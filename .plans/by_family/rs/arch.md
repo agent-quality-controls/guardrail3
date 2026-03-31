@@ -17,6 +17,7 @@ Current source of truth:
 Current state:
 
 - repo-global Rust root placement and owner-family coherence live here
+- repo-global legality should expand here as the shared pre-family legality surface, not as ad hoc family-order dependence
 - the family is self-hosted with `crates/runtime`, `crates/assertions`, and `test_support`
 - recent hardening closed the main audit gaps:
   - `RS-ARCH-04` is a layout-level overlap rule
@@ -26,9 +27,24 @@ Current state:
 
 Scope model:
 
-- repo-global family over shared placement facts
+- repo-global reporting family over shared Rust structure and legality facts
 - subtree validation must not silently localize misplaced-root or overlap
   findings away
+
+Target split:
+
+- shared Rust structure pass discovers roots and attaches family-owned files
+- shared Rust legality pass decides what is legal before family slicing
+- `RS-ARCH` reports those legality failures
+- mapper slices legal family surfaces
+- runners fan workspace-local surfaces into one invocation per legal workspace
+
+Test contract:
+
+- `arch` is the owner of illegal topology and illegal placement tests
+- workspace-local families must not keep those tests by rebuilding fake routes
+- if a test needs an illegal root or misplaced family file, it belongs here
+- if a test is pure rule logic, it should use the rule input directly instead of pretending to be a routed family test
 
 Agent handoff focus:
 
@@ -60,5 +76,12 @@ Historical/supplemental references:
 
 Next planning focus:
 
-- keep shared placement/routing ownership in shared crates rather than re-growing family-local discovery
+- keep shared structure/legality ownership in shared crates rather than re-growing family-local discovery
+- pin the mapper-vs-runner split explicitly:
+  - mapper builds legal family surfaces
+  - runners build actual invocation units
 - add a shared README note for explicit requested-family override behavior if that becomes a repeated product rule
+- drive the remaining cargo/deny migration by rewriting illegal family fixtures into:
+  - legal workspace-local routed tests
+  - `arch` legality tests
+  - direct typed-input rule tests

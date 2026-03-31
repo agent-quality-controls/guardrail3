@@ -3,7 +3,7 @@
 Rust Clippy policy family.
 
 This family enforces `clippy.toml` policy inside legal workspaces. It does not
-own repo-global Rust root discovery or routing.
+own repo-global Rust root legality, discovery, or routing.
 
 ## What This Family Owns
 
@@ -26,14 +26,14 @@ own repo-global Rust root discovery or routing.
 
 It does not own:
 
-- repo-global Rust root placement
+- repo-global Rust root placement legality
 - Cargo lint-table policy in `Cargo.toml`
 - generic source-structure rules
 - test architecture
 
 Those belong to:
 
-- shared Rust `placement`
+- shared Rust `arch`/`placement`
 - shared Rust `FamilyMapper`
 - `RS-CARGO`
 - `RS-CODE`
@@ -41,11 +41,11 @@ Those belong to:
 
 ## Shared Placement And Routing
 
-This family must not decide which Rust roots are live.
+This family must not decide which Rust roots are legal.
 
 It consumes:
 
-- shared topology facts from `placement`
+- legality-aware workspace facts from `arch`/`placement`
 - legal workspaces plus Clippy-relevant files from `FamilyMapper::map_rs_clippy()`
 
 Inside a routed workspace, the family may then do family-local discovery:
@@ -70,7 +70,7 @@ Positive inventory results are the normal "clean state" proof for this family. T
 
 That split is intentional:
 
-- `placement` decides what Rust roots exist
+- `arch` decides what Rust roots are legal
 - `FamilyMapper` decides which legal workspaces and Clippy-relevant files reach `clippy`
 - `clippy` decides Clippy-policy facts inside those routed workspaces
 
@@ -117,7 +117,7 @@ apps/guardrail3/crates/app/rs/families/clippy/
 
 This means:
 
-- the family container is not a nested workspace root
+- the family container is workspace-local and lives under the app workspace
 - the runtime crate builds and the family is green under `RS-ARCH` and `RS-CLIPPY`
 - the facts layer is split into `facts.rs` plus narrow helper modules under `facts/` so the family stays under repo-root file-length guardrails without weakening rule ownership
 - rule sidecars now prove behavior through sibling assertions modules instead of runtime-local helper plumbing

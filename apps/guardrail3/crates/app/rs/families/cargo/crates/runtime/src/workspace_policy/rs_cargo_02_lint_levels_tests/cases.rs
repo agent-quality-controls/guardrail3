@@ -4,7 +4,7 @@ use guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::{
 use test_support::{entry, tree};
 
 const STANDALONE_RUST_LINTS: &str = r#"
-    [lints.rust]
+    [workspace.lints.rust]
     warnings = "deny"
     unsafe_code = "forbid"
     dead_code = "deny"
@@ -14,7 +14,7 @@ const STANDALONE_RUST_LINTS: &str = r#"
 "#;
 
 const STANDALONE_CLIPPY_LINTS: &str = r#"
-    [lints.clippy]
+    [workspace.lints.clippy]
     all = { level = "deny", priority = -1 }
     pedantic = { level = "deny", priority = -1 }
     cargo = { level = "deny", priority = -1 }
@@ -62,9 +62,21 @@ const STANDALONE_CLIPPY_LINTS: &str = r#"
     multiple_crate_versions = "allow"
 "#;
 
+fn workspace_root_manifest(body: &str) -> String {
+    format!(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            {body}
+        "#
+    )
+}
+
 #[test]
 fn stricter_than_baseline_is_accepted_silently() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -73,15 +85,15 @@ fn stricter_than_baseline_is_accepted_silently() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace(
         r#"missing_debug_implementations = "warn""#,
         r#"missing_debug_implementations = "deny""#,
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
@@ -96,7 +108,7 @@ fn stricter_than_baseline_is_accepted_silently() {
 
 #[test]
 fn weaker_levels_are_errors() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -105,12 +117,12 @@ fn weaker_levels_are_errors() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace(r#"warnings = "deny""#, r#"warnings = "warn""#);
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
@@ -125,7 +137,7 @@ fn weaker_levels_are_errors() {
 
 #[test]
 fn wrong_group_priority_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -134,15 +146,15 @@ fn wrong_group_priority_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace(
         r#"all = { level = "deny", priority = -1 }"#,
         r#"all = { level = "deny", priority = 0 }"#,
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
@@ -157,7 +169,7 @@ fn wrong_group_priority_is_error() {
 
 #[test]
 fn malformed_root_local_guardrail_suppresses_clean_inventory() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -166,13 +178,13 @@ fn malformed_root_local_guardrail_suppresses_clean_inventory() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
         &[
-            ("pkg/Cargo.toml", &manifest),
-            ("pkg/guardrail3.toml", "[profile"),
+            ("Cargo.toml", &manifest),
+            ("guardrail3.toml", "[profile"),
         ],
     ));
 
@@ -191,8 +203,8 @@ fn missing_lint_tables_do_not_emit_false_inventory() {
     "#;
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
@@ -203,7 +215,7 @@ fn missing_lint_tables_do_not_emit_false_inventory() {
 
 #[test]
 fn invalid_root_lint_level_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -212,15 +224,15 @@ fn invalid_root_lint_level_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace(
         r#"module_name_repetitions = "allow""#,
         r#"module_name_repetitions = "banana""#,
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
@@ -235,7 +247,7 @@ fn invalid_root_lint_level_is_error() {
 
 #[test]
 fn invalid_group_lint_shape_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -244,15 +256,15 @@ fn invalid_group_lint_shape_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace(
         r#"all = { level = "deny", priority = -1 }"#,
         r#"all = { priority = -1 }"#,
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
@@ -267,7 +279,7 @@ fn invalid_group_lint_shape_is_error() {
 
 #[test]
 fn invalid_group_priority_type_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -276,15 +288,15 @@ fn invalid_group_priority_type_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace(
         r#"all = { level = "deny", priority = -1 }"#,
         r#"all = { level = "deny", priority = "banana" }"#,
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(

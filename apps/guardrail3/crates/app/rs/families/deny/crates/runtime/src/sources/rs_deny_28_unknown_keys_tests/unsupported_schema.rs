@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::rs_deny_28_unknown_keys as assertions;
 
-use super::super::{build_fixture_deny_toml, copy_fixture, write_file};
+use super::super::build_fixture_deny_toml;
 
 fn with_root_override(deny_toml: &str, key: &str, value: toml::Value) -> String {
     let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
@@ -122,8 +122,6 @@ fn warns_on_unsupported_nested_section_schema() {
 
 #[test]
 fn local_unsupported_schema_only_warns_for_the_owned_local_root() {
-    let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
-    write_file(tmp.path(), "deny.toml", &build_fixture_deny_toml("service"));
     let local_deny = with_section_override(
         &with_section_override(
             &build_fixture_deny_toml("service"),
@@ -135,9 +133,7 @@ fn local_unsupported_schema_only_warns_for_the_owned_local_root() {
         "features",
         toml::Value::String("invalid".to_owned()),
     );
-    write_file(tmp.path(), "apps/devctl/deny.toml", &local_deny);
-
-    let results = super::super::run_family(tmp.path());
+    let results = super::super::run_check(&local_deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(
@@ -145,14 +141,14 @@ fn local_unsupported_schema_only_warns_for_the_owned_local_root() {
         &[
             assertions::warn(
                 "unsupported [bans].features schema",
-                "`apps/devctl/deny.toml` uses unsupported schema for `[bans].features`; expected array.",
-                "apps/devctl/deny.toml",
+                "`deny.toml` uses unsupported schema for `[bans].features`; expected array.",
+                "deny.toml",
                 false,
             ),
             assertions::warn(
                 "unsupported [licenses.private] schema",
-                "`apps/devctl/deny.toml` uses unsupported schema for `[licenses.private]`; expected table.",
-                "apps/devctl/deny.toml",
+                "`deny.toml` uses unsupported schema for `[licenses.private]`; expected table.",
+                "deny.toml",
                 false,
             ),
         ],

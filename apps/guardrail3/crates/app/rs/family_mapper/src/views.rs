@@ -1,7 +1,9 @@
 use std::collections::BTreeSet;
 
+use guardrail3_app_rs_legality::{RustTopologyIssueFact, RustTopologyIssueKind};
 use guardrail3_app_rs_ownership::{RustFamilyFileAttachment, RustFamilyFileKind};
 use guardrail3_app_rs_placement::{RustArchRole, RustRootClassification};
+use guardrail3_validation_model::RustValidateFamily;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsRootView {
@@ -155,6 +157,8 @@ pub struct RsArchRoute {
     roots: Vec<RsArchRootView>,
     overlaps: Vec<RsArchOverlapView>,
     input_failures: Vec<RsRootInputFailureView>,
+    topology_issues: Vec<RsArchTopologyIssueView>,
+    family_files: Vec<RsFamilyFileView>,
 }
 
 impl RsArchRoute {
@@ -163,11 +167,15 @@ impl RsArchRoute {
         roots: Vec<RsArchRootView>,
         overlaps: Vec<RsArchOverlapView>,
         input_failures: Vec<RsRootInputFailureView>,
+        topology_issues: Vec<RsArchTopologyIssueView>,
+        family_files: Vec<RsFamilyFileView>,
     ) -> Self {
         Self {
             roots,
             overlaps,
             input_failures,
+            topology_issues,
+            family_files,
         }
     }
 
@@ -184,6 +192,103 @@ impl RsArchRoute {
     #[must_use]
     pub fn input_failures(&self) -> &[RsRootInputFailureView] {
         &self.input_failures
+    }
+
+    #[must_use]
+    pub fn topology_issues(&self) -> &[RsArchTopologyIssueView] {
+        &self.topology_issues
+    }
+
+    #[must_use]
+    pub fn family_files(&self) -> &[RsFamilyFileView] {
+        &self.family_files
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RsArchTopologyIssueView {
+    rel_dir: String,
+    cargo_rel_path: String,
+    classification: RustRootClassification,
+    kind: RsArchTopologyIssueKindView,
+}
+
+impl RsArchTopologyIssueView {
+    #[must_use]
+    pub fn from_fact(issue: &RustTopologyIssueFact) -> Self {
+        Self {
+            rel_dir: issue.rel_dir().to_owned(),
+            cargo_rel_path: issue.cargo_rel_path().to_owned(),
+            classification: issue.classification(),
+            kind: RsArchTopologyIssueKindView::from_kind(issue.kind()),
+        }
+    }
+
+    #[must_use]
+    pub fn rel_dir(&self) -> &str {
+        &self.rel_dir
+    }
+
+    #[must_use]
+    pub fn cargo_rel_path(&self) -> &str {
+        &self.cargo_rel_path
+    }
+
+    #[must_use]
+    pub const fn classification(&self) -> RustRootClassification {
+        self.classification
+    }
+
+    #[must_use]
+    pub fn kind(&self) -> &RsArchTopologyIssueKindView {
+        &self.kind
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RsArchTopologyIssueKindView {
+    TopLevelRootMustBeWorkspace,
+    LooseTopLevelPackage,
+    NestedWorkspace {
+        parent_workspace_rel: String,
+    },
+    UndeclaredWorkspaceMember {
+        workspace_root_rel: String,
+    },
+    WorkspaceMemberPathEscapesRoot {
+        workspace_root_rel: String,
+        member_pattern: String,
+    },
+    AuxiliaryTopLevelRootMustBeWorkspace,
+}
+
+impl RsArchTopologyIssueKindView {
+    #[must_use]
+    pub fn from_kind(kind: &RustTopologyIssueKind) -> Self {
+        match kind {
+            RustTopologyIssueKind::TopLevelRootMustBeWorkspace => Self::TopLevelRootMustBeWorkspace,
+            RustTopologyIssueKind::LooseTopLevelPackage => Self::LooseTopLevelPackage,
+            RustTopologyIssueKind::NestedWorkspace {
+                parent_workspace_rel,
+            } => Self::NestedWorkspace {
+                parent_workspace_rel: parent_workspace_rel.clone(),
+            },
+            RustTopologyIssueKind::UndeclaredWorkspaceMember {
+                workspace_root_rel,
+            } => Self::UndeclaredWorkspaceMember {
+                workspace_root_rel: workspace_root_rel.clone(),
+            },
+            RustTopologyIssueKind::WorkspaceMemberPathEscapesRoot {
+                workspace_root_rel,
+                member_pattern,
+            } => Self::WorkspaceMemberPathEscapesRoot {
+                workspace_root_rel: workspace_root_rel.clone(),
+                member_pattern: member_pattern.clone(),
+            },
+            RustTopologyIssueKind::AuxiliaryTopLevelRootMustBeWorkspace => {
+                Self::AuxiliaryTopLevelRootMustBeWorkspace
+            }
+        }
     }
 }
 
@@ -243,9 +348,11 @@ pub type RsCodeRoute = RsScopedSourceRoute;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsFamilyFileView {
+    family: RustValidateFamily,
     rel_path: String,
     kind: RustFamilyFileKind,
     attachment: RsFamilyFileAttachmentView,
+    placement: RsFamilyFilePlacementView,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -266,18 +373,35 @@ pub enum RsFamilyFileAttachmentView {
     },
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RsFamilyFilePlacementView {
+    Legal,
+    Illegal {
+        reason: String,
+    },
+}
+
 impl RsFamilyFileView {
     #[must_use]
     pub fn new(
+        family: RustValidateFamily,
         rel_path: String,
         kind: RustFamilyFileKind,
         attachment: RsFamilyFileAttachmentView,
+        placement: RsFamilyFilePlacementView,
     ) -> Self {
         Self {
+            family,
             rel_path,
             kind,
             attachment,
+            placement,
         }
+    }
+
+    #[must_use]
+    pub const fn family(&self) -> RustValidateFamily {
+        self.family
     }
 
     #[must_use]
@@ -293,6 +417,11 @@ impl RsFamilyFileView {
     #[must_use]
     pub fn attachment(&self) -> &RsFamilyFileAttachmentView {
         &self.attachment
+    }
+
+    #[must_use]
+    pub fn placement(&self) -> &RsFamilyFilePlacementView {
+        &self.placement
     }
 
     #[must_use]
@@ -313,6 +442,41 @@ impl RsFamilyFileView {
     #[must_use]
     pub fn exact_rust_root_owner(&self) -> bool {
         self.attachment.exact_rust_root_owner()
+    }
+
+    #[must_use]
+    pub fn placement_is_legal(&self) -> bool {
+        matches!(self.placement, RsFamilyFilePlacementView::Legal)
+    }
+
+    #[must_use]
+    pub fn placement_reason(&self) -> Option<&str> {
+        match &self.placement {
+            RsFamilyFilePlacementView::Legal => None,
+            RsFamilyFilePlacementView::Illegal { reason } => Some(reason.as_str()),
+        }
+    }
+
+    #[must_use]
+    pub fn included_in_workspace_local_surface(&self, root_rel: &str) -> bool {
+        if !self.placement_is_legal() {
+            return false;
+        }
+
+        match self.attachment() {
+            RsFamilyFileAttachmentView::ExactRoot { root_rel: file_root_rel } => {
+                file_root_rel == root_rel
+            }
+            RsFamilyFileAttachmentView::NestedUnderRoot {
+                root_rel: file_root_rel,
+                ..
+            } => file_root_rel == root_rel && supports_nested_local_surface(self.kind),
+            RsFamilyFileAttachmentView::AncestorOfRoots { root_rels, .. } => {
+                supports_ancestor_local_surface(self.kind)
+                    && root_rels.iter().any(|candidate| candidate == root_rel)
+            }
+            RsFamilyFileAttachmentView::OutsideRoots { .. } => false,
+        }
     }
 }
 
@@ -416,6 +580,25 @@ impl RsCargoRoute {
     pub fn validation_scope(&self) -> Option<&str> {
         self.validation_scope.as_deref()
     }
+
+    #[must_use]
+    pub fn for_workspace(&self, root_rel: &str) -> Self {
+        Self {
+            roots: self
+                .roots
+                .iter()
+                .filter(|root| root.rel_dir() == root_rel)
+                .cloned()
+                .collect(),
+            family_files: self
+                .family_files
+                .iter()
+                .filter(|file| file.included_in_workspace_local_surface(root_rel))
+                .cloned()
+                .collect(),
+            validation_scope: self.validation_scope.clone(),
+        }
+    }
 }
 
 pub type RsClippyRoute = RsCargoRoute;
@@ -457,6 +640,25 @@ impl RsDenyRoute {
     #[must_use]
     pub fn validation_scope(&self) -> Option<&str> {
         self.validation_scope.as_deref()
+    }
+
+    #[must_use]
+    pub fn for_workspace(&self, root_rel: &str) -> Self {
+        Self {
+            roots: self
+                .roots
+                .iter()
+                .filter(|root| root.rel_dir() == root_rel)
+                .cloned()
+                .collect(),
+            family_files: self
+                .family_files
+                .iter()
+                .filter(|file| file.included_in_workspace_local_surface(root_rel))
+                .cloned()
+                .collect(),
+            validation_scope: self.validation_scope.clone(),
+        }
     }
 }
 
@@ -503,6 +705,25 @@ impl RsReleaseRoute {
     pub fn validation_scope(&self) -> Option<&str> {
         self.validation_scope.as_deref()
     }
+
+    #[must_use]
+    pub fn for_workspace(&self, root_rel: &str) -> Self {
+        Self {
+            roots: self
+                .roots
+                .iter()
+                .filter(|root| root.rel_dir() == root_rel)
+                .cloned()
+                .collect(),
+            family_files: self
+                .family_files
+                .iter()
+                .filter(|file| file.included_in_workspace_local_surface(root_rel))
+                .cloned()
+                .collect(),
+            validation_scope: self.validation_scope.clone(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -548,6 +769,21 @@ impl RsHexarchRoute {
     pub fn guardrail_config_rel_path(&self) -> Option<&str> {
         self.guardrail_config_rel_path.as_deref()
     }
+
+    #[must_use]
+    pub fn for_workspace(&self, root_rel: &str) -> Self {
+        Self {
+            roots: self
+                .roots
+                .iter()
+                .filter(|root| root.rel_dir() == root_rel)
+                .cloned()
+                .collect(),
+            scoped_files: self.scoped_files.clone(),
+            repo_root_cargo_rel_path: self.repo_root_cargo_rel_path.clone(),
+            guardrail_config_rel_path: self.guardrail_config_rel_path.clone(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -585,6 +821,25 @@ impl RsGardeRoute {
     pub fn family_files(&self) -> &[RsFamilyFileView] {
         &self.family_files
     }
+
+    #[must_use]
+    pub fn for_workspace(&self, root_rel: &str) -> Self {
+        Self {
+            roots: self
+                .roots
+                .iter()
+                .filter(|root| root.root().rel_dir() == root_rel)
+                .cloned()
+                .collect(),
+            scoped_files: self.scoped_files.clone(),
+            family_files: self
+                .family_files
+                .iter()
+                .filter(|file| file.included_in_workspace_local_surface(root_rel))
+                .cloned()
+                .collect(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -611,4 +866,12 @@ impl RsTestRoute {
     pub fn scoped_files(&self) -> Option<&BTreeSet<String>> {
         self.scoped_files.as_ref()
     }
+}
+
+fn supports_nested_local_surface(kind: RustFamilyFileKind) -> bool {
+    matches!(kind, RustFamilyFileKind::CargoToml | RustFamilyFileKind::GuardrailToml)
+}
+
+fn supports_ancestor_local_surface(kind: RustFamilyFileKind) -> bool {
+    matches!(kind, RustFamilyFileKind::GuardrailToml)
 }

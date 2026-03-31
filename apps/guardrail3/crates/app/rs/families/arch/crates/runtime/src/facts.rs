@@ -1,9 +1,12 @@
 use std::collections::BTreeMap;
 
-use guardrail3_app_rs_family_mapper::{RsArchRootView, RsArchRoute};
+use guardrail3_app_rs_family_mapper::{
+    RsArchRootView, RsArchRoute, RsArchTopologyIssueKindView,
+};
 use guardrail3_app_rs_placement::{RustArchitectureOwner, RustRootClassification};
 use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_validation_model::RustValidateFamily;
 
 #[derive(Debug, Clone)]
 pub struct ArchRootFacts {
@@ -39,6 +42,33 @@ pub struct GovernedRootFacts {
 }
 
 #[derive(Debug, Clone)]
+pub struct IllegalFamilyFileFacts {
+    pub(crate) family: RustValidateFamily,
+    pub(crate) rel_path: String,
+    pub(crate) reason: String,
+}
+
+#[derive(Debug, Clone)]
+pub enum ArchTopologyIssueKind {
+    TopLevelRootMustBeWorkspace,
+    LooseTopLevelPackage,
+    NestedWorkspace { parent_workspace_rel: String },
+    UndeclaredWorkspaceMember { workspace_root_rel: String },
+    WorkspaceMemberPathEscapesRoot {
+        workspace_root_rel: String,
+        member_pattern: String,
+    },
+    AuxiliaryTopLevelRootMustBeWorkspace,
+}
+
+#[derive(Debug, Clone)]
+pub struct TopologyIssueFacts {
+    pub(crate) rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) kind: ArchTopologyIssueKind,
+}
+
+#[derive(Debug, Clone)]
 pub struct ArchInputFailureFacts {
     pub(crate) rel_path: String,
     pub(crate) message: String,
@@ -50,6 +80,8 @@ pub struct ArchFacts {
     pub(crate) roots: Vec<ArchRootFacts>,
     pub(crate) overlaps: Vec<ZoneOverlapFacts>,
     pub(crate) governed_roots: Vec<GovernedRootFacts>,
+    pub(crate) topology_issues: Vec<TopologyIssueFacts>,
+    pub(crate) illegal_family_files: Vec<IllegalFamilyFileFacts>,
     pub(crate) input_failures: Vec<ArchInputFailureFacts>,
     pub(crate) misplaced_root_reporting_enabled: bool,
 }
@@ -97,11 +129,61 @@ pub fn collect(tree: &ProjectTree, route: &RsArchRoute) -> ArchFacts {
         .iter()
         .filter_map(|root| governed_root(root, &config))
         .collect();
+    let topology_issues = route
+        .topology_issues()
+        .iter()
+        .map(|issue| TopologyIssueFacts {
+            rel_dir: issue.rel_dir().to_owned(),
+            cargo_rel_path: issue.cargo_rel_path().to_owned(),
+            kind: match issue.kind() {
+                RsArchTopologyIssueKindView::TopLevelRootMustBeWorkspace => {
+                    ArchTopologyIssueKind::TopLevelRootMustBeWorkspace
+                }
+                RsArchTopologyIssueKindView::LooseTopLevelPackage => {
+                    ArchTopologyIssueKind::LooseTopLevelPackage
+                }
+                RsArchTopologyIssueKindView::NestedWorkspace {
+                    parent_workspace_rel,
+                } => ArchTopologyIssueKind::NestedWorkspace {
+                    parent_workspace_rel: parent_workspace_rel.clone(),
+                },
+                RsArchTopologyIssueKindView::UndeclaredWorkspaceMember {
+                    workspace_root_rel,
+                } => ArchTopologyIssueKind::UndeclaredWorkspaceMember {
+                    workspace_root_rel: workspace_root_rel.clone(),
+                },
+                RsArchTopologyIssueKindView::WorkspaceMemberPathEscapesRoot {
+                    workspace_root_rel,
+                    member_pattern,
+                } => ArchTopologyIssueKind::WorkspaceMemberPathEscapesRoot {
+                    workspace_root_rel: workspace_root_rel.clone(),
+                    member_pattern: member_pattern.clone(),
+                },
+                RsArchTopologyIssueKindView::AuxiliaryTopLevelRootMustBeWorkspace => {
+                    ArchTopologyIssueKind::AuxiliaryTopLevelRootMustBeWorkspace
+                }
+            },
+        })
+        .collect();
+    let illegal_family_files = route
+        .family_files()
+        .iter()
+        .filter(|file| !file.placement_is_legal())
+        .filter_map(|file| {
+            Some(IllegalFamilyFileFacts {
+                family: file.family(),
+                rel_path: file.rel_path().to_owned(),
+                reason: file.placement_reason()?.to_owned(),
+            })
+        })
+        .collect();
 
     ArchFacts {
         roots,
         overlaps,
         governed_roots,
+        topology_issues,
+        illegal_family_files,
         input_failures,
         misplaced_root_reporting_enabled: misplaced_root_reporting_enabled(&config),
     }

@@ -1,10 +1,9 @@
-use guardrail3_app_rs_family_clippy_assertions::rs_clippy_01_coverage as assertions;
 use test_support::{build_fixture_clippy_toml, create_dir_all, create_temp_dir, write_file};
 
 use super::super::run_for_tests;
 
 #[test]
-fn errors_when_a_routed_cargo_root_cannot_be_parsed() {
+fn ignores_malformed_workspace_roots_because_arch_owns_root_legality() {
     let tmp = create_temp_dir("rs-clippy-01-unparseable-routed-cargo");
     create_dir_all(&tmp.path().join("apps/backend/crates/core"));
     write_file(
@@ -24,5 +23,10 @@ fn errors_when_a_routed_cargo_root_cannot_be_parsed() {
     );
 
     let results = run_for_tests(tmp.path());
-    assertions::assert_unparseable_routed_cargo_root(&results, "apps/backend/Cargo.toml");
+    assert!(
+        results
+            .iter()
+            .all(|result| result.file() != Some("apps/backend/Cargo.toml")),
+        "clippy should not report malformed workspace roots now that arch owns root legality: {results:#?}"
+    );
 }

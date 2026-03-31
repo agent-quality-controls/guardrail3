@@ -407,7 +407,7 @@ fn toolchain_runtime_accepts_local_nested_workspace_toolchain() {
 }
 
 #[test]
-fn toolchain_runtime_rejects_repo_root_toolchain_when_nested_workspace_owns_policy() {
+fn toolchain_runtime_requires_workspace_local_toolchain_when_repo_root_file_is_not_routed() {
     let root = super::temp_root_for_tests("toolchain-runtime-local-workspace");
     super::write_file_for_tests(
         &root,
@@ -428,9 +428,7 @@ fn toolchain_runtime_rejects_repo_root_toolchain_when_nested_workspace_owns_poli
     let report = super::run_toolchain_for_tests(&super::LocalFsTest, &root)
         .expect("toolchain runtime report");
 
-    assertions::assert_toolchain_requires_local_workspace_toolchain_and_rejects_repo_root_toolchain(
-        &report,
-    );
+    assertions::assert_toolchain_requires_local_workspace_toolchain(&report);
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }

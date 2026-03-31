@@ -94,13 +94,7 @@ pub fn check(tree: &ProjectTree, route: &RsCargoRoute) -> Vec<CheckResult> {
 
 #[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
-    let scope = guardrail3_app_rs_placement::collect(tree);
-    let config = tree
-        .file_content("guardrail3.toml")
-        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
-    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
-    let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None).map_rs_cargo();
-    check(tree, &route)
+    check(tree, &test_route_for_checks(tree, None))
 }
 
 #[cfg(test)]
@@ -108,13 +102,20 @@ pub fn check_test_tree_with_validation_scope(
     tree: &ProjectTree,
     validation_scope: &str,
 ) -> Vec<CheckResult> {
+    check(tree, &test_route_for_checks(tree, Some(validation_scope)))
+}
+
+#[cfg(test)]
+fn test_route_for_checks(
+    tree: &ProjectTree,
+    validation_scope: Option<&str>,
+) -> RsCargoRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
     let config = tree
         .file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
-    let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None)
-        .with_validation_scope(Some(validation_scope))
-        .map_rs_cargo();
-    check(tree, &route)
+    FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None)
+        .with_validation_scope(validation_scope)
+        .map_rs_cargo()
 }

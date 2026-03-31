@@ -2,18 +2,15 @@
 
 Rust `cargo-deny` policy family.
 
-This family owns allowed deny config placement plus the generated `deny.toml`
-contract: graph settings, ban baselines, feature bans, license allowlists,
-advisory policy, source restrictions, and inventory-style visibility for local
-exceptions. It is workspace-local over legal workspaces plus deny-relevant
-files.
+This family owns the generated `deny.toml` contract: graph settings, ban
+baselines, feature bans, license allowlists, advisory policy, source
+restrictions, and inventory-style visibility for local exceptions. It is
+workspace-local over legal workspaces plus deny-relevant files.
 
 ## What This Family Owns
 
 `RS-DENY` owns:
 
-- allowed root placement for `deny.toml`, `.deny.toml`, and `.cargo/deny.toml`
-- local shadowing detection for nested deny configs
 - generated service/library deny baseline parity
 - graph, bans, feature-ban, license, advisory, and source policy checks
 - inventory rules for stricter local policy and documented local exceptions
@@ -46,13 +43,14 @@ Inside that owned surface, the family may then do family-local work:
 
 - deny config discovery and parsing
 - profile-map and policy-context resolution
-- placement, shadowing, and uncovered-workspace analysis
+- workspace-local coverage and same-root conflict analysis
 - fail-closed input collection
 - per-rule fan-out
 
 That split is intentional:
 
 - `placement` decides what Rust roots exist
+- `arch` decides legality for workspace placement and illegal family-file shapes
 - `FamilyMapper` decides which legal workspaces and deny-relevant files reach `deny`
 - `deny` decides deny-policy facts over that workspace-local owned surface
 
@@ -142,4 +140,5 @@ The next deny work should stay narrow:
 1. add the missing adversarial coverage from the deny hardening matrix
 2. improve end-to-end generator/root parity evidence
 
-Do not broaden the deny policy surface until those are closed.
+Do not broaden the deny policy surface until those are closed. Placement
+legality is already owned by `arch`.

@@ -850,6 +850,7 @@ name = "guardrail3-app-rs-family-mapper"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-mapper-assertions",
+ "guardrail3-app-rs-legality",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
@@ -995,6 +996,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-rs-legality"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-ownership",
+ "guardrail3-app-rs-placement",
+ "guardrail3-domain-project-tree",
+ "guardrail3-domain-validation-model",
+ "toml",
+]
+
+[[package]]
 name = "guardrail3-app-rs-ownership"
 version = "0.0.0"
 dependencies = [
@@ -1033,6 +1045,7 @@ dependencies = [
  "guardrail3-app-rs-family-selection",
  "guardrail3-app-rs-family-test",
  "guardrail3-app-rs-family-toolchain",
+ "guardrail3-app-rs-legality",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-app-rs-runtime-assertions",

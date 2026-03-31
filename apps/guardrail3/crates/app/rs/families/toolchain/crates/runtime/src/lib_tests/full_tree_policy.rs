@@ -59,10 +59,10 @@ fn full_tree_fixture_enforces_workspace_only_toolchain_policy() {
         .map(|file| file.rel_path())
         .collect::<Vec<_>>();
     assert!(
-        routed_files.contains(&"apps/admin/rust-toolchain.toml")
-            && routed_files.contains(&"packages/ui-kit/rust-toolchain")
-            && routed_files.contains(&"rust-toolchain.toml"),
-        "routed toolchain file surface lost illegal placements: {routed_files:#?}"
+        !routed_files.contains(&"apps/admin/rust-toolchain.toml")
+            && !routed_files.contains(&"packages/ui-kit/rust-toolchain")
+            && !routed_files.contains(&"rust-toolchain.toml"),
+        "toolchain family route should only carry legal local files now: {routed_files:#?}"
     );
     assert!(
         route.family_files().iter().any(|file| {
@@ -92,33 +92,14 @@ fn full_tree_fixture_enforces_workspace_only_toolchain_policy() {
         Some("apps/devctl/rust-toolchain.toml"),
     );
 
-    assert_live_files_for_id(
-        &results,
-        "RS-TOOLCHAIN-06",
-        &[
-            "apps/backend/crates/domain/engine/rust-toolchain.toml",
-            "apps/backend/docs/rust-toolchain.toml",
-        ],
-    );
-    assert_live_files_for_id(
-        &results,
-        "RS-TOOLCHAIN-07",
-        &[
-            "apps/admin/rust-toolchain.toml",
-            "packages/ui-kit/rust-toolchain",
-            "rust-toolchain.toml",
-        ],
-    );
     assert!(
         !results.iter().any(|result| {
-            result.id() == "RS-TOOLCHAIN-07"
-                && matches!(
-                    result.file(),
-                    Some("apps/backend/crates/domain/engine/rust-toolchain.toml")
-                        | Some("apps/backend/docs/rust-toolchain.toml")
-                )
+            matches!(
+                result.id(),
+                "RS-TOOLCHAIN-06" | "RS-TOOLCHAIN-07"
+            )
         }),
-        "nested descendant toolchains should be owned by RS-TOOLCHAIN-06, not doubled as RS-TOOLCHAIN-07: {results:#?}"
+        "toolchain placement findings now belong to arch and should not surface here: {results:#?}"
     );
 }
 
@@ -131,13 +112,4 @@ fn assert_result(results: &[CheckResult], id: &str, severity: Severity, file: Op
         }),
         "expected {id} result not present for {file:?}: {results:#?}"
     );
-}
-
-fn assert_live_files_for_id(results: &[CheckResult], id: &str, expected_files: &[&str]) {
-    let files = results
-        .iter()
-        .filter(|result| result.id() == id && !result.inventory())
-        .filter_map(CheckResult::file)
-        .collect::<Vec<_>>();
-    assert_eq!(files, expected_files, "unexpected {id} files: {results:#?}");
 }

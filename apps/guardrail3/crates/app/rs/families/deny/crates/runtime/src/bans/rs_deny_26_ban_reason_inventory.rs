@@ -93,13 +93,14 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
 
 #[cfg(test)]
 pub(crate) use ::test_support::{
-    add_deny_ban_entry, build_fixture_deny_toml, copy_fixture, remove_deny_ban_reason, write_file,
+    add_deny_ban_entry, build_fixture_deny_toml, remove_deny_ban_reason,
 };
 #[cfg(test)]
 #[path = "rs_deny_26_ban_reason_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring

@@ -113,7 +113,7 @@ fn deps_route_drops_repo_workspace_root_when_enabled_descendant_app_is_not_a_wor
         .iter()
         .map(|root| root.cargo_rel_path())
         .collect::<Vec<_>>();
-    assert_eq!(cargo_paths, vec!["apps/api/Cargo.toml"]);
+    assert!(cargo_paths.is_empty());
 }
 
 #[test]
@@ -131,11 +131,8 @@ fn toolchain_route_keeps_non_workspace_roots_visible_for_family_judgment() {
         .iter()
         .map(|root| root.cargo_rel_path().to_owned())
         .collect::<Vec<_>>();
-    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
-    assert!(route
-        .family_files()
-        .iter()
-        .any(|file| file.rel_path() == "tools/helper/rust-toolchain.toml"));
+    assert!(cargo_paths.is_empty());
+    assert!(route.family_files().is_empty());
 }
 
 #[test]
@@ -156,17 +153,8 @@ fn clippy_route_keeps_non_workspace_roots_visible_for_family_judgment() {
         .iter()
         .map(|root| root.cargo_rel_path().to_owned())
         .collect::<Vec<_>>();
-    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
-    assert_eq!(
-        route.family_files()
-            .iter()
-            .map(|file| file.rel_path().to_owned())
-            .collect::<Vec<_>>(),
-        vec![
-            "tools/helper/Cargo.toml".to_owned(),
-            "tools/helper/clippy.toml".to_owned(),
-        ]
-    );
+    assert!(cargo_paths.is_empty());
+    assert!(route.family_files().is_empty());
 }
 
 #[test]
@@ -187,17 +175,8 @@ fn deny_route_keeps_non_workspace_roots_visible_for_family_judgment() {
         .iter()
         .map(|root| root.cargo_rel_path().to_owned())
         .collect::<Vec<_>>();
-    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
-    assert_eq!(
-        route.family_files()
-            .iter()
-            .map(|file| file.rel_path().to_owned())
-            .collect::<Vec<_>>(),
-        vec![
-            "tools/helper/Cargo.toml".to_owned(),
-            "tools/helper/deny.toml".to_owned(),
-        ]
-    );
+    assert!(cargo_paths.is_empty());
+    assert!(route.family_files().is_empty());
 }
 
 #[test]
@@ -218,17 +197,8 @@ fn cargo_route_keeps_non_workspace_roots_visible_for_family_judgment() {
         .iter()
         .map(|root| root.cargo_rel_path().to_owned())
         .collect::<Vec<_>>();
-    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
-    assert_eq!(
-        route.family_files()
-            .iter()
-            .map(|file| file.rel_path().to_owned())
-            .collect::<Vec<_>>(),
-        vec![
-            "tools/helper/Cargo.toml".to_owned(),
-            "tools/helper/guardrail3.toml".to_owned(),
-        ]
-    );
+    assert!(cargo_paths.is_empty());
+    assert!(route.family_files().is_empty());
 }
 
 #[test]
@@ -249,17 +219,8 @@ fn deps_route_keeps_non_workspace_roots_visible_for_family_judgment() {
         .iter()
         .map(|root| root.cargo_rel_path().to_owned())
         .collect::<Vec<_>>();
-    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
-    assert_eq!(
-        route.family_files()
-            .iter()
-            .map(|file| file.rel_path().to_owned())
-            .collect::<Vec<_>>(),
-        vec![
-            "tools/helper/Cargo.toml".to_owned(),
-            "tools/helper/guardrail3.toml".to_owned(),
-        ]
-    );
+    assert!(cargo_paths.is_empty());
+    assert!(route.family_files().is_empty());
 }
 
 #[test]
@@ -281,18 +242,8 @@ fn garde_route_keeps_non_workspace_roots_visible_for_family_judgment() {
         .iter()
         .map(|root| root.root().cargo_rel_path().to_owned())
         .collect::<Vec<_>>();
-    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
-    assert_eq!(
-        route.family_files()
-            .iter()
-            .map(|file| file.rel_path().to_owned())
-            .collect::<Vec<_>>(),
-        vec![
-            "tools/helper/Cargo.toml".to_owned(),
-            "tools/helper/clippy.toml".to_owned(),
-            "tools/helper/guardrail3.toml".to_owned(),
-        ]
-    );
+    assert!(cargo_paths.is_empty());
+    assert!(route.family_files().is_empty());
 }
 
 #[test]
@@ -313,17 +264,139 @@ fn release_route_keeps_non_workspace_roots_visible_for_family_judgment() {
         .iter()
         .map(|root| root.cargo_rel_path().to_owned())
         .collect::<Vec<_>>();
-    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
-    assert_eq!(
-        route.family_files()
-            .iter()
-            .map(|file| file.rel_path().to_owned())
-            .collect::<Vec<_>>(),
-        vec![
-            "tools/helper/Cargo.toml".to_owned(),
-            "tools/helper/release-plz.toml".to_owned(),
-        ]
+    assert!(cargo_paths.is_empty());
+    assert!(route.family_files().is_empty());
+}
+
+#[test]
+fn arch_route_receives_illegal_family_files_and_topology_issues() {
+    let tree = ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry::new(
+                    vec!["apps".to_owned(), "tools".to_owned()],
+                    vec!["clippy.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "apps".to_owned(),
+                DirEntry::new(vec!["api".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "apps/api".to_owned(),
+                DirEntry::new(
+                    vec!["crates".to_owned()],
+                    vec!["Cargo.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "apps/api/crates".to_owned(),
+                DirEntry::new(vec!["member".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "apps/api/crates/member".to_owned(),
+                DirEntry::new(
+                    Vec::new(),
+                    vec!["Cargo.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "tools".to_owned(),
+                DirEntry::new(vec!["helper".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "tools/helper".to_owned(),
+                DirEntry::new(
+                    Vec::new(),
+                    vec!["rust-toolchain.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+        ]),
+        BTreeMap::from([
+            ("clippy.toml".to_owned(), "msrv = \"1.85\"\n".to_owned()),
+            (
+                "apps/api/Cargo.toml".to_owned(),
+                "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
+            ),
+            (
+                "apps/api/crates/member/Cargo.toml".to_owned(),
+                "[package]\nname = \"member\"\nversion = \"0.1.0\"\nedition = \"2024\"\n"
+                    .to_owned(),
+            ),
+            (
+                "tools/helper/rust-toolchain.toml".to_owned(),
+                "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]\n"
+                    .to_owned(),
+            ),
+        ]),
     );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Arch]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_arch();
+
+    let illegal_files = route
+        .family_files()
+        .iter()
+        .map(|file| file.rel_path().to_owned())
+        .collect::<Vec<_>>();
+    let issue_paths = route
+        .topology_issues()
+        .iter()
+        .map(|issue| issue.cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+
+    assert!(illegal_files.contains(&"clippy.toml".to_owned()));
+    assert!(illegal_files.contains(&"tools/helper/rust-toolchain.toml".to_owned()));
+    assert!(issue_paths.contains(&"apps/api/crates/member/Cargo.toml".to_owned()));
+}
+
+#[test]
+fn toolchain_route_keeps_root_workspace_surface() {
+    let tree = ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([(
+            "".to_owned(),
+            DirEntry::new(
+                Vec::new(),
+                vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()],
+                Vec::new(),
+                Vec::new(),
+            ),
+        )]),
+        BTreeMap::from([
+            (
+                "Cargo.toml".to_owned(),
+                "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
+            ),
+            (
+                "rust-toolchain.toml".to_owned(),
+                "[toolchain]\nchannel = \"stable\"\n".to_owned(),
+            ),
+        ]),
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Toolchain]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_toolchain();
+
+    let roots = route.roots().iter().map(|root| root.rel_dir().to_owned()).collect::<Vec<_>>();
+    let files = route
+        .family_files()
+        .iter()
+        .map(|file| file.rel_path().to_owned())
+        .collect::<Vec<_>>();
+
+    assert_eq!(roots, vec!["".to_owned()]);
+    assert_eq!(files, vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()]);
 }
 
 #[test]
@@ -398,7 +471,7 @@ fn cargo_route_validation_scope_excludes_sibling_policy_roots() {
 }
 
 #[test]
-fn cargo_route_scope_keeps_descendant_member_manifests_of_the_routed_workspace() {
+fn cargo_route_scope_keeps_the_legal_workspace_surface_that_owns_the_scope() {
     let tree = ProjectTree::new(
         PathBuf::from("/tmp/project"),
         BTreeMap::from([
@@ -481,6 +554,7 @@ fn cargo_route_scope_keeps_descendant_member_manifests_of_the_routed_workspace()
         vec![
             "Cargo.toml".to_owned(),
             "crates/api/Cargo.toml".to_owned(),
+            "crates/other/Cargo.toml".to_owned(),
         ]
     );
 }
@@ -557,14 +631,7 @@ fn toolchain_route_keeps_rootless_and_ancestor_toolchain_files_visible() {
         .collect::<Vec<_>>();
     assert_eq!(
         toolchain_files,
-        vec![
-            ("apps/backend/Cargo.toml".to_owned(), "apps/backend".to_owned()),
-            ("rust-toolchain.toml".to_owned(), "".to_owned()),
-            (
-                "tools/helper/rust-toolchain".to_owned(),
-                "tools/helper".to_owned()
-            ),
-        ]
+        vec![("apps/backend/Cargo.toml".to_owned(), "apps/backend".to_owned())]
     );
 }
 
@@ -646,10 +713,7 @@ fn toolchain_route_drops_outside_root_candidates_when_scope_does_not_touch_them(
         .collect::<Vec<_>>();
     assert_eq!(
         toolchain_files,
-        vec![
-            "apps/backend/Cargo.toml".to_owned(),
-            "rust-toolchain.toml".to_owned(),
-        ]
+        vec!["apps/backend/Cargo.toml".to_owned()]
     );
 }
 
@@ -746,7 +810,7 @@ fn clippy_route_keeps_only_scope_relevant_candidates_when_scope_is_narrow() {
         .collect::<Vec<_>>();
     assert_eq!(
         files,
-        vec!["apps/backend/Cargo.toml".to_owned(), "clippy.toml".to_owned()]
+        vec!["apps/backend/Cargo.toml".to_owned()]
     );
 }
 
@@ -825,10 +889,7 @@ fn clippy_route_keeps_ancestor_cargo_override_when_scope_targets_descendant_work
         .collect::<Vec<_>>();
     assert_eq!(
         files,
-        vec![
-            ".cargo/config.toml".to_owned(),
-            "apps/backend/Cargo.toml".to_owned()
-        ]
+        vec!["apps/backend/Cargo.toml".to_owned()]
     );
 }
 
@@ -910,13 +971,7 @@ fn clippy_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
         .collect::<Vec<_>>();
     assert_eq!(
         files,
-        vec![
-            ("apps/backend/Cargo.toml".to_owned(), "apps/backend".to_owned()),
-            (
-                "tools/helper/clippy.toml".to_owned(),
-                "tools/helper".to_owned()
-            )
-        ]
+        vec![("apps/backend/Cargo.toml".to_owned(), "apps/backend".to_owned())]
     );
 }
 
@@ -1062,13 +1117,7 @@ fn deny_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
         .collect::<Vec<_>>();
     assert_eq!(
         files,
-        vec![
-            ("apps/backend/Cargo.toml".to_owned(), "apps/backend".to_owned()),
-            (
-                "tools/helper/.cargo/deny.toml".to_owned(),
-                "tools/helper".to_owned()
-            )
-        ]
+        vec![("apps/backend/Cargo.toml".to_owned(), "apps/backend".to_owned())]
     );
 }
 
@@ -1149,16 +1198,12 @@ fn cargo_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
         .collect::<Vec<_>>();
     assert_eq!(
         files,
-        vec![
-            "apps/backend/Cargo.toml".to_owned(),
-            "tools/guardrail3.toml".to_owned(),
-            "tools/helper/Cargo.toml".to_owned(),
-        ]
+        vec!["apps/backend/Cargo.toml".to_owned()]
     );
 }
 
 #[test]
-fn deps_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
+fn deps_route_keeps_ancestor_guardrail_policy_for_local_surface() {
     let tree = ProjectTree::new(
         PathBuf::from("/tmp/project"),
         BTreeMap::from([
@@ -1237,7 +1282,6 @@ fn deps_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
         vec![
             "apps/backend/Cargo.toml".to_owned(),
             "guardrail3.toml".to_owned(),
-            "tools/helper/Cargo.toml".to_owned(),
         ]
     );
 }

@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 use guardrail3_domain_project_tree::ProjectTree;
 
@@ -9,17 +9,6 @@ use crate::facts::{
 pub(crate) struct ProfileMapFacts {
     pub(crate) map: BTreeMap<String, Option<String>>,
     pub(crate) parse_error: Option<String>,
-}
-
-pub(crate) fn nearest_allowed_ancestor(
-    rel_dir: &str,
-    allowed_roots: &BTreeSet<String>,
-) -> Option<String> {
-    allowed_roots
-        .iter()
-        .filter(|ancestor| is_ancestor_dir(ancestor, rel_dir))
-        .max_by_key(|ancestor| ancestor.len())
-        .cloned()
 }
 
 fn is_ancestor_dir(ancestor: &str, rel_dir: &str) -> bool {

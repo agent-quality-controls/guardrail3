@@ -5,9 +5,6 @@ mod rs_toolchain_01_exists;
 mod rs_toolchain_02_channel_and_components;
 mod rs_toolchain_03_msrv_consistency;
 mod rs_toolchain_04_legacy_file;
-mod rs_toolchain_05_ancestor_shadow_drift;
-mod rs_toolchain_06_descendant_shadowing;
-mod rs_toolchain_07_illegal_placement;
 
 use guardrail3_app_rs_family_mapper::RsToolchainRoute;
 use guardrail3_domain_project_tree::ProjectTree;
@@ -23,7 +20,7 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 use std::collections::BTreeSet;
 
 use self::discover::collect;
-use self::inputs::{all_from_facts, all_unowned_from_facts};
+use self::inputs::all_from_facts;
 
 pub fn check(tree: &ProjectTree, route: &RsToolchainRoute) -> Vec<CheckResult> {
     let facts = collect(tree, route);
@@ -34,12 +31,6 @@ pub fn check(tree: &ProjectTree, route: &RsToolchainRoute) -> Vec<CheckResult> {
         rs_toolchain_02_channel_and_components::check(&input, &mut results);
         rs_toolchain_03_msrv_consistency::check(&input, &mut results);
         rs_toolchain_04_legacy_file::check(&input, &mut results);
-        rs_toolchain_05_ancestor_shadow_drift::check(&input, &mut results);
-        rs_toolchain_06_descendant_shadowing::check(&input, &mut results);
-    }
-
-    for input in all_unowned_from_facts(&facts) {
-        rs_toolchain_07_illegal_placement::check(&input, &mut results);
     }
 
     results

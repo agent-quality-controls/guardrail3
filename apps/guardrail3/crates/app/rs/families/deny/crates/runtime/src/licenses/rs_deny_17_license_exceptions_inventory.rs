@@ -173,13 +173,14 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
 
 #[cfg(test)]
 pub(crate) use ::test_support::{
-    build_fixture_deny_toml, copy_fixture, set_license_exceptions, write_file,
+    build_fixture_deny_toml, set_license_exceptions,
 };
 #[cfg(test)]
 #[path = "rs_deny_17_license_exceptions_inventory_tests/mod.rs"]

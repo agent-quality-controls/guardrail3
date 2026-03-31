@@ -80,9 +80,11 @@ fn forbids_both_same_root_sibling_configs_at_a_non_workspace_root() {
     );
 
     let results = run_for_tests(&tree);
-    assertions::assert_allowed_files(&results, &[]);
-    assertions::assert_forbidden_files(
-        &results,
-        &["tools/helper/.clippy.toml", "tools/helper/clippy.toml"],
+    assert!(
+        results.iter().all(|result| {
+            result.file() != Some("tools/helper/.clippy.toml")
+                && result.file() != Some("tools/helper/clippy.toml")
+        }),
+        "clippy should ignore illegal non-workspace config placement because arch owns placement legality: {results:#?}"
     );
 }

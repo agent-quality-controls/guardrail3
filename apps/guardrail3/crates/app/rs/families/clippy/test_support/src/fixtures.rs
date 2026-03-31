@@ -122,21 +122,25 @@ pub fn same_root_dual_config_tree() -> ProjectTree {
 pub fn incomplete_workspace_policy_root_tree() -> ProjectTree {
     project_tree(
         vec![
-            ("", dir_entry(&["workspace"], &["clippy.toml"])),
+            ("", dir_entry(&["apps"], &["clippy.toml"])),
             (
-                "workspace",
+                "apps",
+                dir_entry(&["backend"], &[]),
+            ),
+            (
+                "apps/backend",
                 dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"]),
             ),
-            ("workspace/crates", dir_entry(&["core"], &[])),
-            ("workspace/crates/core", dir_entry(&[], &["Cargo.toml"])),
+            ("apps/backend/crates", dir_entry(&["core"], &[])),
+            ("apps/backend/crates/core", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
             (
-                "workspace/Cargo.toml",
+                "apps/backend/Cargo.toml",
                 "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
             ),
             (
-                "workspace/crates/core/Cargo.toml",
+                "apps/backend/crates/core/Cargo.toml",
                 "[package]\nname = \"core\"".to_owned(),
             ),
             (
@@ -144,7 +148,7 @@ pub fn incomplete_workspace_policy_root_tree() -> ProjectTree {
                 build_fixture_clippy_toml("service", false, true, "", ""),
             ),
             (
-                "workspace/clippy.toml",
+                "apps/backend/clippy.toml",
                 r#"
 too-many-lines-threshold = 75
 disallowed-methods = []

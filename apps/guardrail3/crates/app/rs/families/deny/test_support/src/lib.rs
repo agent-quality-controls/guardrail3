@@ -98,51 +98,6 @@ pub fn build_fixture_deny_toml(profile_name: &str) -> String {
     build_deny_toml(profile_name, "", "", "")
 }
 
-pub fn nested_member_shadow_tree(file_name: &str) -> ProjectTree {
-    let (core_dirs, core_files, nested_rel_path) =
-        if let Some((dir, nested_file)) = file_name.split_once('/') {
-            (
-                vec![dir],
-                vec!["Cargo.toml"],
-                format!("workspace/crates/core/{dir}/{nested_file}"),
-            )
-        } else {
-            (
-                Vec::new(),
-                vec!["Cargo.toml", file_name],
-                format!("workspace/crates/core/{file_name}"),
-            )
-        };
-
-    project_tree(
-        vec![
-            ("", dir_entry(&["workspace"], &[])),
-            (
-                "workspace",
-                dir_entry(&["crates"], &["Cargo.toml", "deny.toml"]),
-            ),
-            ("workspace/crates", dir_entry(&["core"], &[])),
-            ("workspace/crates/core", dir_entry(&core_dirs, &core_files)),
-            (
-                "workspace/crates/core/.cargo",
-                dir_entry(&[], &["deny.toml"]),
-            ),
-        ],
-        vec![
-            (
-                "workspace/Cargo.toml",
-                "[workspace]\nmembers=[\"crates/*\"]".to_owned(),
-            ),
-            (
-                "workspace/crates/core/Cargo.toml",
-                "[package]\nname=\"core\"".to_owned(),
-            ),
-            ("workspace/deny.toml", build_fixture_deny_toml("service")),
-            (&nested_rel_path, build_fixture_deny_toml("service")),
-        ],
-    )
-}
-
 pub fn same_root_conflict_tree() -> ProjectTree {
     project_tree(
         vec![

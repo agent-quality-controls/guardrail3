@@ -1,7 +1,8 @@
 use guardrail3_app_rs_placement::RustRootClassification;
 
 use super::facts::{
-    ArchFacts, ArchInputFailureFacts, ArchRootFacts, GovernedRootFacts, ZoneOverlapFacts,
+    ArchFacts, ArchInputFailureFacts, ArchRootFacts, GovernedRootFacts, IllegalFamilyFileFacts,
+    TopologyIssueFacts, ZoneOverlapFacts,
 };
 
 pub struct RootClassificationInput<'a> {
@@ -35,6 +36,14 @@ pub struct OwnerFamilyCoherenceInput<'a> {
 
 pub struct RequiredInputFailureInput<'a> {
     pub(crate) failure: &'a ArchInputFailureFacts,
+}
+
+pub struct IllegalFamilyFilePlacementInput<'a> {
+    pub(crate) file: &'a IllegalFamilyFileFacts,
+}
+
+pub struct TopologyIssueInput<'a> {
+    pub(crate) issue: &'a TopologyIssueFacts,
 }
 
 impl<'a> RootClassificationInput<'a> {
@@ -138,6 +147,26 @@ impl<'a> RequiredInputFailureInput<'a> {
                 )
             })
             .map(|failure| Self { failure })
+            .collect()
+    }
+}
+
+impl<'a> IllegalFamilyFilePlacementInput<'a> {
+    pub fn from_facts(facts: &'a ArchFacts) -> Vec<Self> {
+        facts
+            .illegal_family_files
+            .iter()
+            .map(|file| Self { file })
+            .collect()
+    }
+}
+
+impl<'a> TopologyIssueInput<'a> {
+    pub fn from_facts(facts: &'a ArchFacts) -> Vec<Self> {
+        facts
+            .topology_issues
+            .iter()
+            .map(|issue| Self { issue })
             .collect()
     }
 }

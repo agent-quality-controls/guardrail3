@@ -20,6 +20,7 @@ members = [
     "crates/app/rs/runtime/assertions",
     "crates/app/rs/placement",
     "crates/app/rs/ownership",
+    "crates/app/rs/legality",
     "crates/app/rs/family_selection",
     "crates/app/rs/family_selection/assertions",
     "crates/app/rs/family_mapper",

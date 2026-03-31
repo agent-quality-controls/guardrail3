@@ -4,8 +4,6 @@ mod facts_support;
 mod inputs;
 #[path = "coverage/rs_deny_01_coverage.rs"]
 mod rs_deny_01_coverage;
-#[path = "coverage/rs_deny_02_allowed_locations.rs"]
-mod rs_deny_02_allowed_locations;
 #[path = "coverage/rs_deny_03_shadowing.rs"]
 mod rs_deny_03_shadowing;
 #[path = "advisories/rs_deny_04_deprecated_advisories.rs"]
@@ -71,10 +69,7 @@ use guardrail3_domain_report::CheckResult;
 use guardrail3_app_rs_family_deny_assertions as _;
 
 use self::facts::collect;
-use self::inputs::{
-    ConfigDenyInput, CoveredRustUnitInput, ForbiddenDenyConfigInput, SameRootConflictInput,
-    UncoveredRustUnitInput,
-};
+use self::inputs::{ConfigDenyInput, CoveredRustUnitInput, SameRootConflictInput, UncoveredRustUnitInput};
 
 pub use self::deny_support::expected_ban_names;
 
@@ -91,16 +86,6 @@ pub fn check(tree: &ProjectTree, route: &RsDenyRoute) -> Vec<CheckResult> {
     }
     for uncovered in &facts.uncovered_units {
         rs_deny_01_coverage::check_uncovered(&UncoveredRustUnitInput::new(uncovered), &mut results);
-    }
-    for forbidden in &facts.forbidden_configs {
-        rs_deny_02_allowed_locations::check(
-            &ForbiddenDenyConfigInput::new(forbidden),
-            &mut results,
-        );
-        rs_deny_03_shadowing::check_forbidden(
-            &ForbiddenDenyConfigInput::new(forbidden),
-            &mut results,
-        );
     }
     for conflict in &facts.same_root_conflicts {
         rs_deny_03_shadowing::check_same_root_conflict(
@@ -159,19 +144,6 @@ pub(crate) fn config_facts_with_profile(
 #[cfg(test)]
 pub(crate) fn collected_facts(tree: &ProjectTree) -> facts::DenyFacts {
     collect_facts_for_test(tree)
-}
-
-#[cfg(test)]
-pub(crate) fn forbidden_input<'a>(
-    facts: &'a facts::DenyFacts,
-    rel_path: &str,
-) -> ForbiddenDenyConfigInput<'a> {
-    let forbidden = facts
-        .forbidden_configs
-        .iter()
-        .find(|config| config.rel_path == rel_path)
-        .expect("expected forbidden deny config facts");
-    ForbiddenDenyConfigInput::new(forbidden)
 }
 
 #[cfg(test)]

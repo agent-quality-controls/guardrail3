@@ -1,18 +1,21 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_01_coverage as assertions;
-use test_support::{create_dir_all, create_temp_dir, write_file};
+use test_support::{create_temp_dir, write_file};
 
 use super::super::run_for_tests;
 
 #[test]
-fn ignores_uncovered_non_workspace_package_roots() {
-    let tmp = create_temp_dir("rs-clippy-01-standalone-uncovered");
-    create_dir_all(&tmp.path().join("packages/shared-types"));
+fn reports_uncovered_legal_workspace_root_without_clippy_config() {
+    let tmp = create_temp_dir("rs-clippy-01-uncovered-workspace");
     write_file(
         tmp.path(),
-        "packages/shared-types/Cargo.toml",
-        "[package]\nname = \"shared-types\"\n",
+        "Cargo.toml",
+        "[workspace]\nmembers = []\n",
     );
 
     let results = run_for_tests(tmp.path());
-    assertions::assert_multi_root_coverage(&results, &[]);
+    assertions::assert_selective_uncovered(
+        &results,
+        &["workspace root is not covered by any allowed clippy.toml at a workspace root."],
+        &[""],
+    );
 }

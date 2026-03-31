@@ -1,7 +1,8 @@
-use guardrail3_app_rs_ownership::{RustFamilyFileFact, RustOwnedSurfaceFacts};
-use guardrail3_app_rs_placement::{
-    RustRootClassification, RustRootPlacementFacts, RustRootPlacementRootFacts,
+use guardrail3_app_rs_legality::{
+    RustIllegalFamilyFileFact, RustLegalFamilyFileFact, RustLegalityFacts,
 };
+use guardrail3_app_rs_ownership::{RustFamilyFileAttachment, RustOwnedSurfaceFacts};
+use guardrail3_app_rs_placement::{RustRootPlacementFacts, RustRootPlacementRootFacts};
 use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
@@ -13,7 +14,7 @@ use crate::views;
 pub struct FamilyMapper<'a> {
     tree: &'a ProjectTree,
     scope: &'a RustRootPlacementFacts,
-    owned_surface: RustOwnedSurfaceFacts,
+    legality: RustLegalityFacts,
     config: Option<&'a GuardrailConfig>,
     selected_families: &'a RustFamilySelection,
     scoped_files: Option<&'a std::collections::BTreeSet<String>>,
@@ -30,14 +31,8 @@ impl<'a> FamilyMapper<'a> {
         scoped_files: Option<&'a std::collections::BTreeSet<String>>,
     ) -> Self {
         let owned_surface = guardrail3_app_rs_ownership::collect(tree, scope);
-        Self::with_owned_surface(
-            tree,
-            scope,
-            &owned_surface,
-            config,
-            selected_families,
-            scoped_files,
-        )
+        let legality = guardrail3_app_rs_legality::collect(tree, scope, &owned_surface);
+        Self::with_legality(tree, scope, &legality, config, selected_families, scoped_files)
     }
 
     #[must_use]
@@ -49,10 +44,23 @@ impl<'a> FamilyMapper<'a> {
         selected_families: &'a RustFamilySelection,
         scoped_files: Option<&'a std::collections::BTreeSet<String>>,
     ) -> Self {
+        let legality = guardrail3_app_rs_legality::collect(tree, scope, owned_surface);
+        Self::with_legality(tree, scope, &legality, config, selected_families, scoped_files)
+    }
+
+    #[must_use]
+    pub fn with_legality(
+        tree: &'a ProjectTree,
+        scope: &'a RustRootPlacementFacts,
+        legality: &RustLegalityFacts,
+        config: Option<&'a GuardrailConfig>,
+        selected_families: &'a RustFamilySelection,
+        scoped_files: Option<&'a std::collections::BTreeSet<String>>,
+    ) -> Self {
         Self {
             tree,
             scope,
-            owned_surface: owned_surface.clone(),
+            legality: legality.clone(),
             config,
             selected_families,
             scoped_files,
@@ -69,14 +77,19 @@ impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn map_rs_arch(&self) -> views::RsArchRoute {
         if !self.selected_families.contains(RustValidateFamily::Arch) {
-            return views::RsArchRoute::new(Vec::new(), Vec::new(), Vec::new());
+            return views::RsArchRoute::new(
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+            );
         }
 
         views::RsArchRoute::new(
             self.scope
                 .roots()
                 .iter()
-                .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
                 .map(|root| {
                     views::RsArchRootView::new(
                         root_view(root),
@@ -90,10 +103,6 @@ impl<'a> FamilyMapper<'a> {
             self.scope
                 .overlaps()
                 .iter()
-                .filter(|overlap| {
-                    self.root_matches_validation_scope(overlap.app_root_rel())
-                        || self.root_matches_validation_scope(overlap.package_root_rel())
-                })
                 .map(|overlap| {
                     views::RsArchOverlapView::new(
                         overlap.app_root_rel().to_owned(),
@@ -113,6 +122,12 @@ impl<'a> FamilyMapper<'a> {
                     )
                 })
                 .collect(),
+            self.legality
+                .topology_issues()
+                .iter()
+                .map(views::RsArchTopologyIssueView::from_fact)
+                .collect(),
+            self.map_arch_family_files(),
         )
     }
 
@@ -122,10 +137,12 @@ impl<'a> FamilyMapper<'a> {
             return views::RsHexarchRoute::new(Vec::new(), None, None, None);
         }
 
-        let roots = self.map_roots_for_family(RustValidateFamily::Hexarch, |root| {
-            root.classification() == RustRootClassification::App
-                && self.root_is_live_for_hexarch(root)
-        });
+        let roots = self
+            .map_workspace_roots_for_family(RustValidateFamily::Hexarch)
+            .into_iter()
+            .filter(|root| matches!(root_scope(root.rel_dir()), RootScope::App(_)))
+            .filter(|root| self.tree.file_content(root.cargo_rel_path()).is_some())
+            .collect::<Vec<_>>();
         let root_rels = roots
             .iter()
             .map(|root| root.rel_dir().to_owned())
@@ -155,67 +172,81 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_clippy(&self) -> views::RsClippyRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Clippy, |_| true);
+        let roots = self.map_workspace_roots_for_family(RustValidateFamily::Clippy);
+        let root_rels = roots
+            .iter()
+            .map(|root| root.rel_dir().to_owned())
+            .collect::<Vec<_>>();
         views::RsClippyRoute::new(
             roots,
-            self.map_family_files(RustValidateFamily::Clippy, &[]),
+            self.map_local_family_files(RustValidateFamily::Clippy, &root_rels),
         )
         .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_cargo(&self) -> views::RsCargoRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Cargo, |_| true);
+        let roots = self.map_workspace_roots_for_family(RustValidateFamily::Cargo);
+        let root_rels = roots
+            .iter()
+            .map(|root| root.rel_dir().to_owned())
+            .collect::<Vec<_>>();
         views::RsCargoRoute::new(
             roots,
-            self.map_family_files(RustValidateFamily::Cargo, &[]),
+            self.map_local_family_files(RustValidateFamily::Cargo, &root_rels),
         )
         .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_toolchain(&self) -> views::RsToolchainRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Toolchain, |_| true);
+        let roots = self.map_workspace_roots_for_family(RustValidateFamily::Toolchain);
+        let root_rels = roots
+            .iter()
+            .map(|root| root.rel_dir().to_owned())
+            .collect::<Vec<_>>();
         views::RsToolchainRoute::new(
             roots,
-            self.map_family_files(RustValidateFamily::Toolchain, &[]),
+            self.map_local_family_files(RustValidateFamily::Toolchain, &root_rels),
         )
         .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_deny(&self) -> views::RsDenyRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Deny, |_| true);
+        let roots = self.map_workspace_roots_for_family(RustValidateFamily::Deny);
+        let root_rels = roots
+            .iter()
+            .map(|root| root.rel_dir().to_owned())
+            .collect::<Vec<_>>();
         views::RsDenyRoute::new(
             roots,
-            self.map_family_files(RustValidateFamily::Deny, &[]),
+            self.map_local_family_files(RustValidateFamily::Deny, &root_rels),
             self.validation_scope.map(str::to_owned),
         )
     }
 
     #[must_use]
     pub fn map_rs_libarch(&self) -> views::RsLibarchRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Libarch, |root| {
-            root.classification() == RustRootClassification::Package
-                && root
-                    .package_zone_candidates()
-                    .first()
-                    .is_some_and(|candidate| candidate == root.rel_dir())
-        });
+        let roots = self
+            .map_workspace_roots_for_family(RustValidateFamily::Libarch)
+            .into_iter()
+            .filter(|root| matches!(root_scope(root.rel_dir()), RootScope::Packages))
+            .collect::<Vec<_>>();
         let root_rels = roots
             .iter()
             .map(|root| root.rel_dir().to_owned())
             .collect::<Vec<_>>();
         views::RsLibarchRoute::new(
             roots,
-            self.map_family_files(RustValidateFamily::Libarch, &root_rels),
+            self.map_local_family_files(RustValidateFamily::Libarch, &root_rels),
         )
-        .with_validation_scope(self.validation_scope.map(str::to_owned))
+            .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_deps(&self) -> views::RsDepsRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Deps, |_| true);
+        let roots = self.map_workspace_roots_for_family(RustValidateFamily::Deps);
         let root_rels = roots
             .iter()
             .map(|root| root.rel_dir().to_owned())
@@ -223,22 +254,26 @@ impl<'a> FamilyMapper<'a> {
 
         views::RsDepsRoute::new(
             roots,
-            self.map_family_files(RustValidateFamily::Deps, &root_rels),
+            self.map_local_family_files(RustValidateFamily::Deps, &root_rels),
         )
         .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_release(&self) -> views::RsReleaseRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Release, |_| true);
+        let roots = self.map_workspace_roots_for_family(RustValidateFamily::Release);
+        let root_rels = roots
+            .iter()
+            .map(|root| root.rel_dir().to_owned())
+            .collect::<Vec<_>>();
         views::RsReleaseRoute::new(roots)
-            .with_family_files(self.map_family_files(RustValidateFamily::Release, &[]))
+            .with_family_files(self.map_local_family_files(RustValidateFamily::Release, &root_rels))
             .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_garde(&self) -> views::RsGardeRoute {
-        let roots = self.map_scoped_roots_for_family(RustValidateFamily::Garde, |_| true);
+        let roots = self.map_scoped_workspace_roots_for_family(RustValidateFamily::Garde);
         let root_rels = roots
             .iter()
             .map(|root| root.root().rel_dir().to_owned())
@@ -252,7 +287,7 @@ impl<'a> FamilyMapper<'a> {
                 &root_rels,
                 self.validation_scope,
             ),
-            self.map_family_files(RustValidateFamily::Garde, &[]),
+            self.map_local_family_files(RustValidateFamily::Garde, &root_rels),
         )
     }
 
@@ -291,6 +326,36 @@ impl<'a> FamilyMapper<'a> {
                 self.validation_scope,
             ),
         )
+    }
+
+    fn map_workspace_roots_for_family(&self, family: RustValidateFamily) -> Vec<views::RsRootView> {
+        self.legal_workspace_roots_for_family(family)
+            .into_iter()
+            .map(|root| {
+                views::RsRootView::new(
+                    root.rel_dir().to_owned(),
+                    root.cargo_rel_path().to_owned(),
+                )
+            })
+            .collect()
+    }
+
+    fn map_scoped_workspace_roots_for_family(
+        &self,
+        family: RustValidateFamily,
+    ) -> Vec<views::RsScopedRootView> {
+        self.legal_workspace_roots_for_family(family)
+            .into_iter()
+            .map(|root| {
+                views::RsScopedRootView::new(
+                    views::RsRootView::new(
+                        root.rel_dir().to_owned(),
+                        root.cargo_rel_path().to_owned(),
+                    ),
+                    root.classification(),
+                )
+            })
+            .collect()
     }
 
     fn map_roots_for_family<F>(
@@ -337,93 +402,85 @@ impl<'a> FamilyMapper<'a> {
             .collect()
     }
 
-    fn root_is_live_for_hexarch(&self, root: &RustRootPlacementRootFacts) -> bool {
-        self.tree.file_content(root.cargo_rel_path()).is_some()
-    }
-
     fn root_matches_validation_scope(&self, root_rel: &str) -> bool {
         self.validation_scope.is_none_or(|scope_rel| {
             path_is_under(root_rel, scope_rel) || path_is_under(scope_rel, root_rel)
         })
     }
 
-    fn map_family_files(
+    fn map_local_family_files(
         &self,
         family: RustValidateFamily,
-        routed_root_rels: &[String],
+        legal_root_rels: &[String],
     ) -> Vec<views::RsFamilyFileView> {
-        self.owned_surface
-            .family_files()
+        self.legality
+            .legal_family_files()
             .iter()
             .filter(|fact| fact.family() == family)
-            .filter(|fact| self.family_file_matches_route(fact, routed_root_rels))
-            .map(file_view)
+            .filter(|fact| {
+                legal_root_rels.iter().any(|root_rel| {
+                    root_rel == fact.workspace_root_rel()
+                        || fact
+                            .attachment()
+                            .ancestor_root_rels()
+                            .is_some_and(|roots| roots.iter().any(|candidate| candidate == root_rel))
+                })
+            })
+            .filter(|fact| self.legal_family_file_matches_scope(fact))
+            .map(legal_file_view)
             .collect()
     }
 
-    fn family_file_matches_route(
-        &self,
-        fact: &RustFamilyFileFact,
-        routed_root_rels: &[String],
-    ) -> bool {
-        use guardrail3_app_rs_ownership::RustFamilyFileAttachment::{
-            AncestorOfRoots, ExactRoot, NestedUnderRoot, OutsideRoots,
-        };
+    fn map_arch_family_files(&self) -> Vec<views::RsFamilyFileView> {
+        self.legality
+            .illegal_family_files()
+            .iter()
+            .filter(|fact| is_arch_tracked_family_file(fact.family(), fact.kind()))
+            .filter(|fact| self.illegal_family_file_matches_scope(fact))
+            .map(illegal_file_view)
+            .collect()
+    }
 
-        match fact.attachment() {
-            ExactRoot { root_rel } => self.validation_scope.map_or_else(
-                || {
-                    routed_root_rels.is_empty()
-                        || routed_root_rels
-                            .iter()
-                            .any(|routed| routed == root_rel || path_is_under(root_rel, routed))
-                },
-                |_scope_rel| self.root_matches_validation_scope(root_rel),
-            ),
-            NestedUnderRoot {
-                root_rel,
-                owner_rel,
-            } => self.validation_scope.map_or_else(
-                || {
-                    routed_root_rels.is_empty()
-                        || routed_root_rels.iter().any(|routed| {
-                            routed == root_rel
-                                || path_is_under(root_rel, routed)
-                                || path_is_under(owner_rel, routed)
-                        })
-                },
-                |scope_rel| {
-                    path_is_under(owner_rel, scope_rel)
-                        || path_is_under(scope_rel, owner_rel)
-                        || path_is_under(root_rel, scope_rel)
-                        || path_is_under(scope_rel, root_rel)
-                },
-            ),
-            AncestorOfRoots {
-                root_rels,
-                owner_rel,
-            } => self.validation_scope.map_or_else(
-                || {
-                    routed_root_rels.is_empty()
-                        || routed_root_rels.iter().any(|routed| {
-                            root_rels
-                                .iter()
-                                .any(|root_rel| routed == root_rel || path_is_under(root_rel, routed))
-                        })
-                },
-                |scope_rel| {
-                    path_is_under(owner_rel, scope_rel)
-                        || path_is_under(scope_rel, owner_rel)
-                        || root_rels.iter().any(|root_rel| {
-                            path_is_under(root_rel, scope_rel)
-                                || path_is_under(scope_rel, root_rel)
-                        })
-                },
-            ),
-            OutsideRoots { owner_rel } => self.validation_scope.map_or(true, |scope_rel| {
-                path_is_under(owner_rel, scope_rel) || path_is_under(scope_rel, owner_rel)
-            }),
+    fn legal_workspace_roots_for_family(
+        &self,
+        family: RustValidateFamily,
+    ) -> Vec<&guardrail3_app_rs_legality::RustLegalWorkspaceRoot> {
+        if !self.selected_families.contains(family) {
+            return Vec::new();
         }
+
+        self.legality
+            .legal_workspace_roots()
+            .iter()
+            .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
+            .filter(|root| {
+                self.scope
+                    .roots()
+                    .iter()
+                    .find(|candidate| candidate.rel_dir() == root.rel_dir())
+                    .is_some_and(|placement_root| {
+                        root_enabled_for_family(placement_root, family, self.config)
+                    })
+            })
+            .collect()
+    }
+
+    fn legal_family_file_matches_scope(&self, fact: &RustLegalFamilyFileFact) -> bool {
+        self.validation_scope.is_none_or(|scope_rel| {
+            path_is_under(fact.rel_path(), scope_rel)
+                || path_is_under(scope_rel, fact.rel_path())
+                || path_is_under(fact.workspace_root_rel(), scope_rel)
+                || path_is_under(scope_rel, fact.workspace_root_rel())
+                || attachment_matches_scope(fact.attachment(), scope_rel)
+        })
+    }
+
+    fn illegal_family_file_matches_scope(&self, fact: &RustIllegalFamilyFileFact) -> bool {
+        self.validation_scope.is_none_or(|scope_rel| {
+            path_is_under(fact.rel_path(), scope_rel)
+                || path_is_under(scope_rel, fact.rel_path())
+                || attachment_matches_scope(fact.attachment(), scope_rel)
+        })
     }
 }
 
@@ -435,23 +492,156 @@ fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
             .is_some_and(|rest| rest.starts_with('/'))
 }
 
+fn attachment_matches_scope(attachment: &RustFamilyFileAttachment, scope_rel: &str) -> bool {
+    match attachment {
+        RustFamilyFileAttachment::ExactRoot { root_rel } => {
+            path_is_under(root_rel, scope_rel) || path_is_under(scope_rel, root_rel)
+        }
+        RustFamilyFileAttachment::NestedUnderRoot { root_rel, owner_rel } => {
+            path_is_under(owner_rel, scope_rel)
+                || path_is_under(scope_rel, owner_rel)
+                || path_is_under(root_rel, scope_rel)
+                || path_is_under(scope_rel, root_rel)
+        }
+        RustFamilyFileAttachment::AncestorOfRoots { root_rels, owner_rel } => {
+            path_is_under(owner_rel, scope_rel)
+                || path_is_under(scope_rel, owner_rel)
+                || root_rels.iter().any(|root_rel| {
+                    path_is_under(root_rel, scope_rel) || path_is_under(scope_rel, root_rel)
+                })
+        }
+        RustFamilyFileAttachment::OutsideRoots { owner_rel } => {
+            path_is_under(owner_rel, scope_rel) || path_is_under(scope_rel, owner_rel)
+        }
+    }
+}
+
 fn root_view(root: &RustRootPlacementRootFacts) -> views::RsRootView {
     views::RsRootView::new(root.rel_dir().to_owned(), root.cargo_rel_path().to_owned())
 }
 
-fn file_view(fact: &RustFamilyFileFact) -> views::RsFamilyFileView {
+fn legal_file_view(fact: &RustLegalFamilyFileFact) -> views::RsFamilyFileView {
     views::RsFamilyFileView::new(
+        fact.family(),
         fact.rel_path().to_owned(),
         fact.kind(),
         views::RsFamilyFileAttachmentView::from_attachment(fact.attachment()),
+        views::RsFamilyFilePlacementView::Legal,
     )
 }
+
+fn illegal_file_view(fact: &RustIllegalFamilyFileFact) -> views::RsFamilyFileView {
+    views::RsFamilyFileView::new(
+        fact.family(),
+        fact.rel_path().to_owned(),
+        fact.kind(),
+        views::RsFamilyFileAttachmentView::from_attachment(fact.attachment()),
+        views::RsFamilyFilePlacementView::Illegal {
+            reason: illegal_file_reason_text(fact),
+        },
+    )
+}
+
+fn illegal_file_reason_text(fact: &RustIllegalFamilyFileFact) -> String {
+    use guardrail3_app_rs_legality::RustIllegalFamilyFileReason;
+
+    match fact.reason() {
+        RustIllegalFamilyFileReason::OutsideEveryLegalWorkspace => format!(
+            "`{}` is placed outside every legal workspace root for `{}`.",
+            fact.rel_path(),
+            family_label(fact.family())
+        ),
+        RustIllegalFamilyFileReason::AboveLegalWorkspaceRoots {
+            workspace_root_rels,
+        } => format!(
+            "`{}` is placed above legal workspace roots {:?} for `{}`.",
+            fact.rel_path(),
+            workspace_root_rels,
+            family_label(fact.family())
+        ),
+        RustIllegalFamilyFileReason::NestedBeneathLegalWorkspace {
+            workspace_root_rel,
+            owner_rel,
+        } => format!(
+            "`{}` is nested at `{owner_rel}` beneath legal workspace `{workspace_root_rel}`. `{}` files are only allowed at the workspace root.",
+            fact.rel_path(),
+            family_label(fact.family())
+        ),
+        RustIllegalFamilyFileReason::AttachedToIllegalRoot { root_rel } => format!(
+            "`{}` is attached to illegal Rust root `{root_rel}`. `{}` files are only allowed at legal workspace roots.",
+            fact.rel_path(),
+            family_label(fact.family())
+        ),
+        RustIllegalFamilyFileReason::AttachedToLegalMemberRoot {
+            workspace_root_rel,
+            member_rel,
+        } => format!(
+            "`{}` is attached to member crate `{member_rel}` under legal workspace `{workspace_root_rel}`. `{}` files are only allowed at the workspace root.",
+            fact.rel_path(),
+            family_label(fact.family())
+        ),
+    }
+}
+
+fn family_label(family: RustValidateFamily) -> &'static str {
+    match family {
+        RustValidateFamily::Toolchain => "toolchain",
+        RustValidateFamily::Clippy => "clippy",
+        RustValidateFamily::Deny => "deny",
+        RustValidateFamily::Cargo => "cargo",
+        RustValidateFamily::Deps => "deps",
+        RustValidateFamily::Garde => "garde",
+        RustValidateFamily::Release => "release",
+        RustValidateFamily::Hexarch => "hexarch",
+        RustValidateFamily::Libarch => "libarch",
+        RustValidateFamily::Arch => "arch",
+        RustValidateFamily::Fmt => "fmt",
+        RustValidateFamily::Code => "code",
+        RustValidateFamily::Test => "test",
+        RustValidateFamily::HooksShared => "hooks-shared",
+        RustValidateFamily::HooksRs => "hooks-rs",
+    }
+}
+
+fn is_arch_tracked_family_file(family: RustValidateFamily, kind: RustValidateFamilyFileKind) -> bool {
+    matches!(
+        family,
+        RustValidateFamily::Toolchain
+            | RustValidateFamily::Clippy
+            | RustValidateFamily::Deny
+            | RustValidateFamily::Cargo
+            | RustValidateFamily::Deps
+            | RustValidateFamily::Garde
+            | RustValidateFamily::Release
+    ) && !matches!(
+        kind,
+        RustValidateFamilyFileKind::CargoToml | RustValidateFamilyFileKind::GuardrailToml
+    )
+}
+
+type RustValidateFamilyFileKind = guardrail3_app_rs_ownership::RustFamilyFileKind;
 
 fn root_enabled_for_family(
     root: &RustRootPlacementRootFacts,
     family: RustValidateFamily,
     config: Option<&GuardrailConfig>,
 ) -> bool {
+    root_enabled_for_family_rel(root.rel_dir(), family, config)
+}
+
+fn root_enabled_for_family_rel(
+    rel_dir: &str,
+    family: RustValidateFamily,
+    config: Option<&GuardrailConfig>,
+) -> bool {
+    if rel_dir.is_empty() {
+        return config
+            .and_then(GuardrailConfig::rust)
+            .and_then(|rust| rust.checks())
+            .and_then(|checks| checks.family_enabled(family))
+            .unwrap_or(true);
+    }
+
     let Some(rust) = config.and_then(GuardrailConfig::rust) else {
         return true;
     };
@@ -463,7 +653,7 @@ fn root_enabled_for_family(
     let app_count = rust.apps().map_or(0, std::collections::BTreeMap::len);
     let has_packages_scope = rust.packages().is_some();
 
-    match root_scope(root.rel_dir()) {
+    match root_scope(rel_dir) {
         RootScope::App(app_path) => rust
             .apps()
             .and_then(|apps| {
@@ -625,24 +815,16 @@ pub(crate) fn root_test(rel_dir: &str) -> guardrail3_app_rs_placement::RustRootP
         if rel_dir.is_empty() {
             "Cargo.toml".to_owned()
         } else {
-            format!("{rel_dir}/Cargo.toml")
+            ProjectTree::join_rel(rel_dir, "Cargo.toml")
         },
-        match rel_dir.split('/').next() {
-            Some("apps") => RustRootClassification::App,
-            Some("packages") => RustRootClassification::Package,
-            _ => RustRootClassification::Other,
-        },
+        RustRootClassification::App,
         None,
-        if rel_dir.starts_with("apps/") {
-            vec!["apps/guardrail3".to_owned()]
-        } else {
-            Vec::new()
-        },
+        vec!["apps/guardrail3".to_owned()],
         Vec::new(),
         Vec::new(),
     )
 }
 
 #[cfg(test)]
-#[path = "rs_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_tests/mod.rs"]
 mod rs_tests;

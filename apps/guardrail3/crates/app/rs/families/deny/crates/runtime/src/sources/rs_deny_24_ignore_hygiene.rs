@@ -170,13 +170,14 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
 
 #[cfg(test)]
 pub(crate) use ::test_support::{
-    build_fixture_deny_toml, copy_fixture, set_advisory_ignores, write_file,
+    build_fixture_deny_toml, set_advisory_ignores,
 };
 #[cfg(test)]
 #[path = "rs_deny_24_ignore_hygiene_tests/mod.rs"] // reason: test-only sidecar module wiring

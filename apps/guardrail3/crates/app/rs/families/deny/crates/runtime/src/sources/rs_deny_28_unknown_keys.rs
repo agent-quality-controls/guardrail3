@@ -373,14 +373,15 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
 
 #[cfg(test)]
 pub(crate) use ::test_support::{
-    add_skip_entry, build_fixture_deny_toml, copy_fixture, set_advisory_ignores,
-    set_feature_entries, set_license_exceptions, write_file,
+    add_skip_entry, build_fixture_deny_toml, set_advisory_ignores, set_feature_entries,
+    set_license_exceptions,
 };
 #[cfg(test)]
 #[path = "rs_deny_28_unknown_keys_tests/mod.rs"] // reason: test-only sidecar module wiring

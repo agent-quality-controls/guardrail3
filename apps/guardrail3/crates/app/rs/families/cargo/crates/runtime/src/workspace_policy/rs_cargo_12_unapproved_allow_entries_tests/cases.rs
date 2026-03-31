@@ -4,7 +4,7 @@ use guardrail3_app_rs_family_cargo_assertions::rs_cargo_12_unapproved_allow_entr
 use test_support::{entry, tree};
 
 const STANDALONE_RUST_LINTS: &str = r#"
-    [lints.rust]
+    [workspace.lints.rust]
     warnings = "deny"
     unsafe_code = "forbid"
     dead_code = "deny"
@@ -14,7 +14,7 @@ const STANDALONE_RUST_LINTS: &str = r#"
 "#;
 
 const STANDALONE_CLIPPY_LINTS: &str = r#"
-    [lints.clippy]
+    [workspace.lints.clippy]
     all = { level = "deny", priority = -1 }
     pedantic = { level = "deny", priority = -1 }
     cargo = { level = "deny", priority = -1 }
@@ -62,9 +62,21 @@ const STANDALONE_CLIPPY_LINTS: &str = r#"
     multiple_crate_versions = "allow"
 "#;
 
+fn workspace_root_manifest(body: &str) -> String {
+    format!(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            {body}
+        "#
+    )
+}
+
 #[test]
 fn approved_allow_inventory_stays_clean() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -74,10 +86,10 @@ fn approved_allow_inventory_stays_clean() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_12_unapproved_allow_entries::assert_rule_results(
@@ -92,7 +104,7 @@ fn approved_allow_inventory_stays_clean() {
 
 #[test]
 fn unapproved_allow_entry_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -102,11 +114,11 @@ fn unapproved_allow_entry_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace(r#"warnings = "deny""#, r#"warnings = "allow""#);
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_12_unapproved_allow_entries::assert_rule_results(
@@ -135,8 +147,8 @@ fn missing_lint_tables_do_not_emit_false_inventory() {
     "#;
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_12_unapproved_allow_entries::assert_rule_results(
@@ -270,8 +282,8 @@ fn invalid_lint_level_does_not_emit_clean_allow_inventory() {
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_12_unapproved_allow_entries::assert_rule_results(
@@ -299,8 +311,8 @@ fn invalid_allow_priority_does_not_emit_clean_allow_inventory() {
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_12_unapproved_allow_entries::assert_rule_results(
@@ -324,10 +336,10 @@ fn malformed_root_local_guardrail_suppresses_clean_inventory() {
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
         &[
-            ("pkg/Cargo.toml", &manifest),
-            ("pkg/guardrail3.toml", "[profile"),
+            ("Cargo.toml", &manifest),
+            ("guardrail3.toml", "[profile"),
         ],
     ));
 

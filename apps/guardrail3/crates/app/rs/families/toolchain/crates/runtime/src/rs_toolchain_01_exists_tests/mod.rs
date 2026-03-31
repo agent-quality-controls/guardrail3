@@ -236,19 +236,12 @@ fn family_does_not_require_local_toolchain_for_non_member_package_inside_workspa
 }
 
 #[test]
-fn family_reports_descendant_toolchain_without_nested_cargo_root() {
+fn family_ignores_descendant_toolchain_without_nested_cargo_root() {
     let tree = workspace_tree_with_non_package_descendant_toolchain();
     let results = run_family_check(&tree);
 
     assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TOOLCHAIN-06"
-                && result.severity() == Severity::Error
-                && !result.inventory()
-                && result.title() == "descendant toolchain shadows workspace policy"
-                && result.message() == "Descendant `rust-toolchain.toml` at `docs/rust-toolchain.toml` can override the workspace-root toolchain contract. Keep toolchain policy at the workspace root only."
-                && result.file() == Some("docs/rust-toolchain.toml")
-        }),
-        "non-package descendant toolchain should trigger RS-TOOLCHAIN-06: {results:#?}"
+        !results.iter().any(|result| result.file() == Some("docs/rust-toolchain.toml")),
+        "descendant non-root toolchain placement now belongs to arch, not toolchain: {results:#?}"
     );
 }

@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::rs_deny_21_tokio_full_ban as assertions;
 
-use super::super::{build_fixture_deny_toml, copy_fixture, set_feature_entries, write_file};
+use super::super::{build_fixture_deny_toml, set_feature_entries};
 use super::super::{expected_tokio_allowed_features_for_test, join_set_for_test};
 
 fn tokio_entry(deny: &[&str], allow: &[&str]) -> toml::Value {
@@ -32,28 +32,20 @@ fn tokio_entry(deny: &[&str], allow: &[&str]) -> toml::Value {
 
 #[test]
 fn local_tokio_drift_only_warns_for_the_owned_local_root() {
-    let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
-    write_file(tmp.path(), "deny.toml", &build_fixture_deny_toml("service"));
-    write_file(
-        tmp.path(),
-        "apps/devctl/deny.toml",
-        &set_feature_entries(
-            &build_fixture_deny_toml("service"),
-            vec![tokio_entry(&["full"], &["rt-multi-thread"])],
-        ),
-    );
-
-    let results = super::super::run_family(tmp.path());
+    let results = super::super::run_check(&set_feature_entries(
+        &build_fixture_deny_toml("service"),
+        vec![tokio_entry(&["full"], &["rt-multi-thread"])],
+    ));
     assert!(!results.is_empty());
     assertions::assert_findings(
         &results,
         &[assertions::warn(
             "tokio allowed features changed",
             &format!(
-                "`apps/devctl/deny.toml` must keep `tokio` allowed features `{}`.",
+                "`deny.toml` must keep `tokio` allowed features `{}`.",
                 join_set_for_test(&expected_tokio_allowed_features_for_test())
             ),
-            "apps/devctl/deny.toml",
+            "deny.toml",
             false,
         )],
     );

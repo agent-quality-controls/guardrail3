@@ -204,8 +204,6 @@ pub(crate) fn test_input_for_root<'a>(
         cargo_rust_version,
         cargo_rust_version_invalid: false,
         cargo_parse_error,
-        ancestor_toolchain: None,
-        descendant_toolchains: Vec::new(),
     }
 }
 
@@ -228,8 +226,6 @@ pub(crate) fn test_input_invalid_cargo_rust_version_type<'a>(
         cargo_rust_version: None,
         cargo_rust_version_invalid: true,
         cargo_parse_error,
-        ancestor_toolchain: None,
-        descendant_toolchains: Vec::new(),
     }
 }
 

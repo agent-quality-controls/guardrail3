@@ -196,24 +196,11 @@ pub fn assert_code_scoped_files_config_result(report: &Report) {
     );
 }
 
-pub fn assert_toolchain_requires_local_workspace_toolchain_and_rejects_repo_root_toolchain(
-    report: &Report,
-) {
-    assert_live_ids_present(report, "toolchain", &["RS-TOOLCHAIN-01", "RS-TOOLCHAIN-07"]);
-    assert_result_present(
+pub fn assert_toolchain_requires_local_workspace_toolchain(report: &Report) {
+    assert_single_live_result(
         report,
         "toolchain",
         "RS-TOOLCHAIN-01",
         Some("apps/guardrail3/rust-toolchain.toml"),
-        None,
-        None,
-    );
-    assert_result_present(
-        report,
-        "toolchain",
-        "RS-TOOLCHAIN-07",
-        Some("rust-toolchain.toml"),
-        None,
-        None,
     );
 }
