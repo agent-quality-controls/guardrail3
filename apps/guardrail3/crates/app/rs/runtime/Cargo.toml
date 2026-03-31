@@ -34,7 +34,7 @@ families-all = [
     "family-hooks-rs",
 ]
 family-arch = ["dep:guardrail3_app_rs_family_arch", "routing"]
-family-fmt = ["dep:guardrail3_app_rs_family_fmt"]
+family-fmt = ["dep:guardrail3_app_rs_family_fmt", "routing"]
 family-toolchain = ["dep:guardrail3_app_rs_family_toolchain", "routing"]
 family-clippy = ["dep:guardrail3_app_rs_family_clippy", "routing"]
 family-deny = ["dep:guardrail3_app_rs_family_deny", "routing"]

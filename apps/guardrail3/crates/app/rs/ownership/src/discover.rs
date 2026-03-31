@@ -21,6 +21,7 @@ pub(super) fn collect(
     let mut family_files = Vec::new();
 
     collect_toolchain_files(tree, &root_rels, &mut seen, &mut family_files);
+    collect_fmt_files(tree, &root_rels, &mut seen, &mut family_files);
     collect_clippy_files(tree, &root_rels, &mut seen, &mut family_files);
     collect_deny_files(tree, &root_rels, &mut seen, &mut family_files);
     collect_cargo_and_policy_files(tree, &root_rels, &mut seen, &mut family_files);
@@ -34,6 +35,32 @@ pub(super) fn collect(
     });
 
     RustOwnedSurfaceFacts::new(family_files)
+}
+
+fn collect_fmt_files(
+    tree: &ProjectTree,
+    root_rels: &[String],
+    seen: &mut BTreeSet<(RustValidateFamily, String)>,
+    out: &mut Vec<RustFamilyFileFact>,
+) {
+    collect_root_and_dir_file(
+        tree,
+        root_rels,
+        seen,
+        out,
+        RustValidateFamily::Fmt,
+        RustFamilyFileKind::RustfmtToml,
+        "rustfmt.toml",
+    );
+    collect_root_and_dir_file(
+        tree,
+        root_rels,
+        seen,
+        out,
+        RustValidateFamily::Fmt,
+        RustFamilyFileKind::DotRustfmtToml,
+        ".rustfmt.toml",
+    );
 }
 
 fn collect_toolchain_files(

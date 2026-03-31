@@ -26,23 +26,6 @@ pub fn check_allowed(config: &ClippyConfigFacts, results: &mut Vec<CheckResult>)
 
 pub fn check(forbidden: &ForbiddenConfigFacts, results: &mut Vec<CheckResult>) {
     let (title, message) = match &forbidden.reason {
-        ForbiddenConfigReason::NotAllowedRoot => (
-            "clippy.toml in forbidden location".to_owned(),
-            format!(
-                "`{}` is not an allowed clippy policy root. clippy.toml is allowed only at workspace roots.",
-                forbidden.config.rel_path
-            ),
-        ),
-        ForbiddenConfigReason::UnparseableCargoRoot {
-            cargo_rel_path,
-            parse_error,
-        } => (
-            "clippy.toml placement could not be resolved".to_owned(),
-            format!(
-                "`{}` is attached to routed Cargo root `{cargo_rel_path}`, but that Cargo.toml could not be parsed: {parse_error}",
-                forbidden.config.rel_path
-            ),
-        ),
         ForbiddenConfigReason::ShadowedSameRoot { preferred_rel_path } => (
             "same-root clippy config conflict".to_owned(),
             format!(

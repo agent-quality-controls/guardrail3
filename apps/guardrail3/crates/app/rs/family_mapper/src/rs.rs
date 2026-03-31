@@ -158,6 +158,21 @@ impl<'a> FamilyMapper<'a> {
     }
 
     #[must_use]
+    pub fn map_rs_fmt(&self) -> views::RsFmtRoute {
+        if !self.selected_families.contains(RustValidateFamily::Fmt) {
+            return views::RsFmtRoute::new(Vec::new());
+        }
+        views::RsFmtRoute::new(
+            self.legality
+                .legal_family_files()
+                .iter()
+                .filter(|fact| fact.family() == RustValidateFamily::Fmt)
+                .map(legal_file_view)
+                .collect(),
+        )
+    }
+
+    #[must_use]
     pub fn map_rs_clippy(&self) -> views::RsClippyRoute {
         let roots = self.map_workspace_roots_for_family(RustValidateFamily::Clippy);
         let root_rels = roots
@@ -567,6 +582,11 @@ fn illegal_file_reason_text(fact: &RustIllegalFamilyFileFact) -> String {
             fact.rel_path(),
             family_label(fact.family())
         ),
+        RustIllegalFamilyFileReason::OutsideValidationRoot => format!(
+            "`{}` is placed outside the validation root. `{}` files are only allowed at the validation root.",
+            fact.rel_path(),
+            family_label(fact.family())
+        ),
         RustIllegalFamilyFileReason::AboveLegalWorkspaceRoots {
             workspace_root_rels,
         } => format!(
@@ -629,6 +649,7 @@ fn is_arch_tracked_family_file(family: RustValidateFamily, kind: RustValidateFam
             | RustValidateFamily::Deps
             | RustValidateFamily::Garde
             | RustValidateFamily::Release
+            | RustValidateFamily::Fmt
     ) && !matches!(
         kind,
         RustValidateFamilyFileKind::CargoToml | RustValidateFamilyFileKind::GuardrailToml

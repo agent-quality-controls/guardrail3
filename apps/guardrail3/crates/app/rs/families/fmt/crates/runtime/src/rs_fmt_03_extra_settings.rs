@@ -39,6 +39,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
 fn expected_keys() -> BTreeSet<&'static str> {
     [
         "edition",
+        "style_edition",
         "max_width",
         "tab_spaces",
         "use_field_init_shorthand",

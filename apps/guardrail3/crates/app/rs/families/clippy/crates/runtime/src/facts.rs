@@ -47,11 +47,6 @@ pub struct ClippyConfigFacts {
 
 #[derive(Debug, Clone)]
 pub enum ForbiddenConfigReason {
-    NotAllowedRoot,
-    UnparseableCargoRoot {
-        cargo_rel_path: String,
-        parse_error: String,
-    },
     ShadowedSameRoot {
         preferred_rel_path: String,
     },
@@ -132,77 +127,30 @@ struct ResolvedPolicyMap {
 pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     let validation_scope = route.validation_scope();
     let cargo_roots = collect_cargo_roots(tree, route, validation_scope);
-    let routed_root_rels = route
+    let workspace_roots = route
         .roots()
         .iter()
         .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
-    let workspace_roots = top_level_workspace_roots(&cargo_roots);
     let policy_map = read_policy_map(tree, &cargo_roots);
     let mut cargo_config_overrides = collect_cargo_config_overrides(
         tree,
         route,
-        &routed_root_rels,
+        &workspace_roots,
         &cargo_roots,
         validation_scope,
     );
-
-    let mut allowed_policy_roots = BTreeSet::new();
-    allowed_policy_roots.extend(workspace_roots.iter().cloned());
 
     let configs = collect_configs(
         tree,
         route,
         &cargo_roots,
         &policy_map,
-        &routed_root_rels,
+        &workspace_roots,
         validation_scope,
     );
-    let mut allowed_configs = Vec::new();
+    let allowed_configs = configs;
     let mut forbidden_configs = Vec::new();
-    for config in configs {
-        let has_same_root_config = route.family_files().iter().any(|file| {
-            matches!(
-                file.kind(),
-                guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyToml
-                    | guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyDotToml
-            ) && file.logical_owner_rel() == config.rel_dir
-        });
-        let nested_under_allowed_root = workspace_roots
-            .iter()
-            .any(|root_rel| root_rel != &config.rel_dir && path_is_under(&config.rel_dir, root_rel));
-        if let Some(cargo_root) = cargo_roots
-            .get(&config.rel_dir)
-            .filter(|facts| facts.parse_error.is_some())
-        {
-            if has_same_root_config && !nested_under_allowed_root {
-                forbidden_configs.push(ForbiddenConfigFacts {
-                    config,
-                    reason: ForbiddenConfigReason::UnparseableCargoRoot {
-                        cargo_rel_path: cargo_root.cargo_rel_path.clone(),
-                        parse_error: cargo_root
-                            .parse_error
-                            .clone()
-                            .expect("cargo root parse error"),
-                    },
-                });
-            } else {
-                forbidden_configs.push(ForbiddenConfigFacts {
-                    config,
-                    reason: ForbiddenConfigReason::NotAllowedRoot,
-                });
-            }
-            continue;
-        }
-        if allowed_policy_roots.contains(&config.rel_dir) {
-            allowed_configs.push(config);
-        } else {
-            forbidden_configs.push(ForbiddenConfigFacts {
-                config,
-                reason: ForbiddenConfigReason::NotAllowedRoot,
-            });
-        }
-    }
 
     let mut deduped_allowed = Vec::new();
     let mut configs_by_dir = BTreeMap::<String, Vec<ClippyConfigFacts>>::new();
@@ -232,23 +180,12 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     let mut allowed_configs = deduped_allowed;
     let mut cargo_root_failures = cargo_roots
         .values()
+        .filter(|facts| workspace_roots.contains(&facts.rel_dir))
         .filter_map(|facts| {
-            let has_same_root_config = route.family_files().iter().any(|file| {
-                matches!(
-                    file.kind(),
-                    guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyToml
-                        | guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyDotToml
-                ) && file.logical_owner_rel() == facts.rel_dir
-            });
-            let nested_under_allowed_root = workspace_roots
-                .iter()
-                .any(|root_rel| root_rel != &facts.rel_dir && path_is_under(&facts.rel_dir, root_rel));
-            if !workspace_roots.contains(&facts.rel_dir)
-                && (!has_same_root_config || nested_under_allowed_root)
-            {
-                return None;
-            }
-            facts.parse_error.as_ref().map(|parse_error: &String| CargoRootFailureFacts {
+            facts
+                .parse_error
+                .as_ref()
+                .map(|parse_error: &String| CargoRootFailureFacts {
                     rel_dir: facts.rel_dir.clone(),
                     cargo_rel_path: facts.cargo_rel_path.clone(),
                     parse_error: parse_error.clone(),
@@ -283,32 +220,6 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
         covered_units,
         uncovered_units,
     }
-}
-
-fn top_level_workspace_roots(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeSet<String> {
-    let all_workspace_roots = cargo_roots
-        .iter()
-        .filter(|(_rel_dir, facts)| facts.parse_error.is_none() && facts.has_workspace)
-        .map(|(rel_dir, _facts)| rel_dir.clone())
-        .collect::<BTreeSet<_>>();
-
-    all_workspace_roots
-        .iter()
-        .filter(|rel_dir| {
-            !all_workspace_roots
-                .iter()
-                .any(|other| other != *rel_dir && path_is_under(rel_dir, other))
-        })
-        .cloned()
-        .collect()
-}
-
-fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
-    parent_rel.is_empty()
-        || rel_path == parent_rel
-        || rel_path
-            .strip_prefix(parent_rel)
-            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 #[cfg(test)]

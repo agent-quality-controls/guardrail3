@@ -9,10 +9,9 @@ This family owns the repository-root `rustfmt.toml` contract plus any nested ove
 `RS-FMT` owns:
 
 - required root `rustfmt.toml` or `.rustfmt.toml`
-- baseline rustfmt key/value policy
+- baseline rustfmt key/value policy (including `style_edition`)
 - extra-setting inventory
 - nightly-only rustfmt keys on stable toolchains
-- nested `rustfmt.toml` and `.rustfmt.toml` override detection
 - root Cargo/rustfmt edition consistency
 - `ignore` escape-hatch visibility
 - same-directory `rustfmt.toml` plus `.rustfmt.toml` conflicts
@@ -82,5 +81,10 @@ This family is now self-hosted in the same stabilized shape as the other migrate
 - family-local assertions crate for reusable result-shape checks
 - fail-closed coverage for required root Cargo/toolchain inputs used by `RS-FMT-04` and `RS-FMT-06`
 - quiet success on `RS-FMT-01`; missing root config is the only finding path for that rule
+
+Placement split:
+
+- illegal rustfmt config placement (for example nested `rustfmt.toml`) is reported by `RS-ARCH`
+- `RS-FMT` consumes legality-approved config surface and validates content only
 
 The next work on `fmt` should stay in the attack-review lane: compare live behavior against `.plans/todo/checks/rs/fmt.md`, add regressions for any concrete detector drift, and avoid treating repo-wide formatting debt as a detector bug.

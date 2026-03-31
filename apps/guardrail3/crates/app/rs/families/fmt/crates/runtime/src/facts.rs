@@ -1,5 +1,7 @@
 use std::path::Path;
 
+use guardrail3_app_rs_family_mapper::RsFmtRoute;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_config::types::EscapeHatchConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 
@@ -36,38 +38,27 @@ pub struct RustfmtFacts {
     pub(crate) toolchain_channel: ToolchainChannelState,
 }
 
-pub fn collect(tree: &ProjectTree) -> RustfmtFacts {
+pub fn collect(tree: &ProjectTree, route: &RsFmtRoute) -> RustfmtFacts {
     let mut root_config_rel = None;
     let mut root_parsed = None;
-    let mut extra_config_rels = Vec::new();
+    let extra_config_rels = Vec::new();
     let mut dual_file_conflict_dirs = Vec::new();
 
-    for (dir_rel, entry) in tree.structure() {
-        let has_rustfmt = entry.has_file("rustfmt.toml");
-        let has_dot_rustfmt = entry.has_file(".rustfmt.toml");
+    let has_root_rustfmt = route.family_files().iter().any(|file| {
+        file.kind() == RustFamilyFileKind::RustfmtToml && file.logical_owner_rel().is_empty()
+    });
+    let has_root_dot_rustfmt = route.family_files().iter().any(|file| {
+        file.kind() == RustFamilyFileKind::DotRustfmtToml && file.logical_owner_rel().is_empty()
+    });
 
-        if has_rustfmt && has_dot_rustfmt {
-            dual_file_conflict_dirs.push(dir_rel.clone());
-        }
-
-        if dir_rel.is_empty() {
-            if has_rustfmt {
-                root_config_rel = Some("rustfmt.toml".to_owned());
-            } else if has_dot_rustfmt {
-                root_config_rel = Some(".rustfmt.toml".to_owned());
-            }
-        } else {
-            if has_rustfmt {
-                extra_config_rels.push(ProjectTree::join_rel(dir_rel, "rustfmt.toml"));
-            }
-            if has_dot_rustfmt {
-                extra_config_rels.push(ProjectTree::join_rel(dir_rel, ".rustfmt.toml"));
-            }
-        }
+    if has_root_rustfmt && has_root_dot_rustfmt {
+        dual_file_conflict_dirs.push(String::new());
     }
-
-    extra_config_rels.sort();
-    dual_file_conflict_dirs.sort();
+    if has_root_rustfmt {
+        root_config_rel = Some("rustfmt.toml".to_owned());
+    } else if has_root_dot_rustfmt {
+        root_config_rel = Some(".rustfmt.toml".to_owned());
+    }
 
     if let Some(rel) = &root_config_rel {
         root_parsed = tree

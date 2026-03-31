@@ -42,7 +42,13 @@ fn reports_non_table_root_configs_as_parse_errors() {
 fn reports_missing_required_setting_with_exact_branch() {
     let results = run_check(Some(parse_rustfmt_settings_fixture("edition = \"2024\"")));
 
-    assertions::assert_count(&results, 6);
+    assertions::assert_count(&results, 7);
+    assertions::assert_warn_present(
+        &results,
+        "rustfmt style_edition missing",
+        "style_edition must be set to 2024",
+        "rustfmt.toml",
+    );
     assertions::assert_warn_present(
         &results,
         "rustfmt max_width missing",
@@ -56,6 +62,7 @@ fn reports_wrong_required_setting_with_exact_branch() {
     let results = run_check(Some(parse_rustfmt_settings_fixture(
         r#"
 edition = "2024"
+style_edition = "2024"
 max_width = 120
 tab_spaces = 4
 use_field_init_shorthand = true
@@ -79,6 +86,7 @@ fn emits_no_results_when_all_required_settings_match() {
     let results = run_check(Some(parse_rustfmt_settings_fixture(
         r#"
 edition = "2024"
+style_edition = "2024"
 max_width = 100
 tab_spaces = 4
 use_field_init_shorthand = true

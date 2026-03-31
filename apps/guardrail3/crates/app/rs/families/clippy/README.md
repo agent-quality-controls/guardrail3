@@ -10,7 +10,7 @@ own repo-global Rust root legality, discovery, or routing.
 `RS-CLIPPY` owns:
 
 - allowed `clippy.toml` coverage for legal workspaces
-- allowed `clippy.toml` placement and shadowing rules
+- same-root `clippy.toml` / `.clippy.toml` shadowing conflicts on legality-approved policy roots
 - applicable cargo-config override surfaces that can redirect Clippy config discovery
 - exact managed threshold values
 - required disallowed method/type/macro baseline
@@ -22,7 +22,7 @@ own repo-global Rust root legality, discovery, or routing.
 - fail-closed handling when active Clippy inputs are unreadable or malformed
   - including malformed `guardrail3.toml` policy context used to resolve profile/garde behavior
   - including malformed allowed `clippy.toml` / `.clippy.toml`
-  - including malformed routed `Cargo.toml` when coverage or placement depends on it
+  - including malformed routed `Cargo.toml` when coverage depends on it
 
 It does not own:
 
@@ -50,11 +50,10 @@ It consumes:
 
 Inside a routed workspace, the family may then do family-local discovery:
 
-- allowed Clippy policy root selection
 - `clippy.toml` / `.clippy.toml` parsing
 - applicable `.cargo/config.toml` / `.cargo/config` discovery for forbidden `CLIPPY_CONF_DIR` overrides
 - managed-key normalization
-- per-root coverage and shadowing analysis
+- per-root coverage and same-root shadowing analysis
 - profile-aware baseline comparison
 - input failure collection
 - no pure-layer-specific Clippy baseline forks; pure-layer semantics stay owned by architecture checks
@@ -64,7 +63,7 @@ Malformed inputs are owned at the point where the rule depends on them:
 - malformed allowed `clippy.toml` / `.clippy.toml` is owned by `RS-CLIPPY-25`
 - malformed `guardrail3.toml` is owned by the policy-context rule
 - malformed applicable `.cargo/config.toml` / `.cargo/config` override surfaces are owned by the Clippy override rule
-- malformed routed `Cargo.toml` is fail-closed by `RS-CLIPPY-01` for coverage and by `RS-CLIPPY-12` for placement of attached configs
+- malformed routed `Cargo.toml` is fail-closed by `RS-CLIPPY-01` for coverage
 
 Positive inventory results are the normal "clean state" proof for this family. That includes the clean-path inventory emitted by `RS-CLIPPY-06` and `RS-CLIPPY-07` when there are no extra bans. They are not extra warnings and they are not emitted when the required input is broken.
 
@@ -224,7 +223,6 @@ At the current checkpoint:
 - the repo-owned policy root is [`apps/guardrail3/clippy.toml`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/clippy.toml), and the family root no longer carries a local `clippy.toml`
 - parseability of active Clippy configs is owned once by `RS-CLIPPY-25`, so threshold/baseline rules no longer fan out duplicate parse errors
 - the family now fail-closes on applicable `CLIPPY_CONF_DIR` override surfaces in `.cargo/config.toml` / `.cargo/config`
-- routed Cargo-root parse failures now fail closed instead of silently erasing policy roots
 - the family no longer has a runtime-local `test_support.rs` shim
 - rule clusters `02..25` now use owner helpers plus sibling assertions modules
 - adversarial fixture configs that need a literal `clippy.toml` are now materialized in tempdirs during tests instead of living as active repo policy roots

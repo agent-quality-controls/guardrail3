@@ -127,10 +127,6 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         })
         .unwrap_or_default();
     let workspaces = discover_workspaces(tree, route, &exact_root_cargo_dirs, &mut input_failures);
-    if !routed_workspace_roots.is_empty() {
-        collect_guardrail_placement_failures(route, &routed_workspace_roots, &mut input_failures);
-        collect_cargo_placement_failures(&exact_root_cargo_dirs, &workspaces, &mut input_failures);
-    }
     let workspace_by_member = workspace_by_member(&workspaces);
     let members = discover_members(
         tree,
@@ -194,89 +190,6 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         direct_dependency_caps,
         input_failures,
     }
-}
-
-fn collect_guardrail_placement_failures(
-    route: &RsDepsRoute,
-    routed_workspace_roots: &BTreeSet<String>,
-    input_failures: &mut Vec<InputFailureFacts>,
-) {
-    for file in route
-        .family_files()
-        .iter()
-        .filter(|file| file.kind() == RustFamilyFileKind::GuardrailToml)
-    {
-        let allowed_exact_root =
-            file.exact_rust_root_owner() && routed_workspace_roots.contains(file.logical_owner_rel());
-        let allowed_ancestor = file
-            .ancestor_rust_root_rels()
-            .is_some_and(|roots| roots.iter().any(|root| routed_workspace_roots.contains(root)));
-        if allowed_exact_root || allowed_ancestor {
-            continue;
-        }
-
-        let message = if routed_workspace_roots
-            .iter()
-            .any(|root_rel| rel_is_nested_beneath(file.logical_owner_rel(), root_rel))
-        {
-            "guardrail3.toml is nested under a workspace root but does not belong to the workspace root. Deps policy files are only allowed at workspace roots."
-        } else {
-            "guardrail3.toml sits outside every legal workspace root. Deps policy files are only allowed at workspace roots."
-        };
-        input_failures.push(InputFailureFacts {
-            rel_path: file.rel_path().to_owned(),
-            message: message.to_owned(),
-        });
-    }
-}
-
-fn collect_cargo_placement_failures(
-    exact_root_cargo_dirs: &BTreeSet<String>,
-    workspaces: &[WorkspaceFacts],
-    input_failures: &mut Vec<InputFailureFacts>,
-) {
-    let legal_workspace_roots = workspaces
-        .iter()
-        .map(|workspace| workspace.root_rel_dir.as_str())
-        .collect::<BTreeSet<_>>();
-    let legal_package_dirs = workspaces
-        .iter()
-        .flat_map(|workspace| workspace.workspace_package_dirs.iter().map(String::as_str))
-        .collect::<BTreeSet<_>>();
-
-    for rel_dir in exact_root_cargo_dirs {
-        if legal_workspace_roots.contains(rel_dir.as_str()) || legal_package_dirs.contains(rel_dir.as_str()) {
-            continue;
-        }
-
-        let cargo_rel_path = if rel_dir.is_empty() {
-            "Cargo.toml".to_owned()
-        } else {
-            format!("{rel_dir}/Cargo.toml")
-        };
-        let message = if workspaces
-            .iter()
-            .any(|workspace| rel_is_nested_beneath(rel_dir, &workspace.root_rel_dir))
-        {
-            "Cargo.toml is nested under a workspace root but is not declared as a workspace package. Deps checks do not allow loose crates inside governed workspaces."
-        } else {
-            "Cargo.toml sits outside every legal workspace root. Deps checks require Rust crates to belong to a legal workspace."
-        };
-        input_failures.push(InputFailureFacts {
-            rel_path: cargo_rel_path,
-            message: message.to_owned(),
-        });
-    }
-}
-
-fn rel_is_nested_beneath(rel_dir: &str, parent_rel: &str) -> bool {
-    if parent_rel.is_empty() {
-        return !rel_dir.is_empty();
-    }
-
-    rel_dir
-        .strip_prefix(parent_rel)
-        .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn rel_intersects_validation_scope(rel_dir: &str, validation_scope: &str) -> bool {

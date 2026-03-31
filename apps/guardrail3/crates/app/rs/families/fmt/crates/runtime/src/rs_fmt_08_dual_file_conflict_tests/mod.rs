@@ -18,7 +18,7 @@ fn reports_nested_dual_config_conflicts_at_nested_path() {
 }
 
 #[test]
-fn discovers_root_and_nested_dual_file_conflicts_from_family_walk() {
+fn discovers_only_root_dual_file_conflicts_from_family_walk() {
     let fixture = tempdir();
     let root = fixture.path();
 
@@ -35,9 +35,9 @@ fn discovers_root_and_nested_dual_file_conflicts_from_family_walk() {
     write_file(
         root,
         "rustfmt.toml",
-        "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
+        "edition = \"2024\"\nstyle_edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
     );
-    write_file(root, ".rustfmt.toml", "edition = \"2024\"\n");
+    write_file(root, ".rustfmt.toml", "edition = \"2024\"\nstyle_edition = \"2024\"\n");
     write_file(root, "nested/rustfmt.toml", "max_width = 120\n");
     write_file(root, "nested/.rustfmt.toml", "max_width = 120\n");
 
@@ -51,13 +51,6 @@ fn discovers_root_and_nested_dual_file_conflicts_from_family_walk() {
                 title: "Conflicting rustfmt config files",
                 message: "Both rustfmt.toml and .rustfmt.toml exist in the same directory",
                 file: Some("rustfmt.toml"),
-                inventory: false,
-            },
-            assertions::Finding {
-                severity: assertions::Severity::Warn,
-                title: "Conflicting rustfmt config files",
-                message: "Both rustfmt.toml and .rustfmt.toml exist in the same directory",
-                file: Some("nested/rustfmt.toml"),
                 inventory: false,
             },
         ],

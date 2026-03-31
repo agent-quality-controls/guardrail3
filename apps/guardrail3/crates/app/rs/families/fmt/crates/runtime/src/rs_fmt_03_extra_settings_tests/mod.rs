@@ -11,6 +11,7 @@ fn inventories_extra_nonstandard_root_settings() {
     let results = run_check(parse_rustfmt_extra_settings_fixture(
         r#"
 edition = "2024"
+style_edition = "2024"
 max_width = 100
 tab_spaces = 4
 use_field_init_shorthand = true
@@ -29,6 +30,7 @@ fn does_not_treat_ignore_as_generic_extra_setting() {
     let results = run_check(parse_rustfmt_extra_settings_fixture(
         r#"
 edition = "2024"
+style_edition = "2024"
 max_width = 100
 tab_spaces = 4
 use_field_init_shorthand = true

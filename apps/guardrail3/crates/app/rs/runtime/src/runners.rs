@@ -17,7 +17,7 @@ fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 
 #[cfg(feature = "family-fmt")]
 fn run_fmt(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    guardrail3_app_rs_family_fmt::check(ctx.tree)
+    guardrail3_app_rs_family_fmt::check(ctx.tree, &ctx.mapper.map_rs_fmt())
 }
 
 #[cfg(feature = "family-toolchain")]
