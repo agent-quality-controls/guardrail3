@@ -165,7 +165,7 @@ pub fn run(
         report.add_section(Section::new("ESLint boundary audit".to_owned(), eslint_results));
 
         // Per-app topology checks (only on service-type apps)
-        let topology_structure = ts_topology_checks::check_hex_topology_structure_for_apps(fs, &app_contexts);
+        let topology_structure = ts_topology_checks::check_hexarch_structure_for_apps(fs, &app_contexts);
         let topology_imports = ts_topology_checks::check_import_boundaries_for_apps(fs, &app_contexts);
         let mut topology_results = topology_structure;
         topology_results.extend(topology_imports);
@@ -223,7 +223,7 @@ fn has_content_app(fs: &dyn FileSystem, root: &Path, config: Option<&GuardrailCo
 /// Returns None if no clear signal is found.
 #[allow(clippy::disallowed_methods)] // reason: serde_json for per-app package.json inspection
 pub fn auto_detect_app_type(fs: &dyn FileSystem, app_path: &Path) -> Option<TsAppType> {
-    // Signal 1: hex topology structure → Service
+    // Signal 1: hexarch structure → Service
     let has_modules_domain = app_path.join("src/modules/domain").is_dir();
     if has_modules_domain {
         return Some(TsAppType::Service);
@@ -261,7 +261,7 @@ pub fn auto_detect_app_type(fs: &dyn FileSystem, app_path: &Path) -> Option<TsAp
                     return Some(TsAppType::Content);
                 }
 
-                // Next.js without hex topology or backend → likely Content
+                // Next.js without hexarch or backend → likely Content
                 // (services using Next.js would have src/modules/)
                 if deps.contains_key("next") && !has_modules_domain {
                     return Some(TsAppType::Content);

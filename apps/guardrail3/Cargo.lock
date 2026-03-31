@@ -383,6 +383,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-hexarch-helpers"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-domain-report",
+ "guardrail3-ports-outbound-traits",
+]
+
+[[package]]
 name = "guardrail3-app-hooks"
 version = "0.0.0"
 dependencies = [
@@ -1062,19 +1070,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "guardrail3-app-topology-helpers"
-version = "0.0.0"
-dependencies = [
- "guardrail3-domain-report",
- "guardrail3-ports-outbound-traits",
-]
-
-[[package]]
 name = "guardrail3-app-ts"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-core",
- "guardrail3-app-topology-helpers",
+ "guardrail3-app-hexarch-helpers",
  "guardrail3-domain-config",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",

@@ -363,7 +363,7 @@ impl Default for TsCheckCategories {
 /// TypeScript app type — determines which check categories apply by default.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TsAppType {
-    /// HTTP server, API backend — hex topology, route wrappers, full `ESLint` strict
+    /// HTTP server, API backend — hexarch, route wrappers, full `ESLint` strict
     Service,
     /// Marketing site, blog, docs — content checks, SEO, accessibility, static gen
     Content,

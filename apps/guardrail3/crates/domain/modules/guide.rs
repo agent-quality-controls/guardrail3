@@ -119,7 +119,7 @@ hooks_rs
 
 `service`
 - For binaries and services that do I/O.
-- Services typically live under `apps/` and use hex topology.
+- Services typically live under `apps/` and use hexarch.
 
 `library`
 - For shared packages with no uncontrolled I/O.

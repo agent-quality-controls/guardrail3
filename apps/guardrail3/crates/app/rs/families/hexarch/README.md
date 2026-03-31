@@ -1,6 +1,6 @@
 # RS-HEXARCH
 
-Rust app-internal hexagonal topology family.
+Rust app-internal hexarch family.
 
 This family enforces app-local Rust structure inside routed app roots. It does not own repo-global root placement.
 

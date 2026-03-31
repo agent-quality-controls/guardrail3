@@ -42,7 +42,7 @@ pub fn check(input: &DirectionalContainerHexarchInput<'_>, results: &mut Vec<Che
                 input.app_name, input.label, dir
             ),
             format!(
-                "Service `{}` has `{}/{}/` which is not part of the hex topology template. Only `{{inbound, outbound}}` directories are allowed in `{}/`.",
+                "Service `{}` has `{}/{}/` which is not part of the hexarch template. Only `{{inbound, outbound}}` directories are allowed in `{}/`.",
                 input.app_name, input.label, dir, input.label
             ),
             Some(format!("{}/{}", input.rel_path, dir)),

@@ -1,7 +1,7 @@
-//! R-TOPOLOGY-01: Hex topology structural enforcement.
+//! R-TOPOLOGY-01: Hexarch structural enforcement.
 //!
 //! Auto-detects service apps from `apps/*/Cargo.toml` and enforces the
-//! canonical hex topology directory template:
+//! canonical hexarch directory template:
 //!
 //! ```text
 //! apps/{name}/crates/{adapters/{inbound,outbound}, app, domain, ports/{inbound,outbound}}
@@ -24,7 +24,7 @@ use guardrail3_outbound_traits::FileSystem;
 /// Run all R-TOPOLOGY-01 structural checks.
 ///
 /// Auto-detects service apps by scanning `apps/*/Cargo.toml`.
-pub fn check_hex_topology_structure(fs: &dyn FileSystem, root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_hexarch_structure(fs: &dyn FileSystem, root: &Path, results: &mut Vec<CheckResult>) {
     let apps_dir = root.join("apps");
     let apps_entries = fs.list_dir(&apps_dir);
     if apps_entries.is_empty() {
@@ -66,7 +66,7 @@ fn check_single_app(
     format!("Service `{name}` has src/ directory"),
     format!(
                 "Service `{name}` has an `src/` directory. Code must be in `crates/` \
-                 following hex topology layout. Move code into \
+                 following hexarch layout. Move code into \
                  `crates/{{adapters,app,domain,ports}}` subcrates."
             ),
     Some(app_dir.join("src").display().to_string()),
@@ -78,7 +78,7 @@ fn check_single_app(
     check_crates_dir(fs, name, app_dir, "crates", results);,
 )
 
-/// Check a `crates/` directory for hex topology structure.
+/// Check a `crates/` directory for hexarch structure.
 /// Reusable for both top-level apps and hex-in-hex recursion.
 fn check_crates_dir(
     fs: &dyn FileSystem,
@@ -95,7 +95,7 @@ fn check_crates_dir(
     Severity::Error,
     format!("Service `{name}` missing {label_prefix}/ directory"),
     format!(
-                "Service `{name}` has no `{label_prefix}/` directory. Create it with the hex topology \
+                "Service `{name}` has no `{label_prefix}/` directory. Create it with the hexarch \
                  template: `{label_prefix}/{{adapters/{{inbound,outbound}}, app, domain, \
                  ports/{{inbound,outbound}}}}`."
             ),
@@ -213,7 +213,7 @@ fn check_inbound_outbound(
                 title: format!("Service `{name}` has unexpected directory {layer}/{dir_name}/"),
                 message: format!(
                     "Service `{name}` has `{layer}/{dir_name}/` which is not part of \
-                     the hex topology template. Only `{{inbound, outbound}}` directories are \
+                     the hexarch template. Only `{{inbound, outbound}}` directories are \
                      allowed in `{layer}/`."
                 ),
                 file: Some(dir.join(dir_name).display().to_string()),

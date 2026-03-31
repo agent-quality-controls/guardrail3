@@ -120,7 +120,7 @@ fn check_boundary_enforcement(
                 "T6".to_owned(),
                 Severity::Info,
                 "Import boundary enforcement configured".to_owned(),
-                "`eslint-plugin-boundaries` found in config. This enforces hexagonal architecture \
+                "`eslint-plugin-boundaries` found in config. This enforces hexarch \
                      import rules — domain cannot import adapters, ports cannot import application, etc."
                     .to_owned(),
                 Some(eslint_path.display().to_string()),

@@ -294,7 +294,7 @@ pub fn check_unconfigured_members(
     Severity::Error,
     "Service not in apps/ directory".to_owned(),
     "Profile is \"service\" but project is not inside an apps/ \
-                             directory. Services must live in apps/<name>/ with hex topology \
+                             directory. Services must live in apps/<name>/ with hexarch \
                              structure (crates/domain, crates/ports, crates/app, \
                              crates/adapters). Shared libraries go in packages/."
                         .to_owned(),

@@ -352,7 +352,7 @@ fn generate_ts_section(fs: &dyn FileSystem, project_path: &Path) -> String {
         section.push_str("\n[typescript.apps.my-app]\n");
         section.push_str("type = \"service\"         # service | content | library\n");
         section.push_str("\n[typescript.apps.my-app.checks]\n");
-        section.push_str("topology = true      # T-TOPOLOGY-* — hex topology enforcement\n");
+        section.push_str("topology = true      # T-TOPOLOGY-* — hexarch enforcement\n");
         section
             .push_str("content = false          # T-STYL-*, T-ESLP-07/08 — accessibility, SEO\n");
         section.push_str("tests = true             # T-TEST-* — test quality\n");
@@ -382,7 +382,7 @@ fn generate_ts_section(fs: &dyn FileSystem, project_path: &Path) -> String {
             writeln!(section, "\n[typescript.apps.{name}.checks]").unwrap_or_default();
             writeln!(
                 section,
-                "topology = {:<9}# T-TOPOLOGY-* — hex topology enforcement",
+                "topology = {:<9}# T-TOPOLOGY-* — hexarch enforcement",
                 cats.0
             )
             .unwrap_or_default();
@@ -482,7 +482,7 @@ fn detect_reason(app_path: &Path, detected: Option<TsAppType>) -> &'static str {
         }
         Some(TsAppType::Service) => {
             if app_path.join("src/modules/domain").is_dir() {
-                "auto-detected: hex topology structure"
+                "auto-detected: hexarch structure"
             } else {
                 "auto-detected: backend framework"
             }
