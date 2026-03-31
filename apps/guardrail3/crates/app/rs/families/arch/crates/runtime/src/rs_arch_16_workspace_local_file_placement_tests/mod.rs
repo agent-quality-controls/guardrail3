@@ -5,6 +5,7 @@ mod nested_clippy;
 mod nested_deny;
 mod nested_fmt;
 mod nested_toolchain;
+mod outside_workspace_guardrail;
 mod repo_root_toolchain;
 mod workspace_root_toolchain;
 

@@ -675,10 +675,7 @@ fn is_arch_tracked_family_file(
             | RustValidateFamily::Garde
             | RustValidateFamily::Release
             | RustValidateFamily::Fmt
-    ) && !matches!(
-        kind,
-        RustValidateFamilyFileKind::CargoToml | RustValidateFamilyFileKind::GuardrailToml
-    )
+    ) && !matches!(kind, RustValidateFamilyFileKind::CargoToml)
 }
 
 type RustValidateFamilyFileKind = guardrail3_app_rs_ownership::RustFamilyFileKind;
@@ -877,7 +874,7 @@ pub(crate) fn root_test(rel_dir: &str) -> guardrail3_app_rs_placement::RustRootP
         if rel_dir.is_empty() {
             "Cargo.toml".to_owned()
         } else {
-            ProjectTree::join_rel(rel_dir, "Cargo.toml")
+            format!("{rel_dir}/Cargo.toml")
         },
         RustRootClassification::App,
         None,
