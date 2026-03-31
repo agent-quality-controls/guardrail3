@@ -48,7 +48,9 @@ Instead:
 
 - `ProjectTree` remains the one full repository snapshot
 - shared layers derive typed owned surfaces from that snapshot
-- families receive the full `ProjectTree` plus a narrow typed route describing exactly what they may validate
+- families receive routed family-owned surfaces derived from that snapshot
+- global families do not receive raw `ProjectTree`; they receive repo-global owned slices
+- workspace-local families do not receive raw `ProjectTree`; they receive one legal workspace-local slice at a time
 
 ## Responsibility Split
 
@@ -133,7 +135,7 @@ Family tests exist to prove:
 - fan-out from family facts into rule inputs
 - family-local behavior on one legal routed invocation surface
 
-They may use `ProjectTree`, mapper routes, and family-local fixtures.
+They may use routed family surfaces, mapper routes, and family-local fixtures.
 
 But they must use legal routed shapes for workspace-local families.
 

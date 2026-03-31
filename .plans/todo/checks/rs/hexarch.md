@@ -17,9 +17,7 @@
 | RS-HEXARCH-04 | Error | Loose files in structural/container dirs (only .gitkeep allowed) | Implemented |
 | RS-HEXARCH-05 | Error | Container dirs not empty (must have subdirs or .gitkeep) | Implemented |
 | RS-HEXARCH-06 | Error | Leaf valid (Cargo.toml or crates/ hex-in-hex or .gitkeep) | Implemented |
-| RS-HEXARCH-07 | Error | Workspace members cover all live app-local Cargo roots | Implemented |
 | RS-HEXARCH-08 | Error | App Cargo.toml is workspace | Implemented |
-| RS-HEXARCH-09 | Error | No extra workspace members | Implemented |
 | RS-HEXARCH-10 | Error | Members within app boundary | Implemented |
 | RS-HEXARCH-11 | Error | Root workspace doesn't include apps | Implemented |
 | RS-HEXARCH-12 | Error | src/ banned at app level | Implemented |

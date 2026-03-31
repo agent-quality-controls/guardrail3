@@ -12,7 +12,6 @@ This family enforces app-local Rust structure inside routed app roots. It does n
 - exact top-level hex container shape
 - directional inbound/outbound container shape
 - loose-file and empty-container structure checks
-- workspace member coverage for every live app-local Cargo root
 - nested workspace prohibition inside one routed app
 - dependency-direction and cross-app dependency rules
 - source-level ports/adapter surface rules
@@ -55,7 +54,6 @@ It consumes:
 Inside a routed root, the family may then do family-local discovery:
 
 - app hex roots
-- workspace/member coverage across all live app-local Cargo roots
 - dependency edges/cycles
 - source facts
 

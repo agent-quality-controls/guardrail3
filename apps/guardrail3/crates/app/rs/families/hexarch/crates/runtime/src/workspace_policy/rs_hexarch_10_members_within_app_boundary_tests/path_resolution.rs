@@ -165,8 +165,6 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    assertions::assert_no_error(&results, "RS-HEXARCH-07");
-    assertions::assert_no_error(&results, "RS-HEXARCH-09");
     assertions::assert_expected_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {

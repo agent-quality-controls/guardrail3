@@ -65,6 +65,69 @@ fn nested_workspace_and_nested_clippy_are_illegal() {
 }
 
 #[test]
+fn extra_workspace_member_is_reported_as_topology_issue() {
+    let tree = ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry::new(vec!["apps".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "apps".to_owned(),
+                DirEntry::new(vec!["api".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "apps/api".to_owned(),
+                DirEntry::new(
+                    vec!["crates".to_owned()],
+                    vec!["Cargo.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "apps/api/crates".to_owned(),
+                DirEntry::new(vec!["member".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "apps/api/crates/member".to_owned(),
+                DirEntry::new(
+                    Vec::new(),
+                    vec!["Cargo.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+        ]),
+        BTreeMap::from([
+            (
+                "apps/api/Cargo.toml".to_owned(),
+                "[workspace]\nmembers = [\"crates/member\", \"crates/ghost\"]\nresolver = \"2\"\n"
+                    .to_owned(),
+            ),
+            (
+                "apps/api/crates/member/Cargo.toml".to_owned(),
+                "[package]\nname = \"member\"\nversion = \"0.1.0\"\n".to_owned(),
+            ),
+        ]),
+    );
+    let structure = collect_structure(&tree);
+    let legality = collect_legality(&tree, &structure);
+
+    assert!(legality.topology_issues().iter().any(|issue| {
+        issue.rel_dir() == "apps/api"
+            && matches!(
+                issue.kind(),
+                RustTopologyIssueKind::ExtraWorkspaceMember {
+                    workspace_root_rel,
+                    member_pattern,
+                } if workspace_root_rel == "apps/api" && member_pattern == "crates/ghost"
+            )
+    }));
+}
+
+#[test]
 fn top_level_package_toolchain_is_illegal_for_local_family_routing() {
     let tree = ProjectTree::new(
         PathBuf::from("/tmp/project"),

@@ -226,7 +226,7 @@ Malformed required placement/config inputs must not silently suppress misplaced-
 | RS-ARCH-09 | Error | Every live top-level Rust root must be a workspace root | Planned |
 | RS-ARCH-10 | Error | Loose top-level package roots are forbidden | Planned |
 | RS-ARCH-11 | Error | Nested workspaces are forbidden even when excluded or not referenced by the parent workspace | Planned |
-| RS-ARCH-12 | Error | Live lower-level Rust crates under a governed workspace must be declared workspace members | Planned |
+| RS-ARCH-12 | Error | Workspace membership must exactly match real owned child Rust crates beneath a governed workspace | Implemented |
 | RS-ARCH-13 | Error | Workspace member paths must not escape the workspace root | Planned |
 | RS-ARCH-14 | Error | Auxiliary top-level Rust roots must obey the same top-level workspace rule | Planned |
 | RS-ARCH-15 | Policy | Hybrid top-level workspace roots need an explicit allow/forbid decision | Planned |
@@ -329,11 +329,17 @@ This must still fail when the nested workspace is:
 
 Discovery is structural, not membership-based.
 
-### RS-ARCH-12 — Live lower-level Rust crates must be declared members
+### RS-ARCH-12 — Workspace membership must exactly match real owned child crates
 
-If a live lower-level Rust crate exists beneath a governed workspace root and is not itself excluded by structural discovery rules, it must be declared in the parent workspace membership set.
+For each governed workspace root:
 
-This forbids shadow crates that exist on disk but are quietly omitted from the workspace.
+- every real owned child Rust crate beneath that workspace must be declared in `[workspace].members`
+- every declared workspace member must resolve to a real owned child Rust crate for that workspace
+
+This is one topology concept with two failure directions:
+
+- missing real child crate from membership
+- extra declared member with no matching owned child crate
 
 ### RS-ARCH-13 — Workspace member paths must stay inside the root
 
@@ -382,7 +388,6 @@ It is the global architectural assertion that placement legality is settled befo
 `RS-HEXARCH` owns:
 - app structure
 - app workspace shape
-- app member coverage
 - app dependency direction
 
 It does **not** own repo-global misplaced-root detection.
@@ -503,9 +508,9 @@ apps/guardrail3/crates/app/rs/placement/
 - The family still does not implement the intended repo-global Rust topology contract:
   - top-level roots must be workspaces
   - loose top-level packages must be rejected
-  - nested workspaces must be rejected everywhere, not only in app-local `hexarch`
-  - shadow lower-level crates omitted from workspace membership must be rejected
-  - workspace member path escape must be rejected
+- nested workspaces must be rejected everywhere, not only in app-local `hexarch`
+- workspace membership exactness beneath governed workspaces must be enforced
+- workspace member path escape must be rejected
   - auxiliary roots still need an explicit topology decision
 - Hybrid top-level root policy remains intentionally unresolved and must be decided before implementing the topology rules above.
 
@@ -515,16 +520,9 @@ The current `hexarch` family still owns several workspace/topology rules that ar
 
 These rules should move into `arch` or be subsumed by generalized `arch` rules:
 
-- `RS-HEXARCH-07` — workspace members cover all live app-local Cargo roots
-  - keep the intent
-  - generalize from "app-local Cargo roots" to "all live lower-level Cargo roots beneath a governed workspace root"
-  - this becomes the universal "if it is nested and live, it is a member" rule
 - `RS-HEXARCH-08` — app Cargo.toml is workspace
   - move to `arch`
   - generalize from app roots to all top-level governed Rust roots
-- `RS-HEXARCH-09` — no extra workspace members
-  - move to `arch`
-  - generalize from app-local exactness to universal workspace member exactness under a governed root
 - `RS-HEXARCH-10` — members within app boundary
   - move to `arch`
   - generalize from app boundary to owning workspace root boundary
