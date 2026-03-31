@@ -212,6 +212,79 @@ fn clean_inputs_are_inventory() {
 }
 
 #[test]
+fn undeclared_nested_package_surfaces_explicit_failure() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates", "tools"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+            ("tools", entry(&["helper"], &[])),
+            ("tools/helper", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            (
+                "crates/api/Cargo.toml",
+                r#"
+                    [package]
+                    name = "api"
+                    edition = "2024"
+
+                    [lints]
+                    workspace = true
+                "#,
+            ),
+            (
+                "tools/helper/Cargo.toml",
+                r#"
+                    [package]
+                    name = "helper"
+                    edition = "2024"
+                "#,
+            ),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_14_input_failures::assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                file: Some("tools/helper/Cargo.toml"),
+                title: None,
+                inventory: None,
+            },
+            ExpectedRuleResult {
+                file: Some("Cargo.toml"),
+                title: Some("cargo-family inputs parsed cleanly"),
+                inventory: Some(true),
+            },
+        ],
+    );
+    assert!(results.iter().any(|result| {
+        result.id() == "RS-CARGO-14"
+            && result.file() == Some("tools/helper/Cargo.toml")
+            && result
+                .message()
+                .contains("must be declared in `[workspace].members`")
+    }));
+}
+
+#[test]
 fn malformed_workspace_members_shape_surfaces_explicit_failure() {
     let workspace_manifest = format!(
         r#"

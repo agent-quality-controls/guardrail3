@@ -139,6 +139,16 @@ pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
             continue;
         }
         if snapshot.has_package || snapshot.parse_error.is_some() {
+            if workspace_roots
+                .iter()
+                .any(|workspace_root| is_descendant_of(&snapshot.rel_dir, workspace_root))
+            {
+                input_failures.push(InputFailureFacts {
+                    rel_path: snapshot.cargo_rel_path.clone(),
+                    message: "Live Cargo.toml under a workspace root must be declared in `[workspace].members`; undeclared nested packages are forbidden.".to_owned(),
+                });
+                continue;
+            }
             push_policy_root(
                 snapshot,
                 PolicyRootKind::StandalonePackageRoot,
@@ -500,7 +510,7 @@ fn collect_route_file_index(route: &RsCargoRoute) -> RouteFileIndex {
 
     for file in route.family_files() {
         match file.kind() {
-            RustFamilyFileKind::CargoToml if file.exact_rust_root_owner() => {
+            RustFamilyFileKind::CargoToml => {
                 let _ = cargo_by_owner.insert(
                     file.logical_owner_rel().to_owned(),
                     file.rel_path().to_owned(),

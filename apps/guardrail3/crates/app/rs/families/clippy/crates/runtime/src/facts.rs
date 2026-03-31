@@ -137,13 +137,7 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
         .iter()
         .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
-    let workspace_roots: BTreeSet<_> = cargo_roots
-        .iter()
-        .filter(|(rel_dir, _facts)| routed_root_rels.contains(*rel_dir))
-        .filter(|(_rel_dir, facts)| facts.parse_error.is_none())
-        .filter(|(_rel_dir, facts)| facts.has_workspace)
-        .map(|(rel_dir, _facts)| rel_dir.clone())
-        .collect();
+    let workspace_roots = top_level_workspace_roots(&cargo_roots);
     let policy_map = read_policy_map(tree, &cargo_roots);
     let mut cargo_config_overrides = collect_cargo_config_overrides(
         tree,
@@ -174,14 +168,14 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
                     | guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyDotToml
             ) && file.logical_owner_rel() == config.rel_dir
         });
-        let nested_under_routed_root = routed_root_rels
+        let nested_under_allowed_root = workspace_roots
             .iter()
             .any(|root_rel| root_rel != &config.rel_dir && path_is_under(&config.rel_dir, root_rel));
         if let Some(cargo_root) = cargo_roots
             .get(&config.rel_dir)
             .filter(|facts| facts.parse_error.is_some())
         {
-            if has_same_root_config && !nested_under_routed_root {
+            if has_same_root_config && !nested_under_allowed_root {
                 forbidden_configs.push(ForbiddenConfigFacts {
                     config,
                     reason: ForbiddenConfigReason::UnparseableCargoRoot {
@@ -246,11 +240,11 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
                         | guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyDotToml
                 ) && file.logical_owner_rel() == facts.rel_dir
             });
-            let nested_under_routed_root = routed_root_rels
+            let nested_under_allowed_root = workspace_roots
                 .iter()
                 .any(|root_rel| root_rel != &facts.rel_dir && path_is_under(&facts.rel_dir, root_rel));
-            if !routed_root_rels.contains(&facts.rel_dir)
-                && (!has_same_root_config || nested_under_routed_root)
+            if !workspace_roots.contains(&facts.rel_dir)
+                && (!has_same_root_config || nested_under_allowed_root)
             {
                 return None;
             }
@@ -289,6 +283,24 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
         covered_units,
         uncovered_units,
     }
+}
+
+fn top_level_workspace_roots(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeSet<String> {
+    let all_workspace_roots = cargo_roots
+        .iter()
+        .filter(|(_rel_dir, facts)| facts.parse_error.is_none() && facts.has_workspace)
+        .map(|(rel_dir, _facts)| rel_dir.clone())
+        .collect::<BTreeSet<_>>();
+
+    all_workspace_roots
+        .iter()
+        .filter(|rel_dir| {
+            !all_workspace_roots
+                .iter()
+                .any(|other| other != *rel_dir && path_is_under(rel_dir, other))
+        })
+        .cloned()
+        .collect()
 }
 
 fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {

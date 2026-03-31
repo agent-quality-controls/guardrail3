@@ -155,41 +155,27 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_clippy(&self) -> views::RsClippyRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Clippy, |root| {
-            self.root_is_workspace_policy_root(root)
-        });
-        let root_rels = roots
-            .iter()
-            .map(|root| root.rel_dir().to_owned())
-            .collect::<Vec<_>>();
+        let roots = self.map_roots_for_family(RustValidateFamily::Clippy, |_| true);
         views::RsClippyRoute::new(
             roots,
-            self.map_family_files(RustValidateFamily::Clippy, &root_rels),
+            self.map_family_files(RustValidateFamily::Clippy, &[]),
         )
         .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_cargo(&self) -> views::RsCargoRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Cargo, |root| {
-            self.root_is_workspace_policy_root(root)
-        });
-        let root_rels = roots
-            .iter()
-            .map(|root| root.rel_dir().to_owned())
-            .collect::<Vec<_>>();
+        let roots = self.map_roots_for_family(RustValidateFamily::Cargo, |_| true);
         views::RsCargoRoute::new(
             roots,
-            self.map_family_files(RustValidateFamily::Cargo, &root_rels),
+            self.map_family_files(RustValidateFamily::Cargo, &[]),
         )
         .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_toolchain(&self) -> views::RsToolchainRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Toolchain, |root| {
-            self.root_is_workspace_policy_root(root)
-        });
+        let roots = self.map_roots_for_family(RustValidateFamily::Toolchain, |_| true);
         views::RsToolchainRoute::new(
             roots,
             self.map_family_files(RustValidateFamily::Toolchain, &[]),
@@ -199,16 +185,10 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_deny(&self) -> views::RsDenyRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Deny, |root| {
-            self.root_is_workspace_policy_root(root)
-        });
-        let root_rels = roots
-            .iter()
-            .map(|root| root.rel_dir().to_owned())
-            .collect::<Vec<_>>();
+        let roots = self.map_roots_for_family(RustValidateFamily::Deny, |_| true);
         views::RsDenyRoute::new(
             roots,
-            self.map_family_files(RustValidateFamily::Deny, &root_rels),
+            self.map_family_files(RustValidateFamily::Deny, &[]),
             self.validation_scope.map(str::to_owned),
         )
     }
@@ -235,32 +215,7 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_deps(&self) -> views::RsDepsRoute {
-        if !self.selected_families.contains(RustValidateFamily::Deps) {
-            return views::RsDepsRoute::new(
-                Vec::new(),
-                self.map_family_files(RustValidateFamily::Deps, &[]),
-            )
-            .with_validation_scope(self.validation_scope.map(str::to_owned));
-        }
-
-        let routed_roots = self
-            .scope
-            .roots()
-            .iter()
-            .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
-            .filter(|root| self.root_is_workspace_policy_root(root))
-            .collect::<Vec<_>>();
-        let enabled_root_rels = routed_roots
-            .iter()
-            .filter(|root| root_enabled_for_family(root, RustValidateFamily::Deps, self.config))
-            .map(|root| root.rel_dir().to_owned())
-            .collect::<std::collections::BTreeSet<_>>();
-
-        let roots = routed_roots
-            .into_iter()
-            .filter(|root| enabled_root_rels.contains(root.rel_dir()))
-            .map(root_view)
-            .collect::<Vec<_>>();
+        let roots = self.map_roots_for_family(RustValidateFamily::Deps, |_| true);
         let root_rels = roots
             .iter()
             .map(|root| root.rel_dir().to_owned())
@@ -275,23 +230,15 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_release(&self) -> views::RsReleaseRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Release, |root| {
-            self.root_is_workspace_policy_root(root)
-        });
-        let root_rels = roots
-            .iter()
-            .map(|root| root.rel_dir().to_owned())
-            .collect::<Vec<_>>();
+        let roots = self.map_roots_for_family(RustValidateFamily::Release, |_| true);
         views::RsReleaseRoute::new(roots)
-            .with_family_files(self.map_family_files(RustValidateFamily::Release, &root_rels))
+            .with_family_files(self.map_family_files(RustValidateFamily::Release, &[]))
             .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_garde(&self) -> views::RsGardeRoute {
-        let roots = self.map_scoped_roots_for_family(RustValidateFamily::Garde, |root| {
-            self.root_is_workspace_policy_root(root)
-        });
+        let roots = self.map_scoped_roots_for_family(RustValidateFamily::Garde, |_| true);
         let root_rels = roots
             .iter()
             .map(|root| root.root().rel_dir().to_owned())
@@ -305,7 +252,7 @@ impl<'a> FamilyMapper<'a> {
                 &root_rels,
                 self.validation_scope,
             ),
-            self.map_family_files(RustValidateFamily::Garde, &root_rels),
+            self.map_family_files(RustValidateFamily::Garde, &[]),
         )
     }
 
@@ -392,15 +339,6 @@ impl<'a> FamilyMapper<'a> {
 
     fn root_is_live_for_hexarch(&self, root: &RustRootPlacementRootFacts) -> bool {
         self.tree.file_content(root.cargo_rel_path()).is_some()
-    }
-
-    fn root_is_workspace_policy_root(&self, root: &RustRootPlacementRootFacts) -> bool {
-        root_has_workspace(self.tree, root.cargo_rel_path())
-            && !self.scope.roots().iter().any(|other| {
-                other.rel_dir() != root.rel_dir()
-                    && root_has_workspace(self.tree, other.cargo_rel_path())
-                    && path_is_under(root.rel_dir(), other.rel_dir())
-            })
     }
 
     fn root_matches_validation_scope(&self, root_rel: &str) -> bool {
@@ -569,17 +507,6 @@ fn root_scope(rel_dir: &str) -> RootScope {
         (0, 1) => RootScope::Packages,
         _ => RootScope::Other,
     }
-}
-
-fn root_has_workspace(tree: &ProjectTree, cargo_rel_path: &str) -> bool {
-    let Some(content) = tree.file_content(cargo_rel_path) else {
-        return true;
-    };
-
-    toml::from_str::<toml::Value>(content)
-        .ok()
-        .and_then(|parsed| parsed.get("workspace").cloned())
-        .is_some()
 }
 
 fn effective_family_flag(

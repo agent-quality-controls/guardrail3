@@ -272,7 +272,11 @@ fn workspace_members_with_non_string_entries_surface_explicit_failure() {
 
     assertions::assert_summary(
         summary,
-        vec![(Some("Cargo.toml"), assertions::Severity::Error, true)],
+        vec![
+            (Some("Cargo.toml"), assertions::Severity::Error, true),
+            (Some("Cargo.toml"), assertions::Severity::Error, false),
+            (Some("packages/core/Cargo.toml"), assertions::Severity::Error, false),
+        ],
     );
 }
 
@@ -340,7 +344,11 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
 
     assertions::assert_summary(
         summary,
-        vec![(Some("Cargo.toml"), assertions::Severity::Error, true, false)],
+        vec![
+            (Some("Cargo.toml"), assertions::Severity::Error, true, false),
+            (Some("Cargo.toml"), assertions::Severity::Error, false, false),
+            (Some("packages/core/Cargo.toml"), assertions::Severity::Error, false, true),
+        ],
     );
 }
 
@@ -504,7 +512,10 @@ fn unreadable_member_manifest_surfaces_explicit_failure() {
 
     assertions::assert_summary(
         summary,
-        vec![(Some("apps/api/Cargo.toml"), assertions::Severity::Error, false)],
+        vec![
+            (Some("apps/api/Cargo.toml"), assertions::Severity::Error, true),
+            (Some("apps/api/Cargo.toml"), assertions::Severity::Error, false),
+        ],
     );
 }
 
@@ -538,7 +549,10 @@ fn unreadable_workspace_manifest_surfaces_explicit_failure() {
 
     assertions::assert_summary(
         summary,
-        vec![(Some("Cargo.toml"), assertions::Severity::Error, true)],
+        vec![
+            (Some("Cargo.toml"), assertions::Severity::Error, true),
+            (Some("Cargo.toml"), assertions::Severity::Error, false),
+        ],
     );
 }
 
@@ -589,12 +603,20 @@ fn malformed_member_manifest_surfaces_explicit_failure() {
 
     assertions::assert_summary(
         summary,
-        vec![(
-            Some("apps/api/Cargo.toml"),
-            assertions::Severity::Error,
-            false,
-            false,
-        )],
+        vec![
+            (
+                Some("apps/api/Cargo.toml"),
+                assertions::Severity::Error,
+                true,
+                false,
+            ),
+            (
+                Some("apps/api/Cargo.toml"),
+                assertions::Severity::Error,
+                false,
+                false,
+            ),
+        ],
     );
 }
 
@@ -650,7 +672,17 @@ fn malformed_workspace_manifest_does_not_fail_open_workspace_true_resolution() {
 
     assertions::assert_summary(
         summary,
-        vec![(Some("Cargo.toml"), assertions::Severity::Error, true, false, false)],
+        vec![
+            (Some("Cargo.toml"), assertions::Severity::Error, true, false, false),
+            (Some("Cargo.toml"), assertions::Severity::Error, false, false, false),
+            (
+                Some("apps/api/Cargo.toml"),
+                assertions::Severity::Error,
+                false,
+                false,
+                false,
+            ),
+        ],
     );
 }
 

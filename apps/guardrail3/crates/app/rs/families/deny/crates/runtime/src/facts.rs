@@ -84,12 +84,7 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
         .iter()
         .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
-    let workspace_roots: BTreeSet<_> = cargo_roots
-        .iter()
-        .filter(|(rel_dir, _facts)| routed_root_rels.contains(*rel_dir))
-        .filter(|(_rel_dir, facts)| facts.has_workspace)
-        .map(|(rel_dir, _facts)| rel_dir.clone())
-        .collect();
+    let workspace_roots = top_level_workspace_roots(&cargo_roots);
     let mut allowed_policy_roots = BTreeSet::new();
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
     let profile_map_facts = facts_support::read_profile_map(tree, &cargo_roots);
@@ -275,6 +270,24 @@ fn collect_configs(
     }
 
     configs
+}
+
+fn top_level_workspace_roots(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeSet<String> {
+    let all_workspace_roots = cargo_roots
+        .iter()
+        .filter(|(_rel_dir, facts)| facts.has_workspace)
+        .map(|(rel_dir, _facts)| rel_dir.clone())
+        .collect::<BTreeSet<_>>();
+
+    all_workspace_roots
+        .iter()
+        .filter(|rel_dir| {
+            !all_workspace_roots
+                .iter()
+                .any(|other| other != *rel_dir && path_is_under(rel_dir, other))
+        })
+        .cloned()
+        .collect()
 }
 
 fn collect_same_root_conflicts(allowed_configs: &[DenyConfigFacts]) -> Vec<SameRootConflictFacts> {

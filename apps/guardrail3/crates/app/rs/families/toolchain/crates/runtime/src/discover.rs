@@ -49,11 +49,36 @@ fn collect_cargo_snapshots(
     tree: &ProjectTree,
     route: &RsToolchainRoute,
 ) -> BTreeMap<String, CargoSnapshot> {
-    route
+    let mut rel_dirs = route
         .roots()
         .iter()
-        .map(|root| {
-            let snapshot = cargo_snapshot(tree, root.rel_dir(), root.cargo_rel_path());
+        .map(|root| root.rel_dir().to_owned())
+        .collect::<BTreeSet<_>>();
+    rel_dirs.extend(route.family_files().iter().filter_map(|file| {
+        (file.kind() == RustFamilyFileKind::CargoToml
+            && (file.nearest_rust_root_rel().is_some() || file.ancestor_rust_root_rels().is_some()))
+        .then(|| file.logical_owner_rel().to_owned())
+    }));
+
+    rel_dirs
+        .into_iter()
+        .map(|rel_dir| {
+            let cargo_rel_path = route
+                .family_files()
+                .iter()
+                .find(|file| {
+                    file.kind() == RustFamilyFileKind::CargoToml
+                        && file.logical_owner_rel() == rel_dir
+                })
+                .map(|file| file.rel_path().to_owned())
+                .unwrap_or_else(|| {
+                    if rel_dir.is_empty() {
+                        "Cargo.toml".to_owned()
+                    } else {
+                        ProjectTree::join_rel(&rel_dir, "Cargo.toml")
+                    }
+                });
+            let snapshot = cargo_snapshot(tree, &rel_dir, &cargo_rel_path);
             (snapshot.rel_dir.clone(), snapshot)
         })
         .collect()

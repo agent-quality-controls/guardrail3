@@ -45,27 +45,17 @@ pub(super) fn collect_cargo_roots(
     cargo_roots
 }
 
-fn cargo_manifest_owner_dirs(tree: &ProjectTree, route: &RsReleaseRoute) -> BTreeSet<String> {
-    let mut owner_dirs = BTreeSet::new();
-
-    for root in route.roots() {
-        let root_rel = root.rel_dir();
-        let _ = owner_dirs.insert(root_rel.to_owned());
-
-        for dir_rel in tree.structure().keys() {
-            if dir_rel.is_empty() {
-                continue;
-            }
-            if !path_is_under(dir_rel, root_rel) {
-                continue;
-            }
-            if tree.file_exists(&join_under_root(dir_rel, "Cargo.toml")) {
-                let _ = owner_dirs.insert(dir_rel.to_owned());
-            }
-        }
-    }
-
-    owner_dirs
+fn cargo_manifest_owner_dirs(_tree: &ProjectTree, route: &RsReleaseRoute) -> BTreeSet<String> {
+    route
+        .family_files()
+        .iter()
+        .filter(|file| {
+            file.kind() == guardrail3_app_rs_ownership::RustFamilyFileKind::CargoToml
+                && (file.nearest_rust_root_rel().is_some()
+                    || file.ancestor_rust_root_rels().is_some())
+        })
+        .map(|file| file.logical_owner_rel().to_owned())
+        .collect()
 }
 
 fn expanded_workspace_members(tree: &ProjectTree, root: &CargoRootFacts) -> Vec<String> {
@@ -297,12 +287,4 @@ fn normalize_rel_dir(path: PathBuf) -> String {
         }
     }
     parts.join("/")
-}
-
-fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
-    parent_rel.is_empty()
-        || rel_path == parent_rel
-        || rel_path
-            .strip_prefix(parent_rel)
-            .is_some_and(|rest| rest.starts_with('/'))
 }

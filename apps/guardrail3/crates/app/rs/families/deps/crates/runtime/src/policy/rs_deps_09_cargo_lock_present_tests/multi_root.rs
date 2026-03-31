@@ -1,5 +1,8 @@
 use super::{collected_facts, collected_facts_with_validation_scope, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_09_cargo_lock_present as assertions;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_12_direct_dependency_cap::{
+    ExpectedInputFailureResult, InputFailureSeverity, assert_input_failure_results,
+};
 
 #[test]
 fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
@@ -262,7 +265,7 @@ fn scoped_run_ignores_unrelated_standalone_package_roots() {
 }
 
 #[test]
-fn nested_non_member_package_under_workspace_root_is_not_a_lockfile_root() {
+fn nested_non_member_package_under_workspace_root_emits_input_failure() {
     let tree = project_tree(
         vec![
             (
@@ -309,6 +312,16 @@ fn nested_non_member_package_under_workspace_root_is_not_a_lockfile_root() {
             ..Default::default()
         }],
     );
+    assert_input_failure_results(
+        &results,
+        &[ExpectedInputFailureResult {
+            file: Some("support/assertions/Cargo.toml"),
+            severity: Some(InputFailureSeverity::Error),
+            message_contains: Some("not declared as a workspace package"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
     assert!(
         results
             .iter()
@@ -318,7 +331,7 @@ fn nested_non_member_package_under_workspace_root_is_not_a_lockfile_root() {
 }
 
 #[test]
-fn nested_non_member_helper_crate_under_workspace_root_does_not_require_its_own_lockfile() {
+fn nested_non_member_helper_crate_under_workspace_root_emits_input_failure_without_lockfile_root() {
     let tree = project_tree(
         vec![
             ("", dir_entry(&["apps"], &["Cargo.toml", "Cargo.lock"])),
@@ -361,6 +374,16 @@ fn nested_non_member_helper_crate_under_workspace_root_does_not_require_its_own_
             severity: Some(assertions::Severity::Info),
             message: Some("Rust root `.` has `Cargo.lock` committed."),
             inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+    assert_input_failure_results(
+        &results,
+        &[ExpectedInputFailureResult {
+            file: Some("apps/api/assertions/Cargo.toml"),
+            severity: Some(InputFailureSeverity::Error),
+            message_contains: Some("not declared as a workspace package"),
+            inventory: Some(false),
             ..Default::default()
         }],
     );
