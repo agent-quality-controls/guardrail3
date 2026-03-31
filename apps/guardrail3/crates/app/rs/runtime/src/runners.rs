@@ -107,7 +107,7 @@ fn run_code(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let surface = RsProjectSurface::from_route_scope(
         ctx.tree,
         &scoped_route_root_rels(route.roots()),
-        &scoped_route_root_cargo_files(route.roots()),
+        &code_extra_files(route.roots()),
         None,
     );
     guardrail3_app_rs_family_code::check(&surface, &route)
@@ -286,6 +286,13 @@ fn fmt_extra_files(route: &guardrail3_app_rs_family_mapper::RsFmtRoute) -> Vec<S
     let mut extra = family_file_rels(route.family_files());
     extra.push("Cargo.toml".to_owned());
     extra.push("rust-toolchain.toml".to_owned());
+    extra.push("guardrail3.toml".to_owned());
+    extra
+}
+
+#[cfg(feature = "family-code")]
+fn code_extra_files(roots: &[RsScopedRootView]) -> Vec<String> {
+    let mut extra = scoped_route_root_cargo_files(roots);
     extra.push("guardrail3.toml".to_owned());
     extra
 }

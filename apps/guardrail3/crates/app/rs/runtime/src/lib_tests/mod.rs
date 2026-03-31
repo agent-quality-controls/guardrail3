@@ -438,6 +438,154 @@ fn toolchain_runtime_requires_workspace_local_toolchain_when_repo_root_file_is_n
 }
 
 #[test]
+fn toolchain_runtime_runs_each_legal_workspace_once() {
+    let root = super::temp_root_for_tests("toolchain-runtime-multi-workspace");
+    super::write_file_for_tests(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\ntoolchain = true\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/rust-toolchain.toml",
+        "[toolchain]\nchannel = \"1.87.0\"\ncomponents = [\"rustfmt\", \"clippy\"]\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/other/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+
+    let report = super::run_toolchain_for_tests(&super::LocalFsTest, &root)
+        .expect("toolchain runtime report");
+
+    assertions::assert_result_present(
+        &report,
+        "toolchain",
+        "RS-TOOLCHAIN-01",
+        Some("apps/backend/rust-toolchain.toml"),
+        Some(true),
+        Some("rust-toolchain.toml exists"),
+    );
+    assertions::assert_result_present(
+        &report,
+        "toolchain",
+        "RS-TOOLCHAIN-01",
+        Some("apps/other/rust-toolchain.toml"),
+        Some(false),
+        Some("rust-toolchain.toml missing"),
+    );
+    assert_eq!(
+        report.sections()[0]
+            .results()
+            .iter()
+            .filter(|result| result.id() == "RS-TOOLCHAIN-01")
+            .count(),
+        2,
+        "expected exactly one toolchain coverage result per legal workspace: {report:#?}"
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
+fn clippy_runtime_validation_scope_stays_inside_owning_workspace() {
+    let root = super::temp_root_for_tests("clippy-runtime-validation-scope");
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(&root, "apps/backend/src/lib.rs", "pub fn backend() {}\n");
+    super::write_file_for_tests(
+        &root,
+        "apps/other/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(&root, "apps/other/src/lib.rs", "pub fn other() {}\n");
+
+    let report = super::run_clippy_with_validation_scope_for_tests(
+        &super::LocalFsTest,
+        &root,
+        "apps/backend/src",
+    )
+    .expect("clippy runtime report");
+
+    assertions::assert_result_present(
+        &report,
+        "clippy",
+        "RS-CLIPPY-01",
+        Some("apps/backend"),
+        Some(false),
+        Some("Rust unit uncovered by clippy.toml"),
+    );
+    assertions::assert_absent_file(&report, "clippy", "apps/other");
+    assert_eq!(
+        report.sections()[0]
+            .results()
+            .iter()
+            .filter(|result| !result.inventory())
+            .filter_map(|result| result.file().map(str::to_owned))
+            .collect::<std::collections::BTreeSet<_>>(),
+        std::collections::BTreeSet::from(["apps/backend".to_owned()]),
+        "expected scoped clippy run to stay inside one workspace surface: {report:#?}"
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
+fn cargo_runtime_validation_scope_stays_inside_owning_workspace() {
+    let root = super::temp_root_for_tests("cargo-runtime-validation-scope");
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(&root, "apps/backend/src/lib.rs", "pub fn backend() {}\n");
+    super::write_file_for_tests(
+        &root,
+        "apps/other/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(&root, "apps/other/src/lib.rs", "pub fn other() {}\n");
+
+    let report = super::run_cargo_with_validation_scope_for_tests(
+        &super::LocalFsTest,
+        &root,
+        "apps/backend/src",
+    )
+    .expect("cargo runtime report");
+
+    assertions::assert_result_present(
+        &report,
+        "cargo",
+        "RS-CARGO-01",
+        Some("apps/backend/Cargo.toml"),
+        Some(false),
+        None,
+    );
+    assertions::assert_absent_file(&report, "cargo", "apps/other/Cargo.toml");
+    assert_eq!(
+        report.sections()[0]
+            .results()
+            .iter()
+            .filter(|result| !result.inventory())
+            .filter_map(|result| result.file().map(str::to_owned))
+            .collect::<std::collections::BTreeSet<_>>(),
+        std::collections::BTreeSet::from(["apps/backend/Cargo.toml".to_owned()]),
+        "expected scoped cargo run to stay inside one workspace surface: {report:#?}"
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
 fn deps_runtime_validation_scope_does_not_spill_into_sibling_workspace_members() {
     let root = super::temp_root_for_tests("deps-runtime-validation-scope");
     super::write_file_for_tests(

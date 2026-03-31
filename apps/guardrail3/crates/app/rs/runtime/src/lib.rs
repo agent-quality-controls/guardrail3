@@ -478,6 +478,23 @@ pub(crate) fn run_toolchain_for_tests(
 }
 
 #[cfg(test)]
+pub(crate) fn run_clippy_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Clippy],
+        false,
+        &StubToolCheckerTest,
+    )
+}
+
+#[cfg(test)]
 pub(crate) fn run_deps_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
@@ -491,6 +508,23 @@ pub(crate) fn run_cargo_for_tests(
     root: &std::path::Path,
 ) -> Result<guardrail3_domain_report::Report, RustRunError> {
     run_for_tests(fs, root, &[RustValidateFamily::Cargo])
+}
+
+#[cfg(test)]
+pub(crate) fn run_cargo_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Cargo],
+        false,
+        &StubToolCheckerTest,
+    )
 }
 
 #[cfg(test)]
