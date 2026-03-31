@@ -508,6 +508,10 @@ pub enum RsArchTopologyIssueKindView {
     UndeclaredWorkspaceMember {
         workspace_root_rel: String,
     },
+    ExtraWorkspaceMember {
+        workspace_root_rel: String,
+        member_pattern: String,
+    },
     WorkspaceMemberPathEscapesRoot {
         workspace_root_rel: String,
         member_pattern: String,
@@ -531,6 +535,13 @@ impl RsArchTopologyIssueKindView {
                     workspace_root_rel: workspace_root_rel.clone(),
                 }
             }
+            RustTopologyIssueKind::ExtraWorkspaceMember {
+                workspace_root_rel,
+                member_pattern,
+            } => Self::ExtraWorkspaceMember {
+                workspace_root_rel: workspace_root_rel.clone(),
+                member_pattern: member_pattern.clone(),
+            },
             RustTopologyIssueKind::WorkspaceMemberPathEscapesRoot {
                 workspace_root_rel,
                 member_pattern,

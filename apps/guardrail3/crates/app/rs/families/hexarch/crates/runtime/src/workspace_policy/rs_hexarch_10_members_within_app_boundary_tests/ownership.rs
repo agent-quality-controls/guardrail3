@@ -16,7 +16,7 @@ fn package_style_app_cargo_is_owned_by_rule_08_not_rule_10() {
 }
 
 #[test]
-fn phantom_workspace_member_stays_owned_by_rule_09_not_rule_10() {
+fn phantom_workspace_member_does_not_hit_rule_10() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -36,11 +36,10 @@ resolver = "2"
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error(&results, "");
-    assertions::assert_error_count(&results, "RS-HEXARCH-09", 1);
 }
 
 #[test]
-fn crates_root_member_stays_owned_by_rule_09_not_rule_10() {
+fn crates_root_member_does_not_hit_rule_10() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -60,11 +59,10 @@ resolver = "2"
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error(&results, "");
-    assertions::assert_error_count(&results, "RS-HEXARCH-09", 1);
 }
 
 #[test]
-fn app_root_members_are_owned_by_rule_10_not_rules_07_or_09() {
+fn app_root_members_are_owned_by_rule_10() {
     for member in [".", "./", ""] {
         let tmp = copy_fixture();
         write_file(
@@ -86,8 +84,6 @@ resolver = "2"
         );
 
         let results = super::run_family(tmp.path());
-        assertions::assert_no_error(&results, "RS-HEXARCH-07");
-        assertions::assert_no_error(&results, "RS-HEXARCH-09");
         let expected = if member.is_empty() {
             assertions::ExpectedRuleResult {
                 file: Some("apps/devctl"),
@@ -147,7 +143,7 @@ resolver = "2"
 }
 
 #[test]
-fn sibling_app_member_stays_owned_by_rule_10_not_rules_07_or_09() {
+fn sibling_app_member_stays_owned_by_rule_10() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -166,8 +162,6 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    assertions::assert_no_error(&results, "RS-HEXARCH-07");
-    assertions::assert_no_error(&results, "RS-HEXARCH-09");
     assertions::assert_expected_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {

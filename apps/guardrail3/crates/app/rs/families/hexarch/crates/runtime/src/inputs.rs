@@ -157,7 +157,6 @@ impl<'a> WorkspaceCoverageHexarchInput<'a> {
 pub struct AppLocalCargoRootHexarchInput<'a> {
     pub(crate) rel_dir: &'a str,
     pub(crate) cargo_rel_path: &'a str,
-    pub(crate) cargo_parse_error: Option<&'a str>,
     pub(crate) is_workspace: bool,
 }
 
@@ -166,7 +165,6 @@ impl<'a> AppLocalCargoRootHexarchInput<'a> {
         Self {
             rel_dir: &facts.rel_dir,
             cargo_rel_path: &facts.cargo_rel_path,
-            cargo_parse_error: facts.cargo_parse_error.as_deref(),
             is_workspace: facts.is_workspace,
         }
     }
@@ -174,7 +172,6 @@ impl<'a> AppLocalCargoRootHexarchInput<'a> {
 
 pub struct WorkspaceMemberHexarchInput<'a> {
     pub(crate) raw: &'a str,
-    pub(crate) resolved_dirs: &'a [String],
     pub(crate) within_app_boundary: bool,
 }
 
@@ -182,15 +179,8 @@ impl<'a> WorkspaceMemberHexarchInput<'a> {
     pub fn new(facts: &'a super::facts::WorkspaceMemberFact) -> Self {
         Self {
             raw: &facts.raw,
-            resolved_dirs: &facts.resolved_dirs,
             within_app_boundary: facts.within_app_boundary,
         }
-    }
-
-    pub fn covers_dir(&self, rel_dir: &str) -> bool {
-        self.resolved_dirs
-            .iter()
-            .any(|resolved| resolved == rel_dir)
     }
 
     pub const fn is_within_app_boundary(&self) -> bool {

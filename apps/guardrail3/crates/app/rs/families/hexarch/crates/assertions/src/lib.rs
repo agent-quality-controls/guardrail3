@@ -18,12 +18,8 @@ pub mod rs_hexarch_04_loose_files;
 pub mod rs_hexarch_05_container_not_empty;
 #[path = "structure/rs_hexarch_06_leaf_valid.rs"]
 pub mod rs_hexarch_06_leaf_valid;
-#[path = "workspace_policy/rs_hexarch_07_workspace_members_match_crate_dirs.rs"]
-pub mod rs_hexarch_07_workspace_members_match_crate_dirs;
 #[path = "workspace_policy/rs_hexarch_08_app_cargo_is_workspace.rs"]
 pub mod rs_hexarch_08_app_cargo_is_workspace;
-#[path = "workspace_policy/rs_hexarch_09_no_extra_workspace_members.rs"]
-pub mod rs_hexarch_09_no_extra_workspace_members;
 #[path = "workspace_policy/rs_hexarch_10_members_within_app_boundary.rs"]
 pub mod rs_hexarch_10_members_within_app_boundary;
 #[path = "workspace_policy/rs_hexarch_11_root_workspace_doesnt_include_apps.rs"]

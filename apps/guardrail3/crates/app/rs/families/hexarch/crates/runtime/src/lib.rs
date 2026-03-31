@@ -14,12 +14,8 @@ mod rs_hexarch_04_loose_files;
 mod rs_hexarch_05_container_not_empty;
 #[path = "structure/rs_hexarch_06_leaf_valid.rs"]
 mod rs_hexarch_06_leaf_valid;
-#[path = "workspace_policy/rs_hexarch_07_workspace_members_match_crate_dirs.rs"]
-mod rs_hexarch_07_workspace_members_match_crate_dirs;
 #[path = "workspace_policy/rs_hexarch_08_app_cargo_is_workspace.rs"]
 mod rs_hexarch_08_app_cargo_is_workspace;
-#[path = "workspace_policy/rs_hexarch_09_no_extra_workspace_members.rs"]
-mod rs_hexarch_09_no_extra_workspace_members;
 #[path = "workspace_policy/rs_hexarch_10_members_within_app_boundary.rs"]
 mod rs_hexarch_10_members_within_app_boundary;
 #[path = "workspace_policy/rs_hexarch_11_root_workspace_doesnt_include_apps.rs"]
@@ -161,8 +157,6 @@ pub fn check(
 
     for app in &facts.workspace_coverage {
         let input = inputs::WorkspaceCoverageHexarchInput::new(app);
-        rs_hexarch_07_workspace_members_match_crate_dirs::check(&input, &mut results);
-        rs_hexarch_09_no_extra_workspace_members::check(&input, &mut results);
         rs_hexarch_10_members_within_app_boundary::check(&input, &mut results);
         rs_hexarch_27_nested_workspace_forbidden::check(&input, &mut results);
     }

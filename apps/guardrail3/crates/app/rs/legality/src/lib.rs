@@ -55,6 +55,10 @@ pub enum RustTopologyIssueKind {
     UndeclaredWorkspaceMember {
         workspace_root_rel: String,
     },
+    ExtraWorkspaceMember {
+        workspace_root_rel: String,
+        member_pattern: String,
+    },
     WorkspaceMemberPathEscapesRoot {
         workspace_root_rel: String,
         member_pattern: String,
@@ -286,8 +290,14 @@ struct CargoRootSnapshot {
     parse_error: Option<String>,
     has_workspace: bool,
     has_package: bool,
-    expanded_members: Vec<String>,
+    workspace_members: Vec<WorkspaceMemberSnapshot>,
     escaping_member_patterns: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+struct WorkspaceMemberSnapshot {
+    raw: String,
+    resolved_dirs: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -358,7 +368,11 @@ pub fn collect(tree: &dyn ProjectTreeView, structure: &RustStructureFacts) -> Ru
                 ));
                 let _ = workspace_members.insert(
                     snapshot.rel_dir.clone(),
-                    snapshot.expanded_members.iter().cloned().collect(),
+                    snapshot
+                        .workspace_members
+                        .iter()
+                        .flat_map(|member| member.resolved_dirs.iter().cloned())
+                        .collect(),
                 );
                 let _ =
                     root_legality.insert(snapshot.rel_dir.clone(), RootLegality::LegalWorkspace);
@@ -377,12 +391,6 @@ pub fn collect(tree: &dyn ProjectTreeView, structure: &RustStructureFacts) -> Ru
             if declared && root_is_member_candidate(snapshot) {
                 let _ = root_legality.insert(snapshot.rel_dir.clone(), RootLegality::LegalMember);
             } else {
-                topology_issues.push(RustTopologyIssueFact::new(
-                    snapshot.rel_dir.clone(),
-                    snapshot.cargo_rel_path.clone(),
-                    snapshot.classification,
-                    RustTopologyIssueKind::UndeclaredWorkspaceMember { workspace_root_rel },
-                ));
                 let _ = root_legality.insert(snapshot.rel_dir.clone(), RootLegality::Illegal);
             }
             continue;
@@ -413,6 +421,11 @@ pub fn collect(tree: &dyn ProjectTreeView, structure: &RustStructureFacts) -> Ru
         }
         let _ = root_legality.insert(snapshot.rel_dir.clone(), RootLegality::Illegal);
     }
+
+    topology_issues.extend(collect_workspace_membership_exactness_issues(
+        &snapshots,
+        &top_level_workspaces,
+    ));
 
     legal_workspace_roots.sort_by(|left, right| left.cargo_rel_path.cmp(&right.cargo_rel_path));
     topology_issues.sort_by(|left, right| {
@@ -529,7 +542,7 @@ fn cargo_root_snapshot(
             parse_error: Some("Cargo.toml content missing from ProjectTree".to_owned()),
             has_workspace: false,
             has_package: false,
-            expanded_members: Vec::new(),
+            workspace_members: Vec::new(),
             escaping_member_patterns: Vec::new(),
         };
     };
@@ -538,7 +551,7 @@ fn cargo_root_snapshot(
         Ok(parsed) => {
             let has_workspace = parsed.get("workspace").is_some();
             let has_package = parsed.get("package").is_some();
-            let (expanded_members, escaping_member_patterns) =
+            let (workspace_members, escaping_member_patterns) =
                 parse_workspace_members(tree, rel_dir, &parsed);
             CargoRootSnapshot {
                 rel_dir: rel_dir.to_owned(),
@@ -547,7 +560,7 @@ fn cargo_root_snapshot(
                 parse_error: None,
                 has_workspace,
                 has_package,
-                expanded_members,
+                workspace_members,
                 escaping_member_patterns,
             }
         }
@@ -558,7 +571,7 @@ fn cargo_root_snapshot(
             parse_error: Some(parse_error.to_string()),
             has_workspace: false,
             has_package: false,
-            expanded_members: Vec::new(),
+            workspace_members: Vec::new(),
             escaping_member_patterns: Vec::new(),
         },
     }
@@ -568,7 +581,7 @@ fn parse_workspace_members(
     tree: &dyn ProjectTreeView,
     workspace_rel: &str,
     parsed: &toml::Value,
-) -> (Vec<String>, Vec<String>) {
+) -> (Vec<WorkspaceMemberSnapshot>, Vec<String>) {
     let Some(raw_members) = parsed
         .get("workspace")
         .and_then(|value| value.get("members"))
@@ -577,22 +590,23 @@ fn parse_workspace_members(
         return (Vec::new(), Vec::new());
     };
 
-    let mut expanded = BTreeSet::new();
+    let mut expansions = Vec::new();
     let mut escaping = BTreeSet::new();
     for member in raw_members.iter().filter_map(toml::Value::as_str) {
         if member_pattern_escapes_root(member) {
             let _ = escaping.insert(member.to_owned());
             continue;
         }
-        for member_rel in expand_member_pattern(tree, workspace_rel, member) {
-            let _ = expanded.insert(member_rel);
-        }
+        let mut resolved_dirs = expand_member_pattern(tree, workspace_rel, member);
+        resolved_dirs.sort();
+        resolved_dirs.dedup();
+        expansions.push(WorkspaceMemberSnapshot {
+            raw: member.to_owned(),
+            resolved_dirs,
+        });
     }
 
-    (
-        expanded.into_iter().collect(),
-        escaping.into_iter().collect(),
-    )
+    (expansions, escaping.into_iter().collect())
 }
 
 fn expand_member_pattern(
@@ -817,6 +831,10 @@ fn issue_sort_key(kind: &RustTopologyIssueKind) -> (&'static str, String) {
         RustTopologyIssueKind::UndeclaredWorkspaceMember { workspace_root_rel } => {
             ("undeclared-member", workspace_root_rel.clone())
         }
+        RustTopologyIssueKind::ExtraWorkspaceMember {
+            workspace_root_rel,
+            member_pattern,
+        } => ("extra-member", format!("{workspace_root_rel}:{member_pattern}")),
         RustTopologyIssueKind::WorkspaceMemberPathEscapesRoot {
             workspace_root_rel,
             member_pattern,
@@ -836,6 +854,75 @@ fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
         || rel_path
             .strip_prefix(parent_rel)
             .is_some_and(|rest| rest.starts_with('/'))
+}
+
+fn collect_workspace_membership_exactness_issues(
+    snapshots: &BTreeMap<String, CargoRootSnapshot>,
+    workspace_rels: &BTreeSet<String>,
+) -> Vec<RustTopologyIssueFact> {
+    let mut issues = Vec::new();
+
+    for workspace_rel in workspace_rels {
+        let Some(workspace_snapshot) = snapshots.get(workspace_rel) else {
+            continue;
+        };
+        if !root_is_workspace_eligible(workspace_snapshot) {
+            continue;
+        }
+
+        let actual_children = snapshots
+            .values()
+            .filter(|snapshot| snapshot.rel_dir != *workspace_rel)
+            .filter(|snapshot| {
+                nearest_ancestor_workspace(&snapshot.rel_dir, workspace_rels)
+                    .as_deref()
+                    == Some(workspace_rel.as_str())
+            })
+            .map(|snapshot| (snapshot.rel_dir.clone(), snapshot))
+            .collect::<BTreeMap<_, _>>();
+
+        for snapshot in actual_children.values() {
+            let declared = workspace_snapshot.workspace_members.iter().any(|member| {
+                member
+                    .resolved_dirs
+                    .iter()
+                    .any(|resolved| resolved == &snapshot.rel_dir)
+            });
+            if declared {
+                continue;
+            }
+            issues.push(RustTopologyIssueFact::new(
+                snapshot.rel_dir.clone(),
+                snapshot.cargo_rel_path.clone(),
+                snapshot.classification,
+                RustTopologyIssueKind::UndeclaredWorkspaceMember {
+                    workspace_root_rel: workspace_rel.clone(),
+                },
+            ));
+        }
+
+        for member in &workspace_snapshot.workspace_members {
+            let covers_real_child = !member.resolved_dirs.is_empty()
+                && member
+                    .resolved_dirs
+                    .iter()
+                    .all(|resolved| actual_children.contains_key(resolved));
+            if covers_real_child {
+                continue;
+            }
+            issues.push(RustTopologyIssueFact::new(
+                workspace_snapshot.rel_dir.clone(),
+                workspace_snapshot.cargo_rel_path.clone(),
+                workspace_snapshot.classification,
+                RustTopologyIssueKind::ExtraWorkspaceMember {
+                    workspace_root_rel: workspace_rel.clone(),
+                    member_pattern: member.raw.clone(),
+                },
+            ));
+        }
+    }
+
+    issues
 }
 
 #[cfg(test)]

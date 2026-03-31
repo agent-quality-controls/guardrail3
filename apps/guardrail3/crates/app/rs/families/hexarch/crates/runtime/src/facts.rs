@@ -70,14 +70,12 @@ pub struct WorkspaceCoverageFacts {
 pub struct AppLocalCargoRootFact {
     pub(crate) rel_dir: String,
     pub(crate) cargo_rel_path: String,
-    pub(crate) cargo_parse_error: Option<String>,
     pub(crate) is_workspace: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct WorkspaceMemberFact {
     pub(crate) raw: String,
-    pub(crate) resolved_dirs: Vec<String>,
     pub(crate) within_app_boundary: bool,
 }
 
@@ -310,7 +308,6 @@ fn collect_app_local_cargo_roots(
             AppLocalCargoRootFact {
                 rel_dir,
                 cargo_rel_path,
-                cargo_parse_error: cargo_snapshot.parse_error,
                 is_workspace: cargo_snapshot
                     .value
                     .as_ref()
@@ -327,7 +324,6 @@ fn build_workspace_member_facts(
 ) -> Vec<WorkspaceMemberFact> {
     let mut facts = Vec::new();
     for member in workspace_members {
-        let mut resolved = BTreeSet::new();
         let absolute_member = member.starts_with('/');
         let repo_pattern = if absolute_member {
             member.trim_end_matches('/').to_owned()
@@ -336,19 +332,9 @@ fn build_workspace_member_facts(
         };
         let within_app_boundary =
             !absolute_member && is_within_app_boundary(app_rel_dir, &repo_pattern);
-        if !absolute_member {
-            if looks_like_glob(member) {
-                for match_rel in tree.matching_dir_rels(&repo_pattern) {
-                    insert_app_relative_member(&mut resolved, app_rel_dir, &match_rel);
-                }
-            } else {
-                let normalized = super::dependency_facts::normalize_path(app_rel_dir, member);
-                insert_app_relative_member(&mut resolved, app_rel_dir, &normalized);
-            }
-        }
+        let _ = (tree, app_rel_dir);
         facts.push(WorkspaceMemberFact {
             raw: member.clone(),
-            resolved_dirs: resolved.into_iter().collect(),
             within_app_boundary,
         });
     }
@@ -381,14 +367,6 @@ fn build_root_workspace_member_facts(
         });
     }
     facts
-}
-
-fn insert_app_relative_member(resolved: &mut BTreeSet<String>, app_rel_dir: &str, repo_rel: &str) {
-    let rel_to_app = repo_rel
-        .strip_prefix(app_rel_dir)
-        .unwrap_or(repo_rel)
-        .trim_start_matches('/');
-    let _ = resolved.insert(rel_to_app.to_owned());
 }
 
 fn insert_root_workspace_member(resolved: &mut BTreeSet<String>, repo_rel: &str) {

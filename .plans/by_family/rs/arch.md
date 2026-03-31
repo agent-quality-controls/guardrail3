@@ -18,6 +18,7 @@ Current state:
 
 - repo-global Rust root placement and owner-family coherence live here
 - repo-global legality should expand here as the shared pre-family legality surface, not as ad hoc family-order dependence
+- exact workspace membership for governed workspaces now lives here as one topology concept
 - the family is self-hosted with `crates/runtime`, `crates/assertions`, and `test_support`
 - recent hardening closed the main audit gaps:
   - `RS-ARCH-04` is a layout-level overlap rule
@@ -42,6 +43,7 @@ Target split:
 Test contract:
 
 - `arch` is the owner of illegal topology and illegal placement tests
+- `arch` is the owner of exact workspace-membership tests
 - workspace-local families must not keep those tests by rebuilding fake routes
 - if a test needs an illegal root or misplaced family file, it belongs here
 - if a test is pure rule logic, it should use the rule input directly instead of pretending to be a routed family test

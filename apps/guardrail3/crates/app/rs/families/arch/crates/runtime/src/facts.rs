@@ -56,6 +56,10 @@ pub enum ArchTopologyIssueKind {
     UndeclaredWorkspaceMember {
         workspace_root_rel: String,
     },
+    ExtraWorkspaceMember {
+        workspace_root_rel: String,
+        member_pattern: String,
+    },
     WorkspaceMemberPathEscapesRoot {
         workspace_root_rel: String,
         member_pattern: String,
@@ -153,6 +157,13 @@ pub fn collect(tree: &ProjectTree, route: &RsArchRoute) -> ArchFacts {
                         workspace_root_rel: workspace_root_rel.clone(),
                     }
                 }
+                RsArchTopologyIssueKindView::ExtraWorkspaceMember {
+                    workspace_root_rel,
+                    member_pattern,
+                } => ArchTopologyIssueKind::ExtraWorkspaceMember {
+                    workspace_root_rel: workspace_root_rel.clone(),
+                    member_pattern: member_pattern.clone(),
+                },
                 RsArchTopologyIssueKindView::WorkspaceMemberPathEscapesRoot {
                     workspace_root_rel,
                     member_pattern,

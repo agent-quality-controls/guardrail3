@@ -38,13 +38,13 @@ It evaluates:
 - declared auxiliary Rust roots
 - root-to-family ownership
 - app/package overlap and dual ownership
+- exact workspace-membership equivalence for governed workspaces
 - global Rust architecture enablement
 
 It does not own:
 
 - app-internal structure
 - package-internal structure
-- workspace member completeness inside one app or package
 - generic Cargo policy
 
 Those belong to:
@@ -89,7 +89,7 @@ For `RS-ARCH`, the important contract is:
 
 - live Rust root scope comes from shared `placement`
 - family routing comes from shared `FamilyMapper`
-- `RS-ARCH` is the family that emits repo-global placement findings over that shared scope
+- `RS-ARCH` is the family that emits repo-global placement findings and exact workspace-membership topology findings over that shared scope
 
 `RS-HEXARCH` and `RS-LIBARCH` may consume the same placement facts, but must not emit misplaced-root findings.
 

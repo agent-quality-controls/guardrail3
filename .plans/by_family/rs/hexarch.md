@@ -17,6 +17,7 @@ Current state:
 - self-hosted with `crates/runtime`, `crates/assertions`, `crates/assertions_common`, and `test_support`
 - owns app-internal hex structure and dependency-direction semantics
 - workspace-boundary enforcement was recently tightened so nested workspaces under app roots are forbidden
+- no longer owns generic workspace-membership exactness; that moved to `RS-ARCH`
 - `assertions_common` is a real current implementation detail and should stay explicit in docs rather than hidden
 
 Scope model:

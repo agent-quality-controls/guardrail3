@@ -3,7 +3,7 @@ use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_27_nested_workspace_
 use std::path::PathBuf;
 
 #[test]
-fn malformed_nested_cargo_is_owned_by_rule_07_not_rule_27() {
+fn malformed_nested_cargo_is_not_owned_by_rule_27() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -13,17 +13,10 @@ fn malformed_nested_cargo_is_owned_by_rule_07_not_rule_27() {
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error(&results);
-    assertions::assert_workspace_members_error_summary(
-        &results,
-        1,
-        "apps/devctl/crates/app/rs/families/deny/Cargo.toml",
-        &["crates/app/rs/families/deny"],
-        &["Every live app-local Cargo root must be owned"],
-    );
 }
 
 #[test]
-fn family_style_nested_workspace_shape_hits_rule_27_and_workspace_membership_gap() {
+fn family_style_nested_workspace_shape_hits_rule_27() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -66,13 +59,6 @@ resolver = "2"
             message_contains: None,
         }],
     );
-    assertions::assert_workspace_members_error_summary(
-        &results,
-        1,
-        "apps/devctl/crates/app/rs/families/deny/Cargo.toml",
-        &["crates/app/rs/families/deny"],
-        &["Every live app-local Cargo root must be owned"],
-    );
 }
 
 #[test]
@@ -84,8 +70,4 @@ fn actual_guardrail3_repo_no_longer_has_nested_family_workspaces() {
 
     let results = super::run_family(&repo_root);
     assertions::assert_no_error(&results);
-    assertions::assert_no_workspace_members_error_with_file_prefix(
-        &results,
-        "apps/guardrail3/crates/app/rs/families/",
-    );
 }

@@ -1,7 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 const RULE_ID: &str = "RS-HEXARCH-27";
-const WORKSPACE_MEMBERS_RULE_ID: &str = "RS-HEXARCH-07";
 
 #[derive(Debug)]
 pub struct ExpectedRuleResult<'a> {
@@ -59,59 +58,6 @@ pub fn assert_no_error(results: &[CheckResult]) {
         errors.is_empty(),
         "expected no RS-HEXARCH-27 errors, got: {errors:#?}"
     );
-}
-
-pub fn assert_no_workspace_members_error_with_file_prefix(results: &[CheckResult], prefix: &str) {
-    let errors = results
-        .iter()
-        .filter(|result| {
-            result.id() == WORKSPACE_MEMBERS_RULE_ID
-                && result.severity() == Severity::Error
-                && result
-                    .file
-                    .as_deref()
-                    .is_some_and(|file| file.starts_with(prefix))
-        })
-        .collect::<Vec<_>>();
-    assert!(
-        errors.is_empty(),
-        "expected no {WORKSPACE_MEMBERS_RULE_ID} errors with file prefix {prefix}, got: {errors:#?}"
-    );
-}
-
-pub fn assert_workspace_members_error_summary(
-    results: &[CheckResult],
-    expected_count: usize,
-    expected_file: &str,
-    title_contains: &[&str],
-    message_contains: &[&str],
-) {
-    let errors = results
-        .iter()
-        .filter(|result| {
-            result.id() == WORKSPACE_MEMBERS_RULE_ID && result.severity() == Severity::Error
-        })
-        .collect::<Vec<_>>();
-    assert_eq!(
-        errors.len(),
-        expected_count,
-        "unexpected {WORKSPACE_MEMBERS_RULE_ID} error count: {errors:#?}"
-    );
-    for result in &errors {
-        assert_eq!(result.file(), Some(expected_file), "{errors:#?}");
-        assert!(
-            title_contains
-                .iter()
-                .all(|needle| result.title().contains(needle)),
-            "{errors:#?}"
-        );
-        assert!(
-            message_contains
-                .iter()
-                .all(|needle| result.message().contains(needle)),
-            "{errors:#?}"
-        );
-    }
 }
 
 pub fn assert_error_count(results: &[CheckResult], expected_count: usize) {
