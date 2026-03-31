@@ -15,7 +15,7 @@ Current state:
 
 - self-hosted with `crates/runtime`, `crates/assertions`, and `test_support`
 - root-level family, not multi-root policy discovery
-- nested `rustfmt.toml` placement is enforced globally by `RS-ARCH-16`; `RS-FMT` receives only legality-approved root config surface
+- nested `rustfmt.toml` placement is enforced globally by `RS-TOPOLOGY-16`; `RS-FMT` receives only legality-approved root config surface
 
 Scope model:
 

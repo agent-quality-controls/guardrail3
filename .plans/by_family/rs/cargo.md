@@ -52,7 +52,7 @@ Done means:
   returns no legal workspaces
 - routed cargo tests use legal workspace fixtures only
 - pure cargo rule semantics are covered by direct typed-input sidecar tests
-- illegal root or placement expectations live under `arch`, not cargo
+- illegal root or placement expectations live under `topology`, not cargo
 
 Historical/supplemental references:
 
@@ -66,4 +66,4 @@ Next planning focus:
 - rewrite the remaining `pkg/` standalone-root tests into:
   - legal workspace-root routed tests
   - direct rule-input tests for pure lint semantics
-  - `arch` tests where the old assertion was really about illegal root shape
+  - `topology` tests where the old assertion was really about illegal root shape

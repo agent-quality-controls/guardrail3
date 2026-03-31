@@ -5,8 +5,8 @@ use crate::selection::resolve_for_tests;
 #[test]
 fn explicit_family_request_bypasses_disabled_config_filter() {
     let tree = assertions::minimal_tree();
-    let config = assertions::config_for_explicit_arch_request();
-    let requested = assertions::explicit_arch_request();
+    let config = assertions::config_for_explicit_topology_request();
+    let requested = assertions::explicit_topology_request();
 
     let selection = resolve_for_tests(&tree, Some(&config), &requested);
 

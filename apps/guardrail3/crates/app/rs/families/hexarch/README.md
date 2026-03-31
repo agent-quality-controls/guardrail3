@@ -34,7 +34,7 @@ It does not own:
 
 Those belong to:
 
-- `RS-ARCH`
+- `RS-TOPOLOGY`
 - shared Rust `placement`
 - shared Rust `FamilyMapper`
 - `RS-CARGO`
@@ -187,7 +187,7 @@ For this family itself:
 
 At the current checkpoint this family:
 
-- passes `RS-ARCH`
+- passes `RS-TOPOLOGY`
 - passes `RS-TEST`
 - is routed through shared `placement` + `FamilyMapper`
 

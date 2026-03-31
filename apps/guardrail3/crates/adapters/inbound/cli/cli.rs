@@ -262,7 +262,7 @@ impl RsValidateArgs {
 
 #[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RustValidateFamilyArg {
-    Arch,
+    Topology,
     Fmt,
     Toolchain,
     Clippy,
@@ -282,7 +282,7 @@ pub enum RustValidateFamilyArg {
 impl From<RustValidateFamilyArg> for RustValidateFamily {
     fn from(value: RustValidateFamilyArg) -> Self {
         match value {
-            RustValidateFamilyArg::Arch => Self::Arch,
+            RustValidateFamilyArg::Topology => Self::Topology,
             RustValidateFamilyArg::Fmt => Self::Fmt,
             RustValidateFamilyArg::Toolchain => Self::Toolchain,
             RustValidateFamilyArg::Clippy => Self::Clippy,

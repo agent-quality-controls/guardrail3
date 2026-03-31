@@ -24,7 +24,7 @@ It does not own:
 
 Those belong to:
 
-- `RS-ARCH`
+- `RS-TOPOLOGY`
 - `RS-CARGO`
 - `RS-CODE`
 - `RS-FMT`
@@ -50,7 +50,7 @@ Inside that owned surface, the family may then do family-local work:
 That split is intentional:
 
 - `placement` decides what Rust roots exist
-- `arch` decides legality for workspace placement and illegal family-file shapes
+- `topology` decides legality for workspace placement and illegal family-file shapes
 - `FamilyMapper` decides which legal workspaces and deny-relevant files reach `deny`
 - `deny` decides deny-policy facts over that workspace-local owned surface
 
@@ -141,4 +141,4 @@ The next deny work should stay narrow:
 2. improve end-to-end generator/root parity evidence
 
 Do not broaden the deny policy surface until those are closed. Placement
-legality is already owned by `arch`.
+legality is already owned by `topology`.

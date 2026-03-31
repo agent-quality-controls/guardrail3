@@ -71,7 +71,7 @@ pub const TS_HELP: &str = "\
 pub const RS_VALIDATE_HELP: &str = "\
 RUST VALIDATION FAMILIES
 
-  arch
+  topology
   fmt
   toolchain
   clippy
@@ -90,7 +90,7 @@ RUST VALIDATION FAMILIES
 EXAMPLES
 
   guardrail3 rs validate .
-  guardrail3 rs validate . --family arch
+  guardrail3 rs validate . --family topology
   guardrail3 rs validate . --family hexarch
   guardrail3 rs validate . --family code --family garde --staged
   guardrail3 rs validate . --family release --thorough
@@ -99,7 +99,7 @@ EXAMPLES
 CONFIG
 
   [rust.checks]
-  arch = true
+  topology = true
   fmt = true
   toolchain = true
   clippy = true
@@ -142,7 +142,7 @@ PROFILES
 RUST CHECK TOGGLES
 
   `rs init` writes family-based Rust check toggles:
-    arch, fmt, toolchain, clippy, deny, cargo, code, hexarch, deps,
+    topology, fmt, toolchain, clippy, deny, cargo, code, hexarch, deps,
     libarch, garde, test, release, hooks_shared, hooks_rs
 
 AFTER INIT
@@ -178,7 +178,7 @@ guardrail3 rs show-module <NAME>
 Rust validate families:
 
 ```text
-arch
+topology
 fmt
 toolchain
 clippy
@@ -201,7 +201,7 @@ Examples:
 
 ```text
 guardrail3 rs validate .
-guardrail3 rs validate . --family arch
+guardrail3 rs validate . --family topology
 guardrail3 rs validate . --family hexarch
 guardrail3 rs validate . --family code --family garde --staged
 guardrail3 rs validate . --family release --thorough
@@ -225,7 +225,7 @@ Only `generate` / `check` depend on `guardrail3.toml`. Rust validate also reads 
 
 ```toml
 [rust.checks]
-arch = true
+topology = true
 fmt = true
 toolchain = true
 clippy = true
@@ -242,7 +242,7 @@ hooks_shared = true
 hooks_rs = true
 ```
 
-Per-app and package overrides use the scoped family names only. `arch` stays global-only under `[rust.checks]`:
+Per-app and package overrides use the scoped family names only. `topology` stays global-only under `[rust.checks]`:
 
 ```toml
 [rust.apps.my_api.checks]

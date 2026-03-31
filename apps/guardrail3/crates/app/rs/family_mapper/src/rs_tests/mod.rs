@@ -366,8 +366,8 @@ fn arch_route_receives_illegal_family_files_and_topology_issues() {
         ]),
     );
     let scope = guardrail3_app_rs_structure::collect(&tree);
-    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Arch]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_arch();
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Topology]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_topology();
 
     let illegal_files = route
         .family_files()

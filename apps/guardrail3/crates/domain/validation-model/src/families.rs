@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum RustValidateFamily {
-    Arch,
+    Topology,
     Fmt,
     Toolchain,
     Clippy,
@@ -21,7 +21,7 @@ pub enum RustValidateFamily {
 
 impl RustValidateFamily {
     pub const ALL: [Self; 15] = [
-        Self::Arch,
+        Self::Topology,
         Self::Fmt,
         Self::Toolchain,
         Self::Clippy,

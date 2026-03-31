@@ -23,7 +23,7 @@ Scope model:
 - workspace-local family
 - should compute legal local deny facts over routed legal workspaces and routed
   deny-relevant files rather than rediscovering policy roots inside the family
-- illegal placement belongs to `arch`, not to deny
+- illegal placement belongs to `topology`, not to deny
 
 Agent handoff focus:
 
@@ -42,12 +42,12 @@ Known current risk:
 - no confirmed production routing bug yet, but this family has several mixed
   config-placement surfaces and not enough subtree proof coverage
 - older deny tests still assert placement/shadowing ownership that should now
-  belong to `arch`
+  belong to `topology`
 
 Done means:
 
 - subtree tests prove sibling deny roots do not leak into nested-path runs
-- misplaced deny configs outside legal workspaces are reported by `arch`
+- misplaced deny configs outside legal workspaces are reported by `topology`
 - malformed routed manifests and profile-map inputs still fail closed
 - production facts stay route-bounded
 - deny test helpers do not rebuild fake routed surfaces when the mapper returns
@@ -67,5 +67,5 @@ Next planning focus:
 - finish the old-ledger cleanup if stale implementation pointers remain in the secondary docs
 - rewrite stale placement/shadowing tests into either:
   - legal workspace-local deny tests
-  - `arch` legality tests
+  - `topology` legality tests
   - direct typed-input deny rule tests

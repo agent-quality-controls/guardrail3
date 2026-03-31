@@ -17,7 +17,7 @@ routing = [
     "dep:guardrail3_app_rs_structure",
 ]
 families-all = [
-    "family-arch",
+    "family-topology",
     "family-fmt",
     "family-toolchain",
     "family-clippy",
@@ -33,20 +33,20 @@ families-all = [
     "family-hooks-shared",
     "family-hooks-rs",
 ]
-family-arch = ["dep:guardrail3_app_rs_family_arch", "routing"]
-family-fmt = ["family-arch", "dep:guardrail3_app_rs_family_fmt", "routing"]
-family-toolchain = ["family-arch", "dep:guardrail3_app_rs_family_toolchain", "routing"]
-family-clippy = ["family-arch", "dep:guardrail3_app_rs_family_clippy", "routing"]
-family-deny = ["family-arch", "dep:guardrail3_app_rs_family_deny", "routing"]
-family-cargo = ["family-arch", "dep:guardrail3_app_rs_family_cargo", "routing"]
-family-code = ["family-arch", "dep:guardrail3_app_rs_family_code", "routing"]
-family-hexarch = ["family-arch", "dep:guardrail3_app_rs_family_hexarch", "routing"]
-family-libarch = ["family-arch", "dep:guardrail3_app_rs_family_libarch", "routing"]
-family-deps = ["family-arch", "dep:guardrail3_app_rs_family_deps", "routing"]
-family-garde = ["family-arch", "dep:guardrail3_app_rs_family_garde", "routing"]
-family-test = ["family-arch", "dep:guardrail3_app_rs_family_test", "routing"]
-family-release = ["family-arch", "dep:guardrail3_app_rs_family_release", "routing"]
-family-hooks-shared = ["family-arch", "dep:guardrail3_app_rs_family_hooks_shared"]
+family-topology = ["dep:guardrail3_app_rs_family_topology", "routing"]
+family-fmt = ["family-topology", "dep:guardrail3_app_rs_family_fmt", "routing"]
+family-toolchain = ["family-topology", "dep:guardrail3_app_rs_family_toolchain", "routing"]
+family-clippy = ["family-topology", "dep:guardrail3_app_rs_family_clippy", "routing"]
+family-deny = ["family-topology", "dep:guardrail3_app_rs_family_deny", "routing"]
+family-cargo = ["family-topology", "dep:guardrail3_app_rs_family_cargo", "routing"]
+family-code = ["family-topology", "dep:guardrail3_app_rs_family_code", "routing"]
+family-hexarch = ["family-topology", "dep:guardrail3_app_rs_family_hexarch", "routing"]
+family-libarch = ["family-topology", "dep:guardrail3_app_rs_family_libarch", "routing"]
+family-deps = ["family-topology", "dep:guardrail3_app_rs_family_deps", "routing"]
+family-garde = ["family-topology", "dep:guardrail3_app_rs_family_garde", "routing"]
+family-test = ["family-topology", "dep:guardrail3_app_rs_family_test", "routing"]
+family-release = ["family-topology", "dep:guardrail3_app_rs_family_release", "routing"]
+family-hooks-shared = ["family-topology", "dep:guardrail3_app_rs_family_hooks_shared"]
 family-hooks-rs = [
     "dep:guardrail3_app_rs_family_hooks_rs",
     "family-hooks-shared",
@@ -59,7 +59,7 @@ guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", p
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../domain/report" }
 guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../ports/outbound/traits" }
 guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../domain/validation-model" }
-guardrail3_app_rs_family_arch = { package = "guardrail3-app-rs-family-arch", path = "../families/arch/crates/runtime", optional = true }
+guardrail3_app_rs_family_topology = { package = "guardrail3-app-rs-family-topology", path = "../families/topology/crates/runtime", optional = true }
 guardrail3_app_rs_family_cargo = { package = "guardrail3-app-rs-family-cargo", path = "../families/cargo/crates/runtime", optional = true }
 guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "../families/clippy/crates/runtime", optional = true }
 guardrail3_app_rs_family_code = { package = "guardrail3-app-rs-family-code", path = "../families/code/crates/runtime", optional = true }

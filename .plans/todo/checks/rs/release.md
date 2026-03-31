@@ -71,7 +71,7 @@ The current family is intentionally split into:
 
 That split should stay explicit in the plan because the rules are not all evaluating the same scope.
 
-## Relocated from RS-ARCH
+## Relocated from RS-TOPOLOGY
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|

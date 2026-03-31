@@ -1,4 +1,4 @@
-pub use guardrail3_app_rs_family_arch as arch;
+pub use guardrail3_app_rs_family_topology as topology;
 pub use guardrail3_app_rs_family_cargo as cargo;
 pub use guardrail3_app_rs_family_clippy as clippy;
 pub use guardrail3_app_rs_family_code as code;

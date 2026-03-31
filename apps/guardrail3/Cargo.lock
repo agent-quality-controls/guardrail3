@@ -421,28 +421,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "guardrail3-app-rs-family-arch"
-version = "0.0.0"
-dependencies = [
- "guardrail3-app-rs-family-arch-test-support",
- "guardrail3-app-rs-family-mapper",
- "guardrail3-app-rs-placement",
- "guardrail3-app-rs-structure",
- "guardrail3-domain-config",
- "guardrail3-domain-report",
- "guardrail3-domain-validation-model",
- "guardrail3_app_rs_family_arch_assertions",
- "toml",
-]
-
-[[package]]
-name = "guardrail3-app-rs-family-arch-test-support"
-version = "0.0.0"
-dependencies = [
- "guardrail3-app-rs-family-mapper",
-]
-
-[[package]]
 name = "guardrail3-app-rs-family-cargo"
 version = "0.0.0"
 dependencies = [
@@ -969,6 +947,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-rs-family-topology"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-topology-test-support",
+ "guardrail3-app-rs-placement",
+ "guardrail3-app-rs-structure",
+ "guardrail3-domain-config",
+ "guardrail3-domain-report",
+ "guardrail3-domain-validation-model",
+ "guardrail3_app_rs_family_topology_assertions",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-topology-test-support"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-mapper",
+]
+
+[[package]]
 name = "guardrail3-app-rs-generate"
 version = "0.0.0"
 dependencies = [
@@ -1023,7 +1023,6 @@ name = "guardrail3-app-rs-runtime"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-core",
- "guardrail3-app-rs-family-arch",
  "guardrail3-app-rs-family-cargo",
  "guardrail3-app-rs-family-clippy",
  "guardrail3-app-rs-family-code",
@@ -1040,6 +1039,7 @@ dependencies = [
  "guardrail3-app-rs-family-selection",
  "guardrail3-app-rs-family-test",
  "guardrail3-app-rs-family-toolchain",
+ "guardrail3-app-rs-family-topology",
  "guardrail3-app-rs-legality",
  "guardrail3-app-rs-runtime-assertions",
  "guardrail3-app-rs-structure",
@@ -1142,15 +1142,6 @@ name = "guardrail3-shared-fs"
 version = "0.0.0"
 
 [[package]]
-name = "guardrail3_app_rs_family_arch_assertions"
-version = "0.0.0"
-dependencies = [
- "guardrail3-app-rs-family-arch",
- "guardrail3-app-rs-family-arch-test-support",
- "guardrail3-domain-report",
-]
-
-[[package]]
 name = "guardrail3_app_rs_family_garde_assertions"
 version = "0.0.0"
 dependencies = [
@@ -1170,6 +1161,15 @@ name = "guardrail3_app_rs_family_toolchain_assertions"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-toolchain",
+ "guardrail3-domain-report",
+]
+
+[[package]]
+name = "guardrail3_app_rs_family_topology_assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-topology",
+ "guardrail3-app-rs-family-topology-test-support",
  "guardrail3-domain-report",
 ]
 

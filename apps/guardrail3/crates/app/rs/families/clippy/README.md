@@ -33,7 +33,7 @@ It does not own:
 
 Those belong to:
 
-- shared Rust `arch`/`placement`
+- shared Rust `topology`/`placement`
 - shared Rust `FamilyMapper`
 - `RS-CARGO`
 - `RS-CODE`
@@ -45,7 +45,7 @@ This family must not decide which Rust roots are legal.
 
 It consumes:
 
-- legality-aware workspace facts from `arch`/`placement`
+- legality-aware workspace facts from `topology`/`placement`
 - legal workspaces plus Clippy-relevant files from `FamilyMapper::map_rs_clippy()`
 
 Inside a routed workspace, the family may then do family-local discovery:
@@ -69,7 +69,7 @@ Positive inventory results are the normal "clean state" proof for this family. T
 
 That split is intentional:
 
-- `arch` decides what Rust roots are legal
+- `topology` decides what Rust roots are legal
 - `FamilyMapper` decides which legal workspaces and Clippy-relevant files reach `clippy`
 - `clippy` decides Clippy-policy facts inside those routed workspaces
 
@@ -117,7 +117,7 @@ apps/guardrail3/crates/app/rs/families/clippy/
 This means:
 
 - the family container is workspace-local and lives under the app workspace
-- the runtime crate builds and the family is green under `RS-ARCH` and `RS-CLIPPY`
+- the runtime crate builds and the family is green under `RS-TOPOLOGY` and `RS-CLIPPY`
 - the facts layer is split into `facts.rs` plus narrow helper modules under `facts/` so the family stays under repo-root file-length guardrails without weakening rule ownership
 - rule sidecars now prove behavior through sibling assertions modules instead of runtime-local helper plumbing
 - generic fixture setup now lives in the sibling `test_support` crate rather than a private runtime shim, and that crate is split into small helper modules for filesystem, tree-building, fixture scenarios, and TOML edits
@@ -125,7 +125,7 @@ This means:
 
 ## Target Shape
 
-The target is the same self-hosted family pattern now used by `test`, `arch`, `cargo`, `hexarch`, and `code`:
+The target is the same self-hosted family pattern now used by `test`, `topology`, `cargo`, `hexarch`, and `code`:
 
 ```text
 apps/guardrail3/crates/app/rs/families/clippy/
@@ -217,7 +217,7 @@ Must not own:
 At the current checkpoint:
 
 - the family unit tests pass
-- the family passes `RS-ARCH`
+- the family passes `RS-TOPOLOGY`
 - the family passes `RS-CLIPPY`
 - the family currently exposes 25 production `RS-CLIPPY-*` rules
 - the repo-owned policy root is [`apps/guardrail3/clippy.toml`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/clippy.toml), and the family root no longer carries a local `clippy.toml`

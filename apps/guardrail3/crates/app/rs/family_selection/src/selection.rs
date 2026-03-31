@@ -22,7 +22,7 @@ pub fn resolve(
         RustFamilySelection::new(requested_families.iter().copied().collect())
     };
 
-    selection.insert(RustValidateFamily::Arch);
+    selection.insert(RustValidateFamily::Topology);
 
     if selection.contains(RustValidateFamily::HooksRs) {
         selection.insert(RustValidateFamily::HooksShared);
@@ -61,7 +61,7 @@ pub fn minimal_tree_for_tests() -> ProjectTree {
 }
 
 #[must_use]
-pub fn config_for_explicit_arch_request_for_tests() -> GuardrailConfig {
+pub fn config_for_explicit_topology_request_for_tests() -> GuardrailConfig {
     GuardrailConfig::new(
         None,
         None,
@@ -127,8 +127,8 @@ pub fn config_for_enabled_family_filtering_for_tests() -> GuardrailConfig {
 }
 
 #[must_use]
-pub fn explicit_arch_request_for_tests() -> Vec<RustValidateFamily> {
-    vec![RustValidateFamily::Arch]
+pub fn explicit_topology_request_for_tests() -> Vec<RustValidateFamily> {
+    vec![RustValidateFamily::Topology]
 }
 
 fn family_enabled_for_runtime(
@@ -136,7 +136,7 @@ fn family_enabled_for_runtime(
     tree: &ProjectTree,
     config: Option<&GuardrailConfig>,
 ) -> bool {
-    if family == RustValidateFamily::Arch {
+    if family == RustValidateFamily::Topology {
         return true;
     }
 
@@ -190,7 +190,7 @@ fn family_enabled_for_runtime(
 fn family_uses_global_only(family: RustValidateFamily) -> bool {
     matches!(
         family,
-        RustValidateFamily::Arch
+        RustValidateFamily::Topology
             | RustValidateFamily::Fmt
             | RustValidateFamily::Code
             | RustValidateFamily::Test

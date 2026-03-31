@@ -368,7 +368,7 @@ impl RsRootInputFailureView {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RsArchRootView {
+pub struct RsTopologyRootView {
     root: RsRootView,
     classification: RustRootClassification,
     arch_role: Option<RustArchRole>,
@@ -376,7 +376,7 @@ pub struct RsArchRootView {
     package_zone_candidates: Vec<String>,
 }
 
-impl RsArchRootView {
+impl RsTopologyRootView {
     #[must_use]
     pub fn new(
         root: RsRootView,
@@ -421,21 +421,21 @@ impl RsArchRootView {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RsArchRoute {
-    roots: Vec<RsArchRootView>,
+pub struct RsTopologyRoute {
+    roots: Vec<RsTopologyRootView>,
     overlaps: Vec<RsArchOverlapView>,
     input_failures: Vec<RsRootInputFailureView>,
-    topology_issues: Vec<RsArchTopologyIssueView>,
+    topology_issues: Vec<RsTopologyIssueView>,
     family_files: Vec<RsFamilyFileView>,
 }
 
-impl RsArchRoute {
+impl RsTopologyRoute {
     #[must_use]
     pub fn new(
-        roots: Vec<RsArchRootView>,
+        roots: Vec<RsTopologyRootView>,
         overlaps: Vec<RsArchOverlapView>,
         input_failures: Vec<RsRootInputFailureView>,
-        topology_issues: Vec<RsArchTopologyIssueView>,
+        topology_issues: Vec<RsTopologyIssueView>,
         family_files: Vec<RsFamilyFileView>,
     ) -> Self {
         Self {
@@ -448,7 +448,7 @@ impl RsArchRoute {
     }
 
     #[must_use]
-    pub fn roots(&self) -> &[RsArchRootView] {
+    pub fn roots(&self) -> &[RsTopologyRootView] {
         &self.roots
     }
 
@@ -463,7 +463,7 @@ impl RsArchRoute {
     }
 
     #[must_use]
-    pub fn topology_issues(&self) -> &[RsArchTopologyIssueView] {
+    pub fn topology_issues(&self) -> &[RsTopologyIssueView] {
         &self.topology_issues
     }
 
@@ -474,21 +474,21 @@ impl RsArchRoute {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RsArchTopologyIssueView {
+pub struct RsTopologyIssueView {
     rel_dir: String,
     cargo_rel_path: String,
     classification: RustRootClassification,
-    kind: RsArchTopologyIssueKindView,
+    kind: RsTopologyIssueKindView,
 }
 
-impl RsArchTopologyIssueView {
+impl RsTopologyIssueView {
     #[must_use]
     pub fn from_fact(issue: &RustTopologyIssueFact) -> Self {
         Self {
             rel_dir: issue.rel_dir().to_owned(),
             cargo_rel_path: issue.cargo_rel_path().to_owned(),
             classification: issue.classification(),
-            kind: RsArchTopologyIssueKindView::from_kind(issue.kind()),
+            kind: RsTopologyIssueKindView::from_kind(issue.kind()),
         }
     }
 
@@ -508,13 +508,13 @@ impl RsArchTopologyIssueView {
     }
 
     #[must_use]
-    pub fn kind(&self) -> &RsArchTopologyIssueKindView {
+    pub fn kind(&self) -> &RsTopologyIssueKindView {
         &self.kind
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum RsArchTopologyIssueKindView {
+pub enum RsTopologyIssueKindView {
     TopLevelRootMustBeWorkspace,
     LooseTopLevelPackage,
     NestedWorkspace {
@@ -534,7 +534,7 @@ pub enum RsArchTopologyIssueKindView {
     AuxiliaryTopLevelRootMustBeWorkspace,
 }
 
-impl RsArchTopologyIssueKindView {
+impl RsTopologyIssueKindView {
     #[must_use]
     pub fn from_kind(kind: &RustTopologyIssueKind) -> Self {
         match kind {
