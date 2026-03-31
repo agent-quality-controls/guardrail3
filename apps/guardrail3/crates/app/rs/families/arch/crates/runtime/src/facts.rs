@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use guardrail3_app_rs_family_mapper::{RsArchRootView, RsArchRoute, RsArchTopologyIssueKindView};
 use guardrail3_app_rs_placement::{RustArchitectureOwner, RustRootClassification};
 use guardrail3_domain_config::types::GuardrailConfig;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_validation_model::RustValidateFamily;
 
 #[derive(Debug, Clone)]

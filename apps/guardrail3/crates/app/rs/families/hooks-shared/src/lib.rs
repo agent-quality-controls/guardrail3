@@ -59,7 +59,7 @@ pub fn check(
     surface: &RsProjectSurface,
     _tc: &dyn ToolChecker,
 ) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = collect(fs, root, tree);
     let mut results = Vec::new();
 

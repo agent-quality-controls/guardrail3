@@ -40,7 +40,7 @@ pub fn check(
     route: &RsDepsRoute,
     tc: &dyn ToolChecker,
 ) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = collect(tree, route, tc);
     run_with_facts(&facts)
 }

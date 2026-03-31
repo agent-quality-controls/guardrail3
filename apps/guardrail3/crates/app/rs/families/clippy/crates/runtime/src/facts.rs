@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 #[cfg(test)]
 use guardrail3_app_rs_family_mapper::FamilyMapper;
 use guardrail3_app_rs_family_mapper::RsClippyRoute;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 #[cfg(test)]
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 

@@ -9,7 +9,7 @@ mod repo_root_toolchain;
 mod workspace_root_toolchain;
 
 fn check_results(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::check_test_tree(tree)
 }

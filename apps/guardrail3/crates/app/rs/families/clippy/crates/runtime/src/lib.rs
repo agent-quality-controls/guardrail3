@@ -40,7 +40,7 @@ use self::inputs::{
 use guardrail3_app_rs_family_clippy_assertions as _;
 
 pub fn check(surface: &RsProjectSurface, route: &RsClippyRoute) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = collect(tree, route);
     let has_routed_roots = !route.roots().is_empty();
     let mut results = Vec::new();

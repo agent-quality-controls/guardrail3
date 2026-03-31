@@ -14,6 +14,17 @@ pub struct RsProjectSurface {
 
 impl RsProjectSurface {
     #[must_use]
+    pub fn new(
+        root: PathBuf,
+        structure: BTreeMap<String, DirEntry>,
+        content: BTreeMap<String, String>,
+    ) -> Self {
+        Self {
+            tree: ProjectTree::new(root, structure, content),
+        }
+    }
+
+    #[must_use]
     pub fn from_tree(tree: &ProjectTree) -> Self {
         Self { tree: tree.clone() }
     }
@@ -121,13 +132,74 @@ impl RsProjectSurface {
             .collect::<BTreeMap<_, _>>();
 
         let root = PathBuf::from(tree.root());
-        Self {
-            tree: ProjectTree::new(root, structure, content),
-        }
+        Self::new(root, structure, content)
     }
 
     #[must_use]
-    pub fn tree(&self) -> &ProjectTree {
+    pub fn root(&self) -> &PathBuf {
+        self.tree.root()
+    }
+
+    #[must_use]
+    pub fn structure(&self) -> &BTreeMap<String, DirEntry> {
+        self.tree.structure()
+    }
+
+    #[must_use]
+    pub fn content(&self) -> &BTreeMap<String, String> {
+        self.tree.content()
+    }
+
+    #[must_use]
+    pub fn dir_exists(&self, rel: &str) -> bool {
+        self.tree.dir_exists(rel)
+    }
+
+    #[must_use]
+    pub fn dir_contents(&self, rel: &str) -> Option<&DirEntry> {
+        self.tree.dir_contents(rel)
+    }
+
+    #[must_use]
+    pub fn file_content(&self, rel: &str) -> Option<&str> {
+        self.tree.file_content(rel)
+    }
+
+    #[must_use]
+    pub fn file_exists(&self, rel: &str) -> bool {
+        self.tree.file_exists(rel)
+    }
+
+    #[must_use]
+    pub fn all_dir_rels(&self) -> Vec<String> {
+        self.tree.all_dir_rels()
+    }
+
+    #[must_use]
+    pub fn dirs_with_file(&self, name: &str) -> Vec<String> {
+        self.tree.dirs_with_file(name)
+    }
+
+    #[must_use]
+    pub fn matching_dir_rels(&self, pattern: &str) -> Vec<String> {
+        self.tree.matching_dir_rels(pattern)
+    }
+
+    #[must_use]
+    pub fn abs_path(&self, rel: &str) -> PathBuf {
+        self.tree.abs_path(rel)
+    }
+
+    #[must_use]
+    pub fn join_rel(parent: &str, child: &str) -> String {
+        ProjectTree::join_rel(parent, child)
+    }
+}
+
+impl std::ops::Deref for RsProjectSurface {
+    type Target = ProjectTree;
+
+    fn deref(&self) -> &Self::Target {
         &self.tree
     }
 }

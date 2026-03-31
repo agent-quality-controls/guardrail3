@@ -11,7 +11,7 @@ mod rs_fmt_08_dual_file_conflict;
 
 use guardrail3_app_rs_family_mapper::RsProjectSurface;
 #[cfg(test)]
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
 use self::facts::{collect, file_name_kind};
@@ -32,7 +32,7 @@ pub fn check(
     surface: &RsProjectSurface,
     route: &guardrail3_app_rs_family_mapper::RsFmtRoute,
 ) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = collect(tree, route);
     let mut results = Vec::new();
 

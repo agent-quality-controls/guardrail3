@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
-use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {

@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use super::{
     PatchEntryFacts, WorkspaceFacts, dir_is_within_owned_hex_scope, layer_from_path, normalize_path,

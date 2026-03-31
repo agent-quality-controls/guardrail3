@@ -92,7 +92,7 @@ pub fn check(
     route: &guardrail3_app_rs_family_mapper::RsCodeRoute,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     mark_runtime_dependencies_used();
-    let tree = surface.tree();
+    let tree = surface;
     let facts = collect(tree, route);
     let mut results = Vec::new();
 
@@ -203,7 +203,7 @@ pub(crate) fn check_test_root(
 #[cfg(test)]
 #[must_use]
 pub(crate) fn check_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     check(
         &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
@@ -213,7 +213,7 @@ pub(crate) fn check_test_tree(
 
 #[cfg(test)]
 fn family_route_for_tests(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> guardrail3_app_rs_family_mapper::RsCodeRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let config = parse_guardrail_config(tree);
@@ -233,7 +233,7 @@ fn family_route_for_tests(
 
 #[cfg(test)]
 fn parse_guardrail_config(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> Option<guardrail3_domain_config::types::GuardrailConfig> {
     tree.file_content("guardrail3.toml").and_then(|content| {
         toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()

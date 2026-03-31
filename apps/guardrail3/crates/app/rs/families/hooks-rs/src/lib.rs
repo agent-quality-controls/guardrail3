@@ -28,7 +28,7 @@ use self::facts::collect;
 use self::inputs::RustHookCommandInput;
 
 pub fn check(surface: &RsProjectSurface, tc: &dyn ToolChecker) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = collect(tree);
     let mut results = Vec::new();
 

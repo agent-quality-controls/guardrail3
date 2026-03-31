@@ -3,12 +3,12 @@ use std::path::{Path, PathBuf};
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
-use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 use guardrail3_shared_fs::{create_dir_all, write_file as write_file_at};
 
 pub fn walk(root: &Path) -> ProjectTree {
-    walk_project(&RealFileSystem, root)
+    ProjectTree::from_tree(&walk_project(&RealFileSystem, root))
 }
 
 pub fn write_file(root: &Path, rel: &str, content: &str) {

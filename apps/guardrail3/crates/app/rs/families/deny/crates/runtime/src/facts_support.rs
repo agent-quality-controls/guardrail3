@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use crate::facts::{
     CargoRootFacts, CoveredRustUnitFacts, DenyConfigFacts, PolicyRootKind, UncoveredRustUnitFacts,

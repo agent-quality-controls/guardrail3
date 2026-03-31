@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsToolchainRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use super::facts::{ToolchainFamilyFacts, ToolchainPolicyRootFacts};
 

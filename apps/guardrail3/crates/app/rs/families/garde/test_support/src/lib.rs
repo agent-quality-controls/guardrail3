@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
 use guardrail3_shared_fs::{create_dir_all, write_file};
 
 pub fn temp_root(slug: &str) -> PathBuf {

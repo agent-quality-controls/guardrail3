@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 #[cfg(test)]
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 #[cfg(test)]
 use super::dependency_facts::EdgeKind;

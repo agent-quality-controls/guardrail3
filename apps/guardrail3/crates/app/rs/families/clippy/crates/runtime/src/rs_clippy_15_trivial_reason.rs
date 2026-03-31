@@ -1,5 +1,5 @@
 #[cfg(test)]
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_reason_policy::validate_reason_text;
 

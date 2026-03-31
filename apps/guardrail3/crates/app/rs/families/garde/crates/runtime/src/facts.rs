@@ -7,7 +7,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
 use guardrail3_domain_config::types::GuardrailConfig;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use self::cargo_roots::collect_cargo_roots;
 use self::clippy::{collect_clippy_configs, owning_root_dir, push_root_facts};
@@ -433,7 +433,7 @@ fn parsed_file_shows_garde_adoption(parsed: &ParsedGardeFile) -> bool {
 
 #[cfg(test)]
 pub(super) fn family_route(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     scoped_files: Option<&std::collections::BTreeSet<String>>,
 ) -> guardrail3_app_rs_family_mapper::RsGardeRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);

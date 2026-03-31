@@ -2,6 +2,7 @@ mod rs;
 mod scoped_files;
 mod views;
 
+pub use guardrail3_domain_project_tree::DirEntry;
 pub use rs::FamilyMapper;
 pub type RsArchOverlapView = views::RsArchOverlapView;
 pub type RsArchRootView = views::RsArchRootView;

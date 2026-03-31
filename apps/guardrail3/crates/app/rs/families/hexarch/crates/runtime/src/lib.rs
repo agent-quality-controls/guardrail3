@@ -75,7 +75,7 @@ pub use self::dependency_facts::DependencyFamilyFacts;
 #[doc(hidden)]
 #[cfg(test)]
 pub fn collect_dependency_facts_for_tests(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     route: &guardrail3_app_rs_family_mapper::RsHexarchRoute,
 ) -> DependencyFamilyFacts {
     dependency_facts::collect(tree, route)
@@ -83,7 +83,7 @@ pub fn collect_dependency_facts_for_tests(
 
 #[cfg(test)]
 pub fn family_route_for_tests(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> guardrail3_app_rs_family_mapper::RsHexarchRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree.file_content("guardrail3.toml").and_then(|content| {
@@ -104,7 +104,7 @@ pub fn family_route_for_tests(
 
 #[cfg(test)]
 pub fn check_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     let route = family_route_for_tests(tree);
     check(
@@ -115,7 +115,7 @@ pub fn check_test_tree(
 
 #[cfg(test)]
 pub fn collect_dependency_facts_from_tree_for_tests(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> DependencyFamilyFacts {
     let route = family_route_for_tests(tree);
     collect_dependency_facts_for_tests(tree, &route)
@@ -125,7 +125,7 @@ pub fn check(
     surface: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     route: &guardrail3_app_rs_family_mapper::RsHexarchRoute,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = facts::collect(tree, route);
     let dependency_facts = dependency_facts::collect(tree, route);
     let source_facts = source_facts::collect(tree, &dependency_facts.members);

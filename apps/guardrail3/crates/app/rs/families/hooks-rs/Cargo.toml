@@ -9,7 +9,6 @@ workspace = true
 [dependencies]
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../family_mapper" }
 guardrail3_app_rs_family_hooks_shared = { package = "guardrail3-app-rs-family-hooks-shared", path = "../hooks-shared" }
-guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../domain/project-tree" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../domain/report" }
 guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../../ports/outbound/traits" }
 

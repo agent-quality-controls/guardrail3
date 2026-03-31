@@ -46,7 +46,7 @@ mod rs_test_17_external_harnesses_use_assertions;
 mod rs_test_18_test_support_generic;
 
 #[cfg(test)]
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
 
 #[cfg(test)]
@@ -61,7 +61,7 @@ pub fn check(
     route: &RsTestRoute,
     tc: &dyn ToolChecker,
 ) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = discover::collect(tree, route.roots(), tc);
     let mut results = Vec::new();
     let discovered_root_dirs = facts

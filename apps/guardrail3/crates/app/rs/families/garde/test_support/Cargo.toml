@@ -10,5 +10,5 @@ workspace = true
 name = "test_support"
 
 [dependencies]
-guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../domain/project-tree" }
+guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../family_mapper" }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../../shared/fs" }

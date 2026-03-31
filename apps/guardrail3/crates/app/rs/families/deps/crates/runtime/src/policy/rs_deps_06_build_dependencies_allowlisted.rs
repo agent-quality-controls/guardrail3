@@ -48,7 +48,7 @@ pub fn check(input: &DependencyEntryDepsInput<'_>, results: &mut Vec<CheckResult
 
 #[cfg(test)]
 fn family_route(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let selected =
@@ -61,7 +61,7 @@ fn family_route(
 
 #[cfg(test)]
 pub(super) fn collected_facts(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     installed: &[&str],
 ) -> super::facts::DepsFacts {
     super::facts::collect(

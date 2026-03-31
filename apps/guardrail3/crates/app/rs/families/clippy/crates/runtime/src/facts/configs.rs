@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use super::policy::{policy_settings_for, published_library_policy};
 use super::{

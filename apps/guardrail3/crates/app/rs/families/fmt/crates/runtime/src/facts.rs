@@ -3,7 +3,7 @@ use std::path::Path;
 use guardrail3_app_rs_family_mapper::RsFmtRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_config::types::EscapeHatchConfig;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RustfmtConfigKind {

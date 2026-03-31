@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
 
 pub fn entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     DirEntry::new(
