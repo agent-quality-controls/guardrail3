@@ -16,6 +16,7 @@ pub type RsDepsRoute = views::RsDepsRoute;
 pub type RsFamilyFileAttachmentView = views::RsFamilyFileAttachmentView;
 pub type RsFamilyFilePlacementView = views::RsFamilyFilePlacementView;
 pub type RsFamilyFileView = views::RsFamilyFileView;
+pub type RsFmtRoute = views::RsFmtRoute;
 pub type RsGardeRoute = views::RsGardeRoute;
 pub type RsHexarchRoute = views::RsHexarchRoute;
 pub type RsLibarchRoute = views::RsLibarchRoute;

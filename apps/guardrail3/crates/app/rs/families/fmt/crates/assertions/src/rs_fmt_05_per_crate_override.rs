@@ -31,6 +31,10 @@ pub fn assert_findings(results: &[CheckResult], expected: &[Finding<'_>]) {
     assert_eq!(findings(results), expected);
 }
 
+pub fn assert_no_findings(results: &[CheckResult]) {
+    assert!(findings(results).is_empty());
+}
+
 pub fn assert_override(results: &[CheckResult], message: &str, file: &str) {
     let findings = findings(results);
     assert_eq!(
@@ -39,8 +43,8 @@ pub fn assert_override(results: &[CheckResult], message: &str, file: &str) {
         "unexpected RS-FMT-05 findings: {findings:#?}"
     );
     let finding = &findings[0];
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "Per-crate rustfmt override");
+    assert_eq!(finding.severity, Severity::Error);
+    assert_eq!(finding.title, "Illegal nested rustfmt config");
     assert_eq!(finding.message, message);
     assert_eq!(finding.file, Some(file));
     assert!(!finding.inventory);

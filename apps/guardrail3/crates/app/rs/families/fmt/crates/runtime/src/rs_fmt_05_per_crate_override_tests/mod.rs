@@ -12,7 +12,7 @@ fn reports_extra_per_crate_rustfmt_configs() {
 
     assertions::assert_override(
         &results,
-        ".rustfmt.toml below workspace root overrides root formatting policy",
+        ".rustfmt.toml below repository root is forbidden; rustfmt policy is root-only",
         "crates/core/.rustfmt.toml",
     );
 }
@@ -26,13 +26,13 @@ fn reports_plain_nested_rustfmt_toml_overrides() {
 
     assertions::assert_override(
         &results,
-        "rustfmt.toml below workspace root overrides root formatting policy",
+        "rustfmt.toml below repository root is forbidden; rustfmt policy is root-only",
         "crates/core/rustfmt.toml",
     );
 }
 
 #[test]
-fn discovers_nested_override_files_from_family_walk() {
+fn ignores_nested_override_files_in_family_surface() {
     let fixture = tempdir();
     let root = fixture.path();
 
@@ -49,30 +49,12 @@ fn discovers_nested_override_files_from_family_walk() {
     write_file(
         root,
         "rustfmt.toml",
-        "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
+        "edition = \"2024\"\nstyle_edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
     );
     write_file(root, "nested/rustfmt.toml", "max_width = 120\n");
     write_file(root, "nested/.rustfmt.toml", "max_width = 120\n");
 
     let results = super::run_family_check(root);
 
-    assertions::assert_findings(
-        &results,
-        &[
-            assertions::Finding {
-                severity: assertions::Severity::Warn,
-                title: "Per-crate rustfmt override",
-                message: ".rustfmt.toml below workspace root overrides root formatting policy",
-                file: Some("nested/.rustfmt.toml"),
-                inventory: false,
-            },
-            assertions::Finding {
-                severity: assertions::Severity::Warn,
-                title: "Per-crate rustfmt override",
-                message: "rustfmt.toml below workspace root overrides root formatting policy",
-                file: Some("nested/rustfmt.toml"),
-                inventory: false,
-            },
-        ],
-    );
+    assertions::assert_no_findings(&results);
 }

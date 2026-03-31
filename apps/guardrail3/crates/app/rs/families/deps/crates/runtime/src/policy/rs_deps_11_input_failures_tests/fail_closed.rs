@@ -273,11 +273,7 @@ fn workspace_members_with_non_string_entries_surface_explicit_failure() {
 
     assertions::assert_summary(
         summary,
-        vec![
-            (Some("Cargo.toml"), assertions::Severity::Error, true),
-            (Some("Cargo.toml"), assertions::Severity::Error, false),
-            (Some("packages/core/Cargo.toml"), assertions::Severity::Error, false),
-        ],
+        vec![(Some("Cargo.toml"), assertions::Severity::Error, true)],
     );
 }
 
@@ -345,10 +341,7 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
 
     assertions::assert_summary(
         summary,
-        vec![
-            (Some("Cargo.toml"), assertions::Severity::Error, true, false),
-            (Some("Cargo.toml"), assertions::Severity::Error, false, false),
-        ],
+        vec![(Some("Cargo.toml"), assertions::Severity::Error, true, false)],
     );
 }
 

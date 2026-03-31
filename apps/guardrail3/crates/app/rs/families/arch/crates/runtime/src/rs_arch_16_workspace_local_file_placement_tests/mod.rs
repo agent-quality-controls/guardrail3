@@ -3,6 +3,7 @@ use test_support::{entry, tree};
 mod nested_cargo_sidecar;
 mod nested_deny;
 mod nested_clippy;
+mod nested_fmt;
 mod nested_toolchain;
 mod repo_root_toolchain;
 mod workspace_root_toolchain;

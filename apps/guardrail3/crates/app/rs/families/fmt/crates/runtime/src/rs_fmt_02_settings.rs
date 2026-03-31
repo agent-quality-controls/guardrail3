@@ -48,6 +48,18 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
         },
         results,
     );
+    check_string(
+        parsed,
+        rel,
+        "style_edition",
+        match &input.cargo_edition {
+            CargoEditionState::Present(edition) => edition,
+            CargoEditionState::MissingManifest
+            | CargoEditionState::ParseError
+            | CargoEditionState::MissingEdition => "2024",
+        },
+        results,
+    );
     check_int(parsed, rel, "max_width", 100, results);
     check_int(parsed, rel, "tab_spaces", 4, results);
     check_bool(parsed, rel, "use_field_init_shorthand", true, results);

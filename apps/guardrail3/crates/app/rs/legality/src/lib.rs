@@ -157,6 +157,7 @@ impl RustLegalFamilyFileFact {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RustIllegalFamilyFileReason {
     OutsideEveryLegalWorkspace,
+    OutsideValidationRoot,
     AboveLegalWorkspaceRoots {
         workspace_root_rels: Vec<String>,
     },
@@ -666,6 +667,10 @@ fn legal_policy_file_workspace_owner(
     legal_workspace_rels: &BTreeSet<String>,
     legal_member_rels: &BTreeSet<String>,
 ) -> Result<String, RustIllegalFamilyFileReason> {
+    if fact.family() == RustValidateFamily::Fmt {
+        return legal_fmt_file_owner(fact);
+    }
+
     match fact.attachment() {
         RustFamilyFileAttachment::ExactRoot { root_rel } => {
             if legal_workspace_rels.contains(root_rel) {
@@ -730,6 +735,35 @@ fn legal_policy_file_workspace_owner(
         }
         RustFamilyFileAttachment::OutsideRoots { .. } => {
             Err(RustIllegalFamilyFileReason::OutsideEveryLegalWorkspace)
+        }
+    }
+}
+
+fn legal_fmt_file_owner(fact: &RustFamilyFileFact) -> Result<String, RustIllegalFamilyFileReason> {
+    match fact.attachment() {
+        RustFamilyFileAttachment::ExactRoot { root_rel } => {
+            if root_rel.is_empty() {
+                Ok(String::new())
+            } else {
+                Err(RustIllegalFamilyFileReason::OutsideValidationRoot)
+            }
+        }
+        RustFamilyFileAttachment::AncestorOfRoots { owner_rel, .. } => {
+            if owner_rel.is_empty() {
+                Ok(String::new())
+            } else {
+                Err(RustIllegalFamilyFileReason::OutsideValidationRoot)
+            }
+        }
+        RustFamilyFileAttachment::NestedUnderRoot { .. } => {
+            Err(RustIllegalFamilyFileReason::OutsideValidationRoot)
+        }
+        RustFamilyFileAttachment::OutsideRoots { owner_rel } => {
+            if owner_rel.is_empty() {
+                Ok(String::new())
+            } else {
+                Err(RustIllegalFamilyFileReason::OutsideValidationRoot)
+            }
         }
     }
 }

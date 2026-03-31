@@ -118,6 +118,95 @@ fn top_level_package_toolchain_is_illegal_for_local_family_routing() {
     }));
 }
 
+#[test]
+fn fmt_root_file_is_legal() {
+    let tree = ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry::new(
+                    vec!["apps".to_owned()],
+                    vec!["rustfmt.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "apps".to_owned(),
+                DirEntry::new(vec!["api".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "apps/api".to_owned(),
+                DirEntry::new(Vec::new(), vec!["Cargo.toml".to_owned()], Vec::new(), Vec::new()),
+            ),
+        ]),
+        BTreeMap::from([
+            (
+                "apps/api/Cargo.toml".to_owned(),
+                "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
+            ),
+            (
+                "rustfmt.toml".to_owned(),
+                "edition = \"2024\"\nstyle_edition = \"2024\"\n".to_owned(),
+            ),
+        ]),
+    );
+    let structure = collect_structure(&tree);
+    let legality = collect_legality(&tree, &structure);
+
+    assert!(legality.legal_family_files().iter().any(|file| {
+        file.family() == RustValidateFamily::Fmt && file.rel_path() == "rustfmt.toml"
+    }));
+}
+
+#[test]
+fn fmt_nested_file_is_illegal() {
+    let tree = ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry::new(vec!["apps".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "apps".to_owned(),
+                DirEntry::new(vec!["api".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "apps/api".to_owned(),
+                DirEntry::new(
+                    Vec::new(),
+                    vec!["Cargo.toml".to_owned(), "rustfmt.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+        ]),
+        BTreeMap::from([
+            (
+                "apps/api/Cargo.toml".to_owned(),
+                "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
+            ),
+            (
+                "apps/api/rustfmt.toml".to_owned(),
+                "edition = \"2024\"\nstyle_edition = \"2024\"\n".to_owned(),
+            ),
+        ]),
+    );
+    let structure = collect_structure(&tree);
+    let legality = collect_legality(&tree, &structure);
+
+    assert!(legality.illegal_family_files().iter().any(|file| {
+        file.family() == RustValidateFamily::Fmt
+            && file.rel_path() == "apps/api/rustfmt.toml"
+            && matches!(
+                file.reason(),
+                RustIllegalFamilyFileReason::OutsideValidationRoot
+            )
+    }));
+}
+
 fn workspace_tree() -> ProjectTree {
     ProjectTree::new(
         PathBuf::from("/tmp/project"),

@@ -16,10 +16,18 @@ use self::facts::{collect, file_name_kind};
 use self::inputs::{RustfmtDualConflictInput, RustfmtExtraConfigInput, RustfmtRootInput};
 
 #[cfg(test)]
+use guardrail3_app_rs_family_mapper::FamilyMapper;
+#[cfg(test)]
+use guardrail3_domain_config::types::GuardrailConfig;
+#[cfg(test)]
 use tempfile as _;
+#[cfg(test)]
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
+#[cfg(test)]
+use std::collections::BTreeSet;
 
-pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
-    let facts = collect(tree);
+pub fn check(tree: &ProjectTree, route: &guardrail3_app_rs_family_mapper::RsFmtRoute) -> Vec<CheckResult> {
+    let facts = collect(tree, route);
     let mut results = Vec::new();
 
     let root = RustfmtRootInput::from_facts(&facts);
@@ -50,7 +58,13 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
 
 #[cfg(test)]
 pub(crate) fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
-    check(tree)
+    let scope = guardrail3_app_rs_structure::collect(tree);
+    let config = tree
+        .file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Fmt]));
+    let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None).map_rs_fmt();
+    check(tree, &route)
 }
 
 #[cfg(test)]

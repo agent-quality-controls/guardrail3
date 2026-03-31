@@ -4,6 +4,8 @@ use guardrail3_validation_model::RustValidateFamily;
 pub enum RustFamilyFileKind {
     CargoToml,
     GuardrailToml,
+    RustfmtToml,
+    DotRustfmtToml,
     RustToolchainToml,
     RustToolchainLegacy,
     ClippyToml,

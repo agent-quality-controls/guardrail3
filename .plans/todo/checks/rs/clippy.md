@@ -147,7 +147,6 @@ Every guardrail-managed ban entry must have a real `reason`.
 - `RS-CLIPPY-25` owns parseability of allowed `clippy.toml` / `.clippy.toml` files
 - `RS-CLIPPY-24` owns malformed or unreadable applicable `.cargo/config.toml` / `.cargo/config` surfaces that can set `CLIPPY_CONF_DIR`
 - `RS-CLIPPY-01` fail-closes coverage when a routed `Cargo.toml` cannot be parsed
-- `RS-CLIPPY-12` fail-closes placement when a `clippy.toml` is attached to a routed Cargo root whose `Cargo.toml` cannot be parsed
 - dependent rule checks skip defaulting when their required input is broken; they do not re-parse or guess around it
 
 ### Source of truth after cleanup
@@ -273,11 +272,8 @@ The generator and checker must match exactly.
 ### RS-CLIPPY-12: clippy.toml placement is allowed
 - **Old ID:** R2 (was overloaded)
 - **Severity:** Error
-- **What:** `clippy.toml` is allowed only at:
-  - validation root
-  - Rust workspace roots
-  - standalone package roots not belonging to a workspace
-- **What fails:** nested member-crate `clippy.toml`, intermediate shadow configs, or any other disallowed placement
+- **What:** on a legality-approved policy root, only the highest-precedence same-root file is active (`.clippy.toml` wins over `clippy.toml`)
+- **What fails:** duplicate same-root sibling configs after precedence resolution
 - **Status:** Implemented
 
 ### RS-CLIPPY-13: allowed local policy roots must contain the full baseline

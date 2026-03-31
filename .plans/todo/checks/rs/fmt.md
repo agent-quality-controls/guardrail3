@@ -25,7 +25,7 @@ Forbidden:
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
 | RS-FMT-01 | R21 | Error | Root rustfmt config exists at repository root (`rustfmt.toml` or `.rustfmt.toml`). Success is intentionally quiet; missing root config is Error. | Implemented |
-| RS-FMT-02 | R22 | Warn/Error | Baseline settings correctness. Owned keys are exactly: `edition`, `max_width`, `tab_spaces`, `use_field_init_shorthand`, `use_try_shorthand`, `reorder_imports`, `reorder_modules`. Wrong or missing value is Warn; unreadable/unparseable or non-table root config for this rule is Error. | Implemented |
+| RS-FMT-02 | R22 | Warn/Error | Baseline settings correctness. Owned keys are exactly: `edition`, `style_edition`, `max_width`, `tab_spaces`, `use_field_init_shorthand`, `use_try_shorthand`, `reorder_imports`, `reorder_modules`. Wrong or missing value is Warn; unreadable/unparseable or non-table root config for this rule is Error. | Implemented |
 | RS-FMT-03 | R23 | Info | Extra settings beyond expected baseline (inventory) | Implemented |
 
 ## New rules from audit
@@ -33,7 +33,7 @@ Forbidden:
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
 | RS-FMT-04 | Warn | Nightly-only settings on stable toolchain. If rustfmt.toml contains nightly-only keys (group_imports, imports_granularity, format_code_in_doc_comments, format_strings, overflow_delimited_expr, normalize_comments, normalize_doc_attributes, wrap_comments, format_macro_matchers, format_macro_bodies, condense_wildcard_suffixes) AND rust-toolchain.toml has `channel = "stable"`, Warn. `cargo fmt` refuses to run. | Implemented |
-| RS-FMT-05 | Warn | Per-crate rustfmt.toml overrides. Same bypass as RS-CLIPPY-13 — rustfmt uses closest config, no merging. A sub-crate rustfmt.toml completely replaces root settings. Crawler already discovers these. Flag any non-root rustfmt.toml or .rustfmt.toml. | Implemented |
+| RS-FMT-05 | Error | Per-crate rustfmt.toml overrides are forbidden. Same bypass as RS-CLIPPY-13 — rustfmt uses closest config, no merging. A sub-crate rustfmt.toml completely replaces root settings. Placement is now enforced by `RS-ARCH-16`; `RS-FMT` no longer owns nested placement discovery. | Implemented (moved to `RS-ARCH-16`) |
 | RS-FMT-06 | Warn | Edition mismatch: rustfmt.toml `edition` vs Cargo.toml `edition`. When they disagree, rustfmt formats for one edition while compiler parses another. Causes issues with edition-specific syntax (e.g., `gen` keyword in 2024). | Implemented |
 | RS-FMT-07 | Warn | `ignore` setting escape hatch. The `ignore` key in rustfmt.toml silently excludes entire directories from formatting. Promote from generic RS-FMT-03 inventory to specific Warn — escape hatches deserve explicit visibility. | Implemented |
 | RS-FMT-08 | Warn | Dual file conflict. Both `rustfmt.toml` and `.rustfmt.toml` exist at same level. rustfmt picks `rustfmt.toml`, but validator's `find_root_config` might pick a different one from sorted crawler results. Flag both-exist as Warn. | Implemented |

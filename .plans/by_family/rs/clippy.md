@@ -34,9 +34,8 @@ Agent handoff focus:
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/lib.rs`
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs`
   - `apps/guardrail3/crates/app/rs/family_mapper/src/rs.rs`
-- prove allowed and forbidden `clippy.toml` placement is computed from legal
-  workspaces plus all Clippy-relevant files after the whole-project walker
-  change
+- prove `RS-ARCH-16` owns illegal `clippy.toml` placement and `RS-CLIPPY-12`
+  only handles same-root shadow conflicts on legality-approved policy roots
 - prove subtree runs do not report unrelated sibling policy roots
 
 Known current risk:
@@ -46,8 +45,8 @@ Known current risk:
 
 Done means:
 
-- subtree tests prove workspace-local routing for coverage and allowed-placement
-  rules while keeping misplaced `clippy.toml` files visible
+- subtree tests prove workspace-local routing for coverage and same-root conflict
+  rules while misplaced `clippy.toml` files are reported by `arch`, not clippy
 - malformed routed `Cargo.toml` still fails closed
 - no repo-global fallback path survives in production code
 

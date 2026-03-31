@@ -13,9 +13,11 @@ pub fn check(input: &RustfmtExtraConfigInput, results: &mut Vec<CheckResult>) {
 
     results.push(CheckResult::from_parts(
         ID.to_owned(),
-        Severity::Warn,
-        "Per-crate rustfmt override".to_owned(),
-        format!("{kind} below workspace root overrides root formatting policy"),
+        Severity::Error,
+        "Illegal nested rustfmt config".to_owned(),
+        format!(
+            "{kind} below repository root is forbidden; rustfmt policy is root-only"
+        ),
         Some(input.config_rel.clone()),
         None,
         false,

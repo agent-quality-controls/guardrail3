@@ -347,6 +347,23 @@ impl RsScopedSourceRoute {
 pub type RsCodeRoute = RsScopedSourceRoute;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RsFmtRoute {
+    family_files: Vec<RsFamilyFileView>,
+}
+
+impl RsFmtRoute {
+    #[must_use]
+    pub fn new(family_files: Vec<RsFamilyFileView>) -> Self {
+        Self { family_files }
+    }
+
+    #[must_use]
+    pub fn family_files(&self) -> &[RsFamilyFileView] {
+        &self.family_files
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsFamilyFileView {
     family: RustValidateFamily,
     rel_path: String,
