@@ -97,6 +97,23 @@ pub fn assert_result_present(
     );
 }
 
+pub fn assert_ids_absent(report: &Report, ids: &[&str]) {
+    let present = report
+        .sections()
+        .iter()
+        .flat_map(Section::results)
+        .filter(|result| ids.contains(&result.id()))
+        .map(|result| {
+            (
+                result.id().to_owned(),
+                result.file().map(str::to_owned),
+                result.inventory(),
+            )
+        })
+        .collect::<Vec<_>>();
+    assert!(present.is_empty(), "unexpected ids present: {present:#?}\n{report:#?}");
+}
+
 pub fn assert_absent_file(report: &Report, section_name: &str, file: &str) {
     assert!(
         !section(report, section_name)
