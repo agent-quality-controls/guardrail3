@@ -4,8 +4,8 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
 use guardrail3_domain_modules::deny::build_deny_toml;
-use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 
 static TEMP_ROOT_COUNTER: AtomicU64 = AtomicU64::new(0);
 
@@ -121,7 +121,7 @@ pub fn same_root_conflict_tree() -> ProjectTree {
 
 #[must_use]
 pub fn walk(root: &Path) -> ProjectTree {
-    walk_project(&RealFileSystem, root)
+    ProjectTree::from_tree(&walk_project(&RealFileSystem, root))
 }
 
 #[must_use]

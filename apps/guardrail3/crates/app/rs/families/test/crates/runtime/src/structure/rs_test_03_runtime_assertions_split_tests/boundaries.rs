@@ -444,7 +444,7 @@ fn assertions_module_calling_runtime_check_test_tree_is_reported() {
     write_file(
         root,
         "crates/assertions/src/lib.rs",
-        "use demo_runtime as runtime;\nuse guardrail3_domain_project_tree::ProjectTree;\npub fn assert_runtime(tree: &ProjectTree) {let _ = runtime::check_test_tree(tree); assert!(true);}\n",
+        "use demo_runtime as runtime;\nuse guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;\npub fn assert_runtime(tree: &ProjectTree) {let _ = runtime::check_test_tree(tree); assert!(true);}\n",
     );
 
     let results = run_family(root);

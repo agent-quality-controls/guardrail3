@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path};
 
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use super::guardrail::{
     validate_target_dependency_manifest_shape, validate_top_level_dependency_manifest_shape,

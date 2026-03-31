@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use guardrail3_app_rs_family_mapper::RsCargoRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_config::types::{EscapeHatchConfig, GuardrailConfig};
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use super::facts::{
     CargoFamilyFacts, InputFailureFacts, MissingMemberCargoFacts, PolicyRootCargoFacts,

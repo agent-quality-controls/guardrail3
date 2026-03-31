@@ -8,7 +8,7 @@ mod rs_toolchain_04_legacy_file;
 
 use guardrail3_app_rs_family_mapper::{RsProjectSurface, RsToolchainRoute};
 #[cfg(test)]
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
@@ -24,7 +24,7 @@ use self::discover::collect;
 use self::inputs::all_from_facts;
 
 pub fn check(surface: &RsProjectSurface, route: &RsToolchainRoute) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = collect(tree, route);
     let mut results = Vec::new();
 

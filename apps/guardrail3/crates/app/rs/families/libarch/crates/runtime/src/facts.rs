@@ -4,7 +4,7 @@ mod package_support;
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_mapper::RsLibarchRoute;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use self::measurements::collect_measurements;
 use self::package_support::{

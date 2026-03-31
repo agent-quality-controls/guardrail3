@@ -4,7 +4,7 @@ mod golden;
 mod ownership_edges;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction::CheckResult;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

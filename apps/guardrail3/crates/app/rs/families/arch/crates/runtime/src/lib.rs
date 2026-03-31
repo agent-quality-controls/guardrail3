@@ -18,7 +18,7 @@ mod rs_arch_16_workspace_local_file_placement;
 
 use guardrail3_app_rs_family_mapper::{RsArchRoute, RsProjectSurface};
 #[cfg(test)]
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
@@ -31,7 +31,7 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 use std::collections::BTreeSet;
 
 pub fn check(surface: &RsProjectSurface, route: &RsArchRoute) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = facts::collect(tree, route);
     let mut results = Vec::new();
 

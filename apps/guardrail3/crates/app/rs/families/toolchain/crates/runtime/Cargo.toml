@@ -9,7 +9,6 @@ workspace = true
 [dependencies]
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../../../../ownership" }
-guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../../domain/project-tree" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
 toml = "0.8"
 

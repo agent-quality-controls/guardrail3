@@ -85,7 +85,7 @@ pub(super) fn remove_clippy_ban_path(clippy_toml: &str, key: &str, path: &str) -
 
 #[cfg(test)]
 pub(super) fn run_family(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     {
         let scope = guardrail3_app_rs_structure::collect(tree);

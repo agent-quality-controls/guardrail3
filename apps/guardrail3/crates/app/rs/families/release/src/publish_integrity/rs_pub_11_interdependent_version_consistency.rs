@@ -39,7 +39,7 @@ pub fn check(input: &ReleaseEdgeInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 pub(super) fn run_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
@@ -48,7 +48,7 @@ pub(super) fn run_tree(
 
 #[cfg(test)]
 pub(super) fn run_tree_with_validation_scope(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
     validation_scope: &str,

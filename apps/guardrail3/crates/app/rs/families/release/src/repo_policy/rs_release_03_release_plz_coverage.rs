@@ -134,7 +134,7 @@ pub(super) fn repo_input(
 
 #[cfg(test)]
 pub(super) fn run_tree_with_validation_scope(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
     validation_scope: &str,

@@ -38,7 +38,7 @@ pub fn check_success(has_required_input_failures: bool, results: &mut Vec<CheckR
 
 #[cfg(test)]
 pub(crate) fn check_results(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::check_test_tree(tree)
 }

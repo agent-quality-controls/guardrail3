@@ -4,7 +4,7 @@ mod policy;
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsCodeRoute;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use super::discover::{is_test_root_path, rust_file_rels};
 

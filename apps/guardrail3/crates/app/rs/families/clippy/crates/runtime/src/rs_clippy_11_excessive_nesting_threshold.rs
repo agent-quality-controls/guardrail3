@@ -1,6 +1,6 @@
 use guardrail3_domain_modules::clippy::EXCESSIVE_NESTING_THRESHOLD;
 #[cfg(test)]
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::clippy_support::{IntegerSetting, integer_setting, value_kind};

@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_mapper::RsHexarchRoute;
-use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
 
 #[derive(Debug, Clone)]
 pub struct HexAppFacts {

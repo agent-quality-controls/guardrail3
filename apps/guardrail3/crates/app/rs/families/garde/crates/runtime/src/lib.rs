@@ -45,7 +45,7 @@ use serde_yaml as _;
 use self::facts::collect;
 
 pub fn check(surface: &RsProjectSurface, route: &RsGardeRoute) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = collect(tree, route);
     let mut results = Vec::new();
 
@@ -164,7 +164,7 @@ pub fn check(surface: &RsProjectSurface, route: &RsGardeRoute) -> Vec<CheckResul
 
 #[cfg(test)]
 pub(crate) fn check_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     route: &RsGardeRoute,
 ) -> Vec<CheckResult> {
     check(&RsProjectSurface::from_tree(tree), route)

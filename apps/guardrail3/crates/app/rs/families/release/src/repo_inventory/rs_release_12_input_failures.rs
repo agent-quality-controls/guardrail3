@@ -18,7 +18,7 @@ pub fn check(input: &ReleaseInputFailureInput<'_>, results: &mut Vec<CheckResult
 
 #[cfg(test)]
 pub(super) fn run_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {

@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 use crate::discover;
 use crate::facts::{DiscoveredTestFile, InputFailureFacts, TestFacts, TestFileKind, TestRootFacts};

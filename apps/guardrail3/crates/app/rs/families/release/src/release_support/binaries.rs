@@ -3,7 +3,7 @@ use std::path::{Component, Path, PathBuf};
 
 use semver::{Version, VersionReq};
 
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 pub fn package_table(parsed: &toml::Value) -> Option<&toml::Value> {
     parsed.get("package")

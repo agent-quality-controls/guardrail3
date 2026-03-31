@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_outbound_traits::FileSystem;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -15,7 +15,7 @@ mod rs_libarch_11_root_facade_exports_api;
 use facts::LibarchFacts;
 use guardrail3_app_rs_family_mapper::{RsLibarchRoute, RsProjectSurface};
 #[cfg(test)]
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use inputs::PackageLibarchInput;
 
@@ -31,7 +31,7 @@ use std::collections::BTreeSet;
 use test_support as _;
 
 pub fn check(surface: &RsProjectSurface, route: &RsLibarchRoute) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     run_with_facts(&facts::collect(tree, route))
 }
 

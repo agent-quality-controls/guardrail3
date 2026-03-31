@@ -59,7 +59,7 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
 
 #[cfg(test)]
 pub(crate) fn check_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> Vec<CheckResult> {
     let route = super::family_route_for_tests(tree);
     super::check(&RsProjectSurface::from_tree(tree), &route)

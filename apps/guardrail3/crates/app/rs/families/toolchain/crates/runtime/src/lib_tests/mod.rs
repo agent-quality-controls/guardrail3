@@ -9,12 +9,16 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 
 pub(super) fn run_family(root: &Path) -> Vec<guardrail3_domain_report::CheckResult> {
-    let tree = guardrail3_app_core::project_walker::walk_project(&RealFileSystem, root);
+    let tree = guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(
+        &guardrail3_app_core::project_walker::walk_project(&RealFileSystem, root),
+    );
     super::check_test_tree(&tree)
 }
 
 pub(super) fn route_family(root: &Path) -> guardrail3_app_rs_family_mapper::RsToolchainRoute {
-    let tree = guardrail3_app_core::project_walker::walk_project(&RealFileSystem, root);
+    let tree = guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(
+        &guardrail3_app_core::project_walker::walk_project(&RealFileSystem, root),
+    );
     let scope = guardrail3_app_rs_structure::collect(&tree);
     let config = tree
         .file_content("guardrail3.toml")

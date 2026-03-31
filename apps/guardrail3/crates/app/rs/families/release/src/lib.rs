@@ -84,7 +84,7 @@ pub fn check(
     tc: &dyn ToolChecker,
     thorough: bool,
 ) -> Vec<CheckResult> {
-    let tree = surface.tree();
+    let tree = surface;
     let facts = collect(tree, route, tc, thorough);
     let mut results = Vec::new();
 
