@@ -57,7 +57,6 @@ pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
 
     let files = rust_file_rels(tree)
         .into_iter()
-        .filter(|rel_path| owning_root_dir(rel_path, &root_dirs).is_some())
         .map(|rel_path| RustCodeFileFacts {
             profile_name: policy::policy_settings_for(file_parent_rel(&rel_path), &policy_map)
                 .profile_name,

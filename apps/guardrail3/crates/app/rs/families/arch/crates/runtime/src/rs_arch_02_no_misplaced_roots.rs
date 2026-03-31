@@ -38,10 +38,10 @@ pub fn check_success(
                 Severity::Info,
                 "Misplaced-root reporting is inactive".to_owned(),
                 if has_misplaced_roots {
-                    "Discovered Rust roots outside governed zones exist, but `RS-ARCH-02` is inactive because `arch` or both owner architecture families are disabled."
+                    "Discovered Rust roots outside governed zones exist, but `RS-ARCH-02` is inactive because both owner architecture families are disabled."
                         .to_owned()
                 } else {
-                    "No misplaced-root errors can fire in this run because `RS-ARCH-02` is inactive while `arch` or both owner architecture families are disabled."
+                    "No misplaced-root errors can fire in this run because `RS-ARCH-02` is inactive while both owner architecture families are disabled."
                         .to_owned()
                 },
                 None,

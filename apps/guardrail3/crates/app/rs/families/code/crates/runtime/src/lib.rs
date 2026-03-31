@@ -197,7 +197,8 @@ pub(crate) fn check_test_root(
     root: &std::path::Path,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
-    check_test_tree(&tree)
+    let surface = guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(&tree);
+    check_test_tree(&surface)
 }
 
 #[cfg(test)]

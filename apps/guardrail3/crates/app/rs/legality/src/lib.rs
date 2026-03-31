@@ -692,6 +692,21 @@ fn legal_policy_file_workspace_owner(
     if fact.family() == RustValidateFamily::Fmt {
         return legal_fmt_file_owner(fact);
     }
+    if fact.family() == RustValidateFamily::Clippy
+        && matches!(
+            fact.kind(),
+            RustFamilyFileKind::CargoConfigToml | RustFamilyFileKind::CargoConfigLegacy
+        )
+        && let RustFamilyFileAttachment::AncestorOfRoots { root_rels, .. } = fact.attachment()
+    {
+        if let Some(workspace_root_rel) = root_rels
+            .iter()
+            .filter(|root_rel| legal_workspace_rels.contains(*root_rel))
+            .max_by_key(|root_rel| root_rel.len())
+        {
+            return Ok(workspace_root_rel.clone());
+        }
+    }
 
     match fact.attachment() {
         RustFamilyFileAttachment::ExactRoot { root_rel } => {

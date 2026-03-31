@@ -1,4 +1,4 @@
-use guardrail3_domain_report::{CheckResult, Report};
+use guardrail3_domain_report::{CheckResult, Report, Section};
 
 pub fn assert_filtered_files(filtered: &[CheckResult], expected: &[&str]) {
     let files = filtered
@@ -12,14 +12,16 @@ pub fn assert_allowed(actual: bool) {
     assert!(actual);
 }
 
+fn section<'a>(report: &'a Report, section_name: &str) -> &'a Section {
+    report
+        .sections()
+        .iter()
+        .find(|section| section.name() == section_name)
+        .unwrap_or_else(|| panic!("missing section `{section_name}`: {report:#?}"))
+}
+
 pub fn assert_clean_section(report: &Report, section_name: &str) {
-    assert_eq!(
-        report.sections().len(),
-        1,
-        "unexpected sections: {report:#?}"
-    );
-    assert_eq!(report.sections()[0].name(), section_name);
-    let live_results = report.sections()[0]
+    let live_results = section(report, section_name)
         .results()
         .iter()
         .filter(|result| !result.inventory())
@@ -36,13 +38,7 @@ pub fn assert_single_live_result(
     id: &str,
     file: Option<&str>,
 ) {
-    assert_eq!(
-        report.sections().len(),
-        1,
-        "unexpected sections: {report:#?}"
-    );
-    assert_eq!(report.sections()[0].name(), section_name);
-    let live_results = report.sections()[0]
+    let live_results = section(report, section_name)
         .results()
         .iter()
         .filter(|result| !result.inventory())
@@ -53,13 +49,7 @@ pub fn assert_single_live_result(
 }
 
 pub fn assert_live_ids_present(report: &Report, section_name: &str, expected_ids: &[&str]) {
-    assert_eq!(
-        report.sections().len(),
-        1,
-        "unexpected sections: {report:#?}"
-    );
-    assert_eq!(report.sections()[0].name(), section_name);
-    let ids = report.sections()[0]
+    let ids = section(report, section_name)
         .results()
         .iter()
         .filter(|result| !result.inventory())
@@ -79,13 +69,7 @@ pub fn assert_live_files_for_id(
     id: &str,
     expected_files: &[&str],
 ) {
-    assert_eq!(
-        report.sections().len(),
-        1,
-        "unexpected sections: {report:#?}"
-    );
-    assert_eq!(report.sections()[0].name(), section_name);
-    let files = report.sections()[0]
+    let files = section(report, section_name)
         .results()
         .iter()
         .filter(|result| result.id() == id && !result.inventory())
@@ -102,14 +86,8 @@ pub fn assert_result_present(
     inventory: Option<bool>,
     title: Option<&str>,
 ) {
-    assert_eq!(
-        report.sections().len(),
-        1,
-        "unexpected sections: {report:#?}"
-    );
-    assert_eq!(report.sections()[0].name(), section_name);
     assert!(
-        report.sections()[0].results().iter().any(|result| {
+        section(report, section_name).results().iter().any(|result| {
             result.id() == id
                 && file.is_none_or(|expected| result.file() == Some(expected))
                 && inventory.is_none_or(|expected| result.inventory() == expected)
@@ -120,14 +98,8 @@ pub fn assert_result_present(
 }
 
 pub fn assert_absent_file(report: &Report, section_name: &str, file: &str) {
-    assert_eq!(
-        report.sections().len(),
-        1,
-        "unexpected sections: {report:#?}"
-    );
-    assert_eq!(report.sections()[0].name(), section_name);
     assert!(
-        !report.sections()[0]
+        !section(report, section_name)
             .results()
             .iter()
             .any(|result| result.file() == Some(file)),

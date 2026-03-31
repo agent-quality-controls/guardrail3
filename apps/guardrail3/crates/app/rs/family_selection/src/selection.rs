@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_config::types::{CrateConfig, GuardrailConfig, RustChecksConfig, RustConfig};
+use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig, RustConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
@@ -21,6 +21,8 @@ pub fn resolve(
     } else {
         RustFamilySelection::new(requested_families.iter().copied().collect())
     };
+
+    selection.insert(RustValidateFamily::Arch);
 
     if selection.contains(RustValidateFamily::HooksRs) {
         selection.insert(RustValidateFamily::HooksShared);
@@ -134,6 +136,10 @@ fn family_enabled_for_runtime(
     tree: &ProjectTree,
     config: Option<&GuardrailConfig>,
 ) -> bool {
+    if family == RustValidateFamily::Arch {
+        return true;
+    }
+
     let Some(rust) = config.and_then(GuardrailConfig::rust) else {
         return true;
     };
@@ -142,10 +148,6 @@ fn family_enabled_for_runtime(
         .checks()
         .and_then(|checks| checks.family_enabled(family))
         .unwrap_or(true);
-
-    if family == RustValidateFamily::Arch {
-        return global || scoped_arch_config_present(rust);
-    }
 
     if family_uses_global_only(family) {
         return global;
@@ -190,20 +192,11 @@ fn family_uses_global_only(family: RustValidateFamily) -> bool {
         family,
         RustValidateFamily::Arch
             | RustValidateFamily::Fmt
+            | RustValidateFamily::Code
+            | RustValidateFamily::Test
             | RustValidateFamily::HooksShared
             | RustValidateFamily::HooksRs
     )
-}
-
-fn scoped_arch_config_present(rust: &RustConfig) -> bool {
-    rust.apps().is_some_and(|apps| {
-        apps.values()
-            .any(|cfg| cfg.checks().and_then(RustChecksConfig::arch).is_some())
-    }) || rust
-        .packages()
-        .and_then(CrateConfig::checks)
-        .and_then(RustChecksConfig::arch)
-        .is_some()
 }
 
 fn effective_family_flag(

@@ -29,11 +29,23 @@ pub fn assert_explicit_request_bypasses_disabled_config_filter(selection: &RustF
 
 pub fn assert_enabled_family_filtering(selection: &RustFamilySelection) {
     assert!(
-        !selection.contains(RustValidateFamily::Arch),
-        "unrequested disabled family should stay filtered"
+        selection.contains(RustValidateFamily::Arch),
+        "arch should always be selected"
     );
     assert!(
         selection.contains(RustValidateFamily::Fmt),
         "enabled family should still be selected"
+    );
+    assert!(
+        selection.contains(RustValidateFamily::Code),
+        "global code family should stay selected without routed workspace discovery"
+    );
+    assert!(
+        selection.contains(RustValidateFamily::Test),
+        "global test family should stay selected without routed workspace discovery"
+    );
+    assert!(
+        !selection.contains(RustValidateFamily::Hexarch),
+        "disabled workspace-local family should stay filtered"
     );
 }
