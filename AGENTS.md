@@ -14,7 +14,7 @@ TypeScript and deployment work is not the active direction right now:
 The active work is:
 - clean Rust rule inventory
 - new checker architecture based on `ProjectTree`
-- family-by-family migration from old `rs/validate/*` code into new per-family checks
+- family-by-family migration from old `rs/legacy/validate/*` code into new per-family checks
 
 ## What guardrail3 is
 
