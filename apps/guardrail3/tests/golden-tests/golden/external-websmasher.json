@@ -9296,7 +9296,7 @@
       ]
     },
     {
-      "name": "Architecture checks",
+      "name": "Topology checks",
       "results": [
         {
           "file": "./packages/seo-site-files/Cargo.toml",

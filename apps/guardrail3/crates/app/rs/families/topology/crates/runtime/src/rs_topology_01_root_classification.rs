@@ -11,11 +11,11 @@ pub fn check(input: &RootClassificationInput<'_>, results: &mut Vec<CheckResult>
             ID.to_owned(),
             Severity::Error,
             format!(
-                "Rust root `{}` has ambiguous architecture classification",
+                "Rust root `{}` has ambiguous topology classification",
                 display_dir(&input.root.rel_dir)
             ),
             format!(
-                "`{}` matches multiple architecture zones. app candidates: [{}]; package candidates: [{}]. Each discovered Rust root must classify as exactly one of app, package, or other.",
+                "`{}` matches multiple topology zones. app candidates: [{}]; package candidates: [{}]. Each discovered Rust root must classify as exactly one of app, package, or other.",
                 input.root.cargo_rel_path,
                 input.root.app_zone_candidates.join(", "),
                 input.root.package_zone_candidates.join(", "),

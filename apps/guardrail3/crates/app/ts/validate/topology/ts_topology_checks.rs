@@ -3,20 +3,20 @@ use std::path::Path;
 use walkdir::WalkDir;
 
 use super::source_scan::is_excluded_ts_dir;
-use guardrail3_app_arch_helpers as arch_helpers;
+use guardrail3_app_topology_helpers as topology_helpers;
 use guardrail3_domain_report::{CheckResult, Severity, TsAppContext};
 use guardrail3_outbound_traits::FileSystem;
 
-const ID: &str = "T-ARCH-01";
+const ID: &str = "T-TOPOLOGY-01";
 const ENTITY: &str = "TS app";
 
 // -----------------------------------------------------------------------
-// T-ARCH-01: TS service missing hex arch structure
+// T-TOPOLOGY-01: TS service missing hex topology structure
 // -----------------------------------------------------------------------
 
 /// Scan `apps/` for TypeScript apps and check that each has
 /// `src/modules/domain/` and `src/modules/adapters/` subdirectories.
-pub fn check_hex_arch_structure(fs: &dyn FileSystem, root: &Path) -> Vec<CheckResult> {
+pub fn check_hex_topology_structure(fs: &dyn FileSystem, root: &Path) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let apps = discover_ts_apps(fs, root);
     for app_dir in &apps {
@@ -51,14 +51,14 @@ pub fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::Path
     found
 }
 
-/// Run hex arch structure checks only on service-type apps.
-pub fn check_hex_arch_structure_for_apps(
+/// Run hex topology structure checks only on service-type apps.
+pub fn check_hex_topology_structure_for_apps(
     fs: &dyn FileSystem,
     app_contexts: &[TsAppContext],
 ) -> Vec<CheckResult> {
     let mut results = Vec::new();
     for ctx in app_contexts {
-        if ctx.categories().architecture() {
+        if ctx.categories().topology() {
             check_single_app_structure(fs, ctx.path(), &mut results);
         }
     }
@@ -72,7 +72,7 @@ pub fn check_import_boundaries_for_apps(
 ) -> Vec<CheckResult> {
     let mut results = Vec::new();
     for ctx in app_contexts {
-        if ctx.categories().architecture() {
+        if ctx.categories().topology() {
             let ts_files = collect_module_ts_files(ctx.path());
             for file_path_str in &ts_files {
                 let file_path = Path::new(file_path_str);
@@ -101,7 +101,7 @@ fn has_ts_files(dir: &Path) -> bool {
         })
 }
 
-/// Check a single TS app for hex arch structure.
+/// Check a single TS app for hex topology structure.
 pub fn check_single_app_structure(
     fs: &dyn FileSystem,
     app_dir: &Path,
@@ -117,11 +117,11 @@ pub fn check_single_app_structure(
     // src/modules/ must exist
     if fs.metadata(&modules_dir).is_none() {
         results.push(CheckResult::from_parts(
-            "T-ARCH-01".to_owned(),
+            "T-TOPOLOGY-01".to_owned(),
             Severity::Warn,
             format!("TS app `{app_name}` missing src/modules/ directory"),
             format!(
-                "App `{app_name}` has no `src/modules/` directory. Create it with the hex arch \
+                "App `{app_name}` has no `src/modules/` directory. Create it with the hex topology \
                  template: `src/modules/{{domain, ports/{{inbound,outbound}}, application, \
                  adapters/{{inbound,outbound}}}}`."
             ),
@@ -135,7 +135,7 @@ pub fn check_single_app_structure(
     check_ts_modules_dir(fs, app_name, &modules_dir, "src/modules", results);
 }
 
-/// Check a `modules/` directory for TS hex arch structure.
+/// Check a `modules/` directory for TS hex topology structure.
 /// Reusable for both top-level apps and hex-in-hex recursion.
 fn check_ts_modules_dir(
     fs: &dyn FileSystem,
@@ -146,7 +146,7 @@ fn check_ts_modules_dir(
 ) {
     // modules/ must contain exactly {adapters, application, domain, ports}
     let expected_top = ["adapters", "application", "domain", "ports"];
-    arch_helpers::check_exact_subdirs(
+    topology_helpers::check_exact_subdirs(
         fs,
         name,
         modules_dir,
@@ -207,7 +207,7 @@ fn check_ts_inbound_outbound(
         return; // missing dir already reported
     }
 
-    arch_helpers::check_exact_subdirs(
+    topology_helpers::check_exact_subdirs(
         fs,
         name,
         dir,
@@ -220,7 +220,7 @@ fn check_ts_inbound_outbound(
 }
 
 /// Validate a TS container folder: must have `.gitkeep` or at least one subdir.
-/// Also checks for loose files (via arch_helpers::check_container_not_empty)
+/// Also checks for loose files (via topology_helpers::check_container_not_empty)
 /// and validates each subdir has .ts/.tsx files or is a hex-in-hex.
 fn validate_ts_container(
     fs: &dyn FileSystem,
@@ -234,11 +234,11 @@ fn validate_ts_container(
     }
 
     // Empty check + loose file detection (shared helper)
-    arch_helpers::check_container_not_empty(fs, name, dir, label, ID, ENTITY, results);
+    topology_helpers::check_container_not_empty(fs, name, dir, label, ID, ENTITY, results);
 
     // TS-specific leaf validation: each subdir must have .ts/.tsx files,
     // .gitkeep, or a modules/ dir (hex-in-hex)
-    let dirs = arch_helpers::list_dir_names(fs, dir);
+    let dirs = topology_helpers::list_dir_names(fs, dir);
     for subdir in &dirs {
         let sub_path = dir.join(subdir);
         let has_modules = fs.metadata(&sub_path.join("modules")).is_some();
@@ -285,7 +285,7 @@ fn has_ts_source_files(dir: &Path) -> bool {
 }
 
 // -----------------------------------------------------------------------
-// T-ARCH-02: TS import boundary violation
+// T-TOPOLOGY-02: TS import boundary violation
 // -----------------------------------------------------------------------
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -523,11 +523,11 @@ pub fn check_file_imports(file_path: &Path, content: &str, results: &mut Vec<Che
         if forbidden.contains(&target_layer) {
             let line_number = line_idx.saturating_add(1);
             results.push(CheckResult::from_parts(
-                "T-ARCH-02".to_owned(),
+                "T-TOPOLOGY-02".to_owned(),
                 Severity::Error,
-                "Hexagonal architecture import boundary violation".to_owned(),
+                "Hexagonal topology import boundary violation".to_owned(),
                 format!(
-                    "The `{}` layer imports from the `{}` layer: `{import_path}`. In hexagonal architecture, \
+                    "The `{}` layer imports from the `{}` layer: `{import_path}`. In hexagonal topology, \
                      imports must flow inward (adapters -> application -> ports -> domain). The `{}` layer \
                      must not depend on `{}`. Move shared types to a common layer, or invert the dependency \
                      using an interface/port.",

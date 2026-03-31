@@ -1384,7 +1384,7 @@
       ]
     },
     {
-      "name": "Architecture checks",
+      "name": "Topology checks",
       "results": [
         {
           "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",

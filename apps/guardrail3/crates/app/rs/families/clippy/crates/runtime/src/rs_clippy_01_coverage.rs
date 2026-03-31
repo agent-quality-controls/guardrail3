@@ -68,7 +68,7 @@ pub fn check_uncovered(input: &UncoveredRustUnitInput<'_>, results: &mut Vec<Che
 #[cfg(test)]
 pub(crate) fn fixture_root_for_tests() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../../../../../../tests/fixtures/r_arch_01/golden")
+        .join("../../../../../../../tests/fixtures/full_golden")
 }
 
 #[cfg(test)]

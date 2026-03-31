@@ -3,7 +3,7 @@ mod overlap;
 mod roots;
 
 pub use classification::{
-    RustArchRole, RustArchitectureOwner, RustRootClassification, RustRootPlacementRootFacts,
+    RustTopologyRole, RustTopologyOwner, RustRootClassification, RustRootPlacementRootFacts,
 };
 pub use overlap::{RustZoneOverlapFacts, collect_overlaps};
 pub use roots::{

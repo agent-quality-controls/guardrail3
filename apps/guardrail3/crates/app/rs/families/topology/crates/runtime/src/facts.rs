@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use guardrail3_app_rs_family_mapper::{RsTopologyIssueKindView, RsTopologyRootView, RsTopologyRoute};
-use guardrail3_app_rs_placement::{RustArchitectureOwner, RustRootClassification};
+use guardrail3_app_rs_placement::{RustTopologyOwner, RustRootClassification};
 use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use guardrail3_validation_model::RustValidateFamily;
@@ -13,7 +13,7 @@ pub struct TopologyRootFacts {
     pub(crate) classification: RustRootClassification,
     pub(crate) app_zone_candidates: Vec<String>,
     pub(crate) package_zone_candidates: Vec<String>,
-    pub(crate) owner_families: Vec<RustArchitectureOwner>,
+    pub(crate) owner_families: Vec<RustTopologyOwner>,
 }
 
 #[derive(Debug, Clone)]
@@ -34,7 +34,7 @@ pub enum TopologyInputFailureKind {
 pub struct GovernedRootFacts {
     pub(crate) rel_dir: String,
     pub(crate) cargo_rel_path: String,
-    pub(crate) owner: RustArchitectureOwner,
+    pub(crate) owner: RustTopologyOwner,
     pub(crate) owner_root_rel: String,
     pub(crate) effective_enabled: bool,
 }
@@ -209,7 +209,7 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
                 failures: vec![TopologyInputFailureFacts {
                     rel_path: "guardrail3.toml".to_owned(),
                     message:
-                        "Failed to read guardrail3.toml for Rust architecture placement checks."
+                        "Failed to read guardrail3.toml for Rust topology placement checks."
                             .to_owned(),
                     kind: TopologyInputFailureKind::RequiredInput,
                 }],
@@ -275,7 +275,7 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
             failures: vec![TopologyInputFailureFacts {
                 rel_path: "guardrail3.toml".to_owned(),
                 message: format!(
-                    "Failed to parse guardrail3.toml for Rust architecture placement checks: {parse_error}"
+                    "Failed to parse guardrail3.toml for Rust topology placement checks: {parse_error}"
                 ),
                 kind: TopologyInputFailureKind::RequiredInput,
             }],
@@ -335,7 +335,7 @@ fn scoped_topology_failures(config: &GuardrailConfig) -> Vec<TopologyInputFailur
 
 fn governed_root(root: &TopologyRootFacts, config: &ConfigResolution) -> Option<GovernedRootFacts> {
     match root.owner_families.as_slice() {
-        [RustArchitectureOwner::Hexarch] => {
+        [RustTopologyOwner::Hexarch] => {
             let owner_root_rel = root.app_zone_candidates.first()?.clone();
             let owner_name = owner_root_rel.rsplit('/').next()?;
             let effective_enabled = config
@@ -346,18 +346,18 @@ fn governed_root(root: &TopologyRootFacts, config: &ConfigResolution) -> Option<
             Some(GovernedRootFacts {
                 rel_dir: root.rel_dir.clone(),
                 cargo_rel_path: root.cargo_rel_path.clone(),
-                owner: RustArchitectureOwner::Hexarch,
+                owner: RustTopologyOwner::Hexarch,
                 owner_root_rel,
                 effective_enabled,
             })
         }
-        [RustArchitectureOwner::Libarch] => {
+        [RustTopologyOwner::Libarch] => {
             let owner_root_rel = root.package_zone_candidates.first()?.clone();
             let _owner_name = owner_root_rel.rsplit('/').next()?;
             Some(GovernedRootFacts {
                 rel_dir: root.rel_dir.clone(),
                 cargo_rel_path: root.cargo_rel_path.clone(),
-                owner: RustArchitectureOwner::Libarch,
+                owner: RustTopologyOwner::Libarch,
                 owner_root_rel,
                 effective_enabled: config.packages_libarch_enabled,
             })
@@ -369,10 +369,10 @@ fn governed_root(root: &TopologyRootFacts, config: &ConfigResolution) -> Option<
 fn root_from_route(root: &RsTopologyRootView) -> TopologyRootFacts {
     let mut owner_families = Vec::new();
     if !root.app_zone_candidates().is_empty() {
-        owner_families.push(RustArchitectureOwner::Hexarch);
+        owner_families.push(RustTopologyOwner::Hexarch);
     }
     if !root.package_zone_candidates().is_empty() {
-        owner_families.push(RustArchitectureOwner::Libarch);
+        owner_families.push(RustTopologyOwner::Libarch);
     }
 
     TopologyRootFacts {

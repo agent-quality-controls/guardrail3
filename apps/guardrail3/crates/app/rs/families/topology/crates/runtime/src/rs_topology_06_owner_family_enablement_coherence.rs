@@ -1,4 +1,4 @@
-use guardrail3_app_rs_placement::RustArchitectureOwner;
+use guardrail3_app_rs_placement::RustTopologyOwner;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::OwnerFamilyCoherenceInput;
@@ -8,8 +8,8 @@ const ID: &str = "RS-TOPOLOGY-06";
 pub fn check(input: &OwnerFamilyCoherenceInput<'_>, results: &mut Vec<CheckResult>) {
     if !input.root.effective_enabled {
         let family_label = match input.root.owner {
-            RustArchitectureOwner::Hexarch => "hexarch",
-            RustArchitectureOwner::Libarch => "libarch",
+            RustTopologyOwner::Hexarch => "hexarch",
+            RustTopologyOwner::Libarch => "libarch",
         };
         results.push(CheckResult::from_parts(
             ID.to_owned(),
@@ -21,7 +21,7 @@ pub fn check(input: &OwnerFamilyCoherenceInput<'_>, results: &mut Vec<CheckResul
                 family_label
             ),
             format!(
-                "`{}` classifies under `{}`, but effective `{}` enablement resolves to false. Governed Rust roots must stay coherent with their owning architecture family.",
+                "`{}` classifies under `{}`, but effective `{}` enablement resolves to false. Governed Rust roots must stay coherent with their owning topology family.",
                 input.root.cargo_rel_path, input.root.owner_root_rel, family_label
             ),
             Some(input.root.cargo_rel_path.clone()),
@@ -32,8 +32,8 @@ pub fn check(input: &OwnerFamilyCoherenceInput<'_>, results: &mut Vec<CheckResul
     }
 
     let family_label = match input.root.owner {
-        RustArchitectureOwner::Hexarch => "hexarch",
-        RustArchitectureOwner::Libarch => "libarch",
+        RustTopologyOwner::Hexarch => "hexarch",
+        RustTopologyOwner::Libarch => "libarch",
     };
     results.push(
         CheckResult::from_parts(

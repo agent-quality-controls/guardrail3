@@ -259,7 +259,7 @@ release = false
 Removed Rust check keys:
 
 ```toml
-architecture
+topology
 tests
 hooks
 ```
@@ -277,13 +277,13 @@ hooks_rs
 
 `service`
 - For binaries and services that do I/O.
-- Services typically live under `apps/` and use hex arch.
+- Services typically live under `apps/` and use hex topology.
 
 `library`
 - For shared packages with no uncontrolled I/O.
 - Libraries typically live under `packages/` and use `allowed_deps`.
 
-## Architecture Convention
+## Topology Convention
 
 Rust services:
 

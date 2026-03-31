@@ -12,7 +12,7 @@ use guardrail3_domain_project_tree::ProjectTree;
 use super::walk_project;
 
 fn golden_path() -> std::path::PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../tests/fixtures/r_arch_01/golden")
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../tests/fixtures/full_golden")
 }
 
 /// Verify lossless structure roundtrip: every dir and file on disk appears

@@ -207,7 +207,7 @@ fn topology_runtime_reports_governed_auxiliary_metadata_as_fail_closed() {
     super::write_file_for_tests(
         &root,
         "apps/backend/Cargo.toml",
-        "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\ntopology_role = \"auxiliary\"\n",
     );
 
     let report =

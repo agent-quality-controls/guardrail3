@@ -77,7 +77,7 @@ fn resolve_layer(name: &str, dir: &str, cfgs: &BTreeMap<String, CrateConfig>) ->
 /// Maps crate name to (`member_dir`, layer).
 type CrateLayerMap = BTreeMap<String, (String, Layer)>;
 
-// R-ARCH-02: Dependency flow violation
+// R-TOPOLOGY-02: Dependency flow violation
 pub fn check_dependency_flow(
     fs: &dyn FileSystem,
     root: &Path,
@@ -111,7 +111,7 @@ pub fn check_dependency_flow(
         };
         let Ok(table) = content.parse::<toml::Value>() else {
             results.push(CheckResult::from_parts(
-    "R-ARCH-02".to_owned(),
+    "R-TOPOLOGY-02".to_owned(),
     Severity::Error,
     format!("Cargo.toml parse error for {crate_name}"),
     format!("Invalid TOML in Cargo.toml for crate `{crate_name}` ({member_dir}), cannot check dependency flow"),
@@ -140,7 +140,7 @@ pub fn check_dependency_flow(
                 if let Some(tgt_layer) = tgt {
                     if forbidden.contains(&tgt_layer) {
                         results.push(CheckResult::from_parts(
-    "R-ARCH-02".to_owned(),
+    "R-TOPOLOGY-02".to_owned(),
     Severity::Error,
     "Dependency flow violation".to_owned(),
     format!(
@@ -201,7 +201,7 @@ pub fn normalize_path(base: &str, rel: &str) -> String {
     parts.join("/")
 }
 
-// R-ARCH-03: Library depends on service internals
+// R-TOPOLOGY-03: Library depends on service internals
 pub fn check_library_service_boundary(
     fs: &dyn FileSystem,
     root: &Path,
@@ -226,7 +226,7 @@ pub fn check_library_service_boundary(
             };
             let Ok(table) = content.parse::<toml::Value>() else {
                 results.push(CheckResult::from_parts(
-    "R-ARCH-03".to_owned(),
+    "R-TOPOLOGY-03".to_owned(),
     Severity::Error,
     format!("Cargo.toml parse error for {name}"),
     format!("Invalid TOML in Cargo.toml for crate `{name}` ({dir}), cannot check library-service boundary"),
@@ -248,7 +248,7 @@ pub fn check_library_service_boundary(
                     let resolved = normalize_path(dir, rel);
                     if is_service_internal(&resolved) {
                         results.push(CheckResult::from_parts(
-    "R-ARCH-03".to_owned(),
+    "R-TOPOLOGY-03".to_owned(),
     Severity::Error,
     "Library depends on service internals".to_owned(),
     format!(
@@ -266,7 +266,7 @@ pub fn check_library_service_boundary(
     },
 )
 
-// R-ARCH-04: Workspace members must be configured + single-crate service must be in apps/
+// R-TOPOLOGY-04: Workspace members must be configured + single-crate service must be in apps/
 pub fn check_unconfigured_members(
     fs: &dyn FileSystem,
     root: &Path,
@@ -290,11 +290,11 @@ pub fn check_unconfigured_members(
 
             if !in_apps && !has_apps_dir {
                 results.push(CheckResult::from_parts(
-    "R-ARCH-04".to_owned(),
+    "R-TOPOLOGY-04".to_owned(),
     Severity::Error,
     "Service not in apps/ directory".to_owned(),
     "Profile is \"service\" but project is not inside an apps/ \
-                             directory. Services must live in apps/<name>/ with hex arch \
+                             directory. Services must live in apps/<name>/ with hex topology \
                              structure (crates/domain, crates/ports, crates/app, \
                              crates/adapters). Shared libraries go in packages/."
                         .to_owned(),
@@ -310,7 +310,7 @@ pub fn check_unconfigured_members(
     // Workspace: if profile is service and no per-crate configs, error
     if cfgs.is_empty() && profile == "service" {
         results.push(CheckResult {
-            id: "R-ARCH-04".to_owned(),
+            id: "R-TOPOLOGY-04".to_owned(),
             severity: Severity::Error,
             title: "No per-crate configuration".to_owned(),
             message: format!(
@@ -336,7 +336,7 @@ pub fn check_unconfigured_members(
                 && !cfgs.contains_key(member.name())
             {
                 results.push(CheckResult {
-                    id: "R-ARCH-04".to_owned(),
+                    id: "R-TOPOLOGY-04".to_owned(),
                     severity: Severity::Warn,
                     title: format!("Workspace member `{crate_name}` not configured"),
                     message: format!(

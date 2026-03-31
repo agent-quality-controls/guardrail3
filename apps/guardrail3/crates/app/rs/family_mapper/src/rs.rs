@@ -91,7 +91,7 @@ impl<'a> FamilyMapper<'a> {
                     views::RsTopologyRootView::new(
                         root_view(root),
                         root.classification(),
-                        root.arch_role(),
+                        root.topology_role(),
                         root.app_zone_candidates().to_vec(),
                         root.package_zone_candidates().to_vec(),
                     )

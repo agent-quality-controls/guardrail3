@@ -6,7 +6,7 @@ use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
-const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/full_golden";
 
 pub(super) fn run_family(root: &Path) -> Vec<guardrail3_domain_report::CheckResult> {
     let tree = guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(

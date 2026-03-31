@@ -30,8 +30,8 @@ mod stylelint_check;
 pub mod test_checks;
 #[path = "packages/tool_config_checks.rs"]
 mod tool_config_checks;
-#[path = "architecture/ts_arch_checks.rs"]
-pub mod ts_arch_checks;
+#[path = "topology/ts_topology_checks.rs"]
+pub mod ts_topology_checks;
 #[path = "source/ts_code_analysis.rs"]
 pub mod ts_code_analysis;
 #[path = "source/ts_comment_checks.rs"]
@@ -156,7 +156,7 @@ pub fn run(
     let source_results = source_scan::check(fs, path, scoped_files);
     report.add_section(Section::new("TS source code scan".to_owned(), source_results));
 
-    if categories.architecture() {
+    if categories.topology() {
         // Discover apps and resolve per-app context
         let app_contexts = resolve_app_contexts(fs, path, categories, config);
 
@@ -165,12 +165,12 @@ pub fn run(
         report.add_section(Section::new("ESLint boundary audit".to_owned(), eslint_results));
 
         // Per-app topology checks (only on service-type apps)
-        let arch_structure = ts_arch_checks::check_hex_arch_structure_for_apps(fs, &app_contexts);
-        let arch_imports = ts_arch_checks::check_import_boundaries_for_apps(fs, &app_contexts);
-        let mut arch_results = arch_structure;
-        arch_results.extend(arch_imports);
-        if !arch_results.is_empty() {
-            report.add_section(Section::new("TS architecture".to_owned(), arch_results));
+        let topology_structure = ts_topology_checks::check_hex_topology_structure_for_apps(fs, &app_contexts);
+        let topology_imports = ts_topology_checks::check_import_boundaries_for_apps(fs, &app_contexts);
+        let mut topology_results = topology_structure;
+        topology_results.extend(topology_imports);
+        if !topology_results.is_empty() {
+            report.add_section(Section::new("TS topology".to_owned(), topology_results));
         }
     }
 
@@ -209,7 +209,7 @@ fn has_content_app(fs: &dyn FileSystem, root: &Path, config: Option<&GuardrailCo
     }
 
     // Auto-detect: scan discovered apps for content signals
-    let discovered = ts_arch_checks::discover_ts_apps(fs, root);
+    let discovered = ts_topology_checks::discover_ts_apps(fs, root);
     for app_path in &discovered {
         if auto_detect_app_type(fs, app_path) == Some(TsAppType::Content) {
             return true;
@@ -223,7 +223,7 @@ fn has_content_app(fs: &dyn FileSystem, root: &Path, config: Option<&GuardrailCo
 /// Returns None if no clear signal is found.
 #[allow(clippy::disallowed_methods)] // reason: serde_json for per-app package.json inspection
 pub fn auto_detect_app_type(fs: &dyn FileSystem, app_path: &Path) -> Option<TsAppType> {
-    // Signal 1: hex arch structure → Service
+    // Signal 1: hex topology structure → Service
     let has_modules_domain = app_path.join("src/modules/domain").is_dir();
     if has_modules_domain {
         return Some(TsAppType::Service);
@@ -261,7 +261,7 @@ pub fn auto_detect_app_type(fs: &dyn FileSystem, app_path: &Path) -> Option<TsAp
                     return Some(TsAppType::Content);
                 }
 
-                // Next.js without hex arch or backend → likely Content
+                // Next.js without hex topology or backend → likely Content
                 // (services using Next.js would have src/modules/)
                 if deps.contains_key("next") && !has_modules_domain {
                     return Some(TsAppType::Content);
@@ -296,7 +296,7 @@ fn resolve_app_contexts(
     _global_categories: &TsCheckCategories,
     config: Option<&GuardrailConfig>,
 ) -> Vec<TsAppContext> {
-    let discovered = ts_arch_checks::discover_ts_apps(fs, root);
+    let discovered = ts_topology_checks::discover_ts_apps(fs, root);
     let app_configs = config
         .and_then(GuardrailConfig::typescript)
         .and_then(|typescript| typescript.apps());
@@ -324,7 +324,7 @@ fn resolve_app_contexts(
             let type_defaults = app_type.default_categories();
             let categories = if let Some(checks) = app_cfg.and_then(|config| config.checks()) {
                 TsCheckCategories::new(
-                    checks.architecture().unwrap_or(type_defaults.architecture()),
+                    checks.topology().unwrap_or(type_defaults.topology()),
                     checks.content().unwrap_or(type_defaults.content()),
                     checks.tests().unwrap_or(type_defaults.tests()),
                 )

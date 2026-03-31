@@ -14,7 +14,7 @@ pub fn check(input: &AuxiliaryRootInput<'_>, results: &mut Vec<CheckResult>) {
                 display_dir(&input.root.rel_dir)
             ),
             format!(
-                "`{}` is outside `apps/*` and `packages/*`, but is explicitly marked with `arch_role = \"auxiliary\"` in Cargo metadata.",
+                "`{}` is outside `apps/*` and `packages/*`, but is explicitly marked with `topology_role = \"auxiliary\"` in Cargo metadata.",
                 input.root.cargo_rel_path
             ),
             Some(input.root.cargo_rel_path.clone()),

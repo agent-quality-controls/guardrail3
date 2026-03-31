@@ -19,7 +19,7 @@ use guardrail3_outbound_traits::FileSystem;
 /// Run all RS-TOPOLOGY-01 structural checks.
 ///
 /// Auto-detects service apps by scanning `apps/*/Cargo.toml`.
-pub fn check_hex_arch_structure(fs: &dyn FileSystem, root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_hex_topology_structure(fs: &dyn FileSystem, root: &Path, results: &mut Vec<CheckResult>) {
     let apps_dir = root.join("apps");
     let apps_entries = fs.list_dir(&apps_dir);
     if apps_entries.is_empty() {

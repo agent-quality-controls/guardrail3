@@ -1,7 +1,7 @@
-//! R-ARCH-01: Hex arch structural enforcement.
+//! R-TOPOLOGY-01: Hex topology structural enforcement.
 //!
 //! Auto-detects service apps from `apps/*/Cargo.toml` and enforces the
-//! canonical hex arch directory template:
+//! canonical hex topology directory template:
 //!
 //! ```text
 //! apps/{name}/crates/{adapters/{inbound,outbound}, app, domain, ports/{inbound,outbound}}
@@ -21,10 +21,10 @@ use std::path::Path;
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
 
-/// Run all R-ARCH-01 structural checks.
+/// Run all R-TOPOLOGY-01 structural checks.
 ///
 /// Auto-detects service apps by scanning `apps/*/Cargo.toml`.
-pub fn check_hex_arch_structure(fs: &dyn FileSystem, root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_hex_topology_structure(fs: &dyn FileSystem, root: &Path, results: &mut Vec<CheckResult>) {
     let apps_dir = root.join("apps");
     let apps_entries = fs.list_dir(&apps_dir);
     if apps_entries.is_empty() {
@@ -61,12 +61,12 @@ fn check_single_app(
     let src_entries = fs.list_dir(&app_dir.join("src"));
     if !src_entries.is_empty() {
         results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!("Service `{name}` has src/ directory"),
     format!(
                 "Service `{name}` has an `src/` directory. Code must be in `crates/` \
-                 following hex arch layout. Move code into \
+                 following hex topology layout. Move code into \
                  `crates/{{adapters,app,domain,ports}}` subcrates."
             ),
     Some(app_dir.join("src").display().to_string()),
@@ -78,7 +78,7 @@ fn check_single_app(
     check_crates_dir(fs, name, app_dir, "crates", results);,
 )
 
-/// Check a `crates/` directory for hex arch structure.
+/// Check a `crates/` directory for hex topology structure.
 /// Reusable for both top-level apps and hex-in-hex recursion.
 fn check_crates_dir(
     fs: &dyn FileSystem,
@@ -91,11 +91,11 @@ fn check_crates_dir(
     let crates_entries = fs.list_dir(&crates_dir);
     if crates_entries.is_empty() {
         results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!("Service `{name}` missing {label_prefix}/ directory"),
     format!(
-                "Service `{name}` has no `{label_prefix}/` directory. Create it with the hex arch \
+                "Service `{name}` has no `{label_prefix}/` directory. Create it with the hex topology \
                  template: `{label_prefix}/{{adapters/{{inbound,outbound}}, app, domain, \
                  ports/{{inbound,outbound}}}}`."
             ),
@@ -111,7 +111,7 @@ fn check_crates_dir(
     for expected in &expected_top {
         if !crate_dir_names.iter().any(|n| n == expected) {
             results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!("Service `{name}` missing {label_prefix}/{expected}/ directory"),
     format!(
@@ -130,14 +130,14 @@ fn check_crates_dir(
     for dir_name in &crate_dir_names {
         if !expected_top.contains(&dir_name.as_str()) {
             results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!(
                     "Service `{name}` has unexpected directory {label_prefix}/{dir_name}/"
                 ),
     format!(
                     "Service `{name}` has `{label_prefix}/{dir_name}/` which is not part of the hex \
-                     arch template. Only `{{adapters, app, domain, ports}}` directories are \
+                     topology template. Only `{{adapters, app, domain, ports}}` directories are \
                      allowed in `{label_prefix}/`."
                 ),
     Some(crates_dir.join(dir_name).display().to_string()),
@@ -190,7 +190,7 @@ fn check_inbound_outbound(
     for expected in &["inbound", "outbound"] {
         if !dir_names.iter().any(|n| n == expected) {
             results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!("Service `{name}` missing {layer}/{expected}/ directory"),
     format!(
@@ -208,12 +208,12 @@ fn check_inbound_outbound(
     for dir_name in &dir_names {
         if dir_name != "inbound" && dir_name != "outbound" {
             results.push(CheckResult {
-                id: "R-ARCH-01".to_owned(),
+                id: "R-TOPOLOGY-01".to_owned(),
                 severity: Severity::Error,
                 title: format!("Service `{name}` has unexpected directory {layer}/{dir_name}/"),
                 message: format!(
                     "Service `{name}` has `{layer}/{dir_name}/` which is not part of \
-                     the hex arch template. Only `{{inbound, outbound}}` directories are \
+                     the hex topology template. Only `{{inbound, outbound}}` directories are \
                      allowed in `{layer}/`."
                 ),
                 file: Some(dir.join(dir_name).display().to_string()),
@@ -270,7 +270,7 @@ fn validate_container_folder(
             )
         };
         results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!("Service `{name}` empty container {label}/"),
     format!(
@@ -299,7 +299,7 @@ fn validate_container_folder(
             check_crates_dir(fs, name, &sub_path, &inner_label, results);
         } else if !has_cargo {
             results.push(CheckResult {
-                id: "R-ARCH-01".to_owned(),
+                id: "R-TOPOLOGY-01".to_owned(),
                 severity: Severity::Error,
                 title: format!(
                     "Service `{name}` subdirectory {label}/{subdir}/ missing Cargo.toml"
@@ -343,7 +343,7 @@ fn check_loose_files(
 
     if !bad_files.is_empty() {
         results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!("Service `{name}` has loose files in {label}/"),
     format!(

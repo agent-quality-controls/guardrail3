@@ -1,4 +1,4 @@
-//! Shared hex arch structural helpers used by both RS-TOPOLOGY-01 and TS-ARCH-01.
+//! Shared hex topology structural helpers used by both RS-TOPOLOGY-01 and TS-TOPOLOGY-01.
 //!
 //! These are language-agnostic utilities for checking directory structure.
 //! Language-specific concerns (app discovery, leaf validation, recursion markers)
@@ -58,7 +58,7 @@ pub fn is_gitkeep_only(fs: &dyn FileSystem, dir: &Path) -> bool {
 /// Report loose files in a directory (only `.gitkeep` is allowed).
 ///
 /// Parameters:
-/// - `id`: Check ID (e.g., "R-ARCH-01" or "T-ARCH-01")
+/// - `id`: Check ID (e.g., "R-TOPOLOGY-01" or "T-TOPOLOGY-01")
 /// - `entity`: Entity label (e.g., "Service" or "TS app")
 pub fn check_loose_files(
     fs: &dyn FileSystem,
@@ -138,7 +138,7 @@ pub fn check_exact_subdirs(
                 format!("{entity} `{name}` has unexpected directory {label}/{dir_name}/"),
                 format!(
                     "{entity} `{name}` has `{label}/{dir_name}/` which is not part of \
-                     the hex arch template. Only `{{{}}}` directories are allowed in `{label}/`.",
+                     the hex topology template. Only `{{{}}}` directories are allowed in `{label}/`.",
                     expected.join(", ")
                 ),
                 Some(dir.join(dir_name).display().to_string()),

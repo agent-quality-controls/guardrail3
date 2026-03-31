@@ -38,7 +38,7 @@ fn misplaced_roots_fire_when_libarch_is_enabled() {
 }
 
 #[test]
-fn misplaced_roots_do_not_fire_when_both_architecture_families_are_disabled() {
+fn misplaced_roots_do_not_fire_when_both_owner_topology_families_are_disabled() {
     let config = "[rust.checks]\nhexarch = false\nlibarch = false\n";
     let results = check_results(&tree(
         &[

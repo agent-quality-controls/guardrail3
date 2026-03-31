@@ -20,7 +20,7 @@ pub fn check(
     Severity::Error,
     format!("Service `{name}` missing {label_prefix}/ directory"),
     format!(
-                "Service `{name}` has no `{label_prefix}/` directory. Create it with the hex arch \
+                "Service `{name}` has no `{label_prefix}/` directory. Create it with the hex topology \
                  template: `{label_prefix}/{{adapters/{{inbound,outbound}}, app, domain, \
                  ports/{{inbound,outbound}}}}`."
             ),

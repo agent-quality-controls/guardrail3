@@ -13,11 +13,11 @@ pub fn check(input: &MisplacedRootInput<'_>, results: &mut Vec<CheckResult>) {
         ID.to_owned(),
         Severity::Error,
         format!(
-            "Rust root `{}` is misplaced outside architecture zones",
+            "Rust root `{}` is misplaced outside topology zones",
             display_dir(&input.root.rel_dir)
         ),
         format!(
-            "`{}` lives outside any `apps/*` or `packages/*` zone while Rust architecture enforcement is active.",
+            "`{}` lives outside any `apps/*` or `packages/*` zone while Rust topology enforcement is active.",
             input.root.cargo_rel_path
         ),
         Some(input.root.cargo_rel_path.clone()),
@@ -38,10 +38,10 @@ pub fn check_success(
                 Severity::Info,
                 "Misplaced-root reporting is inactive".to_owned(),
                 if has_misplaced_roots {
-                    "Discovered Rust roots outside governed zones exist, but `RS-TOPOLOGY-02` is inactive because both owner architecture families are disabled."
+                    "Discovered Rust roots outside governed zones exist, but `RS-TOPOLOGY-02` is inactive because both owner topology families are disabled."
                         .to_owned()
                 } else {
-                    "No misplaced-root errors can fire in this run because `RS-TOPOLOGY-02` is inactive while both owner architecture families are disabled."
+                    "No misplaced-root errors can fire in this run because `RS-TOPOLOGY-02` is inactive while both owner topology families are disabled."
                         .to_owned()
                 },
                 None,
@@ -62,7 +62,7 @@ pub fn check_success(
             ID.to_owned(),
             Severity::Info,
             "No misplaced Rust roots found".to_owned(),
-            "All discovered live Rust roots stay within governed architecture zones or declared auxiliary roots."
+            "All discovered live Rust roots stay within governed topology zones or declared auxiliary roots."
                     .to_owned(),
             None,
             None,

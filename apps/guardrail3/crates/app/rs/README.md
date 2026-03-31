@@ -299,7 +299,7 @@ pub struct RustRootFact {
     pub rel_dir: String,
     pub cargo_rel_path: String,
     pub classification: RustRootClassification,
-    pub arch_role: Option<RustArchRole>,
+    pub topology_role: Option<RustTopologyRole>,
     pub app_zone_candidates: Vec<String>,
     pub package_zone_candidates: Vec<String>,
 }
@@ -384,7 +384,7 @@ pub struct RsRootInputFailureView {
 pub struct RsTopologyRootView {
     pub root: RsRootView,
     pub classification: RustRootClassification,
-    pub arch_role: Option<RustArchRole>,
+    pub topology_role: Option<RustTopologyRole>,
     pub app_zone_candidates: Vec<String>,
     pub package_zone_candidates: Vec<String>,
 }

@@ -8,7 +8,7 @@ pub fn check(input: &RequiredInputFailureInput<'_>, results: &mut Vec<CheckResul
     results.push(CheckResult::from_parts(
         ID.to_owned(),
         Severity::Error,
-        "Rust architecture required input failed closed".to_owned(),
+        "Rust topology required input failed closed".to_owned(),
         input.failure.message.clone(),
         Some(input.failure.rel_path.clone()),
         None,
@@ -25,8 +25,8 @@ pub fn check_success(has_required_input_failures: bool, results: &mut Vec<CheckR
         CheckResult::from_parts(
             ID.to_owned(),
             Severity::Info,
-            "Rust architecture required inputs are readable".to_owned(),
-            "Required Rust architecture placement inputs resolved without unreadable-present or malformed failures."
+            "Rust topology required inputs are readable".to_owned(),
+            "Required Rust topology placement inputs resolved without unreadable-present or malformed failures."
                     .to_owned(),
             None,
             None,

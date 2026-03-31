@@ -4,7 +4,7 @@ use super::super::{copy_fixture, write_file};
 
 #[test]
 fn errors_when_an_allowed_deny_config_cannot_be_parsed() {
-    let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
+    let tmp = copy_fixture("../../../../../../../tests/fixtures/full_golden");
     write_file(tmp.path(), "deny.toml", "[sources");
 
     let results = super::super::run_family(tmp.path());

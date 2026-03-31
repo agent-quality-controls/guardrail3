@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_libarch_assertions::rs_libarch_11_root_facade_exports_api as assertions;
 use test_support::{copy_fixture, promote_golden_shared_types_to_layered_library};
 
-const GOLDEN_FIXTURE_REL: &str = "../../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_FIXTURE_REL: &str = "../../../../../../tests/fixtures/full_golden";
 const GOLDEN_SHARED_TYPES_LIB: &str = "packages/shared-types/src/lib.rs";
 
 #[test]

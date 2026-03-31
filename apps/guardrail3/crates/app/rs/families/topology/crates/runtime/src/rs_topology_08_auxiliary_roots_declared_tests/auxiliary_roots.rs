@@ -10,7 +10,7 @@ fn declared_auxiliary_roots_are_reported_as_info() {
         ],
         &[(
             "fuzz/Cargo.toml",
-            "[package]\nname = \"fuzz\"\n\n[package.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+            "[package]\nname = \"fuzz\"\n\n[package.metadata.guardrail3]\ntopology_role = \"auxiliary\"\n",
         )],
     ));
 
@@ -28,7 +28,7 @@ fn workspace_level_auxiliary_metadata_is_reported_as_info() {
         ],
         &[(
             "tools/xtask/Cargo.toml",
-            "[workspace]\nmembers = []\n\n[workspace.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+            "[workspace]\nmembers = []\n\n[workspace.metadata.guardrail3]\ntopology_role = \"auxiliary\"\n",
         )],
     ));
 

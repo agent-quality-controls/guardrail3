@@ -4,7 +4,7 @@ use guardrail3_domain_project_tree::ProjectTreeView;
 use toml::Value;
 
 use crate::classification::{
-    RustArchRole, RustRootPlacementRootFacts, classify_root, has_governed_zone_candidate,
+    RustTopologyRole, RustRootPlacementRootFacts, classify_root, has_governed_zone_candidate,
 };
 use crate::overlap::{RustZoneOverlapFacts, collect_overlaps};
 
@@ -104,24 +104,24 @@ pub fn collect(tree: &dyn ProjectTreeView) -> RustRootPlacementFacts {
 
         let placement_rel_dir = contextual_rel_dir(zone_context_prefix.as_deref(), &rel_dir);
         let parsed = parse_live_cargo_toml(tree, &cargo_rel_path, &mut input_failures);
-        let arch_role = if has_governed_zone_candidate(&placement_rel_dir) {
+        let topology_role = if has_governed_zone_candidate(&placement_rel_dir) {
             if let Some(parsed) = parsed.as_ref() {
-                if declares_arch_role(parsed) {
+                if declares_topology_role(parsed) {
                     input_failures.push(RustRootPlacementInputFailureFacts::new(
                         cargo_rel_path.clone(),
-                        "Governed Rust roots under `apps/*` or `packages/*` must not declare `arch_role` in Cargo metadata. The only supported `arch_role` value is `auxiliary`, and it is valid only for roots outside governed architecture zones.".to_owned(),
+                        "Governed Rust roots under `apps/*` or `packages/*` must not declare `topology_role` in Cargo metadata. The only supported `topology_role` value is `auxiliary`, and it is valid only for roots outside governed topology zones.".to_owned(),
                     ));
                 }
             }
             None
         } else {
-            resolve_arch_role(parsed.as_ref(), &cargo_rel_path, &mut input_failures)
+            resolve_topology_role(parsed.as_ref(), &cargo_rel_path, &mut input_failures)
         };
         roots.push(classify_root(
             rel_dir,
             cargo_rel_path,
             &placement_rel_dir,
-            arch_role,
+            topology_role,
         ));
     }
 
@@ -166,16 +166,16 @@ fn is_excluded_path(path: &str) -> bool {
         .any(|window| matches!(window, ["tests", "fixtures"] | ["tests", "snapshots"]))
 }
 
-fn resolve_arch_role(
+fn resolve_topology_role(
     parsed: Option<&Value>,
     cargo_rel_path: &str,
     input_failures: &mut Vec<RustRootPlacementInputFailureFacts>,
-) -> Option<RustArchRole> {
+) -> Option<RustTopologyRole> {
     let Some(parsed) = parsed else {
         return None;
     };
 
-    match arch_role_from_toml(parsed) {
+    match topology_role_from_toml(parsed) {
         Ok(role) => role,
         Err(message) => {
             input_failures.push(RustRootPlacementInputFailureFacts::new(
@@ -210,42 +210,42 @@ fn parse_live_cargo_toml(
     }
 }
 
-fn arch_role_from_toml(parsed: &Value) -> Result<Option<RustArchRole>, String> {
-    let Some(value) = arch_role_value(parsed) else {
+fn topology_role_from_toml(parsed: &Value) -> Result<Option<RustTopologyRole>, String> {
+    let Some(value) = topology_role_value(parsed) else {
         return Ok(None);
     };
 
     let Some(value) = value.as_str() else {
         return Err(
-            "Invalid `arch_role` in Cargo metadata for Rust root placement discovery: expected a string value like `\"auxiliary\"`."
+            "Invalid `topology_role` in Cargo metadata for Rust root placement discovery: expected a string value like `\"auxiliary\"`."
                 .to_owned(),
         );
     };
 
     match value {
-        "auxiliary" => Ok(Some(RustArchRole::Auxiliary)),
+        "auxiliary" => Ok(Some(RustTopologyRole::Auxiliary)),
         other => Err(format!(
-            "Invalid `arch_role = \"{other}\"` in Cargo metadata for Rust root placement discovery. Expected `\"auxiliary\"`."
+            "Invalid `topology_role = \"{other}\"` in Cargo metadata for Rust root placement discovery. Expected `\"auxiliary\"`."
         )),
     }
 }
 
-fn declares_arch_role(parsed: &Value) -> bool {
-    arch_role_value(parsed).is_some()
+fn declares_topology_role(parsed: &Value) -> bool {
+    topology_role_value(parsed).is_some()
 }
 
-fn arch_role_value(parsed: &Value) -> Option<&Value> {
+fn topology_role_value(parsed: &Value) -> Option<&Value> {
     parsed
         .get("package")
         .and_then(|value| value.get("metadata"))
         .and_then(|value| value.get("guardrail3"))
-        .and_then(|value| value.get("arch_role"))
+        .and_then(|value| value.get("topology_role"))
         .or_else(|| {
             parsed
                 .get("workspace")
                 .and_then(|value| value.get("metadata"))
                 .and_then(|value| value.get("guardrail3"))
-                .and_then(|value| value.get("arch_role"))
+                .and_then(|value| value.get("topology_role"))
         })
 }
 

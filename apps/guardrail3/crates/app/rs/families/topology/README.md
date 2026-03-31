@@ -1,29 +1,29 @@
 # RS-TOPOLOGY
 
-Rust root placement and architecture ownership family.
+Rust root placement and topology ownership family.
 
 Current source of truth for this family:
 
 - this README for family-local behavior and rule boundaries
-- [apps/guardrail3/crates/app/rs/README.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/README.md) for shared `placement` / `FamilyMapper` architecture
+- [apps/guardrail3/crates/app/rs/README.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/README.md) for shared `placement` / `FamilyMapper` wiring
 - [.plans/todo/checks/rs/topology.md](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/topology.md) for the live rule inventory
 
 Older handoffs and migration briefs are historical only.
 
-This family enforces a target state where Rust architecture ownership is:
+This family enforces a target state where Rust topology ownership is:
 
 - repo-global
 - live-root-only
 - emitted once
 - explicit about auxiliary roots
 - fail-closed on required inputs
-- shared across architecture families through one placement substrate
+- shared across topology families through one placement substrate
 
 ## What This Family Prevents
 
-- misplaced Rust roots drifting outside governed architecture zones
+- misplaced Rust roots drifting outside governed topology zones
 - `hexarch` and `libarch` rediscovering roots differently and disagreeing
-- fixture `Cargo.toml` files polluting live architecture results
+- fixture `Cargo.toml` files polluting live topology results
 - app/package dual ownership and illegal nesting
 - dead scoped `topology` config that looks supported but does nothing
 
@@ -39,7 +39,7 @@ It evaluates:
 - root-to-family ownership
 - app/package overlap and dual ownership
 - exact workspace-membership equivalence for governed workspaces
-- global Rust architecture enablement
+- global Rust topology enablement
 
 It does not own:
 
@@ -103,14 +103,14 @@ Eligible live Rust roots are discovered from `ProjectTree` and include:
 - repository root `Cargo.toml`, if present
 - any directory containing `Cargo.toml`
 
-Excluded from live architecture discovery:
+Excluded from live topology discovery:
 
 - any root under `**/tests/fixtures/**`
 - any root under `**/tests/snapshots/**`
 - any root under `target/**`
 - any root under `.claude/worktrees/**`
 
-These excluded roots are test corpora or build outputs, not live architecture.
+These excluded roots are test corpora or build outputs, not live topology.
 
 The exclusion rule is structural and path-based.
 It is not inferred from file contents.
@@ -125,8 +125,8 @@ Every eligible live Rust root is classified as exactly one of:
   - root path is inside `packages/<name>/...`
 - `auxiliary`
   - root is outside governed zones but explicitly declares:
-    - `[package.metadata.guardrail3] arch_role = "auxiliary"`
-    - or `[workspace.metadata.guardrail3] arch_role = "auxiliary"`
+    - `[package.metadata.guardrail3] topology_role = "auxiliary"`
+    - or `[workspace.metadata.guardrail3] topology_role = "auxiliary"`
 - `other`
   - root path is outside both governed zones and does not declare an auxiliary role
 - `ambiguous`
@@ -158,7 +158,7 @@ That means:
 This avoids:
 
 - duplicate signaling
-- drift between architecture families
+- drift between topology families
 - hidden placement policy in app/package-local families
 
 ## Fail-Closed Inputs
@@ -177,7 +177,7 @@ Examples:
 - `guardrail3.toml` exists in the tree but cached content is missing
 - `guardrail3.toml` content is malformed TOML
 - governed app/package `Cargo.toml` is readable but malformed
-- governed app/package `Cargo.toml` declares `arch_role`, which is invalid there
+- governed app/package `Cargo.toml` declares `topology_role`, which is invalid there
 - malformed eligible live out-of-zone `Cargo.toml`
 
 Absence and unreadability are different states.
@@ -288,7 +288,7 @@ Must not inspect:
 
 ### RS-TOPOLOGY-02
 
-No eligible live Rust root may live in unexpected `other` when architecture enforcement is active.
+No eligible live Rust root may live in unexpected `other` when topology enforcement is active.
 
 Severity:
 
@@ -318,7 +318,7 @@ This rule owns repo-global misplaced-root reporting exclusively.
 
 ### RS-TOPOLOGY-03
 
-No eligible live Rust root may be owned by both architecture families.
+No eligible live Rust root may be owned by both topology families.
 
 Severity:
 
@@ -395,7 +395,7 @@ Detection:
 
 ### RS-TOPOLOGY-07
 
-Required architecture inputs must fail closed.
+Required topology inputs must fail closed.
 
 Severity:
 
@@ -407,7 +407,7 @@ Detection:
 - active required inputs include:
   - readable eligible live `Cargo.toml`
   - parseable governed app/package `Cargo.toml`
-  - governed app/package `Cargo.toml` that does not declare `arch_role`
+  - governed app/package `Cargo.toml` that does not declare `topology_role`
   - readable `guardrail3.toml`
   - parseable `guardrail3.toml`
   - parseable auxiliary-role metadata in eligible live `Cargo.toml`
@@ -424,8 +424,8 @@ Detection:
 
 - start from eligible live roots
 - emit for roots outside governed zones that explicitly declare:
-  - `[package.metadata.guardrail3] arch_role = "auxiliary"`
-  - or `[workspace.metadata.guardrail3] arch_role = "auxiliary"`
+  - `[package.metadata.guardrail3] topology_role = "auxiliary"`
+  - or `[workspace.metadata.guardrail3] topology_role = "auxiliary"`
 - inventory-mark these confirmations so the exemption stays visible without masquerading as an error
 
 Do not emit for:

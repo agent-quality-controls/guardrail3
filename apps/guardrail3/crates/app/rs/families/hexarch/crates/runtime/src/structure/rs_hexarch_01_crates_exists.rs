@@ -25,7 +25,7 @@ pub fn check(input: &AppHexarchInput<'_>, results: &mut Vec<CheckResult>) {
         Severity::Error,
         format!("Service `{}` missing crates/ directory", input.app_name),
         format!(
-            "Service `{}` has no `crates/` directory. Create it with the hex arch template: `crates/{{adapters/{{inbound,outbound}}, app, domain, ports/{{inbound,outbound}}}}` and add optional `crates/macros/` only if needed.",
+            "Service `{}` has no `crates/` directory. Create it with the hex topology template: `crates/{{adapters/{{inbound,outbound}}, app, domain, ports/{{inbound,outbound}}}}` and add optional `crates/macros/` only if needed.",
             input.app_name
         ),
         Some(input.app_rel_dir.to_owned()),

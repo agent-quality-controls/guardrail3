@@ -10,7 +10,7 @@ fn auxiliary_top_level_root_must_be_workspace() {
         ],
         &[(
             "tools/helper/Cargo.toml",
-            "[package]\nname = \"helper\"\n\n[package.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+            "[package]\nname = \"helper\"\n\n[package.metadata.guardrail3]\ntopology_role = \"auxiliary\"\n",
         )],
     );
 

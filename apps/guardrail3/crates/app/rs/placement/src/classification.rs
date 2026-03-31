@@ -1,10 +1,10 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum RustArchitectureOwner {
+pub enum RustTopologyOwner {
     Hexarch,
     Libarch,
 }
 
-impl RustArchitectureOwner {
+impl RustTopologyOwner {
     #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
@@ -28,10 +28,10 @@ pub struct RustRootPlacementRootFacts {
     rel_dir: String,
     cargo_rel_path: String,
     classification: RustRootClassification,
-    arch_role: Option<RustArchRole>,
+    topology_role: Option<RustTopologyRole>,
     app_zone_candidates: Vec<String>,
     package_zone_candidates: Vec<String>,
-    owner_families: Vec<RustArchitectureOwner>,
+    owner_families: Vec<RustTopologyOwner>,
 }
 
 impl RustRootPlacementRootFacts {
@@ -40,16 +40,16 @@ impl RustRootPlacementRootFacts {
         rel_dir: String,
         cargo_rel_path: String,
         classification: RustRootClassification,
-        arch_role: Option<RustArchRole>,
+        topology_role: Option<RustTopologyRole>,
         app_zone_candidates: Vec<String>,
         package_zone_candidates: Vec<String>,
-        owner_families: Vec<RustArchitectureOwner>,
+        owner_families: Vec<RustTopologyOwner>,
     ) -> Self {
         Self {
             rel_dir,
             cargo_rel_path,
             classification,
-            arch_role,
+            topology_role,
             app_zone_candidates,
             package_zone_candidates,
             owner_families,
@@ -72,8 +72,8 @@ impl RustRootPlacementRootFacts {
     }
 
     #[must_use]
-    pub const fn arch_role(&self) -> Option<RustArchRole> {
-        self.arch_role
+    pub const fn topology_role(&self) -> Option<RustTopologyRole> {
+        self.topology_role
     }
 
     #[must_use]
@@ -87,13 +87,13 @@ impl RustRootPlacementRootFacts {
     }
 
     #[must_use]
-    pub fn owner_families(&self) -> &[RustArchitectureOwner] {
+    pub fn owner_families(&self) -> &[RustTopologyOwner] {
         &self.owner_families
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum RustArchRole {
+pub enum RustTopologyRole {
     Auxiliary,
 }
 
@@ -107,7 +107,7 @@ pub fn classify_root(
     rel_dir: String,
     cargo_rel_path: String,
     placement_rel_dir: &str,
-    arch_role: Option<RustArchRole>,
+    topology_role: Option<RustTopologyRole>,
 ) -> RustRootPlacementRootFacts {
     let app_zone_candidates = zone_candidates(placement_rel_dir, "apps");
     let package_zone_candidates = zone_candidates(placement_rel_dir, "packages");
@@ -115,9 +115,9 @@ pub fn classify_root(
     let classification = match (
         app_zone_candidates.len(),
         package_zone_candidates.len(),
-        arch_role,
+        topology_role,
     ) {
-        (0, 0, Some(RustArchRole::Auxiliary)) => RustRootClassification::Auxiliary,
+        (0, 0, Some(RustTopologyRole::Auxiliary)) => RustRootClassification::Auxiliary,
         (0, 0, _) => RustRootClassification::Other,
         (1, 0, _) => RustRootClassification::App,
         (0, 1, _) => RustRootClassification::Package,
@@ -126,17 +126,17 @@ pub fn classify_root(
 
     let mut owner_families = Vec::new();
     if !app_zone_candidates.is_empty() {
-        owner_families.push(RustArchitectureOwner::Hexarch);
+        owner_families.push(RustTopologyOwner::Hexarch);
     }
     if !package_zone_candidates.is_empty() {
-        owner_families.push(RustArchitectureOwner::Libarch);
+        owner_families.push(RustTopologyOwner::Libarch);
     }
 
     RustRootPlacementRootFacts::new(
         rel_dir,
         cargo_rel_path,
         classification,
-        arch_role,
+        topology_role,
         app_zone_candidates,
         package_zone_candidates,
         owner_families,

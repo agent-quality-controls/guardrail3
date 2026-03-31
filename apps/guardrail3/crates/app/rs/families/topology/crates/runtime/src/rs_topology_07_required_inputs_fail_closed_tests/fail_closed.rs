@@ -41,7 +41,7 @@ fn malformed_auxiliary_metadata_emits_required_input_failure() {
         ],
         &[(
             "fuzz/Cargo.toml",
-            "[package]\nname = \"fuzz\"\n\n[package.metadata.guardrail3]\narch_role = \"sidecar\"\n",
+            "[package]\nname = \"fuzz\"\n\n[package.metadata.guardrail3]\ntopology_role = \"sidecar\"\n",
         )],
     ));
 
@@ -103,7 +103,7 @@ fn governed_root_declaring_auxiliary_metadata_emits_required_input_failure() {
         ],
         &[(
             "apps/backend/Cargo.toml",
-            "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+            "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\ntopology_role = \"auxiliary\"\n",
         )],
     ));
 
@@ -120,7 +120,7 @@ fn governed_package_root_declaring_auxiliary_metadata_emits_required_input_failu
         ],
         &[(
             "packages/shared/Cargo.toml",
-            "[package]\nname = \"shared\"\nedition = \"2024\"\n\n[package.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+            "[package]\nname = \"shared\"\nedition = \"2024\"\n\n[package.metadata.guardrail3]\ntopology_role = \"auxiliary\"\n",
         )],
     ));
 
@@ -137,7 +137,7 @@ fn governed_package_workspace_metadata_declaring_auxiliary_emits_required_input_
         ],
         &[(
             "packages/shared/Cargo.toml",
-            "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+            "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\ntopology_role = \"auxiliary\"\n",
         )],
     ));
 

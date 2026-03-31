@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_libarch_assertions::rs_libarch_07_core_no_api_dep as assertions;
 use test_support::{copy_fixture, promote_golden_shared_types_to_layered_library};
 
-const GOLDEN_FIXTURE_REL: &str = "../../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_FIXTURE_REL: &str = "../../../../../../tests/fixtures/full_golden";
 const GOLDEN_SHARED_TYPES_CORE_CARGO: &str = "packages/shared-types/crates/core/Cargo.toml";
 
 #[test]
