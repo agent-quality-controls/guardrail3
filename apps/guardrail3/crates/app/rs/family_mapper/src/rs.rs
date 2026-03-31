@@ -82,13 +82,13 @@ impl<'a> FamilyMapper<'a> {
     }
 
     #[must_use]
-    pub fn map_rs_arch(&self) -> views::RsArchRoute {
-        views::RsArchRoute::new(
+    pub fn map_rs_topology(&self) -> views::RsTopologyRoute {
+        views::RsTopologyRoute::new(
             self.structure
                 .roots()
                 .iter()
                 .map(|root| {
-                    views::RsArchRootView::new(
+                    views::RsTopologyRootView::new(
                         root_view(root),
                         root.classification(),
                         root.arch_role(),
@@ -122,9 +122,9 @@ impl<'a> FamilyMapper<'a> {
             self.legality
                 .topology_issues()
                 .iter()
-                .map(views::RsArchTopologyIssueView::from_fact)
+                .map(views::RsTopologyIssueView::from_fact)
                 .collect(),
-            self.map_arch_family_files(),
+            self.map_topology_family_files(),
         )
     }
 
@@ -425,11 +425,11 @@ impl<'a> FamilyMapper<'a> {
             .collect()
     }
 
-    fn map_arch_family_files(&self) -> Vec<views::RsFamilyFileView> {
+    fn map_topology_family_files(&self) -> Vec<views::RsFamilyFileView> {
         self.legality
             .illegal_family_files()
             .iter()
-            .filter(|fact| is_arch_tracked_family_file(fact.family(), fact.kind()))
+            .filter(|fact| is_topology_tracked_family_file(fact.family(), fact.kind()))
             .filter(|fact| self.illegal_family_file_matches_scope(fact))
             .map(illegal_file_view)
             .collect()
@@ -599,7 +599,7 @@ fn family_label(family: RustValidateFamily) -> &'static str {
         RustValidateFamily::Release => "release",
         RustValidateFamily::Hexarch => "hexarch",
         RustValidateFamily::Libarch => "libarch",
-        RustValidateFamily::Arch => "arch",
+        RustValidateFamily::Topology => "topology",
         RustValidateFamily::Fmt => "fmt",
         RustValidateFamily::Code => "code",
         RustValidateFamily::Test => "test",
@@ -608,7 +608,7 @@ fn family_label(family: RustValidateFamily) -> &'static str {
     }
 }
 
-fn is_arch_tracked_family_file(
+fn is_topology_tracked_family_file(
     family: RustValidateFamily,
     kind: RustValidateFamilyFileKind,
 ) -> bool {

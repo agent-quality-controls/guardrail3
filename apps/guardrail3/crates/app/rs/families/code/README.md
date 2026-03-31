@@ -25,7 +25,7 @@ It does not own:
 
 Those belong to:
 
-- `RS-ARCH`
+- `RS-TOPOLOGY`
 - `RS-HEXARCH`
 - `RS-CARGO`
 - `RS-DEPS`
@@ -67,7 +67,7 @@ Current implementation state:
   - [test_support](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/test_support)
 - the family consumes `RsCodeRoute` in [lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/lib.rs)
 - recent correctness work has focused on shared parser/model fixes captured in [FIXES.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/FIXES.md)
-- this README does not claim the family root is currently clean for `RS-ARCH`, `RS-TEST`, or live repo-root `RS-CODE` without a fresh verification pass
+- this README does not claim the family root is currently clean for `RS-TOPOLOGY`, `RS-TEST`, or live repo-root `RS-CODE` without a fresh verification pass
 
 The highest-value audit fixes already landed:
 

@@ -5,7 +5,7 @@ This directory needs one shared Rust structure pass, one shared Rust legality pa
 The problem:
 
 - Rust topology discovery and Rust file attachment are still split awkwardly
-- `arch` reports legality today, but legality is not yet a shared pre-family fact set
+- `topology` reports legality today, but legality is not yet a shared pre-family fact set
 - family mapping and family invocation are still easy to confuse
 - workspace-local families still risk seeing either too much or too little
 
@@ -38,7 +38,7 @@ There should then be exactly one external answer to:
 Those answers should come from shared layers under:
 
 - one shared Rust structure pass under `apps/guardrail3/crates/app/rs/`
-- one shared Rust legality pass reported through `RS-ARCH`
+- one shared Rust legality pass reported through `RS-TOPOLOGY`
 
 Families should then consume legality-aware routed surfaces and only do family-specific work.
 
@@ -142,7 +142,7 @@ But they must use legal routed shapes for workspace-local families.
 That means:
 
 - if the test is proving routed workspace-local family behavior, the fixture must contain a legal workspace root
-- if the fixture shape is illegal, the test belongs in `arch` instead
+- if the fixture shape is illegal, the test belongs in `topology` instead
 
 ### Shared legality / routing tests
 
@@ -153,7 +153,7 @@ Shared legality and mapper tests exist to prove:
 - legal routed workspace-local surfaces are sliced correctly
 - subtree routing does not bleed across siblings
 
-These tests belong under shared crates and `arch`, not under workspace-local
+These tests belong under shared crates and `topology`, not under workspace-local
 families.
 
 ### Hard rule
@@ -172,7 +172,7 @@ workspace-local family, tests must respect that.
 
 So the migration rule is:
 
-- illegal root or illegal placement expectations move to `arch`
+- illegal root or illegal placement expectations move to `topology`
 - legal workspace-local content expectations stay in the local family
 - pure content-rule semantics use direct typed inputs
 
@@ -184,7 +184,7 @@ Rust families fall into two scope classes only:
 
 These govern the entire non-excluded Rust repo surface.
 
-- `RS-ARCH`
+- `RS-TOPOLOGY`
 - `RS-FMT`
 - `RS-CODE`
 - `RS-TEST`
@@ -194,7 +194,7 @@ It means the shared layers must expose a repo-global owned surface for that fami
 
 Examples:
 
-- `arch` owns repo-global Rust root/topology facts over all live non-excluded `Cargo.toml` roots
+- `topology` owns repo-global Rust root/topology facts over all live non-excluded `Cargo.toml` roots
 - `fmt` owns repo-global formatting config placement over all non-excluded formatting config candidates
 - `code` owns all non-excluded Rust source files in the repo
 - `test` owns all non-excluded Rust test/runtime test surfaces in the repo
@@ -223,7 +223,7 @@ Workspace-local means:
 - the shared legality pass decides which workspace-local artifacts are legally placed
 - the mapper builds a legal family surface for that family
 - the family runner invokes the family once per legal workspace
-- misplaced or illegally placed family-owned files are not judged by the local family; they are judged by the shared legality pass and reported through `RS-ARCH`
+- misplaced or illegally placed family-owned files are not judged by the local family; they are judged by the shared legality pass and reported through `RS-TOPOLOGY`
 
 ## Intended Flow
 
@@ -262,7 +262,7 @@ apps/guardrail3/crates/app/rs/
       lib.rs
       topology.rs                     # legal/illegal Cargo-root topology
       placement.rs                    # legal/illegal family-file placement
-      views.rs                        # legality facts consumed by arch and mapper
+      views.rs                        # legality facts consumed by topology and mapper
 
   family_mapper/                      # shared typed family mapping only
     Cargo.toml
@@ -477,7 +477,7 @@ The mapper builds one legal family surface.
 
 Examples:
 
-- `arch`
+- `topology`
   - repo-global legal and illegal Rust topology + placement facts
 - `fmt`
   - repo-global legal formatting surface
@@ -512,7 +512,7 @@ The general contract is:
 
 Examples:
 
-- `arch`
+- `topology`
   - all live non-excluded Rust root/topology facts plus legality results
 - `fmt`
   - all non-excluded formatting config candidates
@@ -613,7 +613,7 @@ In concrete terms:
 3. `runtime/src/lib.rs` should resolve selected families once via `family_selection`.
 4. `runtime/src/lib.rs` should build one external typed `FamilyMapper` once.
 5. `runtime/src/runners.rs` should turn family surfaces into invocation units.
-6. `arch` should report shared legality facts rather than rediscovering topology.
+6. `topology` should report shared legality facts rather than rediscovering topology.
 7. `code`, `fmt`, and `test` should consume repo-global legal surfaces from the mapper.
 8. Workspace-local families should receive one legal workspace-local invocation at a time.
 9. No family should infer workspace attachment or placement legality from raw paths.
@@ -624,7 +624,7 @@ This is the concrete implementation surface required to reach the target model.
 
 1. Merge `placement` and `ownership` conceptually into one shared Rust structure stage.
 2. Add a shared Rust legality stage that consumes structure facts and produces legal/illegal root and file placement facts.
-3. Recast `RS-ARCH` as the reporting surface over that legality stage instead of the only place where legality exists.
+3. Recast `RS-TOPOLOGY` as the reporting surface over that legality stage instead of the only place where legality exists.
 4. Change `family_mapper` to map legal family surfaces rather than raw discovered files.
 5. Change `runtime/src/runners.rs` so it owns invocation fan-out:
    - global families: repo-global invocation
@@ -639,7 +639,7 @@ This is the concrete implementation surface required to reach the target model.
    - `release`
 7. Keep only content validation in workspace-local families.
 8. Keep global families repo-global:
-   - `arch`
+   - `topology`
    - `fmt`
    - `code`
    - `test`
@@ -704,7 +704,7 @@ Required code changes from the current state:
 2. Keep `legality` as the only shared Rust legality stage.
    It turns structure facts into legal and illegal root/file-placement facts before local families run.
 
-3. Keep `RS-ARCH` as the reporting surface over shared legality, not as an ad hoc rediscovery family.
+3. Keep `RS-TOPOLOGY` as the reporting surface over shared legality, not as an ad hoc rediscovery family.
 
 4. Keep `family_mapper/` legality-aware.
    It builds family surfaces from legal facts rather than rediscovering or re-judging ownership.
@@ -714,7 +714,7 @@ Required code changes from the current state:
    - workspace-local families: one invocation per legal workspace/package root
 
 6. Keep workspace-local families content-only.
-   Illegal placement, illegal topology, and impossible local surfaces belong to shared legality plus `arch`, not to local families.
+   Illegal placement, illegal topology, and impossible local surfaces belong to shared legality plus `topology`, not to local families.
 
 7. Delete any remaining duplicate root collectors, duplicate file discovery, and duplicate ownership inference from family crates.
 
@@ -723,7 +723,7 @@ Required code changes from the current state:
    - mapper only slices from shared legality facts
    - global families stay global
    - workspace-local families only see legal local surfaces
-   - `arch` and local families agree on routed legal ownership
+   - `topology` and local families agree on routed legal ownership
 
 ## Design Constraints
 

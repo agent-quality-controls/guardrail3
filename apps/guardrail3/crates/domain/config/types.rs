@@ -292,7 +292,7 @@ impl CrateConfig {
 #[serde(deny_unknown_fields)]
 pub struct RustChecksConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    arch: Option<bool>,
+    topology: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
     fmt: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
@@ -327,7 +327,7 @@ impl RustChecksConfig {
     #[must_use]
     #[allow(clippy::too_many_arguments)] // reason: config value object mirrors serialized family toggle set
     pub const fn new(
-        arch: Option<bool>,
+        topology: Option<bool>,
         fmt: Option<bool>,
         toolchain: Option<bool>,
         clippy: Option<bool>,
@@ -344,7 +344,7 @@ impl RustChecksConfig {
         hooks_rs: Option<bool>,
     ) -> Self {
         Self {
-            arch,
+            topology,
             fmt,
             toolchain,
             clippy,
@@ -365,7 +365,7 @@ impl RustChecksConfig {
     #[must_use]
     pub const fn family_enabled(&self, family: RustValidateFamily) -> Option<bool> {
         match family {
-            RustValidateFamily::Arch => self.arch,
+            RustValidateFamily::Topology => self.topology,
             RustValidateFamily::Fmt => self.fmt,
             RustValidateFamily::Toolchain => self.toolchain,
             RustValidateFamily::Clippy => self.clippy,
@@ -384,8 +384,8 @@ impl RustChecksConfig {
     }
 
     #[must_use]
-    pub const fn arch(&self) -> Option<bool> {
-        self.arch
+    pub const fn topology(&self) -> Option<bool> {
+        self.topology
     }
 
     #[must_use]

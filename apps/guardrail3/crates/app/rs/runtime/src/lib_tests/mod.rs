@@ -60,12 +60,12 @@ fn rootless_results_follow_global_enablement() {
 }
 
 #[test]
-fn arch_runtime_dispatch_uses_arch_section_name() {
-    let root = super::temp_root_for_tests("arch-runtime-dispatch");
+fn topology_runtime_dispatch_uses_topology_section_name() {
+    let root = super::temp_root_for_tests("topology-runtime-dispatch");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -74,20 +74,20 @@ fn arch_runtime_dispatch_uses_arch_section_name() {
     );
 
     let report =
-        super::run_arch_for_tests(&super::LocalFsTest, &root).expect("arch runtime report");
+        super::run_topology_for_tests(&super::LocalFsTest, &root).expect("topology runtime report");
 
-    assertions::assert_clean_section(&report, "arch");
+    assertions::assert_clean_section(&report, "topology");
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }
 
 #[test]
-fn arch_runtime_reports_scoped_arch_config_violation() {
-    let root = super::temp_root_for_tests("arch-runtime-scoped-config");
+fn topology_runtime_reports_scoped_topology_config_violation() {
+    let root = super::temp_root_for_tests("topology-runtime-scoped-config");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\narch = false\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\ntopology = false\n",
     );
     super::write_file_for_tests(
         &root,
@@ -96,20 +96,20 @@ fn arch_runtime_reports_scoped_arch_config_violation() {
     );
 
     let report =
-        super::run_arch_for_tests(&super::LocalFsTest, &root).expect("arch runtime report");
+        super::run_topology_for_tests(&super::LocalFsTest, &root).expect("topology runtime report");
 
-    assertions::assert_arch_scoped_config_violation(&report);
+    assertions::assert_topology_scoped_config_violation(&report);
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }
 
 #[test]
-fn arch_runtime_still_reports_scoped_arch_config_when_global_arch_is_disabled() {
-    let root = super::temp_root_for_tests("arch-runtime-scoped-config-global-off");
+fn topology_runtime_still_reports_scoped_topology_config_when_global_topology_is_disabled() {
+    let root = super::temp_root_for_tests("topology-runtime-scoped-config-global-off");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\narch = false\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\narch = false\n",
+        "[rust.checks]\ntopology = false\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\ntopology = false\n",
     );
     super::write_file_for_tests(
         &root,
@@ -118,16 +118,16 @@ fn arch_runtime_still_reports_scoped_arch_config_when_global_arch_is_disabled() 
     );
 
     let report =
-        super::run_arch_for_tests(&super::LocalFsTest, &root).expect("arch runtime report");
+        super::run_topology_for_tests(&super::LocalFsTest, &root).expect("topology runtime report");
 
-    assertions::assert_arch_scoped_config_violation(&report);
+    assertions::assert_topology_scoped_config_violation(&report);
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }
 
 #[test]
-fn arch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
-    let root = super::temp_root_for_tests("arch-runtime-malformed-config");
+fn topology_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
+    let root = super::temp_root_for_tests("topology-runtime-malformed-config");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
@@ -140,20 +140,20 @@ fn arch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
     );
 
     let report =
-        super::run_arch_for_tests(&super::LocalFsTest, &root).expect("arch runtime report");
+        super::run_topology_for_tests(&super::LocalFsTest, &root).expect("topology runtime report");
 
-    assertions::assert_arch_fail_closed_malformed_config(&report);
+    assertions::assert_topology_fail_closed_malformed_config(&report);
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }
 
 #[test]
-fn arch_runtime_reports_fail_closed_results_for_malformed_governed_manifest() {
-    let root = super::temp_root_for_tests("arch-runtime-malformed-governed-cargo");
+fn topology_runtime_reports_fail_closed_results_for_malformed_governed_manifest() {
+    let root = super::temp_root_for_tests("topology-runtime-malformed-governed-cargo");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -162,20 +162,20 @@ fn arch_runtime_reports_fail_closed_results_for_malformed_governed_manifest() {
     );
 
     let report =
-        super::run_arch_for_tests(&super::LocalFsTest, &root).expect("arch runtime report");
+        super::run_topology_for_tests(&super::LocalFsTest, &root).expect("topology runtime report");
 
-    assertions::assert_arch_fail_closed_malformed_governed_manifest(&report);
+    assertions::assert_topology_fail_closed_malformed_governed_manifest(&report);
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }
 
 #[test]
-fn arch_runtime_honors_app_scoped_hexarch_override() {
-    let root = super::temp_root_for_tests("arch-runtime-app-scoped-hexarch");
+fn topology_runtime_honors_app_scoped_hexarch_override() {
+    let root = super::temp_root_for_tests("topology-runtime-app-scoped-hexarch");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\nhexarch = false\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\nhexarch = false\n",
     );
     super::write_file_for_tests(
         &root,
@@ -189,20 +189,20 @@ fn arch_runtime_honors_app_scoped_hexarch_override() {
     );
 
     let report =
-        super::run_arch_for_tests(&super::LocalFsTest, &root).expect("arch runtime report");
+        super::run_topology_for_tests(&super::LocalFsTest, &root).expect("topology runtime report");
 
-    assertions::assert_arch_app_scoped_hexarch_override(&report);
+    assertions::assert_topology_app_scoped_hexarch_override(&report);
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }
 
 #[test]
-fn arch_runtime_reports_governed_auxiliary_metadata_as_fail_closed() {
-    let root = super::temp_root_for_tests("arch-runtime-governed-auxiliary-metadata");
+fn topology_runtime_reports_governed_auxiliary_metadata_as_fail_closed() {
+    let root = super::temp_root_for_tests("topology-runtime-governed-auxiliary-metadata");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -211,20 +211,20 @@ fn arch_runtime_reports_governed_auxiliary_metadata_as_fail_closed() {
     );
 
     let report =
-        super::run_arch_for_tests(&super::LocalFsTest, &root).expect("arch runtime report");
+        super::run_topology_for_tests(&super::LocalFsTest, &root).expect("topology runtime report");
 
-    assertions::assert_arch_fail_closed_malformed_governed_manifest(&report);
+    assertions::assert_topology_fail_closed_malformed_governed_manifest(&report);
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }
 
 #[test]
-fn arch_runtime_runs_even_when_only_other_family_is_requested() {
-    let root = super::temp_root_for_tests("arch-runtime-always-on");
+fn topology_runtime_runs_even_when_only_other_family_is_requested() {
+    let root = super::temp_root_for_tests("topology-runtime-always-on");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\narch = false\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = false\nhexarch = true\nlibarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -249,26 +249,26 @@ fn arch_runtime_runs_even_when_only_other_family_is_requested() {
         report
             .sections()
             .iter()
-            .any(|section| section.name() == "arch"),
-        "arch section should always be present: {report:#?}"
+            .any(|section| section.name() == "topology"),
+        "topology section should always be present: {report:#?}"
     );
     assert!(
         report.sections().iter().any(|section| {
-            section.name() == "arch"
+            section.name() == "topology"
                 && section.results().iter().any(|result| {
-                    result.id() == "RS-ARCH-02"
+                    result.id() == "RS-TOPOLOGY-02"
                         && result.file() == Some("tools/worker/Cargo.toml")
                         && !result.inventory()
                 })
         }),
-        "arch should still report misplaced roots when only another family was requested: {report:#?}"
+        "topology should still report misplaced roots when only another family was requested: {report:#?}"
     );
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }
 
 #[test]
-fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
+fn hextopology_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
     let root = super::temp_root_for_tests("hexarch-runtime-malformed-config");
     super::write_file_for_tests(
         &root,
@@ -300,7 +300,7 @@ fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() 
 }
 
 #[test]
-fn hexarch_runtime_runs_each_legal_workspace_once() {
+fn hextopology_runtime_runs_each_legal_workspace_once() {
     let root = super::temp_root_for_tests("hexarch-runtime-multi-workspace");
     super::write_file_for_tests(
         &root,
@@ -359,7 +359,7 @@ fn hexarch_runtime_runs_each_legal_workspace_once() {
 }
 
 #[test]
-fn hexarch_runtime_validation_scope_stays_inside_owning_workspace() {
+fn hextopology_runtime_validation_scope_stays_inside_owning_workspace() {
     let root = super::temp_root_for_tests("hexarch-runtime-validation-scope");
     super::write_file_for_tests(
         &root,
@@ -420,12 +420,12 @@ fn hexarch_runtime_validation_scope_stays_inside_owning_workspace() {
 }
 
 #[test]
-fn hexarch_runtime_uses_arch_for_workspace_membership_exactness() {
-    let root = super::temp_root_for_tests("hexarch-runtime-arch-exactness");
+fn hextopology_runtime_uses_topology_for_workspace_membership_exactness() {
+    let root = super::temp_root_for_tests("hexarch-runtime-topology-exactness");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -443,8 +443,8 @@ fn hexarch_runtime_uses_arch_for_workspace_membership_exactness() {
 
     assertions::assert_result_present(
         &report,
-        "arch",
-        "RS-ARCH-12",
+        "topology",
+        "RS-TOPOLOGY-12",
         Some("apps/backend/crates/app/Cargo.toml"),
         None,
         None,
@@ -1656,7 +1656,7 @@ fn release_runtime_runs_each_legal_workspace_once() {
 }
 
 #[test]
-fn libarch_runtime_runs_each_legal_workspace_once() {
+fn libtopology_runtime_runs_each_legal_workspace_once() {
     let root = super::temp_root_for_tests("libarch-runtime-multi-workspace");
     super::write_file_for_tests(
         &root,
@@ -1761,7 +1761,7 @@ fn libarch_runtime_runs_each_legal_workspace_once() {
 }
 
 #[test]
-fn libarch_runtime_validation_scope_stays_inside_owning_workspace() {
+fn libtopology_runtime_validation_scope_stays_inside_owning_workspace() {
     let root = super::temp_root_for_tests("libarch-runtime-validation-scope");
     super::write_file_for_tests(
         &root,
@@ -1852,12 +1852,12 @@ fn libarch_runtime_validation_scope_stays_inside_owning_workspace() {
 }
 
 #[test]
-fn libarch_runtime_uses_arch_for_workspace_membership_exactness() {
-    let root = super::temp_root_for_tests("libarch-runtime-arch-exactness");
+fn libtopology_runtime_uses_topology_for_workspace_membership_exactness() {
+    let root = super::temp_root_for_tests("libarch-runtime-topology-exactness");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -1875,8 +1875,8 @@ fn libarch_runtime_uses_arch_for_workspace_membership_exactness() {
 
     assertions::assert_result_present(
         &report,
-        "arch",
-        "RS-ARCH-12",
+        "topology",
+        "RS-TOPOLOGY-12",
         Some("packages/reason-policy/Cargo.toml"),
         None,
         None,

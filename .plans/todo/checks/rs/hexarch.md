@@ -1,13 +1,13 @@
-# RS-HEXARCH — Hex arch structure + dependency direction checker (27 rules)
+# RS-HEXARCH — Hex topology structure + dependency direction checker (27 rules)
 
 > Superseded as the primary family plan by [`.plans/by_family/rs/hexarch.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/hexarch.md).
 > Keep this file as a detailed rule ledger and migration/history reference.
 
 **Input:** Directory structure + Cargo.toml files (workspace + per-crate) + *.rs files (for ports/adapter content checks)
 **Parser:** TOML + filesystem + syn AST
-**Current code:** `arch/rs_arch_01/`, `hex_arch_checks.rs`
+**Current code:** `topology/rs_arch_01/`, `hex_arch_checks.rs`
 
-## Structure rules (from old RS-ARCH-01 sub-rules — now individual rules)
+## Structure rules (from old RS-TOPOLOGY-01 sub-rules — now individual rules)
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
@@ -61,10 +61,10 @@ Current migrated structural coverage:
 
 | Old ID | What | New location | Why |
 |--------|------|-------------|-----|
-| RS-ARCH-05 (R55) | Workspace edition + rust-version metadata | RS-CARGO-05 | Workspace metadata, not hex arch |
-| RS-ARCH-06 (R56) | Publish status inventory | RS-RELEASE-09 | Release concern, not hex arch |
-| RS-ARCH-07 (R57) | Release profile settings inventory | RS-RELEASE-10 | Release concern, not hex arch |
-| RS-ARCH-08 (R58) | Direct std::fs usage | RS-CODE-15 | Code scan, not hex arch |
+| RS-TOPOLOGY-05 (R55) | Workspace edition + rust-version metadata | RS-CARGO-05 | Workspace metadata, not hex topology |
+| RS-TOPOLOGY-06 (R56) | Publish status inventory | RS-RELEASE-09 | Release concern, not hex topology |
+| RS-TOPOLOGY-07 (R57) | Release profile settings inventory | RS-RELEASE-10 | Release concern, not hex topology |
+| RS-TOPOLOGY-08 (R58) | Direct std::fs usage | RS-CODE-15 | Code scan, not hex topology |
 
 ## Explicitly rejected
 
@@ -81,13 +81,13 @@ Current migrated structural coverage:
 
 ## Relationship to other families
 
-### RS-ARCH
+### RS-TOPOLOGY
 
-`RS-ARCH` owns:
+`RS-TOPOLOGY` owns:
 - repo-global Rust root placement
 - zone classification (`apps/*`, `packages/*`, `other`)
 - misplaced-root reporting
 - overlap/ownership legality between app/package zones
 
 `RS-HEXARCH` does not emit repo-global misplaced-root findings.
-It assumes `RS-ARCH` has already answered whether a Rust root belongs in the app zone at all.
+It assumes `RS-TOPOLOGY` has already answered whether a Rust root belongs in the app zone at all.

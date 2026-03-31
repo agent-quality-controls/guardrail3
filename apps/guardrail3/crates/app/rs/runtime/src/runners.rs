@@ -2,7 +2,7 @@
 use guardrail3_app_rs_family_mapper::RsScopedRootView;
 use guardrail3_app_rs_family_mapper::RsProjectSurface;
 #[cfg(any(
-    feature = "family-arch",
+    feature = "family-topology",
     feature = "family-fmt",
     feature = "family-toolchain",
     feature = "family-clippy",
@@ -28,7 +28,7 @@ use guardrail3_app_rs_family_mapper::RsFamilyFileView;
 ))]
 use guardrail3_app_rs_family_mapper::RsRootView;
 #[cfg(any(
-    feature = "family-arch",
+    feature = "family-topology",
     feature = "family-toolchain",
     feature = "family-clippy",
     feature = "family-deny",
@@ -55,11 +55,11 @@ pub(crate) struct RustFamilyRunnerDef {
     pub(crate) run: RunnerFn,
 }
 
-#[cfg(feature = "family-arch")]
+#[cfg(feature = "family-topology")]
 fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    let route = ctx.mapper.map_rs_arch();
-    let surface = arch_surface(ctx.tree, &route);
-    guardrail3_app_rs_family_arch::check(&surface, &route)
+    let route = ctx.mapper.map_rs_topology();
+    let surface = topology_surface(ctx.tree, &route);
+    guardrail3_app_rs_family_topology::check(&surface, &route)
 }
 
 #[cfg(feature = "family-fmt")]
@@ -254,10 +254,10 @@ fn run_hooks_rs(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     guardrail3_app_rs_family_hooks_rs::check(&surface, ctx.tc)
 }
 
-#[cfg(feature = "family-arch")]
-fn arch_surface(
+#[cfg(feature = "family-topology")]
+fn topology_surface(
     tree: &ProjectTree,
-    route: &guardrail3_app_rs_family_mapper::RsArchRoute,
+    route: &guardrail3_app_rs_family_mapper::RsTopologyRoute,
 ) -> RsProjectSurface {
     let mut extra_file_rels = route
         .roots()
@@ -268,7 +268,7 @@ fn arch_surface(
     if tree.file_exists("guardrail3.toml") {
         extra_file_rels.push("guardrail3.toml".to_owned());
     }
-    RsProjectSurface::from_route_scope(tree, &arch_root_rels(route.roots()), &extra_file_rels, None)
+    RsProjectSurface::from_route_scope(tree, &topology_root_rels(route.roots()), &extra_file_rels, None)
 }
 
 #[cfg(any(
@@ -413,8 +413,8 @@ fn scoped_route_root_rels(roots: &[RsScopedRootView]) -> Vec<String> {
         .collect()
 }
 
-#[cfg(feature = "family-arch")]
-fn arch_root_rels(roots: &[guardrail3_app_rs_family_mapper::RsArchRootView]) -> Vec<String> {
+#[cfg(feature = "family-topology")]
+fn topology_root_rels(roots: &[guardrail3_app_rs_family_mapper::RsTopologyRootView]) -> Vec<String> {
     roots
         .iter()
         .map(|root| root.root().rel_dir().to_owned())
@@ -431,7 +431,7 @@ fn scoped_route_root_cargo_files(roots: &[RsScopedRootView]) -> Vec<String> {
 
 #[cfg(any(
     feature = "family-fmt",
-    feature = "family-arch",
+    feature = "family-topology",
     feature = "family-toolchain",
     feature = "family-clippy",
     feature = "family-deny",
@@ -534,9 +534,9 @@ fn dir_file_rels(tree: &ProjectTree, dir_rel: &str) -> Vec<String> {
 pub(crate) fn compiled_runners() -> Vec<RustFamilyRunnerDef> {
     let mut runners = Vec::new();
 
-    #[cfg(feature = "family-arch")]
+    #[cfg(feature = "family-topology")]
     runners.push(RustFamilyRunnerDef {
-        family: RustValidateFamily::Arch,
+        family: RustValidateFamily::Topology,
         run: run_arch,
     });
 

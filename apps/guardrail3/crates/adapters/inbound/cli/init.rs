@@ -255,7 +255,7 @@ workspace_root = "."
 
 fn write_global_checks(config: &mut String) {
     writeln!(config, "\n[rust.checks]").unwrap_or_default();
-    writeln!(config, "arch = true").unwrap_or_default();
+    writeln!(config, "topology = true").unwrap_or_default();
 }
 
 fn write_single_crate_checks(config: &mut String) {
@@ -428,8 +428,8 @@ mod tests {
     }
 
     #[test]
-    fn rs_init_keeps_arch_global_even_with_scoped_sections() {
-        let root = temp_root("rs-init-arch-global");
+    fn rs_init_keeps_topology_global_even_with_scoped_sections() {
+        let root = temp_root("rs-init-topology-global");
         write_file(
             &root,
             "Cargo.toml",
@@ -449,16 +449,16 @@ mod tests {
         let config = generate_rs_config_content("service", &root);
 
         assert!(
-            config.contains("[rust.checks]\narch = true"),
-            "global arch toggle missing from generated config:\n{config}"
+            config.contains("[rust.checks]\ntopology = true"),
+            "global topology toggle missing from generated config:\n{config}"
         );
         assert!(
-            !config.contains("[rust.apps.backend.checks]\narch ="),
-            "arch must not be generated under app-scoped checks:\n{config}"
+            !config.contains("[rust.apps.backend.checks]\ntopology ="),
+            "topology must not be generated under app-scoped checks:\n{config}"
         );
         assert!(
-            !config.contains("[rust.packages.checks]\narch ="),
-            "arch must not be generated under package-scoped checks:\n{config}"
+            !config.contains("[rust.packages.checks]\ntopology ="),
+            "topology must not be generated under package-scoped checks:\n{config}"
         );
         assert!(
             config.contains("[rust.packages.checks]\nclippy = true\ndeny = true\ncargo = true\ncode = true\nlibarch = true"),

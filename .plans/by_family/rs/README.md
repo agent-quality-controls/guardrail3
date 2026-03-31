@@ -23,7 +23,7 @@ Shared Rust authority:
 
 Rust validation families covered here:
 
-- `RS-ARCH`
+- `RS-TOPOLOGY`
 - `RS-CARGO`
 - `RS-CLIPPY`
 - `RS-CODE`
@@ -76,7 +76,7 @@ Status snapshot / dispatch map:
 
 | Family | Scope model | Current code root | Family README | Planning status |
 |---|---|---|---|---|
-| `arch` | global | `apps/guardrail3/crates/app/rs/families/arch/` | yes | current |
+| `topology` | global | `apps/guardrail3/crates/app/rs/families/topology/` | yes | current |
 | `cargo` | workspace-local | `apps/guardrail3/crates/app/rs/families/cargo/` | yes | current |
 | `clippy` | workspace-local | `apps/guardrail3/crates/app/rs/families/clippy/` | yes | current |
 | `code` | global | `apps/guardrail3/crates/app/rs/families/code/` | yes | current |

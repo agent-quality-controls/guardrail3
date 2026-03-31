@@ -30,7 +30,7 @@ It does not own:
 
 Those belong to:
 
-- `RS-ARCH`
+- `RS-TOPOLOGY`
 - `RS-HEXARCH`
 - the affected tool family itself, for example `RS-CLIPPY` for `CLIPPY_CONF_DIR`
 - `RS-CODE`
@@ -161,7 +161,7 @@ For this family itself:
 
 At the current checkpoint this family:
 
-- passes `RS-ARCH`
+- passes `RS-TOPOLOGY`
 - passes `RS-TEST`
 - is routed through shared `placement` + `FamilyMapper`
 

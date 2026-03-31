@@ -146,7 +146,7 @@ fn requested_families_allow_config_parse_failure(
         && requested_families.iter().all(|family| {
             matches!(
                 family,
-                RustValidateFamily::Arch
+                RustValidateFamily::Topology
                     | RustValidateFamily::Hexarch
                     | RustValidateFamily::Libarch
                     | RustValidateFamily::Code
@@ -312,7 +312,7 @@ fn load_config(tree: &ProjectTree) -> Result<Option<GuardrailConfig>, RustRunErr
 fn family_uses_global_only(family: RustValidateFamily) -> bool {
     matches!(
         family,
-        RustValidateFamily::Arch
+        RustValidateFamily::Topology
             | RustValidateFamily::Fmt
             | RustValidateFamily::Code
             | RustValidateFamily::Test
@@ -446,11 +446,11 @@ pub(crate) fn run_for_tests(
 }
 
 #[cfg(test)]
-pub(crate) fn run_arch_for_tests(
+pub(crate) fn run_topology_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
 ) -> Result<guardrail3_domain_report::Report, RustRunError> {
-    run_for_tests(fs, root, &[RustValidateFamily::Arch])
+    run_for_tests(fs, root, &[RustValidateFamily::Topology])
 }
 
 #[cfg(test)]

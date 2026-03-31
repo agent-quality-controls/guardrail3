@@ -124,30 +124,30 @@ pub fn assert_absent_file(report: &Report, section_name: &str, file: &str) {
     );
 }
 
-pub fn assert_arch_scoped_config_violation(report: &Report) {
-    assert_single_live_result(report, "arch", "RS-ARCH-05", Some("guardrail3.toml"));
+pub fn assert_topology_scoped_config_violation(report: &Report) {
+    assert_single_live_result(report, "topology", "RS-TOPOLOGY-05", Some("guardrail3.toml"));
 }
 
-pub fn assert_arch_fail_closed_malformed_config(report: &Report) {
-    assert_live_ids_present(report, "arch", &["RS-ARCH-02", "RS-ARCH-07"]);
+pub fn assert_topology_fail_closed_malformed_config(report: &Report) {
+    assert_live_ids_present(report, "topology", &["RS-TOPOLOGY-02", "RS-TOPOLOGY-07"]);
 }
 
-pub fn assert_arch_fail_closed_malformed_governed_manifest(report: &Report) {
+pub fn assert_topology_fail_closed_malformed_governed_manifest(report: &Report) {
     assert_result_present(
         report,
-        "arch",
-        "RS-ARCH-07",
+        "topology",
+        "RS-TOPOLOGY-07",
         Some("apps/backend/Cargo.toml"),
         None,
         None,
     );
 }
 
-pub fn assert_arch_app_scoped_hexarch_override(report: &Report) {
+pub fn assert_topology_app_scoped_hexarch_override(report: &Report) {
     assert_live_files_for_id(
         report,
-        "arch",
-        "RS-ARCH-06",
+        "topology",
+        "RS-TOPOLOGY-06",
         &[
             "apps/backend/Cargo.toml",
             "apps/backend/crates/worker/Cargo.toml",
@@ -155,11 +155,11 @@ pub fn assert_arch_app_scoped_hexarch_override(report: &Report) {
     );
 }
 
-pub fn assert_arch_inactive_misplaced_root_inventory(report: &Report) {
+pub fn assert_topology_inactive_misplaced_root_inventory(report: &Report) {
     assert_result_present(
         report,
-        "arch",
-        "RS-ARCH-02",
+        "topology",
+        "RS-TOPOLOGY-02",
         None,
         Some(true),
         Some("Misplaced-root reporting is inactive"),

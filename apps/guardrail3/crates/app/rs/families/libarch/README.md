@@ -19,7 +19,7 @@ It owns:
 
 It does not replace:
 
-- `RS-ARCH` for placement ownership
-- `RS-ARCH` for workspace-membership exactness
+- `RS-TOPOLOGY` for placement ownership
+- `RS-TOPOLOGY` for workspace-membership exactness
 - `RS-CODE` for generic facade/source quality
 - `RS-DEPS` for dependency allowlist policy

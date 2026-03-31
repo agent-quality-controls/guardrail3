@@ -1,0 +1,10 @@
+[package]
+name = "guardrail3-app-rs-family-topology-test-support"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
+guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../family_mapper" }
+
+[lints]
+workspace = true

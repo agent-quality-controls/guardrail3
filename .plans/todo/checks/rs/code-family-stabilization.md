@@ -83,7 +83,7 @@ apps/guardrail3/crates/app/rs/families/code/
 
 Required end-state properties:
 
-- passes `RS-ARCH`
+- passes `RS-TOPOLOGY`
 - passes `RS-TEST`
 - family-local README matches reality
 - runtime owns orchestration only
@@ -210,6 +210,6 @@ The next concrete coding order is now:
 - the family has the package-group shape above
 - `guardrail3-app-rs-family-code` points at `crates/runtime`
 - family tests pass
-- `RS-ARCH` on the family root is clean
+- `RS-TOPOLOGY` on the family root is clean
 - `RS-TEST` on the family root is clean
 - the family is ready for repeated adversarial rule-family review without reopening shared-parser trust gaps

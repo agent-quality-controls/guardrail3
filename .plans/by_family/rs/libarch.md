@@ -20,7 +20,7 @@ Current state:
   - `test_support`
 - runtime/model/config/reporting selection already know `libarch`
 - the family now owns layered-library escalation, layered crate-set shape, layer dependency direction, and root facade export policy for package-owned library roots
-- workspace-membership exactness now belongs to `RS-ARCH`, not `RS-LIBARCH`
+- workspace-membership exactness now belongs to `RS-TOPOLOGY`, not `RS-LIBARCH`
 - the old detailed design ledger remains useful as history, but it is no longer describing a hypothetical family
 
 Scope model:
@@ -55,9 +55,9 @@ Historical/supplemental references:
 
 - `.plans/todo/checks/rs/libarch.md`
 - `.plans/todo/family-implementation-handoffs/libarch.md`
-- `arch` and `hexarch` docs where package/app ownership boundaries are already described
+- `topology` and `hexarch` docs where package/app ownership boundaries are already described
 
 Next planning focus:
 
-- keep package architecture separate from generic Cargo policy and from repo-global `arch`
+- keep package architecture separate from generic Cargo policy and from repo-global `topology`
 - pressure fail-closed and dependency-direction edges as the package zone evolves

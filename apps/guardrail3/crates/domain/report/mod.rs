@@ -275,7 +275,7 @@ impl Default for RustCheckCategories {
 #[must_use]
 pub const fn rust_validate_family_cli_name(family: RustValidateFamily) -> &'static str {
     match family {
-        RustValidateFamily::Arch => "arch",
+        RustValidateFamily::Topology => "topology",
         RustValidateFamily::Fmt => "fmt",
         RustValidateFamily::Toolchain => "toolchain",
         RustValidateFamily::Clippy => "clippy",
@@ -296,7 +296,7 @@ pub const fn rust_validate_family_cli_name(family: RustValidateFamily) -> &'stat
 #[must_use]
 pub const fn rust_validate_family_config_key(family: RustValidateFamily) -> &'static str {
     match family {
-        RustValidateFamily::Arch => "arch",
+        RustValidateFamily::Topology => "topology",
         RustValidateFamily::Fmt => "fmt",
         RustValidateFamily::Toolchain => "toolchain",
         RustValidateFamily::Clippy => "clippy",
