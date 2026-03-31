@@ -83,16 +83,6 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_arch(&self) -> views::RsArchRoute {
-        if !self.selected_families.contains(RustValidateFamily::Arch) {
-            return views::RsArchRoute::new(
-                Vec::new(),
-                Vec::new(),
-                Vec::new(),
-                Vec::new(),
-                Vec::new(),
-            );
-        }
-
         views::RsArchRoute::new(
             self.structure
                 .roots()
@@ -174,7 +164,7 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_code(&self) -> views::RsCodeRoute {
-        self.map_scoped_source_route(RustValidateFamily::Code)
+        self.map_global_source_route(RustValidateFamily::Code)
     }
 
     #[must_use]
@@ -315,39 +305,11 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_test(&self) -> views::RsTestRoute {
-        let roots = self.map_roots_for_family(RustValidateFamily::Test, |_| true);
-        let root_rels = roots
-            .iter()
-            .map(|root| root.rel_dir().to_owned())
-            .collect::<Vec<_>>();
-
-        views::RsTestRoute::new(
-            roots,
-            filter_for_roots(
-                self.tree,
-                self.scoped_files,
-                &root_rels,
-                self.validation_scope,
-            ),
-        )
+        views::RsTestRoute::new(self.map_global_roots_for_family(RustValidateFamily::Test), None)
     }
 
-    fn map_scoped_source_route(&self, family: RustValidateFamily) -> views::RsCodeRoute {
-        let roots = self.map_scoped_roots_for_family(family, |_| true);
-        let root_rels = roots
-            .iter()
-            .map(|root| root.root().rel_dir().to_owned())
-            .collect::<Vec<_>>();
-
-        views::RsCodeRoute::new(
-            roots,
-            filter_for_roots(
-                self.tree,
-                self.scoped_files,
-                &root_rels,
-                self.validation_scope,
-            ),
-        )
+    fn map_global_source_route(&self, family: RustValidateFamily) -> views::RsCodeRoute {
+        views::RsCodeRoute::new(self.map_global_scoped_roots_for_family(family), None)
     }
 
     fn map_workspace_roots_for_family(&self, family: RustValidateFamily) -> Vec<views::RsRootView> {
@@ -406,14 +368,7 @@ impl<'a> FamilyMapper<'a> {
             .collect()
     }
 
-    fn map_roots_for_family<F>(
-        &self,
-        family: RustValidateFamily,
-        predicate: F,
-    ) -> Vec<views::RsRootView>
-    where
-        F: Fn(&RustRootPlacementRootFacts) -> bool,
-    {
+    fn map_global_roots_for_family(&self, family: RustValidateFamily) -> Vec<views::RsRootView> {
         if !self.selected_families.contains(family) {
             return Vec::new();
         }
@@ -421,21 +376,15 @@ impl<'a> FamilyMapper<'a> {
         self.structure
             .roots()
             .iter()
-            .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
-            .filter(|root| predicate(root))
             .filter(|root| root_enabled_for_family(root, family, self.config))
             .map(root_view)
             .collect()
     }
 
-    fn map_scoped_roots_for_family<F>(
+    fn map_global_scoped_roots_for_family(
         &self,
         family: RustValidateFamily,
-        predicate: F,
-    ) -> Vec<views::RsScopedRootView>
-    where
-        F: Fn(&RustRootPlacementRootFacts) -> bool,
-    {
+    ) -> Vec<views::RsScopedRootView> {
         if !self.selected_families.contains(family) {
             return Vec::new();
         }
@@ -443,8 +392,6 @@ impl<'a> FamilyMapper<'a> {
         self.structure
             .roots()
             .iter()
-            .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
-            .filter(|root| predicate(root))
             .filter(|root| root_enabled_for_family(root, family, self.config))
             .map(|root| views::RsScopedRootView::new(root_view(root), root.classification()))
             .collect()

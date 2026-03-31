@@ -1,4 +1,4 @@
-#[cfg(any(feature = "family-code", feature = "family-garde"))]
+#[cfg(feature = "family-garde")]
 use guardrail3_app_rs_family_mapper::RsScopedRootView;
 use guardrail3_app_rs_family_mapper::{RsFamilyFileView, RsProjectSurface, RsRootView};
 use guardrail3_domain_project_tree::ProjectTree;
@@ -104,12 +104,7 @@ fn run_cargo(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-code")]
 fn run_code(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_code();
-    let surface = RsProjectSurface::from_route_scope(
-        ctx.tree,
-        &scoped_route_root_rels(route.roots()),
-        &code_extra_files(route.roots()),
-        None,
-    );
+    let surface = RsProjectSurface::from_tree(ctx.tree);
     guardrail3_app_rs_family_code::check(&surface, &route)
 }
 
@@ -290,13 +285,6 @@ fn fmt_extra_files(route: &guardrail3_app_rs_family_mapper::RsFmtRoute) -> Vec<S
     extra
 }
 
-#[cfg(feature = "family-code")]
-fn code_extra_files(roots: &[RsScopedRootView]) -> Vec<String> {
-    let mut extra = scoped_route_root_cargo_files(roots);
-    extra.push("guardrail3.toml".to_owned());
-    extra
-}
-
 #[cfg(any(
     feature = "family-toolchain",
     feature = "family-clippy",
@@ -330,7 +318,7 @@ fn route_root_cargo_files(roots: &[RsRootView]) -> Vec<String> {
         .collect()
 }
 
-#[cfg(any(feature = "family-code", feature = "family-garde"))]
+#[cfg(feature = "family-garde")]
 fn scoped_route_root_rels(roots: &[RsScopedRootView]) -> Vec<String> {
     roots
         .iter()
@@ -338,7 +326,7 @@ fn scoped_route_root_rels(roots: &[RsScopedRootView]) -> Vec<String> {
         .collect()
 }
 
-#[cfg(any(feature = "family-code", feature = "family-garde"))]
+#[cfg(feature = "family-garde")]
 fn scoped_route_root_cargo_files(roots: &[RsScopedRootView]) -> Vec<String> {
     roots
         .iter()

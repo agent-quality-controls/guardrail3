@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_domain_config::types::GuardrailConfig;
 
 use super::{CargoRootFacts, CodeInputFailureFacts, PolicySettings, rel_is_same_or_descendant};
 

@@ -462,6 +462,23 @@ pub(crate) fn run_hexarch_for_tests(
 }
 
 #[cfg(test)]
+pub(crate) fn run_hexarch_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Hexarch],
+        false,
+        &StubToolCheckerTest,
+    )
+}
+
+#[cfg(test)]
 pub(crate) fn run_code_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
@@ -475,6 +492,31 @@ pub(crate) fn run_toolchain_for_tests(
     root: &std::path::Path,
 ) -> Result<guardrail3_domain_report::Report, RustRunError> {
     run_for_tests(fs, root, &[RustValidateFamily::Toolchain])
+}
+
+#[cfg(test)]
+pub(crate) fn run_clippy_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run_for_tests(fs, root, &[RustValidateFamily::Clippy])
+}
+
+#[cfg(test)]
+pub(crate) fn run_fmt_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Fmt],
+        false,
+        &StubToolCheckerTest,
+    )
 }
 
 #[cfg(test)]
@@ -495,11 +537,61 @@ pub(crate) fn run_clippy_with_validation_scope_for_tests(
 }
 
 #[cfg(test)]
+pub(crate) fn run_deny_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run_for_tests(fs, root, &[RustValidateFamily::Deny])
+}
+
+#[cfg(test)]
+pub(crate) fn run_deny_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Deny],
+        false,
+        &StubToolCheckerTest,
+    )
+}
+
+#[cfg(test)]
 pub(crate) fn run_deps_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
 ) -> Result<guardrail3_domain_report::Report, RustRunError> {
     run_for_tests(fs, root, &[RustValidateFamily::Deps])
+}
+
+#[cfg(test)]
+pub(crate) fn run_garde_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run_for_tests(fs, root, &[RustValidateFamily::Garde])
+}
+
+#[cfg(test)]
+pub(crate) fn run_garde_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Garde],
+        false,
+        &StubToolCheckerTest,
+    )
 }
 
 #[cfg(test)]
@@ -556,6 +648,56 @@ pub(crate) fn run_release_with_validation_scope_for_tests(
         Some(validation_scope),
         None,
         &[RustValidateFamily::Release],
+        false,
+        &StubToolCheckerTest,
+    )
+}
+
+#[cfg(test)]
+pub(crate) fn run_libarch_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run_for_tests(fs, root, &[RustValidateFamily::Libarch])
+}
+
+#[cfg(test)]
+pub(crate) fn run_libarch_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Libarch],
+        false,
+        &StubToolCheckerTest,
+    )
+}
+
+#[cfg(test)]
+pub(crate) fn run_release_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run_for_tests(fs, root, &[RustValidateFamily::Release])
+}
+
+#[cfg(test)]
+pub(crate) fn run_test_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Test],
         false,
         &StubToolCheckerTest,
     )
