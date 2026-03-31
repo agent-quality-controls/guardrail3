@@ -177,10 +177,7 @@ fn malformed_root_local_guardrail_does_not_downgrade_missing_rust_version() {
 
     let results = check_results(&tree(
         &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
-        &[
-            ("Cargo.toml", &manifest),
-            ("guardrail3.toml", "[profile"),
-        ],
+        &[("Cargo.toml", &manifest), ("guardrail3.toml", "[profile")],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_15_rust_version_policy::assert_rule_results(

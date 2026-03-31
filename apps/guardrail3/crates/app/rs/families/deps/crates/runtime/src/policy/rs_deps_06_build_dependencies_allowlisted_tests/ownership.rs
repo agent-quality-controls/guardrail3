@@ -133,7 +133,10 @@ fn build_rule_stays_silent_without_allowlist() {
 fn undeclared_workspace_path_build_dependency_fails_closed() {
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["tools"], &["Cargo.toml", "guardrail3.toml"])),
+            (
+                "",
+                dir_entry(&["tools"], &["Cargo.toml", "guardrail3.toml"]),
+            ),
             ("tools", dir_entry(&["packages"], &[])),
             ("tools/packages", dir_entry(&["runtime"], &[])),
             (
@@ -188,7 +191,9 @@ fn undeclared_workspace_path_build_dependency_fails_closed() {
         results.iter().any(|result| {
             result.id() == "RS-DEPS-11"
                 && result.file() == Some("tools/packages/runtime/Cargo.toml")
-                && result.message().contains("not declared in `[workspace].members`")
+                && result
+                    .message()
+                    .contains("not declared in `[workspace].members`")
         }),
         "expected undeclared local workspace package failure: {results:#?}"
     );

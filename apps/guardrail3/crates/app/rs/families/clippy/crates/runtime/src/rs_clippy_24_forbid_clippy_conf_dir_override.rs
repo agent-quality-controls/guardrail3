@@ -1,4 +1,6 @@
 #[cfg(test)]
+use guardrail3_app_rs_family_mapper::RsProjectSurface;
+#[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
@@ -95,7 +97,7 @@ pub(crate) fn run_family_with_validation_scope_for_tests(
         guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
             .with_validation_scope(Some(validation_scope))
             .map_rs_clippy();
-    crate::check(tree, &route)
+    crate::check(&RsProjectSurface::from_tree(tree), &route)
 }
 
 #[cfg(test)]

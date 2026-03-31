@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 use std::path::Path;
 
-use guardrail3_app_rs_family_mapper::FamilyMapper;
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsProjectSurface};
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 pub(crate) use super::run_family;
@@ -14,7 +14,11 @@ pub(crate) fn run_family_scoped(root: &Path, scope: &str) -> Vec<crate::CheckRes
     let route = FamilyMapper::new(&tree, &placement, None, &selection, None)
         .with_validation_scope(Some(scope))
         .map_rs_test();
-    crate::check(&tree, &route, &test_support::StubToolChecker::default())
+    crate::check(
+        &RsProjectSurface::from_tree(&tree),
+        &route,
+        &test_support::StubToolChecker::default(),
+    )
 }
 
 mod boundaries;

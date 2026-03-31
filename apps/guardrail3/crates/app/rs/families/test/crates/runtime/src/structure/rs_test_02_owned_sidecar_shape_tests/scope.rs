@@ -71,7 +71,11 @@ fn scoped_test_file_does_not_report_unrelated_src_tests_tree() {
         "crates/runtime/src/lib.rs",
         "#[cfg(test)]\n#[path = \"foo_tests/mod.rs\"]\nmod foo_tests;\npub fn value() -> u8 { 1 }\n",
     );
-    write_file(root, "crates/runtime/src/foo.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/runtime/src/foo.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(root, "crates/runtime/src/foo_tests/mod.rs", "mod cases;\n");
     write_file(
         root,

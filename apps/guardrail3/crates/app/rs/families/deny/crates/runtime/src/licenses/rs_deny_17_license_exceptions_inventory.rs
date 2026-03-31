@@ -179,9 +179,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{
-    build_fixture_deny_toml, set_license_exceptions,
-};
+pub(crate) use ::test_support::{build_fixture_deny_toml, set_license_exceptions};
 #[cfg(test)]
 #[path = "rs_deny_17_license_exceptions_inventory_tests/mod.rs"]
 // reason: test-only sidecar module wiring

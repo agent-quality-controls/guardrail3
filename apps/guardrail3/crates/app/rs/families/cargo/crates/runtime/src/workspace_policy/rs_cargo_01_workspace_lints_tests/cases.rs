@@ -136,7 +136,9 @@ fn nested_package_under_workspace_is_not_treated_as_a_second_policy_root() {
         }],
     );
     assert!(
-        results.iter().all(|result| result.file() != Some("tools/helper/Cargo.toml")),
+        results
+            .iter()
+            .all(|result| result.file() != Some("tools/helper/Cargo.toml")),
         "cargo family should ignore undeclared nested packages because placement legality belongs to arch: {results:#?}"
     );
 }

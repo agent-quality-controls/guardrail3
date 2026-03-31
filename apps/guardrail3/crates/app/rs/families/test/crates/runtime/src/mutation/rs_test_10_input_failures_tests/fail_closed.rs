@@ -131,7 +131,9 @@ fn unreadable_pre_commit_hook_fails_closed_for_hook_only_adoption() {
     write_file(root, ".githooks/pre-commit", "#!/bin/sh\ncargo mutants\n");
 
     let hook_path = root.join(".githooks/pre-commit");
-    let mut permissions = std::fs::metadata(&hook_path).expect("metadata").permissions();
+    let mut permissions = std::fs::metadata(&hook_path)
+        .expect("metadata")
+        .permissions();
     permissions.set_mode(0o000);
     std::fs::set_permissions(&hook_path, permissions.clone()).expect("chmod 000");
 
@@ -172,7 +174,9 @@ fn unreadable_pre_commit_d_hook_fails_closed_for_hook_only_adoption() {
     );
 
     let hook_path = root.join(".githooks/pre-commit.d/run-mutants");
-    let mut permissions = std::fs::metadata(&hook_path).expect("metadata").permissions();
+    let mut permissions = std::fs::metadata(&hook_path)
+        .expect("metadata")
+        .permissions();
     permissions.set_mode(0o000);
     std::fs::set_permissions(&hook_path, permissions.clone()).expect("chmod 000");
 
@@ -181,7 +185,10 @@ fn unreadable_pre_commit_d_hook_fails_closed_for_hook_only_adoption() {
     permissions.set_mode(0o644);
     std::fs::set_permissions(&hook_path, permissions).expect("chmod restore");
 
-    assert_rule_files(&results, vec![".githooks/pre-commit.d/run-mutants".to_owned()]);
+    assert_rule_files(
+        &results,
+        vec![".githooks/pre-commit.d/run-mutants".to_owned()],
+    );
     assert_reported(
         &results,
         ".githooks/pre-commit.d/run-mutants",

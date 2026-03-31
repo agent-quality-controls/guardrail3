@@ -117,11 +117,18 @@ fn inventories_every_approved_allow_entry() {
 
     let results = check_results(&tree(
         &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
-        &[ ("Cargo.toml", &manifest),  ("guardrail3.toml", &guardrail)],
+        &[("Cargo.toml", &manifest), ("guardrail3.toml", &guardrail)],
     ));
 
-    let rs_cargo_03: Vec<_> = results.iter().filter(|result| result.id() == "RS-CARGO-03").collect();
-    assert_eq!(rs_cargo_03.len(), 10, "unexpected RS-CARGO-03 results: {results:#?}");
+    let rs_cargo_03: Vec<_> = results
+        .iter()
+        .filter(|result| result.id() == "RS-CARGO-03")
+        .collect();
+    assert_eq!(
+        rs_cargo_03.len(),
+        10,
+        "unexpected RS-CARGO-03 results: {results:#?}"
+    );
     for lint in APPROVED_ALLOWS {
         let expected_message = format!(
             "`Cargo.toml` explicitly allows `{lint}` in `clippy` with documented reason `Legacy lint suppression while API cleanup lands.`."
@@ -165,21 +172,27 @@ fn invalid_allow_entry_value_is_inventoried_accurately() {
 
     let results = check_results(&tree(
         &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
-        &[ ("Cargo.toml", &manifest),  ("guardrail3.toml", &guardrail)],
+        &[("Cargo.toml", &manifest), ("guardrail3.toml", &guardrail)],
     ));
 
-    let rs_cargo_03: Vec<_> = results.iter().filter(|result| result.id() == "RS-CARGO-03").collect();
-    assert_eq!(rs_cargo_03.len(), 9, "unexpected RS-CARGO-03 results: {results:#?}");
+    let rs_cargo_03: Vec<_> = results
+        .iter()
+        .filter(|result| result.id() == "RS-CARGO-03")
+        .collect();
+    assert_eq!(
+        rs_cargo_03.len(),
+        9,
+        "unexpected RS-CARGO-03 results: {results:#?}"
+    );
     assert!(
-        rs_cargo_03.iter().all(|result| !result.message().contains("module_name_repetitions")),
+        rs_cargo_03
+            .iter()
+            .all(|result| !result.message().contains("module_name_repetitions")),
         "RS-CARGO-03 should ignore malformed allow entries owned by other rules: {results:#?}"
     );
     let count = results
         .iter()
-        .find(|result| {
-            result.id() == "RS-CARGO-03"
-                && result.title() == "approved allow count"
-        })
+        .find(|result| result.id() == "RS-CARGO-03" && result.title() == "approved allow count")
         .expect("expected RS-CARGO-03 count summary");
     assert_eq!(
         count.message(),
@@ -204,7 +217,7 @@ fn invalid_clippy_table_shape_emits_no_allow_inventory() {
 
     let results = check_results(&tree(
         &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
-        &[ ("Cargo.toml", &manifest)],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_03_allow_inventory::assert_rule_results(
@@ -233,11 +246,18 @@ fn invalid_allow_priority_is_inventoried_accurately() {
 
     let results = check_results(&tree(
         &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
-        &[ ("Cargo.toml", &manifest),  ("guardrail3.toml", &guardrail)],
+        &[("Cargo.toml", &manifest), ("guardrail3.toml", &guardrail)],
     ));
 
-    let rs_cargo_03: Vec<_> = results.iter().filter(|result| result.id() == "RS-CARGO-03").collect();
-    assert_eq!(rs_cargo_03.len(), 10, "unexpected RS-CARGO-03 results: {results:#?}");
+    let rs_cargo_03: Vec<_> = results
+        .iter()
+        .filter(|result| result.id() == "RS-CARGO-03")
+        .collect();
+    assert_eq!(
+        rs_cargo_03.len(),
+        10,
+        "unexpected RS-CARGO-03 results: {results:#?}"
+    );
     assert!(
         rs_cargo_03
             .iter()
@@ -246,10 +266,7 @@ fn invalid_allow_priority_is_inventoried_accurately() {
     );
     let count = results
         .iter()
-        .find(|result| {
-            result.id() == "RS-CARGO-03"
-                && result.title() == "approved allow count"
-        })
+        .find(|result| result.id() == "RS-CARGO-03" && result.title() == "approved allow count")
         .expect("expected RS-CARGO-03 count summary");
     assert_eq!(
         count.message(),

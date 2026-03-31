@@ -6,7 +6,7 @@ use super::super::run_for_tests;
 #[test]
 fn inventories_root_workspace_clippy_only() {
     let tree = project_tree(
-        vec![( "", dir_entry(&[], &["Cargo.toml", "clippy.toml"]) )],
+        vec![("", dir_entry(&[], &["Cargo.toml", "clippy.toml"]))],
         vec![
             ("Cargo.toml", "[workspace]\nmembers = []\n".to_owned()),
             ("clippy.toml", "msrv = \"1.85\"\n".to_owned()),

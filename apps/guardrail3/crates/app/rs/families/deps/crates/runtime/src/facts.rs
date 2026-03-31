@@ -91,9 +91,7 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
     let exact_root_cargo_dirs = route
         .family_files()
         .iter()
-        .filter(|file| {
-            file.kind() == RustFamilyFileKind::CargoToml && file.exact_rust_root_owner()
-        })
+        .filter(|file| file.kind() == RustFamilyFileKind::CargoToml && file.exact_rust_root_owner())
         .map(|file| file.logical_owner_rel().to_owned())
         .collect::<BTreeSet<_>>();
     let routed_workspace_roots = route
@@ -108,9 +106,11 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
             file.kind() == RustFamilyFileKind::GuardrailToml
                 && (routed_workspace_roots.is_empty()
                     || routed_workspace_roots.contains(file.logical_owner_rel())
-                    || file
-                        .ancestor_rust_root_rels()
-                        .is_some_and(|roots| roots.iter().any(|root| routed_workspace_roots.contains(root))))
+                    || file.ancestor_rust_root_rels().is_some_and(|roots| {
+                        roots
+                            .iter()
+                            .any(|root| routed_workspace_roots.contains(root))
+                    }))
         })
         .map(|file| file.rel_path().to_owned());
     let parsed_guardrail = parse_guardrail(tree, guardrail_rel_path.as_deref());
@@ -128,19 +128,14 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         .unwrap_or_default();
     let workspaces = discover_workspaces(tree, route, &exact_root_cargo_dirs, &mut input_failures);
     let workspace_by_member = workspace_by_member(&workspaces);
-    let members = discover_members(
-        tree,
-        &workspaces,
-        &workspace_by_member,
-        &parsed_guardrail,
-    )
-    .into_iter()
-    .filter(|member| {
-        route.validation_scope().is_none_or(|scope| {
-            rel_intersects_validation_scope(&member.rel_dir, scope)
+    let members = discover_members(tree, &workspaces, &workspace_by_member, &parsed_guardrail)
+        .into_iter()
+        .filter(|member| {
+            route
+                .validation_scope()
+                .is_none_or(|scope| rel_intersects_validation_scope(&member.rel_dir, scope))
         })
-    })
-    .collect::<Vec<_>>();
+        .collect::<Vec<_>>();
 
     let (dependency_entries, direct_dependency_caps) =
         collect_dependency_facts(tree, &members, &workspaces, &mut input_failures);

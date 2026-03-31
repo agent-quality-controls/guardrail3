@@ -8,7 +8,7 @@ mod runners;
 use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig, RustConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{
-    rust_validate_family_cli_name, rust_validate_family_section_name, CheckResult, Report, Section,
+    CheckResult, Report, Section, rust_validate_family_cli_name, rust_validate_family_section_name,
 };
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 use guardrail3_validation_model::RustValidateFamily;

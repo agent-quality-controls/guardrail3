@@ -106,7 +106,11 @@ pub(crate) fn read_profile_map(
             .filter(|facts| facts.has_workspace)
             .map(|facts| facts.rel_dir.as_str())
             .filter(|rel_dir| !rel_dir.is_empty())
-            .filter(|rel_dir| !resolved_app_paths.values().any(|app_rel| app_rel == *rel_dir))
+            .filter(|rel_dir| {
+                !resolved_app_paths
+                    .values()
+                    .any(|app_rel| app_rel == *rel_dir)
+            })
         {
             let _ = map
                 .entry(rel_dir.to_owned())

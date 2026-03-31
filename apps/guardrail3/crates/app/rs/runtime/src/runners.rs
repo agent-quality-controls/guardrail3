@@ -1,3 +1,7 @@
+#[cfg(any(feature = "family-code", feature = "family-garde"))]
+use guardrail3_app_rs_family_mapper::RsScopedRootView;
+use guardrail3_app_rs_family_mapper::{RsFamilyFileView, RsProjectSurface, RsRootView};
+use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_validation_model::RustValidateFamily;
 
@@ -12,12 +16,17 @@ pub(crate) struct RustFamilyRunnerDef {
 
 #[cfg(feature = "family-arch")]
 fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    guardrail3_app_rs_family_arch::check(ctx.tree, &ctx.mapper.map_rs_arch())
+    guardrail3_app_rs_family_arch::check(
+        &RsProjectSurface::from_tree(ctx.tree),
+        &ctx.mapper.map_rs_arch(),
+    )
 }
 
 #[cfg(feature = "family-fmt")]
 fn run_fmt(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    guardrail3_app_rs_family_fmt::check(ctx.tree, &ctx.mapper.map_rs_fmt())
+    let route = ctx.mapper.map_rs_fmt();
+    let surface = RsProjectSurface::from_route_scope(ctx.tree, &[], &fmt_extra_files(&route), None);
+    guardrail3_app_rs_family_fmt::check(&surface, &route)
 }
 
 #[cfg(feature = "family-toolchain")]
@@ -28,7 +37,12 @@ fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            guardrail3_app_rs_family_toolchain::check(ctx.tree, &workspace_route)
+            let surface = workspace_surface(
+                ctx.tree,
+                workspace_route.roots(),
+                workspace_route.family_files(),
+            );
+            guardrail3_app_rs_family_toolchain::check(&surface, &workspace_route)
         })
         .collect()
 }
@@ -41,7 +55,12 @@ fn run_clippy(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            guardrail3_app_rs_family_clippy::check(ctx.tree, &workspace_route)
+            let surface = workspace_surface(
+                ctx.tree,
+                workspace_route.roots(),
+                workspace_route.family_files(),
+            );
+            guardrail3_app_rs_family_clippy::check(&surface, &workspace_route)
         })
         .collect()
 }
@@ -54,7 +73,12 @@ fn run_deny(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            guardrail3_app_rs_family_deny::check(ctx.tree, &workspace_route)
+            let surface = workspace_surface(
+                ctx.tree,
+                workspace_route.roots(),
+                workspace_route.family_files(),
+            );
+            guardrail3_app_rs_family_deny::check(&surface, &workspace_route)
         })
         .collect()
 }
@@ -67,14 +91,26 @@ fn run_cargo(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            guardrail3_app_rs_family_cargo::check(ctx.tree, &workspace_route)
+            let surface = workspace_surface(
+                ctx.tree,
+                workspace_route.roots(),
+                workspace_route.family_files(),
+            );
+            guardrail3_app_rs_family_cargo::check(&surface, &workspace_route)
         })
         .collect()
 }
 
 #[cfg(feature = "family-code")]
 fn run_code(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    guardrail3_app_rs_family_code::check(ctx.tree, &ctx.mapper.map_rs_code())
+    let route = ctx.mapper.map_rs_code();
+    let surface = RsProjectSurface::from_route_scope(
+        ctx.tree,
+        &scoped_route_root_rels(route.roots()),
+        &scoped_route_root_cargo_files(route.roots()),
+        None,
+    );
+    guardrail3_app_rs_family_code::check(&surface, &route)
 }
 
 #[cfg(feature = "family-hexarch")]
@@ -85,7 +121,8 @@ fn run_hexarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            guardrail3_app_rs_family_hexarch::check(ctx.tree, &workspace_route)
+            let surface = hexarch_surface(ctx.tree, &workspace_route);
+            guardrail3_app_rs_family_hexarch::check(&surface, &workspace_route)
         })
         .collect()
 }
@@ -98,7 +135,12 @@ fn run_libarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            guardrail3_app_rs_family_libarch::check(ctx.tree, &workspace_route)
+            let surface = workspace_surface(
+                ctx.tree,
+                workspace_route.roots(),
+                workspace_route.family_files(),
+            );
+            guardrail3_app_rs_family_libarch::check(&surface, &workspace_route)
         })
         .collect()
 }
@@ -111,7 +153,12 @@ fn run_deps(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            guardrail3_app_rs_family_deps::check(ctx.tree, &workspace_route, ctx.tc)
+            let surface = workspace_surface(
+                ctx.tree,
+                workspace_route.roots(),
+                workspace_route.family_files(),
+            );
+            guardrail3_app_rs_family_deps::check(&surface, &workspace_route, ctx.tc)
         })
         .collect()
 }
@@ -124,14 +171,22 @@ fn run_garde(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.root().rel_dir());
-            guardrail3_app_rs_family_garde::check(ctx.tree, &workspace_route)
+            let surface = garde_surface(ctx.tree, &workspace_route);
+            guardrail3_app_rs_family_garde::check(&surface, &workspace_route)
         })
         .collect()
 }
 
 #[cfg(feature = "family-test")]
 fn run_test(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    guardrail3_app_rs_family_test::check(ctx.tree, &ctx.mapper.map_rs_test(), ctx.tc)
+    let route = ctx.mapper.map_rs_test();
+    let surface = RsProjectSurface::from_route_scope(
+        ctx.tree,
+        &route_root_rels(route.roots()),
+        &route_root_cargo_files(route.roots()),
+        None,
+    );
+    guardrail3_app_rs_family_test::check(&surface, &route, ctx.tc)
 }
 
 #[cfg(feature = "family-release")]
@@ -142,8 +197,13 @@ fn run_release(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            guardrail3_app_rs_family_release::check(
+            let surface = workspace_surface(
                 ctx.tree,
+                workspace_route.roots(),
+                workspace_route.family_files(),
+            );
+            guardrail3_app_rs_family_release::check(
+                &surface,
                 &workspace_route,
                 ctx.tc,
                 ctx.thorough,
@@ -154,12 +214,147 @@ fn run_release(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 
 #[cfg(feature = "family-hooks-shared")]
 fn run_hooks_shared(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    guardrail3_app_rs_family_hooks_shared::check(ctx.fs, ctx.path, ctx.tree, ctx.tc)
+    guardrail3_app_rs_family_hooks_shared::check(
+        ctx.fs,
+        ctx.path,
+        &RsProjectSurface::from_tree(ctx.tree),
+        ctx.tc,
+    )
 }
 
 #[cfg(feature = "family-hooks-rs")]
 fn run_hooks_rs(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    guardrail3_app_rs_family_hooks_rs::check(ctx.tree, ctx.tc)
+    guardrail3_app_rs_family_hooks_rs::check(&RsProjectSurface::from_tree(ctx.tree), ctx.tc)
+}
+
+#[cfg(any(
+    feature = "family-toolchain",
+    feature = "family-clippy",
+    feature = "family-deny",
+    feature = "family-cargo",
+    feature = "family-libarch",
+    feature = "family-deps",
+    feature = "family-release",
+))]
+fn workspace_surface(
+    tree: &ProjectTree,
+    roots: &[RsRootView],
+    family_files: &[RsFamilyFileView],
+) -> RsProjectSurface {
+    let mut extra_file_rels = route_root_cargo_files(roots);
+    extra_file_rels.extend(family_file_rels(family_files));
+    RsProjectSurface::from_route_scope(tree, &route_root_rels(roots), &extra_file_rels, None)
+}
+
+#[cfg(feature = "family-garde")]
+fn garde_surface(
+    tree: &ProjectTree,
+    route: &guardrail3_app_rs_family_mapper::RsGardeRoute,
+) -> RsProjectSurface {
+    let mut extra_file_rels = scoped_route_root_cargo_files(route.roots());
+    extra_file_rels.extend(family_file_rels(route.family_files()));
+    RsProjectSurface::from_route_scope(
+        tree,
+        &scoped_route_root_rels(route.roots()),
+        &extra_file_rels,
+        None,
+    )
+}
+
+#[cfg(feature = "family-hexarch")]
+fn hexarch_surface(
+    tree: &ProjectTree,
+    route: &guardrail3_app_rs_family_mapper::RsHexarchRoute,
+) -> RsProjectSurface {
+    let mut extra_file_rels = route_root_cargo_files(route.roots());
+    if let Some(repo_root_cargo) = route.repo_root_cargo_rel_path() {
+        extra_file_rels.push(repo_root_cargo.to_owned());
+    }
+    if let Some(guardrail_rel) = route.guardrail_config_rel_path() {
+        extra_file_rels.push(guardrail_rel.to_owned());
+    }
+    RsProjectSurface::from_route_scope(
+        tree,
+        &route_root_rels(route.roots()),
+        &extra_file_rels,
+        None,
+    )
+}
+
+#[cfg(feature = "family-fmt")]
+fn fmt_extra_files(route: &guardrail3_app_rs_family_mapper::RsFmtRoute) -> Vec<String> {
+    let mut extra = family_file_rels(route.family_files());
+    extra.push("Cargo.toml".to_owned());
+    extra.push("rust-toolchain.toml".to_owned());
+    extra.push("guardrail3.toml".to_owned());
+    extra
+}
+
+#[cfg(any(
+    feature = "family-toolchain",
+    feature = "family-clippy",
+    feature = "family-deny",
+    feature = "family-cargo",
+    feature = "family-libarch",
+    feature = "family-deps",
+    feature = "family-release",
+    feature = "family-test",
+    feature = "family-hexarch",
+))]
+fn route_root_rels(roots: &[RsRootView]) -> Vec<String> {
+    roots.iter().map(|root| root.rel_dir().to_owned()).collect()
+}
+
+#[cfg(any(
+    feature = "family-toolchain",
+    feature = "family-clippy",
+    feature = "family-deny",
+    feature = "family-cargo",
+    feature = "family-libarch",
+    feature = "family-deps",
+    feature = "family-release",
+    feature = "family-test",
+    feature = "family-hexarch",
+))]
+fn route_root_cargo_files(roots: &[RsRootView]) -> Vec<String> {
+    roots
+        .iter()
+        .map(|root| root.cargo_rel_path().to_owned())
+        .collect()
+}
+
+#[cfg(any(feature = "family-code", feature = "family-garde"))]
+fn scoped_route_root_rels(roots: &[RsScopedRootView]) -> Vec<String> {
+    roots
+        .iter()
+        .map(|root| root.root().rel_dir().to_owned())
+        .collect()
+}
+
+#[cfg(any(feature = "family-code", feature = "family-garde"))]
+fn scoped_route_root_cargo_files(roots: &[RsScopedRootView]) -> Vec<String> {
+    roots
+        .iter()
+        .map(|root| root.root().cargo_rel_path().to_owned())
+        .collect()
+}
+
+#[cfg(any(
+    feature = "family-fmt",
+    feature = "family-toolchain",
+    feature = "family-clippy",
+    feature = "family-deny",
+    feature = "family-cargo",
+    feature = "family-libarch",
+    feature = "family-deps",
+    feature = "family-release",
+    feature = "family-garde",
+))]
+fn family_file_rels(family_files: &[RsFamilyFileView]) -> Vec<String> {
+    family_files
+        .iter()
+        .map(|file| file.rel_path().to_owned())
+        .collect()
 }
 
 pub(crate) fn compiled_runners() -> Vec<RustFamilyRunnerDef> {

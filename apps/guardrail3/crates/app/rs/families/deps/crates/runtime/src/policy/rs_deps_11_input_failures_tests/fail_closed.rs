@@ -395,7 +395,11 @@ fn dependency_workspace_flag_with_non_boolean_value_surfaces_explicit_failure() 
 
     assertions::assert_summary(
         summary,
-        vec![(Some("apps/api/Cargo.toml"), assertions::Severity::Error, true)],
+        vec![(
+            Some("apps/api/Cargo.toml"),
+            assertions::Severity::Error,
+            true,
+        )],
     );
 }
 
@@ -505,7 +509,11 @@ fn unreadable_member_manifest_surfaces_explicit_failure() {
 
     assertions::assert_summary(
         summary,
-        vec![(Some("apps/api/Cargo.toml"), assertions::Severity::Error, false)],
+        vec![(
+            Some("apps/api/Cargo.toml"),
+            assertions::Severity::Error,
+            false,
+        )],
     );
 }
 
@@ -537,7 +545,10 @@ fn unreadable_workspace_manifest_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, Vec::<(Option<&str>, assertions::Severity, bool)>::new());
+    assertions::assert_summary(
+        summary,
+        Vec::<(Option<&str>, assertions::Severity, bool)>::new(),
+    );
 }
 
 #[test]

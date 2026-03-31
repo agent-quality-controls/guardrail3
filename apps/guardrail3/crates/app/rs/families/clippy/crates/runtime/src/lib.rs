@@ -27,8 +27,7 @@ mod rs_clippy_23_policy_context_parseable;
 mod rs_clippy_24_forbid_clippy_conf_dir_override;
 mod rs_clippy_25_config_parseable;
 
-use guardrail3_app_rs_family_mapper::RsClippyRoute;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_mapper::{RsClippyRoute, RsProjectSurface};
 use guardrail3_domain_report::CheckResult;
 
 use self::facts::collect;
@@ -40,7 +39,8 @@ use self::inputs::{
 #[cfg(test)]
 use guardrail3_app_rs_family_clippy_assertions as _;
 
-pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
+pub fn check(surface: &RsProjectSurface, route: &RsClippyRoute) -> Vec<CheckResult> {
+    let tree = surface.tree();
     let facts = collect(tree, route);
     let has_routed_roots = !route.roots().is_empty();
     let mut results = Vec::new();

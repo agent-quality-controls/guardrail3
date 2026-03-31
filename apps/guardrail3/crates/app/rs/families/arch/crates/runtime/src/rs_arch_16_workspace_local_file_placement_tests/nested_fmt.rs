@@ -8,13 +8,13 @@ fn reports_nested_rustfmt_config_outside_validation_root() {
         &[
             ("", entry(&["apps"], &["guardrail3.toml"])),
             ("apps", entry(&["api"], &[])),
-            (
-                "apps/api",
-                entry(&[], &["Cargo.toml", "rustfmt.toml"]),
-            ),
+            ("apps/api", entry(&[], &["Cargo.toml", "rustfmt.toml"])),
         ],
         &[
-            ("guardrail3.toml", "[rust.checks]\narch = true\nfmt = true\n"),
+            (
+                "guardrail3.toml",
+                "[rust.checks]\narch = true\nfmt = true\n",
+            ),
             (
                 "apps/api/Cargo.toml",
                 "[workspace]\nmembers = []\nresolver = \"2\"\n",

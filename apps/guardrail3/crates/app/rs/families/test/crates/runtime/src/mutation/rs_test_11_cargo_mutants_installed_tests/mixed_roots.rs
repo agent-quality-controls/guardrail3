@@ -28,6 +28,9 @@ fn workspace_root_hook_adoption_reaches_workspace_member_but_not_idle_standalone
 
     assert_rule_files(
         &results,
-        vec!["Cargo.toml".to_owned(), "crates/adopted/Cargo.toml".to_owned()],
+        vec![
+            "Cargo.toml".to_owned(),
+            "crates/adopted/Cargo.toml".to_owned(),
+        ],
     );
 }

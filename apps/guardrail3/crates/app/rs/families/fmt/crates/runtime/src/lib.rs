@@ -9,6 +9,8 @@ mod rs_fmt_06_edition_mismatch;
 mod rs_fmt_07_ignore_escape_hatch;
 mod rs_fmt_08_dual_file_conflict;
 
+use guardrail3_app_rs_family_mapper::RsProjectSurface;
+#[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
@@ -20,13 +22,17 @@ use guardrail3_app_rs_family_mapper::FamilyMapper;
 #[cfg(test)]
 use guardrail3_domain_config::types::GuardrailConfig;
 #[cfg(test)]
-use tempfile as _;
-#[cfg(test)]
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 #[cfg(test)]
 use std::collections::BTreeSet;
+#[cfg(test)]
+use tempfile as _;
 
-pub fn check(tree: &ProjectTree, route: &guardrail3_app_rs_family_mapper::RsFmtRoute) -> Vec<CheckResult> {
+pub fn check(
+    surface: &RsProjectSurface,
+    route: &guardrail3_app_rs_family_mapper::RsFmtRoute,
+) -> Vec<CheckResult> {
+    let tree = surface.tree();
     let facts = collect(tree, route);
     let mut results = Vec::new();
 
@@ -64,7 +70,7 @@ pub(crate) fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Fmt]));
     let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None).map_rs_fmt();
-    check(tree, &route)
+    check(&RsProjectSurface::from_tree(tree), &route)
 }
 
 #[cfg(test)]

@@ -69,7 +69,10 @@ fn should_resolve_workspace_readme_relative_to_workspace_root() {
             ("packages", dir_entry(&["shared"], &["README.md"])),
             ("packages/shared", dir_entry(&["crates"], &["Cargo.toml"])),
             ("packages/shared/crates", dir_entry(&["pub"], &[])),
-            ("packages/shared/crates/pub", dir_entry(&[], &["Cargo.toml"])),
+            (
+                "packages/shared/crates/pub",
+                dir_entry(&[], &["Cargo.toml"]),
+            ),
         ],
         vec![
             (

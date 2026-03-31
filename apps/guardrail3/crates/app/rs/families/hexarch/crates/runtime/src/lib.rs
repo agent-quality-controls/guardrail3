@@ -107,7 +107,10 @@ pub fn check_test_tree(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     let route = family_route_for_tests(tree);
-    check(tree, &route)
+    check(
+        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
+        &route,
+    )
 }
 
 #[cfg(test)]
@@ -119,9 +122,10 @@ pub fn collect_dependency_facts_from_tree_for_tests(
 }
 
 pub fn check(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    surface: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     route: &guardrail3_app_rs_family_mapper::RsHexarchRoute,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
+    let tree = surface.tree();
     let facts = facts::collect(tree, route);
     let dependency_facts = dependency_facts::collect(tree, route);
     let source_facts = source_facts::collect(tree, &dependency_facts.members);

@@ -14,5 +14,8 @@ pub fn assert_error_files(results: &[CheckResult], expected: &[&str]) {
         .iter()
         .map(|path| (*path).to_owned())
         .collect::<BTreeSet<_>>();
-    assert_eq!(actual, expected, "unexpected {RULE_ID} error set: {results:#?}");
+    assert_eq!(
+        actual, expected,
+        "unexpected {RULE_ID} error set: {results:#?}"
+    );
 }

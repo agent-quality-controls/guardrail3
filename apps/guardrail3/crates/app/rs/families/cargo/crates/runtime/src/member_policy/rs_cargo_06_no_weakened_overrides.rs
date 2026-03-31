@@ -17,7 +17,8 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
     };
     let workspace_rust_lints = policy_lints(input.workspace, "rust");
     let workspace_clippy_lints = policy_lints(input.workspace, "clippy");
-    let workspace_policy_complete = workspace_rust_lints.is_some() && workspace_clippy_lints.is_some();
+    let workspace_policy_complete =
+        workspace_rust_lints.is_some() && workspace_clippy_lints.is_some();
 
     let mut violations = 0usize;
     violations += check_family(

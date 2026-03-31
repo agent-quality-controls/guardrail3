@@ -19,7 +19,10 @@ fn reports_nested_toolchain_under_workspace_member() {
             ),
         ],
         &[
-            ("guardrail3.toml", "[rust.checks]\narch = true\ntoolchain = true\n"),
+            (
+                "guardrail3.toml",
+                "[rust.checks]\narch = true\ntoolchain = true\n",
+            ),
             (
                 "apps/api/Cargo.toml",
                 "[workspace]\nmembers = [\"crates/member\"]\nresolver = \"2\"\n",

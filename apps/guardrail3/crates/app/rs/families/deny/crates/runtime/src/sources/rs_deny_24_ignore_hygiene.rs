@@ -140,7 +140,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             id: "RS-DENY-24".to_owned(),
             severity: Severity::Warn,
             title: "advisory ignore entry".to_owned(),
-            message: format!("`{}` has documented advisory ignore `{id}`.", config.rel_path),
+            message: format!(
+                "`{}` has documented advisory ignore `{id}`.",
+                config.rel_path
+            ),
             file: Some(config.rel_path.clone()),
             line: None,
             inventory: false,
@@ -176,9 +179,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{
-    build_fixture_deny_toml, set_advisory_ignores,
-};
+pub(crate) use ::test_support::{build_fixture_deny_toml, set_advisory_ignores};
 #[cfg(test)]
 #[path = "rs_deny_24_ignore_hygiene_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_24_ignore_hygiene_tests;

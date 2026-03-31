@@ -28,7 +28,10 @@ fn scoped_member_root_does_not_wake_sibling_mutation_roots() {
 
     let results = run_family_scoped(root, "crates/adopted/Cargo.toml");
 
-    assert_rule_files(&results, vec!["crates/adopted/.cargo/mutants.toml".to_owned()]);
+    assert_rule_files(
+        &results,
+        vec!["crates/adopted/.cargo/mutants.toml".to_owned()],
+    );
 }
 
 #[test]

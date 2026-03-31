@@ -18,7 +18,11 @@ fn filters_disabled_app_results_by_path() {
 
     assertions::assert_filtered_files(
         &filtered,
-        &["apps/enabled/Cargo.toml", "packages/lib/Cargo.toml", "Cargo.toml"],
+        &[
+            "apps/enabled/Cargo.toml",
+            "packages/lib/Cargo.toml",
+            "Cargo.toml",
+        ],
     );
 }
 

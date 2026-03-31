@@ -6,16 +6,8 @@ use super::super::run_for_tests;
 #[test]
 fn inventories_legal_workspace_root_clippy_config() {
     let tmp = create_temp_dir("rs-clippy-01-legal-workspace");
-    write_file(
-        tmp.path(),
-        "Cargo.toml",
-        "[workspace]\nmembers = []\n",
-    );
-    write_file(
-        tmp.path(),
-        "clippy.toml",
-        "msrv = \"1.85\"\n",
-    );
+    write_file(tmp.path(), "Cargo.toml", "[workspace]\nmembers = []\n");
+    write_file(tmp.path(), "clippy.toml", "msrv = \"1.85\"\n");
 
     let results = run_for_tests(tmp.path());
     assertions::assert_multi_root_coverage(

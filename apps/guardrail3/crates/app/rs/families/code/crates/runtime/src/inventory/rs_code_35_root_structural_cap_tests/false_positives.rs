@@ -4,6 +4,7 @@ use super::super::run_family;
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
 use guardrail3_app_rs_family_code_assertions::rs_code_35_root_structural_cap::assert_no_hits;
+use guardrail3_app_rs_family_mapper::RsProjectSurface;
 use test_support::{create_temp_dir, write_file};
 
 #[test]
@@ -58,6 +59,6 @@ fn stays_quiet_when_root_is_scoped_to_one_file() {
     )
     .map_rs_code();
 
-    let results = crate::check(&tree, &route);
+    let results = crate::check(&RsProjectSurface::from_tree(&tree), &route);
     assert_no_hits(&results);
 }

@@ -60,11 +60,10 @@ mod rs_release_11_accidentally_publishable_internal_crates;
 #[path = "repo_inventory/rs_release_12_input_failures.rs"]
 mod rs_release_12_input_failures;
 
-use guardrail3_app_rs_family_mapper::RsReleaseRoute;
+use guardrail3_app_rs_family_mapper::{RsProjectSurface, RsReleaseRoute};
 use guardrail3_app_rs_ownership as _;
 use guardrail3_domain_config as _;
 use guardrail3_domain_modules as _;
-use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
 use proc_macro2 as _;
@@ -80,11 +79,12 @@ use self::inputs::{
 mod test_fixtures;
 
 pub fn check(
-    tree: &ProjectTree,
+    surface: &RsProjectSurface,
     route: &RsReleaseRoute,
     tc: &dyn ToolChecker,
     thorough: bool,
 ) -> Vec<CheckResult> {
+    let tree = surface.tree();
     let facts = collect(tree, route, tc, thorough);
     let mut results = Vec::new();
 

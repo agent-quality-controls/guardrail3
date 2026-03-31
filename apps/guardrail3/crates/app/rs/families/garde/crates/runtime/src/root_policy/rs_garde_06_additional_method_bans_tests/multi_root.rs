@@ -14,10 +14,7 @@ fn local_missing_additional_ban_only_warns_for_owned_root() {
         vec![
             ("", dir_entry(&["apps"], &[])),
             ("apps", dir_entry(&["root", "lib"], &[])),
-            (
-                "apps/root",
-                dir_entry(&[], &["Cargo.toml", "clippy.toml"]),
-            ),
+            ("apps/root", dir_entry(&[], &["Cargo.toml", "clippy.toml"])),
             ("apps/lib", dir_entry(&[], &["Cargo.toml", "clippy.toml"])),
         ],
         vec![

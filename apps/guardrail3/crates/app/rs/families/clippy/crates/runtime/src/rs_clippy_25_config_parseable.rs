@@ -1,4 +1,6 @@
 #[cfg(test)]
+use guardrail3_app_rs_family_mapper::RsProjectSurface;
+#[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
@@ -55,7 +57,7 @@ pub(crate) fn run_family_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
     let route =
         guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
             .map_rs_clippy();
-    crate::check(tree, &route)
+    crate::check(&RsProjectSurface::from_tree(tree), &route)
 }
 
 #[cfg(test)]

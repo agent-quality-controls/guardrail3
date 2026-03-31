@@ -20,12 +20,10 @@ fn errors_only_for_the_top_workspace_root_when_nested_workspaces_exist() {
     assert!(!results.is_empty());
     assertions::assert_findings(
         &results,
-        &[
-            assertions::error_no_file(
-                "Rust root uncovered by deny config",
-                "workspace root `.` is not covered by any allowed deny config.",
-                false,
-            ),
-        ],
+        &[assertions::error_no_file(
+            "Rust root uncovered by deny config",
+            "workspace root `.` is not covered by any allowed deny config.",
+            false,
+        )],
     );
 }

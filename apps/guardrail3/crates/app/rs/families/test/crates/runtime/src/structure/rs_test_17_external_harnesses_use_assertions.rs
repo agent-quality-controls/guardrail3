@@ -1,8 +1,8 @@
 use crate::{CheckResult, Severity};
 
 use super::facts::TestFileKind;
-use super::parse::FunctionInfo;
 use super::inputs::TestFunctionInput;
+use super::parse::FunctionInfo;
 use super::rs_test_07_real_proof_site::has_owned_assertion_proof;
 
 const ID: &str = "RS-TEST-17";

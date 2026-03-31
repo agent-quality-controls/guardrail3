@@ -1,6 +1,7 @@
 use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_01_exists::{
-    assert_invalid_root_cargo_rust_version_type, assert_legacy_only_family_results,
-    assert_malformed_modern_and_legacy_results, assert_rule_results, ExpectedRuleResult, Severity,
+    ExpectedRuleResult, Severity, assert_invalid_root_cargo_rust_version_type,
+    assert_legacy_only_family_results, assert_malformed_modern_and_legacy_results,
+    assert_rule_results,
 };
 
 use super::{check, nested_workspace_root_tree, run_family_check, test_input, test_tree};
@@ -53,8 +54,8 @@ fn workspace_tree_with_nested_non_member_package() -> guardrail3_domain_project_
     )
 }
 
-fn workspace_tree_with_non_package_descendant_toolchain(
-) -> guardrail3_domain_project_tree::ProjectTree {
+fn workspace_tree_with_non_package_descendant_toolchain()
+-> guardrail3_domain_project_tree::ProjectTree {
     use std::collections::BTreeMap;
     use std::path::PathBuf;
 
@@ -241,7 +242,9 @@ fn family_ignores_descendant_toolchain_without_nested_cargo_root() {
     let results = run_family_check(&tree);
 
     assert!(
-        !results.iter().any(|result| result.file() == Some("docs/rust-toolchain.toml")),
+        !results
+            .iter()
+            .any(|result| result.file() == Some("docs/rust-toolchain.toml")),
         "descendant non-root toolchain placement now belongs to arch, not toolchain: {results:#?}"
     );
 }

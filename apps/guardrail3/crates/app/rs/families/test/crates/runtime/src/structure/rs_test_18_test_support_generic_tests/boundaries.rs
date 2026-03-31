@@ -684,7 +684,11 @@ fn test_support_transitive_method_selector_helper_is_reported() {
         "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
     );
-    write_file(root, "crates/runtime/src/lib.rs", "pub fn value() -> u8 {1}\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
     write_file(
         root,
         "crates/runtime/tests/public_surface.rs",

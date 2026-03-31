@@ -44,9 +44,7 @@ impl ReasonIssue {
             Self::TooShort {
                 min_chars,
                 actual_chars,
-            } => format!(
-                "reason must be at least {min_chars} characters; found {actual_chars}"
-            ),
+            } => format!("reason must be at least {min_chars} characters; found {actual_chars}"),
             Self::TooFewWords {
                 min_words,
                 actual_words,
@@ -150,7 +148,10 @@ mod tests {
     #[test]
     fn rejects_placeholder_reasons() {
         assert_eq!(validate_reason_text("temp"), Err(ReasonIssue::Placeholder));
-        assert_eq!(validate_reason_text("fix later"), Err(ReasonIssue::Placeholder));
+        assert_eq!(
+            validate_reason_text("fix later"),
+            Err(ReasonIssue::Placeholder)
+        );
     }
 
     #[test]

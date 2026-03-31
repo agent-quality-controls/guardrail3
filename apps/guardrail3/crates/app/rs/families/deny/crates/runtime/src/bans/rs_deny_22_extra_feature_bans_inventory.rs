@@ -41,9 +41,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{
-    build_fixture_deny_toml, set_feature_entries,
-};
+pub(crate) use ::test_support::{build_fixture_deny_toml, set_feature_entries};
 #[cfg(test)]
 pub(crate) fn parse_feature_entries_for_test(
     parsed: &toml::Value,

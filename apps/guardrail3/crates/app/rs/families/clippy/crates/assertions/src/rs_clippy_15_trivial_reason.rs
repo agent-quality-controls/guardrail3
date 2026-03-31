@@ -28,13 +28,18 @@ pub fn assert_weak_reason_messages(results: &[CheckResult], expected: &[&str], f
     expected_messages.sort();
     assert_eq!(actual_messages, expected_messages);
     assert_eq!(actual_messages.len(), expected_messages.len());
-    assert!(results.iter().filter(|result| result.file().is_some()).all(|result| {
-        result.id() == ID
-            && !result.inventory()
-            && result.severity() == Severity::Error
-            && result.title() == "ban entry reason too weak"
-            && result.file() == Some(file)
-    }));
+    assert!(
+        results
+            .iter()
+            .filter(|result| result.file().is_some())
+            .all(|result| {
+                result.id() == ID
+                    && !result.inventory()
+                    && result.severity() == Severity::Error
+                    && result.title() == "ban entry reason too weak"
+                    && result.file() == Some(file)
+            })
+    );
 }
 
 pub fn assert_documented_messages(results: &[CheckResult], expected: &[&str], file: &str) {
@@ -49,13 +54,18 @@ pub fn assert_documented_messages(results: &[CheckResult], expected: &[&str], fi
     expected_messages.sort();
     assert_eq!(actual_messages, expected_messages);
     assert_eq!(actual_messages.len(), expected_messages.len());
-    assert!(results.iter().filter(|result| result.file().is_some()).all(|result| {
-        result.id() == ID
-            && !result.inventory()
-            && result.severity() == Severity::Warn
-            && result.title() == "ban entry uses documented escape hatch"
-            && result.file() == Some(file)
-    }));
+    assert!(
+        results
+            .iter()
+            .filter(|result| result.file().is_some())
+            .all(|result| {
+                result.id() == ID
+                    && !result.inventory()
+                    && result.severity() == Severity::Warn
+                    && result.title() == "ban entry uses documented escape hatch"
+                    && result.file() == Some(file)
+            })
+    );
 }
 
 pub fn assert_count_summary(results: &[CheckResult], expected: &str) {

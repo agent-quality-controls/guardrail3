@@ -18,9 +18,10 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
     let workspace_policy_complete = super::lint_support::policy_lints(input.workspace, "rust")
         .is_some()
         && super::lint_support::policy_lints(input.workspace, "clippy").is_some();
-    let member_override_shapes_valid = [member_lints(parsed, "rust"), member_lints(parsed, "clippy")]
-        .into_iter()
-        .all(lints_are_well_formed);
+    let member_override_shapes_valid =
+        [member_lints(parsed, "rust"), member_lints(parsed, "clippy")]
+            .into_iter()
+            .all(lints_are_well_formed);
 
     let mut documented_count = 0usize;
     let mut missing_reason_count = 0usize;

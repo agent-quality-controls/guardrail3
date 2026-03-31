@@ -31,7 +31,10 @@ fn adopted_workspace_root_does_not_require_profile_for_idle_standalone_root() {
 
     assert_rule_files(
         &results,
-        vec!["Cargo.toml".to_owned(), "crates/adopted/Cargo.toml".to_owned()],
+        vec![
+            "Cargo.toml".to_owned(),
+            "crates/adopted/Cargo.toml".to_owned(),
+        ],
     );
     assert_reported(
         &results,

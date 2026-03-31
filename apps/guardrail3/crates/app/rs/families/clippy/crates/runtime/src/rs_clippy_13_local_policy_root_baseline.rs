@@ -5,8 +5,8 @@ use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::clippy_support::{
-    ban_paths, expected_method_bans, expected_type_bans, threshold_value, EXPECTED_MACRO_BANS,
-    THRESHOLD_EXPECTATIONS,
+    EXPECTED_MACRO_BANS, THRESHOLD_EXPECTATIONS, ban_paths, expected_method_bans,
+    expected_type_bans, threshold_value,
 };
 use super::inputs::ConfigClippyInput;
 

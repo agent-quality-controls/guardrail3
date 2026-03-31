@@ -182,9 +182,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{
-    add_skip_entry, build_fixture_deny_toml,
-};
+pub(crate) use ::test_support::{add_skip_entry, build_fixture_deny_toml};
 #[cfg(test)]
 #[path = "rs_deny_23_skip_hygiene_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_23_skip_hygiene_tests;

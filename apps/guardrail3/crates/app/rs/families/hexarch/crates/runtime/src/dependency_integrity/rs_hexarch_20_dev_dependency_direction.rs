@@ -1,3 +1,5 @@
+#[cfg(test)]
+use guardrail3_app_rs_family_mapper::RsProjectSurface;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::dependency_facts::EdgeKind;
@@ -60,7 +62,7 @@ pub(crate) fn check_for_test_tree(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> Vec<CheckResult> {
     let route = super::family_route_for_tests(tree);
-    super::check(tree, &route)
+    super::check(&RsProjectSurface::from_tree(tree), &route)
 }
 
 #[cfg(test)]

@@ -71,10 +71,7 @@ fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
 fn nested_package_root_uses_library_lockfile_severity() {
     let tree = project_tree(
         vec![
-            (
-                "",
-                dir_entry(&["tools"], &["guardrail3.toml"]),
-            ),
+            ("", dir_entry(&["tools"], &["guardrail3.toml"])),
             ("tools", dir_entry(&["packages"], &[])),
             ("tools/packages", dir_entry(&["core"], &[])),
             ("tools/packages/core", dir_entry(&[], &["Cargo.toml"])),

@@ -1,9 +1,148 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
+use std::path::PathBuf;
 
 use guardrail3_app_rs_legality::{RustTopologyIssueFact, RustTopologyIssueKind};
 use guardrail3_app_rs_ownership::{RustFamilyFileAttachment, RustFamilyFileKind};
 use guardrail3_app_rs_placement::{RustArchRole, RustRootClassification};
+use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_validation_model::RustValidateFamily;
+
+#[derive(Debug, Clone)]
+pub struct RsProjectSurface {
+    tree: ProjectTree,
+}
+
+impl RsProjectSurface {
+    #[must_use]
+    pub fn from_tree(tree: &ProjectTree) -> Self {
+        Self { tree: tree.clone() }
+    }
+
+    #[must_use]
+    pub fn from_route_scope(
+        tree: &ProjectTree,
+        root_rels: &[String],
+        extra_file_rels: &[String],
+        scoped_files: Option<&BTreeSet<String>>,
+    ) -> Self {
+        let mut allowed_files = BTreeSet::new();
+        let mut allowed_dirs = BTreeSet::new();
+
+        for (dir_rel, entry) in tree.structure() {
+            if root_rels
+                .iter()
+                .any(|root_rel| path_is_under(dir_rel, root_rel))
+            {
+                let _ = allowed_dirs.insert(dir_rel.clone());
+                for file_name in entry.files() {
+                    let rel_path = ProjectTree::join_rel(dir_rel, file_name);
+                    let _ = allowed_files.insert(rel_path);
+                }
+            }
+        }
+
+        for rel_path in extra_file_rels {
+            let _ = allowed_files.insert(rel_path.clone());
+        }
+
+        if let Some(scoped) = scoped_files {
+            allowed_files.retain(|rel_path| scoped.contains(rel_path));
+            for rel_path in extra_file_rels {
+                let _ = allowed_files.insert(rel_path.clone());
+            }
+        }
+
+        for rel_path in &allowed_files {
+            let mut cursor = split_parent(rel_path);
+            loop {
+                let _ = allowed_dirs.insert(cursor.to_owned());
+                if cursor.is_empty() {
+                    break;
+                }
+                cursor = split_parent(cursor);
+            }
+        }
+
+        let mut structure = BTreeMap::new();
+        for dir_rel in &allowed_dirs {
+            if let Some(entry) = tree.dir_contents(dir_rel) {
+                let filtered_dirs = entry
+                    .dirs()
+                    .iter()
+                    .filter_map(|child| {
+                        let rel = ProjectTree::join_rel(dir_rel, child);
+                        allowed_dirs.contains(&rel).then_some(child.clone())
+                    })
+                    .collect::<Vec<_>>();
+                let filtered_files = entry
+                    .files()
+                    .iter()
+                    .filter_map(|child| {
+                        let rel = ProjectTree::join_rel(dir_rel, child);
+                        allowed_files.contains(&rel).then_some(child.clone())
+                    })
+                    .collect::<Vec<_>>();
+                let filtered_symlink_dirs = entry
+                    .symlink_dirs()
+                    .iter()
+                    .filter_map(|child| {
+                        let rel = ProjectTree::join_rel(dir_rel, child);
+                        allowed_dirs.contains(&rel).then_some(child.clone())
+                    })
+                    .collect::<Vec<_>>();
+                let filtered_symlink_files = entry
+                    .symlink_files()
+                    .iter()
+                    .filter_map(|child| {
+                        let rel = ProjectTree::join_rel(dir_rel, child);
+                        allowed_files.contains(&rel).then_some(child.clone())
+                    })
+                    .collect::<Vec<_>>();
+                let _ = structure.insert(
+                    dir_rel.clone(),
+                    DirEntry::new(
+                        filtered_dirs,
+                        filtered_files,
+                        filtered_symlink_dirs,
+                        filtered_symlink_files,
+                    ),
+                );
+            }
+        }
+
+        let content = tree
+            .content()
+            .iter()
+            .filter_map(|(rel, value)| {
+                allowed_files
+                    .contains(rel)
+                    .then_some((rel.clone(), value.clone()))
+            })
+            .collect::<BTreeMap<_, _>>();
+
+        let root = PathBuf::from(tree.root());
+        Self {
+            tree: ProjectTree::new(root, structure, content),
+        }
+    }
+
+    #[must_use]
+    pub fn tree(&self) -> &ProjectTree {
+        &self.tree
+    }
+}
+
+fn split_parent(rel: &str) -> &str {
+    rel.rsplit_once('/').map_or("", |(parent, _)| parent)
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsRootView {
@@ -273,11 +412,11 @@ impl RsArchTopologyIssueKindView {
             } => Self::NestedWorkspace {
                 parent_workspace_rel: parent_workspace_rel.clone(),
             },
-            RustTopologyIssueKind::UndeclaredWorkspaceMember {
-                workspace_root_rel,
-            } => Self::UndeclaredWorkspaceMember {
-                workspace_root_rel: workspace_root_rel.clone(),
-            },
+            RustTopologyIssueKind::UndeclaredWorkspaceMember { workspace_root_rel } => {
+                Self::UndeclaredWorkspaceMember {
+                    workspace_root_rel: workspace_root_rel.clone(),
+                }
+            }
             RustTopologyIssueKind::WorkspaceMemberPathEscapesRoot {
                 workspace_root_rel,
                 member_pattern,
@@ -393,9 +532,7 @@ pub enum RsFamilyFileAttachmentView {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RsFamilyFilePlacementView {
     Legal,
-    Illegal {
-        reason: String,
-    },
+    Illegal { reason: String },
 }
 
 impl RsFamilyFileView {
@@ -481,9 +618,9 @@ impl RsFamilyFileView {
         }
 
         match self.attachment() {
-            RsFamilyFileAttachmentView::ExactRoot { root_rel: file_root_rel } => {
-                file_root_rel == root_rel
-            }
+            RsFamilyFileAttachmentView::ExactRoot {
+                root_rel: file_root_rel,
+            } => file_root_rel == root_rel,
             RsFamilyFileAttachmentView::NestedUnderRoot {
                 root_rel: file_root_rel,
                 ..
@@ -886,7 +1023,10 @@ impl RsTestRoute {
 }
 
 fn supports_nested_local_surface(kind: RustFamilyFileKind) -> bool {
-    matches!(kind, RustFamilyFileKind::CargoToml | RustFamilyFileKind::GuardrailToml)
+    matches!(
+        kind,
+        RustFamilyFileKind::CargoToml | RustFamilyFileKind::GuardrailToml
+    )
 }
 
 fn supports_ancestor_local_surface(kind: RustFamilyFileKind) -> bool {

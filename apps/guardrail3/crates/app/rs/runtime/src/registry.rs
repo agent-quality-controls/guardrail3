@@ -1,6 +1,6 @@
 use guardrail3_validation_model::RustValidateFamily;
 
-use crate::runners::{compiled_runners, RustFamilyRunnerDef};
+use crate::runners::{RustFamilyRunnerDef, compiled_runners};
 
 pub(crate) fn runner_for(family: RustValidateFamily) -> Option<RustFamilyRunnerDef> {
     compiled_runners()

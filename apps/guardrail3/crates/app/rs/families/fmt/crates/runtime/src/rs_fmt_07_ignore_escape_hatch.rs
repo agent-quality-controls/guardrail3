@@ -30,9 +30,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
                 ID.to_owned(),
                 Severity::Error,
                 "rustfmt ignore missing reason".to_owned(),
-                format!(
-                    "`{rel}` uses `ignore = {ignore}` without a matching escape-hatch reason."
-                ),
+                format!("`{rel}` uses `ignore = {ignore}` without a matching escape-hatch reason."),
                 Some(rel.to_owned()),
                 None,
                 false,

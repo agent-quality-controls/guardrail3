@@ -279,8 +279,12 @@ fn build_root_facts(
         "nextest config",
         input_failures,
     );
-    let hook_state =
-        collect_mutation_hook_state(tree, rel_dir, &active_hook_root_dirs(rel_dir, cargo_roots), input_failures);
+    let hook_state = collect_mutation_hook_state(
+        tree,
+        rel_dir,
+        &active_hook_root_dirs(rel_dir, cargo_roots),
+        input_failures,
+    );
 
     TestRootFacts {
         rel_dir: rel_dir.to_owned(),
@@ -333,7 +337,12 @@ fn active_hook_root_dirs(
         if !facts.has_workspace {
             continue;
         }
-        if workspace_rel == rel_dir || facts.workspace_members.iter().any(|member| member == rel_dir) {
+        if workspace_rel == rel_dir
+            || facts
+                .workspace_members
+                .iter()
+                .any(|member| member == rel_dir)
+        {
             let _ = roots.insert(workspace_rel.clone());
         }
     }
