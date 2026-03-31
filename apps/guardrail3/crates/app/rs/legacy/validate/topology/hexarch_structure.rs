@@ -1,4 +1,4 @@
-//! R-TOPOLOGY-01: Hexarch structural enforcement.
+//! Legacy R-TOPOLOGY-01: Hexarch structural enforcement.
 //!
 //! Auto-detects service apps from `apps/*/Cargo.toml` and enforces the
 //! canonical hexarch directory template:

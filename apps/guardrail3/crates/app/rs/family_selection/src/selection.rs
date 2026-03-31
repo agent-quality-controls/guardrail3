@@ -22,8 +22,6 @@ pub fn resolve(
         RustFamilySelection::new(requested_families.iter().copied().collect())
     };
 
-    selection.insert(RustValidateFamily::Topology);
-
     if selection.contains(RustValidateFamily::HooksRs) {
         selection.insert(RustValidateFamily::HooksShared);
     }

@@ -32,6 +32,13 @@ pub fn assert_clean_section(report: &Report, section_name: &str) {
     );
 }
 
+pub fn assert_section_absent(report: &Report, section_name: &str) {
+    assert!(
+        !report.sections().iter().any(|section| section.name() == section_name),
+        "unexpected section `{section_name}` present: {report:#?}"
+    );
+}
+
 pub fn assert_single_live_result(
     report: &Report,
     section_name: &str,
