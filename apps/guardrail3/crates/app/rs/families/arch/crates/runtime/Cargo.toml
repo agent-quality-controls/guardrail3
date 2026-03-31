@@ -1,0 +1,16 @@
+[package]
+name = "guardrail3-app-rs-family-arch"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
+toml = "0.8"
+
+[dev-dependencies]
+guardrail3_app_rs_structure = { package = "guardrail3-app-rs-structure", path = "../../../../structure" }
+guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../../../../domain/validation-model" }

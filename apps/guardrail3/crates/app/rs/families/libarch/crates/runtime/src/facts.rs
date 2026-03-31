@@ -1,4 +1,3 @@
-mod measurements;
 mod package_support;
 
 use std::collections::BTreeSet;
@@ -6,7 +5,6 @@ use std::collections::BTreeSet;
 use guardrail3_app_rs_family_mapper::RsLibarchRoute;
 use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
-use self::measurements::collect_measurements;
 use self::package_support::{
     collect_facade_exports, facade_source_error, fallback_name, library_crate_name,
     library_rel_path, package_name,
@@ -40,16 +38,9 @@ pub(crate) struct LibarchFacts {
 pub(crate) struct LibraryPackageFacts {
     pub package_rel_dir: String,
     pub cargo_rel_path: String,
-    pub has_package: bool,
     pub is_library: bool,
-    pub cargo_parse_error: Option<String>,
     pub lib_rel_path: Option<String>,
     pub facade_source_error: Option<String>,
-    pub measurement_error: Option<String>,
-    pub escalation_required: bool,
-    pub threshold_reasons: Vec<String>,
-    pub is_workspace: bool,
-    pub crates_dir_exists: bool,
     pub layer_dirs: Vec<LayerDirFacts>,
     pub uses_layered_mode: bool,
     pub facade_exports: Vec<FacadeExportFacts>,
@@ -59,7 +50,7 @@ pub(crate) struct LibraryPackageFacts {
 impl LibraryPackageFacts {
     #[must_use]
     pub fn layered_rules_active(&self) -> bool {
-        self.is_library && (self.escalation_required || self.uses_layered_mode)
+        self.is_library && self.uses_layered_mode
     }
 
     #[must_use]
@@ -137,21 +128,6 @@ fn collect_package(
         None
     };
 
-    let (
-        measurement_error,
-        _dependency_count,
-        _max_module_depth,
-        _max_sibling_dirs,
-        _max_sibling_rs_files,
-        threshold_reasons,
-    ) = collect_measurements(
-        tree,
-        parsed,
-        lib_rel_path.as_deref(),
-        cargo.parse_error.as_deref(),
-    );
-    let escalation_required = !threshold_reasons.is_empty();
-
     let is_workspace = parsed.is_some_and(|value| value.get("workspace").is_some());
     let workspace_dependencies = parsed
         .and_then(|value| value.get("workspace"))
@@ -187,16 +163,9 @@ fn collect_package(
     LibraryPackageFacts {
         package_rel_dir: package_rel_dir.to_owned(),
         cargo_rel_path: cargo_rel_path.to_owned(),
-        has_package,
         is_library,
-        cargo_parse_error: cargo.parse_error,
         lib_rel_path,
         facade_source_error,
-        measurement_error,
-        escalation_required,
-        threshold_reasons,
-        is_workspace,
-        crates_dir_exists,
         layer_dirs,
         uses_layered_mode,
         facade_exports,

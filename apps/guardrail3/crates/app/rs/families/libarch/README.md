@@ -1,25 +1,21 @@
 # RS-LIBARCH
 
-Rust layered-library architecture checks for package-owned library roots.
+Rust legacy layered-library checks for package-owned library roots.
 
-This family enforces when a package library must escalate from a flat crate into
-the layered workspace shape:
+This family is in retirement. The generic split-library architecture contract
+now belongs in `RS-ARCH`.
 
-- root facade package at the package root
-- `crates/api`
-- `crates/core`
-- optional `crates/infra`
+`RS-LIBARCH` only retains the old layered-shape specifics that are still
+temporarily present in the repo:
 
-It owns:
-
-- escalation from flat library to layered workspace
 - exact layered crate set once layered mode exists
 - dependency direction between `api`, `core`, and `infra`
-- root facade export policy
+- old layered facade/export policy tied to that shape
 
-It does not replace:
+It no longer owns:
 
-- `RS-TOPOLOGY` for placement ownership
-- `RS-TOPOLOGY` for workspace-membership exactness
-- `RS-CODE` for generic facade/source quality
-- `RS-DEPS` for dependency allowlist policy
+- escalation from flat library into split architecture
+- split-root workspace-facade requirements
+- generic split-root existence requirements
+
+Those now belong in `RS-ARCH`.

@@ -421,6 +421,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-rs-family-arch"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-structure",
+ "guardrail3-domain-report",
+ "guardrail3-domain-validation-model",
+ "toml",
+]
+
+[[package]]
 name = "guardrail3-app-rs-family-cargo"
 version = "0.0.0"
 dependencies = [
@@ -1023,6 +1034,7 @@ name = "guardrail3-app-rs-runtime"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-core",
+ "guardrail3-app-rs-family-arch",
  "guardrail3-app-rs-family-cargo",
  "guardrail3-app-rs-family-clippy",
  "guardrail3-app-rs-family-code",

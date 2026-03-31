@@ -23,6 +23,7 @@ Shared Rust authority:
 
 Rust validation families covered here:
 
+- `RS-ARCH`
 - `RS-TOPOLOGY`
 - `RS-CARGO`
 - `RS-CLIPPY`
@@ -76,6 +77,7 @@ Status snapshot / dispatch map:
 
 | Family | Scope model | Current code root | Family README | Planning status |
 |---|---|---|---|---|
+| `arch` | package-scoped split-library roots with cross-root dependency checks | `apps/guardrail3/crates/app/rs/families/arch/` | yes | current |
 | `topology` | global | `apps/guardrail3/crates/app/rs/families/topology/` | yes | current |
 | `cargo` | workspace-local | `apps/guardrail3/crates/app/rs/families/cargo/` | yes | current |
 | `clippy` | workspace-local | `apps/guardrail3/crates/app/rs/families/clippy/` | yes | current |
@@ -85,7 +87,7 @@ Status snapshot / dispatch map:
 | `fmt` | global | `apps/guardrail3/crates/app/rs/families/fmt/` | yes | current |
 | `garde` | workspace-local | `apps/guardrail3/crates/app/rs/families/garde/` | yes | current |
 | `hexarch` | workspace-local under `apps/*` | `apps/guardrail3/crates/app/rs/families/hexarch/` | yes | current |
-| `libarch` | workspace-local under `packages/*` | `apps/guardrail3/crates/app/rs/families/libarch/` | yes | current |
+| `libarch` | workspace-local under `packages/*`, retiring | `apps/guardrail3/crates/app/rs/families/libarch/` | yes | current |
 | `release` | workspace-local | `apps/guardrail3/crates/app/rs/families/release/` | yes | current |
 | `test` | global | `apps/guardrail3/crates/app/rs/families/test/` | yes | current |
 | `toolchain` | workspace-local | `apps/guardrail3/crates/app/rs/families/toolchain/` | yes | current |

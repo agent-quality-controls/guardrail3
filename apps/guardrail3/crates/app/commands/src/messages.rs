@@ -71,6 +71,7 @@ pub const TS_HELP: &str = "\
 pub const RS_VALIDATE_HELP: &str = "\
 RUST VALIDATION FAMILIES
 
+  arch
   topology
   fmt
   toolchain
@@ -90,6 +91,7 @@ RUST VALIDATION FAMILIES
 EXAMPLES
 
   guardrail3 rs validate .
+  guardrail3 rs validate . --family arch
   guardrail3 rs validate . --family topology
   guardrail3 rs validate . --family hexarch
   guardrail3 rs validate . --family code --family garde --staged
@@ -99,6 +101,7 @@ EXAMPLES
 CONFIG
 
   [rust.checks]
+  arch = true
   topology = true
   fmt = true
   toolchain = true
@@ -142,7 +145,7 @@ PROFILES
 RUST CHECK TOGGLES
 
   `rs init` writes family-based Rust check toggles:
-    topology, fmt, toolchain, clippy, deny, cargo, code, hexarch, deps,
+    arch, topology, fmt, toolchain, clippy, deny, cargo, code, hexarch, deps,
     libarch, garde, test, release, hooks_shared, hooks_rs
 
 AFTER INIT
@@ -178,6 +181,7 @@ guardrail3 rs show-module <NAME>
 Rust validate families:
 
 ```text
+arch
 topology
 fmt
 toolchain
@@ -201,6 +205,7 @@ Examples:
 
 ```text
 guardrail3 rs validate .
+guardrail3 rs validate . --family arch
 guardrail3 rs validate . --family topology
 guardrail3 rs validate . --family hexarch
 guardrail3 rs validate . --family code --family garde --staged
@@ -225,6 +230,7 @@ Only `generate` / `check` depend on `guardrail3.toml`. Rust validate also reads 
 
 ```toml
 [rust.checks]
+arch = true
 topology = true
 fmt = true
 toolchain = true
@@ -250,6 +256,7 @@ hexarch = true
 garde = false
 
 [rust.packages.checks]
+arch = true
 libarch = true
 code = true
 test = true

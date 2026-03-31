@@ -896,6 +896,7 @@ impl RsCargoRoute {
 }
 
 pub type RsClippyRoute = RsCargoRoute;
+pub type RsArchRoute = RsCargoRoute;
 pub type RsDepsRoute = RsCargoRoute;
 pub type RsLibarchRoute = RsCargoRoute;
 pub type RsToolchainRoute = RsCargoRoute;

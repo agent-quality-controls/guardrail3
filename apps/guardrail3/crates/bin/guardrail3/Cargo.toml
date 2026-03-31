@@ -26,6 +26,7 @@ default = [
 ]
 families-all = ["guardrail3_app_rs_runtime/families-all"]
 family-topology = ["guardrail3_app_rs_runtime/family-topology"]
+family-arch = ["guardrail3_app_rs_runtime/family-arch"]
 family-fmt = ["guardrail3_app_rs_runtime/family-fmt"]
 family-toolchain = ["guardrail3_app_rs_runtime/family-toolchain"]
 family-clippy = ["guardrail3_app_rs_runtime/family-clippy"]
