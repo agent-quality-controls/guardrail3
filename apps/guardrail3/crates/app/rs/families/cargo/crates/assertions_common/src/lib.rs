@@ -15,7 +15,7 @@ pub struct ExpectedRuleResult<'a> {
 }
 
 pub fn check_results(tree: &ProjectTree) -> Vec<CheckResult> {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree
         .file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());

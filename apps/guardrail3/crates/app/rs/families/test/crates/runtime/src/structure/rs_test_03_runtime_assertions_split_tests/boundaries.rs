@@ -673,7 +673,7 @@ fn assertions_module_fully_qualified_placement_call_is_reported() {
     write_file(
         root,
         "crates/assertions/src/lib.rs",
-        "pub fn prove_runtime() { let _ = guardrail3_app_rs_placement::collect(todo!()); assert_eq!(demo_runtime::value(), 1); }\n",
+        "pub fn prove_runtime() { let _ = guardrail3_app_rs_structure::collect(todo!()); assert_eq!(demo_runtime::value(), 1); }\n",
     );
 
     let results = run_family(root);

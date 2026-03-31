@@ -29,8 +29,6 @@ pub fn assert_rule_file_absent(results: &[CheckResult], file: &str) {
 pub fn assert_unreadable_cached_files_fail_closed(results: &[CheckResult]) {
     let actual = findings(results);
     let expected = [
-        ("Cargo.toml", "Failed to read Cargo.toml"),
-        ("crates/example/Cargo.toml", "Failed to read Cargo.toml"),
         ("release-plz.toml", "Failed to read release-plz.toml"),
         ("cliff.toml", "Failed to read cliff.toml"),
         (

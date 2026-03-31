@@ -339,7 +339,7 @@ pub(crate) fn config_input_for_tests<'a>(
 
 #[cfg(test)]
 fn family_route_for_tests(tree: &ProjectTree, validation_scope: Option<&str>) -> RsClippyRoute {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let selected = RustFamilySelection::new(std::collections::BTreeSet::from([
         RustValidateFamily::Clippy,
     ]));

@@ -264,7 +264,7 @@ fn test_support_route_construction_imports_are_reported() {
     write_file(
         root,
         "test_support/src/lib.rs",
-        "use guardrail3_app_rs_family_mapper::FamilyMapper;\nuse guardrail3_app_rs_placement;\npub fn cargo_route(tree: &ProjectTree, scope: &Scope, selected: &Selected) {let _ = guardrail3_app_rs_placement::collect(tree); FamilyMapper::new(tree, scope, None, selected, None);}\n",
+        "use guardrail3_app_rs_family_mapper::FamilyMapper;\nuse guardrail3_app_rs_placement;\npub fn cargo_route(tree: &ProjectTree, scope: &Scope, selected: &Selected) {let _ = guardrail3_app_rs_structure::collect(tree); FamilyMapper::new(tree, scope, None, selected, None);}\n",
     );
 
     let results = run_family(root);
@@ -432,7 +432,7 @@ fn test_support_fully_qualified_placement_call_is_reported() {
     write_file(
         root,
         "test_support/src/lib.rs",
-        "pub fn cargo_route() { let _ = guardrail3_app_rs_placement::collect(todo!()); }\n",
+        "pub fn cargo_route() { let _ = guardrail3_app_rs_structure::collect(todo!()); }\n",
     );
 
     let results = run_family(root);

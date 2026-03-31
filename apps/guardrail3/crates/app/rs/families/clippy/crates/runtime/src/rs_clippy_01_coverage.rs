@@ -80,7 +80,7 @@ pub(crate) fn run_for_tests(root: &Path) -> Vec<CheckResult> {
         &guardrail3_adapters_outbound_fs::RealFileSystem,
         root,
     );
-    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let scope = guardrail3_app_rs_structure::collect(&tree);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Clippy,
@@ -100,7 +100,7 @@ pub(crate) fn run_with_validation_scope_for_tests(
         &guardrail3_adapters_outbound_fs::RealFileSystem,
         root,
     );
-    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let scope = guardrail3_app_rs_structure::collect(&tree);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Clippy,

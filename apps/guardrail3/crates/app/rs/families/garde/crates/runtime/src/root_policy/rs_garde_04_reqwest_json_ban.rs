@@ -76,7 +76,7 @@ pub(super) fn remove_clippy_ban_path(clippy_toml: &str, key: &str, path: &str) -
 pub(super) fn run_family(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree.file_content("guardrail3.toml").and_then(|content| {
         toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
     });

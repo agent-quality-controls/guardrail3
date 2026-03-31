@@ -115,7 +115,7 @@ pub fn check(tree: &ProjectTree, route: &RsArchRoute) -> Vec<CheckResult> {
 
 #[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree
         .file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());

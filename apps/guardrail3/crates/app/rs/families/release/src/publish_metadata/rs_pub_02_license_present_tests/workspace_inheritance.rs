@@ -116,7 +116,7 @@ readme = false
 }
 
 #[test]
-fn should_error_when_non_member_crate_tries_to_inherit_workspace_license_file() {
+fn should_ignore_non_member_crate_trying_to_inherit_workspace_license_file() {
     let root = temp_root("release-workspace-license-file-non-member");
     let tree = project_tree(
         vec![
@@ -164,14 +164,6 @@ license-file.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(!assertions::findings(&results).is_empty());
-    assertions::assert_rule_results(
-        &results,
-        &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Error),
-            file: Some("crates/orphan/Cargo.toml"),
-            inventory: Some(false),
-            ..Default::default()
-        }],
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }

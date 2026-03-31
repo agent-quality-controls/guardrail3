@@ -85,7 +85,7 @@ pub fn collect_dependency_facts_for_tests(
 pub fn family_route_for_tests(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> guardrail3_app_rs_family_mapper::RsHexarchRoute {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree.file_content("guardrail3.toml").and_then(|content| {
         toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
     });

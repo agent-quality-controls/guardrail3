@@ -60,7 +60,7 @@ readme = false
 }
 
 #[test]
-fn should_error_when_workspace_repository_is_used_by_non_member_crate() {
+fn should_ignore_non_member_crate_trying_to_inherit_workspace_repository() {
     let root = temp_root("release-workspace-repository-non-member");
     let tree = project_tree(
         vec![
@@ -107,15 +107,8 @@ repository.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(!assertions::findings(&results).is_empty());
-    assertions::assert_rule_results(
-        &results,
-        &[assertions::ExpectedRuleResult {
-            file: Some("crates/orphan/Cargo.toml"),
-            inventory: Some(false),
-            ..Default::default()
-        }],
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]

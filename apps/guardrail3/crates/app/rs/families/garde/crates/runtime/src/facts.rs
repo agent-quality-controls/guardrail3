@@ -436,7 +436,7 @@ pub(super) fn family_route(
     tree: &guardrail3_domain_project_tree::ProjectTree,
     scoped_files: Option<&std::collections::BTreeSet<String>>,
 ) -> guardrail3_app_rs_family_mapper::RsGardeRoute {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree.file_content("guardrail3.toml").and_then(|content| {
         toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
     });

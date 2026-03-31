@@ -65,14 +65,15 @@ fn should_resolve_workspace_readme_relative_to_workspace_root() {
     let root = temp_root("release-workspace-readme-relative-path");
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["ws"], &["README.md"])),
-            ("ws", dir_entry(&["crates"], &["Cargo.toml"])),
-            ("ws/crates", dir_entry(&["pub"], &[])),
-            ("ws/crates/pub", dir_entry(&[], &["Cargo.toml"])),
+            ("", dir_entry(&["packages"], &[])),
+            ("packages", dir_entry(&["shared"], &["README.md"])),
+            ("packages/shared", dir_entry(&["crates"], &["Cargo.toml"])),
+            ("packages/shared/crates", dir_entry(&["pub"], &[])),
+            ("packages/shared/crates/pub", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
             (
-                "ws/Cargo.toml",
+                "packages/shared/Cargo.toml",
                 r#"
 [workspace]
 members = ["crates/pub"]
@@ -87,7 +88,7 @@ readme = "../README.md"
 "#,
             ),
             (
-                "ws/crates/pub/Cargo.toml",
+                "packages/shared/crates/pub/Cargo.toml",
                 r#"
 [package]
 name = "pub"
@@ -112,15 +113,16 @@ readme.workspace = true
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            file: Some("README.md"),
-            inventory: Some(true),
+            severity: Some(assertions::Severity::Warn),
+            file: Some("packages/shared/crates/pub/Cargo.toml"),
+            inventory: Some(false),
             ..Default::default()
         }],
     );
 }
 
 #[test]
-fn should_warn_when_non_member_crate_tries_to_inherit_workspace_readme() {
+fn should_ignore_non_member_crate_trying_to_inherit_workspace_readme() {
     let root = temp_root("release-workspace-readme-orphan");
     let tree = project_tree(
         vec![
@@ -171,16 +173,8 @@ readme.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(!assertions::findings(&results).is_empty());
-    assertions::assert_rule_results(
-        &results,
-        &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
-            file: Some("crates/orphan/Cargo.toml"),
-            inventory: Some(false),
-            ..Default::default()
-        }],
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]

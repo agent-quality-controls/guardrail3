@@ -44,7 +44,7 @@ fn stays_quiet_when_root_is_scoped_to_one_file() {
     write_file(tmp.path(), "src/a/b/c/d/e/f/mod.rs", "");
 
     let tree = walk_project(&RealFileSystem, tmp.path());
-    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let scope = guardrail3_app_rs_structure::collect(&tree);
     let selected = guardrail3_validation_model::RustFamilySelection::new(BTreeSet::from([
         guardrail3_validation_model::RustValidateFamily::Code,
     ]));

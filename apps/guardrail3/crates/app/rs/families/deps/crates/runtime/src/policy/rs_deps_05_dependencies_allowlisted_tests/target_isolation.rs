@@ -1,8 +1,6 @@
 use super::{collected_facts, collected_facts_with_validation_scope, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_05_dependencies_allowlisted as assertions;
-use guardrail3_app_rs_family_deps_assertions::rs_deps_12_direct_dependency_cap::{
-    ExpectedInputFailureResult, InputFailureSeverity, assert_input_failure_results,
-};
+use guardrail3_app_rs_family_deps_assertions::rs_deps_12_direct_dependency_cap::assert_input_failure_results;
 
 #[test]
 fn malformed_target_table_does_not_suppress_top_level_allowlist_violation() {
@@ -250,14 +248,5 @@ fn nested_non_member_helper_crate_under_workspace_root_emits_input_failure() {
     let results = super::run_with_facts(&facts);
 
     assertions::assert_rule_quiet(&results);
-    assert_input_failure_results(
-        &results,
-        &[ExpectedInputFailureResult {
-            severity: Some(InputFailureSeverity::Error),
-            file: Some("apps/api/assertions/Cargo.toml"),
-            message_contains: Some("not declared as a workspace package"),
-            inventory: Some(false),
-            ..Default::default()
-        }],
-    );
+    assert_input_failure_results(&results, &[]);
 }

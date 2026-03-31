@@ -215,7 +215,7 @@ fn stays_quiet_when_validation_scope_selects_zero_code_roots() {
     );
 
     let tree = walk_project(&RealFileSystem, root.path());
-    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let scope = guardrail3_app_rs_structure::collect(&tree);
     let selected = guardrail3_validation_model::RustFamilySelection::new(BTreeSet::from([
         guardrail3_validation_model::RustValidateFamily::Code,
     ]));

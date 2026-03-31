@@ -240,17 +240,13 @@ project walker
 
 ```text
 apps/guardrail3/crates/app/rs/
-  placement/                          # shared Rust structure facts
+  structure/                          # shared Rust structure facts
     Cargo.toml
     src/
       lib.rs
-      ids.rs                          # stable root ids / shared references
-      roots.rs                        # eligible live Cargo root discovery
-      exclusions.rs                   # target/, fixtures, snapshots, worktrees
-      classification.rs               # app/package/auxiliary/other/ambiguous
-      overlap.rs                      # overlap / dual-ownership support facts
+      facts.rs                        # unified structure fact bundle
+      discover.rs                     # eligible live Cargo root discovery
       attachment.rs                   # attach family-owned files to Rust structure
-      relations.rs                    # ancestor/descendant/walk-up/shadow facts
 
   family_selection/                   # shared family-set selection only
     Cargo.toml
@@ -657,91 +653,75 @@ Concrete flow:
 
 ```text
 walk_project()
-  -> placement::collect(&tree)
-  -> ownership::collect(&tree, &placement)
+  -> structure::collect(&tree)
+  -> legality::collect(&tree, &structure)
   -> family_selection::resolve(...)
-  -> FamilyMapper::new(&tree, &placement, &ownership, config, &selected_families)
+  -> FamilyMapper::new(&tree, &structure, config, &selected_families)
   -> family_mapper.map_rs_*()
   -> family::check(&tree, route, ...)
 ```
 
 ## Current Direction
 
-The shared root-topology seed already exists in:
+The shared Rust pre-family pipeline now exists in:
 
+- [structure/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/structure/src/lib.rs)
 - [placement/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/placement/src/lib.rs)
-- [placement/roots.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/placement/src/roots.rs)
-- [placement/classification.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/placement/src/classification.rs)
-- [placement/overlap.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/placement/src/overlap.rs)
+- [ownership/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/ownership/src/lib.rs)
+- [legality/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/legality/src/lib.rs)
 
-`arch` and `test` now consume routed roots from shared placement scope. Other Rust families are still on older direct `ProjectTree` entrypoints, and runtime-level applicability filtering has not been fully collapsed yet.
+`runtime` now:
+- builds `ProjectTree`
+- collects shared Rust structure
+- derives shared Rust legality from that structure
+- maps family surfaces from legality-aware facts
+- fans those surfaces into family invocations
 
 Current code reality:
 
-- [placement/src/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/placement/src/lib.rs) only models root topology facts
-- [family_mapper/src/rs.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/family_mapper/src/rs.rs) currently routes mostly root lists and optional scoped files
-- [family_mapper/src/views.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/family_mapper/src/views.rs) does not yet model owned file views or workspace attachment facts
-- `RsClippyRoute`, `RsDepsRoute`, `RsLibarchRoute`, and `RsToolchainRoute` are currently aliases over the same simple root route shape
-- `RsCodeRoute` and `RsGardeRoute` are currently aliases over a scoped-root/source route shape
-
-That is sufficient for the current routed-root families, but it is not sufficient for the target architecture described above.
+- [structure/src/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/structure/src/lib.rs) is the one shared Rust structure stage
+- [placement/src/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/placement/src/lib.rs) and [ownership/src/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/ownership/src/lib.rs) are implementation details under that stage, not separate architectural stages
+- [legality/src/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/legality/src/lib.rs) is the shared legality stage
+- [family_mapper/src/rs.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/family_mapper/src/rs.rs) maps family surfaces from shared legality-aware facts
+- [runtime/src/runners.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/runtime/src/runners.rs) fans family surfaces into invocations
+- [runtime/src/lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/runtime/src/lib.rs) constructs `structure` before `legality`
 
 Required code changes from the current state:
 
-- keep `placement` focused on topology
-- add a new shared `ownership` crate/module for family-relevant file discovery and attachment
-- extend `FamilyMapper::new(...)` to receive both topology facts and owned-surface facts
-- replace the current route aliases in `views.rs` with explicit route structs that can carry:
-  - legal workspace roots
-  - repo-global file surfaces
-  - relevant local-family files
-  - attachment metadata for each file
-- update `map_rs_code()` and `map_rs_test()` away from routed-root + scoped-file semantics into repo-global owned surfaces
-- update `map_rs_clippy()`, `map_rs_toolchain()`, `map_rs_deny()`, `map_rs_cargo()`, `map_rs_garde()`, `map_rs_deps()`, and `map_rs_release()` to route:
-  - all legal workspaces
-  - all relevant files for that family
-  - shared attachment metadata
-- keep `hexarch` and `libarch` local, but stop using them to own generic workspace-topology legality once `arch` absorbs those rules
+- keep the shared structure stage family-agnostic
+- keep the shared legality stage as the only source of legal/illegal root and file-placement facts
+- keep mapper legality-aware
+- keep runners responsible for invocation fan-out
+- keep workspace-local families content-only
 
 ## Migration Plan
 
-1. Keep `placement` as the shared Rust topology layer.
-   It should stay family-agnostic.
-   It should describe live roots, overlaps, exclusions, and root-discovery failures.
+1. Keep `structure` as the only shared Rust discovery stage.
+   It discovers roots, family-owned files, attachments, overlaps, exclusions, and read/parse-neutral structural facts.
 
-2. Add a shared owned-surface layer under `ownership/`.
-   It should:
-   - discover family-relevant files across the non-excluded tree
-   - attach those files to legal workspaces or to illegal/outside positions
-   - remain fact-only, not semantic
+2. Keep `legality` as the only shared Rust legality stage.
+   It turns structure facts into legal and illegal root/file-placement facts before local families run.
 
-3. Define a shared family-selection layer under `family_selection/`.
-   It owns requested-family resolution, enabled-family filtering, and implied-family expansion.
+3. Keep `RS-ARCH` as the reporting surface over shared legality, not as an ad hoc rediscovery family.
 
-4. Redefine the external typed family-mapper layer under `family_mapper/`.
-   [lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/runtime/src/lib.rs) should call it, not implement it inline.
-   It should map shared topology facts and shared owned-surface facts into typed family orchestrator inputs.
-   Families must not invent their own routed universe.
+4. Keep `family_mapper/` legality-aware.
+   It builds family surfaces from legal facts rather than rediscovering or re-judging ownership.
 
-5. Refactor `arch` to consume injected typed mapped route instead of calling `placement::collect(...)` internally.
+5. Keep `runtime/src/runners.rs` responsible for invocation fan-out.
+   - global families: one repo-global invocation
+   - workspace-local families: one invocation per legal workspace/package root
 
-6. Refactor global families to consume repo-global owned surfaces:
-   - `fmt`
-   - `code`
-   - `test`
+6. Keep workspace-local families content-only.
+   Illegal placement, illegal topology, and impossible local surfaces belong to shared legality plus `arch`, not to local families.
 
-7. Refactor workspace-local families to consume:
-   - all legal workspaces
-   - all relevant files for that family
-   - shared attachment metadata
+7. Delete any remaining duplicate root collectors, duplicate file discovery, and duplicate ownership inference from family crates.
 
-8. Delete duplicate root collectors, duplicate file discovery, and duplicate ownership inference from families after the shared path is live.
-
-9. Add regressions proving:
-   - global families do not narrow to one workspace
-   - workspace-local families still see misplaced relevant files
-   - families no longer infer ownership from raw paths
-   - `arch` and local families agree on workspace attachment facts
+8. Add regressions proving:
+   - structure always runs before legality
+   - mapper only slices from shared legality facts
+   - global families stay global
+   - workspace-local families only see legal local surfaces
+   - `arch` and local families agree on routed legal ownership
 
 ## Design Constraints
 
@@ -752,23 +732,19 @@ Required code changes from the current state:
 - The external orchestrator may route different root sets to different families, but that routing policy must live outside the family crates.
 - The external orchestrator may also route different file surfaces to different families, but that owned-surface policy must live outside the family crates.
 - `runtime/src/lib.rs` should stay thin; if family mapping becomes nontrivial, it belongs in `family_mapper/`, not inline in runtime.
-- `family_selection/` and `family_mapper/` are separate because selecting a family set is not the same problem as routing roots into typed family routes.
-- Shared scope must not encode family semantics.
-- Shared owned-surface discovery must not encode family legality semantics.
+- Shared structure must not encode family legality semantics.
 - External family mapping may encode family ownership/routing policy, but not family-internal parsing semantics.
-- Shared scope must be stable enough that families cannot silently diverge.
+- Shared structure plus legality must be stable enough that families cannot silently diverge.
 
 ## Acceptance Criteria
 
 This plan is complete when:
 
-- `arch` no longer performs family-local live-root discovery
-- `arch` no longer performs family-local root routing
-- one shared owned-surface layer discovers family-relevant files once
-- one shared owned-surface layer computes workspace attachment facts once
+- one shared Rust structure stage discovers family-relevant files once
+- one shared Rust structure stage computes attachment facts once
+- one shared Rust legality stage decides legal/illegal root and file-placement facts once
 - `fmt`, `code`, and `test` consume repo-global owned surfaces from the mapper
 - one shared exclusion policy governs Rust root scope
-- one external typed family-selection layer chooses families once
-- one external typed family-mapper layer feeds all Rust families that need topology or owned-file ownership
+- one external typed family-mapper layer feeds all Rust families that need topology or file ownership
 - family `check(...)` entrypoints consume injected typed family routes instead of rediscovering roots or file ownership
 - disagreements between families are about semantics, not scope
