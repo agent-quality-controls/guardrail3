@@ -4,8 +4,6 @@ mod rs_libarch_01_escalation_required;
 mod rs_libarch_02_layered_root_workspace_facade;
 mod rs_libarch_03_crates_dir_exists;
 mod rs_libarch_04_exact_layered_crate_set;
-mod rs_libarch_05_workspace_members_match_layer_dirs;
-mod rs_libarch_06_no_extra_workspace_members;
 mod rs_libarch_07_core_no_api_dep;
 mod rs_libarch_08_core_no_infra_dep;
 mod rs_libarch_09_api_no_infra_dep;
@@ -43,8 +41,6 @@ pub(crate) fn run_with_facts(facts: &LibarchFacts) -> Vec<CheckResult> {
         rs_libarch_02_layered_root_workspace_facade::check(&input, &mut results);
         rs_libarch_03_crates_dir_exists::check(&input, &mut results);
         rs_libarch_04_exact_layered_crate_set::check(&input, &mut results);
-        rs_libarch_05_workspace_members_match_layer_dirs::check(&input, &mut results);
-        rs_libarch_06_no_extra_workspace_members::check(&input, &mut results);
         rs_libarch_07_core_no_api_dep::check(&input, &mut results);
         rs_libarch_08_core_no_infra_dep::check(&input, &mut results);
         rs_libarch_09_api_no_infra_dep::check(&input, &mut results);

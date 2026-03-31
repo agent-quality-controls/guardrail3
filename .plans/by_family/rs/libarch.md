@@ -19,7 +19,8 @@ Current state:
   - `crates/assertions`
   - `test_support`
 - runtime/model/config/reporting selection already know `libarch`
-- the family now owns layered-library escalation, layered workspace shape, layer dependency direction, and root facade export policy for package-owned library roots
+- the family now owns layered-library escalation, layered crate-set shape, layer dependency direction, and root facade export policy for package-owned library roots
+- workspace-membership exactness now belongs to `RS-ARCH`, not `RS-LIBARCH`
 - the old detailed design ledger remains useful as history, but it is no longer describing a hypothetical family
 
 Scope model:
