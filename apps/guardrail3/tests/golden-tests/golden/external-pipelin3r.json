@@ -2800,7 +2800,7 @@
       ]
     },
     {
-      "name": "Architecture checks",
+      "name": "Topology checks",
       "results": [
         {
           "file": "./packages/pipelin3r/Cargo.toml",

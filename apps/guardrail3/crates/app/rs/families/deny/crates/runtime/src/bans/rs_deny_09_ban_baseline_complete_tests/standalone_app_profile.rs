@@ -4,7 +4,7 @@ use super::super::{build_fixture_deny_toml, copy_fixture, run_family, write_file
 
 #[test]
 fn generated_library_baseline_passes_for_standalone_app_root() {
-    let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
+    let tmp = copy_fixture("../../../../../../../tests/fixtures/full_golden");
     write_file(tmp.path(), "deny.toml", &build_fixture_deny_toml("service"));
     write_file(
         tmp.path(),

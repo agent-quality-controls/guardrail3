@@ -5,7 +5,7 @@ use test_support::{copy_fixture, remove_deny_ban, write_file};
 
 #[test]
 fn malformed_guardrail_policy_emits_an_explicit_error_and_skips_profile_sensitive_rules() {
-    let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
+    let tmp = copy_fixture("../../../../../../../tests/fixtures/full_golden");
     write_file(tmp.path(), "guardrail3.toml", "[profile =");
     write_file(
         tmp.path(),
@@ -26,7 +26,7 @@ fn malformed_guardrail_policy_emits_an_explicit_error_and_skips_profile_sensitiv
 
 #[test]
 fn unknown_guardrail_profile_emits_an_explicit_error_and_skips_profile_sensitive_rules() {
-    let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
+    let tmp = copy_fixture("../../../../../../../tests/fixtures/full_golden");
     write_file(tmp.path(), "guardrail3.toml", "[profile]\nname = \"cli\"\n");
     write_file(
         tmp.path(),

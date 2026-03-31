@@ -69,7 +69,7 @@ fn declared_auxiliary_roots_do_not_trigger_misplaced_reporting() {
             ("guardrail3.toml", config),
             (
                 "fuzz/Cargo.toml",
-                "[package]\nname = \"fuzz\"\n\n[package.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+                "[package]\nname = \"fuzz\"\n\n[package.metadata.guardrail3]\ntopology_role = \"auxiliary\"\n",
             ),
         ],
     ));
@@ -78,7 +78,7 @@ fn declared_auxiliary_roots_do_not_trigger_misplaced_reporting() {
 }
 
 #[test]
-fn excluded_validation_root_does_not_treat_its_own_cargo_manifest_as_live_architecture() {
+fn excluded_validation_root_does_not_treat_its_own_cargo_manifest_as_live_topology() {
     let config = "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n";
     let results = check_results(&tree_at(
         "/tmp/repo/tests/fixtures/rust-app",

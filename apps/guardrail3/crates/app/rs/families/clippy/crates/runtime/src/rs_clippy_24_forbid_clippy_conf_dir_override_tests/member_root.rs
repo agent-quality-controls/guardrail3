@@ -4,7 +4,7 @@ use test_support::nested_workspace_member_with_cargo_config;
 use super::super::run_for_tests;
 
 #[test]
-fn stays_clean_for_workspace_member_cargo_config_override_because_arch_owns_placement() {
+fn stays_clean_for_workspace_member_cargo_config_override_because_topology_owns_placement() {
     let tree = nested_workspace_member_with_cargo_config(
         "config.toml",
         "[env]\nCLIPPY_CONF_DIR = \"../../..\"\n",

@@ -85,7 +85,7 @@ use guardrail3_app_core::project_walker::walk_project;
 use guardrail3_app_rs_family_code_assertions as _;
 
 #[cfg(test)]
-const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/full_golden";
 
 pub fn check(
     surface: &guardrail3_app_rs_family_mapper::RsProjectSurface,

@@ -8,7 +8,7 @@ edition = "2024"
 cargo-fuzz = true
 
 [package.metadata.guardrail3]
-arch_role = "auxiliary"
+topology_role = "auxiliary"
 
 [dependencies]
 libfuzzer-sys = "0.4"

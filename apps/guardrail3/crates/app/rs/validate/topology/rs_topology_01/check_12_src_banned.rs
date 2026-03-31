@@ -22,7 +22,7 @@ pub fn check(fs: &dyn FileSystem, name: &str, app_dir: &Path, results: &mut Vec<
     format!("Service `{name}` has src/ directory"),
     format!(
                 "Service `{name}` has an `src/` directory. Code must be in `crates/` \
-                 following hex arch layout. Move code into \
+                 following hex topology layout. Move code into \
                  `crates/{{adapters,app,domain,ports}}` subcrates."
             ),
     Some(src_dir.display().to_string()),

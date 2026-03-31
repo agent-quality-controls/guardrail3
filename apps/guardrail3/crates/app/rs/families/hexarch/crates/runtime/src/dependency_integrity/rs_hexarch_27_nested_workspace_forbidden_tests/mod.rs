@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{walk, write_file};
 
-const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/full_golden";
 
 pub(super) fn run_family(root: &Path) -> Vec<guardrail3_domain_report::CheckResult> {
     super::results_for_test_root(root)

@@ -16,7 +16,7 @@ fn misplaced_other_roots_do_not_count_as_ambiguous_classification() {
 }
 
 #[test]
-fn fixture_and_snapshot_manifests_are_not_classified_as_live_architecture() {
+fn fixture_and_snapshot_manifests_are_not_classified_as_live_topology() {
     let results = check_results(&tree(
         &[
             ("", entry(&["apps", "tests"], &[])),

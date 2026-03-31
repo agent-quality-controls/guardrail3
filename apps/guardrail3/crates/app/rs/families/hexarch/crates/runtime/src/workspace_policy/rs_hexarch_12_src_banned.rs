@@ -28,7 +28,7 @@ pub fn check(input: &AppHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     Severity::Error,
     format!("Service `{}` has src/ directory", input.app_name),
     format!(
-            "Service `{}` has an `src/` directory. Code must be in `crates/` following hex arch layout. Move code into `crates/{{adapters,app,domain,ports}}` subcrates, with optional `crates/macros/` only when needed.",
+            "Service `{}` has an `src/` directory. Code must be in `crates/` following hex topology layout. Move code into `crates/{{adapters,app,domain,ports}}` subcrates, with optional `crates/macros/` only when needed.",
             input.app_name
         ),
     Some(format!("{}/src", input.app_rel_dir)),

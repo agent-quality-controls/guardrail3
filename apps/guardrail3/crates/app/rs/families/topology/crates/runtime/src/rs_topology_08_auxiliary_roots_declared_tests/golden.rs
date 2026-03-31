@@ -28,7 +28,7 @@ fn governed_roots_with_auxiliary_metadata_do_not_emit_auxiliary_info() {
         ],
         &[(
             "apps/backend/Cargo.toml",
-            "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+            "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\ntopology_role = \"auxiliary\"\n",
         )],
     ));
 

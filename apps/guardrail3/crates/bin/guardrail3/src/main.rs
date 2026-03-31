@@ -409,9 +409,9 @@ fn build_ts_categories(
         .and_then(|typescript| typescript.checks());
 
     let ts_defaults = domain_types::TsCheckCategories::default();
-    let cfg_arch = checks
-        .and_then(|check_set| check_set.architecture())
-        .unwrap_or(ts_defaults.architecture());
+    let cfg_topology = checks
+        .and_then(|check_set| check_set.topology())
+        .unwrap_or(ts_defaults.topology());
     let cfg_content = checks
         .and_then(|check_set| check_set.content())
         .unwrap_or(ts_defaults.content());
@@ -419,5 +419,5 @@ fn build_ts_categories(
         .and_then(|check_set| check_set.tests())
         .unwrap_or(ts_defaults.tests());
 
-    domain_types::TsCheckCategories::new(cfg_arch, cfg_content, cfg_tests)
+    domain_types::TsCheckCategories::new(cfg_topology, cfg_content, cfg_tests)
 }

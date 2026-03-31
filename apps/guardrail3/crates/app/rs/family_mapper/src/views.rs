@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use guardrail3_app_rs_legality::{RustTopologyIssueFact, RustTopologyIssueKind};
 use guardrail3_app_rs_ownership::{RustFamilyFileAttachment, RustFamilyFileKind};
-use guardrail3_app_rs_placement::{RustArchRole, RustRootClassification};
+use guardrail3_app_rs_placement::{RustTopologyRole, RustRootClassification};
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree, ProjectTreeView};
 use guardrail3_validation_model::RustValidateFamily;
 
@@ -371,7 +371,7 @@ impl RsRootInputFailureView {
 pub struct RsTopologyRootView {
     root: RsRootView,
     classification: RustRootClassification,
-    arch_role: Option<RustArchRole>,
+    topology_role: Option<RustTopologyRole>,
     app_zone_candidates: Vec<String>,
     package_zone_candidates: Vec<String>,
 }
@@ -381,14 +381,14 @@ impl RsTopologyRootView {
     pub fn new(
         root: RsRootView,
         classification: RustRootClassification,
-        arch_role: Option<RustArchRole>,
+        topology_role: Option<RustTopologyRole>,
         app_zone_candidates: Vec<String>,
         package_zone_candidates: Vec<String>,
     ) -> Self {
         Self {
             root,
             classification,
-            arch_role,
+            topology_role,
             app_zone_candidates,
             package_zone_candidates,
         }
@@ -405,8 +405,8 @@ impl RsTopologyRootView {
     }
 
     #[must_use]
-    pub const fn arch_role(&self) -> Option<RustArchRole> {
-        self.arch_role
+    pub const fn topology_role(&self) -> Option<RustTopologyRole> {
+        self.topology_role
     }
 
     #[must_use]

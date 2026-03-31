@@ -5,7 +5,7 @@ use guardrail3_app_rs_family_libarch_assertions::rs_libarch_01_escalation_requir
 
 use test_support::copy_fixture;
 
-const GOLDEN_FIXTURE_REL: &str = "../../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_FIXTURE_REL: &str = "../../../../../../tests/fixtures/full_golden";
 const GOLDEN_SHARED_TYPES_CARGO: &str = "packages/shared-types/Cargo.toml";
 const GOLDEN_SHARED_TYPES_LIB: &str = "packages/shared-types/src/lib.rs";
 

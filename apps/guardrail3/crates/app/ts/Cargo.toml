@@ -10,7 +10,7 @@ path = "mod.rs"
 workspace = true
 
 [dependencies]
-guardrail3_app_arch_helpers = { package = "guardrail3-app-arch-helpers", path = "../arch-helpers" }
+guardrail3_app_topology_helpers = { package = "guardrail3-app-topology-helpers", path = "../topology-helpers" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../core" }
 guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../domain/config" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../domain/report" }

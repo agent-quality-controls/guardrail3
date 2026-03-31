@@ -3,7 +3,7 @@ use test_support::{build_fixture_clippy_toml, create_dir_all, create_temp_dir, w
 use super::super::run_for_tests;
 
 #[test]
-fn ignores_malformed_workspace_roots_because_arch_owns_root_legality() {
+fn ignores_malformed_workspace_roots_because_topology_owns_root_legality() {
     let tmp = create_temp_dir("rs-clippy-01-unparseable-routed-cargo");
     create_dir_all(&tmp.path().join("apps/backend/crates/core"));
     write_file(

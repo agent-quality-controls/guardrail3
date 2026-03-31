@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_REL: &str = "../../../../../tests/fixtures/full_golden";
 
 pub(crate) fn fixture_root() -> std::path::PathBuf {
     std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(GOLDEN_REL)

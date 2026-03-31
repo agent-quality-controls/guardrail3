@@ -21,18 +21,18 @@ mod deny_bans;
 pub mod deny_inventory;
 #[path = "config/deny_licenses.rs"]
 mod deny_licenses;
-#[path = "architecture/dependency_allowlist.rs"]
+#[path = "topology/dependency_allowlist.rs"]
 pub mod dependency_allowlist;
-#[path = "architecture/dependency_scan.rs"]
+#[path = "topology/dependency_scan.rs"]
 pub mod dependency_scan;
 #[path = "source/extra_visitors.rs"]
 pub mod extra_visitors;
-#[path = "architecture/garde_checks.rs"]
+#[path = "topology/garde_checks.rs"]
 pub mod garde_checks;
-#[path = "architecture/hex_arch_checks.rs"]
-pub mod hex_arch_checks;
-#[path = "architecture/hex_arch_structure.rs"]
-pub mod hex_arch_structure;
+#[path = "topology/hex_topology_checks.rs"]
+pub mod hex_topology_checks;
+#[path = "topology/hex_topology_structure.rs"]
+pub mod hex_topology_structure;
 #[path = "release/release_bin_checks.rs"]
 pub mod release_bin_checks;
 #[path = "release/release_checks.rs"]
@@ -137,8 +137,8 @@ pub fn run(input: RunInput<'_>) -> Report {
         &mut report,
     );
 
-    if input.categories.architecture() {
-        run_architecture_checks(
+    if input.categories.topology() {
+        run_topology_checks(
             input.fs,
             workspace_root,
             input.project,
@@ -267,7 +267,7 @@ fn run_code_checks(input: CodeCheckInput<'_>, report: &mut Report) {
     ));
 }
 
-fn run_architecture_checks(
+fn run_topology_checks(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     project: &ProjectInfo,
@@ -275,37 +275,37 @@ fn run_architecture_checks(
     profile: Option<&String>,
     report: &mut Report,
 ) {
-    let mut arch_results = Vec::new();
+    let mut topology_results = Vec::new();
     let crate_configs = merged_crate_configs(project, guardrail_cfg);
     {
-        hex_arch_structure::check_hex_arch_structure(fs, workspace_root, &mut arch_results);
-        hex_arch_checks::check_dependency_flow(
+        hex_topology_structure::check_hex_topology_structure(fs, workspace_root, &mut topology_results);
+        hex_topology_checks::check_dependency_flow(
             fs,
             workspace_root,
             project,
             &crate_configs,
-            &mut arch_results,
+            &mut topology_results,
         );
-        hex_arch_checks::check_library_service_boundary(
+        hex_topology_checks::check_library_service_boundary(
             fs,
             workspace_root,
             project,
             &crate_configs,
-            &mut arch_results,
+            &mut topology_results,
         );
-        hex_arch_checks::check_unconfigured_members(
+        hex_topology_checks::check_unconfigured_members(
             fs,
             workspace_root,
             project,
             &crate_configs,
             profile.map_or("service", String::as_str),
-            &mut arch_results,
+            &mut topology_results,
         );
     }
 
-    run_dependency_allowlist_checks(fs, workspace_root, &crate_configs, &mut arch_results);
+    run_dependency_allowlist_checks(fs, workspace_root, &crate_configs, &mut topology_results);
 
-    report.add_section(Section::new("Architecture checks".to_owned(), arch_results));
+    report.add_section(Section::new("Topology checks".to_owned(), topology_results));
 }
 
 fn merged_crate_configs(
@@ -346,7 +346,7 @@ fn run_dependency_allowlist_checks(
         String,
         guardrail3_domain_config::types::RustAppConfig,
     >,
-    arch_results: &mut Vec<guardrail3_domain_report::CheckResult>,
+    topology_results: &mut Vec<guardrail3_domain_report::CheckResult>,
 ) {
     for (crate_name, crate_cfg) in crate_configs {
         if let Some(allowed) = &crate_cfg.allowed_deps {
@@ -356,9 +356,9 @@ fn run_dependency_allowlist_checks(
                 crate_name,
                 allowed,
                 fs,
-                arch_results,
+                topology_results,
             );
         }
-        dependency_allowlist::check_library_has_allowlist(crate_name, crate_cfg, arch_results);
+        dependency_allowlist::check_library_has_allowlist(crate_name, crate_cfg, topology_results);
     }
 }

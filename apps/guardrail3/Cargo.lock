@@ -363,14 +363,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "guardrail3-app-arch-helpers"
-version = "0.0.0"
-dependencies = [
- "guardrail3-domain-report",
- "guardrail3-ports-outbound-traits",
-]
-
-[[package]]
 name = "guardrail3-app-commands"
 version = "0.0.0"
 
@@ -1070,11 +1062,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-topology-helpers"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-domain-report",
+ "guardrail3-ports-outbound-traits",
+]
+
+[[package]]
 name = "guardrail3-app-ts"
 version = "0.0.0"
 dependencies = [
- "guardrail3-app-arch-helpers",
  "guardrail3-app-core",
+ "guardrail3-app-topology-helpers",
  "guardrail3-domain-config",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",

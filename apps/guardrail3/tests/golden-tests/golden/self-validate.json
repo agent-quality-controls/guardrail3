@@ -5432,7 +5432,7 @@
       ]
     },
     {
-      "name": "Architecture checks",
+      "name": "Topology checks",
       "results": [
         {
           "file": "/Users/tartakovsky/Projects/websmasher/guardrail3/Cargo.toml",

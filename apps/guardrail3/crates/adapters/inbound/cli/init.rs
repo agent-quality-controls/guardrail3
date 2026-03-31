@@ -6,7 +6,7 @@ use guardrail3_app_core::discover::detect_project;
 #[cfg(feature = "product-ts")]
 use guardrail3_app_ts::validate::auto_detect_app_type;
 #[cfg(feature = "product-ts")]
-use guardrail3_app_ts::validate::ts_arch_checks::discover_ts_apps;
+use guardrail3_app_ts::validate::ts_topology_checks::discover_ts_apps;
 #[cfg(feature = "product-ts")]
 use guardrail3_outbound_traits::FileSystem;
 
@@ -352,7 +352,7 @@ fn generate_ts_section(fs: &dyn FileSystem, project_path: &Path) -> String {
         section.push_str("\n[typescript.apps.my-app]\n");
         section.push_str("type = \"service\"         # service | content | library\n");
         section.push_str("\n[typescript.apps.my-app.checks]\n");
-        section.push_str("architecture = true      # T-ARCH-* — hex arch enforcement\n");
+        section.push_str("topology = true      # T-TOPOLOGY-* — hex topology enforcement\n");
         section
             .push_str("content = false          # T-STYL-*, T-ESLP-07/08 — accessibility, SEO\n");
         section.push_str("tests = true             # T-TEST-* — test quality\n");
@@ -382,7 +382,7 @@ fn generate_ts_section(fs: &dyn FileSystem, project_path: &Path) -> String {
             writeln!(section, "\n[typescript.apps.{name}.checks]").unwrap_or_default();
             writeln!(
                 section,
-                "architecture = {:<9}# T-ARCH-* — hex arch enforcement",
+                "topology = {:<9}# T-TOPOLOGY-* — hex topology enforcement",
                 cats.0
             )
             .unwrap_or_default();
@@ -482,7 +482,7 @@ fn detect_reason(app_path: &Path, detected: Option<TsAppType>) -> &'static str {
         }
         Some(TsAppType::Service) => {
             if app_path.join("src/modules/domain").is_dir() {
-                "auto-detected: hex arch structure"
+                "auto-detected: hex topology structure"
             } else {
                 "auto-detected: backend framework"
             }

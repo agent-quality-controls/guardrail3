@@ -8,7 +8,7 @@ pub(super) use test_support::{
     create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
 };
 
-const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/full_golden";
 const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
 const INNER_HEX_ROOT: &str = "apps/backend/crates/adapters/inbound/mcp/crates";
 

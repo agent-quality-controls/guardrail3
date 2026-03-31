@@ -30,9 +30,9 @@ pub fn check(input: &ZoneOverlapInput<'_>, results: &mut Vec<CheckResult>) {
     results.push(CheckResult::from_parts(
         ID.to_owned(),
         Severity::Error,
-        "app and package architecture zones overlap illegally".to_owned(),
+        "app and package topology zones overlap illegally".to_owned(),
         format!(
-            "{nesting_message}. app Cargo root: `{}`; package Cargo root: `{}`. App/package architecture zones must not overlap or nest.",
+            "{nesting_message}. app Cargo root: `{}`; package Cargo root: `{}`. App/package topology zones must not overlap or nest.",
             input.overlap.app_cargo_rel_path, input.overlap.package_cargo_rel_path
         ),
         Some(file),
@@ -51,7 +51,7 @@ pub fn check_success(has_overlaps: bool, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Info,
             "No illegal app/package zone overlap found".to_owned(),
-            "App and package architecture zones do not overlap or nest illegally.".to_owned(),
+            "App and package topology zones do not overlap or nest illegally.".to_owned(),
             None,
             None,
             false,

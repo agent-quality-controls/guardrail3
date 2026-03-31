@@ -325,7 +325,7 @@ fn preserves_immediate_broken_symlink_children_in_discovered_dirs() {
 }
 
 fn rust_golden_fixture_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../tests/fixtures/r_arch_01/golden")
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../tests/fixtures/full_golden")
 }
 
 fn copy_rust_golden_fixture() -> tempfile::TempDir {

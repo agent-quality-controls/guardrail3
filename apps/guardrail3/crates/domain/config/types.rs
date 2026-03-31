@@ -462,7 +462,7 @@ impl RustChecksConfig {
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct TsChecksConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    architecture: Option<bool>,
+    topology: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
     content: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
@@ -472,20 +472,20 @@ pub struct TsChecksConfig {
 impl TsChecksConfig {
     #[must_use]
     pub const fn new(
-        architecture: Option<bool>,
+        topology: Option<bool>,
         content: Option<bool>,
         tests: Option<bool>,
     ) -> Self {
         Self {
-            architecture,
+            topology,
             content,
             tests,
         }
     }
 
     #[must_use]
-    pub const fn architecture(&self) -> Option<bool> {
-        self.architecture
+    pub const fn topology(&self) -> Option<bool> {
+        self.topology
     }
 
     #[must_use]

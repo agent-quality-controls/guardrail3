@@ -56,7 +56,7 @@ pub(crate) struct RustFamilyRunnerDef {
 }
 
 #[cfg(feature = "family-topology")]
-fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
+fn run_topology(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_topology();
     let surface = topology_surface(ctx.tree, &route);
     guardrail3_app_rs_family_topology::check(&surface, &route)
@@ -537,7 +537,7 @@ pub(crate) fn compiled_runners() -> Vec<RustFamilyRunnerDef> {
     #[cfg(feature = "family-topology")]
     runners.push(RustFamilyRunnerDef {
         family: RustValidateFamily::Topology,
-        run: run_arch,
+        run: run_topology,
     });
 
     #[cfg(feature = "family-fmt")]

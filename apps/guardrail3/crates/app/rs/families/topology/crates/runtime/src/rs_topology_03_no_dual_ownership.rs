@@ -10,7 +10,7 @@ pub fn check(input: &DualOwnershipInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             format!(
-                "Rust root `{}` has dual architecture ownership",
+                "Rust root `{}` has dual topology ownership",
                 display_dir(&input.root.rel_dir)
             ),
             format!(
@@ -31,11 +31,11 @@ pub fn check(input: &DualOwnershipInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Info,
             format!(
-                "Rust root `{}` avoids dual architecture ownership",
+                "Rust root `{}` avoids dual topology ownership",
                 display_dir(&input.root.rel_dir)
             ),
             format!(
-                "`{}` is governed by at most one architecture family.",
+                "`{}` is governed by at most one topology family.",
                 input.root.cargo_rel_path
             ),
             Some(input.root.cargo_rel_path.clone()),

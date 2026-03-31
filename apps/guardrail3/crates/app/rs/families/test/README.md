@@ -1,6 +1,6 @@
 # RS-TEST
 
-Rust test quality and test architecture family.
+Rust test quality and test topology family.
 
 This family enforces a target state where Rust tests are:
 

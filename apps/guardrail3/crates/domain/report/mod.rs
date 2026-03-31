@@ -167,17 +167,17 @@ pub struct Report {
 #[allow(clippy::struct_excessive_bools)] // reason: domain flags are independent toggles, not a state machine
 pub struct ValidateDomains {
     code: bool,
-    architecture: bool,
+    topology: bool,
     release: bool,
     tests: bool,
 }
 
 impl ValidateDomains {
     #[must_use]
-    pub const fn new(code: bool, architecture: bool, release: bool, tests: bool) -> Self {
+    pub const fn new(code: bool, topology: bool, release: bool, tests: bool) -> Self {
         Self {
             code,
-            architecture,
+            topology,
             release,
             tests,
         }
@@ -189,8 +189,8 @@ impl ValidateDomains {
     }
 
     #[must_use]
-    pub const fn architecture(&self) -> bool {
-        self.architecture
+    pub const fn topology(&self) -> bool {
+        self.topology
     }
 
     #[must_use]
@@ -209,7 +209,7 @@ impl ValidateDomains {
 #[derive(Debug, Clone)]
 #[allow(clippy::struct_excessive_bools)] // reason: check category flags are independent toggles, not a state machine
 pub struct RustCheckCategories {
-    architecture: bool,
+    topology: bool,
     garde: bool,
     hooks: bool,
     tests: bool,
@@ -219,14 +219,14 @@ pub struct RustCheckCategories {
 impl RustCheckCategories {
     #[must_use]
     pub const fn new(
-        architecture: bool,
+        topology: bool,
         garde: bool,
         hooks: bool,
         tests: bool,
         release: bool,
     ) -> Self {
         Self {
-            architecture,
+            topology,
             garde,
             hooks,
             tests,
@@ -235,8 +235,8 @@ impl RustCheckCategories {
     }
 
     #[must_use]
-    pub const fn architecture(&self) -> bool {
-        self.architecture
+    pub const fn topology(&self) -> bool {
+        self.topology
     }
 
     #[must_use]
@@ -263,7 +263,7 @@ impl RustCheckCategories {
 impl Default for RustCheckCategories {
     fn default() -> Self {
         Self {
-            architecture: true,
+            topology: true,
             garde: true,
             hooks: true,
             tests: true,
@@ -323,24 +323,24 @@ pub const fn rust_validate_family_section_name(family: RustValidateFamily) -> &'
 /// Built by merging guardrail3.toml [typescript.checks] with CLI flags.
 #[derive(Debug, Clone)]
 pub struct TsCheckCategories {
-    architecture: bool,
+    topology: bool,
     content: bool,
     tests: bool,
 }
 
 impl TsCheckCategories {
     #[must_use]
-    pub const fn new(architecture: bool, content: bool, tests: bool) -> Self {
+    pub const fn new(topology: bool, content: bool, tests: bool) -> Self {
         Self {
-            architecture,
+            topology,
             content,
             tests,
         }
     }
 
     #[must_use]
-    pub const fn architecture(&self) -> bool {
-        self.architecture
+    pub const fn topology(&self) -> bool {
+        self.topology
     }
 
     #[must_use]
@@ -363,7 +363,7 @@ impl Default for TsCheckCategories {
 /// TypeScript app type — determines which check categories apply by default.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TsAppType {
-    /// HTTP server, API backend — hex arch, route wrappers, full `ESLint` strict
+    /// HTTP server, API backend — hex topology, route wrappers, full `ESLint` strict
     Service,
     /// Marketing site, blog, docs — content checks, SEO, accessibility, static gen
     Content,
@@ -386,17 +386,17 @@ impl TsAppType {
     pub const fn default_categories(self) -> TsCheckCategories {
         match self {
             Self::Service => TsCheckCategories {
-                architecture: true,
+                topology: true,
                 content: false,
                 tests: true,
             },
             Self::Content => TsCheckCategories {
-                architecture: false,
+                topology: false,
                 content: true,
                 tests: true,
             },
             Self::Library => TsCheckCategories {
-                architecture: false,
+                topology: false,
                 content: false,
                 tests: true,
             },
