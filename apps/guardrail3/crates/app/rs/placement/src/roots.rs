@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_project_tree::ProjectTreeView;
 use toml::Value;
 
 use crate::classification::{
@@ -69,7 +69,7 @@ impl RustRootPlacementFacts {
 }
 
 #[must_use]
-pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
+pub fn collect(tree: &dyn ProjectTreeView) -> RustRootPlacementFacts {
     if is_excluded_validation_root(tree) {
         return RustRootPlacementFacts::default();
     }
@@ -92,7 +92,7 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
         let cargo_rel_path = if rel_dir.is_empty() {
             "Cargo.toml".to_owned()
         } else {
-            ProjectTree::join_rel(&rel_dir, "Cargo.toml")
+            join_rel(&rel_dir, "Cargo.toml")
         };
         if tree.file_exists(&cargo_rel_path) && tree.file_content(&cargo_rel_path).is_none() {
             input_failures.push(RustRootPlacementInputFailureFacts::new(
@@ -136,7 +136,7 @@ pub fn is_excluded_live_root_dir(rel_dir: &str) -> bool {
     is_excluded_path(rel_dir)
 }
 
-fn is_excluded_validation_root(tree: &ProjectTree) -> bool {
+fn is_excluded_validation_root(tree: &dyn ProjectTreeView) -> bool {
     is_excluded_path(&tree.root().to_string_lossy().replace('\\', "/"))
 }
 
@@ -188,7 +188,7 @@ fn resolve_arch_role(
 }
 
 fn parse_live_cargo_toml(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     cargo_rel_path: &str,
     input_failures: &mut Vec<RustRootPlacementInputFailureFacts>,
 ) -> Option<Value> {
@@ -249,7 +249,7 @@ fn arch_role_value(parsed: &Value) -> Option<&Value> {
         })
 }
 
-fn zone_context_prefix(tree: &ProjectTree) -> Option<String> {
+fn zone_context_prefix(tree: &dyn ProjectTreeView) -> Option<String> {
     let segments: Vec<_> = tree
         .root()
         .iter()
@@ -274,5 +274,13 @@ fn contextual_rel_dir(zone_context_prefix: Option<&str>, rel_dir: &str) -> Strin
         Some(prefix) if rel_dir.is_empty() => prefix.to_owned(),
         Some(prefix) => format!("{prefix}/{rel_dir}"),
         None => rel_dir.to_owned(),
+    }
+}
+
+fn join_rel(parent: &str, child: &str) -> String {
+    if parent.is_empty() {
+        child.to_owned()
+    } else {
+        format!("{parent}/{child}")
     }
 }

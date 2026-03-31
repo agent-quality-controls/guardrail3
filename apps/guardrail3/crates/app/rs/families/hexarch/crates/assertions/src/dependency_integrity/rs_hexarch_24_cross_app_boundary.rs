@@ -7,7 +7,7 @@ pub use guardrail3_app_rs_family_hexarch_assertions_common::{
     assert_all_inventory, assert_all_titles_contain, assert_result_messages, assert_result_summary,
     assert_result_titles, assert_result_titles_excluding, count_titles_containing_all,
 };
-pub type ProjectTree = guardrail3_domain_project_tree::ProjectTree;
+pub type ProjectTree = guardrail3_app_rs_family_mapper::RsProjectSurface;
 
 pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a CheckResult> {
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };

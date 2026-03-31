@@ -17,6 +17,20 @@ use garde::Validate;
 use glob::Pattern;
 use serde::{Deserialize, Serialize};
 
+pub trait ProjectTreeView {
+    fn root(&self) -> &PathBuf;
+    fn structure(&self) -> &BTreeMap<String, DirEntry>;
+    fn content(&self) -> &BTreeMap<String, String>;
+    fn dir_exists(&self, rel: &str) -> bool;
+    fn dir_contents(&self, rel: &str) -> Option<&DirEntry>;
+    fn file_content(&self, rel: &str) -> Option<&str>;
+    fn file_exists(&self, rel: &str) -> bool;
+    fn all_dir_rels(&self) -> Vec<String>;
+    fn dirs_with_file(&self, name: &str) -> Vec<String>;
+    fn matching_dir_rels(&self, pattern: &str) -> Vec<String>;
+    fn abs_path(&self, rel: &str) -> PathBuf;
+}
+
 /// The full project tree.
 #[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct ProjectTree {
@@ -174,6 +188,52 @@ impl ProjectTree {
         } else {
             format!("{parent}/{child}")
         }
+    }
+}
+
+impl ProjectTreeView for ProjectTree {
+    fn root(&self) -> &PathBuf {
+        ProjectTree::root(self)
+    }
+
+    fn structure(&self) -> &BTreeMap<String, DirEntry> {
+        ProjectTree::structure(self)
+    }
+
+    fn content(&self) -> &BTreeMap<String, String> {
+        ProjectTree::content(self)
+    }
+
+    fn dir_exists(&self, rel: &str) -> bool {
+        ProjectTree::dir_exists(self, rel)
+    }
+
+    fn dir_contents(&self, rel: &str) -> Option<&DirEntry> {
+        ProjectTree::dir_contents(self, rel)
+    }
+
+    fn file_content(&self, rel: &str) -> Option<&str> {
+        ProjectTree::file_content(self, rel)
+    }
+
+    fn file_exists(&self, rel: &str) -> bool {
+        ProjectTree::file_exists(self, rel)
+    }
+
+    fn all_dir_rels(&self) -> Vec<String> {
+        ProjectTree::all_dir_rels(self)
+    }
+
+    fn dirs_with_file(&self, name: &str) -> Vec<String> {
+        ProjectTree::dirs_with_file(self, name)
+    }
+
+    fn matching_dir_rels(&self, pattern: &str) -> Vec<String> {
+        ProjectTree::matching_dir_rels(self, pattern)
+    }
+
+    fn abs_path(&self, rel: &str) -> PathBuf {
+        ProjectTree::abs_path(self, rel)
     }
 }
 

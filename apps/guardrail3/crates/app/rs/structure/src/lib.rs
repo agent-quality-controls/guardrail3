@@ -5,7 +5,7 @@ use guardrail3_app_rs_placement::{
     RustRootPlacementFacts, RustRootPlacementInputFailureFacts, RustRootPlacementRootFacts,
     RustZoneOverlapFacts, collect as collect_placement,
 };
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_project_tree::ProjectTreeView;
 
 #[derive(Debug, Clone, Default)]
 pub struct RustStructureFacts {
@@ -54,7 +54,7 @@ impl RustStructureFacts {
 }
 
 #[must_use]
-pub fn collect(tree: &ProjectTree) -> RustStructureFacts {
+pub fn collect(tree: &dyn ProjectTreeView) -> RustStructureFacts {
     let placement = collect_placement(tree);
     let owned_surface = collect_owned_surface(tree, &placement);
     RustStructureFacts::new(placement, owned_surface)
