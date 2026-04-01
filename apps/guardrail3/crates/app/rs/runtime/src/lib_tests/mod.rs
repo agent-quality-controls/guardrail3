@@ -615,6 +615,27 @@ fn code_runtime_repo_global_surface_includes_rust_files_outside_cargo_roots() {
 }
 
 #[test]
+fn code_runtime_reports_rust_files_when_repo_has_no_cargo_roots() {
+    let root = super::temp_root_for_tests("code-runtime-zero-cargo-roots");
+    super::write_file_for_tests(&root, "guardrail3.toml", "[rust.checks]\ncode = true\n");
+    super::write_file_for_tests(&root, "tools/stray.rs", "pub fn stray() { todo!() }\n");
+
+    let report =
+        super::run_code_for_tests(&super::LocalFsTest, &root).expect("code runtime report");
+
+    assertions::assert_result_present(
+        &report,
+        "code",
+        "RS-CODE-13",
+        Some("tools/stray.rs"),
+        Some(false),
+        Some("todo! macro"),
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
 fn fmt_runtime_validation_scope_does_not_narrow_global_family() {
     let root = super::temp_root_for_tests("fmt-runtime-global-validation-scope");
     super::write_file_for_tests(&root, "guardrail3.toml", "[rust.checks]\nfmt = true\n");

@@ -42,15 +42,6 @@ pub struct StructuralCapFacts {
 pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
     let mut input_failures = Vec::new();
     let active_root_dirs = active_root_dirs(route);
-    if active_root_dirs.is_empty() {
-        return CodeFacts {
-            files: Vec::new(),
-            structural_caps: Vec::new(),
-            unsafe_code_lints: Vec::new(),
-            exception_comments: Vec::new(),
-            input_failures,
-        };
-    }
     let cargo_roots = collect_cargo_roots(tree, route, &active_root_dirs, &mut input_failures);
     let root_dirs = cargo_roots.keys().cloned().collect::<Vec<_>>();
     let policy_map = policy::read_policy_map(tree, &cargo_roots, &mut input_failures);
