@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use guardrail3_app_rs_family_mapper::{RsArchRoute, RsProjectSurface as ProjectTree};
+use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 
 /// A node in the crate containment tree.
 /// Each node is a directory with a Cargo.toml.
@@ -35,6 +35,8 @@ pub(crate) struct CrateNode {
     pub has_all_feature: bool,
     /// Dependencies of the `all` feature (feature names it enables).
     pub all_feature_deps: Vec<String>,
+    /// Dependencies of the `default` feature.
+    pub default_feature_deps: Vec<String>,
     /// Complexity: number of direct dependencies in Cargo.toml.
     pub dependency_count: usize,
     /// Complexity: sibling .rs file count in src/ (or crate root if no src/).
@@ -83,16 +85,22 @@ impl CrateTree {
         let mut current = target_rel;
         loop {
             let Some((parent, _)) = current.rsplit_once('/') else {
-                // Reached project root
+                // Reached project root.
                 if let Some(root_node) = self.nodes.get("") {
-                    if root_node.rel_dir != target_rel && !self.is_inside(source_rel, "") {
+                    if root_node.rel_dir != target_rel
+                        && root_node.rel_dir != source_rel
+                        && !self.is_inside(source_rel, "")
+                    {
                         return Some(String::new());
                     }
                 }
                 return None;
             };
             if let Some(boundary) = self.nodes.get(parent) {
-                if boundary.rel_dir != target_rel && !self.is_inside(source_rel, &boundary.rel_dir)
+                // Skip if source IS the boundary crate (parent accessing its own subtree).
+                if boundary.rel_dir != target_rel
+                    && boundary.rel_dir != source_rel
+                    && !self.is_inside(source_rel, &boundary.rel_dir)
                 {
                     return Some(boundary.rel_dir.clone());
                 }
@@ -113,7 +121,7 @@ impl CrateTree {
     }
 }
 
-pub(super) fn collect(tree: &ProjectTree, _route: &RsArchRoute) -> CrateTree {
+pub(super) fn collect(tree: &ProjectTree) -> CrateTree {
     let cargo_dirs = tree.dirs_with_file("Cargo.toml");
 
     let mut nodes = BTreeMap::new();
@@ -214,6 +222,16 @@ fn build_node(tree: &ProjectTree, dir: &str, cargo_rel: &str, parsed: &toml::Val
                 .collect()
         })
         .unwrap_or_default();
+    let default_feature_deps: Vec<String> = features_table
+        .and_then(|t| t.get("default"))
+        .and_then(toml::Value::as_array)
+        .map(|arr| {
+            arr.iter()
+                .filter_map(toml::Value::as_str)
+                .map(str::to_owned)
+                .collect()
+        })
+        .unwrap_or_default();
 
     // Complexity measurements.
     let dependency_count = count_dependencies(parsed);
@@ -240,6 +258,7 @@ fn build_node(tree: &ProjectTree, dir: &str, cargo_rel: &str, parsed: &toml::Val
         has_default_feature,
         has_all_feature,
         all_feature_deps,
+        default_feature_deps,
         dependency_count,
         sibling_rs_file_count,
         sibling_dir_count,
@@ -264,6 +283,7 @@ fn make_error_node(dir: &str, cargo_rel: &str, error: String) -> CrateNode {
         has_default_feature: false,
         has_all_feature: false,
         all_feature_deps: Vec::new(),
+        default_feature_deps: Vec::new(),
         dependency_count: 0,
         sibling_rs_file_count: 0,
         sibling_dir_count: 0,

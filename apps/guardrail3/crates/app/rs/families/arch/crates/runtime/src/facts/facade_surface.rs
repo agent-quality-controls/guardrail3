@@ -269,13 +269,25 @@ fn span_line<T: syn::spanned::Spanned>(item: &T) -> usize {
 fn is_broad_reexport(tree: &syn::UseTree) -> bool {
     match tree {
         syn::UseTree::Glob(_) => true,
-        syn::UseTree::Path(p) => is_broad_reexport(&p.tree),
-        syn::UseTree::Name(_) => {
-            // `pub use foo;` re-exports entire crate/module — broad.
-            true
-        }
-        syn::UseTree::Rename(_) => false,
+        syn::UseTree::Path(p) => is_broad_reexport_inner(&p.tree),
+        // Top-level `pub use foo;` re-exports entire crate/module.
+        syn::UseTree::Name(_) => true,
+        // Top-level `pub use foo as bar;` also re-exports entire crate/module under alias.
+        syn::UseTree::Rename(_) => true,
         syn::UseTree::Group(g) => g.items.iter().any(is_broad_reexport),
+    }
+}
+
+/// Inside a path (e.g., `pub use foo::X`), Name means specific item, not broad.
+fn is_broad_reexport_inner(tree: &syn::UseTree) -> bool {
+    match tree {
+        syn::UseTree::Glob(_) => true,
+        syn::UseTree::Path(p) => is_broad_reexport_inner(&p.tree),
+        // `pub use foo::Bar;` — specific item, not broad.
+        syn::UseTree::Name(_) => false,
+        // `pub use foo::Bar as Baz;` — specific item with alias, not broad.
+        syn::UseTree::Rename(_) => false,
+        syn::UseTree::Group(g) => g.items.iter().any(is_broad_reexport_inner),
     }
 }
 
@@ -320,17 +332,39 @@ fn extract_feature_gate(item: &syn::Item) -> Option<String> {
         let Ok(meta) = attr.parse_args::<syn::Meta>() else {
             continue;
         };
-        if let syn::Meta::NameValue(nv) = &meta {
-            if nv.path.is_ident("feature") {
-                if let syn::Expr::Lit(syn::ExprLit {
-                    lit: syn::Lit::Str(s),
-                    ..
-                }) = &nv.value
-                {
-                    return Some(s.value());
-                }
-            }
+        if let Some(feature) = extract_feature_from_meta(&meta) {
+            return Some(feature);
         }
     }
     None
+}
+
+fn extract_feature_from_meta(meta: &syn::Meta) -> Option<String> {
+    match meta {
+        syn::Meta::NameValue(nv) if nv.path.is_ident("feature") => {
+            if let syn::Expr::Lit(syn::ExprLit {
+                lit: syn::Lit::Str(s),
+                ..
+            }) = &nv.value
+            {
+                return Some(s.value());
+            }
+            None
+        }
+        syn::Meta::List(list) if list.path.is_ident("all") || list.path.is_ident("any") => {
+            // Search inside all(...) or any(...) for a feature = "..." entry.
+            let Ok(nested) =
+                list.parse_args_with(syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated)
+            else {
+                return None;
+            };
+            for inner in &nested {
+                if let Some(feature) = extract_feature_from_meta(inner) {
+                    return Some(feature);
+                }
+            }
+            None
+        }
+        _ => None,
+    }
 }

@@ -92,14 +92,46 @@ pub(crate) fn check(
         ));
     }
 
+    if node.has_all_feature && node.all_feature_deps.is_empty() {
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "`all` feature is empty".to_owned(),
+            format!(
+                "Crate `{}` has an `all` feature but it enables no sub-features. \
+                 `all` must list the named sub-features: `all = [\"types\", \"api\", ...]`.",
+                node.rel_dir
+            ),
+            Some(node.cargo_rel_path.clone()),
+            None,
+            false,
+        ));
+    }
+
     if node.has_all_feature && !node.has_default_feature {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Error,
             "missing `default` feature".to_owned(),
             format!(
-                "Crate `{}` has `all` feature but no `default = [\"all\"]`. \
-                 Consumers should get everything by default unless they opt out.",
+                "Crate `{}` has `all` feature but no `default` feature. \
+                 Add `default = [\"all\"]` so consumers get everything by default.",
+                node.rel_dir
+            ),
+            Some(node.cargo_rel_path.clone()),
+            None,
+            false,
+        ));
+    }
+
+    if node.has_default_feature && !node.default_feature_deps.contains(&"all".to_owned()) {
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "`default` feature must include `all`".to_owned(),
+            format!(
+                "Crate `{}` has a `default` feature but it does not include `all`. \
+                 Set `default = [\"all\"]` so consumers get everything unless they opt out.",
                 node.rel_dir
             ),
             Some(node.cargo_rel_path.clone()),
