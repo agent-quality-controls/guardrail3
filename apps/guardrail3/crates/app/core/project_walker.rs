@@ -8,8 +8,8 @@
 //! tracked ones. But tracked files are part of the project (they ship to other
 //! developers on `git pull`). So after the initial walk, we run `git ls-files`
 //! to find any tracked files the walker missed and add them back. We also
-//! recover ignored files that still matter to validation, such as manifests,
-//! config files, and Rust/TypeScript source files.
+//! recover ignored files that still matter to discovery and policy validation,
+//! such as manifests and config files.
 //!
 //! Source files (.rs, .ts, .tsx) appear in the structure but their content
 //! is NOT cached. Config files get their content cached.
@@ -79,8 +79,11 @@ const CACHED_PREFIX: &[&str] = &[
     "jest.config.",
 ];
 
-const RECOVERED_SOURCE_EXTENSIONS: &[&str] =
-    &["rs", "ts", "tsx", "js", "jsx", "mts", "cts", "mjs", "cjs"];
+/// Root-relative subtrees or directory-name roots that are never governed.
+///
+/// These are excluded from all walker phases, including ignored-file recovery.
+const HARD_BANNED_ROOTS: &[&str] = &[".claude/worktrees"];
+const HARD_BANNED_DIR_NAMES: &[&str] = &[".git", "target", "node_modules"];
 
 /// Check if a file name should have its content cached.
 fn should_cache(name: &str, rel_path: &str) -> bool {
@@ -120,14 +123,23 @@ fn should_cache(name: &str, rel_path: &str) -> bool {
 }
 
 fn should_recover_ignored(name: &str, rel_path: &str) -> bool {
-    if should_cache(name, rel_path) {
+    should_cache(name, rel_path)
+}
+
+fn is_hard_banned_rel(rel: &str) -> bool {
+    if rel.is_empty() {
+        return false;
+    }
+
+    if HARD_BANNED_ROOTS
+        .iter()
+        .any(|root| rel == *root || rel.starts_with(&format!("{root}/")))
+    {
         return true;
     }
 
-    Path::new(name)
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .is_some_and(|ext| RECOVERED_SOURCE_EXTENSIONS.contains(&ext))
+    rel.split('/')
+        .any(|component| HARD_BANNED_DIR_NAMES.contains(&component))
 }
 
 /// Build a [`ProjectTree`] by walking the filesystem from `root`.
@@ -141,6 +153,7 @@ fn should_recover_ignored(name: &str, rel_path: &str) -> bool {
 pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
     let mut dir_children: BTreeMap<String, ChildSets> = BTreeMap::new();
     let mut content: BTreeMap<String, String> = BTreeMap::new();
+    let root_buf = root.to_path_buf();
 
     // Phase 1: Walk with ignore crate
     let walker = ignore::WalkBuilder::new(root)
@@ -149,11 +162,13 @@ pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
         .git_ignore(true)
         .git_global(true)
         .git_exclude(true)
-        .filter_entry(|entry| {
-            // Skip .git/ — the ignore crate doesn't auto-skip it with hidden(false)
+        .filter_entry(move |entry| {
             if entry.file_type().is_some_and(|ft| ft.is_dir()) {
-                let name = entry.file_name().to_string_lossy();
-                if name == ".git" {
+                let Ok(rel) = entry.path().strip_prefix(&root_buf) else {
+                    return true;
+                };
+                let rel = rel.to_string_lossy();
+                if is_hard_banned_rel(&rel) {
                     return false;
                 }
             }
@@ -288,6 +303,9 @@ fn patch_tracked_files(
         if line.is_empty() {
             continue;
         }
+        if is_hard_banned_rel(line) {
+            continue;
+        }
         // Skip files already in the tree
         if existing_files.contains(line) {
             continue;
@@ -336,7 +354,13 @@ fn patch_relevant_ignored_files(
     for entry in WalkDir::new(root)
         .follow_links(true)
         .into_iter()
-        .filter_entry(|entry| entry.file_name().to_str().is_none_or(|name| name != ".git"))
+        .filter_entry(|entry| {
+            let Ok(rel) = entry.path().strip_prefix(root) else {
+                return true;
+            };
+            let rel = rel.to_string_lossy();
+            !is_hard_banned_rel(&rel)
+        })
         .flatten()
     {
         if !(entry.file_type().is_file() || entry.file_type().is_symlink()) {
@@ -399,6 +423,10 @@ fn patch_immediate_children(
                 continue;
             };
             let name = entry.file_name().to_string_lossy().into_owned();
+            let child_rel = ProjectTree::join_rel(&dir_rel, &name);
+            if is_hard_banned_rel(&child_rel) {
+                continue;
+            }
             let parent = dir_children
                 .entry(dir_rel.clone())
                 .or_insert_with(empty_child_sets);
@@ -417,7 +445,7 @@ fn patch_immediate_children(
             }
 
             if file_type.is_file() {
-                let rel_path = ProjectTree::join_rel(&dir_rel, &name);
+                let rel_path = child_rel;
                 let _ = parent.1.insert(name.clone());
                 if !content.contains_key(&rel_path) && should_cache(&name, &rel_path) {
                     if let Some(file_content) = fs.read_file(&root.join(&rel_path)) {
@@ -428,7 +456,6 @@ fn patch_immediate_children(
             }
 
             if file_type.is_dir() {
-                let child_rel = ProjectTree::join_rel(&dir_rel, &name);
                 let _ = parent.0.insert(name);
                 let _ = dir_children
                     .entry(child_rel)

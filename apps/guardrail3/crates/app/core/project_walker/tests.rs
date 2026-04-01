@@ -164,8 +164,9 @@ fn recovers_ignored_untracked_manifest_files_anywhere_under_root() {
 }
 
 #[test]
-fn recovers_ignored_untracked_typescript_source_files_anywhere_under_root() {
+fn does_not_recover_ignored_untracked_typescript_source_files_anywhere_under_root() {
     let tmp = tempdir().expect("failed to create temporary project root");
+    init_git_repo(tmp.path());
     guardrail3_shared_fs::create_dir_all(&tmp.path().join("ignored/web/src"))
         .expect("failed to create ignored typescript fixture directories");
     guardrail3_shared_fs::write_file(&tmp.path().join(".gitignore"), "ignored/\n")
@@ -177,13 +178,72 @@ fn recovers_ignored_untracked_typescript_source_files_anywhere_under_root() {
     .expect("failed to write ignored TypeScript source");
 
     let tree = walk_project(&RealFileSystem, tmp.path());
-    let entry = tree
-        .dir_contents("ignored/web/src")
-        .expect("ignored typescript source parent directory should be recovered");
 
     assert!(
-        entry.files().iter().any(|file| file == "index.ts"),
-        "ignored TypeScript source should be recovered into ProjectTree: {entry:#?}"
+        !tree.file_exists("ignored/web/src/index.ts"),
+        "ignored TypeScript source should stay out of ProjectTree"
+    );
+}
+
+#[test]
+fn does_not_recover_ignored_untracked_rust_source_files_anywhere_under_root() {
+    let tmp = tempdir().expect("failed to create temporary project root");
+    init_git_repo(tmp.path());
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join("ignored/crate/src"))
+        .expect("failed to create ignored rust fixture directories");
+    guardrail3_shared_fs::write_file(&tmp.path().join(".gitignore"), "ignored/\n")
+        .expect("failed to write project fixture .gitignore");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join("ignored/crate/src/lib.rs"),
+        "pub fn ready() {}\n",
+    )
+    .expect("failed to write ignored Rust source");
+
+    let tree = walk_project(&RealFileSystem, tmp.path());
+
+    assert!(
+        !tree.file_exists("ignored/crate/src/lib.rs"),
+        "ignored Rust source should stay out of ProjectTree"
+    );
+}
+
+#[test]
+fn does_not_recover_hard_banned_worktrees() {
+    let tmp = tempdir().expect("failed to create temporary project root");
+    init_git_repo(tmp.path());
+    guardrail3_shared_fs::write_file(&tmp.path().join(".gitignore"), ".claude/\n")
+        .expect("failed to write project fixture .gitignore");
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join(".claude/worktrees/agent-a/src"))
+        .expect("failed to create hard-banned worktree fixture");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join(".claude/worktrees/agent-a/Cargo.toml"),
+        "[package]\nname = \"agent-a\"\nversion = \"0.1.0\"\n",
+    )
+    .expect("failed to write hard-banned Cargo.toml");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join(".claude/worktrees/agent-a/guardrail3.toml"),
+        "[rust.checks]\ncode = true\n",
+    )
+    .expect("failed to write hard-banned guardrail config");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join(".claude/worktrees/agent-a/src/lib.rs"),
+        "pub fn stray() {}\n",
+    )
+    .expect("failed to write hard-banned Rust source");
+
+    let tree = walk_project(&RealFileSystem, tmp.path());
+
+    assert!(
+        !tree.dir_exists(".claude/worktrees/agent-a"),
+        "hard-banned worktree directory should stay out of ProjectTree"
+    );
+    assert!(
+        !tree.file_exists(".claude/worktrees/agent-a/Cargo.toml"),
+        "hard-banned worktree manifest should stay out of ProjectTree"
+    );
+    assert!(
+        !tree.file_exists(".claude/worktrees/agent-a/src/lib.rs"),
+        "hard-banned worktree source should stay out of ProjectTree"
     );
 }
 
@@ -360,11 +420,7 @@ fn write_fixture_file(root: &Path, rel_path: &str, content: &str) {
         .expect("failed to write mutated fixture file");
 }
 
-#[test]
-fn recovers_tracked_ignored_files_when_git_marker_is_a_file() {
-    let tmp = tempdir().expect("failed to create temporary project root");
-    let root = tmp.path();
-
+fn init_git_repo(root: &Path) {
     let status = std::process::Command::new("git")
         .arg("init")
         .arg("-q")
@@ -372,6 +428,14 @@ fn recovers_tracked_ignored_files_when_git_marker_is_a_file() {
         .status()
         .expect("run git init");
     assert!(status.success(), "git init should succeed");
+}
+
+#[test]
+fn recovers_tracked_ignored_files_when_git_marker_is_a_file() {
+    let tmp = tempdir().expect("failed to create temporary project root");
+    let root = tmp.path();
+
+    init_git_repo(root);
 
     let status = std::process::Command::new("git")
         .args(["config", "user.email", "guardrail3@example.test"])
