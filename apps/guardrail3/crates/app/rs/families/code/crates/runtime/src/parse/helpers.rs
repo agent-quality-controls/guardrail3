@@ -3,7 +3,6 @@ use syn::spanned::Spanned;
 
 use super::types::{
     CfgAttrLintInfo, CfgPredicateTruth, DenyForbidInfo, LintPolicyInfo, LintPolicyKind,
-    PathAttrInfo,
 };
 
 pub(crate) fn span_line(span: Span) -> usize {
@@ -275,53 +274,6 @@ pub(crate) fn collect_cfg_attr_deny_forbid_attrs(
     }
 }
 
-pub(crate) fn collect_path_attrs(attrs: &[syn::Attribute], out: &mut Vec<PathAttrInfo>) {
-    for attr in attrs {
-        if !attr.path().is_ident("path") {
-            continue;
-        }
-        let syn::Meta::NameValue(name_value) = &attr.meta else {
-            continue;
-        };
-        let syn::Expr::Lit(expr_lit) = &name_value.value else {
-            continue;
-        };
-        let syn::Lit::Str(path_lit) = &expr_lit.lit else {
-            continue;
-        };
-        out.push(PathAttrInfo {
-            line: span_end_line(attr.span()),
-            path: path_lit.value(),
-            via_cfg_attr: false,
-            cfg_truth: CfgPredicateTruth::KnownTrue,
-        });
-    }
-}
+// collect_path_attrs removed: RS-CODE-24 moved to RS-ARCH-09.
 
-pub(crate) fn collect_cfg_attr_path_attrs(attrs: &[syn::Attribute], out: &mut Vec<PathAttrInfo>) {
-    for attr in attrs {
-        if !attr.path().is_ident("cfg_attr") {
-            continue;
-        }
-        super::analysis_helpers::walk_cfg_attr_payloads(attr, |line, truth, meta| {
-            let syn::Meta::NameValue(name_value) = meta else {
-                return;
-            };
-            if !name_value.path.is_ident("path") {
-                return;
-            }
-            let syn::Expr::Lit(expr_lit) = &name_value.value else {
-                return;
-            };
-            let syn::Lit::Str(path_lit) = &expr_lit.lit else {
-                return;
-            };
-            out.push(PathAttrInfo {
-                line,
-                path: path_lit.value(),
-                via_cfg_attr: true,
-                cfg_truth: truth,
-            });
-        });
-    }
-}
+// collect_cfg_attr_path_attrs removed: RS-CODE-24 moved to RS-ARCH-09.

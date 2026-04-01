@@ -46,8 +46,7 @@ mod rs_code_21_fs_glob_import;
 mod rs_code_22_deny_forbid_without_reason;
 #[path = "cfg_and_paths/rs_code_23_include_bypass.rs"]
 mod rs_code_23_include_bypass;
-#[path = "cfg_and_paths/rs_code_24_path_attr.rs"]
-mod rs_code_24_path_attr;
+// RS-CODE-24 removed: #[path] detection moved to RS-ARCH-09 (unconditional ban).
 #[path = "api_shape/rs_code_25_public_result_error_type.rs"]
 mod rs_code_25_public_result_error_type;
 #[path = "api_shape/rs_code_26_lib_glob_reexport.rs"]
@@ -169,7 +168,7 @@ pub fn check(
         rs_code_21_fs_glob_import::check(&input, &mut results);
         rs_code_22_deny_forbid_without_reason::check(&input, &mut results);
         rs_code_23_include_bypass::check(&input, &mut results);
-        rs_code_24_path_attr::check(&input, &mut results);
+        // RS-CODE-24 removed: #[path] detection moved to RS-ARCH-09.
         rs_code_31_public_struct_named_fields::check(&input, &mut results);
         rs_code_25_public_result_error_type::check(&input, &mut results);
         rs_code_33_public_weak_error_forms::check(&input, &mut results);

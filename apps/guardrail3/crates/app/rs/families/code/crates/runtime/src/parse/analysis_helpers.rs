@@ -202,7 +202,7 @@ pub(crate) fn expr_has_path_traversal(expr: &syn::Expr) -> bool {
     }
 }
 
-pub(crate) fn path_string_has_parent_segment(path: &str) -> bool {
+fn path_string_has_parent_segment(path: &str) -> bool {
     path.split('/').any(|segment| segment == "..")
         || path.split('\\').any(|segment| segment == "..")
 }
