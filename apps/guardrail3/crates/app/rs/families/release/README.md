@@ -41,7 +41,7 @@ Those belong to:
 - shared Rust `FamilyMapper`
 - `RS-CARGO`
 - `RS-CODE`
-- `RS-TOPOLOGY`
+- shared Rust legality/topology substrate
 
 ## Shared Placement And Routing
 
@@ -49,7 +49,7 @@ This family must not decide which Rust roots or release-owned files are live.
 
 It consumes:
 
-- shared topology facts from `placement`
+- shared legality-aware workspace facts from `placement`
 - legal workspaces plus release-owned files from `FamilyMapper::map_rs_release()`
 
 Inside routed workspaces, the family may then do family-local work:

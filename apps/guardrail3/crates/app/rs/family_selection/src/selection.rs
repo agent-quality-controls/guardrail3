@@ -136,10 +136,6 @@ fn family_enabled_for_runtime(
     tree: &ProjectTree,
     config: Option<&GuardrailConfig>,
 ) -> bool {
-    if family == RustValidateFamily::Topology {
-        return true;
-    }
-
     let Some(rust) = config.and_then(GuardrailConfig::rust) else {
         return true;
     };

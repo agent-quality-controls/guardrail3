@@ -25,7 +25,7 @@ It does not own:
 
 Those belong to:
 
-- `RS-TOPOLOGY`
+- shared Rust legality/topology substrate
 - `RS-HEXARCH`
 - `RS-CARGO`
 - `RS-DEPS`
@@ -38,7 +38,7 @@ This family must not decide which Rust roots or Rust source files are owned.
 
 It consumes:
 
-- shared topology facts from `placement`
+- shared legality-aware root facts from `placement`
 - shared owned Rust source-file facts from the shared ownership layer
 - a repo-global `RsCodeRoute` from `FamilyMapper::map_rs_code()`
 
@@ -51,7 +51,7 @@ Inside that owned source surface, the family may then do family-local work:
 
 That split is intentional:
 
-- `placement` decides Rust topology
+- `placement` and shared legality decide the owned repo surface
 - shared ownership decides which Rust source files are owned
 - `FamilyMapper` decides the typed global route that reaches `code`
 - `code` decides source-policy facts over that owned file surface
@@ -67,7 +67,7 @@ Current implementation state:
   - [test_support](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/test_support)
 - the family consumes `RsCodeRoute` in [lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/lib.rs)
 - recent correctness work has focused on shared parser/model fixes captured in [FIXES.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/FIXES.md)
-- this README does not claim the family root is currently clean for `RS-TOPOLOGY`, `RS-TEST`, or live repo-root `RS-CODE` without a fresh verification pass
+- this README does not claim the family root is currently clean for explicit `topology`, `RS-TEST`, or live repo-root `RS-CODE` runs without a fresh verification pass
 
 The highest-value audit fixes already landed:
 

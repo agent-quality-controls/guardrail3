@@ -34,7 +34,7 @@ It does not own:
 
 Those belong to:
 
-- `RS-TOPOLOGY`
+- shared Rust legality/topology substrate
 - shared Rust `placement`
 - shared Rust `FamilyMapper`
 - `RS-CARGO`
@@ -187,7 +187,7 @@ For this family itself:
 
 At the current checkpoint this family:
 
-- passes `RS-TOPOLOGY`
+- runs on shared legality-approved routed app roots
 - passes `RS-TEST`
 - is routed through shared `placement` + `FamilyMapper`
 

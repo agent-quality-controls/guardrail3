@@ -30,7 +30,7 @@ It does not own:
 
 Those belong to:
 
-- `RS-TOPOLOGY`
+- shared Rust legality/topology substrate
 - `RS-HEXARCH`
 - the affected tool family itself, for example `RS-CLIPPY` for `CLIPPY_CONF_DIR`
 - `RS-CODE`
@@ -43,7 +43,7 @@ This family must not decide which Rust roots are live.
 
 It consumes:
 
-- shared topology facts from `placement`
+- shared legality-aware root facts from `placement`
 - legal workspaces plus Cargo-family file surfaces from `FamilyMapper::map_rs_cargo()`
 
 Inside a routed workspace, the family may then do family-local discovery:
@@ -161,7 +161,7 @@ For this family itself:
 
 At the current checkpoint this family:
 
-- passes `RS-TOPOLOGY`
+- runs correctly on shared legality-approved routed workspaces
 - passes `RS-TEST`
 - is routed through shared `placement` + `FamilyMapper`
 

@@ -25,7 +25,7 @@ It does not own:
 
 Those belong to:
 
-- `RS-TOPOLOGY`
+- shared Rust legality/topology substrate
 - `RS-CARGO`
 - `RS-CODE`
 
@@ -84,7 +84,7 @@ This family is now self-hosted in the same stabilized shape as the other migrate
 
 Placement split:
 
-- illegal rustfmt config placement (for example nested `rustfmt.toml`) is reported by `RS-TOPOLOGY`
+- illegal rustfmt config placement (for example nested `rustfmt.toml`) is filtered by shared legality and reported by `topology` only when `topology` itself is run
 - `RS-FMT` consumes legality-approved config surface and validates content only
 
 The next work on `fmt` should stay in the attack-review lane: compare live behavior against `.plans/todo/checks/rs/fmt.md`, add regressions for any concrete detector drift, and avoid treating repo-wide formatting debt as a detector bug.
