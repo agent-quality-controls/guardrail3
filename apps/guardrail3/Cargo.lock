@@ -428,6 +428,9 @@ dependencies = [
  "guardrail3-app-rs-structure",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
+ "guardrail3-shared-fs",
+ "proc-macro2",
+ "syn",
  "toml",
 ]
 
