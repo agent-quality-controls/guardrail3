@@ -9,7 +9,7 @@
 //! developers on `git pull`). So after the initial walk, we run `git ls-files`
 //! to find any tracked files the walker missed and add them back. We also
 //! recover ignored files that still matter to discovery and policy validation,
-//! such as manifests and config files.
+//! such as manifests, policy files, hook surfaces, and tool config files.
 //!
 //! Source files (.rs, .ts, .tsx) appear in the structure but their content
 //! is NOT cached. Config files get their content cached.
@@ -41,6 +41,7 @@ const CACHED_EXACT: &[&str] = &[
     "rustfmt.toml",
     ".rustfmt.toml",
     "rust-toolchain.toml",
+    "rust-toolchain",
     "package.json",
     "pnpm-workspace.yaml",
     "tsconfig.json",
@@ -53,12 +54,10 @@ const CACHED_EXACT: &[&str] = &[
     "release-plz.toml",
     ".release-plz.toml",
     "cliff.toml",
-    "CLAUDE.md",
-    "LICENSE",
-    "LICENSE-MIT",
-    "LICENSE-APACHE",
-    "LICENSE.md",
-    ".gitkeep",
+    "lefthook.yml",
+    "lefthook.yaml",
+    ".lefthook.yml",
+    ".lefthook.yaml",
     "stryker.config.json",
 ];
 
@@ -73,10 +72,12 @@ const CACHED_PREFIX: &[&str] = &[
     "prettier.config.",
     ".prettierrc",
     "velite.config.",
+    "contentlayer.config.",
     "next.config.",
     "stryker.config.",
     "vitest.config.",
     "jest.config.",
+    "playwright.config.",
 ];
 
 /// Root-relative subtrees or directory-name roots that are never governed.
@@ -93,6 +94,10 @@ fn should_cache(name: &str, rel_path: &str) -> bool {
     if CACHED_PREFIX.iter().any(|p| name.starts_with(p)) {
         return true;
     }
+    // tsconfig*.json — TS config surface is JSON-only, not arbitrary tsconfig.*
+    if name.starts_with("tsconfig") && name.ends_with(".json") {
+        return true;
+    }
     // .cargo/config.toml and legacy .cargo/config — cargo-local env/tool overrides
     if rel_path.ends_with(".cargo/config.toml") || rel_path.ends_with(".cargo/config") {
         return true;
@@ -103,6 +108,12 @@ fn should_cache(name: &str, rel_path: &str) -> bool {
     }
     // .config/nextest.toml — special path-based match
     if name == "nextest.toml" && rel_path.contains(".config/") {
+        return true;
+    }
+    // .config/cspell.* — special path-based match
+    if rel_path.contains(".config/")
+        && (name.starts_with("cspell.") || name.starts_with(".cspell."))
+    {
         return true;
     }
     // GitHub workflow YAML files
@@ -116,7 +127,16 @@ fn should_cache(name: &str, rel_path: &str) -> bool {
         }
     }
     // Pre-commit hooks
-    if name == "pre-commit" && (rel_path.contains(".githooks/") || rel_path.contains("/hooks/")) {
+    if name == "pre-commit"
+        && (rel_path == ".githooks/pre-commit"
+            || rel_path == "hooks/pre-commit"
+            || rel_path == ".husky/pre-commit")
+    {
+        return true;
+    }
+    if rel_path.starts_with(".githooks/pre-commit.d/")
+        || rel_path.starts_with(".guardrail3/overrides/pre-commit.d/")
+    {
         return true;
     }
     false
@@ -148,8 +168,9 @@ fn is_hard_banned_rel(rel: &str) -> bool {
 /// 2. If in a git repo, run `git ls-files` to find tracked-but-gitignored files
 ///    and add them back — tracked files are part of the project regardless of
 ///    `.gitignore` patterns.
-/// 3. Recover ignored-but-relevant files (manifests, config, source) so
-///    validation still sees them even when they are untracked.
+/// 3. Recover ignored-but-relevant files (manifests, policy, hook, and tool
+///    config surfaces) so validation still sees them even when they are
+///    untracked.
 pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
     let mut dir_children: BTreeMap<String, ChildSets> = BTreeMap::new();
     let mut content: BTreeMap<String, String> = BTreeMap::new();
