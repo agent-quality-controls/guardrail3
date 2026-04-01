@@ -445,7 +445,7 @@ fn topology_root_rels(roots: &[guardrail3_app_rs_family_mapper::RsTopologyRootVi
         .collect()
 }
 
-#[cfg(any(feature = "family-code", feature = "family-garde"))]
+#[cfg(feature = "family-garde")]
 fn scoped_route_root_cargo_files(roots: &[RsScopedRootView]) -> Vec<String> {
     roots
         .iter()
