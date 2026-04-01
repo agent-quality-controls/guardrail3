@@ -245,6 +245,6 @@ fn family_ignores_descendant_toolchain_without_nested_cargo_root() {
         !results
             .iter()
             .any(|result| result.file() == Some("docs/rust-toolchain.toml")),
-        "descendant non-root toolchain placement now belongs to topology, not toolchain: {results:#?}"
+        "descendant non-root toolchain placement is filtered by shared legality, not toolchain: {results:#?}"
     );
 }

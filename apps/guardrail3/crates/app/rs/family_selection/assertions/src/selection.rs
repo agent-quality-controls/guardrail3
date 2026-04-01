@@ -29,8 +29,8 @@ pub fn assert_explicit_request_bypasses_disabled_config_filter(selection: &RustF
 
 pub fn assert_enabled_family_filtering(selection: &RustFamilySelection) {
     assert!(
-        selection.contains(RustValidateFamily::Topology),
-        "topology should always be selected"
+        !selection.contains(RustValidateFamily::Topology),
+        "disabled topology should stay filtered on empty-request resolution"
     );
     assert!(
         selection.contains(RustValidateFamily::Fmt),
