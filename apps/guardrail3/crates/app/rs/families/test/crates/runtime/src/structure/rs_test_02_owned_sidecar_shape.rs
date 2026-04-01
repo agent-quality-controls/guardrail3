@@ -26,7 +26,7 @@ pub(crate) fn collect(
                 Severity::Info,
                 "owned sidecar shape confirmed".to_owned(),
                 format!(
-                    "Root `{}` keeps sidecar harnesses in owned `<module>_tests/` directories.",
+                    "Root `{}` keeps test harnesses inside modules as `<module>/tests/`.",
                     root.rel_dir
                 ),
                 Some(root.cargo_rel_path.clone()),
@@ -82,12 +82,13 @@ fn collect_violations(
         }) {
             continue;
         }
+        // Forbid ad-hoc src/tests/ trees, but allow module/tests/ (the inside pattern).
         if rel_after_src == "tests" || rel_after_src.starts_with("tests/") {
             violations.push(SidecarViolation {
                 rel_path: dir_rel.clone(),
                 line: None,
                 title: "ad hoc src/tests tree".to_owned(),
-                message: "Internal test harnesses must live in owned `<module>_tests/` directories, not under `src/tests/`.".to_owned(),
+                message: "Internal test harnesses must live inside their module as `<module>/tests/`, not under `src/tests/`.".to_owned(),
             });
             continue;
         }
@@ -138,7 +139,7 @@ fn collect_violations(
                 rel_path: file.facts.rel_path.clone(),
                 line: None,
                 title: "flat sidecar test file".to_owned(),
-                message: "Internal sidecar harnesses must use `<module>_tests/mod.rs`, not flat `*_tests.rs` files.".to_owned(),
+                message: "Internal test harnesses must live inside their module as `<module>/tests/mod.rs`, not as flat `*_tests.rs` files or `<module>_tests/` sidecars.".to_owned(),
             });
         }
 
@@ -158,7 +159,7 @@ fn collect_violations(
                     rel_path: file.facts.rel_path.clone(),
                     line: Some(module.line),
                     title: "ad hoc cfg(test) module declaration".to_owned(),
-                    message: "Declaration-only `#[cfg(test)]` modules must resolve to the owned `<module>_tests/mod.rs` sidecar shape.".to_owned(),
+                    message: "Declaration-only `#[cfg(test)]` modules must be `mod tests;` resolving to `tests/mod.rs` inside the module directory.".to_owned(),
                 });
             }
         }
@@ -180,14 +181,22 @@ fn src_roots_for_root(root: &TestRootFacts) -> Vec<String> {
 
 fn owned_sidecar_owner_rel_path(src_root: &str, rel_after_src: &str) -> Option<String> {
     let dir_name = rel_after_src.rsplit('/').next()?;
-    let owner_module_name = dir_name.strip_suffix("_tests")?;
-    let relative_parent = parent_dir(rel_after_src);
-    let owner_rel = if relative_parent.is_empty() {
-        format!("{owner_module_name}.rs")
-    } else {
-        format!("{relative_parent}/{owner_module_name}.rs")
-    };
-    Some(format!("{src_root}/{owner_rel}"))
+
+    // Only pattern: `module/tests/` — owner is `module/mod.rs`.
+    if dir_name == "tests" {
+        let module_rel = parent_dir(rel_after_src);
+        if module_rel.is_empty() {
+            return None; // src/tests/ is ad-hoc, not inside-module.
+        }
+        return Some(format!("{src_root}/{module_rel}/mod.rs"));
+    }
+
+    // Any _tests/ directory is a violation — must use module/tests/ instead.
+    if dir_name.ends_with("_tests") {
+        return None;
+    }
+
+    None
 }
 
 fn is_flat_test_sidecar(rel_path: &str) -> bool {
@@ -199,27 +208,21 @@ fn is_flat_test_sidecar(rel_path: &str) -> bool {
 fn cfg_test_decl_is_owned_sidecar(
     tree: &ProjectTree,
     file_rel_path: &str,
-    owner_module_name: Option<&str>,
+    _owner_module_name: Option<&str>,
     module: &parse::CfgTestModuleInfo,
 ) -> bool {
-    let Some(owner_module_name) = owner_module_name else {
+    // Only valid pattern: `#[cfg(test)] mod tests;` resolving to `tests/mod.rs`
+    // inside the module's own directory. No #[path], no _tests suffix.
+    if module.name != "tests" {
         return false;
-    };
-    let expected_module_name = format!("{owner_module_name}_tests");
-    if module.name != expected_module_name {
-        return false;
+    }
+    if module.path_attr.is_some() {
+        return false; // #[path] is forbidden.
     }
 
     let parent = parent_dir(file_rel_path);
-    let expected_path = format!("{expected_module_name}/mod.rs");
-    if let Some(path_attr) = module.path_attr.as_deref() {
-        return path_attr == expected_path
-            && tree.file_exists(&format!("{parent}/{expected_path}"));
-    }
-
-    let sidecar_dir = format!("{parent}/{expected_module_name}");
-    tree.file_exists(&format!("{sidecar_dir}/mod.rs"))
-        && !tree.file_exists(&format!("{parent}/{expected_module_name}.rs"))
+    let tests_mod_rs = format!("{parent}/tests/mod.rs");
+    tree.file_exists(&tests_mod_rs)
 }
 
 #[cfg(test)]

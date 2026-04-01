@@ -21,10 +21,10 @@ use std::collections::BTreeSet;
 
 pub fn check(surface: &RsProjectSurface, _route: &RsArchRoute) -> Vec<CheckResult> {
     let facts = facts::collect(surface);
-    run_with_facts(&facts)
+    run_with_facts(surface, &facts)
 }
 
-pub(crate) fn run_with_facts(facts: &ArchFacts) -> Vec<CheckResult> {
+pub(crate) fn run_with_facts(surface: &RsProjectSurface, facts: &ArchFacts) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     // Facade rules: per crate node.
@@ -48,10 +48,15 @@ pub(crate) fn run_with_facts(facts: &ArchFacts) -> Vec<CheckResult> {
     }
 
     // Facade rules: per mod.rs surface.
-    for surface in facts.facade_surfaces.values() {
-        if surface.is_mod_rs {
-            facade::rs_arch_04_mod_facade_only::check(surface, &mut results);
+    for fs in facts.facade_surfaces.values() {
+        if fs.is_mod_rs {
+            facade::rs_arch_04_mod_facade_only::check(fs, &mut results);
         }
+    }
+
+    // Facade rules: #[path] scan on all .rs files.
+    for rel_path in &facts.all_rs_files {
+        facade::rs_arch_09_no_path_attr::check_file(surface, rel_path, &mut results);
     }
 
     // Dependency rules: per dependency edge.

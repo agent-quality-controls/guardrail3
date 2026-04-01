@@ -12,7 +12,7 @@ type ForeignModAllowInfo = types::ForeignModAllowInfo;
 type ImplAllowInfo = types::ImplAllowInfo;
 type IncludeMacroInfo = types::IncludeMacroInfo;
 type LintPolicyInfo = types::LintPolicyInfo;
-type PathAttrInfo = types::PathAttrInfo;
+// PathAttrInfo removed: RS-CODE-24 moved to RS-ARCH-09.
 type PublicResultErrorInfo = types::PublicResultErrorInfo;
 type PublicStructFieldBagInfo = types::PublicStructFieldBagInfo;
 
@@ -57,14 +57,7 @@ pub fn find_cfg_attr_lint_policies(ast: &syn::File) -> Vec<CfgAttrLintInfo> {
     out
 }
 
-pub fn find_path_attrs(ast: &syn::File) -> Vec<PathAttrInfo> {
-    let mut out = Vec::new();
-    helpers::collect_path_attrs(&ast.attrs, &mut out);
-    helpers::collect_cfg_attr_path_attrs(&ast.attrs, &mut out);
-    let mut visitor = PathAttrVisitor { out: &mut out };
-    visitor.visit_file(ast);
-    out
-}
+// find_path_attrs removed: RS-CODE-24 moved to RS-ARCH-09.
 
 pub fn find_public_result_error_types(ast: &syn::File) -> Vec<PublicResultErrorInfo> {
     let reachable_types = collect_reachable_public_types(ast);
@@ -111,9 +104,7 @@ struct CfgAttrPolicyVisitor<'a> {
     out: &'a mut Vec<CfgAttrLintInfo>,
 }
 
-struct PathAttrVisitor<'a> {
-    out: &'a mut Vec<PathAttrInfo>,
-}
+// PathAttrVisitor removed: RS-CODE-24 moved to RS-ARCH-09.
 
 struct PublicResultErrorVisitor {
     out: Vec<PublicResultErrorInfo>,
@@ -269,13 +260,7 @@ impl<'ast> Visit<'ast> for CfgAttrPolicyVisitor<'ast> {
     }
 }
 
-impl<'ast> Visit<'ast> for PathAttrVisitor<'ast> {
-    fn visit_item(&mut self, item: &'ast syn::Item) {
-        helpers::collect_path_attrs(helpers::item_attrs(item), self.out);
-        helpers::collect_cfg_attr_path_attrs(helpers::item_attrs(item), self.out);
-        syn::visit::visit_item(self, item);
-    }
-}
+// PathAttrVisitor impl removed: RS-CODE-24 moved to RS-ARCH-09.
 
 impl PublicResultErrorVisitor {
     fn current_module_public(&self) -> bool {

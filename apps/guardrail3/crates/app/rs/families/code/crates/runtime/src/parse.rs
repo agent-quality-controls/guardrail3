@@ -21,7 +21,7 @@ pub type ImplAllowInfo = types::ImplAllowInfo;
 pub type IncludeMacroInfo = types::IncludeMacroInfo;
 pub type LargeTypeItem = types::LargeTypeItem;
 pub type LintPolicyInfo = types::LintPolicyInfo;
-pub type PathAttrInfo = types::PathAttrInfo;
+// PathAttrInfo removed: RS-CODE-24 moved to RS-ARCH-09.
 pub type PublicStructFieldBagInfo = types::PublicStructFieldBagInfo;
 pub type PublicResultErrorInfo = types::PublicResultErrorInfo;
 pub type PublicResultErrorKind = types::PublicResultErrorKind;
@@ -89,13 +89,7 @@ pub fn find_cfg_attr_lint_policies(ast: &syn::File) -> Vec<CfgAttrLintInfo> {
     attrs::find_cfg_attr_lint_policies(ast)
 }
 
-pub fn path_string_has_parent_segment(path: &str) -> bool {
-    analysis_helpers::path_string_has_parent_segment(path)
-}
-
-pub fn find_path_attrs(ast: &syn::File) -> Vec<PathAttrInfo> {
-    attrs::find_path_attrs(ast)
-}
+// find_path_attrs and path_string_has_parent_segment removed: RS-CODE-24 moved to RS-ARCH-09.
 
 pub fn find_public_result_error_types(ast: &syn::File) -> Vec<PublicResultErrorInfo> {
     attrs::find_public_result_error_types(ast)

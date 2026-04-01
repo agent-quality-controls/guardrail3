@@ -48,8 +48,7 @@ pub mod rs_code_21_fs_glob_import;
 pub mod rs_code_22_deny_forbid_without_reason;
 #[path = "cfg_and_paths/rs_code_23_include_bypass.rs"]
 pub mod rs_code_23_include_bypass;
-#[path = "cfg_and_paths/rs_code_24_path_attr.rs"]
-pub mod rs_code_24_path_attr;
+// RS-CODE-24 removed: #[path] detection moved to RS-ARCH-09.
 #[path = "api_shape/rs_code_25_public_result_error_type.rs"]
 pub mod rs_code_25_public_result_error_type;
 #[path = "api_shape/rs_code_26_lib_glob_reexport.rs"]

@@ -44,13 +44,7 @@ pub struct IncludeMacroInfo {
     pub(crate) path_traversal: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PathAttrInfo {
-    pub(crate) line: usize,
-    pub(crate) path: String,
-    pub(crate) via_cfg_attr: bool,
-    pub(crate) cfg_truth: CfgPredicateTruth,
-}
+// PathAttrInfo removed: RS-CODE-24 moved to RS-ARCH-09.
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PublicResultErrorKind {
