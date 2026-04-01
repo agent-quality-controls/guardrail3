@@ -79,9 +79,6 @@ members = [
     "crates/app/rs/families/toolchain/crates/runtime",
     "crates/app/rs/families/toolchain/crates/assertions",
 ]
-exclude = [
-    "crates/app/rs/legacy/validate",
-]
 resolver = "2"
 
 [workspace.package]
