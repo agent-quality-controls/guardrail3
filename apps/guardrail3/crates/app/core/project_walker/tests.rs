@@ -164,6 +164,244 @@ fn recovers_ignored_untracked_manifest_files_anywhere_under_root() {
 }
 
 #[test]
+fn recovers_ignored_untracked_tool_and_policy_files_anywhere_under_root() {
+    let tmp = tempdir().expect("failed to create temporary project root");
+    init_git_repo(tmp.path());
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join("ignored/nested/app/.cargo"))
+        .expect("failed to create ignored cargo config fixture directories");
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join("ignored/nested/app/.config"))
+        .expect("failed to create ignored config fixture directories");
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join("ignored/nested/app/.github/workflows"))
+        .expect("failed to create ignored workflow fixture directories");
+    guardrail3_shared_fs::write_file(&tmp.path().join(".gitignore"), "ignored/\n")
+        .expect("failed to write project fixture .gitignore");
+    for (rel_path, content) in [
+        ("ignored/nested/app/rust-toolchain", "stable\n"),
+        (
+            "ignored/nested/app/.cargo/config.toml",
+            "[env]\nCLIPPY_CONF_DIR = \".\"\n",
+        ),
+        ("ignored/nested/app/.config/cspell.yaml", "version: 0.2\n"),
+        ("ignored/nested/app/release-plz.toml", "[workspace]\n"),
+        ("ignored/nested/app/cliff.toml", "[git]\n"),
+        (
+            "ignored/nested/app/.github/workflows/release.yml",
+            "name: release\n",
+        ),
+        ("ignored/nested/app/eslint.config.ts", "export default [];\n"),
+        ("ignored/nested/app/prettier.config.mjs", "export default {};\n"),
+        ("ignored/nested/app/vitest.config.ts", "export default {};\n"),
+        ("ignored/nested/app/jest.config.js", "module.exports = {};\n"),
+        ("ignored/nested/app/stryker.config.mjs", "export default {};\n"),
+        ("ignored/nested/app/contentlayer.config.ts", "export default {};\n"),
+    ] {
+        guardrail3_shared_fs::write_file(&tmp.path().join(rel_path), content)
+            .expect("failed to write ignored tool/policy fixture");
+    }
+
+    let tree = walk_project(&RealFileSystem, tmp.path());
+
+    for rel_path in [
+        "ignored/nested/app/rust-toolchain",
+        "ignored/nested/app/.cargo/config.toml",
+        "ignored/nested/app/.config/cspell.yaml",
+        "ignored/nested/app/release-plz.toml",
+        "ignored/nested/app/cliff.toml",
+        "ignored/nested/app/.github/workflows/release.yml",
+        "ignored/nested/app/eslint.config.ts",
+        "ignored/nested/app/prettier.config.mjs",
+        "ignored/nested/app/vitest.config.ts",
+        "ignored/nested/app/jest.config.js",
+        "ignored/nested/app/stryker.config.mjs",
+        "ignored/nested/app/contentlayer.config.ts",
+    ] {
+        assert!(
+            tree.file_exists(rel_path),
+            "ignored config/policy file should be recovered into ProjectTree: {rel_path}"
+        );
+    }
+
+    assert_eq!(
+        tree.file_content("ignored/nested/app/eslint.config.ts"),
+        Some("export default [];\n"),
+    );
+    assert_eq!(
+        tree.file_content("ignored/nested/app/.github/workflows/release.yml"),
+        Some("name: release\n"),
+    );
+    assert_eq!(
+        tree.file_content("ignored/nested/app/.config/cspell.yaml"),
+        Some("version: 0.2\n"),
+    );
+}
+
+#[test]
+fn recovers_ignored_root_hooks_pre_commit() {
+    let tmp = tempdir().expect("failed to create temporary project root");
+    init_git_repo(tmp.path());
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join("hooks"))
+        .expect("failed to create ignored hooks fixture directories");
+    guardrail3_shared_fs::write_file(&tmp.path().join(".gitignore"), "hooks/\n")
+        .expect("failed to write project fixture .gitignore");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join("hooks/pre-commit"),
+        "#!/bin/sh\nexit 0\n",
+    )
+    .expect("failed to write ignored root hooks/pre-commit");
+
+    let tree = walk_project(&RealFileSystem, tmp.path());
+
+    assert!(tree.file_exists("hooks/pre-commit"));
+    assert_eq!(
+        tree.file_content("hooks/pre-commit"),
+        Some("#!/bin/sh\nexit 0\n"),
+    );
+}
+
+#[test]
+fn recovers_ignored_root_hook_surfaces() {
+    let tmp = tempdir().expect("failed to create temporary project root");
+    init_git_repo(tmp.path());
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join(".husky"))
+        .expect("failed to create root husky fixture directories");
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join(".githooks/pre-commit.d"))
+        .expect("failed to create root githooks fixture directories");
+    guardrail3_shared_fs::create_dir_all(
+        &tmp.path().join(".guardrail3/overrides/pre-commit.d"),
+    )
+    .expect("failed to create root override fixture directories");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join(".gitignore"),
+        ".husky/\n.githooks/\n.guardrail3/\n",
+    )
+    .expect("failed to write project fixture .gitignore");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join(".husky/pre-commit"),
+        "#!/bin/sh\nexit 0\n",
+    )
+    .expect("failed to write root .husky/pre-commit");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join(".githooks/pre-commit.d/check-rust"),
+        "#!/bin/sh\ncargo test\n",
+    )
+    .expect("failed to write root pre-commit.d script");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join(".guardrail3/overrides/pre-commit.d/local"),
+        "#!/bin/sh\necho local\n",
+    )
+    .expect("failed to write root override pre-commit.d script");
+
+    let tree = walk_project(&RealFileSystem, tmp.path());
+
+    assert_eq!(
+        tree.file_content(".husky/pre-commit"),
+        Some("#!/bin/sh\nexit 0\n"),
+    );
+    assert_eq!(
+        tree.file_content(".githooks/pre-commit.d/check-rust"),
+        Some("#!/bin/sh\ncargo test\n"),
+    );
+    assert_eq!(
+        tree.file_content(".guardrail3/overrides/pre-commit.d/local"),
+        Some("#!/bin/sh\necho local\n"),
+    );
+}
+
+#[test]
+fn does_not_recover_nested_non_root_hook_surfaces() {
+    let tmp = tempdir().expect("failed to create temporary project root");
+    init_git_repo(tmp.path());
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join("apps/demo/hooks"))
+        .expect("failed to create nested hooks fixture directories");
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join("apps/demo/.husky"))
+        .expect("failed to create nested husky fixture directories");
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join("apps/demo/.githooks/pre-commit.d"))
+        .expect("failed to create nested githooks fixture directories");
+    guardrail3_shared_fs::create_dir_all(
+        &tmp.path().join("apps/demo/.guardrail3/overrides/pre-commit.d"),
+    )
+    .expect("failed to create nested override fixture directories");
+    guardrail3_shared_fs::write_file(&tmp.path().join(".gitignore"), "apps/\n")
+        .expect("failed to write project fixture .gitignore");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join("apps/demo/hooks/pre-commit"),
+        "#!/bin/sh\nexit 0\n",
+    )
+    .expect("failed to write nested hooks/pre-commit");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join("apps/demo/.husky/pre-commit"),
+        "#!/bin/sh\nexit 0\n",
+    )
+    .expect("failed to write nested .husky/pre-commit");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join("apps/demo/.githooks/pre-commit.d/check-rust"),
+        "#!/bin/sh\ncargo test\n",
+    )
+    .expect("failed to write nested pre-commit.d script");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join("apps/demo/.guardrail3/overrides/pre-commit.d/local"),
+        "#!/bin/sh\necho local\n",
+    )
+    .expect("failed to write nested override pre-commit.d script");
+
+    let tree = walk_project(&RealFileSystem, tmp.path());
+
+    assert!(
+        !tree.file_exists("apps/demo/hooks/pre-commit"),
+        "non-root hooks/pre-commit should not be recovered into ProjectTree"
+    );
+    assert!(
+        !tree.file_exists("apps/demo/.husky/pre-commit"),
+        "non-root .husky/pre-commit should not be recovered into ProjectTree"
+    );
+    assert!(
+        !tree.file_exists("apps/demo/.githooks/pre-commit.d/check-rust"),
+        "non-root .githooks/pre-commit.d/* should not be recovered into ProjectTree"
+    );
+    assert!(
+        !tree.file_exists("apps/demo/.guardrail3/overrides/pre-commit.d/local"),
+        "non-root override pre-commit.d/* should not be recovered into ProjectTree"
+    );
+}
+
+#[test]
+fn recovers_ignored_tsconfig_variants() {
+    let tmp = tempdir().expect("failed to create temporary project root");
+    init_git_repo(tmp.path());
+    guardrail3_shared_fs::create_dir_all(&tmp.path().join("ignored/app"))
+        .expect("failed to create ignored tsconfig fixture directories");
+    guardrail3_shared_fs::write_file(&tmp.path().join(".gitignore"), "ignored/\n")
+        .expect("failed to write project fixture .gitignore");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join("ignored/app/tsconfig.app.json"),
+        "{\"extends\":\"./tsconfig.base.json\"}\n",
+    )
+    .expect("failed to write ignored tsconfig.app.json");
+    guardrail3_shared_fs::write_file(
+        &tmp.path().join("ignored/app/tsconfig.worker.json"),
+        "{\"compilerOptions\":{\"strict\":true}}\n",
+    )
+    .expect("failed to write ignored tsconfig.worker.json");
+
+    let tree = walk_project(&RealFileSystem, tmp.path());
+
+    for rel_path in ["ignored/app/tsconfig.app.json", "ignored/app/tsconfig.worker.json"] {
+        assert!(
+            tree.file_exists(rel_path),
+            "ignored tsconfig variant should be recovered into ProjectTree: {rel_path}"
+        );
+    }
+    assert_eq!(
+        tree.file_content("ignored/app/tsconfig.app.json"),
+        Some("{\"extends\":\"./tsconfig.base.json\"}\n"),
+    );
+    assert_eq!(
+        tree.file_content("ignored/app/tsconfig.worker.json"),
+        Some("{\"compilerOptions\":{\"strict\":true}}\n"),
+    );
+}
+
+#[test]
 fn does_not_recover_ignored_untracked_typescript_source_files_anywhere_under_root() {
     let tmp = tempdir().expect("failed to create temporary project root");
     init_git_repo(tmp.path());

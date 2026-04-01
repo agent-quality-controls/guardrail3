@@ -22,17 +22,22 @@ Instead:
 
 - the baseline walk uses `.gitignore` to skip noise
 - then we patch back tracked ignored files
-- then we patch back ignored files that define structure or policy outside hard-banned roots
+- then we patch back ignored files that define structure, policy, hook, or tool-config surfaces outside hard-banned roots
 
 Today, the ignored-file recovery pass restores:
 
 - cached config/manifests handled by `should_cache(...)`
+- hook-entry and hook-directory files that families inspect later
 
 That means ignored-but-relevant files such as:
 
 - `Cargo.toml`
 - `guardrail3.toml`
 - `.gitignore`
+- `rust-toolchain`
+- `release-plz.toml`
+- `.github/workflows/release.yml`
+- `.githooks/pre-commit`
 - `package.json`
 - `tsconfig.json`
 
