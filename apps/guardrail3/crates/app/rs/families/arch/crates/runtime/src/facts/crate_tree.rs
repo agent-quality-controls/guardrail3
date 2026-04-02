@@ -121,8 +121,9 @@ impl CrateTree {
     }
 }
 
-pub(super) fn collect(tree: &ProjectTree) -> CrateTree {
-    let cargo_dirs = tree.dirs_with_file("Cargo.toml");
+pub(super) fn collect(tree: &ProjectTree, root_dirs: &[String]) -> CrateTree {
+    // Find Cargo.toml files within route roots by recursive dir_contents walk.
+    let cargo_dirs = find_cargo_dirs(tree, root_dirs);
 
     let mut nodes = BTreeMap::new();
     for dir in &cargo_dirs {
@@ -367,4 +368,29 @@ fn measure_depth_recursive(tree: &ProjectTree, dir: &str, depth: usize) -> usize
         .max()
         .unwrap_or(0);
     current.max(max_child)
+}
+
+/// Find all directories with Cargo.toml within the given root dirs.
+/// Uses dir_contents recursion (known-path lookup) instead of dirs_with_file (discovery).
+fn find_cargo_dirs(tree: &ProjectTree, root_dirs: &[String]) -> Vec<String> {
+    let mut dirs = Vec::new();
+    for root in root_dirs {
+        find_cargo_dirs_recursive(tree, root, &mut dirs);
+    }
+    dirs.sort();
+    dirs.dedup();
+    dirs
+}
+
+fn find_cargo_dirs_recursive(tree: &ProjectTree, dir: &str, result: &mut Vec<String>) {
+    let Some(entry) = tree.dir_contents(dir) else {
+        return;
+    };
+    if entry.files().iter().any(|f| f == "Cargo.toml") {
+        result.push(dir.to_owned());
+    }
+    for subdir in entry.dirs() {
+        let child = ProjectTree::join_rel(dir, subdir);
+        find_cargo_dirs_recursive(tree, &child, result);
+    }
 }

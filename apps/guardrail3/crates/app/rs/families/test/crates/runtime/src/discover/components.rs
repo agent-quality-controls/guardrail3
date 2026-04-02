@@ -166,9 +166,12 @@ fn collect_sidecars(
     let src_rel_dir = ProjectTree::join_rel(runtime_rel_dir, "src");
     let mut sidecars = Vec::new();
 
-    for dir_rel in tree.all_dir_rels() {
-        if !super::path_is_under(&dir_rel, &src_rel_dir) {
-            continue;
+    let mut stack = vec![src_rel_dir.clone()];
+    while let Some(dir_rel) = stack.pop() {
+        if let Some(entry) = tree.dir_contents(&dir_rel) {
+            for child in entry.dirs() {
+                stack.push(ProjectTree::join_rel(&dir_rel, child));
+            }
         }
         let Some(dir_name) = dir_rel.rsplit('/').next() else {
             continue;

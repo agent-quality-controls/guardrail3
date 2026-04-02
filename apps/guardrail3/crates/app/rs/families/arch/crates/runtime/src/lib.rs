@@ -19,8 +19,8 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 #[cfg(test)]
 use std::collections::BTreeSet;
 
-pub fn check(surface: &RsProjectSurface, _route: &RsArchRoute) -> Vec<CheckResult> {
-    let facts = facts::collect(surface);
+pub fn check(surface: &RsProjectSurface, route: &RsArchRoute) -> Vec<CheckResult> {
+    let facts = facts::collect(surface, route);
     run_with_facts(surface, &facts)
 }
 

@@ -1,9 +1,9 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_cargo as runtime;
-use guardrail3_app_rs_family_mapper::FamilyMapper;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsProjectSurface};
 use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_domain_project_tree::ProjectTreeDiscovery;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
@@ -14,14 +14,15 @@ pub struct ExpectedRuleResult<'a> {
     pub inventory: Option<bool>,
 }
 
-pub fn check_results(tree: &ProjectTree) -> Vec<CheckResult> {
+pub fn check_results(tree: &dyn ProjectTreeDiscovery) -> Vec<CheckResult> {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree
         .file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
     let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None).map_rs_cargo();
-    runtime::check(tree, &route)
+    let surface = RsProjectSurface::from_tree(tree);
+    runtime::check(&surface, &route)
 }
 
 pub fn rule_results<'a>(results: &'a [CheckResult], id: &str) -> Vec<&'a CheckResult> {
