@@ -1,5 +1,7 @@
 mod rule;
 pub use rule::{check, check_allowed};
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;

@@ -1,5 +1,9 @@
 mod rule;
 pub use rule::{check};
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
+#[cfg(test)]
+use crate::inputs::RustfmtRootInput;
 
 #[cfg(test)]
 pub(crate) fn run_check(config_rel: Option<&str>) -> Vec<CheckResult> {

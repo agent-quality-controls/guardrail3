@@ -1,5 +1,11 @@
 mod rule;
 pub use rule::{check};
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
+#[cfg(test)]
+use crate::facts::RustfmtConfigKind;
+#[cfg(test)]
+use crate::inputs::RustfmtExtraConfigInput;
 
 #[cfg(test)]
 pub(crate) fn run_check(config_rel: &str, config_kind: RustfmtConfigKind) -> Vec<CheckResult> {

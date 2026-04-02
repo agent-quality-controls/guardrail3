@@ -1,5 +1,9 @@
 mod rule;
 pub use rule::{check};
+#[cfg(test)]
+use crate::inputs::AppHexarchInput;
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
 pub(crate) fn check_with_top_level_entries_for_tests(

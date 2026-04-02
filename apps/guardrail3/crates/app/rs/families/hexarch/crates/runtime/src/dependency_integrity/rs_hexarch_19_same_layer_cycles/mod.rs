@@ -1,5 +1,11 @@
 mod rule;
 pub use rule::{check, check_inventory};
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
+#[cfg(test)]
+use crate::dependency_facts::CycleFacts;
+#[cfg(test)]
+use crate::inputs::CycleHexarchInput;
 
 #[cfg(test)]
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;

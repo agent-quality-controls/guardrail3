@@ -1,5 +1,9 @@
 mod rule;
 pub use rule::{check};
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
+#[cfg(test)]
+use crate::inputs::RustfmtDualConflictInput;
 
 #[cfg(test)]
 pub(crate) fn run_check(dir_rel: &str) -> Vec<CheckResult> {
