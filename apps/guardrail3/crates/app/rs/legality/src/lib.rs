@@ -242,28 +242,12 @@ pub struct RustLegalityFacts {
     topology_issues: Vec<RustTopologyIssueFact>,
     legal_family_files: Vec<RustLegalFamilyFileFact>,
     illegal_family_files: Vec<RustIllegalFamilyFileFact>,
-    /// Carried forward from structure — the mapper and topology need this.
+    /// Carried forward from structure — FILTERED to legal roots only.
+    /// Raw structure is NOT exposed. Only filtered data accessors are public.
     structure: RustStructureFacts,
 }
 
 impl RustLegalityFacts {
-    #[must_use]
-    pub fn new(
-        legal_workspace_roots: Vec<RustLegalWorkspaceRoot>,
-        topology_issues: Vec<RustTopologyIssueFact>,
-        legal_family_files: Vec<RustLegalFamilyFileFact>,
-        illegal_family_files: Vec<RustIllegalFamilyFileFact>,
-        structure: RustStructureFacts,
-    ) -> Self {
-        Self {
-            legal_workspace_roots,
-            topology_issues,
-            legal_family_files,
-            illegal_family_files,
-            structure,
-        }
-    }
-
     #[must_use]
     pub fn legal_workspace_roots(&self) -> &[RustLegalWorkspaceRoot] {
         &self.legal_workspace_roots
@@ -284,10 +268,54 @@ impl RustLegalityFacts {
         &self.illegal_family_files
     }
 
-    /// Access to carried-forward structure data.
+    /// Filtered content map — only files under legal roots.
     #[must_use]
-    pub fn structure(&self) -> &RustStructureFacts {
-        &self.structure
+    pub fn content(&self) -> &std::collections::BTreeMap<String, String> {
+        self.structure.content()
+    }
+
+    /// Filtered directory structure — only dirs under legal roots.
+    #[must_use]
+    pub fn dir_structure(&self) -> &std::collections::BTreeMap<String, guardrail3_app_rs_structure::DirEntry> {
+        self.structure.dir_structure()
+    }
+
+    /// Project root path.
+    #[must_use]
+    pub fn root_path(&self) -> &std::path::PathBuf {
+        self.structure.root_path()
+    }
+
+    /// Structure roots — for topology reporting.
+    /// These are ALL classified roots (not just legal workspace roots).
+    /// Topology needs this to report on misclassified/illegal roots.
+    #[must_use]
+    pub fn placement(&self) -> &guardrail3_app_rs_placement::RustRootPlacementFacts {
+        self.structure.placement()
+    }
+
+    /// Structure overlaps — for topology reporting.
+    #[must_use]
+    pub fn overlaps(&self) -> &[guardrail3_app_rs_placement::RustZoneOverlapFacts] {
+        self.structure.overlaps()
+    }
+
+    /// Structure input failures — for topology reporting.
+    #[must_use]
+    pub fn input_failures(&self) -> &[guardrail3_app_rs_placement::RustRootPlacementInputFailureFacts] {
+        self.structure.input_failures()
+    }
+
+    /// Glob match directories in the filtered structure.
+    #[must_use]
+    pub fn matching_dir_rels(&self, pattern: &str) -> Vec<String> {
+        self.structure.matching_dir_rels(pattern)
+    }
+
+    /// Read cached file content.
+    #[must_use]
+    pub fn file_content(&self, rel: &str) -> Option<&str> {
+        self.structure.file_content(rel)
     }
 }
 
@@ -511,13 +539,20 @@ pub fn collect(structure: RustStructureFacts) -> RustLegalityFacts {
             .then(left.kind().cmp(&right.kind()))
     });
 
-    RustLegalityFacts::new(
+    // Filter the carried-forward structure to legal roots only.
+    let legal_root_rels: Vec<String> = legal_workspace_roots
+        .iter()
+        .map(|r| r.rel_dir().to_owned())
+        .collect();
+    let filtered_structure = structure.filter_to_roots(&legal_root_rels);
+
+    RustLegalityFacts {
         legal_workspace_roots,
         topology_issues,
         legal_family_files,
         illegal_family_files,
-        structure,
-    )
+        structure: filtered_structure,
+    }
 }
 
 fn collect_snapshots_from_placement(

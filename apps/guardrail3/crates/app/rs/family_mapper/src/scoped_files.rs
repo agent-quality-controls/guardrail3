@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_structure::RustStructureFacts;
+use guardrail3_app_rs_legality::RustLegalityFacts;
 
 #[must_use]
 pub fn filter_for_roots(
-    structure: &RustStructureFacts,
+    legality: &RustLegalityFacts,
     scoped_files: Option<&BTreeSet<String>>,
     root_rels: &[String],
     validation_scope: Option<&str>,
@@ -12,12 +12,12 @@ pub fn filter_for_roots(
     let explicit = scoped_files.map(|files| {
         files
             .iter()
-            .filter(|path| scoped_path_is_live(structure, path))
+            .filter(|path| scoped_path_is_live(legality, path))
             .filter(|path| root_rels.iter().any(|root| path_is_under_root(path, root)))
             .cloned()
             .collect::<BTreeSet<_>>()
     });
-    let derived = validation_scope.map(|scope| collect_scope_files(structure, scope, root_rels));
+    let derived = validation_scope.map(|scope| collect_scope_files(legality, scope, root_rels));
 
     match (explicit, derived) {
         (Some(explicit), Some(derived)) => Some(explicit.intersection(&derived).cloned().collect()),
@@ -27,10 +27,10 @@ pub fn filter_for_roots(
     }
 }
 
-fn scoped_path_is_live(structure: &RustStructureFacts, rel_path: &str) -> bool {
+fn scoped_path_is_live(legality: &RustLegalityFacts, rel_path: &str) -> bool {
     // Check file existence via content map or directory structure.
-    structure.file_content(rel_path).is_some()
-        || structure.dir_structure().contains_key(rel_path)
+    legality.file_content(rel_path).is_some()
+        || legality.dir_structure().contains_key(rel_path)
 }
 
 fn path_is_under_root(rel_path: &str, root_rel: &str) -> bool {
@@ -42,13 +42,13 @@ fn path_is_under_root(rel_path: &str, root_rel: &str) -> bool {
 }
 
 fn collect_scope_files(
-    structure: &RustStructureFacts,
+    legality: &RustLegalityFacts,
     scope_rel: &str,
     root_rels: &[String],
 ) -> BTreeSet<String> {
     let mut files = BTreeSet::new();
 
-    if structure.file_content(scope_rel).is_some() {
+    if legality.file_content(scope_rel).is_some() {
         if root_rels
             .iter()
             .any(|root| path_is_under_root(scope_rel, root))
@@ -58,7 +58,7 @@ fn collect_scope_files(
         return files;
     }
 
-    for (dir_rel, entry) in structure.dir_structure() {
+    for (dir_rel, entry) in legality.dir_structure() {
         if !(dir_rel == scope_rel || path_is_under_root(dir_rel, scope_rel)) {
             continue;
         }
