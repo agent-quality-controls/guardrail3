@@ -58,5 +58,10 @@ ref_option_ref = "allow"
 trivially_copy_pass_by_ref = "allow"
 multiple_crate_versions = "allow"
 
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
 [dependencies]
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = ".." }

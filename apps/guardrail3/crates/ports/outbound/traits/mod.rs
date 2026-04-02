@@ -7,6 +7,7 @@ mod fs_types;
 
 use std::path::Path;
 
+#[cfg(feature = "api")]
 pub use fs_types::{FsDirEntry, FsFileType, FsIoError, FsMetadata, FsPermissions};
 
 /// Filesystem operations abstraction.

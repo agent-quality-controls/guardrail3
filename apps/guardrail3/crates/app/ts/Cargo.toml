@@ -9,6 +9,11 @@ path = "mod.rs"
 [lints]
 workspace = true
 
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
 [dependencies]
 guardrail3_app_hexarch_helpers = { package = "guardrail3-app-hexarch-helpers", path = "../hexarch-helpers" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../core" }

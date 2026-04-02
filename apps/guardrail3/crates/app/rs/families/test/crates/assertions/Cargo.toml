@@ -6,5 +6,10 @@ edition = "2024"
 [lints]
 workspace = true
 
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
 [dependencies]
 "guardrail3-app-rs-family-test" = { path = "../runtime" }

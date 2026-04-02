@@ -1,3 +1,4 @@
+#[cfg(feature = "api")]
 pub mod clippy_support;
 mod facts;
 mod inputs;

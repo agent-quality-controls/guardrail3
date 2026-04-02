@@ -8,6 +8,7 @@ use guardrail3_app_rs_placement::{
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+#[cfg(feature = "api")]
 pub use guardrail3_domain_project_tree::DirEntry;
 use guardrail3_domain_project_tree::ProjectTree;
 

@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
+#[cfg(feature = "api")]
 pub use guardrail3_domain_project_tree::DirEntry;
 
 /// Scoped view of the project for a family. Contains only structure and content

@@ -41,6 +41,7 @@ mod hook_shared_19_real_dispatcher_syntax_only;
 mod hook_shared_20_concrete_lockfile_command;
 #[path = "shell_safety/hook_shared_21_no_fail_open_wrappers.rs"]
 mod hook_shared_21_no_fail_open_wrappers;
+#[cfg(feature = "api")]
 pub mod hook_shell;
 mod inputs;
 
