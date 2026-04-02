@@ -44,7 +44,7 @@ impl<'a> FamilyMapper<'a> {
         selected_families: &'a RustFamilySelection,
         scoped_files: Option<&'a std::collections::BTreeSet<String>>,
     ) -> Self {
-        let legality = guardrail3_app_rs_legality::collect(tree, structure);
+        let legality = guardrail3_app_rs_legality::collect(structure);
         Self::with_legality(
             tree,
             structure,
