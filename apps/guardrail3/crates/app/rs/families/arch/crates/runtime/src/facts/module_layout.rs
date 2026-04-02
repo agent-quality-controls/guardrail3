@@ -30,7 +30,7 @@ pub(super) fn collect(tree: &ProjectTree, crate_tree: &CrateTree) -> ModuleLayou
     let mut map = BTreeMap::new();
 
     // Pass 1: Scan mod declarations for directories referenced via `mod foo;`.
-    collect_from_mod_declarations(tree, &mut map);
+    collect_from_mod_declarations(tree, crate_tree, &mut map);
 
     // Pass 2: Scan all directories with .rs files under crate src/ trees.
     // This catches directories wired via #[path] that Pass 1 misses,
@@ -40,26 +40,11 @@ pub(super) fn collect(tree: &ProjectTree, crate_tree: &CrateTree) -> ModuleLayou
     map
 }
 
-fn collect_from_mod_declarations(tree: &ProjectTree, map: &mut ModuleLayoutMap) {
-    let all_dirs = tree.all_dir_rels();
+fn collect_from_mod_declarations(tree: &ProjectTree, crate_tree: &CrateTree, map: &mut ModuleLayoutMap) {
+    // Collect .rs files by walking within each crate's directory tree.
     let mut rs_files: Vec<(String, String)> = Vec::new();
-
-    for dir in &all_dirs {
-        let Some(entry) = tree.dir_contents(dir) else {
-            continue;
-        };
-        for file in entry.files() {
-            if file.ends_with(".rs") {
-                rs_files.push((dir.clone(), file.clone()));
-            }
-        }
-    }
-    if let Some(entry) = tree.dir_contents("") {
-        for file in entry.files() {
-            if file.ends_with(".rs") {
-                rs_files.push((String::new(), file.clone()));
-            }
-        }
+    for node in crate_tree.nodes.values() {
+        collect_rs_files_in_dir(tree, &node.rel_dir, &mut rs_files);
     }
 
     for (dir, filename) in &rs_files {
@@ -138,9 +123,16 @@ fn collect_from_directory_scan(
     crate_tree: &CrateTree,
     map: &mut ModuleLayoutMap,
 ) {
-    let all_dirs = tree.all_dir_rels();
+    // Walk within each crate's src/ tree.
+    let mut src_dirs = Vec::new();
+    for node in crate_tree.nodes.values() {
+        let src = ProjectTree::join_rel(&node.rel_dir, "src");
+        if tree.dir_exists(&src) {
+            collect_dirs_recursive(tree, &src, &mut src_dirs);
+        }
+    }
 
-    for dir in &all_dirs {
+    for dir in &src_dirs {
         // Skip if already found by pass 1.
         if map.contains_key(dir) {
             continue;
@@ -213,4 +205,30 @@ fn is_test_or_example_path(rel_path: &str) -> bool {
     segments.iter().any(|s| {
         *s == "tests" || *s == "examples" || *s == "benches" || *s == "target"
     })
+}
+
+fn collect_rs_files_in_dir(tree: &ProjectTree, dir: &str, rs_files: &mut Vec<(String, String)>) {
+    let Some(entry) = tree.dir_contents(dir) else {
+        return;
+    };
+    for file in entry.files() {
+        if file.ends_with(".rs") {
+            rs_files.push((dir.to_owned(), file.clone()));
+        }
+    }
+    for subdir in entry.dirs() {
+        let child = ProjectTree::join_rel(dir, subdir);
+        collect_rs_files_in_dir(tree, &child, rs_files);
+    }
+}
+
+fn collect_dirs_recursive(tree: &ProjectTree, dir: &str, result: &mut Vec<String>) {
+    result.push(dir.to_owned());
+    let Some(entry) = tree.dir_contents(dir) else {
+        return;
+    };
+    for subdir in entry.dirs() {
+        let child = ProjectTree::join_rel(dir, subdir);
+        collect_dirs_recursive(tree, &child, result);
+    }
 }

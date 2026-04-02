@@ -61,15 +61,22 @@ fn collect_violations(
 ) -> Vec<SidecarViolation> {
     let mut violations = Vec::new();
     let src_roots = src_roots_for_root(root);
-    for dir_rel in tree.all_dir_rels() {
-        let Some(src_root) = src_roots
-            .iter()
-            .find(|src_root| path_is_under(&dir_rel, src_root))
-        else {
-            continue;
-        };
+    let mut all_dirs: Vec<(String, String)> = Vec::new();
+    for src_root in &src_roots {
+        let mut stack = vec![src_root.clone()];
+        while let Some(dir_rel) = stack.pop() {
+            if let Some(entry) = tree.dir_contents(&dir_rel) {
+                for child in entry.dirs() {
+                    stack.push(ProjectTree::join_rel(&dir_rel, child));
+                }
+            }
+            all_dirs.push((dir_rel, src_root.clone()));
+        }
+    }
+    all_dirs.sort_by(|(a, _), (b, _)| a.cmp(b));
+    for (dir_rel, src_root) in &all_dirs {
         let rel_after_src = dir_rel
-            .strip_prefix(src_root)
+            .strip_prefix(src_root.as_str())
             .and_then(|rest| rest.strip_prefix('/'))
             .unwrap_or("");
         let owner_module_rel_path = owned_sidecar_owner_rel_path(src_root, rel_after_src);

@@ -279,11 +279,19 @@ fn collect_app_local_cargo_roots(
     app_rel_dir: &str,
 ) -> Vec<AppLocalCargoRootFact> {
     let mut rel_dirs = tree
-        .dirs_with_file("Cargo.toml")
-        .into_iter()
-        .filter(|rel_dir| {
-            rel_dir.starts_with(&format!("{app_rel_dir}/"))
-                && !guardrail3_app_rs_placement::is_excluded_live_root_dir(rel_dir)
+        .structure()
+        .iter()
+        .filter_map(|(dir_rel, entry)| {
+            if dir_rel.is_empty() || !entry.has_file("Cargo.toml") {
+                return None;
+            }
+            if !dir_rel.starts_with(&format!("{app_rel_dir}/")) {
+                return None;
+            }
+            if guardrail3_app_rs_placement::is_excluded_live_root_dir(dir_rel) {
+                return None;
+            }
+            Some(dir_rel.clone())
         })
         .collect::<Vec<_>>();
     rel_dirs.sort();

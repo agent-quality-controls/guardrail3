@@ -34,7 +34,8 @@ pub(super) fn collect_cargo_roots(
         }
     }
 
-    for claimed_rel_dir in claimed_workspace_packages(tree, cargo_roots.values()) {
+    let root_rels: Vec<String> = route.roots().iter().map(|r| r.rel_dir().to_owned()).collect();
+    for claimed_rel_dir in claimed_workspace_packages(tree, &root_rels, cargo_roots.values()) {
         if attempted_rel_dirs.insert(claimed_rel_dir.clone()) {
             if let Some(root) = parse_root(tree, &claimed_rel_dir, input_failures) {
                 let _ = cargo_roots.insert(claimed_rel_dir, root);
@@ -92,6 +93,7 @@ fn looks_like_glob(pattern: &str) -> bool {
 
 fn claimed_workspace_packages<'a>(
     tree: &ProjectTree,
+    root_rels: &[String],
     workspace_roots: impl Iterator<Item = &'a CargoRootFacts>,
 ) -> Vec<String> {
     let workspace_dirs = workspace_roots
@@ -103,15 +105,38 @@ fn claimed_workspace_packages<'a>(
         return Vec::new();
     }
 
+    let cargo_dirs = find_dirs_with_cargo_toml(tree, root_rels);
     let mut claimed = BTreeSet::new();
-    if tree.file_exists("Cargo.toml") {
-        let _ = maybe_collect_claimed_workspace_root(tree, "", &workspace_dirs, &mut claimed);
-    }
-    for dir in tree.dirs_with_file("Cargo.toml") {
-        let _ = maybe_collect_claimed_workspace_root(tree, &dir, &workspace_dirs, &mut claimed);
+    for dir in &cargo_dirs {
+        let _ = maybe_collect_claimed_workspace_root(tree, dir, &workspace_dirs, &mut claimed);
     }
 
     claimed.into_iter().collect()
+}
+
+/// Recursively find all directories containing Cargo.toml within the given root dirs.
+/// Uses `dir_contents` recursion (known-path lookup) instead of `dirs_with_file` (discovery).
+fn find_dirs_with_cargo_toml(tree: &ProjectTree, root_rels: &[String]) -> Vec<String> {
+    let mut dirs = Vec::new();
+    for root in root_rels {
+        find_dirs_with_cargo_toml_recursive(tree, root, &mut dirs);
+    }
+    dirs.sort();
+    dirs.dedup();
+    dirs
+}
+
+fn find_dirs_with_cargo_toml_recursive(tree: &ProjectTree, dir: &str, result: &mut Vec<String>) {
+    let Some(entry) = tree.dir_contents(dir) else {
+        return;
+    };
+    if entry.files().iter().any(|f| f == "Cargo.toml") {
+        result.push(dir.to_owned());
+    }
+    for subdir in entry.dirs() {
+        let child = ProjectTree::join_rel(dir, subdir);
+        find_dirs_with_cargo_toml_recursive(tree, &child, result);
+    }
 }
 
 fn maybe_collect_claimed_workspace_root(

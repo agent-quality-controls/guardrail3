@@ -60,18 +60,28 @@ pub(super) fn collect(tree: &ProjectTree, crate_tree: &CrateTree) -> FacadeSurfa
         }
     }
 
-    // Collect all mod.rs files in the project.
-    let all_dirs = tree.all_dir_rels();
-    for dir in &all_dirs {
-        let mod_rs = ProjectTree::join_rel(dir, "mod.rs");
-        if tree.file_exists(&mod_rs) {
-            if let Some(surface) = analyze_facade(tree, &mod_rs, false, true) {
-                let _ = map.insert(mod_rs, surface);
-            }
-        }
+    // Collect mod.rs files within crate source trees.
+    for node in crate_tree.nodes.values() {
+        collect_mod_rs_recursive(tree, &node.rel_dir, &mut map);
     }
 
     map
+}
+
+fn collect_mod_rs_recursive(tree: &ProjectTree, dir: &str, map: &mut FacadeSurfaceMap) {
+    let Some(entry) = tree.dir_contents(dir) else {
+        return;
+    };
+    if entry.files().iter().any(|f| f == "mod.rs") {
+        let mod_rs = ProjectTree::join_rel(dir, "mod.rs");
+        if let Some(surface) = analyze_facade(tree, &mod_rs, false, true) {
+            let _ = map.insert(mod_rs, surface);
+        }
+    }
+    for subdir in entry.dirs() {
+        let child = ProjectTree::join_rel(dir, subdir);
+        collect_mod_rs_recursive(tree, &child, map);
+    }
 }
 
 fn analyze_facade(

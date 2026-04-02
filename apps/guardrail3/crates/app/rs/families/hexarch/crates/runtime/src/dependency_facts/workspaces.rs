@@ -14,10 +14,20 @@ pub(super) fn discover_workspaces(
     let mut workspaces = Vec::new();
     let mut seen = BTreeSet::new();
 
+    let cargo_dirs = tree
+        .structure()
+        .iter()
+        .filter_map(|(dir_rel, entry)| {
+            if dir_rel.is_empty() || !entry.has_file("Cargo.toml") {
+                return None;
+            }
+            Some(dir_rel.clone())
+        })
+        .collect::<Vec<String>>();
     let root_dirs = include_repo_root_workspace
         .then_some(String::new())
         .into_iter();
-    for dir in root_dirs.chain(tree.dirs_with_file("Cargo.toml")) {
+    for dir in root_dirs.chain(cargo_dirs) {
         if !seen.insert(dir.clone()) {
             continue;
         }
