@@ -477,7 +477,7 @@ mod tests {
             )]),
         );
 
-        let placement = guardrail3_app_rs_placement::collect(&tree);
+        let placement = guardrail3_app_rs_placement::collect(&tree, &[]);
         let facts = collect(&tree, &placement);
         let fact = facts
             .family_files()
@@ -524,7 +524,7 @@ mod tests {
             )]),
         );
 
-        let placement = guardrail3_app_rs_placement::collect(&tree);
+        let placement = guardrail3_app_rs_placement::collect(&tree, &[]);
         let facts = collect(&tree, &placement);
         let fact = facts
             .family_files()
@@ -569,7 +569,7 @@ mod tests {
             BTreeMap::new(),
         );
 
-        let placement = guardrail3_app_rs_placement::collect(&tree);
+        let placement = guardrail3_app_rs_placement::collect(&tree, &[]);
         let facts = collect(&tree, &placement);
         assert!(facts.family_files().is_empty());
     }
@@ -595,7 +595,7 @@ mod tests {
             BTreeMap::new(),
         );
 
-        let placement = guardrail3_app_rs_placement::collect(&tree);
+        let placement = guardrail3_app_rs_placement::collect(&tree, &[]);
         let facts = collect(&tree, &placement);
         let fact = facts
             .family_files()
@@ -640,7 +640,7 @@ mod tests {
             ]),
         );
 
-        let placement = guardrail3_app_rs_placement::collect(&tree);
+        let placement = guardrail3_app_rs_placement::collect(&tree, &[]);
         let facts = collect(&tree, &placement);
         let deny_facts = facts
             .family_files()
@@ -732,7 +732,7 @@ mod tests {
             ]),
         );
 
-        let placement = guardrail3_app_rs_placement::collect(&tree);
+        let placement = guardrail3_app_rs_placement::collect(&tree, &[]);
         let facts = collect(&tree, &placement);
         let files = facts
             .family_files()
@@ -782,7 +782,7 @@ mod tests {
             )]),
         );
 
-        let placement = guardrail3_app_rs_placement::collect(&tree);
+        let placement = guardrail3_app_rs_placement::collect(&tree, &[]);
         let facts = collect(&tree, &placement);
         let file_kinds = facts
             .family_files()

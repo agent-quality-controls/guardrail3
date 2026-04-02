@@ -19,6 +19,7 @@ pub fn check(
         &hook_file_rels(tree),
         &hook_dir_rels(tree),
         None,
+        &[],
     );
     guardrail3_app_rs_family_hooks_shared::check(fs, root, &surface, tc)
 }

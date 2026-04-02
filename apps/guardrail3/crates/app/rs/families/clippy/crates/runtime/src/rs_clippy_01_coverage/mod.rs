@@ -91,7 +91,7 @@ pub(crate) fn run_for_tests(root: &Path) -> Vec<CheckResult> {
             .map_rs_clippy();
     let surface = guardrail3_app_rs_family_view::FamilyView::build(
         tree.root().clone(), tree.structure(), tree.content(),
-        &["".to_owned()], &[], &[], None,
+        &["".to_owned()], &[], &[], None, &[],
     );
     crate::check(&surface, &route)
 }
@@ -117,7 +117,7 @@ pub(crate) fn run_with_validation_scope_for_tests(
             .map_rs_clippy();
     let surface = guardrail3_app_rs_family_view::FamilyView::build(
         tree.root().clone(), tree.structure(), tree.content(),
-        &["".to_owned()], &[], &[], None,
+        &["".to_owned()], &[], &[], None, &[],
     );
     crate::check(&surface, &route)
 }

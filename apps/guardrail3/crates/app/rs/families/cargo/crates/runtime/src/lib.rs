@@ -71,7 +71,7 @@ pub fn check(surface: &FamilyView, route: &RsCargoRoute) -> Vec<CheckResult> {
 pub fn check_test_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
     let surface = FamilyView::build(
         tree.root().clone(), tree.structure(), tree.content(),
-        &["".to_owned()], &[], &[], None,
+        &["".to_owned()], &[], &[], None, &[],
     );
     check(
         &surface,
@@ -86,7 +86,7 @@ pub fn check_test_tree_with_validation_scope(
 ) -> Vec<CheckResult> {
     let surface = FamilyView::build(
         tree.root().clone(), tree.structure(), tree.content(),
-        &["".to_owned()], &[], &[], None,
+        &["".to_owned()], &[], &[], None, &[],
     );
     check(
         &surface,

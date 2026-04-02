@@ -61,7 +61,7 @@ fn stays_quiet_when_root_is_scoped_to_one_file() {
 
     let surface = FamilyView::build(
         tree.root().clone(), tree.structure(), tree.content(),
-        &["".to_owned()], &[], &[], None,
+        &["".to_owned()], &[], &[], None, &[],
     );
     let results = crate::check(&surface, &route);
     assert_no_hits(&results);

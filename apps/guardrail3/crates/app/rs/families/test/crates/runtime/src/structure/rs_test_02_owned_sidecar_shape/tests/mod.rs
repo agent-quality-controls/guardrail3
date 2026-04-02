@@ -24,6 +24,7 @@ pub(crate) fn run_family_scoped(root: &Path, scope: &str) -> Vec<crate::CheckRes
         &[],
         &[],
         None,
+        &[],
     );
     crate::check(
         &surface,

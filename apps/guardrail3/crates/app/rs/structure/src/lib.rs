@@ -95,6 +95,11 @@ impl RustStructureFacts {
         &self.structure
     }
 
+    #[must_use]
+    pub fn excluded_paths(&self) -> &[String] {
+        &self.excluded_paths
+    }
+
     /// Filter structure/content to only include data under the given root directories.
     /// Strips out everything not under a legal root (test fixtures, etc.).
     #[must_use]
@@ -188,7 +193,7 @@ fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
 
 #[must_use]
 pub fn collect(tree: ProjectTree, excluded_paths: &[String]) -> RustStructureFacts {
-    let placement = collect_placement(&tree);
+    let placement = collect_placement(&tree, excluded_paths);
     let owned_surface = collect_owned_surface(&tree, &placement);
     let content = tree.content().clone();
     let root = tree.root().clone();

@@ -24,7 +24,7 @@ fn project_tree(
     structure: BTreeMap<String, DirEntry>,
     content: BTreeMap<String, String>,
 ) -> ProjectTree {
-    ProjectTree::build(root.to_path_buf(), &structure, &content, &["".to_owned()], &[], &[], None)
+    ProjectTree::build(root.to_path_buf(), &structure, &content, &["".to_owned()], &[], &[], None, &[])
 }
 
 #[test]
@@ -228,7 +228,7 @@ fn stays_quiet_when_validation_scope_selects_zero_code_roots() {
 
     let surface = FamilyView::build(
         tree.root().clone(), tree.structure(), tree.content(),
-        &["".to_owned()], &[], &[], None,
+        &["".to_owned()], &[], &[], None, &[],
     );
     let results = crate::check(&surface, &route);
     assert_no_hits(&results);

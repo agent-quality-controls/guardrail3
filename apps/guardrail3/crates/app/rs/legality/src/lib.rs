@@ -286,6 +286,12 @@ impl RustLegalityFacts {
         self.structure.root_path()
     }
 
+    /// Configured exclusion patterns from guardrail3.toml.
+    #[must_use]
+    pub fn excluded_paths(&self) -> &[String] {
+        self.structure.excluded_paths()
+    }
+
     /// Structure roots — for topology reporting.
     /// These are ALL classified roots (not just legal workspace roots).
     /// Topology needs this to report on misclassified/illegal roots.

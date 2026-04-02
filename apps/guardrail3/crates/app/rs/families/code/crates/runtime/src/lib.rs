@@ -143,6 +143,7 @@ pub(crate) fn check_test_root(
         &[],
         &[],
         None,
+        &[],
     );
     check_test_tree(&surface)
 }

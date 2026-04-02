@@ -31,6 +31,7 @@ pub fn hook_tree(pre_commit: &str) -> ProjectTree {
         &[],
         &[],
         None,
+        &[],
     )
 }
 
