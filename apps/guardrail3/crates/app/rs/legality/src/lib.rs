@@ -539,19 +539,14 @@ pub fn collect(structure: RustStructureFacts) -> RustLegalityFacts {
             .then(left.kind().cmp(&right.kind()))
     });
 
-    // Filter the carried-forward structure to legal roots only.
-    let legal_root_rels: Vec<String> = legal_workspace_roots
-        .iter()
-        .map(|r| r.rel_dir().to_owned())
-        .collect();
-    let filtered_structure = structure.filter_to_roots(&legal_root_rels);
-
+    // Legality marks, it doesn't erase. Carry ALL structure data through.
+    // The mapper and runner decide what each family sees based on markers.
     RustLegalityFacts {
         legal_workspace_roots,
         topology_issues,
         legal_family_files,
         illegal_family_files,
-        structure: filtered_structure,
+        structure,
     }
 }
 
