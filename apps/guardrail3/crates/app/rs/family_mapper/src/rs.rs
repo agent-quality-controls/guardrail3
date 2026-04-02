@@ -3,18 +3,14 @@ use guardrail3_app_rs_legality::{
 };
 use guardrail3_app_rs_ownership::RustFamilyFileAttachment;
 use guardrail3_app_rs_placement::RustRootPlacementRootFacts;
-use guardrail3_app_rs_structure::RustStructureFacts;
 use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig};
-use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use crate::scoped_files::filter_for_roots;
 use crate::views;
 
 pub struct FamilyMapper<'a> {
-    tree: &'a ProjectTree,
-    structure: &'a RustStructureFacts,
-    legality: RustLegalityFacts,
+    legality: &'a RustLegalityFacts,
     config: Option<&'a GuardrailConfig>,
     selected_families: &'a RustFamilySelection,
     scoped_files: Option<&'a std::collections::BTreeSet<String>>,
@@ -24,8 +20,6 @@ pub struct FamilyMapper<'a> {
 impl std::fmt::Debug for FamilyMapper<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("FamilyMapper")
-            .field("tree", &"<ProjectTree>")
-            .field("structure", &self.structure)
             .field("legality", &self.legality)
             .field("config", &self.config)
             .field("selected_families", &self.selected_families)
@@ -37,37 +31,14 @@ impl std::fmt::Debug for FamilyMapper<'_> {
 
 impl<'a> FamilyMapper<'a> {
     #[must_use]
-    pub fn new(
-        tree: &'a ProjectTree,
-        structure: &'a RustStructureFacts,
-        config: Option<&'a GuardrailConfig>,
-        selected_families: &'a RustFamilySelection,
-        scoped_files: Option<&'a std::collections::BTreeSet<String>>,
-    ) -> Self {
-        let legality = guardrail3_app_rs_legality::collect(structure);
-        Self::with_legality(
-            tree,
-            structure,
-            &legality,
-            config,
-            selected_families,
-            scoped_files,
-        )
-    }
-
-    #[must_use]
-    pub fn with_legality(
-        tree: &'a ProjectTree,
-        structure: &'a RustStructureFacts,
-        legality: &RustLegalityFacts,
+    pub fn from_legality(
+        legality: &'a RustLegalityFacts,
         config: Option<&'a GuardrailConfig>,
         selected_families: &'a RustFamilySelection,
         scoped_files: Option<&'a std::collections::BTreeSet<String>>,
     ) -> Self {
         Self {
-            tree,
-            structure,
-            legality: legality.clone(),
+            legality,
             config,
             selected_families,
             scoped_files,
@@ -84,7 +55,7 @@ impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn map_rs_topology(&self) -> views::RsTopologyRoute {
         views::RsTopologyRoute::new(
-            self.structure
+            self.legality.structure()
                 .roots()
                 .iter()
                 .map(|root| {
@@ -97,7 +68,7 @@ impl<'a> FamilyMapper<'a> {
                     )
                 })
                 .collect(),
-            self.structure
+            self.legality.structure()
                 .overlaps()
                 .iter()
                 .map(|overlap| {
@@ -109,7 +80,7 @@ impl<'a> FamilyMapper<'a> {
                     )
                 })
                 .collect(),
-            self.structure
+            self.legality.structure()
                 .input_failures()
                 .iter()
                 .map(|failure| {
@@ -144,7 +115,7 @@ impl<'a> FamilyMapper<'a> {
             .map_workspace_roots_for_family(RustValidateFamily::Hexarch)
             .into_iter()
             .filter(|root| matches!(root_scope(root.rel_dir()), RootScope::App(_)))
-            .filter(|root| self.tree.file_content(root.cargo_rel_path()).is_some())
+            .filter(|root| self.legality.structure().file_content(root.cargo_rel_path()).is_some())
             .collect::<Vec<_>>();
         let root_rels = roots
             .iter()
@@ -154,16 +125,18 @@ impl<'a> FamilyMapper<'a> {
         views::RsHexarchRoute::new(
             roots,
             filter_for_roots(
-                self.tree,
+                self.legality.structure(),
                 self.scoped_files,
                 &root_rels,
                 self.validation_scope,
             ),
-            self.tree
-                .file_exists("Cargo.toml")
+            self.legality.structure()
+                .file_content("Cargo.toml")
+                .is_some()
                 .then(|| "Cargo.toml".to_owned()),
-            self.tree
-                .file_exists("guardrail3.toml")
+            self.legality.structure()
+                .file_content("guardrail3.toml")
+                .is_some()
                 .then(|| "guardrail3.toml".to_owned()),
         )
     }
@@ -300,7 +273,7 @@ impl<'a> FamilyMapper<'a> {
         views::RsGardeRoute::new(
             roots,
             filter_for_roots(
-                self.tree,
+                self.legality.structure(),
                 self.scoped_files,
                 &root_rels,
                 self.validation_scope,
@@ -347,7 +320,7 @@ impl<'a> FamilyMapper<'a> {
             })
             .collect::<std::collections::BTreeSet<_>>();
 
-        self.structure
+        self.legality.structure()
             .roots()
             .iter()
             .filter(|root| root_rels.contains(root.rel_dir()))
@@ -379,7 +352,7 @@ impl<'a> FamilyMapper<'a> {
             return Vec::new();
         }
 
-        self.structure
+        self.legality.structure()
             .roots()
             .iter()
             .filter(|root| root_enabled_for_family(root, family, self.config))
@@ -395,7 +368,7 @@ impl<'a> FamilyMapper<'a> {
             return Vec::new();
         }
 
-        self.structure
+        self.legality.structure()
             .roots()
             .iter()
             .filter(|root| root_enabled_for_family(root, family, self.config))
@@ -454,7 +427,7 @@ impl<'a> FamilyMapper<'a> {
             .iter()
             .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
             .filter(|root| {
-                self.structure
+                self.legality.structure()
                     .roots()
                     .iter()
                     .find(|candidate| candidate.rel_dir() == root.rel_dir())

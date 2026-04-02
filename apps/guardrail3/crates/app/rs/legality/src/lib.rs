@@ -236,12 +236,14 @@ impl RustIllegalFamilyFileFact {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct RustLegalityFacts {
     legal_workspace_roots: Vec<RustLegalWorkspaceRoot>,
     topology_issues: Vec<RustTopologyIssueFact>,
     legal_family_files: Vec<RustLegalFamilyFileFact>,
     illegal_family_files: Vec<RustIllegalFamilyFileFact>,
+    /// Carried forward from structure — the mapper and topology need this.
+    structure: RustStructureFacts,
 }
 
 impl RustLegalityFacts {
@@ -251,12 +253,14 @@ impl RustLegalityFacts {
         topology_issues: Vec<RustTopologyIssueFact>,
         legal_family_files: Vec<RustLegalFamilyFileFact>,
         illegal_family_files: Vec<RustIllegalFamilyFileFact>,
+        structure: RustStructureFacts,
     ) -> Self {
         Self {
             legal_workspace_roots,
             topology_issues,
             legal_family_files,
             illegal_family_files,
+            structure,
         }
     }
 
@@ -278,6 +282,12 @@ impl RustLegalityFacts {
     #[must_use]
     pub fn illegal_family_files(&self) -> &[RustIllegalFamilyFileFact] {
         &self.illegal_family_files
+    }
+
+    /// Access to carried-forward structure data.
+    #[must_use]
+    pub fn structure(&self) -> &RustStructureFacts {
+        &self.structure
     }
 }
 
@@ -307,10 +317,11 @@ enum RootLegality {
 }
 
 #[must_use]
-pub fn collect(structure: &RustStructureFacts) -> RustLegalityFacts {
-    let placement = structure.placement();
-    let owned_surface = structure.owned_surface();
-    let snapshots = collect_snapshots(structure, placement);
+pub fn collect(structure: RustStructureFacts) -> RustLegalityFacts {
+    // Clone what we need from structure before consuming it.
+    let placement = structure.placement().clone();
+    let owned_surface = structure.owned_surface().clone();
+    let snapshots = collect_snapshots_from_placement(&structure, &placement);
     let top_level_workspaces = top_level_workspace_candidates(&snapshots);
     let mut legal_workspace_roots = Vec::new();
     let mut topology_issues = Vec::new();
@@ -505,10 +516,11 @@ pub fn collect(structure: &RustStructureFacts) -> RustLegalityFacts {
         topology_issues,
         legal_family_files,
         illegal_family_files,
+        structure,
     )
 }
 
-fn collect_snapshots(
+fn collect_snapshots_from_placement(
     structure: &RustStructureFacts,
     placement: &RustRootPlacementFacts,
 ) -> BTreeMap<String, CargoRootSnapshot> {

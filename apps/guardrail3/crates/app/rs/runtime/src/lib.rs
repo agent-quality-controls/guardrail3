@@ -86,11 +86,9 @@ pub fn run(
     #[cfg(feature = "routing")]
     let structure = runtime_deps::structure::collect(tree);  // tree consumed
     #[cfg(feature = "routing")]
-    let legality = runtime_deps::legality::collect(&structure);
+    let legality = runtime_deps::legality::collect(structure);  // structure consumed
     #[cfg(feature = "routing")]
-    let mapper = runtime_deps::FamilyMapper::with_legality(
-        &tree,
-        &structure,
+    let mapper = runtime_deps::FamilyMapper::from_legality(
         &legality,
         config.as_ref(),
         &selected,
