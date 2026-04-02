@@ -1,52 +1,12 @@
-use crate::{CheckResult, Severity};
-
-use crate::inputs::InputFailureTestInput;
-
-const ID: &str = "RS-TEST-10";
-
-pub fn check(input: &InputFailureTestInput<'_>, results: &mut Vec<CheckResult>) {
-    results.push(CheckResult::from_parts(
-        ID.to_owned(),
-        Severity::Error,
-        "test-family input failure".to_owned(),
-        input.failure.message.clone(),
-        Some(input.failure.rel_path.clone()),
-        None,
-        false,
-    ));
-}
-
-pub(crate) fn emit_inventory_if_clean(
-    root: &crate::facts::TestRootFacts,
-    results: &mut Vec<CheckResult>,
-    has_failures: bool,
-) {
-    if has_failures {
-        return;
-    }
-    results.push(
-        CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Info,
-            "test-family input failures evaluated".to_owned(),
-            format!(
-                "Root `{}` was checked for input failures and none were found.",
-                root.rel_dir
-            ),
-            Some(root.cargo_rel_path.clone()),
-            None,
-            false,
-        )
-        .as_inventory(),
-    );
-}
+mod rule;
+pub use rule::check;
+pub(crate) use rule::emit_inventory_if_clean;
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
     crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
-
 #[cfg(test)]
 pub(crate) fn run_family_with_tool(
     root: &std::path::Path,
@@ -60,7 +20,6 @@ pub(crate) fn run_family_with_tool(
     };
     crate::check_test_tree(&tree, &checker)
 }
-
 #[cfg(test)]
 
 mod tests;

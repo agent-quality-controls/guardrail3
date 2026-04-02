@@ -1,34 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use super::inputs::ToolchainPolicyRootInput;
-
-const ID: &str = "RS-TOOLCHAIN-01";
-
-pub fn check(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<CheckResult>) {
-    match input.toolchain_toml_rel {
-        Some(rel) => results.push(
-            CheckResult::from_parts(
-                ID.to_owned(),
-                Severity::Info,
-                "rust-toolchain.toml exists".to_owned(),
-                "Found rust-toolchain.toml at workspace root.".to_owned(),
-                Some(rel.to_owned()),
-                None,
-                false,
-            )
-            .as_inventory(),
-        ),
-        None => results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Error,
-            "rust-toolchain.toml missing".to_owned(),
-            "Expected rust-toolchain.toml at workspace root.".to_owned(),
-            Some(expected_toolchain_rel(input.rel_dir)),
-            None,
-            false,
-        )),
-    }
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn test_input<'a>(
@@ -50,7 +21,6 @@ pub(crate) fn test_input<'a>(
         cargo_parse_error,
     )
 }
-
 #[cfg(test)]
 pub(crate) fn test_input_for_root<'a>(
     rel_dir: &'a str,
@@ -76,7 +46,6 @@ pub(crate) fn test_input_for_root<'a>(
         cargo_parse_error,
     }
 }
-
 #[cfg(test)]
 pub(crate) fn run_family_check(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -86,7 +55,6 @@ pub(crate) fn run_family_check(
         &test_route(tree),
     )
 }
-
 #[cfg(test)]
 pub(crate) fn test_tree(
     root_files: &[&str],
@@ -122,7 +90,6 @@ pub(crate) fn test_tree(
         &[],
     )
 }
-
 #[cfg(test)]
 pub(crate) fn nested_workspace_root_tree() -> guardrail3_app_rs_family_view::FamilyView {
     use std::collections::BTreeMap;
@@ -180,7 +147,6 @@ pub(crate) fn nested_workspace_root_tree() -> guardrail3_app_rs_family_view::Fam
         &[],
     )
 }
-
 #[cfg(test)]
 pub(crate) fn test_route(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -195,15 +161,6 @@ pub(crate) fn test_route(
     guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .map_rs_toolchain()
 }
-
-fn expected_toolchain_rel(rel_dir: &str) -> String {
-    if rel_dir.is_empty() {
-        "rust-toolchain.toml".to_owned()
-    } else {
-        guardrail3_app_rs_family_view::FamilyView::join_rel(rel_dir, "rust-toolchain.toml")
-    }
-}
-
 #[cfg(test)]
 
 mod tests;

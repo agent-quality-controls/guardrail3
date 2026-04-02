@@ -1,40 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::ToolDepsInput;
-
-const ID: &str = "RS-DEPS-03";
-
-pub fn check(input: &ToolDepsInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.tool.tool_name != "cargo-dupes" {
-        return;
-    }
-
-    if input.tool.installed {
-        results.push(
-            CheckResult::from_parts(
-                ID.to_owned(),
-                Severity::Info,
-                "cargo-dupes installed".to_owned(),
-                "`cargo-dupes` is available on PATH.".to_owned(),
-                None,
-                None,
-                false,
-            )
-            .as_inventory(),
-        );
-    } else {
-        results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Warn,
-            "cargo-dupes missing".to_owned(),
-            "`cargo-dupes` is recommended for Rust dependency guardrails but was not found on PATH."
-                .to_owned(),
-            None,
-            None,
-            false,
-        ));
-    }
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 fn family_route(
@@ -50,7 +15,6 @@ fn family_route(
     guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .map_rs_deps()
 }
-
 #[cfg(test)]
 pub(crate) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -62,7 +26,6 @@ pub(crate) fn collected_facts(
         &test_support::StubToolChecker::new(installed),
     )
 }
-
 #[cfg(test)]
 pub(crate) fn tool_input<'a>(
     facts: &'a crate::facts::DepsFacts,
@@ -75,7 +38,6 @@ pub(crate) fn tool_input<'a>(
         .expect("expected tool facts");
     crate::inputs::ToolDepsInput::new(tool)
 }
-
 #[cfg(test)]
 pub(crate) fn tool_facts(tool_name: &str, installed: bool) -> crate::facts::DepsFacts {
     crate::facts::DepsFacts {
@@ -97,14 +59,12 @@ pub(crate) fn tool_facts(tool_name: &str, installed: bool) -> crate::facts::Deps
         input_failures: Vec::new(),
     }
 }
-
 #[cfg(test)]
 pub(crate) fn run_with_facts(
     facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }
-
 #[cfg(test)]
 
 mod tests;

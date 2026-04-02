@@ -1,40 +1,8 @@
-#[cfg(test)]
+mod rule;
+pub use rule::{check};
+
 #[cfg(test)]
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use super::inputs::ConfigClippyInput;
-
-const ID: &str = "RS-CLIPPY-25";
-
-pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
-    match (&input.config.parsed, &input.config.parse_error) {
-        (Some(_), None) => results.push(
-            CheckResult::from_parts(
-                ID.to_owned(),
-                Severity::Info,
-                "clippy.toml parseable".to_owned(),
-                format!("`{}` parsed successfully.", input.config.rel_path),
-                Some(input.config.rel_path.clone()),
-                None,
-                false,
-            )
-            .as_inventory(),
-        ),
-        (None, Some(parse_error)) => results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Error,
-            "clippy.toml parse error".to_owned(),
-            format!("Failed to parse `{}`: {parse_error}", input.config.rel_path),
-            Some(input.config.rel_path.clone()),
-            None,
-            false,
-        )),
-        (None, None) => {}
-        (Some(_), Some(_)) => {}
-    }
-}
-
 #[cfg(test)]
 pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResult> {
     let facts = super::facts::collect_for_tests(tree);
@@ -45,7 +13,6 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
     );
     results
 }
-
 #[cfg(test)]
 pub(crate) fn run_family_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
     let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
@@ -60,7 +27,6 @@ pub(crate) fn run_family_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
             .map_rs_clippy();
     crate::check(tree, &route)
 }
-
 #[cfg(test)]
 
 mod tests;

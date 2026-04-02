@@ -1,47 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::PublishableCrateReleaseInput;
-
-const ID: &str = "RS-PUB-06";
-
-pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckResult>) {
-    let krate = input.krate;
-    if !krate.publishable {
-        return;
-    }
-    match krate.keywords_count {
-        Some(0) | None => results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Warn,
-            format!("{}: keywords missing", krate.name),
-            "Publishable crates should set 1-5 `[package].keywords`.".to_owned(),
-            Some(krate.cargo_rel_path.clone()),
-            None,
-            false,
-        )),
-        Some(count) if count > 5 => results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Warn,
-            format!("{}: too many keywords", krate.name),
-            format!("`[package].keywords` has {count} entries; crates.io allows at most 5."),
-            Some(krate.cargo_rel_path.clone()),
-            None,
-            false,
-        )),
-        Some(count) => results.push(
-            CheckResult::from_parts(
-                ID.to_owned(),
-                Severity::Info,
-                format!("{}: keywords present", krate.name),
-                format!("`[package].keywords` has {count} entries."),
-                Some(krate.cargo_rel_path.clone()),
-                None,
-                false,
-            )
-            .as_inventory(),
-        ),
-    }
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn run_tree(
@@ -55,7 +13,6 @@ pub(crate) fn run_tree(
 pub(crate) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
     crate::test_fixtures::crate_facts(name)
 }
-
 #[cfg(test)]
 pub(crate) fn crate_input(
     krate: &crate::facts::PublishableCrateFacts,
@@ -64,7 +21,6 @@ pub(crate) fn crate_input(
 }
 #[cfg(test)]
 pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
-
 #[cfg(test)]
 
 mod tests;

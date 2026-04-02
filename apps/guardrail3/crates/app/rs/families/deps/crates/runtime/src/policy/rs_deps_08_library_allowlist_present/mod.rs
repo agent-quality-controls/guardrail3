@@ -1,45 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::AllowlistCoverageDepsInput;
-
-const ID: &str = "RS-DEPS-08";
-
-pub fn check(input: &AllowlistCoverageDepsInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.coverage.profile_name.as_deref() != Some("library") {
-        return;
-    }
-
-    if input.coverage.has_allowlist {
-        results.push(
-            CheckResult::from_parts(
-                ID.to_owned(),
-                Severity::Info,
-                "library allowlist present".to_owned(),
-                format!(
-                    "Library crate `{}` has an `allowed_deps` policy.",
-                    input.coverage.crate_name
-                ),
-                Some(input.coverage.cargo_rel_path.clone()),
-                None,
-                false,
-            )
-            .as_inventory(),
-        );
-    } else {
-        results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Warn,
-            "library allowlist missing".to_owned(),
-            format!(
-                "Library crate `{}` has no `allowed_deps` policy.",
-                input.coverage.crate_name
-            ),
-            Some(input.coverage.cargo_rel_path.clone()),
-            None,
-            false,
-        ));
-    }
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 fn family_route(
@@ -55,7 +15,6 @@ fn family_route(
     guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .map_rs_deps()
 }
-
 #[cfg(test)]
 pub(crate) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -67,7 +26,6 @@ pub(crate) fn collected_facts(
         &test_support::StubToolChecker::new(installed),
     )
 }
-
 #[cfg(test)]
 pub(crate) fn coverage_facts(
     profile_name: Option<&str>,
@@ -94,7 +52,6 @@ pub(crate) fn coverage_facts(
         input_failures: Vec::new(),
     }
 }
-
 #[cfg(test)]
 pub(crate) fn coverage_input<'a>(
     facts: &'a crate::facts::DepsFacts,
@@ -107,14 +64,12 @@ pub(crate) fn coverage_input<'a>(
         .expect("expected allowlist coverage facts");
     crate::inputs::AllowlistCoverageDepsInput::new(coverage)
 }
-
 #[cfg(test)]
 pub(crate) fn run_with_facts(
     facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }
-
 #[cfg(test)]
 
 mod tests;

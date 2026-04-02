@@ -1,0 +1,31 @@
+use guardrail3_domain_report::{CheckResult, Severity};
+
+use crate::inputs::AuxiliaryRootInput;
+
+const ID: &str = "RS-TOPOLOGY-08";
+
+pub fn check(input: &AuxiliaryRootInput<'_>, results: &mut Vec<CheckResult>) {
+    results.push(
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            format!(
+                "Rust root `{}` is declared auxiliary",
+                display_dir(&input.root.rel_dir)
+            ),
+            format!(
+                "`{}` is outside `apps/*` and `packages/*`, but is explicitly marked with `topology_role = \"auxiliary\"` in Cargo metadata.",
+                input.root.cargo_rel_path
+            ),
+            Some(input.root.cargo_rel_path.clone()),
+            None,
+            false,
+        )
+        .as_inventory(),
+    );
+}
+
+fn display_dir(rel_dir: &str) -> &str {
+    if rel_dir.is_empty() { "." } else { rel_dir }
+}
+

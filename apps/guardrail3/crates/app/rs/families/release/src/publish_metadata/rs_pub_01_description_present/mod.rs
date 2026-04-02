@@ -1,36 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::PublishableCrateReleaseInput;
-
-const ID: &str = "RS-PUB-01";
-
-pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckResult>) {
-    if !input.krate.publishable {
-        return;
-    }
-    results.push(if input.krate.description_present {
-        CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Info,
-            format!("{}: description present", input.krate.name),
-            "Cargo.toml sets `[package].description`.".to_owned(),
-            Some(input.krate.cargo_rel_path.clone()),
-            None,
-            false,
-        )
-        .as_inventory()
-    } else {
-        CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Error,
-            format!("{}: missing description", input.krate.name),
-            "Publishable crates must set `[package].description`.".to_owned(),
-            Some(input.krate.cargo_rel_path.clone()),
-            None,
-            false,
-        )
-    });
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn run_tree(
@@ -40,7 +9,6 @@ pub(crate) fn run_tree(
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::test_fixtures::run_tree(tree, tc, thorough)
 }
-
 #[cfg(test)]
 pub(crate) fn run_tree_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -54,7 +22,6 @@ pub(crate) fn run_tree_with_validation_scope(
 pub(crate) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
     crate::test_fixtures::crate_facts(name)
 }
-
 #[cfg(test)]
 pub(crate) fn crate_input(
     krate: &crate::facts::PublishableCrateFacts,
@@ -63,7 +30,6 @@ pub(crate) fn crate_input(
 }
 #[cfg(test)]
 pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
-
 #[cfg(test)]
 
 mod tests;

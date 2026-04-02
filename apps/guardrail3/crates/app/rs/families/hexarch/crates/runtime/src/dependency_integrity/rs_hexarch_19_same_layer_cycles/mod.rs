@@ -1,55 +1,10 @@
-use guardrail3_domain_report::{CheckResult, Severity};
+mod rule;
+pub use rule::{check, check_inventory};
 
 #[cfg(test)]
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
-
 #[cfg(test)]
 use crate::dependency_facts::Layer;
-use crate::dependency_facts::{CycleFacts, MemberDependencyFacts};
-use crate::inventory::push_success;
-
-use crate::inputs::CycleHexarchInput;
-
-const ID: &str = "RS-HEXARCH-19";
-
-pub fn check(input: &CycleHexarchInput<'_>, results: &mut Vec<CheckResult>) {
-    let cycle = input.cycle;
-    results.push(CheckResult::from_parts(
-        ID.to_owned(),
-        Severity::Error,
-        format!("same-layer {} dependency cycle", cycle.layer.label()),
-        format!(
-            "Found same-layer dependency cycle in `{}` layer: {}",
-            cycle.layer.label(),
-            cycle.members.join(" -> ")
-        ),
-        None,
-        None,
-        false,
-    ));
-}
-
-pub fn check_inventory(
-    members: &[MemberDependencyFacts],
-    cycles: &[CycleFacts],
-    results: &mut Vec<CheckResult>,
-) {
-    if members.is_empty() || !cycles.is_empty() {
-        return;
-    }
-
-    push_success(
-        results,
-        ID,
-        "no same-layer dependency cycles detected".to_owned(),
-        format!(
-            "Hexarch checked {} workspace member(s) and found no same-layer dependency cycles.",
-            members.len()
-        ),
-        None,
-    );
-}
-
 #[cfg(test)]
 pub fn results_for_cycles_for_test(tree: &ProjectTree) -> (Vec<String>, Vec<CheckResult>) {
     let facts = crate::collect_dependency_facts_from_tree_for_tests(tree);
@@ -64,7 +19,6 @@ pub fn results_for_cycles_for_test(tree: &ProjectTree) -> (Vec<String>, Vec<Chec
     }
     (cycle_layers, results)
 }
-
 #[cfg(test)]
 pub fn check_cycle_for_test(layer: &str, members: Vec<&str>) -> Vec<CheckResult> {
     let layer = match layer {
@@ -82,7 +36,6 @@ pub fn check_cycle_for_test(layer: &str, members: Vec<&str>) -> Vec<CheckResult>
     check(&CycleHexarchInput::new(&cycle), &mut results);
     results
 }
-
 #[cfg(test)]
 pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))

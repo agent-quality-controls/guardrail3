@@ -1,69 +1,14 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::garde_support::{EXTRACTOR_TYPE_BANS, extract_ban_paths, missing_bans};
-use crate::inputs::GardeRootInput;
-
-const ID: &str = "RS-GARDE-03";
-
-pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
-    let Some(parsed) = input.root.clippy_parsed.as_ref() else {
-        results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Warn,
-            "cannot verify garde extractor bans".to_owned(),
-            input.root.clippy_parse_error.clone().unwrap_or_else(|| {
-                "No covering clippy configuration found for garde extractor-ban validation."
-                    .to_owned()
-            }),
-            input.root.clippy_rel_path.clone(),
-            None,
-            false,
-        ));
-        return;
-    };
-
-    let found = extract_ban_paths(parsed, "disallowed-types");
-    let missing = missing_bans(&found, EXTRACTOR_TYPE_BANS);
-    if missing.is_empty() {
-        results.push(
-            CheckResult::from_parts(
-                ID.to_owned(),
-                Severity::Info,
-                "garde extractor bans present".to_owned(),
-                "All required Axum extractor bans are present in the covering clippy configuration."
-                    .to_owned(),
-                input.root.clippy_rel_path.clone(),
-                None,
-                false,
-            )
-            .as_inventory(),
-        );
-    } else {
-        results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Warn,
-            "missing garde extractor bans".to_owned(),
-            format!(
-                "Missing garde extractor bans from `disallowed-types`: {}.",
-                missing.join(", ")
-            ),
-            input.root.clippy_rel_path.clone(),
-            None,
-            false,
-        ));
-    }
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn canonical_clippy_toml() -> String {
     guardrail3_domain_modules::clippy::build_clippy_toml("service", false, true, "", "")
 }
-
 #[cfg(test)]
 pub(crate) fn canonical_library_clippy_toml() -> String {
     guardrail3_domain_modules::clippy::build_clippy_toml("library", false, true, "", "")
 }
-
 #[cfg(test)]
 pub(crate) fn remove_clippy_ban_path(clippy_toml: &str, key: &str, path: &str) -> String {
     {
@@ -82,7 +27,6 @@ pub(crate) fn remove_clippy_ban_path(clippy_toml: &str, key: &str, path: &str) -
         toml::to_string(&parsed).expect("serialize clippy TOML")
     }
 }
-
 #[cfg(test)]
 pub(crate) fn run_family(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -109,7 +53,6 @@ pub(crate) fn run_family(
         crate::check_test_tree(tree, &route)
     }
 }
-
 #[cfg(test)]
 
 mod tests;

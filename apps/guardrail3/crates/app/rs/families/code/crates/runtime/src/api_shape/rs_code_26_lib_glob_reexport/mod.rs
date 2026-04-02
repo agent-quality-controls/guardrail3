@@ -1,45 +1,14 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::RustCodeFileInput;
-use crate::parse::find_pub_use_glob_reexports;
-
-const ID: &str = "RS-CODE-26";
-
-pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.profile_name != Some("library") || !is_lib_rs(input.rel_path) {
-        return;
-    }
-
-    for (line, target) in find_pub_use_glob_reexports(input.ast) {
-        results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Warn,
-            "glob re-export in lib.rs".to_owned(),
-            format!("`pub use {target}` creates an unstable API surface."),
-            Some(input.rel_path.to_owned()),
-            Some(line),
-            false,
-        ));
-    }
-}
-
-fn is_lib_rs(rel_path: &str) -> bool {
-    rel_path
-        .rsplit('/')
-        .next()
-        .is_some_and(|name| name == "lib.rs")
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
-
 #[cfg(test)]
 pub(crate) fn copy_fixture() -> test_support::TempDir {
     crate::copy_test_fixture()
 }
-
 #[cfg(test)]
 pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
     let ast = crate::parse::parse_rust_file(content)
@@ -55,7 +24,6 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
     check(&input, &mut results);
     results
 }
-
 #[cfg(test)]
 
 mod tests;

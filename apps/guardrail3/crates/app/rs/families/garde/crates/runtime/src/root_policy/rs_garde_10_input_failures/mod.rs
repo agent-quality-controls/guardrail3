@@ -1,26 +1,10 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::GardeInputFailureInput;
-
-const ID: &str = "RS-GARDE-10";
-
-pub fn check(input: &GardeInputFailureInput<'_>, results: &mut Vec<CheckResult>) {
-    results.push(CheckResult::from_parts(
-        ID.to_owned(),
-        Severity::Error,
-        "garde-family input failure".to_owned(),
-        input.failure.message.clone(),
-        Some(input.failure.rel_path.clone()),
-        None,
-        false,
-    ));
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn canonical_clippy_toml() -> String {
     guardrail3_domain_modules::clippy::build_clippy_toml("service", false, true, "", "")
 }
-
 #[cfg(test)]
 pub(crate) fn run_family(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -47,7 +31,6 @@ pub(crate) fn run_family(
         crate::check_test_tree(tree, &route)
     }
 }
-
 #[cfg(test)]
 
 mod tests;

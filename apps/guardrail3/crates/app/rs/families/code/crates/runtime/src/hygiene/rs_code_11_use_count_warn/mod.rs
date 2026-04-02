@@ -1,41 +1,14 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::RustCodeFileInput;
-use crate::parse::count_top_level_use_imports;
-
-const ID: &str = "RS-CODE-11";
-
-pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.is_test_root {
-        return;
-    }
-
-    let use_count = count_top_level_use_imports(input.ast);
-    if !(16..=20).contains(&use_count) {
-        return;
-    }
-
-    results.push(CheckResult::from_parts(
-        ID.to_owned(),
-        Severity::Warn,
-        "many use imports".to_owned(),
-        format!("{use_count} top-level use imports (warn at 16, max 20)."),
-        Some(input.rel_path.to_owned()),
-        None,
-        false,
-    ));
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
-
 #[cfg(test)]
 pub(crate) fn copy_fixture() -> test_support::TempDir {
     crate::copy_test_fixture()
 }
-
 #[cfg(test)]
 pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
     let ast = crate::parse::parse_rust_file(content)
@@ -51,7 +24,6 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
     check(&input, &mut results);
     results
 }
-
 #[cfg(test)]
 
 mod tests;
