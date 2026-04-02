@@ -1,5 +1,5 @@
 use super::{copy_fixture, create_dir, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_12_src_banned as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::workspace_policy::rs_hexarch_12_src_banned as assertions;
 
 #[test]
 fn app_level_src_dirs_hit_every_mutated_rust_app() {

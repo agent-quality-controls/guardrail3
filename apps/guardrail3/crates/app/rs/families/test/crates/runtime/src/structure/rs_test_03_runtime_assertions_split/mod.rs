@@ -2,14 +2,13 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
-#[path = "rs_test_03_runtime_assertions_split/helpers.rs"]
 mod helpers;
 
 use crate::analysis::AnalyzedFile;
 use crate::{CheckResult, Severity};
 
-use super::facts::{RuntimeAssertionsViolation, TestFileKind, TestRootFacts};
-use super::inputs::RuntimeAssertionsViolationInput;
+use crate::facts::{RuntimeAssertionsViolation, TestFileKind, TestRootFacts};
+use crate::inputs::RuntimeAssertionsViolationInput;
 
 const ID: &str = "RS-TEST-03";
 
@@ -495,8 +494,5 @@ fn non_component_harness_violations(
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
-#[cfg(test)]
-#[path = "rs_test_03_runtime_assertions_split_tests/mod.rs"]
-mod rs_test_03_runtime_assertions_split_tests;

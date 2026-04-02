@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_dominance as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_22_ports_trait_dominance as assertions;
 
 #[test]
 fn orphan_ports_source_file_does_not_count_toward_trait_dominance() {

@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_release_assertions::rs_release_12_input_failures as assertions;
+use guardrail3_app_rs_family_release_assertions::repo_inventory::rs_release_12_input_failures as assertions;
 
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};

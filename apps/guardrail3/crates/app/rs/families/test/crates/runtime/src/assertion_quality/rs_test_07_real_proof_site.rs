@@ -2,8 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::{CheckResult, Severity};
 
-use super::inputs::TestFunctionInput;
-use super::parse::{TestFunctionInfo, UseBinding};
+use crate::inputs::TestFunctionInput;
+use crate::parse::{TestFunctionInfo, UseBinding};
 
 const ID: &str = "RS-TEST-07";
 
@@ -171,7 +171,7 @@ fn path_is_owned(
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 #[cfg(test)]
 #[path = "rs_test_07_real_proof_site_tests/mod.rs"]

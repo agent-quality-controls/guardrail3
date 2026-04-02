@@ -1,6 +1,6 @@
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_29_large_trait_inventory::assert_no_hits;
+use guardrail3_app_rs_family_code_assertions::inventory::rs_code_29_large_trait_inventory::assert_no_hits;
 
 #[test]
 fn populated_golden_fixture_has_no_large_trait_hits() {

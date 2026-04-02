@@ -1,5 +1,5 @@
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_36_string_dispatch_cap::assert_no_hits;
+use guardrail3_app_rs_family_code_assertions::cfg_and_paths::rs_code_36_string_dispatch_cap::assert_no_hits;
 
 #[test]
 fn skips_small_sites_and_test_contexts() {

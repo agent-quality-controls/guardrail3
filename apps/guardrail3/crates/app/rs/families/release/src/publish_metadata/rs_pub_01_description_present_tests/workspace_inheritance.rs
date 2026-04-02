@@ -1,6 +1,6 @@
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
-use guardrail3_app_rs_family_release_assertions::rs_pub_01_description_present as assertions;
+use guardrail3_app_rs_family_release_assertions::publish_metadata::rs_pub_01_description_present as assertions;
 
 #[test]
 fn should_not_error_when_description_is_inherited_from_workspace_package() {

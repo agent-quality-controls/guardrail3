@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_release_assertions::rs_pub_12_crate_inventory as assertions;
+use guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_12_crate_inventory as assertions;
 
 use super::super::check;
 use super::super::{repo_facts, repo_input};

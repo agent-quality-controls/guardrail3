@@ -1,5 +1,5 @@
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_33_public_weak_error_forms::{
+use guardrail3_app_rs_family_code_assertions::api_shape::rs_code_33_public_weak_error_forms::{
     RuleFinding, assert_findings,
 };
 

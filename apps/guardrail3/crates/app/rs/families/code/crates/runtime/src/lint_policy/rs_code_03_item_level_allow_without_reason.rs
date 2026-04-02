@@ -1,8 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_reason_policy::reason_text_is_useful;
 
-use super::inputs::RustCodeFileInput;
-use super::parse::{find_item_lint_policies, same_line_reason};
+use crate::inputs::RustCodeFileInput;
+use crate::parse::{find_item_lint_policies, same_line_reason};
 
 const ID: &str = "RS-CODE-03";
 

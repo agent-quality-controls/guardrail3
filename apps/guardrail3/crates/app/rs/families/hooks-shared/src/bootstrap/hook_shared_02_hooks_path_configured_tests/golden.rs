@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_hooks_shared_assertions::hook_shared_02_hooks_path_configured as assertions;
+use guardrail3_app_rs_family_hooks_shared_assertions::bootstrap::hook_shared_02_hooks_path_configured as assertions;
 
 use crate::hook_shared_02_hooks_path_configured::check;
 

@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_15_boundary_config as assertions;
 
 use super::copy_fixture;
 

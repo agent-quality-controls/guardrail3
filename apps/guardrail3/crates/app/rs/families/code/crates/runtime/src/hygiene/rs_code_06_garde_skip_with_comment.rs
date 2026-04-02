@@ -1,8 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_reason_policy::reason_text_is_useful;
 
-use super::inputs::RustCodeFileInput;
-use super::parse::{
+use crate::inputs::RustCodeFileInput;
+use crate::parse::{
     GardeSkipInfo, find_garde_skips_with_types, same_line_has_comment, same_line_reason,
 };
 

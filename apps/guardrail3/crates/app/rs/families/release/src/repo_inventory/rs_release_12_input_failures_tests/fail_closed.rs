@@ -1,7 +1,7 @@
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
-use guardrail3_app_rs_family_release_assertions::rs_release_12_input_failures as assertions;
-use guardrail3_app_rs_family_release_assertions::rs_release_12_input_failures::ExpectedRuleResult;
+use guardrail3_app_rs_family_release_assertions::repo_inventory::rs_release_12_input_failures as assertions;
+use guardrail3_app_rs_family_release_assertions::repo_inventory::rs_release_12_input_failures::ExpectedRuleResult;
 
 #[test]
 fn emits_exact_fail_closed_hits_for_malformed_release_configs_and_workflow_yaml() {

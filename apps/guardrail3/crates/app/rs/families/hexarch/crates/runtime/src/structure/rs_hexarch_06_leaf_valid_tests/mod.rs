@@ -8,7 +8,7 @@ mod permission_edges;
 mod symlink_edges;
 mod valid_variants;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_06_leaf_valid::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

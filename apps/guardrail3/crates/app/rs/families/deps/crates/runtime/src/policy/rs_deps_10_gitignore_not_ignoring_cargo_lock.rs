@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::LockfileDepsInput;
+use crate::inputs::LockfileDepsInput;
 
 const ID: &str = "RS-DEPS-10";
 
@@ -78,8 +78,8 @@ fn family_route_with_validation_scope(
 pub(super) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
-) -> super::facts::DepsFacts {
-    super::facts::collect(
+) -> crate::facts::DepsFacts {
+    crate::facts::collect(
         tree,
         &family_route(tree),
         &test_support::StubToolChecker::new(installed),
@@ -91,8 +91,8 @@ pub(super) fn collected_facts_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
     validation_scope: Option<&str>,
-) -> super::facts::DepsFacts {
-    super::facts::collect(
+) -> crate::facts::DepsFacts {
+    crate::facts::collect(
         tree,
         &family_route_with_validation_scope(tree, validation_scope),
         &test_support::StubToolChecker::new(installed),
@@ -104,10 +104,10 @@ pub(super) fn lockfile_facts(
     cargo_lock_exists: bool,
     cargo_lock_ignored: bool,
     root_profile_name: Option<&str>,
-) -> super::facts::DepsFacts {
-    super::facts::DepsFacts {
+) -> crate::facts::DepsFacts {
+    crate::facts::DepsFacts {
         tools: Vec::new(),
-        lockfiles: vec![super::facts::LockfileFacts {
+        lockfiles: vec![crate::facts::LockfileFacts {
             root_rel_dir: String::new(),
             cargo_lock_rel_path: "Cargo.lock".to_owned(),
             cargo_lock_exists,
@@ -124,14 +124,14 @@ pub(super) fn lockfile_facts(
 
 #[cfg(test)]
 pub(super) fn lockfile_input<'a>(
-    facts: &'a super::facts::DepsFacts,
-) -> super::inputs::LockfileDepsInput<'a> {
-    super::inputs::LockfileDepsInput::new(facts.lockfiles.first().expect("expected lockfile facts"))
+    facts: &'a crate::facts::DepsFacts,
+) -> crate::inputs::LockfileDepsInput<'a> {
+    crate::inputs::LockfileDepsInput::new(facts.lockfiles.first().expect("expected lockfile facts"))
 }
 
 #[cfg(test)]
 pub(super) fn run_with_facts(
-    facts: &super::facts::DepsFacts,
+    facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }

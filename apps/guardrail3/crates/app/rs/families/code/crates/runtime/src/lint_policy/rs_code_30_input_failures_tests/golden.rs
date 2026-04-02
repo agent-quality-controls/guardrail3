@@ -1,5 +1,5 @@
 use super::super::{DirEntry, ProjectTree, run_tree};
-use guardrail3_app_rs_family_code_assertions::rs_code_30_input_failures::assert_no_hits;
+use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_30_input_failures::assert_no_hits;
 use test_support::{create_dir_all, create_temp_dir, write_path};
 
 fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {

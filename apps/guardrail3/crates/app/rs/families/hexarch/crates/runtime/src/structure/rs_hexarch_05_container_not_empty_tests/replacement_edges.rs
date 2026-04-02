@@ -6,7 +6,7 @@ fn inner_hex() -> &'static str {
 }
 
 use super::{copy_fixture, remove_dir, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_05_container_not_empty as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_05_container_not_empty as assertions;
 
 const SAFE_SUFFIXES: &[&str] = &[
     "app",

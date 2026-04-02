@@ -1,6 +1,6 @@
 use crate::{CheckResult, Severity};
 
-use super::inputs::RootTestInput;
+use crate::inputs::RootTestInput;
 
 const ID: &str = "RS-TEST-11";
 
@@ -43,7 +43,7 @@ pub(crate) fn run_family_with_tool(
     } else {
         test_support::StubToolChecker::default()
     };
-    super::check_test_tree(&tree, &checker)
+    crate::check_test_tree(&tree, &checker)
 }
 
 #[cfg(test)]

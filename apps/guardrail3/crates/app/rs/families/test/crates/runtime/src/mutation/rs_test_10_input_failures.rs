@@ -1,6 +1,6 @@
 use crate::{CheckResult, Severity};
 
-use super::inputs::InputFailureTestInput;
+use crate::inputs::InputFailureTestInput;
 
 const ID: &str = "RS-TEST-10";
 
@@ -17,7 +17,7 @@ pub fn check(input: &InputFailureTestInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 pub(crate) fn emit_inventory_if_clean(
-    root: &super::facts::TestRootFacts,
+    root: &crate::facts::TestRootFacts,
     results: &mut Vec<CheckResult>,
     has_failures: bool,
 ) {
@@ -44,7 +44,7 @@ pub(crate) fn emit_inventory_if_clean(
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 
 #[cfg(test)]
@@ -58,7 +58,7 @@ pub(crate) fn run_family_with_tool(
     } else {
         test_support::StubToolChecker::default()
     };
-    super::check_test_tree(&tree, &checker)
+    crate::check_test_tree(&tree, &checker)
 }
 
 #[cfg(test)]

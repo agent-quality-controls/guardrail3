@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RustCodeFileInput;
-use super::parse::{CfgPredicateTruth, find_cfg_attr_lint_policies};
+use crate::inputs::RustCodeFileInput;
+use crate::parse::{CfgPredicateTruth, find_cfg_attr_lint_policies};
 
 const ID: &str = "RS-CODE-08";
 

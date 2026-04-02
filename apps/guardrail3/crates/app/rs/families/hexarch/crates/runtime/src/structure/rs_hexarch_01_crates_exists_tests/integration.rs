@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 use super::{copy_fixture, remove_dir, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_01_crates_exists as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_01_crates_exists as assertions;
 
 #[test]
 fn golden_has_no_rule_01_errors() {

@@ -1,5 +1,5 @@
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_15_direct_fs_usage::{
+use guardrail3_app_rs_family_code_assertions::hygiene::rs_code_15_direct_fs_usage::{
     RuleFinding, assert_findings,
 };
 

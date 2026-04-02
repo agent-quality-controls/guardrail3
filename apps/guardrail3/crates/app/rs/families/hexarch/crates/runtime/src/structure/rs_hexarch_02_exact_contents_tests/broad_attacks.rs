@@ -5,7 +5,7 @@ fn inner_hex() -> &'static str {
 }
 
 use super::{copy_fixture, remove_dir, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_02_exact_contents as assertions;
 
 #[test]
 fn missing_domain_hits_all_owned_outer_and_nested_hex_roots() {

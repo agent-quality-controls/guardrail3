@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::CodeInputFailureInput;
+use crate::inputs::CodeInputFailureInput;
 
 const ID: &str = "RS-CODE-30";
 
@@ -26,7 +26,7 @@ pub(crate) use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTr
 
 #[cfg(test)]
 pub(crate) fn check_input_failure(rel_path: &str, message: &str) -> Vec<CheckResult> {
-    let input = super::inputs::CodeInputFailureInput { rel_path, message };
+    let input = crate::inputs::CodeInputFailureInput { rel_path, message };
     let mut results = Vec::new();
     check(&input, &mut results);
     results

@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::{
+use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_02_unused_crate_dependencies_allow::{
     RuleFinding, Severity, assert_files, assert_findings,
 };
 use test_support::write_file;

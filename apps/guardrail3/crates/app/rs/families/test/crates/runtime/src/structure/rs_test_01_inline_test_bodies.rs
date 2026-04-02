@@ -1,6 +1,6 @@
 use crate::{CheckResult, Severity};
 
-use super::inputs::CfgTestModuleInput;
+use crate::inputs::CfgTestModuleInput;
 
 const ID: &str = "RS-TEST-01";
 
@@ -36,7 +36,7 @@ pub fn check(input: &CfgTestModuleInput<'_>, results: &mut Vec<CheckResult>) {
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 #[cfg(test)]
 #[path = "rs_test_01_inline_test_bodies_tests/mod.rs"]

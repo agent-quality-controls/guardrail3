@@ -1,5 +1,5 @@
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_20_extern_allow::{
+use guardrail3_app_rs_family_code_assertions::cfg_and_paths::rs_code_20_extern_allow::{
     RuleFinding, assert_findings,
 };
 

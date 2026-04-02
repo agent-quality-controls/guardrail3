@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_hooks_shared_assertions::hook_shared_18_executable_command_context_only as assertions;
+use guardrail3_app_rs_family_hooks_shared_assertions::shell_safety::hook_shared_18_executable_command_context_only as assertions;
 
 use crate::hook_shared_18_executable_command_context_only::run_case;
 

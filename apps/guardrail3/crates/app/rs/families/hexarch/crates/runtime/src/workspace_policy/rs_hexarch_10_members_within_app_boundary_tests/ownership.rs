@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_10_members_within_app_boundary as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::workspace_policy::rs_hexarch_10_members_within_app_boundary as assertions;
 
 #[test]
 fn package_style_app_cargo_is_owned_by_rule_08_not_rule_10() {

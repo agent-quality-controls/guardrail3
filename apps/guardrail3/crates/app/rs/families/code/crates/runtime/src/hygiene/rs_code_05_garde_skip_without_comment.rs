@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RustCodeFileInput;
-use super::parse::{GardeSkipInfo, find_garde_skips_with_types, same_line_has_comment};
+use crate::inputs::RustCodeFileInput;
+use crate::parse::{GardeSkipInfo, find_garde_skips_with_types, same_line_has_comment};
 
 const ID: &str = "RS-CODE-05";
 

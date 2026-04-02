@@ -6,7 +6,7 @@ fn inner_hex() -> &'static str {
 }
 
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_04_loose_files as assertions;
 
 const CONTAINER_SUFFIXES: &[&str] = &[
     "app",

@@ -1,8 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::facts::RepoReleaseFacts;
-use super::inputs::PublishableCrateReleaseInput;
-use super::release_support::binary_release_present;
+use crate::facts::RepoReleaseFacts;
+use crate::inputs::PublishableCrateReleaseInput;
+use crate::release_support::binary_release_present;
 
 const ID: &str = "RS-BIN-01";
 

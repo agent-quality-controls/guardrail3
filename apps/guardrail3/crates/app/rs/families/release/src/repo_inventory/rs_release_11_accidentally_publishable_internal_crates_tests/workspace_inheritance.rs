@@ -1,6 +1,6 @@
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
-use guardrail3_app_rs_family_release_assertions::rs_release_11_accidentally_publishable_internal_crates as assertions;
+use guardrail3_app_rs_family_release_assertions::repo_inventory::rs_release_11_accidentally_publishable_internal_crates as assertions;
 
 #[test]
 fn should_not_warn_when_release_metadata_is_inherited_from_workspace_package() {

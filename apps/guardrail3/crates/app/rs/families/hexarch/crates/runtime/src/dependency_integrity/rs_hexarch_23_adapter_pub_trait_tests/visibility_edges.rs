@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_23_adapter_pub_trait as assertions;
 
 #[test]
 fn pub_super_trait_in_multi_file_adapter_crate_is_ignored() {

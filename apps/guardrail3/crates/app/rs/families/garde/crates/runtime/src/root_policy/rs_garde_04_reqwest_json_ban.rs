@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::garde_support::{REQWEST_JSON_BAN, extract_ban_paths};
-use super::inputs::GardeRootInput;
+use crate::garde_support::{REQWEST_JSON_BAN, extract_ban_paths};
+use crate::inputs::GardeRootInput;
 
 const ID: &str = "RS-GARDE-04";
 
@@ -92,7 +92,7 @@ pub(super) fn run_family(
         None,
     )
     .map_rs_garde();
-    super::check_test_tree(tree, &route)
+    crate::check_test_tree(tree, &route)
 }
 
 #[cfg(test)]

@@ -1,7 +1,7 @@
 use super::super::check_source;
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_25_public_result_error_type::assert_no_hits;
+use guardrail3_app_rs_family_code_assertions::api_shape::rs_code_25_public_result_error_type::assert_no_hits;
 use test_support::write_file;
 
 #[test]

@@ -4,7 +4,7 @@ mod golden;
 mod ownership;
 mod path_resolution;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_10_members_within_app_boundary::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::workspace_policy::rs_hexarch_10_members_within_app_boundary::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

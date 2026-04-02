@@ -4,7 +4,7 @@ mod golden;
 mod non_member_paths;
 mod ownership_edges;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_20_dev_dependency_direction::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

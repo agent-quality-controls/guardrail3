@@ -2,7 +2,7 @@
 mod broad_attacks;
 mod false_positives;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_12_src_banned::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::workspace_policy::rs_hexarch_12_src_banned::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

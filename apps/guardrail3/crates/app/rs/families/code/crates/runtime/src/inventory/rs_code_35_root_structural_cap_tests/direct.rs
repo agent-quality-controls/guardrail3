@@ -1,5 +1,5 @@
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_35_root_structural_cap::{
+use guardrail3_app_rs_family_code_assertions::inventory::rs_code_35_root_structural_cap::{
     RuleFinding, assert_findings,
 };
 use test_support::{create_dir_all, create_temp_dir, write_file};

@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::ReleaseEdgeInput;
+use crate::inputs::ReleaseEdgeInput;
 
 const ID: &str = "RS-PUB-10";
 
@@ -74,7 +74,7 @@ pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_roo
 #[path = "rs_pub_10_no_path_deps_to_unpublishable_tests/mod.rs"]
 mod rs_pub_10_no_path_deps_to_unpublishable_tests;
 
-fn dependency_package_suffix(edge: &super::facts::ReleaseEdgeFacts) -> String {
+fn dependency_package_suffix(edge: &crate::facts::ReleaseEdgeFacts) -> String {
     (edge.dep_name != edge.dep_package_name)
         .then(|| format!(" (package `{}`)", edge.dep_package_name))
         .unwrap_or_default()

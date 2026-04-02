@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 
 use crate::{CheckResult, Severity};
 
-use super::inputs::TestSupportFileInput;
-use super::parse::{PublicValueKind, ReturnKind};
+use crate::inputs::TestSupportFileInput;
+use crate::parse::{PublicValueKind, ReturnKind};
 
 const ID: &str = "RS-TEST-18";
 const REPORT_FIELDS: &[&str] = &[
@@ -284,7 +284,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-fn semantic_helper_names<'a>(functions: &'a [super::parse::FunctionInfo]) -> BTreeSet<&'a str> {
+fn semantic_helper_names<'a>(functions: &'a [crate::parse::FunctionInfo]) -> BTreeSet<&'a str> {
     let mut semantic_helpers = functions
         .iter()
         .filter(|function| !function.is_public && !function.is_test)
@@ -340,7 +340,7 @@ fn semantic_helper_names<'a>(functions: &'a [super::parse::FunctionInfo]) -> BTr
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 #[cfg(test)]
 #[path = "rs_test_18_test_support_generic_tests/mod.rs"]

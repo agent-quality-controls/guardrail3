@@ -4,10 +4,10 @@ use crate::analysis::AnalyzedFile;
 use crate::{CheckResult, Severity};
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
-use super::discover::{join_under_root, parent_dir, path_is_under};
-use super::facts::{SidecarViolation, TestFileKind, TestRootFacts};
-use super::inputs::SidecarViolationInput;
-use super::parse;
+use crate::discover::{join_under_root, parent_dir, path_is_under};
+use crate::facts::{SidecarViolation, TestFileKind, TestRootFacts};
+use crate::inputs::SidecarViolationInput;
+use crate::parse;
 
 const ID: &str = "RS-TEST-02";
 
@@ -235,7 +235,7 @@ fn cfg_test_decl_is_owned_sidecar(
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 #[cfg(test)]
 #[path = "rs_test_02_owned_sidecar_shape_tests/mod.rs"]

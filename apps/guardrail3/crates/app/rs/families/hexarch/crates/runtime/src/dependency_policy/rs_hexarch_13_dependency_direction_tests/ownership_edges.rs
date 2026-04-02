@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_13_dependency_direction as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_13_dependency_direction as assertions;
 
 #[test]
 fn cross_app_normal_edge_is_owned_by_rule_24_not_rule_13() {

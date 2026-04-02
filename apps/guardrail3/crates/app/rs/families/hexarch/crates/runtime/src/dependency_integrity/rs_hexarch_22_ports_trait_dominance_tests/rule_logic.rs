@@ -1,5 +1,5 @@
 use super::super::{SourceCrateLayerForTest, run_source_case};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_dominance as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_22_ports_trait_dominance as assertions;
 
 #[test]
 fn dto_only_ports_crate_stays_clean() {

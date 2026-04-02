@@ -1,7 +1,7 @@
 use super::super::check;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root};
-use guardrail3_app_rs_family_release_assertions::rs_bin_03_binstall_metadata as assertions;
+use guardrail3_app_rs_family_release_assertions::binaries::rs_bin_03_binstall_metadata as assertions;
 
 #[test]
 fn inventories_binstall_metadata_for_publishable_binary_crate() {

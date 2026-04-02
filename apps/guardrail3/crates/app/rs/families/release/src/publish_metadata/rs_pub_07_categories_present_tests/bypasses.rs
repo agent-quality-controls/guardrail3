@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_release_assertions::rs_pub_07_categories_present as assertions;
+use guardrail3_app_rs_family_release_assertions::publish_metadata::rs_pub_07_categories_present as assertions;
 
 use super::super::check;
 use super::super::{crate_facts, crate_input};

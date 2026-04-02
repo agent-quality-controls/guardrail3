@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::garde_support::{CORE_METHOD_BANS, extract_ban_paths, missing_bans};
-use super::inputs::GardeRootInput;
+use crate::garde_support::{CORE_METHOD_BANS, extract_ban_paths, missing_bans};
+use crate::inputs::GardeRootInput;
 
 const ID: &str = "RS-GARDE-02";
 
@@ -97,7 +97,7 @@ pub(super) fn run_family(
             None,
         )
         .map_rs_garde();
-        super::check_test_tree(tree, &route)
+        crate::check_test_tree(tree, &route)
     }
 }
 

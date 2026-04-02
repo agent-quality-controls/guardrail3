@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_24_cross_app_boundary as assertions;
 
 #[test]
 fn external_same_name_collision_does_not_count_as_cross_app_path_dep() {

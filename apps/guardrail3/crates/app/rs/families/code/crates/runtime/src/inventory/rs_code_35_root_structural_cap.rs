@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::StructuralCapInput;
+use crate::inputs::StructuralCapInput;
 
 const ID: &str = "RS-CODE-35";
 

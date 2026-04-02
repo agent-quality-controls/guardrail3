@@ -10,7 +10,7 @@ mod workspace_inherited_aliases;
 mod workspace_inherited_external;
 mod workspace_membership;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_21_domain_purity::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

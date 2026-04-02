@@ -1,6 +1,6 @@
 use super::super::results_for_dependency_edges_for_test as results_for_dependency_edges;
 use super::{dir_entry, project_tree};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_17_workspace_inherited_direction as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_17_workspace_inherited_direction as assertions;
 
 #[test]
 fn forbidden_workspace_inherited_edges_error_and_allowed_ones_do_not() {

@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::DirectDependencyCapDepsInput;
+use crate::inputs::DirectDependencyCapDepsInput;
 
 const ID: &str = "RS-DEPS-12";
 const MAX_UNIQUE_DIRECT_DEPENDENCIES: usize = 25;
@@ -52,8 +52,8 @@ fn family_route_with_validation_scope(
 pub(super) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
-) -> super::facts::DepsFacts {
-    super::facts::collect(
+) -> crate::facts::DepsFacts {
+    crate::facts::collect(
         tree,
         &family_route(tree),
         &test_support::StubToolChecker::new(installed),
@@ -65,8 +65,8 @@ pub(super) fn collected_facts_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
     validation_scope: Option<&str>,
-) -> super::facts::DepsFacts {
-    super::facts::collect(
+) -> crate::facts::DepsFacts {
+    crate::facts::collect(
         tree,
         &family_route_with_validation_scope(tree, validation_scope),
         &test_support::StubToolChecker::new(installed),
@@ -78,13 +78,13 @@ pub(super) fn direct_dependency_cap_facts(
     crate_name: &str,
     cargo_rel_path: &str,
     unique_direct_dependency_count: usize,
-) -> super::facts::DepsFacts {
-    super::facts::DepsFacts {
+) -> crate::facts::DepsFacts {
+    crate::facts::DepsFacts {
         tools: Vec::new(),
         lockfiles: Vec::new(),
         dependency_entries: Vec::new(),
         allowlist_coverage: Vec::new(),
-        direct_dependency_caps: vec![super::facts::DirectDependencyCapFacts {
+        direct_dependency_caps: vec![crate::facts::DirectDependencyCapFacts {
             crate_name: crate_name.to_owned(),
             cargo_rel_path: cargo_rel_path.to_owned(),
             unique_direct_dependency_count,
@@ -95,7 +95,7 @@ pub(super) fn direct_dependency_cap_facts(
 
 #[cfg(test)]
 pub(super) fn run_with_facts(
-    facts: &super::facts::DepsFacts,
+    facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }

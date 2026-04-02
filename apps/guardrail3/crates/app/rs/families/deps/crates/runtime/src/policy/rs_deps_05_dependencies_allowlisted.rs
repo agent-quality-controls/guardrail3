@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::facts::DependencySectionKind;
-use super::inputs::DependencyEntryDepsInput;
+use crate::facts::DependencySectionKind;
+use crate::inputs::DependencyEntryDepsInput;
 
 const ID: &str = "RS-DEPS-05";
 
@@ -72,8 +72,8 @@ fn family_route_with_validation_scope(
 pub(super) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
-) -> super::facts::DepsFacts {
-    super::facts::collect(
+) -> crate::facts::DepsFacts {
+    crate::facts::collect(
         tree,
         &family_route(tree),
         &test_support::StubToolChecker::new(installed),
@@ -85,8 +85,8 @@ pub(super) fn collected_facts_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
     validation_scope: Option<&str>,
-) -> super::facts::DepsFacts {
-    super::facts::collect(
+) -> crate::facts::DepsFacts {
+    crate::facts::collect(
         tree,
         &family_route_with_validation_scope(tree, validation_scope),
         &test_support::StubToolChecker::new(installed),
@@ -98,10 +98,10 @@ pub(super) fn dependency_facts(
     allowlist_present: bool,
     allowlisted: bool,
     dep_package_name: &str,
-) -> super::facts::DepsFacts {
-    super::facts::DepsFacts {
+) -> crate::facts::DepsFacts {
+    crate::facts::DepsFacts {
         tools: Vec::new(),
-        lockfiles: vec![super::facts::LockfileFacts {
+        lockfiles: vec![crate::facts::LockfileFacts {
             root_rel_dir: String::new(),
             cargo_lock_rel_path: "Cargo.lock".to_owned(),
             cargo_lock_exists: true,
@@ -109,10 +109,10 @@ pub(super) fn dependency_facts(
             gitignore_rel_path: Some(".gitignore".to_owned()),
             profile_name: Some("service".to_owned()),
         }],
-        dependency_entries: vec![super::facts::DependencyEntryFacts {
+        dependency_entries: vec![crate::facts::DependencyEntryFacts {
             crate_name: "api".to_owned(),
             cargo_rel_path: "crates/api/Cargo.toml".to_owned(),
-            section_kind: super::facts::DependencySectionKind::Dependencies,
+            section_kind: crate::facts::DependencySectionKind::Dependencies,
             table_label: "[dependencies]".to_owned(),
             dep_package_name: dep_package_name.to_owned(),
             allowlist_present,
@@ -126,25 +126,25 @@ pub(super) fn dependency_facts(
 
 #[cfg(test)]
 pub(super) fn dependency_input<'a>(
-    facts: &'a super::facts::DepsFacts,
+    facts: &'a crate::facts::DepsFacts,
     cargo_rel_path: &str,
     dep_package_name: &str,
-) -> super::inputs::DependencyEntryDepsInput<'a> {
+) -> crate::inputs::DependencyEntryDepsInput<'a> {
     let entry = facts
         .dependency_entries
         .iter()
         .find(|entry| {
             entry.cargo_rel_path == cargo_rel_path
-                && entry.section_kind == super::facts::DependencySectionKind::Dependencies
+                && entry.section_kind == crate::facts::DependencySectionKind::Dependencies
                 && entry.dep_package_name == dep_package_name
         })
         .expect("expected dependency entry facts");
-    super::inputs::DependencyEntryDepsInput::new(entry)
+    crate::inputs::DependencyEntryDepsInput::new(entry)
 }
 
 #[cfg(test)]
 pub(super) fn run_with_facts(
-    facts: &super::facts::DepsFacts,
+    facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }

@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_01_coverage as coverage_assertions;
+use guardrail3_app_rs_family_deny_assertions::coverage::rs_deny_01_coverage as coverage_assertions;
 
 use super::super::{build_fixture_deny_toml, run_family};
 use test_support::{copy_fixture, remove_deny_ban, write_file};

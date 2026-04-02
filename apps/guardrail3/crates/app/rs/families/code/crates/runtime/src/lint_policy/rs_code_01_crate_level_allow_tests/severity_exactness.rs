@@ -1,6 +1,6 @@
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_01_crate_level_allow::{
+use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_01_crate_level_allow::{
     RuleFinding, Severity, assert_findings,
 };
 use test_support::write_file;

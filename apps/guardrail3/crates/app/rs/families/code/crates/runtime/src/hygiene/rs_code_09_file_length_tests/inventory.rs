@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_09_file_length::{
+use guardrail3_app_rs_family_code_assertions::hygiene::rs_code_09_file_length::{
     RuleFinding, Severity, assert_files, assert_findings,
 };
 use test_support::write_file;

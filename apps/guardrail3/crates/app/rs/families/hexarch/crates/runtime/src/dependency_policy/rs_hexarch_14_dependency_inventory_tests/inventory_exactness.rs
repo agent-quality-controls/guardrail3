@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_14_dependency_inventory as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_14_dependency_inventory as assertions;
 
 #[test]
 fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {

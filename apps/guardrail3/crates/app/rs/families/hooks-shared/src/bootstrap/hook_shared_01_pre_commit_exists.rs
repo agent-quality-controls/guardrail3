@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::facts::HookScriptFacts;
+use crate::facts::HookScriptFacts;
 
 const ID: &str = "HOOK-SHARED-01";
 
@@ -34,7 +34,7 @@ pub fn check(pre_commit: Option<&HookScriptFacts>, results: &mut Vec<CheckResult
 pub(crate) fn run_case(pre_commit_content: Option<&str>) -> Vec<CheckResult> {
     let pre_commit = pre_commit_content.map(|content| HookScriptFacts {
         rel_path: ".githooks/pre-commit".to_owned(),
-        kind: super::facts::HookScriptKind::PreCommit,
+        kind: crate::facts::HookScriptKind::PreCommit,
         content: content.to_owned(),
     });
     let mut results = Vec::new();

@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_01_coverage as assertions;
+use guardrail3_app_rs_family_deny_assertions::coverage::rs_deny_01_coverage as assertions;
 
 use super::super::{copy_fixture, write_file};
 

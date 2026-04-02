@@ -7,7 +7,7 @@ mod missing_config;
 mod schema_invalid_partial_recovery;
 mod zero_member_workspace;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_15_boundary_config::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

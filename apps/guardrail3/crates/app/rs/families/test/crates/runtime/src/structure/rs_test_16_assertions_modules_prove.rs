@@ -1,8 +1,8 @@
 use crate::{CheckResult, Severity};
 
-use super::facts::TestFileKind;
-use super::inputs::{AssertionsModuleInput, TestFunctionInput};
-use super::parse::{FieldAccessInfo, FunctionInfo};
+use crate::facts::TestFileKind;
+use crate::inputs::{AssertionsModuleInput, TestFunctionInput};
+use crate::parse::{FieldAccessInfo, FunctionInfo};
 
 const ID: &str = "RS-TEST-16";
 const REPORT_FIELDS: &[&str] = &[
@@ -173,7 +173,7 @@ fn owns_result_shape_assertion(
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 #[cfg(test)]
 #[path = "rs_test_16_assertions_modules_prove_tests/mod.rs"]

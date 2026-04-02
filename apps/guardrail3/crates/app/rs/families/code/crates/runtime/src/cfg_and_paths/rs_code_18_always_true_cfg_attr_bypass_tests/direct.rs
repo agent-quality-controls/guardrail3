@@ -1,5 +1,5 @@
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_18_always_true_cfg_attr_bypass::{
+use guardrail3_app_rs_family_code_assertions::cfg_and_paths::rs_code_18_always_true_cfg_attr_bypass::{
     RuleFinding, assert_findings,
 };
 

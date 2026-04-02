@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_03_shadowing as assertions;
+use guardrail3_app_rs_family_deny_assertions::coverage::rs_deny_03_shadowing as assertions;
 
 use super::super::check_same_root_conflict;
 use super::super::{collected_facts, same_root_conflict_input, same_root_conflict_tree};

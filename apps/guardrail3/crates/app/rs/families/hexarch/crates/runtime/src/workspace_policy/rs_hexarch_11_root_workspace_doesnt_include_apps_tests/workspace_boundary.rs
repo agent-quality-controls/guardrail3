@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_11_root_workspace_doesnt_include_apps as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::workspace_policy::rs_hexarch_11_root_workspace_doesnt_include_apps as assertions;
 
 #[test]
 fn root_workspace_including_all_rust_apps_hits_every_owned_app_member() {

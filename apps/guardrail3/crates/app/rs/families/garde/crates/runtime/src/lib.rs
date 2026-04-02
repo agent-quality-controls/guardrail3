@@ -1,36 +1,11 @@
+mod derive_checks;
 mod discover;
 mod facts;
 mod garde_support;
 mod inputs;
+mod inventory;
 mod parse;
-#[path = "root_policy/rs_garde_01_dependency_present.rs"]
-mod rs_garde_01_dependency_present;
-#[path = "root_policy/rs_garde_02_core_method_bans.rs"]
-mod rs_garde_02_core_method_bans;
-#[path = "root_policy/rs_garde_03_extractor_type_bans.rs"]
-mod rs_garde_03_extractor_type_bans;
-#[path = "root_policy/rs_garde_04_reqwest_json_ban.rs"]
-mod rs_garde_04_reqwest_json_ban;
-#[path = "derive_checks/rs_garde_05_struct_derive_validate.rs"]
-mod rs_garde_05_struct_derive_validate;
-#[path = "root_policy/rs_garde_06_additional_method_bans.rs"]
-mod rs_garde_06_additional_method_bans;
-#[path = "derive_checks/rs_garde_07_manual_deserialize_impl.rs"]
-mod rs_garde_07_manual_deserialize_impl;
-#[path = "derive_checks/rs_garde_08_enum_derive_validate.rs"]
-mod rs_garde_08_enum_derive_validate;
-#[path = "inventory/rs_garde_09_query_as_inventory.rs"]
-mod rs_garde_09_query_as_inventory;
-#[path = "root_policy/rs_garde_10_input_failures.rs"]
-mod rs_garde_10_input_failures;
-#[path = "derive_checks/rs_garde_11_field_level_constraints.rs"]
-mod rs_garde_11_field_level_constraints;
-#[path = "derive_checks/rs_garde_12_nested_validation_dive.rs"]
-mod rs_garde_12_nested_validation_dive;
-#[path = "derive_checks/rs_garde_13_context_validation_surface.rs"]
-mod rs_garde_13_context_validation_surface;
-#[path = "derive_checks/rs_garde_14_guardrail_config_validate_call.rs"]
-mod rs_garde_14_guardrail_config_validate_call;
+mod root_policy;
 
 use glob as _;
 use guardrail3_app_core as _;
@@ -51,7 +26,7 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     for failure in &facts.input_failures {
-        rs_garde_10_input_failures::check(
+        root_policy::rs_garde_10_input_failures::check(
             &inputs::GardeInputFailureInput::new(failure),
             &mut results,
         );
@@ -62,16 +37,16 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
             continue;
         }
         let input = inputs::GardeRootInput::new(root);
-        rs_garde_01_dependency_present::check(&input, &mut results);
+        root_policy::rs_garde_01_dependency_present::check(&input, &mut results);
 
         if !root.garde_dependency_present {
             continue;
         }
 
-        rs_garde_02_core_method_bans::check(&input, &mut results);
-        rs_garde_03_extractor_type_bans::check(&input, &mut results);
-        rs_garde_04_reqwest_json_ban::check(&input, &mut results);
-        rs_garde_06_additional_method_bans::check(&input, &mut results);
+        root_policy::rs_garde_02_core_method_bans::check(&input, &mut results);
+        root_policy::rs_garde_03_extractor_type_bans::check(&input, &mut results);
+        root_policy::rs_garde_04_reqwest_json_ban::check(&input, &mut results);
+        root_policy::rs_garde_06_additional_method_bans::check(&input, &mut results);
     }
 
     for target in &facts.struct_targets {
@@ -81,7 +56,7 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
         {
             continue;
         }
-        rs_garde_05_struct_derive_validate::check(
+        derive_checks::rs_garde_05_struct_derive_validate::check(
             &inputs::DerivedBoundaryTypeInput::new(target),
             &mut results,
         );
@@ -94,7 +69,7 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
         {
             continue;
         }
-        rs_garde_07_manual_deserialize_impl::check(
+        derive_checks::rs_garde_07_manual_deserialize_impl::check(
             &inputs::ManualDeserializeImplInput::new(target),
             &mut results,
         );
@@ -107,7 +82,7 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
         {
             continue;
         }
-        rs_garde_08_enum_derive_validate::check(
+        derive_checks::rs_garde_08_enum_derive_validate::check(
             &inputs::DerivedBoundaryTypeInput::new(target),
             &mut results,
         );
@@ -120,12 +95,12 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
         {
             continue;
         }
-        rs_garde_09_query_as_inventory::check(
+        inventory::rs_garde_09_query_as_inventory::check(
             &inputs::QueryAsMacroInput::new(macro_use),
             &mut results,
         );
     }
-    rs_garde_09_query_as_inventory::check_count(
+    inventory::rs_garde_09_query_as_inventory::check_count(
         facts.query_as_macros.iter().filter(|macro_use| {
             route
                 .scoped_files()
@@ -142,9 +117,9 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
             continue;
         }
         let input = inputs::BoundaryFieldInput::new(field);
-        rs_garde_11_field_level_constraints::check(&input, &mut results);
-        rs_garde_12_nested_validation_dive::check(&input, &mut results);
-        rs_garde_13_context_validation_surface::check(&input, &mut results);
+        derive_checks::rs_garde_11_field_level_constraints::check(&input, &mut results);
+        derive_checks::rs_garde_12_nested_validation_dive::check(&input, &mut results);
+        derive_checks::rs_garde_13_context_validation_surface::check(&input, &mut results);
     }
 
     for site in &facts.guardrail_config_validation_sites {
@@ -154,7 +129,7 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
         {
             continue;
         }
-        rs_garde_14_guardrail_config_validate_call::check(
+        derive_checks::rs_garde_14_guardrail_config_validate_call::check(
             &inputs::GuardrailConfigValidationInput::new(site),
             &mut results,
         );

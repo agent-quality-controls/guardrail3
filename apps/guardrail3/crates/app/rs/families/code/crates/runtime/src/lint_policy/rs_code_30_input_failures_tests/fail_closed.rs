@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use super::super::{DirEntry, ProjectTree, run_tree};
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
-use guardrail3_app_rs_family_code_assertions::rs_code_30_input_failures::{
+use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_30_input_failures::{
     assert_files, assert_guardrail_policy_parse_failure, assert_message_fragment_failure,
     assert_no_hits, assert_source_parse_failure,
 };

@@ -1,7 +1,7 @@
 use std::os::unix::fs::PermissionsExt;
 
 use super::copy_fixture;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_06_leaf_valid as assertions;
 
 #[test]
 #[cfg(unix)]

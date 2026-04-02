@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::UnsafeCodeLintInput;
+use crate::inputs::UnsafeCodeLintInput;
 
 const ID: &str = "RS-CODE-12";
 
@@ -46,7 +46,7 @@ pub(crate) fn check_unsafe_code_lint(
     cargo_rel_path: &str,
     lint_level: Option<&str>,
 ) -> Vec<CheckResult> {
-    let input = super::inputs::UnsafeCodeLintInput {
+    let input = crate::inputs::UnsafeCodeLintInput {
         cargo_rel_path,
         lint_level,
     };

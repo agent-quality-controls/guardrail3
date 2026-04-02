@@ -5,7 +5,7 @@ mod fixture_cycles;
 mod golden;
 mod scope_boundaries;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_19_same_layer_cycles::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_19_same_layer_cycles::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

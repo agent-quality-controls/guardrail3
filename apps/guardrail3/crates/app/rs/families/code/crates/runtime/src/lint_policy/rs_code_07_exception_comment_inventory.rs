@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::ExceptionCommentInput;
+use crate::inputs::ExceptionCommentInput;
 
 const ID: &str = "RS-CODE-07";
 
@@ -31,7 +31,7 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 
 #[cfg(test)]
 pub(crate) fn check_comment(rel_path: &str, line: usize, line_text: &str) -> Vec<CheckResult> {
-    let input = super::inputs::ExceptionCommentInput {
+    let input = crate::inputs::ExceptionCommentInput {
         rel_path,
         line,
         line_text,

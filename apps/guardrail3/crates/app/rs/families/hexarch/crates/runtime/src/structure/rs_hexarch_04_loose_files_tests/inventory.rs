@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_04_loose_files as assertions;
 
 #[test]
 fn multiple_loose_entries_in_one_container_produce_one_error_listing_every_entry() {

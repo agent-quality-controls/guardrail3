@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_23_skip_hygiene as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_23_skip_hygiene as assertions;
 
 #[test]
 fn errors_when_skip_container_is_not_an_array() {

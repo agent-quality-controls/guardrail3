@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::FailOpenWrapperInput;
+use crate::inputs::FailOpenWrapperInput;
 
 const ID: &str = "HOOK-SHARED-21";
 

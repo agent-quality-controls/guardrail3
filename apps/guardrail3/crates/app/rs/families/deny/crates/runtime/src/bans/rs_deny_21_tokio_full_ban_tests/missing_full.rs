@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_21_tokio_full_ban as assertions;
+use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_21_tokio_full_ban as assertions;
 
 use super::super::expected_tokio_allowed_features_for_test;
 use super::super::{build_fixture_deny_toml, set_feature_entries};

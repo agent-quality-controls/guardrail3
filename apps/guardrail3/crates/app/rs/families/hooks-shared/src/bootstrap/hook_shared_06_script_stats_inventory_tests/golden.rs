@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_hooks_shared_assertions::hook_shared_06_script_stats_inventory as assertions;
+use guardrail3_app_rs_family_hooks_shared_assertions::bootstrap::hook_shared_06_script_stats_inventory as assertions;
 
 use crate::hook_shared_06_script_stats_inventory::check;
 

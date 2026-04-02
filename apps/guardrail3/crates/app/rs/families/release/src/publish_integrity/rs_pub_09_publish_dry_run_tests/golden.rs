@@ -15,7 +15,7 @@ fn inventories_direct_publish_dry_run_success() {
 
     check(&input, &mut results);
 
-    guardrail3_app_rs_family_release_assertions::rs_pub_09_publish_dry_run::assert_passed(
+    guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_09_publish_dry_run::assert_passed(
         &results,
         "crates/example/Cargo.toml",
         "x: publish dry-run passed",
@@ -27,7 +27,7 @@ fn inventories_real_publish_dry_run_success_from_richer_fixture() {
     let tmp = copy_fixture();
     let results = run_family(tmp.path(), true);
 
-    guardrail3_app_rs_family_release_assertions::rs_pub_09_publish_dry_run::assert_passed(
+    guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_09_publish_dry_run::assert_passed(
         &results,
         "packages/shared-types/Cargo.toml",
         "shared-types: publish dry-run passed",

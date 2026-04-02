@@ -1,5 +1,5 @@
 use super::copy_fixture;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_13_dependency_direction as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_13_dependency_direction as assertions;
 
 #[test]
 fn golden_fixture_has_no_rule_13_errors() {
