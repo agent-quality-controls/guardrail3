@@ -3,7 +3,7 @@ use guardrail3_app_rs_ownership::{
 };
 use guardrail3_app_rs_placement::{
     RustRootPlacementFacts, RustRootPlacementInputFailureFacts, RustRootPlacementRootFacts,
-    RustZoneOverlapFacts, collect as collect_placement, is_excluded_live_root_dir,
+    RustZoneOverlapFacts, collect as collect_placement,
 };
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -21,6 +21,8 @@ pub struct RustStructureFacts {
     root: PathBuf,
     /// Carried forward from ProjectTree — directory structure (for legality glob expansion).
     structure: BTreeMap<String, DirEntry>,
+    /// Configurable exclusion patterns from guardrail3.toml.
+    excluded_paths: Vec<String>,
 }
 
 impl RustStructureFacts {
@@ -38,6 +40,7 @@ impl RustStructureFacts {
             content,
             root,
             structure,
+            excluded_paths: Vec::new(),
         }
     }
 
@@ -95,6 +98,7 @@ impl RustStructureFacts {
     /// Strips out everything not under a legal root (test fixtures, etc.).
     #[must_use]
     pub fn filter_to_roots(self, root_rels: &[String]) -> Self {
+        let excluded = &self.excluded_paths;
         let filtered_structure: BTreeMap<String, DirEntry> = self
             .structure
             .into_iter()
@@ -102,7 +106,8 @@ impl RustStructureFacts {
                 root_rels
                     .iter()
                     .any(|root| path_is_under(dir_rel, root))
-                    && !is_excluded_live_root_dir(dir_rel)
+                    && !is_excluded_by_builtin(dir_rel)
+                    && !is_excluded_by_config(dir_rel, excluded)
             })
             .collect();
 
@@ -113,7 +118,8 @@ impl RustStructureFacts {
                 root_rels
                     .iter()
                     .any(|root| path_is_under(rel, root))
-                    && !is_excluded_live_root_dir(rel)
+                    && !is_excluded_by_builtin(rel)
+                    && !is_excluded_by_config(rel, excluded)
             })
             .collect();
 
@@ -123,6 +129,7 @@ impl RustStructureFacts {
             content: filtered_content,
             root: self.root,
             structure: filtered_structure,
+            excluded_paths: excluded.to_vec(),
         }
     }
 
@@ -141,6 +148,35 @@ impl RustStructureFacts {
     }
 }
 
+/// Built-in exclusions that always apply (Cargo build output, tool worktrees).
+fn is_excluded_by_builtin(path: &str) -> bool {
+    let segments: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+    if segments.contains(&"target") {
+        return true;
+    }
+    segments
+        .windows(2)
+        .any(|window| matches!(window, [".claude", "worktrees"]))
+}
+
+/// Configurable exclusions from guardrail3.toml `[rust] excluded_paths`.
+fn is_excluded_by_config(path: &str, excluded_paths: &[String]) -> bool {
+    let segments: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+    for pattern in excluded_paths {
+        let pattern_segments: Vec<&str> = pattern.split('/').filter(|s| !s.is_empty()).collect();
+        if pattern_segments.is_empty() {
+            continue;
+        }
+        if segments
+            .windows(pattern_segments.len())
+            .any(|window| window == pattern_segments.as_slice())
+        {
+            return true;
+        }
+    }
+    false
+}
+
 fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
     parent_rel.is_empty()
         || rel_path == parent_rel
@@ -150,12 +186,14 @@ fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
 }
 
 #[must_use]
-pub fn collect(tree: ProjectTree) -> RustStructureFacts {
+pub fn collect(tree: ProjectTree, excluded_paths: &[String]) -> RustStructureFacts {
     let placement = collect_placement(&tree);
     let owned_surface = collect_owned_surface(&tree, &placement);
     let content = tree.content().clone();
     let root = tree.root().clone();
     let structure = tree.structure().clone();
     // tree is consumed here — no further access possible
-    RustStructureFacts::new(placement, owned_surface, content, root, structure)
+    let mut facts = RustStructureFacts::new(placement, owned_surface, content, root, structure);
+    facts.excluded_paths = excluded_paths.to_vec();
+    facts
 }

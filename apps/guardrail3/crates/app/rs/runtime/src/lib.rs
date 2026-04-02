@@ -84,7 +84,13 @@ pub fn run(
         runtime_deps::family_selection::resolve(&tree, config.as_ref(), requested_families);
     let applicability = collect_family_applicability(config.as_ref());
     #[cfg(feature = "routing")]
-    let structure = runtime_deps::structure::collect(tree);  // tree consumed
+    let excluded_paths = config
+        .as_ref()
+        .and_then(|c| c.rust())
+        .map(|r| r.excluded_paths().to_vec())
+        .unwrap_or_default();
+    #[cfg(feature = "routing")]
+    let structure = runtime_deps::structure::collect(tree, &excluded_paths);  // tree consumed
     #[cfg(feature = "routing")]
     let legality = runtime_deps::legality::collect(structure);  // structure consumed
     #[cfg(feature = "routing")]

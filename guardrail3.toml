@@ -5,6 +5,7 @@ name = "service"
 
 [rust]
 workspace_root = "apps/guardrail3"
+excluded_paths = ["tests/fixtures", "tests/snapshots"]
 
 [rust.checks]
 fmt = true
