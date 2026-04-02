@@ -102,7 +102,8 @@ pub fn run(
         fs,
         #[cfg(feature = "family-hooks-shared")]
         path: project_root,
-        tree: &tree,
+        #[cfg(feature = "routing")]
+        legality: &legality,
         #[cfg(feature = "routing")]
         mapper: &mapper,
         #[cfg(any(

@@ -1,7 +1,7 @@
-use guardrail3_domain_project_tree::ProjectTree;
-
 #[cfg(feature = "routing")]
 use guardrail3_app_rs_family_mapper::FamilyMapper;
+#[cfg(feature = "routing")]
+use guardrail3_app_rs_legality::RustLegalityFacts;
 #[cfg(feature = "family-hooks-shared")]
 use guardrail3_outbound_traits::FileSystem;
 #[cfg(any(
@@ -20,7 +20,8 @@ pub(crate) struct RustRunContext<'a> {
     pub(crate) fs: &'a dyn FileSystem,
     #[cfg(feature = "family-hooks-shared")]
     pub(crate) path: &'a Path,
-    pub(crate) tree: &'a ProjectTree,
+    #[cfg(feature = "routing")]
+    pub(crate) legality: &'a RustLegalityFacts,
     #[cfg(feature = "routing")]
     pub(crate) mapper: &'a FamilyMapper<'a>,
     #[cfg(any(

@@ -1062,6 +1062,7 @@ dependencies = [
  "guardrail3-app-rs-family-test",
  "guardrail3-app-rs-family-toolchain",
  "guardrail3-app-rs-family-topology",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-legality",
  "guardrail3-app-rs-runtime-assertions",
  "guardrail3-app-rs-structure",

@@ -1,6 +1,5 @@
 #[cfg(any(feature = "family-code", feature = "family-garde"))]
 use guardrail3_app_rs_family_mapper::RsScopedRootView;
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
 #[cfg(any(
     feature = "family-arch",
     feature = "family-topology",
@@ -44,8 +43,10 @@ use guardrail3_app_rs_family_mapper::RsRootView;
     feature = "family-code",
     feature = "family-hooks-shared",
     feature = "family-hooks-rs",
+    feature = "family-fmt",
+    feature = "family-test",
 ))]
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_validation_model::RustValidateFamily;
 
@@ -61,38 +62,101 @@ pub(crate) struct RustFamilyRunnerDef {
 #[cfg(feature = "family-topology")]
 fn run_topology(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_topology();
-    let surface = topology_surface(ctx.tree, &route);
-    guardrail3_app_rs_family_topology::check(&surface, &route)
+    let structure = ctx.legality.structure();
+    let root_rels = topology_root_rels(route.roots());
+    let mut extra = route
+        .roots()
+        .iter()
+        .map(|root| root.root().cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+    extra.extend(family_file_rels(route.family_files()));
+    if structure
+        .dir_structure()
+        .get("")
+        .is_some_and(|e| e.has_file("guardrail3.toml"))
+    {
+        extra.push("guardrail3.toml".to_owned());
+    }
+    let view = FamilyView::build(
+        structure.root_path().clone(),
+        structure.dir_structure(),
+        structure.content(),
+        &root_rels,
+        &extra,
+        &[],
+        None,
+    );
+    guardrail3_app_rs_family_topology::check(&view, &route)
 }
 
 #[cfg(feature = "family-arch")]
 fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_arch();
-    let surface = arch_surface(ctx.tree, &route);
-    guardrail3_app_rs_family_arch::check(&surface, &route)
+    let structure = ctx.legality.structure();
+    let root_rels = route_root_rels(route.roots());
+    let mut extra = route_root_cargo_files(route.roots());
+    extra.extend(family_file_rels(route.family_files()));
+    if structure
+        .dir_structure()
+        .get("")
+        .is_some_and(|e| e.has_file("guardrail3.toml"))
+    {
+        extra.push("guardrail3.toml".to_owned());
+    }
+    let view = FamilyView::build(
+        structure.root_path().clone(),
+        structure.dir_structure(),
+        structure.content(),
+        &root_rels,
+        &extra,
+        &[],
+        None,
+    );
+    guardrail3_app_rs_family_arch::check(&view, &route)
 }
 
 #[cfg(feature = "family-fmt")]
 fn run_fmt(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_fmt();
-    let surface = RsProjectSurface::from_route_scope(ctx.tree, &[], &fmt_extra_files(&route), None);
-    guardrail3_app_rs_family_fmt::check(&surface, &route)
+    let structure = ctx.legality.structure();
+    let mut extra = family_file_rels(route.family_files());
+    extra.push("Cargo.toml".to_owned());
+    extra.push("rust-toolchain.toml".to_owned());
+    extra.push("guardrail3.toml".to_owned());
+    let view = FamilyView::build(
+        structure.root_path().clone(),
+        structure.dir_structure(),
+        structure.content(),
+        &[],
+        &extra,
+        &[],
+        None,
+    );
+    guardrail3_app_rs_family_fmt::check(&view, &route)
 }
 
 #[cfg(feature = "family-toolchain")]
 fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_toolchain();
+    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            let surface = workspace_surface(
-                ctx.tree,
-                workspace_route.roots(),
-                workspace_route.family_files(),
+            let root_rels = vec![root.rel_dir().to_owned()];
+            let mut extra = route_root_cargo_files(workspace_route.roots());
+            extra.extend(family_file_rels(workspace_route.family_files()));
+            let view = FamilyView::build(
+                structure.root_path().clone(),
+                structure.dir_structure(),
+                structure.content(),
+                &root_rels,
+                &extra,
+                &[],
+                None,
             );
-            guardrail3_app_rs_family_toolchain::check(&surface, &workspace_route)
+            guardrail3_app_rs_family_toolchain::check(&view, &workspace_route)
         })
         .collect()
 }
@@ -100,17 +164,25 @@ fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-clippy")]
 fn run_clippy(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_clippy();
+    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            let surface = workspace_surface(
-                ctx.tree,
-                workspace_route.roots(),
-                workspace_route.family_files(),
+            let root_rels = vec![root.rel_dir().to_owned()];
+            let mut extra = route_root_cargo_files(workspace_route.roots());
+            extra.extend(family_file_rels(workspace_route.family_files()));
+            let view = FamilyView::build(
+                structure.root_path().clone(),
+                structure.dir_structure(),
+                structure.content(),
+                &root_rels,
+                &extra,
+                &[],
+                None,
             );
-            guardrail3_app_rs_family_clippy::check(&surface, &workspace_route)
+            guardrail3_app_rs_family_clippy::check(&view, &workspace_route)
         })
         .collect()
 }
@@ -118,17 +190,25 @@ fn run_clippy(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-deny")]
 fn run_deny(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_deny();
+    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            let surface = workspace_surface(
-                ctx.tree,
-                workspace_route.roots(),
-                workspace_route.family_files(),
+            let root_rels = vec![root.rel_dir().to_owned()];
+            let mut extra = route_root_cargo_files(workspace_route.roots());
+            extra.extend(family_file_rels(workspace_route.family_files()));
+            let view = FamilyView::build(
+                structure.root_path().clone(),
+                structure.dir_structure(),
+                structure.content(),
+                &root_rels,
+                &extra,
+                &[],
+                None,
             );
-            guardrail3_app_rs_family_deny::check(&surface, &workspace_route)
+            guardrail3_app_rs_family_deny::check(&view, &workspace_route)
         })
         .collect()
 }
@@ -136,17 +216,25 @@ fn run_deny(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-cargo")]
 fn run_cargo(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_cargo();
+    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            let surface = workspace_surface(
-                ctx.tree,
-                workspace_route.roots(),
-                workspace_route.family_files(),
+            let root_rels = vec![root.rel_dir().to_owned()];
+            let mut extra = route_root_cargo_files(workspace_route.roots());
+            extra.extend(family_file_rels(workspace_route.family_files()));
+            let view = FamilyView::build(
+                structure.root_path().clone(),
+                structure.dir_structure(),
+                structure.content(),
+                &root_rels,
+                &extra,
+                &[],
+                None,
             );
-            guardrail3_app_rs_family_cargo::check(&surface, &workspace_route)
+            guardrail3_app_rs_family_cargo::check(&view, &workspace_route)
         })
         .collect()
 }
@@ -154,20 +242,48 @@ fn run_cargo(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-code")]
 fn run_code(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_code();
-    let surface = code_surface(ctx.tree, &route);
-    guardrail3_app_rs_family_code::check(&surface, &route)
+    let structure = ctx.legality.structure();
+    let root_rels = scoped_route_root_rels(route.roots());
+    let extra = code_extra_file_rels(structure.dir_structure(), route.roots());
+    let view = FamilyView::build(
+        structure.root_path().clone(),
+        structure.dir_structure(),
+        structure.content(),
+        &root_rels,
+        &extra,
+        &[],
+        route.scoped_files(),
+    );
+    guardrail3_app_rs_family_code::check(&view, &route)
 }
 
 #[cfg(feature = "family-hexarch")]
 fn run_hexarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_hexarch();
+    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            let surface = hexarch_surface(ctx.tree, &workspace_route);
-            guardrail3_app_rs_family_hexarch::check(&surface, &workspace_route)
+            let root_rels = vec![root.rel_dir().to_owned()];
+            let mut extra = route_root_cargo_files(workspace_route.roots());
+            if let Some(repo_root_cargo) = workspace_route.repo_root_cargo_rel_path() {
+                extra.push(repo_root_cargo.to_owned());
+            }
+            if let Some(guardrail_rel) = workspace_route.guardrail_config_rel_path() {
+                extra.push(guardrail_rel.to_owned());
+            }
+            let view = FamilyView::build(
+                structure.root_path().clone(),
+                structure.dir_structure(),
+                structure.content(),
+                &root_rels,
+                &extra,
+                &[],
+                None,
+            );
+            guardrail3_app_rs_family_hexarch::check(&view, &workspace_route)
         })
         .collect()
 }
@@ -175,17 +291,25 @@ fn run_hexarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-libarch")]
 fn run_libarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_libarch();
+    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            let surface = workspace_surface(
-                ctx.tree,
-                workspace_route.roots(),
-                workspace_route.family_files(),
+            let root_rels = vec![root.rel_dir().to_owned()];
+            let mut extra = route_root_cargo_files(workspace_route.roots());
+            extra.extend(family_file_rels(workspace_route.family_files()));
+            let view = FamilyView::build(
+                structure.root_path().clone(),
+                structure.dir_structure(),
+                structure.content(),
+                &root_rels,
+                &extra,
+                &[],
+                None,
             );
-            guardrail3_app_rs_family_libarch::check(&surface, &workspace_route)
+            guardrail3_app_rs_family_libarch::check(&view, &workspace_route)
         })
         .collect()
 }
@@ -193,17 +317,25 @@ fn run_libarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-deps")]
 fn run_deps(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_deps();
+    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            let surface = workspace_surface(
-                ctx.tree,
-                workspace_route.roots(),
-                workspace_route.family_files(),
+            let root_rels = vec![root.rel_dir().to_owned()];
+            let mut extra = route_root_cargo_files(workspace_route.roots());
+            extra.extend(family_file_rels(workspace_route.family_files()));
+            let view = FamilyView::build(
+                structure.root_path().clone(),
+                structure.dir_structure(),
+                structure.content(),
+                &root_rels,
+                &extra,
+                &[],
+                None,
             );
-            guardrail3_app_rs_family_deps::check(&surface, &workspace_route, ctx.tc)
+            guardrail3_app_rs_family_deps::check(&view, &workspace_route, ctx.tc)
         })
         .collect()
 }
@@ -211,13 +343,25 @@ fn run_deps(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-garde")]
 fn run_garde(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_garde();
+    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.root().rel_dir());
-            let surface = garde_surface(ctx.tree, &workspace_route);
-            guardrail3_app_rs_family_garde::check(&surface, &workspace_route)
+            let root_rels = scoped_route_root_rels(workspace_route.roots());
+            let mut extra = scoped_route_root_cargo_files(workspace_route.roots());
+            extra.extend(family_file_rels(workspace_route.family_files()));
+            let view = FamilyView::build(
+                structure.root_path().clone(),
+                structure.dir_structure(),
+                structure.content(),
+                &root_rels,
+                &extra,
+                &[],
+                None,
+            );
+            guardrail3_app_rs_family_garde::check(&view, &workspace_route)
         })
         .collect()
 }
@@ -225,25 +369,44 @@ fn run_garde(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-test")]
 fn run_test(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_test();
-    let surface = test_surface(ctx.tree, &route);
-    guardrail3_app_rs_family_test::check(&surface, &route, ctx.tc)
+    let structure = ctx.legality.structure();
+    let root_rels = route_root_rels(route.roots());
+    let extra = route_root_cargo_files(route.roots());
+    let view = FamilyView::build(
+        structure.root_path().clone(),
+        structure.dir_structure(),
+        structure.content(),
+        &root_rels,
+        &extra,
+        &[],
+        route.scoped_files(),
+    );
+    guardrail3_app_rs_family_test::check(&view, &route, ctx.tc)
 }
 
 #[cfg(feature = "family-release")]
 fn run_release(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_release();
+    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
-            let surface = workspace_surface(
-                ctx.tree,
-                workspace_route.roots(),
-                workspace_route.family_files(),
+            let root_rels = vec![root.rel_dir().to_owned()];
+            let mut extra = route_root_cargo_files(workspace_route.roots());
+            extra.extend(family_file_rels(workspace_route.family_files()));
+            let view = FamilyView::build(
+                structure.root_path().clone(),
+                structure.dir_structure(),
+                structure.content(),
+                &root_rels,
+                &extra,
+                &[],
+                None,
             );
             guardrail3_app_rs_family_release::check(
-                &surface,
+                &view,
                 &workspace_route,
                 ctx.tc,
                 ctx.thorough,
@@ -254,146 +417,43 @@ fn run_release(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 
 #[cfg(feature = "family-hooks-shared")]
 fn run_hooks_shared(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    let surface = hooks_surface(ctx.tree);
-    guardrail3_app_rs_family_hooks_shared::check(ctx.fs, ctx.path, &surface, ctx.tc)
+    let structure = ctx.legality.structure();
+    let dir_structure = structure.dir_structure();
+    let extra_files = hook_file_rels(dir_structure);
+    let extra_dirs = hook_dir_rels(dir_structure);
+    let view = FamilyView::build(
+        structure.root_path().clone(),
+        dir_structure,
+        structure.content(),
+        &[],
+        &extra_files,
+        &extra_dirs,
+        None,
+    );
+    guardrail3_app_rs_family_hooks_shared::check(ctx.fs, ctx.path, &view, ctx.tc)
 }
 
 #[cfg(feature = "family-hooks-rs")]
 fn run_hooks_rs(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    let surface = hooks_surface(ctx.tree);
-    guardrail3_app_rs_family_hooks_rs::check(&surface, ctx.tc)
-}
-
-#[cfg(feature = "family-topology")]
-fn topology_surface(
-    tree: &ProjectTree,
-    route: &guardrail3_app_rs_family_mapper::RsTopologyRoute,
-) -> RsProjectSurface {
-    let mut extra_file_rels = route
-        .roots()
-        .iter()
-        .map(|root| root.root().cargo_rel_path().to_owned())
-        .collect::<Vec<_>>();
-    extra_file_rels.extend(family_file_rels(route.family_files()));
-    if tree.file_exists("guardrail3.toml") {
-        extra_file_rels.push("guardrail3.toml".to_owned());
-    }
-    RsProjectSurface::from_route_scope(tree, &topology_root_rels(route.roots()), &extra_file_rels, None)
-}
-
-#[cfg(feature = "family-arch")]
-fn arch_surface(
-    tree: &ProjectTree,
-    route: &guardrail3_app_rs_family_mapper::RsArchRoute,
-) -> RsProjectSurface {
-    let mut extra_file_rels = route_root_cargo_files(route.roots());
-    extra_file_rels.extend(family_file_rels(route.family_files()));
-    if tree.file_exists("guardrail3.toml") {
-        extra_file_rels.push("guardrail3.toml".to_owned());
-    }
-    RsProjectSurface::from_route_scope(tree, &route_root_rels(route.roots()), &extra_file_rels, None)
-}
-
-#[cfg(any(
-    feature = "family-toolchain",
-    feature = "family-clippy",
-    feature = "family-deny",
-    feature = "family-cargo",
-    feature = "family-libarch",
-    feature = "family-deps",
-    feature = "family-release",
-))]
-fn workspace_surface(
-    tree: &ProjectTree,
-    roots: &[RsRootView],
-    family_files: &[RsFamilyFileView],
-) -> RsProjectSurface {
-    let mut extra_file_rels = route_root_cargo_files(roots);
-    extra_file_rels.extend(family_file_rels(family_files));
-    RsProjectSurface::from_route_scope(tree, &route_root_rels(roots), &extra_file_rels, None)
-}
-
-#[cfg(feature = "family-garde")]
-fn garde_surface(
-    tree: &ProjectTree,
-    route: &guardrail3_app_rs_family_mapper::RsGardeRoute,
-) -> RsProjectSurface {
-    let mut extra_file_rels = scoped_route_root_cargo_files(route.roots());
-    extra_file_rels.extend(family_file_rels(route.family_files()));
-    RsProjectSurface::from_route_scope(
-        tree,
-        &scoped_route_root_rels(route.roots()),
-        &extra_file_rels,
-        None,
-    )
-}
-
-#[cfg(feature = "family-hexarch")]
-fn hexarch_surface(
-    tree: &ProjectTree,
-    route: &guardrail3_app_rs_family_mapper::RsHexarchRoute,
-) -> RsProjectSurface {
-    let mut extra_file_rels = route_root_cargo_files(route.roots());
-    if let Some(repo_root_cargo) = route.repo_root_cargo_rel_path() {
-        extra_file_rels.push(repo_root_cargo.to_owned());
-    }
-    if let Some(guardrail_rel) = route.guardrail_config_rel_path() {
-        extra_file_rels.push(guardrail_rel.to_owned());
-    }
-    RsProjectSurface::from_route_scope(
-        tree,
-        &route_root_rels(route.roots()),
-        &extra_file_rels,
-        None,
-    )
-}
-
-#[cfg(feature = "family-code")]
-fn code_surface(
-    tree: &ProjectTree,
-    route: &guardrail3_app_rs_family_mapper::RsCodeRoute,
-) -> RsProjectSurface {
-    let extra_file_rels = code_surface_file_rels(tree, route);
-    RsProjectSurface::from_route_scope(
-        tree,
-        &scoped_route_root_rels(route.roots()),
-        &extra_file_rels,
-        None,
-    )
-}
-
-#[cfg(feature = "family-fmt")]
-fn fmt_extra_files(route: &guardrail3_app_rs_family_mapper::RsFmtRoute) -> Vec<String> {
-    let mut extra = family_file_rels(route.family_files());
-    extra.push("Cargo.toml".to_owned());
-    extra.push("rust-toolchain.toml".to_owned());
-    extra.push("guardrail3.toml".to_owned());
-    extra
-}
-
-#[cfg(feature = "family-test")]
-fn test_surface(
-    tree: &ProjectTree,
-    route: &guardrail3_app_rs_family_mapper::RsTestRoute,
-) -> RsProjectSurface {
-    RsProjectSurface::from_route_scope(
-        tree,
-        &route_root_rels(route.roots()),
-        &route_root_cargo_files(route.roots()),
-        route.scoped_files(),
-    )
-}
-
-#[cfg(any(feature = "family-hooks-shared", feature = "family-hooks-rs"))]
-fn hooks_surface(tree: &ProjectTree) -> RsProjectSurface {
-    RsProjectSurface::from_route_scope_with_dirs(
-        tree,
+    let structure = ctx.legality.structure();
+    let dir_structure = structure.dir_structure();
+    let extra_files = hook_file_rels(dir_structure);
+    let extra_dirs = hook_dir_rels(dir_structure);
+    let view = FamilyView::build(
+        structure.root_path().clone(),
+        dir_structure,
+        structure.content(),
         &[],
-        &hook_file_rels(tree),
-        &hook_dir_rels(tree),
+        &extra_files,
+        &extra_dirs,
         None,
-    )
+    );
+    guardrail3_app_rs_family_hooks_rs::check(&view, ctx.tc)
 }
+
+// ---------------------------------------------------------------------------
+// Route data helpers — extract data from routes, no tree access.
+// ---------------------------------------------------------------------------
 
 #[cfg(any(
     feature = "family-arch",
@@ -475,18 +535,21 @@ fn family_file_rels(family_files: &[RsFamilyFileView]) -> Vec<String> {
         .collect()
 }
 
+// ---------------------------------------------------------------------------
+// Code family: collect all .rs files + config files from dir_structure.
+// ---------------------------------------------------------------------------
+
 #[cfg(feature = "family-code")]
-fn code_surface_file_rels(
-    tree: &ProjectTree,
-    route: &guardrail3_app_rs_family_mapper::RsCodeRoute,
+fn code_extra_file_rels(
+    dir_structure: &std::collections::BTreeMap<String, guardrail3_app_rs_family_view::DirEntry>,
+    roots: &[RsScopedRootView],
 ) -> Vec<String> {
-    let mut rels = route
-        .roots()
+    let mut rels = roots
         .iter()
         .map(|root| root.root().cargo_rel_path().to_owned())
         .collect::<std::collections::BTreeSet<_>>();
 
-    for (dir_rel, entry) in tree.structure() {
+    for (dir_rel, entry) in dir_structure {
         for file_name in entry.files() {
             let include = file_name.ends_with(".rs")
                 || matches!(
@@ -503,7 +566,12 @@ fn code_surface_file_rels(
                         | "rust-toolchain"
                 );
             if include {
-                let _ = rels.insert(ProjectTree::join_rel(dir_rel, file_name));
+                let rel_path = if dir_rel.is_empty() {
+                    file_name.to_owned()
+                } else {
+                    format!("{dir_rel}/{file_name}")
+                };
+                let _ = rels.insert(rel_path);
             }
         }
     }
@@ -511,8 +579,14 @@ fn code_surface_file_rels(
     rels.into_iter().collect()
 }
 
+// ---------------------------------------------------------------------------
+// Hooks helpers: check dir_structure for hook paths.
+// ---------------------------------------------------------------------------
+
 #[cfg(any(feature = "family-hooks-shared", feature = "family-hooks-rs"))]
-fn hook_file_rels(tree: &ProjectTree) -> Vec<String> {
+fn hook_file_rels(
+    dir_structure: &std::collections::BTreeMap<String, guardrail3_app_rs_family_view::DirEntry>,
+) -> Vec<String> {
     let mut rels = [
         ".githooks/pre-commit",
         "hooks/pre-commit",
@@ -523,39 +597,65 @@ fn hook_file_rels(tree: &ProjectTree) -> Vec<String> {
         ".lefthook.yaml",
     ]
     .into_iter()
-    .filter(|rel_path| tree.file_exists(rel_path))
+    .filter(|rel_path| {
+        let (parent, name) = split_rel_path(rel_path);
+        dir_structure
+            .get(parent)
+            .is_some_and(|entry| entry.has_file(name))
+    })
     .map(str::to_owned)
     .collect::<Vec<_>>();
 
-    rels.extend(dir_file_rels(tree, ".githooks/pre-commit.d"));
-    rels.extend(dir_file_rels(tree, ".guardrail3/overrides/pre-commit.d"));
+    rels.extend(dir_file_rels(dir_structure, ".githooks/pre-commit.d"));
+    rels.extend(dir_file_rels(dir_structure, ".guardrail3/overrides/pre-commit.d"));
     rels
 }
 
 #[cfg(any(feature = "family-hooks-shared", feature = "family-hooks-rs"))]
-fn hook_dir_rels(tree: &ProjectTree) -> Vec<String> {
+fn hook_dir_rels(
+    dir_structure: &std::collections::BTreeMap<String, guardrail3_app_rs_family_view::DirEntry>,
+) -> Vec<String> {
     [
         ".githooks/pre-commit.d",
         ".guardrail3/overrides/pre-commit.d",
     ]
     .into_iter()
-    .filter(|rel_path| tree.dir_exists(rel_path))
+    .filter(|rel_path| dir_structure.contains_key(*rel_path))
     .map(str::to_owned)
     .collect()
 }
 
 #[cfg(any(feature = "family-hooks-shared", feature = "family-hooks-rs"))]
-fn dir_file_rels(tree: &ProjectTree, dir_rel: &str) -> Vec<String> {
-    tree.dir_contents(dir_rel)
+fn dir_file_rels(
+    dir_structure: &std::collections::BTreeMap<String, guardrail3_app_rs_family_view::DirEntry>,
+    dir_rel: &str,
+) -> Vec<String> {
+    dir_structure
+        .get(dir_rel)
         .map(|entry| {
-            entry.files()
+            entry
+                .files()
                 .iter()
-                .map(|file_name| ProjectTree::join_rel(dir_rel, file_name))
+                .map(|file_name| {
+                    if dir_rel.is_empty() {
+                        file_name.to_owned()
+                    } else {
+                        format!("{dir_rel}/{file_name}")
+                    }
+                })
                 .collect()
         })
         .unwrap_or_default()
 }
 
+#[cfg(any(feature = "family-hooks-shared", feature = "family-hooks-rs"))]
+fn split_rel_path(rel: &str) -> (&str, &str) {
+    rel.rsplit_once('/').unwrap_or(("", rel))
+}
+
+// ---------------------------------------------------------------------------
+// Runner registry.
+// ---------------------------------------------------------------------------
 
 pub(crate) fn compiled_runners() -> Vec<RustFamilyRunnerDef> {
     let mut runners = Vec::new();

@@ -13,6 +13,7 @@ workspace = true
 default = ["families-all"]
 routing = [
     "dep:guardrail3_app_rs_family_mapper",
+    "dep:guardrail3_app_rs_family_view",
     "dep:guardrail3_app_rs_legality",
     "dep:guardrail3_app_rs_structure",
 ]
@@ -48,7 +49,7 @@ family-deps = ["dep:guardrail3_app_rs_family_deps", "routing"]
 family-garde = ["dep:guardrail3_app_rs_family_garde", "routing"]
 family-test = ["dep:guardrail3_app_rs_family_test", "routing"]
 family-release = ["dep:guardrail3_app_rs_family_release", "routing"]
-family-hooks-shared = ["dep:guardrail3_app_rs_family_hooks_shared"]
+family-hooks-shared = ["dep:guardrail3_app_rs_family_hooks_shared", "routing"]
 family-hooks-rs = [
     "dep:guardrail3_app_rs_family_hooks_rs",
     "family-hooks-shared",
@@ -79,6 +80,7 @@ guardrail3_app_rs_family_test = { package = "guardrail3-app-rs-family-test", pat
 guardrail3_app_rs_family_toolchain = { package = "guardrail3-app-rs-family-toolchain", path = "../families/toolchain/crates/runtime", optional = true }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../family_mapper", optional = true }
 guardrail3_app_rs_family_selection = { package = "guardrail3-app-rs-family-selection", path = "../family_selection" }
+guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../family_view", optional = true }
 guardrail3_app_rs_legality = { package = "guardrail3-app-rs-legality", path = "../legality", optional = true }
 guardrail3_app_rs_structure = { package = "guardrail3-app-rs-structure", path = "../structure", optional = true }
 toml = "0.8"
