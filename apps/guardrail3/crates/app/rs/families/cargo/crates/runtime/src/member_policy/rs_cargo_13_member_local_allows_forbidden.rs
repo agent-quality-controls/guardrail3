@@ -1,8 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
-use super::inputs::WorkspaceMemberCargoInput;
-use super::lint_support::{
+use crate::inputs::WorkspaceMemberCargoInput;
+use crate::lint_support::{
     allow_selector, escape_hatch_reason, explicit_allow_entries, has_valid_lint_level, member_lints,
 };
 
@@ -15,9 +15,9 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
     let Some(parsed) = input.member.parsed.as_ref() else {
         return;
     };
-    let workspace_policy_complete = super::lint_support::policy_lints(input.workspace, "rust")
+    let workspace_policy_complete = crate::lint_support::policy_lints(input.workspace, "rust")
         .is_some()
-        && super::lint_support::policy_lints(input.workspace, "clippy").is_some();
+        && crate::lint_support::policy_lints(input.workspace, "clippy").is_some();
     let member_override_shapes_valid =
         [member_lints(parsed, "rust"), member_lints(parsed, "clippy")]
             .into_iter()

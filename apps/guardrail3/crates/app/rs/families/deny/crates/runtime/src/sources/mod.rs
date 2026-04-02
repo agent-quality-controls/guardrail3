@@ -1,0 +1,9 @@
+pub(crate) mod rs_deny_18_unknown_sources_policy;
+pub(crate) mod rs_deny_19_allow_registry_baseline;
+pub(crate) mod rs_deny_20_allow_git_inventory;
+pub(crate) mod rs_deny_23_skip_hygiene;
+pub(crate) mod rs_deny_24_ignore_hygiene;
+pub(crate) mod rs_deny_25_allow_override_channel;
+pub(crate) mod rs_deny_28_unknown_keys;
+pub(crate) mod rs_deny_29_ignore_accumulation;
+pub(crate) mod rs_deny_30_wrappers;

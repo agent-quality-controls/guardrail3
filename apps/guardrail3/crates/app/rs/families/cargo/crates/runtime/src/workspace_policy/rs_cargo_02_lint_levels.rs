@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::PolicyRootCargoInput;
-use super::lint_support::{
+use crate::inputs::PolicyRootCargoInput;
+use crate::lint_support::{
     EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS,
     LintEntryValidity, is_weaker, lint_entry_validity, lint_level, lint_priority, policy_lints,
 };

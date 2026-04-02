@@ -70,7 +70,7 @@ fn malformed_owned_policy_root_manifest_surfaces_explicit_failure() {
     };
     let input = crate::inputs::InputFailureCargoInput::new(&failure);
     let mut results = Vec::new();
-    crate::rs_cargo_14_input_failures::check(&input, &mut results);
+    crate::member_policy::rs_cargo_14_input_failures::check(&input, &mut results);
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_14_input_failures::assert_rule_results(
         &results,

@@ -1,10 +1,10 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::dependency_facts::Layer;
-use super::inputs::SourceCrateHexarchInput;
-use super::inventory::push_success;
+use crate::dependency_facts::Layer;
+use crate::inputs::SourceCrateHexarchInput;
+use crate::inventory::push_success;
 #[cfg(test)]
-use super::source_facts::SourceCrateFacts;
+use crate::source_facts::SourceCrateFacts;
 
 const ID: &str = "RS-HEXARCH-23";
 

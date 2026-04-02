@@ -4,11 +4,11 @@ use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 #[cfg(test)]
-use super::dependency_facts::Layer;
-use super::dependency_facts::{CycleFacts, MemberDependencyFacts};
-use super::inventory::push_success;
+use crate::dependency_facts::Layer;
+use crate::dependency_facts::{CycleFacts, MemberDependencyFacts};
+use crate::inventory::push_success;
 
-use super::inputs::CycleHexarchInput;
+use crate::inputs::CycleHexarchInput;
 
 const ID: &str = "RS-HEXARCH-19";
 

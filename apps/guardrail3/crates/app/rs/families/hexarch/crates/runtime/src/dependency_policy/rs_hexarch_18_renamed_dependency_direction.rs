@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::DependencyEdgeHexarchInput;
-use super::inventory::push_success;
+use crate::inputs::DependencyEdgeHexarchInput;
+use crate::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-18";
 

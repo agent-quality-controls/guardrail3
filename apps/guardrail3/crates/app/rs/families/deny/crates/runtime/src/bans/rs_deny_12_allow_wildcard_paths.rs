@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::{expected_bans_settings, section};
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::{expected_bans_settings, section};
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;

@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::WorkspaceMemberCargoInput;
-use super::lint_support::{
+use crate::inputs::WorkspaceMemberCargoInput;
+use crate::lint_support::{
     has_valid_lint_level, is_valid_lint_level, is_weaker, lint_level, member_lints, policy_lints,
 };
 

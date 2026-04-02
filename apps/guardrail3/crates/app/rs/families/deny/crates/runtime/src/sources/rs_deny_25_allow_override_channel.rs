@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::{ban_name, expected_bans, join_set, section};
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::{ban_name, expected_bans, join_set, section};
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
@@ -81,7 +81,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 fn push_malformed_allow_error(
-    config: &super::facts::DenyConfigFacts,
+    config: &crate::facts::DenyConfigFacts,
     message: String,
     results: &mut Vec<CheckResult>,
 ) {

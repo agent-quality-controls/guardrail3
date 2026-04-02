@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::{expected_graph, section};
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::{expected_graph, section};
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
@@ -30,7 +30,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-fn push_missing(config: &super::facts::DenyConfigFacts, results: &mut Vec<CheckResult>) {
+fn push_missing(config: &crate::facts::DenyConfigFacts, results: &mut Vec<CheckResult>) {
     results.push(CheckResult::from_parts(
         "RS-DENY-08".to_owned(),
         Severity::Error,

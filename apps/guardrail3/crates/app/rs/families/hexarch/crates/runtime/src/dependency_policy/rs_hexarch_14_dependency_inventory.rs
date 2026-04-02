@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::DependencyEdgeHexarchInput;
+use crate::inputs::DependencyEdgeHexarchInput;
 
 const ID: &str = "RS-HEXARCH-14";
 

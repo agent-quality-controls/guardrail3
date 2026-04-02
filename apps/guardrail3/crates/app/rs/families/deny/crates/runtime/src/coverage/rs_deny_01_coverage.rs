@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::{ConfigDenyInput, CoveredRustUnitInput, UncoveredRustUnitInput};
+use crate::inputs::{ConfigDenyInput, CoveredRustUnitInput, UncoveredRustUnitInput};
 
 pub fn check_covered(input: &CoveredRustUnitInput<'_>, results: &mut Vec<CheckResult>) {
     let covered = input.covered;

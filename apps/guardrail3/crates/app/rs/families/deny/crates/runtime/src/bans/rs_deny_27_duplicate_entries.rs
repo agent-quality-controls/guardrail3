@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::{ban_name, parse_feature_entries_in_config, section};
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::{ban_name, parse_feature_entries_in_config, section};
+use crate::inputs::ConfigDenyInput;
 
 fn normalized_skip_identity(table: &toml::map::Map<String, toml::Value>) -> Option<String> {
     if let Some(crate_field) = table.get("crate").and_then(toml::Value::as_str) {

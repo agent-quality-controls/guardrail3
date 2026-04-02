@@ -3,8 +3,8 @@ use guardrail3_domain_report::{CheckResult, Severity};
 #[cfg(test)]
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
-use super::inputs::DependencyEdgeHexarchInput;
-use super::inventory::push_success;
+use crate::inputs::DependencyEdgeHexarchInput;
+use crate::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-17";
 
@@ -96,13 +96,13 @@ pub fn audit_edge_for_test(
     check(&DependencyEdgeHexarchInput::new(edge), &mut rule17);
 
     let mut rule18 = Vec::new();
-    crate::rs_hexarch_18_renamed_dependency_direction::check(
+    crate::dependency_policy::rs_hexarch_18_renamed_dependency_direction::check(
         &DependencyEdgeHexarchInput::new(edge),
         &mut rule18,
     );
 
     let mut rule24 = Vec::new();
-    crate::rs_hexarch_24_cross_app_boundary::check(
+    crate::dependency_integrity::rs_hexarch_24_cross_app_boundary::check(
         &DependencyEdgeHexarchInput::new(edge),
         &mut rule24,
     );

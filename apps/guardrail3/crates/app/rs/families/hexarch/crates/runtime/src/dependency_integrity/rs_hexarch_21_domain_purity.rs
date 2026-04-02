@@ -6,10 +6,10 @@ use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 #[cfg(test)]
-use super::dependency_facts::EdgeKind;
-use super::dependency_facts::Layer;
-use super::inputs::MemberDependencyHexarchInput;
-use super::inventory::push_success;
+use crate::dependency_facts::EdgeKind;
+use crate::dependency_facts::Layer;
+use crate::inputs::MemberDependencyHexarchInput;
+use crate::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-21";
 const BUILTIN_ALLOWED: &[&str] = &[
@@ -142,7 +142,7 @@ pub(crate) fn run_domain_purity_case(
     member_rel_dir: &str,
     edge_kind: DomainPurityEdgeKindForTest,
 ) -> Vec<CheckResult> {
-    let facts = super::collect_dependency_facts_from_tree_for_tests(tree);
+    let facts = crate::collect_dependency_facts_from_tree_for_tests(tree);
     let member = facts
         .members
         .iter()

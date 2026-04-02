@@ -1,8 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
-use super::inputs::PolicyRootCargoInput;
-use super::lint_support::{
+use crate::inputs::PolicyRootCargoInput;
+use crate::lint_support::{
     allow_selector, escape_hatch_reason, explicit_allow_entries, is_approved_allow,
     lints_table_is_well_formed, policy_lints,
 };

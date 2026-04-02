@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::parse_feature_entries_in_config;
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::parse_feature_entries_in_config;
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
@@ -45,8 +45,8 @@ pub(crate) use ::test_support::{build_fixture_deny_toml, set_feature_entries};
 #[cfg(test)]
 pub(crate) fn parse_feature_entries_for_test(
     parsed: &toml::Value,
-) -> Vec<super::deny_support::FeatureConfigEntry> {
-    super::deny_support::parse_feature_entries_in_config(parsed)
+) -> Vec<crate::deny_support::FeatureConfigEntry> {
+    crate::deny_support::parse_feature_entries_in_config(parsed)
 }
 #[cfg(test)]
 #[path = "rs_deny_22_extra_feature_bans_inventory_tests/mod.rs"]

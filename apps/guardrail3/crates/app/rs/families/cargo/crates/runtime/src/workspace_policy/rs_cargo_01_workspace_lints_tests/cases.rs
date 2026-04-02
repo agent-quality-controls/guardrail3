@@ -245,7 +245,7 @@ fn invalid_clippy_table_shape_is_explicit_error() {
     };
     let input = crate::inputs::PolicyRootCargoInput::new(&root);
     let mut results = Vec::new();
-    crate::rs_cargo_01_workspace_lints::check(&input, &mut results);
+    crate::workspace_policy::rs_cargo_01_workspace_lints::check(&input, &mut results);
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::assert_rule_results(
         &results,

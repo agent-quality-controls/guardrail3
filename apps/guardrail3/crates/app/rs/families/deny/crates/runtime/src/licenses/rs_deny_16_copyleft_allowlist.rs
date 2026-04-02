@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::section;
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::section;
+use crate::inputs::ConfigDenyInput;
 
 const COPYLEFT_LICENSES: &[&str] = &[
     "GPL-2.0-only",

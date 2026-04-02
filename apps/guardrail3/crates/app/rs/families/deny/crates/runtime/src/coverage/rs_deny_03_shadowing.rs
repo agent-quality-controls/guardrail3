@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::SameRootConflictInput;
+use crate::inputs::SameRootConflictInput;
 
 pub fn check_same_root_conflict(input: &SameRootConflictInput<'_>, results: &mut Vec<CheckResult>) {
     let conflict = input.conflict;
