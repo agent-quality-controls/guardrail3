@@ -6,6 +6,11 @@ edition = "2024"
 [lints]
 workspace = true
 
+[features]
+default = ["all"]
+all = ["support"]
+support = []
+
 [dependencies]
 guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../family_view" }
 guardrail3_domain_modules = { package = "guardrail3-domain-modules", path = "../../../../../domain/modules" }

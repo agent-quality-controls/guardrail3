@@ -66,6 +66,7 @@ extern crate serde_yaml as _;
 use std::collections::BTreeSet;
 
 #[doc(hidden)]
+#[cfg(feature = "api")]
 pub use self::dependency_facts::DependencyFamilyFacts;
 
 #[doc(hidden)]

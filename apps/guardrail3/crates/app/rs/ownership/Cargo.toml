@@ -6,6 +6,11 @@ edition = "2024"
 [lints]
 workspace = true
 
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
 [dependencies]
 guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../placement" }
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../domain/project-tree" }

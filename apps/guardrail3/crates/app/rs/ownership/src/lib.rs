@@ -1,6 +1,7 @@
 mod discover;
 mod kinds;
 
+#[cfg(feature = "api")]
 pub use kinds::{
     RustFamilyFileAttachment, RustFamilyFileFact, RustFamilyFileKind, RustOwnedSurfaceFacts,
 };

@@ -8,3 +8,9 @@ path = "mod.rs"
 
 [lints]
 workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+

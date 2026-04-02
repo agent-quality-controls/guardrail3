@@ -1,4 +1,5 @@
 mod deny_support;
+#[cfg(feature = "api")]
 pub mod facts;
 mod facts_support;
 mod inputs;
@@ -75,6 +76,7 @@ use self::inputs::{
     ConfigDenyInput, CoveredRustUnitInput, SameRootConflictInput, UncoveredRustUnitInput,
 };
 
+#[cfg(feature = "api")]
 pub use self::deny_support::expected_ban_names;
 
 pub fn check(surface: &FamilyView, route: &RsDenyRoute) -> Vec<CheckResult> {

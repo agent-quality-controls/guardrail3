@@ -9,6 +9,11 @@ path = "mod.rs"
 [lints]
 workspace = true
 
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
 [dependencies]
 glob = { workspace = true }
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../domain/project-tree" }

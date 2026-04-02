@@ -9,6 +9,11 @@ path = "mod.rs"
 [lints]
 workspace = true
 
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
 [dependencies]
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../core" }
 guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../rs/family_view" }

@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_mapper::RsTestRoute;
 use guardrail3_app_rs_family_view::FamilyView;
+#[cfg(feature = "api")]
 pub use guardrail3_domain_report::{CheckResult, Severity};
 
 mod analysis;

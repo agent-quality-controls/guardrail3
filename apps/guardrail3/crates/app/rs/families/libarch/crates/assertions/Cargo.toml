@@ -6,6 +6,11 @@ edition = "2024"
 [lints]
 workspace = true
 
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
 [dependencies]
 guardrail3_app_rs_family_libarch = { package = "guardrail3-app-rs-family-libarch", path = "../runtime" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }

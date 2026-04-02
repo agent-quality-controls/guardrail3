@@ -9,6 +9,11 @@ path = "mod.rs"
 [lints]
 workspace = true
 
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
 [dependencies]
 colored = "2"
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../domain/report" }

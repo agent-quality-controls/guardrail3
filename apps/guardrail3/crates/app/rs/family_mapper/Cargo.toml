@@ -6,6 +6,11 @@ edition = "2024"
 [lints]
 workspace = true
 
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
 [dependencies]
 guardrail3_app_rs_legality = { package = "guardrail3-app-rs-legality", path = "../legality" }
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../ownership" }

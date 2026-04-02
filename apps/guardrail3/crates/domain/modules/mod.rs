@@ -1,11 +1,20 @@
+#[cfg(feature = "api")]
 pub mod canonical;
+#[cfg(feature = "api")]
 pub mod clippy;
+#[cfg(feature = "api")]
 pub mod cspell;
+#[cfg(feature = "api")]
 pub mod deny;
+#[cfg(feature = "api")]
 pub mod eslint;
+#[cfg(feature = "api")]
 pub mod guide;
+#[cfg(feature = "api")]
 pub mod pre_commit;
+#[cfg(feature = "api")]
 pub mod release;
+#[cfg(feature = "api")]
 pub mod stylelint;
 
 #[derive(Debug)]

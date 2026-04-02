@@ -3,6 +3,11 @@ name = "guardrail3_app_rs_family_topology_assertions"
 version = "0.0.0"
 edition = "2024"
 
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
 [dependencies]
 "guardrail3-app-rs-family-topology" = { path = "../runtime" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
