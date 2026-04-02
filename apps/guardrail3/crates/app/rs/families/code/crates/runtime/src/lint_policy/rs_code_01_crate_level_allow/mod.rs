@@ -71,4 +71,4 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 
 #[cfg(test)]
 
-mod rs_code_01_crate_level_allow_tests;
+mod tests;

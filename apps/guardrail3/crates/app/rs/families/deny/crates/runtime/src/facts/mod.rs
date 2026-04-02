@@ -330,4 +330,4 @@ pub(crate) fn collect_for_test(tree: &ProjectTree) -> DenyFacts {
 pub(crate) use ::test_support::{build_fixture_deny_toml, dir_entry, project_tree};
 #[cfg(test)]
 
-mod facts_tests;
+mod tests;

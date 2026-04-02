@@ -32,7 +32,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-pub(super) fn run_tree(
+pub(crate) fn run_tree(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
@@ -40,12 +40,12 @@ pub(super) fn run_tree(
     crate::test_fixtures::run_tree(tree, tc, thorough)
 }
 #[cfg(test)]
-pub(super) fn repo_facts() -> crate::facts::RepoReleaseFacts {
+pub(crate) fn repo_facts() -> crate::facts::RepoReleaseFacts {
     crate::test_fixtures::repo_facts()
 }
 
 #[cfg(test)]
-pub(super) fn repo_input(
+pub(crate) fn repo_input(
     repo: &crate::facts::RepoReleaseFacts,
 ) -> crate::inputs::RepoReleaseInput<'_> {
     crate::test_fixtures::repo_input(repo)
@@ -55,4 +55,4 @@ pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_roo
 
 #[cfg(test)]
 
-mod rs_release_01_license_file_tests;
+mod tests;

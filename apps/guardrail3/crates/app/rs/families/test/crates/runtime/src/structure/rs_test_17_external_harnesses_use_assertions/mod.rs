@@ -166,4 +166,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 #[cfg(test)]
 
-mod rs_test_17_external_harnesses_use_assertions_tests;
+mod tests;

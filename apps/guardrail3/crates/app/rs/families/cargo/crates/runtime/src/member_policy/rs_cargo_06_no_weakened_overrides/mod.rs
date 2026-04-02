@@ -140,4 +140,4 @@ fn check_family(
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_cargo_06_no_weakened_overrides_tests;
+mod tests;

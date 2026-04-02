@@ -385,4 +385,4 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 
-mod rs_deny_28_unknown_keys_tests;
+mod tests;

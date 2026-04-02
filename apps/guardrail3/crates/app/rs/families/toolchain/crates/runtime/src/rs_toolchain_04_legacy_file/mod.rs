@@ -81,4 +81,4 @@ pub(crate) fn test_input_for_root<'a>(
 
 #[cfg(test)]
 
-mod rs_toolchain_04_legacy_file_tests;
+mod tests;

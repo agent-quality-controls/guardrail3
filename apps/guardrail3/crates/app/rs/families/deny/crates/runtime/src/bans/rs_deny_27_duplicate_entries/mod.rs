@@ -174,4 +174,4 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 
-mod rs_deny_27_duplicate_entries_tests;
+mod tests;

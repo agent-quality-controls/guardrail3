@@ -68,32 +68,42 @@ pub fn check(surface: &FamilyView, route: &RsCargoRoute) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
+pub fn check_test_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+    let surface = FamilyView::build(
+        tree.root().clone(), tree.structure(), tree.content(),
+        &["".to_owned()], &[], &[], None,
+    );
     check(
-        &FamilyView::from_tree(tree),
-        &test_route_for_checks(tree, None),
+        &surface,
+        &test_route_for_checks(&surface, None),
     )
 }
 
 #[cfg(test)]
 pub fn check_test_tree_with_validation_scope(
-    tree: &ProjectTree,
+    tree: &guardrail3_domain_project_tree::ProjectTree,
     validation_scope: &str,
 ) -> Vec<CheckResult> {
+    let surface = FamilyView::build(
+        tree.root().clone(), tree.structure(), tree.content(),
+        &["".to_owned()], &[], &[], None,
+    );
     check(
-        &FamilyView::from_tree(tree),
-        &test_route_for_checks(tree, Some(validation_scope)),
+        &surface,
+        &test_route_for_checks(&surface, Some(validation_scope)),
     )
 }
 
 #[cfg(test)]
 fn test_route_for_checks(tree: &ProjectTree, validation_scope: Option<&str>) -> RsCargoRoute {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let config = tree
         .file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
-    FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None)
+    FamilyMapper::from_legality(&legality, config.as_ref(), &selected, None)
         .with_validation_scope(validation_scope)
         .map_rs_cargo()
 }

@@ -108,4 +108,4 @@ pub(crate) fn expected_ban_names_for_test(
 }
 #[cfg(test)]
 
-mod rs_deny_09_ban_baseline_complete_tests;
+mod tests;

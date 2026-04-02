@@ -225,4 +225,4 @@ fn check_expected_level(
 
 #[cfg(test)]
 
-mod rs_cargo_02_lint_levels_tests;
+mod tests;

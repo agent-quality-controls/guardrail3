@@ -36,4 +36,4 @@ fn display_dir(rel_dir: &str) -> &str {
 
 #[cfg(test)]
 
-mod rs_topology_10_no_loose_top_level_packages_tests;
+mod tests;

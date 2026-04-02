@@ -248,11 +248,13 @@ pub(crate) fn config_input_for_tests<'a>(
 
 #[cfg(test)]
 fn family_route_for_tests(tree: &ProjectTree, validation_scope: Option<&str>) -> RsClippyRoute {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(std::collections::BTreeSet::from([
         RustValidateFamily::Clippy,
     ]));
-    FamilyMapper::new(tree, &scope, None, &selected, None)
+    FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(validation_scope)
         .map_rs_clippy()
 }

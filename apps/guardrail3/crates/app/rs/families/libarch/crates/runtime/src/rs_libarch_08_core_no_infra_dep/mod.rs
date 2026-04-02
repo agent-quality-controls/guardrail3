@@ -67,10 +67,10 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-pub(super) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
 
 #[cfg(test)]
 
-mod rs_libarch_08_core_no_infra_dep_tests;
+mod tests;

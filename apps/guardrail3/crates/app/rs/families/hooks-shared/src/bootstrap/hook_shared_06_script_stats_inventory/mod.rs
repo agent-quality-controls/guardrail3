@@ -21,4 +21,4 @@ pub fn check(rel_path: &str, content: &str, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 
-mod hook_shared_06_script_stats_inventory_tests;
+mod tests;

@@ -112,4 +112,4 @@ pub(crate) use ::test_support::{build_fixture_deny_toml, set_bans_allow_entries}
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_deny_25_allow_override_channel_tests;
+mod tests;

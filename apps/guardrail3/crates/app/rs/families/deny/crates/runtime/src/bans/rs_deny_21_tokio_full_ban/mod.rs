@@ -99,4 +99,4 @@ pub(crate) fn parse_feature_entries_for_test(
 }
 #[cfg(test)]
 
-mod rs_deny_21_tokio_full_ban_tests;
+mod tests;

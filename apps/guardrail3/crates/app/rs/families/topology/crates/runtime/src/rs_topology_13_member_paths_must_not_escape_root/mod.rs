@@ -37,4 +37,4 @@ fn display_dir(rel_dir: &str) -> &str {
 
 #[cfg(test)]
 
-mod rs_topology_13_member_paths_must_not_escape_root_tests;
+mod tests;

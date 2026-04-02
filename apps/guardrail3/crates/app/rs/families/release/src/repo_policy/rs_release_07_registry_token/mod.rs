@@ -39,21 +39,21 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 #[cfg(test)]
-pub(super) fn repo_facts() -> crate::facts::RepoReleaseFacts {
+pub(crate) fn repo_facts() -> crate::facts::RepoReleaseFacts {
     crate::test_fixtures::repo_facts()
 }
 
 #[cfg(test)]
-pub(super) fn repo_input(
+pub(crate) fn repo_input(
     repo: &crate::facts::RepoReleaseFacts,
 ) -> crate::inputs::RepoReleaseInput<'_> {
     crate::test_fixtures::repo_input(repo)
 }
 #[cfg(test)]
-pub(super) fn workflow_from_yaml(rel_path: &str, yaml: &str) -> crate::facts::WorkflowFacts {
+pub(crate) fn workflow_from_yaml(rel_path: &str, yaml: &str) -> crate::facts::WorkflowFacts {
     crate::test_fixtures::workflow_from_yaml(rel_path, yaml)
 }
 
 #[cfg(test)]
 
-mod rs_release_07_registry_token_tests;
+mod tests;

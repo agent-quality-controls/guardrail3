@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::workflow::hook_shared_16_file_size_step_present as assertions;
 
-use crate::hook_shared_16_file_size_step_present::run_case;
+use super::run_case;
 
 #[test]
 fn warns_when_file_size_only_appears_in_comment() {

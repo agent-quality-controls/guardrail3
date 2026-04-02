@@ -40,4 +40,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 #[cfg(test)]
 
-mod rs_test_14_mutation_hook_present_tests;
+mod tests;

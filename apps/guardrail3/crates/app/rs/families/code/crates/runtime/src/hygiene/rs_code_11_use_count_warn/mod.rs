@@ -54,4 +54,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 
 #[cfg(test)]
 
-mod rs_code_11_use_count_warn_tests;
+mod tests;

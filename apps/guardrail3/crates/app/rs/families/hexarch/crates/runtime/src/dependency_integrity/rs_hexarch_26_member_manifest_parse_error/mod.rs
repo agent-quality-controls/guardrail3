@@ -44,9 +44,9 @@ pub fn check_inventory(
 }
 
 #[cfg(test)]
-pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 #[cfg(test)]
 
-mod rs_hexarch_26_member_manifest_parse_error_tests;
+mod tests;

@@ -48,4 +48,4 @@ pub(crate) fn run_family_with_tool(
 
 #[cfg(test)]
 
-mod rs_test_11_cargo_mutants_installed_tests;
+mod tests;

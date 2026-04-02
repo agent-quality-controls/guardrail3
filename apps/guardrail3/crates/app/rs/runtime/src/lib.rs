@@ -746,4 +746,4 @@ pub(crate) fn run_code_with_validation_scope_for_tests(
 
 #[cfg(test)]
 
-mod lib_tests;
+mod tests;

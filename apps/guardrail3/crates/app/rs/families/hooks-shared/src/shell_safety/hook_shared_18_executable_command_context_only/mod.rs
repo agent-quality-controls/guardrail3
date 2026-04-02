@@ -122,4 +122,4 @@ pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod hook_shared_18_executable_command_context_only_tests;
+mod tests;

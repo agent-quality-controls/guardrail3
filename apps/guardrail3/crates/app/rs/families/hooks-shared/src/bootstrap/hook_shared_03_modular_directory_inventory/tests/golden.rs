@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::bootstrap::hook_shared_03_modular_directory_inventory as assertions;
 
-use crate::hook_shared_03_modular_directory_inventory::check;
+use super::check;
 
 #[test]
 fn inventories_modular_directory_when_present() {

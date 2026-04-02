@@ -8,3 +8,4 @@ workspace = true
 
 [dependencies]
 guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../family_view" }
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../domain/project-tree" }

@@ -84,9 +84,9 @@ pub fn check_cycle_for_test(layer: &str, members: Vec<&str>) -> Vec<CheckResult>
 }
 
 #[cfg(test)]
-pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 #[cfg(test)]
 
-mod rs_hexarch_19_same_layer_cycles_tests;
+mod tests;

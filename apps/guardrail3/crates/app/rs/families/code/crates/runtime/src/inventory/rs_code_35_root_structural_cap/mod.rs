@@ -46,4 +46,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod rs_code_35_root_structural_cap_tests;
+mod tests;

@@ -344,4 +344,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 #[cfg(test)]
 
-mod rs_test_18_test_support_generic_tests;
+mod tests;

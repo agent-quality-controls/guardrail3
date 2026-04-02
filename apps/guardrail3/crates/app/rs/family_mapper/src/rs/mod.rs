@@ -813,4 +813,4 @@ pub(crate) fn root_test(rel_dir: &str) -> guardrail3_app_rs_placement::RustRootP
 
 #[cfg(test)]
 
-mod rs_tests;
+mod tests;

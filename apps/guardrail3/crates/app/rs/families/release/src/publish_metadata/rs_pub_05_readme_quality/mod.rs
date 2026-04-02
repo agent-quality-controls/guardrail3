@@ -61,12 +61,12 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-pub(super) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
+pub(crate) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
     crate::test_fixtures::crate_facts(name)
 }
 
 #[cfg(test)]
-pub(super) fn crate_input(
+pub(crate) fn crate_input(
     krate: &crate::facts::PublishableCrateFacts,
 ) -> crate::inputs::PublishableCrateReleaseInput<'_> {
     crate::test_fixtures::crate_input(krate)
@@ -74,7 +74,7 @@ pub(super) fn crate_input(
 
 #[cfg(test)]
 
-mod rs_pub_05_readme_quality_tests;
+mod tests;
 
 fn has_markdown_heading(content: &str) -> bool {
     let mut in_fenced_code = false;

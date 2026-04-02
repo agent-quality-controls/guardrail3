@@ -405,4 +405,4 @@ fn strip_section(script: &str, start_marker: &str, end_marker: &str) -> String {
 
 #[cfg(test)]
 
-mod owned_artifacts_tests;
+mod tests;

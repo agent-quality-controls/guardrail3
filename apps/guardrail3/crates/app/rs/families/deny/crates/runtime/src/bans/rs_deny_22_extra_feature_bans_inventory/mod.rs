@@ -51,4 +51,4 @@ pub(crate) fn parse_feature_entries_for_test(
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_deny_22_extra_feature_bans_inventory_tests;
+mod tests;

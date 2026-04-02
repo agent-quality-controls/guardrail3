@@ -57,4 +57,4 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 
-mod rs_deny_12_allow_wildcard_paths_tests;
+mod tests;

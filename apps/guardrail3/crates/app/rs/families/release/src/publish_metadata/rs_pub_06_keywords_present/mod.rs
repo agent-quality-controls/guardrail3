@@ -44,7 +44,7 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-pub(super) fn run_tree(
+pub(crate) fn run_tree(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
@@ -52,12 +52,12 @@ pub(super) fn run_tree(
     crate::test_fixtures::run_tree(tree, tc, thorough)
 }
 #[cfg(test)]
-pub(super) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
+pub(crate) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
     crate::test_fixtures::crate_facts(name)
 }
 
 #[cfg(test)]
-pub(super) fn crate_input(
+pub(crate) fn crate_input(
     krate: &crate::facts::PublishableCrateFacts,
 ) -> crate::inputs::PublishableCrateReleaseInput<'_> {
     crate::test_fixtures::crate_input(krate)
@@ -67,4 +67,4 @@ pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_roo
 
 #[cfg(test)]
 
-mod rs_pub_06_keywords_present_tests;
+mod tests;

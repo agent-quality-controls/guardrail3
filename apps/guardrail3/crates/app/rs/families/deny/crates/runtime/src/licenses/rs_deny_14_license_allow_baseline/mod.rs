@@ -94,4 +94,4 @@ pub(crate) fn expected_licenses_for_test() -> std::collections::BTreeSet<String>
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_deny_14_license_allow_baseline_tests;
+mod tests;

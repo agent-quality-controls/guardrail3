@@ -57,4 +57,4 @@ pub(crate) fn run_case(script_names: &[&str]) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod hook_shared_07_modular_scripts_inventory_tests;
+mod tests;

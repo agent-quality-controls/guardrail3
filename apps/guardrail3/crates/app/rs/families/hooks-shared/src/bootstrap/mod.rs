@@ -5,15 +5,3 @@ pub(crate) mod hook_shared_04_dispatcher_pattern;
 pub(crate) mod hook_shared_05_pre_commit_executable;
 pub(crate) mod hook_shared_06_script_stats_inventory;
 
-#[cfg(test)]
-mod hook_shared_01_pre_commit_exists_tests;
-#[cfg(test)]
-mod hook_shared_02_hooks_path_configured_tests;
-#[cfg(test)]
-mod hook_shared_03_modular_directory_inventory_tests;
-#[cfg(test)]
-mod hook_shared_04_dispatcher_pattern_tests;
-#[cfg(test)]
-mod hook_shared_05_pre_commit_executable_tests;
-#[cfg(test)]
-mod hook_shared_06_script_stats_inventory_tests;

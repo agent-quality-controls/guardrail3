@@ -117,9 +117,9 @@ fn label<'a>(input: &'a HexRootInput<'a>) -> &'a str {
 }
 
 #[cfg(test)]
-pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 #[cfg(test)]
 
-mod rs_hexarch_02_exact_contents_tests;
+mod tests;

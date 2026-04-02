@@ -55,4 +55,4 @@ pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod hook_shared_16_file_size_step_present_tests;
+mod tests;

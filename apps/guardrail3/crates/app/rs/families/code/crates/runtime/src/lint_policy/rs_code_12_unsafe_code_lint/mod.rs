@@ -57,4 +57,4 @@ pub(crate) fn check_unsafe_code_lint(
 
 #[cfg(test)]
 
-mod rs_code_12_unsafe_code_lint_tests;
+mod tests;

@@ -77,4 +77,4 @@ pub(crate) fn run_with_validation_scope_for_tests(
 
 #[cfg(test)]
 
-mod rs_clippy_12_allowed_placement_tests;
+mod tests;

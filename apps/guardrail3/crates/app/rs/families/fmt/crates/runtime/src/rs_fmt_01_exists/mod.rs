@@ -40,4 +40,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod rs_fmt_01_exists_tests;
+mod tests;

@@ -1,5 +1,3 @@
-#[cfg(test)]
-use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::{CheckResult, Severity};
 #[cfg(test)]
 use std::path::{Path, PathBuf};
@@ -82,15 +80,20 @@ pub(crate) fn run_for_tests(root: &Path) -> Vec<CheckResult> {
         &guardrail3_adapters_outbound_fs::RealFileSystem,
         root,
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Clippy,
         ]));
     let route =
-        guardrail3_app_rs_family_mapper::FamilyMapper::new(&tree, &scope, None, &selected, None)
+        guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
             .map_rs_clippy();
-    crate::check(&FamilyView::from_tree(&tree), &route)
+    let surface = guardrail3_app_rs_family_view::FamilyView::build(
+        tree.root().clone(), tree.structure(), tree.content(),
+        &["".to_owned()], &[], &[], None,
+    );
+    crate::check(&surface, &route)
 }
 
 #[cfg(test)]
@@ -102,18 +105,23 @@ pub(crate) fn run_with_validation_scope_for_tests(
         &guardrail3_adapters_outbound_fs::RealFileSystem,
         root,
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Clippy,
         ]));
     let route =
-        guardrail3_app_rs_family_mapper::FamilyMapper::new(&tree, &scope, None, &selected, None)
+        guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
             .with_validation_scope(Some(validation_scope))
             .map_rs_clippy();
-    crate::check(&FamilyView::from_tree(&tree), &route)
+    let surface = guardrail3_app_rs_family_view::FamilyView::build(
+        tree.root().clone(), tree.structure(), tree.content(),
+        &["".to_owned()], &[], &[], None,
+    );
+    crate::check(&surface, &route)
 }
 
 #[cfg(test)]
 
-mod rs_clippy_01_coverage_tests;
+mod tests;

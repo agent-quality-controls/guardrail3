@@ -49,4 +49,4 @@ pub(crate) fn check_results(
 
 #[cfg(test)]
 
-mod rs_topology_05_scoped_topology_config_forbidden_tests;
+mod tests;

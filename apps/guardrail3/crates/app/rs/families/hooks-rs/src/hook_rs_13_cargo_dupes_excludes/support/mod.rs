@@ -4,7 +4,7 @@ use guardrail3_app_rs_family_hooks_shared::hook_shell::{ParsedShellScript, parse
 
 use self::helpers::*;
 
-pub(super) fn env_wrapper_contains_cargo_dupes<'a, I>(
+pub(crate) fn env_wrapper_contains_cargo_dupes<'a, I>(
     mut parts: std::iter::Peekable<I>,
     current: &ParsedShellScript<'_>,
     root: &ParsedShellScript<'_>,
@@ -100,7 +100,7 @@ where
     )
 }
 
-pub(super) fn shell_wrapper_contains_cargo_dupes<'a, I>(
+pub(crate) fn shell_wrapper_contains_cargo_dupes<'a, I>(
     parts: std::iter::Peekable<I>,
     _current: &ParsedShellScript<'_>,
     _root: &ParsedShellScript<'_>,
@@ -167,7 +167,7 @@ where
     super::script_contains_cargo_dupes(&parsed, want_exclude_tests)
 }
 
-pub(super) fn command_wrapper_contains_cargo_dupes<'a, I>(
+pub(crate) fn command_wrapper_contains_cargo_dupes<'a, I>(
     parts: std::iter::Peekable<I>,
     current: &ParsedShellScript<'_>,
     root: &ParsedShellScript<'_>,
@@ -209,7 +209,7 @@ where
     )
 }
 
-pub(super) fn exec_wrapper_contains_cargo_dupes<'a, I>(
+pub(crate) fn exec_wrapper_contains_cargo_dupes<'a, I>(
     parts: std::iter::Peekable<I>,
     current: &ParsedShellScript<'_>,
     root: &ParsedShellScript<'_>,
@@ -318,7 +318,7 @@ where
     }
 }
 
-pub(super) fn cargo_dupes_subcommand_invocation<'a, I>(
+pub(crate) fn cargo_dupes_subcommand_invocation<'a, I>(
     parts: &mut std::iter::Peekable<I>,
     want_exclude_tests: bool,
 ) -> bool
@@ -366,7 +366,7 @@ where
     command_has_exact_exclude_tests_flag(parts) == want_exclude_tests
 }
 
-pub(super) fn cargo_dupes_binary_invocation<'a, I>(parts: &mut I, want_exclude_tests: bool) -> bool
+pub(crate) fn cargo_dupes_binary_invocation<'a, I>(parts: &mut I, want_exclude_tests: bool) -> bool
 where
     I: Iterator<Item = &'a str>,
 {

@@ -12,3 +12,6 @@ guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = 
 guardrail3_app_rs_structure = { package = "guardrail3-app-rs-structure", path = "../structure" }
 guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../domain/validation-model" }
 toml = "0.8"
+
+[dev-dependencies]
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../domain/project-tree" }

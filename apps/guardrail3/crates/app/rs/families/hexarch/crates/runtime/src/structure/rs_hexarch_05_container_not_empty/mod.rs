@@ -59,9 +59,9 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 #[cfg(test)]
-pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 #[cfg(test)]
 
-mod rs_hexarch_05_container_not_empty_tests;
+mod tests;

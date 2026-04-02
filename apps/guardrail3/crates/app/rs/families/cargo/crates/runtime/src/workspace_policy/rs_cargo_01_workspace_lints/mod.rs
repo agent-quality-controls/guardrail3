@@ -192,4 +192,4 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 
-mod rs_cargo_01_workspace_lints_tests;
+mod tests;

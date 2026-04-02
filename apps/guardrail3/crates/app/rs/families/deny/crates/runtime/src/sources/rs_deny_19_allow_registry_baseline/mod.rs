@@ -142,4 +142,4 @@ pub(crate) fn expected_sources_for_test() -> (std::collections::BTreeSet<String>
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_deny_19_allow_registry_baseline_tests;
+mod tests;

@@ -179,7 +179,7 @@ fn dupes_flag_takes_value(flag: &str) -> bool {
 }
 
 #[cfg(test)]
-pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
+pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
     let parsed = test_support::parsed_hook(content);
     let input = RustHookCommandInput {
         rel_path: ".githooks/pre-commit",

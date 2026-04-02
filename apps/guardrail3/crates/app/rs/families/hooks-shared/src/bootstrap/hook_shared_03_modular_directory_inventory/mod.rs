@@ -33,4 +33,4 @@ pub fn check(has_modular_dir: bool, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 
-mod hook_shared_03_modular_directory_inventory_tests;
+mod tests;

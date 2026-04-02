@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::shell_safety::hook_shared_18_executable_command_context_only as assertions;
 
-use crate::hook_shared_18_executable_command_context_only::run_case;
+use super::run_case;
 
 #[test]
 fn reports_guardrail_command_mentioned_only_in_comment() {

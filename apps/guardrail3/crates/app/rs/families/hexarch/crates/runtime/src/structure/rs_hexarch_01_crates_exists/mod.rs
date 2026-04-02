@@ -35,7 +35,7 @@ pub fn check(input: &AppHexarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-pub(super) fn check_with_top_level_entries_for_tests(
+pub(crate) fn check_with_top_level_entries_for_tests(
     top_level_crates_entry_count: usize,
 ) -> Vec<CheckResult> {
     let input = AppHexarchInput {
@@ -53,7 +53,7 @@ pub(super) fn check_with_top_level_entries_for_tests(
 }
 
 #[cfg(test)]
-pub(super) fn discovered_app_rel_dirs_for_tests(
+pub(crate) fn discovered_app_rel_dirs_for_tests(
     root: &std::path::Path,
 ) -> std::collections::BTreeSet<String> {
     let tree = test_support::walk(root);
@@ -66,9 +66,9 @@ pub(super) fn discovered_app_rel_dirs_for_tests(
 }
 
 #[cfg(test)]
-pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 #[cfg(test)]
 
-mod rs_hexarch_01_crates_exists_tests;
+mod tests;

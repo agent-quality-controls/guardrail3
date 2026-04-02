@@ -58,18 +58,20 @@ fn family_route_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     validation_scope: Option<&str>,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Deps,
         ]));
-    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+    guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(validation_scope)
         .map_rs_deps()
 }
 
 #[cfg(test)]
-pub(super) fn collected_facts(
+pub(crate) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
 ) -> crate::facts::DepsFacts {
@@ -81,7 +83,7 @@ pub(super) fn collected_facts(
 }
 
 #[cfg(test)]
-pub(super) fn collected_facts_with_validation_scope(
+pub(crate) fn collected_facts_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
     validation_scope: Option<&str>,
@@ -94,7 +96,7 @@ pub(super) fn collected_facts_with_validation_scope(
 }
 
 #[cfg(test)]
-pub(super) fn dependency_facts(
+pub(crate) fn dependency_facts(
     allowlist_present: bool,
     allowlisted: bool,
     dep_package_name: &str,
@@ -125,7 +127,7 @@ pub(super) fn dependency_facts(
 }
 
 #[cfg(test)]
-pub(super) fn dependency_input<'a>(
+pub(crate) fn dependency_input<'a>(
     facts: &'a crate::facts::DepsFacts,
     cargo_rel_path: &str,
     dep_package_name: &str,
@@ -143,7 +145,7 @@ pub(super) fn dependency_input<'a>(
 }
 
 #[cfg(test)]
-pub(super) fn run_with_facts(
+pub(crate) fn run_with_facts(
     facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
@@ -151,4 +153,4 @@ pub(super) fn run_with_facts(
 
 #[cfg(test)]
 
-mod rs_deps_05_dependencies_allowlisted_tests;
+mod tests;

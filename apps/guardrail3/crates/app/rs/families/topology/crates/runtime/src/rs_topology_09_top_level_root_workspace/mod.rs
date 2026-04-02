@@ -36,4 +36,4 @@ fn display_dir(rel_dir: &str) -> &str {
 
 #[cfg(test)]
 
-mod rs_topology_09_top_level_root_workspace_tests;
+mod tests;

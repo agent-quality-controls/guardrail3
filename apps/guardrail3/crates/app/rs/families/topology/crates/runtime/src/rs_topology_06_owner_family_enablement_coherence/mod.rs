@@ -70,4 +70,4 @@ pub(crate) fn check_results(
 
 #[cfg(test)]
 
-mod rs_topology_06_owner_family_enablement_coherence_tests;
+mod tests;

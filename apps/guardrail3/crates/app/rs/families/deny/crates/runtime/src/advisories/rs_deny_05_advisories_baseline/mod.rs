@@ -88,4 +88,4 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 
-mod rs_deny_05_advisories_baseline_tests;
+mod tests;

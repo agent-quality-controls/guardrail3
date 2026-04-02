@@ -61,4 +61,4 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 
-mod rs_deny_07_graph_all_features_tests;
+mod tests;

@@ -14,6 +14,8 @@ guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../..
 toml = "0.8"
 
 [dev-dependencies]
+guardrail3_app_rs_legality = { package = "guardrail3-app-rs-legality", path = "../../../../legality" }
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../../domain/project-tree" }
 guardrail3_app_rs_structure = { package = "guardrail3-app-rs-structure", path = "../../../../structure" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../../../core" }
 guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../../../../../adapters/outbound/fs" }

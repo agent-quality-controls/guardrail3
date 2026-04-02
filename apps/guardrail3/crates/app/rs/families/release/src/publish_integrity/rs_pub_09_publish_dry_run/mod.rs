@@ -48,7 +48,7 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
     });
 }
 #[cfg(test)]
-pub(super) fn run_family(
+pub(crate) fn run_family(
     root: &std::path::Path,
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
@@ -56,16 +56,16 @@ pub(super) fn run_family(
 }
 
 #[cfg(test)]
-pub(super) fn copy_fixture() -> tempfile::TempDir {
+pub(crate) fn copy_fixture() -> tempfile::TempDir {
     crate::test_fixtures::copy_fixture()
 }
 #[cfg(test)]
-pub(super) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
+pub(crate) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
     crate::test_fixtures::crate_facts(name)
 }
 
 #[cfg(test)]
-pub(super) fn crate_input(
+pub(crate) fn crate_input(
     krate: &crate::facts::PublishableCrateFacts,
 ) -> crate::inputs::PublishableCrateReleaseInput<'_> {
     crate::test_fixtures::crate_input(krate)
@@ -75,4 +75,4 @@ pub(super) use test_support::write_file;
 
 #[cfg(test)]
 
-mod rs_pub_09_publish_dry_run_tests;
+mod tests;

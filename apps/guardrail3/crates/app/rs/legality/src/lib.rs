@@ -973,4 +973,4 @@ fn collect_workspace_membership_exactness_issues(
 
 #[cfg(test)]
 
-mod lib_tests;
+mod tests;

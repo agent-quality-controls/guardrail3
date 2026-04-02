@@ -124,7 +124,7 @@ fn is_help_or_version_flag(token: &str) -> bool {
 }
 
 #[cfg(test)]
-pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
+pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
     let parsed = test_support::parsed_hook(content);
     let input = RustHookCommandInput {
         rel_path: ".githooks/pre-commit",

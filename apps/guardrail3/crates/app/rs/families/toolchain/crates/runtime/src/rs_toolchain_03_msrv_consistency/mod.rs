@@ -231,4 +231,4 @@ pub(crate) fn test_input_invalid_cargo_rust_version_type<'a>(
 
 #[cfg(test)]
 
-mod rs_toolchain_03_msrv_consistency_tests;
+mod tests;

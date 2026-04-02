@@ -69,9 +69,9 @@ pub fn check(input: &DirectionalContainerHexarchInput<'_>, results: &mut Vec<Che
 }
 
 #[cfg(test)]
-pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 #[cfg(test)]
 
-mod rs_hexarch_03_inbound_outbound_tests;
+mod tests;

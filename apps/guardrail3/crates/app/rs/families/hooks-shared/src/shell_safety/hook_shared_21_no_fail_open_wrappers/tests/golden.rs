@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::shell_safety::hook_shared_21_no_fail_open_wrappers as assertions;
 
-use crate::hook_shared_21_no_fail_open_wrappers::run_case;
+use super::run_case;
 
 #[test]
 fn reports_fail_open_wrapper_on_critical_command() {

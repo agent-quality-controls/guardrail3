@@ -74,4 +74,4 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_clippy_22_type_complexity_threshold_tests;
+mod tests;

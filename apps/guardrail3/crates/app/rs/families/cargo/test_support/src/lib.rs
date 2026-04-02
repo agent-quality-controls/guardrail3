@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
+use guardrail3_app_rs_family_view::DirEntry;
+use guardrail3_domain_project_tree::ProjectTree;
 
 pub fn entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     DirEntry::new(
@@ -21,13 +22,9 @@ pub fn tree(structure: &[(&str, DirEntry)], content: &[(&str, &str)]) -> Project
         .iter()
         .map(|(path, body)| ((*path).to_owned(), (*body).to_owned()))
         .collect();
-    ProjectTree::build(
+    ProjectTree::new(
         PathBuf::from("/tmp/project"),
-        &full_structure,
-        &full_content,
-        &["".to_owned()],
-        &[],
-        &[],
-        None,
+        full_structure,
+        full_content,
     )
 }

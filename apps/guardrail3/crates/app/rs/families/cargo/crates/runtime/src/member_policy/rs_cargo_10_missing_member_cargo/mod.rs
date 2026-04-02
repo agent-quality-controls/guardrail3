@@ -46,4 +46,4 @@ pub fn check_inventory(
 
 #[cfg(test)]
 
-mod rs_cargo_10_missing_member_cargo_tests;
+mod tests;

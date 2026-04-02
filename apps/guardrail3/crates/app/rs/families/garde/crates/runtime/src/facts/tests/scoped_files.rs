@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::super::{collect, family_route};
-use crate::rs_garde_02_core_method_bans;
+use crate::root_policy::rs_garde_02_core_method_bans;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]

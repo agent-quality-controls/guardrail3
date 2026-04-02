@@ -185,4 +185,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 pub(crate) use ::test_support::{add_skip_entry, build_fixture_deny_toml};
 #[cfg(test)]
 
-mod rs_deny_23_skip_hygiene_tests;
+mod tests;

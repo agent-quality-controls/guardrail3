@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::shell_safety::hook_shared_10_shell_error_handling as assertions;
 
-use crate::hook_shared_10_shell_error_handling::run_case;
+use super::run_case;
 
 #[test]
 fn warns_when_set_e_only_appears_in_comment() {

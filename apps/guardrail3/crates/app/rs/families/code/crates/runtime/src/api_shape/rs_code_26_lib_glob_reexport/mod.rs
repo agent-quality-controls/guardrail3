@@ -58,4 +58,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 
 #[cfg(test)]
 
-mod rs_code_26_lib_glob_reexport_tests;
+mod tests;

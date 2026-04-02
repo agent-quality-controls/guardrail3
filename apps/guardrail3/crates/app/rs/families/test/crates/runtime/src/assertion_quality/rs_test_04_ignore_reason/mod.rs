@@ -94,4 +94,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 #[cfg(test)]
 
-mod rs_test_04_ignore_reason_tests;
+mod tests;

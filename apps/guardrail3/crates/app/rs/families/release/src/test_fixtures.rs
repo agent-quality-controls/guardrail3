@@ -16,11 +16,18 @@ pub(crate) fn run_family(
     root: &std::path::Path,
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
-    let tree = guardrail3_app_rs_family_view::FamilyView::from_tree(
-        &guardrail3_app_core::project_walker::walk_project(
-            &guardrail3_adapters_outbound_fs::RealFileSystem,
-            root,
-        ),
+    let walked = guardrail3_app_core::project_walker::walk_project(
+        &guardrail3_adapters_outbound_fs::RealFileSystem,
+        root,
+    );
+    let tree = guardrail3_app_rs_family_view::FamilyView::build(
+        walked.root().clone(),
+        walked.structure(),
+        walked.content(),
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
     );
     run_tree(
         &tree,
@@ -35,7 +42,7 @@ pub(crate) fn run_tree(
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::check(
-        &guardrail3_app_rs_family_view::FamilyView::from_tree(tree),
+        tree,
         &family_route(tree),
         tc,
         thorough,
@@ -49,7 +56,7 @@ pub(crate) fn run_tree_with_validation_scope(
     validation_scope: &str,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::check(
-        &guardrail3_app_rs_family_view::FamilyView::from_tree(tree),
+        tree,
         &family_route_with_validation_scope(tree, validation_scope),
         tc,
         thorough,
@@ -154,12 +161,14 @@ pub(crate) fn edge_input(
 pub(crate) fn family_route(
     tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> guardrail3_app_rs_family_mapper::RsReleaseRoute {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Release,
         ]));
-    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+    guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .map_rs_release()
 }
 
@@ -167,12 +176,14 @@ pub(crate) fn family_route_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     validation_scope: &str,
 ) -> guardrail3_app_rs_family_mapper::RsReleaseRoute {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Release,
         ]));
-    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+    guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(Some(validation_scope))
         .map_rs_release()
 }

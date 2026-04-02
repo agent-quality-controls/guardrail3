@@ -100,4 +100,4 @@ pub(crate) fn run_check_with_escape_hatches(
 
 #[cfg(test)]
 
-mod rs_fmt_07_ignore_escape_hatch_tests;
+mod tests;

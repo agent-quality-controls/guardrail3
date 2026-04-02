@@ -10,13 +10,23 @@ pub(crate) use test_support::{tempdir, write_file};
 
 pub(crate) fn run_family_scoped(root: &Path, scope: &str) -> Vec<crate::CheckResult> {
     let tree = test_support::walk(root);
-    let placement = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Test]));
-    let route = FamilyMapper::new(&tree, &placement, None, &selection, None)
+    let route = FamilyMapper::from_legality(&legality, None, &selection, None)
         .with_validation_scope(Some(scope))
         .map_rs_test();
+    let surface = FamilyView::build(
+        tree.root().clone(),
+        tree.structure(),
+        tree.content(),
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
+    );
     crate::check(
-        &FamilyView::from_tree(&tree),
+        &surface,
         &route,
         &test_support::StubToolChecker::default(),
     )
