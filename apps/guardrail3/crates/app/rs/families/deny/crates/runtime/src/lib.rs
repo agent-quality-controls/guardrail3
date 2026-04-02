@@ -134,6 +134,7 @@ pub(crate) fn check_test_root(root: &std::path::Path) -> Vec<CheckResult> {
         &[],
         &[],
         None,
+        &[],
     );
     check(&surface, &route)
 }

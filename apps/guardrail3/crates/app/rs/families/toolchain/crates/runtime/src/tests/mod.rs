@@ -18,6 +18,7 @@ pub(super) fn run_family(root: &Path) -> Vec<guardrail3_domain_report::CheckResu
         &[],
         &[],
         None,
+        &[],
     );
     super::check_test_tree(&tree)
 }
@@ -32,6 +33,7 @@ pub(super) fn route_family(root: &Path) -> guardrail3_app_rs_family_mapper::RsTo
         &[],
         &[],
         None,
+        &[],
     );
     let structure = guardrail3_app_rs_structure::collect(walked, &[]);
     let legality = guardrail3_app_rs_legality::collect(structure);

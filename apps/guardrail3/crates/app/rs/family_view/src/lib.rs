@@ -34,12 +34,16 @@ impl FamilyView {
         extra_file_rels: &[String],
         extra_dir_rels: &[String],
         scoped_files: Option<&BTreeSet<String>>,
+        excluded_paths: &[String],
     ) -> Self {
         let mut allowed_files = BTreeSet::new();
         let mut allowed_dirs = BTreeSet::new();
 
-        // Include all files/dirs under root_rels.
+        // Include all files/dirs under root_rels, excluding configured paths.
         for (dir_rel, entry) in full_structure {
+            if is_excluded_by_config(dir_rel, excluded_paths) {
+                continue;
+            }
             if root_rels
                 .iter()
                 .any(|root_rel| path_is_under(dir_rel, root_rel))
@@ -263,4 +267,21 @@ fn join_rel(parent: &str, child: &str) -> String {
     } else {
         format!("{parent}/{child}")
     }
+}
+
+fn is_excluded_by_config(path: &str, excluded_paths: &[String]) -> bool {
+    let segments: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+    for pattern in excluded_paths {
+        let pattern_segments: Vec<&str> = pattern.split('/').filter(|s| !s.is_empty()).collect();
+        if pattern_segments.is_empty() {
+            continue;
+        }
+        if segments
+            .windows(pattern_segments.len())
+            .any(|window| window == pattern_segments.as_slice())
+        {
+            return true;
+        }
+    }
+    false
 }

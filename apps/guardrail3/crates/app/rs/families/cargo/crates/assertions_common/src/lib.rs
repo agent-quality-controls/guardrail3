@@ -33,6 +33,7 @@ pub fn check_results(tree: &ProjectTree) -> Vec<CheckResult> {
         &[],
         &[],
         None,
+        &[],
     );
     runtime::check(&surface, &route)
 }

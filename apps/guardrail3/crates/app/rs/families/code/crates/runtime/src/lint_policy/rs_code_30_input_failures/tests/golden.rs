@@ -45,6 +45,7 @@ fn golden_tree_has_no_code_input_failures() {
         &[],
         &[],
         None,
+        &[],
     );
 
     let results = run_tree(&tree);

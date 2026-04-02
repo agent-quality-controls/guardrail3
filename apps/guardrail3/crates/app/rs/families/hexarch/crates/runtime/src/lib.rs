@@ -83,6 +83,7 @@ fn routed_surface_for_tests(
         &extra_file_rels,
         &[],
         None,
+        &[],
     )
 }
 

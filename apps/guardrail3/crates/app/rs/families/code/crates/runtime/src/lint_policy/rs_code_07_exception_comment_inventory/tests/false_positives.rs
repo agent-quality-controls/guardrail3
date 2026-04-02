@@ -85,7 +85,7 @@ fn does_not_inventory_repo_root_exception_comments_in_backend_scoped_run() {
 
     let surface = FamilyView::build(
         tree.root().clone(), tree.structure(), tree.content(),
-        &["".to_owned()], &[], &[], None,
+        &["".to_owned()], &[], &[], None, &[],
     );
     let results = crate::check(&surface, &route);
     assert_findings(

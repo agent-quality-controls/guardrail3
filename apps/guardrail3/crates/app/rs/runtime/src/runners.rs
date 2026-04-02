@@ -84,6 +84,7 @@ fn run_topology(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         &extra,
         &[],
         None,
+        ctx.legality.excluded_paths(),
     );
     guardrail3_app_rs_family_topology::check(&view, &route)
 }
@@ -109,6 +110,7 @@ fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         &extra,
         &[],
         None,
+        ctx.legality.excluded_paths(),
     );
     guardrail3_app_rs_family_arch::check(&view, &route)
 }
@@ -128,6 +130,7 @@ fn run_fmt(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         &extra,
         &[],
         None,
+        ctx.legality.excluded_paths(),
     );
     guardrail3_app_rs_family_fmt::check(&view, &route)
 }
@@ -151,6 +154,7 @@ fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 &extra,
                 &[],
                 None,
+                ctx.legality.excluded_paths(),
             );
             guardrail3_app_rs_family_toolchain::check(&view, &workspace_route)
         })
@@ -176,6 +180,7 @@ fn run_clippy(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 &extra,
                 &[],
                 None,
+                ctx.legality.excluded_paths(),
             );
             guardrail3_app_rs_family_clippy::check(&view, &workspace_route)
         })
@@ -201,6 +206,7 @@ fn run_deny(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 &extra,
                 &[],
                 None,
+                ctx.legality.excluded_paths(),
             );
             guardrail3_app_rs_family_deny::check(&view, &workspace_route)
         })
@@ -226,6 +232,7 @@ fn run_cargo(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 &extra,
                 &[],
                 None,
+                ctx.legality.excluded_paths(),
             );
             guardrail3_app_rs_family_cargo::check(&view, &workspace_route)
         })
@@ -245,6 +252,7 @@ fn run_code(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         &extra,
         &[],
         route.scoped_files(),
+        ctx.legality.excluded_paths(),
     );
     guardrail3_app_rs_family_code::check(&view, &route)
 }
@@ -273,6 +281,7 @@ fn run_hexarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 &extra,
                 &[],
                 None,
+                ctx.legality.excluded_paths(),
             );
             guardrail3_app_rs_family_hexarch::check(&view, &workspace_route)
         })
@@ -298,6 +307,7 @@ fn run_libarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 &extra,
                 &[],
                 None,
+                ctx.legality.excluded_paths(),
             );
             guardrail3_app_rs_family_libarch::check(&view, &workspace_route)
         })
@@ -323,6 +333,7 @@ fn run_deps(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 &extra,
                 &[],
                 None,
+                ctx.legality.excluded_paths(),
             );
             guardrail3_app_rs_family_deps::check(&view, &workspace_route, ctx.tc)
         })
@@ -348,6 +359,7 @@ fn run_garde(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 &extra,
                 &[],
                 None,
+                ctx.legality.excluded_paths(),
             );
             guardrail3_app_rs_family_garde::check(&view, &workspace_route)
         })
@@ -367,6 +379,7 @@ fn run_test(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         &extra,
         &[],
         route.scoped_files(),
+        ctx.legality.excluded_paths(),
     );
     guardrail3_app_rs_family_test::check(&view, &route, ctx.tc)
 }
@@ -390,6 +403,7 @@ fn run_release(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 &extra,
                 &[],
                 None,
+                ctx.legality.excluded_paths(),
             );
             guardrail3_app_rs_family_release::check(
                 &view,
@@ -414,6 +428,7 @@ fn run_hooks_shared(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         &extra_files,
         &extra_dirs,
         None,
+        ctx.legality.excluded_paths(),
     );
     guardrail3_app_rs_family_hooks_shared::check(ctx.fs, ctx.path, &view, ctx.tc)
 }
@@ -431,6 +446,7 @@ fn run_hooks_rs(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         &extra_files,
         &extra_dirs,
         None,
+        ctx.legality.excluded_paths(),
     );
     guardrail3_app_rs_family_hooks_rs::check(&view, ctx.tc)
 }

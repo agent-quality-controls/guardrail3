@@ -20,7 +20,7 @@ fn attaches_toolchain_file_to_exact_root() {
         )],
     );
 
-    let facts = collect(&tree, &collect_placement(&tree));
+    let facts = collect(&tree, &collect_placement(&tree, &[]));
     let file = find_file(
         &facts,
         RustValidateFamily::Toolchain,
@@ -53,7 +53,7 @@ fn attaches_validation_root_policy_file_as_ancestor_of_descendant_roots() {
         ],
     );
 
-    let facts = collect(&tree, &collect_placement(&tree));
+    let facts = collect(&tree, &collect_placement(&tree, &[]));
     let file = find_file(&facts, RustValidateFamily::Clippy, "clippy.toml");
 
     assert_eq!(file.kind(), RustFamilyFileKind::ClippyToml);
@@ -79,7 +79,7 @@ fn normalizes_cargo_config_owner_to_parent_root() {
         )],
     );
 
-    let facts = collect(&tree, &collect_placement(&tree));
+    let facts = collect(&tree, &collect_placement(&tree, &[]));
     let file = find_file(
         &facts,
         RustValidateFamily::Clippy,
@@ -113,7 +113,7 @@ fn attaches_nested_member_config_under_nearest_root() {
         )],
     );
 
-    let facts = collect(&tree, &collect_placement(&tree));
+    let facts = collect(&tree, &collect_placement(&tree, &[]));
     let file = find_file(
         &facts,
         RustValidateFamily::Deny,
@@ -145,7 +145,7 @@ fn keeps_stray_toolchain_outside_all_roots_visible() {
         )],
     );
 
-    let facts = collect(&tree, &collect_placement(&tree));
+    let facts = collect(&tree, &collect_placement(&tree, &[]));
     let file = find_file(
         &facts,
         RustValidateFamily::Toolchain,

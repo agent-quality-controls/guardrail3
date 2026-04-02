@@ -17,6 +17,7 @@ pub fn walk(root: &Path) -> ProjectTree {
         &[],
         &[],
         None,
+        &[],
     )
 }
 
@@ -71,6 +72,7 @@ pub fn project_tree(
         &[],
         &[],
         None,
+        &[],
     )
 }
 

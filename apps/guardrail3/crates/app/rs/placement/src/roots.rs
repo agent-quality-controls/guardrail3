@@ -69,19 +69,19 @@ impl RustRootPlacementFacts {
 }
 
 #[must_use]
-pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
+pub fn collect(tree: &ProjectTree, excluded_paths: &[String]) -> RustRootPlacementFacts {
     if is_excluded_validation_root(tree) {
         return RustRootPlacementFacts::default();
     }
 
     let mut root_dirs = BTreeSet::new();
-    if tree.file_exists("Cargo.toml") && !is_excluded_live_root_dir("") {
+    if tree.file_exists("Cargo.toml") && !is_excluded("", excluded_paths) {
         let _ = root_dirs.insert(String::new());
     }
     root_dirs.extend(
         tree.dirs_with_file("Cargo.toml")
             .into_iter()
-            .filter(|rel_dir| !is_excluded_live_root_dir(rel_dir)),
+            .filter(|rel_dir| !is_excluded(rel_dir, excluded_paths)),
     );
 
     let mut roots = Vec::new();
@@ -131,17 +131,31 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
     RustRootPlacementFacts::new(roots, overlaps, input_failures)
 }
 
+/// Check if a directory should be excluded using built-in patterns only.
+/// Used by ownership and hexarch for directory filtering.
 #[must_use]
 pub fn is_excluded_live_root_dir(rel_dir: &str) -> bool {
-    is_excluded_path(rel_dir)
+    is_excluded_builtin(rel_dir)
 }
 
-fn is_excluded_validation_root(tree: &ProjectTree) -> bool {
-    is_excluded_path(&tree.root().to_string_lossy().replace('\\', "/"))
+fn is_excluded_builtin(path: &str) -> bool {
+    let segments: Vec<&str> = path
+        .split('/')
+        .filter(|segment| !segment.is_empty())
+        .collect();
+    if segments.is_empty() {
+        return false;
+    }
+    segments.contains(&"target")
+        || segments
+            .windows(2)
+            .any(|window| matches!(window, [".claude", "worktrees"]))
 }
 
-fn is_excluded_path(path: &str) -> bool {
-    let segments: Vec<_> = path
+/// Check if a path should be excluded. Uses built-in patterns (target,
+/// .claude/worktrees) plus configurable patterns from guardrail3.toml.
+fn is_excluded(path: &str, config_excluded: &[String]) -> bool {
+    let segments: Vec<&str> = path
         .split('/')
         .filter(|segment| !segment.is_empty())
         .collect();
@@ -150,10 +164,10 @@ fn is_excluded_path(path: &str) -> bool {
         return false;
     }
 
+    // Built-in: always exclude.
     if segments.contains(&"target") {
         return true;
     }
-
     if segments
         .windows(2)
         .any(|window| matches!(window, [".claude", "worktrees"]))
@@ -161,9 +175,31 @@ fn is_excluded_path(path: &str) -> bool {
         return true;
     }
 
-    segments
-        .windows(2)
-        .any(|window| matches!(window, ["tests", "fixtures"] | ["tests", "snapshots"]))
+    // Configurable: from guardrail3.toml [rust] excluded_paths.
+    for pattern in config_excluded {
+        let pattern_segments: Vec<&str> = pattern.split('/').filter(|s| !s.is_empty()).collect();
+        if pattern_segments.is_empty() {
+            continue;
+        }
+        if segments
+            .windows(pattern_segments.len())
+            .any(|window| window == pattern_segments.as_slice())
+        {
+            return true;
+        }
+    }
+
+    false
+}
+
+fn is_excluded_validation_root(tree: &ProjectTree) -> bool {
+    // Validation root check only uses built-in exclusions (no config available here).
+    let path = tree.root().to_string_lossy().replace('\\', "/");
+    let segments: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+    segments.contains(&"target")
+        || segments
+            .windows(2)
+            .any(|window| matches!(window, [".claude", "worktrees"]))
 }
 
 fn resolve_topology_role(

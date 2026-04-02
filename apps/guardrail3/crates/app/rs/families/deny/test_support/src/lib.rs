@@ -96,6 +96,7 @@ pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, String
         &[],
         &[],
         None,
+        &[],
     )
 }
 
@@ -136,6 +137,7 @@ pub fn walk(root: &Path) -> ProjectTree {
         &[],
         &[],
         None,
+        &[],
     )
 }
 

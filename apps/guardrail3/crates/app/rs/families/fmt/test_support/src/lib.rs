@@ -24,5 +24,6 @@ pub fn walk(root: &Path) -> ProjectTree {
         &[],
         &[],
         None,
+        &[],
     )
 }

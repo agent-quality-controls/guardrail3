@@ -119,6 +119,7 @@ pub(crate) fn test_tree(
         &[],
         &[],
         None,
+        &[],
     )
 }
 
@@ -176,6 +177,7 @@ pub(crate) fn nested_workspace_root_tree() -> guardrail3_app_rs_family_view::Fam
         &[],
         &[],
         None,
+        &[],
     )
 }
 
