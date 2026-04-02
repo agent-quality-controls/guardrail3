@@ -109,8 +109,12 @@ impl<'a> FamilyMapper<'a> {
             return views::RsHexarchRoute::new(Vec::new(), None, None, None);
         }
 
+        // Hexarch uses ALL placement roots classified as apps — not just
+        // legal workspace roots. App roots are often nested workspaces under
+        // the project root, which legality marks as illegal (no nested workspaces).
+        // Hexarch needs to see them regardless.
         let roots = self
-            .map_workspace_roots_for_family(RustValidateFamily::Hexarch)
+            .map_global_roots_for_family(RustValidateFamily::Hexarch)
             .into_iter()
             .filter(|root| matches!(root_scope(root.rel_dir()), RootScope::App(_)))
             .filter(|root| self.legality.file_content(root.cargo_rel_path()).is_some())
