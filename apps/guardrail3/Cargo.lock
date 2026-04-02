@@ -983,6 +983,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-rs-family-view"
+version = "0.0.0"
+dependencies = [
+ "glob",
+ "guardrail3-domain-project-tree",
+]
+
+[[package]]
 name = "guardrail3-app-rs-generate"
 version = "0.0.0"
 dependencies = [

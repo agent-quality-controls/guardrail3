@@ -26,6 +26,7 @@ members = [
     "crates/app/rs/family_selection/assertions",
     "crates/app/rs/family_mapper",
     "crates/app/rs/family_mapper/assertions",
+    "crates/app/rs/family_view",
     "crates/app/rs/ast",
     "crates/app/rs/ast/assertions",
     "crates/app/rs/generate",
