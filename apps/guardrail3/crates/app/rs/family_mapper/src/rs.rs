@@ -5,14 +5,14 @@ use guardrail3_app_rs_ownership::RustFamilyFileAttachment;
 use guardrail3_app_rs_placement::RustRootPlacementRootFacts;
 use guardrail3_app_rs_structure::RustStructureFacts;
 use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig};
-use guardrail3_domain_project_tree::ProjectTreeDiscovery;
+use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use crate::scoped_files::filter_for_roots;
 use crate::views;
 
 pub struct FamilyMapper<'a> {
-    tree: &'a dyn ProjectTreeDiscovery,
+    tree: &'a ProjectTree,
     structure: &'a RustStructureFacts,
     legality: RustLegalityFacts,
     config: Option<&'a GuardrailConfig>,
@@ -24,7 +24,7 @@ pub struct FamilyMapper<'a> {
 impl std::fmt::Debug for FamilyMapper<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("FamilyMapper")
-            .field("tree", &"<ProjectTreeDiscovery>")
+            .field("tree", &"<ProjectTree>")
             .field("structure", &self.structure)
             .field("legality", &self.legality)
             .field("config", &self.config)
@@ -38,7 +38,7 @@ impl std::fmt::Debug for FamilyMapper<'_> {
 impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn new(
-        tree: &'a dyn ProjectTreeDiscovery,
+        tree: &'a ProjectTree,
         structure: &'a RustStructureFacts,
         config: Option<&'a GuardrailConfig>,
         selected_families: &'a RustFamilySelection,
@@ -57,7 +57,7 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn with_legality(
-        tree: &'a dyn ProjectTreeDiscovery,
+        tree: &'a ProjectTree,
         structure: &'a RustStructureFacts,
         legality: &RustLegalityFacts,
         config: Option<&'a GuardrailConfig>,

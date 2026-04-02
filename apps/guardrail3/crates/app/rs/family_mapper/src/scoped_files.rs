@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_project_tree::ProjectTreeView;
+use guardrail3_domain_project_tree::ProjectTree;
 
 #[must_use]
 pub fn filter_for_roots(
-    tree: &dyn ProjectTreeView,
+    tree: &ProjectTree,
     scoped_files: Option<&BTreeSet<String>>,
     root_rels: &[String],
     validation_scope: Option<&str>,
@@ -27,7 +27,7 @@ pub fn filter_for_roots(
     }
 }
 
-fn scoped_path_is_live(tree: &dyn ProjectTreeView, rel_path: &str) -> bool {
+fn scoped_path_is_live(tree: &ProjectTree, rel_path: &str) -> bool {
     tree.file_exists(rel_path) || tree.dir_exists(rel_path)
 }
 
@@ -40,7 +40,7 @@ fn path_is_under_root(rel_path: &str, root_rel: &str) -> bool {
 }
 
 fn collect_scope_files(
-    tree: &dyn ProjectTreeView,
+    tree: &ProjectTree,
     scope_rel: &str,
     root_rels: &[String],
 ) -> BTreeSet<String> {

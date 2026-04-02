@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_project_tree::{ProjectTreeDiscovery, ProjectTreeView};
+use guardrail3_domain_project_tree::ProjectTree;
 use toml::Value;
 
 use crate::classification::{
@@ -69,7 +69,7 @@ impl RustRootPlacementFacts {
 }
 
 #[must_use]
-pub fn collect(tree: &dyn ProjectTreeDiscovery) -> RustRootPlacementFacts {
+pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
     if is_excluded_validation_root(tree) {
         return RustRootPlacementFacts::default();
     }
@@ -136,7 +136,7 @@ pub fn is_excluded_live_root_dir(rel_dir: &str) -> bool {
     is_excluded_path(rel_dir)
 }
 
-fn is_excluded_validation_root(tree: &dyn ProjectTreeView) -> bool {
+fn is_excluded_validation_root(tree: &ProjectTree) -> bool {
     is_excluded_path(&tree.root().to_string_lossy().replace('\\', "/"))
 }
 
@@ -188,7 +188,7 @@ fn resolve_topology_role(
 }
 
 fn parse_live_cargo_toml(
-    tree: &dyn ProjectTreeView,
+    tree: &ProjectTree,
     cargo_rel_path: &str,
     input_failures: &mut Vec<RustRootPlacementInputFailureFacts>,
 ) -> Option<Value> {
@@ -249,7 +249,7 @@ fn topology_role_value(parsed: &Value) -> Option<&Value> {
         })
 }
 
-fn zone_context_prefix(tree: &dyn ProjectTreeView) -> Option<String> {
+fn zone_context_prefix(tree: &ProjectTree) -> Option<String> {
     let segments: Vec<_> = tree
         .root()
         .iter()
