@@ -68,19 +68,8 @@ fn run_topology(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-arch")]
 fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_arch();
-    route
-        .roots()
-        .iter()
-        .flat_map(|root| {
-            let workspace_route = route.for_workspace(root.rel_dir());
-            let surface = workspace_surface(
-                ctx.tree,
-                workspace_route.roots(),
-                workspace_route.family_files(),
-            );
-            guardrail3_app_rs_family_arch::check(&surface, &workspace_route)
-        })
-        .collect()
+    let surface = arch_surface(ctx.tree, &route);
+    guardrail3_app_rs_family_arch::check(&surface, &route)
 }
 
 #[cfg(feature = "family-fmt")]
@@ -292,8 +281,20 @@ fn topology_surface(
     RsProjectSurface::from_route_scope(tree, &topology_root_rels(route.roots()), &extra_file_rels, None)
 }
 
+#[cfg(feature = "family-arch")]
+fn arch_surface(
+    tree: &ProjectTree,
+    route: &guardrail3_app_rs_family_mapper::RsArchRoute,
+) -> RsProjectSurface {
+    let mut extra_file_rels = route_root_cargo_files(route.roots());
+    extra_file_rels.extend(family_file_rels(route.family_files()));
+    if tree.file_exists("guardrail3.toml") {
+        extra_file_rels.push("guardrail3.toml".to_owned());
+    }
+    RsProjectSurface::from_route_scope(tree, &route_root_rels(route.roots()), &extra_file_rels, None)
+}
+
 #[cfg(any(
-    feature = "family-arch",
     feature = "family-toolchain",
     feature = "family-clippy",
     feature = "family-deny",
