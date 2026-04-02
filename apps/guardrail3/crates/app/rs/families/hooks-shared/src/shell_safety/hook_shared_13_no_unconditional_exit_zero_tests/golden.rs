@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_hooks_shared_assertions::hook_shared_13_no_unconditional_exit_zero as assertions;
+use guardrail3_app_rs_family_hooks_shared_assertions::shell_safety::hook_shared_13_no_unconditional_exit_zero as assertions;
 
 use crate::hook_shared_13_no_unconditional_exit_zero::run_case;
 

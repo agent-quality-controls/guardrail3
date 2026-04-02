@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_16_patch_replace_bypass as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_16_patch_replace_bypass as assertions;
 
 #[test]
 fn fixture_backed_patch_and_replace_only_error_for_layered_targets() {

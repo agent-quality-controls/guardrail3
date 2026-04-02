@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RepoReleaseInput;
+use crate::inputs::RepoReleaseInput;
 
 const ID: &str = "RS-RELEASE-01";
 const ALLOWED_LICENSE_PATHS: &[&str] = &["LICENSE", "LICENSE-MIT", "LICENSE-APACHE", "LICENSE.md"];

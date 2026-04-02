@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_12_unsafe_code_lint::{
+use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_12_unsafe_code_lint::{
     assert_files, assert_populated_golden_fixture_inventories_workspace_forbid_lints,
 };
 use test_support::write_file;

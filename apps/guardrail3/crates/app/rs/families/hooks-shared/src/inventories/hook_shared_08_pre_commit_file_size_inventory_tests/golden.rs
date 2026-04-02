@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_hooks_shared_assertions::hook_shared_08_pre_commit_file_size_inventory as assertions;
+use guardrail3_app_rs_family_hooks_shared_assertions::inventories::hook_shared_08_pre_commit_file_size_inventory as assertions;
 
 use crate::hook_shared_08_pre_commit_file_size_inventory::check;
 

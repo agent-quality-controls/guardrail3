@@ -11,7 +11,7 @@ fn errors_when_publishable_crate_has_no_dry_run_result() {
 
     check(&input, &mut results);
 
-    guardrail3_app_rs_family_release_assertions::rs_pub_09_publish_dry_run::assert_missing(
+    guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_09_publish_dry_run::assert_missing(
         &results,
         "crates/example/Cargo.toml",
     );
@@ -29,13 +29,13 @@ fn errors_on_direct_publish_dry_run_failure_and_truncates_stderr() {
 
     check(&input, &mut results);
 
-    guardrail3_app_rs_family_release_assertions::rs_pub_09_publish_dry_run::assert_failed(
+    guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_09_publish_dry_run::assert_failed(
         &results,
         "crates/example/Cargo.toml",
         "x: publish dry-run failed",
         "line1; line2; line3",
     );
-    guardrail3_app_rs_family_release_assertions::rs_pub_09_publish_dry_run::assert_no_message_contains(
+    guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_09_publish_dry_run::assert_no_message_contains(
         &results,
         "line4",
     );
@@ -65,7 +65,7 @@ fn errors_on_real_publish_dry_run_failure_from_broken_fixture_crate() {
 
     let results = run_family(tmp.path(), true);
 
-    guardrail3_app_rs_family_release_assertions::rs_pub_09_publish_dry_run::assert_failed(
+    guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_09_publish_dry_run::assert_failed(
         &results,
         "packages/shared-types/Cargo.toml",
         "shared-types: publish dry-run failed",
@@ -78,5 +78,5 @@ fn family_does_not_emit_publish_dry_run_results_when_not_thorough() {
     let tmp = copy_fixture();
     let results = run_family(tmp.path(), false);
 
-    guardrail3_app_rs_family_release_assertions::rs_pub_09_publish_dry_run::assert_quiet(&results);
+    guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_09_publish_dry_run::assert_quiet(&results);
 }

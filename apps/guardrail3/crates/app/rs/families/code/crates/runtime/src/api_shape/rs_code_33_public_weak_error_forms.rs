@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RustCodeFileInput;
-use super::parse::{PublicResultErrorKind, find_public_result_error_types};
+use crate::inputs::RustCodeFileInput;
+use crate::parse::{PublicResultErrorKind, find_public_result_error_types};
 
 const ID: &str = "RS-CODE-33";
 
@@ -30,9 +30,9 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
-    let ast = super::parse::parse_rust_file(content)
+    let ast = crate::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
-    let input = super::inputs::RustCodeFileInput {
+    let input = crate::inputs::RustCodeFileInput {
         rel_path,
         content,
         ast: &ast,

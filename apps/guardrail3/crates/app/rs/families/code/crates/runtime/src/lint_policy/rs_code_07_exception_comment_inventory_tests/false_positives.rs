@@ -4,7 +4,7 @@ use super::super::copy_fixture;
 use super::super::run_family;
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
-use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::{
+use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_07_exception_comment_inventory::{
     RuleFinding, Severity, assert_findings, assert_no_hits,
 };
 use guardrail3_app_rs_family_view::FamilyView;

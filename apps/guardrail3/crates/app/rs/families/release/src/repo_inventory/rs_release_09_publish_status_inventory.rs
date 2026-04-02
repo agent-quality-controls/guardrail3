@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RepoReleaseInput;
+use crate::inputs::RepoReleaseInput;
 
 const ID: &str = "RS-RELEASE-09";
 

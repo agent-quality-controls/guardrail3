@@ -2,7 +2,7 @@
 mod fail_closed;
 mod workspace_policy;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_08_app_cargo_is_workspace::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::workspace_policy::rs_hexarch_08_app_cargo_is_workspace::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_06_stricter_advisories_inventory as assertions;
+use guardrail3_app_rs_family_deny_assertions::advisories::rs_deny_06_stricter_advisories_inventory as assertions;
 
 use super::super::{build_fixture_deny_toml, set_section_string};
 

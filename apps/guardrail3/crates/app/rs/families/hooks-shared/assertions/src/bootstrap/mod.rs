@@ -1,0 +1,6 @@
+pub mod hook_shared_01_pre_commit_exists;
+pub mod hook_shared_02_hooks_path_configured;
+pub mod hook_shared_03_modular_directory_inventory;
+pub mod hook_shared_04_dispatcher_pattern;
+pub mod hook_shared_05_pre_commit_executable;
+pub mod hook_shared_06_script_stats_inventory;

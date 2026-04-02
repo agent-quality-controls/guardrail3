@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_release_assertions::rs_release_02_release_plz_exists as assertions;
+use guardrail3_app_rs_family_release_assertions::repo_policy::rs_release_02_release_plz_exists as assertions;
 
 use super::super::check;
 use super::super::{repo_facts, repo_input};

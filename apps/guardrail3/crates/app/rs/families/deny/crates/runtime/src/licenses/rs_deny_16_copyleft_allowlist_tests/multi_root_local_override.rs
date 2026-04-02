@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_16_copyleft_allowlist as assertions;
+use guardrail3_app_rs_family_deny_assertions::licenses::rs_deny_16_copyleft_allowlist as assertions;
 
 use super::super::{add_allowed_license, build_fixture_deny_toml};
 

@@ -1,5 +1,5 @@
 use super::super::run_source_case;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_23_adapter_pub_trait as assertions;
 
 #[test]
 fn adapter_public_trait_errors() {

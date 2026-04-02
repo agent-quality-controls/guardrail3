@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_24_ignore_hygiene as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_24_ignore_hygiene as assertions;
 
 fn ignore_toml(ignore: &str) -> String {
     format!("[advisories]\nignore = {ignore}\n")

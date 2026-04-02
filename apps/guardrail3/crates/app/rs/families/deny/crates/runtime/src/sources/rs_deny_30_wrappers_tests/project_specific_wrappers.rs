@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_30_wrappers as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_30_wrappers as assertions;
 
 use super::super::{add_deny_ban_entry, build_fixture_deny_toml, set_deny_ban_wrappers};
 

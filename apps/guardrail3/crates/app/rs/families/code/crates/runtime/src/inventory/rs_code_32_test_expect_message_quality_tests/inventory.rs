@@ -1,6 +1,6 @@
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_32_test_expect_message_quality::{
+use guardrail3_app_rs_family_code_assertions::inventory::rs_code_32_test_expect_message_quality::{
     RuleFinding, Severity, assert_findings,
 };
 use test_support::{line_number, read_file, write_file};

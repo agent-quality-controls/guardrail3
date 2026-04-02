@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::ReleaseInputFailureInput;
+use crate::inputs::ReleaseInputFailureInput;
 
 const ID: &str = "RS-RELEASE-12";
 

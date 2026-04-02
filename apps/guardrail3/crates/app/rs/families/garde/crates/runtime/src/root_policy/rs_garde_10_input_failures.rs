@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::GardeInputFailureInput;
+use crate::inputs::GardeInputFailureInput;
 
 const ID: &str = "RS-GARDE-10";
 
@@ -43,7 +43,7 @@ pub(super) fn run_family(
             None,
         )
         .map_rs_garde();
-        super::check_test_tree(tree, &route)
+        crate::check_test_tree(tree, &route)
     }
 }
 

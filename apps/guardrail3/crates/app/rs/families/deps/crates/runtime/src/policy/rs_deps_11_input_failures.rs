@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::InputFailureDepsInput;
+use crate::inputs::InputFailureDepsInput;
 
 const ID: &str = "RS-DEPS-11";
 
@@ -33,8 +33,8 @@ fn family_route(
 pub(super) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
-) -> super::facts::DepsFacts {
-    super::facts::collect(
+) -> crate::facts::DepsFacts {
+    crate::facts::collect(
         tree,
         &family_route(tree),
         &test_support::StubToolChecker::new(installed),
@@ -42,10 +42,10 @@ pub(super) fn collected_facts(
 }
 
 #[cfg(test)]
-pub(super) fn failure_facts(rel_path: &str, message: &str) -> super::facts::DepsFacts {
-    super::facts::DepsFacts {
+pub(super) fn failure_facts(rel_path: &str, message: &str) -> crate::facts::DepsFacts {
+    crate::facts::DepsFacts {
         tools: Vec::new(),
-        lockfiles: vec![super::facts::LockfileFacts {
+        lockfiles: vec![crate::facts::LockfileFacts {
             root_rel_dir: String::new(),
             cargo_lock_rel_path: "Cargo.lock".to_owned(),
             cargo_lock_exists: true,
@@ -56,7 +56,7 @@ pub(super) fn failure_facts(rel_path: &str, message: &str) -> super::facts::Deps
         dependency_entries: Vec::new(),
         allowlist_coverage: Vec::new(),
         direct_dependency_caps: Vec::new(),
-        input_failures: vec![super::facts::InputFailureFacts {
+        input_failures: vec![crate::facts::InputFailureFacts {
             rel_path: rel_path.to_owned(),
             message: message.to_owned(),
         }],
@@ -65,20 +65,20 @@ pub(super) fn failure_facts(rel_path: &str, message: &str) -> super::facts::Deps
 
 #[cfg(test)]
 pub(super) fn failure_input<'a>(
-    facts: &'a super::facts::DepsFacts,
+    facts: &'a crate::facts::DepsFacts,
     rel_path: &str,
-) -> super::inputs::InputFailureDepsInput<'a> {
+) -> crate::inputs::InputFailureDepsInput<'a> {
     let failure = facts
         .input_failures
         .iter()
         .find(|failure| failure.rel_path == rel_path)
         .expect("expected input failure facts");
-    super::inputs::InputFailureDepsInput::new(failure)
+    crate::inputs::InputFailureDepsInput::new(failure)
 }
 
 #[cfg(test)]
 pub(super) fn run_with_facts(
-    facts: &super::facts::DepsFacts,
+    facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }

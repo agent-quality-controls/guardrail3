@@ -5,7 +5,7 @@ mod non_member_paths;
 mod ownership_and_fail_closed;
 mod ownership_edges;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_13_dependency_direction::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_13_dependency_direction::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

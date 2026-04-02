@@ -4,7 +4,7 @@ mod golden;
 mod ownership_edges;
 mod package_non_hit;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_24_cross_app_boundary::CheckResult;
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use std::path::{Path, PathBuf};
 

@@ -1,5 +1,5 @@
 use super::{copy_fixture, remove_dir};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_03_inbound_outbound as assertions;
 const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {

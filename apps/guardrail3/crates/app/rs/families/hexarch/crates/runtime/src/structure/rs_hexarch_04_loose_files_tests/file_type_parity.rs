@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_04_loose_files as assertions;
 
 fn single_container_results(file_name: &str) -> Vec<guardrail3_domain_report::CheckResult> {
     let tmp = copy_fixture();

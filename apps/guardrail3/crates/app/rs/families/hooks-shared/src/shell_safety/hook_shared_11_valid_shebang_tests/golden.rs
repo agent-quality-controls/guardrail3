@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_hooks_shared_assertions::hook_shared_11_valid_shebang as assertions;
+use guardrail3_app_rs_family_hooks_shared_assertions::shell_safety::hook_shared_11_valid_shebang as assertions;
 
 use crate::hook_shared_11_valid_shebang::run_case;
 

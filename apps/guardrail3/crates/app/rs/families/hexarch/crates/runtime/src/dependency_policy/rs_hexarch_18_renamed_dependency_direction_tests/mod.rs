@@ -3,7 +3,7 @@ mod broad_attacks;
 mod non_member_targets;
 mod ownership_edges;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_18_renamed_dependency_direction::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

@@ -1,5 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_20_dev_dependency_direction as assertions;
 
 #[test]
 fn renamed_dev_edge_is_owned_by_rule_20_not_rule_18() {

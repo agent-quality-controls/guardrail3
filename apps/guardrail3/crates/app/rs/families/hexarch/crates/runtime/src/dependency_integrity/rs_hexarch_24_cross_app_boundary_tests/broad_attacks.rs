@@ -1,5 +1,5 @@
 use super::{dir_entry, project_tree, run_tree};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_24_cross_app_boundary as assertions;
 
 #[test]
 fn cross_app_edges_error_and_same_app_edges_do_not() {

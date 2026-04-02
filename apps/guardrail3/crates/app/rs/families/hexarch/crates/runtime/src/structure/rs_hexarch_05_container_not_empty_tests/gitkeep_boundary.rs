@@ -1,5 +1,5 @@
 use super::{copy_fixture, empty_dir, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_05_container_not_empty as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_05_container_not_empty as assertions;
 
 #[test]
 fn gitkeep_plus_files_does_not_trigger_rule_05() {

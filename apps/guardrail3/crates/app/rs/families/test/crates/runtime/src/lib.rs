@@ -10,42 +10,9 @@ mod discover;
 mod facts;
 mod inputs;
 mod parse;
-#[path = "structure/rs_test_01_inline_test_bodies.rs"]
-mod rs_test_01_inline_test_bodies;
-#[path = "structure/rs_test_02_owned_sidecar_shape.rs"]
-mod rs_test_02_owned_sidecar_shape;
-#[path = "structure/rs_test_03_runtime_assertions_split.rs"]
-mod rs_test_03_runtime_assertions_split;
-#[path = "assertion_quality/rs_test_04_ignore_reason.rs"]
-mod rs_test_04_ignore_reason;
-#[path = "assertion_quality/rs_test_05_should_panic_expected.rs"]
-mod rs_test_05_should_panic_expected;
-#[path = "assertion_quality/rs_test_06_tautological_assertions.rs"]
-mod rs_test_06_tautological_assertions;
-#[path = "assertion_quality/rs_test_07_real_proof_site.rs"]
-mod rs_test_07_real_proof_site;
-#[path = "assertion_quality/rs_test_08_weak_matches_assert.rs"]
-mod rs_test_08_weak_matches_assert;
-#[path = "mutation/rs_test_09_nextest_timeouts.rs"]
-mod rs_test_09_nextest_timeouts;
-#[path = "mutation/rs_test_10_input_failures.rs"]
-mod rs_test_10_input_failures;
-#[path = "mutation/rs_test_11_cargo_mutants_installed.rs"]
-mod rs_test_11_cargo_mutants_installed;
-#[path = "mutation/rs_test_12_mutants_toml_exists.rs"]
-mod rs_test_12_mutants_toml_exists;
-#[path = "mutation/rs_test_13_mutants_profile_present.rs"]
-mod rs_test_13_mutants_profile_present;
-#[path = "mutation/rs_test_14_mutation_hook_present.rs"]
-mod rs_test_14_mutation_hook_present;
-#[path = "mutation/rs_test_15_mutants_config_sane.rs"]
-mod rs_test_15_mutants_config_sane;
-#[path = "structure/rs_test_16_assertions_modules_prove.rs"]
-mod rs_test_16_assertions_modules_prove;
-#[path = "structure/rs_test_17_external_harnesses_use_assertions.rs"]
-mod rs_test_17_external_harnesses_use_assertions;
-#[path = "structure/rs_test_18_test_support_generic.rs"]
-mod rs_test_18_test_support_generic;
+mod assertion_quality;
+mod mutation;
+mod structure;
 
 #[cfg(test)]
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
@@ -78,7 +45,7 @@ pub fn check(
         .filter(|failure| failure.rel_path.ends_with("Cargo.toml"))
         .filter(|failure| !discovered_root_dirs.contains(failure.root_rel_dir.as_str()))
     {
-        rs_test_10_input_failures::check(
+        mutation::rs_test_10_input_failures::check(
             &inputs::InputFailureTestInput::new(failure),
             &mut results,
         );
@@ -104,14 +71,14 @@ pub fn check(
         for failure in analysis::active_failures_for_root(&facts, root, &analysis, mutation_active)
         {
             had_root_input_failures = true;
-            rs_test_10_input_failures::check(
+            mutation::rs_test_10_input_failures::check(
                 &inputs::InputFailureTestInput::new(failure),
                 &mut results,
             );
         }
 
         if analysis.has_tests {
-            rs_test_02_owned_sidecar_shape::collect(
+            structure::rs_test_02_owned_sidecar_shape::collect(
                 tree,
                 root,
                 &analysis.files,
@@ -119,7 +86,7 @@ pub fn check(
                 &mut results,
             );
 
-            rs_test_03_runtime_assertions_split::collect(
+            structure::rs_test_03_runtime_assertions_split::collect(
                 tree,
                 root,
                 &analysis.files,
@@ -137,7 +104,7 @@ pub fn check(
                         .proof_bearing_assertions_by_file
                         .get(&file.facts.rel_path)
                         .unwrap_or(&empty);
-                    rs_test_16_assertions_modules_prove::check(
+                    structure::rs_test_16_assertions_modules_prove::check(
                         &inputs::AssertionsModuleInput::new(
                             &file.facts,
                             &file.parsed,
@@ -148,7 +115,7 @@ pub fn check(
                 }
 
                 if analysis::is_test_support_file(root, &file.facts.rel_path) {
-                    rs_test_18_test_support_generic::check(
+                    structure::rs_test_18_test_support_generic::check(
                         &inputs::TestSupportFileInput::new(
                             &file.facts,
                             &file.parsed,
@@ -161,14 +128,14 @@ pub fn check(
 
                 if matches!(file.facts.kind, TestFileKind::Source) {
                     for module in &file.parsed.cfg_test_modules {
-                        rs_test_01_inline_test_bodies::check(
+                        structure::rs_test_01_inline_test_bodies::check(
                             &inputs::CfgTestModuleInput::new(&file.facts, module),
                             &mut results,
                         );
                     }
                 }
 
-                rs_test_04_ignore_reason::check(&file_input, &mut results);
+                assertion_quality::rs_test_04_ignore_reason::check(&file_input, &mut results);
 
                 for function in &file.parsed.test_functions {
                     let proof_bearing_assertion_functions = file
@@ -184,36 +151,36 @@ pub fn check(
                         function,
                         proof_bearing_assertion_functions,
                     );
-                    rs_test_16_assertions_modules_prove::check_sidecar_semantic_proof(
+                    structure::rs_test_16_assertions_modules_prove::check_sidecar_semantic_proof(
                         &function_input,
                         &mut results,
                     );
-                    rs_test_05_should_panic_expected::check(&function_input, &mut results);
-                    rs_test_06_tautological_assertions::check(&function_input, &mut results);
-                    rs_test_07_real_proof_site::check(&function_input, &mut results);
-                    rs_test_08_weak_matches_assert::check(&function_input, &mut results);
-                    rs_test_17_external_harnesses_use_assertions::check(
+                    assertion_quality::rs_test_05_should_panic_expected::check(&function_input, &mut results);
+                    assertion_quality::rs_test_06_tautological_assertions::check(&function_input, &mut results);
+                    assertion_quality::rs_test_07_real_proof_site::check(&function_input, &mut results);
+                    assertion_quality::rs_test_08_weak_matches_assert::check(&function_input, &mut results);
+                    structure::rs_test_17_external_harnesses_use_assertions::check(
                         &function_input,
                         &mut results,
                     );
                 }
             }
 
-            rs_test_09_nextest_timeouts::check(&root_input, &mut results);
+            mutation::rs_test_09_nextest_timeouts::check(&root_input, &mut results);
         }
 
-        rs_test_10_input_failures::emit_inventory_if_clean(
+        mutation::rs_test_10_input_failures::emit_inventory_if_clean(
             root,
             &mut results,
             had_root_input_failures,
         );
 
         if mutation_active {
-            rs_test_11_cargo_mutants_installed::check(&root_input, &mut results);
-            rs_test_12_mutants_toml_exists::check(&root_input, &mut results);
-            rs_test_13_mutants_profile_present::check(&root_input, &mut results);
-            rs_test_14_mutation_hook_present::check(&root_input, &mut results);
-            rs_test_15_mutants_config_sane::check(&root_input, &mut results);
+            mutation::rs_test_11_cargo_mutants_installed::check(&root_input, &mut results);
+            mutation::rs_test_12_mutants_toml_exists::check(&root_input, &mut results);
+            mutation::rs_test_13_mutants_profile_present::check(&root_input, &mut results);
+            mutation::rs_test_14_mutation_hook_present::check(&root_input, &mut results);
+            mutation::rs_test_15_mutants_config_sane::check(&root_input, &mut results);
         }
     }
 

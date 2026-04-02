@@ -5,7 +5,7 @@ mod reachable_modules;
 mod rule_logic;
 mod source_layout;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_dominance::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_22_ports_trait_dominance::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

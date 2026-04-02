@@ -1,5 +1,5 @@
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_32_test_expect_message_quality::{
+use guardrail3_app_rs_family_code_assertions::inventory::rs_code_32_test_expect_message_quality::{
     RuleFinding, assert_findings,
 };
 

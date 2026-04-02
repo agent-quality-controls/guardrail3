@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::PublishableCrateReleaseInput;
+use crate::inputs::PublishableCrateReleaseInput;
 
 const ID: &str = "RS-PUB-06";
 

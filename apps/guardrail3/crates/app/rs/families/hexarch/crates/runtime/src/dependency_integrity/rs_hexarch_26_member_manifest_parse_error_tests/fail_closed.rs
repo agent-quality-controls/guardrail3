@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_26_member_manifest_parse_error as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_26_member_manifest_parse_error as assertions;
 
 use super::copy_fixture;
 

@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RustCodeFileInput;
-use super::parse::{LargeTypeItem as LargeTypeFact, find_large_type_items};
+use crate::inputs::RustCodeFileInput;
+use crate::parse::{LargeTypeItem as LargeTypeFact, find_large_type_items};
 
 const ID: &str = "RS-CODE-19";
 
@@ -71,9 +71,9 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 
 #[cfg(test)]
 pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
-    let ast = super::parse::parse_rust_file(content)
+    let ast = crate::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
-    let input = super::inputs::RustCodeFileInput {
+    let input = crate::inputs::RustCodeFileInput {
         rel_path,
         content,
         ast: &ast,

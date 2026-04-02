@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::GuardrailConfigValidationInput;
+use crate::inputs::GuardrailConfigValidationInput;
 
 const ID: &str = "RS-GARDE-14";
 
@@ -44,7 +44,7 @@ pub(super) fn run_family(
         None,
     )
     .map_rs_garde();
-    super::check_test_tree(tree, &route)
+    crate::check_test_tree(tree, &route)
 }
 
 #[cfg(test)]

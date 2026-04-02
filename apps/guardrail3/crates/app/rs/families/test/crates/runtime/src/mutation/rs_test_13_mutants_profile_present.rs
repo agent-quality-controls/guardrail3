@@ -1,6 +1,6 @@
 use crate::{CheckResult, Severity};
 
-use super::inputs::RootTestInput;
+use crate::inputs::RootTestInput;
 
 const ID: &str = "RS-TEST-13";
 
@@ -40,7 +40,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 #[cfg(test)]
 #[path = "rs_test_13_mutants_profile_present_tests/mod.rs"]

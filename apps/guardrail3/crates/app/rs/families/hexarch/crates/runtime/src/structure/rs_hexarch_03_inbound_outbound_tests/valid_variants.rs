@@ -5,7 +5,7 @@ fn inner_hex() -> &'static str {
 }
 
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_03_inbound_outbound as assertions;
 
 #[test]
 fn unexpected_directional_dir_hits_only_the_mutated_owned_container() {

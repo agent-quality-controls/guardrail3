@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::ToolDepsInput;
+use crate::inputs::ToolDepsInput;
 
 const ID: &str = "RS-DEPS-01";
 
@@ -53,8 +53,8 @@ fn family_route(
 pub(super) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
-) -> super::facts::DepsFacts {
-    super::facts::collect(
+) -> crate::facts::DepsFacts {
+    crate::facts::collect(
         tree,
         &family_route(tree),
         &test_support::StubToolChecker::new(installed),
@@ -63,25 +63,25 @@ pub(super) fn collected_facts(
 
 #[cfg(test)]
 pub(super) fn tool_input<'a>(
-    facts: &'a super::facts::DepsFacts,
+    facts: &'a crate::facts::DepsFacts,
     tool_name: &str,
-) -> super::inputs::ToolDepsInput<'a> {
+) -> crate::inputs::ToolDepsInput<'a> {
     let tool = facts
         .tools
         .iter()
         .find(|tool| tool.tool_name == tool_name)
         .expect("expected tool facts");
-    super::inputs::ToolDepsInput::new(tool)
+    crate::inputs::ToolDepsInput::new(tool)
 }
 
 #[cfg(test)]
-pub(super) fn tool_facts(tool_name: &str, installed: bool) -> super::facts::DepsFacts {
-    super::facts::DepsFacts {
-        tools: vec![super::facts::ToolFacts {
+pub(super) fn tool_facts(tool_name: &str, installed: bool) -> crate::facts::DepsFacts {
+    crate::facts::DepsFacts {
+        tools: vec![crate::facts::ToolFacts {
             tool_name: tool_name.to_owned(),
             installed,
         }],
-        lockfiles: vec![super::facts::LockfileFacts {
+        lockfiles: vec![crate::facts::LockfileFacts {
             root_rel_dir: String::new(),
             cargo_lock_rel_path: "Cargo.lock".to_owned(),
             cargo_lock_exists: true,
@@ -98,7 +98,7 @@ pub(super) fn tool_facts(tool_name: &str, installed: bool) -> super::facts::Deps
 
 #[cfg(test)]
 pub(super) fn run_with_facts(
-    facts: &super::facts::DepsFacts,
+    facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }

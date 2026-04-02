@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::DerivedBoundaryTypeInput;
-use super::parse::BoundaryKind;
+use crate::inputs::DerivedBoundaryTypeInput;
+use crate::parse::BoundaryKind;
 
 const ID: &str = "RS-GARDE-08";
 
@@ -52,7 +52,7 @@ pub(super) fn run_family(
             None,
         )
         .map_rs_garde();
-        super::check_test_tree(tree, &route)
+        crate::check_test_tree(tree, &route)
     }
 }
 

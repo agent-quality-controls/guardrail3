@@ -1,7 +1,7 @@
 use crate::{CheckResult, Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
-use super::inputs::TestFileInput;
+use crate::inputs::TestFileInput;
 
 const ID: &str = "RS-TEST-04";
 
@@ -90,7 +90,7 @@ pub fn check(input: &TestFileInput<'_>, results: &mut Vec<CheckResult>) {
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 #[cfg(test)]
 #[path = "rs_test_04_ignore_reason_tests/mod.rs"]

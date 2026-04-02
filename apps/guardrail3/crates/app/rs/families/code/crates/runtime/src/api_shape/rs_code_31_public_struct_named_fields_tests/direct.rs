@@ -1,5 +1,5 @@
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_31_public_struct_named_fields::{
+use guardrail3_app_rs_family_code_assertions::api_shape::rs_code_31_public_struct_named_fields::{
     RuleFinding, assert_findings,
 };
 

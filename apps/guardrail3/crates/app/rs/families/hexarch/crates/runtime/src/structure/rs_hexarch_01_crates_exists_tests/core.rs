@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_01_crates_exists as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_01_crates_exists as assertions;
 
 use super::super::check_with_top_level_entries_for_tests;
 

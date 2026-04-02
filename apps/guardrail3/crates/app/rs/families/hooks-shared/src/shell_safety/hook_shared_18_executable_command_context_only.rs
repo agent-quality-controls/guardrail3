@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::facts::HookScriptKind;
-use super::inputs::ExecutableCommandContextInput;
+use crate::facts::HookScriptKind;
+use crate::inputs::ExecutableCommandContextInput;
 
 const ID: &str = "HOOK-SHARED-18";
 
@@ -111,7 +111,7 @@ pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
     let parsed = crate::hook_shell::parse_script(content);
     let input = ExecutableCommandContextInput {
         rel_path: ".githooks/pre-commit",
-        kind: super::facts::HookScriptKind::PreCommit,
+        kind: crate::facts::HookScriptKind::PreCommit,
         content,
         parsed: &parsed,
     };

@@ -4,7 +4,7 @@ mod core;
 mod integration;
 mod ownership;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_01_crates_exists::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_01_crates_exists::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

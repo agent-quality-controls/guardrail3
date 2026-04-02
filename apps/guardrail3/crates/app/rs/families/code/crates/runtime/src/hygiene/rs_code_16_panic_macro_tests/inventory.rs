@@ -1,6 +1,6 @@
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_16_panic_macro::assert_attacks_panic_macros_across_real_owned_files_with_exact_metadata;
+use guardrail3_app_rs_family_code_assertions::hygiene::rs_code_16_panic_macro::assert_attacks_panic_macros_across_real_owned_files_with_exact_metadata;
 use test_support::write_file;
 
 #[test]

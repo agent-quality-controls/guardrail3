@@ -1,6 +1,6 @@
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_08_cfg_attr_allow_inventory::{
+use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_08_cfg_attr_allow_inventory::{
     assert_no_hits, assert_normalized_empty, findings,
 };
 use test_support::write_file;

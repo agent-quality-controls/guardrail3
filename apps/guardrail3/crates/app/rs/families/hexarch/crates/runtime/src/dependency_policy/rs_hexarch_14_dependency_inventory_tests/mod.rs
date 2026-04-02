@@ -1,7 +1,7 @@
 #![allow(dead_code, unused_imports)]
 mod inventory_exactness;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_14_dependency_inventory::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_14_dependency_inventory::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

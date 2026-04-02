@@ -2,7 +2,7 @@ use super::super::check;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 use super::super::{crate_facts, crate_input};
-use guardrail3_app_rs_family_release_assertions::rs_bin_03_binstall_metadata as assertions;
+use guardrail3_app_rs_family_release_assertions::binaries::rs_bin_03_binstall_metadata as assertions;
 
 #[test]
 fn warns_without_binstall_metadata_and_skips_out_of_scope_crates() {

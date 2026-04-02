@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::DispatcherSyntaxInput;
+use crate::inputs::DispatcherSyntaxInput;
 
 const ID: &str = "HOOK-SHARED-04";
 

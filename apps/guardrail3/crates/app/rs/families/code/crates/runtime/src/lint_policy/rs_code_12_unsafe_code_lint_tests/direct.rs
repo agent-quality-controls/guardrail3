@@ -1,5 +1,5 @@
 use super::super::check_unsafe_code_lint;
-use guardrail3_app_rs_family_code_assertions::rs_code_12_unsafe_code_lint::{
+use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_12_unsafe_code_lint::{
     RuleFinding, assert_findings, assert_no_hits,
 };
 

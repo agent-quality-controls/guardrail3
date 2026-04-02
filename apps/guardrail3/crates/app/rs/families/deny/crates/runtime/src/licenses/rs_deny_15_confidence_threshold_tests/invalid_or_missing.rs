@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_15_confidence_threshold as assertions;
+use guardrail3_app_rs_family_deny_assertions::licenses::rs_deny_15_confidence_threshold as assertions;
 
 use super::super::ConfigDenyInput;
 use super::super::check;

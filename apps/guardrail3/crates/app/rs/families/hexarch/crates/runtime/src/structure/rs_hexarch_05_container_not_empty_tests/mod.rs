@@ -7,7 +7,7 @@ mod ownership;
 mod replacement_edges;
 mod symlink_edges;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_05_container_not_empty::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_05_container_not_empty::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

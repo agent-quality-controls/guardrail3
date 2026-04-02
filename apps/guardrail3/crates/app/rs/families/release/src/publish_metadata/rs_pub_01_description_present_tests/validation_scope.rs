@@ -1,6 +1,6 @@
 use super::super::run_tree_with_validation_scope as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
-use guardrail3_app_rs_family_release_assertions::rs_pub_01_description_present as assertions;
+use guardrail3_app_rs_family_release_assertions::publish_metadata::rs_pub_01_description_present as assertions;
 
 #[test]
 fn subtree_run_does_not_emit_description_results_for_sibling_publishable_crates() {

@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_29_ignore_accumulation as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_29_ignore_accumulation as assertions;
 
 use super::super::{build_fixture_deny_toml, set_advisory_ignores};
 

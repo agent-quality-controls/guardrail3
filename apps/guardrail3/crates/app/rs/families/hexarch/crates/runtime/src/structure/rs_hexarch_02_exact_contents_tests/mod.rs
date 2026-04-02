@@ -8,7 +8,7 @@ mod root_loose_files;
 mod unexpected_dirs;
 mod valid_variants;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_02_exact_contents::CheckResult;
 use std::path::{Path, PathBuf};
 
 pub(super) use test_support::{

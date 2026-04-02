@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_05_advisories_baseline as assertions;
+use guardrail3_app_rs_family_deny_assertions::advisories::rs_deny_05_advisories_baseline as assertions;
 
 use super::super::{build_fixture_deny_toml, remove_section_key};
 

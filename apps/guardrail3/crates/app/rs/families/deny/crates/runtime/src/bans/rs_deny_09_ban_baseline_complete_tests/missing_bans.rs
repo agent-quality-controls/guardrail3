@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::rs_deny_09_ban_baseline_complete as assertions;
+use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_09_ban_baseline_complete as assertions;
 
 use super::super::{build_fixture_deny_toml, remove_deny_ban};
 

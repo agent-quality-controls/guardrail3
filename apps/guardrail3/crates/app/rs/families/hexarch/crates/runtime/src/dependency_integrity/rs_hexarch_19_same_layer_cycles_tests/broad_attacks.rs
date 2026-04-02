@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::super::results_for_cycles_for_test as results_for_cycles;
 use super::{dir_entry, project_tree};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_19_same_layer_cycles as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_19_same_layer_cycles as assertions;
 
 #[test]
 fn same_layer_cycle_is_reported_once_even_with_mixed_layer_cycle_present() {

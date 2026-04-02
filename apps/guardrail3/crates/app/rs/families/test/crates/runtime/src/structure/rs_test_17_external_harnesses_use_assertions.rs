@@ -1,9 +1,9 @@
 use crate::{CheckResult, Severity};
 
-use super::facts::TestFileKind;
-use super::inputs::TestFunctionInput;
-use super::parse::FunctionInfo;
-use super::rs_test_07_real_proof_site::has_owned_assertion_proof;
+use crate::facts::TestFileKind;
+use crate::inputs::TestFunctionInput;
+use crate::parse::FunctionInfo;
+use crate::assertion_quality::rs_test_07_real_proof_site::has_owned_assertion_proof;
 
 const ID: &str = "RS-TEST-17";
 
@@ -88,7 +88,7 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
 
 fn local_assertion_helper_names<'a>(
     functions: &'a [FunctionInfo],
-    imports: &[super::parse::UseBinding],
+    imports: &[crate::parse::UseBinding],
     file_function_names: &std::collections::BTreeSet<String>,
     assertions_package_name: Option<&str>,
     proof_bearing_assertion_functions: Option<&std::collections::BTreeSet<String>>,
@@ -99,7 +99,7 @@ fn local_assertion_helper_names<'a>(
         .filter(|function| {
             function.has_assertion_macro
                 || has_owned_assertion_proof(
-                    &super::parse::TestFunctionInfo {
+                    &crate::parse::TestFunctionInfo {
                         line: function.line,
                         name: function.name.clone(),
                         uses_tokio_test_attr: false,
@@ -148,7 +148,7 @@ fn local_assertion_helper_names<'a>(
     assertion_helpers
 }
 
-fn import_binds_name(imports: &[super::parse::UseBinding], name: &str) -> bool {
+fn import_binds_name(imports: &[crate::parse::UseBinding], name: &str) -> bool {
     imports.iter().any(|binding| {
         binding.local_name.as_deref() == Some(name)
             || (binding.local_name.is_none()
@@ -162,7 +162,7 @@ fn import_binds_name(imports: &[super::parse::UseBinding], name: &str) -> bool {
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+    crate::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 #[cfg(test)]
 #[path = "rs_test_17_external_harnesses_use_assertions_tests/mod.rs"]
