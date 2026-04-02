@@ -95,5 +95,4 @@ pub(crate) fn run_case(pre_commit: &str, installed: &[&'static str]) -> Vec<Chec
 }
 
 #[cfg(test)]
-#[path = "lib_tests/mod.rs"]
-mod lib_tests;
+mod tests;
