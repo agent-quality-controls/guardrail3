@@ -41,7 +41,7 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 pub(super) fn run_family(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree.file_content("guardrail3.toml").and_then(|content| {

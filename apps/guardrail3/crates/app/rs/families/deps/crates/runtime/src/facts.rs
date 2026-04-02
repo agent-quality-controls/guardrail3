@@ -7,7 +7,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsDepsRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
 
 use self::dependency_entries::{collect_dependency_facts, discover_members};

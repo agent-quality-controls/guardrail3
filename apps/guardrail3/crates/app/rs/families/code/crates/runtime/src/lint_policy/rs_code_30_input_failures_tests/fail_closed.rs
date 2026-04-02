@@ -7,7 +7,7 @@ use guardrail3_app_rs_family_code_assertions::rs_code_30_input_failures::{
     assert_files, assert_guardrail_policy_parse_failure, assert_message_fragment_failure,
     assert_no_hits, assert_source_parse_failure,
 };
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
+use guardrail3_app_rs_family_view::FamilyView;
 use test_support::{create_dir_all, create_temp_dir, write_path};
 
 fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
@@ -225,6 +225,6 @@ fn stays_quiet_when_validation_scope_selects_zero_code_roots() {
             .with_validation_scope(Some("docs"))
             .map_rs_code();
 
-    let results = crate::check(&RsProjectSurface::from_tree(&tree), &route);
+    let results = crate::check(&FamilyView::from_tree(&tree), &route);
     assert_no_hits(&results);
 }

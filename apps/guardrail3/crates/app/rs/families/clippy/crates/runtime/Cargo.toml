@@ -9,6 +9,7 @@ workspace = true
 [dependencies]
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../../../core" }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
+guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../../family_view" }
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../../../../ownership" }
 guardrail3_domain_modules = { package = "guardrail3-domain-modules", path = "../../../../../../domain/modules" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }

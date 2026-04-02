@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_mapper::RsHexarchRoute;
-use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
+use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
 
 #[derive(Debug, Clone)]
 pub struct HexAppFacts {
@@ -383,9 +383,11 @@ fn insert_root_workspace_member(resolved: &mut BTreeSet<String>, repo_rel: &str)
 }
 
 fn absolute_member_to_repo_rel(tree: &ProjectTree, member: &str) -> Option<String> {
+    // Derive the project root from abs_path("") — returns None if root is out of scope.
+    let root = tree.abs_path("")?;
     let absolute = std::path::Path::new(member);
     absolute
-        .strip_prefix(tree.root())
+        .strip_prefix(&root)
         .ok()
         .map(|rel| rel.to_string_lossy().replace('\\', "/"))
 }

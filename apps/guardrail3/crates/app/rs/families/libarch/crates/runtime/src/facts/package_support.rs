@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use syn::{Item, UseTree};
 
 use super::FacadeExportFacts;
@@ -10,7 +10,10 @@ pub(super) fn collect_facade_exports(
     let Some(lib_rel_path) = lib_rel_path else {
         return Vec::new();
     };
-    let Ok(content) = guardrail3_shared_fs::read_file_err(&tree.abs_path(lib_rel_path)) else {
+    let Some(abs) = tree.abs_path(lib_rel_path) else {
+        return Vec::new();
+    };
+    let Ok(content) = guardrail3_shared_fs::read_file_err(&abs) else {
         return Vec::new();
     };
     let Ok(file) = syn::parse_file(&content) else {
@@ -45,7 +48,8 @@ pub(super) fn facade_source_error(
     if !tree.file_exists(lib_rel_path) {
         return Some(format!("Facade source `{lib_rel_path}` does not exist."));
     }
-    let content = guardrail3_shared_fs::read_file_err(&tree.abs_path(lib_rel_path))
+    let abs = tree.abs_path(lib_rel_path)?;
+    let content = guardrail3_shared_fs::read_file_err(&abs)
         .map_err(|error| error.to_string())
         .ok()?;
     syn::parse_file(&content)

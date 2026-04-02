@@ -3,7 +3,7 @@ mod package_support;
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_mapper::RsLibarchRoute;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use self::package_support::{
     collect_facade_exports, facade_source_error, fallback_name, library_crate_name,

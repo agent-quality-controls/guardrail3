@@ -79,10 +79,10 @@ pub(crate) fn test_input_for_root<'a>(
 
 #[cfg(test)]
 pub(crate) fn run_family_check(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> Vec<CheckResult> {
     crate::check(
-        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
+        &guardrail3_app_rs_family_view::FamilyView::from_tree(tree),
         &test_route(tree),
     )
 }
@@ -91,11 +91,11 @@ pub(crate) fn run_family_check(
 pub(crate) fn test_tree(
     root_files: &[&str],
     content: &[(&str, &str)],
-) -> guardrail3_app_rs_family_mapper::RsProjectSurface {
+) -> guardrail3_app_rs_family_view::FamilyView {
     use std::collections::BTreeMap;
     use std::path::PathBuf;
 
-    use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
+    use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
 
     let structure = BTreeMap::from([(
         String::new(),
@@ -119,11 +119,11 @@ pub(crate) fn test_tree(
 }
 
 #[cfg(test)]
-pub(crate) fn nested_workspace_root_tree() -> guardrail3_app_rs_family_mapper::RsProjectSurface {
+pub(crate) fn nested_workspace_root_tree() -> guardrail3_app_rs_family_view::FamilyView {
     use std::collections::BTreeMap;
     use std::path::PathBuf;
 
-    use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
+    use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
 
     let structure = BTreeMap::from([
         (
@@ -173,7 +173,7 @@ pub(crate) fn nested_workspace_root_tree() -> guardrail3_app_rs_family_mapper::R
 
 #[cfg(test)]
 pub(crate) fn test_route(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> guardrail3_app_rs_family_mapper::RsToolchainRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let selected =
@@ -188,7 +188,7 @@ fn expected_toolchain_rel(rel_dir: &str) -> String {
     if rel_dir.is_empty() {
         "rust-toolchain.toml".to_owned()
     } else {
-        guardrail3_app_rs_family_mapper::RsProjectSurface::join_rel(rel_dir, "rust-toolchain.toml")
+        guardrail3_app_rs_family_view::FamilyView::join_rel(rel_dir, "rust-toolchain.toml")
     }
 }
 

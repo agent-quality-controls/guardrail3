@@ -45,7 +45,7 @@ pub mod hook_shell;
 mod inputs;
 
 use crate::hook_shell::parse_script;
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::FileSystem;
 use guardrail3_outbound_traits::ToolChecker;
@@ -56,7 +56,7 @@ use self::inputs::{DispatcherSyntaxInput, ExecutableCommandContextInput, FailOpe
 pub fn check(
     fs: &dyn FileSystem,
     root: &std::path::Path,
-    surface: &RsProjectSurface,
+    surface: &FamilyView,
     _tc: &dyn ToolChecker,
 ) -> Vec<CheckResult> {
     let tree = surface;

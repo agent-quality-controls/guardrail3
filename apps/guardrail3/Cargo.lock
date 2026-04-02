@@ -396,7 +396,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-core",
  "guardrail3-app-rs-family-hooks-shared",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
@@ -425,6 +425,7 @@ name = "guardrail3-app-rs-family-arch"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
@@ -441,6 +442,7 @@ dependencies = [
  "guardrail3-app-rs-family-cargo-assertions",
  "guardrail3-app-rs-family-cargo-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
@@ -465,6 +467,8 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-cargo",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
+ "guardrail3-app-rs-legality",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
@@ -477,7 +481,7 @@ dependencies = [
 name = "guardrail3-app-rs-family-cargo-test-support"
 version = "0.0.0"
 dependencies = [
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
 ]
 
 [[package]]
@@ -489,6 +493,7 @@ dependencies = [
  "guardrail3-app-rs-family-clippy-assertions",
  "guardrail3-app-rs-family-clippy-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-modules",
@@ -511,7 +516,7 @@ dependencies = [
 name = "guardrail3-app-rs-family-clippy-test-support"
 version = "0.0.0"
 dependencies = [
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-domain-modules",
  "guardrail3-shared-fs",
  "toml",
@@ -528,6 +533,7 @@ dependencies = [
  "guardrail3-app-rs-family-code-assertions",
  "guardrail3-app-rs-family-code-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
@@ -568,6 +574,7 @@ dependencies = [
  "guardrail3-app-rs-family-deny-assertions",
  "guardrail3-app-rs-family-deny-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-modules",
@@ -591,7 +598,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-domain-modules",
  "guardrail3-shared-fs",
  "toml",
@@ -605,6 +612,7 @@ dependencies = [
  "guardrail3-app-rs-family-deps-assertions",
  "guardrail3-app-rs-family-deps-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-report",
@@ -625,7 +633,7 @@ dependencies = [
 name = "guardrail3-app-rs-family-deps-test-support"
 version = "0.0.0"
 dependencies = [
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-ports-outbound-traits",
 ]
 
@@ -636,6 +644,7 @@ dependencies = [
  "guardrail3-app-rs-family-fmt-assertions",
  "guardrail3-app-rs-family-fmt-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
@@ -660,7 +669,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-shared-fs",
  "tempfile",
 ]
@@ -673,6 +682,7 @@ dependencies = [
  "guardrail3-app-core",
  "guardrail3-app-rs-family-garde-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
@@ -695,7 +705,7 @@ dependencies = [
 name = "guardrail3-app-rs-family-garde-test-support"
 version = "0.0.0"
 dependencies = [
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-shared-fs",
 ]
 
@@ -707,6 +717,7 @@ dependencies = [
  "guardrail3-app-rs-family-hexarch-assertions",
  "guardrail3-app-rs-family-hexarch-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-placement",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
@@ -731,7 +742,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-hexarch",
  "guardrail3-app-rs-family-hexarch-assertions-common",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-domain-report",
 ]
 
@@ -748,7 +759,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-shared-fs",
 ]
 
@@ -759,7 +770,7 @@ dependencies = [
  "guardrail3-app-rs-family-hooks-rs-assertions",
  "guardrail3-app-rs-family-hooks-rs-test-support",
  "guardrail3-app-rs-family-hooks-shared",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
 ]
@@ -777,7 +788,7 @@ name = "guardrail3-app-rs-family-hooks-rs-test-support"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-hooks-shared",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-ports-outbound-traits",
 ]
 
@@ -786,7 +797,7 @@ name = "guardrail3-app-rs-family-hooks-shared"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-hooks-shared-assertions",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
  "guardrail3-shared-fs",
@@ -807,6 +818,7 @@ dependencies = [
  "guardrail3-app-rs-family-libarch-assertions",
  "guardrail3-app-rs-family-libarch-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
@@ -829,7 +841,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-shared-fs",
  "tempfile",
 ]
@@ -866,6 +878,7 @@ dependencies = [
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-family-release-assertions",
  "guardrail3-app-rs-family-release-test-support",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
@@ -897,7 +910,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-ports-outbound-traits",
  "guardrail3-shared-fs",
 ]
@@ -929,6 +942,7 @@ dependencies = [
  "guardrail3-app-rs-ast",
  "guardrail3-app-rs-family-hooks-shared",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
@@ -949,6 +963,7 @@ dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
@@ -966,6 +981,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-family-topology-test-support",
+ "guardrail3-app-rs-family-view",
  "guardrail3-app-rs-placement",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
@@ -979,7 +995,7 @@ dependencies = [
 name = "guardrail3-app-rs-family-topology-test-support"
 version = "0.0.0"
 dependencies = [
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
 ]
 
 [[package]]
@@ -1541,7 +1557,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
- "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-view",
  "guardrail3-ports-outbound-traits",
  "guardrail3-shared-fs",
  "tempfile",

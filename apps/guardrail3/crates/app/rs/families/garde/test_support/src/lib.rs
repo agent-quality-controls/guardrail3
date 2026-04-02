@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
+use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
 use guardrail3_shared_fs::{create_dir_all, write_file};
 
 pub fn temp_root(slug: &str) -> PathBuf {
@@ -40,16 +40,22 @@ pub fn project_tree(
         write_file(&abs_path, body).expect("write project file");
     }
 
-    ProjectTree::new(
+    let full_structure: BTreeMap<_, _> = structure
+        .into_iter()
+        .map(|(rel, entry)| (rel.to_owned(), entry))
+        .collect();
+    let full_content: BTreeMap<_, _> = content
+        .into_iter()
+        .map(|(rel, body)| (rel.to_owned(), body.to_owned()))
+        .collect();
+    ProjectTree::build(
         root,
-        structure
-            .into_iter()
-            .map(|(rel, entry)| (rel.to_owned(), entry))
-            .collect::<BTreeMap<_, _>>(),
-        content
-            .into_iter()
-            .map(|(rel, body)| (rel.to_owned(), body.to_owned()))
-            .collect::<BTreeMap<_, _>>(),
+        &full_structure,
+        &full_content,
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
     )
 }
 

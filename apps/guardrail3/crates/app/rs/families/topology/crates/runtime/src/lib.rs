@@ -16,9 +16,10 @@ mod rs_topology_13_member_paths_must_not_escape_root;
 mod rs_topology_14_auxiliary_root_workspace;
 mod rs_topology_16_workspace_local_file_placement;
 
-use guardrail3_app_rs_family_mapper::{RsProjectSurface, RsTopologyRoute};
+use guardrail3_app_rs_family_mapper::RsTopologyRoute;
+use guardrail3_app_rs_family_view::FamilyView;
 #[cfg(test)]
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
@@ -30,7 +31,7 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 #[cfg(test)]
 use std::collections::BTreeSet;
 
-pub fn check(surface: &RsProjectSurface, route: &RsTopologyRoute) -> Vec<CheckResult> {
+pub fn check(surface: &FamilyView, route: &RsTopologyRoute) -> Vec<CheckResult> {
     let tree = surface;
     let facts = facts::collect(tree, route);
     let mut results = Vec::new();
@@ -123,5 +124,5 @@ pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
     let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Topology]));
     let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selection, None).map_rs_topology();
-    check(&RsProjectSurface::from_tree(tree), &route)
+    check(&FamilyView::from_tree(tree), &route)
 }

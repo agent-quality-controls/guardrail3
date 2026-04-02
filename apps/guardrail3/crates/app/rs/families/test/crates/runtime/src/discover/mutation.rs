@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hooks_shared::hook_shell::{ExecutableLine, parse_script};
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use crate::facts::InputFailureFacts;
 
@@ -50,7 +50,8 @@ pub(super) fn collect_mutation_hook_state(
         if let Some(dir) = tree.dir_contents(&hook_dir_rel) {
             for file_name in dir.files() {
                 let rel_path = ProjectTree::join_rel(&hook_dir_rel, file_name);
-                match guardrail3_shared_fs::read_file_err(&tree.abs_path(&rel_path)) {
+                let Some(abs) = tree.abs_path(&rel_path) else { continue };
+                match guardrail3_shared_fs::read_file_err(&abs) {
                     Ok(content) => {
                         if parse_script(&content)
                             .executable_lines()

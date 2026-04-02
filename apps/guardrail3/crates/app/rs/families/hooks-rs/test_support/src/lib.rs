@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use std::path::Path;
 use std::path::PathBuf;
 
-use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
+use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
 use guardrail3_app_rs_family_hooks_shared::hook_shell::{ParsedShellScript, parse_script};
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 
@@ -12,18 +12,25 @@ pub fn parsed_hook(content: &str) -> ParsedShellScript<'_> {
 }
 
 pub fn hook_tree(pre_commit: &str) -> ProjectTree {
-    ProjectTree::new(
+    let full_structure = BTreeMap::from([(
+        ".githooks".to_owned(),
+        DirEntry::new(
+            Vec::new(),
+            vec!["pre-commit".to_owned()],
+            Vec::new(),
+            Vec::new(),
+        ),
+    )]);
+    let full_content =
+        BTreeMap::from([(".githooks/pre-commit".to_owned(), pre_commit.to_owned())]);
+    ProjectTree::build(
         PathBuf::from("/tmp/project"),
-        BTreeMap::from([(
-            ".githooks".to_owned(),
-            DirEntry::new(
-                Vec::new(),
-                vec!["pre-commit".to_owned()],
-                Vec::new(),
-                Vec::new(),
-            ),
-        )]),
-        BTreeMap::from([(".githooks/pre-commit".to_owned(), pre_commit.to_owned())]),
+        &full_structure,
+        &full_content,
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
     )
 }
 

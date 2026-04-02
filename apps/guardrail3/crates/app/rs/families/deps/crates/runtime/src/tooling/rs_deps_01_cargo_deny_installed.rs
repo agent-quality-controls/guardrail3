@@ -38,7 +38,7 @@ pub fn check(input: &ToolDepsInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 fn family_route(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let selected =
@@ -51,7 +51,7 @@ fn family_route(
 
 #[cfg(test)]
 pub(super) fn collected_facts(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
 ) -> super::facts::DepsFacts {
     super::facts::collect(

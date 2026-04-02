@@ -25,7 +25,8 @@ mod rs_deps_11_input_failures;
 #[path = "policy/rs_deps_12_direct_dependency_cap.rs"]
 mod rs_deps_12_direct_dependency_cap;
 
-use guardrail3_app_rs_family_mapper::{RsDepsRoute, RsProjectSurface};
+use guardrail3_app_rs_family_mapper::RsDepsRoute;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
 
@@ -36,7 +37,7 @@ use self::inputs::{
 };
 
 pub fn check(
-    surface: &RsProjectSurface,
+    surface: &FamilyView,
     route: &RsDepsRoute,
     tc: &dyn ToolChecker,
 ) -> Vec<CheckResult> {

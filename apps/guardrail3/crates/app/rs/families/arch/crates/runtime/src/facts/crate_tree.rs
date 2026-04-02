@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 /// A node in the crate containment tree.
 /// Each node is a directory with a Cargo.toml.

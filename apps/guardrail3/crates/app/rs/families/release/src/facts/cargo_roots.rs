@@ -4,7 +4,7 @@ use std::path::{Component, Path, PathBuf};
 use glob::Pattern;
 
 use guardrail3_app_rs_family_mapper::RsReleaseRoute;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use super::types::{CargoRootFacts, ReleaseInputFailureFacts};
 use crate::release_support::binaries::join_under_root;

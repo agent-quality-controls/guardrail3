@@ -3,7 +3,7 @@ use std::path::{Component, Path, PathBuf};
 
 use semver::{Version, VersionReq};
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 pub fn package_table(parsed: &toml::Value) -> Option<&toml::Value> {
     parsed.get("package")
@@ -153,15 +153,17 @@ pub fn resolve_manifest_relative_path(
     manifest_rel_dir: &str,
     relative: &str,
 ) -> (String, PathBuf) {
-    let abs = if manifest_rel_dir.is_empty() {
-        tree.root().join(relative)
+    // Build the repo-relative path by joining manifest dir and the relative reference,
+    // then normalize away ".." and "." components.
+    let joined = if manifest_rel_dir.is_empty() {
+        relative.to_owned()
     } else {
-        tree.root().join(manifest_rel_dir).join(relative)
+        format!("{manifest_rel_dir}/{relative}")
     };
-    let rel = abs
-        .strip_prefix(tree.root())
-        .map(normalize_relative_path)
-        .unwrap_or_else(|_| relative.to_owned());
+    let rel = normalize_relative_path(Path::new(&joined));
+    let abs = tree
+        .abs_path(&rel)
+        .unwrap_or_else(|| PathBuf::from(&rel));
     (rel, abs)
 }
 

@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use super::crate_tree::CrateTree;
 
@@ -95,7 +95,7 @@ fn analyze_facade(
     let content = if let Some(cached) = tree.file_content(rel_path) {
         cached
     } else {
-        let abs = tree.abs_path(rel_path);
+        let abs = tree.abs_path(rel_path)?;
         owned_content = guardrail3_shared_fs::read_file_err(&abs).ok()?;
         &owned_content
     };

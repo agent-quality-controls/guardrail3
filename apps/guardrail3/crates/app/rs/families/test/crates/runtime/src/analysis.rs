@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use crate::discover;
 use crate::facts::{DiscoveredTestFile, InputFailureFacts, TestFacts, TestFileKind, TestRootFacts};
@@ -36,7 +36,8 @@ pub(crate) fn analyze_root(
         .iter()
         .filter(|file| file.root_rel_dir == root.rel_dir)
     {
-        let content = match guardrail3_shared_fs::read_file_err(&tree.abs_path(&file.rel_path)) {
+        let Some(abs) = tree.abs_path(&file.rel_path) else { continue };
+        let content = match guardrail3_shared_fs::read_file_err(&abs) {
             Ok(content) => content,
             Err(read_error) => {
                 analysis.input_failures.push(InputFailureFacts {
