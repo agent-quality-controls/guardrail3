@@ -5,7 +5,6 @@ use guardrail3_app_rs_ownership::{
 };
 use guardrail3_app_rs_placement::{RustRootClassification, RustRootPlacementFacts};
 use guardrail3_app_rs_structure::RustStructureFacts;
-use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::RustValidateFamily;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -308,10 +307,10 @@ enum RootLegality {
 }
 
 #[must_use]
-pub fn collect(tree: &ProjectTree, structure: &RustStructureFacts) -> RustLegalityFacts {
+pub fn collect(structure: &RustStructureFacts) -> RustLegalityFacts {
     let placement = structure.placement();
     let owned_surface = structure.owned_surface();
-    let snapshots = collect_snapshots(tree, placement);
+    let snapshots = collect_snapshots(structure, placement);
     let top_level_workspaces = top_level_workspace_candidates(&snapshots);
     let mut legal_workspace_roots = Vec::new();
     let mut topology_issues = Vec::new();
@@ -510,7 +509,7 @@ pub fn collect(tree: &ProjectTree, structure: &RustStructureFacts) -> RustLegali
 }
 
 fn collect_snapshots(
-    tree: &ProjectTree,
+    structure: &RustStructureFacts,
     placement: &RustRootPlacementFacts,
 ) -> BTreeMap<String, CargoRootSnapshot> {
     placement
@@ -518,7 +517,7 @@ fn collect_snapshots(
         .iter()
         .map(|root| {
             let snapshot = cargo_root_snapshot(
-                tree,
+                structure,
                 root.rel_dir(),
                 root.cargo_rel_path(),
                 root.classification(),
@@ -529,12 +528,12 @@ fn collect_snapshots(
 }
 
 fn cargo_root_snapshot(
-    tree: &ProjectTree,
+    structure: &RustStructureFacts,
     rel_dir: &str,
     cargo_rel_path: &str,
     classification: RustRootClassification,
 ) -> CargoRootSnapshot {
-    let Some(content) = tree.file_content(cargo_rel_path) else {
+    let Some(content) = structure.file_content(cargo_rel_path) else {
         return CargoRootSnapshot {
             rel_dir: rel_dir.to_owned(),
             cargo_rel_path: cargo_rel_path.to_owned(),
@@ -552,7 +551,7 @@ fn cargo_root_snapshot(
             let has_workspace = parsed.get("workspace").is_some();
             let has_package = parsed.get("package").is_some();
             let (workspace_members, escaping_member_patterns) =
-                parse_workspace_members(tree, rel_dir, &parsed);
+                parse_workspace_members(structure, rel_dir, &parsed);
             CargoRootSnapshot {
                 rel_dir: rel_dir.to_owned(),
                 cargo_rel_path: cargo_rel_path.to_owned(),
@@ -578,7 +577,7 @@ fn cargo_root_snapshot(
 }
 
 fn parse_workspace_members(
-    tree: &ProjectTree,
+    structure: &RustStructureFacts,
     workspace_rel: &str,
     parsed: &toml::Value,
 ) -> (Vec<WorkspaceMemberSnapshot>, Vec<String>) {
@@ -597,7 +596,7 @@ fn parse_workspace_members(
             let _ = escaping.insert(member.to_owned());
             continue;
         }
-        let mut resolved_dirs = expand_member_pattern(tree, workspace_rel, member);
+        let mut resolved_dirs = expand_member_pattern(structure, workspace_rel, member);
         resolved_dirs.sort();
         resolved_dirs.dedup();
         expansions.push(WorkspaceMemberSnapshot {
@@ -610,7 +609,7 @@ fn parse_workspace_members(
 }
 
 fn expand_member_pattern(
-    tree: &ProjectTree,
+    structure: &RustStructureFacts,
     workspace_rel: &str,
     member: &str,
 ) -> Vec<String> {
@@ -621,7 +620,7 @@ fn expand_member_pattern(
         join_rel(workspace_rel, trimmed)
     };
     if trimmed.contains('*') || trimmed.contains('?') || trimmed.contains('[') {
-        tree.matching_dir_rels(&pattern)
+        structure.matching_dir_rels(&pattern)
     } else {
         vec![pattern]
     }
