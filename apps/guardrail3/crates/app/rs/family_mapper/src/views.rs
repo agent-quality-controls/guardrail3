@@ -336,6 +336,7 @@ impl RsScopedRootView {
 pub struct RsScopedSourceRoute {
     roots: Vec<RsScopedRootView>,
     scoped_files: Option<BTreeSet<String>>,
+    validation_scope: Option<String>,
 }
 
 impl RsScopedSourceRoute {
@@ -344,7 +345,14 @@ impl RsScopedSourceRoute {
         Self {
             roots,
             scoped_files,
+            validation_scope: None,
         }
+    }
+
+    #[must_use]
+    pub fn with_validation_scope(mut self, validation_scope: Option<String>) -> Self {
+        self.validation_scope = validation_scope;
+        self
     }
 
     #[must_use]
@@ -355,6 +363,11 @@ impl RsScopedSourceRoute {
     #[must_use]
     pub fn scoped_files(&self) -> Option<&BTreeSet<String>> {
         self.scoped_files.as_ref()
+    }
+
+    #[must_use]
+    pub fn validation_scope(&self) -> Option<&str> {
+        self.validation_scope.as_deref()
     }
 }
 

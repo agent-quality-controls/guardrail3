@@ -7,7 +7,7 @@ fn must_parse(source: &str) -> syn::File {
 }
 
 #[test]
-fn ignore_with_name_value_reason_not_flagged() {
+fn ignore_with_name_value_reason_recorded_with_reason() {
     let src = "#[test]\n#[ignore = \"requires network\"]\nfn slow_test() {}";
     let file = must_parse(src);
     let mut v = IgnoreVisitor {
@@ -15,9 +15,12 @@ fn ignore_with_name_value_reason_not_flagged() {
         findings: Vec::new(),
     };
     v.visit_file(&file);
-    assert!(
-        v.findings.is_empty(),
-        "ignore with = reason should not be flagged"
+    assert_eq!(v.findings.len(), 1, "name-value ignore should produce a finding");
+    assert_eq!(v.findings[0].line, 2);
+    assert_eq!(
+        v.findings[0].reason.as_deref(),
+        Some("requires network"),
+        "reason should be extracted from the name-value attribute"
     );
 }
 
