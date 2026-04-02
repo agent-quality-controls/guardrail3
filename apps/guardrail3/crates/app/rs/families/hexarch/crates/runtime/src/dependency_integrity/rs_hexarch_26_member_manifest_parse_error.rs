@@ -1,8 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::dependency_facts::{MemberDependencyFacts, MemberManifestFailureFacts};
-use super::inputs::MemberManifestFailureHexarchInput;
-use super::inventory::push_success;
+use crate::dependency_facts::{MemberDependencyFacts, MemberManifestFailureFacts};
+use crate::inputs::MemberManifestFailureHexarchInput;
+use crate::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-26";
 

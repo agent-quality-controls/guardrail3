@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::{expected_sources, section};
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::{expected_sources, section};
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
@@ -49,7 +49,7 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
 pub(crate) use ::test_support::{build_fixture_deny_toml, remove_section, set_source_policy};
 #[cfg(test)]
 pub(crate) fn expected_sources_for_test() -> (std::collections::BTreeSet<String>, String, String) {
-    super::deny_support::expected_sources()
+    crate::deny_support::expected_sources()
 }
 #[cfg(test)]
 #[path = "rs_deny_18_unknown_sources_policy_tests/mod.rs"]

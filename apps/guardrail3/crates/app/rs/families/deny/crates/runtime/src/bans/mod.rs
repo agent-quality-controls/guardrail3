@@ -1,0 +1,9 @@
+pub(crate) mod rs_deny_09_ban_baseline_complete;
+pub(crate) mod rs_deny_10_multiple_versions_floor;
+pub(crate) mod rs_deny_11_highlight_inventory;
+pub(crate) mod rs_deny_12_allow_wildcard_paths;
+pub(crate) mod rs_deny_13_wildcards_inventory;
+pub(crate) mod rs_deny_21_tokio_full_ban;
+pub(crate) mod rs_deny_22_extra_feature_bans_inventory;
+pub(crate) mod rs_deny_26_ban_reason_inventory;
+pub(crate) mod rs_deny_27_duplicate_entries;

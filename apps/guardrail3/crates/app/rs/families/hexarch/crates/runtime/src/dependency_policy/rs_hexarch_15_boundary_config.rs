@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inventory::push_success;
+use crate::inventory::push_success;
 use crate::inputs::MemberConfigHexarchInput;
 
 const ID: &str = "RS-HEXARCH-15";
@@ -65,7 +65,7 @@ pub fn check_boundary_config_for_test(
     is_app_boundary: bool,
     parse_error: Option<&str>,
 ) -> Vec<CheckResult> {
-    let input = super::dependency_facts::BoundaryConfigFacts {
+    let input = crate::dependency_facts::BoundaryConfigFacts {
         rel_dir: rel_dir.to_owned(),
         has_config_entry,
         is_app_boundary,

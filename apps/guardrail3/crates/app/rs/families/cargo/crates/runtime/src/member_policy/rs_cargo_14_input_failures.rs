@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::{InputFailureCargoInput, InputFailureInventoryCargoInput};
+use crate::inputs::{InputFailureCargoInput, InputFailureInventoryCargoInput};
 
 const ID: &str = "RS-CARGO-14";
 

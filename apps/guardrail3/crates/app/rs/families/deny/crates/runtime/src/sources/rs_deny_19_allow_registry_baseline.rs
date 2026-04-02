@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::section;
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::section;
+use crate::inputs::ConfigDenyInput;
 
 const CANONICAL_CRATES_IO_REGISTRY: &str = "sparse+https://index.crates.io/";
 
@@ -137,7 +137,7 @@ pub(crate) use crate::config_facts;
 pub(crate) use ::test_support::{build_fixture_deny_toml, set_allow_registries};
 #[cfg(test)]
 pub(crate) fn expected_sources_for_test() -> (std::collections::BTreeSet<String>, String, String) {
-    super::deny_support::expected_sources()
+    crate::deny_support::expected_sources()
 }
 #[cfg(test)]
 #[path = "rs_deny_19_allow_registry_baseline_tests/mod.rs"]

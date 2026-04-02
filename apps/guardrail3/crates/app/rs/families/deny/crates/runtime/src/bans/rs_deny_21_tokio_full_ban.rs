@@ -1,9 +1,9 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::{
+use crate::deny_support::{
     expected_tokio_allowed_features, join_set, parse_feature_entries_in_config,
 };
-use super::inputs::ConfigDenyInput;
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
@@ -85,17 +85,17 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 pub(crate) use ::test_support::{build_fixture_deny_toml, set_feature_entries};
 #[cfg(test)]
 pub(crate) fn expected_tokio_allowed_features_for_test() -> std::collections::BTreeSet<String> {
-    super::deny_support::expected_tokio_allowed_features()
+    crate::deny_support::expected_tokio_allowed_features()
 }
 #[cfg(test)]
 pub(crate) fn join_set_for_test(values: &std::collections::BTreeSet<String>) -> String {
-    super::deny_support::join_set(values)
+    crate::deny_support::join_set(values)
 }
 #[cfg(test)]
 pub(crate) fn parse_feature_entries_for_test(
     parsed: &toml::Value,
-) -> Vec<super::deny_support::FeatureConfigEntry> {
-    super::deny_support::parse_feature_entries_in_config(parsed)
+) -> Vec<crate::deny_support::FeatureConfigEntry> {
+    crate::deny_support::parse_feature_entries_in_config(parsed)
 }
 #[cfg(test)]
 #[path = "rs_deny_21_tokio_full_ban_tests/mod.rs"] // reason: test-only sidecar module wiring

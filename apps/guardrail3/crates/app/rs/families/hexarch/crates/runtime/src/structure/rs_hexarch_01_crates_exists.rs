@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::AppHexarchInput;
-use super::inventory::push_success;
+use crate::inputs::AppHexarchInput;
+use crate::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-01";
 
@@ -57,8 +57,8 @@ pub(super) fn discovered_app_rel_dirs_for_tests(
     root: &std::path::Path,
 ) -> std::collections::BTreeSet<String> {
     let tree = test_support::walk(root);
-    let route = super::family_route_for_tests(&tree);
-    super::facts::collect(&tree, &route)
+    let route = crate::family_route_for_tests(&tree);
+    crate::facts::collect(&tree, &route)
         .apps
         .into_iter()
         .map(|app| app.app_rel_dir)

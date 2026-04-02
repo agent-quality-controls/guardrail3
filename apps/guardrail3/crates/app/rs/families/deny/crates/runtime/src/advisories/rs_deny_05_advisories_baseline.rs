@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::{expected_advisory_baseline, section};
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::{expected_advisory_baseline, section};
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
@@ -39,7 +39,7 @@ fn check_value(
     actual: Option<&str>,
     key: &str,
     expected: &str,
-    config: &super::facts::DenyConfigFacts,
+    config: &crate::facts::DenyConfigFacts,
     results: &mut Vec<CheckResult>,
 ) {
     match actual {

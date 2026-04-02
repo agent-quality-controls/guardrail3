@@ -1,8 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
-use super::deny_support::{ban_name, section};
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::{ban_name, section};
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;

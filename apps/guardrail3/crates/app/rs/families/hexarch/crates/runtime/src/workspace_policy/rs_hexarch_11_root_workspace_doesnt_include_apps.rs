@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RootWorkspaceHexarchInput;
-use super::inventory::push_success;
+use crate::inputs::RootWorkspaceHexarchInput;
+use crate::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-11";
 

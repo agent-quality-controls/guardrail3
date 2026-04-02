@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::facts::PolicyRootKind;
-use super::inputs::PolicyRootCargoInput;
+use crate::facts::PolicyRootKind;
+use crate::inputs::PolicyRootCargoInput;
 
 const ID: &str = "RS-CARGO-08";
 

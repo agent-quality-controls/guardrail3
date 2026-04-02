@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::{
+use crate::deny_support::{
     known_section_keys, known_top_level_keys, parse_feature_entries_in_config, section,
 };
 
@@ -76,7 +76,7 @@ fn warn_string_array_members(
         }
     }
 }
-use super::inputs::ConfigDenyInput;
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;

@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::deny_support::{ban_name, expected_bans, string_array};
-use super::inputs::ConfigDenyInput;
+use crate::deny_support::{ban_name, expected_bans, string_array};
+use crate::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
@@ -102,7 +102,7 @@ pub(crate) use ::test_support::{
 pub(crate) fn expected_ban_names_for_test(
     profile_name: Option<&str>,
 ) -> std::collections::BTreeSet<String> {
-    super::deny_support::expected_bans(profile_name)
+    crate::deny_support::expected_bans(profile_name)
         .into_keys()
         .collect()
 }

@@ -1,0 +1,9 @@
+pub(crate) mod rs_cargo_01_workspace_lints;
+pub(crate) mod rs_cargo_02_lint_levels;
+pub(crate) mod rs_cargo_03_allow_inventory;
+pub(crate) mod rs_cargo_05_workspace_metadata;
+pub(crate) mod rs_cargo_07_priority_order;
+pub(crate) mod rs_cargo_08_resolver;
+pub(crate) mod rs_cargo_11_disallowed_macros_deny;
+pub(crate) mod rs_cargo_12_unapproved_allow_entries;
+pub(crate) mod rs_cargo_15_rust_version_policy;
