@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_placement::{RustRootPlacementFacts, is_excluded_live_root_dir};
-use guardrail3_domain_project_tree::ProjectTreeView;
+use guardrail3_domain_project_tree::ProjectTreeDiscovery;
 use guardrail3_validation_model::RustValidateFamily;
 
 use crate::kinds::{
@@ -9,7 +9,7 @@ use crate::kinds::{
 };
 
 pub(super) fn collect(
-    tree: &dyn ProjectTreeView,
+    tree: &dyn ProjectTreeDiscovery,
     placement: &RustRootPlacementFacts,
 ) -> RustOwnedSurfaceFacts {
     let root_rels = placement
@@ -38,7 +38,7 @@ pub(super) fn collect(
 }
 
 fn collect_fmt_files(
-    tree: &dyn ProjectTreeView,
+    tree: &dyn ProjectTreeDiscovery,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -64,7 +64,7 @@ fn collect_fmt_files(
 }
 
 fn collect_toolchain_files(
-    tree: &dyn ProjectTreeView,
+    tree: &dyn ProjectTreeDiscovery,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -90,7 +90,7 @@ fn collect_toolchain_files(
 }
 
 fn collect_clippy_files(
-    tree: &dyn ProjectTreeView,
+    tree: &dyn ProjectTreeDiscovery,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -136,7 +136,7 @@ fn collect_clippy_files(
 }
 
 fn collect_deny_files(
-    tree: &dyn ProjectTreeView,
+    tree: &dyn ProjectTreeDiscovery,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -205,7 +205,7 @@ fn collect_deny_files(
 }
 
 fn collect_cargo_and_policy_files(
-    tree: &dyn ProjectTreeView,
+    tree: &dyn ProjectTreeDiscovery,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -249,7 +249,7 @@ fn collect_cargo_and_policy_files(
 }
 
 fn collect_release_files(
-    tree: &dyn ProjectTreeView,
+    tree: &dyn ProjectTreeDiscovery,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -275,7 +275,7 @@ fn collect_release_files(
 }
 
 fn collect_root_and_dir_file(
-    tree: &dyn ProjectTreeView,
+    tree: &dyn ProjectTreeDiscovery,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -298,7 +298,7 @@ fn collect_root_and_dir_file(
 }
 
 fn collect_cargo_dir_file(
-    tree: &dyn ProjectTreeView,
+    tree: &dyn ProjectTreeDiscovery,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,

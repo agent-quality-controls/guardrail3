@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_project_tree::ProjectTreeView;
+use guardrail3_domain_project_tree::{ProjectTreeDiscovery, ProjectTreeView};
 use toml::Value;
 
 use crate::classification::{
@@ -69,7 +69,7 @@ impl RustRootPlacementFacts {
 }
 
 #[must_use]
-pub fn collect(tree: &dyn ProjectTreeView) -> RustRootPlacementFacts {
+pub fn collect(tree: &dyn ProjectTreeDiscovery) -> RustRootPlacementFacts {
     if is_excluded_validation_root(tree) {
         return RustRootPlacementFacts::default();
     }

@@ -190,16 +190,6 @@ impl RsProjectSurface {
     }
 
     #[must_use]
-    pub fn all_dir_rels(&self) -> Vec<String> {
-        self.tree.all_dir_rels()
-    }
-
-    #[must_use]
-    pub fn dirs_with_file(&self, name: &str) -> Vec<String> {
-        self.tree.dirs_with_file(name)
-    }
-
-    #[must_use]
     pub fn matching_dir_rels(&self, pattern: &str) -> Vec<String> {
         self.tree.matching_dir_rels(pattern)
     }
@@ -242,14 +232,6 @@ impl ProjectTreeView for RsProjectSurface {
 
     fn file_exists(&self, rel: &str) -> bool {
         RsProjectSurface::file_exists(self, rel)
-    }
-
-    fn all_dir_rels(&self) -> Vec<String> {
-        RsProjectSurface::all_dir_rels(self)
-    }
-
-    fn dirs_with_file(&self, name: &str) -> Vec<String> {
-        RsProjectSurface::dirs_with_file(self, name)
     }
 
     fn matching_dir_rels(&self, pattern: &str) -> Vec<String> {

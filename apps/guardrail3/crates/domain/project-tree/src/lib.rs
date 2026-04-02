@@ -17,6 +17,8 @@ use garde::Validate;
 use glob::Pattern;
 use serde::{Deserialize, Serialize};
 
+/// Read-only view of the project tree. Available to families via RsProjectSurface.
+/// Does NOT include discovery/walking methods — those are on ProjectTreeDiscovery.
 pub trait ProjectTreeView {
     fn root(&self) -> &PathBuf;
     fn structure(&self) -> &BTreeMap<String, DirEntry>;
@@ -25,10 +27,16 @@ pub trait ProjectTreeView {
     fn dir_contents(&self, rel: &str) -> Option<&DirEntry>;
     fn file_content(&self, rel: &str) -> Option<&str>;
     fn file_exists(&self, rel: &str) -> bool;
-    fn all_dir_rels(&self) -> Vec<String>;
-    fn dirs_with_file(&self, name: &str) -> Vec<String>;
     fn matching_dir_rels(&self, pattern: &str) -> Vec<String>;
     fn abs_path(&self, rel: &str) -> PathBuf;
+}
+
+/// Discovery/walking methods. Available to pre-family stages (structure, legality,
+/// placement, mapper) but NOT to families. Families must use route roots for
+/// discovery, not walk the tree.
+pub trait ProjectTreeDiscovery: ProjectTreeView {
+    fn all_dir_rels(&self) -> Vec<String>;
+    fn dirs_with_file(&self, name: &str) -> Vec<String>;
 }
 
 /// The full project tree.
@@ -220,20 +228,22 @@ impl ProjectTreeView for ProjectTree {
         ProjectTree::file_exists(self, rel)
     }
 
-    fn all_dir_rels(&self) -> Vec<String> {
-        ProjectTree::all_dir_rels(self)
-    }
-
-    fn dirs_with_file(&self, name: &str) -> Vec<String> {
-        ProjectTree::dirs_with_file(self, name)
-    }
-
     fn matching_dir_rels(&self, pattern: &str) -> Vec<String> {
         ProjectTree::matching_dir_rels(self, pattern)
     }
 
     fn abs_path(&self, rel: &str) -> PathBuf {
         ProjectTree::abs_path(self, rel)
+    }
+}
+
+impl ProjectTreeDiscovery for ProjectTree {
+    fn all_dir_rels(&self) -> Vec<String> {
+        ProjectTree::all_dir_rels(self)
+    }
+
+    fn dirs_with_file(&self, name: &str) -> Vec<String> {
+        ProjectTree::dirs_with_file(self, name)
     }
 }
 
