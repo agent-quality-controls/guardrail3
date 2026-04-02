@@ -210,5 +210,4 @@ pub fn parse_script(content: &str) -> ParsedShellScript<'_> {
 }
 
 #[cfg(test)]
-#[path = "hook_shell_tests/mod.rs"]
-mod hook_shell_tests;
+mod tests;

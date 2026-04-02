@@ -246,5 +246,4 @@ fn split_rel(rel: &str) -> (&str, &str) {
 }
 
 #[cfg(test)]
-#[path = "lib_tests/mod.rs"]
-mod lib_tests;
+mod tests;
