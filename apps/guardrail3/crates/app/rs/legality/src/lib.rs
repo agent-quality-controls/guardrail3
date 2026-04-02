@@ -5,7 +5,7 @@ use guardrail3_app_rs_ownership::{
 };
 use guardrail3_app_rs_placement::{RustRootClassification, RustRootPlacementFacts};
 use guardrail3_app_rs_structure::RustStructureFacts;
-use guardrail3_domain_project_tree::ProjectTreeView;
+use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::RustValidateFamily;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -308,7 +308,7 @@ enum RootLegality {
 }
 
 #[must_use]
-pub fn collect(tree: &dyn ProjectTreeView, structure: &RustStructureFacts) -> RustLegalityFacts {
+pub fn collect(tree: &ProjectTree, structure: &RustStructureFacts) -> RustLegalityFacts {
     let placement = structure.placement();
     let owned_surface = structure.owned_surface();
     let snapshots = collect_snapshots(tree, placement);
@@ -510,7 +510,7 @@ pub fn collect(tree: &dyn ProjectTreeView, structure: &RustStructureFacts) -> Ru
 }
 
 fn collect_snapshots(
-    tree: &dyn ProjectTreeView,
+    tree: &ProjectTree,
     placement: &RustRootPlacementFacts,
 ) -> BTreeMap<String, CargoRootSnapshot> {
     placement
@@ -529,7 +529,7 @@ fn collect_snapshots(
 }
 
 fn cargo_root_snapshot(
-    tree: &dyn ProjectTreeView,
+    tree: &ProjectTree,
     rel_dir: &str,
     cargo_rel_path: &str,
     classification: RustRootClassification,
@@ -578,7 +578,7 @@ fn cargo_root_snapshot(
 }
 
 fn parse_workspace_members(
-    tree: &dyn ProjectTreeView,
+    tree: &ProjectTree,
     workspace_rel: &str,
     parsed: &toml::Value,
 ) -> (Vec<WorkspaceMemberSnapshot>, Vec<String>) {
@@ -610,7 +610,7 @@ fn parse_workspace_members(
 }
 
 fn expand_member_pattern(
-    tree: &dyn ProjectTreeView,
+    tree: &ProjectTree,
     workspace_rel: &str,
     member: &str,
 ) -> Vec<String> {

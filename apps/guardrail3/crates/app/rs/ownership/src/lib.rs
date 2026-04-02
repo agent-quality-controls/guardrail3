@@ -6,11 +6,11 @@ pub use kinds::{
 };
 
 use guardrail3_app_rs_placement::RustRootPlacementFacts;
-use guardrail3_domain_project_tree::ProjectTreeDiscovery;
+use guardrail3_domain_project_tree::ProjectTree;
 
 #[must_use]
 pub fn collect(
-    tree: &dyn ProjectTreeDiscovery,
+    tree: &ProjectTree,
     placement: &RustRootPlacementFacts,
 ) -> RustOwnedSurfaceFacts {
     discover::collect(tree, placement)

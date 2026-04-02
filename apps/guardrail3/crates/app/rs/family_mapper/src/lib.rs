@@ -2,7 +2,7 @@ mod rs;
 mod scoped_files;
 mod views;
 
-pub use guardrail3_domain_project_tree::DirEntry;
+// DirEntry re-export removed. Families don't get directory access.
 pub use rs::FamilyMapper;
 pub type RsTopologyOverlapView = views::RsTopologyOverlapView;
 pub type RsTopologyRootView = views::RsTopologyRootView;
@@ -22,7 +22,7 @@ pub type RsFmtRoute = views::RsFmtRoute;
 pub type RsGardeRoute = views::RsGardeRoute;
 pub type RsHexarchRoute = views::RsHexarchRoute;
 pub type RsLibarchRoute = views::RsLibarchRoute;
-pub type RsProjectSurface = views::RsProjectSurface;
+// RsProjectSurface removed. Families receive FamilyView from legality.
 pub type RsReleaseRoute = views::RsReleaseRoute;
 pub type RsRootInputFailureView = views::RsRootInputFailureView;
 pub type RsRootView = views::RsRootView;
