@@ -844,7 +844,6 @@ dependencies = [
  "guardrail3-app-rs-placement",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
- "guardrail3-domain-project-tree",
  "guardrail3-domain-validation-model",
  "toml",
 ]
