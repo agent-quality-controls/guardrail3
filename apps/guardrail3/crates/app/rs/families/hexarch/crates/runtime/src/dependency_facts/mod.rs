@@ -306,5 +306,4 @@ pub fn normalize_path(base: &str, rel: &str) -> String {
 }
 
 #[cfg(test)]
-#[path = "dependency_facts_tests/mod.rs"]
-mod dependency_facts_tests;
+mod tests;

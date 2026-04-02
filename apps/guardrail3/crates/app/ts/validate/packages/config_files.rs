@@ -3,7 +3,7 @@ use std::path::Path;
 use guardrail3_app_core::crawl::CrawlResult;
 use guardrail3_domain_report::CheckResult;
 
-use super::eslint_check;
+use crate::validate::eslint::eslint_check;
 use super::jscpd_check;
 use super::npmrc_check;
 use super::package_check;

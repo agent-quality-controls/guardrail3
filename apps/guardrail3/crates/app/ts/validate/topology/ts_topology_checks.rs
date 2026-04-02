@@ -2,7 +2,7 @@ use std::path::Path;
 
 use walkdir::WalkDir;
 
-use super::source_scan::is_excluded_ts_dir;
+use crate::validate::source::source_scan::is_excluded_ts_dir;
 use guardrail3_app_hexarch_helpers as hexarch_helpers;
 use guardrail3_domain_report::{CheckResult, Severity, TsAppContext};
 use guardrail3_outbound_traits::FileSystem;

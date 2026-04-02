@@ -52,5 +52,5 @@ pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "lib_tests/mod.rs"]
+
 mod lib_tests;

@@ -403,5 +403,4 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "tests/tools/hook_rs_09_clippy_denies_warnings_tests/mod.rs"]
-mod hook_rs_09_clippy_denies_warnings_tests;
+mod tests;

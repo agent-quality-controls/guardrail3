@@ -1,43 +1,14 @@
-#[path = "source/ast_helpers.rs"]
-pub mod ast_helpers;
-#[path = "packages/config_files.rs"]
-pub mod config_files;
-#[path = "eslint/eslint_audit.rs"]
-pub mod eslint_audit;
-#[path = "eslint/eslint_check.rs"]
-mod eslint_check;
-#[path = "eslint/eslint_parser.rs"]
-pub mod eslint_parser;
-#[path = "eslint/eslint_plugin_checks.rs"]
-mod eslint_plugin_checks;
-#[path = "eslint/eslint_rule_infra.rs"]
-mod eslint_rule_infra;
-#[path = "packages/i18n_check.rs"]
-pub mod i18n_check;
-#[path = "packages/jscpd_check.rs"]
-mod jscpd_check;
-#[path = "packages/npmrc_check.rs"]
-mod npmrc_check;
-#[path = "packages/package_check.rs"]
-mod package_check;
-#[path = "packages/package_deps.rs"]
-mod package_deps;
-#[path = "source/source_scan.rs"]
-pub mod source_scan;
-#[path = "packages/stylelint_check.rs"]
-mod stylelint_check;
-#[path = "source/test_checks.rs"]
-pub mod test_checks;
-#[path = "packages/tool_config_checks.rs"]
-mod tool_config_checks;
-#[path = "topology/ts_topology_checks.rs"]
-pub mod ts_topology_checks;
-#[path = "source/ts_code_analysis.rs"]
-pub mod ts_code_analysis;
-#[path = "source/ts_comment_checks.rs"]
-pub mod ts_comment_checks;
-#[path = "packages/tsconfig_check.rs"]
-mod tsconfig_check;
+mod eslint;
+mod packages;
+mod source;
+mod topology;
+
+// Re-export for external consumers
+pub use topology::ts_topology_checks;
+
+use eslint::{eslint_audit, eslint_parser, eslint_plugin_checks};
+use packages::{config_files, i18n_check, package_deps, stylelint_check, tool_config_checks};
+use source::{source_scan, test_checks};
 
 use std::path::Path;
 

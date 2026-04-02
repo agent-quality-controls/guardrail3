@@ -1,0 +1,9 @@
+pub(crate) mod config_files;
+pub(crate) mod i18n_check;
+pub(crate) mod jscpd_check;
+pub(crate) mod npmrc_check;
+pub(crate) mod package_check;
+pub(crate) mod package_deps;
+pub(crate) mod stylelint_check;
+pub(crate) mod tool_config_checks;
+pub(crate) mod tsconfig_check;

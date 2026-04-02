@@ -455,5 +455,4 @@ pub(super) fn family_route(
 }
 
 #[cfg(test)]
-#[path = "facts_tests/mod.rs"]
-mod facts_tests;
+mod tests;

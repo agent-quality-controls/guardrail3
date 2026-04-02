@@ -73,22 +73,6 @@ pub fn find_comments(tree: &Tree, source: &str) -> Vec<CommentInfo> {
     out
 }
 
-/// Find eslint-disable directives that appear inside actual comments (not strings).
-pub fn find_eslint_disables(tree: &Tree, source: &str) -> Vec<CommentInfo> {
-    find_comments(tree, source)
-        .into_iter()
-        .filter(|c| c.text.contains("eslint-disable"))
-        .collect()
-}
-
-/// Find `@ts-ignore` and `@ts-expect-error` directives inside comments.
-pub fn find_ts_directives(tree: &Tree, source: &str) -> Vec<CommentInfo> {
-    find_comments(tree, source)
-        .into_iter()
-        .filter(|c| c.text.contains("@ts-ignore") || c.text.contains("@ts-expect-error"))
-        .collect()
-}
-
 // ---------------------------------------------------------------------------
 // Internal — recursive tree walkers
 // ---------------------------------------------------------------------------
