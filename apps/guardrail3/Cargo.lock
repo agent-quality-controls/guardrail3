@@ -1011,7 +1011,6 @@ dependencies = [
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-app-rs-structure",
- "guardrail3-domain-project-tree",
  "guardrail3-domain-validation-model",
  "toml",
 ]
@@ -1080,6 +1079,7 @@ dependencies = [
 name = "guardrail3-app-rs-structure"
 version = "0.0.0"
 dependencies = [
+ "glob",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-project-tree",

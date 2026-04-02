@@ -84,9 +84,9 @@ pub fn run(
         runtime_deps::family_selection::resolve(&tree, config.as_ref(), requested_families);
     let applicability = collect_family_applicability(config.as_ref());
     #[cfg(feature = "routing")]
-    let structure = runtime_deps::structure::collect(&tree);
+    let structure = runtime_deps::structure::collect(tree);  // tree consumed
     #[cfg(feature = "routing")]
-    let legality = runtime_deps::legality::collect(&tree, &structure);
+    let legality = runtime_deps::legality::collect(&structure);
     #[cfg(feature = "routing")]
     let mapper = runtime_deps::FamilyMapper::with_legality(
         &tree,

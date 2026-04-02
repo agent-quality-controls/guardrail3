@@ -10,3 +10,4 @@ workspace = true
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../ownership" }
 guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../placement" }
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../domain/project-tree" }
+glob = { workspace = true }
