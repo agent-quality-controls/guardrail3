@@ -1,5 +1,7 @@
 mod rule;
 pub use rule::check;
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
 pub(crate) use rule::emit_inventory_if_clean;
 
 #[cfg(test)]

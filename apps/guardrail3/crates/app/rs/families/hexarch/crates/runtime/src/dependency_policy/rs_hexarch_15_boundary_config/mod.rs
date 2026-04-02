@@ -1,5 +1,9 @@
 mod rule;
 pub use rule::{check};
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
+#[cfg(test)]
+use crate::inputs::MemberConfigHexarchInput;
 
 #[cfg(test)]
 pub fn check_boundary_config_for_test(

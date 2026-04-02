@@ -1,5 +1,7 @@
 mod rule;
 pub use rule::{check};
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
 use crate::source_facts::SourceCrateFacts;

@@ -1,5 +1,9 @@
 mod rule;
 pub use rule::{check};
+#[cfg(test)]
+use guardrail3_domain_report::CheckResult;
+#[cfg(test)]
+use crate::inputs::ToolchainPolicyRootInput;
 
 #[cfg(test)]
 pub(crate) fn test_input<'a>(

@@ -1,5 +1,7 @@
 mod rule;
 pub use rule::{check};
+#[cfg(test)]
+use crate::inputs::ToolchainRootInput;
 
 #[cfg(test)]
 pub(crate) fn test_input<'a>(
