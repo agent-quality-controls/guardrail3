@@ -62,7 +62,6 @@ pub(crate) struct RustFamilyRunnerDef {
 #[cfg(feature = "family-topology")]
 fn run_topology(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_topology();
-    let structure = ctx.legality.structure();
     let root_rels = topology_root_rels(route.roots());
     let mut extra = route
         .roots()
@@ -70,7 +69,7 @@ fn run_topology(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .map(|root| root.root().cargo_rel_path().to_owned())
         .collect::<Vec<_>>();
     extra.extend(family_file_rels(route.family_files()));
-    if structure
+    if ctx.legality
         .dir_structure()
         .get("")
         .is_some_and(|e| e.has_file("guardrail3.toml"))
@@ -78,9 +77,9 @@ fn run_topology(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         extra.push("guardrail3.toml".to_owned());
     }
     let view = FamilyView::build(
-        structure.root_path().clone(),
-        structure.dir_structure(),
-        structure.content(),
+        ctx.legality.root_path().clone(),
+        ctx.legality.dir_structure(),
+        ctx.legality.content(),
         &root_rels,
         &extra,
         &[],
@@ -92,11 +91,10 @@ fn run_topology(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-arch")]
 fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_arch();
-    let structure = ctx.legality.structure();
     let root_rels = route_root_rels(route.roots());
     let mut extra = route_root_cargo_files(route.roots());
     extra.extend(family_file_rels(route.family_files()));
-    if structure
+    if ctx.legality
         .dir_structure()
         .get("")
         .is_some_and(|e| e.has_file("guardrail3.toml"))
@@ -104,9 +102,9 @@ fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         extra.push("guardrail3.toml".to_owned());
     }
     let view = FamilyView::build(
-        structure.root_path().clone(),
-        structure.dir_structure(),
-        structure.content(),
+        ctx.legality.root_path().clone(),
+        ctx.legality.dir_structure(),
+        ctx.legality.content(),
         &root_rels,
         &extra,
         &[],
@@ -118,15 +116,14 @@ fn run_arch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-fmt")]
 fn run_fmt(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_fmt();
-    let structure = ctx.legality.structure();
     let mut extra = family_file_rels(route.family_files());
     extra.push("Cargo.toml".to_owned());
     extra.push("rust-toolchain.toml".to_owned());
     extra.push("guardrail3.toml".to_owned());
     let view = FamilyView::build(
-        structure.root_path().clone(),
-        structure.dir_structure(),
-        structure.content(),
+        ctx.legality.root_path().clone(),
+        ctx.legality.dir_structure(),
+        ctx.legality.content(),
         &[],
         &extra,
         &[],
@@ -138,7 +135,6 @@ fn run_fmt(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-toolchain")]
 fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_toolchain();
-    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
@@ -148,9 +144,9 @@ fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
             let mut extra = route_root_cargo_files(workspace_route.roots());
             extra.extend(family_file_rels(workspace_route.family_files()));
             let view = FamilyView::build(
-                structure.root_path().clone(),
-                structure.dir_structure(),
-                structure.content(),
+                ctx.legality.root_path().clone(),
+                ctx.legality.dir_structure(),
+                ctx.legality.content(),
                 &root_rels,
                 &extra,
                 &[],
@@ -164,7 +160,6 @@ fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-clippy")]
 fn run_clippy(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_clippy();
-    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
@@ -174,9 +169,9 @@ fn run_clippy(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
             let mut extra = route_root_cargo_files(workspace_route.roots());
             extra.extend(family_file_rels(workspace_route.family_files()));
             let view = FamilyView::build(
-                structure.root_path().clone(),
-                structure.dir_structure(),
-                structure.content(),
+                ctx.legality.root_path().clone(),
+                ctx.legality.dir_structure(),
+                ctx.legality.content(),
                 &root_rels,
                 &extra,
                 &[],
@@ -190,7 +185,6 @@ fn run_clippy(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-deny")]
 fn run_deny(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_deny();
-    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
@@ -200,9 +194,9 @@ fn run_deny(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
             let mut extra = route_root_cargo_files(workspace_route.roots());
             extra.extend(family_file_rels(workspace_route.family_files()));
             let view = FamilyView::build(
-                structure.root_path().clone(),
-                structure.dir_structure(),
-                structure.content(),
+                ctx.legality.root_path().clone(),
+                ctx.legality.dir_structure(),
+                ctx.legality.content(),
                 &root_rels,
                 &extra,
                 &[],
@@ -216,7 +210,6 @@ fn run_deny(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-cargo")]
 fn run_cargo(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_cargo();
-    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
@@ -226,9 +219,9 @@ fn run_cargo(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
             let mut extra = route_root_cargo_files(workspace_route.roots());
             extra.extend(family_file_rels(workspace_route.family_files()));
             let view = FamilyView::build(
-                structure.root_path().clone(),
-                structure.dir_structure(),
-                structure.content(),
+                ctx.legality.root_path().clone(),
+                ctx.legality.dir_structure(),
+                ctx.legality.content(),
                 &root_rels,
                 &extra,
                 &[],
@@ -242,13 +235,12 @@ fn run_cargo(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-code")]
 fn run_code(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_code();
-    let structure = ctx.legality.structure();
     let root_rels = scoped_route_root_rels(route.roots());
-    let extra = code_extra_file_rels(structure.dir_structure(), route.roots());
+    let extra = code_extra_file_rels(ctx.legality.dir_structure(), route.roots());
     let view = FamilyView::build(
-        structure.root_path().clone(),
-        structure.dir_structure(),
-        structure.content(),
+        ctx.legality.root_path().clone(),
+        ctx.legality.dir_structure(),
+        ctx.legality.content(),
         &root_rels,
         &extra,
         &[],
@@ -260,7 +252,6 @@ fn run_code(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-hexarch")]
 fn run_hexarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_hexarch();
-    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
@@ -275,9 +266,9 @@ fn run_hexarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 extra.push(guardrail_rel.to_owned());
             }
             let view = FamilyView::build(
-                structure.root_path().clone(),
-                structure.dir_structure(),
-                structure.content(),
+                ctx.legality.root_path().clone(),
+                ctx.legality.dir_structure(),
+                ctx.legality.content(),
                 &root_rels,
                 &extra,
                 &[],
@@ -291,7 +282,6 @@ fn run_hexarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-libarch")]
 fn run_libarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_libarch();
-    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
@@ -301,9 +291,9 @@ fn run_libarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
             let mut extra = route_root_cargo_files(workspace_route.roots());
             extra.extend(family_file_rels(workspace_route.family_files()));
             let view = FamilyView::build(
-                structure.root_path().clone(),
-                structure.dir_structure(),
-                structure.content(),
+                ctx.legality.root_path().clone(),
+                ctx.legality.dir_structure(),
+                ctx.legality.content(),
                 &root_rels,
                 &extra,
                 &[],
@@ -317,7 +307,6 @@ fn run_libarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-deps")]
 fn run_deps(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_deps();
-    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
@@ -327,9 +316,9 @@ fn run_deps(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
             let mut extra = route_root_cargo_files(workspace_route.roots());
             extra.extend(family_file_rels(workspace_route.family_files()));
             let view = FamilyView::build(
-                structure.root_path().clone(),
-                structure.dir_structure(),
-                structure.content(),
+                ctx.legality.root_path().clone(),
+                ctx.legality.dir_structure(),
+                ctx.legality.content(),
                 &root_rels,
                 &extra,
                 &[],
@@ -343,7 +332,6 @@ fn run_deps(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-garde")]
 fn run_garde(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_garde();
-    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
@@ -353,9 +341,9 @@ fn run_garde(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
             let mut extra = scoped_route_root_cargo_files(workspace_route.roots());
             extra.extend(family_file_rels(workspace_route.family_files()));
             let view = FamilyView::build(
-                structure.root_path().clone(),
-                structure.dir_structure(),
-                structure.content(),
+                ctx.legality.root_path().clone(),
+                ctx.legality.dir_structure(),
+                ctx.legality.content(),
                 &root_rels,
                 &extra,
                 &[],
@@ -369,13 +357,12 @@ fn run_garde(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-test")]
 fn run_test(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_test();
-    let structure = ctx.legality.structure();
     let root_rels = route_root_rels(route.roots());
     let extra = route_root_cargo_files(route.roots());
     let view = FamilyView::build(
-        structure.root_path().clone(),
-        structure.dir_structure(),
-        structure.content(),
+        ctx.legality.root_path().clone(),
+        ctx.legality.dir_structure(),
+        ctx.legality.content(),
         &root_rels,
         &extra,
         &[],
@@ -387,7 +374,6 @@ fn run_test(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-release")]
 fn run_release(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_release();
-    let structure = ctx.legality.structure();
     route
         .roots()
         .iter()
@@ -397,9 +383,9 @@ fn run_release(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
             let mut extra = route_root_cargo_files(workspace_route.roots());
             extra.extend(family_file_rels(workspace_route.family_files()));
             let view = FamilyView::build(
-                structure.root_path().clone(),
-                structure.dir_structure(),
-                structure.content(),
+                ctx.legality.root_path().clone(),
+                ctx.legality.dir_structure(),
+                ctx.legality.content(),
                 &root_rels,
                 &extra,
                 &[],
@@ -417,14 +403,13 @@ fn run_release(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 
 #[cfg(feature = "family-hooks-shared")]
 fn run_hooks_shared(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    let structure = ctx.legality.structure();
-    let dir_structure = structure.dir_structure();
+    let dir_structure = ctx.legality.dir_structure();
     let extra_files = hook_file_rels(dir_structure);
     let extra_dirs = hook_dir_rels(dir_structure);
     let view = FamilyView::build(
-        structure.root_path().clone(),
+        ctx.legality.root_path().clone(),
         dir_structure,
-        structure.content(),
+        ctx.legality.content(),
         &[],
         &extra_files,
         &extra_dirs,
@@ -435,14 +420,13 @@ fn run_hooks_shared(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 
 #[cfg(feature = "family-hooks-rs")]
 fn run_hooks_rs(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    let structure = ctx.legality.structure();
-    let dir_structure = structure.dir_structure();
+    let dir_structure = ctx.legality.dir_structure();
     let extra_files = hook_file_rels(dir_structure);
     let extra_dirs = hook_dir_rels(dir_structure);
     let view = FamilyView::build(
-        structure.root_path().clone(),
+        ctx.legality.root_path().clone(),
         dir_structure,
-        structure.content(),
+        ctx.legality.content(),
         &[],
         &extra_files,
         &extra_dirs,

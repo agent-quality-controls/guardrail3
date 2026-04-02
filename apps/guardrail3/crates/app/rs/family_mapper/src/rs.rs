@@ -55,7 +55,7 @@ impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn map_rs_topology(&self) -> views::RsTopologyRoute {
         views::RsTopologyRoute::new(
-            self.legality.structure()
+            self.legality.placement()
                 .roots()
                 .iter()
                 .map(|root| {
@@ -68,8 +68,7 @@ impl<'a> FamilyMapper<'a> {
                     )
                 })
                 .collect(),
-            self.legality.structure()
-                .overlaps()
+            self.legality.overlaps()
                 .iter()
                 .map(|overlap| {
                     views::RsTopologyOverlapView::new(
@@ -80,8 +79,7 @@ impl<'a> FamilyMapper<'a> {
                     )
                 })
                 .collect(),
-            self.legality.structure()
-                .input_failures()
+            self.legality.input_failures()
                 .iter()
                 .map(|failure| {
                     views::RsRootInputFailureView::new(
@@ -115,7 +113,7 @@ impl<'a> FamilyMapper<'a> {
             .map_workspace_roots_for_family(RustValidateFamily::Hexarch)
             .into_iter()
             .filter(|root| matches!(root_scope(root.rel_dir()), RootScope::App(_)))
-            .filter(|root| self.legality.structure().file_content(root.cargo_rel_path()).is_some())
+            .filter(|root| self.legality.file_content(root.cargo_rel_path()).is_some())
             .collect::<Vec<_>>();
         let root_rels = roots
             .iter()
@@ -125,16 +123,16 @@ impl<'a> FamilyMapper<'a> {
         views::RsHexarchRoute::new(
             roots,
             filter_for_roots(
-                self.legality.structure(),
+                self.legality,
                 self.scoped_files,
                 &root_rels,
                 self.validation_scope,
             ),
-            self.legality.structure()
+            self.legality
                 .file_content("Cargo.toml")
                 .is_some()
                 .then(|| "Cargo.toml".to_owned()),
-            self.legality.structure()
+            self.legality
                 .file_content("guardrail3.toml")
                 .is_some()
                 .then(|| "guardrail3.toml".to_owned()),
@@ -273,7 +271,7 @@ impl<'a> FamilyMapper<'a> {
         views::RsGardeRoute::new(
             roots,
             filter_for_roots(
-                self.legality.structure(),
+                self.legality,
                 self.scoped_files,
                 &root_rels,
                 self.validation_scope,
@@ -320,7 +318,7 @@ impl<'a> FamilyMapper<'a> {
             })
             .collect::<std::collections::BTreeSet<_>>();
 
-        self.legality.structure()
+        self.legality.placement()
             .roots()
             .iter()
             .filter(|root| root_rels.contains(root.rel_dir()))
@@ -352,7 +350,7 @@ impl<'a> FamilyMapper<'a> {
             return Vec::new();
         }
 
-        self.legality.structure()
+        self.legality.placement()
             .roots()
             .iter()
             .filter(|root| root_enabled_for_family(root, family, self.config))
@@ -368,7 +366,7 @@ impl<'a> FamilyMapper<'a> {
             return Vec::new();
         }
 
-        self.legality.structure()
+        self.legality.placement()
             .roots()
             .iter()
             .filter(|root| root_enabled_for_family(root, family, self.config))
@@ -427,7 +425,7 @@ impl<'a> FamilyMapper<'a> {
             .iter()
             .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
             .filter(|root| {
-                self.legality.structure()
+                self.legality.placement()
                     .roots()
                     .iter()
                     .find(|candidate| candidate.rel_dir() == root.rel_dir())

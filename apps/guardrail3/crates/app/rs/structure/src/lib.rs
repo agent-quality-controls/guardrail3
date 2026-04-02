@@ -3,12 +3,13 @@ use guardrail3_app_rs_ownership::{
 };
 use guardrail3_app_rs_placement::{
     RustRootPlacementFacts, RustRootPlacementInputFailureFacts, RustRootPlacementRootFacts,
-    RustZoneOverlapFacts, collect as collect_placement,
+    RustZoneOverlapFacts, collect as collect_placement, is_excluded_live_root_dir,
 };
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+pub use guardrail3_domain_project_tree::DirEntry;
+use guardrail3_domain_project_tree::ProjectTree;
 
 #[derive(Debug, Clone, Default)]
 pub struct RustStructureFacts {
@@ -90,6 +91,41 @@ impl RustStructureFacts {
         &self.structure
     }
 
+    /// Filter structure/content to only include data under the given root directories.
+    /// Strips out everything not under a legal root (test fixtures, etc.).
+    #[must_use]
+    pub fn filter_to_roots(self, root_rels: &[String]) -> Self {
+        let filtered_structure: BTreeMap<String, DirEntry> = self
+            .structure
+            .into_iter()
+            .filter(|(dir_rel, _)| {
+                root_rels
+                    .iter()
+                    .any(|root| path_is_under(dir_rel, root))
+                    && !is_excluded_live_root_dir(dir_rel)
+            })
+            .collect();
+
+        let filtered_content: BTreeMap<String, String> = self
+            .content
+            .into_iter()
+            .filter(|(rel, _)| {
+                root_rels
+                    .iter()
+                    .any(|root| path_is_under(rel, root))
+                    && !is_excluded_live_root_dir(rel)
+            })
+            .collect();
+
+        Self {
+            placement: self.placement,
+            owned_surface: self.owned_surface,
+            content: filtered_content,
+            root: self.root,
+            structure: filtered_structure,
+        }
+    }
+
     /// Glob-match directories in the carried-forward structure.
     #[must_use]
     pub fn matching_dir_rels(&self, pattern: &str) -> Vec<String> {
@@ -103,6 +139,14 @@ impl RustStructureFacts {
             .cloned()
             .collect()
     }
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 #[must_use]
