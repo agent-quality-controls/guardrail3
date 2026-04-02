@@ -191,5 +191,4 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "tests/tools/hook_rs_13_cargo_dupes_excludes_tests/mod.rs"]
-mod hook_rs_13_cargo_dupes_excludes_tests;
+mod tests;

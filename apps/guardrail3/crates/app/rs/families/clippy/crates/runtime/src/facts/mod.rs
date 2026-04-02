@@ -258,5 +258,4 @@ fn family_route_for_tests(tree: &ProjectTree, validation_scope: Option<&str>) ->
 }
 
 #[cfg(test)]
-#[path = "facts_tests/mod.rs"] // reason: test-only sidecar module wiring
-mod facts_tests;
+mod tests;

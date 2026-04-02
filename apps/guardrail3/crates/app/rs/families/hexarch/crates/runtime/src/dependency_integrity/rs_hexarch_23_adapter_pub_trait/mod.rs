@@ -1,0 +1,98 @@
+use guardrail3_domain_report::{CheckResult, Severity};
+
+use crate::dependency_facts::Layer;
+use crate::inputs::SourceCrateHexarchInput;
+use crate::inventory::push_success;
+#[cfg(test)]
+use crate::source_facts::SourceCrateFacts;
+
+const ID: &str = "RS-HEXARCH-23";
+
+pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>) {
+    let source = input.source;
+    if source.layer != Some(Layer::Adapters) {
+        return;
+    }
+
+    if let Some(source_error_message) = &source.source_error_message {
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            format!(
+                "adapter crate `{}` source analysis failed",
+                source.crate_name
+            ),
+            source_error_message.clone(),
+            Some(
+                source
+                    .source_error_rel_path
+                    .clone()
+                    .unwrap_or_else(|| source.rel_dir.clone()),
+            ),
+            None,
+            false,
+        ));
+        return;
+    }
+
+    if source.pub_trait_count == 0 {
+        push_success(
+            results,
+            ID,
+            format!(
+                "adapter crate `{}` defines no public traits",
+                source.crate_name
+            ),
+            format!(
+                "Adapter crate `{}` keeps its public surface free of adapter-owned public traits.",
+                source.crate_name
+            ),
+            Some(source.rel_dir.clone()),
+        );
+        return;
+    }
+
+    results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Error,
+    format!("adapter crate `{}` defines public traits", source.crate_name),
+    format!(
+            "Adapter crate `{}` defines {} public trait(s). Adapters should implement port traits, not define their own public trait surface.",
+            source.crate_name, source.pub_trait_count
+        ),
+    Some(source.rel_dir.clone()),
+    None,
+    false,
+    ));
+}
+
+#[cfg(test)]
+pub(crate) fn run_source_case(
+    crate_name: &str,
+    rel_dir: &str,
+    pub_trait_count: usize,
+    source_error_rel_path: Option<&str>,
+    source_error_message: Option<&str>,
+) -> Vec<CheckResult> {
+    let source = SourceCrateFacts {
+        crate_name: crate_name.to_owned(),
+        rel_dir: rel_dir.to_owned(),
+        layer: Some(Layer::Adapters),
+        pub_trait_count,
+        public_free_fn_count: 0,
+        public_inherent_method_count: 0,
+        source_error_rel_path: source_error_rel_path.map(|value| value.to_owned()),
+        source_error_message: source_error_message.map(|value| value.to_owned()),
+    };
+    let mut results = Vec::new();
+    check(&SourceCrateHexarchInput::new(&source), &mut results);
+    results
+}
+
+#[cfg(test)]
+pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_tree(&test_support::walk(root))
+}
+#[cfg(test)]
+
+mod rs_hexarch_23_adapter_pub_trait_tests;

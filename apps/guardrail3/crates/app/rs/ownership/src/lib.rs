@@ -18,5 +18,5 @@ pub fn collect(
 }
 
 #[cfg(test)]
-#[path = "lib_tests/mod.rs"]
+
 mod lib_tests;

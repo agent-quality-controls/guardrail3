@@ -221,5 +221,5 @@ pub fn check(
 }
 
 #[cfg(test)]
-#[path = "lib_tests/mod.rs"]
+
 mod lib_tests;

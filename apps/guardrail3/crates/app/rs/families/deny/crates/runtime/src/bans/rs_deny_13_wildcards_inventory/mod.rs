@@ -1,0 +1,47 @@
+use guardrail3_domain_report::{CheckResult, Severity};
+
+use crate::deny_support::{expected_bans_settings, section};
+use crate::inputs::ConfigDenyInput;
+
+pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
+    let config = input.config;
+    let Some(bans) = section(config, "bans") else {
+        return;
+    };
+    let (expected, _, _) = expected_bans_settings();
+    let actual = bans.get("wildcards").and_then(toml::Value::as_str);
+    if actual.map(str::to_owned) != expected {
+        results.push(CheckResult::from_parts(
+            "RS-DENY-13".to_owned(),
+            Severity::Warn,
+            "wildcards differs from baseline".to_owned(),
+            format!(
+                "`{}` sets `[bans].wildcards = {}`.",
+                config.rel_path,
+                actual.unwrap_or("<missing>")
+            ),
+            Some(config.rel_path.clone()),
+            None,
+            false,
+        ));
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
+    crate::run_config_rule_for_test(deny_toml, None, check)
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_root(root)
+}
+
+#[cfg(test)]
+pub(crate) use crate::config_facts;
+#[cfg(test)]
+pub(crate) use ::test_support::{build_fixture_deny_toml, remove_section_key, set_section_string};
+#[cfg(test)]
+
+mod rs_deny_13_wildcards_inventory_tests;

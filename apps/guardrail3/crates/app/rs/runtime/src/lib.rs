@@ -745,5 +745,5 @@ pub(crate) fn run_code_with_validation_scope_for_tests(
 }
 
 #[cfg(test)]
-#[path = "lib_tests/mod.rs"] // reason: test-only sidecar module wiring
+
 mod lib_tests;

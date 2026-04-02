@@ -972,5 +972,5 @@ fn collect_workspace_membership_exactness_issues(
 }
 
 #[cfg(test)]
-#[path = "lib_tests/mod.rs"]
+
 mod lib_tests;
