@@ -42,6 +42,15 @@ pub struct StructuralCapFacts {
 pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
     let mut input_failures = Vec::new();
     let active_root_dirs = active_root_dirs(route);
+    if active_root_dirs.is_empty() {
+        return CodeFacts {
+            files: Vec::new(),
+            structural_caps: Vec::new(),
+            unsafe_code_lints: Vec::new(),
+            exception_comments: Vec::new(),
+            input_failures,
+        };
+    }
     let cargo_roots = collect_cargo_roots(tree, route, &active_root_dirs, &mut input_failures);
     let root_dirs = cargo_roots.keys().cloned().collect::<Vec<_>>();
     let policy_map = policy::read_policy_map(tree, &cargo_roots, &mut input_failures);
@@ -212,6 +221,7 @@ fn active_root_dirs(route: &RsCodeRoute) -> BTreeSet<String> {
     match route.scoped_files() {
         None => routed_roots
             .into_iter()
+            .filter(|root| root_matches_validation_scope(root.rel_dir(), route.validation_scope()))
             .map(|root| root.rel_dir().to_owned())
             .collect::<BTreeSet<_>>(),
         Some(scoped_files) => scoped_files
@@ -220,6 +230,20 @@ fn active_root_dirs(route: &RsCodeRoute) -> BTreeSet<String> {
             .map(|root| root.rel_dir().to_owned())
             .collect(),
     }
+}
+
+fn root_matches_validation_scope(root_rel: &str, validation_scope: Option<&str>) -> bool {
+    validation_scope.is_none_or(|scope_rel| {
+        path_is_under(root_rel, scope_rel) || path_is_under(scope_rel, root_rel)
+    })
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn owning_routed_root<'a>(

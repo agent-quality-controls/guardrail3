@@ -286,7 +286,11 @@ impl<'a> FamilyMapper<'a> {
     }
 
     fn map_global_source_route(&self, family: RustValidateFamily) -> views::RsCodeRoute {
-        views::RsCodeRoute::new(self.map_global_scoped_roots_for_family(family), None)
+        views::RsCodeRoute::new(
+            self.map_global_scoped_roots_for_family(family),
+            self.scoped_files.cloned(),
+        )
+        .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     fn map_workspace_roots_for_family(&self, family: RustValidateFamily) -> Vec<views::RsRootView> {
