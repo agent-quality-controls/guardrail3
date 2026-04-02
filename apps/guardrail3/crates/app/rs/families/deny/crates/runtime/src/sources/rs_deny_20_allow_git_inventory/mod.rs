@@ -61,4 +61,4 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
 pub(crate) use ::test_support::{build_fixture_deny_toml, set_allow_git_sources};
 #[cfg(test)]
 
-mod rs_deny_20_allow_git_inventory_tests;
+mod tests;

@@ -34,4 +34,4 @@ pub(crate) fn check_input_failure(rel_path: &str, message: &str) -> Vec<CheckRes
 
 #[cfg(test)]
 
-mod rs_code_30_input_failures_tests;
+mod tests;

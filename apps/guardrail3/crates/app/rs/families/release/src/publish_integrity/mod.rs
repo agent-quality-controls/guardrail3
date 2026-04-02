@@ -6,17 +6,3 @@ pub(crate) mod rs_pub_12_crate_inventory;
 pub(crate) mod rs_pub_13_docs_rs_metadata;
 pub(crate) mod rs_pub_14_include_exclude_inventory;
 
-#[cfg(test)]
-mod rs_pub_08_valid_semver_tests;
-#[cfg(test)]
-mod rs_pub_09_publish_dry_run_tests;
-#[cfg(test)]
-mod rs_pub_10_no_path_deps_to_unpublishable_tests;
-#[cfg(test)]
-mod rs_pub_11_interdependent_version_consistency_tests;
-#[cfg(test)]
-mod rs_pub_12_crate_inventory_tests;
-#[cfg(test)]
-mod rs_pub_13_docs_rs_metadata_tests;
-#[cfg(test)]
-mod rs_pub_14_include_exclude_inventory_tests;

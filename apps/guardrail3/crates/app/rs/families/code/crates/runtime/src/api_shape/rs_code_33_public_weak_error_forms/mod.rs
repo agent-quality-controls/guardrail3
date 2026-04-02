@@ -46,4 +46,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 
 #[cfg(test)]
 
-mod rs_code_33_public_weak_error_forms_tests;
+mod tests;

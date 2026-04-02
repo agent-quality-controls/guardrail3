@@ -68,4 +68,4 @@ pub(crate) use ::test_support::{build_fixture_deny_toml, set_section_string};
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_deny_06_stricter_advisories_inventory_tests;
+mod tests;

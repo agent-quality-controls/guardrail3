@@ -40,4 +40,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod rs_code_34_generic_parameter_cap_tests;
+mod tests;

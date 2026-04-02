@@ -104,4 +104,4 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 
-mod rs_deny_26_ban_reason_inventory_tests;
+mod tests;

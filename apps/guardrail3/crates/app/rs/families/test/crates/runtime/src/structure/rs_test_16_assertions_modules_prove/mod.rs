@@ -177,4 +177,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 #[cfg(test)]
 
-mod rs_test_16_assertions_modules_prove_tests;
+mod tests;

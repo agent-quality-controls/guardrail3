@@ -47,15 +47,17 @@ pub(crate) fn run_with_facts(facts: &LibarchFacts) -> Vec<CheckResult> {
 
 #[cfg(test)]
 pub fn family_route_for_tests(tree: &ProjectTree) -> RsLibarchRoute {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Libarch]));
-    FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_libarch()
+    FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_libarch()
 }
 
 #[cfg(test)]
 pub(crate) fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
     let route = family_route_for_tests(tree);
-    check(&FamilyView::from_tree(tree), &route)
+    check(tree, &route)
 }
 
 #[cfg(test)]

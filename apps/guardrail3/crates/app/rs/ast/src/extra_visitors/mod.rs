@@ -213,4 +213,4 @@ fn cfg_meta_contains_positive_test(meta: &syn::Meta) -> bool {
 
 #[cfg(test)]
 
-mod extra_visitors_tests;
+mod tests;

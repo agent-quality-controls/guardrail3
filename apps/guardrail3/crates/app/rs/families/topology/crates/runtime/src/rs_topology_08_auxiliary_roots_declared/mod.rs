@@ -38,4 +38,4 @@ pub(crate) fn check_results(
 
 #[cfg(test)]
 
-mod rs_topology_08_auxiliary_roots_declared_tests;
+mod tests;

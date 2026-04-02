@@ -27,16 +27,18 @@ pub fn check(input: &BoundaryFieldInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-pub(super) fn canonical_clippy_toml() -> String {
+pub(crate) fn canonical_clippy_toml() -> String {
     guardrail3_domain_modules::clippy::build_clippy_toml("service", false, true, "", "")
 }
 
 #[cfg(test)]
-pub(super) fn run_family(
+pub(crate) fn run_family(
     tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     {
-        let scope = guardrail3_app_rs_structure::collect(tree);
+        let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
         let config = tree.file_content("guardrail3.toml").and_then(|content| {
             toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
         });
@@ -45,9 +47,8 @@ pub(super) fn run_family(
                 guardrail3_validation_model::RustValidateFamily::Garde,
             ]),
         );
-        let route = guardrail3_app_rs_family_mapper::FamilyMapper::new(
-            tree,
-            &scope,
+        let route = guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(
+        &legality,
             config.as_ref(),
             &selected,
             None,
@@ -59,4 +60,4 @@ pub(super) fn run_family(
 
 #[cfg(test)]
 
-mod rs_garde_12_nested_validation_dive_tests;
+mod tests;

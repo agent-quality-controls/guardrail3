@@ -83,4 +83,4 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 
-mod rs_cargo_15_rust_version_policy_tests;
+mod tests;

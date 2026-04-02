@@ -101,4 +101,4 @@ pub(crate) fn expected_ban_wrappers_for_test(
 }
 #[cfg(test)]
 
-mod rs_deny_30_wrappers_tests;
+mod tests;

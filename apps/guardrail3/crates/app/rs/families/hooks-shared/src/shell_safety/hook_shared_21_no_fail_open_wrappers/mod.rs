@@ -54,4 +54,4 @@ pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod hook_shared_21_no_fail_open_wrappers_tests;
+mod tests;

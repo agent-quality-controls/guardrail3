@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::shell_safety::hook_shared_14_no_bypass_instructions as assertions;
 
-use crate::hook_shared_14_no_bypass_instructions::run_case;
+use super::run_case;
 
 #[test]
 fn flags_comment_teaching_no_verify() {

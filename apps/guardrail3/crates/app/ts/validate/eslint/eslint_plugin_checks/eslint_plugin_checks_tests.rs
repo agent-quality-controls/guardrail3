@@ -87,7 +87,7 @@ export default [
 
     let errors: Vec<_> = results
         .iter()
-        .filter(|r| r.severity()()()() == Severity::Error)
+        .filter(|r| r.severity() == Severity::Error)
         .collect();
     assert!(errors.is_empty(), "unexpected errors: {errors:?}");
 }
@@ -113,7 +113,7 @@ export default [
 
     let errors: Vec<_> = results
         .iter()
-        .filter(|r| r.severity()()()() == Severity::Error)
+        .filter(|r| r.severity() == Severity::Error)
         .collect();
     assert!(errors.is_empty(), "unexpected errors: {errors:?}");
 }
@@ -127,7 +127,7 @@ fn test_content_plugins_all_missing() {
 
     let error_count = results
         .iter()
-        .filter(|r| r.severity()()()() == Severity::Error)
+        .filter(|r| r.severity() == Severity::Error)
         .count();
     assert_eq!(error_count, 3, "expected 3 errors for T-ESLP-07/08/12");
 }
@@ -140,7 +140,7 @@ fn test_test_relaxation_missing_section() {
     check_test_relaxations(&config, &path(), &mut results);
     assert_eq!(results.len(), 1);
     if let Some(first) = results.first() {
-        assert_eq!(first.severity()()()(), Severity::Error);
-        assert!(first.title()()()().contains("missing"));
+        assert_eq!(first.severity(), Severity::Error);
+        assert!(first.title().contains("missing"));
     }
 }

@@ -57,4 +57,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_code_17_impl_allow_blast_radius_tests;
+mod tests;

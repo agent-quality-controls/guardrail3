@@ -82,7 +82,7 @@ pub(crate) fn run_family_check(
     tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> Vec<CheckResult> {
     crate::check(
-        &guardrail3_app_rs_family_view::FamilyView::from_tree(tree),
+        tree,
         &test_route(tree),
     )
 }
@@ -111,10 +111,14 @@ pub(crate) fn test_tree(
         .map(|(path, file_content)| ((*path).to_owned(), (*file_content).to_owned()))
         .collect();
 
-    ProjectTree::new(
+    ProjectTree::build(
         PathBuf::from("/tmp/toolchain-family-tests"),
-        structure,
-        content,
+        &structure,
+        &content,
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
     )
 }
 
@@ -164,10 +168,14 @@ pub(crate) fn nested_workspace_root_tree() -> guardrail3_app_rs_family_view::Fam
             "[workspace]\n".to_owned(),
         ),
     ]);
-    ProjectTree::new(
+    ProjectTree::build(
         PathBuf::from("/tmp/toolchain-family-nested-root"),
-        structure,
-        content,
+        &structure,
+        &content,
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
     )
 }
 
@@ -175,12 +183,14 @@ pub(crate) fn nested_workspace_root_tree() -> guardrail3_app_rs_family_view::Fam
 pub(crate) fn test_route(
     tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> guardrail3_app_rs_family_mapper::RsToolchainRoute {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Toolchain,
         ]));
-    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+    guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .map_rs_toolchain()
 }
 
@@ -194,4 +204,4 @@ fn expected_toolchain_rel(rel_dir: &str) -> String {
 
 #[cfg(test)]
 
-mod rs_toolchain_01_exists_tests;
+mod tests;

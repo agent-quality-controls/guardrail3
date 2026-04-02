@@ -63,4 +63,4 @@ pub(crate) fn run_family_with_tool(
 
 #[cfg(test)]
 
-mod rs_test_10_input_failures_tests;
+mod tests;

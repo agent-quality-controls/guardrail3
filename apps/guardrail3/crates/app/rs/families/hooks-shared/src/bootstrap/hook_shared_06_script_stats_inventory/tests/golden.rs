@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::bootstrap::hook_shared_06_script_stats_inventory as assertions;
 
-use crate::hook_shared_06_script_stats_inventory::check;
+use super::check;
 
 #[test]
 fn reports_line_and_byte_counts() {

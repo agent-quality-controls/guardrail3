@@ -56,4 +56,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 
 #[cfg(test)]
 
-mod rs_code_09_file_length_tests;
+mod tests;

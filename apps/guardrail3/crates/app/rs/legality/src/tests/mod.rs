@@ -11,8 +11,8 @@ use crate::{RustIllegalFamilyFileReason, RustTopologyIssueKind, collect as colle
 #[test]
 fn legal_workspace_root_and_member_cargo_are_kept_legal() {
     let tree = workspace_tree();
-    let structure = collect_structure(&tree);
-    let legality = collect_legality(&tree, &structure);
+    let structure = collect_structure(tree.clone(), &[]);
+    let legality = collect_legality(structure);
 
     let legal_roots = legality
         .legal_workspace_roots()
@@ -42,8 +42,8 @@ fn legal_workspace_root_and_member_cargo_are_kept_legal() {
 #[test]
 fn nested_workspace_and_nested_clippy_are_illegal() {
     let tree = nested_workspace_tree();
-    let structure = collect_structure(&tree);
-    let legality = collect_legality(&tree, &structure);
+    let structure = collect_structure(tree.clone(), &[]);
+    let legality = collect_legality(structure);
 
     assert!(legality.topology_issues().iter().any(|issue| {
         issue.rel_dir() == "apps/api/crates/demo"
@@ -112,8 +112,8 @@ fn extra_workspace_member_is_reported_as_topology_issue() {
             ),
         ]),
     );
-    let structure = collect_structure(&tree);
-    let legality = collect_legality(&tree, &structure);
+    let structure = collect_structure(tree.clone(), &[]);
+    let legality = collect_legality(structure);
 
     assert!(legality.topology_issues().iter().any(|issue| {
         issue.rel_dir() == "apps/api"
@@ -166,8 +166,8 @@ fn top_level_package_toolchain_is_illegal_for_local_family_routing() {
             ),
         ]),
     );
-    let structure = collect_structure(&tree);
-    let legality = collect_legality(&tree, &structure);
+    let structure = collect_structure(tree.clone(), &[]);
+    let legality = collect_legality(structure);
 
     assert!(legality.topology_issues().iter().any(|issue| {
         issue.rel_dir() == "tools/helper"
@@ -223,8 +223,8 @@ fn fmt_root_file_is_legal() {
             ),
         ]),
     );
-    let structure = collect_structure(&tree);
-    let legality = collect_legality(&tree, &structure);
+    let structure = collect_structure(tree.clone(), &[]);
+    let legality = collect_legality(structure);
 
     assert!(legality.legal_family_files().iter().any(|file| {
         file.family() == RustValidateFamily::Fmt && file.rel_path() == "rustfmt.toml"
@@ -265,8 +265,8 @@ fn fmt_nested_file_is_illegal() {
             ),
         ]),
     );
-    let structure = collect_structure(&tree);
-    let legality = collect_legality(&tree, &structure);
+    let structure = collect_structure(tree.clone(), &[]);
+    let legality = collect_legality(structure);
 
     assert!(legality.illegal_family_files().iter().any(|file| {
         file.family() == RustValidateFamily::Fmt

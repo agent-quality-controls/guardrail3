@@ -330,4 +330,4 @@ pub(crate) fn test_input_for_root<'a>(
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_toolchain_02_channel_and_components_tests;
+mod tests;

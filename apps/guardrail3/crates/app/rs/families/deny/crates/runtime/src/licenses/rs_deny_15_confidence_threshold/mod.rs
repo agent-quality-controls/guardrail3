@@ -109,4 +109,4 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 
-mod rs_deny_15_confidence_threshold_tests;
+mod tests;

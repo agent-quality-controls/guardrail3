@@ -112,4 +112,4 @@ fn edition_rank(edition: &str) -> Option<usize> {
 
 #[cfg(test)]
 
-mod rs_cargo_09_member_edition_drift_tests;
+mod tests;

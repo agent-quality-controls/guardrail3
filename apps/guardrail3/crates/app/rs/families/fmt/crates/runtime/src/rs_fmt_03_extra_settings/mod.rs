@@ -68,4 +68,4 @@ pub(crate) fn run_check(parsed: toml::Value) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod rs_fmt_03_extra_settings_tests;
+mod tests;

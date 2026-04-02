@@ -70,4 +70,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 pub(crate) use ::test_support::{add_allowed_license, build_fixture_deny_toml};
 #[cfg(test)]
 
-mod rs_deny_16_copyleft_allowlist_tests;
+mod tests;

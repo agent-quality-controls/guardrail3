@@ -40,4 +40,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 #[cfg(test)]
 
-mod rs_test_01_inline_test_bodies_tests;
+mod tests;

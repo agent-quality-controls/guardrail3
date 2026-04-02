@@ -47,10 +47,14 @@ fn workspace_tree_with_nested_non_member_package() -> guardrail3_app_rs_family_v
         ),
     ]);
 
-    ProjectTree::new(
+    ProjectTree::build(
         PathBuf::from("/tmp/toolchain-nested-non-member-package"),
-        structure,
-        content,
+        &structure,
+        &content,
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
     )
 }
 
@@ -96,10 +100,14 @@ fn workspace_tree_with_non_package_descendant_toolchain()
         ),
     ]);
 
-    ProjectTree::new(
+    ProjectTree::build(
         PathBuf::from("/tmp/toolchain-non-package-descendant"),
-        structure,
-        content,
+        &structure,
+        &content,
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
     )
 }
 

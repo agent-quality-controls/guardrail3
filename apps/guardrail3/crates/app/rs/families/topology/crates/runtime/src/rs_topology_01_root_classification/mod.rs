@@ -71,4 +71,4 @@ pub(crate) fn check_results(
 
 #[cfg(test)]
 
-mod rs_topology_01_root_classification_tests;
+mod tests;

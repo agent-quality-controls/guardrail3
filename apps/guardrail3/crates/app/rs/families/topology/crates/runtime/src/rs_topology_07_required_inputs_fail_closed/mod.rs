@@ -45,4 +45,4 @@ pub(crate) fn check_results(
 
 #[cfg(test)]
 
-mod rs_topology_07_required_inputs_fail_closed_tests;
+mod tests;

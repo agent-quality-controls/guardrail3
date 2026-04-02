@@ -52,4 +52,4 @@ pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod hook_shared_13_no_unconditional_exit_zero_tests;
+mod tests;

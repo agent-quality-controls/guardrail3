@@ -1,5 +1,4 @@
 #[cfg(test)]
-use guardrail3_app_rs_family_view::FamilyView;
 #[cfg(test)]
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
@@ -88,19 +87,21 @@ pub(crate) fn run_family_with_validation_scope_for_tests(
     tree: &ProjectTree,
     validation_scope: &str,
 ) -> Vec<CheckResult> {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Clippy,
         ]));
     let route =
-        guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+        guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
             .with_validation_scope(Some(validation_scope))
             .map_rs_clippy();
-    crate::check(&FamilyView::from_tree(tree), &route)
+    crate::check(tree, &route)
 }
 
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_clippy_24_forbid_clippy_conf_dir_override_tests;
+mod tests;

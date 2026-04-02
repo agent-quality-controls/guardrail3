@@ -58,4 +58,4 @@ pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod hook_shared_20_concrete_lockfile_command_tests;
+mod tests;

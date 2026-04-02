@@ -43,4 +43,4 @@ pub(crate) use crate::config_facts;
 pub(crate) use ::test_support::{build_fixture_deny_toml, set_advisory_ignores};
 #[cfg(test)]
 
-mod rs_deny_29_ignore_accumulation_tests;
+mod tests;

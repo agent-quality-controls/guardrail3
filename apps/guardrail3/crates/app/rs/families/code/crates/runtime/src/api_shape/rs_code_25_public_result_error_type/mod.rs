@@ -38,4 +38,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_code_25_public_result_error_type_tests;
+mod tests;

@@ -66,16 +66,16 @@ fn does_not_inventory_repo_root_exception_comments_in_backend_scoped_run() {
     );
 
     let tree = walk_project(&RealFileSystem, root);
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let config = tree.file_content("guardrail3.toml").and_then(|content| {
         toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
     });
     let selected = guardrail3_validation_model::RustFamilySelection::new(BTreeSet::from([
         guardrail3_validation_model::RustValidateFamily::Code,
     ]));
-    let route = guardrail3_app_rs_family_mapper::FamilyMapper::new(
-        &tree,
-        &scope,
+    let route = guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(
+        &legality,
         config.as_ref(),
         &selected,
         None,
@@ -83,7 +83,11 @@ fn does_not_inventory_repo_root_exception_comments_in_backend_scoped_run() {
     .with_validation_scope(Some("apps/backend/src"))
     .map_rs_code();
 
-    let results = crate::check(&FamilyView::from_tree(&tree), &route);
+    let surface = FamilyView::build(
+        tree.root().clone(), tree.structure(), tree.content(),
+        &["".to_owned()], &[], &[], None,
+    );
+    let results = crate::check(&surface, &route);
     assert_findings(
         &results,
         &[RuleFinding::new(

@@ -127,7 +127,7 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_cargo_13_member_local_allows_forbidden_tests;
+mod tests;
 
 fn lints_are_well_formed(lints: Option<&toml::Value>) -> bool {
     let Some(lints) = lints else {

@@ -44,4 +44,4 @@ pub(crate) fn run_case(pre_commit_content: Option<&str>) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod hook_shared_01_pre_commit_exists_tests;
+mod tests;

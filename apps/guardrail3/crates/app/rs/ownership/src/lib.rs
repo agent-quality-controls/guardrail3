@@ -19,4 +19,4 @@ pub fn collect(
 
 #[cfg(test)]
 
-mod lib_tests;
+mod tests;

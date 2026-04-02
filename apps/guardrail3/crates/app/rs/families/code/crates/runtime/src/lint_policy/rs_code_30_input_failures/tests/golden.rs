@@ -22,16 +22,16 @@ fn golden_tree_has_no_code_input_failures() {
         "pub fn parse() -> Result<(), String> { Ok(()) }",
     );
 
-    let tree = ProjectTree::new(
+    let tree = ProjectTree::build(
         root.path().to_path_buf(),
-        std::collections::BTreeMap::from([
+        &std::collections::BTreeMap::from([
             (
                 String::new(),
                 dir_entry(&["src"], &["Cargo.toml", "guardrail3.toml"]),
             ),
             ("src".to_owned(), dir_entry(&[], &["lib.rs"])),
         ]),
-        std::collections::BTreeMap::from([
+        &std::collections::BTreeMap::from([
             (
                 "Cargo.toml".to_owned(),
                 "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n".to_owned(),
@@ -41,6 +41,10 @@ fn golden_tree_has_no_code_input_failures() {
                 "[rust.packages]\ntype = \"library\"\n".to_owned(),
             ),
         ]),
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
     );
 
     let results = run_tree(&tree);

@@ -103,4 +103,4 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 
-mod rs_cargo_03_allow_inventory_tests;
+mod tests;

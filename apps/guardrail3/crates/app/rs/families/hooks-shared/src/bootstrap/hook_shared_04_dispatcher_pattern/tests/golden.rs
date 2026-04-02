@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::bootstrap::hook_shared_04_dispatcher_pattern as assertions;
 
-use crate::hook_shared_04_dispatcher_pattern::run_case;
+use super::run_case;
 
 #[test]
 fn reports_inventory_when_modular_dir_is_absent() {

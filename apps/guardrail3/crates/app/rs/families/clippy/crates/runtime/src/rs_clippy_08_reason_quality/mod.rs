@@ -80,4 +80,4 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
 
 #[cfg(test)]
 
-mod rs_clippy_08_reason_quality_tests;
+mod tests;

@@ -190,6 +190,12 @@ impl FamilyView {
         }
     }
 
+    /// The root path of the project.
+    #[must_use]
+    pub fn root_path(&self) -> &std::path::Path {
+        &self.root
+    }
+
     /// The full scoped structure map.
     #[must_use]
     pub fn structure(&self) -> &BTreeMap<String, DirEntry> {

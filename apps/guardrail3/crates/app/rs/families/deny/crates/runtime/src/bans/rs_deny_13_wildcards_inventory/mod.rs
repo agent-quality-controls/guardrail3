@@ -44,4 +44,4 @@ pub(crate) use crate::config_facts;
 pub(crate) use ::test_support::{build_fixture_deny_toml, remove_section_key, set_section_string};
 #[cfg(test)]
 
-mod rs_deny_13_wildcards_inventory_tests;
+mod tests;

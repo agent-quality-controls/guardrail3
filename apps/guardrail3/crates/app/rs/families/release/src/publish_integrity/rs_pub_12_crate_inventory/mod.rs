@@ -22,12 +22,12 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
     );
 }
 #[cfg(test)]
-pub(super) fn repo_facts() -> crate::facts::RepoReleaseFacts {
+pub(crate) fn repo_facts() -> crate::facts::RepoReleaseFacts {
     crate::test_fixtures::repo_facts()
 }
 
 #[cfg(test)]
-pub(super) fn repo_input(
+pub(crate) fn repo_input(
     repo: &crate::facts::RepoReleaseFacts,
 ) -> crate::inputs::RepoReleaseInput<'_> {
     crate::test_fixtures::repo_input(repo)
@@ -35,4 +35,4 @@ pub(super) fn repo_input(
 
 #[cfg(test)]
 
-mod rs_pub_12_crate_inventory_tests;
+mod tests;

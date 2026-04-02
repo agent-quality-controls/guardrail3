@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::bootstrap::hook_shared_05_pre_commit_executable as assertions;
 
-use crate::hook_shared_05_pre_commit_executable::check;
+use super::check;
 
 #[test]
 fn inventories_executable_dispatcher() {

@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::inventories::hook_shared_09_local_override_inventory as assertions;
 
-use crate::hook_shared_09_local_override_inventory::check;
+use super::check;
 
 #[test]
 fn inventories_no_overrides() {

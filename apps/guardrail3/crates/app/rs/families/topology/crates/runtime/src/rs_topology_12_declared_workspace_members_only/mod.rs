@@ -55,4 +55,4 @@ fn display_dir(rel_dir: &str) -> &str {
 
 #[cfg(test)]
 
-mod rs_topology_12_declared_workspace_members_only_tests;
+mod tests;

@@ -53,9 +53,9 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
 }
 
 #[cfg(test)]
-pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 #[cfg(test)]
 
-mod rs_hexarch_27_nested_workspace_forbidden_tests;
+mod tests;

@@ -38,9 +38,9 @@ pub fn check(input: &AppHexarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 #[cfg(test)]
 
-mod rs_hexarch_12_src_banned_tests;
+mod tests;

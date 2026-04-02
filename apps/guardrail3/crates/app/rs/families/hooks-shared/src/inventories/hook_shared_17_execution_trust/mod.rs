@@ -35,4 +35,4 @@ pub fn check(trust_risks: &[String], results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 
-mod hook_shared_17_execution_trust_tests;
+mod tests;

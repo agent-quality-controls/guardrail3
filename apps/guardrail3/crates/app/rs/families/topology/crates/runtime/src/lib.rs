@@ -118,11 +118,13 @@ pub fn check(surface: &FamilyView, route: &RsTopologyRoute) -> Vec<CheckResult> 
 
 #[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let config = tree
         .file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
     let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Topology]));
-    let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selection, None).map_rs_topology();
-    check(&FamilyView::from_tree(tree), &route)
+    let route = FamilyMapper::from_legality(&legality, config.as_ref(), &selection, None).map_rs_topology();
+    check(tree, &route)
 }

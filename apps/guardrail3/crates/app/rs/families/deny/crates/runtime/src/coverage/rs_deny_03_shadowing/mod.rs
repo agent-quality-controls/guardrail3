@@ -39,4 +39,4 @@ pub(crate) use crate::{collected_facts, same_root_conflict_input};
 pub(crate) use ::test_support::same_root_conflict_tree;
 #[cfg(test)]
 
-mod rs_deny_03_shadowing_tests;
+mod tests;

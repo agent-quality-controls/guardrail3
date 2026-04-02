@@ -379,4 +379,4 @@ fn strip_string_literals(line: &str) -> String {
 
 #[cfg(test)]
 
-mod comments_tests;
+mod tests;

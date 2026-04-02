@@ -98,7 +98,8 @@ fn deps_route_drops_repo_workspace_root_when_enabled_descendant_app_is_not_a_wor
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let config = toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(
         tree.file_content("guardrail3.toml")
             .expect("expected guardrail3.toml"),
@@ -106,7 +107,7 @@ fn deps_route_drops_repo_workspace_root_when_enabled_descendant_app_is_not_a_wor
     .expect("expected config");
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Deps]));
     let route =
-        super::FamilyMapper::new(&tree, &scope, Some(&config), &selected, None).map_rs_deps();
+        super::FamilyMapper::from_legality(&legality, Some(&config), &selected, None).map_rs_deps();
 
     let cargo_paths = route
         .roots()
@@ -122,9 +123,10 @@ fn toolchain_route_keeps_non_workspace_roots_visible_for_family_judgment() {
         &["Cargo.toml", "rust-toolchain.toml"],
         &[("tools/helper/Cargo.toml", "[package]\nname = \"helper\"\n")],
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Toolchain]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_toolchain();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_toolchain();
 
     let cargo_paths = route
         .roots()
@@ -144,9 +146,10 @@ fn clippy_route_keeps_non_workspace_roots_visible_for_family_judgment() {
             ("tools/helper/clippy.toml", "msrv = \"1.85\"\n"),
         ],
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Clippy]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_clippy();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_clippy();
 
     let cargo_paths = route
         .roots()
@@ -169,9 +172,10 @@ fn deny_route_keeps_non_workspace_roots_visible_for_family_judgment() {
             ),
         ],
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Deny]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deny();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_deny();
 
     let cargo_paths = route
         .roots()
@@ -194,9 +198,10 @@ fn cargo_route_keeps_non_workspace_roots_visible_for_family_judgment() {
             ),
         ],
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_cargo();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_cargo();
 
     let cargo_paths = route
         .roots()
@@ -219,9 +224,10 @@ fn deps_route_keeps_non_workspace_roots_visible_for_family_judgment() {
             ),
         ],
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Deps]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deps();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_deps();
 
     let cargo_paths = route
         .roots()
@@ -245,9 +251,10 @@ fn garde_route_keeps_non_workspace_roots_visible_for_family_judgment() {
             ),
         ],
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Garde]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_garde();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_garde();
 
     let cargo_paths = route
         .roots()
@@ -270,9 +277,10 @@ fn release_route_keeps_non_workspace_roots_visible_for_family_judgment() {
             ("tools/helper/release-plz.toml", "[workspace]\n"),
         ],
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Release]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_release();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_release();
 
     let cargo_paths = route
         .roots()
@@ -365,9 +373,10 @@ fn topology_route_receives_illegal_family_files_and_topology_issues() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Topology]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_topology();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_topology();
 
     let illegal_files = route
         .family_files()
@@ -409,9 +418,10 @@ fn toolchain_route_keeps_root_workspace_surface() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Toolchain]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_toolchain();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_toolchain();
 
     let roots = route
         .roots()
@@ -488,9 +498,10 @@ fn cargo_route_validation_scope_excludes_sibling_policy_roots() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None)
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(Some("apps/backend/src"))
         .map_rs_cargo();
 
@@ -566,9 +577,10 @@ fn fmt_route_stays_global_when_validation_scope_is_narrow() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Fmt]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None)
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(Some("apps/backend/src"))
         .map_rs_fmt();
 
@@ -646,9 +658,10 @@ fn code_route_stays_global_when_validation_scope_is_narrow() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Code]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None)
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(Some("apps/backend/src"))
         .map_rs_code();
 
@@ -745,9 +758,10 @@ fn test_route_stays_global_when_validation_scope_is_narrow() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Test]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None)
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(Some("apps/backend/tests"))
         .map_rs_test();
 
@@ -827,9 +841,10 @@ fn cargo_route_scope_keeps_the_legal_workspace_surface_that_owns_the_scope() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None)
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(Some("crates/api/src"))
         .map_rs_cargo();
 
@@ -907,9 +922,10 @@ fn libarch_route_includes_legal_package_members() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Libarch]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_libarch();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_libarch();
 
     let root_rels = route
         .roots()
@@ -975,9 +991,10 @@ fn toolchain_route_keeps_rootless_and_ancestor_toolchain_files_visible() {
             "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
         )]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Toolchain]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_toolchain();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_toolchain();
 
     let toolchain_files = route
         .family_files()
@@ -1063,9 +1080,10 @@ fn toolchain_route_drops_outside_root_candidates_when_scope_does_not_touch_them(
             "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
         )]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Toolchain]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None)
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(Some("apps/backend/src"))
         .map_rs_toolchain();
 
@@ -1157,9 +1175,10 @@ fn clippy_route_keeps_only_scope_relevant_candidates_when_scope_is_narrow() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Clippy]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None)
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(Some("apps/backend/src"))
         .map_rs_clippy();
 
@@ -1233,9 +1252,10 @@ fn clippy_route_keeps_ancestor_cargo_override_when_scope_targets_descendant_work
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Clippy]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None)
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None)
         .with_validation_scope(Some("apps/backend/src"))
         .map_rs_clippy();
 
@@ -1315,9 +1335,10 @@ fn clippy_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Clippy]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_clippy();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_clippy();
 
     let files = route
         .family_files()
@@ -1380,9 +1401,10 @@ fn deny_route_normalizes_cargo_deny_owner_to_parent_root() {
             "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
         )]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Deny]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deny();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_deny();
 
     let file = route
         .family_files()
@@ -1464,9 +1486,10 @@ fn deny_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Deny]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deny();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_deny();
 
     let files = route
         .family_files()
@@ -1553,9 +1576,10 @@ fn cargo_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_cargo();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_cargo();
 
     let files = route
         .family_files()
@@ -1631,9 +1655,10 @@ fn deps_route_keeps_ancestor_guardrail_policy_for_local_surface() {
             ),
         ]),
     );
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Deps]));
-    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deps();
+    let route = super::FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_deps();
 
     let files = route
         .family_files()

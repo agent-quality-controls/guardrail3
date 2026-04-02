@@ -83,4 +83,4 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_code_06_garde_skip_with_comment_tests;
+mod tests;

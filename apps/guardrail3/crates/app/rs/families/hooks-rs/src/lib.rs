@@ -89,7 +89,7 @@ pub fn check(surface: &FamilyView, tc: &dyn ToolChecker) -> Vec<CheckResult> {
 pub(crate) fn run_case(pre_commit: &str, installed: &[&'static str]) -> Vec<CheckResult> {
     let tree = test_support::hook_tree(pre_commit);
     check(
-        &FamilyView::from_tree(&tree),
+        &tree,
         &test_support::StubToolChecker::new(installed),
     )
 }

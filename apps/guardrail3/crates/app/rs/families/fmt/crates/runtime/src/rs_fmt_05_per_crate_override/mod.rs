@@ -40,4 +40,4 @@ pub(crate) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod rs_fmt_05_per_crate_override_tests;
+mod tests;

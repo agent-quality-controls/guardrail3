@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
-use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
+use guardrail3_app_rs_family_view::{DirEntry, FamilyView};
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
@@ -13,7 +13,7 @@ pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     )
 }
 
-pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, &str)>) -> ProjectTree {
+pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, &str)>) -> FamilyView {
     let full_structure: BTreeMap<_, _> = structure
         .into_iter()
         .map(|(rel, entry)| (rel.to_owned(), entry))
@@ -22,7 +22,7 @@ pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, &str)>
         .into_iter()
         .map(|(rel, body)| (rel.to_owned(), body.to_owned()))
         .collect();
-    ProjectTree::build(
+    FamilyView::build(
         PathBuf::from("/tmp/project"),
         &full_structure,
         &full_content,

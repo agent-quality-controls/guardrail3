@@ -1,4 +1,4 @@
-use crate::hook_shell::{FailOpenWrapper, parse_script};
+use super::{FailOpenWrapper, parse_script};
 
 #[test]
 fn records_shebang_and_executable_lines_only() {

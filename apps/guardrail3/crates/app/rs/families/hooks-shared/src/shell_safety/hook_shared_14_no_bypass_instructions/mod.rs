@@ -53,4 +53,4 @@ pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod hook_shared_14_no_bypass_instructions_tests;
+mod tests;

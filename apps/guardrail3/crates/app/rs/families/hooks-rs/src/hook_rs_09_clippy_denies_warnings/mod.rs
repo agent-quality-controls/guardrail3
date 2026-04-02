@@ -391,7 +391,7 @@ fn wrapper_or_command_contains_clippy_deny(
 }
 
 #[cfg(test)]
-pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
+pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
     let parsed = test_support::parsed_hook(content);
     let input = RustHookCommandInput {
         rel_path: ".githooks/pre-commit",

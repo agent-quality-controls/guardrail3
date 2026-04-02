@@ -101,4 +101,4 @@ fn edition_rank(edition: &str) -> Option<usize> {
 
 #[cfg(test)]
 
-mod rs_cargo_05_workspace_metadata_tests;
+mod tests;

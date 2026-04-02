@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::inventories::hook_shared_12_modular_scripts_executable as assertions;
 
-use crate::hook_shared_12_modular_scripts_executable::check;
+use super::check;
 
 #[test]
 fn returns_no_results_for_empty_inventory() {

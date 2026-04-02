@@ -40,17 +40,19 @@ pub fn check(input: &ToolDepsInput<'_>, results: &mut Vec<CheckResult>) {
 fn family_route(
     tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Deps,
         ]));
-    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+    guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .map_rs_deps()
 }
 
 #[cfg(test)]
-pub(super) fn collected_facts(
+pub(crate) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
 ) -> crate::facts::DepsFacts {
@@ -62,7 +64,7 @@ pub(super) fn collected_facts(
 }
 
 #[cfg(test)]
-pub(super) fn tool_input<'a>(
+pub(crate) fn tool_input<'a>(
     facts: &'a crate::facts::DepsFacts,
     tool_name: &str,
 ) -> crate::inputs::ToolDepsInput<'a> {
@@ -75,7 +77,7 @@ pub(super) fn tool_input<'a>(
 }
 
 #[cfg(test)]
-pub(super) fn tool_facts(tool_name: &str, installed: bool) -> crate::facts::DepsFacts {
+pub(crate) fn tool_facts(tool_name: &str, installed: bool) -> crate::facts::DepsFacts {
     crate::facts::DepsFacts {
         tools: vec![crate::facts::ToolFacts {
             tool_name: tool_name.to_owned(),
@@ -97,7 +99,7 @@ pub(super) fn tool_facts(tool_name: &str, installed: bool) -> crate::facts::Deps
 }
 
 #[cfg(test)]
-pub(super) fn run_with_facts(
+pub(crate) fn run_with_facts(
     facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
@@ -105,4 +107,4 @@ pub(super) fn run_with_facts(
 
 #[cfg(test)]
 
-mod rs_deps_04_gitleaks_installed_tests;
+mod tests;

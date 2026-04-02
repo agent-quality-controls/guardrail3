@@ -19,6 +19,7 @@ guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../..
 guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../domain/validation-model" }
 
 [dev-dependencies]
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../domain/project-tree" }
 guardrail3_app_rs_family_mapper_assertions = { package = "guardrail3-app-rs-family-mapper-assertions", path = "assertions" }
 guardrail3_app_rs_structure = { package = "guardrail3-app-rs-structure", path = "../structure" }
 toml = "0.8"

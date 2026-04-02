@@ -33,7 +33,7 @@ pub fn check(rel_path: &str, tc: &dyn ToolChecker, results: &mut Vec<CheckResult
 }
 
 #[cfg(test)]
-pub(super) fn run_case(installed: &[&'static str]) -> Vec<CheckResult> {
+pub(crate) fn run_case(installed: &[&'static str]) -> Vec<CheckResult> {
     let mut results = Vec::new();
     check(
         ".githooks/pre-commit",
@@ -45,4 +45,4 @@ pub(super) fn run_case(installed: &[&'static str]) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod hook_rs_06_required_tools_installed_tests;
+mod tests;

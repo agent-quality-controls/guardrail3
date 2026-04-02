@@ -86,4 +86,4 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_clippy_14_library_global_state_tests;
+mod tests;

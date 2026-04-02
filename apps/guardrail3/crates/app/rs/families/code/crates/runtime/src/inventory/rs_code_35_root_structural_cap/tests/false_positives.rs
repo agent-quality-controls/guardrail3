@@ -45,20 +45,24 @@ fn stays_quiet_when_root_is_scoped_to_one_file() {
     write_file(tmp.path(), "src/a/b/c/d/e/f/mod.rs", "");
 
     let tree = walk_project(&RealFileSystem, tmp.path());
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = guardrail3_validation_model::RustFamilySelection::new(BTreeSet::from([
         guardrail3_validation_model::RustValidateFamily::Code,
     ]));
     let scoped_files = BTreeSet::from(["src/lib.rs".to_owned()]);
-    let route = guardrail3_app_rs_family_mapper::FamilyMapper::new(
-        &tree,
-        &scope,
+    let route = guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(
+        &legality,
         None,
         &selected,
         Some(&scoped_files),
     )
     .map_rs_code();
 
-    let results = crate::check(&FamilyView::from_tree(&tree), &route);
+    let surface = FamilyView::build(
+        tree.root().clone(), tree.structure(), tree.content(),
+        &["".to_owned()], &[], &[], None,
+    );
+    let results = crate::check(&surface, &route);
     assert_no_hits(&results);
 }

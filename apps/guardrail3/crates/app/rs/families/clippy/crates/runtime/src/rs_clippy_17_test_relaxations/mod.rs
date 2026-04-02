@@ -117,7 +117,7 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
 
 #[cfg(test)]
 
-mod rs_clippy_17_test_relaxations_tests;
+mod tests;
 
 fn relaxation_message(
     key: &str,

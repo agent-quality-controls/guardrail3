@@ -118,15 +118,24 @@ pub(crate) fn check_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     use guardrail3_adapters_outbound_fs::RealFileSystem;
     use guardrail3_app_core::project_walker::walk_project;
     use guardrail3_app_rs_family_mapper::FamilyMapper;
-    use guardrail3_app_rs_structure::collect as collect_scope;
     use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
     let tree = walk_project(&RealFileSystem, root);
-    let scope = collect_scope(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         RustFamilySelection::new(std::collections::BTreeSet::from([RustValidateFamily::Deny]));
-    let route = FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deny();
-    check(&FamilyView::from_tree(&tree), &route)
+    let route = FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_deny();
+    let surface = guardrail3_app_rs_family_view::FamilyView::build(
+        tree.root().clone(),
+        tree.structure(),
+        tree.content(),
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
+    );
+    check(&surface, &route)
 }
 
 #[cfg(test)]
@@ -163,14 +172,15 @@ pub(crate) fn run_config_rule_for_test(
 }
 
 #[cfg(test)]
-pub(crate) fn collect_facts_for_test(tree: &ProjectTree) -> facts::DenyFacts {
+pub(crate) fn collect_facts_for_test(tree: &FamilyView) -> facts::DenyFacts {
     use guardrail3_app_rs_family_mapper::FamilyMapper;
-    use guardrail3_app_rs_structure::collect as collect_scope;
     use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
-    let scope = collect_scope(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         RustFamilySelection::new(std::collections::BTreeSet::from([RustValidateFamily::Deny]));
-    let route = FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_deny();
+    let route = FamilyMapper::from_legality(&legality, None, &selected, None).map_rs_deny();
     collect(tree, &route)
 }

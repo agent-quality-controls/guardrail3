@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::bootstrap::hook_shared_01_pre_commit_exists as assertions;
 
-use crate::hook_shared_01_pre_commit_exists::run_case;
+use super::run_case;
 
 #[test]
 fn errors_when_pre_commit_is_missing() {

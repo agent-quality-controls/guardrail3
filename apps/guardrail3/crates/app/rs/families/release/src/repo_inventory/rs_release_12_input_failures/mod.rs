@@ -17,7 +17,7 @@ pub fn check(input: &ReleaseInputFailureInput<'_>, results: &mut Vec<CheckResult
 }
 
 #[cfg(test)]
-pub(super) fn run_tree(
+pub(crate) fn run_tree(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
@@ -26,7 +26,7 @@ pub(super) fn run_tree(
 }
 
 #[cfg(test)]
-pub(super) fn run_family(
+pub(crate) fn run_family(
     root: &std::path::Path,
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
@@ -34,7 +34,7 @@ pub(super) fn run_family(
 }
 
 #[cfg(test)]
-pub(super) fn copy_fixture() -> tempfile::TempDir {
+pub(crate) fn copy_fixture() -> tempfile::TempDir {
     crate::test_fixtures::copy_fixture()
 }
 #[cfg(test)]
@@ -42,4 +42,4 @@ pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_roo
 
 #[cfg(test)]
 
-mod rs_release_12_input_failures_tests;
+mod tests;

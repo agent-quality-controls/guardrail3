@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hooks_shared_assertions::shell_safety::hook_shared_20_concrete_lockfile_command as assertions;
 
-use crate::hook_shared_20_concrete_lockfile_command::run_case;
+use super::run_case;
 
 #[test]
 fn warns_when_lockfile_check_is_only_prose() {

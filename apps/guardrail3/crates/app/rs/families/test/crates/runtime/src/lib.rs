@@ -212,8 +212,10 @@ fn root_is_active_in_scope(
 
 #[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Test]));
-    let route = FamilyMapper::new(tree, &scope, None, &selection, None).map_rs_test();
-    check(&FamilyView::from_tree(tree), &route, tc)
+    let route = FamilyMapper::from_legality(&legality, None, &selection, None).map_rs_test();
+    check(tree, &route, tc)
 }

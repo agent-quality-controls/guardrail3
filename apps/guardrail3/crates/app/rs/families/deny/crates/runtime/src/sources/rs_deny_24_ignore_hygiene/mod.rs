@@ -182,4 +182,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 pub(crate) use ::test_support::{build_fixture_deny_toml, set_advisory_ignores};
 #[cfg(test)]
 
-mod rs_deny_24_ignore_hygiene_tests;
+mod tests;

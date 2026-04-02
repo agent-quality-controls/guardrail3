@@ -55,10 +55,10 @@ pub fn check(input: &RootWorkspaceHexarchInput<'_>, results: &mut Vec<CheckResul
 }
 
 #[cfg(test)]
-pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 
 #[cfg(test)]
 
-mod rs_hexarch_11_root_workspace_doesnt_include_apps_tests;
+mod tests;

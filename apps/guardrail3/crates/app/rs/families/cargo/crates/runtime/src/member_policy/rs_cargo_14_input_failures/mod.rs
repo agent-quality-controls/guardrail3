@@ -40,4 +40,4 @@ pub fn check_inventory(
 
 #[cfg(test)]
 
-mod rs_cargo_14_input_failures_tests;
+mod tests;

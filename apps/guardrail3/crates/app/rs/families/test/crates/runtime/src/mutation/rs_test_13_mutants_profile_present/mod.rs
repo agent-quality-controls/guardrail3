@@ -44,4 +44,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 #[cfg(test)]
 
-mod rs_test_13_mutants_profile_present_tests;
+mod tests;

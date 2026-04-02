@@ -83,4 +83,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 
 #[cfg(test)]
 
-mod rs_code_23_include_bypass_tests;
+mod tests;

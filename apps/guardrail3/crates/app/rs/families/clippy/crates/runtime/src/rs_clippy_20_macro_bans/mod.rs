@@ -76,4 +76,4 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
 
 #[cfg(test)]
 
-mod rs_clippy_20_macro_bans_tests;
+mod tests;

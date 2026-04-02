@@ -183,4 +183,4 @@ pub(crate) use ::test_support::{build_fixture_deny_toml, set_license_exceptions}
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_deny_17_license_exceptions_inventory_tests;
+mod tests;

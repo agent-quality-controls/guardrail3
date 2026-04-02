@@ -57,4 +57,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 
 #[cfg(test)]
 
-mod rs_code_21_fs_glob_import_tests;
+mod tests;

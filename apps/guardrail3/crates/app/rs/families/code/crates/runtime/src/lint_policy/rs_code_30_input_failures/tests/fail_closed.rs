@@ -2,12 +2,12 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use super::super::{DirEntry, ProjectTree, run_tree};
 use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_app_core::project_walker::walk_project;
 use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_30_input_failures::{
     assert_files, assert_guardrail_policy_parse_failure, assert_message_fragment_failure,
     assert_no_hits, assert_source_parse_failure,
 };
-use guardrail3_app_rs_family_view::FamilyView;
 use test_support::{create_dir_all, create_temp_dir, write_path};
 
 fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
@@ -24,7 +24,7 @@ fn project_tree(
     structure: BTreeMap<String, DirEntry>,
     content: BTreeMap<String, String>,
 ) -> ProjectTree {
-    ProjectTree::new(root.to_path_buf(), structure, content)
+    ProjectTree::build(root.to_path_buf(), &structure, &content, &["".to_owned()], &[], &[], None)
 }
 
 #[test]
@@ -216,15 +216,20 @@ fn stays_quiet_when_validation_scope_selects_zero_code_roots() {
     );
 
     let tree = walk_project(&RealFileSystem, root.path());
-    let scope = guardrail3_app_rs_structure::collect(&tree);
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
+        let legality = guardrail3_app_rs_legality::collect(structure);
     let selected = guardrail3_validation_model::RustFamilySelection::new(BTreeSet::from([
         guardrail3_validation_model::RustValidateFamily::Code,
     ]));
     let route =
-        guardrail3_app_rs_family_mapper::FamilyMapper::new(&tree, &scope, None, &selected, None)
+        guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
             .with_validation_scope(Some("docs"))
             .map_rs_code();
 
-    let results = crate::check(&FamilyView::from_tree(&tree), &route);
+    let surface = FamilyView::build(
+        tree.root().clone(), tree.structure(), tree.content(),
+        &["".to_owned()], &[], &[], None,
+    );
+    let results = crate::check(&surface, &route);
     assert_no_hits(&results);
 }

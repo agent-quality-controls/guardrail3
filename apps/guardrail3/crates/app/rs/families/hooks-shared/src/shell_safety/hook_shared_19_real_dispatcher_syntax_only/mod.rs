@@ -62,4 +62,4 @@ pub(crate) fn run_case(content: &str, has_modular_dir: bool) -> Vec<CheckResult>
 
 #[cfg(test)]
 
-mod hook_shared_19_real_dispatcher_syntax_only_tests;
+mod tests;

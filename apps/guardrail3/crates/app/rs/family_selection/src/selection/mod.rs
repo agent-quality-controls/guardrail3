@@ -215,4 +215,4 @@ fn has_unscoped_rust_root(tree: &ProjectTree, rust: &RustConfig) -> bool {
 
 #[cfg(test)]
 
-mod selection_tests;
+mod tests;

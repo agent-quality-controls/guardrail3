@@ -41,7 +41,7 @@ pub fn check(
 }
 
 #[cfg(test)]
-pub(super) fn run_case(
+pub(crate) fn run_case(
     cargo_dupes_required: bool,
     cargo_dupes_path_qualified: bool,
     installed: &[&'static str],
@@ -59,4 +59,4 @@ pub(super) fn run_case(
 
 #[cfg(test)]
 
-mod hook_rs_15_cargo_dupes_installed_tests;
+mod tests;

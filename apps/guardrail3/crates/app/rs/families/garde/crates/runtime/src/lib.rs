@@ -143,5 +143,5 @@ pub(crate) fn check_test_tree(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     route: &RsGardeRoute,
 ) -> Vec<CheckResult> {
-    check(&FamilyView::from_tree(tree), route)
+    check(tree, route)
 }

@@ -41,7 +41,7 @@ pub fn check(
 }
 
 #[cfg(test)]
-pub(super) fn run_case(
+pub(crate) fn run_case(
     guardrail_validation_expected: bool,
     guardrail_validation_path_qualified: bool,
     installed: &[&'static str],
@@ -59,4 +59,4 @@ pub(super) fn run_case(
 
 #[cfg(test)]
 
-mod hook_rs_14_guardrail_binary_available_tests;
+mod tests;

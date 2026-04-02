@@ -43,4 +43,4 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
 
 #[cfg(test)]
 
-mod rs_cargo_04_lint_inheritance_tests;
+mod tests;

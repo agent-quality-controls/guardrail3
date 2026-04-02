@@ -40,4 +40,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod rs_code_31_public_struct_named_fields_tests;
+mod tests;

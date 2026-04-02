@@ -45,17 +45,19 @@ pub fn check(input: &AllowlistCoverageDepsInput<'_>, results: &mut Vec<CheckResu
 fn family_route(
     tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
-    let scope = guardrail3_app_rs_structure::collect(tree);
+    let pt = guardrail3_domain_project_tree::ProjectTree::new(tree.root_path().to_path_buf(), tree.structure().clone(), tree.content().clone());
+    let structure = guardrail3_app_rs_structure::collect(pt, &[]);
+    let legality = guardrail3_app_rs_legality::collect(structure);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Deps,
         ]));
-    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+    guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .map_rs_deps()
 }
 
 #[cfg(test)]
-pub(super) fn collected_facts(
+pub(crate) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
 ) -> crate::facts::DepsFacts {
@@ -67,7 +69,7 @@ pub(super) fn collected_facts(
 }
 
 #[cfg(test)]
-pub(super) fn coverage_facts(
+pub(crate) fn coverage_facts(
     profile_name: Option<&str>,
     has_allowlist: bool,
 ) -> crate::facts::DepsFacts {
@@ -94,7 +96,7 @@ pub(super) fn coverage_facts(
 }
 
 #[cfg(test)]
-pub(super) fn coverage_input<'a>(
+pub(crate) fn coverage_input<'a>(
     facts: &'a crate::facts::DepsFacts,
     cargo_rel_path: &str,
 ) -> crate::inputs::AllowlistCoverageDepsInput<'a> {
@@ -107,7 +109,7 @@ pub(super) fn coverage_input<'a>(
 }
 
 #[cfg(test)]
-pub(super) fn run_with_facts(
+pub(crate) fn run_with_facts(
     facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
@@ -115,4 +117,4 @@ pub(super) fn run_with_facts(
 
 #[cfg(test)]
 
-mod rs_deps_08_library_allowlist_present_tests;
+mod tests;

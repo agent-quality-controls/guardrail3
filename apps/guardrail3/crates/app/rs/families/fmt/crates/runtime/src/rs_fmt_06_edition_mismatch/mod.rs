@@ -101,4 +101,4 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 
 #[cfg(test)]
 
-mod rs_fmt_06_edition_mismatch_tests;
+mod tests;

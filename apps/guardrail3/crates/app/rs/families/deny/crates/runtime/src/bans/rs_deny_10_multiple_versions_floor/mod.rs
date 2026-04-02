@@ -65,4 +65,4 @@ pub(crate) use ::test_support::{
 #[cfg(test)]
 
 // reason: test-only sidecar module wiring
-mod rs_deny_10_multiple_versions_floor_tests;
+mod tests;
