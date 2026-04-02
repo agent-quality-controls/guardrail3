@@ -9,6 +9,6 @@ workspace = true
 [dependencies]
 guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../../../../adapters/outbound/fs" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../../core" }
-guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../family_mapper" }
+guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../family_view" }
 guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../../../ports/outbound/traits" }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../../shared/fs" }

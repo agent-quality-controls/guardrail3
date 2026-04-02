@@ -7,14 +7,14 @@ const ID: &str = "RS-ARCH-09";
 /// declarations. Unconditionally forbidden — `#[path]` bypasses the module
 /// facade (mod.rs) and breaks the module boundary model.
 pub(crate) fn check_file(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     rel_path: &str,
     results: &mut Vec<CheckResult>,
 ) {
     let content = if let Some(cached) = tree.file_content(rel_path) {
         cached.to_owned()
     } else {
-        let abs = tree.abs_path(rel_path);
+        let Some(abs) = tree.abs_path(rel_path) else { return };
         match guardrail3_shared_fs::read_file_err(&abs) {
             Ok(c) => c,
             Err(_) => return,

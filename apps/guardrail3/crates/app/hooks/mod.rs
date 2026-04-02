@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
@@ -11,8 +11,10 @@ pub fn check(
     tree: &ProjectTree,
     tc: &dyn ToolChecker,
 ) -> Vec<CheckResult> {
-    let surface = RsProjectSurface::from_route_scope_with_dirs(
-        tree,
+    let surface = FamilyView::build(
+        tree.root().clone(),
+        tree.structure(),
+        tree.content(),
         &[],
         &hook_file_rels(tree),
         &hook_dir_rels(tree),

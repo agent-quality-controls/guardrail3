@@ -1,7 +1,7 @@
 #[cfg(test)]
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
+use guardrail3_app_rs_family_view::FamilyView;
 #[cfg(test)]
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::CargoConfigOverrideInput;
@@ -97,7 +97,7 @@ pub(crate) fn run_family_with_validation_scope_for_tests(
         guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
             .with_validation_scope(Some(validation_scope))
             .map_rs_clippy();
-    crate::check(&RsProjectSurface::from_tree(tree), &route)
+    crate::check(&FamilyView::from_tree(tree), &route)
 }
 
 #[cfg(test)]

@@ -7,7 +7,7 @@ use guardrail3_app_core::project_walker::walk_project;
 use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::{
     RuleFinding, Severity, assert_findings, assert_no_hits,
 };
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
+use guardrail3_app_rs_family_view::FamilyView;
 use test_support::{create_temp_dir, write_file};
 
 #[test]
@@ -83,7 +83,7 @@ fn does_not_inventory_repo_root_exception_comments_in_backend_scoped_run() {
     .with_validation_scope(Some("apps/backend/src"))
     .map_rs_code();
 
-    let results = crate::check(&RsProjectSurface::from_tree(&tree), &route);
+    let results = crate::check(&FamilyView::from_tree(&tree), &route);
     assert_findings(
         &results,
         &[RuleFinding::new(

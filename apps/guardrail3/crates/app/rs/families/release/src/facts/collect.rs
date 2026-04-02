@@ -5,7 +5,7 @@ use super::{cargo_roots, inheritance, types};
 use crate::release_support;
 
 pub fn collect(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     route: &guardrail3_app_rs_family_mapper::RsReleaseRoute,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
@@ -73,7 +73,7 @@ struct CrateIndex {
 }
 
 fn collect_crate_index(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     cargo_roots: &BTreeMap<String, types::CargoRootFacts>,
 ) -> CrateIndex {
     let mut publishable_names = BTreeSet::new();
@@ -121,7 +121,7 @@ fn collect_crate_index(
 }
 
 fn collect_crate_facts(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     cargo_roots: &BTreeMap<String, types::CargoRootFacts>,
     validation_scope: Option<&str>,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
@@ -243,7 +243,8 @@ fn collect_crate_facts(
                 .and_then(toml::Value::as_table)
                 .is_some(),
             dry_run: if publishable && thorough {
-                tc.run_cargo_publish_dry_run_outcome(&tree.abs_path(&root.rel_dir))
+                tree.abs_path(&root.rel_dir)
+                    .and_then(|abs| tc.run_cargo_publish_dry_run_outcome(&abs))
             } else {
                 None
             },
@@ -254,7 +255,7 @@ fn collect_crate_facts(
 }
 
 fn collect_repo_facts(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     cargo_roots: &BTreeMap<String, types::CargoRootFacts>,
     publishable_names: BTreeSet<String>,
@@ -324,7 +325,7 @@ fn collect_repo_facts(
 }
 
 fn parse_release_plz(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     input_failures: &mut Vec<types::ReleaseInputFailureFacts>,
     rel_path: &str,
 ) -> (bool, Option<toml::Value>, BTreeSet<String>) {
@@ -365,7 +366,7 @@ fn parse_release_plz(
 }
 
 fn parse_optional_toml(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     input_failures: &mut Vec<types::ReleaseInputFailureFacts>,
     rel_path: &str,
     display_name: &str,
@@ -470,7 +471,7 @@ fn rel_intersects_validation_scope(rel_dir: &str, validation_scope: &str) -> boo
 }
 
 fn collect_workflows(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     input_failures: &mut Vec<types::ReleaseInputFailureFacts>,
 ) -> Vec<types::WorkflowFacts> {
     let mut workflow_paths = tree
@@ -479,7 +480,7 @@ fn collect_workflows(
         .flat_map(|(dir_rel, entry)| {
             entry.files().iter().filter_map(move |file_name| {
                 let rel_path =
-                    guardrail3_app_rs_family_mapper::RsProjectSurface::join_rel(dir_rel, file_name);
+                    guardrail3_app_rs_family_view::FamilyView::join_rel(dir_rel, file_name);
                 let is_workflow = rel_path.starts_with(".github/workflows/")
                     && Path::new(file_name)
                         .extension()

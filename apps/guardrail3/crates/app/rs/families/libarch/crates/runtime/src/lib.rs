@@ -8,9 +8,10 @@ mod rs_libarch_10_infra_not_public_surface;
 mod rs_libarch_11_root_facade_exports_api;
 
 use facts::LibarchFacts;
-use guardrail3_app_rs_family_mapper::{RsLibarchRoute, RsProjectSurface};
+use guardrail3_app_rs_family_mapper::RsLibarchRoute;
+use guardrail3_app_rs_family_view::FamilyView;
 #[cfg(test)]
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use inputs::PackageLibarchInput;
 
@@ -25,7 +26,7 @@ use std::collections::BTreeSet;
 #[cfg(test)]
 use test_support as _;
 
-pub fn check(surface: &RsProjectSurface, route: &RsLibarchRoute) -> Vec<CheckResult> {
+pub fn check(surface: &FamilyView, route: &RsLibarchRoute) -> Vec<CheckResult> {
     let tree = surface;
     run_with_facts(&facts::collect(tree, route))
 }
@@ -54,7 +55,7 @@ pub fn family_route_for_tests(tree: &ProjectTree) -> RsLibarchRoute {
 #[cfg(test)]
 pub(crate) fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
     let route = family_route_for_tests(tree);
-    check(&RsProjectSurface::from_tree(tree), &route)
+    check(&FamilyView::from_tree(tree), &route)
 }
 
 #[cfg(test)]

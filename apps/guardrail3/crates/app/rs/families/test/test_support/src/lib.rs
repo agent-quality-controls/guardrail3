@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 use guardrail3_shared_fs::write_file as write_fs_file;
 
@@ -30,7 +30,16 @@ pub fn write_file(root: &Path, rel_path: &str, content: &str) {
 }
 
 pub fn walk(root: &Path) -> ProjectTree {
-    ProjectTree::from_tree(&walk_project(&RealFileSystem, root))
+    let walked = walk_project(&RealFileSystem, root);
+    ProjectTree::build(
+        walked.root().clone(),
+        walked.structure(),
+        walked.content(),
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
+    )
 }
 
 #[derive(Debug, Default)]

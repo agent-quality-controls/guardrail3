@@ -17,12 +17,12 @@ pub fn check(input: &CodeInputFailureInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 #[cfg(test)]
-pub(crate) fn run_tree(tree: &guardrail3_app_rs_family_mapper::RsProjectSurface) -> Vec<CheckResult> {
+pub(crate) fn run_tree(tree: &guardrail3_app_rs_family_view::FamilyView) -> Vec<CheckResult> {
     crate::check_test_tree(tree)
 }
 
 #[cfg(test)]
-pub(crate) use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
+pub(crate) use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
 
 #[cfg(test)]
 pub(crate) fn check_input_failure(rel_path: &str, message: &str) -> Vec<CheckResult> {

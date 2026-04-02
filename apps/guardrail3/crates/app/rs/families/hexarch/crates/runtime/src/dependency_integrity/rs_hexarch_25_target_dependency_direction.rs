@@ -60,7 +60,7 @@ pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> 
 
 #[cfg(test)]
 pub(super) fn results_for_test_tree(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> Vec<CheckResult> {
     crate::check_test_tree(tree)
 }

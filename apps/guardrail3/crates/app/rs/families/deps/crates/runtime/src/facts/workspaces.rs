@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use glob::Pattern;
 
 use guardrail3_app_rs_family_mapper::RsDepsRoute;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use super::guardrail::validate_workspace_manifest_shape;
 use super::{InputFailureFacts, WorkspaceFacts};

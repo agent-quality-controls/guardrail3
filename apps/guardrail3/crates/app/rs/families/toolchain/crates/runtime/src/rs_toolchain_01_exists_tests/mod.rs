@@ -6,11 +6,11 @@ use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_01_exists::{
 
 use super::{check, nested_workspace_root_tree, run_family_check, test_input, test_tree};
 
-fn workspace_tree_with_nested_non_member_package() -> guardrail3_app_rs_family_mapper::RsProjectSurface {
+fn workspace_tree_with_nested_non_member_package() -> guardrail3_app_rs_family_view::FamilyView {
     use std::collections::BTreeMap;
     use std::path::PathBuf;
 
-    use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
+    use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
 
     let structure = BTreeMap::from([
         (
@@ -55,11 +55,11 @@ fn workspace_tree_with_nested_non_member_package() -> guardrail3_app_rs_family_m
 }
 
 fn workspace_tree_with_non_package_descendant_toolchain()
--> guardrail3_app_rs_family_mapper::RsProjectSurface {
+-> guardrail3_app_rs_family_view::FamilyView {
     use std::collections::BTreeMap;
     use std::path::PathBuf;
 
-    use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
+    use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
 
     let structure = BTreeMap::from([
         (

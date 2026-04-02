@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
+guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../../family_view" }
 guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../../../../placement" }
 guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../../../../domain/config" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }

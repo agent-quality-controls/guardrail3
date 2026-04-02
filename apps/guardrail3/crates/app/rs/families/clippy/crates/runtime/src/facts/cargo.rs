@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use super::CargoRootFacts;
 

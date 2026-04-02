@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::RustfmtDualConflictInput;

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use super::crate_tree::CrateTree;
 

@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsHexarchRoute;
 use guardrail3_domain_config::types::{CrateConfig, EscapeHatchConfig};
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use self::boundary::{collect_boundary_configs, parse_guardrail_config};
 use self::cycles::collect_same_layer_cycles;

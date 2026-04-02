@@ -7,11 +7,12 @@ mod facade;
 mod facts;
 
 use facts::ArchFacts;
-use guardrail3_app_rs_family_mapper::{RsArchRoute, RsProjectSurface};
+use guardrail3_app_rs_family_mapper::RsArchRoute;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 #[cfg(test)]
 use guardrail3_app_rs_family_mapper::FamilyMapper;
 #[cfg(test)]
@@ -19,12 +20,12 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 #[cfg(test)]
 use std::collections::BTreeSet;
 
-pub fn check(surface: &RsProjectSurface, route: &RsArchRoute) -> Vec<CheckResult> {
+pub fn check(surface: &FamilyView, route: &RsArchRoute) -> Vec<CheckResult> {
     let facts = facts::collect(surface, route);
     run_with_facts(surface, &facts)
 }
 
-pub(crate) fn run_with_facts(surface: &RsProjectSurface, facts: &ArchFacts) -> Vec<CheckResult> {
+pub(crate) fn run_with_facts(surface: &FamilyView, facts: &ArchFacts) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     // Facade rules: per crate node.
@@ -86,5 +87,5 @@ pub fn family_route_for_tests(tree: &ProjectTree) -> RsArchRoute {
 #[cfg(test)]
 pub(crate) fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
     let route = family_route_for_tests(tree);
-    check(&RsProjectSurface::from_tree(tree), &route)
+    check(&FamilyView::from_tree(tree), &route)
 }

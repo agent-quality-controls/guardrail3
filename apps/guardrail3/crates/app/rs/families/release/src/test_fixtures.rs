@@ -16,7 +16,7 @@ pub(crate) fn run_family(
     root: &std::path::Path,
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
-    let tree = guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(
+    let tree = guardrail3_app_rs_family_view::FamilyView::from_tree(
         &guardrail3_app_core::project_walker::walk_project(
             &guardrail3_adapters_outbound_fs::RealFileSystem,
             root,
@@ -30,12 +30,12 @@ pub(crate) fn run_family(
 }
 
 pub(crate) fn run_tree(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::check(
-        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
+        &guardrail3_app_rs_family_view::FamilyView::from_tree(tree),
         &family_route(tree),
         tc,
         thorough,
@@ -43,13 +43,13 @@ pub(crate) fn run_tree(
 }
 
 pub(crate) fn run_tree_with_validation_scope(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
     validation_scope: &str,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::check(
-        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
+        &guardrail3_app_rs_family_view::FamilyView::from_tree(tree),
         &family_route_with_validation_scope(tree, validation_scope),
         tc,
         thorough,
@@ -152,7 +152,7 @@ pub(crate) fn edge_input(
 }
 
 pub(crate) fn family_route(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> guardrail3_app_rs_family_mapper::RsReleaseRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let selected =
@@ -164,7 +164,7 @@ pub(crate) fn family_route(
 }
 
 pub(crate) fn family_route_with_validation_scope(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     validation_scope: &str,
 ) -> guardrail3_app_rs_family_mapper::RsReleaseRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);

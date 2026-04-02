@@ -34,7 +34,8 @@ mod rs_garde_14_guardrail_config_validate_call;
 
 use glob as _;
 use guardrail3_app_core as _;
-use guardrail3_app_rs_family_mapper::{RsGardeRoute, RsProjectSurface};
+use guardrail3_app_rs_family_mapper::RsGardeRoute;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_config as _;
 use guardrail3_domain_modules as _;
 use guardrail3_domain_report::CheckResult;
@@ -44,7 +45,7 @@ use serde_yaml as _;
 
 use self::facts::collect;
 
-pub fn check(surface: &RsProjectSurface, route: &RsGardeRoute) -> Vec<CheckResult> {
+pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
     let tree = surface;
     let facts = collect(tree, route);
     let mut results = Vec::new();
@@ -164,8 +165,8 @@ pub fn check(surface: &RsProjectSurface, route: &RsGardeRoute) -> Vec<CheckResul
 
 #[cfg(test)]
 pub(crate) fn check_test_tree(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     route: &RsGardeRoute,
 ) -> Vec<CheckResult> {
-    check(&RsProjectSurface::from_tree(tree), route)
+    check(&FamilyView::from_tree(tree), route)
 }

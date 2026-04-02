@@ -3,7 +3,8 @@ mod dependency_edges;
 mod facade_surface;
 mod module_layout;
 
-use guardrail3_app_rs_family_mapper::{RsArchRoute, RsProjectSurface as ProjectTree};
+use guardrail3_app_rs_family_mapper::RsArchRoute;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 pub(crate) use self::crate_tree::{CrateNode, CrateTree};
 pub(crate) use self::dependency_edges::{DependencyEdge, DependencyEdges};

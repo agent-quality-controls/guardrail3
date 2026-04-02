@@ -4,7 +4,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
-use guardrail3_app_rs_family_mapper::{DirEntry, RsProjectSurface as ProjectTree};
+use guardrail3_app_rs_family_view::{DirEntry, FamilyView as ProjectTree};
 use guardrail3_domain_modules::deny::build_deny_toml;
 
 static TEMP_ROOT_COUNTER: AtomicU64 = AtomicU64::new(0);
@@ -80,16 +80,22 @@ pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
 }
 
 pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, String)>) -> ProjectTree {
-    ProjectTree::new(
+    let full_structure: BTreeMap<_, _> = structure
+        .into_iter()
+        .map(|(rel, entry)| (rel.to_owned(), entry))
+        .collect();
+    let full_content: BTreeMap<_, _> = content
+        .into_iter()
+        .map(|(rel, content)| (rel.to_owned(), content))
+        .collect();
+    ProjectTree::build(
         PathBuf::from("/tmp/project"),
-        structure
-            .into_iter()
-            .map(|(rel, entry)| (rel.to_owned(), entry))
-            .collect::<BTreeMap<_, _>>(),
-        content
-            .into_iter()
-            .map(|(rel, content)| (rel.to_owned(), content))
-            .collect::<BTreeMap<_, _>>(),
+        &full_structure,
+        &full_content,
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
     )
 }
 
@@ -121,7 +127,16 @@ pub fn same_root_conflict_tree() -> ProjectTree {
 
 #[must_use]
 pub fn walk(root: &Path) -> ProjectTree {
-    ProjectTree::from_tree(&walk_project(&RealFileSystem, root))
+    let walked = walk_project(&RealFileSystem, root);
+    ProjectTree::build(
+        walked.root().clone(),
+        walked.structure(),
+        walked.content(),
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
+    )
 }
 
 #[must_use]

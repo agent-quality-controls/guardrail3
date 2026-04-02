@@ -57,7 +57,7 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
 
 #[cfg(test)]
 pub(crate) fn check_for_test_tree(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> Vec<CheckResult> {
     crate::check_test_tree(tree)
 }

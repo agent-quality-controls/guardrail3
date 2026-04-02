@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use crate::facts_support;
 use guardrail3_app_rs_family_mapper::RsDenyRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyRootKind {

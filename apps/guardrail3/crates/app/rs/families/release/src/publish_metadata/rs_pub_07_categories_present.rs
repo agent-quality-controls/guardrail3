@@ -36,7 +36,7 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 
 #[cfg(test)]
 pub(super) fn run_tree(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {

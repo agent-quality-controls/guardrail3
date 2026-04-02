@@ -54,14 +54,14 @@ fn rel_label(rel: &str) -> String {
 
 #[cfg(test)]
 fn family_route(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
     family_route_with_validation_scope(tree, None)
 }
 
 #[cfg(test)]
 fn family_route_with_validation_scope(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     validation_scope: Option<&str>,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);
@@ -76,7 +76,7 @@ fn family_route_with_validation_scope(
 
 #[cfg(test)]
 pub(super) fn collected_facts(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
 ) -> super::facts::DepsFacts {
     super::facts::collect(
@@ -88,7 +88,7 @@ pub(super) fn collected_facts(
 
 #[cfg(test)]
 pub(super) fn collected_facts_with_validation_scope(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     installed: &[&str],
     validation_scope: Option<&str>,
 ) -> super::facts::DepsFacts {

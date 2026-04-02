@@ -7,7 +7,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
 use guardrail3_domain_config::types::GuardrailConfig;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use self::cargo_roots::collect_cargo_roots;
 use self::clippy::{collect_clippy_configs, owning_root_dir, push_root_facts};
@@ -209,7 +209,7 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
         let Some(root_rel_dir) = owning_root_dir(&rel_path, &routed_root_dirs) else {
             continue;
         };
-        let abs_path = tree.abs_path(&rel_path);
+        let Some(abs_path) = tree.abs_path(&rel_path) else { continue };
         let content = match guardrail3_shared_fs::read_file_err(&abs_path) {
             Ok(content) => content,
             Err(read_error) => {
@@ -433,7 +433,7 @@ fn parsed_file_shows_garde_adoption(parsed: &ParsedGardeFile) -> bool {
 
 #[cfg(test)]
 pub(super) fn family_route(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
     scoped_files: Option<&std::collections::BTreeSet<String>>,
 ) -> guardrail3_app_rs_family_mapper::RsGardeRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);

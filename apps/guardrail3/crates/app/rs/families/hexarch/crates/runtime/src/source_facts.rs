@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use super::dependency_facts::MemberDependencyFacts;
 
@@ -119,7 +119,13 @@ fn walk_module_file(
         return ModuleStats::default();
     }
 
-    let abs_path = tree.abs_path(rel_path);
+    let Some(abs_path) = tree.abs_path(rel_path) else {
+        *source_error = Some((
+            rel_path.to_owned(),
+            "Path not in scope for hexarch checks".to_owned(),
+        ));
+        return ModuleStats::default();
+    };
     let content = match guardrail3_shared_fs::read_file_err(&abs_path) {
         Ok(content) => content,
         Err(read_error) => {

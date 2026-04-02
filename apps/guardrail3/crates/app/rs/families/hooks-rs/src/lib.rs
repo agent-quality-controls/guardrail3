@@ -20,14 +20,14 @@ mod hook_rs_16_config_changes_trigger_validation;
 mod inputs;
 
 use guardrail3_app_rs_family_hooks_shared::hook_shell::parse_script;
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
 
 use self::facts::collect;
 use self::inputs::RustHookCommandInput;
 
-pub fn check(surface: &RsProjectSurface, tc: &dyn ToolChecker) -> Vec<CheckResult> {
+pub fn check(surface: &FamilyView, tc: &dyn ToolChecker) -> Vec<CheckResult> {
     let tree = surface;
     let facts = collect(tree);
     let mut results = Vec::new();
@@ -89,7 +89,7 @@ pub fn check(surface: &RsProjectSurface, tc: &dyn ToolChecker) -> Vec<CheckResul
 pub(crate) fn run_case(pre_commit: &str, installed: &[&'static str]) -> Vec<CheckResult> {
     let tree = test_support::hook_tree(pre_commit);
     check(
-        &RsProjectSurface::from_tree(&tree),
+        &FamilyView::from_tree(&tree),
         &test_support::StubToolChecker::new(installed),
     )
 }

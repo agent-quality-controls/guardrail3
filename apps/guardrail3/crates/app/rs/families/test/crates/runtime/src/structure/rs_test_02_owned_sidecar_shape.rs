@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use crate::analysis::AnalyzedFile;
 use crate::{CheckResult, Severity};
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use super::discover::{join_under_root, parent_dir, path_is_under};
 use super::facts::{SidecarViolation, TestFileKind, TestRootFacts};

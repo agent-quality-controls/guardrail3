@@ -1,5 +1,5 @@
 #[cfg(test)]
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::{CheckResult, Severity};
 #[cfg(test)]
 use std::path::{Path, PathBuf};
@@ -90,7 +90,7 @@ pub(crate) fn run_for_tests(root: &Path) -> Vec<CheckResult> {
     let route =
         guardrail3_app_rs_family_mapper::FamilyMapper::new(&tree, &scope, None, &selected, None)
             .map_rs_clippy();
-    crate::check(&RsProjectSurface::from_tree(&tree), &route)
+    crate::check(&FamilyView::from_tree(&tree), &route)
 }
 
 #[cfg(test)]
@@ -111,7 +111,7 @@ pub(crate) fn run_with_validation_scope_for_tests(
         guardrail3_app_rs_family_mapper::FamilyMapper::new(&tree, &scope, None, &selected, None)
             .with_validation_scope(Some(validation_scope))
             .map_rs_clippy();
-    crate::check(&RsProjectSurface::from_tree(&tree), &route)
+    crate::check(&FamilyView::from_tree(&tree), &route)
 }
 
 #[cfg(test)]

@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_outbound_traits::FileSystem;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -44,8 +44,10 @@ pub fn collect(fs: &dyn FileSystem, root: &Path, tree: &ProjectTree) -> SharedHo
     if let Some(dir) = tree.dir_contents(".githooks/pre-commit.d") {
         for file_name in dir.files() {
             let rel_path = ProjectTree::join_rel(".githooks/pre-commit.d", file_name);
-            let content =
-                guardrail3_shared_fs::read_file_err(&tree.abs_path(&rel_path)).unwrap_or_default();
+            let content = tree
+                .abs_path(&rel_path)
+                .and_then(|p| guardrail3_shared_fs::read_file_err(&p).ok())
+                .unwrap_or_default();
             modular_scripts.push(HookScriptFacts {
                 rel_path,
                 kind: HookScriptKind::Modular,
@@ -64,10 +66,11 @@ pub fn collect(fs: &dyn FileSystem, root: &Path, tree: &ProjectTree) -> SharedHo
     let hooks_path = read_hooks_path(root);
     let pre_commit_executable = pre_commit
         .as_ref()
-        .and_then(|script| executable_bit(fs, &tree.abs_path(&script.rel_path)));
+        .and_then(|script| tree.abs_path(&script.rel_path))
+        .and_then(|abs| executable_bit(fs, &abs));
     let mut modular_executable = Vec::new();
     for script in &modular_scripts {
-        if let Some(is_executable) = executable_bit(fs, &tree.abs_path(&script.rel_path)) {
+        if let Some(is_executable) = tree.abs_path(&script.rel_path).and_then(|abs| executable_bit(fs, &abs)) {
             modular_executable.push((script.rel_path.clone(), is_executable));
         }
     }

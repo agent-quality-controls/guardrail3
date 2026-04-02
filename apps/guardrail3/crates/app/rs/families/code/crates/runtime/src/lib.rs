@@ -87,7 +87,7 @@ use guardrail3_app_rs_family_code_assertions as _;
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/full_golden";
 
 pub fn check(
-    surface: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    surface: &guardrail3_app_rs_family_view::FamilyView,
     route: &guardrail3_app_rs_family_mapper::RsCodeRoute,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     mark_runtime_dependencies_used();
@@ -122,7 +122,8 @@ pub fn check(
         {
             continue;
         }
-        let content = match guardrail3_shared_fs::read_file_err(&tree.abs_path(&file.rel_path)) {
+        let Some(abs) = tree.abs_path(&file.rel_path) else { continue };
+        let content = match guardrail3_shared_fs::read_file_err(&abs) {
             Ok(content) => content,
             Err(read_error) => {
                 let message = format!("Failed to read Rust source file: {read_error}");
@@ -196,24 +197,24 @@ pub(crate) fn check_test_root(
     root: &std::path::Path,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
-    let surface = guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(&tree);
+    let surface = guardrail3_app_rs_family_view::FamilyView::from_tree(&tree);
     check_test_tree(&surface)
 }
 
 #[cfg(test)]
 #[must_use]
 pub(crate) fn check_test_tree(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     check(
-        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
+        &guardrail3_app_rs_family_view::FamilyView::from_tree(tree),
         &family_route_for_tests(tree),
     )
 }
 
 #[cfg(test)]
 fn family_route_for_tests(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> guardrail3_app_rs_family_mapper::RsCodeRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let config = parse_guardrail_config(tree);
@@ -233,7 +234,7 @@ fn family_route_for_tests(
 
 #[cfg(test)]
 fn parse_guardrail_config(
-    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    tree: &guardrail3_app_rs_family_view::FamilyView,
 ) -> Option<guardrail3_domain_config::types::GuardrailConfig> {
     tree.file_content("guardrail3.toml").and_then(|content| {
         toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()

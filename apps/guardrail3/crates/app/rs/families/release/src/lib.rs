@@ -60,7 +60,8 @@ mod rs_release_11_accidentally_publishable_internal_crates;
 #[path = "repo_inventory/rs_release_12_input_failures.rs"]
 mod rs_release_12_input_failures;
 
-use guardrail3_app_rs_family_mapper::{RsProjectSurface, RsReleaseRoute};
+use guardrail3_app_rs_family_mapper::RsReleaseRoute;
+use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_app_rs_ownership as _;
 use guardrail3_domain_config as _;
 use guardrail3_domain_modules as _;
@@ -79,7 +80,7 @@ use self::inputs::{
 mod test_fixtures;
 
 pub fn check(
-    surface: &RsProjectSurface,
+    surface: &FamilyView,
     route: &RsReleaseRoute,
     tc: &dyn ToolChecker,
     thorough: bool,

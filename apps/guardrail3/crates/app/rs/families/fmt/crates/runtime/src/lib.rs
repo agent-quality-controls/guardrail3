@@ -9,9 +9,9 @@ mod rs_fmt_06_edition_mismatch;
 mod rs_fmt_07_ignore_escape_hatch;
 mod rs_fmt_08_dual_file_conflict;
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
+use guardrail3_app_rs_family_view::FamilyView;
 #[cfg(test)]
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
 use self::facts::{collect, file_name_kind};
@@ -29,7 +29,7 @@ use std::collections::BTreeSet;
 use tempfile as _;
 
 pub fn check(
-    surface: &RsProjectSurface,
+    surface: &FamilyView,
     route: &guardrail3_app_rs_family_mapper::RsFmtRoute,
 ) -> Vec<CheckResult> {
     let tree = surface;
@@ -70,7 +70,7 @@ pub(crate) fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Fmt]));
     let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None).map_rs_fmt();
-    check(&RsProjectSurface::from_tree(tree), &route)
+    check(&FamilyView::from_tree(tree), &route)
 }
 
 #[cfg(test)]

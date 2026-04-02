@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
 use super::crate_tree::CrateTree;
 
@@ -56,7 +56,7 @@ fn collect_from_mod_declarations(tree: &ProjectTree, crate_tree: &CrateTree, map
         let content = if let Some(cached) = tree.file_content(&rel_path) {
             cached.to_owned()
         } else {
-            let abs = tree.abs_path(&rel_path);
+            let Some(abs) = tree.abs_path(&rel_path) else { continue };
             match guardrail3_shared_fs::read_file_err(&abs) {
                 Ok(c) => c,
                 Err(_) => continue,

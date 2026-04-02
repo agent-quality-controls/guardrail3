@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsRootView;
-use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
 
 mod components;
@@ -534,5 +534,8 @@ fn read_cached_or_fs(tree: &ProjectTree, rel_path: &str) -> Result<Option<String
     if !tree.file_exists(rel_path) {
         return Ok(None);
     }
-    guardrail3_shared_fs::read_file_err(&tree.abs_path(rel_path)).map(Some)
+    match tree.abs_path(rel_path) {
+        Some(abs) => guardrail3_shared_fs::read_file_err(&abs).map(Some),
+        None => Ok(None),
+    }
 }

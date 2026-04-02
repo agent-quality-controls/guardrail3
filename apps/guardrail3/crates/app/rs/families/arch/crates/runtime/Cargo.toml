@@ -8,6 +8,7 @@ workspace = true
 
 [dependencies]
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
+guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../../family_view" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../../../shared/fs" }
 proc-macro2 = { version = "1", features = ["span-locations"] }
