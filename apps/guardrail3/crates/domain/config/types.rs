@@ -182,6 +182,12 @@ pub struct RustConfig {
     packages: Option<CrateConfig>,
     #[garde(dive)] // reason: recursively validate nested RustChecksConfig
     checks: Option<RustChecksConfig>,
+    /// Paths to exclude from analysis (e.g., test fixtures, generated code).
+    /// Each entry is a path segment pattern like "tests/fixtures".
+    /// Directories matching any pattern are excluded from the legality output.
+    /// Built-in exclusions (target, .claude/worktrees) are always applied.
+    #[garde(skip)] // reason: free-form path patterns, no structural validation needed
+    excluded_paths: Option<Vec<String>>,
 }
 
 impl RustConfig {
@@ -199,6 +205,7 @@ impl RustConfig {
             apps,
             packages,
             checks,
+            excluded_paths: None,
         }
     }
 
@@ -220,6 +227,11 @@ impl RustConfig {
     #[must_use]
     pub const fn packages(&self) -> Option<&CrateConfig> {
         self.packages.as_ref()
+    }
+
+    #[must_use]
+    pub fn excluded_paths(&self) -> &[String] {
+        self.excluded_paths.as_deref().unwrap_or(&[])
     }
 
     #[must_use]
