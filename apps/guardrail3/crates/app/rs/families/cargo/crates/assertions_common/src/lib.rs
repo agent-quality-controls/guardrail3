@@ -20,7 +20,7 @@ pub fn check_results(tree: &ProjectTree) -> Vec<CheckResult> {
         .file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
-    let structure = guardrail3_app_rs_structure::collect(tree.clone());
+    let structure = guardrail3_app_rs_structure::collect(tree.clone(), &[]);
     let legality = guardrail3_app_rs_legality::collect(structure);
     let mapper = FamilyMapper::from_legality(&legality, config.as_ref(), &selected, None);
     let route = mapper.map_rs_cargo();
