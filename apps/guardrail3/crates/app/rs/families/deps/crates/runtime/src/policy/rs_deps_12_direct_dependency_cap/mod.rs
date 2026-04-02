@@ -1,30 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::DirectDependencyCapDepsInput;
-
-const ID: &str = "RS-DEPS-12";
-const MAX_UNIQUE_DIRECT_DEPENDENCIES: usize = 25;
-
-pub fn check(input: &DirectDependencyCapDepsInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.cap.unique_direct_dependency_count <= MAX_UNIQUE_DIRECT_DEPENDENCIES {
-        return;
-    }
-
-    results.push(CheckResult::from_parts(
-        ID.to_owned(),
-        Severity::Error,
-        "too many direct dependencies".to_owned(),
-        format!(
-            "Crate `{}` has {} unique direct dependencies (max {}).",
-            input.cap.crate_name,
-            input.cap.unique_direct_dependency_count,
-            MAX_UNIQUE_DIRECT_DEPENDENCIES
-        ),
-        Some(input.cap.cargo_rel_path.clone()),
-        None,
-        false,
-    ));
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 fn family_route(
@@ -32,7 +7,6 @@ fn family_route(
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
     family_route_with_validation_scope(tree, None)
 }
-
 #[cfg(test)]
 fn family_route_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -49,7 +23,6 @@ fn family_route_with_validation_scope(
         .with_validation_scope(validation_scope)
         .map_rs_deps()
 }
-
 #[cfg(test)]
 pub(crate) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -61,7 +34,6 @@ pub(crate) fn collected_facts(
         &test_support::StubToolChecker::new(installed),
     )
 }
-
 #[cfg(test)]
 pub(crate) fn collected_facts_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -74,7 +46,6 @@ pub(crate) fn collected_facts_with_validation_scope(
         &test_support::StubToolChecker::new(installed),
     )
 }
-
 #[cfg(test)]
 pub(crate) fn direct_dependency_cap_facts(
     crate_name: &str,
@@ -94,14 +65,12 @@ pub(crate) fn direct_dependency_cap_facts(
         input_failures: Vec::new(),
     }
 }
-
 #[cfg(test)]
 pub(crate) fn run_with_facts(
     facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }
-
 #[cfg(test)]
 
 mod tests;

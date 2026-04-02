@@ -1,63 +1,12 @@
-use guardrail3_domain_report::{CheckResult, Severity};
+mod rule;
+pub use rule::check;
 
 #[cfg(test)]
-use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
-
+pub(crate) use rule::WorkspaceInheritedDirectionAudit;
+#[cfg(test)]
 use crate::inputs::DependencyEdgeHexarchInput;
-use crate::inventory::push_success;
-
-const ID: &str = "RS-HEXARCH-17";
-
-pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResult>) {
-    let edge = input.edge;
-    if !edge.is_workspace_inherited || edge.kind.is_dev() || edge.kind.is_target() {
-        return;
-    }
-    if edge.source_app_root_rel_dir != edge.target_app_root_rel_dir
-        && edge.source_app_root_rel_dir.is_some()
-        && edge.target_app_root_rel_dir.is_some()
-    {
-        return;
-    }
-    let (Some(source_layer), Some(target_layer)) = (edge.source_layer, edge.target_layer) else {
-        return;
-    };
-    if !source_layer.forbidden().contains(&target_layer) {
-        push_success(
-            results,
-            ID,
-            "workspace dependency direction allowed".to_owned(),
-            format!(
-                "{} crate `{}` inherits workspace dependency `{}` to {} crate `{}` without violating hexarch direction.",
-                source_layer.label(),
-                edge.source_name,
-                edge.dep_alias,
-                target_layer.label(),
-                edge.dep_package_name
-            ),
-            Some(edge.source_cargo_rel_path.clone()),
-        );
-        return;
-    }
-
-    results.push(CheckResult::from_parts(
-        ID.to_owned(),
-        Severity::Error,
-        "workspace dependency direction violation".to_owned(),
-        format!(
-            "{} crate `{}` inherits workspace dependency `{}` which resolves to {} crate `{}`.",
-            source_layer.label(),
-            edge.source_name,
-            edge.dep_alias,
-            target_layer.label(),
-            edge.dep_package_name
-        ),
-        Some(edge.source_cargo_rel_path.clone()),
-        None,
-        false,
-    ));
-}
-
+#[cfg(test)]
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 #[cfg(test)]
 pub fn results_for_dependency_edges_for_test(tree: &ProjectTree) -> Vec<CheckResult> {
     let facts = crate::collect_dependency_facts_from_tree_for_tests(tree);
@@ -71,15 +20,6 @@ pub fn results_for_dependency_edges_for_test(tree: &ProjectTree) -> Vec<CheckRes
     }
     results
 }
-
-#[cfg(test)]
-#[derive(Debug)]
-pub struct WorkspaceInheritedDirectionAudit {
-    pub rule17: Vec<CheckResult>,
-    pub rule18: Vec<CheckResult>,
-    pub rule24: Vec<CheckResult>,
-}
-
 #[cfg(test)]
 pub fn audit_edge_for_test(
     tree: &ProjectTree,
@@ -113,7 +53,6 @@ pub fn audit_edge_for_test(
         rule24,
     }
 }
-
 #[cfg(test)]
 pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))

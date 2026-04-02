@@ -1,40 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::PublishableCrateReleaseInput;
-
-const ID: &str = "RS-PUB-04";
-
-pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckResult>) {
-    let krate = input.krate;
-    if !krate.publishable || krate.readme_declared_false {
-        return;
-    }
-    results.push(if krate.readme_exists {
-        CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Info,
-            format!("{}: README present", krate.name),
-            format!("README exists at `{}`.", krate.readme_rel_path),
-            Some(krate.readme_rel_path.clone()),
-            None,
-            false,
-        )
-        .as_inventory()
-    } else {
-        CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Warn,
-            format!("{}: README missing", krate.name),
-            format!(
-                "Publishable crate `{}` is missing README content at `{}`.",
-                krate.name, krate.readme_rel_path
-            ),
-            Some(krate.cargo_rel_path.clone()),
-            None,
-            false,
-        )
-    });
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn run_tree(
@@ -48,7 +13,6 @@ pub(crate) fn run_tree(
 pub(crate) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
     crate::test_fixtures::crate_facts(name)
 }
-
 #[cfg(test)]
 pub(crate) fn crate_input(
     krate: &crate::facts::PublishableCrateFacts,
@@ -57,7 +21,6 @@ pub(crate) fn crate_input(
 }
 #[cfg(test)]
 pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
-
 #[cfg(test)]
 
 mod tests;

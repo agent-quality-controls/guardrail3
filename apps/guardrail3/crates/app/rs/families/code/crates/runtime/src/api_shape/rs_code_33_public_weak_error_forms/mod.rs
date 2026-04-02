@@ -1,32 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::RustCodeFileInput;
-use crate::parse::{PublicResultErrorKind, find_public_result_error_types};
-
-const ID: &str = "RS-CODE-33";
-
-pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
-    for info in find_public_result_error_types(input.ast) {
-        let problem = match info.kind {
-            PublicResultErrorKind::String => "Result<_, String>",
-            PublicResultErrorKind::StrRef => "Result<_, &str>",
-            PublicResultErrorKind::AnyhowError => "Result<_, anyhow::Error>",
-            PublicResultErrorKind::BoxDynError => "Result<_, Box<dyn Error>>",
-        };
-        results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Error,
-            "weak public error form".to_owned(),
-            format!(
-                "Public function `{}` returns `{problem}`. Use a typed public error instead.",
-                info.fn_name
-            ),
-            Some(input.rel_path.to_owned()),
-            Some(info.line),
-            false,
-        ));
-    }
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
@@ -43,7 +16,6 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
     check(&input, &mut results);
     results
 }
-
 #[cfg(test)]
 
 mod tests;

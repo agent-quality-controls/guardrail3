@@ -1,26 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use super::facts::RustfmtConfigKind;
-use super::inputs::RustfmtExtraConfigInput;
-
-const ID: &str = "RS-FMT-05";
-
-pub fn check(input: &RustfmtExtraConfigInput, results: &mut Vec<CheckResult>) {
-    let kind = match input.config_kind {
-        RustfmtConfigKind::RustfmtToml => "rustfmt.toml",
-        RustfmtConfigKind::DotRustfmtToml => ".rustfmt.toml",
-    };
-
-    results.push(CheckResult::from_parts(
-        ID.to_owned(),
-        Severity::Error,
-        "Illegal nested rustfmt config".to_owned(),
-        format!("{kind} below repository root is forbidden; rustfmt policy is root-only"),
-        Some(input.config_rel.clone()),
-        None,
-        false,
-    ));
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn run_check(config_rel: &str, config_kind: RustfmtConfigKind) -> Vec<CheckResult> {
@@ -32,12 +11,10 @@ pub(crate) fn run_check(config_rel: &str, config_kind: RustfmtConfigKind) -> Vec
     check(&input, &mut results);
     results
 }
-
 #[cfg(test)]
 pub(crate) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
-
 #[cfg(test)]
 
 mod tests;

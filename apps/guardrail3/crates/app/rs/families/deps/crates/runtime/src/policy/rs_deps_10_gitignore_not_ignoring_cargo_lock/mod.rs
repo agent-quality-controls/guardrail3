@@ -1,56 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::LockfileDepsInput;
-
-const ID: &str = "RS-DEPS-10";
-
-pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.lockfile.cargo_lock_ignored {
-        results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Error,
-            "Cargo.lock ignored in gitignore".to_owned(),
-            format!(
-                "`{}` ignores `{}` for Rust root `{}`.",
-                input
-                    .lockfile
-                    .gitignore_rel_path
-                    .as_deref()
-                    .unwrap_or(".gitignore"),
-                input.lockfile.cargo_lock_rel_path,
-                rel_label(&input.lockfile.root_rel_dir)
-            ),
-            input.lockfile.gitignore_rel_path.clone(),
-            None,
-            false,
-        ));
-    } else {
-        results.push(
-            CheckResult::from_parts(
-                ID.to_owned(),
-                Severity::Info,
-                "Cargo.lock tracked by git".to_owned(),
-                format!(
-                    "No relevant `.gitignore` masks `{}` for Rust root `{}`.",
-                    input.lockfile.cargo_lock_rel_path,
-                    rel_label(&input.lockfile.root_rel_dir)
-                ),
-                Some(input.lockfile.cargo_lock_rel_path.clone()),
-                None,
-                false,
-            )
-            .as_inventory(),
-        );
-    }
-}
-
-fn rel_label(rel: &str) -> String {
-    if rel.is_empty() {
-        ".".to_owned()
-    } else {
-        rel.to_owned()
-    }
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 fn family_route(
@@ -58,7 +7,6 @@ fn family_route(
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
     family_route_with_validation_scope(tree, None)
 }
-
 #[cfg(test)]
 fn family_route_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -75,7 +23,6 @@ fn family_route_with_validation_scope(
         .with_validation_scope(validation_scope)
         .map_rs_deps()
 }
-
 #[cfg(test)]
 pub(crate) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -87,7 +34,6 @@ pub(crate) fn collected_facts(
         &test_support::StubToolChecker::new(installed),
     )
 }
-
 #[cfg(test)]
 pub(crate) fn collected_facts_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -100,7 +46,6 @@ pub(crate) fn collected_facts_with_validation_scope(
         &test_support::StubToolChecker::new(installed),
     )
 }
-
 #[cfg(test)]
 pub(crate) fn lockfile_facts(
     cargo_lock_exists: bool,
@@ -123,21 +68,18 @@ pub(crate) fn lockfile_facts(
         input_failures: Vec::new(),
     }
 }
-
 #[cfg(test)]
 pub(crate) fn lockfile_input<'a>(
     facts: &'a crate::facts::DepsFacts,
 ) -> crate::inputs::LockfileDepsInput<'a> {
     crate::inputs::LockfileDepsInput::new(facts.lockfiles.first().expect("expected lockfile facts"))
 }
-
 #[cfg(test)]
 pub(crate) fn run_with_facts(
     facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }
-
 #[cfg(test)]
 
 mod tests;

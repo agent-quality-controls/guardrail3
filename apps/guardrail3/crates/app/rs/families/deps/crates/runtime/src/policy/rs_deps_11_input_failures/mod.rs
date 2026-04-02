@@ -1,20 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::InputFailureDepsInput;
-
-const ID: &str = "RS-DEPS-11";
-
-pub fn check(input: &InputFailureDepsInput<'_>, results: &mut Vec<CheckResult>) {
-    results.push(CheckResult::from_parts(
-        ID.to_owned(),
-        Severity::Error,
-        "dependency policy input failure".to_owned(),
-        input.failure.message.clone(),
-        Some(input.failure.rel_path.clone()),
-        None,
-        false,
-    ));
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 fn family_route(
@@ -30,7 +15,6 @@ fn family_route(
     guardrail3_app_rs_family_mapper::FamilyMapper::from_legality(&legality, None, &selected, None)
         .map_rs_deps()
 }
-
 #[cfg(test)]
 pub(crate) fn collected_facts(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -42,7 +26,6 @@ pub(crate) fn collected_facts(
         &test_support::StubToolChecker::new(installed),
     )
 }
-
 #[cfg(test)]
 pub(crate) fn failure_facts(rel_path: &str, message: &str) -> crate::facts::DepsFacts {
     crate::facts::DepsFacts {
@@ -64,7 +47,6 @@ pub(crate) fn failure_facts(rel_path: &str, message: &str) -> crate::facts::Deps
         }],
     }
 }
-
 #[cfg(test)]
 pub(crate) fn failure_input<'a>(
     facts: &'a crate::facts::DepsFacts,
@@ -77,14 +59,12 @@ pub(crate) fn failure_input<'a>(
         .expect("expected input failure facts");
     crate::inputs::InputFailureDepsInput::new(failure)
 }
-
 #[cfg(test)]
 pub(crate) fn run_with_facts(
     facts: &crate::facts::DepsFacts,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }
-
 #[cfg(test)]
 
 mod tests;

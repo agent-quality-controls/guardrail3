@@ -1,20 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::ReleaseInputFailureInput;
-
-const ID: &str = "RS-RELEASE-12";
-
-pub fn check(input: &ReleaseInputFailureInput<'_>, results: &mut Vec<CheckResult>) {
-    results.push(CheckResult::from_parts(
-        ID.to_owned(),
-        Severity::Error,
-        "Release-family input failure".to_owned(),
-        input.failure.message.clone(),
-        Some(input.failure.rel_path.clone()),
-        None,
-        false,
-    ));
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn run_tree(
@@ -24,7 +9,6 @@ pub(crate) fn run_tree(
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::test_fixtures::run_tree(tree, tc, thorough)
 }
-
 #[cfg(test)]
 pub(crate) fn run_family(
     root: &std::path::Path,
@@ -32,14 +16,12 @@ pub(crate) fn run_family(
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::test_fixtures::run_family(root, thorough)
 }
-
 #[cfg(test)]
 pub(crate) fn copy_fixture() -> tempfile::TempDir {
     crate::test_fixtures::copy_fixture()
 }
 #[cfg(test)]
 pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_root, write_file};
-
 #[cfg(test)]
 
 mod tests;

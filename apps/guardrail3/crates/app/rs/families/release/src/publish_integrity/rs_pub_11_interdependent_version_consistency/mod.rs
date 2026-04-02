@@ -1,41 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
-
-use crate::inputs::ReleaseEdgeInput;
-
-const ID: &str = "RS-PUB-11";
-
-pub fn check(input: &ReleaseEdgeInput<'_>, results: &mut Vec<CheckResult>) {
-    let edge = input.edge;
-    if !edge.has_path || !edge.dep_publishable {
-        return;
-    }
-    let Some(version_req) = &edge.version_req else {
-        return;
-    };
-    if edge.version_satisfied.unwrap_or(true) {
-        return;
-    }
-    results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    format!("{}: version mismatch with {}", edge.crate_name, edge.dep_name),
-    format!(
-            "Dependency `{}`{} in `[{}]`{} requires `{}` but actual local publishable version is `{}`.",
-            edge.dep_name,
-            dependency_package_suffix(edge),
-            edge.section_label,
-            edge.target_label
-                .as_ref()
-                .map(|target| format!(" under target `{target}`"))
-                .unwrap_or_default(),
-            version_req,
-            edge.actual_version.clone().unwrap_or_else(|| "unknown".to_owned())
-        ),
-    Some(edge.cargo_rel_path.clone()),
-    None,
-    false,
-    ));
-}
+mod rule;
+pub use rule::{check};
 
 #[cfg(test)]
 pub(crate) fn run_tree(
@@ -45,7 +9,6 @@ pub(crate) fn run_tree(
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::test_fixtures::run_tree(tree, tc, thorough)
 }
-
 #[cfg(test)]
 pub(crate) fn run_tree_with_validation_scope(
     tree: &guardrail3_app_rs_family_view::FamilyView,
@@ -59,7 +22,6 @@ pub(crate) fn run_tree_with_validation_scope(
 pub(crate) fn edge_facts() -> crate::facts::ReleaseEdgeFacts {
     crate::test_fixtures::edge_facts()
 }
-
 #[cfg(test)]
 pub(crate) fn edge_input(
     edge: &crate::facts::ReleaseEdgeFacts,
@@ -73,16 +35,8 @@ pub(crate) fn dependency_edges(
 ) -> Vec<crate::release_support::dependencies::DependencyEdgeFacts> {
     crate::release_support::dependencies::dependency_edges(parsed, workspace_dependencies)
 }
-
 #[cfg(test)]
 pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
-
 #[cfg(test)]
 
 mod tests;
-
-fn dependency_package_suffix(edge: &crate::facts::ReleaseEdgeFacts) -> String {
-    (edge.dep_name != edge.dep_package_name)
-        .then(|| format!(" (package `{}`)", edge.dep_package_name))
-        .unwrap_or_default()
-}
