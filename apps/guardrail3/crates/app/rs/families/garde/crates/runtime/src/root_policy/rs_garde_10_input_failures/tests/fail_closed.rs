@@ -6,7 +6,7 @@ fn errors_on_source_parse_failure() {
     let root = temp_root("rs-garde-10-parse-failure");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -38,7 +38,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);
     assertions::assert_rule_results(
@@ -57,7 +57,7 @@ garde = { version = "0.22", features = ["derive"] }
 #[test]
 fn errors_on_unreadable_source_file() {
     let root = temp_root("rs-garde-10-read-failure");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
 
     let tree = project_tree(
         vec![
@@ -82,7 +82,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);
     assertions::assert_rule_results(
@@ -103,7 +103,7 @@ fn errors_on_cargo_toml_parse_failure() {
     let root = temp_root("rs-garde-10-cargo-failure");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -128,7 +128,7 @@ fn errors_on_cargo_toml_parse_failure() {
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 0);
     assertions::assert_rule_results(&results, &[]);
@@ -141,7 +141,7 @@ fn errors_on_guardrail_policy_parse_failure() {
     let root = temp_root("rs-garde-10-guardrail-policy-failure");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -173,7 +173,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);
     assertions::assert_rule_results(
@@ -225,7 +225,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);
     assertions::assert_rule_results(

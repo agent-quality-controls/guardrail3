@@ -4,7 +4,7 @@ use test_support::{dir_entry, project_tree, temp_root};
 #[test]
 fn does_not_flag_query_scalar() {
     let root = temp_root("rs-garde-09-query-scalar");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
 
     let tree = project_tree(
         vec![
@@ -37,7 +37,7 @@ fn load() {
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert!(findings.is_empty());
     assertions::assert_rule_quiet(&results);
@@ -48,7 +48,7 @@ fn load() {
 #[test]
 fn ignores_non_sqlx_query_as_macro_with_same_name() {
     let root = temp_root("rs-garde-09-non-sqlx-query-as");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
 
     let tree = project_tree(
         vec![
@@ -87,7 +87,7 @@ fn load() {
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert!(findings.is_empty());
     assertions::assert_rule_quiet(&results);

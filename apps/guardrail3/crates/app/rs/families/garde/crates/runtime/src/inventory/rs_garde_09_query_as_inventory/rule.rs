@@ -15,7 +15,7 @@ pub fn check(input: &QueryAsMacroInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "sqlx query_as missing reason".to_owned(),
             format!(
-                "`{}` bypasses derive-based garde boundary checks without a matching escape-hatch reason.",
+                "`{}` bypasses derive-based garde boundary checks without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this usage with a reason.",
                 input.macro_use.macro_name
             ),
             Some(input.macro_use.rel_path.clone()),
@@ -40,7 +40,7 @@ pub fn check(input: &QueryAsMacroInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Error,
                 "sqlx query_as reason too weak".to_owned(),
                 format!(
-                    "`{}` bypasses derive-based garde boundary checks with a weak reason: {}.",
+                    "`{}` bypasses derive-based garde boundary checks with a weak reason: {}. Provide a more specific reason.",
                     input.macro_use.macro_name,
                     issue.message()
                 ),

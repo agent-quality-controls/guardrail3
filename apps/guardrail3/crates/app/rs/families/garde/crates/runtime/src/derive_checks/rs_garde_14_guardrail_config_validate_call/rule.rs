@@ -10,7 +10,7 @@ pub fn check(input: &GuardrailConfigValidationInput<'_>, results: &mut Vec<Check
         Severity::Error,
         "`GuardrailConfig` parse without garde validation".to_owned(),
         format!(
-            "This {} site constructs `GuardrailConfig`, but the same function does not prove garde validation with `.validate()` before the config is used.",
+            "This {} call constructs `GuardrailConfig` but does not call `.validate()` on it. Call `.validate()` on the constructed `GuardrailConfig` before using it.",
             input.site.parse_kind.label()
         ),
         Some(input.site.rel_path.clone()),

@@ -12,7 +12,7 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Warn,
             "cannot verify reqwest garde ban".to_owned(),
             input.root.clippy_parse_error.clone().unwrap_or_else(|| {
-                "No covering clippy configuration found for reqwest garde-ban validation."
+                "No clippy.toml found. Create one with a `disallowed-methods` section."
                     .to_owned()
             }),
             input.root.clippy_rel_path.clone(),
@@ -42,7 +42,7 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Warn,
             "missing reqwest garde ban".to_owned(),
-            "Missing `reqwest::Response::json` from `disallowed-methods`.".to_owned(),
+            "Missing `reqwest::Response::json` from `disallowed-methods`. Add it to `disallowed-methods` in clippy.toml.".to_owned(),
             input.root.clippy_rel_path.clone(),
             None,
             false,

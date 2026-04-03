@@ -4,7 +4,7 @@ use test_support::{dir_entry, project_tree, temp_root};
 fn run_struct_boundary(source: &str) -> Vec<assertions::CheckResult> {
     let root = temp_root("rs-garde-05-derive-variants");
     let source_abs = root.join("src/input.rs");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -36,7 +36,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
     results

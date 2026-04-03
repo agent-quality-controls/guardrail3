@@ -4,7 +4,7 @@ use test_support::{dir_entry, project_tree, temp_root};
 #[test]
 fn inventories_when_all_bans_present() {
     let root = temp_root("golden-garde-06");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     let tree = project_tree(
         vec![("", dir_entry(&[], &["Cargo.toml", "clippy.toml"]))],
         vec![
@@ -16,7 +16,7 @@ fn inventories_when_all_bans_present() {
         ],
         root.clone(),
     );
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(
         findings.len(),

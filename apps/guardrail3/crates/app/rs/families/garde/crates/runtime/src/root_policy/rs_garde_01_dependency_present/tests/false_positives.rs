@@ -42,7 +42,7 @@ pub fn helper_name() -> &'static str {
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");

@@ -15,7 +15,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "workspace resolver invalid".to_owned(),
-            "Every workspace root must set `resolver` to the string `\"2\"` or `\"3\"`.".to_owned(),
+            "Every workspace root must set `resolver` to the string `\"2\"` or `\"3\"`. Prefer `resolver = \"3\"` (edition 2024) if the project allows it.".to_owned(),
             Some(root.cargo_rel_path.clone()),
             None,
             false,
@@ -48,7 +48,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "unsupported workspace resolver".to_owned(),
-            format!("Expected resolver `2` or `3`, got `{other}`."),
+            format!("Expected resolver `2` or `3`, got `{other}`. Prefer `resolver = \"3\"` (edition 2024) if the project allows it."),
             Some(root.cargo_rel_path.clone()),
             None,
             false,
@@ -58,7 +58,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
             severity: Severity::Error,
             title: "workspace resolver missing".to_owned(),
             message:
-                "Every workspace root must set `resolver = \"2\"` or `resolver = \"3\"` explicitly."
+                "Every workspace root must set `resolver = \"2\"` or `resolver = \"3\"` explicitly. Prefer `resolver = \"3\"` (edition 2024) if the project allows it."
                     .to_owned(),
             file: Some(root.cargo_rel_path.clone()),
             line: None,

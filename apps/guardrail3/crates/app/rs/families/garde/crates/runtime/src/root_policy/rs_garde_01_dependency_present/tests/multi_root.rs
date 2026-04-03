@@ -102,7 +102,7 @@ fn main() {}
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let _ = assertions::findings(&results);
     assertions::assert_rule_results(
         &results,

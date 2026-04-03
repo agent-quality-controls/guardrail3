@@ -1,3 +1,4 @@
+mod helpers;
 mod derive_variants;
 mod fail_closed;
 mod false_positives;

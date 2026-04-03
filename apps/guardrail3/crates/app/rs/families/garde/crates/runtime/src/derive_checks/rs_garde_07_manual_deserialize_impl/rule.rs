@@ -17,8 +17,8 @@ pub fn check(input: &ManualDeserializeImplInput<'_>, results: &mut Vec<CheckResu
             input.target.type_name
         ),
     format!(
-            "Manual `Deserialize` impl for `{}` bypasses derive-based garde checks and the type does not also implement `Validate`.",
-            input.target.type_name
+            "Manual `Deserialize` impl for `{}` bypasses derive-based garde checks and the type does not also implement `Validate`. Add `#[derive(Validate)]` or `impl garde::Validate for {}`.",
+            input.target.type_name, input.target.type_name
         ),
     Some(input.target.rel_path.clone()),
     Some(input.target.line),

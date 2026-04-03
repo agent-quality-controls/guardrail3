@@ -6,7 +6,7 @@ fn handles_multiple_roots() {
     let root = temp_root("rs-garde-05-multi-root");
     let source1_rel = "vendor/lib/src/input.rs";
     let source2_rel = "vendor/tool/src/input.rs";
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
 
     let source1_abs = root.join(source1_rel);
     std::fs::create_dir_all(
@@ -96,7 +96,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(
         findings.len(),

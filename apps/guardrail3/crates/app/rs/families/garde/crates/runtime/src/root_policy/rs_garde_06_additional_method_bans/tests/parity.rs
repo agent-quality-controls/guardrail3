@@ -20,7 +20,7 @@ fn disallowed_method_paths(parsed: &toml::Value) -> BTreeSet<String> {
 
 #[test]
 fn generated_service_clippy_baseline_contains_all_additional_garde_method_bans() {
-    let parsed = toml::from_str::<toml::Value>(&super::super::canonical_clippy_toml())
+    let parsed = toml::from_str::<toml::Value>(&super::helpers::canonical_clippy_toml())
         .expect("valid clippy TOML");
     let actual = disallowed_method_paths(&parsed);
     let expected = ADDITIONAL_METHOD_BANS

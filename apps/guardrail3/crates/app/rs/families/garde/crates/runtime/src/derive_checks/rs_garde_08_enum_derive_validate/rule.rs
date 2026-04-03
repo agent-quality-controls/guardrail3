@@ -15,7 +15,7 @@ pub fn check(input: &DerivedBoundaryTypeInput<'_>, results: &mut Vec<CheckResult
     Severity::Error,
     format!("enum `{}` missing Validate derive", input.target.name),
     format!(
-            "Enum `{}` derives {} and has non-primitive payload fields, but does not derive `Validate`.",
+            "Enum `{}` derives {} and has non-primitive payload fields, but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this enum.",
             input.target.name,
             input.target.boundary_macros.join(", ")
         ),

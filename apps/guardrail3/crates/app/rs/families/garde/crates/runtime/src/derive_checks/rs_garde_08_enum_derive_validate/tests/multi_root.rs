@@ -4,7 +4,7 @@ use test_support::{dir_entry, project_tree, temp_root};
 #[test]
 fn reports_only_owned_root_enum_boundary_gap() {
     let root = temp_root("rs-garde-08-multi-root");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
 
     for (rel, source) in [
         (
@@ -87,7 +87,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
 
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);

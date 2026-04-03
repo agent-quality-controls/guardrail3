@@ -17,7 +17,7 @@ pub fn check(input: &BoundaryFieldInput<'_>, results: &mut Vec<CheckResult>) {
             input.field.boundary_name
         ),
     format!(
-            "Field `{}` in validated boundary `{}` references `ctx` in a garde validator, but the boundary type is missing `#[garde(context(...))]`.",
+            "Field `{}` in validated boundary `{}` references `ctx` in a garde validator, but the boundary type is missing `#[garde(context(...))]`. Add `#[garde(context(YourContextType))]` to the struct definition.",
             input.field.field_name, input.field.boundary_name
         ),
     Some(input.field.rel_path.clone()),
