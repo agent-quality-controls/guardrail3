@@ -31,8 +31,8 @@ pub fn check(input: &CargoConfigOverrideInput<'_>, results: &mut Vec<CheckResult
         None => (
             "clippy config dir override is forbidden".to_owned(),
             format!(
-                "`{}` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model.",
-                input.rel_path
+                "`{}` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model. Remove the `CLIPPY_CONF_DIR` setting from `{}`.",
+                input.rel_path, input.rel_path
             ),
         ),
     };

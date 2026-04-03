@@ -43,7 +43,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                     ID.to_owned(),
                     Severity::Warn,
                     "duplicate ban entry".to_owned(),
-                    format!("`{path}` appears {count} times in `{key}`."),
+                    format!("`{path}` appears {count} times in `{key}`. Remove the duplicate entries."),
                     Some(input.config.rel_path.clone()),
                     None,
                     false,

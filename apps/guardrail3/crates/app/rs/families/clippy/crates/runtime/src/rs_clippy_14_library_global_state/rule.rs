@@ -46,7 +46,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 ID.to_owned(),
                 Severity::Error,
                 "library clippy.toml missing global-state type ban".to_owned(),
-                format!("Library profile must ban `{expected}` in `disallowed-types`."),
+                format!("Library profile must ban `{expected}` in `disallowed-types`. Add it to `disallowed-types` in clippy.toml."),
                 Some(input.config.rel_path.clone()),
                 None,
                 false,

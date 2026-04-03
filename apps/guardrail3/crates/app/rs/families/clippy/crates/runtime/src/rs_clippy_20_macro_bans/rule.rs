@@ -50,7 +50,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Error,
                 "missing macro ban".to_owned(),
                 format!(
-                    "`{}!` is not present in `disallowed-macros`.",
+                    "`{}!` is not present in `disallowed-macros`. Add it to `disallowed-macros` in clippy.toml.",
                     display_macro_name(expected)
                 ),
                 Some(input.config.rel_path.clone()),

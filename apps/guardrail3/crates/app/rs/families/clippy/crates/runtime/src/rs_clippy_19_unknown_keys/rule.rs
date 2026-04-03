@@ -35,7 +35,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Warn,
                 "unrecognized clippy.toml key".to_owned(),
                 format!(
-                    "Top-level key `{key}` looks like a typo of a guardrail-managed clippy key."
+                    "Top-level key `{key}` looks like a typo of a guardrail-managed clippy key. Check the spelling and correct it."
                 ),
                 Some(input.config.rel_path.clone()),
                 None,

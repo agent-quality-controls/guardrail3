@@ -52,7 +52,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 ID.to_owned(),
                 Severity::Error,
                 "missing type ban".to_owned(),
-                format!("`{expected}` is not present in `disallowed-types`."),
+                format!("`{expected}` is not present in `disallowed-types`. Add it to `disallowed-types` in clippy.toml."),
                 Some(input.config.rel_path.clone()),
                 None,
                 false,
