@@ -1,0 +1,22 @@
+[package]
+name = "rustfmt-toml"
+version = "0.1.0"
+edition.workspace = true
+description = "Typed parser for rustfmt.toml / .rustfmt.toml configuration files"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["types"]
+types = []
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+
+[dev-dependencies]
+insta = "1"
