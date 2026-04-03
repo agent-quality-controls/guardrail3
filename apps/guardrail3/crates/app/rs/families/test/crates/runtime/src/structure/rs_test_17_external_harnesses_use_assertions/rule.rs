@@ -17,7 +17,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
     ID.to_owned(),
     Severity::Error,
     "external harness asserts directly".to_owned(),
-    "External harnesses must prove through the owned assertions crate, not through direct assertion macros in `runtime/tests/*.rs`.".to_owned(),
+    format!("Test function `{}` in `{}` uses assertion macros directly. External harnesses in `runtime/tests/` must not assert directly — call functions from the sibling assertions crate instead.", input.function.name, input.file.rel_path),
     Some(input.file.rel_path.clone()),
     Some(input.function.line),
     false,

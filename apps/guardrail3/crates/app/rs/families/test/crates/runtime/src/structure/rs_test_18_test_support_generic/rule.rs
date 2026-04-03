@@ -77,7 +77,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "test_support imports route construction infrastructure".to_owned(),
-            "Shared `test_support` must stay generic and must not import route-construction infrastructure."
+            "Shared `test_support` must stay generic and must not import FamilyMapper or placement wiring. Keep test_support independent of how families are routed."
                 .to_owned(),
             Some(input.file.rel_path.clone()),
             Some(binding.line),
@@ -126,7 +126,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "test_support builds routed family input".to_owned(),
-            "Shared `test_support` must stay generic and must not construct routed family inputs through mapper/placement wiring.".to_owned(),
+            "Shared `test_support` must stay generic and must not construct routed family inputs through FamilyMapper or placement wiring. Keep test_support independent of how families are routed.".to_owned(),
             Some(input.file.rel_path.clone()),
             None,
             false,
@@ -197,7 +197,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 severity: Severity::Error,
                 title: "test_support exports canned path or string helper".to_owned(),
                 message: format!(
-                    "Shared `test_support` must stay generic and must not expose public helper `{}` returning canned path/string data.",
+                    "Shared `test_support` must stay generic and must not expose public helper `{}` returning hardcoded path/string data. Helpers should accept parameters instead.",
                     function.name
                 ),
                 file: Some(input.file.rel_path.clone()),
@@ -217,7 +217,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 severity: Severity::Error,
                 title: "test_support exports canned fixture helper".to_owned(),
                 message: format!(
-                    "Shared `test_support` must stay generic and must not expose zero-argument public helper `{}` that wraps canned fixture path/string data.",
+                    "Shared `test_support` must stay generic and must not expose zero-argument public helper `{}` that wraps hardcoded fixture path/string data. Helpers should accept parameters instead.",
                     function.name
                 ),
                 file: Some(input.file.rel_path.clone()),
@@ -257,7 +257,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 severity: Severity::Error,
                 title: "test_support exports semantic finding helper".to_owned(),
                 message: format!(
-                    "Shared `test_support` must stay generic and must not expose public helper `{}` that selects or inspects guardrail findings/results by rule semantics.",
+                    "Shared `test_support` must stay generic and must not expose public helper `{}` that filters or inspects CheckResult fields by rule ID or severity. Move rule-specific assertions into the assertions crate.",
                     function.name
                 ),
                 file: Some(input.file.rel_path.clone()),
