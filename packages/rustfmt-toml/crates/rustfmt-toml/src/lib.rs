@@ -1,5 +1,6 @@
 mod config;
 mod error;
+mod fs;
 
 #[cfg(feature = "types")]
 pub use config::RustfmtConfig;

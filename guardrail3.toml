@@ -24,3 +24,144 @@ hooks_rs = true
 
 [rust.apps.guardrail3]
 type = "service"
+
+[rust.packages]
+type = "library"
+
+[rust.packages.checks]
+hexarch = false
+garde = false
+test = false
+release = false
+hooks_shared = false
+hooks_rs = false
+
+# ── Escape hatches ──────────────────────────────────────────────────────
+
+# apps/guardrail3 workspace lint allows
+[[escape_hatches]]
+family = "cargo"
+file = "apps/guardrail3/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:missing_docs_in_private_items"
+reason = "Private items are implementation details — doc burden outweighs value for internal code"
+
+[[escape_hatches]]
+family = "cargo"
+file = "apps/guardrail3/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:module_name_repetitions"
+reason = "Module-qualified names like config::Config are idiomatic Rust — renaming hurts readability"
+
+[[escape_hatches]]
+family = "cargo"
+file = "apps/guardrail3/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:must_use_candidate"
+reason = "Auto-annotating every pure function adds noise without catching real bugs"
+
+[[escape_hatches]]
+family = "cargo"
+file = "apps/guardrail3/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:option_if_let_else"
+reason = "Pattern match is often clearer than map_or_else for complex branches"
+
+[[escape_hatches]]
+family = "cargo"
+file = "apps/guardrail3/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:empty_line_after_doc_comments"
+reason = "Visual separation between doc comment and attributes improves readability"
+
+[[escape_hatches]]
+family = "cargo"
+file = "apps/guardrail3/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:single_match_else"
+reason = "Single-arm match with else is often clearer than if-let for complex patterns"
+
+[[escape_hatches]]
+family = "cargo"
+file = "apps/guardrail3/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:ref_option_ref"
+reason = "Nested Option references occur naturally in accessor methods on Option fields"
+
+[[escape_hatches]]
+family = "cargo"
+file = "apps/guardrail3/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:trivially_copy_pass_by_ref"
+reason = "Consistent reference-passing convention across APIs — micro-optimization not worth API inconsistency"
+
+[[escape_hatches]]
+family = "cargo"
+file = "apps/guardrail3/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:multiple_crate_versions"
+reason = "Transitive duplicate versions are not actionable — controlled via deny.toml skip list"
+
+# packages/rustfmt-toml workspace lint allows
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:missing_docs_in_private_items"
+reason = "Private items are implementation details — doc burden outweighs value for internal code"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:module_name_repetitions"
+reason = "Module-qualified names like config::Config are idiomatic Rust — renaming hurts readability"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:must_use_candidate"
+reason = "Auto-annotating every pure function adds noise without catching real bugs"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:option_if_let_else"
+reason = "Pattern match is often clearer than map_or_else for complex branches"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:empty_line_after_doc_comments"
+reason = "Visual separation between doc comment and attributes improves readability"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:single_match_else"
+reason = "Single-arm match with else is often clearer than if-let for complex patterns"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:ref_option_ref"
+reason = "Nested Option references occur naturally in accessor methods on Option fields"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:trivially_copy_pass_by_ref"
+reason = "Consistent reference-passing convention across APIs — micro-optimization not worth API inconsistency"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:multiple_crate_versions"
+reason = "Transitive duplicate versions are not actionable — controlled via deny.toml skip list"

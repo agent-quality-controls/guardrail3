@@ -1,10 +1,14 @@
 [package]
 name = "rustfmt-toml"
 version = "0.1.0"
-edition.workspace = true
+edition = "2024"
 description = "Typed parser for rustfmt.toml / .rustfmt.toml configuration files"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["rustfmt", "toml", "parser", "configuration", "rust"]
+categories = ["config", "development-tools", "parser-implementations"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [lints]
 workspace = true
@@ -18,5 +22,6 @@ types = []
 serde = { version = "1", features = ["derive"] }
 toml = "0.8"
 
-[dev-dependencies]
-insta = "1"
+
+[package.metadata.docs.rs]
+all-features = true
