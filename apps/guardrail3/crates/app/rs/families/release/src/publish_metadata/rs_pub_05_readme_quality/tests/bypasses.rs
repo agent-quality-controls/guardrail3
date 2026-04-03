@@ -16,7 +16,7 @@ fn warns_on_stub_readme() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             title_contains: Some("stub"),
             file: Some("crates/example/README.md"),
             inventory: Some(false),
@@ -39,7 +39,7 @@ fn warns_when_readme_has_no_heading() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             title_contains: Some("no heading"),
             file: Some("crates/example/README.md"),
             inventory: Some(false),
@@ -105,7 +105,7 @@ fn warns_when_only_code_blocks_contain_hash_prefixes() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             title_contains: Some("no heading"),
             file: Some("crates/example/README.md"),
             inventory: Some(false),
@@ -130,7 +130,7 @@ fn warns_when_only_indented_code_blocks_contain_hash_prefixes() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             title_contains: Some("no heading"),
             file: Some("crates/example/README.md"),
             inventory: Some(false),
@@ -152,7 +152,7 @@ fn warns_when_hash_prefixed_text_is_not_a_real_markdown_heading() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             title_contains: Some("no heading"),
             file: Some("crates/example/README.md"),
             inventory: Some(false),

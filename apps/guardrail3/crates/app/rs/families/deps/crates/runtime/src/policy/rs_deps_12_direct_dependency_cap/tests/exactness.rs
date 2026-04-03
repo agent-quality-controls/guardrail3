@@ -20,7 +20,7 @@ fn errors_above_twenty_five_unique_direct_dependencies() {
             severity: Some(assertions::Severity::Error),
             title: Some("too many direct dependencies"),
             file: Some("apps/api/Cargo.toml"),
-            message: Some("Crate `api` has 26 unique direct dependencies (max 25)."),
+            message: Some("Crate `api` has 26 unique direct dependencies (max 25). Reduce direct dependencies by consolidating or splitting the crate."),
             inventory: Some(false),
             ..Default::default()
         }],

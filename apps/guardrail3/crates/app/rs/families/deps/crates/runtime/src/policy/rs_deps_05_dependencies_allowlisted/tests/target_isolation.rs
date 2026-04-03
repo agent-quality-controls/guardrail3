@@ -51,7 +51,7 @@ fn malformed_target_table_does_not_suppress_top_level_allowlist_violation() {
             severity: Some(assertions::Severity::Error),
             file: Some("apps/api/Cargo.toml"),
             message: Some(
-                "Dependency `tokio` in `[dependencies]` is not allowlisted for crate `api`.",
+                "Dependency `tokio` in `[dependencies]` is not allowlisted for crate `api`. Add it to the dependency allowlist or remove the dependency.",
             ),
             inventory: Some(false),
             ..Default::default()
@@ -115,7 +115,7 @@ fn target_specific_runtime_dependency_is_checked() {
             file: Some("apps/api/Cargo.toml"),
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Dependency `reqwest` in `[target.'cfg(unix)'.dependencies]` is not allowlisted for crate `api`.",
+                "Dependency `reqwest` in `[target.'cfg(unix)'.dependencies]` is not allowlisted for crate `api`. Add it to the dependency allowlist or remove the dependency.",
             ),
             inventory: Some(false),
             ..Default::default()
@@ -191,7 +191,7 @@ fn scoped_run_does_not_report_sibling_allowlist_violations() {
             severity: Some(assertions::Severity::Error),
             file: Some("apps/api/Cargo.toml"),
             message: Some(
-                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `api`.",
+                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `api`. Add it to the dependency allowlist or remove the dependency.",
             ),
             inventory: Some(false),
             ..Default::default()

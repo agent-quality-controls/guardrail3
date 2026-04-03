@@ -15,7 +15,7 @@ fn emits_info_when_docs_rs_metadata_is_missing_and_skips_out_of_scope_crates() {
     assertions::assert_rule_results(
         &missing_results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Info),
+            severity: Some(assertions::Severity::Warn),
             title_contains: Some("docs.rs metadata missing"),
             file: Some("crates/example/Cargo.toml"),
             inventory: Some(false),
@@ -93,7 +93,7 @@ path = "src/lib.rs"
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Info),
+            severity: Some(assertions::Severity::Warn),
             title_contains: Some("docs.rs metadata missing"),
             file: Some("Cargo.toml"),
             inventory: Some(false),
@@ -143,7 +143,7 @@ foo = "bar"
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Info),
+            severity: Some(assertions::Severity::Warn),
             title_contains: Some("docs.rs metadata missing"),
             file: Some("Cargo.toml"),
             inventory: Some(false),

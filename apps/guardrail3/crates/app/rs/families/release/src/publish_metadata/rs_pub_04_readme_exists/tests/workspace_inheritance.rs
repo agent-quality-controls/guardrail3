@@ -116,7 +116,7 @@ readme.workspace = true
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             file: Some("packages/shared/crates/pub/Cargo.toml"),
             inventory: Some(false),
             ..Default::default()

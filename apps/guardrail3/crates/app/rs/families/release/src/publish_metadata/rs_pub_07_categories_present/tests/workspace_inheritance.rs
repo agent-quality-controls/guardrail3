@@ -99,7 +99,7 @@ categories.workspace = true
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             title_contains: Some("categories missing"),
             file: Some("crates/pub/Cargo.toml"),
             inventory: Some(false),

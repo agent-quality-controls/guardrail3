@@ -50,7 +50,7 @@ fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
             assertions::ExpectedRuleResult {
                 file: Some("apps/api/Cargo.lock"),
                 severity: Some(assertions::Severity::Error),
-                message: Some("Non-library Rust root `apps/api` is missing `apps/api/Cargo.lock`."),
+                message: Some("`apps/api` is missing `apps/api/Cargo.lock`. Run `cargo generate-lockfile` and commit the result."),
                 inventory: Some(false),
                 ..Default::default()
             },
@@ -302,7 +302,7 @@ fn nested_non_member_package_under_workspace_root_emits_input_failure() {
         &[assertions::ExpectedRuleResult {
             file: Some("Cargo.lock"),
             severity: Some(assertions::Severity::Error),
-            message: Some("Non-library Rust root `.` is missing `Cargo.lock`."),
+            message: Some("`.` is missing `Cargo.lock`. Run `cargo generate-lockfile` and commit the result."),
             inventory: Some(false),
             ..Default::default()
         }],

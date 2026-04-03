@@ -17,7 +17,7 @@ fn warns_when_publishable_crate_has_no_readme_file() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             file: Some("crates/example/Cargo.toml"),
             inventory: Some(false),
             title_contains: Some("README missing"),

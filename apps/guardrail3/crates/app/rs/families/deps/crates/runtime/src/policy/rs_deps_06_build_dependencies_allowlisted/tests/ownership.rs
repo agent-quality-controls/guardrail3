@@ -54,7 +54,7 @@ fn workspace_true_external_build_dependency_is_checked() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Dependency `bindgen` in `[build-dependencies]` is not allowlisted for crate `core`.",
+                "Build dependency `bindgen` in `[build-dependencies]` is not allowlisted for crate `core`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],
@@ -111,7 +111,7 @@ fn target_specific_build_dependency_is_checked() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Dependency `bindgen` in `[target.'cfg(unix)'.build-dependencies]` is not allowlisted for crate `core`.",
+                "Build dependency `bindgen` in `[target.'cfg(unix)'.build-dependencies]` is not allowlisted for crate `core`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],

@@ -16,11 +16,11 @@ fn emits_info_when_include_exclude_is_missing_and_skips_non_publishable_crates()
     assertions::assert_rule_results(
         &missing_results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Info),
+            severity: Some(assertions::Severity::Warn),
             file: Some("crates/example/Cargo.toml"),
             inventory: Some(false),
             title_contains: Some("include/exclude missing"),
-            message_contains: Some("consider `include` or `exclude` patterns"),
+            message_contains: Some("should set `include` or `exclude` patterns"),
             ..Default::default()
         }],
     );
@@ -75,7 +75,7 @@ exclude = []
         assertions::assert_rule_results(
             &results,
             &[assertions::ExpectedRuleResult {
-                severity: Some(assertions::Severity::Info),
+                severity: Some(assertions::Severity::Warn),
                 file: Some("Cargo.toml"),
                 inventory: Some(false),
                 title_contains: Some("include/exclude missing"),

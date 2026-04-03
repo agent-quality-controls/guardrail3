@@ -18,7 +18,7 @@ fn warns_on_publishable_crate_with_no_release_metadata() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             file: Some("crates/example/Cargo.toml"),
             inventory: Some(false),
             title_contains: Some("internal"),

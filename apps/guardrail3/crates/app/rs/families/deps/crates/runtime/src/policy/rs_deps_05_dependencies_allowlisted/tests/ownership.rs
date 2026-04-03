@@ -96,7 +96,7 @@ fn non_workspace_path_dependency_is_still_checked() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `core`.",
+                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `core`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],

@@ -17,7 +17,7 @@ fn warns_when_keywords_are_missing_or_zero() {
         assertions::assert_rule_results(
             &results,
             &[assertions::ExpectedRuleResult {
-                severity: Some(assertions::Severity::Warn),
+                severity: Some(assertions::Severity::Error),
                 file: Some("crates/example/Cargo.toml"),
                 inventory: Some(false),
                 title_contains: Some("keywords missing"),
@@ -41,7 +41,7 @@ fn warns_when_too_many_keywords_are_present() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Warn),
+            severity: Some(assertions::Severity::Error),
             file: Some("crates/example/Cargo.toml"),
             inventory: Some(false),
             title_contains: Some("too many keywords"),

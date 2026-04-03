@@ -48,13 +48,22 @@ fn warns_only_for_library_crates_without_allowlists() {
     let results = super::run_with_facts(&facts);
     assertions::assert_rule_results(
         &results,
-        &[assertions::ExpectedRuleResult {
-            file: Some("packages/core/Cargo.toml"),
-            severity: Some(assertions::Severity::Warn),
-            message: Some("Library crate `core` has no `allowed_deps` policy."),
-            inventory: Some(false),
-            ..Default::default()
-        }],
+        &[
+            assertions::ExpectedRuleResult {
+                file: Some("apps/api/Cargo.toml"),
+                severity: Some(assertions::Severity::Warn),
+                message: Some("Crate `api` has no `allowed_deps` policy. Add an `allowed_deps` list for this crate in guardrail3.toml."),
+                inventory: Some(false),
+                ..Default::default()
+            },
+            assertions::ExpectedRuleResult {
+                file: Some("packages/core/Cargo.toml"),
+                severity: Some(assertions::Severity::Warn),
+                message: Some("Crate `core` has no `allowed_deps` policy. Add an `allowed_deps` list for this crate in guardrail3.toml."),
+                inventory: Some(false),
+                ..Default::default()
+            },
+        ],
     );
 }
 
@@ -110,14 +119,14 @@ fn nested_package_zone_uses_library_policy_anywhere_in_path() {
             assertions::ExpectedRuleResult {
                 file: Some("tools/packages/core/Cargo.toml"),
                 severity: Some(assertions::Severity::Warn),
-                message: Some("Library crate `core` has no `allowed_deps` policy."),
+                message: Some("Crate `core` has no `allowed_deps` policy. Add an `allowed_deps` list for this crate in guardrail3.toml."),
                 inventory: Some(false),
                 ..Default::default()
             },
             assertions::ExpectedRuleResult {
                 file: Some("tools/packages/core/support/Cargo.toml"),
                 severity: Some(assertions::Severity::Warn),
-                message: Some("Library crate `support` has no `allowed_deps` policy."),
+                message: Some("Crate `support` has no `allowed_deps` policy. Add an `allowed_deps` list for this crate in guardrail3.toml."),
                 inventory: Some(false),
                 ..Default::default()
             },

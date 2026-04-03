@@ -57,7 +57,7 @@ fn workspace_true_external_path_dependency_is_still_checked() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `core`.",
+                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `core`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],
@@ -199,7 +199,7 @@ fn nested_app_zone_uses_app_policy_anywhere_in_path() {
             file: Some("tools/apps/api/crates/worker/Cargo.toml"),
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `worker`.",
+                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `worker`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],

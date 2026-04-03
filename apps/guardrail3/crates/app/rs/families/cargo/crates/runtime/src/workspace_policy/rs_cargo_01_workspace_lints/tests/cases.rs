@@ -11,6 +11,7 @@ const WORKSPACE_RUST_LINTS: &str = r#"
     unused_results = "deny"
     unused_crate_dependencies = "deny"
     missing_debug_implementations = "warn"
+    unreachable_pub = "deny"
 "#;
 
 const WORKSPACE_CLIPPY_LINTS: &str = r#"
@@ -169,7 +170,7 @@ fn local_library_profile_requires_unreachable_pub() {
         &results,
         &[ExpectedRuleResult {
             file: Some("Cargo.toml"),
-            title: Some("missing library rust lint `unreachable_pub`"),
+            title: Some("missing rust lint `unreachable_pub`"),
             inventory: Some(false),
         }],
     );
@@ -249,10 +250,17 @@ fn invalid_clippy_table_shape_is_explicit_error() {
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::assert_rule_results(
         &results,
-        &[ExpectedRuleResult {
-            file: Some("Cargo.toml"),
-            title: Some("clippy lint table has invalid shape"),
-            inventory: Some(false),
-        }],
+        &[
+            ExpectedRuleResult {
+                file: Some("Cargo.toml"),
+                title: Some("missing rust lint `unreachable_pub`"),
+                inventory: Some(false),
+            },
+            ExpectedRuleResult {
+                file: Some("Cargo.toml"),
+                title: Some("clippy lint table has invalid shape"),
+                inventory: Some(false),
+            },
+        ],
     );
 }
