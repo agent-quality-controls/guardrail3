@@ -62,7 +62,7 @@ enum Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Enum `Input` derives Parser and has non-primitive payload fields, but does not derive `Validate`.",
+                "Enum `Input` derives Parser and has non-primitive payload fields, but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this enum.",
             ),
             ..Default::default()
         }],
@@ -89,7 +89,7 @@ enum Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Enum `Input` derives Args and has non-primitive payload fields, but does not derive `Validate`.",
+                "Enum `Input` derives Args and has non-primitive payload fields, but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this enum.",
             ),
             ..Default::default()
         }],
@@ -116,7 +116,7 @@ enum Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Enum `Input` derives FromRow and has non-primitive payload fields, but does not derive `Validate`.",
+                "Enum `Input` derives FromRow and has non-primitive payload fields, but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this enum.",
             ),
             ..Default::default()
         }],
@@ -143,7 +143,7 @@ enum Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Enum `Input` derives De and has non-primitive payload fields, but does not derive `Validate`.",
+                "Enum `Input` derives De and has non-primitive payload fields, but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this enum.",
             ),
             ..Default::default()
         }],
@@ -170,7 +170,7 @@ enum Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Enum `Input` derives serde1::Deserialize and has non-primitive payload fields, but does not derive `Validate`.",
+                "Enum `Input` derives serde1::Deserialize and has non-primitive payload fields, but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this enum.",
             ),
             ..Default::default()
         }],

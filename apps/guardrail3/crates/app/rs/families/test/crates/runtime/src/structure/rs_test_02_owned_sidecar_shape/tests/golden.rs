@@ -14,14 +14,15 @@ fn owned_sidecar_directory_shape_passes_cleanly() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
+    write_file(root, "src/lib.rs", "pub mod core;\n");
     write_file(
         root,
-        "src/lib.rs",
-        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n",
+        "src/core/mod.rs",
+        "#[cfg(test)]\nmod tests;\npub fn value() -> u8 { 1 }\n",
     );
     write_file(
         root,
-        "src/lib_tests/mod.rs",
+        "src/core/tests/mod.rs",
         "#[test]\nfn owned_sidecar() {assert!(true);}\n",
     );
 
@@ -54,11 +55,16 @@ fn nested_package_root_sidecar_shape_passes_cleanly() {
     write_file(
         root,
         "apps/backend/crates/domain/crates/runtime/src/lib.rs",
-        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\npub fn value() -> u8 {1}\n",
+        "pub mod core;\npub fn value() -> u8 {1}\n",
     );
     write_file(
         root,
-        "apps/backend/crates/domain/crates/runtime/src/lib_tests/mod.rs",
+        "apps/backend/crates/domain/crates/runtime/src/core/mod.rs",
+        "#[cfg(test)]\nmod tests;\npub fn helper() -> u8 { 1 }\n",
+    );
+    write_file(
+        root,
+        "apps/backend/crates/domain/crates/runtime/src/core/tests/mod.rs",
         "#[test]\nfn owned_sidecar() {assert!(true);}\n",
     );
     write_file(

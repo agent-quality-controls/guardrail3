@@ -47,7 +47,7 @@ pub fn assert_mismatch(results: &[CheckResult], rustfmt_edition: &str, cargo_edi
     assert_eq!(
         finding.message,
         format!(
-            "rustfmt edition `{rustfmt_edition}` differs from Cargo edition `{cargo_edition}`."
+            "rustfmt edition `{rustfmt_edition}` differs from Cargo edition `{cargo_edition}`. Update `edition` in rustfmt.toml to `{cargo_edition}`."
         )
     );
     assert_eq!(finding.file, Some("rustfmt.toml"));

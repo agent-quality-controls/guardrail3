@@ -1,9 +1,11 @@
+#![allow(dead_code)]
 #[allow(dead_code, unused_imports)]
 mod cycle_collection;
 mod scope_boundaries;
 
 use std::path::{Path, PathBuf};
 
+#[allow(unused_imports)]
 pub(super) use test_support::{
     create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
 };

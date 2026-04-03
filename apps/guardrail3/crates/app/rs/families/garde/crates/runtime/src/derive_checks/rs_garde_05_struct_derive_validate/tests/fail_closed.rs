@@ -58,7 +58,7 @@ garde = { version = "0.22", features = ["derive"] }
             title: Some("struct `Input` missing Validate derive"),
             file: Some(source_rel),
             message: Some(
-                "Struct `Input` derives Deserialize but does not derive `Validate`. Non-primitive input boundary structs must derive garde validation.",
+                "Struct `Input` derives Deserialize but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this struct.",
             ),
             line: Some(4),
             ..Default::default()

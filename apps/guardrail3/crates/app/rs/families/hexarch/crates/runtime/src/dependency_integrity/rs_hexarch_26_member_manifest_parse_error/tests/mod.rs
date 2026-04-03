@@ -1,9 +1,14 @@
+#![allow(dead_code)]
 mod helpers;
+pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<guardrail3_domain_report::CheckResult> {
+    helpers::results_for_test_root(root)
+}
 #[allow(dead_code, unused_imports)]
 mod fail_closed;
 
 use std::path::{Path, PathBuf};
 
+#[allow(unused_imports)]
 pub(super) use test_support::{
     create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
 };

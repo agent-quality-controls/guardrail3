@@ -314,7 +314,7 @@ fn errors_when_channel_is_nightly() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is nightly",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel is set to nightly. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {
@@ -359,7 +359,7 @@ fn errors_when_channel_is_pinned_nightly() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is nightly",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel is set to nightly. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {
@@ -404,7 +404,7 @@ fn errors_when_stable_channel_contains_nightly_suffix() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is nightly",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel is set to nightly. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {
@@ -449,7 +449,7 @@ fn errors_when_version_like_channel_contains_nightly_suffix() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is nightly",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel is set to nightly. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {
@@ -494,7 +494,7 @@ fn errors_when_version_like_channel_contains_nightly_suffix_after_host_triple() 
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is nightly",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel is set to nightly. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {
@@ -539,7 +539,7 @@ fn errors_when_version_like_channel_contains_beta_suffix_after_host_triple() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is beta",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel is set to beta. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {
@@ -584,7 +584,7 @@ fn errors_when_channel_is_beta() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is beta",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel is set to beta. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {
@@ -629,7 +629,7 @@ fn errors_when_stable_channel_contains_beta_suffix() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is beta",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel is set to beta. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {
@@ -674,7 +674,7 @@ fn errors_when_version_like_channel_contains_beta_suffix() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is beta",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel is set to beta. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {
@@ -719,7 +719,7 @@ fn errors_when_channel_is_unsupported() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is unsupported",
-                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                message: "Channel value is not recognized. Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
             ExpectedRuleResult {

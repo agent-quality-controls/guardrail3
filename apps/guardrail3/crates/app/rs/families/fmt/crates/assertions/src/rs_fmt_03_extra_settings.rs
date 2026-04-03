@@ -44,7 +44,12 @@ pub fn assert_extra_setting_inventory(results: &[CheckResult], key: &str, file: 
     let finding = &findings[0];
     assert_eq!(finding.severity, Severity::Info);
     assert_eq!(finding.title, format!("rustfmt extra setting: {key}"));
-    assert_eq!(finding.message, "Non-baseline rustfmt setting present");
+    assert_eq!(
+        finding.message,
+        format!(
+            "`{key}` in `{file}` is not part of the standard rustfmt baseline. Verify it is intentional."
+        )
+    );
     assert_eq!(finding.file, Some(file));
     assert!(finding.inventory);
 }

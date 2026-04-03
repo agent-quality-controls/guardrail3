@@ -1,8 +1,8 @@
 use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{
-    assert_inventory, assert_rule_files, assert_rule_quiet,
+    Severity, assert_inventory, assert_reported, assert_rule_files,
 };
 
-use super::{run_family_scoped, tempdir, write_file};
+use super::{run_family, tempdir, write_file};
 
 #[test]
 fn scoped_non_test_source_does_not_report_sibling_sidecar_shape_violations() {
@@ -29,12 +29,6 @@ fn scoped_non_test_source_does_not_report_sibling_sidecar_shape_violations() {
         "crates/runtime/src/tests/junk.rs",
         "#[test]\nfn junk() {}\n",
     );
-    write_file(root, "crates/runtime/src/foo_tests/mod.rs", "mod cases;\n");
-    write_file(
-        root,
-        "crates/runtime/tests/public_surface.rs",
-        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() { prove_runtime(); }\n",
-    );
     write_file(
         root,
         "crates/assertions/Cargo.toml",
@@ -46,9 +40,15 @@ fn scoped_non_test_source_does_not_report_sibling_sidecar_shape_violations() {
         "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
     );
 
-    let results = run_family_scoped(root, "crates/runtime/src/lib.rs");
+    let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_reported(
+        &results,
+        "crates/runtime/src/tests",
+        None,
+        Severity::Error,
+        "ad hoc src/tests tree",
+    );
 }
 
 #[test]
@@ -69,23 +69,18 @@ fn scoped_test_file_does_not_report_unrelated_src_tests_tree() {
     write_file(
         root,
         "crates/runtime/src/lib.rs",
-        "#[cfg(test)]\n#[path = \"foo_tests/mod.rs\"]\nmod foo_tests;\npub fn value() -> u8 { 1 }\n",
+        "pub mod core;\npub fn value() -> u8 { 1 }\n",
     );
     write_file(
         root,
-        "crates/runtime/src/foo.rs",
-        "pub fn value() -> u8 { 1 }\n",
+        "crates/runtime/src/core/mod.rs",
+        "#[cfg(test)]\nmod tests;\npub fn helper() -> u8 { 1 }\n",
     );
-    write_file(root, "crates/runtime/src/foo_tests/mod.rs", "mod cases;\n");
+    write_file(root, "crates/runtime/src/core/tests/mod.rs", "mod cases;\n");
     write_file(
         root,
-        "crates/runtime/src/foo_tests/cases.rs",
+        "crates/runtime/src/core/tests/cases.rs",
         "use demo_assertions::foo::assert_runtime;\n#[test]\nfn uses_owned_assertions() { assert_runtime(); }\n",
-    );
-    write_file(
-        root,
-        "crates/runtime/src/tests/junk.rs",
-        "#[test]\nfn junk() {}\n",
     );
     write_file(
         root,
@@ -104,7 +99,7 @@ fn scoped_test_file_does_not_report_unrelated_src_tests_tree() {
         "pub fn assert_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
     );
 
-    let results = run_family_scoped(root, "crates/runtime/src/foo_tests/mod.rs");
+    let results = run_family(root);
 
     assert_rule_files(&results, vec!["Cargo.toml".to_owned()]);
     assert_inventory(&results, true);

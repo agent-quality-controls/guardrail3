@@ -432,7 +432,7 @@ fn test_support_fully_qualified_placement_call_is_reported() {
     write_file(
         root,
         "test_support/src/lib.rs",
-        "pub fn cargo_route() { let _ = guardrail3_app_rs_structure::collect(todo!()); }\n",
+        "pub fn cargo_route() { let _ = guardrail3_app_rs_placement::collect(todo!()); }\n",
     );
 
     let results = run_family(root);

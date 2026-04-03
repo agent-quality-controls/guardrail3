@@ -29,7 +29,7 @@ fn warns_when_bans_missing() {
     assertions::assert_missing(
         &results,
         "clippy.toml",
-        "Missing garde extractor bans from `disallowed-types`: axum::extract::Path, axum_extra::extract::TypedHeader.",
+        "Missing extractor type bans from `disallowed-types`: axum::extract::Path, axum_extra::extract::TypedHeader. Add these entries to `disallowed-types` in clippy.toml.",
     );
 
     std::fs::remove_dir_all(&root).expect("remove temp root");

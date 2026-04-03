@@ -53,7 +53,8 @@ fn discovers_only_root_dual_file_conflicts_from_family_walk() {
         &[assertions::Finding {
             severity: assertions::Severity::Warn,
             title: "Conflicting rustfmt config files",
-            message: "Both rustfmt.toml and .rustfmt.toml exist in the same directory",
+            message:
+                "Both `rustfmt.toml` and `.rustfmt.toml` exist in `.`. Delete `.rustfmt.toml` and keep `rustfmt.toml`.",
             file: Some("rustfmt.toml"),
             inventory: false,
         }],

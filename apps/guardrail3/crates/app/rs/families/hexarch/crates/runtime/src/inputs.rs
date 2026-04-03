@@ -222,9 +222,21 @@ impl<'a> RootWorkspaceMemberHexarchInput<'a> {
     }
 
     pub fn covers_dir(&self, rel_dir: &str) -> bool {
-        self.resolved_dirs
+        if self
+            .resolved_dirs
             .iter()
             .any(|resolved| resolved == rel_dir || resolved.starts_with(&format!("{rel_dir}/")))
+        {
+            return true;
+        }
+
+        if !self.raw.starts_with('/') {
+            return false;
+        }
+
+        let normalized_raw = self.raw.trim_end_matches('/').replace('\\', "/");
+        normalized_raw.ends_with(&format!("/{rel_dir}"))
+            || normalized_raw.contains(&format!("/{rel_dir}/"))
     }
 }
 

@@ -54,9 +54,7 @@ fn main() {}
             title: Some("garde dependency missing"),
             file: Some("Cargo.toml"),
             inventory: Some(false),
-            message: Some(
-                "Missing `garde` dependency in `Cargo.toml` for this workspace root. Runtime input validation at Rust adapter boundaries requires garde.",
-            ),
+            message_contains: Some("Add `garde` to `[dependencies]`"),
             ..Default::default()
         }],
     );

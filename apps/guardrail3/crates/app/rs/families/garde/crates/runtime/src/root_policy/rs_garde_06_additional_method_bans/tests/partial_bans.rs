@@ -30,7 +30,7 @@ fn warns_when_bans_missing() {
     assertions::assert_missing(
         &results,
         "clippy.toml",
-        "Missing additional garde deserialization bans from `disallowed-methods`: serde_qs::from_bytes, figment::Figment::extract.",
+        "Missing additional deserialization bans from `disallowed-methods`: serde_qs::from_bytes, figment::Figment::extract. Add these entries to `disallowed-methods` in clippy.toml.",
     );
 
     std::fs::remove_dir_all(&root).expect("remove temp root");

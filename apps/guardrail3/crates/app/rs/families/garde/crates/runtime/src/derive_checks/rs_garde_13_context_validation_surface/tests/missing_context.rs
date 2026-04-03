@@ -66,7 +66,7 @@ garde = { version = "0.22", features = ["derive"] }
             file: Some(source_rel),
             title: Some("boundary `Input` uses ctx without garde(context)"),
             message: Some(
-                "Field `title` in validated boundary `Input` references `ctx` in a garde validator, but the boundary type is missing `#[garde(context(...))]`.",
+                "Field `title` in validated boundary `Input` references `ctx` in a garde validator, but the boundary type is missing `#[garde(context(...))]`. Add `#[garde(context(YourContextType))]` to the struct definition.",
             ),
             ..Default::default()
         }],

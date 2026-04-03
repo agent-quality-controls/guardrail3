@@ -14,20 +14,21 @@ fn sidecar_fixture_rust_is_ignored() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
+    write_file(root, "src/lib.rs", "pub mod core;\n");
     write_file(
         root,
-        "src/lib.rs",
-        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\npub fn value() -> u8 { 1 }\n",
+        "src/core/mod.rs",
+        "#[cfg(test)]\nmod tests;\npub fn value() -> u8 { 1 }\n",
     );
-    write_file(root, "src/lib_tests/mod.rs", "mod cases;\n");
+    write_file(root, "src/core/tests/mod.rs", "mod cases;\n");
     write_file(
         root,
-        "src/lib_tests/cases.rs",
-        "#[test]\nfn proves() { assert_eq!(super::helpers::value(), 1); }\n",
+        "src/core/tests/cases.rs",
+        "#[test]\nfn proves() { assert_eq!(1, 1); }\n",
     );
     write_file(
         root,
-        "src/lib_tests/fixtures/sample.rs",
+        "src/core/tests/fixtures/sample.rs",
         "#[cfg(test)]\nmod garbage { #[test] fn broken() {} }\n",
     );
 

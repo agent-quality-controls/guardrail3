@@ -61,7 +61,7 @@ struct Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Struct `Input` derives Parser but does not derive `Validate`. Non-primitive input boundary structs must derive garde validation.",
+                "Struct `Input` derives Parser but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this struct.",
             ),
             ..Default::default()
         }],
@@ -87,7 +87,7 @@ struct Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Struct `Input` derives Args but does not derive `Validate`. Non-primitive input boundary structs must derive garde validation.",
+                "Struct `Input` derives Args but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this struct.",
             ),
             ..Default::default()
         }],
@@ -113,7 +113,7 @@ struct Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Struct `Input` derives FromRow but does not derive `Validate`. Non-primitive input boundary structs must derive garde validation.",
+                "Struct `Input` derives FromRow but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this struct.",
             ),
             ..Default::default()
         }],
@@ -139,7 +139,7 @@ struct Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Struct `Input` derives De but does not derive `Validate`. Non-primitive input boundary structs must derive garde validation.",
+                "Struct `Input` derives De but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this struct.",
             ),
             ..Default::default()
         }],
@@ -165,7 +165,7 @@ struct Input {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             message: Some(
-                "Struct `Input` derives serde1::Deserialize but does not derive `Validate`. Non-primitive input boundary structs must derive garde validation.",
+                "Struct `Input` derives serde1::Deserialize but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this struct.",
             ),
             ..Default::default()
         }],

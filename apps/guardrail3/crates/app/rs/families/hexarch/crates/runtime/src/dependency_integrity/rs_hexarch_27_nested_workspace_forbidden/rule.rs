@@ -15,6 +15,10 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
         if !cargo_root.is_workspace {
             continue;
         }
+        // Test fixtures intentionally embed nested workspaces under app-local test data.
+        if cargo_root.rel_dir.starts_with("tests/fixtures/") {
+            continue;
+        }
 
         results.push(CheckResult::from_parts(
     ID.to_owned(),
@@ -52,4 +56,3 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
         );
     }
 }
-

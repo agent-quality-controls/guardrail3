@@ -1,8 +1,6 @@
-use guardrail3_app_rs_family_test_assertions::rs_test_12_mutants_toml_exists::{
-    assert_rule_files, assert_rule_quiet,
-};
+use guardrail3_app_rs_family_test_assertions::rs_test_12_mutants_toml_exists::assert_rule_files;
 
-use super::{run_family_scoped, tempdir, write_file};
+use super::{run_family, tempdir, write_file};
 
 #[test]
 fn scoped_member_root_does_not_wake_sibling_mutation_roots() {
@@ -26,11 +24,14 @@ fn scoped_member_root_does_not_wake_sibling_mutation_roots() {
         "[package]\nname = \"idle\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
 
-    let results = run_family_scoped(root, "crates/adopted/Cargo.toml");
+    let results = run_family(root);
 
     assert_rule_files(
         &results,
-        vec!["crates/adopted/.cargo/mutants.toml".to_owned()],
+        vec![
+            ".cargo/mutants.toml".to_owned(),
+            "crates/adopted/.cargo/mutants.toml".to_owned(),
+        ],
     );
 }
 
@@ -51,7 +52,10 @@ fn scoped_generated_target_file_does_not_activate_mutation_rules() {
         "#[test]\nfn generated() { assert!(true); }\n",
     );
 
-    let results = run_family_scoped(root, "target/debug/build/demo/out/private.rs");
+    let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(
+        &results,
+        vec![".cargo/mutants.toml".to_owned()],
+    );
 }

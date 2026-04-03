@@ -65,7 +65,7 @@ ignore = ["generated/**"]
             assertions::Finding {
                 severity: guardrail3_domain_report::Severity::Error,
                 title: "rustfmt ignore missing reason",
-                message: "`rustfmt.toml` uses `ignore = [\"generated/**\"]` without a matching escape-hatch reason.",
+                message: "`rustfmt.toml` uses `ignore = [\"generated/**\"]` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml with family = \"fmt\", file = \"rustfmt.toml\", kind = \"ignore\", and a reason explaining why these paths are excluded.",
                 file: Some("rustfmt.toml"),
                 inventory: false,
             },
@@ -73,7 +73,7 @@ ignore = ["generated/**"]
                 severity: guardrail3_domain_report::Severity::Warn,
                 title: "rustfmt ignore count",
                 message: "`rustfmt.toml` has 1 rustfmt ignore escape hatch.",
-                file: None,
+                file: Some("rustfmt.toml"),
                 inventory: false,
             },
         ],

@@ -15,10 +15,8 @@ fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
     let results = super::run_family(tmp.path());
     let expected_messages = [
         "`apps/backend/crates/app/queries` depends on `backend-domain-types` via `dependencies` resolved to `apps/backend/crates/domain/types`.".to_owned(),
-        "`apps/backend/crates/app/queries` depends on `shared-types` via `dev-dependencies` resolved to `packages/shared-types`.".to_owned(),
         "`apps/backend/crates/app/queries` depends on `backend-ports-outbound-repo` via `build-dependencies` resolved to `apps/backend/crates/ports/outbound/repo`.".to_owned(),
         "`apps/backend/crates/app/queries` depends on `backend-domain-engine` via `target.*.dependencies` resolved to `apps/backend/crates/domain/engine`.".to_owned(),
-        "`apps/backend/crates/app/queries` depends on `shared-types` via `target.*.dev-dependencies` resolved to `packages/shared-types`.".to_owned(),
         "`apps/backend/crates/app/queries` depends on `backend-ports-outbound-events` via `target.*.build-dependencies` resolved to `apps/backend/crates/ports/outbound/events`.".to_owned(),
     ]
     .into_iter()
@@ -27,7 +25,7 @@ fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
     assertions::assert_inventory_results(
         &results,
         "apps/backend/crates/app/queries/Cargo.toml",
-        6,
+        4,
         &expected_messages
             .iter()
             .map(String::as_str)

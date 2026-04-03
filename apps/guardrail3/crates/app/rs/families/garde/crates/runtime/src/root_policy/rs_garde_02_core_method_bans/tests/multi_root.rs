@@ -46,7 +46,7 @@ fn local_missing_core_ban_only_warns_for_owned_root() {
     assertions::assert_missing(
         &results,
         "apps/lib/clippy.toml",
-        "Missing core garde deserialization bans from `disallowed-methods`: serde_json::from_reader.",
+        "Missing core deserialization bans from `disallowed-methods`: serde_json::from_reader. Add these entries to `disallowed-methods` in clippy.toml.",
     );
     std::fs::remove_dir_all(&root).expect("remove temp root");
 }
