@@ -60,3 +60,6 @@ single_match_else = "deny"
 ref_option_ref = "deny"
 trivially_copy_pass_by_ref = "deny"
 multiple_crate_versions = "deny"
+# redundant_pub_crate conflicts with rustc's unreachable_pub (clippy#5369).
+# Keep unreachable_pub (rustc), disable the clippy nursery lint.
+redundant_pub_crate = "allow"

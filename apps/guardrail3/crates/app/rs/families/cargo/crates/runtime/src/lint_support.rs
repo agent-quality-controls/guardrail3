@@ -121,6 +121,7 @@ pub(crate) const EXPECTED_CLIPPY_ALLOW: &[&str] = &[
     "ref_option_ref",
     "trivially_copy_pass_by_ref",
     "multiple_crate_versions",
+    "redundant_pub_crate", // conflicts with rustc unreachable_pub — clippy#5369
 ];
 
 pub fn policy_lints<'a>(root: &'a PolicyRootCargoFacts, family: &str) -> Option<&'a toml::Value> {
