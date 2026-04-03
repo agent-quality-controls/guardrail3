@@ -217,7 +217,6 @@ fn collect_cargo_and_policy_files(
         RustValidateFamily::Cargo,
         RustValidateFamily::Deps,
         RustValidateFamily::Garde,
-        RustValidateFamily::Libarch,
         RustValidateFamily::Release,
     ] {
         collect_root_and_dir_file(

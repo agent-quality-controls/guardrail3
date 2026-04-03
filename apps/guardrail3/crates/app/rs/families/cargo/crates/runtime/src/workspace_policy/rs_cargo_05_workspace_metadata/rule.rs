@@ -15,7 +15,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "edition invalid".to_owned(),
             format!(
-                "`{}` must declare edition as a string value in the owning Cargo package metadata.",
+                "`{}` must declare edition as a string value in `[package]` or `[workspace.package]`.",
                 root.cargo_rel_path
             ),
             Some(root.cargo_rel_path.clone()),
@@ -78,7 +78,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "edition missing".to_owned(),
             format!(
-                "`{}` must declare an edition for this {}.",
+                "`{}` must declare an edition for this {}. Add `edition = \"2024\"` to the package metadata.",
                 root.cargo_rel_path,
                 root.kind.label()
             ),
@@ -98,4 +98,3 @@ fn edition_rank(edition: &str) -> Option<usize> {
         _ => None,
     }
 }
-

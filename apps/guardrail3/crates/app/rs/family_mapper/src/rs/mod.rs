@@ -220,24 +220,6 @@ impl<'a> FamilyMapper<'a> {
     }
 
     #[must_use]
-    pub fn map_rs_libarch(&self) -> views::RsLibarchRoute {
-        let roots = self
-            .map_manifest_roots_for_family(RustValidateFamily::Libarch)
-            .into_iter()
-            .filter(|root| matches!(root_scope(root.rel_dir()), RootScope::Packages))
-            .collect::<Vec<_>>();
-        let root_rels = roots
-            .iter()
-            .map(|root| root.rel_dir().to_owned())
-            .collect::<Vec<_>>();
-        views::RsLibarchRoute::new(
-            roots,
-            self.map_local_family_files(RustValidateFamily::Libarch, &root_rels),
-        )
-        .with_validation_scope(self.validation_scope.map(str::to_owned))
-    }
-
-    #[must_use]
     pub fn map_rs_deps(&self) -> views::RsDepsRoute {
         let roots = self.map_workspace_roots_for_family(RustValidateFamily::Deps);
         let root_rels = roots
@@ -303,35 +285,6 @@ impl<'a> FamilyMapper<'a> {
             .map(|root| {
                 views::RsRootView::new(root.rel_dir().to_owned(), root.cargo_rel_path().to_owned())
             })
-            .collect()
-    }
-
-    fn map_manifest_roots_for_family(&self, family: RustValidateFamily) -> Vec<views::RsRootView> {
-        if !self.selected_families.contains(family) {
-            return Vec::new();
-        }
-
-        let root_rels = self
-            .legality
-            .legal_family_files()
-            .iter()
-            .filter(|fact| fact.family() == family)
-            .filter(|fact| fact.kind() == RustValidateFamilyFileKind::CargoToml)
-            .filter(|fact| self.legal_family_file_matches_scope(fact))
-            .filter_map(|fact| match fact.attachment() {
-                RustFamilyFileAttachment::ExactRoot { root_rel } => Some(root_rel.clone()),
-                RustFamilyFileAttachment::NestedUnderRoot { .. }
-                | RustFamilyFileAttachment::AncestorOfRoots { .. }
-                | RustFamilyFileAttachment::OutsideRoots { .. } => None,
-            })
-            .collect::<std::collections::BTreeSet<_>>();
-
-        self.legality.placement()
-            .roots()
-            .iter()
-            .filter(|root| root_rels.contains(root.rel_dir()))
-            .filter(|root| root_enabled_for_family(root, family, self.config))
-            .map(root_view)
             .collect()
     }
 
@@ -585,7 +538,6 @@ fn family_label(family: RustValidateFamily) -> &'static str {
         RustValidateFamily::Garde => "garde",
         RustValidateFamily::Release => "release",
         RustValidateFamily::Hexarch => "hexarch",
-        RustValidateFamily::Libarch => "libarch",
         RustValidateFamily::Topology => "topology",
         RustValidateFamily::Fmt => "fmt",
         RustValidateFamily::Code => "code",
@@ -756,7 +708,6 @@ pub(crate) fn app_scoped_config_test() -> guardrail3_domain_config::types::Guard
                 None,
                 None,
                 None,
-                None,
             )),
         )),
         None,
@@ -782,7 +733,6 @@ pub(crate) fn global_toolchain_enabled_config_test()
                 None,
                 None,
                 Some(true),
-                None,
                 None,
                 None,
                 None,

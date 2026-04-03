@@ -21,14 +21,17 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         if lint_priority(clippy_lints, lint_name).is_some_and(|priority| priority < 0) {
             violations += 1;
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    format!("specific lint `{lint_name}` has negative priority"),
-    "Specific clippy denies should keep default priority so groups do not override them."
-                    .to_owned(),
-    Some(root.cargo_rel_path.clone()),
-    None,
-    false,
+                ID.to_owned(),
+                Severity::Warn,
+                format!("specific lint `{lint_name}` has negative priority"),
+                format!(
+                    "Specific clippy deny `{lint_name}` should keep default priority \
+                     so groups do not override it. Remove the negative `priority` from \
+                     `{lint_name}` or set it to `0` or higher."
+                ),
+                Some(root.cargo_rel_path.clone()),
+                None,
+                false,
             ));
         }
     }
@@ -52,4 +55,3 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         );
     }
 }
-

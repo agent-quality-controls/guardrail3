@@ -46,7 +46,7 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
                         Severity::Error,
                         "member-local allow entry missing reason".to_owned(),
                         format!(
-                            "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}` without a matching escape-hatch reason.",
+                            "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this lint with a reason.",
                             input.member.cargo_rel_path
                         ),
                         Some(input.member.cargo_rel_path.clone()),
@@ -62,7 +62,7 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
                             Severity::Error,
                             "member-local allow entry forbidden".to_owned(),
                             format!(
-                                "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}`. The entry is documented but still forbidden.",
+                                "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}`. Remove this `allow` override from the member crate.",
                                 input.member.cargo_rel_path
                             ),
                             Some(input.member.cargo_rel_path.clone()),
@@ -124,7 +124,6 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
     }
 }
 
-
 fn lints_are_well_formed(lints: Option<&toml::Value>) -> bool {
     let Some(lints) = lints else {
         return true;
@@ -135,4 +134,3 @@ fn lints_are_well_formed(lints: Option<&toml::Value>) -> bool {
 
     table.values().all(has_valid_lint_level)
 }
-

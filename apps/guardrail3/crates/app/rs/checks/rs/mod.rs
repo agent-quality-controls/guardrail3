@@ -7,7 +7,6 @@ pub use guardrail3_app_rs_family_deps as deps;
 pub use guardrail3_app_rs_family_fmt as fmt;
 pub use guardrail3_app_rs_family_garde as garde;
 pub use guardrail3_app_rs_family_hexarch as hexarch;
-pub use guardrail3_app_rs_family_libarch as libarch;
 pub use guardrail3_app_rs_family_release as release;
 pub use guardrail3_app_rs_family_test as test;
 pub use guardrail3_app_rs_family_toolchain as toolchain;

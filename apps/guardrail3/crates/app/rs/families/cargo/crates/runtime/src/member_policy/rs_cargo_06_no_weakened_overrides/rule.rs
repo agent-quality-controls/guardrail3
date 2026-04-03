@@ -126,7 +126,7 @@ fn check_family(
                 Severity::Error,
                 format!("weakened member {family} override"),
                 format!(
-                    "`{lint_name}` is `{member_level}` in the member but `{workspace_level}` in the workspace."
+                    "`{lint_name}` is `{member_level}` in the member but `{workspace_level}` in the workspace. Remove the member-level override or set it to `{workspace_level}` or stricter."
                 ),
                 Some(file.to_owned()),
                 None,
@@ -136,6 +136,5 @@ fn check_family(
     }
     violations
 }
-
 
 // reason: test-only sidecar module wiring

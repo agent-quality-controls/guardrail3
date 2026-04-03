@@ -78,7 +78,6 @@ deny = true
 cargo = true
 code = true
 hexarch = true
-libarch = true
 deps = true
 garde = true
 test = true
@@ -96,7 +95,6 @@ garde = false
 
 [rust.packages.checks]
 arch = true
-libarch = true
 code = true
 test = true
 release = false

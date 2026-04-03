@@ -39,7 +39,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Error,
                 "approved allow entry missing reason".to_owned(),
                 format!(
-                    "`{}` explicitly allows `{lint_name}` in `clippy` without a matching escape-hatch reason.",
+                    "`{}` explicitly allows `{lint_name}` in `clippy` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this lint with a reason.",
                     root.cargo_rel_path
                 ),
                 Some(root.cargo_rel_path.clone()),
@@ -72,7 +72,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                     Severity::Error,
                     "approved allow entry reason too weak".to_owned(),
                     format!(
-                        "`{}` explicitly allows `{lint_name}` in `clippy` with a weak reason: {}.",
+                        "`{}` explicitly allows `{lint_name}` in `clippy` with a weak reason: {}. Provide a more specific reason.",
                         root.cargo_rel_path,
                         issue.message()
                     ),
@@ -100,4 +100,3 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         ));
     }
 }
-

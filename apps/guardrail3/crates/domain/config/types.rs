@@ -322,8 +322,6 @@ pub struct RustChecksConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid
     hexarch: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    libarch: Option<bool>,
-    #[garde(skip)] // reason: Option<bool> — inherently valid
     deps: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
     garde: Option<bool>,
@@ -350,7 +348,6 @@ impl RustChecksConfig {
         cargo: Option<bool>,
         code: Option<bool>,
         hexarch: Option<bool>,
-        libarch: Option<bool>,
         deps: Option<bool>,
         garde: Option<bool>,
         test: Option<bool>,
@@ -368,7 +365,6 @@ impl RustChecksConfig {
             cargo,
             code,
             hexarch,
-            libarch,
             deps,
             garde,
             test,
@@ -390,7 +386,6 @@ impl RustChecksConfig {
             RustValidateFamily::Cargo => self.cargo,
             RustValidateFamily::Code => self.code,
             RustValidateFamily::Hexarch => self.hexarch,
-            RustValidateFamily::Libarch => self.libarch,
             RustValidateFamily::Deps => self.deps,
             RustValidateFamily::Garde => self.garde,
             RustValidateFamily::Test => self.test,
@@ -443,11 +438,6 @@ impl RustChecksConfig {
     #[must_use]
     pub const fn hexarch(&self) -> Option<bool> {
         self.hexarch
-    }
-
-    #[must_use]
-    pub const fn libarch(&self) -> Option<bool> {
-        self.libarch
     }
 
     #[must_use]

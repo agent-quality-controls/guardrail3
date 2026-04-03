@@ -10,7 +10,7 @@ pub fn check(input: &MissingMemberCargoInput<'_>, results: &mut Vec<CheckResult>
         Severity::Warn,
         "declared workspace member missing Cargo.toml".to_owned(),
         format!(
-            "`{}` is declared in `[workspace].members` but no `Cargo.toml` was discovered there.",
+            "`{}` is declared in `[workspace].members` but no `Cargo.toml` was discovered there. Remove it from `[workspace].members` or create a `Cargo.toml` at that path.",
             input.missing.member_rel
         ),
         Some(input.missing.workspace_cargo_rel_path.clone()),
@@ -43,4 +43,3 @@ pub fn check_inventory(
         .as_inventory(),
     );
 }
-

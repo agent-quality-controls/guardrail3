@@ -80,7 +80,6 @@ RUST VALIDATION FAMILIES
   cargo
   code
   hexarch
-  libarch
   deps
   garde
   test
@@ -110,7 +109,6 @@ CONFIG
   cargo = true
   code = true
   hexarch = true
-  libarch = true
   deps = true
   garde = true
   test = true
@@ -146,7 +144,7 @@ RUST CHECK TOGGLES
 
   `rs init` writes family-based Rust check toggles:
     arch, topology, fmt, toolchain, clippy, deny, cargo, code, hexarch, deps,
-    libarch, garde, test, release, hooks_shared, hooks_rs
+    garde, test, release, hooks_shared, hooks_rs
 
 AFTER INIT
 
@@ -190,7 +188,6 @@ deny
 cargo
 code
 hexarch
-libarch
 deps
 garde
 test
@@ -239,7 +236,6 @@ deny = true
 cargo = true
 code = true
 hexarch = true
-libarch = true
 deps = true
 garde = true
 test = true
@@ -257,7 +253,6 @@ garde = false
 
 [rust.packages.checks]
 arch = true
-libarch = true
 code = true
 test = true
 release = false

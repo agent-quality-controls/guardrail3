@@ -284,7 +284,7 @@ pub const fn rust_validate_family_cli_name(family: RustValidateFamily) -> &'stat
         RustValidateFamily::Cargo => "cargo",
         RustValidateFamily::Code => "code",
         RustValidateFamily::Hexarch => "hexarch",
-        RustValidateFamily::Libarch => "libarch",
+
         RustValidateFamily::Deps => "deps",
         RustValidateFamily::Garde => "garde",
         RustValidateFamily::Test => "test",
@@ -306,7 +306,7 @@ pub const fn rust_validate_family_config_key(family: RustValidateFamily) -> &'st
         RustValidateFamily::Cargo => "cargo",
         RustValidateFamily::Code => "code",
         RustValidateFamily::Hexarch => "hexarch",
-        RustValidateFamily::Libarch => "libarch",
+
         RustValidateFamily::Deps => "deps",
         RustValidateFamily::Garde => "garde",
         RustValidateFamily::Test => "test",

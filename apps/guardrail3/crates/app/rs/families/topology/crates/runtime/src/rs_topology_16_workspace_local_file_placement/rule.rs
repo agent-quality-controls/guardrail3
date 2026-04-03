@@ -34,7 +34,6 @@ fn family_label(family: guardrail3_validation_model::RustValidateFamily) -> &'st
         guardrail3_validation_model::RustValidateFamily::Fmt => "fmt",
         guardrail3_validation_model::RustValidateFamily::Code => "code",
         guardrail3_validation_model::RustValidateFamily::Hexarch => "hexarch",
-        guardrail3_validation_model::RustValidateFamily::Libarch => "libarch",
         guardrail3_validation_model::RustValidateFamily::Test => "test",
         guardrail3_validation_model::RustValidateFamily::HooksShared => "hooks-shared",
         guardrail3_validation_model::RustValidateFamily::HooksRs => "hooks-rs",

@@ -28,9 +28,8 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "garde dependency missing".to_owned(),
             format!(
-                "Missing `garde` dependency in `{}` for this {}. Runtime input validation at Rust adapter boundaries requires garde.",
-                input.root.cargo_rel_path,
-                input.root.kind.label()
+                "Missing `garde` dependency in `{}`. Add `garde` to `[dependencies]` in this Cargo.toml.",
+                input.root.cargo_rel_path
             ),
             Some(input.root.cargo_rel_path.clone()),
             None,

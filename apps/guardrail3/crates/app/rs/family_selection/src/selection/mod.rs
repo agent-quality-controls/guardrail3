@@ -78,7 +78,6 @@ pub fn config_for_explicit_topology_request_for_tests() -> GuardrailConfig {
                 None,
                 None,
                 Some(true),
-                Some(true),
                 None,
                 None,
                 None,
@@ -111,7 +110,6 @@ pub fn config_for_enabled_family_filtering_for_tests() -> GuardrailConfig {
                 None,
                 None,
                 None,
-                Some(false),
                 Some(false),
                 None,
                 None,
@@ -168,14 +166,6 @@ fn family_enabled_for_runtime(
         let discovered_apps = tree.dir_exists("apps");
         if app_count > 0 || discovered_apps {
             return app_enabled || (global && app_count == 0);
-        }
-        return global;
-    }
-
-    if family == RustValidateFamily::Libarch {
-        let discovered_packages = tree.dir_exists("packages");
-        if has_packages_scope || discovered_packages {
-            return packages_enabled || (global && !has_packages_scope);
         }
         return global;
     }
