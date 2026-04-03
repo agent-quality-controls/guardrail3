@@ -33,17 +33,15 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
             );
         }
 
-        if root.profile_name.as_deref() == Some("library") {
-            for expected in EXPECTED_LIBRARY_RUST_LINTS {
-                violations += check_expected_level(
-                    &root.cargo_rel_path,
-                    rust_lints,
-                    expected.name,
-                    expected.expected_level,
-                    None,
-                    results,
-                );
-            }
+        for expected in EXPECTED_LIBRARY_RUST_LINTS {
+            violations += check_expected_level(
+                &root.cargo_rel_path,
+                rust_lints,
+                expected.name,
+                expected.expected_level,
+                None,
+                results,
+            );
         }
     }
 
