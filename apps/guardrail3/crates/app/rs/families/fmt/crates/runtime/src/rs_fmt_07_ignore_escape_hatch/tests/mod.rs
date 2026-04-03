@@ -3,7 +3,7 @@ use guardrail3_domain_config::types::EscapeHatchConfig;
 
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_07_ignore_escape_hatch as assertions;
 
-use super::{run_check, run_check_with_escape_hatches};
+use helpers::{run_check, run_check_with_escape_hatches};
 
 fn parse_rustfmt_ignore_fixture(source: &str) -> toml::Value {
     toml::from_str::<toml::Value>(source).expect("RS-FMT-07 test fixture rustfmt TOML should parse")

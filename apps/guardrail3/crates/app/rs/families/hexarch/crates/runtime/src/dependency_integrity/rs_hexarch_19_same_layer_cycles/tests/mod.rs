@@ -1,5 +1,5 @@
 mod helpers;
-#![allow(dead_code, unused_imports)]
+#[allow(dead_code, unused_imports)]
 mod broad_attacks;
 mod cycle_exactness;
 mod fixture_cycles;

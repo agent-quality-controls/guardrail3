@@ -19,7 +19,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "garde(skip) without comment".to_owned(),
             format!(
-                "`#[garde(skip)]` on non-exempt {} requires documentation.",
+                "`#[garde(skip)]` on non-exempt {} requires documentation. Add a `// reason:` comment explaining why validation is skipped.",
                 target_label(&info)
             ),
             Some(input.rel_path.to_owned()),

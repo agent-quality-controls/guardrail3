@@ -8,14 +8,13 @@ pub fn check(input: &ExceptionCommentInput<'_>, results: &mut Vec<CheckResult>) 
     results.push(
         CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Info,
+            Severity::Warn,
             "EXCEPTION comment inventory".to_owned(),
             format!("Config exception comment: {}", input.line_text),
             Some(input.rel_path.to_owned()),
             Some(input.line),
             false,
-        )
-        .as_inventory(),
+        ),
     );
 }
 

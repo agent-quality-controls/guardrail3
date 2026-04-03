@@ -13,7 +13,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(
             CheckResult::from_parts(
                 ID.to_owned(),
-                Severity::Info,
+                Severity::Warn,
                 if info.kind.attr_name() == "allow" {
                     "conditional cfg_attr allow".to_owned()
                 } else {
@@ -27,8 +27,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
                 Some(input.rel_path.to_owned()),
                 Some(info.line),
                 false,
-            )
-            .as_inventory(),
+            ),
         );
     }
 }

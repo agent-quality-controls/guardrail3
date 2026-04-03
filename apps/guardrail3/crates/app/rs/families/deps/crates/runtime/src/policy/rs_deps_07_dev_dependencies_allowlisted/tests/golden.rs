@@ -7,7 +7,7 @@ fn inventories_allowlisted_dev_dependency() {
     let input = dependency_input(&facts, "crates/api/Cargo.toml", "insta");
     let mut results = Vec::new();
 
-    super::helpers::check(&input, &mut results);
+    super::super::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

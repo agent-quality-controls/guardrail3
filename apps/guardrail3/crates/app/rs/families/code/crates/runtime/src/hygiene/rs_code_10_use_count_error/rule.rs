@@ -19,7 +19,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
         ID.to_owned(),
         Severity::Error,
         "too many use imports".to_owned(),
-        format!("{use_count} top-level use imports (max 20)."),
+        format!("{use_count} top-level use imports (max 20). Reduce imports by consolidating or splitting the file."),
         Some(input.rel_path.to_owned()),
         None,
         false,

@@ -1,5 +1,5 @@
 mod helpers;
-#![allow(dead_code, unused_imports)]
+#[allow(dead_code, unused_imports)]
 mod broad_attacks;
 mod non_member_targets;
 mod ownership_edges;

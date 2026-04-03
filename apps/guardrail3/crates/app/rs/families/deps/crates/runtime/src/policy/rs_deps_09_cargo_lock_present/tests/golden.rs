@@ -7,7 +7,7 @@ fn inventories_present_cargo_lock() {
     let input = lockfile_input(&facts);
     let mut results = Vec::new();
 
-    super::helpers::check(&input, &mut results);
+    super::super::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

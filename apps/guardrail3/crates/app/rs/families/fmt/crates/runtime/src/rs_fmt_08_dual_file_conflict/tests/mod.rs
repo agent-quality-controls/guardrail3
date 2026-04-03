@@ -2,7 +2,7 @@ mod helpers;
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_08_dual_file_conflict as assertions;
 use test_support::{tempdir, write_file};
 
-use super::run_check;
+use helpers::run_check;
 
 #[test]
 fn reports_dual_root_config_conflicts() {
@@ -46,7 +46,7 @@ fn discovers_only_root_dual_file_conflicts_from_family_walk() {
     write_file(root, "nested/rustfmt.toml", "max_width = 120\n");
     write_file(root, "nested/.rustfmt.toml", "max_width = 120\n");
 
-    let results = super::run_family_check(root);
+    let results = helpers::run_family_check(root);
 
     assertions::assert_findings(
         &results,
