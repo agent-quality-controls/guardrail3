@@ -1,0 +1,25 @@
+use guardrail3_app_rs_family_libarch as _;
+
+mod common;
+
+#[cfg(feature = "checks")]
+pub mod rs_libarch_04_exact_layered_crate_set;
+#[cfg(feature = "checks")]
+pub mod rs_libarch_07_core_no_api_dep;
+#[cfg(feature = "checks")]
+pub mod rs_libarch_08_core_no_infra_dep;
+#[cfg(feature = "checks")]
+pub mod rs_libarch_09_api_no_infra_dep;
+#[cfg(feature = "checks")]
+pub mod rs_libarch_10_infra_not_public_surface;
+#[cfg(feature = "checks")]
+pub mod rs_libarch_11_root_facade_exports_api;
+
+#[cfg(feature = "checks")]
+pub use rs_libarch_07_core_no_api_dep as rs_libarch_07_core_must_not_depend_on_api;
+#[cfg(feature = "checks")]
+pub use rs_libarch_08_core_no_infra_dep as rs_libarch_08_core_must_not_depend_on_infra;
+#[cfg(feature = "checks")]
+pub use rs_libarch_09_api_no_infra_dep as rs_libarch_09_api_must_not_depend_on_infra;
+#[cfg(feature = "checks")]
+pub use rs_libarch_11_root_facade_exports_api as rs_libarch_11_root_facade_exports_from_api;

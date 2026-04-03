@@ -12,7 +12,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "too many generic parameters".to_owned(),
             format!(
-                "{} `{}` has {} type/const generic parameters (cap 6; lifetimes do not count).",
+                "{} `{}` has {} type/const generic parameters (cap 6; lifetimes do not count). Reduce the number of generic parameters or introduce a trait to abstract them.",
                 info.item_kind, info.item_name, info.type_const_param_count
             ),
             Some(input.rel_path.to_owned()),

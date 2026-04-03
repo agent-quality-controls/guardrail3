@@ -33,13 +33,13 @@ pub(crate) fn check(node: &CrateNode, results: &mut Vec<CheckResult>) {
     }
     if node.sibling_dir_count > MAX_SIBLING_DIRS {
         reasons.push(format!(
-            "{} top-level directories under src/ (max {})",
+            "{} sibling directories (max {})",
             node.sibling_dir_count, MAX_SIBLING_DIRS
         ));
     }
     if node.sibling_rs_file_count > MAX_SIBLING_RS_FILES {
         reasons.push(format!(
-            "{} top-level .rs files under src/ (max {})",
+            "{} sibling .rs files (max {})",
             node.sibling_rs_file_count, MAX_SIBLING_RS_FILES
         ));
     }
