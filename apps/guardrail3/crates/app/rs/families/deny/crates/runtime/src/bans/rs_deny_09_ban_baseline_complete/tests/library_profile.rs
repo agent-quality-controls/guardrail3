@@ -1,13 +1,13 @@
 use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_09_ban_baseline_complete as assertions;
 
-use super::super::ConfigDenyInput;
+use crate::inputs::ConfigDenyInput;
 use super::super::check;
-use super::super::{build_fixture_deny_toml, config_facts_with_profile, remove_deny_ban};
+use super::helpers::{build_fixture_deny_toml, config_facts_with_profile, remove_deny_ban};
 
 #[test]
 fn emits_no_result_for_generated_library_ban_baseline() {
     let results =
-        super::super::run_check_with_profile(&build_fixture_deny_toml("library"), "library");
+        super::helpers::run_check_with_profile(&build_fixture_deny_toml("library"), "library");
 
     assert!(
         results.is_empty(),

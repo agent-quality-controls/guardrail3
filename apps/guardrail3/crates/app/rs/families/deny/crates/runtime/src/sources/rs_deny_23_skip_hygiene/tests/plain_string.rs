@@ -6,7 +6,7 @@ fn skip_toml(skip: &str) -> String {
 
 #[test]
 fn errors_for_plain_string_skip_entries_without_reasons() {
-    let results = super::super::run_check(&skip_toml(r#"["plain-crate"]"#));
+    let results = super::helpers::run_check(&skip_toml(r#"["plain-crate"]"#));
 
     assertions::assert_findings(
         &results,

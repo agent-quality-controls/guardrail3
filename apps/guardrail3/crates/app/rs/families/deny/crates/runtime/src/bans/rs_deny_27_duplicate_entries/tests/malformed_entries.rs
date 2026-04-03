@@ -1,4 +1,4 @@
-use super::super::{add_skip_entry, build_fixture_deny_toml, set_advisory_ignores};
+use super::helpers::{add_skip_entry, build_fixture_deny_toml, set_advisory_ignores};
 
 #[test]
 fn ignores_malformed_skip_and_ignore_entries_for_duplicate_detection() {
@@ -17,7 +17,7 @@ fn ignores_malformed_skip_and_ignore_entries_for_duplicate_detection() {
         ],
     );
 
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(
         results.is_empty(),
         "malformed skip/ignore entries should not create fake duplicate warnings: {results:#?}"

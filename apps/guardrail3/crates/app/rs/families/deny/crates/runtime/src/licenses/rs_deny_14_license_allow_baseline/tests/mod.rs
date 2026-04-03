@@ -1,3 +1,4 @@
+mod helpers;
 mod extra_license;
 mod fail_closed;
 mod golden;

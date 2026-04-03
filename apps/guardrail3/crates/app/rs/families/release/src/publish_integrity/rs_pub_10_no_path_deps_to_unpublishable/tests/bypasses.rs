@@ -1,9 +1,9 @@
 use guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_10_no_path_deps_to_unpublishable as assertions;
 
-use super::super::check;
-use super::super::dependency_edges;
-use super::super::run_tree as run_family;
-use super::super::{StubToolChecker, dir_entry, edge_facts, edge_input, project_tree, temp_root};
+use super::helpers::check;
+use super::helpers::dependency_edges;
+use super::helpers::run_tree as run_family;
+use super::helpers::{StubToolChecker, dir_entry, edge_facts, edge_input, project_tree, temp_root};
 
 #[test]
 fn does_not_error_on_path_dep_to_publishable_crate() {

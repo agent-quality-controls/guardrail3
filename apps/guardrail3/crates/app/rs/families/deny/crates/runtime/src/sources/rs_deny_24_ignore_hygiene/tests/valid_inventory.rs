@@ -6,7 +6,7 @@ fn ignore_toml(ignore: &str) -> String {
 
 #[test]
 fn warns_for_documented_ignore_entries() {
-    let results = super::super::run_check(&ignore_toml(
+    let results = super::helpers::run_check(&ignore_toml(
         r#"[{ id = "RUSTSEC-2026-0001", reason = "good enough reason text" }]"#,
     ));
     assert!(!results.is_empty());

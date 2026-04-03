@@ -1,8 +1,8 @@
 use guardrail3_app_rs_family_deny_assertions::advisories::rs_deny_07_graph_all_features as assertions;
 
-use super::super::ConfigDenyInput;
+use crate::inputs::ConfigDenyInput;
 use super::super::check;
-use super::super::{build_fixture_deny_toml, config_facts, remove_section_key, set_section_bool};
+use super::helpers::{build_fixture_deny_toml, config_facts, remove_section_key, set_section_bool};
 
 #[test]
 fn errors_when_all_features_is_missing_or_false() {

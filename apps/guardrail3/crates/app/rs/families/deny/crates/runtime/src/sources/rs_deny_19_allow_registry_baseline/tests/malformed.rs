@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_19_allow_registry_baseline as assertions;
 
-use super::super::build_fixture_deny_toml;
+use super::helpers::build_fixture_deny_toml;
 
 #[test]
 fn errors_when_allow_registry_container_is_not_an_array() {
-    let results = super::super::run_check(&build_fixture_deny_toml("service").replace(
+    let results = super::helpers::run_check(&build_fixture_deny_toml("service").replace(
         "allow-registry = [\"sparse+https://index.crates.io/\"]",
         "allow-registry = \"sparse+https://index.crates.io/\"",
     ));
@@ -23,7 +23,7 @@ fn errors_when_allow_registry_container_is_not_an_array() {
 
 #[test]
 fn errors_when_allow_registry_contains_non_string_entries_even_if_crates_io_is_present() {
-    let results = super::super::run_check(&build_fixture_deny_toml("service").replace(
+    let results = super::helpers::run_check(&build_fixture_deny_toml("service").replace(
         "allow-registry = [\"sparse+https://index.crates.io/\"]",
         "allow-registry = [\"sparse+https://index.crates.io/\", 123]",
     ));

@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::licenses::rs_deny_17_license_exceptions_inventory as assertions;
 
-use super::super::{build_fixture_deny_toml, set_license_exceptions};
+use super::helpers::{build_fixture_deny_toml, set_license_exceptions};
 
 #[test]
 fn local_license_exception_only_warns_for_the_owned_local_root() {
-    let results = super::super::run_check(&set_license_exceptions(
+    let results = super::helpers::run_check(&set_license_exceptions(
         &build_fixture_deny_toml("service"),
         vec![toml::Value::Table(toml::map::Map::from_iter([
             (

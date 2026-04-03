@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_11_interdependent_version_consistency as assertions;
 
-use super::super::{check, dependency_edges, edge_facts, edge_input};
+use super::helpers::{check, dependency_edges, edge_facts, edge_input};
 
 #[test]
 fn errors_on_inherited_workspace_path_dep_with_incompatible_version() {

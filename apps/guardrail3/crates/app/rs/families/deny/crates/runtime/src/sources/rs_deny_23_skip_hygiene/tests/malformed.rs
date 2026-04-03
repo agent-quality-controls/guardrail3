@@ -6,7 +6,7 @@ fn skip_toml(skip: &str) -> String {
 
 #[test]
 fn errors_for_malformed_missing_reason_and_non_string_reason_entries() {
-    let results = super::super::run_check(&skip_toml(
+    let results = super::helpers::run_check(&skip_toml(
         r#"[{ reason = "good enough reason text" }, { crate = "serde@1.0.0" }, { crate = "regex@1.0.0", reason = 7 }]"#,
     ));
     assert!(!results.is_empty());

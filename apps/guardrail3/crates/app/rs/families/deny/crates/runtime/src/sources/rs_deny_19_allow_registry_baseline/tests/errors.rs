@@ -1,32 +1,32 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_19_allow_registry_baseline as assertions;
 
-use super::super::build_fixture_deny_toml;
+use super::helpers::build_fixture_deny_toml;
 
 #[test]
 fn errors_when_sources_section_is_missing_or_registry_policy_is_not_exact() {
     let mut results = Vec::new();
-    results.extend(super::super::run_check(
+    results.extend(super::helpers::run_check(
         &build_fixture_deny_toml("service").replace("[sources]\n", "[removed]\n"),
     ));
-    results.extend(super::super::run_check(
+    results.extend(super::helpers::run_check(
         &build_fixture_deny_toml("service").replace(
             "allow-registry = [\"sparse+https://index.crates.io/\"]",
             "allow-registry = []",
         ),
     ));
-    results.extend(super::super::run_check(
+    results.extend(super::helpers::run_check(
         &build_fixture_deny_toml("service").replace(
             "allow-registry = [\"sparse+https://index.crates.io/\"]",
             "allow-registry = [\"sparse+https://index.crates.io/\", \"https://example.com/index\"]",
         ),
     ));
-    results.extend(super::super::run_check(
+    results.extend(super::helpers::run_check(
         &build_fixture_deny_toml("service").replace(
             "allow-registry = [\"sparse+https://index.crates.io/\"]",
             "allow-registry = [\"https://github.com/rust-lang/crates.io-index\"]",
         ),
     ));
-    results.extend(super::super::run_check(
+    results.extend(super::helpers::run_check(
         &build_fixture_deny_toml("service").replace(
             "allow-registry = [\"sparse+https://index.crates.io/\"]",
             "allow-registry = [\"sparse+https://index.crates.io/\", \"https://github.com/rust-lang/crates.io-index\"]",

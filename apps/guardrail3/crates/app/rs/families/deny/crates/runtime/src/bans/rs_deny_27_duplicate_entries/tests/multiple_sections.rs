@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_27_duplicate_entries as assertions;
 
-use super::super::{
+use super::helpers::{
     add_deny_ban_entry, add_skip_entry, build_fixture_deny_toml, set_advisory_ignores,
     set_feature_entries,
 };
@@ -79,7 +79,7 @@ fn warns_once_per_duplicated_entry_family() {
         &with_ignores,
         vec![feature_entry("tokio"), feature_entry("tokio")],
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(

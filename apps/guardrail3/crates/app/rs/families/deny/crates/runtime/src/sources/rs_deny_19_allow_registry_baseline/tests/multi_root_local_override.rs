@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_19_allow_registry_baseline as assertions;
 
-use super::super::{build_fixture_deny_toml, set_allow_registries};
+use super::helpers::{build_fixture_deny_toml, set_allow_registries};
 
 #[test]
 fn local_registry_drift_only_errors_for_the_owned_local_root() {
-    let results = super::super::run_check(&set_allow_registries(
+    let results = super::helpers::run_check(&set_allow_registries(
         &build_fixture_deny_toml("service"),
         &["https://github.com/rust-lang/crates.io-index"],
     ));

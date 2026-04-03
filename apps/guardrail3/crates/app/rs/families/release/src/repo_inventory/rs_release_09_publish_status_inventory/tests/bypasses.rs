@@ -1,5 +1,5 @@
-use super::super::check;
-use super::super::{repo_facts, repo_input};
+use super::helpers::check;
+use super::helpers::{repo_facts, repo_input};
 
 #[test]
 fn stays_quiet_when_publish_status_is_absent() {

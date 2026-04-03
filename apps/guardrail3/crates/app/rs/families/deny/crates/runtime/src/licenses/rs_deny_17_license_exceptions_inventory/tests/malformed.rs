@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::licenses::rs_deny_17_license_exceptions_inventory as assertions;
 
-use super::super::{build_fixture_deny_toml, set_license_exceptions};
+use super::helpers::{build_fixture_deny_toml, set_license_exceptions};
 
 fn exception_entry(fields: impl IntoIterator<Item = (&'static str, toml::Value)>) -> toml::Value {
     toml::Value::Table(toml::map::Map::from_iter(
@@ -70,7 +70,7 @@ fn errors_for_malformed_missing_reason_and_non_string_reason_exception_entries()
             ]),
         ],
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
 
     assertions::assert_findings(
         &results,

@@ -1,9 +1,9 @@
 use guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_11_interdependent_version_consistency as assertions;
 
-use super::super::check;
-use super::super::run_tree as run_family;
-use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
-use super::super::{edge_facts, edge_input};
+use super::helpers::check;
+use super::helpers::run_tree as run_family;
+use super::helpers::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::helpers::{edge_facts, edge_input};
 
 #[test]
 fn does_not_error_when_local_publishable_version_is_compatible() {

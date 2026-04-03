@@ -1,8 +1,8 @@
 use guardrail3_app_rs_family_deny_assertions::licenses::rs_deny_15_confidence_threshold as assertions;
 
-use super::super::ConfigDenyInput;
+use crate::inputs::ConfigDenyInput;
 use super::super::check;
-use super::super::{
+use super::helpers::{
     build_fixture_deny_toml, config_facts, remove_section_key, set_license_confidence_threshold,
 };
 

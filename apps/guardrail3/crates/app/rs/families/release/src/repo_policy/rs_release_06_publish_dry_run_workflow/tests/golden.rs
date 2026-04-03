@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::repo_policy::rs_release_06_publish_dry_run_workflow as assertions;
 
-use super::super::check;
-use super::super::{repo_facts, repo_input, workflow_from_yaml};
+use super::helpers::check;
+use super::helpers::{repo_facts, repo_input, workflow_from_yaml};
 
 #[test]
 fn inventories_real_publish_dry_run_command_from_workflow_yaml() {

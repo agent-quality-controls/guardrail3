@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_28_unknown_keys as assertions;
 
-use super::super::build_fixture_deny_toml;
+use super::helpers::build_fixture_deny_toml;
 
 #[test]
 fn warns_on_unknown_top_level_and_core_section_keys() {
-    let results = super::super::run_check(&build_fixture_deny_toml("service").replace(
+    let results = super::helpers::run_check(&build_fixture_deny_toml("service").replace(
         "[graph]\n",
         "extra-root = true\n[graph]\nextra-flag = true\n",
     ));

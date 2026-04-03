@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_29_ignore_accumulation as assertions;
 
-use super::super::ConfigDenyInput;
-use super::super::config_facts;
+use crate::inputs::ConfigDenyInput;
+use super::helpers::config_facts;
 
 #[test]
 fn counts_entries_by_container_length_even_when_some_ignore_entries_are_malformed() {

@@ -1,6 +1,6 @@
-use super::super::check;
-use super::super::run_tree as run_family;
-use super::super::{StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root};
+use super::helpers::check;
+use super::helpers::run_tree as run_family;
+use super::helpers::{StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root};
 use guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_13_docs_rs_metadata as assertions;
 
 #[test]

@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::advisories::rs_deny_05_advisories_baseline as assertions;
 
-use super::super::{build_fixture_deny_toml, set_section_string};
+use super::helpers::{build_fixture_deny_toml, set_section_string};
 
 #[test]
 fn errors_when_advisories_baseline_is_weakened() {
@@ -15,7 +15,7 @@ fn errors_when_advisories_baseline_is_weakened() {
         "yanked",
         "allow",
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(

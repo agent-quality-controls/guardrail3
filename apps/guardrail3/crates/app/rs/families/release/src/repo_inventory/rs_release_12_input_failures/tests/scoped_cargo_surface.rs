@@ -1,4 +1,4 @@
-use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::helpers::{StubToolChecker, dir_entry, project_tree, temp_root};
 
 #[test]
 fn scoped_release_run_ignores_cargo_manifests_outside_routed_workspace_surface() {

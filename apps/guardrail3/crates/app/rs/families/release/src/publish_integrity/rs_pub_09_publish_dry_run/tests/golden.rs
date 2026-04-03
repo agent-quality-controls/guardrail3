@@ -1,7 +1,7 @@
-use super::super::check;
-use super::super::copy_fixture;
-use super::super::run_family;
-use super::super::{crate_facts, crate_input};
+use super::helpers::check;
+use super::helpers::copy_fixture;
+use super::helpers::run_family;
+use super::helpers::{crate_facts, crate_input};
 
 #[test]
 fn inventories_direct_publish_dry_run_success() {

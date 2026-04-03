@@ -1,9 +1,9 @@
 use guardrail3_app_rs_family_release_assertions::repo_policy::rs_release_01_license_file as assertions;
 
-use super::super::check;
-use super::super::run_tree as run_family;
-use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
-use super::super::{repo_facts, repo_input};
+use super::helpers::check;
+use super::helpers::run_tree as run_family;
+use super::helpers::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::helpers::{repo_facts, repo_input};
 
 #[test]
 fn errors_when_no_license_material_exists() {

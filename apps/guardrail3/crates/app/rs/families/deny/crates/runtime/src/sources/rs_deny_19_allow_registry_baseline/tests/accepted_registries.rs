@@ -1,6 +1,6 @@
-use super::super::ConfigDenyInput;
+use crate::inputs::ConfigDenyInput;
 use super::super::check;
-use super::super::{build_fixture_deny_toml, config_facts};
+use super::helpers::{build_fixture_deny_toml, config_facts};
 
 #[test]
 fn accepts_only_the_canonical_sparse_crates_io_form() {

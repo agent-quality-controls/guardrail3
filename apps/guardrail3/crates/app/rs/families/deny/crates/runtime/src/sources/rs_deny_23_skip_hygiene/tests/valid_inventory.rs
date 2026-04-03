@@ -6,7 +6,7 @@ fn skip_toml(skip: &str) -> String {
 
 #[test]
 fn warns_for_documented_skip_entries() {
-    let results = super::super::run_check(&skip_toml(
+    let results = super::helpers::run_check(&skip_toml(
         r#"[{ crate = "serde@1.0.0", reason = "good enough reason text" }, { name = "windows-sys", version = "0.60.2", reason = "good enough reason text" }]"#,
     ));
     assert!(!results.is_empty());

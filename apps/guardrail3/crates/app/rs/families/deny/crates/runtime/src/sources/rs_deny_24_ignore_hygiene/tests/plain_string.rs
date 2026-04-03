@@ -6,7 +6,7 @@ fn ignore_toml(ignore: &str) -> String {
 
 #[test]
 fn errors_for_plain_string_ignore_entries_without_reasons() {
-    let results = super::super::run_check(&ignore_toml(r#"["RUSTSEC-2026-0000"]"#));
+    let results = super::helpers::run_check(&ignore_toml(r#"["RUSTSEC-2026-0000"]"#));
 
     assertions::assert_findings(
         &results,

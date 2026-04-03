@@ -1,5 +1,5 @@
-use super::super::run_tree_with_validation_scope;
-use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::helpers::run_tree_with_validation_scope;
+use super::helpers::{StubToolChecker, dir_entry, project_tree, temp_root};
 
 #[test]
 fn subtree_scope_does_not_treat_publishable_sibling_path_dep_as_internal() {

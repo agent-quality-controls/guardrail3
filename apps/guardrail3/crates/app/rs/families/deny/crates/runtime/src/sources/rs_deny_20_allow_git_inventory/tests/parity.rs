@@ -1,4 +1,4 @@
-use super::super::build_fixture_deny_toml;
+use super::helpers::build_fixture_deny_toml;
 
 #[test]
 fn generated_sources_baseline_keeps_allow_git_empty() {

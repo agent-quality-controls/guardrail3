@@ -1,5 +1,5 @@
-use super::super::build_fixture_deny_toml;
-use super::super::parse_feature_entries_for_test;
+use super::helpers::build_fixture_deny_toml;
+use super::helpers::parse_feature_entries_for_test;
 
 #[test]
 fn generated_feature_ban_baseline_contains_only_the_canonical_tokio_entry() {
