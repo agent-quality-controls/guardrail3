@@ -3,7 +3,7 @@ use guardrail3_app_rs_family_topology_assertions::rs_topology_02_no_misplaced_ro
 
 #[test]
 fn app_and_package_roots_do_not_trigger_misplaced_root_reporting() {
-    let config = "[rust.checks]\nhexarch = true\nlibarch = true\n";
+    let config = "[rust.checks]\nhexarch = true\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["apps", "packages"], &["guardrail3.toml"])),
@@ -30,7 +30,7 @@ fn app_and_package_roots_do_not_trigger_misplaced_root_reporting() {
 
 #[test]
 fn excluded_fixture_and_target_roots_do_not_trigger_misplaced_reporting() {
-    let config = "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n";
+    let config = "[rust.checks]\ntopology = true\nhexarch = true\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["tests", "target"], &["guardrail3.toml"])),
@@ -59,7 +59,7 @@ fn excluded_fixture_and_target_roots_do_not_trigger_misplaced_reporting() {
 
 #[test]
 fn declared_auxiliary_roots_do_not_trigger_misplaced_reporting() {
-    let config = "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n";
+    let config = "[rust.checks]\ntopology = true\nhexarch = true\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["fuzz"], &["guardrail3.toml"])),
@@ -79,7 +79,7 @@ fn declared_auxiliary_roots_do_not_trigger_misplaced_reporting() {
 
 #[test]
 fn excluded_validation_root_does_not_treat_its_own_cargo_manifest_as_live_topology() {
-    let config = "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n";
+    let config = "[rust.checks]\ntopology = true\nhexarch = true\n";
     let results = check_results(&tree_at(
         "/tmp/repo/tests/fixtures/rust-app",
         &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
@@ -94,7 +94,7 @@ fn excluded_validation_root_does_not_treat_its_own_cargo_manifest_as_live_topolo
 
 #[test]
 fn app_scoped_validation_root_still_classifies_nested_crates_as_app_owned() {
-    let config = "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n";
+    let config = "[rust.checks]\ntopology = true\nhexarch = true\n";
     let results = check_results(&tree_at(
         "/tmp/repo/apps/backend",
         &[

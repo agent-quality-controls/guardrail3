@@ -1,0 +1,26 @@
+use guardrail3_domain_report::CheckResult;
+use crate::source_facts::SourceCrateFacts;
+pub(super) fn run_source_case(
+    crate_name: &str,
+    rel_dir: &str,
+    pub_trait_count: usize,
+    source_error_rel_path: Option<&str>,
+    source_error_message: Option<&str>,
+) -> Vec<CheckResult> {
+    let source = SourceCrateFacts {
+        crate_name: crate_name.to_owned(),
+        rel_dir: rel_dir.to_owned(),
+        layer: Some(crate::dependency_facts::Layer::Adapters),
+        pub_trait_count,
+        public_free_fn_count: 0,
+        public_inherent_method_count: 0,
+        source_error_rel_path: source_error_rel_path.map(|value| value.to_owned()),
+        source_error_message: source_error_message.map(|value| value.to_owned()),
+    };
+    let mut results = Vec::new();
+    super::super::check(&crate::inputs::SourceCrateHexarchInput::new(&source), &mut results);
+    results
+}
+pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_tree(&test_support::walk(root))
+}
