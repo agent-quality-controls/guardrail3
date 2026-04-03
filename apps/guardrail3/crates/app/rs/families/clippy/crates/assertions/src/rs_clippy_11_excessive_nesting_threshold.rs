@@ -17,7 +17,7 @@ pub fn assert_missing_value(results: &[CheckResult]) {
     assert_eq!(result.title(), "excessive-nesting-threshold missing");
     assert_eq!(
         result.message(),
-        "Expected excessive-nesting-threshold = 4."
+        "Add `excessive-nesting-threshold = 4` to clippy.toml."
     );
 }
 
@@ -32,7 +32,7 @@ pub fn assert_wrong_value(results: &[CheckResult]) {
     let result = single_result(results);
     assert_eq!(result.severity(), Severity::Error);
     assert_eq!(result.title(), "excessive-nesting-threshold wrong value");
-    assert_eq!(result.message(), "Expected 4, got 5.");
+    assert_eq!(result.message(), "Expected 4, got 5. Set `excessive-nesting-threshold = 4` in clippy.toml.");
 }
 
 fn single_result(results: &[CheckResult]) -> &CheckResult {

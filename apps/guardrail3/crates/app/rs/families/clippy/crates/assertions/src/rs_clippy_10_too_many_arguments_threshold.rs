@@ -17,7 +17,7 @@ pub fn assert_missing_value(results: &[CheckResult]) {
     assert_eq!(result.title(), "too-many-arguments-threshold missing");
     assert_eq!(
         result.message(),
-        "Expected too-many-arguments-threshold = 7."
+        "Add `too-many-arguments-threshold = 7` to clippy.toml."
     );
 }
 
@@ -32,7 +32,7 @@ pub fn assert_wrong_value(results: &[CheckResult]) {
     let result = single_result(results);
     assert_eq!(result.severity(), Severity::Error);
     assert_eq!(result.title(), "too-many-arguments-threshold wrong value");
-    assert_eq!(result.message(), "Expected 7, got 8.");
+    assert_eq!(result.message(), "Expected 7, got 8. Set `too-many-arguments-threshold = 7` in clippy.toml.");
 }
 
 fn single_result(results: &[CheckResult]) -> &CheckResult {

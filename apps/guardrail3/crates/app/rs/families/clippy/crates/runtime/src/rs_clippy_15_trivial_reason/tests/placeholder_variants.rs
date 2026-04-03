@@ -25,12 +25,12 @@ disallowed-macros = [
     assertions::assert_weak_reason_messages(
         &results,
         &[
-            "`macro::dots` in `disallowed-macros` has a weak `reason`: reason must not be a placeholder.",
-            "`method::empty` in `disallowed-methods` has a weak `reason`: reason must not be empty.",
-            "`method::fixme` in `disallowed-methods` has a weak `reason`: reason must not be a placeholder.",
-            "`method::space` in `disallowed-methods` has a weak `reason`: reason must not be empty.",
-            "`type::later` in `disallowed-types` has a weak `reason`: reason must not be a placeholder.",
-            "`type::tbd` in `disallowed-types` has a weak `reason`: reason must not be a placeholder.",
+            "`macro::dots` in `disallowed-macros` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
+            "`method::empty` in `disallowed-methods` has a weak `reason`: reason must not be empty. Provide a more specific reason.",
+            "`method::fixme` in `disallowed-methods` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
+            "`method::space` in `disallowed-methods` has a weak `reason`: reason must not be empty. Provide a more specific reason.",
+            "`type::later` in `disallowed-types` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
+            "`type::tbd` in `disallowed-types` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
         ],
         "clippy.toml",
     );

@@ -17,7 +17,7 @@ pub fn assert_missing_value(results: &[CheckResult]) {
     assert_eq!(result.title(), "cognitive-complexity-threshold missing");
     assert_eq!(
         result.message(),
-        "Expected cognitive-complexity-threshold = 15."
+        "Add `cognitive-complexity-threshold = 15` to clippy.toml."
     );
 }
 
@@ -32,7 +32,7 @@ pub fn assert_wrong_value(results: &[CheckResult]) {
     let result = single_result(results);
     assert_eq!(result.severity(), Severity::Error);
     assert_eq!(result.title(), "cognitive-complexity-threshold wrong value");
-    assert_eq!(result.message(), "Expected 15, got 16.");
+    assert_eq!(result.message(), "Expected 15, got 16. Set `cognitive-complexity-threshold = 15` in clippy.toml.");
 }
 
 fn single_result(results: &[CheckResult]) -> &CheckResult {

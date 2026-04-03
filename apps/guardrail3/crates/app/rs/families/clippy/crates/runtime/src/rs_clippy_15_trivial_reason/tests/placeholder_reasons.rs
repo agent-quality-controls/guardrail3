@@ -22,9 +22,9 @@ disallowed-macros = [
     assertions::assert_weak_reason_messages(
         &results,
         &[
-            "`std::println` in `disallowed-macros` has a weak `reason`: reason must be at least 12 characters; found 5.",
-            "`std::collections::HashMap` in `disallowed-types` has a weak `reason`: reason must not be a placeholder.",
-            "`std::env::var` in `disallowed-methods` has a weak `reason`: reason must not be a placeholder.",
+            "`std::println` in `disallowed-macros` has a weak `reason`: reason must be at least 12 characters; found 5. Provide a more specific reason.",
+            "`std::collections::HashMap` in `disallowed-types` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
+            "`std::env::var` in `disallowed-methods` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
         ],
         "clippy.toml",
     );

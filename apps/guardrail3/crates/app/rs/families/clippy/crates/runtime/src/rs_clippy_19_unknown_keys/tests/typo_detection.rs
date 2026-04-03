@@ -12,8 +12,8 @@ fn warns_for_managed_key_typos_but_not_unrelated_unknown_keys() {
     assertions::assert_messages(
         &results,
         &[
-            "Top-level key `allow-print-in-tets` looks like a typo of a guardrail-managed clippy key.",
-            "Top-level key `disalowed-methods` looks like a typo of a guardrail-managed clippy key.",
+            "Top-level key `allow-print-in-tets` looks like a typo of a guardrail-managed clippy key. Check the spelling and correct it.",
+            "Top-level key `disalowed-methods` looks like a typo of a guardrail-managed clippy key. Check the spelling and correct it.",
         ],
         "clippy.toml",
     );

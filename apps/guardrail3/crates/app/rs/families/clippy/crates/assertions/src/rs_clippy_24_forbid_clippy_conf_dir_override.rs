@@ -26,7 +26,7 @@ pub fn assert_override_error(results: &[CheckResult], rel_path: &str) {
     assert_eq!(
         result.message(),
         format!(
-            "`{rel_path}` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model."
+            "`{rel_path}` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model. Remove the `CLIPPY_CONF_DIR` setting from `{rel_path}`."
         )
     );
     assert!(!result.inventory());

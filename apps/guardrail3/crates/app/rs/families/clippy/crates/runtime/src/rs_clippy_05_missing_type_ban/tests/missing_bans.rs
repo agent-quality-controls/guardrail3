@@ -15,8 +15,8 @@ fn errors_for_each_missing_required_service_type_ban() {
     assertions::assert_missing_messages(
         &results,
         &[
-            "`std::collections::HashMap` is not present in `disallowed-types`.",
-            "`std::any::Any` is not present in `disallowed-types`.",
+            "`std::collections::HashMap` is not present in `disallowed-types`. Add it to `disallowed-types` in clippy.toml.",
+            "`std::any::Any` is not present in `disallowed-types`. Add it to `disallowed-types` in clippy.toml.",
         ],
     );
 }

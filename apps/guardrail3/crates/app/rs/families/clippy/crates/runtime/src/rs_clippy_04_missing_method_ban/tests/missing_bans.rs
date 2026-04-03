@@ -15,8 +15,8 @@ fn errors_for_each_missing_required_method_ban() {
     assertions::assert_missing_messages(
         &results,
         &[
-            "`std::env::var` is not present in `disallowed-methods`.",
-            "`std::process::abort` is not present in `disallowed-methods`.",
+            "`std::env::var` is not present in `disallowed-methods`. Add it to `disallowed-methods` in clippy.toml.",
+            "`std::process::abort` is not present in `disallowed-methods`. Add it to `disallowed-methods` in clippy.toml.",
         ],
     );
 }

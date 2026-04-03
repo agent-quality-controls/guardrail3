@@ -36,7 +36,7 @@ fn workspace_local_app_root_uses_rust_apps_profile_policy() {
     let results = run_for_tests(&tree, "apps/libsite/clippy.toml");
     assertions::assert_missing_messages(
         &results,
-        &["Library profile must ban `std::sync::OnceLock` in `disallowed-types`."],
+        &["Library profile must ban `std::sync::OnceLock` in `disallowed-types`. Add it to `disallowed-types` in clippy.toml."],
         "apps/libsite/clippy.toml",
     );
 }
