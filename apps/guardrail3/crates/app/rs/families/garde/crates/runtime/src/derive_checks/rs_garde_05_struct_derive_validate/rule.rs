@@ -15,7 +15,7 @@ pub fn check(input: &DerivedBoundaryTypeInput<'_>, results: &mut Vec<CheckResult
         Severity::Error,
         format!("struct `{}` missing Validate derive", input.target.name),
         format!(
-            "Struct `{}` derives {} but does not derive `Validate`. Non-primitive input boundary structs must derive garde validation.",
+            "Struct `{}` derives {} but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this struct.",
             input.target.name,
             input.target.boundary_macros.join(", ")
         ),

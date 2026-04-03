@@ -6,7 +6,7 @@ fn ignores_cfg_test_helper_functions() {
     let root = temp_root("rs-garde-14-cfg-test");
     let source_rel = "src/load_config.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -53,7 +53,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");

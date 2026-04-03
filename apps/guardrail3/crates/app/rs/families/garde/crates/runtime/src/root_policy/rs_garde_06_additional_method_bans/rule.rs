@@ -12,7 +12,7 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Warn,
             "cannot verify additional garde method bans".to_owned(),
             input.root.clippy_parse_error.clone().unwrap_or_else(|| {
-                "No covering clippy configuration found for additional garde method-ban validation.".to_owned()
+                "No clippy.toml found. Create one with a `disallowed-methods` section.".to_owned()
             }),
             input.root.clippy_rel_path.clone(),
             None,
@@ -42,7 +42,7 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Warn,
             "missing additional garde method bans".to_owned(),
             format!(
-                "Missing additional garde deserialization bans from `disallowed-methods`: {}.",
+                "Missing additional deserialization bans from `disallowed-methods`: {}. Add these entries to `disallowed-methods` in clippy.toml.",
                 missing.join(", ")
             ),
             input.root.clippy_rel_path.clone(),

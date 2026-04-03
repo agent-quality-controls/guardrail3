@@ -6,7 +6,7 @@ fn local_missing_dive_only_errors_for_owned_root() {
     let root = temp_root("rs-garde-12-multi-root");
     let local_rel = "vendor/lib/src/input.rs";
     let shared_rel = "src/input.rs";
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     let local_abs = root.join(local_rel);
     let shared_abs = root.join(shared_rel);
     std::fs::create_dir_all(
@@ -102,7 +102,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);
     assertions::assert_rule_results(

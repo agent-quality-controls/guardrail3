@@ -12,7 +12,7 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Warn,
             "cannot verify garde extractor bans".to_owned(),
             input.root.clippy_parse_error.clone().unwrap_or_else(|| {
-                "No covering clippy configuration found for garde extractor-ban validation."
+                "No clippy.toml found. Create one with a `disallowed-types` section."
                     .to_owned()
             }),
             input.root.clippy_rel_path.clone(),
@@ -44,7 +44,7 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Warn,
             "missing garde extractor bans".to_owned(),
             format!(
-                "Missing garde extractor bans from `disallowed-types`: {}.",
+                "Missing extractor type bans from `disallowed-types`: {}. Add these entries to `disallowed-types` in clippy.toml.",
                 missing.join(", ")
             ),
             input.root.clippy_rel_path.clone(),

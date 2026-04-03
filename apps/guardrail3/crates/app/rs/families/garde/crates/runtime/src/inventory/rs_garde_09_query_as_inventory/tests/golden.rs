@@ -4,7 +4,7 @@ use test_support::{dir_entry, project_tree, temp_root};
 #[test]
 fn inventories_query_as_usage() {
     let root = temp_root("rs-garde-09-golden");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
 
     let tree = project_tree(
         vec![
@@ -60,7 +60,7 @@ fn load() {
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(
         findings.len(),
@@ -87,7 +87,7 @@ fn load() {
 #[test]
 fn inventories_query_as_unchecked_usage() {
     let root = temp_root("rs-garde-09-unchecked");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
 
     let tree = project_tree(
         vec![
@@ -143,7 +143,7 @@ fn load() {
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(
         findings.len(),
@@ -170,7 +170,7 @@ fn load() {
 #[test]
 fn inventories_module_aliased_query_as_usage() {
     let root = temp_root("rs-garde-09-module-aliased");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
 
     let tree = project_tree(
         vec![
@@ -218,7 +218,7 @@ fn load() {
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(
         findings.len(),

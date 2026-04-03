@@ -6,7 +6,7 @@ fn skips_validated_struct_boundary_types() {
     let root = temp_root("rs-garde-05-false-pos");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -50,7 +50,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let _ = assertions::findings(&results);
     assertions::assert_rule_quiet(&results);
 
@@ -62,7 +62,7 @@ fn ignores_non_boundary_derive_with_deserialize_suffix() {
     let root = temp_root("rs-garde-05-fake-deserialize");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -103,7 +103,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let _ = assertions::findings(&results);
     assertions::assert_rule_quiet(&results);
 
@@ -115,7 +115,7 @@ fn skips_struct_with_aliased_validate_derive() {
     let root = temp_root("rs-garde-05-aliased-validate");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -159,7 +159,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let _ = assertions::findings(&results);
     assertions::assert_rule_quiet(&results);
 

@@ -15,7 +15,7 @@ fn ignores_workspace_when_garde_missing() {
         ],
         root.clone(),
     );
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert!(
         findings.is_empty(),

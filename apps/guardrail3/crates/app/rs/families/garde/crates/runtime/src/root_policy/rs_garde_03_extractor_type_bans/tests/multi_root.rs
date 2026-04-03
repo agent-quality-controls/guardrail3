@@ -4,9 +4,9 @@ use test_support::{dir_entry, project_tree, temp_root};
 #[test]
 fn local_missing_extractor_ban_only_warns_for_owned_root() {
     let root = temp_root("multi-garde-03");
-    let root_clippy = super::super::canonical_clippy_toml();
-    let local_clippy = super::super::remove_clippy_ban_path(
-        &super::super::canonical_clippy_toml(),
+    let root_clippy = super::helpers::canonical_clippy_toml();
+    let local_clippy = super::helpers::remove_clippy_ban_path(
+        &super::helpers::canonical_clippy_toml(),
         "disallowed-types",
         "axum::extract::Multipart",
     );
@@ -31,7 +31,7 @@ fn local_missing_extractor_ban_only_warns_for_owned_root() {
         ],
         root.clone(),
     );
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(
         findings.len(),

@@ -4,7 +4,7 @@ use test_support::{dir_entry, project_tree, temp_root};
 #[test]
 fn skips_query_as_inventory_when_garde_missing_for_root() {
     let root = temp_root("rs-garde-09-gating");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
 
     let tree = project_tree(
         vec![
@@ -30,7 +30,7 @@ fn load() {
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert!(findings.is_empty());
     assertions::assert_rule_quiet(&results);

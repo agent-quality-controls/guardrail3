@@ -5,7 +5,7 @@ use test_support::{dir_entry, project_tree, temp_root};
 fn skips_primitive_only_struct_boundary_without_validate() {
     let root = temp_root("rs-garde-05-primitive-only");
     let source_abs = root.join("src/input.rs");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -50,7 +50,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let _ = assertions::findings(&results);
     assertions::assert_rule_quiet(&results);
 
@@ -61,7 +61,7 @@ garde = { version = "0.22", features = ["derive"] }
 fn skips_primitive_array_struct_boundary_without_validate() {
     let root = temp_root("rs-garde-05-primitive-array");
     let source_abs = root.join("src/input.rs");
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -105,7 +105,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let _ = assertions::findings(&results);
     assertions::assert_rule_quiet(&results);
 

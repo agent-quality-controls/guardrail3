@@ -6,7 +6,7 @@ fn errors_when_manual_deserialize_impl_needs_validate() {
     let root = temp_root("rs-garde-07-fail-closed");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -57,7 +57,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);
     assertions::assert_rule_results(
@@ -79,7 +79,7 @@ fn aliased_deserialize_impl() {
     let root = temp_root("rs-garde-07-aliased");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -130,7 +130,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);
     assertions::assert_rule_results(
@@ -151,7 +151,7 @@ fn module_aliased_deserialize_impl() {
     let root = temp_root("rs-garde-07-module-aliased");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -202,7 +202,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);
     assertions::assert_rule_results(
@@ -223,7 +223,7 @@ fn unrelated_validate_trait_does_not_suppress_deserialize_bypass() {
     let root = temp_root("rs-garde-07-non-garde-validate");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = super::super::canonical_clippy_toml();
+    let clippy_toml = super::helpers::canonical_clippy_toml();
     std::fs::create_dir_all(
         source_abs
             .parent()
@@ -281,7 +281,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(findings.len(), 1);
     assertions::assert_rule_results(

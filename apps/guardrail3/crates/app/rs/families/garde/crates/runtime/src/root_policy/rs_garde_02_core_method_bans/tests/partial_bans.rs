@@ -4,10 +4,10 @@ use test_support::{dir_entry, project_tree, temp_root};
 #[test]
 fn warns_when_bans_missing() {
     let root = temp_root("partial-garde-02");
-    let mut clippy_toml = super::super::canonical_clippy_toml();
+    let mut clippy_toml = super::helpers::canonical_clippy_toml();
     for path in ["serde_json::from_slice", "serde_yaml::from_reader"] {
         clippy_toml =
-            super::super::remove_clippy_ban_path(&clippy_toml, "disallowed-methods", path);
+            super::helpers::remove_clippy_ban_path(&clippy_toml, "disallowed-methods", path);
     }
     let tree = project_tree(
         vec![("", dir_entry(&[], &["Cargo.toml", "clippy.toml"]))],
@@ -20,7 +20,7 @@ fn warns_when_bans_missing() {
         ],
         root.clone(),
     );
-    let results = super::super::run_family(&tree);
+    let results = super::helpers::run_family(&tree);
     let findings = assertions::findings(&results);
     assert_eq!(
         findings.len(),
