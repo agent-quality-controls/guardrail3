@@ -6,10 +6,12 @@ mod rs_toolchain_02_channel_and_components;
 mod rs_toolchain_03_msrv_consistency;
 mod rs_toolchain_04_legacy_file;
 
-use guardrail3_app_rs_family_mapper::RsToolchainRoute;
-use guardrail3_app_rs_family_view::FamilyView;
+mod run;
+pub use run::check;
+
 #[cfg(test)]
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
+#[cfg(test)]
 use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
@@ -20,24 +22,6 @@ use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 #[cfg(test)]
 use std::collections::BTreeSet;
-
-use self::discover::collect;
-use self::inputs::all_from_facts;
-
-pub fn check(surface: &FamilyView, route: &RsToolchainRoute) -> Vec<CheckResult> {
-    let tree = surface;
-    let facts = collect(tree, route);
-    let mut results = Vec::new();
-
-    for input in all_from_facts(&facts) {
-        rs_toolchain_01_exists::check(&input, &mut results);
-        rs_toolchain_02_channel_and_components::check(&input, &mut results);
-        rs_toolchain_03_msrv_consistency::check(&input, &mut results);
-        rs_toolchain_04_legacy_file::check(&input, &mut results);
-    }
-
-    results
-}
 
 #[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {

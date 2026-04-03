@@ -25,7 +25,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             )),
             "unreachable" if !info.in_test_context => results.push(CheckResult::from_parts(
                 ID.to_owned(),
-                Severity::Info,
+                Severity::Warn,
                 "unreachable! macro".to_owned(),
                 format!(
                     "`unreachable!()` macro found: {}.",

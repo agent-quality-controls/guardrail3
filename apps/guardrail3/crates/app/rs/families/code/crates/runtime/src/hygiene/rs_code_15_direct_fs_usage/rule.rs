@@ -30,7 +30,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "direct std::fs import".to_owned(),
             format!(
-                "Direct `use std::fs` import found: `{}`.",
+                "Direct `use std::fs` import found: `{}`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
                 line_text(input.content, line)
             ),
             Some(input.rel_path.to_owned()),
@@ -48,7 +48,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "direct std::fs call".to_owned(),
             format!(
-                "Direct `std::fs::*` call found: `{}`.",
+                "Direct `std::fs::*` call found: `{}`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
                 line_text(input.content, line)
             ),
             Some(input.rel_path.to_owned()),

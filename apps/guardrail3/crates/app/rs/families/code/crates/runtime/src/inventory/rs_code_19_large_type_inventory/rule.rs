@@ -26,14 +26,13 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(
             CheckResult::from_parts(
                 ID.to_owned(),
-                Severity::Info,
+                Severity::Warn,
                 "large type inventory".to_owned(),
                 format!("{kind} has {count} items (inventory threshold {threshold})."),
                 Some(input.rel_path.to_owned()),
                 Some(line),
                 false,
-            )
-            .as_inventory(),
+            ),
         );
     }
 }
@@ -48,14 +47,13 @@ fn push_struct_result(
     results.push(
         CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Info,
+            Severity::Warn,
             "large type inventory".to_owned(),
             format!("struct `{name}` has {field_count} fields (inventory threshold 15)."),
             Some(input.rel_path.to_owned()),
             Some(line),
             false,
-        )
-        .as_inventory(),
+        ),
     );
 }
 
