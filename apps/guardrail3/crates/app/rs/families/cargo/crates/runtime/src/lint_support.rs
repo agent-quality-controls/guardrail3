@@ -121,7 +121,21 @@ pub(crate) const EXPECTED_CLIPPY_ALLOW: &[&str] = &[
     "ref_option_ref",
     "trivially_copy_pass_by_ref",
     "multiple_crate_versions",
-    "redundant_pub_crate", // conflicts with rustc unreachable_pub — clippy#5369
+    "redundant_pub_crate",
+];
+
+/// Clippy lints that MUST be set to `allow`. These are lints where deny/warn
+/// conflicts with other required lints and cannot be enforced.
+pub(crate) struct RequiredAllowLint {
+    pub name: &'static str,
+    pub reason: &'static str,
+}
+
+pub(crate) const EXPECTED_CLIPPY_REQUIRED_ALLOW: &[RequiredAllowLint] = &[
+    RequiredAllowLint {
+        name: "redundant_pub_crate",
+        reason: "Conflicts with rustc `unreachable_pub` lint — both cannot be denied simultaneously (clippy#5369). Keep `unreachable_pub = \"deny\"`, allow this clippy nursery lint.",
+    },
 ];
 
 pub fn policy_lints<'a>(root: &'a PolicyRootCargoFacts, family: &str) -> Option<&'a toml::Value> {

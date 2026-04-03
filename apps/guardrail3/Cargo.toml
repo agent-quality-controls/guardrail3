@@ -146,3 +146,5 @@ single_match_else = "allow"
 ref_option_ref = "allow"
 trivially_copy_pass_by_ref = "allow"
 multiple_crate_versions = "allow"
+# Conflicts with rustc unreachable_pub — clippy#5369
+redundant_pub_crate = "allow"
