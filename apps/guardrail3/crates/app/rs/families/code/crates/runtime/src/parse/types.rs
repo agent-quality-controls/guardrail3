@@ -69,6 +69,7 @@ pub struct GenericParameterCapInfo {
     pub(crate) type_const_param_count: usize,
 }
 
+#[allow(dead_code)] // reason: CODE-27 removed (redundant with ARCH-02)
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FacadeBodyItemInfo {
     pub(crate) line: usize,

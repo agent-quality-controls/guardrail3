@@ -8,6 +8,7 @@ pub struct RustCodeFileInput<'a> {
     pub(crate) content: &'a str,
     pub(crate) ast: &'a syn::File,
     pub(crate) is_test_root: bool,
+    #[allow(dead_code)] // reason: retained for future library-profile rules; some rules were removed but field is still populated from facts
     pub(crate) profile_name: Option<&'a str>,
 }
 

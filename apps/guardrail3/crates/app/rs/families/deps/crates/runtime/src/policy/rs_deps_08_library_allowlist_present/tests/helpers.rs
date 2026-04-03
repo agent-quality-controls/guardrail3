@@ -22,7 +22,7 @@ pub(crate) fn collected_facts(
     )
 }
 pub(crate) fn coverage_facts(
-    profile_name: Option<&str>,
+    _profile_name: Option<&str>,
     has_allowlist: bool,
 ) -> crate::facts::DepsFacts {
     crate::facts::DepsFacts {
@@ -39,7 +39,6 @@ pub(crate) fn coverage_facts(
         allowlist_coverage: vec![crate::facts::AllowlistCoverageFacts {
             crate_name: "core".to_owned(),
             cargo_rel_path: "packages/core/Cargo.toml".to_owned(),
-            profile_name: profile_name.map(str::to_owned),
             has_allowlist,
         }],
         direct_dependency_caps: Vec::new(),
