@@ -23,7 +23,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
                 Severity::Warn,
                 "rustfmt edition differs from Cargo edition".to_owned(),
                 format!(
-                    "rustfmt edition `{rustfmt_edition}` differs from Cargo edition `{cargo_edition}`."
+                    "rustfmt edition `{rustfmt_edition}` differs from Cargo edition `{cargo_edition}`. Update `edition` in rustfmt.toml to `{cargo_edition}`."
                 ),
                 Some(rel.to_owned()),
                 None,

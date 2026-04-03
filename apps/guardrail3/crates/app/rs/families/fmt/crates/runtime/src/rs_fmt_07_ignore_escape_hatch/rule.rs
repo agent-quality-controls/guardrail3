@@ -30,7 +30,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
                 ID.to_owned(),
                 Severity::Error,
                 "rustfmt ignore missing reason".to_owned(),
-                format!("`{rel}` uses `ignore = {ignore}` without a matching escape-hatch reason."),
+                format!("`{rel}` uses `ignore = {ignore}` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml with family = \"fmt\", file = \"{rel}\", kind = \"ignore\", and a reason explaining why these paths are excluded."),
                 Some(rel.to_owned()),
                 None,
                 false,
@@ -54,7 +54,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
                     Severity::Error,
                     "rustfmt ignore reason too weak".to_owned(),
                     format!(
-                        "`{rel}` uses `ignore = {ignore}` with a weak reason: {}.",
+                        "`{rel}` uses `ignore = {ignore}` with a weak reason: {}. Provide a more specific reason explaining why these paths cannot be formatted.",
                         issue.message()
                     ),
                     Some(rel.to_owned()),
@@ -69,7 +69,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
             Severity::Warn,
             "rustfmt ignore count".to_owned(),
             format!("`{rel}` has 1 rustfmt ignore escape hatch."),
-            None,
+            Some(rel.to_owned()),
             None,
             false,
         ));

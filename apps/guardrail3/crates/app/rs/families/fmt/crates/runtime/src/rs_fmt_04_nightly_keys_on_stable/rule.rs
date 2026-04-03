@@ -46,7 +46,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
                     Severity::Warn,
                     format!("nightly-only rustfmt setting `{key}` on stable"),
                     format!(
-                        "`{key}` is nightly-only, but rust-toolchain.toml uses `stable`."
+                        "`{key}` is nightly-only, but rust-toolchain.toml uses `stable`. Either remove `{key}` from rustfmt.toml or switch the toolchain channel to nightly."
                     ),
                     Some(rel.to_owned()),
                     None,
@@ -59,7 +59,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "rust-toolchain.toml missing".to_owned(),
-            "Nightly-only rustfmt settings require a root rust-toolchain.toml to prove the channel."
+            "Nightly-only rustfmt settings require a root rust-toolchain.toml to verify the channel."
                 .to_owned(),
             Some("rust-toolchain.toml".to_owned()),
             None,

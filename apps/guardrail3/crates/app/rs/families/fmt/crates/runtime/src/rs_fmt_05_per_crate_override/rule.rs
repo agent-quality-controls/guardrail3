@@ -15,7 +15,7 @@ pub fn check(input: &RustfmtExtraConfigInput, results: &mut Vec<CheckResult>) {
         ID.to_owned(),
         Severity::Error,
         "Illegal nested rustfmt config".to_owned(),
-        format!("{kind} below repository root is forbidden; rustfmt policy is root-only"),
+        format!("`{kind}` below repository root is forbidden; rustfmt policy is root-only. Delete this file and ensure all formatting settings are in the root `rustfmt.toml`."),
         Some(input.config_rel.clone()),
         None,
         false,
