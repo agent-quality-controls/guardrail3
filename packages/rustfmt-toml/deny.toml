@@ -61,7 +61,7 @@ deny = [
     { name = "prost", wrappers = [], reason = "Ban competing binary serialization formats" },
     { name = "flatbuffers", wrappers = [], reason = "Ban competing binary serialization formats" },
     # --- Parsing: use structured parsers, never regex ---
-    { name = "regex", wrappers = ["tree-sitter", "globset", "ignore"], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" }, # EXCEPTION: transitive only
+    { name = "regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "fancy-regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "onig", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "pcre2", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
@@ -109,7 +109,7 @@ ignore = true
 [advisories]
 # unmaintained: check workspace deps only (transitive unmaintained crates are not actionable)
 unmaintained = "workspace"
-yanked = "warn" # EXCEPTION: yanked crates in transitive deps are not actionable -- warn instead of deny
+yanked = "deny"
 ignore = []
 
 # ============================================================
