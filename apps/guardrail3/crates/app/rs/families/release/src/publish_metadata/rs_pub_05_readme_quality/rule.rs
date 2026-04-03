@@ -15,10 +15,10 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
     if content.len() < 200 {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             format!("{}: README is a stub", krate.name),
             format!(
-                "README at `{}` is only {} bytes.",
+                "README at `{}` is only {} bytes. Add meaningful content to the README.",
                 krate.readme_rel_path,
                 content.len()
             ),
@@ -31,10 +31,10 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
     if !has_markdown_heading(content) {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             format!("{}: README has no heading", krate.name),
             format!(
-                "README at `{}` has no markdown heading.",
+                "README at `{}` has no markdown heading. Add a markdown heading (e.g. `# Crate Name`).",
                 krate.readme_rel_path
             ),
             Some(krate.readme_rel_path.clone()),

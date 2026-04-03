@@ -25,7 +25,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
         ID.to_owned(),
         Severity::Warn,
         "release-plz.toml missing".to_owned(),
-        "Repo root is missing `release-plz.toml`.".to_owned(),
+        "Repo root is missing `release-plz.toml`. Create `release-plz.toml` at the repo root.".to_owned(),
         Some(repo.release_plz_rel_path.clone()),
         None,
         false,

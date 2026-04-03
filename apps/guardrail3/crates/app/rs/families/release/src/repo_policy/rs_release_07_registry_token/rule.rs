@@ -31,7 +31,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Warn,
             "CARGO_REGISTRY_TOKEN missing from workflows".to_owned(),
-            "No workflow structurally wires `CARGO_REGISTRY_TOKEN` into release steps.".to_owned(),
+            "No workflow structurally wires `CARGO_REGISTRY_TOKEN` into release steps. Add `CARGO_REGISTRY_TOKEN` as a secret in the release workflow.".to_owned(),
             None,
             None,
             false,

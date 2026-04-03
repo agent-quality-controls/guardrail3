@@ -31,7 +31,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Warn,
             "Publish dry-run workflow missing".to_owned(),
-            "No workflow contains an actual `cargo publish --dry-run` step.".to_owned(),
+            "No workflow contains an actual `cargo publish --dry-run` step. Add a `cargo publish --dry-run` step to a CI workflow.".to_owned(),
             None,
             None,
             false,

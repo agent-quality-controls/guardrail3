@@ -23,10 +23,10 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
     } else {
         CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             format!("{}: README missing", krate.name),
             format!(
-                "Publishable crate `{}` is missing README content at `{}`.",
+                "Publishable crate `{}` is missing README content at `{}`. Create a README.md for this crate.",
                 krate.name, krate.readme_rel_path
             ),
             Some(krate.cargo_rel_path.clone()),
