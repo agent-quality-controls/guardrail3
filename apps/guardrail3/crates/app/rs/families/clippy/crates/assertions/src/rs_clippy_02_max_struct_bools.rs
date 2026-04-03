@@ -15,7 +15,7 @@ pub fn assert_missing_value(results: &[CheckResult]) {
     let result = single_result(results);
     assert_eq!(result.severity(), Severity::Error);
     assert_eq!(result.title(), "max-struct-bools missing");
-    assert_eq!(result.message(), "Expected max-struct-bools = 3.");
+    assert_eq!(result.message(), "Add `max-struct-bools = 3` to clippy.toml.");
 }
 
 pub fn assert_parse_failure(results: &[CheckResult], file: &str) {
@@ -29,7 +29,7 @@ pub fn assert_wrong_value(results: &[CheckResult]) {
     let result = single_result(results);
     assert_eq!(result.severity(), Severity::Error);
     assert_eq!(result.title(), "max-struct-bools wrong value");
-    assert_eq!(result.message(), "Expected 3, got 4.");
+    assert_eq!(result.message(), "Expected 3, got 4. Set `max-struct-bools = 3` in clippy.toml.");
 }
 
 fn single_result(results: &[CheckResult]) -> &CheckResult {

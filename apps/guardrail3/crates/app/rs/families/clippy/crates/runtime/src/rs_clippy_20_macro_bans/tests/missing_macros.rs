@@ -19,8 +19,8 @@ fn errors_for_each_missing_required_macro_ban() {
     assertions::assert_missing_messages(
         &results,
         &[
-            "`eprintln!` is not present in `disallowed-macros`.",
-            "`todo!` is not present in `disallowed-macros`.",
+            "`eprintln!` is not present in `disallowed-macros`. Add it to `disallowed-macros` in clippy.toml.",
+            "`todo!` is not present in `disallowed-macros`. Add it to `disallowed-macros` in clippy.toml.",
         ],
     );
 }

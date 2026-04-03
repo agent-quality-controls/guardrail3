@@ -25,9 +25,9 @@ disallowed-macros = [
     assertions::assert_messages(
         &results,
         &[
-            "`std::println` appears 2 times in `disallowed-macros`.",
-            "`std::collections::HashMap` appears 2 times in `disallowed-types`.",
-            "`std::env::var` appears 2 times in `disallowed-methods`.",
+            "`std::println` appears 2 times in `disallowed-macros`. Remove the duplicate entries.",
+            "`std::collections::HashMap` appears 2 times in `disallowed-types`. Remove the duplicate entries.",
+            "`std::env::var` appears 2 times in `disallowed-methods`. Remove the duplicate entries.",
         ],
         "clippy.toml",
     );

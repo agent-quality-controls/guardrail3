@@ -15,7 +15,7 @@ pub fn assert_missing_value(results: &[CheckResult]) {
     let result = single_result(results);
     assert_eq!(result.severity(), Severity::Error);
     assert_eq!(result.title(), "too-many-lines-threshold missing");
-    assert_eq!(result.message(), "Expected too-many-lines-threshold = 75.");
+    assert_eq!(result.message(), "Add `too-many-lines-threshold = 75` to clippy.toml.");
 }
 
 pub fn assert_parse_failure(results: &[CheckResult], file: &str) {
@@ -29,7 +29,7 @@ pub fn assert_wrong_value(results: &[CheckResult]) {
     let result = single_result(results);
     assert_eq!(result.severity(), Severity::Error);
     assert_eq!(result.title(), "too-many-lines-threshold wrong value");
-    assert_eq!(result.message(), "Expected 75, got 76.");
+    assert_eq!(result.message(), "Expected 75, got 76. Set `too-many-lines-threshold = 75` in clippy.toml.");
 }
 
 fn single_result(results: &[CheckResult]) -> &CheckResult {

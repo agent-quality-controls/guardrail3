@@ -11,10 +11,10 @@ fn errors_for_every_missing_library_global_state_type_ban() {
     assertions::assert_missing_messages(
         &results,
         &[
-            "Library profile must ban `once_cell::sync::Lazy` in `disallowed-types`.",
-            "Library profile must ban `once_cell::sync::OnceCell` in `disallowed-types`.",
-            "Library profile must ban `std::sync::LazyLock` in `disallowed-types`.",
-            "Library profile must ban `std::sync::OnceLock` in `disallowed-types`.",
+            "Library profile must ban `once_cell::sync::Lazy` in `disallowed-types`. Add it to `disallowed-types` in clippy.toml.",
+            "Library profile must ban `once_cell::sync::OnceCell` in `disallowed-types`. Add it to `disallowed-types` in clippy.toml.",
+            "Library profile must ban `std::sync::LazyLock` in `disallowed-types`. Add it to `disallowed-types` in clippy.toml.",
+            "Library profile must ban `std::sync::OnceLock` in `disallowed-types`. Add it to `disallowed-types` in clippy.toml.",
         ],
         "apps/libsite/clippy.toml",
     );
