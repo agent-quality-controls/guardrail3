@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::repo_inventory::rs_release_12_input_failures as assertions;
 
-use super::super::run_tree as check;
-use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::helpers::run_tree as check;
+use super::helpers::{StubToolChecker, dir_entry, project_tree, temp_root};
 
 #[test]
 fn golden_config_only_tree_has_no_release_input_failures() {

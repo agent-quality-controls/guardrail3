@@ -1,7 +1,7 @@
 use guardrail3_outbound_traits::CommandRunResult;
 
-use super::super::check;
-use super::super::{copy_fixture, crate_facts, crate_input, run_family, write_file};
+use super::helpers::check;
+use super::helpers::{copy_fixture, crate_facts, crate_input, run_family, write_file};
 
 #[test]
 fn errors_when_publishable_crate_has_no_dry_run_result() {

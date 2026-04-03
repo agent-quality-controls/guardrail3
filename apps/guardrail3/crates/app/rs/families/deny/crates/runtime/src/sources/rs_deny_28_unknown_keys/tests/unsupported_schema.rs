@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_28_unknown_keys as assertions;
 
-use super::super::build_fixture_deny_toml;
+use super::helpers::build_fixture_deny_toml;
 
 fn with_root_override(deny_toml: &str, key: &str, value: toml::Value) -> String {
     let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
@@ -30,7 +30,7 @@ fn warns_on_unsupported_core_section_schema() {
         "sources",
         toml::Value::String("invalid".to_owned()),
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(
@@ -80,7 +80,7 @@ fn warns_on_unsupported_nested_section_schema() {
         "ignore",
         toml::Value::String("invalid".to_owned()),
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(
@@ -133,7 +133,7 @@ fn local_unsupported_schema_only_warns_for_the_owned_local_root() {
         "features",
         toml::Value::String("invalid".to_owned()),
     );
-    let results = super::super::run_check(&local_deny);
+    let results = super::helpers::run_check(&local_deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(

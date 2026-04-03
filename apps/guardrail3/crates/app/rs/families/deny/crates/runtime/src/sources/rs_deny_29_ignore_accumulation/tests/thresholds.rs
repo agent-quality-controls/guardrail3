@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_29_ignore_accumulation as assertions;
 
-use super::super::ConfigDenyInput;
-use super::super::{build_fixture_deny_toml, config_facts};
+use crate::inputs::ConfigDenyInput;
+use super::helpers::{build_fixture_deny_toml, config_facts};
 
 #[test]
 fn warns_when_ignore_count_exceeds_threshold() {

@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_26_ban_reason_inventory as assertions;
 
-use super::super::add_deny_ban_entry;
+use super::helpers::add_deny_ban_entry;
 
 fn deny_entry_without_reason(name: &str) -> toml::Value {
     toml::Value::Table(toml::map::Map::from_iter([
@@ -18,7 +18,7 @@ fn errors_for_each_ban_entry_without_reason_and_counts_them() {
         ),
         deny_entry_without_reason("json5"),
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(

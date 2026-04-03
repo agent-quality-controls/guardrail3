@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_18_unknown_sources_policy as assertions;
 
-use super::super::{build_fixture_deny_toml, set_source_policy};
+use super::helpers::{build_fixture_deny_toml, set_source_policy};
 
 #[test]
 fn errors_for_each_weakened_unknown_source_policy_key() {
@@ -13,7 +13,7 @@ fn errors_for_each_weakened_unknown_source_policy_key() {
         "unknown-git",
         "warn",
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(

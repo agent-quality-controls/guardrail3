@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::repo_policy::rs_release_07_registry_token as assertions;
 
-use super::super::check;
-use super::super::{repo_facts, repo_input, workflow_from_yaml};
+use super::helpers::check;
+use super::helpers::{repo_facts, repo_input, workflow_from_yaml};
 
 #[test]
 fn warns_when_token_exists_but_no_real_release_step_uses_it() {

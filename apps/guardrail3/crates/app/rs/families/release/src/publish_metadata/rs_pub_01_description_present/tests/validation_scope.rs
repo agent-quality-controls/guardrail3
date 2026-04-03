@@ -1,5 +1,5 @@
-use super::super::run_tree_with_validation_scope as run_family;
-use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::helpers::run_tree_with_validation_scope as run_family;
+use super::helpers::{StubToolChecker, dir_entry, project_tree, temp_root};
 use guardrail3_app_rs_family_release_assertions::publish_metadata::rs_pub_01_description_present as assertions;
 
 #[test]

@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_11_highlight_inventory as assertions;
 
-use super::super::{build_fixture_deny_toml, set_section_string};
+use super::helpers::{build_fixture_deny_toml, set_section_string};
 
 #[test]
 fn local_highlight_drift_only_inventories_for_the_owned_local_root() {
-    let results = super::super::run_check(&set_section_string(
+    let results = super::helpers::run_check(&set_section_string(
         &build_fixture_deny_toml("service"),
         "bans",
         "highlight",

@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_30_wrappers as assertions;
 
-use super::super::{build_fixture_deny_toml, copy_fixture, write_file};
+use super::helpers::{build_fixture_deny_toml, copy_fixture, write_file};
 
 #[test]
 fn local_canonical_wrapper_baseline_does_not_false_positive() {
@@ -12,7 +12,7 @@ fn local_canonical_wrapper_baseline_does_not_false_positive() {
         &build_fixture_deny_toml("service"),
     );
 
-    let results = super::super::run_family(tmp.path());
+    let results = super::helpers::run_family(tmp.path());
     assert!(!results.is_empty());
     assertions::assert_no_findings(&results);
 }

@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::repo_policy::rs_release_05_release_plz_workflow as assertions;
 
-use super::super::check;
-use super::super::{repo_facts, repo_input, workflow_from_yaml};
+use super::helpers::check;
+use super::helpers::{repo_facts, repo_input, workflow_from_yaml};
 
 #[test]
 fn inventories_real_release_plz_execution_step_from_workflow_yaml() {

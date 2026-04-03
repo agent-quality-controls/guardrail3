@@ -1,4 +1,4 @@
-use super::super::{
+use super::helpers::{
     add_skip_entry, build_fixture_deny_toml, set_advisory_ignores, set_feature_entries,
 };
 
@@ -57,7 +57,7 @@ fn does_not_warn_for_distinct_near_duplicate_skip_ignore_and_feature_entries() {
             feature_entry("tokio-util", "codec"),
         ],
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
 
     assert!(
         results.is_empty(),

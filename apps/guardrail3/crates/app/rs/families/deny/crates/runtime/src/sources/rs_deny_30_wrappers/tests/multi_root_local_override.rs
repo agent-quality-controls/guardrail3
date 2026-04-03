@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_30_wrappers as assertions;
 
-use super::super::{build_fixture_deny_toml, set_deny_ban_wrappers};
+use super::helpers::{build_fixture_deny_toml, set_deny_ban_wrappers};
 
 #[test]
 fn local_wrapper_drift_only_reports_for_the_owned_library_root() {
-    let results = super::super::run_check(&set_deny_ban_wrappers(
+    let results = super::helpers::run_check(&set_deny_ban_wrappers(
         &build_fixture_deny_toml("service"),
         "regex",
         &["tree-sitter"],

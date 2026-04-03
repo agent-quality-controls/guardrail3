@@ -1,5 +1,5 @@
-use super::super::check;
-use super::super::{repo_facts, repo_input};
+use super::helpers::check;
+use super::helpers::{repo_facts, repo_input};
 use guardrail3_app_rs_family_release_assertions::publish_integrity::rs_pub_12_crate_inventory as assertions;
 
 #[test]

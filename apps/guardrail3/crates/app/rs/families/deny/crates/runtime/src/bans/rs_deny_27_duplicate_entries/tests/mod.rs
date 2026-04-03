@@ -1,3 +1,4 @@
+mod helpers;
 mod distinct_near_duplicates;
 mod golden;
 mod malformed_entries;

@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::repo_policy::rs_release_02_release_plz_exists as assertions;
 
-use super::super::check;
-use super::super::{repo_facts, repo_input};
+use super::helpers::check;
+use super::helpers::{repo_facts, repo_input};
 
 #[test]
 fn inventories_release_plz_file_when_present() {

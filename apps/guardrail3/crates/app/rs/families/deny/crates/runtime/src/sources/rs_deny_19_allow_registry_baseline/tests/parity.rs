@@ -1,5 +1,5 @@
-use super::super::build_fixture_deny_toml;
-use super::super::expected_sources_for_test;
+use super::helpers::build_fixture_deny_toml;
+use super::helpers::expected_sources_for_test;
 
 #[test]
 fn generated_sources_baseline_contains_exact_expected_registry_allow_list() {

@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_23_skip_hygiene as assertions;
 
-use super::super::{add_skip_entry, build_fixture_deny_toml};
+use super::helpers::{add_skip_entry, build_fixture_deny_toml};
 
 #[test]
 fn local_skip_warning_only_hits_the_owned_local_root() {
-    let results = super::super::run_check(&add_skip_entry(
+    let results = super::helpers::run_check(&add_skip_entry(
         &build_fixture_deny_toml("service"),
         toml::Value::Table(toml::map::Map::from_iter([
             (

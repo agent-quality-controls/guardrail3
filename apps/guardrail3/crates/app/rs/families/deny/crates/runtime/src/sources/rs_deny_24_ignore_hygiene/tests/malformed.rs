@@ -6,7 +6,7 @@ fn ignore_toml(ignore: &str) -> String {
 
 #[test]
 fn errors_for_malformed_missing_reason_and_non_string_reason_ignore_entries() {
-    let results = super::super::run_check(&ignore_toml(
+    let results = super::helpers::run_check(&ignore_toml(
         r#"[{ reason = "good enough reason text" }, { id = "RUSTSEC-2026-0001" }, { id = "RUSTSEC-2026-0002", reason = 7 }]"#,
     ));
     assert!(!results.is_empty());

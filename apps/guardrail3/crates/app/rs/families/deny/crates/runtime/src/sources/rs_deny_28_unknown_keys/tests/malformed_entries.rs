@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_28_unknown_keys as assertions;
 
-use super::super::build_fixture_deny_toml;
+use super::helpers::build_fixture_deny_toml;
 
 #[test]
 fn warns_on_malformed_nested_entries_and_string_array_members() {
@@ -29,7 +29,7 @@ features = [
   { name = "serde", deny = ["derive", 123], allow = "std" }
 ]
 "#;
-    let results = super::super::run_check(deny);
+    let results = super::helpers::run_check(deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(
@@ -119,7 +119,7 @@ features = [
 
 #[test]
 fn generated_baseline_does_not_trigger_schema_warnings() {
-    let results = super::super::run_check(&build_fixture_deny_toml("service"));
+    let results = super::helpers::run_check(&build_fixture_deny_toml("service"));
 
     assert!(results.is_empty());
 }

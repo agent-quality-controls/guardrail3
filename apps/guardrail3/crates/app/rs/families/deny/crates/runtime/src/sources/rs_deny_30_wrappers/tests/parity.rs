@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use super::super::build_fixture_deny_toml;
-use super::super::expected_ban_wrappers_for_test;
+use super::helpers::build_fixture_deny_toml;
+use super::helpers::expected_ban_wrappers_for_test;
 
 fn generated_wrapper_map(
     parsed: &toml::Value,

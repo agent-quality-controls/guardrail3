@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_25_allow_override_channel as assertions;
 
-use super::super::build_fixture_deny_toml;
+use super::helpers::build_fixture_deny_toml;
 
 #[test]
 fn errors_when_bans_allow_is_not_an_array() {
@@ -15,7 +15,7 @@ fn errors_when_bans_allow_is_not_an_array() {
         toml::Value::String("lazy_static".to_owned()),
     );
 
-    let results = super::super::run_check(&toml::to_string(&parsed).expect("serialize deny"));
+    let results = super::helpers::run_check(&toml::to_string(&parsed).expect("serialize deny"));
 
     assertions::assert_findings(
         &results,
@@ -44,7 +44,7 @@ fn errors_when_bans_allow_entries_have_no_matchable_crate_name() {
         )]))]),
     );
 
-    let results = super::super::run_check(&toml::to_string(&parsed).expect("serialize deny"));
+    let results = super::helpers::run_check(&toml::to_string(&parsed).expect("serialize deny"));
 
     assertions::assert_findings(
         &results,

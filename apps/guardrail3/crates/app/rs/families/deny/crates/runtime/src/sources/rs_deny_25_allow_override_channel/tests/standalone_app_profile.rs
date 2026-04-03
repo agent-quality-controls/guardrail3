@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_25_allow_override_channel as assertions;
 
-use super::super::{build_fixture_deny_toml, set_bans_allow_entries};
+use super::helpers::{build_fixture_deny_toml, set_bans_allow_entries};
 
 #[test]
 fn standalone_app_root_uses_rust_apps_library_profile_for_allow_override_checks() {

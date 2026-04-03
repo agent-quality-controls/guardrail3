@@ -1,3 +1,4 @@
+mod helpers;
 mod duplicate_entries;
 mod golden;
 mod missing_full;

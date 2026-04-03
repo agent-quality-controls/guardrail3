@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::publish_metadata::rs_pub_06_keywords_present as assertions;
 
-use super::super::check;
-use super::super::{crate_facts, crate_input};
+use super::helpers::check;
+use super::helpers::{crate_facts, crate_input};
 
 #[test]
 fn inventories_valid_keywords_count() {

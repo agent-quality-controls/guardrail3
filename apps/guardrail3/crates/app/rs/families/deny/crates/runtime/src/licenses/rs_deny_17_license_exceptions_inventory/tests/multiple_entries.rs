@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::licenses::rs_deny_17_license_exceptions_inventory as assertions;
 
-use super::super::{build_fixture_deny_toml, set_license_exceptions};
+use super::helpers::{build_fixture_deny_toml, set_license_exceptions};
 
 fn exception_entry(key: &str, value: &str) -> toml::Value {
     toml::Value::Table(toml::map::Map::from_iter([
@@ -25,7 +25,7 @@ fn warns_for_each_named_documented_license_exception_entry() {
             exception_entry("crate", "demo-legacy"),
         ],
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(

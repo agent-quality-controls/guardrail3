@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_21_tokio_full_ban as assertions;
 
-use super::super::expected_tokio_allowed_features_for_test;
-use super::super::{build_fixture_deny_toml, set_feature_entries};
+use super::helpers::expected_tokio_allowed_features_for_test;
+use super::helpers::{build_fixture_deny_toml, set_feature_entries};
 
 fn tokio_entry(deny: &[&str], allow: &[&str]) -> toml::Value {
     toml::Value::Table(toml::map::Map::from_iter([
@@ -43,7 +43,7 @@ fn warns_when_tokio_full_is_not_banned() {
         &build_fixture_deny_toml("service"),
         vec![tokio_entry(&[], &allow_refs)],
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(

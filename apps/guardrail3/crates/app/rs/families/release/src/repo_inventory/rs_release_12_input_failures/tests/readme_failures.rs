@@ -3,7 +3,7 @@ use std::os::unix::fs::PermissionsExt;
 
 use guardrail3_app_rs_family_release_assertions::repo_inventory::rs_release_12_input_failures as assertions;
 
-use super::super::{copy_fixture, run_family, write_file};
+use super::helpers::{copy_fixture, run_family, write_file};
 
 #[cfg(unix)]
 #[test]

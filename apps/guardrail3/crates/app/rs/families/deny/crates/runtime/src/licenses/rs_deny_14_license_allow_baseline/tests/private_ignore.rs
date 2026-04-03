@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::licenses::rs_deny_14_license_allow_baseline as assertions;
 
-use super::super::{build_fixture_deny_toml, set_private_ignore};
+use super::helpers::{build_fixture_deny_toml, set_private_ignore};
 
 #[test]
 fn errors_when_licenses_private_ignore_is_not_true() {
-    let results = super::super::run_check(&set_private_ignore(
+    let results = super::helpers::run_check(&set_private_ignore(
         &build_fixture_deny_toml("service"),
         false,
     ));

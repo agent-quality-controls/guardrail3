@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_22_extra_feature_bans_inventory as assertions;
 
-use super::super::{build_fixture_deny_toml, set_feature_entries};
+use super::helpers::{build_fixture_deny_toml, set_feature_entries};
 
 fn feature_entry(name: &str) -> toml::Value {
     toml::Value::Table(toml::map::Map::from_iter([
@@ -25,7 +25,7 @@ fn inventories_each_non_tokio_feature_ban_entry() {
     let mut entries = existing;
     entries.push(feature_entry("serde"));
     entries.push(feature_entry("axum"));
-    let results = super::super::run_check(&set_feature_entries(
+    let results = super::helpers::run_check(&set_feature_entries(
         &build_fixture_deny_toml("service"),
         entries,
     ));

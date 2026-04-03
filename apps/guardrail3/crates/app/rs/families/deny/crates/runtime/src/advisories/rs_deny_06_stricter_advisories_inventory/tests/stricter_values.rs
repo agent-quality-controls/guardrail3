@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::advisories::rs_deny_06_stricter_advisories_inventory as assertions;
 
-use super::super::{build_fixture_deny_toml, set_section_string};
+use super::helpers::{build_fixture_deny_toml, set_section_string};
 
 #[test]
 fn inventories_each_advisory_key_that_is_stricter_than_baseline() {
@@ -15,7 +15,7 @@ fn inventories_each_advisory_key_that_is_stricter_than_baseline() {
         "yanked",
         "deny",
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
     assert!(!results.is_empty());
 
     assertions::assert_findings(

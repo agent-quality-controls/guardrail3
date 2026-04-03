@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_21_tokio_full_ban as assertions;
 
-use super::super::{build_fixture_deny_toml, set_feature_entries};
-use super::super::{expected_tokio_allowed_features_for_test, join_set_for_test};
+use super::helpers::{build_fixture_deny_toml, set_feature_entries};
+use super::helpers::{expected_tokio_allowed_features_for_test, join_set_for_test};
 
 fn tokio_entry(deny: &[&str], allow: &[&str]) -> toml::Value {
     toml::Value::Table(toml::map::Map::from_iter([
@@ -39,7 +39,7 @@ fn warns_when_any_duplicate_tokio_entry_drifts_from_the_canonical_shape() {
             tokio_entry(&["rt"], &["rt-multi-thread"]),
         ],
     );
-    let results = super::super::run_check(&deny);
+    let results = super::helpers::run_check(&deny);
 
     assertions::assert_findings(
         &results,

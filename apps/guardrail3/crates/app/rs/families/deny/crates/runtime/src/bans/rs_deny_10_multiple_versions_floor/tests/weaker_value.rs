@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_10_multiple_versions_floor as assertions;
 
-use super::super::{build_fixture_deny_toml, set_section_string};
+use super::helpers::{build_fixture_deny_toml, set_section_string};
 
 #[test]
 fn warns_when_multiple_versions_is_weaker_than_baseline() {
-    let results = super::super::run_check(&set_section_string(
+    let results = super::helpers::run_check(&set_section_string(
         &build_fixture_deny_toml("service"),
         "bans",
         "multiple-versions",

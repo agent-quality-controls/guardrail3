@@ -1,5 +1,5 @@
-use super::super::run_tree_with_validation_scope;
-use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::helpers::run_tree_with_validation_scope;
+use super::helpers::{StubToolChecker, dir_entry, project_tree, temp_root};
 
 #[test]
 fn subtree_scope_does_not_assume_unqualified_release_build_targets_only_live_binary() {

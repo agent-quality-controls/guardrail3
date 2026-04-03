@@ -1,3 +1,4 @@
+mod helpers;
 mod accepted_registries;
 mod errors;
 mod malformed;

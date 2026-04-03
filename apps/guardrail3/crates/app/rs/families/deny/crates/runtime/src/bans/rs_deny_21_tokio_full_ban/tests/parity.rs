@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
-use super::super::build_fixture_deny_toml;
-use super::super::{expected_tokio_allowed_features_for_test, parse_feature_entries_for_test};
+use super::helpers::build_fixture_deny_toml;
+use super::helpers::{expected_tokio_allowed_features_for_test, parse_feature_entries_for_test};
 
 #[test]
 fn generated_tokio_feature_policy_matches_expected_allow_and_deny_sets() {

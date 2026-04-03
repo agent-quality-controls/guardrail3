@@ -1,10 +1,10 @@
 use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_24_ignore_hygiene as assertions;
 
-use super::super::{build_fixture_deny_toml, set_advisory_ignores};
+use super::helpers::{build_fixture_deny_toml, set_advisory_ignores};
 
 #[test]
 fn local_advisory_ignore_warning_only_hits_the_owned_local_root() {
-    let results = super::super::run_check(&set_advisory_ignores(
+    let results = super::helpers::run_check(&set_advisory_ignores(
         &build_fixture_deny_toml("service"),
         vec![toml::Value::Table(toml::map::Map::from_iter([
             (
