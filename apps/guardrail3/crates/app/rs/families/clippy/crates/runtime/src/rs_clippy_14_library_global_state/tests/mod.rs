@@ -1,3 +1,4 @@
+mod helpers;
 mod golden;
 mod malformed_policy_context;
 mod missing_global_state;

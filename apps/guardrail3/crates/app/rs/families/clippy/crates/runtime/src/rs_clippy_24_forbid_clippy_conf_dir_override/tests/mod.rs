@@ -1,3 +1,4 @@
+mod helpers;
 mod golden;
 mod ignored_unrelated_nested;
 mod legacy_config;

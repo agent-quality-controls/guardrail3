@@ -1,3 +1,4 @@
+mod helpers;
 mod fail_closed;
 mod golden;
 mod incomplete_baseline;

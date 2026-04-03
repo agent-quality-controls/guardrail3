@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_13_local_policy_root_baseline as assertions;
 use test_support::incomplete_workspace_policy_root_tree;
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn errors_when_local_policy_root_drops_managed_sections() {

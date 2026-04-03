@@ -1,6 +1,6 @@
 use test_support::{dir_entry, project_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn yields_no_result_when_policy_context_parseability_is_owned_by_rs_clippy_23() {

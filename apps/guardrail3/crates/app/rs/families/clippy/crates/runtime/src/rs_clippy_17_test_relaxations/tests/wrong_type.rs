@@ -3,7 +3,7 @@ use guardrail3_app_rs_family_clippy_assertions::rs_clippy_17_test_relaxations::{
 };
 use test_support::root_workspace_tree;
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn errors_and_warns_when_managed_test_relaxation_keys_have_wrong_types() {

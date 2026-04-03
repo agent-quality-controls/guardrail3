@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_04_missing_method_ban as missing_assertions;
 use test_support::{build_fixture_clippy_toml, replace_ban_entry_with_string, root_workspace_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn plain_string_entries_still_count_for_completeness_but_fail_reason_quality() {

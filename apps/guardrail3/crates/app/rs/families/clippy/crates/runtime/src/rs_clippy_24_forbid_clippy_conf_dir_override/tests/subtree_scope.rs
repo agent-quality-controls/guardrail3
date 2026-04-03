@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_24_forbid_clippy_conf_dir_override as assertions;
 use test_support::{build_fixture_clippy_toml, dir_entry, project_tree};
 
-use super::super::{
+use super::helpers::{
     run_family_with_validation_scope_for_tests, run_with_validation_scope_for_tests,
 };
 

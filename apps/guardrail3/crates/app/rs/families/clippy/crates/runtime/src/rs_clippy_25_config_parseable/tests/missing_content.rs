@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_25_config_parseable as assertions;
 use test_support::{dir_entry, project_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn errors_when_allowed_clippy_config_content_is_missing() {

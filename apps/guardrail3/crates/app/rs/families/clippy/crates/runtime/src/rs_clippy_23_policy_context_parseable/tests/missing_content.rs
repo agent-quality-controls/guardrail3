@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_23_policy_context_parseable as assertions;
 use test_support::{dir_entry, project_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn errors_when_guardrail_policy_file_content_is_missing_from_project_tree() {

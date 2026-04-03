@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_17_test_relaxations as assertions;
 use test_support::root_workspace_tree;
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn warns_for_each_enabled_test_relaxation() {

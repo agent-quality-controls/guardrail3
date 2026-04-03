@@ -3,7 +3,7 @@ use test_support::{
     build_fixture_clippy_toml, prepend_ban_path, published_library_package_root_tree,
 };
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn library_global_state_type_bans_are_not_extra_for_library_profile() {

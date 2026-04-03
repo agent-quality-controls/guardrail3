@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_06_extra_method_ban as assertions;
 use test_support::{build_fixture_clippy_toml, garde_disabled_root_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn inventories_garde_owned_method_bans_as_project_specific_when_garde_is_disabled() {

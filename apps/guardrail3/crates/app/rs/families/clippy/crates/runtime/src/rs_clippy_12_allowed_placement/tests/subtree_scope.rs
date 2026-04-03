@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_12_allowed_placement as assertions;
 use test_support::{dir_entry, project_tree};
 
-use super::super::run_with_validation_scope_for_tests;
+use super::helpers::run_with_validation_scope_for_tests;
 
 #[test]
 fn respects_validation_scope_across_sibling_legal_workspaces() {
