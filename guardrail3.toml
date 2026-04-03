@@ -49,6 +49,49 @@ kind = "lint_allow"
 selector = "clippy:redundant_pub_crate"
 reason = "Conflicts with rustc unreachable_pub — clippy#5369"
 
+# Parser crate workspace lint allows
+[[escape_hatches]]
+family = "cargo"
+file = "packages/clippy-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:redundant_pub_crate"
+reason = "Conflicts with rustc unreachable_pub — clippy#5369"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/deny-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:redundant_pub_crate"
+reason = "Conflicts with rustc unreachable_pub — clippy#5369"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/mutants-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:redundant_pub_crate"
+reason = "Conflicts with rustc unreachable_pub — clippy#5369"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/nextest-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:redundant_pub_crate"
+reason = "Conflicts with rustc unreachable_pub — clippy#5369"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/rustfmt-toml/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:redundant_pub_crate"
+reason = "Conflicts with rustc unreachable_pub — clippy#5369"
+
+[[escape_hatches]]
+family = "cargo"
+file = "packages/reason-policy/Cargo.toml"
+kind = "lint_allow"
+selector = "clippy:redundant_pub_crate"
+reason = "Conflicts with rustc unreachable_pub — clippy#5369"
+
 [[escape_hatches]]
 family = "cargo"
 file = "apps/guardrail3/Cargo.toml"
