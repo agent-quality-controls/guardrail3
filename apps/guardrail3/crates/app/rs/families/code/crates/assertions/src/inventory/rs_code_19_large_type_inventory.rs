@@ -111,21 +111,21 @@ pub fn assert_inventories_large_struct_and_enum_shapes_across_owned_files_with_e
         vec![
             Finding {
                 id: ID,
-                severity: Severity::Info,
+                severity: Severity::Warn,
                 title: "large type inventory",
                 message: "struct `PlannerAudit` has 16 fields (inventory threshold 15).",
                 file: Some(backend_rel),
                 line: Some(backend_line),
-                inventory: true,
+                inventory: false,
             },
             Finding {
                 id: ID,
-                severity: Severity::Info,
+                severity: Severity::Warn,
                 title: "large type inventory",
                 message: "enum `QueueAudit` has 21 items (inventory threshold 20).",
                 file: Some(worker_rel),
                 line: Some(worker_line),
-                inventory: true,
+                inventory: false,
             },
         ],
     );

@@ -46,7 +46,7 @@ fn attacks_excessive_top_level_use_counts_in_real_owned_file() {
     let total_use_count = count_top_level_use_imports(&ast);
 
     let results = run_family(root);
-    let expected_message = format!("{total_use_count} top-level use imports (max 20).");
+    let expected_message = format!("{total_use_count} top-level use imports (max 20). Reduce imports by consolidating or splitting the file.");
 
     assert_files(&results, BTreeSet::from([rel.to_owned()]));
     assert_findings(

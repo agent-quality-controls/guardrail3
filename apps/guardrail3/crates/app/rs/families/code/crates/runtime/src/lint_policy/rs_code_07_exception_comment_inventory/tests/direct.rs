@@ -11,12 +11,12 @@ fn inventories_direct_exception_comment_input() {
     assert_findings(
         &results,
         &[RuleFinding::new(
-            guardrail3_domain_report::Severity::Info,
+            guardrail3_domain_report::Severity::Warn,
             "EXCEPTION comment inventory",
             &format!("Config exception comment: {line_text}"),
             Some("Cargo.toml"),
             Some(4),
-            true,
+            false,
         )],
     );
 }

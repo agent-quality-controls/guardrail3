@@ -94,7 +94,7 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "crate-level allow",
-                "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly.",
+                "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly. Use item-level `#[allow(clippy::unwrap_used)]` with a `// reason:` comment instead.",
                 Some(crate_rel),
                 crate_new
                     .lines()
@@ -105,7 +105,7 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "module-level allow in outer::inner",
-                "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly.",
+                "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly. Use item-level `#[allow(clippy::panic)]` with a `// reason:` comment instead.",
                 Some(mixed_rel),
                 mixed_new
                     .lines()
@@ -116,7 +116,7 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "crate-level allow",
-                "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly.",
+                "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly. Use item-level `#[allow(clippy::unwrap_used)]` with a `// reason:` comment instead.",
                 Some(mixed_rel),
                 mixed_new
                     .lines()
@@ -127,7 +127,7 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "crate-level allow",
-                "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly.",
+                "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly. Use item-level `#[allow(clippy::unwrap_used)]` with a `// reason:` comment instead.",
                 Some(mixed_exempt_rel),
                 mixed_exempt_new
                     .lines()
@@ -146,7 +146,7 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "module-level allow in nested_allow",
-                "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly.",
+                "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly. Use item-level `#[allow(clippy::panic)]` with a `// reason:` comment instead.",
                 Some(inline_rel),
                 inline_new
                     .lines()

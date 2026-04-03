@@ -15,12 +15,12 @@ fn inventories_large_structs() {
     assert_findings(
         &results,
         &[RuleFinding::new(
-            guardrail3_domain_report::Severity::Info,
+            guardrail3_domain_report::Severity::Warn,
             "large type inventory",
             "struct `Big` has 16 fields (inventory threshold 15).",
             Some("src/foo.rs"),
             Some(1),
-            true,
+            false,
         )],
     );
 }
@@ -37,12 +37,12 @@ fn inventories_large_enums() {
     assert_findings(
         &results,
         &[RuleFinding::new(
-            guardrail3_domain_report::Severity::Info,
+            guardrail3_domain_report::Severity::Warn,
             "large type inventory",
             "enum `BigEnum` has 21 items (inventory threshold 20).",
             Some("src/foo.rs"),
             Some(1),
-            true,
+            false,
         )],
     );
 }
@@ -62,12 +62,12 @@ fn inventories_large_tuple_structs() {
     assert_findings(
         &results,
         &[RuleFinding::new(
-            guardrail3_domain_report::Severity::Info,
+            guardrail3_domain_report::Severity::Warn,
             "large type inventory",
             "struct `BigTuple` has 16 fields (inventory threshold 15).",
             Some("src/foo.rs"),
             Some(1),
-            true,
+            false,
         )],
     );
 }

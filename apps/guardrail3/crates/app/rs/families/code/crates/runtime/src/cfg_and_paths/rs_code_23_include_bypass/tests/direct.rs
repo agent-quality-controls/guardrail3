@@ -28,12 +28,12 @@ fn inventories_build_script_include_pattern() {
     assert_findings(
         &results,
         &[RuleFinding::new(
-            guardrail3_domain_report::Severity::Info,
+            guardrail3_domain_report::Severity::Warn,
             "build-script include! inventory",
             "`include!(concat!(env!(\"OUT_DIR\"), ...))` detected. Review generated-code boundary.",
             Some("src/lib.rs"),
             Some(1),
-            true,
+            false,
         )],
     );
 }
@@ -82,12 +82,12 @@ fn keeps_build_script_include_inventory_for_non_traversing_double_dot_filename()
     assert_findings(
         &results,
         &[RuleFinding::new(
-            guardrail3_domain_report::Severity::Info,
+            guardrail3_domain_report::Severity::Warn,
             "build-script include! inventory",
             "`include!(concat!(env!(\"OUT_DIR\"), ...))` detected. Review generated-code boundary.",
             Some("src/lib.rs"),
             Some(1),
-            true,
+            false,
         )],
     );
 }

@@ -50,7 +50,7 @@ fn skips_item_level_and_file_backed_module_near_misses() {
         &[RuleFinding::new(
             Severity::Error,
             "crate-level allow",
-            "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly.",
+            "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly. Use item-level `#[allow(clippy::panic)]` with a `// reason:` comment instead.",
             Some("apps/backend/crates/ports/outbound/events/src/file_backed_child.rs"),
             Some(1),
             false,

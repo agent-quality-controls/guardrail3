@@ -91,12 +91,12 @@ fn does_not_inventory_repo_root_exception_comments_in_backend_scoped_run() {
     assert_findings(
         &results,
         &[RuleFinding::new(
-            Severity::Info,
+            Severity::Warn,
             "EXCEPTION comment inventory",
             "Config exception comment: # EXCEPTION: backend scoped only",
             Some("apps/backend/rustfmt.toml"),
             Some(1),
-            true,
+            false,
         )],
     );
 }

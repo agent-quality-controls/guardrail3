@@ -15,7 +15,7 @@ fn errors_above_twenty_top_level_use_imports() {
         &[RuleFinding::new(
             Severity::Error,
             "too many use imports",
-            "21 top-level use imports (max 20).",
+            "21 top-level use imports (max 20). Reduce imports by consolidating or splitting the file.",
             Some("src/foo.rs"),
             None,
             false,
@@ -31,7 +31,7 @@ fn errors_grouped_imports_by_leaf_count() {
         &[RuleFinding::new(
             Severity::Error,
             "too many use imports",
-            "21 top-level use imports (max 20).",
+            "21 top-level use imports (max 20). Reduce imports by consolidating or splitting the file.",
             Some("src/foo.rs"),
             None,
             false,

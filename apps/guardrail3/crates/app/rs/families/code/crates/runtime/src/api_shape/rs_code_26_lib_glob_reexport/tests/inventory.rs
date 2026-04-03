@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use super::helpers::copy_fixture;
 use super::helpers::run_family;
 use guardrail3_app_rs_family_code_assertions::api_shape::rs_code_26_lib_glob_reexport::{
-    RuleFinding, Severity, assert_files, assert_findings,
+    assert_files, assert_findings,
 };
 use test_support::write_file;
 
@@ -21,22 +21,8 @@ fn warns_on_glob_reexport_in_real_library_lib_rs() {
     write_file(root, package_rel, &mutated);
 
     let results = run_family(root);
-    let glob_line = mutated
-        .lines()
-        .position(|line| line.contains("pub use internal::*;"))
-        .map(|index| index + 1)
-        .unwrap_or_default();
 
-    assert_files(&results, BTreeSet::from([package_rel.to_owned()]));
-    assert_findings(
-        &results,
-        &[RuleFinding::new(
-            Severity::Warn,
-            "glob re-export in lib.rs",
-            "`pub use internal::*` creates an unstable API surface.",
-            Some(package_rel),
-            Some(glob_line),
-            false,
-        )],
-    );
+    // RS-CODE-26 retired: redundant with RS-ARCH-02.
+    assert_files(&results, BTreeSet::new());
+    assert_findings(&results, &[]);
 }

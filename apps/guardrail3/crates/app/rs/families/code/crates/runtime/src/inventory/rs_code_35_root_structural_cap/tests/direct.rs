@@ -28,7 +28,7 @@ fn errors_when_root_exceeds_structural_caps() {
         &[RuleFinding::new(
             guardrail3_domain_report::Severity::Error,
             "crate source tree exceeds structural caps",
-            "Rust root `` exceeds structural caps: module depth 9 > 6, sibling source directories 14 > 12, sibling .rs files 22 > 20.",
+            "Rust root `` exceeds structural caps: module depth 9 > 6, sibling source directories 14 > 12, sibling .rs files 22 > 20. Restructure the crate into smaller modules or sub-crates.",
             Some("Cargo.toml"),
             None,
             false,

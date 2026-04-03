@@ -45,12 +45,12 @@ fn attacks_include_bypass_variants_across_multiple_owned_files() {
         &results,
         &[
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "build-script include! inventory",
                 "`include!(concat!(env!(\"OUT_DIR\"), ...))` detected. Review generated-code boundary.",
                 Some(handlers_rel),
                 Some(handlers_info_line),
-                true,
+                false,
             ),
             RuleFinding::new(
                 Severity::Warn,
