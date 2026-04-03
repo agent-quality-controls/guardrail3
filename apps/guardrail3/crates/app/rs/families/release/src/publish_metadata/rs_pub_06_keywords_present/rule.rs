@@ -12,16 +12,16 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
     match krate.keywords_count {
         Some(0) | None => results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             format!("{}: keywords missing", krate.name),
-            "Publishable crates should set 1-5 `[package].keywords`.".to_owned(),
+            "Publishable crates must set 1-5 `[package].keywords`. Add `keywords = [\"...\"]` to `[package]` in Cargo.toml.".to_owned(),
             Some(krate.cargo_rel_path.clone()),
             None,
             false,
         )),
         Some(count) if count > 5 => results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             format!("{}: too many keywords", krate.name),
             format!("`[package].keywords` has {count} entries; crates.io allows at most 5."),
             Some(krate.cargo_rel_path.clone()),

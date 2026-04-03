@@ -31,7 +31,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Warn,
             "Release-plz workflow missing".to_owned(),
-            "No workflow contains an actual release-plz execution step.".to_owned(),
+            "No workflow contains an actual release-plz execution step. Add a release-plz step to a GitHub Actions workflow.".to_owned(),
             None,
             None,
             false,

@@ -111,7 +111,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             severity: Severity::Warn,
             title: format!("release-plz missing crate `{crate_name}`"),
             message: format!(
-                "Publishable crate `{crate_name}` is missing from `release-plz.toml` `[[package]]` coverage."
+                "Publishable crate `{crate_name}` is missing from `release-plz.toml` `[[package]]` coverage. Add a `[[package]]` entry for `{crate_name}` in release-plz.toml."
             ),
             file: Some(repo.release_plz_rel_path.clone()),
             line: None,

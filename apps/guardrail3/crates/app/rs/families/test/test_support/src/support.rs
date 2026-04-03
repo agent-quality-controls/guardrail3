@@ -1,0 +1,74 @@
+use std::collections::BTreeSet;
+use std::path::{Path, PathBuf};
+
+use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
+use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
+use guardrail3_shared_fs::write_file as write_fs_file;
+
+pub fn temp_root(slug: &str) -> PathBuf {
+    let unique = format!(
+        "{}-{}-{}",
+        slug,
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos()
+    );
+    std::env::temp_dir().join(unique)
+}
+
+pub fn tempdir() -> tempfile::TempDir {
+    tempfile::tempdir().expect("create tempdir")
+}
+
+pub fn write_file(root: &Path, rel_path: &str, content: &str) {
+    let abs = root.join(rel_path);
+    write_fs_file(&abs, content).expect("write file");
+}
+
+pub fn walk(root: &Path) -> ProjectTree {
+    let walked = walk_project(&RealFileSystem, root);
+    ProjectTree::build(
+        walked.root().clone(),
+        walked.structure(),
+        walked.content(),
+        &["".to_owned()],
+        &[],
+        &[],
+        None,
+        &[],
+    )
+}
+
+#[derive(Debug, Default)]
+pub struct StubToolChecker {
+    installed_tools: BTreeSet<String>,
+}
+
+impl StubToolChecker {
+    pub fn with_tools<I, S>(tools: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        Self {
+            installed_tools: tools
+                .into_iter()
+                .map(|tool| tool.as_ref().to_owned())
+                .collect(),
+        }
+    }
+}
+
+impl ToolChecker for StubToolChecker {
+    fn is_installed(&self, tool: &str) -> bool {
+        self.installed_tools.contains(tool)
+    }
+
+    fn run_cargo_publish_dry_run_outcome(&self, _path: &Path) -> Option<CommandRunResult> {
+        None
+    }
+}

@@ -21,7 +21,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Warn,
             "cargo-semver-checks missing".to_owned(),
-            "`cargo-semver-checks` is not available on PATH.".to_owned(),
+            "`cargo-semver-checks` is not available on PATH. Install with `cargo install cargo-semver-checks`.".to_owned(),
             Some(input.repo.cargo_rel_path.clone()),
             None,
             false,

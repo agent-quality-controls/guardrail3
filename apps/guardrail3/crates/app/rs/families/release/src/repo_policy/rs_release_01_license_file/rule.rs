@@ -23,7 +23,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
     ID.to_owned(),
     Severity::Error,
     "LICENSE file missing".to_owned(),
-    "Repo root is missing LICENSE material (`LICENSE`, `LICENSE-MIT`, `LICENSE-APACHE`, or `LICENSE.md`).".to_owned(),
+    "Repo root is missing LICENSE material (`LICENSE`, `LICENSE-MIT`, `LICENSE-APACHE`, or `LICENSE.md`). Create a LICENSE file at the repo root.".to_owned(),
     Some(input.repo.cargo_rel_path.clone()),
     None,
     false,

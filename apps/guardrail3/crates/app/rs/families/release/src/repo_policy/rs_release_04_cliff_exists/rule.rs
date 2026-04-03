@@ -21,7 +21,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Warn,
             "cliff.toml missing".to_owned(),
-            "Repo root is missing `cliff.toml`.".to_owned(),
+            "Repo root is missing `cliff.toml`. Create `cliff.toml` at the repo root with a `[git]` section.".to_owned(),
             Some(repo.cliff_rel_path.clone()),
             None,
             false,

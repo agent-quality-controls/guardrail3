@@ -24,7 +24,7 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
             ID.to_owned(),
             Severity::Error,
             format!("{}: missing description", input.krate.name),
-            "Publishable crates must set `[package].description`.".to_owned(),
+            "Publishable crates must set `[package].description`. Add `description = \"...\"` to `[package]` in Cargo.toml.".to_owned(),
             Some(input.krate.cargo_rel_path.clone()),
             None,
             false,
