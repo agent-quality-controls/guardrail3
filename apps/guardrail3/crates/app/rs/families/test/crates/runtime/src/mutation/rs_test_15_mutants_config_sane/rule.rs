@@ -23,7 +23,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Error,
                 "mutants config excludes everything".to_owned(),
                 format!(
-                    "`{}` contains an `exclude_re` pattern that matches everything.",
+                    "`{}` contains an `exclude_re` pattern that matches everything. Remove the overly broad exclude pattern.",
                     input.root.mutants_rel_path
                 ),
                 Some(input.root.mutants_rel_path.clone()),
@@ -44,7 +44,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Error,
                 "mutants timeout multiplier too low".to_owned(),
                 format!(
-                    "`{}` sets `timeout_multiplier = {timeout_multiplier}`.",
+                    "`{}` sets `timeout_multiplier = {timeout_multiplier}`. Set `timeout_multiplier` to 1.0 or higher.",
                     input.root.mutants_rel_path
                 ),
                 Some(input.root.mutants_rel_path.clone()),

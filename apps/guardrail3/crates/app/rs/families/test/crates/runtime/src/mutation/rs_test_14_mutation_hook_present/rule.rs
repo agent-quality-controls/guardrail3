@@ -10,7 +10,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "mutation hook step missing".to_owned(),
-            "Active hook surfaces do not contain an executable `cargo mutants` step.".to_owned(),
+            "Active hook surfaces do not contain an executable `cargo mutants` step. Add a `cargo mutants` step to the project's hook configuration.".to_owned(),
             Some(input.root.cargo_rel_path.clone()),
             None,
             false,

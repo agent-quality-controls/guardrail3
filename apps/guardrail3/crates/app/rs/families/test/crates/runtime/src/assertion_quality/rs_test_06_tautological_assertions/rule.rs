@@ -11,7 +11,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "tautological assertion".to_owned(),
             format!(
-                "Test `{}` compares only literals in an assertion and proves nothing.",
+                "Test `{}` compares only literals in an assertion and proves nothing. Use values derived from the code under test.",
                 input.function.name
             ),
             Some(input.file.rel_path.clone()),

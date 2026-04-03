@@ -11,7 +11,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "weak matches assertion".to_owned(),
             format!(
-                "Test `{}` uses `assert!(matches!(...))` with `_` wildcards in payload positions.",
+                "Test `{}` uses `assert!(matches!(...))` with `_` wildcards in payload positions. Match on specific payload values instead of wildcards.",
                 input.function.name
             ),
             Some(input.file.rel_path.clone()),
