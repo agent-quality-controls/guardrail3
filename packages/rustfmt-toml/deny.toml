@@ -19,7 +19,6 @@ allow-wildcard-paths = true
 highlight = "all"
 
 skip = [
-    { crate = "windows-sys", reason = "transitive dep version conflict — multiple versions pulled by different deps" },
 ]
 
 deny = [
@@ -61,8 +60,7 @@ deny = [
     { name = "rmp-serde", wrappers = [], reason = "Ban competing binary serialization formats" },
     { name = "prost", wrappers = [], reason = "Ban competing binary serialization formats" },
     { name = "flatbuffers", wrappers = [], reason = "Ban competing binary serialization formats" },
-    # --- Parsing: use structured parsers (syn, tree-sitter, serde_json, toml), never regex ---
-    # regex allowed ONLY as transitive dep of tree-sitter/ignore — never use directly
+    # --- Parsing: use structured parsers, never regex ---
     { name = "regex", wrappers = ["tree-sitter", "globset", "ignore"], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" }, # EXCEPTION: transitive only
     { name = "fancy-regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "onig", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
@@ -70,11 +68,6 @@ deny = [
     { name = "grep-cli", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "grep-regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "grep-matcher", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
-    # --- Local overrides ---
-# Additional [bans] deny entries for deny.toml
-# Example:
-#     { name = "some-crate", wrappers = [] },
-
 ]
 
 # Feature-level bans -- prevent agents from enabling kitchen-sink features
@@ -83,13 +76,6 @@ name = "tokio"
 deny = ["full"]
 # Force explicit feature selection instead of enabling everything
 allow = ["rt-multi-thread", "macros", "net", "sync", "signal", "bytes", "default", "io-util", "time"]
-
-# Additional [[bans.features]] entries for deny.toml
-# Example:
-#     [[bans.features]]
-#     name = "some-crate"
-#     deny = ["full"]
-
 
 # ============================================================
 # LICENSE CHECKING
