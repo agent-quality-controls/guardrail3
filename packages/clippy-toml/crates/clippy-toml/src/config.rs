@@ -129,7 +129,7 @@ impl BanEntry {
     pub fn path(&self) -> &str {
         match self {
             Self::Simple(path) => path,
-            Self::Detailed(detail) => &detail.path,
+            Self::Detailed(detail) => detail.path(),
         }
     }
 
@@ -138,7 +138,7 @@ impl BanEntry {
     pub fn reason(&self) -> Option<&str> {
         match self {
             Self::Simple(_) => None,
-            Self::Detailed(detail) => detail.reason.as_deref(),
+            Self::Detailed(detail) => detail.reason(),
         }
     }
 }
@@ -146,13 +146,30 @@ impl BanEntry {
 /// Detailed ban entry with path and optional reason.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BanEntryDetail {
-    /// The banned path (e.g., `"std::env::var"`).
-    pub path: String,
-    /// Why this item is banned.
-    pub reason: Option<String>,
-    /// Catch-all for additional fields.
+    path: String,
+    reason: Option<String>,
     #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
+    extra: BTreeMap<String, Value>,
+}
+
+impl BanEntryDetail {
+    /// The banned path (e.g., `"std::env::var"`).
+    #[must_use]
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    /// Why this item is banned, if documented.
+    #[must_use]
+    pub fn reason(&self) -> Option<&str> {
+        self.reason.as_deref()
+    }
+
+    /// Additional fields not modeled as typed fields.
+    #[must_use]
+    pub fn extra(&self) -> &BTreeMap<String, Value> {
+        &self.extra
+    }
 }
 
 impl ClippyConfig {
