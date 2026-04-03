@@ -1,4 +1,4 @@
-mod helpers;
+pub(crate) mod helpers;
 mod gating;
 mod golden;
 mod multi_root;

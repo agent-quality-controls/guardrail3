@@ -7,7 +7,7 @@ fn inventories_installed_cargo_dupes() {
     let input = tool_input(&facts, "cargo-dupes");
     let mut results = Vec::new();
 
-    super::helpers::check(&input, &mut results);
+    super::super::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

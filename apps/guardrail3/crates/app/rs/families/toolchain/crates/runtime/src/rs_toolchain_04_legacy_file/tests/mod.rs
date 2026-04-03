@@ -3,8 +3,8 @@ use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_04_legacy_file::
     ExpectedRuleResult, Severity, assert_rule_results,
 };
 
-use super::{check, test_input, test_input_for_root};
-
+use helpers::{test_input, test_input_for_root};
+use super::check;
 #[test]
 fn warns_when_only_legacy_toolchain_file_exists() {
     let input = test_input(None, Some("rust-toolchain"), None, None, None, None);

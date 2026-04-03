@@ -1,5 +1,5 @@
 mod helpers;
-#![allow(dead_code, unused_imports)]
+#[allow(dead_code, unused_imports)]
 mod fail_closed;
 mod golden;
 mod inline_adapter_module;

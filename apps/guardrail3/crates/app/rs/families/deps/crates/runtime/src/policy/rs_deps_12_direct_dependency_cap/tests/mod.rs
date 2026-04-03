@@ -1,5 +1,5 @@
 mod helpers;
-pub(crate) use super::{
+pub(crate) use helpers::{
     collected_facts, collected_facts_with_validation_scope, direct_dependency_cap_facts,
     run_with_facts,
 };

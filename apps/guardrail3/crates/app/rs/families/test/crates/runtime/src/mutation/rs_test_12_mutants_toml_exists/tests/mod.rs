@@ -6,7 +6,7 @@ use guardrail3_app_rs_family_mapper::FamilyMapper;
 use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
-pub(crate) use super::run_family;
+pub(crate) use helpers::run_family;
 pub(crate) use test_support::{tempdir, write_file};
 
 pub(crate) fn run_family_scoped(root: &Path, scope: &str) -> Vec<crate::CheckResult> {

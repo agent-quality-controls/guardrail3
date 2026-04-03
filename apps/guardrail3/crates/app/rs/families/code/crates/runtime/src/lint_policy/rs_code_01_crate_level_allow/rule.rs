@@ -46,7 +46,7 @@ fn push_result(
     let message = if input.is_test_root {
         format!("Crate/module-wide allow for `{lint}` is test-file exempt.")
     } else {
-        format!("Crate/module-wide `allow({lint})` suppresses the lint too broadly.")
+        format!("Crate/module-wide `allow({lint})` suppresses the lint too broadly. Use item-level `#[allow({lint})]` with a `// reason:` comment instead.")
     };
     results.push(CheckResult {
         id: ID.to_owned(),

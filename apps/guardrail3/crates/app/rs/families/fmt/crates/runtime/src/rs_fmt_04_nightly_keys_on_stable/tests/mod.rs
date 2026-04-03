@@ -1,7 +1,7 @@
 mod helpers;
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_04_nightly_keys_on_stable as assertions;
 
-use super::{TestToolchainState, run_check, run_family};
+use helpers::{TestToolchainState, run_check, run_family};
 
 #[test]
 fn reports_nightly_only_keys_on_stable_toolchain() {

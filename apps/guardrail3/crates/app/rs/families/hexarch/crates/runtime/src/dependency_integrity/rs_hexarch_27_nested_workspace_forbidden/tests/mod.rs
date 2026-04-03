@@ -1,5 +1,5 @@
 mod helpers;
-#![allow(dead_code, unused_imports)]
+#[allow(dead_code, unused_imports)]
 mod ownership;
 mod workspace_policy;
 

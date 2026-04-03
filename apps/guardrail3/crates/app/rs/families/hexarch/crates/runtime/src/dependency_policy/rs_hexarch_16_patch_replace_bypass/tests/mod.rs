@@ -1,5 +1,5 @@
 mod helpers;
-#![allow(dead_code, unused_imports)]
+#[allow(dead_code, unused_imports)]
 mod broad_attacks;
 
 use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_16_patch_replace_bypass::CheckResult;

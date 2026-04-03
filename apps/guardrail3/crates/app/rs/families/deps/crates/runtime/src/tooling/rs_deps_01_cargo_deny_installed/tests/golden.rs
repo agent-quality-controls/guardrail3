@@ -7,7 +7,7 @@ fn inventories_installed_cargo_deny() {
     let input = tool_input(&facts, "cargo-deny");
     let mut results = Vec::new();
 
-    super::helpers::check(&input, &mut results);
+    super::super::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

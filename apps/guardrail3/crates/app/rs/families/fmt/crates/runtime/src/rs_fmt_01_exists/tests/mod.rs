@@ -1,7 +1,7 @@
 mod helpers;
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_01_exists as assertions;
 
-use super::{run_check, run_family};
+use helpers::{run_check, run_family};
 
 #[test]
 fn stays_quiet_when_root_rustfmt_config_exists() {

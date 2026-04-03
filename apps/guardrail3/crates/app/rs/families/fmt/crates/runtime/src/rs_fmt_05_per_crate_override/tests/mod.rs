@@ -2,7 +2,7 @@ mod helpers;
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_05_per_crate_override as assertions;
 use test_support::{tempdir, write_file};
 
-use super::run_check;
+use helpers::run_check;
 
 #[test]
 fn reports_extra_per_crate_rustfmt_configs() {
@@ -55,7 +55,7 @@ fn ignores_nested_override_files_in_family_surface() {
     write_file(root, "nested/rustfmt.toml", "max_width = 120\n");
     write_file(root, "nested/.rustfmt.toml", "max_width = 120\n");
 
-    let results = super::run_family_check(root);
+    let results = helpers::run_family_check(root);
 
     assertions::assert_no_findings(&results);
 }

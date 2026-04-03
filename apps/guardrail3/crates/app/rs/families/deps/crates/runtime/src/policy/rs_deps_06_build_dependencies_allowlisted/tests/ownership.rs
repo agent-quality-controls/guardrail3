@@ -47,7 +47,7 @@ fn workspace_true_external_build_dependency_is_checked() {
     let input = dependency_input(&facts, "packages/core/Cargo.toml", "bindgen");
     let mut results = Vec::new();
 
-    super::helpers::check(&input, &mut results);
+    super::super::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,
@@ -104,7 +104,7 @@ fn target_specific_build_dependency_is_checked() {
     let input = dependency_input(&facts, "packages/core/Cargo.toml", "bindgen");
     let mut results = Vec::new();
 
-    super::helpers::check(&input, &mut results);
+    super::super::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,
@@ -124,7 +124,7 @@ fn build_rule_stays_silent_without_allowlist() {
     let input = dependency_input(&facts, "crates/api/Cargo.toml", "bindgen");
     let mut results = Vec::new();
 
-    super::helpers::check(&input, &mut results);
+    super::super::check(&input, &mut results);
 
     assertions::assert_rule_quiet(&results);
 }

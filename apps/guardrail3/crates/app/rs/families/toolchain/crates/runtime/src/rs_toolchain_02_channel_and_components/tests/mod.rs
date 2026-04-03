@@ -3,8 +3,8 @@ use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_02_channel_and_c
     ExpectedRuleResult, Severity, assert_rule_results,
 };
 
-use super::{check, test_input};
-
+use helpers::{test_input};
+use super::check;
 fn parse_toolchain_policy_toml(source: &str) -> toml::Value {
     toml::from_str::<toml::Value>(source)
         .expect("toolchain channel/components test fixture TOML should parse")

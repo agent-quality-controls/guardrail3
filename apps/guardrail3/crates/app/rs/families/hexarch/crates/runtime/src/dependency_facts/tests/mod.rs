@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_imports)]
+#[allow(dead_code, unused_imports)]
 mod cycle_collection;
 mod scope_boundaries;
 
