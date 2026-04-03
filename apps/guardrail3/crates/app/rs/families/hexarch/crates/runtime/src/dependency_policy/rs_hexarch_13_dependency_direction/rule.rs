@@ -45,13 +45,15 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
         Severity::Error,
         "dependency direction violation".to_owned(),
         format!(
-            "{} crate `{}` ({}) depends on {} crate `{}` via `{}`.",
+            "{} crate `{}` ({}) depends on {} crate `{}` via `{}`. {} must not depend on {}. Remove this dependency or invert the direction through ports.",
             source_layer.label(),
             edge.source_name,
             edge.source_rel_dir,
             target_layer.label(),
             edge.dep_package_name,
-            edge.section_label
+            edge.section_label,
+            source_layer.label(),
+            target_layer.label()
         ),
         Some(edge.source_cargo_rel_path.clone()),
         None,

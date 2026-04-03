@@ -42,12 +42,14 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
         Severity::Warn,
         "dev-dependency direction violation".to_owned(),
         format!(
-            "{} crate `{}` dev-depends on {} crate `{}` via `{}`.",
+            "{} crate `{}` dev-depends on {} crate `{}` via `{}`. {} should not dev-depend on {}. Consider restructuring the test dependencies.",
             source_layer.label(),
             edge.source_name,
             target_layer.label(),
             edge.dep_package_name,
-            edge.section_label
+            edge.section_label,
+            source_layer.label(),
+            target_layer.label()
         ),
         Some(edge.source_cargo_rel_path.clone()),
         None,

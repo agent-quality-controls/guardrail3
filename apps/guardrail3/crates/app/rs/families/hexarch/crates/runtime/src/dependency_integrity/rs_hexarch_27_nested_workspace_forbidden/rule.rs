@@ -24,9 +24,10 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
                 input.app_name, cargo_root.rel_dir
             ),
     format!(
-                "Service `{}` contains nested workspace `{}` at `{}`. The app root Cargo.toml must be the only workspace root inside the app boundary.",
+                "Service `{}` contains nested workspace `{}` at `{}`. The app root Cargo.toml must be the only workspace root inside the app boundary. Remove the `[workspace]` section from `{}`.",
                 input.app_name,
                 cargo_root.rel_dir,
+                cargo_root.cargo_rel_path,
                 cargo_root.cargo_rel_path
             ),
     Some(cargo_root.cargo_rel_path.to_owned()),

@@ -46,7 +46,7 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
         Severity::Error,
         "renamed dependency direction violation".to_owned(),
         format!(
-            "{} crate `{}` depends on alias `{}` for package `{}` which resolves to {} layer `{}`.",
+            "{} crate `{}` depends on alias `{}` for package `{}` which resolves to {} layer `{}`. {} must not depend on {}. Remove this dependency or invert the direction through ports.",
             source_layer.label(),
             edge.source_name,
             edge.dep_alias,
@@ -54,7 +54,9 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
             target_layer.label(),
             edge.resolved_target_rel_dir
                 .as_deref()
-                .unwrap_or("<unknown>")
+                .unwrap_or("<unknown>"),
+            source_layer.label(),
+            target_layer.label()
         ),
         Some(edge.source_cargo_rel_path.clone()),
         None,
