@@ -20,7 +20,7 @@ pub fn check(input: &ReleaseEdgeInput<'_>, results: &mut Vec<CheckResult>) {
     Severity::Error,
     format!("{}: version mismatch with {}", edge.crate_name, edge.dep_name),
     format!(
-            "Dependency `{}`{} in `[{}]`{} requires `{}` but actual local publishable version is `{}`.",
+            "Dependency `{}`{} in `[{}]`{} requires `{}` but actual local publishable version is `{}`. Update the version requirement to match the local crate's version.",
             edge.dep_name,
             dependency_package_suffix(edge),
             edge.section_label,

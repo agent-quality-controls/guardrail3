@@ -25,7 +25,7 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
             ID.to_owned(),
             Severity::Warn,
             format!("{}: missing binstall metadata", krate.name),
-            "Publishable binary crates should set `[package.metadata.binstall]`.".to_owned(),
+            "Publishable binary crates should set `[package.metadata.binstall]`. Add `[package.metadata.binstall]` to Cargo.toml.".to_owned(),
             Some(krate.cargo_rel_path.clone()),
             None,
             false,
