@@ -87,23 +87,21 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                 }
             }
 
-            if root.profile_name.as_deref() == Some("library") {
-                for expected in EXPECTED_LIBRARY_RUST_LINTS {
-                    if lint_level(rust_lints, expected.name).is_none() {
-                        missing += 1;
-                        results.push(CheckResult {
-                            id: ID.to_owned(),
-                            severity: Severity::Error,
-                            title: format!("missing library rust lint `{}`", expected.name),
-                            message: format!(
-                                "Library profile requires `{}` in `{table}`. Add `{}` to `{table}`.",
-                                expected.name, expected.name,
-                            ),
-                            file: Some(root.cargo_rel_path.clone()),
-                            line: None,
-                            inventory: false,
-                        });
-                    }
+            for expected in EXPECTED_LIBRARY_RUST_LINTS {
+                if lint_level(rust_lints, expected.name).is_none() {
+                    missing += 1;
+                    results.push(CheckResult {
+                        id: ID.to_owned(),
+                        severity: Severity::Error,
+                        title: format!("missing rust lint `{}`", expected.name),
+                        message: format!(
+                            "`{}` must define `{}` in `{table}`. Add `{}` to `{table}`.",
+                            root.cargo_rel_path, expected.name, expected.name,
+                        ),
+                        file: Some(root.cargo_rel_path.clone()),
+                        line: None,
+                        inventory: false,
+                    });
                 }
             }
         }

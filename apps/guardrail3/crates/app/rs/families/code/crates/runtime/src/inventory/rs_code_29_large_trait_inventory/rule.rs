@@ -6,10 +6,6 @@ use crate::parse::find_large_traits;
 const ID: &str = "RS-CODE-29";
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.profile_name != Some("library") {
-        return;
-    }
-
     for info in find_large_traits(input.ast) {
         let severity = if info.method_count > 12 {
             Severity::Error
