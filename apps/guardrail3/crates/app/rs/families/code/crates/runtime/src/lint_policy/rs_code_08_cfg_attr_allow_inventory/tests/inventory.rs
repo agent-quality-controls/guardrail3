@@ -72,36 +72,36 @@ fn inventories_conditional_cfg_attr_allows_across_real_owned_files_with_exact_me
         &results,
         &[
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "conditional cfg_attr allow",
                 "Conditional cfg_attr allow for `clippy::unwrap_used`.",
                 Some(backend_rel),
                 Some(backend_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "conditional cfg_attr allow",
                 "Conditional cfg_attr allow for `clippy::unwrap_used`.",
                 Some(nested_rel),
                 Some(nested_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "conditional cfg_attr allow",
                 "Conditional cfg_attr allow for `clippy::expect_used`.",
                 Some(worker_rel),
                 Some(worker_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "conditional cfg_attr allow",
                 "Conditional cfg_attr allow for `clippy::panic`.",
                 Some(worker_rel),
                 Some(worker_line),
-                true,
+                false,
             ),
         ],
     );
@@ -131,12 +131,12 @@ fn inventories_conditional_cfg_attr_allow_on_trait_item() {
     assert_findings(
         &results,
         &[RuleFinding::new(
-            Severity::Info,
+            Severity::Warn,
             "conditional cfg_attr allow",
             "Conditional cfg_attr allow for `dead_code`.",
             Some(rel),
             Some(line),
-            true,
+            false,
         )],
     );
 }
@@ -165,12 +165,12 @@ fn inventories_nested_conditional_cfg_attr_allow() {
     assert_findings(
         &results,
         &[RuleFinding::new(
-            Severity::Info,
+            Severity::Warn,
             "conditional cfg_attr allow",
             "Conditional cfg_attr allow for `dead_code`.",
             Some(rel),
             Some(line),
-            true,
+            false,
         )],
     );
 }

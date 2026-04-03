@@ -11,9 +11,9 @@ fn errors_on_public_struct_with_named_public_fields() {
     assert_findings(
         &results,
         &[RuleFinding::new(
-            guardrail3_domain_report::Severity::Error,
+            guardrail3_domain_report::Severity::Warn,
             "public struct exposes named public fields",
-            "Public struct `User` exposes 2 named `pub` fields. Prefer private fields and explicit accessors or constructors.",
+            "Public struct `User` exposes 2 named `pub` fields (warn below 5, error at 5+). Prefer private fields and explicit accessors or constructors.",
             Some("src/lib.rs"),
             Some(1),
             false,

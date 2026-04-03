@@ -90,7 +90,7 @@ fn detects_non_exempt_garde_skips_without_comments_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "garde(skip) without comment",
-                "`#[garde(skip)]` on non-exempt type `WholeTypeSkipProbe` requires documentation.",
+                "`#[garde(skip)]` on non-exempt type `WholeTypeSkipProbe` requires documentation. Add a `// reason:` comment explaining why validation is skipped.",
                 Some(type_rel),
                 Some(type_line),
                 false,
@@ -98,7 +98,7 @@ fn detects_non_exempt_garde_skips_without_comments_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "garde(skip) without comment",
-                "`#[garde(skip)]` on non-exempt field `field: String` requires documentation.",
+                "`#[garde(skip)]` on non-exempt field `field: String` requires documentation. Add a `// reason:` comment explaining why validation is skipped.",
                 Some(field_rel),
                 Some(field_line),
                 false,
@@ -106,7 +106,7 @@ fn detects_non_exempt_garde_skips_without_comments_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "garde(skip) without comment",
-                "`#[garde(skip)]` on non-exempt field `items: Vec<String>` requires documentation.",
+                "`#[garde(skip)]` on non-exempt field `items: Vec<String>` requires documentation. Add a `// reason:` comment explaining why validation is skipped.",
                 Some(vec_rel),
                 Some(vec_line),
                 false,
@@ -114,7 +114,7 @@ fn detects_non_exempt_garde_skips_without_comments_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "garde(skip) without comment",
-                "`#[garde(skip)]` on non-exempt field `field: UserMap` requires documentation.",
+                "`#[garde(skip)]` on non-exempt field `field: UserMap` requires documentation. Add a `// reason:` comment explaining why validation is skipped.",
                 Some(alias_rel),
                 Some(alias_line),
                 false,
@@ -122,7 +122,7 @@ fn detects_non_exempt_garde_skips_without_comments_across_real_owned_files() {
             RuleFinding::new(
                 Severity::Error,
                 "garde(skip) without comment",
-                "`#[garde(skip)]` on non-exempt field `field: Option<UserMap>` requires documentation.",
+                "`#[garde(skip)]` on non-exempt field `field: Option<UserMap>` requires documentation. Add a `// reason:` comment explaining why validation is skipped.",
                 Some(option_alias_rel),
                 Some(option_alias_line),
                 false,

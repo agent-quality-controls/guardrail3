@@ -16,7 +16,7 @@ fn errors_on_functions_and_structs_above_generic_cap() {
             RuleFinding::new(
                 guardrail3_domain_report::Severity::Error,
                 "too many generic parameters",
-                "function `build` has 7 type/const generic parameters (cap 6; lifetimes do not count).",
+                "function `build` has 7 type/const generic parameters (cap 6; lifetimes do not count). Reduce the number of generic parameters or introduce a trait to abstract them.",
                 Some("src/lib.rs"),
                 Some(1),
                 false,
@@ -24,7 +24,7 @@ fn errors_on_functions_and_structs_above_generic_cap() {
             RuleFinding::new(
                 guardrail3_domain_report::Severity::Error,
                 "too many generic parameters",
-                "struct `Cache` has 7 type/const generic parameters (cap 6; lifetimes do not count).",
+                "struct `Cache` has 7 type/const generic parameters (cap 6; lifetimes do not count). Reduce the number of generic parameters or introduce a trait to abstract them.",
                 Some("src/lib.rs"),
                 Some(2),
                 false,

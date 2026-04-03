@@ -13,7 +13,7 @@ fn errors_on_std_fs_import() {
         &[RuleFinding::new(
             guardrail3_domain_report::Severity::Error,
             "direct std::fs import",
-            "Direct `use std::fs` import found: `use std::fs;`.",
+            "Direct `use std::fs` import found: `use std::fs;`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
             Some("src/foo.rs"),
             Some(1),
             false,
@@ -31,7 +31,7 @@ fn errors_on_inline_std_fs_call() {
         &[RuleFinding::new(
             guardrail3_domain_report::Severity::Error,
             "direct std::fs call",
-            "Direct `std::fs::*` call found: `fn main() { let _ = std::fs::read_to_string(\"foo\"); }`.",
+            "Direct `std::fs::*` call found: `fn main() { let _ = std::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
             Some("src/foo.rs"),
             Some(1),
             false,
@@ -49,7 +49,7 @@ fn still_errors_inside_allow_scoped_std_fs_usage() {
         &[RuleFinding::new(
             guardrail3_domain_report::Severity::Error,
             "direct std::fs call",
-            "Direct `std::fs::*` call found: `fn main() { let _ = std::fs::read_to_string(\"foo\"); }`.",
+            "Direct `std::fs::*` call found: `fn main() { let _ = std::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
             Some("src/foo.rs"),
             Some(2),
             false,
@@ -67,7 +67,7 @@ fn errors_on_std_alias_fs_call() {
         &[RuleFinding::new(
             guardrail3_domain_report::Severity::Error,
             "direct std::fs call",
-            "Direct `std::fs::*` call found: `fn main() { let _ = s::fs::read_to_string(\"foo\"); }`.",
+            "Direct `std::fs::*` call found: `fn main() { let _ = s::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
             Some("src/foo.rs"),
             Some(2),
             false,
@@ -85,7 +85,7 @@ fn errors_on_extern_crate_std_alias_fs_call() {
         &[RuleFinding::new(
             guardrail3_domain_report::Severity::Error,
             "direct std::fs call",
-            "Direct `std::fs::*` call found: `fn main() { let _ = s::fs::read_to_string(\"foo\"); }`.",
+            "Direct `std::fs::*` call found: `fn main() { let _ = s::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
             Some("src/foo.rs"),
             Some(2),
             false,
