@@ -13,6 +13,7 @@ pub type InlineModAllow = guardrail3_app_rs_ast::ast_helpers::InlineModAllow;
 pub type CfgAttrLintInfo = types::CfgAttrLintInfo;
 pub type CfgPredicateTruth = types::CfgPredicateTruth;
 pub type DenyForbidInfo = types::DenyForbidInfo;
+#[allow(dead_code)] // reason: CODE-27 removed (redundant with ARCH-02) but type retained for potential future use
 pub type FacadeBodyItemInfo = types::FacadeBodyItemInfo;
 pub type ForbiddenMacroInfo = types::ForbiddenMacroInfo;
 pub type ForeignModAllowInfo = types::ForeignModAllowInfo;
@@ -119,10 +120,12 @@ pub fn find_std_fs_glob_import_lines(ast: &syn::File) -> Vec<usize> {
     fs_visitors::find_std_fs_glob_import_lines(ast)
 }
 
+#[allow(dead_code)] // reason: CODE-26 removed (redundant with ARCH-02)
 pub fn find_pub_use_glob_reexports(ast: &syn::File) -> Vec<(usize, String)> {
     visitors::find_pub_use_glob_reexports(ast)
 }
 
+#[allow(dead_code)] // reason: CODE-27 removed (redundant with ARCH-02)
 pub fn find_facade_body_items(ast: &syn::File) -> Vec<FacadeBodyItemInfo> {
     visitors::find_facade_body_items(ast)
 }

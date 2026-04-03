@@ -61,6 +61,7 @@ pub(crate) fn path_to_string(path: &syn::Path) -> String {
         .join("::")
 }
 
+#[allow(dead_code)] // reason: CODE-26/27 removed (redundant with ARCH-02)
 pub(crate) fn path_to_string_from_use_tree(tree: &syn::UseTree) -> String {
     match tree {
         syn::UseTree::Path(path) => {

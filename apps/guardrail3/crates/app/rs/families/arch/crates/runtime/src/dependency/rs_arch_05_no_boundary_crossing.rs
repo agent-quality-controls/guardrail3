@@ -39,7 +39,7 @@ pub(crate) fn check(
     };
 
     let boundary_label = if boundary_rel.is_empty() {
-        "project root".to_owned()
+        "the root workspace".to_owned()
     } else {
         format!("`{boundary_rel}`")
     };

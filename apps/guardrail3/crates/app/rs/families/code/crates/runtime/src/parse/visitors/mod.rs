@@ -29,6 +29,7 @@ pub fn find_test_expect_calls(ast: &syn::File, file_is_test_root: bool) -> Vec<T
     visitor.out
 }
 
+#[allow(dead_code)] // reason: CODE-26 removed (redundant with ARCH-02)
 pub fn find_pub_use_glob_reexports(ast: &syn::File) -> Vec<(usize, String)> {
     ast.items
         .iter()
@@ -55,6 +56,7 @@ pub fn find_pub_use_glob_reexports(ast: &syn::File) -> Vec<(usize, String)> {
         .collect()
 }
 
+#[allow(dead_code)] // reason: CODE-26 removed (redundant with ARCH-02)
 fn glob_reexport_targets(tree: &syn::UseTree) -> Vec<String> {
     match tree {
         syn::UseTree::Path(path) => glob_reexport_targets(&path.tree)
@@ -67,6 +69,7 @@ fn glob_reexport_targets(tree: &syn::UseTree) -> Vec<String> {
     }
 }
 
+#[allow(dead_code)] // reason: CODE-27 removed (redundant with ARCH-02)
 pub fn find_facade_body_items(ast: &syn::File) -> Vec<FacadeBodyItemInfo> {
     ast.items
         .iter()

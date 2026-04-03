@@ -53,7 +53,6 @@ pub struct DependencyEntryFacts {
 pub struct AllowlistCoverageFacts {
     pub(crate) crate_name: String,
     pub(crate) cargo_rel_path: String,
-    pub(crate) profile_name: Option<String>,
     pub(crate) has_allowlist: bool,
 }
 
@@ -151,7 +150,6 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         .map(|member| AllowlistCoverageFacts {
             crate_name: member.crate_name,
             cargo_rel_path: member.cargo_rel_path,
-            profile_name: member.profile_name,
             has_allowlist: member.allowed_deps.is_some(),
         })
         .collect();
