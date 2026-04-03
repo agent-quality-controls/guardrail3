@@ -2,8 +2,9 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 use crate::inputs::PolicyRootCargoInput;
 use crate::lint_support::{
-    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS,
-    lint_level, policy_lints, policy_lints_table_label,
+    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_CLIPPY_REQUIRED_ALLOW,
+    EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS, lint_level, policy_lints,
+    policy_lints_table_label,
 };
 
 const ID: &str = "RS-CARGO-01";
@@ -157,6 +158,27 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                         line: None,
                         inventory: false,
                     });
+                }
+            }
+
+            for required in EXPECTED_CLIPPY_REQUIRED_ALLOW {
+                match lint_level(clippy_lints, required.name).as_deref() {
+                    Some("allow") => {} // correct
+                    _ => {
+                        missing += 1;
+                        results.push(CheckResult {
+                            id: ID.to_owned(),
+                            severity: Severity::Error,
+                            title: format!("clippy lint `{}` must be allowed", required.name),
+                            message: format!(
+                                "`{}` must set `{} = \"allow\"` in `{table}`. {}",
+                                root.cargo_rel_path, required.name, required.reason,
+                            ),
+                            file: Some(root.cargo_rel_path.clone()),
+                            line: None,
+                            inventory: false,
+                        });
+                    }
                 }
             }
         }
