@@ -17,7 +17,7 @@ fn empty_workspace_app_still_requires_boundary_config() {
         ],
     );
 
-    let results = super::super::results_for_test_tree(&tree);
+    let results = super::helpers::results_for_test_tree(&tree);
     assertions::assert_title_set(
         &results,
         "",

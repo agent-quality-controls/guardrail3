@@ -23,7 +23,7 @@ fn sidecar_fixture_rust_is_ignored() {
     write_file(
         root,
         "src/lib_tests/cases.rs",
-        "#[test]\nfn proves() { assert_eq!(super::super::value(), 1); }\n",
+        "#[test]\nfn proves() { assert_eq!(super::helpers::value(), 1); }\n",
     );
     write_file(
         root,

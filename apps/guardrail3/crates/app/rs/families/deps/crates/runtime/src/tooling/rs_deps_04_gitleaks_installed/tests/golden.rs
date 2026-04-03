@@ -7,7 +7,7 @@ fn inventories_installed_gitleaks() {
     let input = tool_input(&facts, "gitleaks");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

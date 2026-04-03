@@ -1,17 +1,6 @@
 mod rule;
 pub use rule::{check};
-#[cfg(test)]
-use guardrail3_domain_report::CheckResult;
 
-#[cfg(test)]
-use crate::source_facts::SourceCrateFacts;
-#[cfg(test)]
-pub(crate) use rule::SourceCrateLayerForTest;
-#[cfg(test)]
-pub(crate) fn run_source_case(
-    layer: SourceCrateLayerForTest,
-    crate_name: &str,
-    rel_dir: &str,
     pub_trait_count: usize,
     public_free_fn_count: usize,
     public_inherent_method_count: usize,
@@ -34,10 +23,6 @@ pub(crate) fn run_source_case(
     let mut results = Vec::new();
     check(&crate::inputs::SourceCrateHexarchInput::new(&source), &mut results);
     results
-}
-#[cfg(test)]
-pub(crate) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
-    crate::check_test_tree(&test_support::walk(root))
 }
 
 #[cfg(test)]

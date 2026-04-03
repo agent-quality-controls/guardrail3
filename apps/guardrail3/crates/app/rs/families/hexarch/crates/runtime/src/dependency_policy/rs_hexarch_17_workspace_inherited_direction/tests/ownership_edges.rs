@@ -1,4 +1,4 @@
-use super::super::audit_edge_for_test as audit_edge;
+use super::helpers::audit_edge_for_test as audit_edge;
 use super::{dir_entry, project_tree};
 use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_17_workspace_inherited_direction as rule17_assertions;
 

@@ -1,5 +1,5 @@
-use super::super::copy_fixture;
-use super::super::run_family;
+use super::helpers::copy_fixture;
+use super::helpers::run_family;
 use guardrail3_app_rs_family_code_assertions::api_shape::rs_code_27_facade_only_lib::assert_no_hits;
 use test_support::write_file;
 
@@ -26,7 +26,7 @@ fn skips_consts_types_and_explicit_pub_reexports_in_lib_rs() {
 #[test]
 fn skips_cfg_test_inline_module_outside_library_lib_rs() {
     let content = "#[cfg(test)]\npub mod tests { pub fn run() {} }\n";
-    let results = super::super::check_source("src/main.rs", content, false);
+    let results = super::helpers::check_source("src/main.rs", content, false);
 
     assert_no_hits(&results);
 }

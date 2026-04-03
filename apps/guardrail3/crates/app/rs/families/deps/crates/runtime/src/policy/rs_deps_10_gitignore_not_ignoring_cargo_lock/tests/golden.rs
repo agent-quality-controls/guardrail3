@@ -7,7 +7,7 @@ fn inventories_clean_gitignore() {
     let input = lockfile_input(&facts);
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

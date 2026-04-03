@@ -1,4 +1,4 @@
-use super::super::check_source;
+use super::helpers::check_source;
 use guardrail3_app_rs_family_code_assertions::hygiene::rs_code_16_panic_macro::{
     RuleFinding, assert_findings,
 };

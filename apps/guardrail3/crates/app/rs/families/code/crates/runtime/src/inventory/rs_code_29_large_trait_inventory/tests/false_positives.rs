@@ -1,5 +1,5 @@
-use super::super::copy_fixture;
-use super::super::run_family;
+use super::helpers::copy_fixture;
+use super::helpers::run_family;
 use guardrail3_app_rs_family_code_assertions::inventory::rs_code_29_large_trait_inventory::assert_no_hits;
 use test_support::write_file;
 

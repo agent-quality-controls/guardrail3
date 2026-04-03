@@ -12,7 +12,7 @@ fn malformed_member_manifest_errors_in_family_run() {
     )
     .expect("write malformed member cargo");
 
-    let results = super::super::results_for_test_root(tmp.path());
+    let results = super::helpers::results_for_test_root(tmp.path());
     assertions::assert_error_summary(
         &results,
         "",

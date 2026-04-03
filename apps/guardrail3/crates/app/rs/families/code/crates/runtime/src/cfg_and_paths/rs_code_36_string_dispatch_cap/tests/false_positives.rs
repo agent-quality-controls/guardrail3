@@ -1,4 +1,4 @@
-use super::super::check_source;
+use super::helpers::check_source;
 use guardrail3_app_rs_family_code_assertions::cfg_and_paths::rs_code_36_string_dispatch_cap::assert_no_hits;
 
 #[test]

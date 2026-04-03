@@ -47,7 +47,7 @@ fn workspace_true_external_dev_dependency_keeps_warn_severity() {
     let input = dependency_input(&facts, "packages/core/Cargo.toml", "tempfile");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,
@@ -104,7 +104,7 @@ fn target_specific_dev_dependency_keeps_warn_severity() {
     let input = dependency_input(&facts, "packages/core/Cargo.toml", "tempfile");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,
@@ -124,7 +124,7 @@ fn dev_rule_stays_silent_without_allowlist() {
     let input = dependency_input(&facts, "crates/api/Cargo.toml", "tempfile");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_quiet(&results);
 }

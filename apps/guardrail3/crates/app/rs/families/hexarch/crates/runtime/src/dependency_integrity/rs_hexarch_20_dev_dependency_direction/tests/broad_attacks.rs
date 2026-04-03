@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_20_dev_dependency_direction as rule20_assertions;
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 
-use super::super::check_for_test_tree as family_check;
+use super::helpers::check_for_test_tree as family_check;
 use super::{dir_entry, project_tree};
 
 fn dev_graph_tree() -> ProjectTree {

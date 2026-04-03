@@ -1,3 +1,4 @@
+mod helpers;
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_05_per_crate_override as assertions;
 use test_support::{tempdir, write_file};
 

@@ -1,4 +1,4 @@
-use super::super::results_for_dependency_edges_for_test as results_for_dependency_edges;
+use super::helpers::results_for_dependency_edges_for_test as results_for_dependency_edges;
 use super::{dir_entry, project_tree};
 use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_17_workspace_inherited_direction as assertions;
 

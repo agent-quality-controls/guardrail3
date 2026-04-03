@@ -1,3 +1,4 @@
+mod helpers;
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_04_nightly_keys_on_stable as assertions;
 
 use super::{TestToolchainState, run_check, run_family};

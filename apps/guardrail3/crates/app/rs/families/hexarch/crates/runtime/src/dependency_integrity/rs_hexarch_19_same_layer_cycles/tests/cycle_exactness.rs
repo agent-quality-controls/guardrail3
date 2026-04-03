@@ -1,4 +1,4 @@
-use super::super::check_cycle_for_test as check_cycle;
+use super::helpers::check_cycle_for_test as check_cycle;
 use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_19_same_layer_cycles as assertions;
 use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_19_same_layer_cycles::Severity;
 

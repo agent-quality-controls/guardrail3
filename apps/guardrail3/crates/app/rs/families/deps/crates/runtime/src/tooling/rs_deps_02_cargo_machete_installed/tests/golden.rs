@@ -7,7 +7,7 @@ fn inventories_installed_cargo_machete() {
     let input = tool_input(&facts, "cargo-machete");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

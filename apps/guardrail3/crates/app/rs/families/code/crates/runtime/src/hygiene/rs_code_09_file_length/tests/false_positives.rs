@@ -1,5 +1,5 @@
-use super::super::copy_fixture;
-use super::super::run_family;
+use super::helpers::copy_fixture;
+use super::helpers::run_family;
 use guardrail3_app_rs_family_code_assertions::hygiene::rs_code_09_file_length::assert_no_hits;
 use test_support::write_file;
 
@@ -42,7 +42,7 @@ fn skips_nested_block_comment_lines_when_counting_effective_code_bearing_lines()
         "/* outer\n/* inner */\nstill outer */\n".repeat(400)
     );
 
-    let results = super::super::check_source("src/lib.rs", &content, false);
+    let results = super::helpers::check_source("src/lib.rs", &content, false);
     assert_no_hits(&results);
 }
 
@@ -53,6 +53,6 @@ fn skips_multiline_raw_string_payload_lines_when_counting_effective_code_bearing
         "payload line\n".repeat(600)
     );
 
-    let results = super::super::check_source("src/lib.rs", &content, false);
+    let results = super::helpers::check_source("src/lib.rs", &content, false);
     assert_no_hits(&results);
 }

@@ -1,3 +1,4 @@
+mod helpers;
 pub(crate) use super::check_results;
 const APP_WORKSPACE_CARGO: &str = "[workspace]\nmembers = []\nresolver = \"2\"\n";
 const PACKAGE_CARGO: &str = "[package]\nname = \"shared\"\nedition = \"2024\"\n";

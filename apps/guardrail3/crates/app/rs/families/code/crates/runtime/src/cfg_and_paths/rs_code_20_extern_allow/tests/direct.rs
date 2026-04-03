@@ -1,4 +1,4 @@
-use super::super::check_source;
+use super::helpers::check_source;
 use guardrail3_app_rs_family_code_assertions::cfg_and_paths::rs_code_20_extern_allow::{
     RuleFinding, assert_errors_on_allow_attr_on_extern_block,
     assert_errors_on_cfg_attr_allow_covers_an_extern_block,

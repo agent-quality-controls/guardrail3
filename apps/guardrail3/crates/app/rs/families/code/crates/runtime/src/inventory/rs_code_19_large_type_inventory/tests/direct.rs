@@ -1,4 +1,4 @@
-use super::super::check_source;
+use super::helpers::check_source;
 use guardrail3_app_rs_family_code_assertions::inventory::rs_code_19_large_type_inventory::{
     RuleFinding, assert_findings,
 };
