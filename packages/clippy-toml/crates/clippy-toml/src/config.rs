@@ -146,8 +146,11 @@ impl BanEntry {
 /// Detailed ban entry with path and optional reason.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BanEntryDetail {
+    /// The banned path (e.g., `"std::env::var"`).
     path: String,
+    /// Why this item is banned.
     reason: Option<String>,
+    /// Catch-all for additional fields.
     #[serde(flatten)]
     extra: BTreeMap<String, Value>,
 }
@@ -167,7 +170,7 @@ impl BanEntryDetail {
 
     /// Additional fields not modeled as typed fields.
     #[must_use]
-    pub fn extra(&self) -> &BTreeMap<String, Value> {
+    pub const fn extra(&self) -> &BTreeMap<String, Value> {
         &self.extra
     }
 }
