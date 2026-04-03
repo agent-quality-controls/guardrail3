@@ -14,7 +14,7 @@ pub fn check(input: &ReleaseEdgeInput<'_>, results: &mut Vec<CheckResult>) {
         Severity::Error,
         format!("{}: path dep to non-publishable crate", edge.crate_name),
         format!(
-            "Dependency `{}`{} in `[{}]`{} points at a non-publishable local crate.",
+            "Dependency `{}`{} in `[{}]`{} points at a non-publishable local crate. Either make the target crate publishable or replace the path dependency with a version requirement.",
             edge.dep_name,
             dependency_package_suffix(edge),
             edge.section_label,

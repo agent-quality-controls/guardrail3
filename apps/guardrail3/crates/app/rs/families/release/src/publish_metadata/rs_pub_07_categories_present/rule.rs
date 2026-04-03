@@ -24,9 +24,9 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
         ),
         _ => results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             format!("{}: categories missing", krate.name),
-            "Publishable crates should set non-empty `[package].categories`.".to_owned(),
+            "Publishable crates must set non-empty `[package].categories`. Add `categories = [\"...\"]` to `[package]` in Cargo.toml.".to_owned(),
             Some(krate.cargo_rel_path.clone()),
             None,
             false,

@@ -23,9 +23,9 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
     } else {
         CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Info,
+            Severity::Warn,
             format!("{}: include/exclude missing", krate.name),
-            "Publishable crates should consider `include` or `exclude` patterns.".to_owned(),
+            "Publishable crates should set `include` or `exclude` patterns to control what gets published. Add `include = [\"src/**\", \"Cargo.toml\", \"README.md\", \"LICENSE\"]` to `[package]`.".to_owned(),
             Some(krate.cargo_rel_path.clone()),
             None,
             false,

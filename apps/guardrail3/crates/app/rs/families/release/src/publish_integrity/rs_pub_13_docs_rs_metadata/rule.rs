@@ -23,9 +23,9 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
     } else {
         CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Info,
+            Severity::Warn,
             format!("{}: docs.rs metadata missing", krate.name),
-            "Library crates should set `[package.metadata.docs.rs]` for reproducible docs.rs builds.".to_owned(),
+            "Library crates should set `[package.metadata.docs.rs]` for reproducible docs.rs builds. Add `[package.metadata.docs.rs]` to Cargo.toml.".to_owned(),
             Some(krate.cargo_rel_path.clone()),
             None,
             false,
