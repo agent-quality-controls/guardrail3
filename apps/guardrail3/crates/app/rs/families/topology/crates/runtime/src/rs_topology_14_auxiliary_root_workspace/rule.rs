@@ -21,7 +21,7 @@ pub fn check(input: &TopologyIssueInput<'_>, results: &mut Vec<CheckResult>) {
             display_dir(&input.issue.rel_dir)
         ),
         format!(
-            "`{}` is an auxiliary top-level Rust root. Auxiliary roots must still declare `[workspace]`.",
+            "`{}` is a top-level Rust root marked `topology_role = \"auxiliary\"`. Even auxiliary roots must declare `[workspace]`. Add a `[workspace]` section to this Cargo.toml.",
             input.issue.cargo_rel_path
         ),
         Some(input.issue.cargo_rel_path.clone()),

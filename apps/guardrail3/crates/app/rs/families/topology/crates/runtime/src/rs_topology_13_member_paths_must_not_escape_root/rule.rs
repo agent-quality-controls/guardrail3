@@ -22,7 +22,7 @@ pub fn check(input: &TopologyIssueInput<'_>, results: &mut Vec<CheckResult>) {
             display_dir(workspace_root_rel)
         ),
         format!(
-            "`{}` declares member pattern `{member_pattern}`, which escapes the workspace root.",
+            "`{}` declares member pattern `{member_pattern}`, which points outside the workspace directory using `..`. Workspace members must be subdirectories of the workspace. Change the pattern to a relative subdirectory path, or move the target crate inside the workspace.",
             input.issue.cargo_rel_path,
         ),
         Some(input.issue.cargo_rel_path.clone()),

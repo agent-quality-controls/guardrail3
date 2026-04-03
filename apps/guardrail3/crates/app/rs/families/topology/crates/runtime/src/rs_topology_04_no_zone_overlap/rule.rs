@@ -32,7 +32,7 @@ pub fn check(input: &ZoneOverlapInput<'_>, results: &mut Vec<CheckResult>) {
         Severity::Error,
         "app and package topology zones overlap illegally".to_owned(),
         format!(
-            "{nesting_message}. app Cargo root: `{}`; package Cargo root: `{}`. App/package topology zones must not overlap or nest.",
+            "{nesting_message}. app Cargo root: `{}`; package Cargo root: `{}`. App/package topology zones must not overlap or nest. Restructure the repository so neither zone is a subdirectory of the other.",
             input.overlap.app_cargo_rel_path, input.overlap.package_cargo_rel_path
         ),
         Some(file),

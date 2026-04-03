@@ -33,13 +33,13 @@ pub(crate) fn check(node: &CrateNode, results: &mut Vec<CheckResult>) {
     }
     if node.sibling_dir_count > MAX_SIBLING_DIRS {
         reasons.push(format!(
-            "{} sibling directories (max {})",
+            "{} top-level directories under src/ (max {})",
             node.sibling_dir_count, MAX_SIBLING_DIRS
         ));
     }
     if node.sibling_rs_file_count > MAX_SIBLING_RS_FILES {
         reasons.push(format!(
-            "{} sibling .rs files (max {})",
+            "{} top-level .rs files under src/ (max {})",
             node.sibling_rs_file_count, MAX_SIBLING_RS_FILES
         ));
     }
@@ -53,7 +53,7 @@ pub(crate) fn check(node: &CrateNode, results: &mut Vec<CheckResult>) {
         Severity::Error,
         "crate too complex, must split".to_owned(),
         format!(
-            "Crate `{}` exceeds complexity thresholds: {}. Split into a workspace with internal crates.",
+            "Crate `{}` exceeds complexity thresholds: {}. Extract groups of related modules into sub-crates under a `crates/` directory.",
             node.rel_dir,
             reasons.join(", ")
         ),

@@ -15,7 +15,7 @@ pub(crate) fn check(surface: &FacadeSurface, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "mod.rs must be facade-only".to_owned(),
             format!(
-                "mod.rs contains {} `{}`. Keep mod.rs limited to pub mod/use declarations, type/const definitions, and specific re-exports.",
+                "mod.rs contains {} `{}`. Move it to a sibling .rs file in the same directory. mod.rs must only contain mod/use declarations and re-exports.",
                 item.kind, item.name
             ),
             Some(surface.rel_path.clone()),
@@ -31,7 +31,7 @@ pub(crate) fn check(surface: &FacadeSurface, results: &mut Vec<CheckResult>) {
                 Severity::Error,
                 "mod.rs has broad re-export".to_owned(),
                 format!(
-                    "mod.rs uses broad re-export `pub use {}`. Use specific item re-exports instead.",
+                    "mod.rs uses broad re-export `pub use {}`. Use specific item re-exports instead (e.g., `pub use foo::Bar`).",
                     item.name
                 ),
                 Some(surface.rel_path.clone()),

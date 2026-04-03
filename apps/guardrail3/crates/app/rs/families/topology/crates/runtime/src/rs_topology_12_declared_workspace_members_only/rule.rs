@@ -16,8 +16,9 @@ pub fn check(input: &TopologyIssueInput<'_>, results: &mut Vec<CheckResult>) {
                     display_dir(&input.issue.rel_dir)
                 ),
                 format!(
-                    "`{}` sits under workspace `{}`, but it is not a declared workspace member. Workspace membership must exactly match real child Rust roots.",
+                    "`{}` sits under workspace `{}`, but it is not a declared workspace member. Workspace membership must exactly match real child Rust roots. Add this crate's path to `[workspace] members` in `{}/Cargo.toml`.",
                     input.issue.cargo_rel_path,
+                    display_dir(workspace_root_rel),
                     display_dir(workspace_root_rel),
                 ),
                 Some(input.issue.cargo_rel_path.clone()),
@@ -37,7 +38,7 @@ pub fn check(input: &TopologyIssueInput<'_>, results: &mut Vec<CheckResult>) {
                     display_dir(workspace_root_rel)
                 ),
                 format!(
-                    "`{}` declares workspace member `{member_pattern}`, but it does not match a real owned child Rust root. Workspace membership must exactly match real child Rust roots.",
+                    "`{}` declares workspace member `{member_pattern}`, but it does not match a real owned child Rust root. Workspace membership must exactly match real child Rust roots. Remove `{member_pattern}` from `[workspace] members`, or create the missing crate.",
                     input.issue.cargo_rel_path,
                 ),
                 Some(input.issue.cargo_rel_path.clone()),

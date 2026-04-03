@@ -17,7 +17,7 @@ pub fn check(input: &MisplacedRootInput<'_>, results: &mut Vec<CheckResult>) {
             display_dir(&input.root.rel_dir)
         ),
         format!(
-            "`{}` lives outside any `apps/*` or `packages/*` zone while Rust topology enforcement is active.",
+            "`{}` lives outside any `apps/*` or `packages/*` zone while Rust topology enforcement is active. Move it under an `apps/` or `packages/` directory, or declare it auxiliary with `topology_role = \"auxiliary\"` in `[package.metadata.guardrail3]`.",
             input.root.cargo_rel_path
         ),
         Some(input.root.cargo_rel_path.clone()),

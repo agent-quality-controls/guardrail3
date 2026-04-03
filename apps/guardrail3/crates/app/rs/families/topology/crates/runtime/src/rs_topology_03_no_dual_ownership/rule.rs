@@ -14,7 +14,7 @@ pub fn check(input: &DualOwnershipInput<'_>, results: &mut Vec<CheckResult>) {
                 display_dir(&input.root.rel_dir)
             ),
             format!(
-                "`{}` is simultaneously owned by app zone(s) [{}] and package zone(s) [{}]. A single Rust root must not be governed by both hexarch and libarch.",
+                "`{}` is simultaneously owned by app zone(s) [{}] and package zone(s) [{}]. A Rust root must be governed by at most one topology family. Move this crate so it falls under only one zone.",
                 input.root.cargo_rel_path,
                 input.root.app_zone_candidates.join(", "),
                 input.root.package_zone_candidates.join(", "),

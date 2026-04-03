@@ -532,33 +532,34 @@ fn illegal_file_reason_text(fact: &RustIllegalFamilyFileFact) -> String {
 
     match fact.reason() {
         RustIllegalFamilyFileReason::OutsideEveryLegalWorkspace => format!(
-            "`{}` is placed outside every legal workspace root for `{}`.",
+            "`{}` is not inside any workspace that has `{}` checks enabled. Move it under a workspace root where `{}` is configured.",
             fact.rel_path(),
+            family_label(fact.family()),
             family_label(fact.family())
         ),
         RustIllegalFamilyFileReason::OutsideValidationRoot => format!(
-            "`{}` is placed outside the validation root. `{}` files are only allowed at the validation root.",
+            "`{}` is outside the repository's validation root. `{}` configuration files must be placed at the validation root.",
             fact.rel_path(),
             family_label(fact.family())
         ),
         RustIllegalFamilyFileReason::AboveLegalWorkspaceRoots {
             workspace_root_rels,
         } => format!(
-            "`{}` is placed above legal workspace roots {:?} for `{}`.",
+            "`{}` is placed above workspace roots [{}] for `{}`. Move it into one of those workspace roots, not above them.",
             fact.rel_path(),
-            workspace_root_rels,
+            workspace_root_rels.join(", "),
             family_label(fact.family())
         ),
         RustIllegalFamilyFileReason::NestedBeneathLegalWorkspace {
             workspace_root_rel,
             owner_rel,
         } => format!(
-            "`{}` is nested at `{owner_rel}` beneath legal workspace `{workspace_root_rel}`. `{}` files are only allowed at the workspace root.",
+            "`{}` is inside subdirectory `{owner_rel}` of workspace `{workspace_root_rel}`. `{}` configuration files must be placed at the workspace root, not in subdirectories. Move it to `{workspace_root_rel}`.",
             fact.rel_path(),
             family_label(fact.family())
         ),
         RustIllegalFamilyFileReason::AttachedToIllegalRoot { root_rel } => format!(
-            "`{}` is attached to illegal Rust root `{root_rel}`. `{}` files are only allowed at legal workspace roots.",
+            "`{}` is next to Rust root `{root_rel}`, which is not a valid workspace root. `{}` configuration files must be placed at workspace roots. Move it to the nearest workspace root.",
             fact.rel_path(),
             family_label(fact.family())
         ),
@@ -566,7 +567,7 @@ fn illegal_file_reason_text(fact: &RustIllegalFamilyFileFact) -> String {
             workspace_root_rel,
             member_rel,
         } => format!(
-            "`{}` is attached to member crate `{member_rel}` under legal workspace `{workspace_root_rel}`. `{}` files are only allowed at the workspace root.",
+            "`{}` is next to member crate `{member_rel}` under workspace `{workspace_root_rel}`. `{}` configuration files must be placed at the workspace root, not next to individual members. Move it to `{workspace_root_rel}`.",
             fact.rel_path(),
             family_label(fact.family())
         ),

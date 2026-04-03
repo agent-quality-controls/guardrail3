@@ -21,7 +21,7 @@ pub fn check(input: &TopologyIssueInput<'_>, results: &mut Vec<CheckResult>) {
             display_dir(&input.issue.rel_dir)
         ),
         format!(
-            "`{}` declares `[package]` as a top-level Rust root. Top-level Rust code must live in workspaces, not loose packages.",
+            "`{}` declares `[package]` as a top-level Rust root. Top-level Rust code must live in workspaces, not loose packages. Add a `[workspace]` section to this Cargo.toml, or move this package under an existing workspace as a member.",
             input.issue.cargo_rel_path
         ),
         Some(input.issue.cargo_rel_path.clone()),
