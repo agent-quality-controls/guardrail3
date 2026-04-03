@@ -13,7 +13,7 @@ fn inventories_library_allowlist_when_present() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Info),
-            title: Some("library allowlist present"),
+            title: Some("dependency allowlist present"),
             inventory: Some(true),
             ..assertions::ExpectedRuleResult::default()
         }],

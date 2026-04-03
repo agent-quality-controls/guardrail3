@@ -15,7 +15,7 @@ pub fn assert_broad_dependency_attack_summary(results: &[guardrail3_domain_repor
         &[ExpectedRuleResult {
             severity: Some(Severity::Error),
             message: Some(
-                "Dependency `tokio` in `[dependencies]` is not allowlisted for crate `api`.",
+                "Dependency `tokio` in `[dependencies]` is not allowlisted for crate `api`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],
@@ -26,7 +26,7 @@ pub fn assert_broad_dependency_attack_summary(results: &[guardrail3_domain_repor
         &[ExpectedRuleResult {
             severity: Some(Severity::Error),
             message: Some(
-                "Dependency `bindgen` in `[build-dependencies]` is not allowlisted for crate `api`.",
+                "Build dependency `bindgen` in `[build-dependencies]` is not allowlisted for crate `api`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],
@@ -37,7 +37,7 @@ pub fn assert_broad_dependency_attack_summary(results: &[guardrail3_domain_repor
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
             message: Some(
-                "Dependency `tempfile` in `[dev-dependencies]` is not allowlisted for crate `api`.",
+                "Dev dependency `tempfile` in `[dev-dependencies]` is not allowlisted for crate `api`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],

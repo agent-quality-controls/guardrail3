@@ -16,7 +16,7 @@ fn warns_when_categories_are_missing_or_zero() {
         assertions::assert_rule_results(
             &results,
             &[assertions::ExpectedRuleResult {
-                severity: Some(assertions::Severity::Warn),
+                severity: Some(assertions::Severity::Error),
                 file: Some("crates/example/Cargo.toml"),
                 inventory: Some(false),
                 title_contains: Some("categories missing"),

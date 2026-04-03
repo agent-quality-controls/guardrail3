@@ -54,7 +54,7 @@ fn workspace_true_external_dev_dependency_keeps_warn_severity() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Warn),
             message: Some(
-                "Dependency `tempfile` in `[dev-dependencies]` is not allowlisted for crate `core`.",
+                "Dev dependency `tempfile` in `[dev-dependencies]` is not allowlisted for crate `core`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],
@@ -111,7 +111,7 @@ fn target_specific_dev_dependency_keeps_warn_severity() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Warn),
             message: Some(
-                "Dependency `tempfile` in `[target.'cfg(unix)'.dev-dependencies]` is not allowlisted for crate `core`.",
+                "Dev dependency `tempfile` in `[target.'cfg(unix)'.dev-dependencies]` is not allowlisted for crate `core`. Add it to the dependency allowlist or remove the dependency.",
             ),
             ..Default::default()
         }],

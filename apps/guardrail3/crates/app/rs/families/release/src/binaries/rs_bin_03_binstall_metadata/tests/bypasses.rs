@@ -20,7 +20,7 @@ fn warns_without_binstall_metadata_and_skips_out_of_scope_crates() {
             title_contains: Some("missing binstall metadata"),
             file: Some("crates/example/Cargo.toml"),
             inventory: Some(false),
-            message: Some("Publishable binary crates should set `[package.metadata.binstall]`."),
+            message: Some("Publishable binary crates should set `[package.metadata.binstall]`. Add `[package.metadata.binstall]` to Cargo.toml."),
             ..Default::default()
         }],
     );

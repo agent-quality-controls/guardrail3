@@ -11,6 +11,7 @@ const WORKSPACE_RUST_LINTS: &str = r#"
     unused_results = "deny"
     unused_crate_dependencies = "deny"
     missing_debug_implementations = "warn"
+    unreachable_pub = "deny"
 "#;
 
 const WORKSPACE_CLIPPY_LINTS: &str = r#"
@@ -70,6 +71,7 @@ const STANDALONE_RUST_LINTS: &str = r#"
     unused_results = "deny"
     unused_crate_dependencies = "deny"
     missing_debug_implementations = "warn"
+    unreachable_pub = "deny"
 "#;
 
 const STANDALONE_CLIPPY_LINTS: &str = r#"

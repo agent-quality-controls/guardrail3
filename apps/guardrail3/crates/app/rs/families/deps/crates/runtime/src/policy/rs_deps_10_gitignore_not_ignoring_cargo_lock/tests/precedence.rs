@@ -74,13 +74,13 @@ fn reports_exact_gitignore_sources_across_roots() {
                 Some("apps/api/.gitignore"),
                 assertions::Severity::Error,
                 false,
-                "`apps/api/.gitignore` ignores `apps/api/Cargo.lock` for Rust root `apps/api`.",
+                "`apps/api/.gitignore` ignores `apps/api/Cargo.lock` for Rust root `apps/api`. Remove the line ignoring `Cargo.lock` from this `.gitignore`.",
             ),
             (
                 Some(".gitignore"),
                 assertions::Severity::Error,
                 false,
-                "`.gitignore` ignores `packages/core/Cargo.lock` for Rust root `packages/core`.",
+                "`.gitignore` ignores `packages/core/Cargo.lock` for Rust root `packages/core`. Remove the line ignoring `Cargo.lock` from this `.gitignore`.",
             ),
         ],
     );

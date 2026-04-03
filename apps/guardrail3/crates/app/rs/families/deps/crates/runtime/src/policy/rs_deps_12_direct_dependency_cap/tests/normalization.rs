@@ -114,7 +114,7 @@ fn counts_external_workspace_and_vendored_path_but_skips_internal_workspace_path
             severity: Some(assertions::Severity::Error),
             title: Some("too many direct dependencies"),
             file: Some("apps/api/Cargo.toml"),
-            message: Some("Crate `api` has 26 unique direct dependencies (max 25)."),
+            message: Some("Crate `api` has 26 unique direct dependencies (max 25). Reduce direct dependencies by consolidating or splitting the crate."),
             inventory: Some(false),
             ..Default::default()
         }],
@@ -233,7 +233,7 @@ fn scoped_run_does_not_report_sibling_direct_dependency_caps() {
             severity: Some(assertions::Severity::Error),
             title: Some("too many direct dependencies"),
             file: Some("apps/api/Cargo.toml"),
-            message: Some("Crate `api` has 26 unique direct dependencies (max 25)."),
+            message: Some("Crate `api` has 26 unique direct dependencies (max 25). Reduce direct dependencies by consolidating or splitting the crate."),
             inventory: Some(false),
             ..Default::default()
         }],
