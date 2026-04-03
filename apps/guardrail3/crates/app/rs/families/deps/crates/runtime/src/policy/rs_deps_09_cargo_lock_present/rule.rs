@@ -42,7 +42,7 @@ pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
             )
         } else {
             format!(
-                "Non-library Rust root `{}` is missing `{}`.",
+                "`{}` is missing `{}`. Run `cargo generate-lockfile` and commit the result.",
                 rel_label(&input.lockfile.root_rel_dir),
                 input.lockfile.cargo_lock_rel_path
             )

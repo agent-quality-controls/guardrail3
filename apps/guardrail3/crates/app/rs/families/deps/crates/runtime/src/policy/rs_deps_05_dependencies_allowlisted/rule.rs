@@ -37,7 +37,7 @@ pub fn check(input: &DependencyEntryDepsInput<'_>, results: &mut Vec<CheckResult
         Severity::Error,
         "unauthorized dependency".to_owned(),
         format!(
-            "Dependency `{}` in `{}` is not allowlisted for crate `{}`.",
+            "Dependency `{}` in `{}` is not allowlisted for crate `{}`. Add it to the dependency allowlist or remove the dependency.",
             input.entry.dep_package_name, input.entry.table_label, input.entry.crate_name
         ),
         Some(input.entry.cargo_rel_path.clone()),
