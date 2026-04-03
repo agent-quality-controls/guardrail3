@@ -40,24 +40,63 @@ apps/guardrail3/                  ← orchestrator
 2. **The app pre-extracts cross-domain fields.** When a family needs data from
    another family's file, the app extracts the specific field and passes it as
    a typed value — not the raw file. Fmt gets `toolchain_channel: Option<String>`,
-   not `toolchain_configs: Vec<ConfigFile>`.
+   not the raw rust-toolchain.toml content.
 
 3. **Input types enforce boundaries.** ClippyInput has no .rs files. CodeInput
    has no deny.toml. The type system prevents cross-family file access.
 
-4. **Families depend only on guardrail3-check-types.** No dependency on the app,
-   on legality, on FamilyView, on FamilyMapper, or on each other.
+4. **Families depend only on guardrail3-check-types** (and standard parser
+   crates like `toml`). No dependency on the app, on legality, on FamilyView,
+   on FamilyMapper, or on each other.
 
 5. **Topology is not a family.** It reports legality findings. It stays in the
    app as a report phase after legality.
 
-6. **The app parses shared data once.** Workspace members, profiles, Cargo.toml
-   manifests — parsed once by the app, passed as structured data in RootInfo.
-   Families never re-parse workspace membership or guardrail3.toml profiles.
+6. **Shared files use standard parsers.** Cargo.toml parsed once by the app
+   using the `cargo_toml` crate → families receive `cargo_toml::Manifest`.
+   rust-toolchain.toml parsed once using `rust-toolchain-file` crate. No
+   family re-parses shared files.
 
-7. **Family-owned configs stay as raw content.** clippy.toml goes to clippy as
-   a string — clippy parses it internally. deny.toml goes to deny as a string.
-   These are the family's own files; it owns the parsing.
+7. **Family-owned configs stay as raw content.** clippy.toml, deny.toml,
+   rustfmt.toml, nextest.toml, mutants.toml — no standard parser exists for
+   these. The family is the only consumer and understands the schema. It
+   receives raw content string and parses with the `toml` crate internally.
+
+8. **guardrail3.toml parsed once by the app.** Families receive a
+   `GuardrailPolicy` struct with profile, escape hatches, and per-family
+   config sections. No family reads guardrail3.toml directly.
+
+## Parsing strategy
+
+### Shared files — parsed by the app, typed structs to families
+
+| File | Parser | Families that receive it |
+|------|--------|------------------------|
+| Cargo.toml | `cargo_toml::Manifest` | All (except topology) |
+| rust-toolchain.toml | `rust-toolchain-file` | toolchain, fmt (channel only) |
+| guardrail3.toml | Our `GuardrailPolicy` | All that need profile/escape hatches |
+
+### Family-owned files — raw content to the family
+
+| File | Family | Why raw |
+|------|--------|---------|
+| clippy.toml, .clippy.toml | clippy | No standard parser; clippy owns the schema |
+| deny.toml, .deny.toml, .cargo/deny.toml | deny | No standard parser; deny owns the schema |
+| rustfmt.toml, .rustfmt.toml | fmt | Existing parsers unmaintained; fmt owns the schema |
+| .cargo/mutants.toml | test | No standard parser |
+| .config/nextest.toml | test | No standard parser |
+
+### Cross-domain fields — pre-extracted by the app
+
+| Family needs | From file | Receives |
+|-------------|-----------|----------|
+| fmt: toolchain channel | rust-toolchain.toml | `channel: Option<String>` |
+| fmt: cargo edition | Cargo.toml | `Manifest.package.edition` (via cargo_toml) |
+| toolchain: cargo rust-version | Cargo.toml | `Manifest.package.rust_version` (via cargo_toml) |
+| garde: clippy method bans | clippy.toml | `clippy_disallowed_methods: Vec<String>` |
+| garde: garde dep present | Cargo.toml | `Manifest.dependencies` (via cargo_toml) |
+| clippy: cargo env overrides | .cargo/config.toml | `CargoEnvOverride` struct |
+| code: unsafe_code lint level | Cargo.toml | `Manifest.lints` (via cargo_toml) |
 
 ## Audit findings (2026-04-03)
 
@@ -101,6 +140,9 @@ Despite parsing duplication, no two families check the same thing:
 ## Shared types (guardrail3-check-types)
 
 ```rust
+// Re-export standard parsers — families depend on check-types, not directly
+pub use cargo_toml::Manifest as CargoManifest;
+
 // === Output ===
 
 pub struct CheckResult {
@@ -134,7 +176,15 @@ pub struct MemberInfo {
 
 pub enum RootClassification { App, Package, Auxiliary, Other }
 
-// === File content (family-owned configs) ===
+// === Parsed manifests (shared files, parsed once by app) ===
+
+/// Cargo.toml parsed with the cargo_toml crate. Families read typed fields.
+pub struct ManifestFile {
+    pub rel_path: String,
+    pub manifest: CargoManifest,
+}
+
+// === Raw file content (family-owned configs) ===
 
 pub struct ConfigFile {
     pub rel_path: String,
@@ -160,6 +210,11 @@ pub struct DirTree {
 
 // === Policy (extracted from guardrail3.toml by the app) ===
 
+pub struct GuardrailPolicy {
+    pub profile: String,
+    pub escape_hatches: Vec<EscapeHatch>,
+}
+
 pub struct EscapeHatch {
     pub rule_id: String,
     pub rel_path: String,
@@ -174,7 +229,7 @@ pub struct ToolStatus {
     pub version: Option<String>,
 }
 
-// === Shared parser (deduplicated from 3 families) ===
+// === Shared .rs parser (deduplicated from code/garde/test) ===
 
 /// Parse a .rs file with syn, stripping BOM. Returns None on parse failure.
 pub fn parse_rust_file(content: &str) -> Option<syn::File> {
@@ -189,9 +244,10 @@ pub fn parse_rust_file(content: &str) -> Option<syn::File> {
 ```rust
 pub struct ClippyInput {
     pub roots: Vec<RootInfo>,
-    pub clippy_configs: Vec<ConfigFile>,          // clippy.toml, .clippy.toml (family-owned)
-    pub cargo_env_overrides: Vec<CargoEnvOverride>, // .cargo/config.toml env entries (pre-extracted)
-    pub escape_hatches: Vec<EscapeHatch>,
+    pub manifests: Vec<ManifestFile>,                // parsed Cargo.toml (workspace detection)
+    pub clippy_configs: Vec<ConfigFile>,              // clippy.toml, .clippy.toml (raw, family-owned)
+    pub cargo_env_overrides: Vec<CargoEnvOverride>,   // pre-extracted from .cargo/config.toml
+    pub policy: GuardrailPolicy,
 }
 
 pub struct CargoEnvOverride {
@@ -200,42 +256,44 @@ pub struct CargoEnvOverride {
     pub env_value: String,
 }
 ```
-App extracts: workspace members → RootInfo, profile → RootInfo.profile,
-CLIPPY_CONF_DIR → CargoEnvOverride. Clippy parses its own clippy.toml.
+Clippy parses its own clippy.toml. Reads `Manifest.workspace` for coverage.
+App pre-extracts CLIPPY_CONF_DIR from .cargo/config.toml.
 
 ### DenyInput
 ```rust
 pub struct DenyInput {
     pub roots: Vec<RootInfo>,
-    pub deny_configs: Vec<ConfigFile>,  // deny.toml, .deny.toml, .cargo/deny.toml (family-owned)
-    pub escape_hatches: Vec<EscapeHatch>,
+    pub manifests: Vec<ManifestFile>,         // parsed Cargo.toml (workspace members)
+    pub deny_configs: Vec<ConfigFile>,        // deny.toml, .deny.toml, .cargo/deny.toml (raw)
+    pub policy: GuardrailPolicy,
 }
 ```
-App extracts: workspace members → RootInfo, profile → RootInfo.profile.
-Deny parses its own deny.toml files, handles precedence internally.
+Deny parses its own deny.toml files. Reads `Manifest.workspace.members`
+for coverage. Handles config precedence internally.
 
 ### CargoInput
 ```rust
 pub struct CargoInput {
     pub roots: Vec<RootInfo>,
-    pub cargo_manifests: Vec<ConfigFile>,  // all Cargo.toml files (family-owned)
-    pub escape_hatches: Vec<EscapeHatch>,
+    pub manifests: Vec<ManifestFile>,         // parsed Cargo.toml — cargo reads ALL fields
+    pub policy: GuardrailPolicy,
 }
 ```
-Cargo owns Cargo.toml — gets raw content, parses everything internally.
+Cargo gets pre-parsed Manifests. Reads lints, edition, resolver, members,
+features — everything. No raw TOML parsing needed.
 
 ### FmtInput
 ```rust
 pub struct FmtInput {
     pub roots: Vec<RootInfo>,
-    pub rustfmt_configs: Vec<ConfigFile>,          // rustfmt.toml, .rustfmt.toml (family-owned)
-    pub cargo_edition: Option<String>,             // pre-extracted from Cargo.toml
-    pub toolchain_channel: Option<String>,         // pre-extracted from rust-toolchain.toml
-    pub escape_hatches: Vec<EscapeHatch>,
+    pub rustfmt_configs: Vec<ConfigFile>,     // rustfmt.toml, .rustfmt.toml (raw, family-owned)
+    pub cargo_edition: Option<String>,        // pre-extracted from Manifest.package.edition
+    pub toolchain_channel: Option<String>,    // pre-extracted from rust-toolchain.toml
+    pub policy: GuardrailPolicy,
 }
 ```
-App extracts: edition from Cargo.toml, channel from rust-toolchain.toml.
-Fmt never touches those files directly.
+Fmt parses its own rustfmt.toml. Never touches Cargo.toml or
+rust-toolchain.toml — app extracts edition and channel as strings.
 
 ### ToolchainInput
 ```rust
@@ -245,96 +303,97 @@ pub struct ToolchainInput {
 
 pub struct ToolchainRootInput {
     pub root: RootInfo,
-    pub toolchain_config: Option<ConfigFile>,       // rust-toolchain.toml (family-owned)
-    pub legacy_toolchain_exists: bool,              // rust-toolchain (no .toml) presence
-    pub cargo_rust_version: Option<String>,         // pre-extracted from Cargo.toml
+    pub toolchain_config: Option<ConfigFile>,  // rust-toolchain.toml (raw, family-owned)
+    pub legacy_toolchain_exists: bool,         // rust-toolchain (no .toml) file presence
+    pub cargo_rust_version: Option<String>,    // pre-extracted from Manifest.package.rust_version
 }
 ```
-App extracts: rust-version from Cargo.toml. Toolchain owns rust-toolchain.toml.
+Toolchain parses its own rust-toolchain.toml. App pre-extracts
+rust-version from parsed Cargo.toml Manifest.
 
 ### CodeInput
 ```rust
 pub struct CodeInput {
     pub roots: Vec<RootInfo>,
-    pub source_files: Vec<SourceFile>,              // all .rs files (family-owned for parsing)
-    pub unsafe_code_lint_level: Option<String>,     // pre-extracted from Cargo.toml [workspace.lints.rust]
-    pub escape_hatches: Vec<EscapeHatch>,
+    pub source_files: Vec<SourceFile>,        // all .rs files (family-owned for syn parsing)
+    pub manifests: Vec<ManifestFile>,         // parsed Cargo.toml (reads workspace.lints.rust)
+    pub policy: GuardrailPolicy,
 }
 ```
-App extracts: unsafe_code lint level from Cargo.toml. Code owns .rs parsing.
+Code reads `Manifest.lints` for unsafe_code level. Owns .rs parsing.
 
 ### GardeInput
 ```rust
 pub struct GardeInput {
     pub roots: Vec<GardeRootInput>,
-    pub source_files: Vec<SourceFile>,              // all .rs files
-    pub escape_hatches: Vec<EscapeHatch>,
+    pub source_files: Vec<SourceFile>,        // all .rs files (family-owned for syn parsing)
+    pub policy: GuardrailPolicy,
 }
 
 pub struct GardeRootInput {
     pub root: RootInfo,
-    pub garde_dependency_present: bool,             // pre-extracted from Cargo.toml
-    pub clippy_disallowed_methods: Vec<String>,     // pre-extracted from clippy.toml
-    pub clippy_disallowed_types: Vec<String>,       // pre-extracted from clippy.toml
+    pub garde_dependency_present: bool,       // pre-extracted: "garde" in Manifest.dependencies
+    pub clippy_disallowed_methods: Vec<String>, // pre-extracted from clippy.toml
+    pub clippy_disallowed_types: Vec<String>,   // pre-extracted from clippy.toml
 }
 ```
-App extracts: garde dep presence from Cargo.toml, method/type bans from
-clippy.toml. Garde never reads those files. Owns .rs parsing.
+Garde never reads Cargo.toml or clippy.toml. App pre-extracts
+dependency presence and clippy ban lists. Garde owns .rs AST parsing.
 
 ### ArchInput
 ```rust
 pub struct ArchInput {
     pub roots: Vec<RootInfo>,
-    pub cargo_manifests: Vec<ConfigFile>,    // all Cargo.toml (family-owned — reads features, metadata)
-    pub dir_tree: DirTree,                   // full directory structure
-    pub facade_files: Vec<SourceFile>,       // lib.rs + mod.rs content (family-owned for syn parsing)
-    pub module_files: Vec<SourceFile>,       // .rs files under src/ (for mod declaration scanning)
+    pub manifests: Vec<ManifestFile>,         // parsed Cargo.toml (features, metadata, deps)
+    pub dir_tree: DirTree,                    // full directory structure
+    pub facade_files: Vec<SourceFile>,        // lib.rs + mod.rs content (family-owned for syn)
+    pub module_files: Vec<SourceFile>,        // .rs files under src/ (for mod declarations)
 }
 ```
-Arch owns Cargo.toml parsing (features, shared flag, deps count) and
-.rs facade/module parsing. Gets directory tree from app.
+Arch reads `Manifest.features`, `Manifest.dependencies.len()`,
+`Manifest.package.metadata`. Owns .rs facade/module parsing.
 
 ### HexarchInput
 ```rust
 pub struct HexarchInput {
     pub roots: Vec<RootInfo>,
-    pub cargo_manifests: Vec<ConfigFile>,    // all Cargo.toml (family-owned — reads deps, patches)
-    pub dir_tree: DirTree,                   // directory structure
-    pub entrypoint_files: Vec<SourceFile>,   // lib.rs/main.rs only (for trait/fn counting)
-    pub escape_hatches: Vec<EscapeHatch>,
+    pub manifests: Vec<ManifestFile>,         // parsed Cargo.toml (deps, patches, members)
+    pub dir_tree: DirTree,                    // directory structure
+    pub entrypoint_files: Vec<SourceFile>,    // lib.rs/main.rs only (for trait/fn counting)
+    pub policy: GuardrailPolicy,
 }
 ```
-Hexarch owns Cargo.toml dep parsing and lib.rs/main.rs trait counting.
-Gets directory tree from app. Does NOT get full .rs files — only entrypoints.
+Hexarch reads `Manifest.dependencies`, `Manifest.patch`, members.
+Owns lib.rs/main.rs trait counting. Gets dir tree from app.
 
 ### DepsInput
 ```rust
 pub struct DepsInput {
     pub roots: Vec<RootInfo>,
-    pub cargo_manifests: Vec<ConfigFile>,    // all Cargo.toml (family-owned — reads dep sections)
-    pub lockfile_exists: Vec<LockfileStatus>,
+    pub manifests: Vec<ManifestFile>,         // parsed Cargo.toml (all dependency sections)
+    pub lockfile_status: Vec<LockfileStatus>,
     pub tools: Vec<ToolStatus>,
-    pub escape_hatches: Vec<EscapeHatch>,
+    pub policy: GuardrailPolicy,
 }
 
 pub struct LockfileStatus {
     pub root_rel_dir: String,
     pub cargo_lock_exists: bool,
-    pub cargo_lock_gitignored: bool,        // pre-extracted from .gitignore by app
+    pub cargo_lock_gitignored: bool,          // pre-extracted from .gitignore by app
 }
 ```
-App extracts: Cargo.lock existence, .gitignore scanning for Cargo.lock
-patterns. Deps owns Cargo.toml dependency parsing.
+Deps reads `Manifest.dependencies` etc. for allowlist checks. App
+pre-extracts Cargo.lock existence and .gitignore scanning.
 
 ### TestInput
 ```rust
 pub struct TestInput {
     pub roots: Vec<RootInfo>,
-    pub source_files: Vec<SourceFile>,       // all .rs files (for assertion/test analysis)
-    pub cargo_manifests: Vec<ConfigFile>,    // Cargo.toml (tokio dep, package names)
-    pub mutants_configs: Vec<ConfigFile>,    // .cargo/mutants.toml (family-owned)
-    pub nextest_configs: Vec<ConfigFile>,    // .config/nextest.toml (family-owned)
-    pub dir_tree: DirTree,                   // for test file categorization
+    pub source_files: Vec<SourceFile>,        // all .rs files (family-owned for syn parsing)
+    pub manifests: Vec<ManifestFile>,         // parsed Cargo.toml (tokio dep, package names)
+    pub mutants_configs: Vec<ConfigFile>,     // .cargo/mutants.toml (raw, family-owned)
+    pub nextest_configs: Vec<ConfigFile>,     // .config/nextest.toml (raw, family-owned)
+    pub dir_tree: DirTree,                    // for test file categorization
     pub tools: Vec<ToolStatus>,
 }
 ```
@@ -393,13 +452,20 @@ The input_builder replaces both.
 
 ## Key decisions
 
-**Family-owned files: raw content.** clippy.toml → clippy as string.
-Cargo.toml → cargo as string (but also arch, deps, hexarch for different
-fields). The family parses what it needs.
+**Shared files: parsed once with standard crates.** Cargo.toml parsed by
+app with `cargo_toml` crate → families receive `ManifestFile` (typed).
+rust-toolchain.toml parsed with `rust-toolchain-file` crate. No family
+re-parses shared files.
 
-**Cross-domain fields: pre-extracted.** When a family needs one field from
-another family's file, the app extracts it as a typed value. No raw file
-access across domains.
+**Family-owned files: raw content.** clippy.toml, deny.toml, rustfmt.toml,
+nextest.toml, mutants.toml → family receives raw string, parses with `toml`
+crate internally. No standard parser exists for these; the family owns the
+schema.
+
+**Cross-domain fields: pre-extracted.** When a family needs a specific value
+from another family's file (not the whole file), the app extracts it as a
+typed value. Examples: fmt gets `toolchain_channel: Option<String>`, garde
+gets `clippy_disallowed_methods: Vec<String>`.
 
 **Workspace iteration stays in the app.** The app iterates workspace roots
 and calls the family per-workspace or once for project-wide.
@@ -409,6 +475,21 @@ doesn't change. Only the entry point changes.
 
 **Tests move with the family.** Each package has its own tests. test_support
 and assertions fold into the package.
+
+## Rule ownership audit (2026-04-03)
+
+All rules stay in their current families. The "misplaced" rules identified
+in the audit are actually in the correct family by domain knowledge — they
+just read the wrong file. The extraction resolves this by pre-extracting
+cross-domain fields.
+
+**Confirmed dead rules to delete:** RS-CODE-26, RS-CODE-27 (moved to ARCH).
+
+**Rule to move:** RS-CODE-32 (test expect message quality) → TEST family.
+
+**Tool installation checks** (DEPS-01/02/03/04, TEST-11): keep in current
+families for now. Consider a shared "tools" pre-check phase later if more
+tool checks are added.
 
 ## What this enables
 
