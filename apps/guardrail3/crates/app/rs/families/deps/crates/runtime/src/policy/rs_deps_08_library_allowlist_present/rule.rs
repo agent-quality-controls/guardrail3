@@ -31,7 +31,7 @@ pub fn check(input: &AllowlistCoverageDepsInput<'_>, results: &mut Vec<CheckResu
             Severity::Warn,
             "library allowlist missing".to_owned(),
             format!(
-                "Library crate `{}` has no `allowed_deps` policy.",
+                "Library crate `{}` has no `allowed_deps` policy. Add an `allowed_deps` list for this crate in guardrail3.toml.",
                 input.coverage.crate_name
             ),
             Some(input.coverage.cargo_rel_path.clone()),

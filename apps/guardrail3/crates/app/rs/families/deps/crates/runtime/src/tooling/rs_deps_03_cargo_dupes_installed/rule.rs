@@ -27,7 +27,7 @@ pub fn check(input: &ToolDepsInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Warn,
             "cargo-dupes missing".to_owned(),
-            "`cargo-dupes` is recommended for Rust dependency guardrails but was not found on PATH."
+            "`cargo-dupes` was not found on PATH. Install with `cargo install cargo-dupes`."
                 .to_owned(),
             None,
             None,

@@ -27,7 +27,7 @@ pub fn check(input: &ToolDepsInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "cargo-machete missing".to_owned(),
-            "`cargo-machete` is required for Rust dependency guardrails but was not found on PATH."
+            "`cargo-machete` was not found on PATH. Install with `cargo install cargo-machete`."
                 .to_owned(),
             None,
             None,

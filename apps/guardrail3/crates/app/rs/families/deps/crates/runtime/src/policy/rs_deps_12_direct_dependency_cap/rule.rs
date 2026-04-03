@@ -15,7 +15,7 @@ pub fn check(input: &DirectDependencyCapDepsInput<'_>, results: &mut Vec<CheckRe
         Severity::Error,
         "too many direct dependencies".to_owned(),
         format!(
-            "Crate `{}` has {} unique direct dependencies (max {}).",
+            "Crate `{}` has {} unique direct dependencies (max {}). Reduce direct dependencies by consolidating or splitting the crate.",
             input.cap.crate_name,
             input.cap.unique_direct_dependency_count,
             MAX_UNIQUE_DIRECT_DEPENDENCIES

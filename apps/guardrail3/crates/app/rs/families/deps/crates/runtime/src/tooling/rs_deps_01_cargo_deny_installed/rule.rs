@@ -27,7 +27,7 @@ pub fn check(input: &ToolDepsInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "cargo-deny missing".to_owned(),
-            "`cargo-deny` is required for Rust dependency guardrails but was not found on PATH."
+            "`cargo-deny` was not found on PATH. Install with `cargo install cargo-deny`."
                 .to_owned(),
             None,
             None,

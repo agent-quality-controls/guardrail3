@@ -8,7 +8,7 @@ pub fn check(input: &InputFailureDepsInput<'_>, results: &mut Vec<CheckResult>) 
     results.push(CheckResult::from_parts(
         ID.to_owned(),
         Severity::Error,
-        "dependency policy input failure".to_owned(),
+        "failed to read dependency configuration".to_owned(),
         input.failure.message.clone(),
         Some(input.failure.rel_path.clone()),
         None,

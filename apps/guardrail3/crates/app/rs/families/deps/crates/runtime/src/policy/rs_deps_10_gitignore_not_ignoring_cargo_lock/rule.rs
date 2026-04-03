@@ -11,7 +11,7 @@ pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "Cargo.lock ignored in gitignore".to_owned(),
             format!(
-                "`{}` ignores `{}` for Rust root `{}`.",
+                "`{}` ignores `{}` for Rust root `{}`. Remove the line ignoring `Cargo.lock` from this `.gitignore`.",
                 input
                     .lockfile
                     .gitignore_rel_path

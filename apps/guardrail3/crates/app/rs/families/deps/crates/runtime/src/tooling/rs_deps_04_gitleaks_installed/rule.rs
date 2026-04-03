@@ -27,7 +27,7 @@ pub fn check(input: &ToolDepsInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "gitleaks missing".to_owned(),
-            "`gitleaks` is required for Rust dependency guardrails but was not found on PATH."
+            "`gitleaks` was not found on PATH. Install with `brew install gitleaks` or download from GitHub."
                 .to_owned(),
             None,
             None,
