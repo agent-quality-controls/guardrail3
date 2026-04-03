@@ -21,7 +21,6 @@ pub type RsFamilyFileView = views::RsFamilyFileView;
 pub type RsFmtRoute = views::RsFmtRoute;
 pub type RsGardeRoute = views::RsGardeRoute;
 pub type RsHexarchRoute = views::RsHexarchRoute;
-pub type RsLibarchRoute = views::RsLibarchRoute;
 // RsProjectSurface removed. Families receive FamilyView from legality.
 pub type RsReleaseRoute = views::RsReleaseRoute;
 pub type RsRootInputFailureView = views::RsRootInputFailureView;

@@ -40,7 +40,7 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
                     Severity::Error,
                     "member edition unrecognized".to_owned(),
                     format!(
-                        "{} declares unknown edition `{member_edition}`.",
+                        "{} declares unknown edition `{member_edition}`. Use a supported edition like `2021` or `2024`.",
                         input.member.member_rel
                     ),
                     Some(input.member.cargo_rel_path.clone()),
@@ -55,7 +55,7 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
     Severity::Warn,
     "member edition older than workspace".to_owned(),
     format!(
-                    "{} sets edition `{member_edition}` while workspace uses `{workspace_edition}`.",
+                    "{} sets edition `{member_edition}` while workspace uses `{workspace_edition}`. Update the member edition to `{workspace_edition}` or remove the override to inherit.",
                     input.member.member_rel
                 ),
     Some(input.member.cargo_rel_path.clone()),
@@ -109,4 +109,3 @@ fn edition_rank(edition: &str) -> Option<usize> {
         _ => None,
     }
 }
-

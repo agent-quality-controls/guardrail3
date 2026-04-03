@@ -27,7 +27,6 @@ families-all = [
     "family-cargo",
     "family-code",
     "family-hexarch",
-    "family-libarch",
     "family-deps",
     "family-garde",
     "family-test",
@@ -44,7 +43,6 @@ family-deny = ["dep:guardrail3_app_rs_family_deny", "routing"]
 family-cargo = ["dep:guardrail3_app_rs_family_cargo", "routing"]
 family-code = ["dep:guardrail3_app_rs_family_code", "routing"]
 family-hexarch = ["dep:guardrail3_app_rs_family_hexarch", "routing"]
-family-libarch = ["dep:guardrail3_app_rs_family_libarch", "routing"]
 family-deps = ["dep:guardrail3_app_rs_family_deps", "routing"]
 family-garde = ["dep:guardrail3_app_rs_family_garde", "routing"]
 family-test = ["dep:guardrail3_app_rs_family_test", "routing"]
@@ -74,7 +72,6 @@ guardrail3_app_rs_family_garde = { package = "guardrail3-app-rs-family-garde", p
 guardrail3_app_rs_family_hexarch = { package = "guardrail3-app-rs-family-hexarch", path = "../families/hexarch/crates/runtime", optional = true }
 guardrail3_app_rs_family_hooks_rs = { package = "guardrail3-app-rs-family-hooks-rs", path = "../families/hooks-rs", optional = true }
 guardrail3_app_rs_family_hooks_shared = { package = "guardrail3-app-rs-family-hooks-shared", path = "../families/hooks-shared", optional = true }
-guardrail3_app_rs_family_libarch = { package = "guardrail3-app-rs-family-libarch", path = "../families/libarch/crates/runtime", optional = true }
 guardrail3_app_rs_family_release = { package = "guardrail3-app-rs-family-release", path = "../families/release", optional = true }
 guardrail3_app_rs_family_test = { package = "guardrail3-app-rs-family-test", path = "../families/test/crates/runtime", optional = true }
 guardrail3_app_rs_family_toolchain = { package = "guardrail3-app-rs-family-toolchain", path = "../families/toolchain/crates/runtime", optional = true }

@@ -46,7 +46,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
     ID.to_owned(),
     Severity::Error,
     "library rust-version missing".to_owned(),
-    "Library profile must declare `rust-version` as an MSRV contract.".to_owned(),
+    "Library profile must declare `rust-version` as an MSRV contract. Add `rust-version = \"1.75\"` (or appropriate version) to the package metadata.".to_owned(),
     Some(root.cargo_rel_path.clone()),
     None,
     false,
@@ -80,4 +80,3 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         ),
     }
 }
-

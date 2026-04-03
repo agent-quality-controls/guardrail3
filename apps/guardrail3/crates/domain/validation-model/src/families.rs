@@ -11,7 +11,6 @@ pub enum RustValidateFamily {
     Cargo,
     Code,
     Hexarch,
-    Libarch,
     Deps,
     Garde,
     Test,
@@ -21,7 +20,7 @@ pub enum RustValidateFamily {
 }
 
 impl RustValidateFamily {
-    pub const ALL: [Self; 16] = [
+    pub const ALL: [Self; 15] = [
         Self::Topology,
         Self::Arch,
         Self::Fmt,
@@ -31,7 +30,6 @@ impl RustValidateFamily {
         Self::Cargo,
         Self::Code,
         Self::Hexarch,
-        Self::Libarch,
         Self::Deps,
         Self::Garde,
         Self::Test,

@@ -65,7 +65,7 @@ fn topology_runtime_dispatch_uses_topology_section_name() {
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -87,7 +87,7 @@ fn topology_runtime_reports_scoped_topology_config_violation() {
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\ntopology = false\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\n\n[rust.apps.backend.checks]\ntopology = false\n",
     );
     super::write_file_for_tests(
         &root,
@@ -109,7 +109,7 @@ fn topology_runtime_still_reports_scoped_topology_config_when_global_topology_is
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\ntopology = false\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\ntopology = false\n",
+        "[rust.checks]\ntopology = false\nhexarch = true\n\n[rust.apps.backend.checks]\ntopology = false\n",
     );
     super::write_file_for_tests(
         &root,
@@ -153,7 +153,7 @@ fn topology_runtime_reports_fail_closed_results_for_malformed_governed_manifest(
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -175,7 +175,7 @@ fn topology_runtime_honors_app_scoped_hexarch_override() {
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\nhexarch = false\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\n\n[rust.apps.backend.checks]\nhexarch = false\n",
     );
     super::write_file_for_tests(
         &root,
@@ -202,7 +202,7 @@ fn topology_runtime_reports_governed_auxiliary_metadata_as_fail_closed() {
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -224,7 +224,7 @@ fn topology_runtime_stays_absent_when_only_other_family_is_requested() {
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\ntopology = false\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = false\nhexarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -409,7 +409,7 @@ fn hexarch_runtime_stays_decoupled_from_topology_exactness() {
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
+        "[rust.checks]\ntopology = true\nhexarch = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -1649,239 +1649,6 @@ fn release_runtime_runs_each_legal_workspace_once() {
             .count(),
         2,
         "expected one release crate-policy result per legal workspace: {report:#?}"
-    );
-
-    std::fs::remove_dir_all(&root).expect("cleanup temp root");
-}
-
-#[test]
-fn libarch_runtime_runs_each_legal_workspace_once() {
-    let root = super::temp_root_for_tests("libarch-runtime-multi-workspace");
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/Cargo.toml",
-        "[package]\nname = \"shared\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[workspace]\nmembers = [\"crates/api\", \"crates/core\"]\nresolver = \"2\"\n\n[workspace.dependencies]\nshared-api = { path = \"crates/api\" }\nshared-core = { path = \"crates/core\" }\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/src/lib.rs",
-        "pub use shared_api::*;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/crates/api/Cargo.toml",
-        "[package]\nname = \"shared-api\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/crates/api/src/lib.rs",
-        "pub struct Api;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/crates/core/Cargo.toml",
-        "[package]\nname = \"shared-core\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/crates/core/src/lib.rs",
-        "pub struct Core;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/Cargo.toml",
-        "[package]\nname = \"other\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[workspace]\nmembers = [\"crates/api\", \"crates/core\"]\nresolver = \"2\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/src/lib.rs",
-        "pub use other_api::*;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/crates/api/Cargo.toml",
-        "[package]\nname = \"other-api\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/crates/api/src/lib.rs",
-        "pub struct Api;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/crates/core/Cargo.toml",
-        "[package]\nname = \"other-core\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nother-api = { path = \"../api\" }\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/crates/core/src/lib.rs",
-        "pub struct Core;\n",
-    );
-
-    let report =
-        super::run_libarch_for_tests(&super::LocalFsTest, &root).expect("libarch runtime report");
-
-    assertions::assert_result_present(
-        &report,
-        "libarch",
-        "RS-LIBARCH-07",
-        Some("packages/shared/crates/core/Cargo.toml"),
-        Some(true),
-        Some("core does not depend on api"),
-    );
-    assertions::assert_result_present(
-        &report,
-        "libarch",
-        "RS-LIBARCH-07",
-        Some("packages/other/crates/core/Cargo.toml"),
-        Some(false),
-        Some("core must not depend on api"),
-    );
-    assert_eq!(
-        section(&report, "libarch")
-            .results()
-            .iter()
-            .filter(|result| {
-                result.id() == "RS-LIBARCH-07"
-                    && matches!(
-                        result.file(),
-                        Some(
-                            "packages/shared/crates/core/Cargo.toml"
-                                | "packages/other/crates/core/Cargo.toml"
-                        )
-                    )
-            })
-            .count(),
-        2,
-        "expected one libarch core-direction result per legal package root: {report:#?}"
-    );
-
-    std::fs::remove_dir_all(&root).expect("cleanup temp root");
-}
-
-#[test]
-fn libarch_runtime_validation_scope_stays_inside_owning_workspace() {
-    let root = super::temp_root_for_tests("libarch-runtime-validation-scope");
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/Cargo.toml",
-        "[package]\nname = \"shared\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[workspace]\nmembers = [\"crates/api\", \"crates/core\"]\nresolver = \"2\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/src/lib.rs",
-        "pub use shared_api::*;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/crates/api/Cargo.toml",
-        "[package]\nname = \"shared-api\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/crates/api/src/lib.rs",
-        "pub struct Api;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/crates/core/Cargo.toml",
-        "[package]\nname = \"shared-core\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/shared/crates/core/src/lib.rs",
-        "pub struct Core;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/Cargo.toml",
-        "[package]\nname = \"other\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[workspace]\nmembers = [\"crates/api\", \"crates/core\"]\nresolver = \"2\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/src/lib.rs",
-        "pub use other_api::*;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/crates/api/Cargo.toml",
-        "[package]\nname = \"other-api\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/crates/api/src/lib.rs",
-        "pub struct Api;\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/crates/core/Cargo.toml",
-        "[package]\nname = \"other-core\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nother-api = { path = \"../api\" }\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/other/crates/core/src/lib.rs",
-        "pub struct Core;\n",
-    );
-
-    let report = super::run_libarch_with_validation_scope_for_tests(
-        &super::LocalFsTest,
-        &root,
-        "packages/shared/src",
-    )
-    .expect("libarch runtime report");
-
-    assertions::assert_result_present(
-        &report,
-        "libarch",
-        "RS-LIBARCH-07",
-        Some("packages/shared/crates/core/Cargo.toml"),
-        Some(true),
-        None,
-    );
-    assert!(
-        !section(&report, "libarch")
-            .results()
-            .iter()
-            .filter_map(|result| result.file())
-            .any(|file| file.starts_with("packages/other")),
-        "scoped libarch run leaked into sibling package root: {report:#?}"
-    );
-
-    std::fs::remove_dir_all(&root).expect("cleanup temp root");
-}
-
-#[test]
-fn libarch_runtime_stays_decoupled_from_topology_exactness() {
-    let root = super::temp_root_for_tests("libarch-runtime-decoupled-topology-exactness");
-    super::write_file_for_tests(
-        &root,
-        "guardrail3.toml",
-        "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/reason-policy/Cargo.toml",
-        "[workspace]\nmembers = [\"crates/api\", \"crates/ghost\"]\nresolver = \"2\"\n",
-    );
-    super::write_file_for_tests(
-        &root,
-        "packages/reason-policy/crates/api/Cargo.toml",
-        "[package]\nname = \"reason-policy-api\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-
-    let report =
-        super::run_libarch_for_tests(&super::LocalFsTest, &root).expect("libarch runtime report");
-
-    assertions::assert_section_absent(&report, "topology");
-    assertions::assert_ids_absent(
-        &report,
-        &[
-            "RS-TOPOLOGY-12",
-            "RS-HEXARCH-07",
-            "RS-HEXARCH-09",
-            "RS-LIBARCH-05",
-            "RS-LIBARCH-06",
-        ],
     );
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");

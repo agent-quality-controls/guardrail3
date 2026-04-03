@@ -8,7 +8,7 @@ use guardrail3_app_rs_family_mapper::RsScopedRootView;
     feature = "family-clippy",
     feature = "family-deny",
     feature = "family-cargo",
-    feature = "family-libarch",
+
     feature = "family-deps",
     feature = "family-release",
     feature = "family-garde",
@@ -21,7 +21,7 @@ use guardrail3_app_rs_family_mapper::RsFamilyFileView;
     feature = "family-clippy",
     feature = "family-deny",
     feature = "family-cargo",
-    feature = "family-libarch",
+
     feature = "family-deps",
     feature = "family-release",
     feature = "family-test",
@@ -35,7 +35,7 @@ use guardrail3_app_rs_family_mapper::RsRootView;
     feature = "family-clippy",
     feature = "family-deny",
     feature = "family-cargo",
-    feature = "family-libarch",
+
     feature = "family-deps",
     feature = "family-release",
     feature = "family-garde",
@@ -288,32 +288,6 @@ fn run_hexarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         .collect()
 }
 
-#[cfg(feature = "family-libarch")]
-fn run_libarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    let route = ctx.mapper.map_rs_libarch();
-    route
-        .roots()
-        .iter()
-        .flat_map(|root| {
-            let workspace_route = route.for_workspace(root.rel_dir());
-            let root_rels = vec![root.rel_dir().to_owned()];
-            let mut extra = route_root_cargo_files(workspace_route.roots());
-            extra.extend(family_file_rels(workspace_route.family_files()));
-            let view = FamilyView::build(
-                ctx.legality.root_path().clone(),
-                ctx.legality.dir_structure(),
-                ctx.legality.content(),
-                &root_rels,
-                &extra,
-                &[],
-                None,
-                ctx.legality.excluded_paths(),
-            );
-            guardrail3_app_rs_family_libarch::check(&view, &workspace_route)
-        })
-        .collect()
-}
-
 #[cfg(feature = "family-deps")]
 fn run_deps(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_deps();
@@ -461,7 +435,7 @@ fn run_hooks_rs(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     feature = "family-clippy",
     feature = "family-deny",
     feature = "family-cargo",
-    feature = "family-libarch",
+
     feature = "family-deps",
     feature = "family-release",
     feature = "family-test",
@@ -477,7 +451,7 @@ fn route_root_rels(roots: &[RsRootView]) -> Vec<String> {
     feature = "family-clippy",
     feature = "family-deny",
     feature = "family-cargo",
-    feature = "family-libarch",
+
     feature = "family-deps",
     feature = "family-release",
     feature = "family-test",
@@ -522,7 +496,7 @@ fn scoped_route_root_cargo_files(roots: &[RsScopedRootView]) -> Vec<String> {
     feature = "family-clippy",
     feature = "family-deny",
     feature = "family-cargo",
-    feature = "family-libarch",
+
     feature = "family-deps",
     feature = "family-release",
     feature = "family-garde",
@@ -712,12 +686,6 @@ pub(crate) fn compiled_runners() -> Vec<RustFamilyRunnerDef> {
     runners.push(RustFamilyRunnerDef {
         family: RustValidateFamily::Hexarch,
         run: run_hexarch,
-    });
-
-    #[cfg(feature = "family-libarch")]
-    runners.push(RustFamilyRunnerDef {
-        family: RustValidateFamily::Libarch,
-        run: run_libarch,
     });
 
     #[cfg(feature = "family-deps")]

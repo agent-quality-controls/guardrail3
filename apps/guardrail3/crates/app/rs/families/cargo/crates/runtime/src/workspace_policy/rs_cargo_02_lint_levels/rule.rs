@@ -191,7 +191,7 @@ fn check_expected_level(
                 ID.to_owned(),
                 Severity::Error,
                 format!("lint `{name}` weakens policy"),
-                format!("Expected `{expected_level}`, got weaker level `{actual_level}`."),
+                format!("Expected `{expected_level}`, got weaker level `{actual_level}`. Change `{name}` to `{expected_level}` in `{file}`."),
                 Some(file.to_owned()),
                 None,
                 false,
@@ -208,7 +208,7 @@ fn check_expected_level(
                 Severity::Error,
                 format!("lint `{name}` has wrong priority"),
                 format!(
-                    "Expected priority `{expected_priority}`, got `{}`.",
+                    "Expected priority `{expected_priority}`, got `{}`. Set the priority to `{expected_priority}`.",
                     actual_priority
                         .map(|priority| priority.to_string())
                         .unwrap_or_else(|| "none".to_owned())
@@ -222,4 +222,3 @@ fn check_expected_level(
 
     violations
 }
-

@@ -231,10 +231,6 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
                 .and_then(guardrail3_domain_config::types::RustConfig::checks)
                 .and_then(guardrail3_domain_config::types::RustChecksConfig::hexarch)
                 .unwrap_or(true);
-            let global_libarch_enabled = rust
-                .and_then(guardrail3_domain_config::types::RustConfig::checks)
-                .and_then(guardrail3_domain_config::types::RustChecksConfig::libarch)
-                .unwrap_or(true);
             let app_hexarch_enabled = rust
                 .and_then(guardrail3_domain_config::types::RustConfig::apps)
                 .map(|apps| {
@@ -252,11 +248,9 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
                         .collect::<BTreeMap<_, _>>()
                 })
                 .unwrap_or_default();
-            let packages_libarch_enabled = rust
-                .and_then(guardrail3_domain_config::types::RustConfig::packages)
-                .and_then(guardrail3_domain_config::types::CrateConfig::checks)
-                .and_then(guardrail3_domain_config::types::RustChecksConfig::libarch)
-                .unwrap_or(global_libarch_enabled);
+            // Package roots are always governed — the libarch family was
+            // retired and its rules merged into arch.
+            let packages_libarch_enabled = true;
 
             let mut failures = scoped_topology_failures(&config);
             failures.sort_by(|left, right| left.message.cmp(&right.message));

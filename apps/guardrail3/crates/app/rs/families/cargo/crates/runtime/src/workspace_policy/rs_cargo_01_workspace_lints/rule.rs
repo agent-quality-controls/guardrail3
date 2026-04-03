@@ -20,14 +20,14 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
 
     if rust_lints.is_none() {
         missing += 1;
+        let table = policy_lints_table_label(root.kind, "rust");
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Error,
             "rust lint table missing".to_owned(),
             format!(
-                "`{}` must define `{}`.",
+                "`{}` must define `{table}`. Add the required lint entries to `{table}`.",
                 root.cargo_rel_path,
-                policy_lints_table_label(root.kind, "rust")
             ),
             Some(root.cargo_rel_path.clone()),
             None,
@@ -37,14 +37,14 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
 
     if clippy_lints.is_none() {
         missing += 1;
+        let table = policy_lints_table_label(root.kind, "clippy");
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
             title: "clippy lint table missing".to_owned(),
             message: format!(
-                "`{}` must define `{}`.",
+                "`{}` must define `{table}`. Add the required lint entries to `{table}`.",
                 root.cargo_rel_path,
-                policy_lints_table_label(root.kind, "clippy")
             ),
             file: Some(root.cargo_rel_path.clone()),
             line: None,
@@ -53,6 +53,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     if let Some(rust_lints) = rust_lints {
+        let table = policy_lints_table_label(root.kind, "rust");
         if rust_lints.as_table().is_none() {
             missing += 1;
             results.push(CheckResult::from_parts(
@@ -60,9 +61,8 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Error,
                 "rust lint table has invalid shape".to_owned(),
                 format!(
-                    "`{}` must define `{}` as a table of lint entries.",
+                    "`{}` defines `{table}` but it is not a TOML table. Define it as a table of lint entries.",
                     root.cargo_rel_path,
-                    policy_lints_table_label(root.kind, "rust")
                 ),
                 Some(root.cargo_rel_path.clone()),
                 None,
@@ -77,10 +77,8 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                         severity: Severity::Error,
                         title: format!("missing rust lint `{}`", expected.name),
                         message: format!(
-                            "`{}` must define `{}` in `{}`.",
-                            root.cargo_rel_path,
-                            expected.name,
-                            policy_lints_table_label(root.kind, "rust")
+                            "`{}` must define `{}` in `{table}`. Add `{}` to `{table}`.",
+                            root.cargo_rel_path, expected.name, expected.name,
                         ),
                         file: Some(root.cargo_rel_path.clone()),
                         line: None,
@@ -98,9 +96,8 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                             severity: Severity::Error,
                             title: format!("missing library rust lint `{}`", expected.name),
                             message: format!(
-                                "Library profile requires `{}` in `{}`.",
-                                expected.name,
-                                policy_lints_table_label(root.kind, "rust")
+                                "Library profile requires `{}` in `{table}`. Add `{}` to `{table}`.",
+                                expected.name, expected.name,
                             ),
                             file: Some(root.cargo_rel_path.clone()),
                             line: None,
@@ -113,6 +110,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     if let Some(clippy_lints) = clippy_lints {
+        let table = policy_lints_table_label(root.kind, "clippy");
         if clippy_lints.as_table().is_none() {
             missing += 1;
             results.push(CheckResult::from_parts(
@@ -120,9 +118,8 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Error,
                 "clippy lint table has invalid shape".to_owned(),
                 format!(
-                    "`{}` must define `{}` as a table of lint entries.",
+                    "`{}` defines `{table}` but it is not a TOML table. Define it as a table of lint entries.",
                     root.cargo_rel_path,
-                    policy_lints_table_label(root.kind, "clippy")
                 ),
                 Some(root.cargo_rel_path.clone()),
                 None,
@@ -137,10 +134,8 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                         severity: Severity::Error,
                         title: format!("missing clippy lint group `{}`", expected.name),
                         message: format!(
-                            "`{}` must define `{}` in `{}`.",
-                            root.cargo_rel_path,
-                            expected.name,
-                            policy_lints_table_label(root.kind, "clippy")
+                            "`{}` must define `{}` in `{table}`. Add `{}` to `{table}`.",
+                            root.cargo_rel_path, expected.name, expected.name,
                         ),
                         file: Some(root.cargo_rel_path.clone()),
                         line: None,
@@ -157,9 +152,8 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                         severity: Severity::Error,
                         title: format!("missing clippy deny lint `{lint_name}`"),
                         message: format!(
-                            "`{}` must define `{lint_name}` in `{}`.",
+                            "`{}` must define `{lint_name}` in `{table}`. Add `{lint_name}` to `{table}`.",
                             root.cargo_rel_path,
-                            policy_lints_table_label(root.kind, "clippy")
                         ),
                         file: Some(root.cargo_rel_path.clone()),
                         line: None,
@@ -189,4 +183,3 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         );
     }
 }
-

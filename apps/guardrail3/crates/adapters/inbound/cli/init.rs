@@ -266,7 +266,7 @@ fn write_single_crate_checks(config: &mut String) {
     writeln!(config, "cargo = true").unwrap_or_default();
     writeln!(config, "code = true").unwrap_or_default();
     writeln!(config, "hexarch = true").unwrap_or_default();
-    writeln!(config, "libarch = true").unwrap_or_default();
+
     writeln!(config, "deps = true").unwrap_or_default();
     writeln!(config, "garde = true").unwrap_or_default();
     writeln!(config, "test = true").unwrap_or_default();
@@ -304,7 +304,7 @@ fn write_workspace_checks(
         writeln!(config, "deny = true").unwrap_or_default();
         writeln!(config, "cargo = true").unwrap_or_default();
         writeln!(config, "code = true").unwrap_or_default();
-        writeln!(config, "libarch = true").unwrap_or_default();
+    
         writeln!(config, "deps = true").unwrap_or_default();
         writeln!(config, "garde = false").unwrap_or_default();
         writeln!(config, "test = true").unwrap_or_default();
@@ -461,8 +461,8 @@ mod tests {
             "topology must not be generated under package-scoped checks:\n{config}"
         );
         assert!(
-            config.contains("[rust.packages.checks]\nclippy = true\ndeny = true\ncargo = true\ncode = true\nlibarch = true"),
-            "package section must make libarch explicit:\n{config}"
+            config.contains("[rust.packages.checks]\nclippy = true\ndeny = true\ncargo = true\ncode = true\ndeps = true"),
+            "package section must include expected checks:\n{config}"
         );
 
         fs::remove_dir_all(&root).expect("cleanup temp root");

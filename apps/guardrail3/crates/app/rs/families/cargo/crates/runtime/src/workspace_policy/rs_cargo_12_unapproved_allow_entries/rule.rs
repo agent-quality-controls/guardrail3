@@ -42,7 +42,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                         Severity::Error,
                         "unapproved allow entry missing reason".to_owned(),
                         format!(
-                            "`{}` explicitly allows `{lint_name}` in `{family}` without a matching escape-hatch reason.",
+                            "`{}` explicitly allows `{lint_name}` in `{family}` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this lint with a reason.",
                             root.cargo_rel_path
                         ),
                         Some(root.cargo_rel_path.clone()),
@@ -58,7 +58,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
                             Severity::Error,
                             "unapproved allow entry".to_owned(),
                             format!(
-                                "`{}` explicitly allows `{lint_name}` in `{family}`. The entry is documented but still forbidden.",
+                                "`{}` explicitly allows `{lint_name}` in `{family}`. Remove this `allow` override or get it added to the approved inventory.",
                                 root.cargo_rel_path
                             ),
                             Some(root.cargo_rel_path.clone()),
@@ -119,6 +119,5 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         ));
     }
 }
-
 
 // reason: test-only sidecar module wiring

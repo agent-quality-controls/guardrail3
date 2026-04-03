@@ -154,7 +154,6 @@ fn requested_families_allow_config_parse_failure(
                 RustValidateFamily::Topology
                     | RustValidateFamily::Arch
                     | RustValidateFamily::Hexarch
-                    | RustValidateFamily::Libarch
                     | RustValidateFamily::Code
             )
         })
@@ -654,31 +653,6 @@ pub(crate) fn run_release_with_validation_scope_for_tests(
         Some(validation_scope),
         None,
         &[RustValidateFamily::Release],
-        false,
-        &StubToolCheckerTest,
-    )
-}
-
-#[cfg(test)]
-pub(crate) fn run_libarch_for_tests(
-    fs: &dyn guardrail3_outbound_traits::FileSystem,
-    root: &std::path::Path,
-) -> Result<guardrail3_domain_report::Report, RustRunError> {
-    run_for_tests(fs, root, &[RustValidateFamily::Libarch])
-}
-
-#[cfg(test)]
-pub(crate) fn run_libarch_with_validation_scope_for_tests(
-    fs: &dyn guardrail3_outbound_traits::FileSystem,
-    root: &std::path::Path,
-    validation_scope: &str,
-) -> Result<guardrail3_domain_report::Report, RustRunError> {
-    run(
-        fs,
-        root,
-        Some(validation_scope),
-        None,
-        &[RustValidateFamily::Libarch],
         false,
         &StubToolCheckerTest,
     )
