@@ -33,8 +33,8 @@ pub fn check(input: &RootWorkspaceHexarchInput<'_>, results: &mut Vec<CheckResul
             Severity::Error,
             format!("root workspace includes app member `{}`", member.raw),
             format!(
-                "Root workspace must not include Rust app roots like `{}`. Apps own their own workspace boundary.",
-                member.raw
+                "Root workspace must not include Rust app roots like `{}`. Apps own their own workspace boundary. Remove `{}` from the root workspace members.",
+                member.raw, member.raw
             ),
             Some("Cargo.toml".to_owned()),
             None,

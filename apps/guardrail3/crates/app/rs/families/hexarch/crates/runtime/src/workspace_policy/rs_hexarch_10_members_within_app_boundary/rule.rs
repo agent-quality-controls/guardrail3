@@ -23,7 +23,7 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
                 input.app_name, member.raw
             ),
     format!(
-                "Service `{}` lists workspace member `{}` which resolves outside the app boundary. App workspaces must only contain crates inside the app.",
+                "Service `{}` lists workspace member `{}` which resolves outside the app boundary. App workspaces must only contain crates inside the app. Remove this member or move the crate inside the app boundary.",
                 input.app_name, member.raw
             ),
     Some(input.app_rel_dir.to_owned()),
