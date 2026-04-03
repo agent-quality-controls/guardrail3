@@ -1,3 +1,4 @@
+mod helpers;
 use guardrail3_domain_config::types::EscapeHatchConfig;
 
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_07_ignore_escape_hatch as assertions;

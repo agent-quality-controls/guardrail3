@@ -1,3 +1,4 @@
+mod helpers;
 #![allow(dead_code, unused_imports)]
 mod fail_closed;
 mod fixture_missing_all_apps;

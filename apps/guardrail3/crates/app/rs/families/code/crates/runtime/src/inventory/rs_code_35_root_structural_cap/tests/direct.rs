@@ -1,4 +1,4 @@
-use super::super::run_family;
+use super::helpers::run_family;
 use guardrail3_app_rs_family_code_assertions::inventory::rs_code_35_root_structural_cap::{
     RuleFinding, assert_findings,
 };

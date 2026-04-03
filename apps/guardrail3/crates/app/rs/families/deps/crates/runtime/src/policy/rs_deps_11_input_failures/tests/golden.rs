@@ -7,7 +7,7 @@ fn emits_error_for_input_failure() {
     let input = failure_input(&facts, "guardrail3.toml");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

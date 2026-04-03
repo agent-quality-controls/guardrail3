@@ -1,3 +1,4 @@
+mod helpers;
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_03_extra_settings as assertions;
 
 use super::run_check;

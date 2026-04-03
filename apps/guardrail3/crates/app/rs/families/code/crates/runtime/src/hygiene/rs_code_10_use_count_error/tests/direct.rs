@@ -1,4 +1,4 @@
-use super::super::check_source;
+use super::helpers::check_source;
 use guardrail3_app_rs_family_code_assertions::hygiene::rs_code_10_use_count_error::{
     RuleFinding, Severity, assert_findings,
 };

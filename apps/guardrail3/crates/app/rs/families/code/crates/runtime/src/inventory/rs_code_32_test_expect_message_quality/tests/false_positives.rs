@@ -1,4 +1,4 @@
-use super::super::check_source;
+use super::helpers::check_source;
 use guardrail3_app_rs_family_code_assertions::inventory::rs_code_32_test_expect_message_quality::assert_no_hits;
 
 #[test]

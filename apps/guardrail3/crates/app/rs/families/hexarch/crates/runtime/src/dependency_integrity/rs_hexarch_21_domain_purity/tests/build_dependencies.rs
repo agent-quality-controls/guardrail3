@@ -1,4 +1,4 @@
-use super::super::{DomainPurityEdgeKindForTest, run_domain_purity_case};
+use super::helpers::{DomainPurityEdgeKindForTest, run_domain_purity_case};
 use super::{dir_entry, project_tree};
 use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_21_domain_purity as assertions;
 

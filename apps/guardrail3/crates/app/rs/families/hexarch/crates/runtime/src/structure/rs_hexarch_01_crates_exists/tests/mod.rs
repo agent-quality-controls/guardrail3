@@ -1,3 +1,4 @@
+mod helpers;
 #![allow(dead_code, unused_imports)]
 mod collector_discovery;
 mod core;

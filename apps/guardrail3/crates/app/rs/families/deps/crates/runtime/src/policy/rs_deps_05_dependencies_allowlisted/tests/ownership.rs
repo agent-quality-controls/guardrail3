@@ -89,7 +89,7 @@ fn non_workspace_path_dependency_is_still_checked() {
     let input = dependency_input(&facts, "packages/core/Cargo.toml", "reqwest");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

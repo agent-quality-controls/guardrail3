@@ -7,7 +7,7 @@ fn inventories_library_allowlist_when_present() {
     let input = coverage_input(&facts, "packages/core/Cargo.toml");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

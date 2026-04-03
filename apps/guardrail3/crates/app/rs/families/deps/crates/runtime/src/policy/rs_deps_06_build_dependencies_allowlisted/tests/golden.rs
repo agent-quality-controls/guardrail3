@@ -7,7 +7,7 @@ fn inventories_allowlisted_build_dependency() {
     let input = dependency_input(&facts, "crates/api/Cargo.toml", "cc");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

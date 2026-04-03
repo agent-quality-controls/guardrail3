@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::structure::rs_hexarch_01_crates_exists as assertions;
 
-use super::super::check_with_top_level_entries_for_tests;
+use super::helpers::check_with_top_level_entries_for_tests;
 
 #[test]
 fn passes_when_top_level_crates_dir_has_entries() {

@@ -7,7 +7,7 @@ fn inventories_allowlisted_runtime_dependency() {
     let input = dependency_input(&facts, "crates/api/Cargo.toml", "serde");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,
@@ -56,7 +56,7 @@ fn renamed_dependency_uses_package_name_for_allowlist() {
     let input = dependency_input(&facts, "apps/api/Cargo.toml", "serde");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

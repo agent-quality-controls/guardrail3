@@ -1,3 +1,4 @@
+mod helpers;
 use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_03_msrv_consistency::{
     ExpectedRuleResult, Severity, assert_rule_results,
 };

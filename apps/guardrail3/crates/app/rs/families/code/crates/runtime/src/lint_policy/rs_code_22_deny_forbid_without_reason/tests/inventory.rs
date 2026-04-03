@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
-use super::super::copy_fixture;
-use super::super::run_family;
+use super::helpers::copy_fixture;
+use super::helpers::run_family;
 use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_22_deny_forbid_without_reason::{
     RuleFinding, Severity, assert_files, assert_findings,
 };

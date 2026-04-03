@@ -1,3 +1,4 @@
+mod helpers;
 use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_01_exists::{
     ExpectedRuleResult, Severity, assert_invalid_root_cargo_rust_version_type,
     assert_legacy_only_family_results, assert_malformed_modern_and_legacy_results,

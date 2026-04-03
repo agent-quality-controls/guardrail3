@@ -1,3 +1,4 @@
+mod helpers;
 mod bypasses;
 mod direct;
 mod false_positives;

@@ -50,7 +50,7 @@ fn workspace_true_external_path_dependency_is_still_checked() {
     let input = dependency_input(&facts, "packages/core/Cargo.toml", "reqwest");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,
@@ -191,7 +191,7 @@ fn nested_app_zone_uses_app_policy_anywhere_in_path() {
     let input = dependency_input(&facts, "tools/apps/api/crates/worker/Cargo.toml", "reqwest");
     let mut results = Vec::new();
 
-    super::super::check(&input, &mut results);
+    super::helpers::check(&input, &mut results);
 
     assertions::assert_rule_results(
         &results,

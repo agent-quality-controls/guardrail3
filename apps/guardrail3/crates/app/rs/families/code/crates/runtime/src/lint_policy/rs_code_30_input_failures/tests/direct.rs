@@ -1,4 +1,4 @@
-use super::super::check_input_failure;
+use super::helpers::check_input_failure;
 use guardrail3_app_rs_family_code_assertions::lint_policy::rs_code_30_input_failures::{
     RuleFinding, assert_findings,
 };
