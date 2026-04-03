@@ -24,7 +24,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "mutants config missing".to_owned(),
             format!(
-                "{} is missing required mutation config `{}`.",
+                "{} is missing required mutation config `{}`. Create the mutation config file.",
                 display_root(&input.root.rel_dir),
                 input.root.mutants_rel_path
             ),

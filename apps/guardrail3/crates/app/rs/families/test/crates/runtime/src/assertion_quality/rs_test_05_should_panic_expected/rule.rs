@@ -32,7 +32,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
         Severity::Error,
         "should_panic missing expected string".to_owned(),
         format!(
-            "Test `{}` uses `#[should_panic]` without `expected = \"...\"`.",
+            "Test `{}` uses `#[should_panic]` without `expected = \"...\"`. Add `expected = \"...\"` with the expected panic message.",
             input.function.name
         ),
         Some(input.file.rel_path.clone()),

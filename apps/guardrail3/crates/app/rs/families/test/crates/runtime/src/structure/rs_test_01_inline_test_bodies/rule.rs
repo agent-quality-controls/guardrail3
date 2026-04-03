@@ -25,7 +25,7 @@ pub fn check(input: &CfgTestModuleInput<'_>, results: &mut Vec<CheckResult>) {
         ID.to_owned(),
         Severity::Error,
         "inline cfg(test) body in src".to_owned(),
-        "Production `src/` files must not contain inline `#[cfg(test)] mod ... { ... }` bodies."
+        "Production `src/` files must not contain inline `#[cfg(test)] mod ... { ... }` bodies. Move the test module to a sidecar `tests/mod.rs` inside the module directory."
             .to_owned(),
         Some(input.file.rel_path.clone()),
         Some(input.module.line),

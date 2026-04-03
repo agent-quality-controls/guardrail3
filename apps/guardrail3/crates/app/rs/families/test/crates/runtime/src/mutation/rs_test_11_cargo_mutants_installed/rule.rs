@@ -23,7 +23,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "cargo-mutants missing".to_owned(),
-            "`cargo-mutants` was not found on PATH for an active mutation-testing setup."
+            "`cargo-mutants` was not found on PATH. Install with `cargo install cargo-mutants`."
                 .to_owned(),
             Some(input.root.cargo_rel_path.clone()),
             None,

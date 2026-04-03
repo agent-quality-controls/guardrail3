@@ -27,7 +27,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "profile.mutants missing".to_owned(),
             format!(
-                "`{}` does not define `[profile.mutants]` for an active mutation-testing setup.",
+                "`{}` does not define `[profile.mutants]` for an active mutation-testing setup. Add a `[profile.mutants]` section to this Cargo.toml.",
                 input.root.cargo_rel_path
             ),
             Some(input.root.cargo_rel_path.clone()),
