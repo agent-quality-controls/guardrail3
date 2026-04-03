@@ -1,0 +1,15 @@
+[workspace]
+members = ["crates/rustfmt-toml"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+unreachable_pub = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
