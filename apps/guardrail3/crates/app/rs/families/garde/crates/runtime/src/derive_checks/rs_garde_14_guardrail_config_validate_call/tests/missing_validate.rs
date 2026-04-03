@@ -53,7 +53,7 @@ garde = { version = "0.22", features = ["derive"] }
         &results,
         Some(source_rel),
         Some(5),
-        Some("same function does not prove garde validation"),
+        Some("does not call `.validate()` on it"),
     );
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
@@ -242,7 +242,7 @@ garde = { version = "0.22", features = ["derive"] }
         &results,
         Some(source_rel),
         Some(14),
-        Some("same function does not prove garde validation"),
+        Some("does not call `.validate()` on it"),
     );
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
@@ -306,7 +306,7 @@ garde = { version = "0.22", features = ["derive"] }
         &results,
         Some(source_rel),
         Some(8),
-        Some("same function does not prove garde validation"),
+        Some("does not call `.validate()` on it"),
     );
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");

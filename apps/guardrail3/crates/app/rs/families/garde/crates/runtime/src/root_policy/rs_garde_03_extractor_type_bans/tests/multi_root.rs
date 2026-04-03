@@ -46,7 +46,7 @@ fn local_missing_extractor_ban_only_warns_for_owned_root() {
     assertions::assert_missing(
         &results,
         "apps/lib/clippy.toml",
-        "Missing garde extractor bans from `disallowed-types`: axum::extract::Multipart.",
+        "Missing extractor type bans from `disallowed-types`: axum::extract::Multipart. Add these entries to `disallowed-types` in clippy.toml.",
     );
     std::fs::remove_dir_all(&root).expect("remove temp root");
 }

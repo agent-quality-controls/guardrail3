@@ -54,7 +54,7 @@ pub fn assert_count_warning(results: &[CheckResult], message: &str) {
             finding.severity == Severity::Warn
                 && finding.title == "rustfmt ignore count"
                 && finding.message == message
-                && finding.file.is_none()
+                && finding.file == Some("rustfmt.toml")
                 && !finding.inventory
         }),
         "missing RS-FMT-07 count warning: {findings:#?}"

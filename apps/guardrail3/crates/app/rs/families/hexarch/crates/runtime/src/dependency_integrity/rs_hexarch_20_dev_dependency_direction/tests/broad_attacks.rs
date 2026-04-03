@@ -118,10 +118,10 @@ fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
     .into_iter()
     .collect::<BTreeSet<_>>();
     let expected_rule20_messages = [
-        "domain crate `api-domain-types` dev-depends on adapters crate `api-adapters-http` via `dev-dependencies`.".to_owned(),
-        "ports crate `api-ports-repo` dev-depends on adapters crate `api-adapters-http` via `dev-dependencies`.".to_owned(),
-        "domain crate `worker-domain-types` dev-depends on adapters crate `worker-adapters-http` via `dev-dependencies`.".to_owned(),
-        "ports crate `worker-ports-repo` dev-depends on app crate `worker-app-core` via `dev-dependencies`.".to_owned(),
+        "domain crate `api-domain-types` dev-depends on adapters crate `api-adapters-http` via `dev-dependencies`. domain should not dev-depend on adapters. Consider restructuring the test dependencies.".to_owned(),
+        "ports crate `api-ports-repo` dev-depends on adapters crate `api-adapters-http` via `dev-dependencies`. ports should not dev-depend on adapters. Consider restructuring the test dependencies.".to_owned(),
+        "domain crate `worker-domain-types` dev-depends on adapters crate `worker-adapters-http` via `dev-dependencies`. domain should not dev-depend on adapters. Consider restructuring the test dependencies.".to_owned(),
+        "ports crate `worker-ports-repo` dev-depends on app crate `worker-app-core` via `dev-dependencies`. ports should not dev-depend on app. Consider restructuring the test dependencies.".to_owned(),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();

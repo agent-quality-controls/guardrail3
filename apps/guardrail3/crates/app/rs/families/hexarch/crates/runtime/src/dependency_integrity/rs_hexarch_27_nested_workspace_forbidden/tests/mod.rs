@@ -1,16 +1,21 @@
+#![allow(dead_code)]
 mod helpers;
+pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<guardrail3_domain_report::CheckResult> {
+    helpers::results_for_test_root(root)
+}
 #[allow(dead_code, unused_imports)]
 mod ownership;
 mod workspace_policy;
 
 use std::path::{Path, PathBuf};
 
+#[allow(unused_imports)]
 pub(super) use test_support::{walk, write_file};
 
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/full_golden";
 
 pub(super) fn run_family(root: &Path) -> Vec<guardrail3_domain_report::CheckResult> {
-    super::results_for_test_root(root)
+    results_for_test_root(root)
 }
 
 fn fixture_root() -> PathBuf {

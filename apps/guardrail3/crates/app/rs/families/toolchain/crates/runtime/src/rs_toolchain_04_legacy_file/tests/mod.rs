@@ -40,22 +40,13 @@ fn errors_when_both_legacy_and_modern_toolchain_files_exist() {
 
     assert_rule_results(
         &results,
-        &[
-            ExpectedRuleResult {
-                severity: Severity::Warn,
-                inventory: false,
-                title: "legacy rust-toolchain file present",
-                message: "Migrate `rust-toolchain` to `rust-toolchain.toml` so components can be declared explicitly.",
-                file: Some("rust-toolchain"),
-            },
-            ExpectedRuleResult {
-                severity: Severity::Error,
-                inventory: false,
-                title: "both rust-toolchain files present",
-                message: "Remove the legacy `rust-toolchain` file. rustup prefers it over `rust-toolchain.toml`, so the modern contract is shadowed.",
-                file: Some("rust-toolchain"),
-            },
-        ],
+        &[ExpectedRuleResult {
+            severity: Severity::Error,
+            inventory: false,
+            title: "both rust-toolchain files present",
+            message: "Remove the legacy `rust-toolchain` file. rustup reads it instead of `rust-toolchain.toml` when both exist, so your modern config is ignored.",
+            file: Some("rust-toolchain"),
+        }],
     );
 }
 
@@ -77,21 +68,12 @@ fn errors_with_local_legacy_path_for_nested_path_fixture() {
 
     assert_rule_results(
         &results,
-        &[
-            ExpectedRuleResult {
-                severity: Severity::Warn,
-                inventory: false,
-                title: "legacy rust-toolchain file present",
-                message: "Migrate `rust-toolchain` to `rust-toolchain.toml` so components can be declared explicitly.",
-                file: Some("packages/lib/rust-toolchain"),
-            },
-            ExpectedRuleResult {
-                severity: Severity::Error,
-                inventory: false,
-                title: "both rust-toolchain files present",
-                message: "Remove the legacy `rust-toolchain` file. rustup prefers it over `rust-toolchain.toml`, so the modern contract is shadowed.",
-                file: Some("packages/lib/rust-toolchain"),
-            },
-        ],
+        &[ExpectedRuleResult {
+            severity: Severity::Error,
+            inventory: false,
+            title: "both rust-toolchain files present",
+            message: "Remove the legacy `rust-toolchain` file. rustup reads it instead of `rust-toolchain.toml` when both exist, so your modern config is ignored.",
+            file: Some("packages/lib/rust-toolchain"),
+        }],
     );
 }

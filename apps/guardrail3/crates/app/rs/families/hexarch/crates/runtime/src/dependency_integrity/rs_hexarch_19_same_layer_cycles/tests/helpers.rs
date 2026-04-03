@@ -1,4 +1,4 @@
-use super::super::{check, check_inventory};
+use super::super::check;
 use guardrail3_domain_report::CheckResult;
 use crate::dependency_facts::CycleFacts;
 use crate::inputs::CycleHexarchInput;

@@ -46,8 +46,8 @@ pub fn assert_missing_root_config(results: &[CheckResult]) {
     assert_eq!(finding.title, "rustfmt config missing");
     assert_eq!(
         finding.message,
-        "Expected rustfmt.toml or .rustfmt.toml at workspace root"
+        "Expected `rustfmt.toml` at workspace root. Create one with the required formatting settings."
     );
-    assert_eq!(finding.file, Some(""));
+    assert_eq!(finding.file, Some("rustfmt.toml"));
     assert!(!finding.inventory);
 }

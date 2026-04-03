@@ -1,4 +1,13 @@
+#![allow(dead_code)]
 mod helpers;
+pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+    helpers::results_for_test_root(root)
+}
+pub(super) fn results_for_test_tree(
+    tree: &guardrail3_app_rs_family_view::FamilyView,
+) -> Vec<CheckResult> {
+    helpers::results_for_test_tree(tree)
+}
 #[allow(dead_code, unused_imports)]
 mod fail_closed;
 mod fixture_missing_all_apps;
@@ -11,6 +20,7 @@ mod zero_member_workspace;
 use guardrail3_app_rs_family_hexarch_assertions::dependency_policy::rs_hexarch_15_boundary_config::CheckResult;
 use std::path::{Path, PathBuf};
 
+#[allow(unused_imports)]
 pub(super) use test_support::{
     create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
 };
@@ -20,7 +30,7 @@ const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
 const INNER_HEX_ROOT: &str = "apps/backend/crates/adapters/inbound/mcp/crates";
 
 pub(super) fn run_family(root: &Path) -> Vec<CheckResult> {
-    super::results_for_test_root(root)
+    results_for_test_root(root)
 }
 
 fn fixture_root() -> PathBuf {

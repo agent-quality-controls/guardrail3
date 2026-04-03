@@ -27,7 +27,7 @@ fn malformed_source_fails_closed_as_input_failure() {
         "src/lib.rs",
         None,
         Severity::Error,
-        "test-family input failure",
+        "failed to read test input",
     );
     assert_message_starts_with(
         &results,
@@ -50,7 +50,7 @@ fn malformed_cargo_manifest_fails_closed() {
         "Cargo.toml",
         None,
         Severity::Error,
-        "test-family input failure",
+        "failed to read test input",
     );
     assert_message_starts_with(
         &results,
@@ -87,7 +87,7 @@ fn malformed_nextest_config_is_reported_when_async_active() {
         ".config/nextest.toml",
         None,
         Severity::Error,
-        "test-family input failure",
+        "failed to read test input",
     );
     assert_message_starts_with(&results, "Failed to parse nextest config:");
 }
@@ -112,7 +112,7 @@ fn malformed_mutants_config_is_reported_when_mutation_is_adopted() {
         ".cargo/mutants.toml",
         None,
         Severity::Error,
-        "test-family input failure",
+        "failed to read test input",
     );
     assert_message_starts_with(&results, "Failed to parse mutants config:");
 }
@@ -148,7 +148,7 @@ fn unreadable_pre_commit_hook_fails_closed_for_hook_only_adoption() {
         ".githooks/pre-commit",
         None,
         Severity::Error,
-        "test-family input failure",
+        "failed to read test input",
     );
     assert_message_starts_with(
         &results,
@@ -194,7 +194,7 @@ fn unreadable_pre_commit_d_hook_fails_closed_for_hook_only_adoption() {
         ".githooks/pre-commit.d/run-mutants",
         None,
         Severity::Error,
-        "test-family input failure",
+        "failed to read test input",
     );
     assert_message_starts_with(
         &results,

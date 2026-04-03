@@ -30,7 +30,7 @@ fn warns_when_bans_missing() {
     assertions::assert_missing(
         &results,
         "clippy.toml",
-        "Missing `reqwest::Response::json` from `disallowed-methods`.",
+        "Missing `reqwest::Response::json` from `disallowed-methods`. Add it to `disallowed-methods` in clippy.toml.",
     );
 
     std::fs::remove_dir_all(&root).expect("remove temp root");

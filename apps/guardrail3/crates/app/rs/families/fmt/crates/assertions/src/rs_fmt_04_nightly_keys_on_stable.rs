@@ -49,7 +49,9 @@ pub fn assert_warn_for_key(results: &[CheckResult], key: &str, file: &str) {
     );
     assert_eq!(
         finding.message,
-        format!("`{key}` is nightly-only, but rust-toolchain.toml uses `stable`.")
+        format!(
+            "`{key}` is nightly-only, but rust-toolchain.toml uses `stable`. Either remove `{key}` from rustfmt.toml or switch the toolchain channel to nightly."
+        )
     );
     assert_eq!(finding.file, Some(file));
     assert!(!finding.inventory);
@@ -74,7 +76,7 @@ pub fn assert_missing_toolchain_file_error(results: &[CheckResult]) {
     assert_error(
         results,
         "rust-toolchain.toml missing",
-        "Nightly-only rustfmt settings require a root rust-toolchain.toml to prove the channel.",
+        "Nightly-only rustfmt settings require a root rust-toolchain.toml to verify the channel.",
     );
 }
 

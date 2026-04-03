@@ -1,4 +1,8 @@
+#![allow(dead_code)]
 mod helpers;
+pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+    helpers::results_for_test_root(root)
+}
 #[allow(dead_code, unused_imports)]
 mod fail_closed;
 mod golden;
@@ -13,6 +17,7 @@ mod visibility_edges;
 use guardrail3_app_rs_family_hexarch_assertions::dependency_integrity::rs_hexarch_23_adapter_pub_trait::CheckResult;
 use std::path::{Path, PathBuf};
 
+#[allow(unused_imports)]
 pub(super) use test_support::{
     create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
 };
@@ -22,7 +27,7 @@ const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
 const INNER_HEX_ROOT: &str = "apps/backend/crates/adapters/inbound/mcp/crates";
 
 pub(super) fn run_family(root: &Path) -> Vec<CheckResult> {
-    super::results_for_test_root(root)
+    results_for_test_root(root)
 }
 
 fn fixture_root() -> PathBuf {

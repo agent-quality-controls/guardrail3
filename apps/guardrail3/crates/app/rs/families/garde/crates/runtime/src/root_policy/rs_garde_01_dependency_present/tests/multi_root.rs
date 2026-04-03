@@ -112,7 +112,7 @@ fn main() {}
                 file: Some("apps/root/Cargo.toml"),
                 inventory: Some(false),
                 title: Some("garde dependency missing"),
-                message_contains: Some("workspace root"),
+                message_contains: Some("Add `garde` to `[dependencies]`"),
                 ..Default::default()
             },
             assertions::ExpectedRuleResult {
@@ -127,7 +127,7 @@ fn main() {}
                 file: Some("apps/tool/Cargo.toml"),
                 inventory: Some(false),
                 title: Some("garde dependency missing"),
-                message_contains: Some("workspace root"),
+                message_contains: Some("Add `garde` to `[dependencies]`"),
                 ..Default::default()
             },
         ],

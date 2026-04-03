@@ -13,7 +13,7 @@ fn reports_extra_per_crate_rustfmt_configs() {
 
     assertions::assert_override(
         &results,
-        ".rustfmt.toml below repository root is forbidden; rustfmt policy is root-only",
+        "`.rustfmt.toml` below repository root is forbidden; rustfmt policy is root-only. Delete this file and ensure all formatting settings are in the root `rustfmt.toml`.",
         "crates/core/.rustfmt.toml",
     );
 }
@@ -27,7 +27,7 @@ fn reports_plain_nested_rustfmt_toml_overrides() {
 
     assertions::assert_override(
         &results,
-        "rustfmt.toml below repository root is forbidden; rustfmt policy is root-only",
+        "`rustfmt.toml` below repository root is forbidden; rustfmt policy is root-only. Delete this file and ensure all formatting settings are in the root `rustfmt.toml`.",
         "crates/core/rustfmt.toml",
     );
 }

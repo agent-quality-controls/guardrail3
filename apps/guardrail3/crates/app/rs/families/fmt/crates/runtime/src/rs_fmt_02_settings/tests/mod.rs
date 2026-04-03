@@ -77,7 +77,7 @@ reorder_modules = true
     assertions::assert_warn_present(
         &results,
         "rustfmt max_width wrong",
-        "max_width = 120 but expected 100",
+        "max_width = 120 but expected 100. Update max_width in rustfmt.toml.",
         "rustfmt.toml",
     );
 }

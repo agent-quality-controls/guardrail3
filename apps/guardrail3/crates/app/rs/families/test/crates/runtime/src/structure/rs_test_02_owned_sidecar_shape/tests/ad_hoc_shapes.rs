@@ -67,16 +67,18 @@ fn missing_sidecar_mod_rs_is_reported() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
+    write_file(root, "src/lib.rs", "pub mod foo;\n");
+    write_file(root, "src/foo/mod.rs", "pub fn value() -> u8 { 1 }\n");
     write_file(
         root,
-        "src/lib_tests/helper.rs",
+        "src/foo/tests/helper.rs",
         "#[test]\nfn stray() {assert!(true);}\n",
     );
 
     let results = run_family(root);
     assert_reported(
         &results,
-        "src/lib_tests",
+        "src/foo/tests",
         None,
         Severity::Error,
         "sidecar directory missing mod.rs",
@@ -176,9 +178,10 @@ fn orphaned_sidecar_harness_is_reported() {
         "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
+    write_file(root, "crates/runtime/src/lib.rs", "pub mod foo;\n");
     write_file(
         root,
-        "crates/runtime/src/lib_tests/mod.rs",
+        "crates/runtime/src/foo/tests/mod.rs",
         "#[test]\nfn stray() {assert!(true);}\n",
     );
     write_file(
@@ -190,7 +193,7 @@ fn orphaned_sidecar_harness_is_reported() {
     let results = run_family(root);
     assert_reported(
         &results,
-        "crates/runtime/src/lib_tests/mod.rs",
+        "crates/runtime/src/foo/tests/mod.rs",
         None,
         Severity::Error,
         "orphaned sidecar harness",

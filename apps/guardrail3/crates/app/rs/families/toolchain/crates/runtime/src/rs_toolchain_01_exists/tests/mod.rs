@@ -153,7 +153,7 @@ fn errors_when_no_supported_toolchain_file_exists() {
             severity: Severity::Error,
             inventory: false,
             title: "rust-toolchain.toml missing",
-            message: "Expected rust-toolchain.toml at workspace root.",
+            message: "Expected rust-toolchain.toml at workspace root. Create a `rust-toolchain.toml` with a `[toolchain]` section containing `channel` and `components`.",
             file: Some("rust-toolchain.toml"),
         }],
     );
@@ -218,7 +218,7 @@ fn family_targets_nested_workspace_root_instead_of_validation_root() {
             severity: Severity::Error,
             inventory: false,
             title: "rust-toolchain.toml missing",
-            message: "Expected rust-toolchain.toml at workspace root.",
+            message: "Expected rust-toolchain.toml at workspace root. Create a `rust-toolchain.toml` with a `[toolchain]` section containing `channel` and `components`.",
             file: Some("apps/guardrail3/rust-toolchain.toml"),
         }],
     );

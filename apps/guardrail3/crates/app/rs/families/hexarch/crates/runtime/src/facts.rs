@@ -383,11 +383,14 @@ fn insert_root_workspace_member(resolved: &mut BTreeSet<String>, repo_rel: &str)
 }
 
 fn absolute_member_to_repo_rel(tree: &ProjectTree, member: &str) -> Option<String> {
-    // Derive the project root from abs_path("") — returns None if root is out of scope.
     let root = tree.abs_path("")?;
+    let canonical_root = std::fs::canonicalize(&root).unwrap_or(root);
     let absolute = std::path::Path::new(member);
-    absolute
-        .strip_prefix(&root)
+    let canonical_absolute =
+        std::fs::canonicalize(absolute).unwrap_or_else(|_| absolute.to_path_buf());
+    canonical_absolute
+        .strip_prefix(&canonical_root)
+        .or_else(|_| absolute.strip_prefix(&canonical_root))
         .ok()
         .map(|rel| rel.to_string_lossy().replace('\\', "/"))
 }

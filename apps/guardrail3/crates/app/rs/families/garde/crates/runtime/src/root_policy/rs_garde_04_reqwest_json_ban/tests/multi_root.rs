@@ -46,7 +46,7 @@ fn local_missing_reqwest_ban_only_warns_for_owned_root() {
     assertions::assert_missing(
         &results,
         "apps/lib/clippy.toml",
-        "Missing `reqwest::Response::json` from `disallowed-methods`.",
+        "Missing `reqwest::Response::json` from `disallowed-methods`. Add it to `disallowed-methods` in clippy.toml.",
     );
     std::fs::remove_dir_all(&root).expect("remove temp root");
 }

@@ -43,7 +43,15 @@ pub fn assert_conflict(results: &[CheckResult], file: &str) {
     assert_eq!(finding.title, "Conflicting rustfmt config files");
     assert_eq!(
         finding.message,
-        "Both rustfmt.toml and .rustfmt.toml exist in the same directory"
+        format!(
+            "Both `rustfmt.toml` and `.rustfmt.toml` exist in `{}`. Delete `.rustfmt.toml` and keep `rustfmt.toml`.",
+            if file == "rustfmt.toml" {
+                "."
+            } else {
+                file.strip_suffix("/rustfmt.toml")
+                    .expect("nested conflict file should end with /rustfmt.toml")
+            }
+        )
     );
     assert_eq!(finding.file, Some(file));
     assert!(!finding.inventory);

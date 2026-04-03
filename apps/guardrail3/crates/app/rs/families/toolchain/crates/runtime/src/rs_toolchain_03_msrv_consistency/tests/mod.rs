@@ -33,7 +33,7 @@ fn warns_when_pinned_toolchain_is_older_than_msrv() {
             severity: Severity::Warn,
             inventory: false,
             title: "pinned toolchain is older than MSRV",
-            message: "Pinned toolchain `1.84.0` is older than Cargo rust-version `1.85.0`.",
+            message: "Pinned toolchain `1.84.0` is older than Cargo rust-version `1.85.0`. Either update the pinned toolchain to match or exceed the MSRV, or lower `rust-version` in Cargo.toml.",
             file: Some("rust-toolchain.toml"),
         }],
     );
@@ -197,7 +197,7 @@ fn errors_when_cargo_rust_version_is_invalid() {
         &[ExpectedRuleResult {
             severity: Severity::Error,
             inventory: false,
-            title: "Cargo rust-version is invalid",
+            title: "Cargo rust-version is unparseable",
             message: "Cannot compare pinned toolchain against invalid Cargo rust-version `stable`.",
             file: Some("Cargo.toml"),
         }],
