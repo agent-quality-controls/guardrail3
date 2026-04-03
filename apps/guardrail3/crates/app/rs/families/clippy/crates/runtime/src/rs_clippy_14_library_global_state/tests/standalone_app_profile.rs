@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_14_library_global_state as assertions;
 use test_support::{build_fixture_clippy_toml, dir_entry, project_tree, remove_ban_path};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn workspace_local_app_root_uses_rust_apps_profile_policy() {

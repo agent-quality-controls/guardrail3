@@ -1,3 +1,4 @@
+mod helpers;
 mod golden;
 mod local_root;
 mod missing;

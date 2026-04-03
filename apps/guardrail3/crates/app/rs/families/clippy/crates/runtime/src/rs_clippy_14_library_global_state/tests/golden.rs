@@ -3,7 +3,7 @@ use test_support::{
     build_fixture_clippy_toml, published_library_package_root_tree, root_workspace_tree,
 };
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn emits_no_result_for_non_library_profile() {

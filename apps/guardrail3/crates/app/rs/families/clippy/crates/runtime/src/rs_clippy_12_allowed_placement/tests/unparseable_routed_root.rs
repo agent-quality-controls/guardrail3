@@ -1,6 +1,6 @@
 use test_support::{dir_entry, project_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn ignores_configs_attached_to_malformed_workspace_roots_because_shared_legality_owns_root_legality() {

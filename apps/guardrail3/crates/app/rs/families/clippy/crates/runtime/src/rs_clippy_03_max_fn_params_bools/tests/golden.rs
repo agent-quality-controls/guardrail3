@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_03_max_fn_params_bools as assertions;
 use test_support::{build_fixture_clippy_toml, root_workspace_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn inventories_generated_max_fn_params_bools_baseline() {

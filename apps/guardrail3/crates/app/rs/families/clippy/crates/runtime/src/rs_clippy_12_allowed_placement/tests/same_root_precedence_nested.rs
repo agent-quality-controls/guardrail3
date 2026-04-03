@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_12_allowed_placement as assertions;
 use test_support::{dir_entry, project_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn rejects_lower_precedence_same_root_sibling_config_at_workspace_roots() {

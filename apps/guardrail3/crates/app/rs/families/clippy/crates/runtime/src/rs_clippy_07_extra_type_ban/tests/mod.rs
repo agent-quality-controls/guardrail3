@@ -1,3 +1,4 @@
+mod helpers;
 mod garde_disabled;
 mod golden;
 mod library_profile;

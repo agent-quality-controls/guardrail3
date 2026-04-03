@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_14_library_global_state as assertions;
 use test_support::{build_fixture_clippy_toml, package_library_workspace_root_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn package_workspace_root_uses_rust_packages_library_profile() {

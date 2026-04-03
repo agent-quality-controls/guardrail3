@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_07_extra_type_ban as assertions;
 use test_support::{build_fixture_clippy_toml, prepend_ban_path, root_workspace_tree};
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn inventories_project_specific_extra_type_bans() {

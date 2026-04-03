@@ -3,7 +3,7 @@ use test_support::{
     build_fixture_clippy_toml, published_library_package_root_tree, remove_ban_path,
 };
 
-use super::super::run_for_tests;
+use super::helpers::run_for_tests;
 
 #[test]
 fn does_not_inventory_library_only_global_state_type_bans_under_base_missing_type_rule() {
