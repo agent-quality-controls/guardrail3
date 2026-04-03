@@ -23,14 +23,13 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             "include" if info.build_script_pattern && !info.path_traversal => results.push(
                 CheckResult::from_parts(
                     ID.to_owned(),
-                    Severity::Info,
+                    Severity::Warn,
                     "build-script include! inventory".to_owned(),
                     "`include!(concat!(env!(\"OUT_DIR\"), ...))` detected. Review generated-code boundary.".to_owned(),
                     Some(input.rel_path.to_owned()),
                     Some(info.line),
                     false,
-                )
-                .as_inventory(),
+                ),
             ),
             "include" => results.push(CheckResult::from_parts(
                 ID.to_owned(),

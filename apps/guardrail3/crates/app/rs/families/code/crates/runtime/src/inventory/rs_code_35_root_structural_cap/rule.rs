@@ -29,7 +29,7 @@ pub fn check(input: &StructuralCapInput<'_>, results: &mut Vec<CheckResult>) {
         Severity::Error,
         "crate source tree exceeds structural caps".to_owned(),
         format!(
-            "Rust root `{}` exceeds structural caps: {}.",
+            "Rust root `{}` exceeds structural caps: {}. Restructure the crate into smaller modules or sub-crates.",
             input.root_rel_dir,
             exceeded.join(", ")
         ),
