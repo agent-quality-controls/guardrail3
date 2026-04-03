@@ -5,7 +5,7 @@ use guardrail3_app_rs_family_topology_assertions::rs_topology_07_required_inputs
 fn malformed_guardrail_config_emits_required_input_failure() {
     let results = check_results(&tree(
         &[("", entry(&["apps"], &["guardrail3.toml"]))],
-        &[("guardrail3.toml", "[rust.checks]\nlibarch = \"nope\"\n")],
+        &[("guardrail3.toml", "[rust.checks]\nhexarch = \"nope\"\n")],
     ));
 
     assertions::assert_error_files(&results, "RS-TOPOLOGY-07", &["guardrail3.toml"]);

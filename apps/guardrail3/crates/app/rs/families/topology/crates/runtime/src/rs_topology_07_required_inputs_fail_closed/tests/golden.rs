@@ -14,7 +14,7 @@ fn golden_layout_has_no_required_input_failures() {
         &[
             (
                 "guardrail3.toml",
-                "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n",
+                "[rust.checks]\ntopology = true\nhexarch = true\n",
             ),
             (
                 "apps/backend/Cargo.toml",

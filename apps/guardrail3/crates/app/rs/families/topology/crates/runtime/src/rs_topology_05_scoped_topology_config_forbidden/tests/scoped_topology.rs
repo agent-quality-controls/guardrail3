@@ -3,7 +3,7 @@ use guardrail3_app_rs_family_topology_assertions::rs_topology_05_scoped_topology
 
 #[test]
 fn app_scoped_topology_config_is_forbidden() {
-    let config = "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\ntopology = false\n";
+    let config = "[rust.checks]\ntopology = true\nhexarch = true\n\n[rust.apps.backend.checks]\ntopology = false\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &["guardrail3.toml"])),
@@ -24,7 +24,7 @@ fn app_scoped_topology_config_is_forbidden() {
 
 #[test]
 fn package_scoped_topology_config_is_forbidden() {
-    let config = "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n\n[rust.packages.checks]\ntopology = false\n";
+    let config = "[rust.checks]\ntopology = true\nhexarch = true\n\n[rust.packages.checks]\ntopology = false\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["packages"], &["guardrail3.toml"])),

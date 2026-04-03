@@ -3,7 +3,7 @@ use guardrail3_app_rs_family_topology_assertions::rs_topology_06_owner_family_en
 
 #[test]
 fn app_roots_error_when_effective_hexarch_enablement_is_false() {
-    let config = "[rust.checks]\ntopology = true\nhexarch = false\nlibarch = true\n";
+    let config = "[rust.checks]\ntopology = true\nhexarch = false\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &["guardrail3.toml"])),
@@ -24,7 +24,7 @@ fn app_roots_error_when_effective_hexarch_enablement_is_false() {
 
 #[test]
 fn app_scoped_hexarch_override_false_beats_global_true() {
-    let config = "[rust.checks]\ntopology = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\nhexarch = false\n";
+    let config = "[rust.checks]\ntopology = true\nhexarch = true\n\n[rust.apps.backend.checks]\nhexarch = false\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &["guardrail3.toml"])),
@@ -58,7 +58,7 @@ fn app_scoped_hexarch_override_false_beats_global_true() {
 
 #[test]
 fn app_scoped_hexarch_override_true_beats_global_false() {
-    let config = "[rust.checks]\ntopology = true\nhexarch = false\nlibarch = true\n\n[rust.apps.backend.checks]\nhexarch = true\n";
+    let config = "[rust.checks]\ntopology = true\nhexarch = false\n\n[rust.apps.backend.checks]\nhexarch = true\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &["guardrail3.toml"])),
