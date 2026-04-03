@@ -37,7 +37,7 @@ pub(crate) fn check(node: &CrateNode, results: &mut Vec<CheckResult>) {
         Severity::Error,
         "crate missing facade entry point".to_owned(),
         format!(
-            "Crate `{}` has no lib.rs or main.rs. Every crate must have a facade entry point.",
+            "Crate `{}` has no lib.rs or main.rs. Every crate must have a facade entry point. Create `src/lib.rs` or `src/main.rs` and re-export only the crate's intended public API.",
             node.rel_dir
         ),
         Some(node.cargo_rel_path.clone()),

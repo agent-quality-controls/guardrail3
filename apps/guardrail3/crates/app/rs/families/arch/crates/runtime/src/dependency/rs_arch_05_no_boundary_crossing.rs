@@ -49,7 +49,7 @@ pub(crate) fn check(
         Severity::Error,
         "dependency crosses crate boundary".to_owned(),
         format!(
-            "`{}` depends on `{}` (via `{}`), but this crosses the boundary of {boundary_label}. Depend on {boundary_label}'s facade instead.",
+            "`{}` depends on `{}` (via `{}`), but this crosses the boundary of {boundary_label}. Depending on internal crates couples you to another package's structure. Depend on {boundary_label}'s facade crate instead.",
             edge.source_rel_dir,
             target_rel,
             edge.dep_alias,

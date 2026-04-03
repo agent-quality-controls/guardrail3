@@ -21,8 +21,9 @@ pub fn check(input: &TopologyIssueInput<'_>, results: &mut Vec<CheckResult>) {
             display_dir(&input.issue.rel_dir)
         ),
         format!(
-            "`{}` declares a nested workspace under `{}`. Nested workspaces are forbidden.",
+            "`{}` declares a nested workspace under `{}`. Cargo does not support nested workspaces. Remove the `[workspace]` section from this Cargo.toml, or move it so it is not nested under `{}`.",
             input.issue.cargo_rel_path,
+            display_dir(parent_workspace_rel),
             display_dir(parent_workspace_rel),
         ),
         Some(input.issue.cargo_rel_path.clone()),

@@ -25,13 +25,13 @@ pub(crate) fn check(module: &ModuleDir, results: &mut Vec<CheckResult>) {
     if !module.has_mod_rs {
         let detail = if module.mod_decl_file.is_empty() {
             format!(
-                "Directory `{}` contains {} .rs files but has no mod.rs. It is likely wired via #[path] attributes. Add a mod.rs facade and use normal module declarations instead.",
-                module.dir_rel, module.rs_file_count
+                "Directory `{}` contains {} .rs files but has no mod.rs. Create `{}/mod.rs` with `mod` declarations for each .rs file in the directory.",
+                module.dir_rel, module.rs_file_count, module.dir_rel
             )
         } else {
             format!(
-                "Directory `{}` is used as a module (declared in `{}` line {}) but has no mod.rs. Every module directory must have a mod.rs facade.",
-                module.dir_rel, module.mod_decl_file, module.mod_decl_line
+                "Directory `{}` is used as a module (declared in `{}` line {}) but has no mod.rs. Every module directory must have a mod.rs facade. Create `{}/mod.rs` and declare its submodules there.",
+                module.dir_rel, module.mod_decl_file, module.mod_decl_line, module.dir_rel
             )
         };
         let file = if module.mod_decl_file.is_empty() {

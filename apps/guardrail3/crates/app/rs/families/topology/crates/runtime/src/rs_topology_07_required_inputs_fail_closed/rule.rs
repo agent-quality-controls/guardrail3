@@ -26,7 +26,7 @@ pub fn check_success(has_required_input_failures: bool, results: &mut Vec<CheckR
             ID.to_owned(),
             Severity::Info,
             "Rust topology required inputs are readable".to_owned(),
-            "Required Rust topology placement inputs resolved without unreadable-present or malformed failures."
+            "All required Rust topology inputs were readable and parseable."
                     .to_owned(),
             None,
             None,

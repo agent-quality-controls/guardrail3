@@ -23,7 +23,7 @@ pub(crate) fn check(
             Severity::Error,
             "lib.rs must be facade-only".to_owned(),
             format!(
-                "lib.rs contains {} `{}`. Keep lib.rs limited to pub mod/use declarations, type/const definitions, and specific re-exports.",
+                "lib.rs contains {} `{}`. Move it to a submodule. lib.rs must only contain mod/use declarations and re-exports.",
                 item.kind, item.name
             ),
             Some(lib_rel.clone()),
