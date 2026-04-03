@@ -93,7 +93,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         Severity::Error,
         "local clippy policy root drops managed baseline".to_owned(),
         format!(
-            "`{}` replaces inherited clippy policy but is incomplete. Missing or wrong managed sections: {}.",
+            "`{}` replaces inherited clippy policy but is incomplete. Missing or wrong managed sections: {}. Copy the missing sections from the root clippy.toml to ensure the full baseline is present.",
             input.config.rel_path,
             missing_sections.join(", ")
         ),

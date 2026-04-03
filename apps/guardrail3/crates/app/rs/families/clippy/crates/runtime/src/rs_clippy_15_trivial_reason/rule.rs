@@ -49,7 +49,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                             Severity::Error,
                             "ban entry reason too weak".to_owned(),
                             format!(
-                                "`{}` in `{key}` has a weak `reason`: {}.",
+                                "`{}` in `{key}` has a weak `reason`: {}. Provide a more specific reason.",
                                 entry.path,
                                 issue.message()
                             ),

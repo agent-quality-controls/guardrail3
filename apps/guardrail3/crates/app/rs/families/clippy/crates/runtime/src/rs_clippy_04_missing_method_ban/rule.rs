@@ -52,7 +52,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 ID.to_owned(),
                 Severity::Error,
                 "missing method ban".to_owned(),
-                format!("`{expected}` is not present in `disallowed-methods`."),
+                format!("`{expected}` is not present in `disallowed-methods`. Add it to `disallowed-methods` in clippy.toml."),
                 Some(input.config.rel_path.clone()),
                 None,
                 false,
