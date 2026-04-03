@@ -25,7 +25,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
                     ID.to_owned(),
                     Severity::Info,
                     format!("rustfmt extra setting: {key}"),
-                    "Non-baseline rustfmt setting present".to_owned(),
+                    format!("`{key}` in `{rel}` is not part of the standard rustfmt baseline. Verify it is intentional."),
                     Some(rel.to_owned()),
                     None,
                     false,

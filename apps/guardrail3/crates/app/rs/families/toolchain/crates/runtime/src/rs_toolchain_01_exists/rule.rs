@@ -22,7 +22,7 @@ pub fn check(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<CheckResult
             ID.to_owned(),
             Severity::Error,
             "rust-toolchain.toml missing".to_owned(),
-            "Expected rust-toolchain.toml at workspace root.".to_owned(),
+            "Expected rust-toolchain.toml at workspace root. Create a `rust-toolchain.toml` with a `[toolchain]` section containing `channel` and `components`.".to_owned(),
             Some(expected_toolchain_rel(input.rel_dir)),
             None,
             false,

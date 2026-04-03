@@ -89,7 +89,7 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
-            title: "Cargo rust-version is invalid".to_owned(),
+            title: "Cargo rust-version is unparseable".to_owned(),
             message: format!(
                 "Cannot compare pinned toolchain against invalid Cargo rust-version `{cargo_msrv}`."
             ),
@@ -106,7 +106,7 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
             severity: Severity::Warn,
             title: "pinned toolchain is older than MSRV".to_owned(),
             message: format!(
-                "Pinned toolchain `{channel}` is older than Cargo rust-version `{cargo_msrv}`."
+                "Pinned toolchain `{channel}` is older than Cargo rust-version `{cargo_msrv}`. Either update the pinned toolchain to match or exceed the MSRV, or lower `rust-version` in Cargo.toml."
             ),
             file: Some(rel.to_owned()),
             line: None,

@@ -121,7 +121,7 @@ fn push_wrong(
         ID.to_owned(),
         Severity::Warn,
         format!("rustfmt {key} wrong"),
-        format!("{key} = {actual} but expected {expected}"),
+        format!("{key} = {actual} but expected {expected}. Update {key} in rustfmt.toml."),
         Some(rel.to_owned()),
         None,
         false,
