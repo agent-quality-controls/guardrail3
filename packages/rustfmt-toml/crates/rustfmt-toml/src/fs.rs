@@ -2,7 +2,6 @@
 ///
 /// All `std::fs` operations are centralized here so that the rest of the crate
 /// does not scatter direct filesystem calls.
-
 use crate::Error;
 
 /// Read a file to a string, returning the crate's [`Error`] type on failure.

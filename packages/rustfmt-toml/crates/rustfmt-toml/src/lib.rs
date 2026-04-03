@@ -1,5 +1,8 @@
+/// Typed configuration types for rustfmt.toml parsing.
 mod config;
+/// Error types for parse failures.
 mod error;
+/// Filesystem boundary for file reading.
 mod fs;
 
 #[cfg(feature = "types")]
