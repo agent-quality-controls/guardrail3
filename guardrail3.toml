@@ -36,6 +36,9 @@ release = false
 hooks_shared = false
 hooks_rs = false
 
+[rust.packages.deps]
+allowed_deps = ["serde", "toml"]
+
 # ── Escape hatches ──────────────────────────────────────────────────────
 
 # apps/guardrail3 workspace lint allows
