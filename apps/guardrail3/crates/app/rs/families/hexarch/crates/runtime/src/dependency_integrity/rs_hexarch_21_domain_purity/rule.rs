@@ -52,7 +52,7 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
                     Severity::Error,
                     format!("domain crate `{}` depends on non-pure layer", member.name),
                     format!(
-                        "Domain crate `{}` depends on {} layer `{}` via `{}`.",
+                        "Domain crate `{}` depends on {} layer `{}` via `{}`. Domain must only depend on domain and ports layers. Remove this dependency or move the target to the domain or ports layer.",
                         member.name,
                         target_layer.label(),
                         edge.dep_package_name,
@@ -98,8 +98,8 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
                     member.name, edge.dep_package_name
                 ),
                 format!(
-                    "Domain crate `{}` may only use pure allowlisted external crates. `{}` is not in the built-in allowlist or `allowed_deps`.",
-                    member.name, edge.dep_package_name
+                    "Domain crate `{}` may only use pure allowlisted external crates. `{}` is not in the built-in allowlist or `allowed_deps`. Add `{}` to `allowed_deps` in guardrail3.toml if it is a pure dependency, or remove it.",
+                    member.name, edge.dep_package_name, edge.dep_package_name
                 ),
                 Some(member.cargo_rel_path.clone()),
                 None,

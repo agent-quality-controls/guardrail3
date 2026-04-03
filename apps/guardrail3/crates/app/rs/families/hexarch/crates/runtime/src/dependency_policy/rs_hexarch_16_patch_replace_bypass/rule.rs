@@ -34,7 +34,7 @@ pub fn check(input: &PatchHexarchInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             format!("patch/replace entry `{}` missing reason", patch.key),
             format!(
-                "`{}` resolves to `{}` inside the layered Rust tree and has no matching escape-hatch reason.",
+                "`{}` resolves to `{}` inside the layered Rust tree and has no matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this patch with a reason.",
                 patch.key, patch.resolved_rel_dir
             ),
             Some(patch.cargo_rel_path.clone()),
@@ -44,10 +44,10 @@ pub fn check(input: &PatchHexarchInput<'_>, results: &mut Vec<CheckResult>) {
         Some(reason) => match validate_reason_text(reason) {
             Ok(()) => results.push(CheckResult::from_parts(
                 ID.to_owned(),
-                Severity::Error,
+                Severity::Warn,
                 format!("patch/replace entry `{}` bypasses hexarch dependency checks", patch.key),
                 format!(
-                    "`{}` resolves to `{}` inside the layered Rust tree. The bypass is documented but still forbidden here.",
+                    "`{}` resolves to `{}` inside the layered Rust tree with documented reason `{reason}`. This bypass is tracked.",
                     patch.key, patch.resolved_rel_dir
                 ),
                 Some(patch.cargo_rel_path.clone()),
@@ -59,7 +59,7 @@ pub fn check(input: &PatchHexarchInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Error,
                 format!("patch/replace entry `{}` reason too weak", patch.key),
                 format!(
-                    "`{}` resolves to `{}` inside the layered Rust tree with a weak reason: {}.",
+                    "`{}` resolves to `{}` inside the layered Rust tree with a weak reason: {}. Provide a more specific reason.",
                     patch.key,
                     patch.resolved_rel_dir,
                     issue.message()

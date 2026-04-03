@@ -43,12 +43,14 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
         Severity::Error,
         "workspace dependency direction violation".to_owned(),
         format!(
-            "{} crate `{}` inherits workspace dependency `{}` which resolves to {} crate `{}`.",
+            "{} crate `{}` inherits workspace dependency `{}` which resolves to {} crate `{}`. {} must not depend on {}. Remove this dependency or invert the direction through ports.",
             source_layer.label(),
             edge.source_name,
             edge.dep_alias,
             target_layer.label(),
-            edge.dep_package_name
+            edge.dep_package_name,
+            source_layer.label(),
+            target_layer.label()
         ),
         Some(edge.source_cargo_rel_path.clone()),
         None,

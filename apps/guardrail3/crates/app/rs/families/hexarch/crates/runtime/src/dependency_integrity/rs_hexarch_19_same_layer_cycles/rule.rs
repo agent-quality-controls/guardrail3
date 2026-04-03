@@ -15,7 +15,7 @@ pub fn check(input: &CycleHexarchInput<'_>, results: &mut Vec<CheckResult>) {
         Severity::Error,
         format!("same-layer {} dependency cycle", cycle.layer.label()),
         format!(
-            "Found same-layer dependency cycle in `{}` layer: {}",
+            "Found same-layer dependency cycle in `{}` layer: {}. Break the cycle by extracting shared code into a separate crate or removing one of the dependencies.",
             cycle.layer.label(),
             cycle.members.join(" -> ")
         ),
