@@ -3,7 +3,8 @@ use guardrail3_reason_policy::validate_reason_text;
 
 use crate::inputs::PolicyRootCargoInput;
 use crate::lint_support::{
-    allow_selector, escape_hatch_reason, explicit_allow_entries, policy_lints,
+    EXPECTED_CLIPPY_REQUIRED_ALLOW, allow_selector, escape_hatch_reason, explicit_allow_entries,
+    policy_lints,
 };
 
 const ID: &str = "RS-CARGO-03";
@@ -25,6 +26,13 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
     let mut weak_reason_count = 0usize;
 
     for lint_name in explicit_allow_entries(Some(clippy_lints)) {
+        // Skip lints that CARGO-01 requires to be allowed — those are mandated policy, not escape hatches.
+        if EXPECTED_CLIPPY_REQUIRED_ALLOW
+            .iter()
+            .any(|required| required.name == lint_name)
+        {
+            continue;
+        }
         let selector = allow_selector("clippy", &lint_name);
         let Some(reason) = escape_hatch_reason(
             &root.escape_hatches,
