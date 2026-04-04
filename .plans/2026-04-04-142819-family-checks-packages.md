@@ -43,14 +43,14 @@ defines its own input struct using types from the parser crates.
 
 ### Clippy
 ```rust
-use clippy_toml::ClippyConfig;
-use cargo_toml::Manifest;
-use cargo_config_toml::CargoConfig;
+use clippy_toml_parser::ClippyToml;
+use cargo_toml_parser::CargoToml;
+use cargo_config_toml_parser::CargoConfig;
 
 pub struct GrdzClippyChecksInput {
-    pub clippy_config: Option<ClippyConfig>,
+    pub clippy_config: Option<ClippyToml>,
     pub clippy_config_rel_path: Option<String>,
-    pub cargo_manifest: Manifest,
+    pub cargo_manifest: CargoToml,
     pub cargo_config: Option<CargoConfig>,
     pub cargo_config_rel_path: Option<String>,
     pub profile: GrdzProfile,
@@ -64,10 +64,10 @@ Rules in app: RS-CLIPPY-01 (coverage), RS-CLIPPY-12 (placement), RS-CLIPPY-23 (g
 
 ### Deny
 ```rust
-use deny_toml::DenyConfig;
+use deny_toml_parser::DenyToml;
 
 pub struct GrdzDenyChecksInput {
-    pub deny_config: Option<DenyConfig>,
+    pub deny_config: Option<DenyToml>,
     pub deny_config_rel_path: Option<String>,
     pub profile: GrdzProfile,
 }
@@ -80,13 +80,13 @@ Rules in app: RS-DENY-01 (coverage), RS-DENY-03 (shadowing)
 
 ### Cargo
 ```rust
-use cargo_toml::Manifest;
+use cargo_toml_parser::CargoToml;
 use guardrail3_toml::Guardrail3Config;
 
 pub struct GrdzCargoChecksInput {
-    pub workspace_manifest: Manifest,
+    pub workspace_manifest: CargoToml,
     pub workspace_manifest_rel_path: String,
-    pub member_manifests: Vec<(String, Manifest)>,  // (rel_path, manifest)
+    pub member_manifests: Vec<(String, CargoToml)>,  // (rel_path, manifest)
     pub guardrail3_config: Option<Guardrail3Config>,
     pub profile: GrdzProfile,
 }
@@ -99,35 +99,41 @@ Rules in app: none — all cargo rules are content validation
 
 ### Fmt
 ```rust
-use rustfmt_toml::RustfmtConfig;
+use cargo_toml_parser::CargoToml;
+use rust_toolchain_toml_parser::RustToolchainToml;
+use rustfmt_toml_parser::RustfmtToml;
 
-pub struct GrdzFmtChecksInput {
-    pub rustfmt_config: Option<RustfmtConfig>,
-    pub rustfmt_config_rel_path: Option<String>,
-    pub cargo_edition: Option<String>,        // pre-extracted from Manifest
-    pub toolchain_channel: Option<String>,    // pre-extracted from rust-toolchain
-    pub profile: GrdzProfile,
+pub struct G3FmtContentChecksInput {
+    pub rustfmt_rel_path: String,
+    pub rustfmt: RustfmtToml,
+    pub cargo_rel_path: String,
+    pub cargo: CargoToml,
+    pub toolchain_rel_path: String,
+    pub toolchain: RustToolchainToml,
 }
 
-pub fn check(input: &GrdzFmtChecksInput) -> Vec<GrdzCheckResult>
+pub fn check(input: &G3FmtContentChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-FMT-01..08 (all content rules)
-Rules in app: none
+Rules in package: RS-FMT-02, RS-FMT-03, RS-FMT-04, RS-FMT-06
+Rules in app: RS-FMT-01, RS-FMT-05, RS-FMT-07, RS-FMT-08
 
-Note: fmt receives pre-extracted edition and channel rather than full
-Manifest/toolchain structs. These are single fields from other families'
-files — not worth passing the entire parsed struct.
+Note: the package does not discover or choose files. The app/orchestrator
+selects the authoritative `rustfmt.toml`, `Cargo.toml`, and
+`rust-toolchain.toml` to compare, parses them, reports missing/malformed-file
+failures itself, and calls the package only with concrete typed parsed inputs.
+Inside the package, `check(&G3FmtContentChecksInput)` can fan out to smaller
+rule-local inputs, but the package boundary stays one typed aggregate input.
 
 ### Toolchain
 ```rust
-use cargo_toml::Manifest;
+use cargo_toml_parser::CargoToml;
 
 pub struct GrdzToolchainChecksInput {
     pub toolchain_config: Option<String>,         // raw rust-toolchain.toml content
     pub toolchain_config_rel_path: Option<String>,
     pub legacy_toolchain_exists: bool,
-    pub cargo_rust_version: Option<String>,       // pre-extracted from Manifest
+    pub cargo_rust_version: Option<String>,       // pre-extracted from CargoToml
     pub profile: GrdzProfile,
 }
 
@@ -142,13 +148,13 @@ internally) and pre-extracted rust-version.
 
 ### Garde
 ```rust
-use clippy_toml::ClippyConfig;
-use cargo_toml::Manifest;
+use clippy_toml_parser::ClippyToml;
+use cargo_toml_parser::CargoToml;
 
 pub struct GrdzGardeChecksInput {
     pub source_files: Vec<GrdzSourceFile>,
-    pub clippy_config: Option<ClippyConfig>,  // garde checks its bans are present
-    pub cargo_manifest: Manifest,             // garde checks for garde dependency
+    pub clippy_config: Option<ClippyToml>,    // garde checks its bans are present
+    pub cargo_manifest: CargoToml,            // garde checks for garde dependency
     pub profile: GrdzProfile,
 }
 
@@ -160,11 +166,11 @@ Rules in app: none — garde IS the policy owner for its concerns
 
 ### Deps
 ```rust
-use cargo_toml::Manifest;
+use cargo_toml_parser::CargoToml;
 
 pub struct GrdzDepsChecksInput {
-    pub workspace_manifest: Manifest,
-    pub member_manifests: Vec<(String, Manifest)>,
+    pub workspace_manifest: CargoToml,
+    pub member_manifests: Vec<(String, CargoToml)>,
     pub cargo_lock_exists: bool,
     pub cargo_lock_gitignored: bool,
     pub tools: Vec<GrdzToolStatus>,
@@ -179,15 +185,15 @@ Rules in app: none
 
 ### Test
 ```rust
-use nextest_toml::NextestConfig;
-use mutants_toml::MutantsConfig;
-use cargo_toml::Manifest;
+use nextest_toml_parser::NextestToml;
+use mutants_toml_parser::MutantsToml;
+use cargo_toml_parser::CargoToml;
 
 pub struct GrdzTestChecksInput {
     pub source_files: Vec<GrdzSourceFile>,
-    pub cargo_manifest: Manifest,
-    pub nextest_config: Option<NextestConfig>,
-    pub mutants_config: Option<MutantsConfig>,
+    pub cargo_manifest: CargoToml,
+    pub nextest_config: Option<NextestToml>,
+    pub mutants_config: Option<MutantsToml>,
     pub tools: Vec<GrdzToolStatus>,
     pub profile: GrdzProfile,
 }
@@ -200,11 +206,11 @@ Rules in app: none
 
 ### Release
 ```rust
-use cargo_toml::Manifest;
+use cargo_toml_parser::CargoToml;
 
 pub struct GrdzReleaseChecksInput {
-    pub workspace_manifest: Manifest,
-    pub member_manifests: Vec<(String, Manifest)>,
+    pub workspace_manifest: CargoToml,
+    pub member_manifests: Vec<(String, CargoToml)>,
     pub tools: Vec<GrdzToolStatus>,
     pub profile: GrdzProfile,
     // release-plz.toml, cliff.toml etc. — need parsers or raw strings
