@@ -2,8 +2,6 @@ mod discover;
 mod facts;
 mod inputs;
 mod rs_toolchain_01_exists;
-mod rs_toolchain_02_channel_and_components;
-mod rs_toolchain_03_msrv_consistency;
 mod rs_toolchain_04_legacy_file;
 
 mod run;
