@@ -1,0 +1,22 @@
+[package]
+name = "rust-toolchain-toml-parser-assertions"
+version = "0.0.0"
+edition = "2024"
+description = "Assertion helpers for rust-toolchain-toml parser tests"
+license.workspace = true
+repository.workspace = true
+publish = true
+readme = "README.md"
+keywords = ["rust-toolchain", "toml", "assertions", "parser", "rust"]
+categories = ["config", "development-tools", "parser-implementations"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[dependencies]
+rust-toolchain-toml-parser = { path = "../runtime" }

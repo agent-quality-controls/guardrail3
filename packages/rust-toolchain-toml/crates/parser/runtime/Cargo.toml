@@ -1,0 +1,32 @@
+[package]
+name = "rust-toolchain-toml-parser"
+version.workspace = true
+edition = "2024"
+description = "Parser implementation for rust-toolchain.toml facade packages"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["rust-toolchain", "toml", "parser", "toolchain", "rust"]
+categories = ["config", "development-tools", "parser-implementations"]
+publish = true
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+rust-toolchain-toml-types = { path = "../types", version = "0.1.0" }
+toml = "0.8"
+
+[dev-dependencies]
+rust-toolchain-toml-parser-assertions = { path = "../assertions" }
+tempfile = "3"
+
+[package.metadata.docs.rs]
+all-features = true
