@@ -1,0 +1,22 @@
+[package]
+name = "guardrail3-check-types"
+version = "0.1.0"
+edition = "2024"
+description = "Shared types for guardrail3 check packages — results, severity, profiles"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["guardrail3", "checks", "types", "lint", "rust"]
+categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["types"]
+types = []
+
+[package.metadata.docs.rs]
+all-features = true
