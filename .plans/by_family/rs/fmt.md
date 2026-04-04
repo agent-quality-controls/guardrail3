@@ -50,6 +50,19 @@ Historical/supplemental references:
 - `.plans/by_file/rs/rustfmt-toml.md`
 - `.plans/by_file/tools/rustfmt.md`
 
+Extraction note:
+
+- the extracted `fmt` content-checks package should not discover files or
+  resolve scope
+- the app/orchestrator chooses which `rustfmt.toml`, `Cargo.toml`, and
+  `rust-toolchain.toml` are authoritative for one validation call
+- the app parses those files, handles missing/malformed-file failures, and only
+  then calls the package
+- the package boundary should therefore be typed parsed inputs, not raw TOML
+  and not optional/error-state enums
+- inside the package, `check(...)` may fan out into smaller rule-local inputs
+  for `RS-FMT-02`, `RS-FMT-03`, `RS-FMT-04`, and `RS-FMT-06`
+
 Next planning focus:
 
 - keep broadening exact-result attack coverage for nested override and dual-file-conflict discovery

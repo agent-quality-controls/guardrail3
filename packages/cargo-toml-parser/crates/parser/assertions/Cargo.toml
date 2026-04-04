@@ -1,0 +1,22 @@
+[package]
+name = "cargo-toml-parser-runtime-assertions"
+version = "0.0.0"
+edition = "2024"
+description = "Assertion helpers for Cargo.toml parser tests"
+license.workspace = true
+repository.workspace = true
+publish = true
+readme = "README.md"
+keywords = ["cargo", "manifest", "toml", "assertions", "rust"]
+categories = ["config", "development-tools", "parser-implementations"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[dependencies]
+cargo-toml-parser-runtime = { path = "../runtime" }
