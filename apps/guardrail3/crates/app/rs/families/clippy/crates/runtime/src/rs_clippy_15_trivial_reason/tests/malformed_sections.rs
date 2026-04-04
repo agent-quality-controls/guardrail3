@@ -1,10 +1,9 @@
-use guardrail3_app_rs_family_clippy_assertions::rs_clippy_15_trivial_reason as assertions;
 use test_support::root_workspace_tree;
 
 use super::helpers::run_for_tests;
 
 #[test]
-fn inventories_when_no_documented_ban_entries_can_be_parsed() {
+fn stays_quiet_when_ban_sections_are_malformed() {
     let tree = root_workspace_tree(
         r#"
 disallowed-methods = {}
@@ -19,5 +18,5 @@ disallowed-macros = [
 "#,
     );
     let results = run_for_tests(&tree, "clippy.toml");
-    assertions::assert_inventory(&results, "clippy.toml");
+    assert!(results.is_empty(), "malformed ban sections are owned elsewhere: {results:#?}");
 }

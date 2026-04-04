@@ -1,10 +1,9 @@
-use guardrail3_app_rs_family_clippy_assertions::rs_clippy_15_trivial_reason as assertions;
 use test_support::root_workspace_tree;
 
 use super::helpers::run_for_tests;
 
 #[test]
-fn warns_for_all_placeholder_reason_variants() {
+fn stays_quiet_for_all_placeholder_reason_variants_on_ban_entries() {
     let tree = root_workspace_tree(
         r#"
 disallowed-methods = [
@@ -22,20 +21,5 @@ disallowed-macros = [
 "#,
     );
     let results = run_for_tests(&tree, "clippy.toml");
-    assertions::assert_weak_reason_messages(
-        &results,
-        &[
-            "`macro::dots` in `disallowed-macros` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
-            "`method::empty` in `disallowed-methods` has a weak `reason`: reason must not be empty. Provide a more specific reason.",
-            "`method::fixme` in `disallowed-methods` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
-            "`method::space` in `disallowed-methods` has a weak `reason`: reason must not be empty. Provide a more specific reason.",
-            "`type::later` in `disallowed-types` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
-            "`type::tbd` in `disallowed-types` has a weak `reason`: reason must not be a placeholder. Provide a more specific reason.",
-        ],
-        "clippy.toml",
-    );
-    assertions::assert_count_summary(
-        &results,
-        "`clippy.toml` has 6 clippy ban entries (0 documented, 0 missing reasons, 6 weak reasons).",
-    );
+    assert!(results.is_empty(), "ban reasons do not matter for harsher policy: {results:#?}");
 }
