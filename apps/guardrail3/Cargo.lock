@@ -238,6 +238,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "g3-toolchain-content-checks"
+version = "0.1.0"
+dependencies = [
+ "g3-toolchain-content-checks-runtime",
+ "g3-toolchain-content-checks-types",
+]
+
+[[package]]
+name = "g3-toolchain-content-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3-toolchain-content-checks-types",
+ "guardrail3-check-types",
+ "toml",
+]
+
+[[package]]
+name = "g3-toolchain-content-checks-types"
+version = "0.1.0"
+dependencies = [
+ "toml",
+]
+
+[[package]]
 name = "garde"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -949,6 +973,7 @@ dependencies = [
 name = "guardrail3-app-rs-family-toolchain"
 version = "0.0.0"
 dependencies = [
+ "g3-toolchain-content-checks",
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-mapper",
@@ -956,6 +981,7 @@ dependencies = [
  "guardrail3-app-rs-legality",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
+ "guardrail3-check-types",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
@@ -1117,6 +1143,10 @@ dependencies = [
  "tree-sitter-typescript",
  "walkdir",
 ]
+
+[[package]]
+name = "guardrail3-check-types"
+version = "0.1.0"
 
 [[package]]
 name = "guardrail3-domain-config"
