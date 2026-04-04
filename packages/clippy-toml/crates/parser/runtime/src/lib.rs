@@ -1,0 +1,15 @@
+/// Error types for parse failures.
+mod error;
+/// Filesystem boundary for file reading.
+mod fs;
+/// Parser entrypoints.
+mod parser;
+
+#[cfg(feature = "api")]
+pub use clippy_toml_types::{BanEntry, BanEntryDetail, ClippyToml};
+#[cfg(feature = "api")]
+pub use error::Error;
+#[cfg(feature = "api")]
+pub use parser::{from_path, parse};
+#[cfg(feature = "api")]
+pub use toml::Value;

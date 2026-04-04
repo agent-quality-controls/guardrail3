@@ -1,9 +1,45 @@
+[package]
+name = "nextest-toml"
+version = "0.1.0"
+edition = "2024"
+description = "Facade crate for typed nextest.toml parsing"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["nextest", "toml", "parser", "configuration", "rust"]
+categories = ["config", "development-tools", "parser-implementations"]
+publish = true
+readme = "README.md"
+include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[dependencies]
+nextest-toml-parser = { path = "crates/parser/runtime", version = "0.1.0", optional = true }
+
+[features]
+default = ["all"]
+all = ["api"]
+api = ["dep:nextest-toml-parser"]
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+
 [workspace]
-members = ["crates/nextest-toml"]
+members = [
+    "crates/parser/runtime",
+    "crates/parser/assertions",
+    "crates/parser/types",
+]
 resolver = "2"
 
 [workspace.package]
 edition = "2024"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
 
 [workspace.lints.rust]
 warnings = "deny"
