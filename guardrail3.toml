@@ -31,7 +31,7 @@ type = "library"
 [rust.packages.checks]
 hexarch = false
 garde = false
-test = false
+test = true
 release = false
 hooks_shared = false
 hooks_rs = false
