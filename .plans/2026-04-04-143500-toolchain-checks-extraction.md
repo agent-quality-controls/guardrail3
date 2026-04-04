@@ -1,53 +1,42 @@
-# Extract toolchain checks package
+# Extract toolchain content checks package
+
+## Scope
+
+Content checks only. Filetree checks (existence, legacy conflict) stay
+in the app's family runtime.
 
 ## Package
 
 `packages/guardrail3-checks-toolchain/`
 
-Dependencies: `guardrail3-check-types`, `toml` (for parsing rust-toolchain.toml)
-
-Note: NOT using `rust-toolchain-file` external crate. The rules currently
-do raw TOML navigation and the file format is simple enough that we don't
-need an external parser. We parse with `toml::from_str` internally.
+Dependencies: `guardrail3-check-types`, `cargo_toml`, `toml`
 
 ## Public interface
 
 ```rust
 use guardrail3_check_types::{GrdzCheckResult, GrdzProfile};
+use cargo_toml::Manifest;
 
+/// Validate rust-toolchain.toml contents.
+/// The file is known to exist — the app handles missing file errors.
 pub fn check(input: &GrdzToolchainChecksInput) -> Vec<GrdzCheckResult>
 
 pub struct GrdzToolchainChecksInput {
-    /// Raw content of rust-toolchain.toml, if the file exists.
-    pub toolchain_content: Option<String>,
-    /// Repo-relative path to rust-toolchain.toml.
-    pub toolchain_rel_path: Option<String>,
-    /// Whether a legacy rust-toolchain (no .toml) file exists.
-    pub legacy_toolchain_exists: bool,
-    /// Repo-relative path to the legacy file, if it exists.
-    pub legacy_toolchain_rel_path: Option<String>,
-    /// rust-version from Cargo.toml, pre-extracted by the app.
-    pub cargo_rust_version: Option<String>,
-    /// Repo-relative path to the Cargo.toml that owns this root.
+    /// Parsed rust-toolchain.toml. The app parsed it with toml crate.
+    /// Package reads [toolchain].channel, [toolchain].components.
+    pub toolchain_parsed: toml::Value,
+    /// Repo-relative path for error reporting.
+    pub toolchain_rel_path: String,
+    /// Parsed Cargo.toml manifest. Package reads rust-version.
+    pub cargo_manifest: Manifest,
+    /// Repo-relative path to Cargo.toml for error reporting.
     pub cargo_rel_path: String,
-    /// Whether Cargo.toml failed to parse (blocks MSRV check).
-    pub cargo_parse_error: Option<String>,
     /// Workspace profile.
     pub profile: GrdzProfile,
 }
 ```
 
-## Rules (4 total, all move to package)
-
-### RS-TOOLCHAIN-01: rust-toolchain.toml exists
-```rust
-fn check_exists(
-    toolchain_rel_path: Option<&str>,
-    rel_dir: &str,
-) -> Vec<GrdzCheckResult>
-```
-- If Some → Info inventory
-- If None → Error "missing"
+## Rules that move (2)
 
 ### RS-TOOLCHAIN-02: channel and components
 ```rust
@@ -56,104 +45,96 @@ fn check_channel_and_components(
     rel_path: &str,
 ) -> Vec<GrdzCheckResult>
 ```
-- Checks [toolchain].channel is "stable" or pinned stable version
-- Checks [toolchain].components contains "clippy" and "rustfmt"
-- Errors on nightly, beta, missing channel
-- Skips if legacy file exists (rule 04 handles that)
+- Validates [toolchain].channel is stable or pinned stable
+- Validates [toolchain].components contains clippy + rustfmt
+- Errors on nightly, beta, unsupported
 
 ### RS-TOOLCHAIN-03: MSRV consistency
 ```rust
 fn check_msrv_consistency(
     parsed: &toml::Value,
     toolchain_rel_path: &str,
-    cargo_rust_version: Option<&str>,
+    cargo_manifest: &Manifest,
     cargo_rel_path: &str,
-    cargo_parse_error: Option<&str>,
 ) -> Vec<GrdzCheckResult>
 ```
-- Compares pinned toolchain version against Cargo.toml rust-version
+- Extracts rust-version from Manifest
+- Compares pinned toolchain version against MSRV
 - Warns if toolchain < MSRV
-- Skips if not pinned, if Cargo.toml missing, or if legacy file exists
+
+## Rules that stay in app (2)
+
+### RS-TOOLCHAIN-01: existence
+Stays in app. The app checks whether rust-toolchain.toml was found at
+this root. If not, emits "missing" error. If yes, calls the content
+checks package.
 
 ### RS-TOOLCHAIN-04: legacy file conflict
-```rust
-fn check_legacy_file(
-    legacy_rel_path: Option<&str>,
-    toolchain_rel_path: Option<&str>,
-) -> Vec<GrdzCheckResult>
-```
-- Error if both files exist (legacy overrides modern)
-- Warn if only legacy exists (migrate to .toml)
+Stays in app. Checks whether both rust-toolchain and rust-toolchain.toml
+exist. This is filetree/placement, not content validation.
 
-## Top-level dispatch
+## Top-level dispatch in package
 
 ```rust
 pub fn check(input: &GrdzToolchainChecksInput) -> Vec<GrdzCheckResult> {
     let mut results = Vec::new();
-
-    // Rule 01: existence
-    results.extend(check_exists(
-        input.toolchain_rel_path.as_deref(),
-        // derive rel_dir from cargo_rel_path
+    results.extend(check_channel_and_components(
+        &input.toolchain_parsed,
+        &input.toolchain_rel_path,
     ));
-
-    // Rule 04: legacy conflict (check early, rules 02/03 skip if legacy present)
-    results.extend(check_legacy_file(
-        input.legacy_toolchain_rel_path.as_deref(),
-        input.toolchain_rel_path.as_deref(),
+    results.extend(check_msrv_consistency(
+        &input.toolchain_parsed,
+        &input.toolchain_rel_path,
+        &input.cargo_manifest,
+        &input.cargo_rel_path,
     ));
-
-    // Parse toolchain content
-    if input.legacy_toolchain_exists {
-        return results; // rules 02/03 skip when legacy present
-    }
-    let Some(content) = &input.toolchain_content else {
-        return results;
-    };
-    let parsed = match toml::from_str::<toml::Value>(content) {
-        Ok(v) => v,
-        Err(e) => {
-            // emit parse error result
-            return results;
-        }
-    };
-
-    // Rule 02: channel + components
-    if let Some(rel) = &input.toolchain_rel_path {
-        results.extend(check_channel_and_components(&parsed, rel));
-    }
-
-    // Rule 03: MSRV consistency
-    if let Some(rel) = &input.toolchain_rel_path {
-        results.extend(check_msrv_consistency(
-            &parsed,
-            rel,
-            input.cargo_rust_version.as_deref(),
-            &input.cargo_rel_path,
-            input.cargo_parse_error.as_deref(),
-        ));
-    }
-
     results
 }
 ```
 
-## What stays in the app
+## App-side migration
 
-Nothing. All 4 toolchain rules are content validation. There's no coverage
-check ("every root must have rust-toolchain.toml") because the runner
-already iterates workspace roots and calls check() per-root. If a root has
-no toolchain file, the input has `toolchain_content: None` and rule 01 fires.
+The app's toolchain runner currently calls all 4 rules via the internal
+family crate. After extraction:
+
+```rust
+fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
+    // ... existing discovery + facts collection ...
+    
+    for input in all_from_facts(&facts) {
+        // Rules 01 + 04 stay inline
+        rs_toolchain_01_exists::check(&input, &mut results);
+        rs_toolchain_04_legacy_file::check(&input, &mut results);
+        
+        // Rules 02 + 03 delegate to package
+        if let (Some(parsed), Some(rel_path)) = (&input.parsed, input.toolchain_toml_rel) {
+            let checks_input = GrdzToolchainChecksInput {
+                toolchain_parsed: parsed.clone(),
+                toolchain_rel_path: rel_path.to_owned(),
+                cargo_manifest: /* parse from content */,
+                cargo_rel_path: input.cargo_rel_path.to_owned(),
+                profile: /* resolve from guardrail3.toml */,
+            };
+            let package_results = guardrail3_checks_toolchain::check(&checks_input);
+            // convert GrdzCheckResult → CheckResult and extend
+            results.extend(convert(package_results));
+        }
+    }
+    results
+}
+```
+
+Note: there's a GrdzCheckResult → CheckResult conversion needed since
+the app uses its own CheckResult type. Either:
+- Make check-types' GrdzCheckResult THE CheckResult (big refactor)
+- Add a conversion function (pragmatic for migration)
 
 ## Migration steps
 
-1. Create `packages/guardrail3-checks-toolchain/` with the types and rules
-2. Add `guardrail3-check-types` and `toml` as dependencies
-3. Implement all 4 rules as internal functions
-4. Implement public `check()` that dispatches
-5. Write tests (port from existing toolchain test suite)
-6. In the app's toolchain runner: replace internal rule calls with
-   `guardrail3_checks_toolchain::check(input)` where input is built
-   from the current facts
-7. Verify all 48 toolchain tests still pass
-8. Run guardrails on the new package
+1. Create package with types and 2 rules
+2. Write tests for rules 02 + 03 using the new input type
+3. Add package as dependency to the app's toolchain family
+4. Update runner to call package for rules 02 + 03
+5. Remove rules 02 + 03 from the internal family crate
+6. Verify all 48 tests pass
+7. Run guardrails on the new package
