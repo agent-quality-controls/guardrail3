@@ -90,21 +90,27 @@ receives a concrete parsed `DenyToml` only.
 ### Cargo
 ```rust
 use cargo_toml_parser::CargoToml;
-use guardrail3_toml::Guardrail3Config;
 
 pub struct G3CargoChecksInput {
-    pub workspace_manifest: CargoToml,
-    pub workspace_manifest_rel_path: String,
-    pub member_manifests: Vec<(String, CargoToml)>,  // (rel_path, manifest)
-    pub guardrail3_config: Option<Guardrail3Config>,
-    pub profile: G3Profile,
+    pub policy_root_rel_path: String,
+    pub policy_root_manifest: CargoToml,
+    pub member_manifests: Vec<(String, CargoToml)>,
+    pub policy_rel_path: Option<String>,
+    pub policy_profile: Option<G3CargoPolicyProfile>,
+    pub lint_allow_waivers: Vec<G3CargoLintAllowWaiver>,
 }
 
 pub fn check(input: &G3CargoChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-CARGO-01..15 (all lint, edition, resolver rules)
-Rules in app: none — all cargo rules are content validation
+Rules in package: RS-CARGO-01..09, RS-CARGO-11..13, RS-CARGO-15
+Rules in app: RS-CARGO-10, RS-CARGO-14
+
+Package boundary:
+
+- receives parsed policy-root and member `Cargo.toml` values
+- receives normalized profile/waiver policy inputs derived from the root-local guardrail config
+- app still owns root/member discovery, missing-member routing, and malformed-input fail-closed behavior
 
 ### Fmt
 ```rust
