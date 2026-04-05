@@ -9,3 +9,4 @@ fuzz/target/
 fuzz/corpus/
 fuzz/artifacts/
 .env.local
+/packages/*/target/
