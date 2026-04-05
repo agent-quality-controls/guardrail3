@@ -7,10 +7,19 @@ use toml::Value;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct AdvisoriesConfig {
+    /// Advisory database path.
+    pub db_path: Option<String>,
+    /// Advisory database URLs.
+    #[serde(default)]
+    pub db_urls: Vec<String>,
     /// Action for unmaintained crates: `"deny"`, `"warn"`, `"allow"`, or `"workspace"`.
     pub unmaintained: Option<String>,
     /// Action for yanked crates: `"deny"`, `"warn"`, `"allow"`.
     pub yanked: Option<String>,
+    /// Unused ignored advisory handling.
+    pub unused_ignored_advisory: Option<String>,
+    /// Deprecated version field preserved as parsed data.
+    pub version: Option<u32>,
     /// Deprecated: action for vulnerability advisories.
     pub vulnerability: Option<String>,
     /// Deprecated: action for notice advisories.
@@ -36,55 +45,22 @@ pub enum AdvisoryIgnoreEntry {
     Detailed(AdvisoryIgnoreDetail),
 }
 
-impl AdvisoryIgnoreEntry {
-    /// Returns the advisory ID regardless of entry format.
-    #[must_use]
-    pub fn id(&self) -> &str {
-        match self {
-            Self::Simple(id) => id,
-            Self::Detailed(detail) => detail.id(),
-        }
-    }
-
-    /// Returns the reason if present.
-    #[must_use]
-    pub fn reason(&self) -> Option<&str> {
-        match self {
-            Self::Simple(_) => None,
-            Self::Detailed(detail) => detail.reason(),
-        }
-    }
-}
-
 /// Detailed advisory ignore entry with an ID and optional reason.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct AdvisoryIgnoreDetail {
     /// The advisory ID (e.g. `"RUSTSEC-2024-0001"`).
-    id: String,
+    pub id: Option<String>,
+    /// Crate package spec to ignore.
+    #[serde(rename = "crate")]
+    pub crate_name: Option<String>,
+    /// Deprecated crate name field.
+    pub name: Option<String>,
+    /// Deprecated version field for old table format.
+    pub version: Option<String>,
     /// Why this advisory is being ignored.
-    reason: Option<String>,
+    pub reason: Option<String>,
     /// Additional fields not modeled as typed fields.
     #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-impl AdvisoryIgnoreDetail {
-    /// The advisory ID.
-    #[must_use]
-    pub fn id(&self) -> &str {
-        &self.id
-    }
-
-    /// Why this advisory is being ignored, if documented.
-    #[must_use]
-    pub fn reason(&self) -> Option<&str> {
-        self.reason.as_deref()
-    }
-
-    /// Additional fields not modeled as typed fields.
-    #[must_use]
-    pub const fn extra(&self) -> &BTreeMap<String, Value> {
-        &self.extra
-    }
+    pub extra: BTreeMap<String, Value>,
 }

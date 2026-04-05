@@ -1,10 +1,10 @@
 use g3_toolchain_content_checks_types::G3ToolchainChannelAndComponentsInput;
-use guardrail3_check_types::GrdzCheckResult;
+use guardrail3_check_types::G3CheckResult;
 use rust_toolchain_toml_parser::parse as parse_toolchain_toml;
 
 use crate::rs_toolchain_02_channel_and_components::check;
 
-pub(super) fn run_check(toolchain_toml: &str) -> Vec<GrdzCheckResult> {
+pub(super) fn run_check(toolchain_toml: &str) -> Vec<G3CheckResult> {
     let parsed = parse_toolchain_toml(toolchain_toml)
         .expect("toolchain test fixture should parse");
     let input = G3ToolchainChannelAndComponentsInput {

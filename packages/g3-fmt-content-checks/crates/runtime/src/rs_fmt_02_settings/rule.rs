@@ -1,11 +1,11 @@
 use g3_fmt_content_checks_types::G3FmtContentChecksInput;
-use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::inputs::cargo_edition;
 
 const ID: &str = "RS-FMT-02";
 
-pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<GrdzCheckResult>) {
+pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<G3CheckResult>) {
     let expected_edition = cargo_edition(&input.cargo).unwrap_or("2024");
 
     check_string(
@@ -71,7 +71,7 @@ fn check_string(
     key: &str,
     actual: Option<&str>,
     expected: &str,
-    results: &mut Vec<GrdzCheckResult>,
+    results: &mut Vec<G3CheckResult>,
 ) {
     match actual {
         Some(actual) if actual == expected => {}
@@ -85,7 +85,7 @@ fn check_int(
     key: &str,
     actual: Option<i64>,
     expected: i64,
-    results: &mut Vec<GrdzCheckResult>,
+    results: &mut Vec<G3CheckResult>,
 ) {
     match actual {
         Some(actual) if actual == expected => {}
@@ -99,7 +99,7 @@ fn check_bool(
     key: &str,
     actual: Option<bool>,
     expected: bool,
-    results: &mut Vec<GrdzCheckResult>,
+    results: &mut Vec<G3CheckResult>,
 ) {
     match actual {
         Some(actual) if actual == expected => {}
@@ -113,11 +113,11 @@ fn push_wrong(
     key: &str,
     actual: impl std::fmt::Display,
     expected: impl std::fmt::Display,
-    results: &mut Vec<GrdzCheckResult>,
+    results: &mut Vec<G3CheckResult>,
 ) {
-    results.push(GrdzCheckResult::new(
+    results.push(G3CheckResult::new(
         ID.to_owned(),
-        GrdzSeverity::Warn,
+        G3Severity::Warn,
         format!("rustfmt {key} wrong"),
         format!("{key} = {actual} but expected {expected}. Update {key} in rustfmt.toml."),
         Some(rel.to_owned()),
@@ -129,11 +129,11 @@ fn push_missing(
     rel: &str,
     key: &str,
     expected: impl std::fmt::Display,
-    results: &mut Vec<GrdzCheckResult>,
+    results: &mut Vec<G3CheckResult>,
 ) {
-    results.push(GrdzCheckResult::new(
+    results.push(G3CheckResult::new(
         ID.to_owned(),
-        GrdzSeverity::Warn,
+        G3Severity::Warn,
         format!("rustfmt {key} missing"),
         format!("{key} must be set to {expected}"),
         Some(rel.to_owned()),

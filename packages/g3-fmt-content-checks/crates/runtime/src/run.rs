@@ -1,7 +1,7 @@
 use g3_fmt_content_checks_types::G3FmtContentChecksInput;
-use guardrail3_check_types::GrdzCheckResult;
+use guardrail3_check_types::G3CheckResult;
 
-pub fn check(input: &G3FmtContentChecksInput) -> Vec<GrdzCheckResult> {
+pub fn check(input: &G3FmtContentChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     crate::rs_fmt_02_settings::check(input, &mut results);
     crate::rs_fmt_03_extra_settings::check(input, &mut results);

@@ -12,11 +12,11 @@ use toml::Value;
 #[non_exhaustive]
 pub struct RustToolchainToml {
     /// The `[toolchain]` section when present.
-    toolchain: Option<ToolchainSection>,
+    pub toolchain: Option<ToolchainSection>,
 
     /// Unknown top-level keys, preserved for forward compatibility.
     #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
+    pub extra: BTreeMap<String, Value>,
 }
 
 /// Parsed representation of the `[toolchain]` section.
@@ -28,63 +28,19 @@ pub struct RustToolchainToml {
 #[non_exhaustive]
 pub struct ToolchainSection {
     /// Toolchain channel such as `stable`, `nightly`, or `1.85.0`.
-    channel: Option<String>,
+    pub channel: Option<String>,
+    /// Explicit local toolchain path.
+    pub path: Option<String>,
     /// Requested installed components.
     #[serde(default)]
-    components: Vec<String>,
+    pub components: Vec<String>,
     /// Requested cross-compilation targets.
     #[serde(default)]
-    targets: Vec<String>,
+    pub targets: Vec<String>,
     /// Requested rustup profile.
-    profile: Option<String>,
+    pub profile: Option<String>,
 
     /// Unknown toolchain keys, preserved for forward compatibility.
     #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-impl RustToolchainToml {
-    /// Return the parsed `[toolchain]` section when present.
-    #[must_use]
-    pub const fn toolchain(&self) -> Option<&ToolchainSection> {
-        self.toolchain.as_ref()
-    }
-
-    /// Return unknown top-level keys preserved during parsing.
-    #[must_use]
-    pub const fn extra(&self) -> &BTreeMap<String, Value> {
-        &self.extra
-    }
-}
-
-impl ToolchainSection {
-    /// Return the requested toolchain channel.
-    #[must_use]
-    pub fn channel(&self) -> Option<&str> {
-        self.channel.as_deref()
-    }
-
-    /// Return the requested installed components.
-    #[must_use]
-    pub fn components(&self) -> &[String] {
-        &self.components
-    }
-
-    /// Return the requested cross-compilation targets.
-    #[must_use]
-    pub fn targets(&self) -> &[String] {
-        &self.targets
-    }
-
-    /// Return the requested rustup profile.
-    #[must_use]
-    pub fn profile(&self) -> Option<&str> {
-        self.profile.as_deref()
-    }
-
-    /// Return unknown `[toolchain]` keys preserved during parsing.
-    #[must_use]
-    pub const fn extra(&self) -> &BTreeMap<String, Value> {
-        &self.extra
-    }
+    pub extra: BTreeMap<String, Value>,
 }

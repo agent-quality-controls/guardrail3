@@ -47,16 +47,16 @@ use clippy_toml_parser::ClippyToml;
 use cargo_toml_parser::CargoToml;
 use cargo_config_toml_parser::CargoConfig;
 
-pub struct GrdzClippyChecksInput {
+pub struct G3ClippyChecksInput {
     pub clippy_config: Option<ClippyToml>,
     pub clippy_config_rel_path: Option<String>,
     pub cargo_manifest: CargoToml,
     pub cargo_config: Option<CargoConfig>,
     pub cargo_config_rel_path: Option<String>,
-    pub profile: GrdzProfile,
+    pub profile: G3Profile,
 }
 
-pub fn check(input: &GrdzClippyChecksInput) -> Vec<GrdzCheckResult>
+pub fn check(input: &G3ClippyChecksInput) -> Vec<G3CheckResult>
 ```
 
 Rules in package: RS-CLIPPY-02..22, 25 (thresholds, bans, settings, typos, parse)
@@ -65,33 +65,39 @@ Rules in app: RS-CLIPPY-01 (coverage), RS-CLIPPY-12 (placement), RS-CLIPPY-23 (g
 ### Deny
 ```rust
 use deny_toml_parser::DenyToml;
+use guardrail3_check_types::G3CheckResult;
 
-pub struct GrdzDenyChecksInput {
-    pub deny_config: Option<DenyToml>,
-    pub deny_config_rel_path: Option<String>,
-    pub profile: GrdzProfile,
+pub struct G3DenyContentChecksInput {
+    pub deny_rel_path: String,
+    pub deny: DenyToml,
 }
 
-pub fn check(input: &GrdzDenyChecksInput) -> Vec<GrdzCheckResult>
+pub fn check(input: &G3DenyContentChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-DENY-04..30 (all content validation)
-Rules in app: RS-DENY-01 (coverage), RS-DENY-03 (shadowing)
+Rules in package: RS-DENY-04, 05, 06, 07, 08, 10, 11, 12, 13, 14, 15, 16,
+18, 19, 20, 21, 22, 23, 24, 27, 28, 29
+Rules in app: RS-DENY-01, RS-DENY-03, RS-DENY-09, RS-DENY-17, RS-DENY-25,
+RS-DENY-26, RS-DENY-30
+
+Note: app-side deny orchestration still owns authoritative config selection,
+parse-failure routing, coverage/shadowing, and profile resolution. The package
+receives a concrete parsed `DenyToml` only.
 
 ### Cargo
 ```rust
 use cargo_toml_parser::CargoToml;
 use guardrail3_toml::Guardrail3Config;
 
-pub struct GrdzCargoChecksInput {
+pub struct G3CargoChecksInput {
     pub workspace_manifest: CargoToml,
     pub workspace_manifest_rel_path: String,
     pub member_manifests: Vec<(String, CargoToml)>,  // (rel_path, manifest)
     pub guardrail3_config: Option<Guardrail3Config>,
-    pub profile: GrdzProfile,
+    pub profile: G3Profile,
 }
 
-pub fn check(input: &GrdzCargoChecksInput) -> Vec<GrdzCheckResult>
+pub fn check(input: &G3CargoChecksInput) -> Vec<G3CheckResult>
 ```
 
 Rules in package: RS-CARGO-01..15 (all lint, edition, resolver rules)
@@ -128,37 +134,46 @@ rule-local inputs, but the package boundary stays one typed aggregate input.
 ### Toolchain
 ```rust
 use cargo_toml_parser::CargoToml;
+use rust_toolchain_toml_parser::RustToolchainToml;
+use guardrail3_check_types::G3CheckResult;
 
-pub struct GrdzToolchainChecksInput {
-    pub toolchain_config: Option<String>,         // raw rust-toolchain.toml content
-    pub toolchain_config_rel_path: Option<String>,
-    pub legacy_toolchain_exists: bool,
-    pub cargo_rust_version: Option<String>,       // pre-extracted from CargoToml
-    pub profile: GrdzProfile,
+pub struct G3ToolchainChannelAndComponentsInput {
+    pub toolchain_rel_path: String,
+    pub toolchain_toml: RustToolchainToml,
 }
 
-pub fn check(input: &GrdzToolchainChecksInput) -> Vec<GrdzCheckResult>
+pub struct G3ToolchainMsrvConsistencyInput {
+    pub toolchain_rel_path: String,
+    pub toolchain_toml: RustToolchainToml,
+    pub cargo_rel_path: String,
+    pub cargo_toml: CargoToml,
+}
+
+pub fn check_channel_and_components(
+    input: &G3ToolchainChannelAndComponentsInput,
+) -> Vec<G3CheckResult>;
+
+pub fn check_msrv_consistency(
+    input: &G3ToolchainMsrvConsistencyInput,
+) -> Vec<G3CheckResult>;
 ```
 
-Rules in package: RS-TOOLCHAIN-01..04
-Rules in app: none
-
-Note: toolchain receives raw content (uses rust-toolchain-file crate
-internally) and pre-extracted rust-version.
+Rules in package: RS-TOOLCHAIN-02, RS-TOOLCHAIN-03
+Rules in app: RS-TOOLCHAIN-01, RS-TOOLCHAIN-04
 
 ### Garde
 ```rust
 use clippy_toml_parser::ClippyToml;
 use cargo_toml_parser::CargoToml;
 
-pub struct GrdzGardeChecksInput {
-    pub source_files: Vec<GrdzSourceFile>,
+pub struct G3GardeChecksInput {
+    pub source_files: Vec<G3SourceFile>,
     pub clippy_config: Option<ClippyToml>,    // garde checks its bans are present
     pub cargo_manifest: CargoToml,            // garde checks for garde dependency
-    pub profile: GrdzProfile,
+    pub profile: G3Profile,
 }
 
-pub fn check(input: &GrdzGardeChecksInput) -> Vec<GrdzCheckResult>
+pub fn check(input: &G3GardeChecksInput) -> Vec<G3CheckResult>
 ```
 
 Rules in package: RS-GARDE-01..14 (dep check, clippy bans, derive validation)
@@ -168,16 +183,16 @@ Rules in app: none — garde IS the policy owner for its concerns
 ```rust
 use cargo_toml_parser::CargoToml;
 
-pub struct GrdzDepsChecksInput {
+pub struct G3DepsChecksInput {
     pub workspace_manifest: CargoToml,
     pub member_manifests: Vec<(String, CargoToml)>,
     pub cargo_lock_exists: bool,
     pub cargo_lock_gitignored: bool,
-    pub tools: Vec<GrdzToolStatus>,
-    pub profile: GrdzProfile,
+    pub tools: Vec<G3ToolStatus>,
+    pub profile: G3Profile,
 }
 
-pub fn check(input: &GrdzDepsChecksInput) -> Vec<GrdzCheckResult>
+pub fn check(input: &G3DepsChecksInput) -> Vec<G3CheckResult>
 ```
 
 Rules in package: RS-DEPS-01..12 (all rules)
@@ -189,16 +204,16 @@ use nextest_toml_parser::NextestToml;
 use mutants_toml_parser::MutantsToml;
 use cargo_toml_parser::CargoToml;
 
-pub struct GrdzTestChecksInput {
-    pub source_files: Vec<GrdzSourceFile>,
+pub struct G3TestChecksInput {
+    pub source_files: Vec<G3SourceFile>,
     pub cargo_manifest: CargoToml,
     pub nextest_config: Option<NextestToml>,
     pub mutants_config: Option<MutantsToml>,
-    pub tools: Vec<GrdzToolStatus>,
-    pub profile: GrdzProfile,
+    pub tools: Vec<G3ToolStatus>,
+    pub profile: G3Profile,
 }
 
-pub fn check(input: &GrdzTestChecksInput) -> Vec<GrdzCheckResult>
+pub fn check(input: &G3TestChecksInput) -> Vec<G3CheckResult>
 ```
 
 Rules in package: RS-TEST-01..18 (all rules)
@@ -208,15 +223,15 @@ Rules in app: none
 ```rust
 use cargo_toml_parser::CargoToml;
 
-pub struct GrdzReleaseChecksInput {
+pub struct G3ReleaseChecksInput {
     pub workspace_manifest: CargoToml,
     pub member_manifests: Vec<(String, CargoToml)>,
-    pub tools: Vec<GrdzToolStatus>,
-    pub profile: GrdzProfile,
+    pub tools: Vec<G3ToolStatus>,
+    pub profile: G3Profile,
     // release-plz.toml, cliff.toml etc. — need parsers or raw strings
 }
 
-pub fn check(input: &GrdzReleaseChecksInput) -> Vec<GrdzCheckResult>
+pub fn check(input: &G3ReleaseChecksInput) -> Vec<G3CheckResult>
 ```
 
 ## Global families (NOT workspace-local)
@@ -233,13 +248,13 @@ extraction pattern — deferred for now.
 ## Shared types needed in check-types
 
 ```rust
-pub struct GrdzSourceFile {
+pub struct G3SourceFile {
     pub rel_path: String,
     pub content: String,
     pub is_test_context: bool,
 }
 
-pub struct GrdzToolStatus {
+pub struct G3ToolStatus {
     pub name: String,
     pub installed: bool,
 }

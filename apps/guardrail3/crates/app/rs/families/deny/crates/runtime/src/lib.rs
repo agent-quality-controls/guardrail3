@@ -29,6 +29,7 @@ use self::inputs::{ConfigDenyInput, SameRootConflictInput};
 pub use self::deny_support::expected_ban_names;
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn config_facts(deny_toml: &str) -> facts::DenyConfigFacts {
     config_facts_for_test(deny_toml, None)
 }
@@ -90,15 +91,16 @@ pub(crate) fn config_facts_for_test(
     deny_toml: &str,
     profile_name: Option<&str>,
 ) -> facts::DenyConfigFacts {
-    let (parsed, parse_error) = match toml::from_str::<toml::Value>(deny_toml) {
-        Ok(parsed) => (Some(parsed), None),
-        Err(err) => (None, Some(err.to_string())),
+    let (parsed, parsed_typed, parse_error) = match toml::from_str::<toml::Value>(deny_toml) {
+        Ok(parsed) => (Some(parsed), deny_toml_parser::parse(deny_toml).ok(), None),
+        Err(err) => (None, None, Some(err.to_string())),
     };
     facts::DenyConfigFacts {
         policy_root_rel: String::new(),
         rel_path: "deny.toml".to_owned(),
         file_kind: "deny.toml".to_owned(),
         parsed,
+        parsed_typed,
         parse_error,
         profile_name: Some(profile_name.unwrap_or("service").to_owned()),
         policy_context_valid: true,

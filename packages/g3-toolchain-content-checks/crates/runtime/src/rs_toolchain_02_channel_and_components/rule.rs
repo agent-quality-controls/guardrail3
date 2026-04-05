@@ -1,4 +1,4 @@
-use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 use rust_toolchain_toml_parser::{RustToolchainToml, ToolchainSection};
 
 const ID: &str = "RS-TOOLCHAIN-02";
@@ -12,7 +12,7 @@ enum ChannelKind {
     Unsupported,
 }
 
-pub(crate) fn check(toolchain_rel_path: &str, toolchain_toml: &RustToolchainToml, results: &mut Vec<GrdzCheckResult>) {
+pub(crate) fn check(toolchain_rel_path: &str, toolchain_toml: &RustToolchainToml, results: &mut Vec<G3CheckResult>) {
     let Some(toolchain) = toolchain_table(toolchain_toml, toolchain_rel_path, results) else {
         return;
     };
@@ -24,14 +24,14 @@ pub(crate) fn check(toolchain_rel_path: &str, toolchain_toml: &RustToolchainToml
 fn toolchain_table<'a>(
     parsed: &'a RustToolchainToml,
     rel: &str,
-    results: &mut Vec<GrdzCheckResult>,
+    results: &mut Vec<G3CheckResult>,
 ) -> Option<&'a ToolchainSection> {
-    match parsed.toolchain() {
+    match parsed.toolchain.as_ref() {
         Some(toolchain) => Some(toolchain),
         None => {
-            results.push(GrdzCheckResult::new(
+            results.push(G3CheckResult::new(
                 ID.to_owned(),
-                GrdzSeverity::Error,
+                G3Severity::Error,
                 "toolchain table missing".to_owned(),
                 "Add a `[toolchain]` table with `channel` and `components`.".to_owned(),
                 Some(rel.to_owned()),
@@ -45,14 +45,14 @@ fn toolchain_table<'a>(
 fn check_channel(
     toolchain: &ToolchainSection,
     rel: &str,
-    results: &mut Vec<GrdzCheckResult>,
+    results: &mut Vec<G3CheckResult>,
 ) {
-    match toolchain.channel() {
+    match toolchain.channel.as_deref() {
         Some(channel) => match classify_channel(channel) {
             ChannelKind::Stable => results.push(
-                GrdzCheckResult::new(
+                G3CheckResult::new(
                     ID.to_owned(),
-                    GrdzSeverity::Info,
+                    G3Severity::Info,
                     "toolchain channel is stable".to_owned(),
                     "channel = \"stable\".".to_owned(),
                     Some(rel.to_owned()),
@@ -61,9 +61,9 @@ fn check_channel(
                 .into_inventory(),
             ),
             ChannelKind::PinnedStable => results.push(
-                GrdzCheckResult::new(
+                G3CheckResult::new(
                     ID.to_owned(),
-                    GrdzSeverity::Info,
+                    G3Severity::Info,
                     "toolchain channel is pinned".to_owned(),
                     format!("Pinned channel `{channel}` is acceptable."),
                     Some(rel.to_owned()),
@@ -71,27 +71,27 @@ fn check_channel(
                 )
                 .into_inventory(),
             ),
-            ChannelKind::Nightly => results.push(GrdzCheckResult::new(
+            ChannelKind::Nightly => results.push(G3CheckResult::new(
                 ID.to_owned(),
-                GrdzSeverity::Error,
+                G3Severity::Error,
                 "toolchain channel is nightly".to_owned(),
                 "Channel is set to nightly. Use `channel = \"stable\"` or a pinned stable version."
                     .to_owned(),
                 Some(rel.to_owned()),
                 None,
             )),
-            ChannelKind::Beta => results.push(GrdzCheckResult::new(
+            ChannelKind::Beta => results.push(G3CheckResult::new(
                 ID.to_owned(),
-                GrdzSeverity::Error,
+                G3Severity::Error,
                 "toolchain channel is beta".to_owned(),
                 "Channel is set to beta. Use `channel = \"stable\"` or a pinned stable version."
                     .to_owned(),
                 Some(rel.to_owned()),
                 None,
             )),
-            ChannelKind::Unsupported => results.push(GrdzCheckResult::new(
+            ChannelKind::Unsupported => results.push(G3CheckResult::new(
                 ID.to_owned(),
-                GrdzSeverity::Error,
+                G3Severity::Error,
                 "toolchain channel is unsupported".to_owned(),
                 "Channel value is not recognized. Use `channel = \"stable\"` or a pinned stable version."
                     .to_owned(),
@@ -99,9 +99,9 @@ fn check_channel(
                 None,
             )),
         },
-        None => results.push(GrdzCheckResult::new(
+        None => results.push(G3CheckResult::new(
             ID.to_owned(),
-            GrdzSeverity::Warn,
+            G3Severity::Warn,
             "toolchain channel missing".to_owned(),
             "Add `channel = \"stable\"` under `[toolchain]`.".to_owned(),
             Some(rel.to_owned()),
@@ -168,10 +168,10 @@ fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
 fn check_components(
     toolchain: &ToolchainSection,
     rel: &str,
-    results: &mut Vec<GrdzCheckResult>,
+    results: &mut Vec<G3CheckResult>,
 ) {
     let names = toolchain
-        .components()
+        .components
         .iter()
         .map(String::as_str)
         .collect::<Vec<_>>();
@@ -179,9 +179,9 @@ fn check_components(
     for expected in ["clippy", "rustfmt"] {
         if names.contains(&expected) {
             results.push(
-                GrdzCheckResult::new(
+                G3CheckResult::new(
                     ID.to_owned(),
-                    GrdzSeverity::Info,
+                    G3Severity::Info,
                     format!("toolchain component `{expected}` present"),
                     format!("`{expected}` is listed in `components`."),
                     Some(rel.to_owned()),
@@ -190,9 +190,9 @@ fn check_components(
                 .into_inventory(),
             );
         } else {
-            results.push(GrdzCheckResult::new(
+            results.push(G3CheckResult::new(
                 ID.to_owned(),
-                GrdzSeverity::Warn,
+                G3Severity::Warn,
                 format!("toolchain component `{expected}` missing"),
                 format!("Add `{expected}` to `[toolchain].components`."),
                 Some(rel.to_owned()),

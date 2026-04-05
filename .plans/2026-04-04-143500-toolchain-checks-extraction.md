@@ -14,14 +14,14 @@ Dependencies: `guardrail3-check-types`, `cargo_toml`, `toml`
 ## Public interface
 
 ```rust
-use guardrail3_check_types::{GrdzCheckResult, GrdzProfile};
+use guardrail3_check_types::{G3CheckResult, G3Profile};
 use cargo_toml::Manifest;
 
 /// Validate rust-toolchain.toml contents.
 /// The file is known to exist — the app handles missing file errors.
-pub fn check(input: &GrdzToolchainChecksInput) -> Vec<GrdzCheckResult>
+pub fn check(input: &G3ToolchainChecksInput) -> Vec<G3CheckResult>
 
-pub struct GrdzToolchainChecksInput {
+pub struct G3ToolchainChecksInput {
     /// Parsed rust-toolchain.toml. The app parsed it with toml crate.
     /// Package reads [toolchain].channel, [toolchain].components.
     pub toolchain_parsed: toml::Value,
@@ -32,7 +32,7 @@ pub struct GrdzToolchainChecksInput {
     /// Repo-relative path to Cargo.toml for error reporting.
     pub cargo_rel_path: String,
     /// Workspace profile.
-    pub profile: GrdzProfile,
+    pub profile: G3Profile,
 }
 ```
 
@@ -43,7 +43,7 @@ pub struct GrdzToolchainChecksInput {
 fn check_channel_and_components(
     parsed: &toml::Value,
     rel_path: &str,
-) -> Vec<GrdzCheckResult>
+) -> Vec<G3CheckResult>
 ```
 - Validates [toolchain].channel is stable or pinned stable
 - Validates [toolchain].components contains clippy + rustfmt
@@ -56,7 +56,7 @@ fn check_msrv_consistency(
     toolchain_rel_path: &str,
     cargo_manifest: &Manifest,
     cargo_rel_path: &str,
-) -> Vec<GrdzCheckResult>
+) -> Vec<G3CheckResult>
 ```
 - Extracts rust-version from Manifest
 - Compares pinned toolchain version against MSRV
@@ -76,7 +76,7 @@ exist. This is filetree/placement, not content validation.
 ## Top-level dispatch in package
 
 ```rust
-pub fn check(input: &GrdzToolchainChecksInput) -> Vec<GrdzCheckResult> {
+pub fn check(input: &G3ToolchainChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     results.extend(check_channel_and_components(
         &input.toolchain_parsed,
@@ -108,7 +108,7 @@ fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
         
         // Rules 02 + 03 delegate to package
         if let (Some(parsed), Some(rel_path)) = (&input.parsed, input.toolchain_toml_rel) {
-            let checks_input = GrdzToolchainChecksInput {
+            let checks_input = G3ToolchainChecksInput {
                 toolchain_parsed: parsed.clone(),
                 toolchain_rel_path: rel_path.to_owned(),
                 cargo_manifest: /* parse from content */,
@@ -116,7 +116,7 @@ fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
                 profile: /* resolve from guardrail3.toml */,
             };
             let package_results = guardrail3_checks_toolchain::check(&checks_input);
-            // convert GrdzCheckResult → CheckResult and extend
+            // convert G3CheckResult → CheckResult and extend
             results.extend(convert(package_results));
         }
     }
@@ -124,9 +124,9 @@ fn run_toolchain(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 }
 ```
 
-Note: there's a GrdzCheckResult → CheckResult conversion needed since
+Note: there's a G3CheckResult → CheckResult conversion needed since
 the app uses its own CheckResult type. Either:
-- Make check-types' GrdzCheckResult THE CheckResult (big refactor)
+- Make check-types' G3CheckResult THE CheckResult (big refactor)
 - Add a conversion function (pragmatic for migration)
 
 ## Migration steps

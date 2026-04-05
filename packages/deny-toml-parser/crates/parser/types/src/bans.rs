@@ -9,12 +9,20 @@ use toml::Value;
 pub struct BansConfig {
     /// Action for multiple versions of the same crate.
     pub multiple_versions: Option<String>,
+    /// Whether dev-dependencies are included when checking multiple versions.
+    pub multiple_versions_include_dev: Option<bool>,
     /// Action for wildcard dependencies.
     pub wildcards: Option<String>,
     /// Whether to allow wildcard versions for path dependencies.
     pub allow_wildcard_paths: Option<bool>,
     /// Highlight mode for duplicate versions: `"all"`, `"lowest-version"`, `"simplest-path"`.
     pub highlight: Option<String>,
+    /// Default-feature lint level for workspace crates.
+    pub workspace_default_features: Option<String>,
+    /// Default-feature lint level for external crates.
+    pub external_default_features: Option<String>,
+    /// Whether workspace members are automatically allowlisted.
+    pub allow_workspace: Option<bool>,
     /// Crates to explicitly deny.
     #[serde(default)]
     pub deny: Vec<BanDenyEntry>,
@@ -24,9 +32,16 @@ pub struct BansConfig {
     /// Specific crate versions to skip in duplicate checks.
     #[serde(default)]
     pub skip: Vec<BanSkipEntry>,
+    /// Crate trees to skip in duplicate checks.
+    #[serde(default)]
+    pub skip_tree: Vec<BanSkipTreeEntry>,
     /// Feature-level ban configuration.
     #[serde(default)]
     pub features: Vec<BanFeatureEntry>,
+    /// Workspace dependency policy.
+    pub workspace_dependencies: Option<BanWorkspaceDependenciesConfig>,
+    /// Build-time crate policy.
+    pub build: Option<BanBuildConfig>,
     /// Additional fields not modeled as typed fields.
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
@@ -45,83 +60,29 @@ pub enum BanDenyEntry {
     Detailed(BanDenyDetail),
 }
 
-impl BanDenyEntry {
-    /// Returns the crate name regardless of entry format.
-    #[must_use]
-    pub fn name(&self) -> Option<&str> {
-        match self {
-            Self::Simple(name) => Some(name),
-            Self::Detailed(detail) => detail.name(),
-        }
-    }
-
-    /// Returns the reason if present.
-    #[must_use]
-    pub fn reason(&self) -> Option<&str> {
-        match self {
-            Self::Simple(_) => None,
-            Self::Detailed(detail) => detail.reason(),
-        }
-    }
-}
-
 /// Detailed ban deny entry.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct BanDenyDetail {
     /// The crate name.
-    name: Option<String>,
+    pub name: Option<String>,
     /// Alternative crate identifier (deprecated; prefer `name`).
     #[serde(rename = "crate")]
-    crate_name: Option<String>,
+    pub crate_name: Option<String>,
     /// Version requirement to match.
-    version: Option<String>,
+    pub version: Option<String>,
     /// Crates that are allowed to transitively depend on the banned crate.
     #[serde(default)]
-    wrappers: Vec<String>,
+    pub wrappers: Vec<String>,
+    /// Whether this crate should deny multiple versions of itself.
+    pub deny_multiple_versions: Option<bool>,
     /// Why this crate is banned.
-    reason: Option<String>,
+    pub reason: Option<String>,
+    /// Preferred replacement crate.
+    pub use_instead: Option<String>,
     /// Additional fields not modeled as typed fields.
     #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-impl BanDenyDetail {
-    /// The crate name, if specified.
-    #[must_use]
-    pub fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    /// Alternative crate identifier (deprecated; prefer `name`).
-    #[must_use]
-    pub fn crate_name(&self) -> Option<&str> {
-        self.crate_name.as_deref()
-    }
-
-    /// Version requirement, if specified.
-    #[must_use]
-    pub fn version(&self) -> Option<&str> {
-        self.version.as_deref()
-    }
-
-    /// Wrapper crates allowed to depend on this banned crate.
-    #[must_use]
-    pub fn wrappers(&self) -> &[String] {
-        &self.wrappers
-    }
-
-    /// Why this crate is banned, if documented.
-    #[must_use]
-    pub fn reason(&self) -> Option<&str> {
-        self.reason.as_deref()
-    }
-
-    /// Additional fields not modeled as typed fields.
-    #[must_use]
-    pub const fn extra(&self) -> &BTreeMap<String, Value> {
-        &self.extra
-    }
+    pub extra: BTreeMap<String, Value>,
 }
 
 // --- Ban allow entries ---
@@ -137,48 +98,22 @@ pub enum BanAllowEntry {
     Detailed(BanAllowDetail),
 }
 
-impl BanAllowEntry {
-    /// Returns the crate name regardless of entry format.
-    #[must_use]
-    pub fn name(&self) -> Option<&str> {
-        match self {
-            Self::Simple(name) => Some(name),
-            Self::Detailed(detail) => detail.name(),
-        }
-    }
-}
-
 /// Detailed ban allow entry.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct BanAllowDetail {
     /// The crate name.
-    name: Option<String>,
+    pub name: Option<String>,
+    /// Alternative crate identifier.
+    #[serde(rename = "crate")]
+    pub crate_name: Option<String>,
     /// Version requirement to match.
-    version: Option<String>,
+    pub version: Option<String>,
+    /// Why this crate is allowed.
+    pub reason: Option<String>,
     /// Additional fields not modeled as typed fields.
     #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-impl BanAllowDetail {
-    /// The crate name, if specified.
-    #[must_use]
-    pub fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    /// Version requirement, if specified.
-    #[must_use]
-    pub fn version(&self) -> Option<&str> {
-        self.version.as_deref()
-    }
-
-    /// Additional fields not modeled as typed fields.
-    #[must_use]
-    pub const fn extra(&self) -> &BTreeMap<String, Value> {
-        &self.extra
-    }
+    pub extra: BTreeMap<String, Value>,
 }
 
 // --- Ban skip entries ---
@@ -194,65 +129,22 @@ pub enum BanSkipEntry {
     Detailed(BanSkipDetail),
 }
 
-impl BanSkipEntry {
-    /// Returns the crate name regardless of entry format.
-    #[must_use]
-    pub fn name(&self) -> Option<&str> {
-        match self {
-            Self::Simple(name) => Some(name),
-            Self::Detailed(detail) => detail.name(),
-        }
-    }
-
-    /// Returns the reason if present.
-    #[must_use]
-    pub fn reason(&self) -> Option<&str> {
-        match self {
-            Self::Simple(_) => None,
-            Self::Detailed(detail) => detail.reason(),
-        }
-    }
-}
-
 /// Detailed ban skip entry.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct BanSkipDetail {
     /// The crate name.
-    name: Option<String>,
+    pub name: Option<String>,
+    /// Alternative crate identifier.
+    #[serde(rename = "crate")]
+    pub crate_name: Option<String>,
     /// Version requirement to skip.
-    version: Option<String>,
+    pub version: Option<String>,
     /// Why this skip is necessary.
-    reason: Option<String>,
+    pub reason: Option<String>,
     /// Additional fields not modeled as typed fields.
     #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-impl BanSkipDetail {
-    /// The crate name, if specified.
-    #[must_use]
-    pub fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    /// Version requirement, if specified.
-    #[must_use]
-    pub fn version(&self) -> Option<&str> {
-        self.version.as_deref()
-    }
-
-    /// Why this skip is necessary, if documented.
-    #[must_use]
-    pub fn reason(&self) -> Option<&str> {
-        self.reason.as_deref()
-    }
-
-    /// Additional fields not modeled as typed fields.
-    #[must_use]
-    pub const fn extra(&self) -> &BTreeMap<String, Value> {
-        &self.extra
-    }
+    pub extra: BTreeMap<String, Value>,
 }
 
 // --- Ban feature entries ---
@@ -264,48 +156,164 @@ impl BanSkipDetail {
 #[serde(rename_all = "kebab-case")]
 pub struct BanFeatureEntry {
     /// The crate name this feature rule applies to.
-    name: Option<String>,
+    pub name: Option<String>,
+    /// Alternative crate identifier.
+    #[serde(rename = "crate")]
+    pub crate_name: Option<String>,
+    /// Deprecated version field for old table format.
+    pub version: Option<String>,
     /// Features to deny.
     #[serde(default)]
-    deny: Vec<String>,
+    pub deny: Vec<String>,
     /// Features to allow (implicitly denies everything else).
     #[serde(default)]
-    allow: Vec<String>,
+    pub allow: Vec<String>,
+    /// Why this feature rule is needed.
+    pub reason: Option<String>,
     /// Whether to treat the feature set as exact.
-    exact: Option<bool>,
+    pub exact: Option<bool>,
     /// Additional fields not modeled as typed fields.
     #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
+    pub extra: BTreeMap<String, Value>,
 }
 
-impl BanFeatureEntry {
-    /// The crate name this feature rule applies to, if specified.
-    #[must_use]
-    pub fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
+/// An entry in `[bans].skip-tree`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum BanSkipTreeEntry {
+    /// Bare package-spec string.
+    Simple(String),
+    /// Detailed skip-tree entry.
+    Detailed(BanSkipTreeDetail),
+}
 
-    /// Features to deny.
-    #[must_use]
-    pub fn deny(&self) -> &[String] {
-        &self.deny
-    }
-
-    /// Features to allow (implicitly denies everything else).
-    #[must_use]
-    pub fn allow(&self) -> &[String] {
-        &self.allow
-    }
-
-    /// Whether to treat the feature set as exact.
-    #[must_use]
-    pub const fn exact(&self) -> Option<bool> {
-        self.exact
-    }
-
+/// Detailed skip-tree entry.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct BanSkipTreeDetail {
+    /// Deprecated crate name field.
+    pub name: Option<String>,
+    /// Package spec this skip-tree applies to.
+    #[serde(rename = "crate")]
+    pub crate_name: Option<String>,
+    /// Deprecated version field for old table format.
+    pub version: Option<String>,
+    /// How deep the skip should extend.
+    pub depth: Option<u64>,
+    /// Why this skip-tree is necessary.
+    pub reason: Option<String>,
     /// Additional fields not modeled as typed fields.
-    #[must_use]
-    pub const fn extra(&self) -> &BTreeMap<String, Value> {
-        &self.extra
-    }
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+/// `[bans.workspace-dependencies]` configuration.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct BanWorkspaceDependenciesConfig {
+    /// Handling for duplicate workspace dependencies.
+    pub duplicates: Option<String>,
+    /// Whether path dependencies are included.
+    pub include_path_dependencies: Option<bool>,
+    /// Handling for unused workspace dependencies.
+    pub unused: Option<String>,
+    /// Additional fields not modeled as typed fields.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+/// `[bans.build]` configuration.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct BanBuildConfig {
+    /// Crates allowed to have build scripts.
+    #[serde(default)]
+    pub allow_build_scripts: Vec<BanBuildAllowBuildScriptEntry>,
+    /// Handling for native executables.
+    pub executables: Option<String>,
+    /// Handling for interpreted scripts.
+    pub interpreted: Option<String>,
+    /// Extensions to scan for.
+    #[serde(default)]
+    pub script_extensions: Vec<String>,
+    /// Whether builtin glob patterns are enabled.
+    pub enable_builtin_globs: Option<bool>,
+    /// Whether dependencies of compile-time crates are scanned.
+    pub include_dependencies: Option<bool>,
+    /// Whether workspace crates are scanned.
+    pub include_workspace: Option<bool>,
+    /// Whether archives are counted as native code.
+    pub include_archives: Option<bool>,
+    /// Per-crate build scan bypasses.
+    #[serde(default)]
+    pub bypass: Vec<BanBuildBypassEntry>,
+    /// Additional fields not modeled as typed fields.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+/// A package-spec entry under `allow-build-scripts`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum BanBuildAllowBuildScriptEntry {
+    /// Bare package-spec string.
+    Simple(String),
+    /// Detailed package-spec table.
+    Detailed(BanBuildAllowBuildScriptDetail),
+}
+
+/// Detailed package-spec table under `allow-build-scripts`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct BanBuildAllowBuildScriptDetail {
+    /// Deprecated crate name field.
+    pub name: Option<String>,
+    /// Package spec this entry applies to.
+    #[serde(rename = "crate")]
+    pub crate_name: Option<String>,
+    /// Deprecated version field for old table format.
+    pub version: Option<String>,
+    /// Additional fields not modeled as typed fields.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+/// One `[[bans.build.bypass]]` entry.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct BanBuildBypassEntry {
+    /// Deprecated crate name field.
+    pub name: Option<String>,
+    /// Package spec this bypass applies to.
+    #[serde(rename = "crate")]
+    pub crate_name: Option<String>,
+    /// Deprecated version field for old table format.
+    pub version: Option<String>,
+    /// Optional build-script checksum.
+    pub build_script: Option<String>,
+    /// Required features that gate the bypass.
+    #[serde(default)]
+    pub required_features: Vec<String>,
+    /// Globs to bypass scanning for.
+    #[serde(default)]
+    pub allow_globs: Vec<String>,
+    /// Individual files to bypass.
+    #[serde(default)]
+    pub allow: Vec<BanBuildBypassAllowEntry>,
+    /// Additional fields not modeled as typed fields.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+/// One file-level bypass entry under `bans.build.bypass.allow`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct BanBuildBypassAllowEntry {
+    /// Path relative to the crate root.
+    pub path: String,
+    /// Optional SHA-256 checksum.
+    pub checksum: Option<String>,
+    /// Additional fields not modeled as typed fields.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
 }

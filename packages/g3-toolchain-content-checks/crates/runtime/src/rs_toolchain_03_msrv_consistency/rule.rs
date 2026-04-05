@@ -1,6 +1,6 @@
 use cargo_toml_parser::CargoToml;
 use rust_toolchain_toml_parser::RustToolchainToml;
-use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-TOOLCHAIN-03";
 
@@ -9,11 +9,12 @@ pub(crate) fn check(
     toolchain_toml: &RustToolchainToml,
     cargo_rel_path: &str,
     cargo_toml: &CargoToml,
-    results: &mut Vec<GrdzCheckResult>,
+    results: &mut Vec<G3CheckResult>,
 ) {
     let channel = toolchain_toml
-        .toolchain()
-        .and_then(|toolchain| toolchain.channel());
+        .toolchain
+        .as_ref()
+        .and_then(|toolchain| toolchain.channel.as_deref());
 
     let Some(channel) = channel else {
         return;
@@ -25,9 +26,9 @@ pub(crate) fn check(
     match cargo_rust_version(cargo_toml) {
         None => {
             results.push(
-                GrdzCheckResult::new(
+                G3CheckResult::new(
                     ID.to_owned(),
-                    GrdzSeverity::Info,
+                    G3Severity::Info,
                     "Cargo rust-version not declared".to_owned(),
                     "No `rust-version` found in Cargo.toml, so MSRV consistency cannot be checked."
                         .to_owned(),
@@ -39,9 +40,9 @@ pub(crate) fn check(
         }
         Some(cargo_msrv) => {
             let Some(msrv_version) = parse_manifest_version(cargo_msrv) else {
-                results.push(GrdzCheckResult::new(
+                results.push(G3CheckResult::new(
                     ID.to_owned(),
-                    GrdzSeverity::Error,
+                    G3Severity::Error,
                     "Cargo rust-version is unparseable".to_owned(),
                     format!(
                         "Cannot compare pinned toolchain against invalid Cargo rust-version `{cargo_msrv}`."
@@ -53,9 +54,9 @@ pub(crate) fn check(
             };
 
             if toolchain_version < msrv_version {
-                results.push(GrdzCheckResult::new(
+                results.push(G3CheckResult::new(
                     ID.to_owned(),
-                    GrdzSeverity::Warn,
+                    G3Severity::Warn,
                     "pinned toolchain is older than MSRV".to_owned(),
                     format!(
                         "Pinned toolchain `{channel}` is older than Cargo rust-version `{cargo_msrv}`. Either update the pinned toolchain to match or exceed the MSRV, or lower `rust-version` in Cargo.toml."
@@ -65,9 +66,9 @@ pub(crate) fn check(
                 ));
             } else {
                 results.push(
-                    GrdzCheckResult::new(
+                    G3CheckResult::new(
                         ID.to_owned(),
-                        GrdzSeverity::Info,
+                        G3Severity::Info,
                         "pinned toolchain satisfies MSRV".to_owned(),
                         format!(
                             "Pinned toolchain `{channel}` is compatible with Cargo rust-version `{cargo_msrv}`."

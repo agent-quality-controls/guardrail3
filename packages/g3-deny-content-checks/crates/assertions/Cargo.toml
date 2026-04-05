@@ -1,0 +1,11 @@
+[package]
+name = "g3-deny-content-checks-assertions"
+version = "0.1.0"
+edition = "2024"
+description = "Assertion helpers for g3 deny content checks tests"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+
+[lints]
+workspace = true

@@ -25,6 +25,9 @@ pub struct DenyToml {
     pub bans: Option<BansConfig>,
     /// License checking settings.
     pub licenses: Option<LicensesConfig>,
+    /// Standalone exceptions file shape used by `deny.exceptions.toml`.
+    #[serde(default)]
+    pub exceptions: Vec<crate::LicenseException>,
     /// Source restrictions.
     pub sources: Option<SourcesConfig>,
     /// Output formatting configuration.

@@ -19,7 +19,7 @@ components = ["clippy", "rustfmt"]
 )?;
 
 assert_eq!(
-    cfg.toolchain().and_then(|section| section.channel()),
+    cfg.toolchain.as_ref().and_then(|section| section.channel.as_deref()),
     Some("stable")
 );
 ```

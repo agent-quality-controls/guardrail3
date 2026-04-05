@@ -1,7 +1,7 @@
 use g3_toolchain_content_checks::{
     G3ToolchainChannelAndComponentsInput, G3ToolchainMsrvConsistencyInput,
 };
-use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsToolchainRoute;
 use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::{CheckResult, Severity};
@@ -101,8 +101,9 @@ fn run_content_checks(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<Ch
 
 fn uses_pinned_stable_channel(toolchain_toml: &rust_toolchain_toml_parser::RustToolchainToml) -> bool {
     let Some(channel) = toolchain_toml
-        .toolchain()
-        .and_then(|toolchain| toolchain.channel())
+        .toolchain
+        .as_ref()
+        .and_then(|toolchain| toolchain.channel.as_deref())
     else {
         return false;
     };
@@ -129,7 +130,7 @@ fn parse_pinned_stable_version(raw: &str) -> Option<(u64, u64, u64)> {
     Some((major, minor, patch))
 }
 
-fn convert_check_result(result: GrdzCheckResult) -> CheckResult {
+fn convert_check_result(result: G3CheckResult) -> CheckResult {
     CheckResult::from_parts(
         result.id().to_owned(),
         convert_severity(result.severity()),
@@ -141,10 +142,10 @@ fn convert_check_result(result: GrdzCheckResult) -> CheckResult {
     )
 }
 
-fn convert_severity(severity: GrdzSeverity) -> Severity {
+fn convert_severity(severity: G3Severity) -> Severity {
     match severity {
-        GrdzSeverity::Error => Severity::Error,
-        GrdzSeverity::Warn => Severity::Warn,
-        GrdzSeverity::Info => Severity::Info,
+        G3Severity::Error => Severity::Error,
+        G3Severity::Warn => Severity::Warn,
+        G3Severity::Info => Severity::Info,
     }
 }

@@ -1,8 +1,8 @@
-use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
-    pub severity: GrdzSeverity,
+    pub severity: G3Severity,
     pub title: &'a str,
     pub message: &'a str,
     pub file: Option<&'a str>,
@@ -10,7 +10,7 @@ pub struct Finding<'a> {
 }
 
 #[must_use]
-pub(crate) fn findings<'a>(results: &'a [GrdzCheckResult], id: &str) -> Vec<Finding<'a>> {
+pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Finding<'a>> {
     let mut findings = results
         .iter()
         .filter(|result| result.id() == id)
@@ -42,7 +42,7 @@ pub(crate) fn findings<'a>(results: &'a [GrdzCheckResult], id: &str) -> Vec<Find
 }
 
 pub(crate) fn assert_findings(
-    results: &[GrdzCheckResult],
+    results: &[G3CheckResult],
     id: &str,
     expected: &[Finding<'_>],
 ) {
@@ -66,13 +66,13 @@ pub(crate) fn assert_findings(
     assert_eq!(findings(results, id), expected_vec);
 }
 
-pub(crate) fn assert_contains(results: &[GrdzCheckResult], id: &str, expected: Finding<'_>) {
+pub(crate) fn assert_contains(results: &[G3CheckResult], id: &str, expected: Finding<'_>) {
     assert!(findings(results, id).contains(&expected));
 }
 
 #[must_use]
 pub(crate) fn finding<'a>(
-    severity: GrdzSeverity,
+    severity: G3Severity,
     title: &'a str,
     message: &'a str,
     file: Option<&'a str>,
@@ -93,19 +93,19 @@ macro_rules! define_result_assertions {
         pub use crate::common::Finding;
 
         #[must_use]
-        pub fn findings(results: &[guardrail3_check_types::GrdzCheckResult]) -> Vec<Finding<'_>> {
+        pub fn findings(results: &[guardrail3_check_types::G3CheckResult]) -> Vec<Finding<'_>> {
             crate::common::findings(results, $id)
         }
 
         pub fn assert_findings(
-            results: &[guardrail3_check_types::GrdzCheckResult],
+            results: &[guardrail3_check_types::G3CheckResult],
             expected: &[Finding<'_>],
         ) {
             crate::common::assert_findings(results, $id, expected);
         }
 
         pub fn assert_contains(
-            results: &[guardrail3_check_types::GrdzCheckResult],
+            results: &[guardrail3_check_types::G3CheckResult],
             expected: Finding<'_>,
         ) {
             crate::common::assert_contains(results, $id, expected);
@@ -119,7 +119,7 @@ macro_rules! define_result_assertions {
             inventory: bool,
         ) -> Finding<'a> {
             crate::common::finding(
-                guardrail3_check_types::GrdzSeverity::Error,
+                guardrail3_check_types::G3Severity::Error,
                 title,
                 message,
                 Some(file),
@@ -135,7 +135,7 @@ macro_rules! define_result_assertions {
             inventory: bool,
         ) -> Finding<'a> {
             crate::common::finding(
-                guardrail3_check_types::GrdzSeverity::Warn,
+                guardrail3_check_types::G3Severity::Warn,
                 title,
                 message,
                 Some(file),
@@ -151,7 +151,7 @@ macro_rules! define_result_assertions {
             inventory: bool,
         ) -> Finding<'a> {
             crate::common::finding(
-                guardrail3_check_types::GrdzSeverity::Info,
+                guardrail3_check_types::G3Severity::Info,
                 title,
                 message,
                 Some(file),
