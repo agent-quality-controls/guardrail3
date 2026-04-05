@@ -1,16 +1,141 @@
+#![allow(
+    clippy::enum_variant_names,
+    reason = "enum variant names intentionally mirror rustfmt's upstream option names"
+)]
+
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 use toml::Value;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum NewlineStyle {
+    Auto,
+    Windows,
+    Unix,
+    Native,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum BraceStyle {
+    AlwaysNextLine,
+    PreferSameLine,
+    SameLineWhere,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ControlBraceStyle {
+    AlwaysSameLine,
+    ClosingNextLine,
+    AlwaysNextLine,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum IndentStyle {
+    Visual,
+    Block,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Heuristics {
+    Off,
+    Max,
+    Default,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum GroupImportsTactic {
+    Preserve,
+    StdExternalCrate,
+    One,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ImportGranularity {
+    Preserve,
+    Crate,
+    Module,
+    Item,
+    One,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum HexLiteralCase {
+    Preserve,
+    Upper,
+    Lower,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum FloatLiteralTrailingZero {
+    Preserve,
+    Always,
+    IfNoPostfix,
+    Never,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum EmitMode {
+    Files,
+    Stdout,
+    Coverage,
+    Checkstyle,
+    Json,
+    ModifiedLines,
+    Diff,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Color {
+    Always,
+    Never,
+    Auto,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Version {
+    One,
+    Two,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MatchArmLeadingPipe {
+    Always,
+    Never,
+    Preserve,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Edition {
+    #[serde(rename = "2015")]
+    Edition2015,
+    #[serde(rename = "2018")]
+    Edition2018,
+    #[serde(rename = "2021")]
+    Edition2021,
+    #[serde(rename = "2024")]
+    Edition2024,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StyleEdition {
+    #[serde(rename = "2015")]
+    Edition2015,
+    #[serde(rename = "2018")]
+    Edition2018,
+    #[serde(rename = "2021")]
+    Edition2021,
+    #[serde(rename = "2024")]
+    Edition2024,
+    #[serde(rename = "2027")]
+    Edition2027,
+}
 
 /// Typed representation of a `rustfmt.toml` / `.rustfmt.toml` configuration file.
 ///
 /// All known rustfmt options are represented as `Option<T>` fields so that
 /// absent keys parse as `None`. Unknown keys are captured in the `extra`
 /// catch-all via `#[serde(flatten)]`.
-///
-/// String is used for enum-valued options (e.g. `newline_style`, `edition`)
-/// so the parser accepts any value; validation belongs to downstream consumers.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
@@ -19,11 +144,13 @@ pub struct RustfmtToml {
     pub max_width: Option<u32>,
     pub hard_tabs: Option<bool>,
     pub tab_spaces: Option<u32>,
-    pub newline_style: Option<String>,
-    pub indent_style: Option<String>,
-    pub use_small_heuristics: Option<String>,
+    pub newline_style: Option<NewlineStyle>,
+    pub indent_style: Option<IndentStyle>,
+    pub use_small_heuristics: Option<Heuristics>,
     pub fn_call_width: Option<u32>,
     pub attr_fn_like_width: Option<u32>,
+    pub blank_lines_lower_bound: Option<u32>,
+    pub blank_lines_upper_bound: Option<u32>,
     pub struct_lit_width: Option<u32>,
     pub struct_variant_width: Option<u32>,
     pub array_width: Option<u32>,
@@ -36,17 +163,19 @@ pub struct RustfmtToml {
     pub comment_width: Option<u32>,
     pub normalize_comments: Option<bool>,
     pub normalize_doc_attributes: Option<bool>,
+    pub overflow_delimited_expr: Option<bool>,
     pub format_strings: Option<bool>,
-    pub hex_literal_case: Option<String>,
-    pub float_literal_trailing_zero: Option<String>,
+    pub hex_literal_case: Option<HexLiteralCase>,
+    pub float_literal_trailing_zero: Option<FloatLiteralTrailingZero>,
     pub format_macro_bodies: Option<bool>,
     pub format_macro_matchers: Option<bool>,
     #[serde(default)]
     pub skip_macro_invocations: Vec<String>,
+    pub color: Option<Color>,
     pub reorder_imports: Option<bool>,
     pub reorder_modules: Option<bool>,
-    pub group_imports: Option<String>,
-    pub imports_granularity: Option<String>,
+    pub group_imports: Option<GroupImportsTactic>,
+    pub imports_granularity: Option<ImportGranularity>,
     pub imports_indent: Option<String>,
     pub imports_layout: Option<String>,
     pub merge_imports: Option<bool>,
@@ -60,10 +189,10 @@ pub struct RustfmtToml {
     pub spaces_around_ranges: Option<bool>,
     pub type_punctuation_density: Option<String>,
     pub binop_separator: Option<String>,
-    pub brace_style: Option<String>,
-    pub control_brace_style: Option<String>,
+    pub brace_style: Option<BraceStyle>,
+    pub control_brace_style: Option<ControlBraceStyle>,
     pub match_arm_blocks: Option<bool>,
-    pub match_arm_leading_pipes: Option<String>,
+    pub match_arm_leading_pipes: Option<MatchArmLeadingPipe>,
     pub match_arm_indent: Option<bool>,
     pub match_block_trailing_comma: Option<bool>,
     pub force_multiline_blocks: Option<bool>,
@@ -84,12 +213,15 @@ pub struct RustfmtToml {
     pub inline_attribute_width: Option<u32>,
     pub format_generated_files: Option<bool>,
     pub generated_marker_line_search_limit: Option<u32>,
-    pub edition: Option<String>,
-    pub style_edition: Option<String>,
-    pub version: Option<String>,
+    pub edition: Option<Edition>,
+    pub style_edition: Option<StyleEdition>,
+    pub version: Option<Version>,
     pub required_version: Option<String>,
+    pub emit_mode: Option<EmitMode>,
     #[serde(default)]
     pub ignore: Vec<String>,
+    pub make_backup: Option<bool>,
+    pub print_misformatted_file_names: Option<bool>,
     pub unstable_features: Option<bool>,
     pub disable_all_formatting: Option<bool>,
     pub skip_children: Option<bool>,

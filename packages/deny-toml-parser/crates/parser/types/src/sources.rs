@@ -3,6 +3,15 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use toml::Value;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum GitSpec {
+    Any,
+    Branch,
+    Tag,
+    Rev,
+}
+
 /// Source restriction settings.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -12,7 +21,7 @@ pub struct SourcesConfig {
     /// Action for unknown git sources: `"deny"`, `"warn"`, `"allow"`.
     pub unknown_git: Option<String>,
     /// Required git spec level for git dependencies.
-    pub required_git_spec: Option<String>,
+    pub required_git_spec: Option<GitSpec>,
     /// Allowed registries.
     #[serde(default)]
     pub allow_registry: Vec<String>,

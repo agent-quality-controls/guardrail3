@@ -5,7 +5,7 @@
 
 use std::collections::BTreeMap;
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use toml::Value;
 
 /// Typed representation of a `.cargo/config.toml` / `.cargo/config` file.
@@ -52,7 +52,7 @@ pub struct CargoConfigToml {
     pub extra: BTreeMap<String, Value>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum IncludeEntry {
     Path(String),
@@ -67,6 +67,47 @@ pub struct IncludePath {
     pub optional: Option<bool>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
+}
+
+impl<'de> Deserialize<'de> for IncludeEntry {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum RawIncludeEntry {
+            Path(String),
+            Detailed(IncludePath),
+        }
+
+        let raw = RawIncludeEntry::deserialize(deserializer)?;
+
+        match raw {
+            RawIncludeEntry::Path(path) => {
+                validate_include_path(&path).map_err(serde::de::Error::custom)?;
+                Ok(Self::Path(path))
+            }
+            RawIncludeEntry::Detailed(detail) => {
+                validate_include_path(&detail.path).map_err(serde::de::Error::custom)?;
+                Ok(Self::Detailed(detail))
+            }
+        }
+    }
+}
+
+#[allow(
+    clippy::case_sensitive_file_extension_comparisons,
+    reason = "Cargo itself rejects non-lowercase `.toml` include paths"
+)]
+fn validate_include_path(path: &str) -> Result<(), String> {
+    if path.ends_with(".toml") {
+        Ok(())
+    } else {
+        Err(format!(
+            "expected a config include path ending with `.toml`, but found `{path}`",
+        ))
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -1,4 +1,7 @@
 use helpers::{parse_fixture, parse_from_tempfile};
+use crate::{
+    Color, Edition, EmitMode, Heuristics, NewlineStyle,
+};
 use rustfmt_toml_parser_runtime_assertions::parser as assertions;
 
 use super::helpers;
@@ -22,22 +25,36 @@ tab_spaces = 4
 edition = "2021"
 newline_style = "Unix"
 use_small_heuristics = "Default"
+blank_lines_lower_bound = 1
+blank_lines_upper_bound = 2
+color = "Always"
+overflow_delimited_expr = true
+emit_mode = "Stdout"
+make_backup = false
+print_misformatted_file_names = true
 reorder_imports = true
 merge_derives = true
 "#,
     );
 
     assertions::assert_basic_width_fields(&cfg, Some(100), Some(false), Some(4));
-    assertions::assert_string_field(cfg.edition.as_deref(), Some("2021"), "edition");
-    assertions::assert_string_field(
-        cfg.newline_style.as_deref(),
-        Some("Unix"),
-        "newline_style",
+    assert_eq!(cfg.edition, Some(Edition::Edition2021));
+    assert_eq!(cfg.newline_style, Some(NewlineStyle::Unix));
+    assert_eq!(cfg.use_small_heuristics, Some(Heuristics::Default));
+    assert_eq!(cfg.blank_lines_lower_bound, Some(1), "blank_lines_lower_bound");
+    assert_eq!(cfg.blank_lines_upper_bound, Some(2), "blank_lines_upper_bound");
+    assert_eq!(cfg.color, Some(Color::Always));
+    assertions::assert_bool_field(
+        cfg.overflow_delimited_expr,
+        Some(true),
+        "overflow_delimited_expr",
     );
-    assertions::assert_string_field(
-        cfg.use_small_heuristics.as_deref(),
-        Some("Default"),
-        "use_small_heuristics",
+    assert_eq!(cfg.emit_mode, Some(EmitMode::Stdout));
+    assertions::assert_bool_field(cfg.make_backup, Some(false), "make_backup");
+    assertions::assert_bool_field(
+        cfg.print_misformatted_file_names,
+        Some(true),
+        "print_misformatted_file_names",
     );
     assertions::assert_bool_field(cfg.reorder_imports, Some(true), "reorder_imports");
     assertions::assert_bool_field(cfg.merge_derives, Some(true), "merge_derives");
@@ -102,7 +119,18 @@ edition = "2021"
     );
 
     assertions::assert_basic_width_fields(&cfg, Some(99), None, None);
-    assertions::assert_string_field(cfg.edition.as_deref(), Some("2021"), "edition");
+    assert_eq!(cfg.edition, Some(Edition::Edition2021));
+}
+
+#[test]
+fn invalid_enum_value_is_rejected() {
+    let err = super::super::parse(
+        r#"
+newline_style = "Posix"
+"#,
+    );
+
+    assertions::assert_parse_error(err.expect_err("invalid enum value should produce an error"));
 }
 
 #[test]

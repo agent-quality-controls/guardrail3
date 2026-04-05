@@ -1,6 +1,4 @@
-use crate::{
-    AdvisoryIgnoreEntry, BanDenyEntry, GraphTargetEntry,
-};
+use crate::{AdvisoryIgnoreEntry, AdvisoryScope, BanDenyEntry, GitSpec, GraphTargetEntry};
 use deny_toml_parser_runtime_assertions::parser as assertions;
 
 use super::helpers::{parse_fixture, parse_from_tempfile};
@@ -66,7 +64,11 @@ db-path = "~/.cargo/advisory-dbs"
 db-urls = ["https://github.com/RustSec/advisory-db"]
 version = 2
 unmaintained = "workspace"
+unsound = "transitive"
 yanked = "warn"
+git-fetch-with-cli = true
+disable-yank-checking = true
+maximum-db-staleness = "P30D"
 unused-ignored-advisory = "deny"
 ignore = [
     "RUSTSEC-2024-0001",
@@ -80,8 +82,12 @@ ignore = [
     assert_eq!(advisories.db_path, Some("~/.cargo/advisory-dbs".into()));
     assert_eq!(advisories.db_urls, ["https://github.com/RustSec/advisory-db"]);
     assert_eq!(advisories.version, Some(2));
-    assert_eq!(advisories.unmaintained, Some("workspace".into()));
+    assert_eq!(advisories.unmaintained, Some(AdvisoryScope::Workspace));
+    assert_eq!(advisories.unsound, Some(AdvisoryScope::Transitive));
     assert_eq!(advisories.yanked, Some("warn".into()));
+    assert_eq!(advisories.git_fetch_with_cli, Some(true));
+    assert_eq!(advisories.disable_yank_checking, Some(true));
+    assert_eq!(advisories.maximum_db_staleness.as_deref(), Some("P30D"));
     assert_eq!(advisories.unused_ignored_advisory, Some("deny".into()));
     assert_eq!(advisories.ignore.len(), 3, "should have 3 ignore entries");
     assert!(matches!(
@@ -467,7 +473,7 @@ ignore-sources = ["https://sekretz.com/super/secret-index"]
         .first()
         .expect("license file should be present");
     assert_eq!(license_file.path, "LICENSE");
-    assert_eq!(license_file.hash, toml::Value::Integer(1_867_372));
+    assert_eq!(license_file.hash, 1_867_372);
     assert_eq!(
         license_file.extra.get("source"),
         Some(&toml::Value::String("manual".into()))
@@ -505,7 +511,7 @@ feature-depth = 1
     let sources = cfg.sources.expect("sources should be present");
     assert_eq!(sources.unknown_registry, Some("deny".into()));
     assert_eq!(sources.unknown_git, Some("deny".into()));
-    assert_eq!(sources.required_git_spec, Some("tag".into()));
+    assert_eq!(sources.required_git_spec, Some(GitSpec::Tag));
     assert_eq!(sources.allow_registry, ["sparse+https://index.crates.io/"]);
     assert_eq!(sources.allow_git, ["https://github.com/EmbarkStudios/cargo-deny"]);
     assert_eq!(sources.private, ["https://internal-host/repos"]);
@@ -517,6 +523,19 @@ feature-depth = 1
 
     let output = cfg.output.expect("output should be present");
     assert_eq!(output.feature_depth, Some(1));
+}
+
+#[test]
+fn invalid_required_git_spec_is_rejected() {
+    let err = crate::parse(
+        r#"
+[sources]
+required-git-spec = "commit"
+"#,
+    )
+    .expect_err("invalid git spec should fail");
+
+    assertions::assert_parse_error(err);
 }
 
 #[test]

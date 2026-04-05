@@ -11,7 +11,7 @@ mod licenses;
 /// Source restriction and output model definitions.
 mod sources;
 
-pub use advisories::{AdvisoriesConfig, AdvisoryIgnoreDetail, AdvisoryIgnoreEntry};
+pub use advisories::{AdvisoriesConfig, AdvisoryIgnoreDetail, AdvisoryIgnoreEntry, AdvisoryScope};
 pub use bans::{
     BanAllowDetail, BanAllowEntry, BanBuildAllowBuildScriptDetail,
     BanBuildAllowBuildScriptEntry, BanBuildBypassAllowEntry, BanBuildBypassEntry, BanBuildConfig,
@@ -24,4 +24,4 @@ pub use licenses::{
     LicenseClarification, LicenseClarificationFile, LicenseException, LicensesConfig,
     LicensesPrivateConfig,
 };
-pub use sources::{OutputConfig, SourcesAllowOrg, SourcesConfig};
+pub use sources::{GitSpec, OutputConfig, SourcesAllowOrg, SourcesConfig};
