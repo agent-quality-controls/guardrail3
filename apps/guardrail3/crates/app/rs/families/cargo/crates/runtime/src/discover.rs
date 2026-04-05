@@ -15,15 +15,15 @@ struct CargoSnapshot {
     rel_dir: String,
     cargo_rel_path: String,
     parsed: Option<toml::Value>,
+    parsed_typed: Option<cargo_toml_parser::CargoToml>,
     parse_error: Option<String>,
+    typed_parse_error: Option<String>,
     has_workspace: bool,
     has_package: bool,
     edition: Option<String>,
     edition_invalid: bool,
     rust_version: Option<String>,
     rust_version_invalid: bool,
-    resolver: Option<String>,
-    resolver_invalid: bool,
     declared_members: Vec<String>,
     members_parse_error: Option<String>,
 }
@@ -208,15 +208,15 @@ fn snapshot_for(tree: &ProjectTree, rel_dir: &str, cargo_rel_path: &str) -> Carg
             rel_dir: rel_dir.to_owned(),
             cargo_rel_path: cargo_rel_path.to_owned(),
             parsed: None,
+            parsed_typed: None,
             parse_error: Some("Cargo.toml content missing from ProjectTree".to_owned()),
+            typed_parse_error: None,
             has_workspace: false,
             has_package: false,
             edition: None,
             edition_invalid: false,
             rust_version: None,
             rust_version_invalid: false,
-            resolver: None,
-            resolver_invalid: false,
             declared_members: Vec::new(),
             members_parse_error: None,
         };
@@ -224,10 +224,13 @@ fn snapshot_for(tree: &ProjectTree, rel_dir: &str, cargo_rel_path: &str) -> Carg
 
     match toml::from_str::<toml::Value>(content) {
         Ok(parsed) => {
+            let (parsed_typed, typed_parse_error) = match cargo_toml_parser::parse(content) {
+                Ok(parsed_typed) => (Some(parsed_typed), None),
+                Err(error) => (None, Some(error.to_string())),
+            };
             let has_workspace = parsed.get("workspace").is_some();
             let edition = root_package_field(&parsed, has_workspace, "edition");
             let rust_version = root_package_field(&parsed, has_workspace, "rust-version");
-            let resolver = workspace_field(&parsed, "resolver");
             let (declared_members, members_parse_error) = if has_workspace {
                 match parse_workspace_members(tree, rel_dir, &parsed) {
                     Ok(members) => (members, None),
@@ -240,15 +243,15 @@ fn snapshot_for(tree: &ProjectTree, rel_dir: &str, cargo_rel_path: &str) -> Carg
                 rel_dir: rel_dir.to_owned(),
                 cargo_rel_path: cargo_rel_path.to_owned(),
                 parsed: Some(parsed.clone()),
+                parsed_typed,
                 parse_error: None,
+                typed_parse_error,
                 has_workspace,
                 has_package: parsed.get("package").is_some(),
                 edition: edition.value,
                 edition_invalid: edition.invalid,
                 rust_version: rust_version.value,
                 rust_version_invalid: rust_version.invalid,
-                resolver: resolver.value,
-                resolver_invalid: resolver.invalid,
                 declared_members,
                 members_parse_error,
             }
@@ -257,15 +260,15 @@ fn snapshot_for(tree: &ProjectTree, rel_dir: &str, cargo_rel_path: &str) -> Carg
             rel_dir: rel_dir.to_owned(),
             cargo_rel_path: cargo_rel_path.to_owned(),
             parsed: None,
+            parsed_typed: None,
             parse_error: Some(parse_error.to_string()),
+            typed_parse_error: None,
             has_workspace: false,
             has_package: false,
             edition: None,
             edition_invalid: false,
             rust_version: None,
             rust_version_invalid: false,
-            resolver: None,
-            resolver_invalid: false,
             declared_members: Vec::new(),
             members_parse_error: None,
         },
@@ -292,6 +295,16 @@ fn push_policy_root(
             ),
         });
     }
+    if let Some(parse_error) = &snapshot.typed_parse_error
+        && snapshot.members_parse_error.is_none()
+    {
+        input_failures.push(InputFailureFacts {
+            rel_path: snapshot.cargo_rel_path.clone(),
+            message: format!(
+                "Failed to parse owned policy-root Cargo.toml against cargo-toml-parser for cargo content checks: {parse_error}"
+            ),
+        });
+    }
     if let Some(parse_error) = &guardrail.parse_error {
         input_failures.push(InputFailureFacts {
             rel_path: guardrail_rel_path
@@ -308,6 +321,7 @@ fn push_policy_root(
         rel_dir: snapshot.rel_dir.clone(),
         cargo_rel_path: snapshot.cargo_rel_path.clone(),
         parsed: snapshot.parsed.clone(),
+        parsed_typed: snapshot.parsed_typed.clone(),
         parse_error: snapshot.parse_error.clone(),
         guardrail_parse_error: guardrail.parse_error.is_some(),
         members_parse_error: snapshot.members_parse_error.is_some(),
@@ -315,8 +329,6 @@ fn push_policy_root(
         edition_invalid: snapshot.edition_invalid,
         rust_version: snapshot.rust_version.clone(),
         rust_version_invalid: snapshot.rust_version_invalid,
-        resolver: snapshot.resolver.clone(),
-        resolver_invalid: snapshot.resolver_invalid,
         profile_name: guardrail.profile_name,
         escape_hatches: guardrail.escape_hatches,
     });
@@ -465,10 +477,6 @@ fn root_package_field(
     } else {
         package_field(Some(parsed), field)
     }
-}
-
-fn workspace_field(parsed: &toml::Value, field: &str) -> StringFieldSnapshot {
-    string_field(parsed.get("workspace"), field)
 }
 
 fn package_field(parsed: Option<&toml::Value>, field: &str) -> StringFieldSnapshot {

@@ -308,11 +308,18 @@ fn invalid_rust_version_type_is_error() {
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_15_rust_version_policy::assert_rule_results(
         &results,
-        &[ExpectedRuleResult {
-            file: None,
-            title: Some("rust-version invalid"),
-            inventory: None,
-        }],
+        &[],
+    );
+    let input_failures: Vec<_> = results
+        .iter()
+        .filter(|result| result.id() == "RS-CARGO-14")
+        .collect();
+    assert_eq!(input_failures.len(), 1, "unexpected results: {results:#?}");
+    assert!(
+        input_failures[0]
+            .message()
+            .contains("against cargo-toml-parser for cargo content checks"),
+        "expected typed cargo parser failure to be owned by RS-CARGO-14: {results:#?}"
     );
 }
 
@@ -398,10 +405,17 @@ fn invalid_workspace_package_rust_version_does_not_fallback_to_local_package_val
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_15_rust_version_policy::assert_rule_results(
         &results,
-        &[ExpectedRuleResult {
-            file: None,
-            title: Some("rust-version invalid"),
-            inventory: None,
-        }],
+        &[],
+    );
+    let input_failures: Vec<_> = results
+        .iter()
+        .filter(|result| result.id() == "RS-CARGO-14")
+        .collect();
+    assert_eq!(input_failures.len(), 1, "unexpected results: {results:#?}");
+    assert!(
+        input_failures[0]
+            .message()
+            .contains("against cargo-toml-parser for cargo content checks"),
+        "expected typed cargo parser failure to be owned by RS-CARGO-14: {results:#?}"
     );
 }

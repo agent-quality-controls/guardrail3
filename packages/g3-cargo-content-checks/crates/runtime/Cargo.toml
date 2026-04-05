@@ -14,6 +14,7 @@ categories = ["development-tools"]
 workspace = true
 
 [dependencies]
+cargo-toml-parser = { path = "../../../cargo-toml-parser", version = "0.1.0" }
 g3-cargo-content-checks-types = { path = "../types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 

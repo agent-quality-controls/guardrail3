@@ -307,6 +307,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "g3-cargo-content-checks"
+version = "0.1.0"
+dependencies = [
+ "g3-cargo-content-checks-runtime",
+ "g3-cargo-content-checks-types",
+]
+
+[[package]]
+name = "g3-cargo-content-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "g3-cargo-content-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3-cargo-content-checks-types"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+]
+
+[[package]]
 name = "g3-clippy-content-checks"
 version = "0.1.0"
 dependencies = [
@@ -616,6 +640,8 @@ dependencies = [
 name = "guardrail3-app-rs-family-cargo"
 version = "0.0.0"
 dependencies = [
+ "cargo-toml-parser",
+ "g3-cargo-content-checks",
  "guardrail3-app-rs-family-cargo-assertions",
  "guardrail3-app-rs-family-cargo-test-support",
  "guardrail3-app-rs-family-mapper",
@@ -623,6 +649,7 @@ dependencies = [
  "guardrail3-app-rs-legality",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
+ "guardrail3-check-types",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",

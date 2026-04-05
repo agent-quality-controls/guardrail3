@@ -21,6 +21,7 @@ pub struct PolicyRootCargoFacts {
     pub(crate) rel_dir: String,
     pub(crate) cargo_rel_path: String,
     pub(crate) parsed: Option<toml::Value>,
+    pub(crate) parsed_typed: Option<cargo_toml_parser::CargoToml>,
     pub(crate) parse_error: Option<String>,
     pub(crate) guardrail_parse_error: bool,
     pub(crate) members_parse_error: bool,
@@ -28,8 +29,6 @@ pub struct PolicyRootCargoFacts {
     pub(crate) edition_invalid: bool,
     pub(crate) rust_version: Option<String>,
     pub(crate) rust_version_invalid: bool,
-    pub(crate) resolver: Option<String>,
-    pub(crate) resolver_invalid: bool,
     pub(crate) profile_name: Option<String>,
     pub(crate) escape_hatches: Vec<EscapeHatchConfig>,
 }

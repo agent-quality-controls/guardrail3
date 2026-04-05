@@ -51,6 +51,7 @@ dependencies = [
 name = "g3-cargo-content-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "g3-cargo-content-checks-assertions",
  "g3-cargo-content-checks-types",
  "guardrail3-check-types",

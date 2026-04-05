@@ -1,27 +1,15 @@
 use guardrail3_app_rs_family_cargo as _;
 
 #[cfg(feature = "checks")]
-pub mod rs_cargo_01_workspace_lints;
-#[cfg(feature = "checks")]
-pub mod rs_cargo_02_lint_levels;
-#[cfg(feature = "checks")]
 pub mod rs_cargo_03_allow_inventory;
 #[cfg(feature = "checks")]
 pub mod rs_cargo_04_lint_inheritance;
 #[cfg(feature = "checks")]
-pub mod rs_cargo_05_workspace_metadata;
-#[cfg(feature = "checks")]
 pub mod rs_cargo_06_no_weakened_overrides;
-#[cfg(feature = "checks")]
-pub mod rs_cargo_07_priority_order;
-#[cfg(feature = "checks")]
-pub mod rs_cargo_08_resolver;
 #[cfg(feature = "checks")]
 pub mod rs_cargo_09_member_edition_drift;
 #[cfg(feature = "checks")]
 pub mod rs_cargo_10_missing_member_cargo;
-#[cfg(feature = "checks")]
-pub mod rs_cargo_11_disallowed_macros_deny;
 #[cfg(feature = "checks")]
 pub mod rs_cargo_12_unapproved_allow_entries;
 #[cfg(feature = "checks")]
