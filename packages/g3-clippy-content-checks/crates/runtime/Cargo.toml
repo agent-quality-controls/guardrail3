@@ -1,0 +1,20 @@
+[package]
+name = "g3-clippy-content-checks-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3 clippy content checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+
+[lints]
+workspace = true
+
+[dependencies]
+clippy-toml-parser = { path = "../../../clippy-toml-parser" }
+g3-clippy-content-checks-types = { path = "../types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-domain-modules = { path = "../../../../apps/guardrail3/crates/domain/modules" }
+
+[dev-dependencies]
+g3-clippy-content-checks-assertions = { path = "../assertions" }

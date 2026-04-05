@@ -182,35 +182,45 @@ fn parse_config(
     garde_enabled: bool,
     published_library_policy: bool,
 ) -> ClippyConfigFacts {
-    match tree
-        .file_content(rel_path)
-        .map(toml::from_str::<toml::Value>)
-    {
-        Some(Ok(parsed)) => ClippyConfigFacts {
-            rel_dir: rel_dir.to_owned(),
-            rel_path: rel_path.to_owned(),
-            parsed: Some(parsed),
-            parse_error: None,
-            policy_context_parse_error,
-            profile_name,
-            garde_enabled,
-            published_library_policy,
-        },
-        Some(Err(err)) => ClippyConfigFacts {
-            rel_dir: rel_dir.to_owned(),
-            rel_path: rel_path.to_owned(),
-            parsed: None,
-            parse_error: Some(err.to_string()),
-            policy_context_parse_error,
-            profile_name,
-            garde_enabled,
-            published_library_policy,
-        },
+    match tree.file_content(rel_path) {
+        Some(content) => {
+            let parsed = toml::from_str::<toml::Value>(content).map_err(|err| err.to_string());
+            let parsed_typed =
+                clippy_toml_parser::parse(content).map_err(|err| err.to_string());
+            match parsed {
+                Ok(parsed) => ClippyConfigFacts {
+                    rel_dir: rel_dir.to_owned(),
+                    rel_path: rel_path.to_owned(),
+                    parsed: Some(parsed),
+                    parsed_typed: parsed_typed.clone().ok(),
+                    parse_error: None,
+                    typed_parse_error: parsed_typed.err(),
+                    policy_context_parse_error,
+                    profile_name,
+                    garde_enabled,
+                    published_library_policy,
+                },
+                Err(err) => ClippyConfigFacts {
+                    rel_dir: rel_dir.to_owned(),
+                    rel_path: rel_path.to_owned(),
+                    parsed: None,
+                    parsed_typed: None,
+                    parse_error: Some(err),
+                    typed_parse_error: None,
+                    policy_context_parse_error,
+                    profile_name,
+                    garde_enabled,
+                    published_library_policy,
+                },
+            }
+        }
         None => ClippyConfigFacts {
             rel_dir: rel_dir.to_owned(),
             rel_path: rel_path.to_owned(),
             parsed: None,
+            parsed_typed: None,
             parse_error: Some("clippy.toml content missing from ProjectTree".to_owned()),
+            typed_parse_error: None,
             policy_context_parse_error,
             profile_name,
             garde_enabled,

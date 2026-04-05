@@ -1,7 +1,7 @@
 use g3_fmt_content_checks_types::G3FmtContentChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::inputs::cargo_edition;
+use crate::inputs::{cargo_edition, rustfmt_edition, rustfmt_style_edition};
 
 const ID: &str = "RS-FMT-02";
 
@@ -11,14 +11,14 @@ pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<G3CheckRe
     check_string(
         &input.rustfmt_rel_path,
         "edition",
-        input.rustfmt.edition.as_deref(),
+        rustfmt_edition(input.rustfmt.edition),
         expected_edition,
         results,
     );
     check_string(
         &input.rustfmt_rel_path,
         "style_edition",
-        input.rustfmt.style_edition.as_deref(),
+        rustfmt_style_edition(input.rustfmt.style_edition),
         expected_edition,
         results,
     );

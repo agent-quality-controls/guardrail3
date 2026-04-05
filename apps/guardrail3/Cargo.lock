@@ -172,6 +172,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 
 [[package]]
+name = "clippy-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-runtime",
+]
+
+[[package]]
+name = "clippy-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "clippy-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "colorchoice"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -282,6 +305,31 @@ name = "foldhash"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
+
+[[package]]
+name = "g3-clippy-content-checks"
+version = "0.1.0"
+dependencies = [
+ "g3-clippy-content-checks-runtime",
+ "g3-clippy-content-checks-types",
+]
+
+[[package]]
+name = "g3-clippy-content-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser",
+ "g3-clippy-content-checks-types",
+ "guardrail3-check-types",
+ "guardrail3-domain-modules",
+]
+
+[[package]]
+name = "g3-clippy-content-checks-types"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser",
+]
 
 [[package]]
 name = "g3-deny-content-checks"
@@ -620,6 +668,8 @@ dependencies = [
 name = "guardrail3-app-rs-family-clippy"
 version = "0.0.0"
 dependencies = [
+ "clippy-toml-parser",
+ "g3-clippy-content-checks",
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-clippy-assertions",
@@ -629,6 +679,7 @@ dependencies = [
  "guardrail3-app-rs-legality",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
+ "guardrail3-check-types",
  "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",

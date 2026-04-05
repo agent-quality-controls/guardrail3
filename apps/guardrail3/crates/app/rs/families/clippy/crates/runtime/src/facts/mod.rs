@@ -6,6 +6,7 @@ use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 #[cfg(test)]
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
+use clippy_toml_parser::ClippyToml;
 
 #[cfg(test)]
 use super::inputs::ConfigClippyInput;
@@ -38,7 +39,9 @@ pub struct ClippyConfigFacts {
     pub(crate) rel_dir: String,
     pub(crate) rel_path: String,
     pub(crate) parsed: Option<toml::Value>,
+    pub(crate) parsed_typed: Option<ClippyToml>,
     pub(crate) parse_error: Option<String>,
+    pub(crate) typed_parse_error: Option<String>,
     pub(crate) policy_context_parse_error: Option<String>,
     pub(crate) profile_name: Option<String>,
     pub(crate) garde_enabled: bool,

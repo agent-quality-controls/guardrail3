@@ -1,6 +1,8 @@
+use g3_clippy_content_checks::G3ClippyContentChecksInput;
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_app_rs_family_view::FamilyView;
-use guardrail3_domain_report::CheckResult;
+use guardrail3_domain_report::{CheckResult, Severity};
 
 use crate::facts::collect;
 use crate::inputs::{
@@ -66,27 +68,53 @@ pub fn check(surface: &FamilyView, route: &RsClippyRoute) -> Vec<CheckResult> {
 
     for input in ConfigClippyInput::from_facts(&facts) {
         crate::rs_clippy_25_config_parseable::check(&input, &mut results);
-        crate::rs_clippy_02_max_struct_bools::check(&input, &mut results);
-        crate::rs_clippy_03_max_fn_params_bools::check(&input, &mut results);
+        run_content_checks(&input, &mut results);
         crate::rs_clippy_04_missing_method_ban::check(&input, &mut results);
         crate::rs_clippy_05_missing_type_ban::check(&input, &mut results);
         crate::rs_clippy_06_extra_method_ban::check(&input, &mut results);
         crate::rs_clippy_07_extra_type_ban::check(&input, &mut results);
         crate::rs_clippy_08_reason_quality::check(&input, &mut results);
-        crate::rs_clippy_09_too_many_lines_threshold::check(&input, &mut results);
-        crate::rs_clippy_10_too_many_arguments_threshold::check(&input, &mut results);
-        crate::rs_clippy_11_excessive_nesting_threshold::check(&input, &mut results);
         crate::rs_clippy_13_local_policy_root_baseline::check(&input, &mut results);
         crate::rs_clippy_14_library_global_state::check(&input, &mut results);
         crate::rs_clippy_15_trivial_reason::check(&input, &mut results);
         crate::rs_clippy_16_avoid_breaking_exported_api::check(&input, &mut results);
-        crate::rs_clippy_17_test_relaxations::check(&input, &mut results);
         crate::rs_clippy_18_duplicate_bans::check(&input, &mut results);
         crate::rs_clippy_19_unknown_keys::check(&input, &mut results);
         crate::rs_clippy_20_macro_bans::check(&input, &mut results);
-        crate::rs_clippy_21_cognitive_complexity_threshold::check(&input, &mut results);
-        crate::rs_clippy_22_type_complexity_threshold::check(&input, &mut results);
     }
 
     results
+}
+
+fn run_content_checks(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
+    let Some(clippy) = input.config.parsed_typed.clone() else {
+        return;
+    };
+
+    let package_input = G3ClippyContentChecksInput {
+        clippy_rel_path: input.config.rel_path.clone(),
+        clippy,
+    };
+    let package_results = g3_clippy_content_checks::check(&package_input);
+    results.extend(package_results.into_iter().map(convert_check_result));
+}
+
+fn convert_check_result(result: G3CheckResult) -> CheckResult {
+    CheckResult::from_parts(
+        result.id().to_owned(),
+        convert_severity(result.severity()),
+        result.title().to_owned(),
+        result.message().to_owned(),
+        result.file().map(str::to_owned),
+        result.line(),
+        result.inventory(),
+    )
+}
+
+fn convert_severity(severity: G3Severity) -> Severity {
+    match severity {
+        G3Severity::Error => Severity::Error,
+        G3Severity::Warn => Severity::Warn,
+        G3Severity::Info => Severity::Info,
+    }
 }

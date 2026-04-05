@@ -1,4 +1,4 @@
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::{CargoToml, InheritableValue};
 use rust_toolchain_toml_parser::RustToolchainToml;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
@@ -92,8 +92,15 @@ fn cargo_rust_version(cargo: &CargoToml) -> Option<&str> {
         .or_else(|| {
             cargo.package
                 .as_ref()
-                .and_then(|package| package.rust_version.as_deref())
+                .and_then(|package| inheritable_string(package.rust_version.as_ref()))
         })
+}
+
+fn inheritable_string(value: Option<&InheritableValue<String>>) -> Option<&str> {
+    match value {
+        Some(InheritableValue::Value(value)) => Some(value.as_str()),
+        Some(InheritableValue::Inherit(_)) | None => None,
+    }
 }
 
 fn parse_pinned_stable_version(raw: &str) -> Option<(u64, u64, u64)> {

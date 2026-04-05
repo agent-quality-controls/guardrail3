@@ -44,23 +44,26 @@ defines its own input struct using types from the parser crates.
 ### Clippy
 ```rust
 use clippy_toml_parser::ClippyToml;
-use cargo_toml_parser::CargoToml;
-use cargo_config_toml_parser::CargoConfig;
+use guardrail3_check_types::G3CheckResult;
 
-pub struct G3ClippyChecksInput {
-    pub clippy_config: Option<ClippyToml>,
-    pub clippy_config_rel_path: Option<String>,
-    pub cargo_manifest: CargoToml,
-    pub cargo_config: Option<CargoConfig>,
-    pub cargo_config_rel_path: Option<String>,
-    pub profile: G3Profile,
+pub struct G3ClippyContentChecksInput {
+    pub clippy_rel_path: String,
+    pub clippy: ClippyToml,
 }
 
-pub fn check(input: &G3ClippyChecksInput) -> Vec<G3CheckResult>
+pub fn check(input: &G3ClippyContentChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-CLIPPY-02..22, 25 (thresholds, bans, settings, typos, parse)
-Rules in app: RS-CLIPPY-01 (coverage), RS-CLIPPY-12 (placement), RS-CLIPPY-23 (guardrail3.toml)
+Initial rules in package: RS-CLIPPY-02, 03, 09, 10, 11, 17, 21, 22
+Rules in app: RS-CLIPPY-01, 04, 05, 06, 07, 08, 12, 13, 14, 15, 16, 18, 19,
+20, 23, 24, 25
+
+Notes:
+- `RS-CLIPPY-25` stays app-side as the typed parse/schema gate for `clippy.toml`.
+- `RS-CLIPPY-24` stays app-side so the package does not take Cargo config files in
+  its initial input contract.
+- Profile-sensitive and raw malformed-section rules stay app-side until their
+  structural malformed-input ownership is intentionally redesigned.
 
 ### Deny
 ```rust
