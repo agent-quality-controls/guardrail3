@@ -9,3 +9,11 @@ repository = "https://github.com/ArcticLens/websmasher"
 
 [lints]
 workspace = true
+
+[features]
+default = ["checks"]
+checks = []
+
+[dependencies]
+g3-deny-content-checks-runtime = { path = "../runtime" }
+guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }

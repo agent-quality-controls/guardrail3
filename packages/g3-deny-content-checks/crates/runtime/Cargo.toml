@@ -17,3 +17,6 @@ guardrail3-domain-modules = { path = "../../../../apps/guardrail3/crates/domain/
 guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 guardrail3-reason-policy = { path = "../../../reason-policy/crates/reason-policy", version = "0.0.0" }
 toml = "0.8"
+
+[dev-dependencies]
+g3-deny-content-checks-assertions = { path = "../assertions" }

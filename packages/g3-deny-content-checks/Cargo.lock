@@ -42,12 +42,17 @@ dependencies = [
 [[package]]
 name = "g3-deny-content-checks-assertions"
 version = "0.1.0"
+dependencies = [
+ "g3-deny-content-checks-runtime",
+ "guardrail3-check-types",
+]
 
 [[package]]
 name = "g3-deny-content-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
+ "g3-deny-content-checks-assertions",
  "g3-deny-content-checks-types",
  "guardrail3-check-types",
  "guardrail3-domain-modules",
