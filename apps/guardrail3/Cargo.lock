@@ -438,6 +438,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3-garde-content-checks"
+version = "0.1.0"
+dependencies = [
+ "g3-garde-content-checks-runtime",
+ "g3-garde-content-checks-types",
+]
+
+[[package]]
+name = "g3-garde-content-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "clippy-toml-parser",
+ "g3-garde-content-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3-garde-content-checks-types"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "clippy-toml-parser",
+]
+
+[[package]]
 name = "g3-toolchain-content-checks"
 version = "0.1.0"
 dependencies = [
@@ -937,6 +963,9 @@ dependencies = [
 name = "guardrail3-app-rs-family-garde"
 version = "0.0.0"
 dependencies = [
+ "cargo-toml-parser",
+ "clippy-toml-parser",
+ "g3-garde-content-checks",
  "glob",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-garde-test-support",
@@ -945,6 +974,7 @@ dependencies = [
  "guardrail3-app-rs-legality",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
+ "guardrail3-check-types",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",

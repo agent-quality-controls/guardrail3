@@ -172,21 +172,40 @@ Rules in app: RS-TOOLCHAIN-01, RS-TOOLCHAIN-04
 
 ### Garde
 ```rust
-use clippy_toml_parser::ClippyToml;
 use cargo_toml_parser::CargoToml;
+use clippy_toml_parser::ClippyToml;
+use guardrail3_check_types::G3CheckResult;
 
-pub struct G3GardeChecksInput {
-    pub source_files: Vec<G3SourceFile>,
-    pub clippy_config: Option<ClippyToml>,    // garde checks its bans are present
-    pub cargo_manifest: CargoToml,            // garde checks for garde dependency
-    pub profile: G3Profile,
+pub struct G3GardeDependencyCheckInput {
+    pub cargo_rel_path: String,
+    pub cargo: CargoToml,
 }
 
-pub fn check(input: &G3GardeChecksInput) -> Vec<G3CheckResult>
+pub struct G3GardeClippyBanChecksInput {
+    pub clippy_rel_path: String,
+    pub clippy: ClippyToml,
+}
+
+pub fn check_dependency_present(
+    input: &G3GardeDependencyCheckInput,
+) -> Vec<G3CheckResult>;
+
+pub fn check_clippy_bans(
+    input: &G3GardeClippyBanChecksInput,
+) -> Vec<G3CheckResult>;
 ```
 
-Rules in package: RS-GARDE-01..14 (dep check, clippy bans, derive validation)
-Rules in app: none — garde IS the policy owner for its concerns
+Rules in package: RS-GARDE-01, RS-GARDE-02, RS-GARDE-03, RS-GARDE-04, RS-GARDE-06
+Rules in app: RS-GARDE-05, RS-GARDE-07, RS-GARDE-08, RS-GARDE-09, RS-GARDE-10, RS-GARDE-11, RS-GARDE-12, RS-GARDE-13, RS-GARDE-14
+
+Current bridge note:
+
+- app still owns garde applicability gating from policy and source adoption
+- app still owns missing / unparseable covering clippy handling for
+  `RS-GARDE-02/03/04/06`
+- package owns only the typed parsed-file path for those root-policy checks
+- AST/source garde rules stay app-side until there is a clean parsed-file
+  package boundary for them
 
 ### Deps
 ```rust

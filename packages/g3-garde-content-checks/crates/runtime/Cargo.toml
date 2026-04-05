@@ -1,0 +1,30 @@
+[package]
+name = "g3-garde-content-checks-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3 garde content checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "garde", "checks", "rust", "policy"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[lints]
+workspace = true
+
+[dependencies]
+cargo-toml-parser = { path = "../../../cargo-toml-parser", version = "0.1.0" }
+clippy-toml-parser = { path = "../../../clippy-toml-parser", version = "0.1.0" }
+g3-garde-content-checks-types = { path = "../types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+
+[dev-dependencies]
+g3-garde-content-checks-assertions = { path = "../assertions" }
+guardrail3-domain-modules = { path = "../../../../apps/guardrail3/crates/domain/modules" }
+toml = "0.8"

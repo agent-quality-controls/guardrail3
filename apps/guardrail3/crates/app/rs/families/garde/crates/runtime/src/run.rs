@@ -1,6 +1,8 @@
+use g3_garde_content_checks::{G3GardeClippyBanChecksInput, G3GardeDependencyCheckInput};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
 use guardrail3_app_rs_family_view::FamilyView;
-use guardrail3_domain_report::CheckResult;
+use guardrail3_domain_report::{CheckResult, Severity};
 
 use crate::facts::collect;
 
@@ -21,16 +23,13 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
             continue;
         }
         let input = crate::inputs::GardeRootInput::new(root);
-        crate::root_policy::rs_garde_01_dependency_present::check(&input, &mut results);
+        run_dependency_check(&input, &mut results);
 
         if !root.garde_dependency_present {
             continue;
         }
 
-        crate::root_policy::rs_garde_02_core_method_bans::check(&input, &mut results);
-        crate::root_policy::rs_garde_03_extractor_type_bans::check(&input, &mut results);
-        crate::root_policy::rs_garde_04_reqwest_json_ban::check(&input, &mut results);
-        crate::root_policy::rs_garde_06_additional_method_bans::check(&input, &mut results);
+        run_clippy_ban_checks(&input, &mut results);
     }
 
     for target in &facts.struct_targets {
@@ -120,4 +119,67 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
     }
 
     results
+}
+
+fn run_dependency_check(input: &crate::inputs::GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
+    let Some(cargo) = input.root.cargo_parsed_typed.clone() else {
+        crate::root_policy::rs_garde_01_dependency_present::check(input, results);
+        return;
+    };
+
+    let package_input = G3GardeDependencyCheckInput {
+        cargo_rel_path: input.root.cargo_rel_path.clone(),
+        cargo,
+    };
+    results.extend(
+        g3_garde_content_checks::check_dependency_present(&package_input)
+            .into_iter()
+            .map(convert_check_result),
+    );
+}
+
+fn run_clippy_ban_checks(
+    input: &crate::inputs::GardeRootInput<'_>,
+    results: &mut Vec<CheckResult>,
+) {
+    let (Some(clippy_rel_path), Some(clippy)) = (
+        input.root.clippy_rel_path.clone(),
+        input.root.clippy_parsed_typed.clone(),
+    ) else {
+        crate::root_policy::rs_garde_02_core_method_bans::check(input, results);
+        crate::root_policy::rs_garde_03_extractor_type_bans::check(input, results);
+        crate::root_policy::rs_garde_04_reqwest_json_ban::check(input, results);
+        crate::root_policy::rs_garde_06_additional_method_bans::check(input, results);
+        return;
+    };
+
+    let package_input = G3GardeClippyBanChecksInput {
+        clippy_rel_path,
+        clippy,
+    };
+    results.extend(
+        g3_garde_content_checks::check_clippy_bans(&package_input)
+            .into_iter()
+            .map(convert_check_result),
+    );
+}
+
+fn convert_check_result(result: G3CheckResult) -> CheckResult {
+    CheckResult::from_parts(
+        result.id().to_owned(),
+        convert_severity(result.severity()),
+        result.title().to_owned(),
+        result.message().to_owned(),
+        result.file().map(str::to_owned),
+        result.line(),
+        result.inventory(),
+    )
+}
+
+fn convert_severity(severity: G3Severity) -> Severity {
+    match severity {
+        G3Severity::Error => Severity::Error,
+        G3Severity::Warn => Severity::Warn,
+        G3Severity::Info => Severity::Info,
+    }
 }
