@@ -10,6 +10,11 @@ readme = "README.md"
 keywords = ["guardrail3", "cargo", "checks", "rust", "policy"]
 categories = ["development-tools"]
 
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
 [lints]
 workspace = true
 

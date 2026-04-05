@@ -11,7 +11,8 @@ repository = "https://github.com/ArcticLens/websmasher"
 workspace = true
 
 [features]
-default = ["checks"]
+default = ["all"]
+all = ["checks"]
 checks = []
 
 [dependencies]

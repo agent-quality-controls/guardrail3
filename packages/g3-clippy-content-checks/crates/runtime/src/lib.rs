@@ -9,4 +9,5 @@ mod rs_clippy_22_type_complexity_threshold;
 mod run;
 mod support;
 
+#[cfg(feature = "checks")]
 pub use run::check;

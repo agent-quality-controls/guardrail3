@@ -15,4 +15,5 @@ mod support;
 #[cfg(test)]
 use g3_cargo_content_checks_assertions as _;
 
+#[cfg(feature = "checks")]
 pub use run::check;
