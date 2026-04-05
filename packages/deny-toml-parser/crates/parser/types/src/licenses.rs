@@ -101,7 +101,7 @@ pub struct LicenseClarificationFile {
     /// Crate-relative file path.
     pub path: String,
     /// Opaque file hash from cargo-deny.
-    pub hash: Value,
+    pub hash: u32,
     /// Additional fields not modeled as typed fields.
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,

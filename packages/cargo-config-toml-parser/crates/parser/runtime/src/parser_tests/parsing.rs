@@ -33,6 +33,22 @@ OPENSSL_DIR = { value = "vendor/openssl", force = true, relative = true }
 }
 
 #[test]
+fn include_entries_require_toml_paths() {
+    let err = super::super::parse(
+        r#"
+include = ["shared.txt"]
+"#,
+    )
+    .expect_err("non-.toml include path should be rejected");
+
+    let message = err.to_string();
+    assert!(
+        message.contains("expected a config include path ending with `.toml`"),
+        "expected include path error, got: {message}",
+    );
+}
+
+#[test]
 #[allow(clippy::too_many_lines, reason = "one realistic fixture is the clearest way to prove section coverage")]
 fn realistic_config_parses_known_sections() {
     let cfg = parse_fixture(

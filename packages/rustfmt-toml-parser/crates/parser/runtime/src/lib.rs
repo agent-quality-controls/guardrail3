@@ -10,6 +10,10 @@ pub use error::Error;
 #[cfg(feature = "api")]
 pub use parser::{from_path, parse};
 #[cfg(feature = "api")]
-pub use rustfmt_toml_parser_types::RustfmtToml;
+pub use rustfmt_toml_parser_types::{
+    BraceStyle, Color, ControlBraceStyle, Edition, EmitMode, FloatLiteralTrailingZero,
+    GroupImportsTactic, Heuristics, HexLiteralCase, ImportGranularity, IndentStyle,
+    MatchArmLeadingPipe, NewlineStyle, RustfmtToml, StyleEdition, Version,
+};
 #[cfg(feature = "api")]
 pub use toml::Value;

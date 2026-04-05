@@ -105,3 +105,41 @@ components = ["clippy"]
     assertions::assert_toolchain_fields(&cfg, Some("stable"), None, &["clippy"], &[], None);
     assertions::assert_toolchain_extra_empty(&cfg);
 }
+
+#[test]
+fn path_and_channel_cannot_be_combined() {
+    let err = super::super::parse(
+        r#"
+[toolchain]
+channel = "stable"
+path = "/opt/rust/toolchains/local"
+"#,
+    )
+    .expect_err("path + channel should be rejected");
+
+    let message = err.to_string();
+    assert!(
+        message.contains("cannot specify both channel"),
+        "expected path + channel error, got: {message}",
+    );
+}
+
+#[test]
+fn path_cannot_be_combined_with_other_toolchain_options() {
+    let err = super::super::parse(
+        r#"
+[toolchain]
+path = "/opt/rust/toolchains/local"
+components = ["clippy"]
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"
+"#,
+    )
+    .expect_err("path + other toolchain options should be rejected");
+
+    let message = err.to_string();
+    assert!(
+        message.contains("toolchain options are ignored for path toolchain"),
+        "expected path toolchain options error, got: {message}",
+    );
+}
