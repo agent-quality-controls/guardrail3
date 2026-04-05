@@ -1,5 +1,4 @@
 use g3_toolchain_content_checks_assertions::rs_toolchain_03_msrv_consistency as assertions;
-use g3_toolchain_content_checks_types::G3CargoRustVersion;
 
 use super::helpers::run_check;
 
@@ -11,7 +10,13 @@ fn inventories_when_pinned_toolchain_satisfies_msrv() {
 channel = "1.85.0"
 components = ["clippy", "rustfmt"]
 "#,
-        G3CargoRustVersion::Version("1.85".to_owned()),
+        r#"
+[package]
+name = "fixture"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+"#,
     );
 
     assertions::assert_findings(

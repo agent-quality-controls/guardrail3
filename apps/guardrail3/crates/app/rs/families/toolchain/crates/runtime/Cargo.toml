@@ -7,13 +7,14 @@ edition = "2024"
 workspace = true
 
 [dependencies]
+cargo-toml-parser = { path = "../../../../../../../../../packages/cargo-toml-parser" }
 g3-toolchain-content-checks = { path = "../../../../../../../../../packages/g3-toolchain-content-checks" }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
 guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../../family_view" }
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../../../../ownership" }
 guardrail3_check_types = { package = "guardrail3-check-types", path = "../../../../../../../../../packages/guardrail3-check-types/crates/guardrail3-check-types" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
-toml = "0.8"
+rust-toolchain-toml-parser = { path = "../../../../../../../../../packages/rust-toolchain-toml-parser" }
 
 [dev-dependencies]
 guardrail3_app_rs_legality = { package = "guardrail3-app-rs-legality", path = "../../../../legality" }
@@ -26,3 +27,4 @@ guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../..
 guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../../../../domain/validation-model" }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../../../shared/fs" }
 tempfile = "3"
+toml = "0.8"

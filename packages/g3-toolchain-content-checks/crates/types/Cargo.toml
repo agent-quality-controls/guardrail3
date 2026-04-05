@@ -12,4 +12,5 @@ readme = "README.md"
 workspace = true
 
 [dependencies]
-toml = "0.8"
+cargo-toml-parser = { path = "../../../cargo-toml-parser" }
+rust-toolchain-toml-parser = { path = "../../../rust-toolchain-toml-parser" }

@@ -84,6 +84,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-runtime",
+]
+
+[[package]]
+name = "cargo-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "cargo-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "castaway"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -238,6 +261,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "g3-fmt-content-checks"
+version = "0.1.0"
+dependencies = [
+ "g3-fmt-content-checks-runtime",
+ "g3-fmt-content-checks-types",
+]
+
+[[package]]
+name = "g3-fmt-content-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "g3-fmt-content-checks-types",
+ "guardrail3-check-types",
+ "rustfmt-toml-parser",
+ "toml",
+]
+
+[[package]]
+name = "g3-fmt-content-checks-types"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "rust-toolchain-toml-parser",
+ "rustfmt-toml-parser",
+]
+
+[[package]]
 name = "g3-toolchain-content-checks"
 version = "0.1.0"
 dependencies = [
@@ -249,16 +300,18 @@ dependencies = [
 name = "g3-toolchain-content-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "g3-toolchain-content-checks-types",
  "guardrail3-check-types",
- "toml",
+ "rust-toolchain-toml-parser",
 ]
 
 [[package]]
 name = "g3-toolchain-content-checks-types"
 version = "0.1.0"
 dependencies = [
- "toml",
+ "cargo-toml-parser",
+ "rust-toolchain-toml-parser",
 ]
 
 [[package]]
@@ -678,6 +731,8 @@ dependencies = [
 name = "guardrail3-app-rs-family-fmt"
 version = "0.0.0"
 dependencies = [
+ "cargo-toml-parser",
+ "g3-fmt-content-checks",
  "guardrail3-app-rs-family-fmt-assertions",
  "guardrail3-app-rs-family-fmt-test-support",
  "guardrail3-app-rs-family-mapper",
@@ -685,11 +740,14 @@ dependencies = [
  "guardrail3-app-rs-legality",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
+ "guardrail3-check-types",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "guardrail3-reason-policy",
+ "rust-toolchain-toml-parser",
+ "rustfmt-toml-parser",
  "tempfile",
  "toml",
 ]
@@ -973,6 +1031,7 @@ dependencies = [
 name = "guardrail3-app-rs-family-toolchain"
 version = "0.0.0"
 dependencies = [
+ "cargo-toml-parser",
  "g3-toolchain-content-checks",
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
@@ -988,6 +1047,7 @@ dependencies = [
  "guardrail3-domain-validation-model",
  "guardrail3-shared-fs",
  "guardrail3_app_rs_family_toolchain_assertions",
+ "rust-toolchain-toml-parser",
  "tempfile",
  "toml",
 ]
@@ -1413,6 +1473,52 @@ name = "regex-syntax"
 version = "0.8.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
+
+[[package]]
+name = "rust-toolchain-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-runtime",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
+name = "rustfmt-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "rustfmt-toml-parser-runtime",
+]
+
+[[package]]
+name = "rustfmt-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "rustfmt-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "rustfmt-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "rustix"

@@ -1,5 +1,4 @@
 use g3_toolchain_content_checks_assertions::rs_toolchain_03_msrv_consistency as assertions;
-use g3_toolchain_content_checks_types::G3CargoRustVersion;
 
 use super::helpers::run_check;
 
@@ -10,7 +9,12 @@ fn inventories_when_cargo_rust_version_is_missing() {
 [toolchain]
 channel = "1.85.0"
 "#,
-        G3CargoRustVersion::Missing,
+        r#"
+[package]
+name = "fixture"
+version = "0.1.0"
+edition = "2024"
+"#,
     );
 
     assertions::assert_findings(

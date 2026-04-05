@@ -1,5 +1,5 @@
-use g3_toolchain_content_checks_types::G3ToolchainContentChecksInput;
 use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
+use rust_toolchain_toml_parser::{RustToolchainToml, ToolchainSection};
 
 const ID: &str = "RS-TOOLCHAIN-02";
 
@@ -12,35 +12,22 @@ enum ChannelKind {
     Unsupported,
 }
 
-pub(crate) fn check(input: &G3ToolchainContentChecksInput, results: &mut Vec<GrdzCheckResult>) {
-    let rel = &input.toolchain_rel_path;
-
-    let Some(toolchain) = toolchain_table(&input.toolchain_toml, rel, results) else {
+pub(crate) fn check(toolchain_rel_path: &str, toolchain_toml: &RustToolchainToml, results: &mut Vec<GrdzCheckResult>) {
+    let Some(toolchain) = toolchain_table(toolchain_toml, toolchain_rel_path, results) else {
         return;
     };
 
-    check_channel(toolchain, rel, results);
-    check_components(toolchain, rel, results);
+    check_channel(toolchain, toolchain_rel_path, results);
+    check_components(toolchain, toolchain_rel_path, results);
 }
 
 fn toolchain_table<'a>(
-    parsed: &'a toml::Value,
+    parsed: &'a RustToolchainToml,
     rel: &str,
     results: &mut Vec<GrdzCheckResult>,
-) -> Option<&'a toml::value::Table> {
-    match parsed.get("toolchain") {
-        Some(toml::Value::Table(toolchain)) => Some(toolchain),
-        Some(_) => {
-            results.push(GrdzCheckResult::new(
-                ID.to_owned(),
-                GrdzSeverity::Error,
-                "toolchain table is invalid".to_owned(),
-                "`rust-toolchain.toml` must define `[toolchain]` as a table.".to_owned(),
-                Some(rel.to_owned()),
-                None,
-            ));
-            None
-        }
+) -> Option<&'a ToolchainSection> {
+    match parsed.toolchain() {
+        Some(toolchain) => Some(toolchain),
         None => {
             results.push(GrdzCheckResult::new(
                 ID.to_owned(),
@@ -56,12 +43,12 @@ fn toolchain_table<'a>(
 }
 
 fn check_channel(
-    toolchain: &toml::value::Table,
+    toolchain: &ToolchainSection,
     rel: &str,
     results: &mut Vec<GrdzCheckResult>,
 ) {
-    match toolchain.get("channel") {
-        Some(toml::Value::String(channel)) => match classify_channel(channel) {
+    match toolchain.channel() {
+        Some(channel) => match classify_channel(channel) {
             ChannelKind::Stable => results.push(
                 GrdzCheckResult::new(
                     ID.to_owned(),
@@ -112,14 +99,6 @@ fn check_channel(
                 None,
             )),
         },
-        Some(_) => results.push(GrdzCheckResult::new(
-            ID.to_owned(),
-            GrdzSeverity::Error,
-            "toolchain channel is invalid".to_owned(),
-            "`[toolchain].channel` must be a string.".to_owned(),
-            Some(rel.to_owned()),
-            None,
-        )),
         None => results.push(GrdzCheckResult::new(
             ID.to_owned(),
             GrdzSeverity::Warn,
@@ -187,75 +166,38 @@ fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
 }
 
 fn check_components(
-    toolchain: &toml::value::Table,
+    toolchain: &ToolchainSection,
     rel: &str,
     results: &mut Vec<GrdzCheckResult>,
 ) {
-    match toolchain.get("components") {
-        Some(toml::Value::Array(components)) => {
-            if !components
-                .iter()
-                .all(|component| component.as_str().is_some())
-            {
-                results.push(GrdzCheckResult::new(
-                    ID.to_owned(),
-                    GrdzSeverity::Error,
-                    "toolchain components are invalid".to_owned(),
-                    "`[toolchain].components` must be an array of strings.".to_owned(),
-                    Some(rel.to_owned()),
-                    None,
-                ));
-                return;
-            }
+    let names = toolchain
+        .components()
+        .iter()
+        .map(String::as_str)
+        .collect::<Vec<_>>();
 
-            let names = components
-                .iter()
-                .filter_map(toml::Value::as_str)
-                .collect::<Vec<_>>();
-            for expected in ["clippy", "rustfmt"] {
-                if names.contains(&expected) {
-                    results.push(
-                        GrdzCheckResult::new(
-                            ID.to_owned(),
-                            GrdzSeverity::Info,
-                            format!("toolchain component `{expected}` present"),
-                            format!("`{expected}` is listed in `components`."),
-                            Some(rel.to_owned()),
-                            None,
-                        )
-                        .into_inventory(),
-                    );
-                } else {
-                    results.push(GrdzCheckResult::new(
-                        ID.to_owned(),
-                        GrdzSeverity::Warn,
-                        format!("toolchain component `{expected}` missing"),
-                        format!("Add `{expected}` to `[toolchain].components`."),
-                        Some(rel.to_owned()),
-                        None,
-                    ));
-                }
-            }
-        }
-        Some(_) => results.push(GrdzCheckResult::new(
-            ID.to_owned(),
-            GrdzSeverity::Error,
-            "toolchain components are invalid".to_owned(),
-            "`[toolchain].components` must be an array of strings.".to_owned(),
-            Some(rel.to_owned()),
-            None,
-        )),
-        None => {
-            for expected in ["clippy", "rustfmt"] {
-                results.push(GrdzCheckResult::new(
+    for expected in ["clippy", "rustfmt"] {
+        if names.contains(&expected) {
+            results.push(
+                GrdzCheckResult::new(
                     ID.to_owned(),
-                    GrdzSeverity::Warn,
-                    format!("toolchain component `{expected}` missing"),
-                    format!("Add `{expected}` to `[toolchain].components`."),
+                    GrdzSeverity::Info,
+                    format!("toolchain component `{expected}` present"),
+                    format!("`{expected}` is listed in `components`."),
                     Some(rel.to_owned()),
                     None,
-                ));
-            }
+                )
+                .into_inventory(),
+            );
+        } else {
+            results.push(GrdzCheckResult::new(
+                ID.to_owned(),
+                GrdzSeverity::Warn,
+                format!("toolchain component `{expected}` missing"),
+                format!("Add `{expected}` to `[toolchain].components`."),
+                Some(rel.to_owned()),
+                None,
+            ));
         }
     }
 }

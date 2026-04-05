@@ -94,10 +94,11 @@ pub fn assert_invalid_root_cargo_rust_version_type(results: &[CheckResult]) {
             result.id() == "RS-TOOLCHAIN-03"
                 && result.severity() == Severity::Error
                 && !result.inventory()
-                && result.title() == "Cargo rust-version is invalid"
-                && result.message() == "`Cargo.toml` `rust-version` must be a string version."
+                && result.title() == "Cargo.toml parse error blocks MSRV check"
+                && result.message().contains("invalid type")
+                && result.message().contains("string")
                 && result.file() == Some("Cargo.toml")
         }),
-        "missing expected RS-TOOLCHAIN-03 invalid rust-version error: {results:#?}"
+        "missing expected RS-TOOLCHAIN-03 Cargo parse blocker: {results:#?}"
     );
 }

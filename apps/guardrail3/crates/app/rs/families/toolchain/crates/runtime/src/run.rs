@@ -1,4 +1,6 @@
-use g3_toolchain_content_checks::{G3CargoRustVersion, G3ToolchainContentChecksInput};
+use g3_toolchain_content_checks::{
+    G3ToolchainChannelAndComponentsInput, G3ToolchainMsrvConsistencyInput,
+};
 use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
 use guardrail3_app_rs_family_mapper::RsToolchainRoute;
 use guardrail3_app_rs_family_view::FamilyView;
@@ -54,30 +56,77 @@ fn run_content_checks(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<Ch
         return;
     };
 
-    let package_input = G3ToolchainContentChecksInput {
+    let channel_input = G3ToolchainChannelAndComponentsInput {
+        toolchain_rel_path: toolchain_rel_path.to_owned(),
+        toolchain_toml: toolchain_toml.clone(),
+    };
+    let package_results = g3_toolchain_content_checks::check_channel_and_components(&channel_input);
+    results.extend(package_results.into_iter().map(convert_check_result));
+
+    if !uses_pinned_stable_channel(&toolchain_toml) {
+        return;
+    }
+
+    let Some(cargo_toml) = input.cargo.cloned() else {
+        results.push(CheckResult::from_parts(
+            "RS-TOOLCHAIN-03".to_owned(),
+            Severity::Error,
+            match input.cargo_parse_error {
+                Some(_) => "Cargo.toml parse error blocks MSRV check".to_owned(),
+                None => "Cargo.toml missing blocks MSRV check".to_owned(),
+            },
+            match input.cargo_parse_error {
+                Some(parse_error) => format!("Invalid root Cargo.toml: {parse_error}"),
+                None => {
+                    "Cargo.toml is required to compare pinned toolchain against declared MSRV."
+                        .to_owned()
+                }
+            },
+            Some(input.cargo_rel_path.to_owned()),
+            None,
+            false,
+        ));
+        return;
+    };
+
+    let msrv_input = G3ToolchainMsrvConsistencyInput {
         toolchain_rel_path: toolchain_rel_path.to_owned(),
         toolchain_toml,
         cargo_rel_path: input.cargo_rel_path.to_owned(),
-        cargo_rust_version: cargo_rust_version(input),
+        cargo_toml,
     };
-    let package_results = g3_toolchain_content_checks::check(&package_input);
-    results.extend(package_results.into_iter().map(convert_check_result));
+    let msrv_results = g3_toolchain_content_checks::check_msrv_consistency(&msrv_input);
+    results.extend(msrv_results.into_iter().map(convert_check_result));
 }
 
-fn cargo_rust_version(input: &ToolchainPolicyRootInput<'_>) -> G3CargoRustVersion {
-    if input.cargo_toml_rel.is_none() {
-        return G3CargoRustVersion::MissingManifest;
+fn uses_pinned_stable_channel(toolchain_toml: &rust_toolchain_toml_parser::RustToolchainToml) -> bool {
+    let Some(channel) = toolchain_toml
+        .toolchain()
+        .and_then(|toolchain| toolchain.channel())
+    else {
+        return false;
+    };
+
+    parse_pinned_stable_version(channel).is_some()
+}
+
+fn parse_pinned_stable_version(raw: &str) -> Option<(u64, u64, u64)> {
+    let normalized = raw.trim().to_ascii_lowercase();
+    let mut segments = normalized.split('-');
+    let version_part = segments.next()?;
+    if segments.any(|segment| segment.starts_with("nightly") || segment.starts_with("beta")) {
+        return None;
     }
-    if let Some(parse_error) = input.cargo_parse_error {
-        return G3CargoRustVersion::ParseError(parse_error.to_owned());
+
+    let version_part = version_part.trim_start_matches('v');
+    let mut parts = version_part.split('.');
+    let major = parts.next()?.parse().ok()?;
+    let minor = parts.next()?.parse().ok()?;
+    let patch = parts.next().unwrap_or("0").parse().ok()?;
+    if parts.next().is_some() {
+        return None;
     }
-    if input.cargo_rust_version_invalid {
-        return G3CargoRustVersion::InvalidType;
-    }
-    match input.cargo_rust_version {
-        Some(version) => G3CargoRustVersion::Version(version.to_owned()),
-        None => G3CargoRustVersion::Missing,
-    }
+    Some((major, minor, patch))
 }
 
 fn convert_check_result(result: GrdzCheckResult) -> CheckResult {

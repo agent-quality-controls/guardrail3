@@ -3,6 +3,29 @@
 version = 4
 
 [[package]]
+name = "cargo-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-runtime",
+]
+
+[[package]]
+name = "cargo-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "cargo-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -28,17 +51,19 @@ dependencies = [
 name = "g3-toolchain-content-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "g3-toolchain-content-checks-assertions",
  "g3-toolchain-content-checks-types",
  "guardrail3-check-types",
- "toml",
+ "rust-toolchain-toml-parser",
 ]
 
 [[package]]
 name = "g3-toolchain-content-checks-types"
 version = "0.1.0"
 dependencies = [
- "toml",
+ "cargo-toml-parser",
+ "rust-toolchain-toml-parser",
 ]
 
 [[package]]
@@ -86,12 +111,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust-toolchain-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-runtime",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "serde"
 version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
 dependencies = [
  "serde_core",
+ "serde_derive",
 ]
 
 [[package]]
