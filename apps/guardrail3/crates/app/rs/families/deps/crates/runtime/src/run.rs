@@ -1,4 +1,6 @@
-use g3_deps_content_checks::{G3DepsDirectDependencyCapInput, G3DepsPolicyContentChecksInput};
+use g3_deps_content_checks::{
+    G3DepsDirectDependencyCapInput, G3DepsLocalPathCargoManifest, G3DepsPolicyContentChecksInput,
+};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsDepsRoute;
 use guardrail3_app_rs_family_view::FamilyView;
@@ -64,6 +66,15 @@ fn run_policy_content_checks(
         guardrail_rel_path: input.guardrail_rel_path.clone(),
         guardrail: toml::from_str(&input.guardrail_content)
             .expect("guardrail3.toml content fact should parse"),
+        local_path_cargo_rel_paths: input.local_path_cargo_rel_paths.clone(),
+        local_path_cargo_manifests: input
+            .local_path_cargo_manifests
+            .iter()
+            .map(|manifest| G3DepsLocalPathCargoManifest {
+                cargo_rel_path: manifest.cargo_rel_path.clone(),
+                cargo: manifest.cargo.clone(),
+            })
+            .collect(),
     };
     results.extend(
         g3_deps_content_checks::check_policy(&package_input)
@@ -81,6 +92,15 @@ fn run_direct_dependency_cap_check(
         workspace_cargo: input.workspace_cargo.clone(),
         crate_cargo_rel_path: input.crate_cargo_rel_path.clone(),
         crate_cargo: input.crate_cargo.clone(),
+        local_path_cargo_rel_paths: input.local_path_cargo_rel_paths.clone(),
+        local_path_cargo_manifests: input
+            .local_path_cargo_manifests
+            .iter()
+            .map(|manifest| G3DepsLocalPathCargoManifest {
+                cargo_rel_path: manifest.cargo_rel_path.clone(),
+                cargo: manifest.cargo.clone(),
+            })
+            .collect(),
     };
     results.extend(
         g3_deps_content_checks::check_direct_dependency_cap(&package_input)

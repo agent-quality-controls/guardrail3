@@ -1,15 +1,16 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path};
 
-use cargo_toml_parser::parse as parse_cargo_toml;
+use cargo_toml_parser::{CargoToml, Dependency, TargetDependencyTables, parse as parse_cargo_toml};
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
+use guardrail3_domain_config::types::GuardrailConfig;
 use super::guardrail::{
     validate_target_dependency_manifest_shape, validate_top_level_dependency_manifest_shape,
 };
 use super::{
     DependencyEntryFacts, DependencySectionKind, DirectDependencyCapContentFacts,
-    DirectDependencyCapFacts, InputFailureFacts, MemberFacts, ParsedGuardrail,
-    PolicyContentCheckFacts, WorkspaceFacts,
+    DirectDependencyCapFacts, InputFailureFacts, LocalPathCargoManifestFacts, MemberFacts,
+    ParsedGuardrail, PolicyContentCheckFacts, WorkspaceFacts,
 };
 
 pub(super) fn collect_content_check_facts(
@@ -59,23 +60,34 @@ pub(super) fn collect_content_check_facts(
         let Some(workspace_cargo) = typed_workspaces.get(workspace_root_rel_dir).cloned() else {
             continue;
         };
+        let workspace_cargo_rel_path = if workspace_root_rel_dir.is_empty() {
+            "Cargo.toml".to_owned()
+        } else {
+            format!("{workspace_root_rel_dir}/Cargo.toml")
+        };
         let Some(content) = tree.file_content(&member.cargo_rel_path) else {
             continue;
         };
         let Ok(crate_cargo) = parse_cargo_toml(content) else {
             continue;
         };
+        let (local_path_cargo_rel_paths, local_path_cargo_manifests) =
+            collect_local_path_cargo_facts_for_site(
+                tree,
+                &workspace_cargo_rel_path,
+                &workspace_cargo,
+                &member.cargo_rel_path,
+                &crate_cargo,
+            );
         policy_content_checks.push(PolicyContentCheckFacts {
-            workspace_cargo_rel_path: if workspace_root_rel_dir.is_empty() {
-                "Cargo.toml".to_owned()
-            } else {
-                format!("{workspace_root_rel_dir}/Cargo.toml")
-            },
+            workspace_cargo_rel_path,
             workspace_cargo,
             crate_cargo_rel_path: member.cargo_rel_path.clone(),
             crate_cargo,
             guardrail_rel_path: guardrail_rel_path.clone(),
             guardrail_content: guardrail_content.clone(),
+            local_path_cargo_rel_paths,
+            local_path_cargo_manifests,
         });
     }
 
@@ -96,6 +108,11 @@ fn collect_direct_cap_content_facts(
         let Some(workspace_cargo) = typed_workspaces.get(workspace_root_rel_dir).cloned() else {
             continue;
         };
+        let workspace_cargo_rel_path = if workspace_root_rel_dir.is_empty() {
+            "Cargo.toml".to_owned()
+        } else {
+            format!("{workspace_root_rel_dir}/Cargo.toml")
+        };
         let Some(content) = tree.file_content(&member.cargo_rel_path) else {
             continue;
         };
@@ -103,18 +120,159 @@ fn collect_direct_cap_content_facts(
             Ok(parsed) => parsed,
             Err(_) => continue,
         };
+        let (local_path_cargo_rel_paths, local_path_cargo_manifests) =
+            collect_local_path_cargo_facts_for_site(
+                tree,
+                &workspace_cargo_rel_path,
+                &workspace_cargo,
+                &member.cargo_rel_path,
+                &crate_cargo,
+            );
         sites.push(DirectDependencyCapContentFacts {
-            workspace_cargo_rel_path: if workspace_root_rel_dir.is_empty() {
-                "Cargo.toml".to_owned()
-            } else {
-                format!("{workspace_root_rel_dir}/Cargo.toml")
-            },
+            workspace_cargo_rel_path,
             workspace_cargo,
             crate_cargo_rel_path: member.cargo_rel_path.clone(),
             crate_cargo,
+            local_path_cargo_rel_paths,
+            local_path_cargo_manifests,
         });
     }
     sites
+}
+
+fn collect_local_path_cargo_facts_for_site(
+    tree: &ProjectTree,
+    workspace_cargo_rel_path: &str,
+    workspace_cargo: &CargoToml,
+    crate_cargo_rel_path: &str,
+    crate_cargo: &CargoToml,
+) -> (Vec<String>, Vec<LocalPathCargoManifestFacts>) {
+    let mut rel_paths = BTreeSet::new();
+    let mut manifests = BTreeMap::new();
+
+    collect_local_path_manifests_from_table(
+        tree,
+        crate_cargo_rel_path,
+        &crate_cargo.dependencies,
+        &mut rel_paths,
+        &mut manifests,
+    );
+    collect_local_path_manifests_from_table(
+        tree,
+        crate_cargo_rel_path,
+        &crate_cargo.build_dependencies,
+        &mut rel_paths,
+        &mut manifests,
+    );
+    collect_local_path_manifests_from_table(
+        tree,
+        crate_cargo_rel_path,
+        &crate_cargo.dev_dependencies,
+        &mut rel_paths,
+        &mut manifests,
+    );
+    for target_tables in crate_cargo.target.values() {
+        collect_local_path_manifests_from_target_tables(
+            tree,
+            crate_cargo_rel_path,
+            target_tables,
+            &mut rel_paths,
+            &mut manifests,
+        );
+    }
+
+    if let Some(workspace) = &workspace_cargo.workspace {
+        collect_local_path_manifests_from_table(
+            tree,
+            workspace_cargo_rel_path,
+            &workspace.dependencies,
+            &mut rel_paths,
+            &mut manifests,
+        );
+    }
+
+    (
+        rel_paths.into_iter().collect(),
+        manifests
+            .into_iter()
+            .map(|(cargo_rel_path, cargo)| LocalPathCargoManifestFacts {
+                cargo_rel_path,
+                cargo,
+            })
+            .collect(),
+    )
+}
+
+fn collect_local_path_manifests_from_target_tables(
+    tree: &ProjectTree,
+    base_cargo_rel_path: &str,
+    target_tables: &TargetDependencyTables,
+    rel_paths: &mut BTreeSet<String>,
+    manifests: &mut BTreeMap<String, CargoToml>,
+) {
+    collect_local_path_manifests_from_table(
+        tree,
+        base_cargo_rel_path,
+        &target_tables.dependencies,
+        rel_paths,
+        manifests,
+    );
+    collect_local_path_manifests_from_table(
+        tree,
+        base_cargo_rel_path,
+        &target_tables.build_dependencies,
+        rel_paths,
+        manifests,
+    );
+    collect_local_path_manifests_from_table(
+        tree,
+        base_cargo_rel_path,
+        &target_tables.dev_dependencies,
+        rel_paths,
+        manifests,
+    );
+}
+
+fn collect_local_path_manifests_from_table(
+    tree: &ProjectTree,
+    base_cargo_rel_path: &str,
+    dependencies: &BTreeMap<String, Dependency>,
+    rel_paths: &mut BTreeSet<String>,
+    manifests: &mut BTreeMap<String, CargoToml>,
+) {
+    for dependency in dependencies.values() {
+        let Dependency::Detailed(detail) = dependency else {
+            continue;
+        };
+        let Some(dep_path) = &detail.path else {
+            continue;
+        };
+        let resolved_rel_dir = normalize_dependency_path(base_cargo_rel_path, dep_path);
+        let cargo_rel_path = if resolved_rel_dir.is_empty() {
+            "Cargo.toml".to_owned()
+        } else {
+            format!("{resolved_rel_dir}/Cargo.toml")
+        };
+        let _ = rel_paths.insert(cargo_rel_path.clone());
+        if !tree.file_exists(&cargo_rel_path) {
+            continue;
+        }
+        let Some(content) = tree.file_content(&cargo_rel_path) else {
+            continue;
+        };
+        let Ok(parsed) = parse_cargo_toml(content) else {
+            continue;
+        };
+        if parsed
+            .package
+            .as_ref()
+            .and_then(|package| package.name.as_ref())
+            .is_none_or(|name| name.is_empty())
+        {
+            continue;
+        }
+        let _ = manifests.insert(cargo_rel_path, parsed);
+    }
 }
 
 pub(super) fn discover_members(
@@ -641,6 +799,13 @@ fn normalize_rel_path(base_rel_dir: &str, dep_path: &str) -> String {
     parts.join("/")
 }
 
+fn normalize_dependency_path(cargo_rel_path: &str, dep_path: &str) -> String {
+    let base_rel_dir = cargo_rel_path
+        .rsplit_once('/')
+        .map_or("", |(base_rel_dir, _)| base_rel_dir);
+    normalize_rel_path(base_rel_dir, dep_path)
+}
+
 fn read_local_package_name(tree: &ProjectTree, cargo_rel_path: &str) -> Result<String, String> {
     let Some(content) = tree.file_content(cargo_rel_path) else {
         return Err(format!(
@@ -664,4 +829,3 @@ fn read_local_package_name(tree: &ProjectTree, cargo_rel_path: &str) -> Result<S
             )
         })
 }
-use guardrail3_domain_config::types::GuardrailConfig;

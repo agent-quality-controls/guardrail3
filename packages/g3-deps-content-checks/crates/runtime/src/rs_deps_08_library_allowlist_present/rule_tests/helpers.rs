@@ -16,6 +16,8 @@ pub(super) fn run_check(guardrail_toml: &str) -> Vec<G3CheckResult> {
         guardrail_rel_path: "guardrail3.toml".to_owned(),
         guardrail: toml::from_str::<GuardrailConfig>(guardrail_toml)
             .expect("guardrail3.toml fixture should parse"),
+        local_path_cargo_rel_paths: Vec::new(),
+        local_path_cargo_manifests: Vec::new(),
     };
     let mut results = Vec::new();
     check(&input, &mut results);
