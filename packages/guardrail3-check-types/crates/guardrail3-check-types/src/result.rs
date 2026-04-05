@@ -1,15 +1,15 @@
-use crate::GrdzSeverity;
+use crate::G3Severity;
 
 /// A single finding from a guardrail3 check.
 ///
-/// Every check package returns `Vec<GrdzCheckResult>`. The orchestrator
+/// Every check package returns `Vec<G3CheckResult>`. The orchestrator
 /// collects results from all packages and renders the report.
 #[derive(Debug, Clone)]
-pub struct GrdzCheckResult {
+pub struct G3CheckResult {
     /// Rule identifier (e.g., "RS-CLIPPY-02").
     id: String,
     /// How severe this finding is.
-    severity: GrdzSeverity,
+    severity: G3Severity,
     /// Short title for summary display.
     title: String,
     /// Full description with context and remediation.
@@ -22,12 +22,12 @@ pub struct GrdzCheckResult {
     inventory: bool,
 }
 
-impl GrdzCheckResult {
+impl G3CheckResult {
     /// Create a new check result.
     #[must_use]
     pub const fn new(
         id: String,
-        severity: GrdzSeverity,
+        severity: G3Severity,
         title: String,
         message: String,
         file: Option<String>,
@@ -59,7 +59,7 @@ impl GrdzCheckResult {
 
     /// Severity level.
     #[must_use]
-    pub const fn severity(&self) -> GrdzSeverity {
+    pub const fn severity(&self) -> G3Severity {
         self.severity
     }
 

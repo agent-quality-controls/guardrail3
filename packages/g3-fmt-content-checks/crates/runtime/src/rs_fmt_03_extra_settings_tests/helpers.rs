@@ -1,12 +1,12 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
 use g3_fmt_content_checks_types::G3FmtContentChecksInput;
-use guardrail3_check_types::GrdzCheckResult;
+use guardrail3_check_types::G3CheckResult;
 use rust_toolchain_toml_parser::parse as parse_toolchain_toml;
 use rustfmt_toml_parser::parse as parse_rustfmt_toml;
 
 use crate::rs_fmt_03_extra_settings::check;
 
-pub(super) fn run_check(rustfmt_toml: &str) -> Vec<GrdzCheckResult> {
+pub(super) fn run_check(rustfmt_toml: &str) -> Vec<G3CheckResult> {
     let input = G3FmtContentChecksInput {
         rustfmt_rel_path: "rustfmt.toml".to_owned(),
         rustfmt: parse_rustfmt_toml(rustfmt_toml)

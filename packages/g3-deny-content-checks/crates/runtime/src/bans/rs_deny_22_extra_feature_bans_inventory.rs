@@ -1,0 +1,26 @@
+use deny_toml_parser::DenyToml;
+use guardrail3_check_types::G3CheckResult;
+
+use crate::support::{feature_entry_name, inventory};
+
+const ID: &str = "RS-DENY-22";
+
+pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
+    let Some(bans) = deny.bans.as_ref() else {
+        return;
+    };
+
+    for entry in &bans.features {
+        let Some(name) = feature_entry_name(entry) else {
+            continue;
+        };
+        if name != "tokio" {
+            results.push(inventory(
+                ID,
+                "extra feature ban",
+                format!("`{deny_rel_path}` has extra feature-ban entry for `{name}`."),
+                deny_rel_path,
+            ));
+        }
+    }
+}

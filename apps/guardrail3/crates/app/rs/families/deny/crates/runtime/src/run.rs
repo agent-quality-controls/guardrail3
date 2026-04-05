@@ -1,3 +1,5 @@
+use g3_deny_content_checks::G3DenyContentChecksInput;
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsDenyRoute;
 use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::CheckResult;
@@ -31,34 +33,49 @@ pub fn check(surface: &FamilyView, route: &RsDenyRoute) -> Vec<CheckResult> {
 
     for input in ConfigDenyInput::from_facts(&facts) {
         crate::coverage::rs_deny_01_coverage::check_parse_error(&input, &mut results);
-        crate::advisories::rs_deny_04_deprecated_advisories::check(&input, &mut results);
-        crate::advisories::rs_deny_05_advisories_baseline::check(&input, &mut results);
-        crate::advisories::rs_deny_06_stricter_advisories_inventory::check(&input, &mut results);
-        crate::advisories::rs_deny_07_graph_all_features::check(&input, &mut results);
-        crate::advisories::rs_deny_08_graph_no_default_features::check(&input, &mut results);
+        if input.config.parse_error.is_some() {
+            continue;
+        }
+
+        run_content_checks(&input, &mut results);
         crate::bans::rs_deny_09_ban_baseline_complete::check(&input, &mut results);
-        crate::bans::rs_deny_10_multiple_versions_floor::check(&input, &mut results);
-        crate::bans::rs_deny_11_highlight_inventory::check(&input, &mut results);
-        crate::bans::rs_deny_12_allow_wildcard_paths::check(&input, &mut results);
-        crate::bans::rs_deny_13_wildcards_inventory::check(&input, &mut results);
-        crate::licenses::rs_deny_14_license_allow_baseline::check(&input, &mut results);
-        crate::licenses::rs_deny_15_confidence_threshold::check(&input, &mut results);
-        crate::licenses::rs_deny_16_copyleft_allowlist::check(&input, &mut results);
         crate::licenses::rs_deny_17_license_exceptions_inventory::check(&input, &mut results);
-        crate::sources::rs_deny_18_unknown_sources_policy::check(&input, &mut results);
-        crate::sources::rs_deny_19_allow_registry_baseline::check(&input, &mut results);
-        crate::sources::rs_deny_20_allow_git_inventory::check(&input, &mut results);
-        crate::bans::rs_deny_21_tokio_full_ban::check(&input, &mut results);
-        crate::bans::rs_deny_22_extra_feature_bans_inventory::check(&input, &mut results);
-        crate::sources::rs_deny_23_skip_hygiene::check(&input, &mut results);
-        crate::sources::rs_deny_24_ignore_hygiene::check(&input, &mut results);
         crate::sources::rs_deny_25_allow_override_channel::check(&input, &mut results);
         crate::bans::rs_deny_26_ban_reason_inventory::check(&input, &mut results);
-        crate::bans::rs_deny_27_duplicate_entries::check(&input, &mut results);
-        crate::sources::rs_deny_28_unknown_keys::check(&input, &mut results);
-        crate::sources::rs_deny_29_ignore_accumulation::check(&input, &mut results);
         crate::sources::rs_deny_30_wrappers::check(&input, &mut results);
     }
 
     results
+}
+
+fn run_content_checks(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
+    let Some(deny) = input.config.parsed_typed.clone() else {
+        return;
+    };
+    let package_input = G3DenyContentChecksInput {
+        deny_rel_path: input.config.rel_path.clone(),
+        deny,
+    };
+    let package_results = g3_deny_content_checks::check(&package_input);
+    results.extend(package_results.into_iter().map(convert_check_result));
+}
+
+fn convert_check_result(result: G3CheckResult) -> CheckResult {
+    CheckResult::from_parts(
+        result.id().to_owned(),
+        convert_severity(result.severity()),
+        result.title().to_owned(),
+        result.message().to_owned(),
+        result.file().map(str::to_owned),
+        result.line(),
+        result.inventory(),
+    )
+}
+
+fn convert_severity(severity: G3Severity) -> guardrail3_domain_report::Severity {
+    match severity {
+        G3Severity::Error => guardrail3_domain_report::Severity::Error,
+        G3Severity::Warn => guardrail3_domain_report::Severity::Warn,
+        G3Severity::Info => guardrail3_domain_report::Severity::Info,
+    }
 }

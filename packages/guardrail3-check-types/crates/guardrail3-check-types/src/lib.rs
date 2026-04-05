@@ -6,8 +6,8 @@ mod severity;
 mod profile;
 
 #[cfg(feature = "types")]
-pub use profile::GrdzProfile;
+pub use profile::G3Profile;
 #[cfg(feature = "types")]
-pub use result::GrdzCheckResult;
+pub use result::G3CheckResult;
 #[cfg(feature = "types")]
-pub use severity::GrdzSeverity;
+pub use severity::G3Severity;

@@ -26,6 +26,7 @@ profile = "minimal"
     assertions::assert_toolchain_fields(
         &cfg,
         Some("stable"),
+        None,
         &["clippy", "rustfmt"],
         &["wasm32-unknown-unknown"],
         Some("minimal"),
@@ -42,7 +43,26 @@ channel = "1.85.0"
 "#,
     );
 
-    assertions::assert_toolchain_fields(&cfg, Some("1.85.0"), &[], &[], None);
+    assertions::assert_toolchain_fields(&cfg, Some("1.85.0"), None, &[], &[], None);
+}
+
+#[test]
+fn toolchain_section_parses_path_form() {
+    let cfg = parse_fixture(
+        r#"
+[toolchain]
+path = "/opt/rust/toolchains/local"
+"#,
+    );
+
+    assertions::assert_toolchain_fields(
+        &cfg,
+        None,
+        Some("/opt/rust/toolchains/local"),
+        &[],
+        &[],
+        None,
+    );
 }
 
 #[test]
@@ -82,6 +102,6 @@ components = ["clippy"]
 "#,
     );
 
-    assertions::assert_toolchain_fields(&cfg, Some("stable"), &["clippy"], &[], None);
+    assertions::assert_toolchain_fields(&cfg, Some("stable"), None, &["clippy"], &[], None);
     assertions::assert_toolchain_extra_empty(&cfg);
 }

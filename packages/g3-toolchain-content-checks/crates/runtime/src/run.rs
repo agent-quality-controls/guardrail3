@@ -1,4 +1,4 @@
-use guardrail3_check_types::GrdzCheckResult;
+use guardrail3_check_types::G3CheckResult;
 
 use g3_toolchain_content_checks_types::{
     G3ToolchainChannelAndComponentsInput, G3ToolchainMsrvConsistencyInput,
@@ -6,7 +6,7 @@ use g3_toolchain_content_checks_types::{
 
 pub fn check_channel_and_components(
     input: &G3ToolchainChannelAndComponentsInput,
-) -> Vec<GrdzCheckResult> {
+) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     crate::rs_toolchain_02_channel_and_components::check(
         &input.toolchain_rel_path,
@@ -16,7 +16,7 @@ pub fn check_channel_and_components(
     results
 }
 
-pub fn check_msrv_consistency(input: &G3ToolchainMsrvConsistencyInput) -> Vec<GrdzCheckResult> {
+pub fn check_msrv_consistency(input: &G3ToolchainMsrvConsistencyInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     crate::rs_toolchain_03_msrv_consistency::check(
         &input.toolchain_rel_path,

@@ -7,6 +7,16 @@ use toml::Value;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct LicensesConfig {
+    /// Deprecated version field preserved as parsed data.
+    pub version: Option<u32>,
+    /// Whether licenses are checked for dev-dependencies.
+    pub include_dev: Option<bool>,
+    /// Whether licenses are checked for build-dependencies.
+    pub include_build: Option<bool>,
+    /// Unused allow-list handling.
+    pub unused_allowed_license: Option<String>,
+    /// Unused exception handling.
+    pub unused_license_exception: Option<String>,
     /// Allowed license SPDX identifiers.
     #[serde(default)]
     pub allow: Vec<String>,
@@ -15,6 +25,9 @@ pub struct LicensesConfig {
     /// Per-crate license exceptions.
     #[serde(default)]
     pub exceptions: Vec<LicenseException>,
+    /// Per-crate license clarifications.
+    #[serde(default)]
+    pub clarify: Vec<LicenseClarification>,
     /// Configuration for private/unpublished crates.
     pub private: Option<LicensesPrivateConfig>,
     /// Additional fields not modeled as typed fields.
@@ -27,33 +40,20 @@ pub struct LicensesConfig {
 #[serde(rename_all = "kebab-case")]
 pub struct LicenseException {
     /// The crate name.
-    name: String,
+    pub name: Option<String>,
+    /// Alternative crate identifier.
+    #[serde(rename = "crate")]
+    pub crate_name: Option<String>,
+    /// Specific crate version this exception applies to.
+    pub version: Option<String>,
+    /// Why this exception is needed.
+    pub reason: Option<String>,
     /// Allowed licenses for this specific crate.
     #[serde(default)]
-    allow: Vec<String>,
+    pub allow: Vec<String>,
     /// Additional fields not modeled as typed fields.
     #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-impl LicenseException {
-    /// The crate name.
-    #[must_use]
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    /// Allowed licenses for this specific crate.
-    #[must_use]
-    pub fn allow(&self) -> &[String] {
-        &self.allow
-    }
-
-    /// Additional fields not modeled as typed fields.
-    #[must_use]
-    pub const fn extra(&self) -> &BTreeMap<String, Value> {
-        &self.extra
-    }
+    pub extra: BTreeMap<String, Value>,
 }
 
 /// Configuration for private/unpublished crates.
@@ -61,31 +61,48 @@ impl LicenseException {
 #[serde(rename_all = "kebab-case")]
 pub struct LicensesPrivateConfig {
     /// Whether to ignore license requirements for private crates.
-    ignore: Option<bool>,
+    pub ignore: Option<bool>,
     /// Registries whose crates are considered private.
     #[serde(default)]
-    registries: Vec<String>,
+    pub registries: Vec<String>,
+    /// Source registries whose licenses should be ignored.
+    #[serde(default)]
+    pub ignore_sources: Vec<String>,
     /// Additional fields not modeled as typed fields.
     #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
+    pub extra: BTreeMap<String, Value>,
 }
 
-impl LicensesPrivateConfig {
-    /// Whether to ignore license requirements for private crates.
-    #[must_use]
-    pub const fn ignore(&self) -> Option<bool> {
-        self.ignore
-    }
-
-    /// Registries whose crates are considered private.
-    #[must_use]
-    pub fn registries(&self) -> &[String] {
-        &self.registries
-    }
-
+/// A per-crate license clarification.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct LicenseClarification {
+    /// Deprecated crate name field.
+    pub name: Option<String>,
+    /// Crate package spec this clarification applies to.
+    #[serde(rename = "crate")]
+    pub crate_name: Option<String>,
+    /// Deprecated version field for old table format.
+    pub version: Option<String>,
+    /// SPDX expression to use.
+    pub expression: String,
+    /// Files that establish the clarification.
+    #[serde(default)]
+    pub license_files: Vec<LicenseClarificationFile>,
     /// Additional fields not modeled as typed fields.
-    #[must_use]
-    pub const fn extra(&self) -> &BTreeMap<String, Value> {
-        &self.extra
-    }
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+/// One license file used to support a clarification.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct LicenseClarificationFile {
+    /// Crate-relative file path.
+    pub path: String,
+    /// Opaque file hash from cargo-deny.
+    pub hash: Value,
+    /// Additional fields not modeled as typed fields.
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
 }

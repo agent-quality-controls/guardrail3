@@ -1,5 +1,5 @@
 use g3_fmt_content_checks_types::G3FmtContentChecksInput;
-use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::inputs::rustfmt_table;
 
@@ -18,7 +18,7 @@ pub(crate) const NIGHTLY_KEYS: &[&str] = &[
     "condense_wildcard_suffixes",
 ];
 
-pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<GrdzCheckResult>) {
+pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<G3CheckResult>) {
     let table = rustfmt_table(&input.rustfmt);
     let nightly_keys = NIGHTLY_KEYS
         .iter()
@@ -31,14 +31,15 @@ pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<GrdzCheck
 
     match input
         .toolchain
-        .toolchain()
-        .and_then(|toolchain| toolchain.channel())
+        .toolchain
+        .as_ref()
+        .and_then(|toolchain| toolchain.channel.as_deref())
     {
         Some("stable") => {
             for key in nightly_keys {
-                results.push(GrdzCheckResult::new(
+                results.push(G3CheckResult::new(
                     ID.to_owned(),
-                    GrdzSeverity::Warn,
+                    G3Severity::Warn,
                     format!("nightly-only rustfmt setting `{key}` on stable"),
                     format!(
                         "`{key}` is nightly-only, but {} uses `stable`. Either remove `{key}` from rustfmt.toml or switch the toolchain channel to nightly.",
@@ -50,9 +51,9 @@ pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<GrdzCheck
             }
         }
         Some(_) => {}
-        None => results.push(GrdzCheckResult::new(
+        None => results.push(G3CheckResult::new(
             ID.to_owned(),
-            GrdzSeverity::Error,
+            G3Severity::Error,
             "rust-toolchain channel missing".to_owned(),
             format!(
                 "Nightly-only rustfmt settings require `[toolchain].channel` in {}.",

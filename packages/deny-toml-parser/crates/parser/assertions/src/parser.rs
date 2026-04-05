@@ -12,6 +12,7 @@ pub fn assert_empty_toml(cfg: &DenyToml) {
     assert_eq!(cfg.advisories, None, "advisories should be None");
     assert_eq!(cfg.bans, None, "bans should be None");
     assert_eq!(cfg.licenses, None, "licenses should be None");
+    assert!(cfg.exceptions.is_empty(), "exceptions should be empty");
     assert_eq!(cfg.sources, None, "sources should be None");
     assert_eq!(cfg.output, None, "output should be None");
     assert!(cfg.extra.is_empty(), "extra should be empty");

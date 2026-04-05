@@ -3,7 +3,7 @@
 /// An `Application` workspace is deployed and consumed by end users.
 /// A `Library` workspace is published and consumed by other developers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GrdzProfile {
+pub enum G3Profile {
     /// Deployed application (binary, service, CLI tool).
     /// Stricter rules: require input validation, ban raw deserialization, etc.
     Application,
@@ -12,7 +12,7 @@ pub enum GrdzProfile {
     Library,
 }
 
-impl std::fmt::Display for GrdzProfile {
+impl std::fmt::Display for G3Profile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Application => write!(f, "application"),

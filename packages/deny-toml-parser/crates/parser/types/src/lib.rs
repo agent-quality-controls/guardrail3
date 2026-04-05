@@ -13,10 +13,15 @@ mod sources;
 
 pub use advisories::{AdvisoriesConfig, AdvisoryIgnoreDetail, AdvisoryIgnoreEntry};
 pub use bans::{
-    BanAllowDetail, BanAllowEntry, BanDenyDetail, BanDenyEntry, BanFeatureEntry, BanSkipDetail,
-    BanSkipEntry, BansConfig,
+    BanAllowDetail, BanAllowEntry, BanBuildAllowBuildScriptDetail,
+    BanBuildAllowBuildScriptEntry, BanBuildBypassAllowEntry, BanBuildBypassEntry, BanBuildConfig,
+    BanDenyDetail, BanDenyEntry, BanFeatureEntry, BanSkipDetail, BanSkipEntry,
+    BanSkipTreeDetail, BanSkipTreeEntry, BanWorkspaceDependenciesConfig, BansConfig,
 };
 pub use deny_toml::DenyToml;
-pub use graph::GraphConfig;
-pub use licenses::{LicenseException, LicensesConfig, LicensesPrivateConfig};
-pub use sources::{OutputConfig, SourcesConfig};
+pub use graph::{GraphConfig, GraphTargetDetail, GraphTargetEntry};
+pub use licenses::{
+    LicenseClarification, LicenseClarificationFile, LicenseException, LicensesConfig,
+    LicensesPrivateConfig,
+};
+pub use sources::{OutputConfig, SourcesAllowOrg, SourcesConfig};

@@ -1,5 +1,5 @@
 use g3_fmt_content_checks::G3FmtContentChecksInput;
-use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::{CheckResult, Severity};
 
@@ -149,7 +149,7 @@ fn uses_nightly_rustfmt_keys(rustfmt: &rustfmt_toml_parser::RustfmtToml) -> bool
     .any(|key| table.contains_key(key))
 }
 
-fn convert_check_result(result: GrdzCheckResult) -> CheckResult {
+fn convert_check_result(result: G3CheckResult) -> CheckResult {
     CheckResult::from_parts(
         result.id().to_owned(),
         convert_severity(result.severity()),
@@ -161,10 +161,10 @@ fn convert_check_result(result: GrdzCheckResult) -> CheckResult {
     )
 }
 
-fn convert_severity(severity: GrdzSeverity) -> Severity {
+fn convert_severity(severity: G3Severity) -> Severity {
     match severity {
-        GrdzSeverity::Error => Severity::Error,
-        GrdzSeverity::Warn => Severity::Warn,
-        GrdzSeverity::Info => Severity::Info,
+        G3Severity::Error => Severity::Error,
+        G3Severity::Warn => Severity::Warn,
+        G3Severity::Info => Severity::Info,
     }
 }

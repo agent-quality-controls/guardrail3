@@ -1,13 +1,13 @@
 use std::collections::BTreeSet;
 
 use g3_fmt_content_checks_types::G3FmtContentChecksInput;
-use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::inputs::rustfmt_table;
 
 const ID: &str = "RS-FMT-03";
 
-pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<GrdzCheckResult>) {
+pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<G3CheckResult>) {
     let expected = expected_keys();
     let table = rustfmt_table(&input.rustfmt);
     for key in table.keys() {
@@ -16,9 +16,9 @@ pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<GrdzCheck
         }
         if !expected.contains(key.as_str()) {
             results.push(
-                GrdzCheckResult::new(
+                G3CheckResult::new(
                     ID.to_owned(),
-                    GrdzSeverity::Info,
+                    G3Severity::Info,
                     format!("rustfmt extra setting: {key}"),
                     format!(
                         "`{key}` in `{}` is not part of the standard rustfmt baseline. Verify it is intentional.",
