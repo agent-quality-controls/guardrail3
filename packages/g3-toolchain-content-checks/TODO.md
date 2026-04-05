@@ -1,30 +1,20 @@
 # g3-toolchain-content-checks TODO
 
-## Known Issues
+## Deferred Boundary Work
 
-### Compile drift after `cargo-toml-parser` input shape changed
+### Structural rules remain app-side
 
-- The package currently fails to compile against the changed `cargo-toml-parser` types.
-- `RS-TOOLCHAIN-03` still calls `.as_deref()` on `Option<InheritableValue<String>>`.
+- `RS-TOOLCHAIN-01` root config discovery / existence
+- `RS-TOOLCHAIN-04` placement / duplicate-surface checks
 
-Relevant file:
+Reason:
+- these are discovery and structural rules, not pure content checks over
+  already-selected parsed files
 
-- `packages/g3-toolchain-content-checks/crates/runtime/src/rs_toolchain_03_msrv_consistency/rule.rs`
+## Boundary Guard
 
-Observed failure:
-
-- `cargo test --manifest-path packages/g3-toolchain-content-checks/Cargo.toml --workspace -- --list`
-
-Follow-up:
-
-- Update `rust-version` extraction to handle `InheritableValue<String>` explicitly.
-- Re-run package tests and the app `toolchain` family tests after the fix.
-
-### Keep the package boundary on parsed file inputs
-
-- The package should continue to receive parsed `RustToolchainToml` and parsed `CargoToml`.
-- Fix the parser-API drift without reintroducing derived Cargo state as package input.
-
-Follow-up:
-
-- Verify the `RS-TOOLCHAIN-03` fix preserves the “full parsed files in, content checks only” boundary.
+- Keep the package inputs on parsed files only:
+  - parsed `RustToolchainToml`
+  - parsed `CargoToml`
+- Do not reintroduce reduced Cargo state such as extracted rust-version enums
+  or other scoped helper inputs.

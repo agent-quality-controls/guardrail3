@@ -1,33 +1,28 @@
 # g3-fmt-content-checks TODO
 
-## Known Issues
+## Deferred Boundary Work
 
-### Compile drift after `cargo-toml-parser` input shape changed
+### `RS-FMT-07` remains app-side
 
-- The package currently fails to compile against the changed `cargo-toml-parser` types.
-- `inputs.rs` still calls `.as_deref()` on `Option<InheritableValue<String>>`, which no longer works.
+- `RS-FMT-07` depends on documented waiver / escape-hatch policy, not only on
+  parsed `rustfmt.toml` content.
+- Keep it in the app until waiver ownership is intentionally moved using the
+  full parsed policy file, not derived waiver subsets.
 
-Relevant file:
+### Structural and placement rules remain app-side
 
-- `packages/g3-fmt-content-checks/crates/runtime/src/inputs.rs`
+- `RS-FMT-01` root config existence
+- `RS-FMT-05` per-crate override placement
+- `RS-FMT-08` dual-file conflict
 
-Observed failure:
+Reason:
+- these are discovery / placement / structural rules, not pure content checks
 
-- `cargo test --manifest-path packages/g3-fmt-content-checks/Cargo.toml --workspace -- --list`
+## Boundary Guard
 
-Follow-up:
-
-- Update edition extraction to handle `InheritableValue<String>` explicitly.
-- Re-run package tests and the app `fmt` family tests after the fix.
-
-### Keep the package boundary on full parsed files
-
-- The package should continue to receive full parsed files, not derived state enums or ad hoc scalar facts.
-- After adapting to the parser change, verify the runtime still follows the agreed boundary:
+- Keep this package on full parsed files only:
   - parsed `RustfmtToml`
   - parsed `CargoToml`
   - parsed `RustToolchainToml`
-
-Follow-up:
-
-- Check that any fix for `InheritableValue` does not reintroduce scoped derived-state shortcuts.
+- Do not regress to derived edition/channel state enums or scalar facts just to
+  make rule plumbing smaller.

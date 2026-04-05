@@ -1,12 +1,14 @@
 # g3-deny-content-checks TODO
 
-## Known Issues
+## Known Issue
 
-### Structural typed-parse failures go silent in the app boundary
+### Structural typed-parse failures can still go silent in the app boundary
 
 - The package correctly assumes typed `DenyToml` input.
-- The app deny family currently skips package execution when typed parsing fails and does not emit a structural finding for that case.
-- This means malformed-schema cases can disappear instead of surfacing as deny findings.
+- The app deny family still skips package execution when typed parsing fails and
+  does not always emit a structural finding for that case.
+- This means malformed-schema cases can disappear instead of surfacing as deny
+  findings.
 
 Relevant files:
 
@@ -21,24 +23,19 @@ Examples seen during attack:
 
 Follow-up:
 
-- Add structural deny findings for typed parser/schema rejection before calling the package.
-- Reassign malformed-schema expectations to app-level structural tests rather than package-level content tests.
+- Add structural deny findings for typed parser/schema rejection before calling
+  the package.
+- Reassign malformed-schema expectations to app-level structural tests rather
+  than package-level content tests.
 
-### ~~No direct package tests currently run~~ DONE
+## Test Status
 
-- 121 package-level tests now cover all 22 migrated content rules.
-- Each rule has its own test directory with golden, missing, and wrong-value scenarios.
-- Assertions crate provides per-rule typed assertion helpers.
+- 121 package-level tests cover all 22 migrated content rules.
+- Each migrated rule has package-local sidecar tests.
 
-### Re-check parity for migrated malformed-shape behavior after structural signaling lands
+## Boundary Reminder
 
-- `RS-DENY-23`, `RS-DENY-24`, and `RS-DENY-28` were rewritten against typed parser inputs.
-- That is the correct package boundary, but the old malformed-shape expectations need to be explicitly redistributed between:
-  - app structural tests
-  - package content tests over valid typed inputs
-
-Follow-up:
-
-- Audit old deny tests rule by rule.
-- Keep only valid typed-input semantics here.
-- Move malformed parse/schema expectations to the app family.
+- `RS-DENY-23`, `RS-DENY-24`, and `RS-DENY-28` now operate on valid typed
+  inputs only.
+- Any malformed raw-schema expectations that used to be attached to those rules
+  belong in the app once structural signaling is fixed.
