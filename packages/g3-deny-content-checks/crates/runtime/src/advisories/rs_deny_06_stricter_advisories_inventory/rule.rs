@@ -52,3 +52,7 @@ fn check_value(
         ));
     }
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"]
+mod tests;

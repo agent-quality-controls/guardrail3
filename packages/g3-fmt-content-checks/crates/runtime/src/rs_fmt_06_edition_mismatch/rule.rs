@@ -37,3 +37,7 @@ pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<G3CheckRe
         )),
     }
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"]
+mod tests;

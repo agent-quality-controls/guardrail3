@@ -102,3 +102,7 @@ fn check_expected(
 
     violations
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"]
+mod tests;

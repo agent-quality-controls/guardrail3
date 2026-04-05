@@ -201,3 +201,7 @@ fn check_components(
         }
     }
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"]
+mod tests;

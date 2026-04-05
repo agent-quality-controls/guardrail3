@@ -48,3 +48,7 @@ fn expected_keys() -> BTreeSet<&'static str> {
     .into_iter()
     .collect()
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"]
+mod tests;
