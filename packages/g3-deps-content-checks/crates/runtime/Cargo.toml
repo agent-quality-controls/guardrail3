@@ -16,8 +16,11 @@ checks = []
 cargo-toml-parser = { path = "../../../cargo-toml-parser", version = "0.1.0" }
 g3-deps-content-checks-types = { path = "../types", version = "0.1.0" }
 glob = "0.3.3"
-guardrail3-rs-toml-parser = { path = "../../../guardrail3-rs-toml-parser", version = "0.1.0" }
+guardrail3-domain-config = { path = "../../../../apps/guardrail3/crates/domain/config", version = "0.0.0" }
 guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+toml = "0.8"

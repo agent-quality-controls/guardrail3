@@ -1,11 +1,11 @@
-use g3_deps_content_checks_types::G3DepsContentChecksInput;
+use g3_deps_content_checks_types::G3DepsPolicyContentChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{allowlist_present, crate_name, info, warn, workspace_is_library};
 
 const ID: &str = "RS-DEPS-08";
 
-pub(crate) fn check(input: &G3DepsContentChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3DepsPolicyContentChecksInput, results: &mut Vec<G3CheckResult>) {
     let crate_name = crate_name(&input.crate_cargo_rel_path, &input.crate_cargo);
 
     if allowlist_present(input) {
@@ -21,9 +21,9 @@ pub(crate) fn check(input: &G3DepsContentChecksInput, results: &mut Vec<G3CheckR
     if workspace_is_library(input) {
         results.push(warn(
             ID,
-            "dependency allowlist missing",
-            format!(
-                "Crate `{crate_name}` has no `allowed_deps` policy. Add an `allowed_deps` list for this workspace in guardrail3-rs.toml."
+                "dependency allowlist missing",
+                format!(
+                "Crate `{crate_name}` has no `allowed_deps` policy. Add an `allowed_deps` list for this crate in guardrail3.toml."
             ),
             &input.crate_cargo_rel_path,
         ));

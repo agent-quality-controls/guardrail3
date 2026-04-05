@@ -15,19 +15,17 @@ The package receives full parsed files only:
 
 - workspace `Cargo.toml`
 - crate `Cargo.toml`
-- workspace `guardrail3-rs.toml`
+- workspace `guardrail3.toml`
 
 It does not receive derived helper structs, resolved allowlists, or ad hoc
 subset policy types.
 
 ## Initial rule target
 
-This package is intended to own:
+This package owns:
 
 - `RS-DEPS-05`
 - `RS-DEPS-06`
 - `RS-DEPS-07`
 - `RS-DEPS-08`
 - `RS-DEPS-12`
-
-The first scaffold intentionally starts with the contract and runtime shape.

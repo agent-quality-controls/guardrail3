@@ -5,11 +5,14 @@ Rust dependency-policy and tool-presence family.
 This family owns:
 
 - required tool presence on PATH for Rust dependency guardrails
+- `Cargo.lock` presence and `.gitignore` masking policy
+- fail-closed reporting when dependency-policy inputs cannot be trusted
+
+The extracted package [g3-deps-content-checks](/Users/tartakovsky/Projects/websmasher/guardrail3/packages/g3-deps-content-checks) owns the pure content checks:
+
 - crate-local `allowed_deps` enforcement from validation-root `guardrail3.toml`
 - library allowlist coverage policy
 - direct dependency cap enforcement across top-level and target-specific dependency tables
-- `Cargo.lock` presence and `.gitignore` masking policy
-- fail-closed reporting when dependency-policy inputs cannot be trusted
 
 This family is workspace-local:
 
@@ -25,6 +28,7 @@ routed `RsDepsRoute`.
 
 ## Boundary notes
 
+- `RS-DEPS-05`, `06`, `07`, `08`, and `12` run in `g3-deps-content-checks` on parsed files only.
 - `RS-DEPS-11` only owns dependency-policy inputs and dependency-table shape needed by this family. Foreign `rust.*` or crate-policy keys outside deps-owned fields must not fail closed here.
 - `RS-DEPS-05..07` own both top-level and `target.*` dependency tables for their respective sections.
 - `RS-DEPS-12` owns the direct-dependency cap across both top-level and `target.*` dependency tables.
@@ -48,8 +52,8 @@ families/deps/
         lib.rs
         facts.rs
         inputs.rs
-        rs_deps_*.rs
-        rs_deps_*_tests/
+        tooling/
+        policy/
     assertions/
       Cargo.toml
       src/

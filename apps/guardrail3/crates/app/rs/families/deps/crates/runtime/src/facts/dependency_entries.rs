@@ -1,15 +1,121 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path};
 
+use cargo_toml_parser::parse as parse_cargo_toml;
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
-
 use super::guardrail::{
     validate_target_dependency_manifest_shape, validate_top_level_dependency_manifest_shape,
 };
 use super::{
-    DependencyEntryFacts, DependencySectionKind, DirectDependencyCapFacts, InputFailureFacts,
-    MemberFacts, ParsedGuardrail, WorkspaceFacts,
+    DependencyEntryFacts, DependencySectionKind, DirectDependencyCapContentFacts,
+    DirectDependencyCapFacts, InputFailureFacts, MemberFacts, ParsedGuardrail,
+    PolicyContentCheckFacts, WorkspaceFacts,
 };
+
+pub(super) fn collect_content_check_facts(
+    tree: &ProjectTree,
+    members: &[MemberFacts],
+    workspaces: &[WorkspaceFacts],
+    guardrail_rel_path: Option<&str>,
+    parsed_guardrail: Option<&ParsedGuardrail>,
+    input_failures: &mut Vec<InputFailureFacts>,
+) -> (Vec<PolicyContentCheckFacts>, Vec<DirectDependencyCapContentFacts>) {
+    let mut typed_workspaces = BTreeMap::new();
+    for workspace in workspaces {
+        let Some(content) = tree.file_content(&workspace.cargo_rel_path) else {
+            continue;
+        };
+        let parsed = match parse_cargo_toml(content) {
+            Ok(parsed) => parsed,
+            Err(_) => continue,
+        };
+        let _ = typed_workspaces.insert(workspace.root_rel_dir.clone(), parsed);
+    }
+
+    let typed_guardrail_content = match (guardrail_rel_path, parsed_guardrail) {
+        (Some(rel_path), Some(parsed_guardrail)) if parsed_guardrail.parse_error.is_none() => {
+            let Some(content) = tree.file_content(rel_path) else {
+                return (Vec::new(), collect_direct_cap_content_facts(tree, members, &typed_workspaces, input_failures));
+            };
+            match toml::from_str::<GuardrailConfig>(content) {
+                Ok(_) => Some((rel_path.to_owned(), content.to_owned())),
+                Err(_) => None,
+            }
+        }
+        _ => None,
+    };
+
+    let direct_cap_content_checks =
+        collect_direct_cap_content_facts(tree, members, &typed_workspaces, input_failures);
+    let mut policy_content_checks = Vec::new();
+    let Some((guardrail_rel_path, guardrail_content)) = typed_guardrail_content else {
+        return (policy_content_checks, direct_cap_content_checks);
+    };
+
+    for member in members {
+        let Some(workspace_root_rel_dir) = member.workspace_root_rel_dir.as_ref() else {
+            continue;
+        };
+        let Some(workspace_cargo) = typed_workspaces.get(workspace_root_rel_dir).cloned() else {
+            continue;
+        };
+        let Some(content) = tree.file_content(&member.cargo_rel_path) else {
+            continue;
+        };
+        let Ok(crate_cargo) = parse_cargo_toml(content) else {
+            continue;
+        };
+        policy_content_checks.push(PolicyContentCheckFacts {
+            workspace_cargo_rel_path: if workspace_root_rel_dir.is_empty() {
+                "Cargo.toml".to_owned()
+            } else {
+                format!("{workspace_root_rel_dir}/Cargo.toml")
+            },
+            workspace_cargo,
+            crate_cargo_rel_path: member.cargo_rel_path.clone(),
+            crate_cargo,
+            guardrail_rel_path: guardrail_rel_path.clone(),
+            guardrail_content: guardrail_content.clone(),
+        });
+    }
+
+    (policy_content_checks, direct_cap_content_checks)
+}
+
+fn collect_direct_cap_content_facts(
+    tree: &ProjectTree,
+    members: &[MemberFacts],
+    typed_workspaces: &BTreeMap<String, cargo_toml_parser::CargoToml>,
+    _input_failures: &mut Vec<InputFailureFacts>,
+) -> Vec<DirectDependencyCapContentFacts> {
+    let mut sites = Vec::new();
+    for member in members {
+        let Some(workspace_root_rel_dir) = member.workspace_root_rel_dir.as_ref() else {
+            continue;
+        };
+        let Some(workspace_cargo) = typed_workspaces.get(workspace_root_rel_dir).cloned() else {
+            continue;
+        };
+        let Some(content) = tree.file_content(&member.cargo_rel_path) else {
+            continue;
+        };
+        let crate_cargo = match parse_cargo_toml(content) {
+            Ok(parsed) => parsed,
+            Err(_) => continue,
+        };
+        sites.push(DirectDependencyCapContentFacts {
+            workspace_cargo_rel_path: if workspace_root_rel_dir.is_empty() {
+                "Cargo.toml".to_owned()
+            } else {
+                format!("{workspace_root_rel_dir}/Cargo.toml")
+            },
+            workspace_cargo,
+            crate_cargo_rel_path: member.cargo_rel_path.clone(),
+            crate_cargo,
+        });
+    }
+    sites
+}
 
 pub(super) fn discover_members(
     tree: &ProjectTree,
@@ -558,3 +664,4 @@ fn read_local_package_name(tree: &ProjectTree, cargo_rel_path: &str) -> Result<S
             )
         })
 }
+use guardrail3_domain_config::types::GuardrailConfig;

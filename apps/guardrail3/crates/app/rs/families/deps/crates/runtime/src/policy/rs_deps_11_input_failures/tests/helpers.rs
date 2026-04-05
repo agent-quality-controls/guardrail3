@@ -35,6 +35,8 @@ pub(crate) fn failure_facts(rel_path: &str, message: &str) -> crate::facts::Deps
         dependency_entries: Vec::new(),
         allowlist_coverage: Vec::new(),
         direct_dependency_caps: Vec::new(),
+        policy_content_checks: Vec::new(),
+        direct_dependency_cap_content_checks: Vec::new(),
         input_failures: vec![crate::facts::InputFailureFacts {
             rel_path: rel_path.to_owned(),
             message: message.to_owned(),
