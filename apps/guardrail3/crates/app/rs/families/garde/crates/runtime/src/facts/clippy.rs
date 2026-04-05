@@ -56,9 +56,21 @@ fn parse_clippy_candidate(
     rel_path: &str,
     input_failures: &mut Vec<super::GardeInputFailureFacts>,
 ) -> ClippyConfigCandidate {
-    let (parsed, parse_error) = match tree.file_content(&rel_path) {
+    let (parsed, parsed_typed, parse_error) = match tree.file_content(&rel_path) {
         Some(content) => match toml::from_str::<toml::Value>(content) {
-            Ok(parsed) => (Some(parsed), None),
+            Ok(parsed) => match clippy_toml_parser::parse(content) {
+                Ok(parsed_typed) => (Some(parsed), Some(parsed_typed), None),
+                Err(parse_error) => {
+                    let _ = parsed;
+                    (
+                        None,
+                        None,
+                        Some(format!(
+                            "Failed to parse `{rel_path}` for garde clippy-ban validation: {parse_error}"
+                        )),
+                    )
+                }
+            },
             Err(parse_error) => {
                 let message = format!(
                     "Failed to parse `{rel_path}` for garde clippy-ban validation: {parse_error}"
@@ -67,16 +79,17 @@ fn parse_clippy_candidate(
                     rel_path: rel_path.to_owned(),
                     message: message.clone(),
                 });
-                (None, Some(message))
+                (None, None, Some(message))
             }
         },
-        None => (None, None),
+        None => (None, None, None),
     };
 
     ClippyConfigCandidate {
         rel_dir: rel_dir.to_owned(),
         rel_path: rel_path.to_owned(),
         parsed,
+        parsed_typed,
         parse_error,
     }
 }
@@ -111,6 +124,9 @@ pub(super) fn push_root_facts(
     let cargo_parsed = tree
         .file_content(&cargo_rel_path)
         .and_then(|content| toml::from_str::<toml::Value>(content).ok());
+    let cargo_parsed_typed = tree
+        .file_content(&cargo_rel_path)
+        .and_then(|content| cargo_toml_parser::parse(content).ok());
     let garde_dependency_present = cargo_parsed
         .as_ref()
         .is_some_and(content_has_garde_dependency);
@@ -119,11 +135,13 @@ pub(super) fn push_root_facts(
     out.push(GardeRootFacts {
         rel_dir: rel_dir.to_owned(),
         cargo_rel_path,
+        cargo_parsed_typed,
         kind,
         garde_dependency_present,
         garde_applicable: garde_dependency_present,
         clippy_rel_path: covering_config.map(|config| config.rel_path.clone()),
         clippy_parsed: covering_config.and_then(|config| config.parsed.clone()),
+        clippy_parsed_typed: covering_config.and_then(|config| config.parsed_typed.clone()),
         clippy_parse_error: covering_config.and_then(|config| config.parse_error.clone()),
     });
 }

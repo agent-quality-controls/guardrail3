@@ -35,11 +35,13 @@ impl PolicyRootKind {
 pub struct GardeRootFacts {
     pub(crate) rel_dir: String,
     pub(crate) cargo_rel_path: String,
+    pub(crate) cargo_parsed_typed: Option<cargo_toml_parser::CargoToml>,
     pub(crate) kind: PolicyRootKind,
     pub(crate) garde_dependency_present: bool,
     pub(crate) garde_applicable: bool,
     pub(crate) clippy_rel_path: Option<String>,
     pub(crate) clippy_parsed: Option<toml::Value>,
+    pub(crate) clippy_parsed_typed: Option<clippy_toml_parser::ClippyToml>,
     pub(crate) clippy_parse_error: Option<String>,
 }
 
@@ -128,6 +130,7 @@ struct ClippyConfigCandidate {
     rel_dir: String,
     rel_path: String,
     parsed: Option<toml::Value>,
+    parsed_typed: Option<clippy_toml_parser::ClippyToml>,
     parse_error: Option<String>,
 }
 
