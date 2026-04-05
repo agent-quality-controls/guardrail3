@@ -1,3 +1,13 @@
+#![allow(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "parser tests use direct exact-shape assertions for concise contract proofs"
+)]
+
+use crate::{
+    DisallowedField, DisallowedPath, InherentImplLintScope, MatchLintBehaviour,
+    PubUnderscoreFieldsBehaviour, SourceItemOrderingWithinModuleItemGroupings,
+};
 use clippy_toml_parser_runtime_assertions::parser as assertions;
 use helpers::{parse_fixture, parse_from_tempfile};
 
@@ -9,7 +19,6 @@ fn empty_string_yields_empty_config() {
 
     assertions::assert_thresholds_empty(&cfg);
     assertions::assert_ban_lists_empty(&cfg);
-    assertions::assert_extra_empty(&cfg);
 }
 
 #[test]
@@ -59,7 +68,7 @@ fn detailed_ban_entries_with_reason() {
     let cfg = parse_fixture(
         r#"
 disallowed-methods = [
-    { path = "std::env::var", reason = "Use config module" },
+    { path = "std::env::var", reason = "Use config module", replacement = "crate::config::var", allow-invalid = true },
     "std::process::exit",
 ]
 "#,
@@ -72,6 +81,27 @@ disallowed-methods = [
         Some("Use config module"),
     );
     assertions::assert_ban_entry(cfg.disallowed_methods.get(1), "std::process::exit", None);
+    match cfg.disallowed_methods.first() {
+        Some(DisallowedPath::Detailed(detail)) => {
+            assert_eq!(detail.replacement.as_deref(), Some("crate::config::var"));
+            assert_eq!(detail.allow_invalid, Some(true));
+        }
+        _ => panic!("first disallowed method should be detailed"),
+    }
+}
+
+#[test]
+fn disallowed_fields_do_not_accept_replacement() {
+    let err = super::super::parse(
+        r#"
+disallowed-fields = [
+    { path = "crate::Thing::field", replacement = "crate::Thing::field()" },
+]
+"#,
+    )
+    .expect_err("replacement is not allowed for disallowed-fields");
+
+    assertions::assert_parse_error(err);
 }
 
 #[test]
@@ -102,58 +132,110 @@ allow-unwrap-in-tests = false
 }
 
 #[test]
-fn unknown_keys_land_in_extra() {
+fn exact_structured_fields_parse() {
     let cfg = parse_fixture(
+        r#"
+accept-comment-above-attributes = false
+allow-comparison-to-zero = false
+allowed-prefixes = ["to", "into"]
+allowed-duplicate-crates = ["syn"]
+array-size-threshold = 4096
+check-private-items = true
+doc-valid-idents = ["OpenAI", "GitHub"]
+warn-on-all-wildcard-imports = true
+matches-for-let-else = "Never"
+inherent-impl-lint-scope = "file"
+pub-underscore-fields-behavior = "PubliclyExported"
+module-items-ordered-within-groupings = "none"
+source-item-ordering = ["enum", "impl", "module", "struct", "trait"]
+trait-assoc-item-kinds-order = ["const", "fn", "type"]
+standard-macro-braces = [
+    { name = "println", brace = "(" },
+]
+disallowed-fields = [
+    { path = "crate::Thing::field", reason = "use accessor", allow-invalid = true },
+]
+enforced-import-renames = [
+    { path = "std::collections::HashMap", rename = "Map" },
+]
+"#,
+    );
+
+    assertions::assert_bool_field(
+        cfg.accept_comment_above_attributes,
+        Some(false),
+        "accept_comment_above_attributes",
+    );
+    assertions::assert_bool_field(
+        cfg.allow_comparison_to_zero,
+        Some(false),
+        "allow_comparison_to_zero",
+    );
+    assertions::assert_string_list(&cfg.allowed_prefixes, &["to", "into"], "allowed_prefixes");
+    assertions::assert_string_list(
+        &cfg.allowed_duplicate_crates,
+        &["syn"],
+        "allowed_duplicate_crates",
+    );
+    assert_eq!(cfg.array_size_threshold, Some(4096));
+    assertions::assert_bool_field(cfg.check_private_items, Some(true), "check_private_items");
+    assertions::assert_string_list(&cfg.doc_valid_idents, &["OpenAI", "GitHub"], "doc_valid_idents");
+    assertions::assert_bool_field(
+        cfg.warn_on_all_wildcard_imports,
+        Some(true),
+        "warn_on_all_wildcard_imports",
+    );
+    assert_eq!(cfg.matches_for_let_else, Some(MatchLintBehaviour::Never));
+    assert_eq!(cfg.inherent_impl_lint_scope, Some(InherentImplLintScope::File));
+    assert_eq!(
+        cfg.pub_underscore_fields_behavior,
+        Some(PubUnderscoreFieldsBehaviour::PubliclyExported),
+    );
+    assert_eq!(
+        cfg.module_items_ordered_within_groupings,
+        Some(SourceItemOrderingWithinModuleItemGroupings::None),
+    );
+    assert_eq!(cfg.standard_macro_braces.len(), 1, "standard_macro_braces");
+    assert_eq!(cfg.standard_macro_braces[0].name, "println");
+    assert_eq!(cfg.standard_macro_braces[0].brace, '(');
+    assert_eq!(cfg.enforced_import_renames.len(), 1, "enforced_import_renames");
+    assert_eq!(cfg.enforced_import_renames[0].path, "std::collections::HashMap");
+    assert_eq!(cfg.enforced_import_renames[0].rename, "Map");
+    match cfg.disallowed_fields.first() {
+        Some(DisallowedField::Detailed(detail)) => {
+            assert_eq!(detail.path, "crate::Thing::field");
+            assert_eq!(detail.reason.as_deref(), Some("use accessor"));
+            assert_eq!(detail.allow_invalid, Some(true));
+        }
+        _ => panic!("disallowed field should be detailed"),
+    }
+}
+
+#[test]
+fn unknown_keys_are_rejected() {
+    let err = super::super::parse(
         r#"
 max-struct-bools = 3
 some-future-clippy-option = "yes"
 "#,
-    );
+    )
+    .expect_err("unknown clippy keys should be rejected");
 
-    assertions::assert_thresholds(&cfg, Some(3), None, None, None, None, None, None);
-    assertions::assert_top_level_string_extra(&cfg, "some-future-clippy-option", "yes");
+    assertions::assert_parse_error(err);
 }
 
 #[test]
-fn representative_config_parses() {
-    let cfg = parse_fixture(
+fn invalid_macro_brace_is_rejected() {
+    let err = super::super::parse(
         r#"
-too-many-lines-threshold = 75
-cognitive-complexity-threshold = 15
-too-many-arguments-threshold = 7
-type-complexity-threshold = 75
-max-struct-bools = 3
-max-fn-params-bools = 3
-excessive-nesting-threshold = 4
-avoid-breaking-exported-api = false
-allow-dbg-in-tests = false
-allow-expect-in-tests = true
-allow-panic-in-tests = false
-allow-print-in-tests = false
-allow-unwrap-in-tests = false
-disallowed-methods = [
-    { path = "std::env::var", reason = "Use config module" },
-    { path = "std::process::exit", reason = "Use error propagation" },
-]
-disallowed-types = [
-    { path = "std::collections::HashMap", reason = "Use BTreeMap" },
-]
-disallowed-macros = [
-    { path = "println", reason = "Use tracing" },
+standard-macro-braces = [
+    { name = "println", brace = "<" },
 ]
 "#,
-    );
+    )
+    .expect_err("invalid brace should be rejected");
 
-    assertions::assert_thresholds(&cfg, Some(3), Some(3), Some(75), Some(7), Some(4), Some(15), Some(75));
-    assertions::assert_bool_field(
-        cfg.avoid_breaking_exported_api,
-        Some(false),
-        "avoid_breaking_exported_api",
-    );
-    assertions::assert_list_len(&cfg.disallowed_methods, 2, "disallowed_methods");
-    assertions::assert_list_len(&cfg.disallowed_types, 1, "disallowed_types");
-    assertions::assert_list_len(&cfg.disallowed_macros, 1, "disallowed_macros");
-    assertions::assert_extra_empty(&cfg);
+    assertions::assert_parse_error(err);
 }
 
 #[test]

@@ -1,3 +1,10 @@
+#![allow(
+    clippy::expect_used,
+    reason = "parser tests use panic-based helpers for concise proof fixtures"
+)]
+
+use std::io::Write;
+
 use crate::{CargoToml, from_path, parse};
 
 pub(super) fn parse_fixture(input: &str) -> CargoToml {
@@ -5,8 +12,9 @@ pub(super) fn parse_fixture(input: &str) -> CargoToml {
 }
 
 pub(super) fn parse_from_tempfile(input: &str) -> CargoToml {
-    let temp = tempfile::tempdir().expect("create temp dir for Cargo.toml parser test");
-    let path = temp.path().join("Cargo.toml");
-    std::fs::write(&path, input).expect("write Cargo.toml fixture");
+    let mut file = tempfile::NamedTempFile::new().expect("tempfile should be created");
+    file.write_all(input.as_bytes())
+        .expect("Cargo.toml fixture should be written");
+    let path = file.path().to_path_buf();
     from_path(&path).expect("Cargo.toml file should parse")
 }

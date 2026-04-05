@@ -2,6 +2,10 @@
 mod cargo_toml;
 
 pub use cargo_toml::{
-    CargoToml, Dependency, DependencyDetail, LintDetail, LintValue, LintsConfig, NamedTarget,
-    PackageSection, TargetDependencyTables, WorkspacePackageSection, WorkspaceSection,
+    BadgeTable, Badges, CargoToml, Dependency, DependencyDetail, FeatureList, FeatureMap,
+    HintsConfig, InheritableStrings, InheritableValue, IntegerOrBool, IntegerOrString, LintDetail,
+    LintTools, LintValue, LintsConfig, PackageBuildValue, PackageSection, PatchRegistryTable,
+    PatchTable, ProfileConfig, StringOrBool, StringOrVec, TargetDependencyTables, TargetSection,
+    TomlTrimPaths, TomlTrimPathsValue, ToolLints, VecStringOrBool, WorkspaceInheritance,
+    WorkspacePackageSection, WorkspaceSection,
 };
