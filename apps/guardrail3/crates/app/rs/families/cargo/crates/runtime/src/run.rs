@@ -1,6 +1,8 @@
+use g3_cargo_content_checks::G3CargoContentChecksInput;
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsCargoRoute;
 use guardrail3_app_rs_family_view::FamilyView;
-use guardrail3_domain_report::CheckResult;
+use guardrail3_domain_report::{CheckResult, Severity};
 
 use crate::discover::collect;
 use crate::inputs::{
@@ -21,15 +23,12 @@ pub fn check(surface: &FamilyView, route: &RsCargoRoute) -> Vec<CheckResult> {
     }
 
     for input in PolicyRootCargoInput::from_facts(&facts) {
-        crate::workspace_policy::rs_cargo_01_workspace_lints::check(&input, &mut results);
-        crate::workspace_policy::rs_cargo_02_lint_levels::check(&input, &mut results);
-        crate::workspace_policy::rs_cargo_03_allow_inventory::check(&input, &mut results);
-        crate::workspace_policy::rs_cargo_05_workspace_metadata::check(&input, &mut results);
-        crate::workspace_policy::rs_cargo_07_priority_order::check(&input, &mut results);
-        crate::workspace_policy::rs_cargo_08_resolver::check(&input, &mut results);
-        crate::workspace_policy::rs_cargo_11_disallowed_macros_deny::check(&input, &mut results);
-        crate::workspace_policy::rs_cargo_12_unapproved_allow_entries::check(&input, &mut results);
-        crate::workspace_policy::rs_cargo_15_rust_version_policy::check(&input, &mut results);
+        run_content_checks(&input, &mut results);
+        if input.root.parsed_typed.is_some() {
+            crate::workspace_policy::rs_cargo_03_allow_inventory::check(&input, &mut results);
+            crate::workspace_policy::rs_cargo_12_unapproved_allow_entries::check(&input, &mut results);
+            crate::workspace_policy::rs_cargo_15_rust_version_policy::check(&input, &mut results);
+        }
     }
 
     for input in WorkspaceMemberCargoInput::from_facts(&facts) {
@@ -47,4 +46,40 @@ pub fn check(surface: &FamilyView, route: &RsCargoRoute) -> Vec<CheckResult> {
     }
 
     results
+}
+
+fn run_content_checks(
+    input: &PolicyRootCargoInput<'_>,
+    results: &mut Vec<CheckResult>,
+) {
+    let Some(cargo) = input.root.parsed_typed.clone() else {
+        return;
+    };
+
+    let package_input = G3CargoContentChecksInput {
+        cargo_rel_path: input.root.cargo_rel_path.clone(),
+        cargo,
+    };
+    let package_results = g3_cargo_content_checks::check(&package_input);
+    results.extend(package_results.into_iter().map(convert_check_result));
+}
+
+fn convert_check_result(result: G3CheckResult) -> CheckResult {
+    CheckResult::from_parts(
+        result.id().to_owned(),
+        convert_severity(result.severity()),
+        result.title().to_owned(),
+        result.message().to_owned(),
+        result.file().map(str::to_owned),
+        result.line(),
+        result.inventory(),
+    )
+}
+
+fn convert_severity(severity: G3Severity) -> Severity {
+    match severity {
+        G3Severity::Error => Severity::Error,
+        G3Severity::Warn => Severity::Warn,
+        G3Severity::Info => Severity::Info,
+    }
 }

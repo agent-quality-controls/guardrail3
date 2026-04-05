@@ -249,27 +249,19 @@ fn invalid_allow_priority_is_inventoried_accurately() {
         &[("Cargo.toml", &manifest), ("guardrail3.toml", &guardrail)],
     ));
 
-    let rs_cargo_03: Vec<_> = results
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_03_allow_inventory::assert_rule_results(
+        &results,
+        &[],
+    );
+    let input_failures: Vec<_> = results
         .iter()
-        .filter(|result| result.id() == "RS-CARGO-03")
+        .filter(|result| result.id() == "RS-CARGO-14")
         .collect();
-    assert_eq!(
-        rs_cargo_03.len(),
-        10,
-        "unexpected RS-CARGO-03 results: {results:#?}"
-    );
+    assert_eq!(input_failures.len(), 1, "unexpected results: {results:#?}");
     assert!(
-        rs_cargo_03
-            .iter()
-            .any(|result| result.message().contains("`module_name_repetitions`")),
-        "RS-CARGO-03 should still inventory allow-shaped entries even when RS-CARGO-02 owns the malformed priority: {results:#?}"
-    );
-    let count = results
-        .iter()
-        .find(|result| result.id() == "RS-CARGO-03" && result.title() == "approved allow count")
-        .expect("expected RS-CARGO-03 count summary");
-    assert_eq!(
-        count.message(),
-        "`Cargo.toml` has 9 approved manifest allow entries (9 documented, 0 missing reasons, 0 weak reasons)."
+        input_failures[0]
+            .message()
+            .contains("against cargo-toml-parser for cargo content checks"),
+        "expected typed cargo parser failure to be owned by RS-CARGO-14: {results:#?}"
     );
 }

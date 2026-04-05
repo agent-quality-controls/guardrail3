@@ -90,27 +90,27 @@ receives a concrete parsed `DenyToml` only.
 ### Cargo
 ```rust
 use cargo_toml_parser::CargoToml;
+use guardrail3_check_types::G3CheckResult;
 
-pub struct G3CargoChecksInput {
-    pub policy_root_rel_path: String,
-    pub policy_root_manifest: CargoToml,
-    pub member_manifests: Vec<(String, CargoToml)>,
-    pub policy_rel_path: Option<String>,
-    pub policy_profile: Option<G3CargoPolicyProfile>,
-    pub lint_allow_waivers: Vec<G3CargoLintAllowWaiver>,
+pub struct G3CargoContentChecksInput {
+    pub cargo_rel_path: String,
+    pub cargo: CargoToml,
 }
 
-pub fn check(input: &G3CargoChecksInput) -> Vec<G3CheckResult>
+pub fn check(input: &G3CargoContentChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-CARGO-01..09, RS-CARGO-11..13, RS-CARGO-15
-Rules in app: RS-CARGO-10, RS-CARGO-14
+Single-file rules in package: RS-CARGO-01, 02, 05, 07, 08, 11
+Rules in app for now: RS-CARGO-03, 04, 06, 09, 10, 12, 13, 14, 15
 
 Package boundary:
 
-- receives parsed policy-root and member `Cargo.toml` values
-- receives normalized profile/waiver policy inputs derived from the root-local guardrail config
-- app still owns root/member discovery, missing-member routing, and malformed-input fail-closed behavior
+- receives one parsed `Cargo.toml`
+- determines workspace/package applicability from the file itself
+- does not receive member sets, profile enums, waiver subsets, or other
+  derived policy helper types
+- app still owns routing, workspace/member relationship rules, missing-member detection, cross-file comparison
+  rules, and malformed-input fail-closed behavior
 
 ### Fmt
 ```rust
