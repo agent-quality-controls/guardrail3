@@ -1,14 +1,19 @@
-use g3_toolchain_content_checks_types::{G3CargoRustVersion, G3ToolchainContentChecksInput};
+use cargo_toml_parser::CargoToml;
+use rust_toolchain_toml_parser::RustToolchainToml;
 use guardrail3_check_types::{GrdzCheckResult, GrdzSeverity};
 
 const ID: &str = "RS-TOOLCHAIN-03";
 
-pub(crate) fn check(input: &G3ToolchainContentChecksInput, results: &mut Vec<GrdzCheckResult>) {
-    let channel = input
-        .toolchain_toml
-        .get("toolchain")
-        .and_then(|value| value.get("channel"))
-        .and_then(toml::Value::as_str);
+pub(crate) fn check(
+    toolchain_rel_path: &str,
+    toolchain_toml: &RustToolchainToml,
+    cargo_rel_path: &str,
+    cargo_toml: &CargoToml,
+    results: &mut Vec<GrdzCheckResult>,
+) {
+    let channel = toolchain_toml
+        .toolchain()
+        .and_then(|toolchain| toolchain.channel());
 
     let Some(channel) = channel else {
         return;
@@ -17,29 +22,8 @@ pub(crate) fn check(input: &G3ToolchainContentChecksInput, results: &mut Vec<Grd
         return;
     };
 
-    match &input.cargo_rust_version {
-        G3CargoRustVersion::MissingManifest => {
-            results.push(GrdzCheckResult::new(
-                ID.to_owned(),
-                GrdzSeverity::Error,
-                "Cargo.toml missing blocks MSRV check".to_owned(),
-                "Cargo.toml is required to compare pinned toolchain against declared MSRV."
-                    .to_owned(),
-                Some(input.cargo_rel_path.clone()),
-                None,
-            ));
-        }
-        G3CargoRustVersion::ParseError(parse_error) => {
-            results.push(GrdzCheckResult::new(
-                ID.to_owned(),
-                GrdzSeverity::Error,
-                "Cargo.toml parse error blocks MSRV check".to_owned(),
-                format!("Invalid root Cargo.toml: {parse_error}"),
-                Some(input.cargo_rel_path.clone()),
-                None,
-            ));
-        }
-        G3CargoRustVersion::Missing => {
+    match cargo_rust_version(cargo_toml) {
+        None => {
             results.push(
                 GrdzCheckResult::new(
                     ID.to_owned(),
@@ -47,23 +31,13 @@ pub(crate) fn check(input: &G3ToolchainContentChecksInput, results: &mut Vec<Grd
                     "Cargo rust-version not declared".to_owned(),
                     "No `rust-version` found in Cargo.toml, so MSRV consistency cannot be checked."
                         .to_owned(),
-                    Some(input.cargo_rel_path.clone()),
+                    Some(cargo_rel_path.to_owned()),
                     None,
                 )
                 .into_inventory(),
             );
         }
-        G3CargoRustVersion::InvalidType => {
-            results.push(GrdzCheckResult::new(
-                ID.to_owned(),
-                GrdzSeverity::Error,
-                "Cargo rust-version is invalid".to_owned(),
-                "`Cargo.toml` `rust-version` must be a string version.".to_owned(),
-                Some(input.cargo_rel_path.clone()),
-                None,
-            ));
-        }
-        G3CargoRustVersion::Version(cargo_msrv) => {
+        Some(cargo_msrv) => {
             let Some(msrv_version) = parse_manifest_version(cargo_msrv) else {
                 results.push(GrdzCheckResult::new(
                     ID.to_owned(),
@@ -72,7 +46,7 @@ pub(crate) fn check(input: &G3ToolchainContentChecksInput, results: &mut Vec<Grd
                     format!(
                         "Cannot compare pinned toolchain against invalid Cargo rust-version `{cargo_msrv}`."
                     ),
-                    Some(input.cargo_rel_path.clone()),
+                    Some(cargo_rel_path.to_owned()),
                     None,
                 ));
                 return;
@@ -86,7 +60,7 @@ pub(crate) fn check(input: &G3ToolchainContentChecksInput, results: &mut Vec<Grd
                     format!(
                         "Pinned toolchain `{channel}` is older than Cargo rust-version `{cargo_msrv}`. Either update the pinned toolchain to match or exceed the MSRV, or lower `rust-version` in Cargo.toml."
                     ),
-                    Some(input.toolchain_rel_path.clone()),
+                    Some(toolchain_rel_path.to_owned()),
                     None,
                 ));
             } else {
@@ -98,7 +72,7 @@ pub(crate) fn check(input: &G3ToolchainContentChecksInput, results: &mut Vec<Grd
                         format!(
                             "Pinned toolchain `{channel}` is compatible with Cargo rust-version `{cargo_msrv}`."
                         ),
-                        Some(input.toolchain_rel_path.clone()),
+                        Some(toolchain_rel_path.to_owned()),
                         None,
                     )
                     .into_inventory(),
@@ -106,6 +80,19 @@ pub(crate) fn check(input: &G3ToolchainContentChecksInput, results: &mut Vec<Grd
             }
         }
     }
+}
+
+fn cargo_rust_version(cargo: &CargoToml) -> Option<&str> {
+    cargo
+        .workspace
+        .as_ref()
+        .and_then(|workspace| workspace.package.as_ref())
+        .and_then(|package| package.rust_version.as_deref())
+        .or_else(|| {
+            cargo.package
+                .as_ref()
+                .and_then(|package| package.rust_version.as_deref())
+        })
 }
 
 fn parse_pinned_stable_version(raw: &str) -> Option<(u64, u64, u64)> {

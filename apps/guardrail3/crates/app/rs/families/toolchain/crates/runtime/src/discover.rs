@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use cargo_toml_parser::CargoToml;
 use guardrail3_app_rs_family_mapper::RsToolchainRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
@@ -10,10 +11,9 @@ use super::facts::{ToolchainFamilyFacts, ToolchainPolicyRootFacts};
 struct CargoSnapshot {
     rel_dir: String,
     cargo_rel_path: String,
+    cargo_parsed: Option<CargoToml>,
     parse_error: Option<String>,
     has_workspace: bool,
-    rust_version: Option<String>,
-    rust_version_invalid: bool,
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsToolchainRoute) -> ToolchainFamilyFacts {
@@ -46,6 +46,9 @@ fn collect_cargo_snapshots(
         .iter()
         .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
+    if tree.file_content("Cargo.toml").is_some() {
+        let _ = rel_dirs.insert(String::new());
+    }
     rel_dirs.extend(route.family_files().iter().filter_map(|file| {
         (file.kind() == RustFamilyFileKind::CargoToml
             && (file.nearest_rust_root_rel().is_some() || file.ancestor_rust_root_rels().is_some()))
@@ -81,35 +84,35 @@ fn cargo_snapshot(tree: &ProjectTree, rel_dir: &str, cargo_rel_path: &str) -> Ca
         return CargoSnapshot {
             rel_dir: rel_dir.to_owned(),
             cargo_rel_path: cargo_rel_path.to_owned(),
+            cargo_parsed: None,
             parse_error: Some("Cargo.toml content missing from ProjectTree".to_owned()),
             has_workspace: false,
-            rust_version: None,
-            rust_version_invalid: false,
         };
     };
 
-    match toml::from_str::<toml::Value>(content) {
-        Ok(parsed) => {
-            let has_workspace = parsed.get("workspace").is_some();
-            let rust_version = extract_rust_version(&parsed, has_workspace);
-            CargoSnapshot {
-                rel_dir: rel_dir.to_owned(),
-                cargo_rel_path: cargo_rel_path.to_owned(),
-                parse_error: None,
-                has_workspace,
-                rust_version: rust_version.value,
-                rust_version_invalid: rust_version.invalid,
-            }
-        }
+    let has_workspace = contains_workspace_table(content);
+    match cargo_toml_parser::parse(content) {
+        Ok(parsed) => CargoSnapshot {
+            rel_dir: rel_dir.to_owned(),
+            cargo_rel_path: cargo_rel_path.to_owned(),
+            cargo_parsed: Some(parsed),
+            parse_error: None,
+            has_workspace,
+        },
         Err(parse_error) => CargoSnapshot {
             rel_dir: rel_dir.to_owned(),
             cargo_rel_path: cargo_rel_path.to_owned(),
+            cargo_parsed: None,
             parse_error: Some(parse_error.to_string()),
-            has_workspace: false,
-            rust_version: None,
-            rust_version_invalid: false,
+            has_workspace,
         },
     }
+}
+
+fn contains_workspace_table(content: &str) -> bool {
+    content.lines().map(str::trim).any(|line| {
+        matches!(line, "[workspace]") || line.starts_with("[workspace.")
+    })
 }
 
 fn build_policy_root(
@@ -122,17 +125,17 @@ fn build_policy_root(
             && file.exact_rust_root_owner()
             && file.kind() == RustFamilyFileKind::RustToolchainToml)
             .then(|| file.rel_path().to_owned())
-    });
+    }).or_else(|| direct_toolchain_rel(tree, &snapshot.rel_dir, "rust-toolchain.toml"));
     let legacy_toolchain_rel = route.family_files().iter().find_map(|file| {
         (file.logical_owner_rel() == snapshot.rel_dir
             && file.exact_rust_root_owner()
             && file.kind() == RustFamilyFileKind::RustToolchainLegacy)
             .then(|| file.rel_path().to_owned())
-    });
+    }).or_else(|| direct_toolchain_rel(tree, &snapshot.rel_dir, "rust-toolchain"));
 
     let modern_toolchain = match modern_toolchain_rel.as_deref() {
         Some(toolchain_toml_rel) => match tree.file_content(toolchain_toml_rel) {
-            Some(content) => match toml::from_str::<toml::Value>(content) {
+            Some(content) => match rust_toolchain_toml_parser::parse(content) {
                 Ok(parsed) => (Some(toolchain_toml_rel.to_owned()), Some(parsed), None),
                 Err(parse_error) => (
                     Some(toolchain_toml_rel.to_owned()),
@@ -156,43 +159,16 @@ fn build_policy_root(
         legacy_toolchain_rel,
         parsed: modern_toolchain.1,
         parse_error: modern_toolchain.2,
-        cargo_rust_version: snapshot.rust_version.clone(),
-        cargo_rust_version_invalid: snapshot.rust_version_invalid,
+        cargo_parsed: snapshot.cargo_parsed.clone(),
         cargo_parse_error: snapshot.parse_error.clone(),
     }
 }
 
-struct RustVersionField {
-    value: Option<String>,
-    invalid: bool,
-}
-
-fn extract_rust_version(parsed: &toml::Value, is_workspace_root: bool) -> RustVersionField {
-    if is_workspace_root {
-        if let Some(value) = parsed
-            .get("workspace")
-            .and_then(|item| item.get("package"))
-            .and_then(|item| item.get("rust-version"))
-        {
-            return RustVersionField {
-                value: value.as_str().map(str::to_owned),
-                invalid: !value.is_str(),
-            };
-        }
-    }
-
-    if let Some(value) = parsed
-        .get("package")
-        .and_then(|item| item.get("rust-version"))
-    {
-        return RustVersionField {
-            value: value.as_str().map(str::to_owned),
-            invalid: !value.is_str(),
-        };
-    }
-
-    RustVersionField {
-        value: None,
-        invalid: false,
-    }
+fn direct_toolchain_rel(tree: &ProjectTree, rel_dir: &str, file_name: &str) -> Option<String> {
+    let rel = if rel_dir.is_empty() {
+        file_name.to_owned()
+    } else {
+        ProjectTree::join_rel(rel_dir, file_name)
+    };
+    tree.file_content(&rel).map(|_| rel)
 }

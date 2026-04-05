@@ -1,17 +1,17 @@
-use g3_toolchain_content_checks_types::{G3CargoRustVersion, G3ToolchainContentChecksInput};
+use g3_toolchain_content_checks_types::G3ToolchainChannelAndComponentsInput;
 use guardrail3_check_types::GrdzCheckResult;
+use rust_toolchain_toml_parser::parse as parse_toolchain_toml;
 
 use crate::rs_toolchain_02_channel_and_components::check;
 
 pub(super) fn run_check(toolchain_toml: &str) -> Vec<GrdzCheckResult> {
-    let parsed = toml::from_str(toolchain_toml).expect("toolchain test fixture should parse");
-    let input = G3ToolchainContentChecksInput {
+    let parsed = parse_toolchain_toml(toolchain_toml)
+        .expect("toolchain test fixture should parse");
+    let input = G3ToolchainChannelAndComponentsInput {
         toolchain_rel_path: "rust-toolchain.toml".to_owned(),
         toolchain_toml: parsed,
-        cargo_rel_path: "Cargo.toml".to_owned(),
-        cargo_rust_version: G3CargoRustVersion::Version("1.85".to_owned()),
     };
     let mut results = Vec::new();
-    check(&input, &mut results);
+    check(&input.toolchain_rel_path, &input.toolchain_toml, &mut results);
     results
 }

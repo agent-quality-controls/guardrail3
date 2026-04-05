@@ -1,8 +1,10 @@
 use crate::inputs::ToolchainRootInput;
+use rust_toolchain_toml_parser::RustToolchainToml;
+
 pub(super) fn test_input<'a>(
     toolchain_toml_rel: Option<&'a str>,
     legacy_toolchain_rel: Option<&'a str>,
-    parsed: Option<&'a toml::Value>,
+    parsed: Option<&'a RustToolchainToml>,
     parse_error: Option<&'a str>,
     cargo_rust_version: Option<&'a str>,
     cargo_parse_error: Option<&'a str>,
@@ -23,21 +25,20 @@ pub(super) fn test_input_for_root<'a>(
     cargo_rel_path: &'a str,
     toolchain_toml_rel: Option<&'a str>,
     legacy_toolchain_rel: Option<&'a str>,
-    parsed: Option<&'a toml::Value>,
+    parsed: Option<&'a RustToolchainToml>,
     parse_error: Option<&'a str>,
     cargo_rust_version: Option<&'a str>,
     cargo_parse_error: Option<&'a str>,
 ) -> ToolchainRootInput<'a> {
+    let _ = cargo_rust_version;
     ToolchainRootInput {
         rel_dir,
         cargo_rel_path,
-        cargo_toml_rel: Some(cargo_rel_path),
         toolchain_toml_rel,
         legacy_toolchain_rel,
         parsed,
         parse_error,
-        cargo_rust_version,
-        cargo_rust_version_invalid: false,
+        cargo: None,
         cargo_parse_error,
     }
 }

@@ -13,7 +13,8 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    if let Some(ignore) = parsed.get("ignore") {
+    if !parsed.ignore.is_empty() {
+        let ignore = format!("{:?}", parsed.ignore);
         let reason = input
             .escape_hatches
             .iter()
@@ -75,4 +76,3 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
         ));
     }
 }
-

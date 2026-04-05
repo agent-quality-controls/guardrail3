@@ -1,31 +1,32 @@
-/// Cargo rust-version state after app-side extraction from Cargo.toml.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum G3CargoRustVersion {
-    /// Cargo.toml is missing for this policy root.
-    MissingManifest,
-    /// Cargo.toml could not be parsed, so rust-version extraction is blocked.
-    ParseError(String),
-    /// Cargo.toml does not declare rust-version.
-    Missing,
-    /// Cargo.toml declares rust-version with a non-string TOML value.
-    InvalidType,
-    /// Cargo.toml declares a string rust-version.
-    Version(String),
-}
+use cargo_toml_parser::CargoToml;
+use rust_toolchain_toml_parser::RustToolchainToml;
 
-/// Input contract for extracted toolchain content checks.
+/// Input contract for `RS-TOOLCHAIN-02`.
 ///
 /// The app owns discovery, placement, and parse-failure routing. This package
-/// receives already-selected file content for one policy root and validates the
-/// content semantics only.
+/// receives the already-selected parsed `rust-toolchain.toml` file and validates
+/// its content semantics only.
 #[derive(Debug, Clone)]
-pub struct G3ToolchainContentChecksInput {
+pub struct G3ToolchainChannelAndComponentsInput {
     /// Repo-relative path to the active rust-toolchain.toml.
     pub toolchain_rel_path: String,
     /// Parsed rust-toolchain.toml content.
-    pub toolchain_toml: toml::Value,
+    pub toolchain_toml: RustToolchainToml,
+}
+
+/// Input contract for `RS-TOOLCHAIN-03`.
+///
+/// The app owns discovery, placement, and parse-failure routing. This package
+/// receives the already-selected parsed files for one policy root and validates
+/// their content semantics only.
+#[derive(Debug, Clone)]
+pub struct G3ToolchainMsrvConsistencyInput {
+    /// Repo-relative path to the active rust-toolchain.toml.
+    pub toolchain_rel_path: String,
+    /// Parsed rust-toolchain.toml content.
+    pub toolchain_toml: RustToolchainToml,
     /// Repo-relative path to the owning Cargo.toml.
     pub cargo_rel_path: String,
-    /// Extracted rust-version state from Cargo.toml.
-    pub cargo_rust_version: G3CargoRustVersion,
+    /// Parsed Cargo.toml content.
+    pub cargo_toml: CargoToml,
 }

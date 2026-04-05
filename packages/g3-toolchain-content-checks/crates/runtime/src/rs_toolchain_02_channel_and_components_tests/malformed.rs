@@ -16,24 +16,3 @@ fn errors_when_toolchain_table_is_missing() {
         )],
     );
 }
-
-#[test]
-fn errors_when_components_are_not_an_array_of_strings() {
-    let results = run_check(
-        r#"
-[toolchain]
-channel = "stable"
-components = ["clippy", 4]
-"#,
-    );
-
-    assertions::assert_contains(
-        &results,
-        assertions::error(
-            "toolchain components are invalid",
-            "`[toolchain].components` must be an array of strings.",
-            "rust-toolchain.toml",
-            false,
-        ),
-    );
-}

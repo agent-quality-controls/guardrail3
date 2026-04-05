@@ -11,9 +11,10 @@ repository = "https://github.com/ArcticLens/websmasher"
 workspace = true
 
 [dependencies]
+cargo-toml-parser = { path = "../../../cargo-toml-parser" }
 g3-toolchain-content-checks-types = { path = "../types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
-toml = "0.8"
+rust-toolchain-toml-parser = { path = "../../../rust-toolchain-toml-parser" }
 
 [dev-dependencies]
 g3-toolchain-content-checks-assertions = { path = "../assertions" }

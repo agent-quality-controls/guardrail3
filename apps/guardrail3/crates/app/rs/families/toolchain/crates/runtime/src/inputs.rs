@@ -1,3 +1,5 @@
+use cargo_toml_parser::CargoToml;
+
 use super::facts::{ToolchainFamilyFacts, ToolchainPolicyRootFacts};
 
 pub struct ToolchainPolicyRootInput<'a> {
@@ -5,13 +7,11 @@ pub struct ToolchainPolicyRootInput<'a> {
     pub(crate) rel_dir: &'a str,
     #[allow(dead_code)]
     pub(crate) cargo_rel_path: &'a str,
-    pub(crate) cargo_toml_rel: Option<&'a str>,
     pub(crate) toolchain_toml_rel: Option<&'a str>,
     pub(crate) legacy_toolchain_rel: Option<&'a str>,
-    pub(crate) parsed: Option<&'a toml::Value>,
+    pub(crate) parsed: Option<&'a rust_toolchain_toml_parser::RustToolchainToml>,
     pub(crate) parse_error: Option<&'a str>,
-    pub(crate) cargo_rust_version: Option<&'a str>,
-    pub(crate) cargo_rust_version_invalid: bool,
+    pub(crate) cargo: Option<&'a CargoToml>,
     pub(crate) cargo_parse_error: Option<&'a str>,
 }
 
@@ -20,13 +20,11 @@ impl<'a> ToolchainPolicyRootInput<'a> {
         Self {
             rel_dir: &facts.rel_dir,
             cargo_rel_path: &facts.cargo_rel_path,
-            cargo_toml_rel: Some(&facts.cargo_rel_path),
             toolchain_toml_rel: facts.toolchain_toml_rel.as_deref(),
             legacy_toolchain_rel: facts.legacy_toolchain_rel.as_deref(),
             parsed: facts.parsed.as_ref(),
             parse_error: facts.parse_error.as_deref(),
-            cargo_rust_version: facts.cargo_rust_version.as_deref(),
-            cargo_rust_version_invalid: facts.cargo_rust_version_invalid,
+            cargo: facts.cargo_parsed.as_ref(),
             cargo_parse_error: facts.cargo_parse_error.as_deref(),
         }
     }
