@@ -1,8 +1,10 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path};
 
 use cargo_toml_parser::{CargoToml, Dependency, TargetDependencyTables};
-use g3_deps_content_checks_types::{G3DepsDirectDependencyCapInput, G3DepsPolicyContentChecksInput};
+use g3_deps_content_checks_types::{
+    G3DepsDirectDependencyCapInput, G3DepsLocalPathCargoManifest, G3DepsPolicyContentChecksInput,
+};
 use glob::Pattern;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_domain_config::types::{CrateConfig, GuardrailConfig};
@@ -86,22 +88,32 @@ pub(crate) fn workspace_is_library(input: &G3DepsPolicyContentChecksInput) -> bo
 pub(crate) fn dependency_entries_from_policy_input(
     input: &G3DepsPolicyContentChecksInput,
 ) -> Vec<DependencyEntry<'_>> {
+    let lookup = local_path_cargo_lookup(
+        &input.local_path_cargo_rel_paths,
+        &input.local_path_cargo_manifests,
+    );
     dependency_entries_with(
         &input.workspace_cargo_rel_path,
         &input.workspace_cargo,
         &input.crate_cargo_rel_path,
         &input.crate_cargo,
+        &lookup,
     )
 }
 
 pub(crate) fn dependency_entries_from_cap_input(
     input: &G3DepsDirectDependencyCapInput,
 ) -> Vec<DependencyEntry<'_>> {
+    let lookup = local_path_cargo_lookup(
+        &input.local_path_cargo_rel_paths,
+        &input.local_path_cargo_manifests,
+    );
     dependency_entries_with(
         &input.workspace_cargo_rel_path,
         &input.workspace_cargo,
         &input.crate_cargo_rel_path,
         &input.crate_cargo,
+        &lookup,
     )
 }
 
@@ -119,6 +131,7 @@ fn dependency_entries_with<'a>(
     workspace_cargo: &'a CargoToml,
     crate_cargo_rel_path: &'a str,
     crate_cargo: &'a CargoToml,
+    local_path_lookup: &LocalPathCargoLookup<'a>,
 ) -> Vec<DependencyEntry<'a>> {
     let mut entries = Vec::new();
     let crate_name = crate_name(crate_cargo_rel_path, crate_cargo);
@@ -131,6 +144,7 @@ fn dependency_entries_with<'a>(
         &crate_cargo.dependencies,
         DependencySectionKind::Dependencies,
         "[dependencies]",
+        local_path_lookup,
         &mut entries,
     );
     collect_table_entries(
@@ -141,6 +155,7 @@ fn dependency_entries_with<'a>(
         &crate_cargo.build_dependencies,
         DependencySectionKind::BuildDependencies,
         "[build-dependencies]",
+        local_path_lookup,
         &mut entries,
     );
     collect_table_entries(
@@ -151,6 +166,7 @@ fn dependency_entries_with<'a>(
         &crate_cargo.dev_dependencies,
         DependencySectionKind::DevDependencies,
         "[dev-dependencies]",
+        local_path_lookup,
         &mut entries,
     );
 
@@ -162,6 +178,7 @@ fn dependency_entries_with<'a>(
             &crate_name,
             target_key,
             target_tables,
+            local_path_lookup,
             &mut entries,
         );
     }
@@ -176,6 +193,7 @@ fn collect_target_entries<'a>(
     crate_name: &str,
     target_key: &str,
     target_tables: &'a TargetDependencyTables,
+    local_path_lookup: &LocalPathCargoLookup<'a>,
     entries: &mut Vec<DependencyEntry<'a>>,
 ) {
     let dependencies_label = format!("[target.'{target_key}'.dependencies]");
@@ -187,6 +205,7 @@ fn collect_target_entries<'a>(
         &target_tables.dependencies,
         DependencySectionKind::Dependencies,
         &dependencies_label,
+        local_path_lookup,
         entries,
     );
 
@@ -199,6 +218,7 @@ fn collect_target_entries<'a>(
         &target_tables.build_dependencies,
         DependencySectionKind::BuildDependencies,
         &build_label,
+        local_path_lookup,
         entries,
     );
 
@@ -211,6 +231,7 @@ fn collect_target_entries<'a>(
         &target_tables.dev_dependencies,
         DependencySectionKind::DevDependencies,
         &dev_label,
+        local_path_lookup,
         entries,
     );
 }
@@ -223,6 +244,7 @@ fn collect_table_entries<'a>(
     dependencies: &'a std::collections::BTreeMap<String, Dependency>,
     section_kind: DependencySectionKind,
     table_label: &str,
+    local_path_lookup: &LocalPathCargoLookup<'a>,
     entries: &mut Vec<DependencyEntry<'a>>,
 ) {
     for (alias, dependency) in dependencies {
@@ -232,6 +254,7 @@ fn collect_table_entries<'a>(
             crate_cargo_rel_path,
             alias,
             dependency,
+            local_path_lookup,
         ) {
             entries.push(DependencyEntry {
                 crate_name: crate_name.to_owned(),
@@ -250,6 +273,7 @@ fn resolved_dependency_name(
     crate_cargo_rel_path: &str,
     alias: &str,
     dependency: &Dependency,
+    local_path_lookup: &LocalPathCargoLookup<'_>,
 ) -> Option<String> {
     match dependency {
         Dependency::Simple(_) => Some(alias.to_owned()),
@@ -261,11 +285,32 @@ fn resolved_dependency_name(
                     workspace_cargo_rel_path,
                     workspace_cargo,
                     alias,
+                    local_path_lookup,
                 );
             }
 
             if let Some(path) = &detail.path {
                 let resolved = normalize_dependency_path(crate_cargo_rel_path, path);
+                let cargo_rel_path = path_cargo_rel_path(&resolved);
+                if local_path_lookup
+                    .known_paths
+                    .contains(cargo_rel_path.as_str())
+                {
+                    if workspace_declares_member(
+                        workspace_cargo_rel_path,
+                        workspace_cargo,
+                        &resolved,
+                    ) {
+                        return None;
+                    }
+                    if path_is_under_workspace_root(workspace_cargo_rel_path, &resolved) {
+                        return None;
+                    }
+                    return local_path_lookup
+                        .manifests
+                        .get(cargo_rel_path.as_str())
+                        .map(|cargo| crate_name(cargo_rel_path.as_str(), cargo));
+                }
                 if workspace_declares_member(
                     workspace_cargo_rel_path,
                     workspace_cargo,
@@ -284,6 +329,7 @@ fn resolve_workspace_dependency(
     workspace_cargo_rel_path: &str,
     workspace_cargo: &CargoToml,
     alias: &str,
+    local_path_lookup: &LocalPathCargoLookup<'_>,
 ) -> Option<String> {
     let workspace_dependency = workspace_cargo
         .workspace
@@ -298,6 +344,26 @@ fn resolve_workspace_dependency(
             if let Some(path) = &detail.path {
                 let workspace_root = workspace_root_rel_dir(workspace_cargo_rel_path);
                 let resolved = normalize_rel_path(workspace_root, path);
+                let cargo_rel_path = path_cargo_rel_path(&resolved);
+                if local_path_lookup
+                    .known_paths
+                    .contains(cargo_rel_path.as_str())
+                {
+                    if workspace_declares_member(
+                        workspace_cargo_rel_path,
+                        workspace_cargo,
+                        &resolved,
+                    ) {
+                        return None;
+                    }
+                    if path_is_under_workspace_root(workspace_cargo_rel_path, &resolved) {
+                        return None;
+                    }
+                    return local_path_lookup
+                        .manifests
+                        .get(cargo_rel_path.as_str())
+                        .map(|cargo| crate_name(cargo_rel_path.as_str(), cargo));
+                }
                 if workspace_declares_member(
                     workspace_cargo_rel_path,
                     workspace_cargo,
@@ -331,8 +397,49 @@ fn workspace_declares_member(
         .any(|pattern| pattern.matches(relative_to_workspace))
 }
 
+struct LocalPathCargoLookup<'a> {
+    known_paths: BTreeSet<&'a str>,
+    manifests: BTreeMap<&'a str, &'a CargoToml>,
+}
+
+fn local_path_cargo_lookup<'a>(
+    known_paths: &'a [String],
+    manifests: &'a [G3DepsLocalPathCargoManifest],
+) -> LocalPathCargoLookup<'a> {
+    LocalPathCargoLookup {
+        known_paths: known_paths.iter().map(String::as_str).collect(),
+        manifests: manifests
+            .iter()
+            .map(|manifest| (manifest.cargo_rel_path.as_str(), &manifest.cargo))
+            .collect(),
+    }
+}
+
 fn workspace_root_rel_dir(cargo_rel_path: &str) -> &str {
     cargo_rel_path.rsplit_once('/').map_or("", |(dir, _)| dir)
+}
+
+fn path_cargo_rel_path(resolved_rel_path: &str) -> String {
+    if resolved_rel_path.is_empty() {
+        "Cargo.toml".to_owned()
+    } else {
+        format!("{resolved_rel_path}/Cargo.toml")
+    }
+}
+
+fn path_is_under_workspace_root(
+    workspace_cargo_rel_path: &str,
+    resolved_rel_path: &str,
+) -> bool {
+    let workspace_root = workspace_root_rel_dir(workspace_cargo_rel_path);
+    if workspace_root.is_empty() {
+        return !resolved_rel_path.split('/').any(|segment| segment == "..");
+    }
+
+    resolved_rel_path == workspace_root
+        || resolved_rel_path
+            .strip_prefix(workspace_root)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn strip_prefix_path<'a>(rel_path: &'a str, prefix: &str) -> Option<&'a str> {
