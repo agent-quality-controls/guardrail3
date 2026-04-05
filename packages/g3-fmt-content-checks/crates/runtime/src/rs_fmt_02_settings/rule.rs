@@ -140,3 +140,7 @@ fn push_missing(
         None,
     ));
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"]
+mod tests;

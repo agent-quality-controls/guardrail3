@@ -133,3 +133,7 @@ fn parse_manifest_version(raw: &str) -> Option<(u64, u64, u64)> {
     }
     Some((major, minor, patch))
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"]
+mod tests;

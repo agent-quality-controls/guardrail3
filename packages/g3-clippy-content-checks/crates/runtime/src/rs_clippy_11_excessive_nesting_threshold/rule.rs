@@ -16,3 +16,7 @@ pub(crate) fn check(input: &G3ClippyContentChecksInput, results: &mut Vec<G3Chec
         results,
     );
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"]
+mod tests;

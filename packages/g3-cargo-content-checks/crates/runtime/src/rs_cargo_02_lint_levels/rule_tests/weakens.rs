@@ -5,7 +5,7 @@ use super::helpers::run_check;
 #[test]
 fn errors_when_expected_deny_is_weakened() {
     let results = run_check(
-        include_str!("../../rs_cargo_01_workspace_lints/tests/fixtures/golden_workspace.toml")
+        include_str!("../../rs_cargo_01_workspace_lints/rule_tests/fixtures/golden_workspace.toml")
             .replace("unwrap_used = \"deny\"", "unwrap_used = \"warn\"")
             .as_str(),
     );
