@@ -1,4 +1,5 @@
 mod helpers;
+mod family_bridge;
 mod golden;
 mod missing_content;
 mod parse_error;
