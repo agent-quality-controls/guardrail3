@@ -1,12 +1,12 @@
 use g3_fmt_content_checks_types::G3FmtContentChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::inputs::cargo_edition;
+use crate::inputs::{cargo_edition, rustfmt_edition};
 
 const ID: &str = "RS-FMT-06";
 
 pub(crate) fn check(input: &G3FmtContentChecksInput, results: &mut Vec<G3CheckResult>) {
-    let Some(rustfmt_edition) = input.rustfmt.edition.as_deref() else {
+    let Some(rustfmt_edition) = rustfmt_edition(input.rustfmt.edition) else {
         return;
     };
 

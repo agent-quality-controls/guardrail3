@@ -1,4 +1,4 @@
-use deny_toml_parser::DenyToml;
+use deny_toml_parser::{AdvisoryScope, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{expected_advisory_baseline, inventory};
@@ -13,7 +13,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
     check_value(
         deny_rel_path,
-        advisories.unmaintained.as_deref(),
+        advisories.unmaintained.as_ref().map(advisory_scope_str),
         "unmaintained",
         &expected_unmaintained,
         results,
@@ -25,6 +25,15 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
         &expected_yanked,
         results,
     );
+}
+
+const fn advisory_scope_str(scope: &AdvisoryScope) -> &'static str {
+    match scope {
+        AdvisoryScope::All => "all",
+        AdvisoryScope::Workspace => "workspace",
+        AdvisoryScope::Transitive => "transitive",
+        AdvisoryScope::None => "none",
+    }
 }
 
 fn check_value(

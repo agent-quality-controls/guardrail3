@@ -5,8 +5,12 @@ use crate::inputs::ConfigClippyInput;
 const ID: &str = "RS-CLIPPY-25";
 
 pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
-    match (&input.config.parsed, &input.config.parse_error) {
-        (Some(_), None) => results.push(
+    match (
+        &input.config.parsed_typed,
+        input.config.parse_error.as_deref(),
+        input.config.typed_parse_error.as_deref(),
+    ) {
+        (Some(_), None, None) => results.push(
             CheckResult::from_parts(
                 ID.to_owned(),
                 Severity::Info,
@@ -18,7 +22,8 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             )
             .as_inventory(),
         ),
-        (None, Some(parse_error)) => results.push(CheckResult::from_parts(
+        (_, Some(parse_error), _) | (None, None, Some(parse_error)) => results.push(
+            CheckResult::from_parts(
             ID.to_owned(),
             Severity::Error,
             "clippy.toml parse error".to_owned(),
@@ -27,8 +32,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             None,
             false,
         )),
-        (None, None) => {}
-        (Some(_), Some(_)) => {}
+        (None, None, None) => {}
+        (Some(_), None, Some(_)) => {}
     }
 }
-
