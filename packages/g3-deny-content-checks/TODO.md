@@ -24,16 +24,11 @@ Follow-up:
 - Add structural deny findings for typed parser/schema rejection before calling the package.
 - Reassign malformed-schema expectations to app-level structural tests rather than package-level content tests.
 
-### No direct package tests currently run
+### ~~No direct package tests currently run~~ DONE
 
-- `cargo test --manifest-path packages/g3-deny-content-checks/Cargo.toml --workspace -- --list`
-  currently reports `0 tests`.
-- The old app-side tests for migrated rules still exist on disk, but they are no longer compiled through the app module graph.
-
-Follow-up:
-
-- Add direct package tests for the migrated rules.
-- Recreate parity coverage for the migrated content-rule set inside this package.
+- 121 package-level tests now cover all 22 migrated content rules.
+- Each rule has its own test directory with golden, missing, and wrong-value scenarios.
+- Assertions crate provides per-rule typed assertion helpers.
 
 ### Re-check parity for migrated malformed-shape behavior after structural signaling lands
 
