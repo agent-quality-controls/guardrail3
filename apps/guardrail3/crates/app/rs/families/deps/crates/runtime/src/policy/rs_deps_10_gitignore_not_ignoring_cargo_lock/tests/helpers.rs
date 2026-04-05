@@ -57,6 +57,8 @@ pub(crate) fn lockfile_facts(
         dependency_entries: Vec::new(),
         allowlist_coverage: Vec::new(),
         direct_dependency_caps: Vec::new(),
+        policy_content_checks: Vec::new(),
+        direct_dependency_cap_content_checks: Vec::new(),
         input_failures: Vec::new(),
     }
 }

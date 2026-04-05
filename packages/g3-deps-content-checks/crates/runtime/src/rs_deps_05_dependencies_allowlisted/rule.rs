@@ -1,16 +1,16 @@
-use g3_deps_content_checks_types::G3DepsContentChecksInput;
+use g3_deps_content_checks_types::G3DepsPolicyContentChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{DependencySectionKind, allowlist_present, allowlisted, dependency_entries, error, info};
+use crate::support::{DependencySectionKind, allowlist_present, allowlisted, dependency_entries_from_policy_input, error, info};
 
 const ID: &str = "RS-DEPS-05";
 
-pub(crate) fn check(input: &G3DepsContentChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3DepsPolicyContentChecksInput, results: &mut Vec<G3CheckResult>) {
     if !allowlist_present(input) {
         return;
     }
 
-    for entry in dependency_entries(input) {
+    for entry in dependency_entries_from_policy_input(input) {
         if entry.section_kind != DependencySectionKind::Dependencies {
             continue;
         }

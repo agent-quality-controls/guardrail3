@@ -383,6 +383,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3-deps-content-checks"
+version = "0.1.0"
+dependencies = [
+ "g3-deps-content-checks-runtime",
+ "g3-deps-content-checks-types",
+]
+
+[[package]]
+name = "g3-deps-content-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "g3-deps-content-checks-types",
+ "glob",
+ "guardrail3-check-types",
+ "guardrail3-domain-config",
+]
+
+[[package]]
+name = "g3-deps-content-checks-types"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "guardrail3-domain-config",
+]
+
+[[package]]
 name = "g3-fmt-content-checks"
 version = "0.1.0"
 dependencies = [
@@ -827,6 +854,8 @@ dependencies = [
 name = "guardrail3-app-rs-family-deps"
 version = "0.0.0"
 dependencies = [
+ "cargo-toml-parser",
+ "g3-deps-content-checks",
  "glob",
  "guardrail3-app-rs-family-deps-assertions",
  "guardrail3-app-rs-family-deps-test-support",
@@ -835,6 +864,8 @@ dependencies = [
  "guardrail3-app-rs-legality",
  "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-structure",
+ "guardrail3-check-types",
+ "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",

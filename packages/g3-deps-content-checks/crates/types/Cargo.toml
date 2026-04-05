@@ -14,7 +14,7 @@ api = []
 
 [dependencies]
 cargo-toml-parser = { path = "../../../cargo-toml-parser", version = "0.1.0" }
-guardrail3-rs-toml-parser = { path = "../../../guardrail3-rs-toml-parser", version = "0.1.0" }
+guardrail3-domain-config = { path = "../../../../apps/guardrail3/crates/domain/config", version = "0.0.0" }
 
 [lints]
 workspace = true

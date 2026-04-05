@@ -5,12 +5,13 @@ mod workspaces;
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use cargo_toml_parser::CargoToml;
 use guardrail3_app_rs_family_mapper::RsDepsRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_app_rs_family_view::FamilyView as ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
 
-use self::dependency_entries::{collect_dependency_facts, discover_members};
+use self::dependency_entries::{collect_content_check_facts, collect_dependency_facts, discover_members};
 use self::guardrail::parse_guardrail;
 use self::lockfiles::collect_lockfiles;
 use self::workspaces::{discover_workspaces, workspace_by_member};
@@ -39,6 +40,7 @@ pub enum DependencySectionKind {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct DependencyEntryFacts {
     pub(crate) crate_name: String,
     pub(crate) cargo_rel_path: String,
@@ -50,6 +52,7 @@ pub struct DependencyEntryFacts {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct AllowlistCoverageFacts {
     pub(crate) crate_name: String,
     pub(crate) cargo_rel_path: String,
@@ -57,10 +60,29 @@ pub struct AllowlistCoverageFacts {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct DirectDependencyCapFacts {
     pub(crate) crate_name: String,
     pub(crate) cargo_rel_path: String,
     pub(crate) unique_direct_dependency_count: usize,
+}
+
+#[derive(Debug, Clone)]
+pub struct PolicyContentCheckFacts {
+    pub(crate) workspace_cargo_rel_path: String,
+    pub(crate) workspace_cargo: CargoToml,
+    pub(crate) crate_cargo_rel_path: String,
+    pub(crate) crate_cargo: CargoToml,
+    pub(crate) guardrail_rel_path: String,
+    pub(crate) guardrail_content: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct DirectDependencyCapContentFacts {
+    pub(crate) workspace_cargo_rel_path: String,
+    pub(crate) workspace_cargo: CargoToml,
+    pub(crate) crate_cargo_rel_path: String,
+    pub(crate) crate_cargo: CargoToml,
 }
 
 #[derive(Debug, Clone)]
@@ -73,9 +95,14 @@ pub struct InputFailureFacts {
 pub struct DepsFacts {
     pub(crate) tools: Vec<ToolFacts>,
     pub(crate) lockfiles: Vec<LockfileFacts>,
+    #[allow(dead_code)]
     pub(crate) dependency_entries: Vec<DependencyEntryFacts>,
+    #[allow(dead_code)]
     pub(crate) allowlist_coverage: Vec<AllowlistCoverageFacts>,
+    #[allow(dead_code)]
     pub(crate) direct_dependency_caps: Vec<DirectDependencyCapFacts>,
+    pub(crate) policy_content_checks: Vec<PolicyContentCheckFacts>,
+    pub(crate) direct_dependency_cap_content_checks: Vec<DirectDependencyCapContentFacts>,
     pub(crate) input_failures: Vec<InputFailureFacts>,
 }
 
@@ -145,6 +172,14 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         parsed_guardrail.as_ref(),
         &mut input_failures,
     );
+    let (policy_content_checks, direct_dependency_cap_content_checks) = collect_content_check_facts(
+        tree,
+        &members,
+        &workspaces,
+        guardrail_rel_path.as_deref(),
+        parsed_guardrail.as_ref(),
+        &mut input_failures,
+    );
     let allowlist_coverage = members
         .into_iter()
         .map(|member| AllowlistCoverageFacts {
@@ -181,6 +216,8 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         dependency_entries,
         allowlist_coverage,
         direct_dependency_caps,
+        policy_content_checks,
+        direct_dependency_cap_content_checks,
         input_failures,
     }
 }

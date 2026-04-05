@@ -1,6 +1,6 @@
 use super::{collected_facts, collected_facts_with_validation_scope, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_09_cargo_lock_present as assertions;
-use guardrail3_app_rs_family_deps_assertions::rs_deps_12_direct_dependency_cap::assert_input_failure_results;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_11_input_failures as input_failure_assertions;
 
 #[test]
 fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
@@ -307,7 +307,7 @@ fn nested_non_member_package_under_workspace_root_emits_input_failure() {
             ..Default::default()
         }],
     );
-    assert_input_failure_results(&results, &[]);
+    input_failure_assertions::assert_rule_results(&results, &[]);
     assert!(
         results
             .iter()
@@ -363,7 +363,7 @@ fn nested_non_member_helper_crate_under_workspace_root_emits_input_failure_witho
             ..Default::default()
         }],
     );
-    assert_input_failure_results(&results, &[]);
+    input_failure_assertions::assert_rule_results(&results, &[]);
     assert!(
         results
             .iter()
