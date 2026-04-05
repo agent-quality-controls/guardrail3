@@ -175,6 +175,7 @@ Rules in app: RS-TOOLCHAIN-01, RS-TOOLCHAIN-04
 use cargo_toml_parser::CargoToml;
 use clippy_toml_parser::ClippyToml;
 use guardrail3_check_types::G3CheckResult;
+use std::path::PathBuf;
 
 pub struct G3GardeDependencyCheckInput {
     pub cargo_rel_path: String,
@@ -193,19 +194,33 @@ pub fn check_dependency_present(
 pub fn check_clippy_bans(
     input: &G3GardeClippyBanChecksInput,
 ) -> Vec<G3CheckResult>;
+
+pub struct G3AstFile {
+    pub rel_path: String,
+    pub abs_path: PathBuf,
+}
+
+pub struct G3GardeAstChecksInput {
+    pub source_files: Vec<G3AstFile>,
+    pub guardrail_toml: G3AstFile,
+}
+
+pub fn check(input: &G3GardeAstChecksInput) -> Vec<G3CheckResult>;
 ```
 
-Rules in package: RS-GARDE-01, RS-GARDE-02, RS-GARDE-03, RS-GARDE-04, RS-GARDE-06
-Rules in app: RS-GARDE-05, RS-GARDE-07, RS-GARDE-08, RS-GARDE-09, RS-GARDE-10, RS-GARDE-11, RS-GARDE-12, RS-GARDE-13, RS-GARDE-14
+Rules in `g3-garde-content-checks`: RS-GARDE-01, RS-GARDE-02, RS-GARDE-03, RS-GARDE-04, RS-GARDE-06
+Rules in `g3-garde-ast-checks`: RS-GARDE-05, RS-GARDE-07, RS-GARDE-08, RS-GARDE-09, RS-GARDE-11, RS-GARDE-12, RS-GARDE-13, RS-GARDE-14
+Rules in app: RS-GARDE-10
 
 Current bridge note:
 
 - app still owns garde applicability gating from policy and source adoption
 - app still owns missing / unparseable covering clippy handling for
   `RS-GARDE-02/03/04/06`
-- package owns only the typed parsed-file path for those root-policy checks
-- AST/source garde rules stay app-side until there is a clean parsed-file
-  package boundary for them
+- app still owns malformed-input reporting through `RS-GARDE-10`
+- `g3-garde-content-checks` owns the typed parsed-file path for root-policy checks
+- `g3-garde-ast-checks` owns the governed Rust source-file path and required
+  `guardrail3.toml` path for AST/source checks
 
 ### Deps
 ```rust

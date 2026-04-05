@@ -45,6 +45,7 @@ pub struct GardeRootFacts {
     pub(crate) clippy_parse_error: Option<String>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct DerivedBoundaryTypeFacts {
     pub(crate) rel_path: String,
@@ -55,6 +56,7 @@ pub struct DerivedBoundaryTypeFacts {
     pub(crate) has_validate: bool,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct ManualDeserializeImplFacts {
     pub(crate) rel_path: String,
@@ -64,6 +66,7 @@ pub struct ManualDeserializeImplFacts {
     pub(crate) has_validate: bool,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct QueryAsMacroFacts {
     pub(crate) rel_path: String,
@@ -72,6 +75,7 @@ pub struct QueryAsMacroFacts {
     pub(crate) escape_hatch_reason: Option<String>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct BoundaryFieldFacts {
     pub(crate) rel_path: String,
@@ -94,6 +98,7 @@ pub struct GardeInputFailureFacts {
     pub(crate) message: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct GuardrailConfigValidationFacts {
     pub(crate) rel_path: String,
@@ -101,6 +106,7 @@ pub struct GuardrailConfigValidationFacts {
     pub(crate) parse_kind: GuardrailConfigParseKind,
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 #[derive(Debug, Clone, Default)]
 pub struct GardeFacts {
     pub(crate) roots: Vec<GardeRootFacts>,

@@ -438,6 +438,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3-garde-ast-checks"
+version = "0.1.0"
+dependencies = [
+ "g3-garde-ast-checks-runtime",
+ "g3-garde-ast-checks-types",
+]
+
+[[package]]
+name = "g3-garde-ast-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3-garde-ast-checks-types",
+ "guardrail3-check-types",
+ "guardrail3-domain-config",
+ "guardrail3-reason-policy",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "toml",
+]
+
+[[package]]
+name = "g3-garde-ast-checks-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3-garde-content-checks"
 version = "0.1.0"
 dependencies = [
@@ -965,6 +991,7 @@ version = "0.0.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
+ "g3-garde-ast-checks",
  "g3-garde-content-checks",
  "glob",
  "guardrail3-app-core",
@@ -981,7 +1008,6 @@ dependencies = [
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
- "guardrail3-reason-policy",
  "guardrail3-shared-fs",
  "guardrail3_app_rs_family_garde_assertions",
  "proc-macro2",

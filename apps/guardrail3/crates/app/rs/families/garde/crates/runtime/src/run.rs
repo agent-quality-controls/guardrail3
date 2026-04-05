@@ -1,6 +1,8 @@
+use g3_garde_ast_checks::{G3AstFile, G3GardeAstChecksInput};
 use g3_garde_content_checks::{G3GardeClippyBanChecksInput, G3GardeDependencyCheckInput};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::{CheckResult, Severity};
 
@@ -32,91 +34,7 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
         run_clippy_ban_checks(&input, &mut results);
     }
 
-    for target in &facts.struct_targets {
-        if route
-            .scoped_files()
-            .is_some_and(|files| !files.contains(&target.rel_path))
-        {
-            continue;
-        }
-        crate::derive_checks::rs_garde_05_struct_derive_validate::check(
-            &crate::inputs::DerivedBoundaryTypeInput::new(target),
-            &mut results,
-        );
-    }
-
-    for target in &facts.manual_deserialize_impls {
-        if route
-            .scoped_files()
-            .is_some_and(|files| !files.contains(&target.rel_path))
-        {
-            continue;
-        }
-        crate::derive_checks::rs_garde_07_manual_deserialize_impl::check(
-            &crate::inputs::ManualDeserializeImplInput::new(target),
-            &mut results,
-        );
-    }
-
-    for target in &facts.enum_targets {
-        if route
-            .scoped_files()
-            .is_some_and(|files| !files.contains(&target.rel_path))
-        {
-            continue;
-        }
-        crate::derive_checks::rs_garde_08_enum_derive_validate::check(
-            &crate::inputs::DerivedBoundaryTypeInput::new(target),
-            &mut results,
-        );
-    }
-
-    for macro_use in &facts.query_as_macros {
-        if route
-            .scoped_files()
-            .is_some_and(|files| !files.contains(&macro_use.rel_path))
-        {
-            continue;
-        }
-        crate::inventory::rs_garde_09_query_as_inventory::check(
-            &crate::inputs::QueryAsMacroInput::new(macro_use),
-            &mut results,
-        );
-    }
-    crate::inventory::rs_garde_09_query_as_inventory::check_count(
-        facts.query_as_macros.iter().filter(|macro_use| {
-            route
-                .scoped_files()
-                .is_none_or(|files| files.contains(&macro_use.rel_path))
-        }),
-        &mut results,
-    );
-
-    for field in &facts.boundary_fields {
-        if route
-            .scoped_files()
-            .is_some_and(|files| !files.contains(&field.rel_path))
-        {
-            continue;
-        }
-        let input = crate::inputs::BoundaryFieldInput::new(field);
-        crate::derive_checks::rs_garde_11_field_level_constraints::check(&input, &mut results);
-        crate::derive_checks::rs_garde_12_nested_validation_dive::check(&input, &mut results);
-        crate::derive_checks::rs_garde_13_context_validation_surface::check(&input, &mut results);
-    }
-
-    for site in &facts.guardrail_config_validation_sites {
-        if route
-            .scoped_files()
-            .is_some_and(|files| !files.contains(&site.rel_path))
-        {
-            continue;
-        }
-        crate::derive_checks::rs_garde_14_guardrail_config_validate_call::check(
-            &crate::inputs::GuardrailConfigValidationInput::new(site),
-            &mut results,
-        );
-    }
+    run_ast_checks(surface, route, &facts, &mut results);
 
     results
 }
@@ -162,6 +80,88 @@ fn run_clippy_ban_checks(
             .into_iter()
             .map(convert_check_result),
     );
+}
+
+fn run_ast_checks(
+    surface: &FamilyView,
+    route: &RsGardeRoute,
+    facts: &crate::facts::GardeFacts,
+    results: &mut Vec<CheckResult>,
+) {
+    let root_dirs = facts
+        .roots
+        .iter()
+        .map(|root| root.rel_dir.clone())
+        .collect::<Vec<_>>();
+
+    for root in facts.roots.iter().filter(|root| root.garde_applicable) {
+        let Some(guardrail_rel_path) = route.family_files().iter().find_map(|file| {
+            (file.kind() == RustFamilyFileKind::GuardrailToml
+                && file.exact_rust_root_owner()
+                && file.logical_owner_rel() == root.rel_dir)
+                .then(|| file.rel_path().to_owned())
+        }) else {
+            continue;
+        };
+        let Some(guardrail_abs_path) = surface.abs_path(&guardrail_rel_path) else {
+            continue;
+        };
+        if facts
+            .input_failures
+            .iter()
+            .any(|failure| failure.rel_path == guardrail_rel_path)
+        {
+            continue;
+        }
+
+        let source_files = crate::discover::rust_file_rels(surface)
+            .into_iter()
+            .filter(|rel_path| {
+                route
+                    .scoped_files()
+                    .is_none_or(|files| files.contains(rel_path))
+            })
+            .filter(|rel_path| owning_root_dir(rel_path, &root_dirs) == Some(root.rel_dir.as_str()))
+            .filter_map(|rel_path| {
+                surface.abs_path(&rel_path).map(|abs_path| G3AstFile {
+                    rel_path,
+                    abs_path,
+                })
+            })
+            .collect::<Vec<_>>();
+
+        if source_files.is_empty() {
+            continue;
+        }
+
+        let package_input = G3GardeAstChecksInput {
+            source_files,
+            guardrail_toml: G3AstFile {
+                rel_path: guardrail_rel_path,
+                abs_path: guardrail_abs_path,
+            },
+        };
+        results.extend(
+            g3_garde_ast_checks::check(&package_input)
+                .into_iter()
+                .map(convert_check_result),
+        );
+    }
+}
+
+fn owning_root_dir<'a>(rel_path: &str, root_dirs: &'a [String]) -> Option<&'a str> {
+    let parent = rel_path.rsplit_once('/').map_or("", |(prefix, _)| prefix);
+    root_dirs
+        .iter()
+        .filter(|root| {
+            root.is_empty()
+                || parent == root.as_str()
+                || parent
+                    .strip_prefix(root.as_str())
+                    .is_some_and(|rest| rest.starts_with('/'))
+        })
+        .max_by_key(|root| root.len())
+        .map(String::as_str)
 }
 
 fn convert_check_result(result: G3CheckResult) -> CheckResult {

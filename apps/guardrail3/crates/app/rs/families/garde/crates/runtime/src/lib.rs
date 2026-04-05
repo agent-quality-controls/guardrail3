@@ -1,9 +1,7 @@
-mod derive_checks;
 mod discover;
 mod facts;
 mod garde_support;
 mod inputs;
-mod inventory;
 mod parse;
 mod root_policy;
 

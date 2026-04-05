@@ -5,13 +5,13 @@ mod guardrail_config;
 use guardrail_config::collect_unvalidated_guardrail_sites;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum BoundaryKind {
+pub(crate) enum BoundaryKind {
     Struct,
     Enum,
 }
 
 #[derive(Debug, Clone)]
-pub struct DerivedBoundaryType {
+pub(crate) struct DerivedBoundaryType {
     pub(crate) line: usize,
     pub(crate) name: String,
     pub(crate) boundary_kind: BoundaryKind,
@@ -21,19 +21,19 @@ pub struct DerivedBoundaryType {
 }
 
 #[derive(Debug, Clone)]
-pub struct ManualImpl {
+pub(crate) struct ManualImpl {
     pub(crate) line: usize,
     pub(crate) type_name: String,
 }
 
 #[derive(Debug, Clone)]
-pub struct QueryAsMacro {
+pub(crate) struct QueryAsMacro {
     pub(crate) line: usize,
     pub(crate) macro_name: String,
 }
 
 #[derive(Debug, Clone)]
-pub struct BoundaryField {
+pub(crate) struct BoundaryField {
     pub(crate) line: usize,
     pub(crate) boundary_name: String,
     pub(crate) field_name: String,
@@ -49,19 +49,28 @@ pub struct BoundaryField {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum GuardrailConfigParseKind {
+pub(crate) enum GuardrailConfigParseKind {
     TomlFromStr,
     TryInto,
 }
 
+impl GuardrailConfigParseKind {
+    pub(crate) const fn label(self) -> &'static str {
+        match self {
+            Self::TomlFromStr => "`toml::from_str`",
+            Self::TryInto => "`try_into::<GuardrailConfig>()`",
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
-pub struct GuardrailConfigValidationSite {
+pub(crate) struct GuardrailConfigValidationSite {
     pub(crate) line: usize,
     pub(crate) parse_kind: GuardrailConfigParseKind,
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct ParsedGardeFile {
+pub(crate) struct ParsedGardeFile {
     pub(crate) derived_types: Vec<DerivedBoundaryType>,
     pub(crate) manual_deserialize_impls: Vec<ManualImpl>,
     pub(crate) manual_validate_impls: std::collections::BTreeSet<String>,
@@ -71,11 +80,11 @@ pub struct ParsedGardeFile {
     pub(crate) guardrail_config_validation_sites: Vec<GuardrailConfigValidationSite>,
 }
 
-pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
+pub(crate) fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
     syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content))
 }
 
-pub fn analyze(ast: &syn::File) -> ParsedGardeFile {
+pub(crate) fn analyze(ast: &syn::File) -> ParsedGardeFile {
     let mut visitor = GardeVisitor::default();
     syn::visit::Visit::visit_file(&mut visitor, ast);
     visitor.finish()
@@ -199,9 +208,7 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
 
     fn visit_item_struct(&mut self, item: &'ast syn::ItemStruct) {
         let macros = derive_macros(&item.attrs);
-        let has_boundary = macros
-            .iter()
-            .any(|name| self.is_input_boundary_derive(name));
+        let has_boundary = macros.iter().any(|name| self.is_input_boundary_derive(name));
         let has_validate = macros.iter().any(|name| self.is_validate_derive(name));
         let has_non_primitive_fields = fields::struct_has_non_primitive_fields(item);
         let name = self.qualified_name(&item.ident.to_string());
@@ -239,9 +246,7 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
 
     fn visit_item_enum(&mut self, item: &'ast syn::ItemEnum) {
         let macros = derive_macros(&item.attrs);
-        let has_boundary = macros
-            .iter()
-            .any(|name| self.is_input_boundary_derive(name));
+        let has_boundary = macros.iter().any(|name| self.is_input_boundary_derive(name));
         let has_validate = macros.iter().any(|name| self.is_validate_derive(name));
         let has_non_primitive_fields = fields::enum_has_non_primitive_fields(item);
         let name = self.qualified_name(&item.ident.to_string());
