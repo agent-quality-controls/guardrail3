@@ -9,10 +9,17 @@
 use cargo_toml_parser_runtime::{CargoToml, Dependency, LintValue, Value};
 
 pub fn assert_manifest_empty(manifest: &CargoToml) {
+    assert!(
+        manifest.cargo_features.is_empty(),
+        "cargo_features should be empty"
+    );
     assert_eq!(manifest.package, None, "package should be None");
+    assert_eq!(manifest.project, None, "project should be None");
     assert_eq!(manifest.workspace, None, "workspace should be None");
+    assert!(manifest.badges.is_empty(), "badges should be empty");
     assert!(manifest.dependencies.is_empty(), "dependencies should be empty");
     assert!(manifest.target.is_empty(), "target should be empty");
+    assert!(manifest.profile.is_empty(), "profile should be empty");
     assert!(manifest.extra.is_empty(), "extra should be empty");
 }
 

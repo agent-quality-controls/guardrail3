@@ -5,7 +5,9 @@
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
-use nextest_toml_parser_runtime::{NextestProfile, NextestToml, TimeoutConfig, Value};
+use nextest_toml_parser_runtime::{
+    NextestProfile, NextestToml, TestThreads, ThreadsRequired, TimeoutConfig, Value,
+};
 
 pub fn assert_empty_toml(cfg: &NextestToml) {
     assert!(cfg.profile.is_empty(), "profile map should be empty");
@@ -17,7 +19,7 @@ pub fn assert_profile_len(cfg: &NextestToml, expected: usize) {
 }
 
 pub fn assert_profile_extra_empty(profile: &NextestProfile) {
-    assert!(profile.extra().is_empty(), "profile extra should be empty");
+    assert!(profile.extra.is_empty(), "profile extra should be empty");
 }
 
 pub fn assert_top_level_extra_string(cfg: &NextestToml, key: &str, expected: &str) {
@@ -30,10 +32,18 @@ pub fn assert_top_level_extra_string(cfg: &NextestToml, key: &str, expected: &st
 
 pub fn assert_profile_extra_bool(profile: &NextestProfile, key: &str, expected: bool) {
     assert_eq!(
-        profile.extra().get(key).and_then(Value::as_bool),
+        profile.extra.get(key).and_then(Value::as_bool),
         Some(expected),
         "profile extra key should be preserved",
     );
+}
+
+pub fn assert_test_threads(actual: Option<TestThreads>, expected: TestThreads) {
+    assert_eq!(actual, Some(expected), "test-threads mismatch");
+}
+
+pub fn assert_threads_required(actual: Option<ThreadsRequired>, expected: ThreadsRequired) {
+    assert_eq!(actual, Some(expected), "threads-required mismatch");
 }
 
 pub fn assert_simple_timeout(actual: Option<&TimeoutConfig>, expected: &str, field_name: &str) {
@@ -50,9 +60,9 @@ pub fn assert_detailed_timeout(
 ) {
     assert!(
         matches!(actual, Some(TimeoutConfig::Detailed(detail))
-            if detail.period() == period
-                && detail.terminate_after() == terminate_after
-                && detail.extra().is_empty()),
+            if detail.period == period
+                && detail.terminate_after == terminate_after
+                && detail.extra.is_empty()),
         "expected Detailed timeout, got: {actual:?}",
     );
 }

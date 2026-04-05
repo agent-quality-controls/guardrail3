@@ -5,7 +5,7 @@
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
-use clippy_toml_parser_runtime::{BanEntry, ClippyToml, Value};
+use clippy_toml_parser_runtime::{ClippyToml, DisallowedPath};
 
 pub fn assert_thresholds_empty(cfg: &ClippyToml) {
     assert_eq!(cfg.max_struct_bools, None, "max_struct_bools should be None");
@@ -21,20 +21,16 @@ pub fn assert_ban_lists_empty(cfg: &ClippyToml) {
     assert!(cfg.disallowed_macros.is_empty(), "disallowed_macros should be empty");
 }
 
-pub fn assert_extra_empty(cfg: &ClippyToml) {
-    assert!(cfg.extra.is_empty(), "extra should be empty");
-}
-
 #[allow(clippy::too_many_arguments, reason = "threshold tuple would be less readable at callsites")]
 pub fn assert_thresholds(
     cfg: &ClippyToml,
-    max_struct_bools: Option<u32>,
-    max_fn_params_bools: Option<u32>,
-    too_many_lines_threshold: Option<u32>,
-    too_many_arguments_threshold: Option<u32>,
-    excessive_nesting_threshold: Option<u32>,
-    cognitive_complexity_threshold: Option<u32>,
-    type_complexity_threshold: Option<u32>,
+    max_struct_bools: Option<u64>,
+    max_fn_params_bools: Option<u64>,
+    too_many_lines_threshold: Option<u64>,
+    too_many_arguments_threshold: Option<u64>,
+    excessive_nesting_threshold: Option<u64>,
+    cognitive_complexity_threshold: Option<u64>,
+    type_complexity_threshold: Option<u64>,
 ) {
     assert_eq!(cfg.max_struct_bools, max_struct_bools, "max_struct_bools mismatch");
     assert_eq!(
@@ -63,10 +59,18 @@ pub fn assert_thresholds(
     );
 }
 
-pub fn assert_ban_entry(entry: Option<&BanEntry>, path: &str, reason: Option<&str>) {
+pub fn assert_ban_entry(entry: Option<&DisallowedPath>, path: &str, reason: Option<&str>) {
     let entry = entry.expect("ban entry should exist");
-    assert_eq!(entry.path(), path, "ban path mismatch");
-    assert_eq!(entry.reason(), reason, "ban reason mismatch");
+    match entry {
+        DisallowedPath::Simple(simple) => {
+            assert_eq!(simple, path, "ban path mismatch");
+            assert_eq!(reason, None, "simple entries have no reason");
+        }
+        DisallowedPath::Detailed(detail) => {
+            assert_eq!(detail.path, path, "ban path mismatch");
+            assert_eq!(detail.reason.as_deref(), reason, "ban reason mismatch");
+        }
+    }
 }
 
 pub fn assert_list_len<T>(items: &[T], expected: usize, field_name: &str) {
@@ -77,12 +81,9 @@ pub fn assert_bool_field(actual: Option<bool>, expected: Option<bool>, field_nam
     assert_eq!(actual, expected, "{field_name} mismatch");
 }
 
-pub fn assert_top_level_string_extra(cfg: &ClippyToml, key: &str, expected: &str) {
-    assert_eq!(
-        cfg.extra.get(key).and_then(Value::as_str),
-        Some(expected),
-        "unknown key should be captured",
-    );
+pub fn assert_string_list(actual: &[String], expected: &[&str], field_name: &str) {
+    let expected_values = expected.iter().map(ToString::to_string).collect::<Vec<_>>();
+    assert_eq!(actual, expected_values, "{field_name} mismatch");
 }
 
 pub fn assert_parse_error(err: impl std::fmt::Display) {

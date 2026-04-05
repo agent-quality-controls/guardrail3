@@ -6,10 +6,15 @@ mod fs;
 mod parser;
 
 #[cfg(feature = "api")]
-pub use clippy_toml_parser_types::{BanEntry, BanEntryDetail, ClippyToml};
+pub use clippy_toml_parser_types::{
+    ArithmeticSideEffectsBinaryEntry, AwaitHoldingInvalidType, ClippyToml, DisallowedField,
+    DisallowedFieldDetail, DisallowedPath, DisallowedPathDetail, InherentImplLintScope,
+    MacroBraceEntry, MatchLintBehaviour, PubUnderscoreFieldsBehaviour, RenameEntry,
+    SourceItemOrdering, SourceItemOrderingCategory, SourceItemOrderingModuleItemGroupings,
+    SourceItemOrderingModuleItemKind, SourceItemOrderingTraitAssocItemKind,
+    SourceItemOrderingTraitAssocItemKinds, SourceItemOrderingWithinModuleItemGroupings,
+};
 #[cfg(feature = "api")]
 pub use error::Error;
 #[cfg(feature = "api")]
 pub use parser::{from_path, parse};
-#[cfg(feature = "api")]
-pub use toml::Value;
