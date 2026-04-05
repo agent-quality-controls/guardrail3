@@ -191,21 +191,34 @@ Rules in app: none — garde IS the policy owner for its concerns
 ### Deps
 ```rust
 use cargo_toml_parser::CargoToml;
+use guardrail3_rs_toml_parser::Guardrail3RsToml;
+use guardrail3_check_types::G3CheckResult;
 
-pub struct G3DepsChecksInput {
-    pub workspace_manifest: CargoToml,
-    pub member_manifests: Vec<(String, CargoToml)>,
-    pub cargo_lock_exists: bool,
-    pub cargo_lock_gitignored: bool,
-    pub tools: Vec<G3ToolStatus>,
-    pub profile: G3Profile,
+pub struct G3DepsContentChecksInput {
+    pub workspace_cargo_rel_path: String,
+    pub workspace_cargo: CargoToml,
+    pub crate_cargo_rel_path: String,
+    pub crate_cargo: CargoToml,
+    pub guardrail_rs_rel_path: String,
+    pub guardrail_rs: Guardrail3RsToml,
 }
 
-pub fn check(input: &G3DepsChecksInput) -> Vec<G3CheckResult>
+pub fn check(input: &G3DepsContentChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-DEPS-01..12 (all rules)
-Rules in app: none
+Rules in package: RS-DEPS-05, 06, 07, 08, 12
+Rules in app: RS-DEPS-01, 02, 03, 04, 09, 10, 11
+
+Package boundary:
+
+- receives full parsed files only
+- one input represents one crate policy opportunity inside one workspace
+- `workspace_cargo` exists because `RS-DEPS-05..07` may need workspace
+  dependency resolution such as `workspace = true`
+- `guardrail_rs` is the one workspace policy file and applies uniformly within
+  that workspace
+- package does not own tool presence, lockfile discovery, `.gitignore`
+  ownership, or malformed-input fail-closed reporting
 
 ### Test
 ```rust
