@@ -1,6 +1,6 @@
 mod crawl;
 mod fs;
-mod ignore;
+mod recovery;
 mod run;
 mod support;
 
