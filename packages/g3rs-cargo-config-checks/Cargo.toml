@@ -24,6 +24,9 @@ api = [
     "dep:g3rs-cargo-config-checks-types",
 ]
 
+[package.metadata.guardrail3]
+shared = true
+
 [package.metadata.docs.rs]
 all-features = true
 
