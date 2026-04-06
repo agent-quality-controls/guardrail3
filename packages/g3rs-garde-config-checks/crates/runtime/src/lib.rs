@@ -7,4 +7,4 @@ mod run;
 mod support;
 
 #[cfg(feature = "checks")]
-pub use run::{check_clippy_bans, check_dependency_present};
+pub use run::check;

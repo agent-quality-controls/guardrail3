@@ -198,9 +198,6 @@ dependencies = [
 [[package]]
 name = "g3rs-garde-config-ingestion-types"
 version = "0.1.0"
-dependencies = [
- "g3rs-garde-config-checks",
-]
 
 [[package]]
 name = "g3rs-workspace-crawl"
