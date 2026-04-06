@@ -6,12 +6,19 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use cliff_toml_parser as _;
 use release_plz_toml_parser as _;
 
-/// Whether the crate is publishable (not `publish = false` or `publish = []`).
+/// Whether the crate is publishable.
+///
+/// Not publishable when:
+/// - No `[package]` section (workspace-only root)
+/// - `publish = false`
+/// - `publish = []` (empty registry list)
 pub(crate) fn is_publishable(cargo: &CargoToml) -> bool {
-    cargo
-        .package
+    let Some(package) = cargo.package.as_ref() else {
+        return false;
+    };
+    package
+        .publish
         .as_ref()
-        .and_then(|package| package.publish.as_ref())
         .map_or(true, |publish| match publish {
             InheritableValue::Value(VecStringOrBool::Bool(false)) => false,
             InheritableValue::Value(VecStringOrBool::VecString(registries)) => {
