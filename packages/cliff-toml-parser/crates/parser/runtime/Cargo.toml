@@ -1,0 +1,32 @@
+[package]
+name = "cliff-toml-parser-runtime"
+version.workspace = true
+edition = "2024"
+description = "Parser implementation for cliff.toml facade packages"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["cliff", "toml", "parser", "changelog", "rust"]
+categories = ["config", "development-tools", "parser-implementations"]
+publish = true
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+cliff-toml-parser-types = { path = "../types", version = "0.1.0" }
+toml = "0.8"
+
+[dev-dependencies]
+cliff-toml-parser-runtime-assertions = { path = "../assertions" }
+tempfile = "3"
+
+[package.metadata.docs.rs]
+all-features = true

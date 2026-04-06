@@ -1,0 +1,35 @@
+[package]
+name = "release-plz-toml-parser-runtime"
+version.workspace = true
+edition = "2024"
+description = "Parser implementation for release-plz.toml facade packages"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["release-plz", "toml", "parser", "release", "rust"]
+categories = ["config", "development-tools", "parser-implementations"]
+publish = true
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+release-plz-toml-parser-types = { path = "../types", version = "0.1.0" }
+toml = "0.8"
+
+[dev-dependencies]
+release-plz-toml-parser-runtime-assertions = { path = "../assertions" }
+tempfile = "3"
+
+[package.metadata.guardrail3]
+shared = true
+
+[package.metadata.docs.rs]
+all-features = true
