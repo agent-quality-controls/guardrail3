@@ -3,5 +3,8 @@ name = "guardrail3-reason-policy"
 version = "0.0.0"
 edition = "2024"
 
+[lints]
+workspace = true
+
 [lib]
 path = "src/lib.rs"
