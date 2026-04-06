@@ -17,7 +17,7 @@ description = \"A crate with bad version\"
         &results,
         &[assertions::error(
             "bad-ver: invalid version",
-            "Version \"not-semver\" does not have at least a major.minor format.",
+            "Version \"not-semver\" is not valid semver (expected major.minor.patch).",
             "Cargo.toml",
             false,
         )],

@@ -6,15 +6,18 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use cliff_toml_parser as _;
 use release_plz_toml_parser as _;
 
-/// Whether the crate is publishable (not `publish = false`).
+/// Whether the crate is publishable (not `publish = false` or `publish = []`).
 pub(crate) fn is_publishable(cargo: &CargoToml) -> bool {
     cargo
         .package
         .as_ref()
         .and_then(|package| package.publish.as_ref())
         .map_or(true, |publish| match publish {
-            InheritableValue::Value(value) => !matches!(value, VecStringOrBool::Bool(false)),
-            InheritableValue::Inherit(_) => true,
+            InheritableValue::Value(VecStringOrBool::Bool(false)) => false,
+            InheritableValue::Value(VecStringOrBool::VecString(registries)) => {
+                !registries.is_empty()
+            }
+            _ => true,
         })
 }
 

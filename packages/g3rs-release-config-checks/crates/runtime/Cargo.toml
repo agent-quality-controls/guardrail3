@@ -24,6 +24,7 @@ cliff-toml-parser = { path = "../../../cliff-toml-parser", version = "0.1.0" }
 g3rs-release-config-checks-types = { path = "../types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 release-plz-toml-parser = { path = "../../../release-plz-toml-parser", version = "0.1.0" }
+semver = "1"
 
 [dev-dependencies]
 g3rs-release-config-checks-assertions = { path = "../assertions" }
