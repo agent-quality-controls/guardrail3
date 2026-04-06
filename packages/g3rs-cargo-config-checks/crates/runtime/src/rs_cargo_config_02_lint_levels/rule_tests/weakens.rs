@@ -12,5 +12,5 @@ fn errors_when_expected_deny_is_weakened() {
 
     let result = results.iter().find(|result| result.id() == "RS-CARGO-CONFIG-02").unwrap();
     assert_eq!(result.severity(), G3Severity::Error);
-    assert!(result.title().contains("weakens policy"));
+    assert!(result.title().contains("deviates from policy"));
 }
