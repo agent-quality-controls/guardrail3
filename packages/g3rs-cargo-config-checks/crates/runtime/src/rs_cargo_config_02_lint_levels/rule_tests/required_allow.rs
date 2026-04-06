@@ -26,8 +26,8 @@ fn errors_when_required_allow_lint_is_set_to_deny() {
         violations.len()
     );
     assert!(
-        violations.first().unwrap().title().contains("deviates from policy"),
-        "error should say 'deviates from policy' for a required-allow lint set to a stricter level"
+        violations.first().unwrap().title().contains("must be allow"),
+        "error should say 'must be allow' for a required-allow lint set to a non-allow level"
     );
 }
 
