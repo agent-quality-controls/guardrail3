@@ -24,13 +24,13 @@ pub(crate) fn check(input: &G3RsReleaseConfigChecksInput, results: &mut Vec<G3Ch
             results.push(info(ID, format!("{name}: valid semver"), String::new(), file));
         }
         Some(InheritableValue::Value(v)) => {
-            if has_major_minor(v) {
+            if semver::Version::parse(v).is_ok() {
                 results.push(info(ID, format!("{name}: valid semver"), String::new(), file));
             } else {
                 results.push(error(
                     ID,
                     format!("{name}: invalid version"),
-                    format!("Version \"{v}\" does not have at least a major.minor format."),
+                    format!("Version \"{v}\" is not valid semver (expected major.minor.patch)."),
                     file,
                 ));
             }
@@ -47,12 +47,6 @@ pub(crate) fn check(input: &G3RsReleaseConfigChecksInput, results: &mut Vec<G3Ch
 }
 
 /// Check that a version string has at least `major.minor` components.
-fn has_major_minor(version: &str) -> bool {
-    let mut parts = version.split('.');
-    let major_ok = parts.next().is_some_and(|s| !s.is_empty());
-    let minor_ok = parts.next().is_some_and(|s| !s.is_empty());
-    major_ok && minor_ok
-}
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]

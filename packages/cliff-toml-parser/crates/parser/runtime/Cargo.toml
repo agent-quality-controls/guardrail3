@@ -28,5 +28,8 @@ toml = "0.8"
 cliff-toml-parser-runtime-assertions = { path = "../assertions" }
 tempfile = "3"
 
+[package.metadata.guardrail3]
+shared = true
+
 [package.metadata.docs.rs]
 all-features = true
