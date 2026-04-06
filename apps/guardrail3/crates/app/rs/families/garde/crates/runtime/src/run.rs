@@ -1,5 +1,5 @@
 use g3rs_garde_ast_checks::{G3RsAstFile, G3RsGardeAstChecksInput};
-use g3rs_garde_config_checks::{G3RsGardeConfigClippyBanChecksInput, G3RsGardeConfigDependencyCheckInput};
+use g3rs_garde_config_checks::G3RsGardeConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
@@ -25,13 +25,11 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
             continue;
         }
         let input = crate::inputs::GardeRootInput::new(root);
-        run_dependency_check(&input, &mut results);
+        run_config_checks(&input, &mut results);
 
         if !root.garde_dependency_present {
             continue;
         }
-
-        run_clippy_ban_checks(&input, &mut results);
     }
 
     run_ast_checks(surface, route, &facts, &mut results);
@@ -39,31 +37,9 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
     results
 }
 
-fn run_dependency_check(input: &crate::inputs::GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
+fn run_config_checks(input: &crate::inputs::GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(cargo) = input.root.cargo_parsed_typed.clone() else {
         crate::root_policy::rs_garde_config_01_dependency_present::check(input, results);
-        return;
-    };
-
-    let package_input = G3RsGardeConfigDependencyCheckInput {
-        cargo_rel_path: input.root.cargo_rel_path.clone(),
-        cargo,
-    };
-    results.extend(
-        g3rs_garde_config_checks::check_dependency_present(&package_input)
-            .into_iter()
-            .map(convert_check_result),
-    );
-}
-
-fn run_clippy_ban_checks(
-    input: &crate::inputs::GardeRootInput<'_>,
-    results: &mut Vec<CheckResult>,
-) {
-    let (Some(clippy_rel_path), Some(clippy)) = (
-        input.root.clippy_rel_path.clone(),
-        input.root.clippy_parsed_typed.clone(),
-    ) else {
         crate::root_policy::rs_garde_config_02_core_method_bans::check(input, results);
         crate::root_policy::rs_garde_config_03_extractor_type_bans::check(input, results);
         crate::root_policy::rs_garde_config_04_reqwest_json_ban::check(input, results);
@@ -71,12 +47,42 @@ fn run_clippy_ban_checks(
         return;
     };
 
-    let package_input = G3RsGardeConfigClippyBanChecksInput {
+    let (clippy_rel_path, clippy) = match (
+        input.root.clippy_rel_path.clone(),
+        input.root.clippy_parsed_typed.clone(),
+    ) {
+        (Some(rel_path), Some(parsed)) => (Some(rel_path), Some(parsed)),
+        _ => {
+            // Cargo parsed OK but clippy config missing/unparseable — fall back to
+            // app-level checks for the clippy ban rules only; the dependency check
+            // can still run through the extracted package.
+            let package_input = G3RsGardeConfigChecksInput {
+                cargo_rel_path: input.root.cargo_rel_path.clone(),
+                cargo,
+                clippy_rel_path: None,
+                clippy: None,
+            };
+            results.extend(
+                g3rs_garde_config_checks::check(&package_input)
+                    .into_iter()
+                    .map(convert_check_result),
+            );
+            crate::root_policy::rs_garde_config_02_core_method_bans::check(input, results);
+            crate::root_policy::rs_garde_config_03_extractor_type_bans::check(input, results);
+            crate::root_policy::rs_garde_config_04_reqwest_json_ban::check(input, results);
+            crate::root_policy::rs_garde_config_05_additional_method_bans::check(input, results);
+            return;
+        }
+    };
+
+    let package_input = G3RsGardeConfigChecksInput {
+        cargo_rel_path: input.root.cargo_rel_path.clone(),
+        cargo,
         clippy_rel_path,
         clippy,
     };
     results.extend(
-        g3rs_garde_config_checks::check_clippy_bans(&package_input)
+        g3rs_garde_config_checks::check(&package_input)
             .into_iter()
             .map(convert_check_result),
     );

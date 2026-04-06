@@ -21,5 +21,3 @@ workspace = true
 [package.metadata.guardrail3]
 shared = true
 
-[dependencies]
-g3rs-garde-config-checks = { path = "../../../g3rs-garde-config-checks", version = "0.1.0" }
