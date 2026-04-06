@@ -1,32 +1,22 @@
 use cargo_toml_parser::CargoToml;
 use rust_toolchain_toml_parser::RustToolchainToml;
 
-/// Input contract for `RS-TOOLCHAIN-CONFIG-01`.
+/// Input contract for extracted rust-toolchain config checks.
 ///
 /// The app owns discovery, placement, and parse-failure routing. This package
-/// receives the already-selected parsed `rust-toolchain.toml` file and validates
-/// its config semantics only.
-#[derive(Debug, Clone)]
-pub struct G3RsToolchainConfigChannelComponentsInput {
-    /// Repo-relative path to the active rust-toolchain.toml.
-    pub toolchain_rel_path: String,
-    /// Parsed rust-toolchain.toml content.
-    pub toolchain_toml: RustToolchainToml,
-}
-
-/// Input contract for `RS-TOOLCHAIN-CONFIG-02`.
+/// receives already-selected parsed files and validates their config semantics.
 ///
-/// The app owns discovery, placement, and parse-failure routing. This package
-/// receives the already-selected parsed files for one policy root and validates
-/// their config semantics only.
+/// `cargo_rel_path` and `cargo_toml` are optional because a workspace may not
+/// have a `Cargo.toml` at the point of toolchain validation. When absent, the
+/// MSRV consistency check is skipped.
 #[derive(Debug, Clone)]
-pub struct G3RsToolchainConfigMsrvConsistencyInput {
-    /// Repo-relative path to the active rust-toolchain.toml.
+pub struct G3RsToolchainConfigChecksInput {
+    /// Repo-relative path to the active `rust-toolchain.toml`.
     pub toolchain_rel_path: String,
-    /// Parsed rust-toolchain.toml content.
+    /// Parsed `rust-toolchain.toml` content.
     pub toolchain_toml: RustToolchainToml,
-    /// Repo-relative path to the owning Cargo.toml.
-    pub cargo_rel_path: String,
-    /// Parsed Cargo.toml content.
-    pub cargo_toml: CargoToml,
+    /// Repo-relative path to the owning `Cargo.toml`, if present.
+    pub cargo_rel_path: Option<String>,
+    /// Parsed `Cargo.toml` content, if present.
+    pub cargo_toml: Option<CargoToml>,
 }
