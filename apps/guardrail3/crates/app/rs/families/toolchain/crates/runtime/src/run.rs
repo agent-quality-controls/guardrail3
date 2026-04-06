@@ -1,5 +1,5 @@
-use g3_toolchain_content_checks::{
-    G3ToolchainChannelAndComponentsInput, G3ToolchainMsrvConsistencyInput,
+use g3rs_toolchain_config_checks::{
+    G3RsToolchainConfigChannelComponentsInput, G3RsToolchainConfigMsrvConsistencyInput,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsToolchainRoute;
@@ -30,7 +30,7 @@ fn run_content_checks(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<Ch
     let Some(toolchain_rel_path) = input.toolchain_toml_rel else {
         if let Some(parse_error) = input.parse_error {
             results.push(CheckResult::from_parts(
-                "RS-TOOLCHAIN-02".to_owned(),
+                "RS-TOOLCHAIN-CONFIG-01".to_owned(),
                 Severity::Error,
                 "rust-toolchain.toml parse error".to_owned(),
                 format!("Invalid TOML: {parse_error}"),
@@ -44,7 +44,7 @@ fn run_content_checks(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<Ch
     let Some(toolchain_toml) = input.parsed.cloned() else {
         if let Some(parse_error) = input.parse_error {
             results.push(CheckResult::from_parts(
-                "RS-TOOLCHAIN-02".to_owned(),
+                "RS-TOOLCHAIN-CONFIG-01".to_owned(),
                 Severity::Error,
                 "rust-toolchain.toml parse error".to_owned(),
                 format!("Invalid TOML: {parse_error}"),
@@ -56,11 +56,11 @@ fn run_content_checks(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<Ch
         return;
     };
 
-    let channel_input = G3ToolchainChannelAndComponentsInput {
+    let channel_input = G3RsToolchainConfigChannelComponentsInput {
         toolchain_rel_path: toolchain_rel_path.to_owned(),
         toolchain_toml: toolchain_toml.clone(),
     };
-    let package_results = g3_toolchain_content_checks::check_channel_and_components(&channel_input);
+    let package_results = g3rs_toolchain_config_checks::check_channel_and_components(&channel_input);
     results.extend(package_results.into_iter().map(convert_check_result));
 
     if !uses_pinned_stable_channel(&toolchain_toml) {
@@ -69,7 +69,7 @@ fn run_content_checks(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<Ch
 
     let Some(cargo_toml) = input.cargo.cloned() else {
         results.push(CheckResult::from_parts(
-            "RS-TOOLCHAIN-03".to_owned(),
+            "RS-TOOLCHAIN-CONFIG-02".to_owned(),
             Severity::Error,
             match input.cargo_parse_error {
                 Some(_) => "Cargo.toml parse error blocks MSRV check".to_owned(),
@@ -89,13 +89,13 @@ fn run_content_checks(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<Ch
         return;
     };
 
-    let msrv_input = G3ToolchainMsrvConsistencyInput {
+    let msrv_input = G3RsToolchainConfigMsrvConsistencyInput {
         toolchain_rel_path: toolchain_rel_path.to_owned(),
         toolchain_toml,
         cargo_rel_path: input.cargo_rel_path.to_owned(),
         cargo_toml,
     };
-    let msrv_results = g3_toolchain_content_checks::check_msrv_consistency(&msrv_input);
+    let msrv_results = g3rs_toolchain_config_checks::check_msrv_consistency(&msrv_input);
     results.extend(msrv_results.into_iter().map(convert_check_result));
 }
 

@@ -1,7 +1,7 @@
 # RS-FMT Test Attack Coverage Hardening
 
 **Date:** 2026-03-27 20:26
-**Scope:** `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_01_exists.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_01_exists_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_04_nightly_keys_on_stable_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_05_per_crate_override_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_06_edition_mismatch_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_08_dual_file_conflict_tests/mod.rs`
+**Scope:** `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_01_exists.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_01_exists_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_03_nightly_keys_on_stable_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_05_per_crate_override_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_04_edition_mismatch_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_08_dual_file_conflict_tests/mod.rs`
 
 ## Summary
 Ran an adversarial test pass against the self-hosted `RS-FMT` family after stabilization. The pass did not expose a new production bug, but it did expose several missing coverage branches, which were added as focused sidecar tests plus one test-only family runner hook for `RS-FMT-01`.
@@ -44,9 +44,9 @@ This pass stayed within the required sidecar pattern. No family-wide grouped tes
 - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/facts.rs` — config kind and normalized family facts
 - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/inputs.rs` — typed inputs and rule fan-out shape
 - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_01_exists.rs`
-- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_04_nightly_keys_on_stable.rs`
+- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_03_nightly_keys_on_stable.rs`
 - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_05_per_crate_override.rs`
-- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_06_edition_mismatch.rs`
+- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_04_edition_mismatch.rs`
 - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_08_dual_file_conflict.rs`
 - `.worklogs/2026-03-27-200723-stabilize-rs-fmt-family.md` — prior stabilization context and detector hardening decisions
 
@@ -58,11 +58,11 @@ This pass stayed within the required sidecar pattern. No family-wide grouped tes
 - `AGENTS.md` — repo workflow, worklog policy, and current Rust-only scope
 - `.plans/todo/checks/rs/fmt.md` — `RS-FMT` rule inventory and intended behavior
 - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_01_exists.rs` — root config existence rule plus the test-only family runner hook
-- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_04_nightly_keys_on_stable.rs` — fail-closed logic around nightly-only keys and toolchain parsing
-- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_06_edition_mismatch.rs` — edition enforcement and missing-root-manifest behavior
+- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_03_nightly_keys_on_stable.rs` — fail-closed logic around nightly-only keys and toolchain parsing
+- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_04_edition_mismatch.rs` — edition enforcement and missing-root-manifest behavior
 - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_01_exists_tests/mod.rs` — family-level clean-path attack for root `.rustfmt.toml`
-- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_04_nightly_keys_on_stable_tests/mod.rs` — missing-channel fail-closed coverage
-- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_06_edition_mismatch_tests/mod.rs` — missing-root-`Cargo.toml` fail-closed coverage
+- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_03_nightly_keys_on_stable_tests/mod.rs` — missing-channel fail-closed coverage
+- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_04_edition_mismatch_tests/mod.rs` — missing-root-`Cargo.toml` fail-closed coverage
 - `.worklogs/2026-03-27-200723-stabilize-rs-fmt-family.md` — previous handoff implementation record
 
 ## Next Steps / Continuation Plan

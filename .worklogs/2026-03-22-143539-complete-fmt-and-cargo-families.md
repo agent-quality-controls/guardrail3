@@ -16,25 +16,25 @@ That meant:
 ## Decisions Made
 
 ### Finish `rs/fmt` before moving to more families
-- **Chose:** Complete `RS-FMT-04`, `06`, and `07` rather than leaving `fmt` as a half-finished specimen.
+- **Chose:** Complete `RS-FMT-CONFIG-03`, `06`, and `07` rather than leaving `fmt` as a half-finished specimen.
 - **Why:** The architecture question had already been answered by `cargo`, so there was no longer a reason to keep `fmt` intentionally partial.
 - **Alternatives considered:**
   - Move directly to `rs/clippy` — rejected because it would leave an easy family incomplete and create unnecessary breadth.
 
 ### Treat `ignore` as a dedicated escape hatch, not generic extra inventory
-- **Chose:** Add `RS-FMT-07` as the explicit warning for `ignore`, and exclude `ignore` from `RS-FMT-03` generic extra-setting inventory.
+- **Chose:** Add `RS-FMT-07` as the explicit warning for `ignore`, and exclude `ignore` from `RS-FMT-CONFIG-02` generic extra-setting inventory.
 - **Why:** The plan explicitly promoted `ignore` from passive inventory to explicit warning. Reporting it twice would be noisy and would blur the purpose of the dedicated escape-hatch rule.
 - **Alternatives considered:**
   - Keep both signals — rejected because the duplicate reporting adds noise without improving clarity.
 
 ### Use root toolchain facts for nightly-only rustfmt key validation
-- **Chose:** Extend `fmt` family facts with the root toolchain channel and use that in `RS-FMT-04`.
+- **Chose:** Extend `fmt` family facts with the root toolchain channel and use that in `RS-FMT-CONFIG-03`.
 - **Why:** The nightly-key rule is inherently cross-file (`rustfmt.toml` + `rust-toolchain.toml`), but the rule itself should still receive pre-bound facts rather than parsing both files.
 - **Alternatives considered:**
   - Parse `rust-toolchain.toml` inside the rule — rejected because that breaks the orchestrator/facts split.
 
 ### Finish `rs/cargo` with profile-aware behavior inside the existing family
-- **Chose:** Add `guardrail3.toml` profile extraction to `cargo` facts and wire the deferred library-profile behavior into `RS-CARGO-01` and `RS-CARGO-05`.
+- **Chose:** Add `guardrail3.toml` profile extraction to `cargo` facts and wire the deferred library-profile behavior into `RS-CARGO-CONFIG-01` and `RS-CARGO-CONFIG-04`.
 - **Why:** The plan already said those enhancements belonged to the cargo family. They are small, durable, and do not require widening rule inputs.
 - **Alternatives considered:**
   - Leave profile-awareness for later — rejected because it was the main remaining gap between “implemented” and “actually complete” for the family.
@@ -50,11 +50,11 @@ With this checkpoint:
 
 `rs/fmt` now covers:
 - `RS-FMT-01` existence
-- `RS-FMT-02` baseline settings
-- `RS-FMT-03` extra-setting inventory
-- `RS-FMT-04` nightly-only settings on stable
+- `RS-FMT-CONFIG-01` baseline settings
+- `RS-FMT-CONFIG-02` extra-setting inventory
+- `RS-FMT-CONFIG-03` nightly-only settings on stable
 - `RS-FMT-05` per-crate override warning
-- `RS-FMT-06` edition mismatch
+- `RS-FMT-CONFIG-04` edition mismatch
 - `RS-FMT-07` `ignore` escape hatch
 - `RS-FMT-08` dual-file conflict
 

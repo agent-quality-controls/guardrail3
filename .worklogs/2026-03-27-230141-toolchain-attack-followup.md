@@ -1,7 +1,7 @@
 # Toolchain Attack Followup
 
 **Date:** 2026-03-27 23:01
-**Scope:** `apps/guardrail3/crates/app/rs/families/toolchain/Cargo.toml`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/discover.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/facts.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/inputs.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_01_exists.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_01_exists_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_02_channel_and_components.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_02_channel_and_components_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_03_msrv_consistency.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_03_msrv_consistency_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_04_legacy_file.rs`
+**Scope:** `apps/guardrail3/crates/app/rs/families/toolchain/Cargo.toml`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/discover.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/facts.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/inputs.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_01_exists.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_01_exists_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_config_01_channel_components.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_config_01_channel_components_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_config_02_msrv_consistency.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_config_02_msrv_consistency_tests/mod.rs`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_04_legacy_file.rs`
 
 ## Summary
 Ran additional adversarial passes on the stabilized `RS-TOOLCHAIN` family and fixed more fail-open behavior. The main changes were: explicit invalid `[toolchain]` table handling, explicit invalid `Cargo.toml` `rust-version` type handling, and a small family-level `ProjectTree` smoke harness so discovery and cross-rule interaction are tested rather than only rule-local helper inputs.
@@ -16,7 +16,7 @@ There was also a structural testing gap: most tests instantiated `ToolchainRootI
 
 ## Decisions Made
 
-### Treat missing or non-table `[toolchain]` as an explicit `RS-TOOLCHAIN-02` input failure
+### Treat missing or non-table `[toolchain]` as an explicit `RS-TOOLCHAIN-CONFIG-01` input failure
 - **Chose:** Add dedicated errors for missing `[toolchain]` and non-table `toolchain = ...` shapes.
 - **Why:** A present but structurally invalid root toolchain file is not the same as “policy keys absent”; it is malformed active input and should fail closed.
 - **Alternatives considered:**
@@ -24,11 +24,11 @@ There was also a structural testing gap: most tests instantiated `ToolchainRootI
   - Push this into `RS-TOOLCHAIN-01` instead — rejected because the file does exist; the structural content failure belongs with the channel/components rule.
 
 ### Distinguish invalid `rust-version` type from missing `rust-version`
-- **Chose:** Track `cargo_rust_version_invalid` through facts and inputs, and let `RS-TOOLCHAIN-03` emit a dedicated error when the field exists but is not a string.
+- **Chose:** Track `cargo_rust_version_invalid` through facts and inputs, and let `RS-TOOLCHAIN-CONFIG-02` emit a dedicated error when the field exists but is not a string.
 - **Why:** Missing metadata and malformed metadata are different states. The rule should not blur them because malformed declared MSRV is strictly worse than absent declared MSRV.
 - **Alternatives considered:**
   - Keep treating both as “not declared” inventory — rejected because it hides an active manifest bug.
-  - Infer invalidity only inside `RS-TOOLCHAIN-03` from the final string parse — rejected because the type information is lost once discovery collapses non-string values to `None`.
+  - Infer invalidity only inside `RS-TOOLCHAIN-CONFIG-02` from the final string parse — rejected because the type information is lost once discovery collapses non-string values to `None`.
 
 ### Add family-level `ProjectTree` smoke tests
 - **Chose:** Add a tiny `ProjectTree` builder and `crate::check(...)` entrypoint helper in `rs_toolchain_01_exists.rs`, then use that harness for a few cross-rule adversarial cases.
@@ -77,8 +77,8 @@ The small `ProjectTree` test harness deliberately lives near the simplest rule e
 - `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/discover.rs` — discovery state, including `rust-version` type invalidity tracking
 - `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/facts.rs` — new `cargo_rust_version_invalid` fact
 - `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/inputs.rs` — projected input carrying the new invalidity state
-- `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_02_channel_and_components.rs` — explicit invalid/missing `[toolchain]` table handling
-- `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_03_msrv_consistency.rs` — explicit invalid `rust-version` type handling
+- `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_config_01_channel_components.rs` — explicit invalid/missing `[toolchain]` table handling
+- `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_config_02_msrv_consistency.rs` — explicit invalid `rust-version` type handling
 - `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_01_exists_tests/mod.rs` — family-level `ProjectTree` smoke cases
 - `apps/guardrail3/crates/app/rs/families/toolchain/Cargo.toml` — family-local lint inheritance for direct verification
 - `.worklogs/2026-03-27-203046-stabilize-toolchain-family.md` — prior stabilization and earlier attack-hardening context

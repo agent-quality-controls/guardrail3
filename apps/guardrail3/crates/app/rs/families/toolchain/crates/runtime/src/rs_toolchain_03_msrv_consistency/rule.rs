@@ -2,7 +2,7 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 use crate::inputs::ToolchainRootInput;
 
-const ID: &str = "RS-TOOLCHAIN-03";
+const ID: &str = "RS-TOOLCHAIN-CONFIG-02";
 
 pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
     if input.legacy_toolchain_rel.is_some() {

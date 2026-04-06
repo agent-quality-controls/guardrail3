@@ -79,7 +79,7 @@ The earlier `code` family work established the intended direction, but the rest 
 - `apps/guardrail3/crates/domain/config/types.rs` — shared `escape_hatches` config model
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/lint_support.rs` — cargo selector and sidecar lookup helpers
 - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_07_ignore_escape_hatch.rs` — sidecar-backed documented ignore policy
-- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/inventory/rs_garde_09_query_as_inventory.rs` — documented `sqlx::query_as!` bypass handling
+- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/inventory/rs_garde_ast_04_query_as_inventory.rs` — documented `sqlx::query_as!` bypass handling
 - `apps/guardrail3/crates/app/rs/families/hexarch/crates/runtime/src/dependency_policy/rs_hexarch_16_patch_replace_bypass.rs` — forbidden-but-documented bypass behavior
 - `apps/guardrail3/crates/app/rs/families/test/crates/runtime/src/assertion_quality/rs_test_04_ignore_reason.rs` — native attribute reason validation in tests
 - `.plans/todo/checks/2026-03-30-shared-escape-hatch-policy.md` — target-state design that drove this implementation

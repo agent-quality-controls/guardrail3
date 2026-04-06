@@ -7,7 +7,7 @@
 Removed the accidental library-profile enforcement of `missing_docs = "deny"` from the new cargo checker and aligned the cargo plan doc with that policy. The cargo family now only treats `unreachable_pub = "deny"` as the extra library-profile Rust lint requirement.
 
 ## Context & Problem
-After the cargo audit hardening commit, the user clarified that missing docs are explicitly allowed and should not be enforced anywhere. The new `RS-CARGO-01` implementation still carried a library-profile requirement for `missing_docs = "deny"`, inherited from earlier planning assumptions rather than the current policy.
+After the cargo audit hardening commit, the user clarified that missing docs are explicitly allowed and should not be enforced anywhere. The new `RS-CARGO-CONFIG-01` implementation still carried a library-profile requirement for `missing_docs = "deny"`, inherited from earlier planning assumptions rather than the current policy.
 
 This was a contract bug, not a test bug: the checker was enforcing something the project does not want.
 
@@ -21,7 +21,7 @@ This was a contract bug, not a test bug: the checker was enforcing something the
   - Keep it as a warning instead of an error — rejected because the user said to skip the docs check entirely.
 
 ### Update the cargo plan doc immediately
-- **Chose:** Edit `.plans/todo/checks/rs/cargo.md` so `RS-CARGO-01` says library profile adds only `unreachable_pub = "deny"` and explicitly notes that `missing_docs` is not enforced.
+- **Chose:** Edit `.plans/todo/checks/rs/cargo.md` so `RS-CARGO-CONFIG-01` says library profile adds only `unreachable_pub = "deny"` and explicitly notes that `missing_docs` is not enforced.
 - **Why:** The plan should match the implemented contract. Leaving the old wording would reintroduce the same bug later.
 - **Alternatives considered:**
   - Defer the doc fix — rejected because this is exactly the kind of drift we are cleaning up.
@@ -41,7 +41,7 @@ The cargo family still uses the same orchestrator/facts/input structure. This wa
 
 ## Information Sources
 - User clarification in-session that “missing docs are allowed explicitly”
-- `.plans/todo/checks/rs/cargo.md` — stale policy wording for `RS-CARGO-01`
+- `.plans/todo/checks/rs/cargo.md` — stale policy wording for `RS-CARGO-CONFIG-01`
 - `apps/guardrail3/crates/app/rs/checks/rs/cargo/lint_support.rs` — source of the extra library-profile Rust lint expectations
 - `.worklogs/2026-03-22-145320-cargo-fmt-audit-hardening.md` — prior checkpoint that hardened cargo and exposed plan/contract drift issues
 
@@ -53,7 +53,7 @@ The cargo family still uses the same orchestrator/facts/input structure. This wa
 - `AGENTS.md` — current Rust-only project scope and architectural direction
 - `.plans/todo/checks/rs/cargo.md` — current cargo family contract
 - `apps/guardrail3/crates/app/rs/checks/rs/cargo/lint_support.rs` — cargo lint expectation tables
-- `apps/guardrail3/crates/app/rs/checks/rs/cargo/rs_cargo_01_workspace_lints.rs` — rule consuming the expectation table
+- `apps/guardrail3/crates/app/rs/checks/rs/cargo/rs_cargo_config_01_workspace_lints.rs` — rule consuming the expectation table
 - `.worklogs/2026-03-22-145320-cargo-fmt-audit-hardening.md` — previous cargo audit checkpoint
 
 ## Next Steps / Continuation Plan

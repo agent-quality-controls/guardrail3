@@ -1,7 +1,7 @@
 # Extract RS-CLIPPY Threshold Assertions
 
 **Date:** 2026-03-27 20:29
-**Scope:** `apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/src/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_02_max_struct_bools.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_02_max_struct_bools_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_03_max_fn_params_bools.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_03_max_fn_params_bools_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_09_too_many_lines_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_09_too_many_lines_threshold_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_10_too_many_arguments_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_10_too_many_arguments_threshold_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_11_excessive_nesting_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_11_excessive_nesting_threshold_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_21_cognitive_complexity_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_21_cognitive_complexity_threshold_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_22_type_complexity_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_22_type_complexity_threshold_tests/**`
+**Scope:** `apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/src/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_01_max_struct_bools.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_01_max_struct_bools_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_02_max_fn_params_bools.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_02_max_fn_params_bools_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_08_too_many_lines_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_08_too_many_lines_threshold_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_09_too_many_arguments_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_09_too_many_arguments_threshold_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_10_excessive_nesting_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_10_excessive_nesting_threshold_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_19_cognitive_complexity_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_19_cognitive_complexity_threshold_tests/**`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_20_type_complexity_threshold.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_20_type_complexity_threshold_tests/**`
 
 ## Summary
 Moved the threshold-rule test cluster in `clippy` onto the intended self-hosted pattern: runtime sidecars now call owned rule helpers and prove behavior through sibling assertions modules instead of reaching directly into runtime-local `test_support` and asserting `CheckResult` semantics inline. This dropped the family’s `RS-TEST` count from `631` errors to `454` total findings and cut the largest structural debt bucket (`RS-TEST-03`) from `612` to `435`.
@@ -16,13 +16,13 @@ After the workspace-baseline commit (`46011b0`), `clippy` was finally green unde
 - `RS-TEST-18`: `1`
 
 The easiest high-signal cluster was the threshold rules:
-- `RS-CLIPPY-02`
-- `RS-CLIPPY-03`
-- `RS-CLIPPY-09`
-- `RS-CLIPPY-10`
-- `RS-CLIPPY-11`
-- `RS-CLIPPY-21`
-- `RS-CLIPPY-22`
+- `RS-CLIPPY-CONFIG-01`
+- `RS-CLIPPY-CONFIG-02`
+- `RS-CLIPPY-CONFIG-08`
+- `RS-CLIPPY-CONFIG-09`
+- `RS-CLIPPY-CONFIG-10`
+- `RS-CLIPPY-CONFIG-19`
+- `RS-CLIPPY-CONFIG-20`
 
 These all followed the same test shape:
 - build a `ProjectTree`
@@ -67,13 +67,13 @@ That is the same general pattern already used in the stabilized families and is 
 ## Information Sources
 - `.worklogs/2026-03-27-202045-stabilize-rs-clippy-workspace.md` — baseline workspace repair and first RS-TEST counts
 - `apps/guardrail3/crates/app/rs/families/clippy/README.md` — current family contract and migration status
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_02_max_struct_bools.rs`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_03_max_fn_params_bools.rs`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_09_too_many_lines_threshold.rs`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_10_too_many_arguments_threshold.rs`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_11_excessive_nesting_threshold.rs`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_21_cognitive_complexity_threshold.rs`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_22_type_complexity_threshold.rs`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_01_max_struct_bools.rs`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_02_max_fn_params_bools.rs`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_08_too_many_lines_threshold.rs`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_09_too_many_arguments_threshold.rs`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_10_excessive_nesting_threshold.rs`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_19_cognitive_complexity_threshold.rs`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_20_type_complexity_threshold.rs`
 - `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-clippy --lib`
 - `cargo run --quiet --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 -- rs validate apps/guardrail3/crates/app/rs/families/clippy --family test --inventory --format json`
 
@@ -84,9 +84,9 @@ That is the same general pattern already used in the stabilized families and is 
 
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/src/common.rs` — shared result-shape helpers for the threshold cluster
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/src/rs_clippy_02_max_struct_bools.rs` — specimen threshold assertions module
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_02_max_struct_bools.rs` — specimen runtime rule with `run_for_tests`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_02_max_struct_bools_tests/golden.rs` — specimen sidecar after the extraction
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/src/rs_clippy_config_01_max_struct_bools.rs` — specimen threshold assertions module
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_01_max_struct_bools.rs` — specimen runtime rule with `run_for_tests`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_01_max_struct_bools_tests/golden.rs` — specimen sidecar after the extraction
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/test_support.rs` — still-present runtime shim that future slices should shrink and delete
 - `.worklogs/2026-03-27-202045-stabilize-rs-clippy-workspace.md` — baseline before this extraction
 

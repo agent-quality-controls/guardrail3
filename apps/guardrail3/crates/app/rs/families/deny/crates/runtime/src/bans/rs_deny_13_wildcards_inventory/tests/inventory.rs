@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_13_wildcards_inventory as assertions;
+use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_config_09_wildcards_inventory as assertions;
 
 use crate::inputs::ConfigDenyInput;
 use super::super::check;

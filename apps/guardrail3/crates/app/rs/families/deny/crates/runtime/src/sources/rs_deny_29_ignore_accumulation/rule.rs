@@ -15,7 +15,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     };
     if ignore_entries.len() > ADVISORY_IGNORE_THRESHOLD {
         results.push(CheckResult::from_parts(
-            "RS-DENY-29".to_owned(),
+            "RS-DENY-CONFIG-22".to_owned(),
             Severity::Warn,
             "advisory ignore list is large".to_owned(),
             format!(

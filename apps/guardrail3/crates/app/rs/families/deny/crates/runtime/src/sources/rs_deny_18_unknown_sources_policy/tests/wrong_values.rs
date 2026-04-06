@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_18_unknown_sources_policy as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_config_13_unknown_sources_policy as assertions;
 
 use super::helpers::{build_fixture_deny_toml, set_source_policy};
 

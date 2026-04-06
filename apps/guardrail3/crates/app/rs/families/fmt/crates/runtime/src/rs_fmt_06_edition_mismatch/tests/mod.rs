@@ -1,5 +1,5 @@
 mod helpers;
-use guardrail3_app_rs_family_fmt_assertions::rs_fmt_06_edition_mismatch as assertions;
+use guardrail3_app_rs_family_fmt_assertions::rs_fmt_config_04_edition_mismatch as assertions;
 
 use helpers::{TestCargoEditionState, run_check, run_family};
 

@@ -54,13 +54,13 @@ The generator must:
 - checker family: `RS-CARGO`
 
 The generated result must satisfy:
-- `RS-CARGO-01`
-- `RS-CARGO-02`
+- `RS-CARGO-CONFIG-01`
+- `RS-CARGO-CONFIG-02`
 - `RS-CARGO-03`
-- `RS-CARGO-05`
-- `RS-CARGO-07`
-- `RS-CARGO-08`
-- `RS-CARGO-11`
+- `RS-CARGO-CONFIG-04`
+- `RS-CARGO-CONFIG-05`
+- `RS-CARGO-CONFIG-06`
+- `RS-CARGO-CONFIG-07`
 - `RS-CARGO-12`
 - `RS-CARGO-13`
 - `RS-CARGO-15`

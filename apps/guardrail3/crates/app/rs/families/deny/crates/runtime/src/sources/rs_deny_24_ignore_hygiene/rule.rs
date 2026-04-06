@@ -14,7 +14,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     };
     let Some(ignore_entries) = ignore_value.as_array() else {
         results.push(CheckResult::from_parts(
-            "RS-DENY-24".to_owned(),
+            "RS-DENY-CONFIG-19".to_owned(),
             Severity::Error,
             "malformed advisory ignore container".to_owned(),
             format!(
@@ -34,7 +34,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         let Some(table) = entry.as_table() else {
             if let Some(id) = entry.as_str() {
                 results.push(CheckResult::from_parts(
-                    "RS-DENY-24".to_owned(),
+                    "RS-DENY-CONFIG-19".to_owned(),
                     Severity::Error,
                     "advisory ignore must use table form".to_owned(),
                     format!(
@@ -47,7 +47,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 ));
             } else {
                 results.push(CheckResult::from_parts(
-                    "RS-DENY-24".to_owned(),
+                    "RS-DENY-CONFIG-19".to_owned(),
                     Severity::Error,
                     "malformed advisory ignore entry".to_owned(),
                     format!(
@@ -64,7 +64,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
         let Some(id) = table.get("id").and_then(toml::Value::as_str) else {
             results.push(CheckResult::from_parts(
-                "RS-DENY-24".to_owned(),
+                "RS-DENY-CONFIG-19".to_owned(),
                 Severity::Error,
                 "malformed advisory ignore entry".to_owned(),
                 format!(
@@ -83,7 +83,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         if reason_value.is_some() && reason.is_none() {
             missing_or_invalid_reason_count += 1;
             results.push(CheckResult::from_parts(
-                "RS-DENY-24".to_owned(),
+                "RS-DENY-CONFIG-19".to_owned(),
                 Severity::Error,
                 "advisory ignore reason must be a string".to_owned(),
                 format!(
@@ -100,7 +100,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         let Some(reason) = reason else {
             missing_or_invalid_reason_count += 1;
             results.push(CheckResult::from_parts(
-                "RS-DENY-24".to_owned(),
+                "RS-DENY-CONFIG-19".to_owned(),
                 Severity::Error,
                 "advisory ignore missing reason".to_owned(),
                 format!(
@@ -120,7 +120,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             Err(issue) => {
                 weak_reason_count += 1;
                 results.push(CheckResult::from_parts(
-                    "RS-DENY-24".to_owned(),
+                    "RS-DENY-CONFIG-19".to_owned(),
                     Severity::Error,
                     "advisory ignore reason too weak".to_owned(),
                     format!(
@@ -137,7 +137,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         }
 
         results.push(CheckResult {
-            id: "RS-DENY-24".to_owned(),
+            id: "RS-DENY-CONFIG-19".to_owned(),
             severity: Severity::Warn,
             title: "advisory ignore entry".to_owned(),
             message: format!(
@@ -153,7 +153,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let total = documented_count + missing_or_invalid_reason_count + weak_reason_count;
     if total > 0 {
         results.push(CheckResult::from_parts(
-            "RS-DENY-24".to_owned(),
+            "RS-DENY-CONFIG-19".to_owned(),
             Severity::Warn,
             "advisory ignore count".to_owned(),
             format!(

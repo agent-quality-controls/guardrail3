@@ -9,7 +9,7 @@ Committed the `rs/garde` hardening batch. The family now includes the later fiel
 ## Context & Problem
 The garde packet in the dirty tree covered several related concerns:
 - family-side facts/parse/test support expansion
-- new rules `RS-GARDE-11`, `12`, and `13`
+- new rules `RS-GARDE-AST-05`, `12`, and `13`
 - conversion away from old flat `*_tests.rs` sidecars
 - plan and handoff updates reflecting the implemented 13-rule family
 - a scratch planning note for the garde hardening pass

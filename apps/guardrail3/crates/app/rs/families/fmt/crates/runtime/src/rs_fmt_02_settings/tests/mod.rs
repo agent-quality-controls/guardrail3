@@ -1,10 +1,10 @@
 mod helpers;
-use guardrail3_app_rs_family_fmt_assertions::rs_fmt_02_settings as assertions;
+use guardrail3_app_rs_family_fmt_assertions::rs_fmt_config_01_settings as assertions;
 
 use helpers::{run_check, run_family};
 
 fn parse_rustfmt_settings_fixture(source: &str) -> toml::Value {
-    toml::from_str::<toml::Value>(source).expect("RS-FMT-02 test fixture rustfmt TOML should parse")
+    toml::from_str::<toml::Value>(source).expect("RS-FMT-CONFIG-01 test fixture rustfmt TOML should parse")
 }
 
 #[test]

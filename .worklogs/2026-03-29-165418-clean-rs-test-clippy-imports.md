@@ -61,7 +61,7 @@ The repo-root lane matters here: a family can look locally clean while still vio
   - `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-clippy --lib`
   - `apps/guardrail3/target/debug/guardrail3 rs validate apps/guardrail3/crates/app/rs/families/clippy --family test --inventory --format json`
 - App-root adversarial regression:
-  - temp copy of `apps/guardrail3`, reintroducing `guardrail3_domain_report::Severity` into `rs_clippy_17_test_relaxations_tests/multiple_relaxations.rs`
+  - temp copy of `apps/guardrail3`, reintroducing `guardrail3_domain_report::Severity` into `rs_clippy_config_15_test_relaxations_tests/multiple_relaxations.rs`
   - repo-root `RS-TEST` correctly reports `RS-TEST-03` on that file
 - Prior context:
   - `.worklogs/2026-03-29-155903-finish-rs-test-clippy-family.md`
@@ -74,7 +74,7 @@ The repo-root lane matters here: a family can look locally clean while still vio
 
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_01_coverage_tests/multi_root_coverage.rs` — representative sidecar now using owned assertions/test-support instead of direct repo-local imports
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations_tests/multiple_relaxations.rs` — representative `Severity` ownership fix and the file used for the repo-root regression attack
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations_tests/multiple_relaxations.rs` — representative `Severity` ownership fix and the file used for the repo-root regression attack
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/src/rs_clippy_01_coverage.rs` — owned assertions module exposing the severity type needed by its sidecars
 - `apps/guardrail3/crates/app/rs/families/arch/crates/assertions/Cargo.toml` — stale forbidden dependency removed from the `arch` assertions crate
 - `.worklogs/2026-03-29-155903-finish-rs-test-clippy-family.md` — previous `clippy` family checkpoint

@@ -19,8 +19,8 @@ local `rust-toolchain.toml`, and they are not allowed to define one.
 ## What This Family Enforces
 
 - `RS-TOOLCHAIN-01`: `rust-toolchain.toml` exists at each owned policy root
-- `RS-TOOLCHAIN-02`: channel and component policy
-- `RS-TOOLCHAIN-03`: pinned stable toolchain vs owned-root `Cargo.toml`
+- `RS-TOOLCHAIN-CONFIG-01`: channel and component policy
+- `RS-TOOLCHAIN-CONFIG-02`: pinned stable toolchain vs owned-root `Cargo.toml`
   `rust-version`
 - `RS-TOOLCHAIN-04`: legacy `rust-toolchain` migration and same-root shadowing
 - `RS-TOOLCHAIN-05`: ancestor shadow drift across legal workspace policy roots
@@ -36,7 +36,7 @@ local `rust-toolchain.toml`, and they are not allowed to define one.
   `rust-toolchain` exists
 - a parent/repo-root toolchain file does not satisfy a governed workspace root
 
-#### `RS-TOOLCHAIN-02`
+#### `RS-TOOLCHAIN-CONFIG-01`
 
 Channel policy:
 
@@ -64,7 +64,7 @@ Input integrity:
 - non-table `[toolchain]` shape is an error
 - malformed `rust-toolchain.toml` is an error
 
-#### `RS-TOOLCHAIN-03`
+#### `RS-TOOLCHAIN-CONFIG-02`
 
 - activates only for pinned stable toolchain forms
 - warns when pinned toolchain is older than the owned-root `Cargo.toml`
@@ -156,7 +156,7 @@ As of the latest attack-hardening pass:
   validation root is the policy root
 - rule-side coverage includes malformed active inputs and suffix-bypass attacks
 - same-directory legacy-shadow cases now suppress false modern-file inventory in
-  `RS-TOOLCHAIN-02` and `RS-TOOLCHAIN-03`
+  `RS-TOOLCHAIN-CONFIG-01` and `RS-TOOLCHAIN-CONFIG-02`
 - ancestor walk-up drift is enforced explicitly so repo-root toolchains cannot
   silently diverge from governed workspace toolchain contracts
 - descendant toolchain files anywhere beneath a governed workspace root are now

@@ -13,7 +13,7 @@ api = []
 
 [dependencies]
 deny-toml-parser = { path = "../../../../../../../../../packages/deny-toml-parser" }
-g3-deny-content-checks = { path = "../../../../../../../../../packages/g3-deny-content-checks" }
+g3rs-deny-config-checks = { path = "../../../../../../../../../packages/g3rs-deny-config-checks" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../../../core" }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
 guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../../family_view" }

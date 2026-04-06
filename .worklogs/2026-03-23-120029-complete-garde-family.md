@@ -7,7 +7,7 @@
 Implemented the new `rs/garde` check family under the current checker architecture and corrected the `garde` plan so it no longer overclaims the old validator state. The new family replaces line-based cargo parsing and fail-open source scanning with typed facts, explicit input-failure reporting, and one rule file plus one rule-specific test file per rule.
 
 ## Context & Problem
-The old `garde_checks.rs` implementation was only a partial baseline. It used line-based Cargo dependency detection, relied on a small stale ban list, skipped unreadable or unparsable source files silently, and only approximated derive-based validation coverage. The plan also overstated what already existed by marking `RS-GARDE-01..05` as implemented while `06..09` were still design-only and the old code had known enum and parser gaps.
+The old `garde_checks.rs` implementation was only a partial baseline. It used line-based Cargo dependency detection, relied on a small stale ban list, skipped unreadable or unparsable source files silently, and only approximated derive-based validation coverage. The plan also overstated what already existed by marking `RS-GARDE-CONFIG-01..05` as implemented while `06..09` were still design-only and the old code had known enum and parser gaps.
 
 The user explicitly wanted breadth-first family completion without shortcuts, but still with the full architecture shape:
 - one rule per production file
@@ -31,7 +31,7 @@ That meant `rs/garde` had to be built as a first real implementation rather than
 - **Why:** The old validator failed open on unreadable and unparsable source files. The new architecture should surface those as explicit errors rather than silently skipping files.
 - **Alternatives considered:**
   - Keep silent skips — rejected because it weakens the guardrails and hides broken coverage.
-  - Fold input failures into `RS-GARDE-01` — rejected because dependency presence and family input integrity are separate concerns.
+  - Fold input failures into `RS-GARDE-CONFIG-01` — rejected because dependency presence and family input integrity are separate concerns.
 
 ### Model garde checks per enabled Rust root
 - **Chose:** Build root facts for workspace roots and standalone package roots, then apply garde checks only where garde is enabled by policy.
@@ -41,7 +41,7 @@ That meant `rs/garde` had to be built as a first real implementation rather than
   - Per-crate checking for every workspace member — rejected because the user’s policy roots are workspace roots and standalone packages, not arbitrary member crates.
 
 ### Keep clippy baseline lookup local but policy-root aware
-- **Chose:** Resolve the nearest covering `clippy.toml` / `.clippy.toml` at allowed roots and use that for `RS-GARDE-02/03/04/06`.
+- **Chose:** Resolve the nearest covering `clippy.toml` / `.clippy.toml` at allowed roots and use that for `RS-GARDE-CONFIG-02/03/04/06`.
 - **Why:** Garde bans live in clippy config, so the family has to read the same policy-root structure rather than assuming a single root file.
 - **Alternatives considered:**
   - Hardcode repo-root `clippy.toml` — rejected because it breaks nested workspace/package roots.
@@ -61,10 +61,10 @@ That meant `rs/garde` had to be built as a first real implementation rather than
 
 ### Split struct, enum, manual-impl, and macro concerns cleanly
 - **Chose:** Keep:
-  - `RS-GARDE-05` for struct derive validation
-  - `RS-GARDE-07` for manual `Deserialize` impl bypass
-  - `RS-GARDE-08` for enum derive validation
-  - `RS-GARDE-09` for `query_as!` inventory
+  - `RS-GARDE-AST-01` for struct derive validation
+  - `RS-GARDE-AST-02` for manual `Deserialize` impl bypass
+  - `RS-GARDE-AST-03` for enum derive validation
+  - `RS-GARDE-AST-04` for `query_as!` inventory
 - **Why:** Each rule now has one narrow local assertion instead of one large “input validation audit” blob.
 - **Alternatives considered:**
   - Bundle all source boundary checks into one rule — rejected because it violates the one-rule/one-concern design and makes testing ambiguous.

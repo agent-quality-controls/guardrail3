@@ -26,11 +26,11 @@ Important family files:
 
 Rules:
 - `rs_fmt_01_exists.rs`
-- `rs_fmt_02_settings.rs`
-- `rs_fmt_03_extra_settings.rs`
-- `rs_fmt_04_nightly_keys_on_stable.rs`
+- `rs_fmt_config_01_settings.rs`
+- `rs_fmt_config_02_extra_settings.rs`
+- `rs_fmt_config_03_nightly_keys_on_stable.rs`
 - `rs_fmt_05_per_crate_override.rs`
-- `rs_fmt_06_edition_mismatch.rs`
+- `rs_fmt_config_04_edition_mismatch.rs`
 - `rs_fmt_07_ignore_escape_hatch.rs`
 - `rs_fmt_08_dual_file_conflict.rs`
 
@@ -70,8 +70,8 @@ Required inputs include:
 Malformed required inputs must not silently suppress findings.
 
 Ownership split:
-- `RS-FMT-02` owns parse failures of the root rustfmt config
-- `RS-FMT-04` and `RS-FMT-06` own the secondary-file failures they need
+- `RS-FMT-CONFIG-01` owns parse failures of the root rustfmt config
+- `RS-FMT-CONFIG-03` and `RS-FMT-CONFIG-04` own the secondary-file failures they need
 
 ## Known Live Gaps
 
@@ -153,9 +153,9 @@ The pass is not done until:
 2. audit `mod.rs` / `facts.rs` / `inputs.rs` for root-only ownership
 3. audit the existing `rs_fmt_*_tests/` directories for missing attack vectors and exact-result gaps
 4. harden the highest-risk rules first:
-   - `RS-FMT-02`
-   - `RS-FMT-04`
+   - `RS-FMT-CONFIG-01`
+   - `RS-FMT-CONFIG-03`
    - `RS-FMT-05`
-   - `RS-FMT-06`
+   - `RS-FMT-CONFIG-04`
    - `RS-FMT-08`
 5. finish parse-failure and exact-severity coverage before stopping

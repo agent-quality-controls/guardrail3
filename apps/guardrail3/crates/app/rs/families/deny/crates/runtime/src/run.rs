@@ -1,4 +1,4 @@
-use g3_deny_content_checks::G3DenyContentChecksInput;
+use g3rs_deny_config_checks::G3RsDenyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsDenyRoute;
 use guardrail3_app_rs_family_view::FamilyView;
@@ -52,11 +52,11 @@ fn run_content_checks(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult
     let Some(deny) = input.config.parsed_typed.clone() else {
         return;
     };
-    let package_input = G3DenyContentChecksInput {
+    let package_input = G3RsDenyConfigChecksInput {
         deny_rel_path: input.config.rel_path.clone(),
         deny,
     };
-    let package_results = g3_deny_content_checks::check(&package_input);
+    let package_results = g3rs_deny_config_checks::check(&package_input);
     results.extend(package_results.into_iter().map(convert_check_result));
 }
 

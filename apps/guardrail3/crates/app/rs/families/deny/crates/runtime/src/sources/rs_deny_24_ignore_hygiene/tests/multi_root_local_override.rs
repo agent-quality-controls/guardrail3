@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_24_ignore_hygiene as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_config_19_ignore_hygiene as assertions;
 
 use super::helpers::{build_fixture_deny_toml, set_advisory_ignores};
 

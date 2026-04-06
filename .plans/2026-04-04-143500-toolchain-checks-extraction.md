@@ -38,7 +38,7 @@ pub struct G3ToolchainChecksInput {
 
 ## Rules that move (2)
 
-### RS-TOOLCHAIN-02: channel and components
+### RS-TOOLCHAIN-CONFIG-01: channel and components
 ```rust
 fn check_channel_and_components(
     parsed: &toml::Value,
@@ -49,7 +49,7 @@ fn check_channel_and_components(
 - Validates [toolchain].components contains clippy + rustfmt
 - Errors on nightly, beta, unsupported
 
-### RS-TOOLCHAIN-03: MSRV consistency
+### RS-TOOLCHAIN-CONFIG-02: MSRV consistency
 ```rust
 fn check_msrv_consistency(
     parsed: &toml::Value,

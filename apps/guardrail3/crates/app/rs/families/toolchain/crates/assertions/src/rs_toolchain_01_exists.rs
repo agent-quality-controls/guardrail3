@@ -91,7 +91,7 @@ pub fn assert_malformed_modern_and_legacy_results(results: &[CheckResult]) {
 pub fn assert_invalid_root_cargo_rust_version_type(results: &[CheckResult]) {
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-TOOLCHAIN-03"
+            result.id() == "RS-TOOLCHAIN-CONFIG-02"
                 && result.severity() == Severity::Error
                 && !result.inventory()
                 && result.title() == "Cargo.toml parse error blocks MSRV check"
@@ -99,6 +99,6 @@ pub fn assert_invalid_root_cargo_rust_version_type(results: &[CheckResult]) {
                 && result.message().contains("string")
                 && result.file() == Some("Cargo.toml")
         }),
-        "missing expected RS-TOOLCHAIN-03 Cargo parse blocker: {results:#?}"
+        "missing expected RS-TOOLCHAIN-CONFIG-02 Cargo parse blocker: {results:#?}"
     );
 }

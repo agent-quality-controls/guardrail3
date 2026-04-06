@@ -49,7 +49,7 @@ This commit does not change family semantics. It only:
 - `apps/guardrail3/Cargo.lock` — refreshed workspace package graph after recent family splits
 - `apps/guardrail3/crates/app/rs/families/deps/test_support/src/lib.rs` — `Debug` fix for the test-support stub
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/rs_deps_11_input_failures_tests/fail_closed.rs` — formatting-only cleanup in the deps attack suite
-- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_04_nightly_keys_on_stable_tests/mod.rs` — formatting-only cleanup
+- `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_03_nightly_keys_on_stable_tests/mod.rs` — formatting-only cleanup
 - `apps/guardrail3/crates/app/rs/families/hexarch/crates/assertions/src/rs_hexarch_27_nested_workspace_forbidden.rs` — formatting-only cleanup
 
 ## Next Steps / Continuation Plan

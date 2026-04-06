@@ -19,23 +19,23 @@ Completed so far:
   - `RS-CLIPPY-05`
   - `RS-DENY-02`
   - `RS-DENY-03`
-  - `RS-DENY-19`
-  - `RS-DENY-23`
-  - `RS-DENY-24`
-  - `RS-DENY-28`
-  - `RS-DENY-29`
+  - `RS-DENY-CONFIG-16`
+  - `RS-DENY-CONFIG-20`
+  - `RS-DENY-CONFIG-21`
+  - `RS-DENY-CONFIG-25`
+  - `RS-DENY-CONFIG-26`
   - `RS-DENY-30`
   - `RS-DENY-01`
   - `RS-DENY-09`
-  - `RS-DENY-14`
-  - `RS-DENY-18`
-  - `RS-DENY-20`
+  - `RS-DENY-CONFIG-11`
+  - `RS-DENY-CONFIG-15`
+  - `RS-DENY-CONFIG-17`
 - support helpers that copy the real `tests/fixtures/r_arch_01/golden/` scaffold and run clippy/deny families end-to-end
 
 Current next rule targets in this order:
 - refresh `14-clippy-deny-coverage-matrix.md` to current migrated directory state
 - audit remaining unmigrated clippy rules after `RS-CLIPPY-05`
-- audit remaining unmigrated deny rules after `RS-DENY-20`
+- audit remaining unmigrated deny rules after `RS-DENY-CONFIG-17`
 
 ## First action
 
@@ -144,16 +144,16 @@ This first step prevents blind directory churn and makes the migration measurabl
    - `RS-CLIPPY-08`
    - `RS-CLIPPY-15`
    - `RS-CLIPPY-16`
-   - `RS-CLIPPY-17`
+   - `RS-CLIPPY-CONFIG-15`
    - `RS-CLIPPY-18`
    - `RS-CLIPPY-20`
-   - `RS-CLIPPY-02`
-   - `RS-CLIPPY-03`
-   - `RS-CLIPPY-09`
-   - `RS-CLIPPY-10`
-   - `RS-CLIPPY-11`
-   - `RS-CLIPPY-21`
-   - `RS-CLIPPY-22`
+   - `RS-CLIPPY-CONFIG-01`
+   - `RS-CLIPPY-CONFIG-02`
+   - `RS-CLIPPY-CONFIG-08`
+   - `RS-CLIPPY-CONFIG-09`
+   - `RS-CLIPPY-CONFIG-10`
+   - `RS-CLIPPY-CONFIG-19`
+   - `RS-CLIPPY-CONFIG-20`
 
 19. For each clippy rule, create a rule-specific test module directory with semantic files only as needed:
    - `mod.rs`
@@ -216,34 +216,34 @@ This first step prevents blind directory churn and makes the migration measurabl
 29. Use this rule order for deny so location, precedence, profile, and escape-hatch semantics are hardened before the more static inventory rules:
    - `RS-DENY-02`
    - `RS-DENY-03`
-   - `RS-DENY-19`
-   - `RS-DENY-23`
-   - `RS-DENY-24`
-   - `RS-DENY-29`
+   - `RS-DENY-CONFIG-16`
+   - `RS-DENY-CONFIG-20`
+   - `RS-DENY-CONFIG-21`
+   - `RS-DENY-CONFIG-26`
    - `RS-DENY-30`
-   - `RS-DENY-28`
+   - `RS-DENY-CONFIG-25`
    - `RS-DENY-01`
-   - `RS-DENY-04`
-   - `RS-DENY-05`
-   - `RS-DENY-06`
-   - `RS-DENY-07`
-   - `RS-DENY-08`
+   - `RS-DENY-CONFIG-01`
+   - `RS-DENY-CONFIG-02`
+   - `RS-DENY-CONFIG-03`
+   - `RS-DENY-CONFIG-04`
+   - `RS-DENY-CONFIG-05`
    - `RS-DENY-09`
-   - `RS-DENY-10`
-   - `RS-DENY-11`
-   - `RS-DENY-12`
-   - `RS-DENY-13`
-   - `RS-DENY-14`
-   - `RS-DENY-15`
-   - `RS-DENY-16`
+   - `RS-DENY-CONFIG-07`
+   - `RS-DENY-CONFIG-08`
+   - `RS-DENY-CONFIG-09`
+   - `RS-DENY-CONFIG-10`
+   - `RS-DENY-CONFIG-11`
+   - `RS-DENY-CONFIG-12`
+   - `RS-DENY-CONFIG-13`
    - `RS-DENY-17`
-   - `RS-DENY-18`
-   - `RS-DENY-20`
-   - `RS-DENY-21`
-   - `RS-DENY-22`
+   - `RS-DENY-CONFIG-15`
+   - `RS-DENY-CONFIG-17`
+   - `RS-DENY-CONFIG-18`
+   - `RS-DENY-CONFIG-19`
    - `RS-DENY-25`
    - `RS-DENY-26`
-   - `RS-DENY-27`
+   - `RS-DENY-CONFIG-24`
 
 30. For each deny rule, create a rule-specific test module directory with semantic files only as needed:
    - `mod.rs`
@@ -285,7 +285,7 @@ This first step prevents blind directory churn and makes the migration measurabl
 
 36. For deny generator-sensitive rules, explicitly compare checker behavior against generated baseline output instead of trusting copied fixtures.
 
-37. Resolve `RS-DENY-19` explicitly.
+37. Resolve `RS-DENY-CONFIG-16` explicitly.
    - confirm the intended policy source
    - update tests to lock that decision
    - if the correct policy is still ambiguous, stop and record the ambiguity in the lane doc instead of guessing

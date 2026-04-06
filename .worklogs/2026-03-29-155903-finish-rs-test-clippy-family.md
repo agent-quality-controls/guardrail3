@@ -41,7 +41,7 @@ This commit sharpens the intended role of `test_support` in migrated families:
 - Existing runtime parity coverage:
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_04_missing_method_ban_tests/parity.rs`
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_05_missing_type_ban_tests/parity.rs`
-  - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations_tests/parity.rs`
+  - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations_tests/parity.rs`
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_19_unknown_keys_tests/parity.rs`
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_20_macro_bans_tests/parity.rs`
 
@@ -52,7 +52,7 @@ This commit sharpens the intended role of `test_support` in migrated families:
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/clippy/test_support/src/lib.rs` — `test_support` crate surface after removal of the forbidden local harness
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_19_unknown_keys_tests/parity.rs` — representative runtime parity coverage proving generated fixture expectations already exist
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations_tests/parity.rs` — representative runtime-side generator parity test
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations_tests/parity.rs` — representative runtime-side generator parity test
 - `.worklogs/2026-03-29-155441-finish-rs-test-code-family.md` — immediately preceding `RS-TEST` family checkpoint
 
 ## Next Steps / Continuation Plan

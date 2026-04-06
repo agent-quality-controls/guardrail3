@@ -61,7 +61,7 @@ Extraction note:
 - the package boundary should therefore be typed parsed inputs, not raw TOML
   and not optional/error-state enums
 - inside the package, `check(...)` may fan out into smaller rule-local inputs
-  for `RS-FMT-02`, `RS-FMT-03`, `RS-FMT-04`, and `RS-FMT-06`
+  for `RS-FMT-CONFIG-01`, `RS-FMT-CONFIG-02`, `RS-FMT-CONFIG-03`, and `RS-FMT-CONFIG-04`
 
 Next planning focus:
 

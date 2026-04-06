@@ -55,13 +55,13 @@ That means:
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-DEPS-05 | R-DEPS-01 | Error | Unauthorized external dependency in `[dependencies]` not in crate's `allowed_deps` list | Implemented |
-| RS-DEPS-06 | — | Error | Unauthorized external dependency in `[build-dependencies]` not in crate's `allowed_deps` list | Implemented |
-| RS-DEPS-07 | — | Warn | Unauthorized external dependency in `[dev-dependencies]` not in crate's `allowed_deps` list | Implemented |
-| RS-DEPS-08 | R-DEPS-02 | Warn | Library crate has no dependency allowlist configured | Implemented |
+| RS-DEPS-CONFIG-01 | R-DEPS-01 | Error | Unauthorized external dependency in `[dependencies]` not in crate's `allowed_deps` list | Implemented |
+| RS-DEPS-CONFIG-02 | — | Error | Unauthorized external dependency in `[build-dependencies]` not in crate's `allowed_deps` list | Implemented |
+| RS-DEPS-CONFIG-03 | — | Warn | Unauthorized external dependency in `[dev-dependencies]` not in crate's `allowed_deps` list | Implemented |
+| RS-DEPS-CONFIG-04 | R-DEPS-02 | Warn | Library crate has no dependency allowlist configured | Implemented |
 
 Allowlist semantics:
-- no `allowed_deps` configured means `RS-DEPS-05..07` stay silent; only `RS-DEPS-08` warns for library-profile crates
+- no `allowed_deps` configured means `RS-DEPS-CONFIG-01..07` stay silent; only `RS-DEPS-CONFIG-04` warns for library-profile crates
 - path dependencies are skipped only when they resolve to workspace package paths
 - `workspace = true` is **not** automatically skipped
 - if `workspace = true` resolves to an external workspace dependency, it must still be allowlisted
@@ -69,11 +69,11 @@ Allowlist semantics:
 - renamed dependencies must be checked against the real `package` name when present
 
 Section ownership:
-- `RS-DEPS-05` owns `[dependencies]`
-- `RS-DEPS-06` owns `[build-dependencies]`
-- `RS-DEPS-07` owns `[dev-dependencies]`
-- `RS-DEPS-05..07` also own the matching `target.*` dependency tables
-- `RS-DEPS-12` owns the direct-dependency cap across both top-level and target-specific dependency tables
+- `RS-DEPS-CONFIG-01` owns `[dependencies]`
+- `RS-DEPS-CONFIG-02` owns `[build-dependencies]`
+- `RS-DEPS-CONFIG-03` owns `[dev-dependencies]`
+- `RS-DEPS-CONFIG-01..07` also own the matching `target.*` dependency tables
+- `RS-DEPS-CONFIG-05` owns the direct-dependency cap across both top-level and target-specific dependency tables
 
 ## Lockfile rules
 
@@ -102,9 +102,9 @@ Malformed required inputs must surface through `RS-DEPS-11` rather than silently
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-DEPS-12 | Error | More than 25 unique direct dependency package names on one crate across owned direct dependency sections/tables. | Implemented |
+| RS-DEPS-CONFIG-05 | Error | More than 25 unique direct dependency package names on one crate across owned direct dependency sections/tables. | Implemented |
 
-### RS-DEPS-12 — Direct dependency count cap
+### RS-DEPS-CONFIG-05 — Direct dependency count cap
 
 **Intent**
 - catch dependency sprawl and agentic crate accretion
@@ -146,7 +146,7 @@ Malformed required inputs must surface through `RS-DEPS-11` rather than silently
 
 - rule tests for `RS-DEPS-01..11` now use rule-specific `*_tests/` module directories instead of flat `*_tests.rs` sidecars
 - tool-presence rules now have exact owned-hit coverage proving one missing tool only trips its own rule and preserves exact severities
-- `RS-DEPS-05..07` now have exact section-ownership coverage, renamed-dependency coverage, and explicit `workspace = true` attack coverage
+- `RS-DEPS-CONFIG-01..07` now have exact section-ownership coverage, renamed-dependency coverage, and explicit `workspace = true` attack coverage
 - non-workspace path dependencies are now checked instead of being skipped wholesale
 - hybrid workspace roots are now associated with their own workspace facts, which keeps root-package `workspace = true` and workspace-path semantics from failing open
 - `RS-DEPS-09` now has explicit multi-root severity coverage across service and library roots
@@ -156,14 +156,14 @@ Malformed required inputs must surface through `RS-DEPS-11` rather than silently
 - undeclared local Cargo packages under a workspace root now fail closed instead of being tolerated as ordinary external path dependencies
 - nested `apps/*` and `packages/*` zones now resolve deps policy and runtime applicability by zone segment, not only by top-level prefix
 - deps routing/runtime now preserve ancestor workspace roots needed for `Cargo.lock` policy when scoped app/package config enables the family
-- malformed `target.*` dependency tables now fail closed through `RS-DEPS-11` without suppressing `RS-DEPS-05..07`
-- subtree-scoped regressions now prove sibling crates do not leak into routed `RS-DEPS-05` and `RS-DEPS-12` findings
+- malformed `target.*` dependency tables now fail closed through `RS-DEPS-11` without suppressing `RS-DEPS-CONFIG-01..07`
+- subtree-scoped regressions now prove sibling crates do not leak into routed `RS-DEPS-CONFIG-01` and `RS-DEPS-CONFIG-05` findings
 - `RS-DEPS-09/10` now keep nested non-member helper crates under a workspace root subordinate to that workspace root instead of forcing separate `Cargo.lock` policy on them
 
 ### Remaining gaps
 
 - root-package allowlist policy is still weaker than app/package-scoped policy because the current config surface has no exact root-crate `allowed_deps` entry
-- malformed dependency inputs that affect direct-dependency counting are expected to surface through `RS-DEPS-11`, not partial `RS-DEPS-12` counts
+- malformed dependency inputs that affect direct-dependency counting are expected to surface through `RS-DEPS-11`, not partial `RS-DEPS-CONFIG-05` counts
 
 ### Policy questions
 

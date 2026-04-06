@@ -47,8 +47,8 @@ garde = { version = "0.22", features = ["derive"] }
     );
 
     let results = super::helpers::run_family(&tree);
-    let garde_05 = findings(&results, "RS-GARDE-05");
-    assert_eq!(garde_05.len(), 1, "unexpected RS-GARDE-05 results: {garde_05:#?}");
+    let garde_05 = findings(&results, "RS-GARDE-AST-01");
+    assert_eq!(garde_05.len(), 1, "unexpected RS-GARDE-AST-01 results: {garde_05:#?}");
     assert_eq!(garde_05[0].severity(), Severity::Error);
     assert_eq!(garde_05[0].file(), Some(source_rel));
     assert_eq!(garde_05[0].title(), "struct `Input` missing Validate derive");
@@ -123,8 +123,8 @@ reason = "Temporary SQLx row mapping until validated DTO extraction lands."
     );
 
     let results = super::helpers::run_family(&tree);
-    let garde_09 = findings(&results, "RS-GARDE-09");
-    assert_eq!(garde_09.len(), 3, "unexpected RS-GARDE-09 results: {garde_09:#?}");
+    let garde_09 = findings(&results, "RS-GARDE-AST-04");
+    assert_eq!(garde_09.len(), 3, "unexpected RS-GARDE-AST-04 results: {garde_09:#?}");
     assert!(garde_09.iter().any(|result| {
         result.severity() == Severity::Warn
             && result.file() == Some(source_rel)
@@ -196,7 +196,7 @@ garde = { version = "0.22", features = ["derive"] }
     assert!(garde_10[0]
         .message()
         .contains("Failed to parse guardrail3.toml for garde policy resolution"));
-    assert!(findings(&results, "RS-GARDE-09").is_empty());
+    assert!(findings(&results, "RS-GARDE-AST-04").is_empty());
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

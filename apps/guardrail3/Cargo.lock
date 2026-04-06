@@ -307,68 +307,68 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
-name = "g3-cargo-content-checks"
+name = "g3rs-cargo-config-checks"
 version = "0.1.0"
 dependencies = [
- "g3-cargo-content-checks-runtime",
- "g3-cargo-content-checks-types",
+ "g3rs-cargo-config-checks-runtime",
+ "g3rs-cargo-config-checks-types",
 ]
 
 [[package]]
-name = "g3-cargo-content-checks-runtime"
+name = "g3rs-cargo-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-cargo-content-checks-types",
+ "g3rs-cargo-config-checks-types",
  "guardrail3-check-types",
 ]
 
 [[package]]
-name = "g3-cargo-content-checks-types"
+name = "g3rs-cargo-config-checks-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
 ]
 
 [[package]]
-name = "g3-clippy-content-checks"
+name = "g3rs-clippy-config-checks"
 version = "0.1.0"
 dependencies = [
- "g3-clippy-content-checks-runtime",
- "g3-clippy-content-checks-types",
+ "g3rs-clippy-config-checks-runtime",
+ "g3rs-clippy-config-checks-types",
 ]
 
 [[package]]
-name = "g3-clippy-content-checks-runtime"
+name = "g3rs-clippy-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "clippy-toml-parser",
- "g3-clippy-content-checks-types",
+ "g3rs-clippy-config-checks-types",
  "guardrail3-check-types",
  "guardrail3-domain-modules",
 ]
 
 [[package]]
-name = "g3-clippy-content-checks-types"
+name = "g3rs-clippy-config-checks-types"
 version = "0.1.0"
 dependencies = [
  "clippy-toml-parser",
 ]
 
 [[package]]
-name = "g3-deny-content-checks"
+name = "g3rs-deny-config-checks"
 version = "0.1.0"
 dependencies = [
- "g3-deny-content-checks-runtime",
- "g3-deny-content-checks-types",
+ "g3rs-deny-config-checks-runtime",
+ "g3rs-deny-config-checks-types",
 ]
 
 [[package]]
-name = "g3-deny-content-checks-runtime"
+name = "g3rs-deny-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
- "g3-deny-content-checks-types",
+ "g3rs-deny-config-checks-types",
  "guardrail3-check-types",
  "guardrail3-domain-modules",
  "guardrail3-reason-policy",
@@ -376,33 +376,33 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3-deny-content-checks-types"
+name = "g3rs-deny-config-checks-types"
 version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
 ]
 
 [[package]]
-name = "g3-deps-content-checks"
+name = "g3rs-deps-config-checks"
 version = "0.1.0"
 dependencies = [
- "g3-deps-content-checks-runtime",
- "g3-deps-content-checks-types",
+ "g3rs-deps-config-checks-runtime",
+ "g3rs-deps-config-checks-types",
 ]
 
 [[package]]
-name = "g3-deps-content-checks-runtime"
+name = "g3rs-deps-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-deps-content-checks-types",
+ "g3rs-deps-config-checks-types",
  "glob",
  "guardrail3-check-types",
  "guardrail3-domain-config",
 ]
 
 [[package]]
-name = "g3-deps-content-checks-types"
+name = "g3rs-deps-config-checks-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
@@ -410,26 +410,26 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3-fmt-content-checks"
+name = "g3rs-fmt-config-checks"
 version = "0.1.0"
 dependencies = [
- "g3-fmt-content-checks-runtime",
- "g3-fmt-content-checks-types",
+ "g3rs-fmt-config-checks-runtime",
+ "g3rs-fmt-config-checks-types",
 ]
 
 [[package]]
-name = "g3-fmt-content-checks-runtime"
+name = "g3rs-fmt-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-fmt-content-checks-types",
+ "g3rs-fmt-config-checks-types",
  "guardrail3-check-types",
  "rustfmt-toml-parser",
  "toml",
 ]
 
 [[package]]
-name = "g3-fmt-content-checks-types"
+name = "g3rs-fmt-config-checks-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
@@ -438,18 +438,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3-garde-ast-checks"
+name = "g3rs-garde-ast-checks"
 version = "0.1.0"
 dependencies = [
- "g3-garde-ast-checks-runtime",
- "g3-garde-ast-checks-types",
+ "g3rs-garde-ast-checks-runtime",
+ "g3rs-garde-ast-checks-types",
 ]
 
 [[package]]
-name = "g3-garde-ast-checks-runtime"
+name = "g3rs-garde-ast-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-garde-ast-checks-types",
+ "g3rs-garde-ast-checks-types",
  "guardrail3-check-types",
  "guardrail3-domain-config",
  "guardrail3-reason-policy",
@@ -460,29 +460,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3-garde-ast-checks-types"
+name = "g3rs-garde-ast-checks-types"
 version = "0.1.0"
 
 [[package]]
-name = "g3-garde-content-checks"
+name = "g3rs-garde-config-checks"
 version = "0.1.0"
 dependencies = [
- "g3-garde-content-checks-runtime",
- "g3-garde-content-checks-types",
+ "g3rs-garde-config-checks-runtime",
+ "g3rs-garde-config-checks-types",
 ]
 
 [[package]]
-name = "g3-garde-content-checks-runtime"
+name = "g3rs-garde-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3-garde-content-checks-types",
+ "g3rs-garde-config-checks-types",
  "guardrail3-check-types",
 ]
 
 [[package]]
-name = "g3-garde-content-checks-types"
+name = "g3rs-garde-config-checks-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
@@ -490,25 +490,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3-toolchain-content-checks"
+name = "g3rs-toolchain-config-checks"
 version = "0.1.0"
 dependencies = [
- "g3-toolchain-content-checks-runtime",
- "g3-toolchain-content-checks-types",
+ "g3rs-toolchain-config-checks-runtime",
+ "g3rs-toolchain-config-checks-types",
 ]
 
 [[package]]
-name = "g3-toolchain-content-checks-runtime"
+name = "g3rs-toolchain-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-toolchain-content-checks-types",
+ "g3rs-toolchain-config-checks-types",
  "guardrail3-check-types",
  "rust-toolchain-toml-parser",
 ]
 
 [[package]]
-name = "g3-toolchain-content-checks-types"
+name = "g3rs-toolchain-config-checks-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
@@ -720,7 +720,7 @@ name = "guardrail3-app-rs-family-cargo"
 version = "0.0.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-cargo-content-checks",
+ "g3rs-cargo-config-checks",
  "guardrail3-app-rs-family-cargo-assertions",
  "guardrail3-app-rs-family-cargo-test-support",
  "guardrail3-app-rs-family-mapper",
@@ -775,7 +775,7 @@ name = "guardrail3-app-rs-family-clippy"
 version = "0.0.0"
 dependencies = [
  "clippy-toml-parser",
- "g3-clippy-content-checks",
+ "g3rs-clippy-config-checks",
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-clippy-assertions",
@@ -863,7 +863,7 @@ name = "guardrail3-app-rs-family-deny"
 version = "0.0.0"
 dependencies = [
  "deny-toml-parser",
- "g3-deny-content-checks",
+ "g3rs-deny-config-checks",
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-deny-assertions",
@@ -907,7 +907,7 @@ name = "guardrail3-app-rs-family-deps"
 version = "0.0.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-deps-content-checks",
+ "g3rs-deps-config-checks",
  "glob",
  "guardrail3-app-rs-family-deps-assertions",
  "guardrail3-app-rs-family-deps-test-support",
@@ -946,7 +946,7 @@ name = "guardrail3-app-rs-family-fmt"
 version = "0.0.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-fmt-content-checks",
+ "g3rs-fmt-config-checks",
  "guardrail3-app-rs-family-fmt-assertions",
  "guardrail3-app-rs-family-fmt-test-support",
  "guardrail3-app-rs-family-mapper",
@@ -991,8 +991,8 @@ version = "0.0.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3-garde-ast-checks",
- "g3-garde-content-checks",
+ "g3rs-garde-ast-checks",
+ "g3rs-garde-config-checks",
  "glob",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-garde-test-support",
@@ -1250,7 +1250,7 @@ name = "guardrail3-app-rs-family-toolchain"
 version = "0.0.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-toolchain-content-checks",
+ "g3rs-toolchain-config-checks",
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-mapper",

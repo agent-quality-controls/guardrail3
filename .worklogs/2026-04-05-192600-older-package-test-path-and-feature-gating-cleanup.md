@@ -1,13 +1,13 @@
 # Clean Up Older Package Test Paths And Feature Gating
 
 **Date:** 2026-04-05 19:26
-**Scope:** `packages/g3-toolchain-content-checks`, `packages/g3-fmt-content-checks`, `packages/g3-clippy-content-checks`, `packages/g3-deny-content-checks`, `packages/g3-cargo-content-checks`
+**Scope:** `packages/g3rs-toolchain-config-checks`, `packages/g3rs-fmt-config-checks`, `packages/g3rs-clippy-config-checks`, `packages/g3rs-deny-config-checks`, `packages/g3rs-cargo-config-checks`
 
 ## Summary
 Cleaned up the older extracted content-check packages so they stop using the old `#[path = "../..._tests/mod.rs"]` test wiring and stop tripping the missing internal feature-gating checks on their runtime/assertions crates. The affected packages still have the broader shared cross-package dependency debt, but the test-path and gating issues requested by the user are now fixed.
 
 ## Context & Problem
-After building `g3-deps-content-checks`, the user explicitly asked for a comparison against the older extracted packages and then asked for two categories of cleanup across those older packages:
+After building `g3rs-deps-config-checks`, the user explicitly asked for a comparison against the older extracted packages and then asked for two categories of cleanup across those older packages:
 - test path wiring
 - feature gating
 
@@ -41,7 +41,7 @@ Those issues were already present in `toolchain`, `fmt`, `clippy`, `deny`, and `
   - Add ad hoc feature names per crate — rejected because the existing extracted packages already standardize on `all = ["checks"]`.
 
 ### Fix cargo’s moved-fixture paths after the directory reshuffle
-- **Chose:** update the `include_str!` paths in the cargo package tests to point at the new nested fixture location under `rs_cargo_01_workspace_lints/tests/fixtures`.
+- **Chose:** update the `include_str!` paths in the cargo package tests to point at the new nested fixture location under `rs_cargo_config_01_workspace_lints/tests/fixtures`.
 - **Why:** the directory move broke those relative includes.
 - **Alternatives considered:**
   - Duplicate the fixture in each rule directory — rejected because that would create unnecessary test data duplication.
@@ -63,11 +63,11 @@ What did **not** change:
 ## Information Sources
 - `AGENTS.md`
 - package-local `arch/code` validation runs for:
-  - `packages/g3-toolchain-content-checks`
-  - `packages/g3-fmt-content-checks`
-  - `packages/g3-clippy-content-checks`
-  - `packages/g3-deny-content-checks`
-  - `packages/g3-cargo-content-checks`
+  - `packages/g3rs-toolchain-config-checks`
+  - `packages/g3rs-fmt-config-checks`
+  - `packages/g3rs-clippy-config-checks`
+  - `packages/g3rs-deny-config-checks`
+  - `packages/g3rs-cargo-config-checks`
 - `.worklogs/2026-04-05-191423-deps-content-checks-architecture-cleanup.md`
 - existing extracted package layouts under `packages/g3-*`
 
@@ -77,11 +77,11 @@ What did **not** change:
 - Some assertions `lib.rs` files still contain private `use ... as _` stubs and related facade debt; that was not part of the user’s requested cleanup.
 
 ## Key Files for Context
-- `packages/g3-toolchain-content-checks/crates/runtime/src/rs_toolchain_02_channel_and_components/mod.rs` — example of the cleaned test wiring
-- `packages/g3-fmt-content-checks/crates/runtime/Cargo.toml` — example runtime feature gating fix
-- `packages/g3-clippy-content-checks/crates/assertions/Cargo.toml` — example assertions feature gating fix
-- `packages/g3-deny-content-checks/crates/runtime/src` — largest test-directory migration surface
-- `packages/g3-cargo-content-checks/crates/runtime/src/rs_cargo_01_workspace_lints/tests/fixtures/golden_workspace.toml` — fixture path that had to move with the cargo cleanup
+- `packages/g3rs-toolchain-config-checks/crates/runtime/src/rs_toolchain_config_01_channel_components/mod.rs` — example of the cleaned test wiring
+- `packages/g3rs-fmt-config-checks/crates/runtime/Cargo.toml` — example runtime feature gating fix
+- `packages/g3rs-clippy-config-checks/crates/assertions/Cargo.toml` — example assertions feature gating fix
+- `packages/g3rs-deny-config-checks/crates/runtime/src` — largest test-directory migration surface
+- `packages/g3rs-cargo-config-checks/crates/runtime/src/rs_cargo_config_01_workspace_lints/tests/fixtures/golden_workspace.toml` — fixture path that had to move with the cargo cleanup
 - `.worklogs/2026-04-05-191423-deps-content-checks-architecture-cleanup.md` — immediate prior package cleanup that established the desired shape
 
 ## Next Steps / Continuation Plan

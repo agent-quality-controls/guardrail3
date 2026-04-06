@@ -36,7 +36,7 @@ fn check_value(
     if matches!(actual, Some("deny")) && expected != "deny" {
         results.push(
             CheckResult::from_parts(
-                "RS-DENY-06".to_owned(),
+                "RS-DENY-CONFIG-03".to_owned(),
                 Severity::Info,
                 format!("advisories `{key}` stricter than baseline"),
                 format!(

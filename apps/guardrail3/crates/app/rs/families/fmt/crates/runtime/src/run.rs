@@ -1,4 +1,4 @@
-use g3_fmt_content_checks::G3FmtContentChecksInput;
+use g3rs_fmt_config_checks::G3RsFmtConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_view::FamilyView;
 use guardrail3_domain_report::{CheckResult, Severity};
@@ -44,7 +44,7 @@ fn run_content_checks(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) 
     let Some(rustfmt) = input.parsed.as_ref() else {
         if input.parse_error.is_some() {
             results.push(CheckResult::from_parts(
-                "RS-FMT-02".to_owned(),
+                "RS-FMT-CONFIG-01".to_owned(),
                 Severity::Error,
                 "rustfmt config parse error".to_owned(),
                 "rustfmt config exists but could not be parsed as a TOML table".to_owned(),
@@ -67,7 +67,7 @@ fn run_content_checks(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) 
         return;
     };
 
-    let package_input = G3FmtContentChecksInput {
+    let package_input = G3RsFmtConfigChecksInput {
         rustfmt_rel_path: config_rel.to_owned(),
         rustfmt: rustfmt.clone(),
         cargo_rel_path: input.cargo_rel_path.clone(),
@@ -75,7 +75,7 @@ fn run_content_checks(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) 
         toolchain_rel_path: input.toolchain_rel_path.clone(),
         toolchain,
     };
-    let package_results = g3_fmt_content_checks::check(&package_input);
+    let package_results = g3rs_fmt_config_checks::check(&package_input);
     results.extend(package_results.into_iter().map(convert_check_result));
 }
 
@@ -92,7 +92,7 @@ fn push_cargo_blocker(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) 
         ),
     };
     results.push(CheckResult::from_parts(
-        "RS-FMT-06".to_owned(),
+        "RS-FMT-CONFIG-04".to_owned(),
         Severity::Error,
         title.to_owned(),
         message,
@@ -116,7 +116,7 @@ fn push_toolchain_blocker(input: &RustfmtRootInput, results: &mut Vec<CheckResul
         ),
     };
     results.push(CheckResult::from_parts(
-        "RS-FMT-04".to_owned(),
+        "RS-FMT-CONFIG-03".to_owned(),
         Severity::Error,
         title.to_owned(),
         message,

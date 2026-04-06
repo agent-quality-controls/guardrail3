@@ -710,7 +710,7 @@ fn fmt_runtime_validation_scope_keeps_root_toolchain_state() {
     assertions::assert_result_present(
         &report,
         "fmt",
-        "RS-FMT-04",
+        "RS-FMT-CONFIG-03",
         Some("rustfmt.toml"),
         Some(false),
         Some("nightly-only rustfmt setting `group_imports` on stable"),
@@ -750,7 +750,7 @@ fn fmt_runtime_validation_scope_keeps_root_cargo_state() {
     assertions::assert_result_present(
         &report,
         "fmt",
-        "RS-FMT-06",
+        "RS-FMT-CONFIG-04",
         Some("Cargo.toml"),
         Some(false),
         Some("Cargo.toml edition missing"),
@@ -1018,7 +1018,7 @@ fn garde_runtime_runs_each_legal_workspace_once() {
     assertions::assert_result_present(
         &report,
         "garde",
-        "RS-GARDE-01",
+        "RS-GARDE-CONFIG-01",
         Some("apps/backend/Cargo.toml"),
         Some(true),
         Some("garde dependency found"),
@@ -1026,7 +1026,7 @@ fn garde_runtime_runs_each_legal_workspace_once() {
     assertions::assert_result_present(
         &report,
         "garde",
-        "RS-GARDE-01",
+        "RS-GARDE-CONFIG-01",
         Some("apps/other/Cargo.toml"),
         Some(false),
         Some("garde dependency missing"),
@@ -1036,7 +1036,7 @@ fn garde_runtime_runs_each_legal_workspace_once() {
             .results()
             .iter()
             .filter(|result| {
-                result.id() == "RS-GARDE-01"
+                result.id() == "RS-GARDE-CONFIG-01"
                     && matches!(
                         result.file(),
                         Some("apps/backend/Cargo.toml" | "apps/other/Cargo.toml")
@@ -1072,7 +1072,7 @@ fn cargo_runtime_runs_each_legal_workspace_once() {
     assertions::assert_result_present(
         &report,
         "cargo",
-        "RS-CARGO-01",
+        "RS-CARGO-CONFIG-01",
         Some("apps/backend/Cargo.toml"),
         Some(false),
         Some("rust lint table missing"),
@@ -1080,7 +1080,7 @@ fn cargo_runtime_runs_each_legal_workspace_once() {
     assertions::assert_result_present(
         &report,
         "cargo",
-        "RS-CARGO-01",
+        "RS-CARGO-CONFIG-01",
         Some("apps/other/Cargo.toml"),
         Some(false),
         Some("rust lint table missing"),
@@ -1090,7 +1090,7 @@ fn cargo_runtime_runs_each_legal_workspace_once() {
             .results()
             .iter()
             .filter(|result| {
-                result.id() == "RS-CARGO-01"
+                result.id() == "RS-CARGO-CONFIG-01"
                     && result.title() == "rust lint table missing"
                     && !result.inventory()
                     && matches!(
@@ -1265,7 +1265,7 @@ fn cargo_runtime_validation_scope_stays_inside_owning_workspace() {
     assertions::assert_result_present(
         &report,
         "cargo",
-        "RS-CARGO-01",
+        "RS-CARGO-CONFIG-01",
         Some("apps/backend/Cargo.toml"),
         Some(false),
         None,
@@ -1329,7 +1329,7 @@ fn garde_runtime_validation_scope_stays_inside_owning_workspace() {
     assertions::assert_result_present(
         &report,
         "garde",
-        "RS-GARDE-01",
+        "RS-GARDE-CONFIG-01",
         Some("apps/backend/Cargo.toml"),
         Some(false),
         Some("garde dependency missing"),
@@ -1788,7 +1788,7 @@ fn deps_runtime_scoped_opt_in_does_not_emit_global_tool_results() {
         .filter(|result| !result.inventory())
         .collect::<Vec<_>>();
     assert!(
-        live_results.iter().any(|result| result.id() == "RS-DEPS-05"
+        live_results.iter().any(|result| result.id() == "RS-DEPS-CONFIG-01"
             && result.file() == Some("apps/backend/Cargo.toml")),
         "expected crate-local allowlist violation: {report:#?}"
     );

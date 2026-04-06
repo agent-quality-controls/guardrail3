@@ -1,16 +1,16 @@
 # Harden Clippy Family Bridge And Remove Dead App Rule Surface
 
 **Date:** 2026-04-05 15:24
-**Scope:** `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_25_config_parseable/tests/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_02_max_struct_bools/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_03_max_fn_params_bools/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_09_too_many_lines_threshold/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_10_too_many_arguments_threshold/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_11_excessive_nesting_threshold/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_21_cognitive_complexity_threshold/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_22_type_complexity_threshold/`
+**Scope:** `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_25_config_parseable/tests/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_01_max_struct_bools/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_02_max_fn_params_bools/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_08_too_many_lines_threshold/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_09_too_many_arguments_threshold/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_10_excessive_nesting_threshold/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_19_cognitive_complexity_threshold/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_20_type_complexity_threshold/`
 
 ## Summary
 Added family-level smoke tests that prove migrated clippy rules are actually being executed through the app-family bridge, then removed the dead app-side rule directories for the moved clippy slice so the runtime tree no longer claims those rules still live in the app crate.
 
 ## Context & Problem
-After extracting the first `clippy` content slice into `g3-clippy-content-checks`, the package had direct tests and the app family passed overall, but there was still a trust gap:
+After extracting the first `clippy` content slice into `g3rs-clippy-config-checks`, the package had direct tests and the app family passed overall, but there was still a trust gap:
 
 - nothing at the app-family layer explicitly proved that `run.rs` was calling the package correctly for a migrated rule
-- the old app-side rule directories for `RS-CLIPPY-02`, `03`, `09`, `10`, `11`, `17`, `21`, and `22` were still present on disk even though `lib.rs` no longer referenced them
+- the old app-side rule directories for `RS-CLIPPY-CONFIG-01`, `03`, `09`, `10`, `11`, `17`, `21`, and `22` were still present on disk even though `lib.rs` no longer referenced them
 
 That left two risks:
 - the family bridge could regress silently while package tests still passed
@@ -35,7 +35,7 @@ That left two risks:
 ## Architectural Notes
 This change hardens the intended extraction boundary without widening it:
 
-- `g3-clippy-content-checks` continues to own the migrated typed-content rules
+- `g3rs-clippy-config-checks` continues to own the migrated typed-content rules
 - the app clippy family continues to own typed parse gating through `RS-CLIPPY-25`
 - the new tests prove the app still invokes the package and maps its results back into app `CheckResult`s
 
@@ -46,21 +46,21 @@ Using `RS-CLIPPY-25`'s helper is intentional: that rule already sits at the boun
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/lib.rs`
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_25_config_parseable/tests/helpers.rs`
 - `apps/guardrail3/crates/app/rs/families/clippy/test_support/src/fixtures.rs`
-- `packages/g3-clippy-content-checks/crates/runtime/src/run.rs`
+- `packages/g3rs-clippy-config-checks/crates/runtime/src/run.rs`
 - `.worklogs/2026-04-05-145142-clippy-extraction-and-parser-contract-fixes.md`
 
 ## Open Questions / Future Considerations
 - The family now has bridge smoke tests for one migrated threshold rule. If the clippy extraction expands materially, add another bridge test for a different migrated rule class rather than assuming one smoke test is enough forever.
-- `g3-deny-content-checks` still needs similar hardening at the package level; its confidence is still carried mostly by app-family tests.
+- `g3rs-deny-config-checks` still needs similar hardening at the package level; its confidence is still carried mostly by app-family tests.
 
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/run.rs` — app/package bridge for moved clippy rules.
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_25_config_parseable/tests/helpers.rs` — family-level harness used to exercise real package routing.
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_25_config_parseable/tests/family_bridge.rs` — new bridge smoke coverage.
-- `packages/g3-clippy-content-checks/crates/runtime/src/run.rs` — package entrypoint for the migrated clippy slice.
+- `packages/g3rs-clippy-config-checks/crates/runtime/src/run.rs` — package entrypoint for the migrated clippy slice.
 - `.worklogs/2026-04-05-145142-clippy-extraction-and-parser-contract-fixes.md` — prior extraction and parser-compatibility context.
 
 ## Next Steps / Continuation Plan
 1. Run an adversarial review of the clippy extraction against the current family plan, focusing on bridge coverage, parse-owner boundaries, and any leftover false-positive or dead-surface risks.
-2. Add direct runtime tests inside `g3-deny-content-checks` so deny package behavior is exercised locally rather than only through the app family.
-3. Start mapping `cargo` rules into `content package` vs `app structural` ownership before scaffolding `g3-cargo-content-checks`.
+2. Add direct runtime tests inside `g3rs-deny-config-checks` so deny package behavior is exercised locally rather than only through the app family.
+3. Start mapping `cargo` rules into `content package` vs `app structural` ownership before scaffolding `g3rs-cargo-config-checks`.

@@ -34,17 +34,17 @@ Important family files:
 - `discover_tests.rs`
 
 Rules:
-- `rs_cargo_01_workspace_lints.rs`
-- `rs_cargo_02_lint_levels.rs`
+- `rs_cargo_config_01_workspace_lints.rs`
+- `rs_cargo_config_02_lint_levels.rs`
 - `rs_cargo_03_allow_inventory.rs`
 - `rs_cargo_04_lint_inheritance.rs`
-- `rs_cargo_05_workspace_metadata.rs`
+- `rs_cargo_config_04_workspace_metadata.rs`
 - `rs_cargo_06_no_weakened_overrides.rs`
-- `rs_cargo_07_priority_order.rs`
-- `rs_cargo_08_resolver.rs`
+- `rs_cargo_config_05_priority_order.rs`
+- `rs_cargo_config_06_resolver.rs`
 - `rs_cargo_09_member_edition_drift.rs`
 - `rs_cargo_10_missing_member_cargo.rs`
-- `rs_cargo_11_disallowed_macros_deny.rs` (planned)
+- `rs_cargo_config_07_disallowed_macros_deny.rs` (planned)
 - `rs_cargo_12_unapproved_allow_entries.rs` (planned)
 - `rs_cargo_13_member_local_allows_forbidden.rs` (planned)
 - `rs_cargo_14_input_failures.rs` (planned)
@@ -85,11 +85,11 @@ Apply to:
 - standalone package roots
 
 Rules:
-- `RS-CARGO-01`
-- `RS-CARGO-02`
+- `RS-CARGO-CONFIG-01`
+- `RS-CARGO-CONFIG-02`
 - `RS-CARGO-03`
-- `RS-CARGO-05`
-- `RS-CARGO-07`
+- `RS-CARGO-CONFIG-04`
+- `RS-CARGO-CONFIG-05`
 - `RS-CARGO-15`
 
 ### Workspace-only rules
@@ -97,7 +97,7 @@ Rules:
 Apply only to owned workspace roots:
 - `RS-CARGO-04`
 - `RS-CARGO-06`
-- `RS-CARGO-08`
+- `RS-CARGO-CONFIG-06`
 - `RS-CARGO-09`
 - `RS-CARGO-10`
 
@@ -139,8 +139,8 @@ It does not own:
 - toolchain file content
 
 Specifically relevant:
-- `RS-CARGO-11` should require `clippy::disallowed_macros = "deny"` so `RS-CLIPPY-20` is not toothless
-- `RS-CARGO-15` overlaps intentionally with `RS-TOOLCHAIN-03` around MSRV/toolchain compatibility
+- `RS-CARGO-CONFIG-07` should require `clippy::disallowed_macros = "deny"` so `RS-CLIPPY-20` is not toothless
+- `RS-CARGO-15` overlaps intentionally with `RS-TOOLCHAIN-CONFIG-02` around MSRV/toolchain compatibility
 
 ## Known Clean Gaps
 
@@ -151,7 +151,7 @@ These are already accepted as real family work:
 - the family still uses old rule sidecars like `*_tests.rs`
 - rule/test architecture still needs conversion to rule-specific `*_tests/` directories
 - additional planned rules are not yet implemented:
-  - `RS-CARGO-11`
+  - `RS-CARGO-CONFIG-07`
   - `RS-CARGO-12`
   - `RS-CARGO-13`
   - `RS-CARGO-14`
@@ -239,12 +239,12 @@ The pass is not done until:
 4. fix discovery/ownership model before trying to harden individual rules
 5. convert rule sidecars from `*_tests.rs` to `*_tests/`
 6. then harden the highest-signal rules first:
-   - `RS-CARGO-01`
+   - `RS-CARGO-CONFIG-01`
    - `RS-CARGO-04`
    - `RS-CARGO-06`
-   - `RS-CARGO-08`
+   - `RS-CARGO-CONFIG-06`
    - `RS-CARGO-10`
 7. if time allows, implement and harden:
-   - `RS-CARGO-11`
+   - `RS-CARGO-CONFIG-07`
    - `RS-CARGO-12`
    - `RS-CARGO-13`

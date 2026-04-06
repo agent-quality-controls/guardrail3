@@ -1,20 +1,20 @@
 # Deny Content Tests Refactor
 
 **Date:** 2026-04-05 16:52
-**Scope:** `packages/g3-deny-content-checks`
+**Scope:** `packages/g3rs-deny-config-checks`
 
 ## Summary
-Validated and packaged the dirty deny changes as a coherent refactor of `g3-deny-content-checks` from flat rule files into the project’s one-rule/one-sidecar-directory layout. The extracted deny package is green at the package layer and still compatible with the app deny family.
+Validated and packaged the dirty deny changes as a coherent refactor of `g3rs-deny-config-checks` from flat rule files into the project’s one-rule/one-sidecar-directory layout. The extracted deny package is green at the package layer and still compatible with the app deny family.
 
 ## Context & Problem
-After the cargo commit, the remaining dirty tree was dominated by `packages/g3-deny-content-checks`. The package showed a large delete/add pattern: old flat runtime rule files were removed and replaced by per-rule directories, sidecar test directories, and a parallel assertions surface. That kind of broad file churn is easy to misread as half-finished unless the package still compiles, tests, and matches the extracted-family architecture.
+After the cargo commit, the remaining dirty tree was dominated by `packages/g3rs-deny-config-checks`. The package showed a large delete/add pattern: old flat runtime rule files were removed and replaced by per-rule directories, sidecar test directories, and a parallel assertions surface. That kind of broad file churn is easy to misread as half-finished unless the package still compiles, tests, and matches the extracted-family architecture.
 
 The task here was to decide whether the deny package was actually commit-ready or whether it still needed follow-up fixes before committing.
 
 ## Decisions Made
 
 ### Treated the deny package changes as a standalone commit candidate
-- **Chose:** evaluate `packages/g3-deny-content-checks` independently from unrelated dirty files like `.gitignore` and handoff worklogs.
+- **Chose:** evaluate `packages/g3rs-deny-config-checks` independently from unrelated dirty files like `.gitignore` and handoff worklogs.
 - **Why:** The deny package changes are internally coherent and testable on their own, while the other dirty files are separate concerns and would muddy the commit.
 - **Alternatives considered:**
   - Rolling all remaining dirty files into one commit — rejected because it would mix code, handoff docs, and unrelated local edits.
@@ -38,11 +38,11 @@ The changed package shape is primarily a runtime/tests reorganization plus asser
 
 ## Information Sources
 - `git status --short --untracked-files=all` — remaining dirty tree inventory after cargo commit
-- `git diff --name-status -- packages/g3-deny-content-checks` — deny package-only file churn
-- `cargo test --workspace --manifest-path packages/g3-deny-content-checks/Cargo.toml` — package verification (`121` runtime tests passing)
+- `git diff --name-status -- packages/g3rs-deny-config-checks` — deny package-only file churn
+- `cargo test --workspace --manifest-path packages/g3rs-deny-config-checks/Cargo.toml` — package verification (`121` runtime tests passing)
 - `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-deny --lib` — app-family compatibility verification (`46` tests passing)
-- `packages/g3-deny-content-checks/crates/runtime/src/lib.rs` and `run.rs` — package entrypoint and module ownership
-- `packages/g3-deny-content-checks/crates/assertions/src/lib.rs` — package assertions surface
+- `packages/g3rs-deny-config-checks/crates/runtime/src/lib.rs` and `run.rs` — package entrypoint and module ownership
+- `packages/g3rs-deny-config-checks/crates/assertions/src/lib.rs` — package assertions surface
 
 ## Open Questions / Future Considerations
 - There are still unrelated dirty files outside the deny package:
@@ -53,14 +53,14 @@ The changed package shape is primarily a runtime/tests reorganization plus asser
 - The deny package TODO changed as part of the refactor; future work should keep it synced with app-side structural parse ownership expectations.
 
 ## Key Files for Context
-- `packages/g3-deny-content-checks/crates/runtime/src/lib.rs` — runtime module surface after the refactor
-- `packages/g3-deny-content-checks/crates/runtime/src/run.rs` — package entrypoint
-- `packages/g3-deny-content-checks/crates/assertions/src/lib.rs` — assertion modules for package-local tests
-- `packages/g3-deny-content-checks/TODO.md` — known remaining follow-ups for the package
+- `packages/g3rs-deny-config-checks/crates/runtime/src/lib.rs` — runtime module surface after the refactor
+- `packages/g3rs-deny-config-checks/crates/runtime/src/run.rs` — package entrypoint
+- `packages/g3rs-deny-config-checks/crates/assertions/src/lib.rs` — assertion modules for package-local tests
+- `packages/g3rs-deny-config-checks/TODO.md` — known remaining follow-ups for the package
 - `.worklogs/2026-04-05-131948-g3-rename-and-deny-content-checks.md` — earlier deny extraction work
 - `.worklogs/2026-04-05-164952-cargo-content-checks-extraction.md` — immediate prior commit context so the sequence stays clear
 
 ## Next Steps / Continuation Plan
-1. Stage and commit only `packages/g3-deny-content-checks` plus this worklog.
+1. Stage and commit only `packages/g3rs-deny-config-checks` plus this worklog.
 2. Leave `.gitignore`, the session handoff worklog, and the extra untracked handoff files out of the commit.
 3. After the deny commit, re-run `git status --short --untracked-files=all` to confirm what unrelated local dirt remains and report it cleanly.

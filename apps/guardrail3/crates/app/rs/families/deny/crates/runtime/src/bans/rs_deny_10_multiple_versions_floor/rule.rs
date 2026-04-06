@@ -7,7 +7,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
     let Some(bans) = section(config, "bans") else {
         results.push(CheckResult::from_parts(
-            "RS-DENY-10".to_owned(),
+            "RS-DENY-CONFIG-06".to_owned(),
             Severity::Warn,
             "[bans] section missing".to_owned(),
             format!("`{}` has no `[bans]` section.", config.rel_path),
@@ -21,7 +21,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     match bans.get("multiple-versions").and_then(toml::Value::as_str) {
         Some("deny") => {}
         Some(other) => results.push(CheckResult::from_parts(
-            "RS-DENY-10".to_owned(),
+            "RS-DENY-CONFIG-06".to_owned(),
             Severity::Warn,
             "multiple-versions weaker than baseline".to_owned(),
             format!(
@@ -33,7 +33,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             false,
         )),
         None => results.push(CheckResult::from_parts(
-            "RS-DENY-10".to_owned(),
+            "RS-DENY-CONFIG-06".to_owned(),
             Severity::Warn,
             "multiple-versions missing".to_owned(),
             format!(

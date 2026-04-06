@@ -54,13 +54,13 @@ Rust workspace manifest.
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
 | RS-TOOLCHAIN-01 | R24 | Error | rust-toolchain.toml exists at each owned policy root | Implemented |
-| RS-TOOLCHAIN-02 | R25 | Error/Warn/Info | Channel + components policy. `stable` is clean inventory; pinned stable versions are tolerated inventory; nightly, pinned-nightly, and beta are errors; missing channel/components are warnings. Components must include `clippy` + `rustfmt`. | Implemented |
+| RS-TOOLCHAIN-CONFIG-01 | R25 | Error/Warn/Info | Channel + components policy. `stable` is clean inventory; pinned stable versions are tolerated inventory; nightly, pinned-nightly, and beta are errors; missing channel/components are warnings. Components must include `clippy` + `rustfmt`. | Implemented |
 
 ## New rules from audit
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-TOOLCHAIN-03 | Warn/Info | MSRV consistency. If `rust-version` in Cargo.toml AND toolchain pins specific stable version, warn if pinned < MSRV. If `rust-version` is missing, inventory that MSRV consistency cannot be checked. | Implemented |
+| RS-TOOLCHAIN-CONFIG-02 | Warn/Info | MSRV consistency. If `rust-version` in Cargo.toml AND toolchain pins specific stable version, warn if pinned < MSRV. If `rust-version` is missing, inventory that MSRV consistency cannot be checked. | Implemented |
 | RS-TOOLCHAIN-04 | Warn/Error | Legacy `rust-toolchain` file (no .toml extension) cannot specify components. Warn to migrate. Error if both `rust-toolchain` and `rust-toolchain.toml` coexist, because rustup prefers the legacy file and shadows the modern contract. | Implemented |
 | RS-TOOLCHAIN-05 | Warn | Ancestor shadow drift. Warn when an ancestor legacy `rust-toolchain` can shadow a governed local root. Warn when an ancestor `rust-toolchain.toml` is malformed or differs from the local routed-root contract. | Implemented |
 | RS-TOOLCHAIN-06 | Error | Descendant workspace shadowing. Error when a governed workspace subtree contains any descendant `rust-toolchain.toml` or `rust-toolchain`. Nested toolchains are forbidden beneath the workspace root. | Implemented |
@@ -75,7 +75,7 @@ The family depends on:
 
 Malformed inputs required for the rule should not silently weaken enforcement:
 - malformed `rust-toolchain.toml` must surface explicitly
-- malformed owned-root `Cargo.toml` must not silently disable `RS-TOOLCHAIN-03`
+- malformed owned-root `Cargo.toml` must not silently disable `RS-TOOLCHAIN-CONFIG-02`
 - excluded paths from shared Rust scope must stay excluded from tree-wide
   toolchain placement checks
 
@@ -87,14 +87,14 @@ The stable contract is:
 - `beta` is an error
 - `nightly` is an error
 - pinned-nightly forms are treated as nightly and are errors
-- `RS-TOOLCHAIN-02` and `RS-TOOLCHAIN-03` do not inventory a modern file when a
+- `RS-TOOLCHAIN-CONFIG-01` and `RS-TOOLCHAIN-CONFIG-02` do not inventory a modern file when a
   same-directory legacy `rust-toolchain` would shadow it
 
 ## Cross-family dependency
 
-`RS-TOOLCHAIN-03` and `RS-CARGO-15` deliberately touch the same MSRV space from different sides:
+`RS-TOOLCHAIN-CONFIG-02` and `RS-CARGO-15` deliberately touch the same MSRV space from different sides:
 - `RS-CARGO-15` checks whether the manifest declares the metadata
-- `RS-TOOLCHAIN-03` checks whether the chosen local policy-root toolchain is
+- `RS-TOOLCHAIN-CONFIG-02` checks whether the chosen local policy-root toolchain is
   compatible with that metadata
 
 That overlap is intentional and should stay explicit in the plan.
@@ -103,7 +103,7 @@ That overlap is intentional and should stay explicit in the plan.
 
 | Finding | Why rejected |
 |---------|-------------|
-| `profile` field (minimal/default/complete) | Explicit components check (RS-TOOLCHAIN-02) is stronger than implicit profile defaults. |
+| `profile` field (minimal/default/complete) | Explicit components check (RS-TOOLCHAIN-CONFIG-01) is stronger than implicit profile defaults. |
 | Edition vs toolchain version compatibility | cargo catches at build time ("edition 2024 requires Rust 1.85+"). |
 | Toolchain file gitignored | Failure is obvious and immediate (wrong toolchain). |
 | Unknown/typo'd keys | Consequences caught by existing checks (missing channel, missing components). |

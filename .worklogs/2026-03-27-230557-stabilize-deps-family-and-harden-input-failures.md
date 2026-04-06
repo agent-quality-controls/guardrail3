@@ -82,7 +82,7 @@ The concrete detector fixes covered in this batch include:
 
 ## Open Questions / Future Considerations
 - The outer app workspace still has unrelated family drift elsewhere, so the reliable checkpoint remains the nested family workspace test command rather than repo-wide Cargo entrypoints.
-- `target.*.{dependencies,build-dependencies,dev-dependencies}` are still an explicit remaining gap in `RS-DEPS-05..07`; this commit does not change that contract.
+- `target.*.{dependencies,build-dependencies,dev-dependencies}` are still an explicit remaining gap in `RS-DEPS-CONFIG-01..07`; this commit does not change that contract.
 - The shared manifest files still have unrelated unstaged `garde` work in the working tree. This commit stages only the `deps` wiring in those files.
 
 ## Key Files for Context
@@ -90,7 +90,7 @@ The concrete detector fixes covered in this batch include:
 - `apps/guardrail3/crates/app/rs/families/deps/README.md` — current family shape and local verification entrypoint
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/facts.rs` — collector and all fail-closed/input-shape hardening
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/test_harness.rs` — family test route and shared runtime test helpers
-- `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/rs_deps_05_dependencies_allowlisted_tests/workspace_path.rs` — `workspace = true` external path regression
+- `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/rs_deps_config_01_dependencies_allowlisted_tests/workspace_path.rs` — `workspace = true` external path regression
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/rs_deps_10_gitignore_not_ignoring_cargo_lock_tests/precedence.rs` — anchored `.gitignore` precedence regressions
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/rs_deps_11_input_failures_tests/fail_closed.rs` — fail-closed attack coverage for malformed and unreadable inputs
 - `apps/guardrail3/Cargo.toml` — top-level workspace member rewiring for `deps`

@@ -271,7 +271,7 @@ Should error:
 
 | Old ID | What | New location |
 |--------|------|-------------|
-| R49 | CLAUDE.md exists at project root | RS-DEPS-05 (belongs with tool/project checks, not code scan) |
+| R49 | CLAUDE.md exists at project root | RS-DEPS-CONFIG-01 (belongs with tool/project checks, not code scan) |
 
 ## Explicitly rejected audit findings
 

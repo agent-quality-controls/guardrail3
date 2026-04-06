@@ -26,19 +26,19 @@ Important family files:
 - `test_support.rs`
 
 Rules:
-- `rs_garde_01_dependency_present.rs`
-- `rs_garde_02_core_method_bans.rs`
-- `rs_garde_03_extractor_type_bans.rs`
-- `rs_garde_04_reqwest_json_ban.rs`
-- `rs_garde_05_struct_derive_validate.rs`
-- `rs_garde_06_additional_method_bans.rs`
-- `rs_garde_07_manual_deserialize_impl.rs`
-- `rs_garde_08_enum_derive_validate.rs`
-- `rs_garde_09_query_as_inventory.rs`
+- `rs_garde_config_01_dependency_present.rs`
+- `rs_garde_config_02_core_method_bans.rs`
+- `rs_garde_config_03_extractor_type_bans.rs`
+- `rs_garde_config_04_reqwest_json_ban.rs`
+- `rs_garde_ast_01_struct_derive_validate.rs`
+- `rs_garde_config_05_additional_method_bans.rs`
+- `rs_garde_ast_02_manual_deserialize_impl.rs`
+- `rs_garde_ast_03_enum_derive_validate.rs`
+- `rs_garde_ast_04_query_as_inventory.rs`
 - `rs_garde_10_input_failures.rs`
-- `rs_garde_11_field_level_constraints.rs`
-- `rs_garde_12_nested_validation_dive.rs`
-- `rs_garde_13_context_validation_surface.rs`
+- `rs_garde_ast_05_field_level_constraints.rs`
+- `rs_garde_ast_06_nested_validation_dive.rs`
+- `rs_garde_ast_07_context_validation_surface.rs`
 
 ## Legacy Seed Material
 
@@ -62,9 +62,9 @@ Per owned root, the family must determine:
 Important verified semantics:
 - if the root config is package-driven by `[rust.packages]`, root garde gating must inherit `[rust.packages.checks]`
 - the root must not always fall back to the global default garde setting
-- otherwise `RS-GARDE-02..09` can fail open or overfire at the root
+- otherwise `RS-GARDE-CONFIG-02..09` can fail open or overfire at the root
 
-Rules `RS-GARDE-02..09` are conditional:
+Rules `RS-GARDE-CONFIG-02..09` are conditional:
 - if garde is absent for an owned root, those rules do not fire for that root
 
 This is product gating, not a fail-open loophole.
@@ -107,24 +107,24 @@ These remain active even though the family is implemented:
   - focused verification should keep using a stable family `CARGO_TARGET_DIR` such as `target/garde` to avoid lock fights with other agents
 
 - expanded extractor bans are no longer a live gap:
-  - the canonical clippy generator now emits the full RS-GARDE-03 extractor set
-  - rule-local parity exists in `rs_garde_03_extractor_type_bans_tests/parity.rs`
+  - the canonical clippy generator now emits the full RS-GARDE-CONFIG-03 extractor set
+  - rule-local parity exists in `rs_garde_config_03_extractor_type_bans_tests/parity.rs`
   - generator/checker parity is also pinned by the clippy type-ban parity tests
 - expanded deserialization method bans are no longer a live gap:
-  - the canonical clippy generator now emits the RS-GARDE-06 method set as part of the managed garde method baseline
-  - `RS-GARDE-02/04/06` golden tests now read the canonical generated clippy baseline instead of hand-written method lists
+  - the canonical clippy generator now emits the RS-GARDE-CONFIG-05 method set as part of the managed garde method baseline
+  - `RS-GARDE-CONFIG-02/04/06` golden tests now read the canonical generated clippy baseline instead of hand-written method lists
   - clippy-side parity is pinned through `rs_clippy_04_missing_method_ban_tests/parity.rs`
 - source-level multi-root tests were corrected to the actual root model:
-  - `RS-GARDE-05/07/08/09` multi-root tests now use standalone package roots not enrolled in a workspace
+  - `RS-GARDE-AST-01/07/08/09` multi-root tests now use standalone package roots not enrolled in a workspace
   - do not model workspace members as owned garde roots; that contradicts both the plan and `facts.rs`
 - derive coverage is broader now:
-  - `RS-GARDE-05` covers `Parser`, `Args`, and `FromRow`, plus the primitive-only `char` exemption
-  - `RS-GARDE-08` covers `Parser`, `Args`, and `FromRow`
-  - `RS-GARDE-09` now has the explicit `query_scalar!` non-hit the plan calls out
+  - `RS-GARDE-AST-01` covers `Parser`, `Args`, and `FromRow`, plus the primitive-only `char` exemption
+  - `RS-GARDE-AST-03` covers `Parser`, `Args`, and `FromRow`
+  - `RS-GARDE-AST-04` now has the explicit `query_scalar!` non-hit the plan calls out
 - field-level garde quality is no longer just prose:
-  - `RS-GARDE-11` now enforces meaningful field-level garde constraints
-  - `RS-GARDE-12` now enforces `#[garde(dive)]` on nested validated fields
-  - `RS-GARDE-13` now enforces `#[garde(context(...))]` when field validators reference `ctx`
+  - `RS-GARDE-AST-05` now enforces meaningful field-level garde constraints
+  - `RS-GARDE-AST-06` now enforces `#[garde(dive)]` on nested validated fields
+  - `RS-GARDE-AST-07` now enforces `#[garde(context(...))]` when field validators reference `ctx`
 - wrapper-based validation boundary surface remains checker-adjacent guidance, not a distinct garde AST rule:
   - the active enforceable contract here is still the clippy ban surface on raw extractors and raw deserialization
   - do not reopen this as a garde rule unless the project introduces an actual wrapper API surface that guardrail3 can statically detect
@@ -144,9 +144,9 @@ The remaining job is semantic hardening:
 Current verification status:
 - `CARGO_TARGET_DIR=target/garde-check cargo check --manifest-path apps/guardrail3/Cargo.toml --tests` passed
 - `CARGO_TARGET_DIR=target/clippy-check cargo check --manifest-path apps/guardrail3/Cargo.toml --tests` passed
-- the new `RS-GARDE-11/12/13` packet compile-checks cleanly under the garde target too:
+- the new `RS-GARDE-AST-05/12/13` packet compile-checks cleanly under the garde target too:
   - `CARGO_TARGET_DIR=target/garde-check cargo check --manifest-path apps/guardrail3/Cargo.toml --tests`
-- the new `RS-GARDE-11/12/13` packet runtime verification command set is:
+- the new `RS-GARDE-AST-05/12/13` packet runtime verification command set is:
   - `CARGO_TARGET_DIR=target/garde cargo test --manifest-path apps/guardrail3/Cargo.toml --lib rs_garde_11_`
   - `CARGO_TARGET_DIR=target/garde cargo test --manifest-path apps/guardrail3/Cargo.toml --lib rs_garde_12_`
   - `CARGO_TARGET_DIR=target/garde cargo test --manifest-path apps/guardrail3/Cargo.toml --lib rs_garde_13_`
@@ -220,9 +220,9 @@ The pass is not done until:
 2. audit `mod.rs` / `facts.rs` / `discover.rs` for owned-root and covering-config behavior
 3. map old `test_garde_checks.rs` tests to current rule IDs and attack vectors
 4. harden the highest-risk rules first:
-   - `RS-GARDE-05`
-   - `RS-GARDE-07`
-   - `RS-GARDE-08`
+   - `RS-GARDE-AST-01`
+   - `RS-GARDE-AST-02`
+   - `RS-GARDE-AST-03`
    - `RS-GARDE-10`
 5. close generator/checker drift in the canonical clippy baseline before trusting golden cases
 6. update `garde.md` with closed and remaining gaps before stopping

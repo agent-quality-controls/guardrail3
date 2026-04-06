@@ -8,7 +8,7 @@ This family owns:
 - `Cargo.lock` presence and `.gitignore` masking policy
 - fail-closed reporting when dependency-policy inputs cannot be trusted
 
-The extracted package [g3-deps-content-checks](/Users/tartakovsky/Projects/websmasher/guardrail3/packages/g3-deps-content-checks) owns the pure content checks:
+The extracted package [g3rs-deps-config-checks](/Users/tartakovsky/Projects/websmasher/guardrail3/packages/g3rs-deps-config-checks) owns the pure config checks:
 
 - crate-local `allowed_deps` enforcement from validation-root `guardrail3.toml`
 - library allowlist coverage policy
@@ -28,14 +28,14 @@ routed `RsDepsRoute`.
 
 ## Boundary notes
 
-- `RS-DEPS-05`, `06`, `07`, `08`, and `12` run in `g3-deps-content-checks` on parsed files only.
+- `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12` run in `g3rs-deps-config-checks` on parsed files only.
 - `RS-DEPS-11` only owns dependency-policy inputs and dependency-table shape needed by this family. Foreign `rust.*` or crate-policy keys outside deps-owned fields must not fail closed here.
-- `RS-DEPS-05..07` own both top-level and `target.*` dependency tables for their respective sections.
-- `RS-DEPS-12` owns the direct-dependency cap across both top-level and `target.*` dependency tables.
+- `RS-DEPS-CONFIG-01..07` own both top-level and `target.*` dependency tables for their respective sections.
+- `RS-DEPS-CONFIG-05` owns the direct-dependency cap across both top-level and `target.*` dependency tables.
 - `RS-DEPS-09/10` should bind to legal workspace roots rather than standalone
   package escape hatches.
 - local path dependencies that resolve to a real Cargo package under a discovered workspace root must either be declared workspace packages or fail closed through `RS-DEPS-11`.
-- malformed `target.*` dependency tables must surface through `RS-DEPS-11`, but they must not suppress top-level allowlist findings from `RS-DEPS-05..07`.
+- malformed `target.*` dependency tables must surface through `RS-DEPS-11`, but they must not suppress top-level allowlist findings from `RS-DEPS-CONFIG-01..07`.
 - routed subtree runs must keep dependency findings scoped to the owning
   workspace while preserving the family's local baseline rules.
 

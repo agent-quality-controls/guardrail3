@@ -28,7 +28,7 @@ The old implementation split toolchain logic across `config_files.rs` and `toolc
 
 ### Pull Cargo `rust-version` in as a fact, not as a separate traversal
 - **Chose:** `discover.rs` reads root Cargo metadata once and exposes `cargo_rust_version` in family facts.
-- **Why:** The `RS-TOOLCHAIN-03` rule needs that context, but the rule should not parse Cargo.toml on its own.
+- **Why:** The `RS-TOOLCHAIN-CONFIG-02` rule needs that context, but the rule should not parse Cargo.toml on its own.
 - **Alternatives considered:**
   - Let the rule parse Cargo.toml directly — rejected because it violates the orchestrator/facts separation.
 
@@ -42,8 +42,8 @@ The family layout follows the same pattern established by `fmt` and `cargo`:
 
 This family currently implements:
 - `RS-TOOLCHAIN-01` rust-toolchain.toml existence
-- `RS-TOOLCHAIN-02` channel and required components
-- `RS-TOOLCHAIN-03` pinned toolchain vs Cargo MSRV consistency
+- `RS-TOOLCHAIN-CONFIG-01` channel and required components
+- `RS-TOOLCHAIN-CONFIG-02` pinned toolchain vs Cargo MSRV consistency
 - `RS-TOOLCHAIN-04` legacy/duplicate toolchain file warnings
 
 The rules remain side-by-side with the old validator for now and are not yet wired into the top-level validate pipeline.
@@ -59,7 +59,7 @@ The rules remain side-by-side with the old validator for now and are not yet wir
 - `cargo test --lib checks::rs::fmt`
 
 ## Open Questions / Future Considerations
-- `RS-TOOLCHAIN-03` currently only compares numeric pinned channels like `1.84.0`; nonstandard strings are ignored.
+- `RS-TOOLCHAIN-CONFIG-02` currently only compares numeric pinned channels like `1.84.0`; nonstandard strings are ignored.
 - The family does not yet model a more nuanced library/service distinction for MSRV messaging.
 - As with the other migrated families, this code is not yet wired into the old top-level validation path.
 

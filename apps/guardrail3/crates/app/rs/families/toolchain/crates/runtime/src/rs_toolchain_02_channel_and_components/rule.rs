@@ -2,7 +2,7 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 use crate::inputs::ToolchainRootInput;
 
-const ID: &str = "RS-TOOLCHAIN-02";
+const ID: &str = "RS-TOOLCHAIN-CONFIG-01";
 
 #[derive(Clone, Copy)]
 enum ChannelKind {

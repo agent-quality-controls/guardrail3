@@ -41,7 +41,7 @@ The purpose is not to “add more tests”. The purpose is to make every rule ha
 - `37-code-remaining-agent-brief.md`
   - current remaining-work packet for closing the planned `rs/code` backlog
 - `38-deps-remaining-agent-brief.md`
-  - current remaining-work packet for landing `RS-DEPS-12`
+  - current remaining-work packet for landing `RS-DEPS-CONFIG-05`
 - `39-hooks-rs-runtime-agent-brief.md`
   - current operational cutover packet for wiring `hooks-rs` into the live runtime
 - `40-test-remaining-agent-brief.md`

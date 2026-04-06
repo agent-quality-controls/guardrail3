@@ -46,15 +46,15 @@ defines its own input struct using types from the parser crates.
 use clippy_toml_parser::ClippyToml;
 use guardrail3_check_types::G3CheckResult;
 
-pub struct G3ClippyContentChecksInput {
+pub struct G3RsClippyConfigChecksInput {
     pub clippy_rel_path: String,
     pub clippy: ClippyToml,
 }
 
-pub fn check(input: &G3ClippyContentChecksInput) -> Vec<G3CheckResult>
+pub fn check(input: &G3RsClippyConfigChecksInput) -> Vec<G3CheckResult>
 ```
 
-Initial rules in package: RS-CLIPPY-02, 03, 09, 10, 11, 17, 21, 22
+Initial rules in package: RS-CLIPPY-CONFIG-01, 03, 09, 10, 11, 17, 21, 22
 Rules in app: RS-CLIPPY-01, 04, 05, 06, 07, 08, 12, 13, 14, 15, 16, 18, 19,
 20, 23, 24, 25
 
@@ -70,15 +70,15 @@ Notes:
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-pub struct G3DenyContentChecksInput {
+pub struct G3RsDenyConfigChecksInput {
     pub deny_rel_path: String,
     pub deny: DenyToml,
 }
 
-pub fn check(input: &G3DenyContentChecksInput) -> Vec<G3CheckResult>
+pub fn check(input: &G3RsDenyConfigChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-DENY-04, 05, 06, 07, 08, 10, 11, 12, 13, 14, 15, 16,
+Rules in package: RS-DENY-CONFIG-01, 05, 06, 07, 08, 10, 11, 12, 13, 14, 15, 16,
 18, 19, 20, 21, 22, 23, 24, 27, 28, 29
 Rules in app: RS-DENY-01, RS-DENY-03, RS-DENY-09, RS-DENY-17, RS-DENY-25,
 RS-DENY-26, RS-DENY-30
@@ -92,15 +92,15 @@ receives a concrete parsed `DenyToml` only.
 use cargo_toml_parser::CargoToml;
 use guardrail3_check_types::G3CheckResult;
 
-pub struct G3CargoContentChecksInput {
+pub struct G3RsCargoConfigChecksInput {
     pub cargo_rel_path: String,
     pub cargo: CargoToml,
 }
 
-pub fn check(input: &G3CargoContentChecksInput) -> Vec<G3CheckResult>
+pub fn check(input: &G3RsCargoConfigChecksInput) -> Vec<G3CheckResult>
 ```
 
-Single-file rules in package: RS-CARGO-01, 02, 05, 07, 08, 11
+Single-file rules in package: RS-CARGO-CONFIG-01, 02, 05, 07, 08, 11
 Rules in app for now: RS-CARGO-03, 04, 06, 09, 10, 12, 13, 14, 15
 
 Package boundary:
@@ -118,7 +118,7 @@ use cargo_toml_parser::CargoToml;
 use rust_toolchain_toml_parser::RustToolchainToml;
 use rustfmt_toml_parser::RustfmtToml;
 
-pub struct G3FmtContentChecksInput {
+pub struct G3RsFmtConfigChecksInput {
     pub rustfmt_rel_path: String,
     pub rustfmt: RustfmtToml,
     pub cargo_rel_path: String,
@@ -127,17 +127,17 @@ pub struct G3FmtContentChecksInput {
     pub toolchain: RustToolchainToml,
 }
 
-pub fn check(input: &G3FmtContentChecksInput) -> Vec<G3CheckResult>
+pub fn check(input: &G3RsFmtConfigChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-FMT-02, RS-FMT-03, RS-FMT-04, RS-FMT-06
+Rules in package: RS-FMT-CONFIG-01, RS-FMT-CONFIG-02, RS-FMT-CONFIG-03, RS-FMT-CONFIG-04
 Rules in app: RS-FMT-01, RS-FMT-05, RS-FMT-07, RS-FMT-08
 
 Note: the package does not discover or choose files. The app/orchestrator
 selects the authoritative `rustfmt.toml`, `Cargo.toml`, and
 `rust-toolchain.toml` to compare, parses them, reports missing/malformed-file
 failures itself, and calls the package only with concrete typed parsed inputs.
-Inside the package, `check(&G3FmtContentChecksInput)` can fan out to smaller
+Inside the package, `check(&G3RsFmtConfigChecksInput)` can fan out to smaller
 rule-local inputs, but the package boundary stays one typed aggregate input.
 
 ### Toolchain
@@ -146,12 +146,12 @@ use cargo_toml_parser::CargoToml;
 use rust_toolchain_toml_parser::RustToolchainToml;
 use guardrail3_check_types::G3CheckResult;
 
-pub struct G3ToolchainChannelAndComponentsInput {
+pub struct G3RsToolchainConfigChannelComponentsInput {
     pub toolchain_rel_path: String,
     pub toolchain_toml: RustToolchainToml,
 }
 
-pub struct G3ToolchainMsrvConsistencyInput {
+pub struct G3RsToolchainConfigMsrvConsistencyInput {
     pub toolchain_rel_path: String,
     pub toolchain_toml: RustToolchainToml,
     pub cargo_rel_path: String,
@@ -159,15 +159,15 @@ pub struct G3ToolchainMsrvConsistencyInput {
 }
 
 pub fn check_channel_and_components(
-    input: &G3ToolchainChannelAndComponentsInput,
+    input: &G3RsToolchainConfigChannelComponentsInput,
 ) -> Vec<G3CheckResult>;
 
 pub fn check_msrv_consistency(
-    input: &G3ToolchainMsrvConsistencyInput,
+    input: &G3RsToolchainConfigMsrvConsistencyInput,
 ) -> Vec<G3CheckResult>;
 ```
 
-Rules in package: RS-TOOLCHAIN-02, RS-TOOLCHAIN-03
+Rules in package: RS-TOOLCHAIN-CONFIG-01, RS-TOOLCHAIN-CONFIG-02
 Rules in app: RS-TOOLCHAIN-01, RS-TOOLCHAIN-04
 
 ### Garde
@@ -177,49 +177,49 @@ use clippy_toml_parser::ClippyToml;
 use guardrail3_check_types::G3CheckResult;
 use std::path::PathBuf;
 
-pub struct G3GardeDependencyCheckInput {
+pub struct G3RsGardeConfigDependencyCheckInput {
     pub cargo_rel_path: String,
     pub cargo: CargoToml,
 }
 
-pub struct G3GardeClippyBanChecksInput {
+pub struct G3RsGardeConfigClippyBanChecksInput {
     pub clippy_rel_path: String,
     pub clippy: ClippyToml,
 }
 
 pub fn check_dependency_present(
-    input: &G3GardeDependencyCheckInput,
+    input: &G3RsGardeConfigDependencyCheckInput,
 ) -> Vec<G3CheckResult>;
 
 pub fn check_clippy_bans(
-    input: &G3GardeClippyBanChecksInput,
+    input: &G3RsGardeConfigClippyBanChecksInput,
 ) -> Vec<G3CheckResult>;
 
-pub struct G3AstFile {
+pub struct G3RsAstFile {
     pub rel_path: String,
     pub abs_path: PathBuf,
 }
 
-pub struct G3GardeAstChecksInput {
-    pub source_files: Vec<G3AstFile>,
-    pub guardrail_toml: G3AstFile,
+pub struct G3RsGardeAstChecksInput {
+    pub source_files: Vec<G3RsAstFile>,
+    pub guardrail_toml: G3RsAstFile,
 }
 
-pub fn check(input: &G3GardeAstChecksInput) -> Vec<G3CheckResult>;
+pub fn check(input: &G3RsGardeAstChecksInput) -> Vec<G3CheckResult>;
 ```
 
-Rules in `g3-garde-content-checks`: RS-GARDE-01, RS-GARDE-02, RS-GARDE-03, RS-GARDE-04, RS-GARDE-06
-Rules in `g3-garde-ast-checks`: RS-GARDE-05, RS-GARDE-07, RS-GARDE-08, RS-GARDE-09, RS-GARDE-11, RS-GARDE-12, RS-GARDE-13, RS-GARDE-14
+Rules in `g3rs-garde-config-checks`: RS-GARDE-CONFIG-01, RS-GARDE-CONFIG-02, RS-GARDE-CONFIG-03, RS-GARDE-CONFIG-04, RS-GARDE-CONFIG-05
+Rules in `g3rs-garde-ast-checks`: RS-GARDE-AST-01, RS-GARDE-AST-02, RS-GARDE-AST-03, RS-GARDE-AST-04, RS-GARDE-AST-05, RS-GARDE-AST-06, RS-GARDE-AST-07, RS-GARDE-AST-08
 Rules in app: RS-GARDE-10
 
 Current bridge note:
 
 - app still owns garde applicability gating from policy and source adoption
 - app still owns missing / unparseable covering clippy handling for
-  `RS-GARDE-02/03/04/06`
+  `RS-GARDE-CONFIG-02/03/04/06`
 - app still owns malformed-input reporting through `RS-GARDE-10`
-- `g3-garde-content-checks` owns the typed parsed-file path for root-policy checks
-- `g3-garde-ast-checks` owns the governed Rust source-file path and required
+- `g3rs-garde-config-checks` owns the typed parsed-file path for root-policy checks
+- `g3rs-garde-ast-checks` owns the governed Rust source-file path and required
   `guardrail3.toml` path for AST/source checks
 
 ### Deps
@@ -228,7 +228,7 @@ use cargo_toml_parser::CargoToml;
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_domain_config::types::GuardrailConfig;
 
-pub struct G3DepsPolicyContentChecksInput {
+pub struct G3RsDepsConfigPolicyChecksInput {
     pub workspace_cargo_rel_path: String,
     pub workspace_cargo: CargoToml,
     pub crate_cargo_rel_path: String,
@@ -237,25 +237,25 @@ pub struct G3DepsPolicyContentChecksInput {
     pub guardrail: GuardrailConfig,
 }
 
-pub struct G3DepsDirectDependencyCapInput {
+pub struct G3RsDepsConfigDirectDependencyCapInput {
     pub workspace_cargo_rel_path: String,
     pub workspace_cargo: CargoToml,
     pub crate_cargo_rel_path: String,
     pub crate_cargo: CargoToml,
 }
 
-pub fn check_policy(input: &G3DepsPolicyContentChecksInput) -> Vec<G3CheckResult>
-pub fn check_direct_dependency_cap(input: &G3DepsDirectDependencyCapInput) -> Vec<G3CheckResult>
+pub fn check_policy(input: &G3RsDepsConfigPolicyChecksInput) -> Vec<G3CheckResult>
+pub fn check_direct_dependency_cap(input: &G3RsDepsConfigDirectDependencyCapInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-DEPS-05, 06, 07, 08, 12
+Rules in package: RS-DEPS-CONFIG-01, 06, 07, 08, 12
 Rules in app: RS-DEPS-01, 02, 03, 04, 09, 10, 11
 
 Package boundary:
 
 - receives full parsed files only
 - each input represents one crate policy opportunity inside one workspace
-- `workspace_cargo` exists because `RS-DEPS-05..07` may need workspace
+- `workspace_cargo` exists because `RS-DEPS-CONFIG-01..07` may need workspace
   dependency resolution such as `workspace = true`
 - current wired policy file is legacy `guardrail3.toml`
 - package does not own tool presence, lockfile discovery, `.gitignore`

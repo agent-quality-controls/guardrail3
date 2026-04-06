@@ -53,26 +53,26 @@ pub fn assert_single_owner(results: &[CheckResult], file: &str) {
     assert_eq!(result.file(), Some(file));
 
     let duplicate_parse_ids = [
-        "RS-CLIPPY-02",
-        "RS-CLIPPY-03",
+        "RS-CLIPPY-CONFIG-01",
+        "RS-CLIPPY-CONFIG-02",
         "RS-CLIPPY-04",
         "RS-CLIPPY-05",
         "RS-CLIPPY-06",
         "RS-CLIPPY-07",
         "RS-CLIPPY-08",
-        "RS-CLIPPY-09",
-        "RS-CLIPPY-10",
-        "RS-CLIPPY-11",
+        "RS-CLIPPY-CONFIG-03",
+        "RS-CLIPPY-CONFIG-04",
+        "RS-CLIPPY-CONFIG-05",
         "RS-CLIPPY-13",
         "RS-CLIPPY-14",
         "RS-CLIPPY-15",
         "RS-CLIPPY-16",
-        "RS-CLIPPY-17",
+        "RS-CLIPPY-CONFIG-06",
         "RS-CLIPPY-18",
         "RS-CLIPPY-19",
         "RS-CLIPPY-20",
-        "RS-CLIPPY-21",
-        "RS-CLIPPY-22",
+        "RS-CLIPPY-CONFIG-07",
+        "RS-CLIPPY-CONFIG-08",
     ];
     assert!(
         results

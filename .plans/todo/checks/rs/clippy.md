@@ -172,43 +172,43 @@ The generator and checker must match exactly.
 - **Why:** An uncovered Rust unit silently falls back to clippy defaults.
 - **Status:** Implemented
 
-### RS-CLIPPY-02: max-struct-bools threshold
+### RS-CLIPPY-CONFIG-01: max-struct-bools threshold
 - **Old ID:** R2
 - **Severity:** Error
 - **What:** `max-struct-bools` must be set (expected: 3)
 - **Status:** Implemented
 
-### RS-CLIPPY-03: max-fn-params-bools threshold
+### RS-CLIPPY-CONFIG-02: max-fn-params-bools threshold
 - **Old ID:** R3
 - **Severity:** Error
 - **What:** `max-fn-params-bools` must be set (expected: 3)
 - **Status:** Implemented
 
-### RS-CLIPPY-09: too_many_lines threshold
+### RS-CLIPPY-CONFIG-08: too_many_lines threshold
 - **Old ID:** NEW
 - **Severity:** Error
 - **What:** `too-many-lines-threshold` must be set (expected: 75). Controls clippy's `too_many_lines` lint for function length.
 - **Status:** Implemented
 
-### RS-CLIPPY-10: too_many_arguments threshold
+### RS-CLIPPY-CONFIG-09: too_many_arguments threshold
 - **Old ID:** NEW
 - **Severity:** Error
 - **What:** `too-many-arguments-threshold` must be set (expected: 7). Controls clippy's `too_many_arguments` lint.
 - **Status:** Implemented
 
-### RS-CLIPPY-11: excessive_nesting threshold
+### RS-CLIPPY-CONFIG-10: excessive_nesting threshold
 - **Old ID:** NEW
 - **Severity:** Error
 - **What:** `excessive-nesting-threshold` must be set (expected: 4). Controls clippy's nesting depth lint.
 - **Status:** Implemented
 
-### RS-CLIPPY-21: cognitive_complexity threshold
+### RS-CLIPPY-CONFIG-19: cognitive_complexity threshold
 - **Old ID:** R3 (was overloaded with other thresholds)
 - **Severity:** Error
 - **What:** `cognitive-complexity-threshold` must equal expected value (15). Controls clippy's cognitive complexity lint.
 - **Status:** Implemented
 
-### RS-CLIPPY-22: type_complexity threshold
+### RS-CLIPPY-CONFIG-20: type_complexity threshold
 - **Old ID:** R3 (was overloaded)
 - **Severity:** Error
 - **What:** `type-complexity-threshold` must equal expected value (75). Controls clippy's type complexity lint.
@@ -306,7 +306,7 @@ The generator and checker must match exactly.
 
 ## Config hygiene
 
-### RS-CLIPPY-17: test relaxation policy
+### RS-CLIPPY-CONFIG-15: test relaxation policy
 - **Old ID:** NEW (from audit)
 - **Severity:** Warn/Error
 - **What:** test-only Clippy relaxations must match the managed policy exactly:

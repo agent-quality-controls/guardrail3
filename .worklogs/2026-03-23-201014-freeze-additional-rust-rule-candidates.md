@@ -19,7 +19,7 @@ After freezing `RS-CODE-31` and the narrow public-error rule, there were still o
   - Apply to `impl` blocks directly — rejected because the generic burden is already more meaningfully represented on the item definitions themselves.
 
 ### Turn direct dependency sprawl into a hard universal rule
-- **Chose:** Plan `RS-DEPS-12` as an `Error` when one crate has more than 25 unique direct dependency names across normal/build/dev/target direct dependency tables.
+- **Chose:** Plan `RS-DEPS-CONFIG-05` as an `Error` when one crate has more than 25 unique direct dependency names across normal/build/dev/target direct dependency tables.
 - **Why:** A high direct-dependency cap catches real sprawl without needing crate-role exceptions, and it aligns with the “shitty code is shitty code whether publishable or internal” principle.
 - **Alternatives considered:**
   - Count only `[dependencies]` — rejected because build/dev/target direct dependencies still contribute to complexity and abuse.
@@ -58,10 +58,10 @@ They also reinforce the working design principle for new direct rules:
 ## Key Files for Context
 - `.plans/todo/check_review/06-new-rust-rule-candidates.md` — current candidate classification and ownership
 - `.plans/todo/checks/rs/code.md` — planned `RS-CODE-31`, `33`, and `34`
-- `.plans/todo/checks/rs/deps.md` — planned `RS-DEPS-12`
+- `.plans/todo/checks/rs/deps.md` — planned `RS-DEPS-CONFIG-05`
 - `.worklogs/2026-03-23-160918-add-family-hardening-agent-briefs.md` — prior planning work that set up the parallel hardening structure
 
 ## Next Steps / Continuation Plan
 1. Continue the candidate review only for items that can be made crisp enough for no-bypass hard enforcement.
-2. When implementation time comes, treat `RS-CODE-33`, `RS-CODE-34`, and `RS-DEPS-12` as independent rule additions with full family-local tests.
+2. When implementation time comes, treat `RS-CODE-33`, `RS-CODE-34`, and `RS-DEPS-CONFIG-05` as independent rule additions with full family-local tests.
 3. Keep unrelated hardening-lane work out of planning-only commits unless explicitly integrating those lanes.

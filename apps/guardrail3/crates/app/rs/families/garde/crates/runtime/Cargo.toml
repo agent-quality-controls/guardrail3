@@ -9,8 +9,8 @@ workspace = true
 [dependencies]
 cargo-toml-parser = { path = "../../../../../../../../../packages/cargo-toml-parser" }
 clippy-toml-parser = { path = "../../../../../../../../../packages/clippy-toml-parser" }
-g3-garde-content-checks = { path = "../../../../../../../../../packages/g3-garde-content-checks" }
-g3-garde-ast-checks = { path = "../../../../../../../../../packages/g3-garde-ast-checks" }
+g3rs-garde-config-checks = { path = "../../../../../../../../../packages/g3rs-garde-config-checks" }
+g3rs-garde-ast-checks = { path = "../../../../../../../../../packages/g3rs-garde-ast-checks" }
 guardrail3-check-types = { path = "../../../../../../../../../packages/guardrail3-check-types/crates/guardrail3-check-types" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../../../core" }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }

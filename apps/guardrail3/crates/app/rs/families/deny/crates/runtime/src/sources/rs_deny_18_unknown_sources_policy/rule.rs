@@ -7,7 +7,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
     let Some(sources) = section(config, "sources") else {
         results.push(CheckResult::from_parts(
-            "RS-DENY-18".to_owned(),
+            "RS-DENY-CONFIG-13".to_owned(),
             Severity::Error,
             "[sources] section missing".to_owned(),
             format!("`{}` has no `[sources]` section.", config.rel_path),
@@ -25,7 +25,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         match sources.get(key).and_then(toml::Value::as_str) {
             Some(value) if value == expected => {}
             _ => results.push(CheckResult::from_parts(
-                "RS-DENY-18".to_owned(),
+                "RS-DENY-CONFIG-13".to_owned(),
                 Severity::Error,
                 format!("sources `{key}` has wrong value"),
                 format!(

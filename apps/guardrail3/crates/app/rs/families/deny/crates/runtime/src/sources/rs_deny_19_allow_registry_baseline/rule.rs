@@ -9,7 +9,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
     let Some(sources) = section(config, "sources") else {
         results.push(CheckResult::from_parts(
-            "RS-DENY-19".to_owned(),
+            "RS-DENY-CONFIG-14".to_owned(),
             Severity::Error,
             "[sources] allow-registry missing".to_owned(),
             format!(
@@ -24,7 +24,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     };
     let Some(allow_registry_value) = sources.get("allow-registry") else {
         results.push(CheckResult::from_parts(
-            "RS-DENY-19".to_owned(),
+            "RS-DENY-CONFIG-14".to_owned(),
             Severity::Error,
             "[sources] allow-registry missing".to_owned(),
             format!(
@@ -39,7 +39,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     };
     let Some(allow_registry_entries) = allow_registry_value.as_array() else {
         results.push(CheckResult::from_parts(
-            "RS-DENY-19".to_owned(),
+            "RS-DENY-CONFIG-14".to_owned(),
             Severity::Error,
             "malformed allow-registry container".to_owned(),
             format!(
@@ -58,7 +58,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             allow_registry.push(registry);
         } else {
             results.push(CheckResult::from_parts(
-                "RS-DENY-19".to_owned(),
+                "RS-DENY-CONFIG-14".to_owned(),
                 Severity::Error,
                 "registry allow entry must be a string".to_owned(),
                 format!(
@@ -73,7 +73,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     }
     if allow_registry.len() != 1 {
         results.push(CheckResult::from_parts(
-            "RS-DENY-19".to_owned(),
+            "RS-DENY-CONFIG-14".to_owned(),
             Severity::Error,
             "allow-registry must contain exactly one entry".to_owned(),
             format!(
@@ -86,7 +86,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         ));
     } else if allow_registry[0] != CANONICAL_CRATES_IO_REGISTRY {
         results.push(CheckResult::from_parts(
-            "RS-DENY-19".to_owned(),
+            "RS-DENY-CONFIG-14".to_owned(),
             Severity::Error,
             "canonical crates.io registry not allowed".to_owned(),
             format!(
@@ -105,7 +105,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         .collect();
     if !unexpected_registries.is_empty() {
         results.push(CheckResult::from_parts(
-            "RS-DENY-19".to_owned(),
+            "RS-DENY-CONFIG-14".to_owned(),
             Severity::Error,
             "unexpected registry allowed".to_owned(),
             format!(

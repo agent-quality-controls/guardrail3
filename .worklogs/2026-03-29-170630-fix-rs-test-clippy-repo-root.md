@@ -57,7 +57,7 @@ So the correct fix for `clippy` was narrower than a new helper layer: keep the a
 
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_05_missing_type_ban_tests/parity.rs` — representative parity test after removing direct local-crate imports
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations_tests/multiple_relaxations.rs` — representative sidecar now using the sibling assertions severity surface instead of importing `guardrail3_domain_report`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations_tests/multiple_relaxations.rs` — representative sidecar now using the sibling assertions severity surface instead of importing `guardrail3_domain_report`
 - `apps/guardrail3/crates/app/rs/families/clippy/test_support/src/lib.rs` — generic fixture and TOML builder helpers that remain legal for sidecars to use
 - `apps/guardrail3/crates/app/rs/families/test/crates/runtime/src/rs_test_03_runtime_assertions_split.rs` — the rule this cleanup is satisfying at repo root
 - `.worklogs/2026-03-29-155903-finish-rs-test-clippy-family.md` — earlier family-local context for the same family

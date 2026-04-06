@@ -18,7 +18,7 @@ pub(super) fn run_check(
             toml::from_str::<toml::Value>(&format!(
                 "edition = \"{rustfmt_edition}\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n"
             ))
-            .expect("RS-FMT-06 in-memory rustfmt TOML fixture should parse"),
+            .expect("RS-FMT-CONFIG-04 in-memory rustfmt TOML fixture should parse"),
         ),
         escape_hatches: Vec::new(),
         cargo_edition,

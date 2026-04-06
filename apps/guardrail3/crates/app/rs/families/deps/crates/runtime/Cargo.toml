@@ -7,7 +7,7 @@ edition = "2024"
 workspace = true
 
 [dependencies]
-g3-deps-content-checks = { path = "../../../../../../../../../packages/g3-deps-content-checks", version = "0.1.0" }
+g3rs-deps-config-checks = { path = "../../../../../../../../../packages/g3rs-deps-config-checks", version = "0.1.0" }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
 guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../../family_view" }
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../../../../ownership" }

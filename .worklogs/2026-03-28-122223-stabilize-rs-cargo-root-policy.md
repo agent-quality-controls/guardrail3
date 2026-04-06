@@ -22,8 +22,8 @@ Once `missing_debug_implementations` was enforced, workspace builds started fail
 - **Chose:** Add the missing root metadata and lint entries directly in `apps/guardrail3/Cargo.toml`.
 - **Why:** The family plan already expects these invariants, and the goal of the sweep is to make the repo comply with the guardrails rather than soften the guardrails for the current tree.
 - **Alternatives considered:**
-  - Remove `missing_debug_implementations` from the cargo baseline — rejected because `RS-CARGO-01` explicitly owns the lint completeness contract.
-  - Relax `RS-CARGO-11` back out of the root baseline — rejected because macro bans need the cargo-side enforcement switch to be meaningful.
+  - Remove `missing_debug_implementations` from the cargo baseline — rejected because `RS-CARGO-CONFIG-01` explicitly owns the lint completeness contract.
+  - Relax `RS-CARGO-CONFIG-07` back out of the root baseline — rejected because macro bans need the cargo-side enforcement switch to be meaningful.
 
 ### Fix member inheritance at the manifests, not by special-casing paths
 - **Chose:** Add `[lints] workspace = true` to the eight member crates that were missing it.
@@ -42,7 +42,7 @@ Once `missing_debug_implementations` was enforced, workspace builds started fail
 ## Architectural Notes
 This checkpoint makes the app-root workspace manifest the real, enforceable source of lint policy again. That matters beyond `cargo` itself:
 
-- `RS-CARGO-11` now makes macro bans enforceable for downstream policy families.
+- `RS-CARGO-CONFIG-07` now makes macro bans enforceable for downstream policy families.
 - member manifests are structurally consistent, which reduces hidden per-crate policy drift.
 - the workspace build now runs under the same lint baseline the guardrails expect, instead of a weaker accidental baseline.
 
@@ -50,9 +50,9 @@ The `Debug` derive fixes are intentionally narrow: they were only added to expor
 
 ## Information Sources
 - `.plans/todo/checks/rs/cargo.md`
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_01_workspace_lints.rs`
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_05_workspace_metadata.rs`
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_11_disallowed_macros_deny.rs`
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_01_workspace_lints.rs`
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_04_workspace_metadata.rs`
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_07_disallowed_macros_deny.rs`
 - live validation:
   - `apps/guardrail3/target/debug/guardrail3 rs validate apps/guardrail3 --family cargo --inventory --format json`
 - verification commands:
@@ -66,10 +66,10 @@ The `Debug` derive fixes are intentionally narrow: they were only added to expor
 
 ## Key Files for Context
 - `apps/guardrail3/Cargo.toml` — app-root workspace policy root
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_01_workspace_lints.rs` — cargo lint completeness rule
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_01_workspace_lints.rs` — cargo lint completeness rule
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_04_lint_inheritance.rs` — member inheritance rule
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_05_workspace_metadata.rs` — edition policy rule
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_11_disallowed_macros_deny.rs` — cargo-side macro-enforcement switch
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_04_workspace_metadata.rs` — edition policy rule
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_07_disallowed_macros_deny.rs` — cargo-side macro-enforcement switch
 - `.worklogs/2026-03-28-110213-finish-hexarch-workspace-boundary.md` — prior checkpoint that restored valid app-root workspace ownership
 
 ## Next Steps / Continuation Plan

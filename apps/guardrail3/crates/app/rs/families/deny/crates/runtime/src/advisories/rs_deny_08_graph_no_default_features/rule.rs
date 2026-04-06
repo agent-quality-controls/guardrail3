@@ -16,7 +16,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     {
         Some(value) if value == expected_no_default_features => {}
         _ => results.push(CheckResult::from_parts(
-            "RS-DENY-08".to_owned(),
+            "RS-DENY-CONFIG-05".to_owned(),
             Severity::Error,
             "graph no-default-features must be false".to_owned(),
             format!(
@@ -32,7 +32,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
 fn push_missing(config: &crate::facts::DenyConfigFacts, results: &mut Vec<CheckResult>) {
     results.push(CheckResult::from_parts(
-        "RS-DENY-08".to_owned(),
+        "RS-DENY-CONFIG-05".to_owned(),
         Severity::Error,
         "[graph] section missing".to_owned(),
         format!(

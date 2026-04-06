@@ -39,9 +39,9 @@ The repo’s current `RS-ARCH-09` still flags `#[path]` usage broadly, including
 - The repo-wide `RS-ARCH-09` rule still disagrees with the chosen sidecar `#[path]` pattern. That mismatch should be resolved deliberately rather than papered over package by package.
 
 ## Key Files for Context
-- `packages/g3-toolchain-content-checks/crates/runtime/src/rs_toolchain_02_channel_and_components/rule.rs` — representative restored rule-side sidecar wiring
-- `packages/g3-fmt-content-checks/crates/runtime/src/rs_fmt_02_settings/rule.rs` — representative restored sidecar wiring in a different package
-- `packages/g3-deny-content-checks/crates/runtime/src/advisories/rs_deny_04_deprecated_advisories/rule.rs` — representative deep-module variant
+- `packages/g3rs-toolchain-config-checks/crates/runtime/src/rs_toolchain_config_01_channel_components/rule.rs` — representative restored rule-side sidecar wiring
+- `packages/g3rs-fmt-config-checks/crates/runtime/src/rs_fmt_config_01_settings/rule.rs` — representative restored sidecar wiring in a different package
+- `packages/g3rs-deny-config-checks/crates/runtime/src/advisories/rs_deny_config_01_deprecated_advisories/rule.rs` — representative deep-module variant
 - `.worklogs/2026-04-05-192600-older-package-test-path-and-feature-gating-cleanup.md` — immediate backstory for the correction
 
 ## Next Steps / Continuation Plan

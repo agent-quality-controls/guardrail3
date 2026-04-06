@@ -71,7 +71,7 @@ The cargo case-table cleanup is useful beyond one family. It demonstrates a clea
 - There are unrelated dirty files in the repo outside this commit lane, especially in `hooks-rs`, `project-tree`, and pre-existing code-family test files. They were intentionally left out of this checkpoint.
 
 ## Key Files for Context
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_01_workspace_lints_tests/cases.rs` — representative cargo case-table cleanup pattern
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_01_workspace_lints_tests/cases.rs` — representative cargo case-table cleanup pattern
 - `apps/guardrail3/crates/domain/modules/mod.rs` — fixed registry construction without `vec_init_then_push`
 - `apps/guardrail3/crates/domain/modules/cspell_tests.rs` — tightened JSON validation test and required local dev-dependency
 - `apps/guardrail3/crates/shared/fs/src/lib.rs` — removed avoidable `manual_ok_err`

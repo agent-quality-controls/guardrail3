@@ -65,7 +65,7 @@ This was a structural tightening, not a policy change. The rule outputs are the 
 - fresh post-fix test-attack subagent pass over the clippy-owned lane
 
 ## Open Questions / Future Considerations
-- The remaining clippy-owned code-family output is intentional `info` inventory for the `unreachable!()` in `rs_clippy_17_test_relaxations.rs`; it is not a convergence blocker, but it is the next obvious place to revisit if the repo later decides to tighten macro inventory policy.
+- The remaining clippy-owned code-family output is intentional `info` inventory for the `unreachable!()` in `rs_clippy_config_15_test_relaxations.rs`; it is not a convergence blocker, but it is the next obvious place to revisit if the repo later decides to tighten macro inventory policy.
 - The repo still has unrelated dirty files outside the clippy lane; this commit should stay scoped to the clippy cleanup and not sweep those changes in.
 
 ## Key Files for Context

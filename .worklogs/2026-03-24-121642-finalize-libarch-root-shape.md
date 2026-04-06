@@ -8,7 +8,7 @@ Closed the remaining second-pass handoff gaps found by adversarial review. The m
 
 ## Context & Problem
 After committing the first handoff-repair batch, a second adversarial pass still found concrete issues:
-- `cargo` brief misclassified `RS-CARGO-08` and `RS-CARGO-14`
+- `cargo` brief misclassified `RS-CARGO-CONFIG-06` and `RS-CARGO-14`
 - `deps` brief dropped the mixed-scope ownership split and failed to warn that target-specific tables remain out of scope
 - split hook briefs still lacked generator/template sources and enough routing/parity context
 - `libarch` still had a real contract contradiction:

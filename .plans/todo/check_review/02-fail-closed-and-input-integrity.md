@@ -10,7 +10,7 @@
 - `RS-CARGO` still has an unrecorded fail-open on malformed `guardrail3.toml`:
   - profile-sensitive rules silently lose `profile_name` when config parsing fails
   - add explicit profile-input failure handling or stop depending on silently parsed config for those rules
-- `RS-CARGO-05` implementation is broader than the plan text:
+- `RS-CARGO-CONFIG-04` implementation is broader than the plan text:
   - reconcile plan text and actual warning surface instead of allowing silent drift
 
 ## fmt
@@ -19,8 +19,8 @@
   - malformed `Cargo.toml` / `rust-toolchain.toml` gets silently dropped
   - some fmt rules then default or skip instead of surfacing input-integrity failure
 - concrete under-implementation notes still matter:
-  - `RS-FMT-04` currently depends only on repo-root toolchain facts
-  - `RS-FMT-06` currently compares against repo-root Cargo metadata only
+  - `RS-FMT-CONFIG-03` currently depends only on repo-root toolchain facts
+  - `RS-FMT-CONFIG-04` currently compares against repo-root Cargo metadata only
 
 ## toolchain
 
@@ -29,7 +29,7 @@
 - explicit channel-shape hardening is still needed:
   - handle `beta`
   - handle pinned `nightly-*`
-- `RS-TOOLCHAIN-03` still lacks profile context for the library-specific behavior the plan describes.
+- `RS-TOOLCHAIN-CONFIG-02` still lacks profile context for the library-specific behavior the plan describes.
 
 ## deps
 

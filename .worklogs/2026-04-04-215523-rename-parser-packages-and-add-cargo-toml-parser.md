@@ -75,5 +75,5 @@ The active extraction planning was updated to refer to the renamed parser crates
 
 ## Next Steps / Continuation Plan
 1. Rewire family extraction plans and implementation stubs that still mention `cargo_toml::Manifest` so they refer to `cargo-toml-parser::CargoToml` or to orchestrator-derived typed facts where appropriate.
-2. Revisit `g3-toolchain-content-checks` and replace its current raw `toml::Value` toolchain input with typed `rust-toolchain-toml-parser::RustToolchainToml` so the content-check boundary matches the corrected parser package standard.
-3. Clean the unrelated `fmt` runtime/test edits from the worktree before the next extraction commit so the next changeset can stay focused on `g3-fmt-content-checks`.
+2. Revisit `g3rs-toolchain-config-checks` and replace its current raw `toml::Value` toolchain input with typed `rust-toolchain-toml-parser::RustToolchainToml` so the content-check boundary matches the corrected parser package standard.
+3. Clean the unrelated `fmt` runtime/test edits from the worktree before the next extraction commit so the next changeset can stay focused on `g3rs-fmt-config-checks`.

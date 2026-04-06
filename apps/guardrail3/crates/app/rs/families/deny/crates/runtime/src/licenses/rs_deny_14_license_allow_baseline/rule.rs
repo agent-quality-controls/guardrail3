@@ -7,7 +7,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
     let Some(licenses) = section(config, "licenses") else {
         results.push(CheckResult::from_parts(
-            "RS-DENY-14".to_owned(),
+            "RS-DENY-CONFIG-10".to_owned(),
             Severity::Error,
             "[licenses] section missing".to_owned(),
             format!("`{}` has no `[licenses]` section.", config.rel_path),
@@ -34,7 +34,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     for name in &expected {
         if !actual.contains(name.as_str()) {
             results.push(CheckResult::from_parts(
-                "RS-DENY-14".to_owned(),
+                "RS-DENY-CONFIG-10".to_owned(),
                 Severity::Error,
                 "baseline license missing".to_owned(),
                 format!("`{}` is missing allowed license `{name}`.", config.rel_path),
@@ -47,7 +47,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
     for name in actual.difference(&expected) {
         results.push(CheckResult::from_parts(
-            "RS-DENY-14".to_owned(),
+            "RS-DENY-CONFIG-10".to_owned(),
             Severity::Error,
             "unexpected allowed license".to_owned(),
             format!("`{}` allows unexpected license `{name}`.", config.rel_path),
@@ -63,7 +63,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         .and_then(toml::Value::as_bool);
     if private_ignore != Some(true) {
         results.push(CheckResult::from_parts(
-            "RS-DENY-14".to_owned(),
+            "RS-DENY-CONFIG-10".to_owned(),
             Severity::Error,
             "licenses.private.ignore must be true".to_owned(),
             format!(

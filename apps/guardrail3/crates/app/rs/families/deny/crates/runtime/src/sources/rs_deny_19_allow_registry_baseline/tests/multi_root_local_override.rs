@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_19_allow_registry_baseline as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_config_14_allow_registry_baseline as assertions;
 
 use super::helpers::{build_fixture_deny_toml, set_allow_registries};
 

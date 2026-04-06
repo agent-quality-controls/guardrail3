@@ -11,7 +11,7 @@ fn warn_unknown_key(
     message: String,
 ) {
     results.push(CheckResult::from_parts(
-        "RS-DENY-28".to_owned(),
+        "RS-DENY-CONFIG-21".to_owned(),
         Severity::Warn,
         title,
         message,
@@ -28,7 +28,7 @@ fn warn_unsupported_schema(
     expected: &str,
 ) {
     results.push(CheckResult {
-        id: "RS-DENY-28".to_owned(),
+        id: "RS-DENY-CONFIG-21".to_owned(),
         severity: Severity::Warn,
         title: format!("unsupported {scope} schema"),
         message: format!(
@@ -48,7 +48,7 @@ fn warn_unsupported_entry_schema(
     expected: &str,
 ) {
     results.push(CheckResult {
-        id: "RS-DENY-28".to_owned(),
+        id: "RS-DENY-CONFIG-21".to_owned(),
         severity: Severity::Warn,
         title: format!("unsupported {scope} entry schema"),
         message: format!(

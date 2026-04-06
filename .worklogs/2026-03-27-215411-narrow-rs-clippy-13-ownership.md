@@ -4,7 +4,7 @@
 **Scope:** `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/clippy_support.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_13_local_policy_root_baseline.rs`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_13_local_policy_root_baseline_tests/*`
 
 ## Summary
-Narrowed `RS-CLIPPY-13` so it no longer double-reports keys already owned by `RS-CLIPPY-16` and `RS-CLIPPY-17`. Added a regression proving that a local `clippy.toml` with only `avoid-breaking-exported-api` and test-relaxation drift still remains `RS-CLIPPY-13`-clean and is left to the dedicated rules.
+Narrowed `RS-CLIPPY-13` so it no longer double-reports keys already owned by `RS-CLIPPY-16` and `RS-CLIPPY-CONFIG-15`. Added a regression proving that a local `clippy.toml` with only `avoid-breaking-exported-api` and test-relaxation drift still remains `RS-CLIPPY-13`-clean and is left to the dedicated rules.
 
 ## Context & Problem
 The adversarial ownership review across `RS-CLIPPY`, `RS-CARGO`, and `RS-CODE` found that `RS-CLIPPY-13` had drifted beyond its intended role. The rule is supposed to answer whether a local policy root below the validation root drops the inherited managed Clippy baseline, but the implementation also folded in:
@@ -15,7 +15,7 @@ The adversarial ownership review across `RS-CLIPPY`, `RS-CARGO`, and `RS-CODE` f
 That created duplicate reporting with:
 
 - `RS-CLIPPY-16` for `avoid-breaking-exported-api`
-- `RS-CLIPPY-17` for test relaxations
+- `RS-CLIPPY-CONFIG-15` for test relaxations
 
 The family plan already describes `RS-CLIPPY-13` in terms of thresholds and ban sections, so the extra key ownership was implementation drift rather than a deliberate policy split.
 
@@ -45,7 +45,7 @@ This change tightens the internal boundary inside `RS-CLIPPY`:
 
 - `RS-CLIPPY-13` now owns “local policy root completeness” for broad managed sections.
 - `RS-CLIPPY-16` owns `avoid-breaking-exported-api`.
-- `RS-CLIPPY-17` owns test-relaxation key policy.
+- `RS-CLIPPY-CONFIG-15` owns test-relaxation key policy.
 
 That keeps diagnostics more local to the actual defect and reduces overlap inside the family before the broader cross-family ownership review continues.
 
@@ -54,7 +54,7 @@ That keeps diagnostics more local to the actual defect and reduces overlap insid
 - `.plans/todo/checks/rs/clippy.md`
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_13_local_policy_root_baseline.rs`
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_16_avoid_breaking_exported_api.rs`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations.rs`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations.rs`
 - nested family verification run:
   - `cargo test --manifest-path apps/guardrail3/crates/app/rs/families/clippy/Cargo.toml --workspace --lib`
 
@@ -65,7 +65,7 @@ That keeps diagnostics more local to the actual defect and reduces overlap insid
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_13_local_policy_root_baseline.rs` — current aggregate local policy root completeness rule
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_16_avoid_breaking_exported_api.rs` — dedicated ownership of `avoid-breaking-exported-api`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations.rs` — dedicated ownership of test-relaxation booleans
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations.rs` — dedicated ownership of test-relaxation booleans
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/clippy_support.rs` — managed-key support shared across clippy rules
 - `.worklogs/2026-03-27-214025-harden-clippy-policy-context.md` — nearby clippy policy-context hardening
 - `.worklogs/2026-03-27-213947-harden-rs-clippy-policy-context-and-test-relaxations.md` — prior tightening around test-relaxation ownership

@@ -20,10 +20,10 @@ Current state:
 - owns a narrow runtime-usage rule for `GuardrailConfig` parse sites that skip `.validate()`
 - subtree/scoped-file enforcement is now proven in production and test paths
 - alias-aware detection now covers renamed `serde`, `garde`, and `sqlx` imports for
-  `RS-GARDE-05/07/08/09`
+  `RS-GARDE-AST-01/07/08/09`
 - `RS-GARDE-10` now has direct regressions for unreadable source and malformed
   `guardrail3.toml` policy input
-- `RS-GARDE-01` now stays quiet for internal helper crates that do not show real
+- `RS-GARDE-CONFIG-01` now stays quiet for internal helper crates that do not show real
   garde adoption markers
 - family crate tests currently pass:
   - `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-garde --lib`
@@ -70,5 +70,5 @@ Next planning focus:
 
 - keep root-policy inheritance and clippy-coverage dependency explicit
 - generalize validate-call enforcement beyond `GuardrailConfig` only after the false-positive story is proven
-- keep the `RS-GARDE-01` applicability contract narrow:
+- keep the `RS-GARDE-CONFIG-01` applicability contract narrow:
   roots with no garde dependency and no garde adoption markers stay silent

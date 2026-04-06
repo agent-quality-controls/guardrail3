@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_23_skip_hygiene as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_config_18_skip_hygiene as assertions;
 
 fn skip_toml(skip: &str) -> String {
     format!("[bans]\nskip = {skip}\n")

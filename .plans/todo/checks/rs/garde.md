@@ -8,7 +8,7 @@
 **Current code:** `apps/guardrail3/crates/app/rs/families/garde/**`
 **Legacy seed material:** `apps/guardrail3/crates/app/rs/validate/garde_checks.rs`
 
-**Why separate from RS-CLIPPY:** RS-CLIPPY checks baseline bans (always required). RS-GARDE checks additional bans and source-level boundary enforcement that only make sense when the project uses garde for input validation boundaries. RS-GARDE-01 checks garde exists first — if it doesn't, the other rules are skipped.
+**Why separate from RS-CLIPPY:** RS-CLIPPY checks baseline bans (always required). RS-GARDE checks additional bans and source-level boundary enforcement that only make sense when the project uses garde for input validation boundaries. RS-GARDE-CONFIG-01 checks garde exists first — if it doesn't, the other rules are skipped.
 
 ## Implementation mapping contract
 
@@ -40,7 +40,7 @@ For each owned root, the family determines:
 Verified root-policy note:
 - if the effective root config is package-driven by `[rust.packages]`, root garde gating must inherit `[rust.packages.checks]`
 - the root must not always fall back to the global default garde setting
-- otherwise `RS-GARDE-02..09` can fail open or overfire at the root
+- otherwise `RS-GARDE-CONFIG-02..09` can fail open or overfire at the root
 
 Rules about clippy ban presence are evaluated against the covering clippy config for the owned root, not against an arbitrary repo-global file.
 
@@ -52,7 +52,7 @@ Important root-policy detail:
 ## Gating model
 
 The family is intentionally conditional:
-- `RS-GARDE-01` checks whether garde is present for the owned root
+- `RS-GARDE-CONFIG-01` checks whether garde is present for the owned root
 - if garde is absent, the ban and source-enforcement rules for that root do not fire
 
 This is not a fail-open exception. It is the actual product contract: the garde family only governs Rust roots that are using garde as an input-boundary strategy.
@@ -93,25 +93,25 @@ Severity note:
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-GARDE-01 | R-GARDE-01 | Error/Info | garde crate in `[workspace.dependencies]` or `[dependencies]` of each enabled Rust root | Implemented |
-| RS-GARDE-02 | R-GARDE-02 | Warn/Info | Core serde/toml/yaml deserialization method bans in covering clippy config `disallowed-methods` (see list below) | Implemented |
-| RS-GARDE-03 | R-GARDE-03 | Warn/Info | Axum extractor type bans in covering clippy config `disallowed-types` (see list below) | Implemented |
-| RS-GARDE-04 | R-GARDE-04 | Warn/Info | `reqwest::Response::json` method ban in covering clippy config | Implemented |
-| RS-GARDE-05 | R-GARDE-05 | Error/Info | Struct derive inventory: structs with Deserialize/Parser/Args/FromRow + non-primitive fields must also derive Validate. Skips test files. | Implemented |
+| RS-GARDE-CONFIG-01 | R-GARDE-01 | Error/Info | garde crate in `[workspace.dependencies]` or `[dependencies]` of each enabled Rust root | Implemented |
+| RS-GARDE-CONFIG-02 | R-GARDE-02 | Warn/Info | Core serde/toml/yaml deserialization method bans in covering clippy config `disallowed-methods` (see list below) | Implemented |
+| RS-GARDE-CONFIG-03 | R-GARDE-03 | Warn/Info | Axum extractor type bans in covering clippy config `disallowed-types` (see list below) | Implemented |
+| RS-GARDE-CONFIG-04 | R-GARDE-04 | Warn/Info | `reqwest::Response::json` method ban in covering clippy config | Implemented |
+| RS-GARDE-AST-01 | R-GARDE-05 | Error/Info | Struct derive inventory: structs with Deserialize/Parser/Args/FromRow + non-primitive fields must also derive Validate. Skips test files. | Implemented |
 
 ## New rules from audit
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-GARDE-06 | Warn/Info | Additional deserialization method bans beyond serde_json/toml/yaml (see full list below). All deserialization entry points must go through `Validated<T>` wrapper. | Implemented |
-| RS-GARDE-07 | Error/Info | Manual `impl<'de> Deserialize<'de> for T` bypasses derive check. Scan for impl blocks implementing Deserialize trait — flag target type if it has non-primitive fields and doesn't also implement Validate. | Implemented |
-| RS-GARDE-08 | Error/Info | Enum derive inventory: enums with Deserialize/Parser/Args/FromRow and tuple/struct variants containing non-primitive fields must also derive Validate. Avoid false positives on C-like enums. | Implemented |
-| RS-GARDE-09 | Info | `sqlx::query_as!` and `sqlx::query_as_unchecked!` bypass derive check. Scan macro invocations and flag them as inventory items requiring manual review for validation. | Implemented |
+| RS-GARDE-CONFIG-05 | Warn/Info | Additional deserialization method bans beyond serde_json/toml/yaml (see full list below). All deserialization entry points must go through `Validated<T>` wrapper. | Implemented |
+| RS-GARDE-AST-02 | Error/Info | Manual `impl<'de> Deserialize<'de> for T` bypasses derive check. Scan for impl blocks implementing Deserialize trait — flag target type if it has non-primitive fields and doesn't also implement Validate. | Implemented |
+| RS-GARDE-AST-03 | Error/Info | Enum derive inventory: enums with Deserialize/Parser/Args/FromRow and tuple/struct variants containing non-primitive fields must also derive Validate. Avoid false positives on C-like enums. | Implemented |
+| RS-GARDE-AST-04 | Info | `sqlx::query_as!` and `sqlx::query_as_unchecked!` bypass derive check. Scan macro invocations and flag them as inventory items requiring manual review for validation. | Implemented |
 | RS-GARDE-10 | Error | Garde-family input failures: unreadable/parsing-broken Rust sources or broken garde-family policy inputs must surface explicitly instead of being skipped. | Implemented |
-| RS-GARDE-11 | Error/Info | Validated boundary fields that require runtime validation must carry a meaningful field-level garde validator. Primitive-only fields, unvalidatable map/set/reference surfaces, and nested validated fields handled by `dive` are excluded. | Implemented |
-| RS-GARDE-12 | Error/Info | Nested validated fields must use `#[garde(dive)]` so recursive validation actually runs. Applies to validated nested types, not arbitrary custom types. | Implemented |
-| RS-GARDE-13 | Error/Info | If a field-level garde validator references `ctx`, the boundary type must declare `#[garde(context(...))]`. This makes context-driven validation explicit and prevents half-wired ctx usage. | Implemented |
-| RS-GARDE-14 | Error | `GuardrailConfig` parse sites must prove a same-function garde validation call before use. First pass targets explicit/inferred `toml::from_str` and `try_into::<GuardrailConfig>()` patterns and skips `#[cfg(test)]` bodies. | Implemented |
+| RS-GARDE-AST-05 | Error/Info | Validated boundary fields that require runtime validation must carry a meaningful field-level garde validator. Primitive-only fields, unvalidatable map/set/reference surfaces, and nested validated fields handled by `dive` are excluded. | Implemented |
+| RS-GARDE-AST-06 | Error/Info | Nested validated fields must use `#[garde(dive)]` so recursive validation actually runs. Applies to validated nested types, not arbitrary custom types. | Implemented |
+| RS-GARDE-AST-07 | Error/Info | If a field-level garde validator references `ctx`, the boundary type must declare `#[garde(context(...))]`. This makes context-driven validation explicit and prevents half-wired ctx usage. | Implemented |
+| RS-GARDE-AST-08 | Error | `GuardrailConfig` parse sites must prove a same-function garde validation call before use. First pass targets explicit/inferred `toml::from_str` and `try_into::<GuardrailConfig>()` patterns and skips `#[cfg(test)]` bodies. | Implemented |
 
 ## Legacy carry-forward from archived GARDE_GUARDRAILS.md
 
@@ -128,25 +128,25 @@ The older top-level garde design note is being archived, but it still contains l
   - nested `#[garde(dive)]` enforcement
   - explicit `#[garde(context(...))]` enforcement when `ctx` is used
 - canonical clippy parity is now in better shape:
-  - the full `RS-GARDE-03` extractor set is generator-backed
-  - the full `RS-GARDE-06` deserialization method set is generator-backed
+  - the full `RS-GARDE-CONFIG-03` extractor set is generator-backed
+  - the full `RS-GARDE-CONFIG-05` deserialization method set is generator-backed
   - the remaining active gaps are no longer about missing canonical ban entries
 - field-level garde quality is now explicitly enforced:
-  - `RS-GARDE-11` checks meaningful field-level garde constraints
-  - `RS-GARDE-12` checks nested validated fields use `#[garde(dive)]`
-  - `RS-GARDE-13` checks explicit `#[garde(context(...))]` when field validators reference `ctx`
+  - `RS-GARDE-AST-05` checks meaningful field-level garde constraints
+  - `RS-GARDE-AST-06` checks nested validated fields use `#[garde(dive)]`
+  - `RS-GARDE-AST-07` checks explicit `#[garde(context(...))]` when field validators reference `ctx`
 - runtime validation execution is now partially enforced:
-  - `RS-GARDE-14` checks the live `GuardrailConfig` parse boundary, not just derive presence
+  - `RS-GARDE-AST-08` checks the live `GuardrailConfig` parse boundary, not just derive presence
   - first-pass scope is intentionally narrow to avoid pretending we already have generic validate-call dataflow
 - expanded deserialization method coverage is now part of the canonical clippy baseline:
-  - `RS-GARDE-06` and `RS-CLIPPY-04` parity tests now pin the expanded method set
+  - `RS-GARDE-CONFIG-05` and `RS-CLIPPY-04` parity tests now pin the expanded method set
   - service and library generated `clippy.toml` baselines now both include:
     - query-string / urlencoded constructors
     - streaming JSON deserializer constructors
     - binary / CSV / XML / CBOR / RON / postcard / flexbuffers entry points
     - config-crate extraction entry points
 - expanded extractor ban coverage is now part of the canonical clippy baseline:
-  - `RS-GARDE-03` and `RS-CLIPPY-05` parity tests now pin the expanded extractor set
+  - `RS-GARDE-CONFIG-03` and `RS-CLIPPY-05` parity tests now pin the expanded extractor set
   - service and library generated `clippy.toml` baselines now both include:
     - `axum::extract::Path`
     - `axum::extract::Multipart`
@@ -163,7 +163,7 @@ The older top-level garde design note is being archived, but it still contains l
 So the garde family now implements the enforceable AST-side contract from the legacy doc. The remaining wrapper material in that doc is product-pattern guidance carried by the clippy ban surface rather than a separate garde rule in this checker.
 
 Recent hardening note:
-- source-level multi-root attacks for `RS-GARDE-05/07/08/09` should use workspace roots or standalone package roots only
+- source-level multi-root attacks for `RS-GARDE-AST-01/07/08/09` should use workspace roots or standalone package roots only
 - workspace members are not owned garde roots and should not be used as the multi-root ownership model in tests
 
 Latest audit-hardening checkpoint:
@@ -175,14 +175,14 @@ Latest audit-hardening checkpoint:
   - `serde` / `Deserialize`
   - `garde` / `Validate`
   - `sqlx::query_as!` / `query_as_unchecked!`
-  - this closes bypasses for `RS-GARDE-05`, `RS-GARDE-07`, `RS-GARDE-08`, and `RS-GARDE-09`
+  - this closes bypasses for `RS-GARDE-AST-01`, `RS-GARDE-AST-02`, `RS-GARDE-AST-03`, and `RS-GARDE-AST-04`
 - `RS-GARDE-10` now has direct fail-closed tests for:
   - unreadable Rust source files
   - malformed `guardrail3.toml` during garde policy resolution
-- `RS-GARDE-14` is slightly stricter now:
+- `RS-GARDE-AST-08` is slightly stricter now:
   - same-name `.validate()` calls only suppress a finding when they occur after the parse site
   - this still is not full validate-before-use dataflow and should stay documented as a narrow first pass
-- `RS-GARDE-01` applicability is now intentionally narrower:
+- `RS-GARDE-CONFIG-01` applicability is now intentionally narrower:
   - roots with a real `garde` dependency are active as before
   - roots without `garde` stay silent unless parsed source shows garde adoption markers such as
     boundary derives or validate implementations
@@ -192,7 +192,7 @@ Latest audit-hardening checkpoint:
 
 ## Full expected ban lists
 
-### RS-GARDE-02: Serde deserialization method bans (disallowed-methods)
+### RS-GARDE-CONFIG-02: Serde deserialization method bans (disallowed-methods)
 
 Core serde (currently implemented):
 - `serde_json::from_str`
@@ -203,11 +203,11 @@ Core serde (currently implemented):
 - `serde_yaml::from_str`
 - `serde_yaml::from_reader`
 
-### RS-GARDE-04: reqwest response deserialization (disallowed-methods)
+### RS-GARDE-CONFIG-04: reqwest response deserialization (disallowed-methods)
 
 - `reqwest::Response::json`
 
-### RS-GARDE-06: Additional deserialization method bans (disallowed-methods)
+### RS-GARDE-CONFIG-05: Additional deserialization method bans (disallowed-methods)
 
 Query string / URL encoding:
 - `serde_qs::from_str`
@@ -261,7 +261,7 @@ Config crates (from audit round 2):
 - `config::Config::try_deserialize`
 - `figment::Figment::extract`
 
-### RS-GARDE-03: Axum extractor type bans (disallowed-types)
+### RS-GARDE-CONFIG-03: Axum extractor type bans (disallowed-types)
 
 Core extractors:
 - `axum::extract::Json`
@@ -301,7 +301,7 @@ Expanded extractor coverage:
 | `axum::extract::Request` | Banning prevents implementing ValidatedJson itself. Method bans catch deserialization on the body. |
 | `tonic::Request` (gRPC) | Protocol-specific. Protobuf has own type system. Most projects use axum/REST. Revisit when tonic needed. |
 | Type aliases hiding Deserialize | Transparent to clippy bans. No new attack surface. |
-| `#[serde(from = "OtherType")]` proxy | Proxy type flagged by RS-GARDE-05 if it has non-primitive fields. Legitimate custom validation pattern. |
+| `#[serde(from = "OtherType")]` proxy | Proxy type flagged by RS-GARDE-AST-01 if it has non-primitive fields. Legitimate custom validation pattern. |
 | `sqlx::query_scalar!` | Returns single values. Minimal validation concern. |
 | `serde::Deserialize::deserialize` trait method | Transitively covered by Deserializer constructor bans. Nobody calls this directly. |
 | Per-crate clippy.toml drops garde bans | Already covered by RS-CLIPPY-13 (per-crate must contain workspace bans). |

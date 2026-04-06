@@ -261,7 +261,7 @@ fn invalid_allow_priority_is_inventoried_accurately() {
     assert!(
         input_failures[0]
             .message()
-            .contains("against cargo-toml-parser for cargo content checks"),
+            .contains("against cargo-toml-parser for cargo config checks"),
         "expected typed cargo parser failure to be owned by RS-CARGO-14: {results:#?}"
     );
 }

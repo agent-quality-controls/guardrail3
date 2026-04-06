@@ -1,5 +1,5 @@
 mod helpers;
-use guardrail3_app_rs_family_fmt_assertions::rs_fmt_04_nightly_keys_on_stable as assertions;
+use guardrail3_app_rs_family_fmt_assertions::rs_fmt_config_03_nightly_keys_on_stable as assertions;
 
 use helpers::{TestToolchainState, run_check, run_family};
 

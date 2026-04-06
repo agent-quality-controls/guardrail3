@@ -73,7 +73,7 @@ This is the cleaner rule split:
 ## Next Steps / Continuation Plan
 1. Continue the `RS-CLIPPY` attack pass on remaining policy rules:
    - `RS-CLIPPY-16`
-   - `RS-CLIPPY-17`
+   - `RS-CLIPPY-CONFIG-15`
    - `RS-CLIPPY-19`
    - `RS-CLIPPY-20`
 2. Look specifically for:

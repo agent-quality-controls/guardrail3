@@ -1,5 +1,5 @@
-use g3_deps_content_checks::{
-    G3DepsDirectDependencyCapInput, G3DepsLocalPathCargoManifest, G3DepsPolicyContentChecksInput,
+use g3rs_deps_config_checks::{
+    G3RsDepsConfigDirectDependencyCapInput, G3RsDepsConfigLocalPathCargoManifest, G3RsDepsConfigPolicyChecksInput,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsDepsRoute;
@@ -58,7 +58,7 @@ fn run_policy_content_checks(
     input: &crate::facts::PolicyContentCheckFacts,
     results: &mut Vec<CheckResult>,
 ) {
-    let package_input = G3DepsPolicyContentChecksInput {
+    let package_input = G3RsDepsConfigPolicyChecksInput {
         workspace_cargo_rel_path: input.workspace_cargo_rel_path.clone(),
         workspace_cargo: input.workspace_cargo.clone(),
         crate_cargo_rel_path: input.crate_cargo_rel_path.clone(),
@@ -70,14 +70,14 @@ fn run_policy_content_checks(
         local_path_cargo_manifests: input
             .local_path_cargo_manifests
             .iter()
-            .map(|manifest| G3DepsLocalPathCargoManifest {
+            .map(|manifest| G3RsDepsConfigLocalPathCargoManifest {
                 cargo_rel_path: manifest.cargo_rel_path.clone(),
                 cargo: manifest.cargo.clone(),
             })
             .collect(),
     };
     results.extend(
-        g3_deps_content_checks::check_policy(&package_input)
+        g3rs_deps_config_checks::check_policy(&package_input)
             .into_iter()
             .map(convert_check_result),
     );
@@ -87,7 +87,7 @@ fn run_direct_dependency_cap_check(
     input: &crate::facts::DirectDependencyCapContentFacts,
     results: &mut Vec<CheckResult>,
 ) {
-    let package_input = G3DepsDirectDependencyCapInput {
+    let package_input = G3RsDepsConfigDirectDependencyCapInput {
         workspace_cargo_rel_path: input.workspace_cargo_rel_path.clone(),
         workspace_cargo: input.workspace_cargo.clone(),
         crate_cargo_rel_path: input.crate_cargo_rel_path.clone(),
@@ -96,14 +96,14 @@ fn run_direct_dependency_cap_check(
         local_path_cargo_manifests: input
             .local_path_cargo_manifests
             .iter()
-            .map(|manifest| G3DepsLocalPathCargoManifest {
+            .map(|manifest| G3RsDepsConfigLocalPathCargoManifest {
                 cargo_rel_path: manifest.cargo_rel_path.clone(),
                 cargo: manifest.cargo.clone(),
             })
             .collect(),
     };
     results.extend(
-        g3_deps_content_checks::check_direct_dependency_cap(&package_input)
+        g3rs_deps_config_checks::check_direct_dependency_cap(&package_input)
             .into_iter()
             .map(convert_check_result),
     );

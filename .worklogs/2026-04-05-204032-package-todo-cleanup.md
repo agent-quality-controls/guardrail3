@@ -51,12 +51,12 @@ This also makes the package-local TODOs consistent with the current extracted fa
 - `deps` still has the scoped family-view limitation for sibling manifests outside the selected route surface.
 
 ## Key Files for Context
-- `packages/g3-cargo-content-checks/TODO.md` — current cargo package boundary and deferred rules
-- `packages/g3-clippy-content-checks/TODO.md` — current clippy extracted slice and app-side deferred rules
-- `packages/g3-deny-content-checks/TODO.md` — live deny structural parse-gap reminder
-- `packages/g3-deps-content-checks/TODO.md` — deps local-path/family-view limitation and boundary guard
-- `packages/g3-fmt-content-checks/TODO.md` — fmt package-only remaining deferred boundaries
-- `packages/g3-toolchain-content-checks/TODO.md` — toolchain package-only remaining deferred boundaries
+- `packages/g3rs-cargo-config-checks/TODO.md` — current cargo package boundary and deferred rules
+- `packages/g3rs-clippy-config-checks/TODO.md` — current clippy extracted slice and app-side deferred rules
+- `packages/g3rs-deny-config-checks/TODO.md` — live deny structural parse-gap reminder
+- `packages/g3rs-deps-config-checks/TODO.md` — deps local-path/family-view limitation and boundary guard
+- `packages/g3rs-fmt-config-checks/TODO.md` — fmt package-only remaining deferred boundaries
+- `packages/g3rs-toolchain-config-checks/TODO.md` — toolchain package-only remaining deferred boundaries
 - `.worklogs/2026-04-05-203355-deps-local-path-parity.md` — latest deps hardening context
 
 ## Next Steps / Continuation Plan

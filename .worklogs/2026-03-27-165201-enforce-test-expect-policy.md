@@ -63,7 +63,7 @@ It does **not** police normal-code `expect(...)`; that is intentional and left t
 ## Information Sources
 - Local code:
   - `apps/guardrail3/crates/domain/modules/clippy/settings.rs`
-  - `apps/guardrail3/crates/app/rs/families/clippy/src/rs_clippy_17_test_relaxations.rs`
+  - `apps/guardrail3/crates/app/rs/families/clippy/src/rs_clippy_config_15_test_relaxations.rs`
   - `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/lib.rs`
   - `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/parse/visitors.rs`
   - `apps/guardrail3/tests/fixtures/r_arch_01/golden/apps/backend/crates/app/commands/src/lib.rs`
@@ -82,7 +82,7 @@ It does **not** police normal-code `expect(...)`; that is intentional and left t
 
 ## Key Files for Context
 - `apps/guardrail3/crates/domain/modules/clippy/settings.rs` — canonical generated Clippy settings, now including test `expect`/`unwrap` policy.
-- `apps/guardrail3/crates/app/rs/families/clippy/src/rs_clippy_17_test_relaxations.rs` — enforcement of exact test-relaxation config policy.
+- `apps/guardrail3/crates/app/rs/families/clippy/src/rs_clippy_config_15_test_relaxations.rs` — enforcement of exact test-relaxation config policy.
 - `apps/guardrail3/crates/app/rs/families/clippy/src/rs_clippy_13_local_policy_root_baseline.rs` — local policy-root completeness, now requiring the new test keys too.
 - `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/rs_code_32_test_expect_message_quality.rs` — new custom rule for useful test `expect(...)` messages.
 - `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/parse/visitors.rs` — AST visitor for test-context `expect(...)` call discovery.

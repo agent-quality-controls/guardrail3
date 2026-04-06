@@ -8,7 +8,7 @@ fn inventories_migrated_threshold_rule_through_family_package_bridge() {
     let tree = root_workspace_tree(build_fixture_clippy_toml("service", false, true, "", ""));
     let results = run_family_for_tests(&tree);
 
-    let package_results = results_for_id(&results, "RS-CLIPPY-02");
+    let package_results = results_for_id(&results, "RS-CLIPPY-CONFIG-01");
     assert_eq!(package_results.len(), 1);
 
     let result = package_results[0];
@@ -29,7 +29,7 @@ fn reports_migrated_threshold_rule_failure_through_family_package_bridge() {
     let tree = root_workspace_tree("max-struct-bools = 4\n");
     let results = run_family_for_tests(&tree);
 
-    let package_results = results_for_id(&results, "RS-CLIPPY-02");
+    let package_results = results_for_id(&results, "RS-CLIPPY-CONFIG-01");
     assert_eq!(package_results.len(), 1);
 
     let result = package_results[0];

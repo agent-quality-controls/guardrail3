@@ -27,10 +27,10 @@ Rules:
 - `rs_deps_02_cargo_machete_installed.rs`
 - `rs_deps_03_cargo_dupes_installed.rs`
 - `rs_deps_04_gitleaks_installed.rs`
-- `rs_deps_05_dependencies_allowlisted.rs`
-- `rs_deps_06_build_dependencies_allowlisted.rs`
-- `rs_deps_07_dev_dependencies_allowlisted.rs`
-- `rs_deps_08_library_allowlist_present.rs`
+- `rs_deps_config_01_dependencies_allowlisted.rs`
+- `rs_deps_config_02_build_dependencies_allowlisted.rs`
+- `rs_deps_config_03_dev_dependencies_allowlisted.rs`
+- `rs_deps_config_04_library_allowlist_present.rs`
 - `rs_deps_09_cargo_lock_present.rs`
 - `rs_deps_10_gitignore_not_ignoring_cargo_lock.rs`
 - `rs_deps_11_input_failures.rs`
@@ -52,7 +52,7 @@ Use it as seed material only. Do not port it mechanically.
 
 Ownership split matters:
 - `RS-DEPS-01..04` are validation-root tool-availability checks
-- `RS-DEPS-05..08` are crate/package-owned allowlist checks
+- `RS-DEPS-CONFIG-01..08` are crate/package-owned allowlist checks
 - `RS-DEPS-09..10` are Rust-root-owned lockfile checks
 - `RS-DEPS-11` owns fail-closed behavior across those scopes
 
@@ -73,7 +73,7 @@ Important scope points already frozen in the plan and implementation:
 - `workspace = true` dependencies are not auto-skipped
 - path dependencies are skipped only when they are workspace path dependencies
 - renamed dependencies must be checked against real package name when present
-- target-specific dependency tables are still an explicit live gap and are not yet part of `RS-DEPS-05..07`
+- target-specific dependency tables are still an explicit live gap and are not yet part of `RS-DEPS-CONFIG-01..07`
 
 ## Fail-Closed Contract
 
@@ -88,7 +88,7 @@ Malformed inputs must not silently suppress dependency-policy findings.
 
 ## Known Plan-Level Additions
 
-`RS-DEPS-12` is planned but not implemented yet:
+`RS-DEPS-CONFIG-05` is planned but not implemented yet:
 - more than 25 unique direct dependency names on one crate
 
 Do not invent new semantics for it during this pass unless you are explicitly implementing it.
@@ -176,9 +176,9 @@ The pass is not done until:
 3. map old seed tests into current attack vectors
 4. verify the existing `*_tests/` directories actually match the rule/attack-vector standard
 5. harden the highest-risk rules first:
-   - `RS-DEPS-05`
-   - `RS-DEPS-06`
-   - `RS-DEPS-07`
+   - `RS-DEPS-CONFIG-01`
+   - `RS-DEPS-CONFIG-02`
+   - `RS-DEPS-CONFIG-03`
    - `RS-DEPS-09`
    - `RS-DEPS-10`
    - `RS-DEPS-11`

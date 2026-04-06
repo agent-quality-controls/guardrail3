@@ -391,19 +391,19 @@ Target:
 - `RS-DENY-17`, `23`, `24`, `26` use shared validator
 - valid documented `licenses.exceptions`, `skip`, and `ignore` become visible `Warn`
 - missing or weak reasons remain `Error`
-- `RS-DENY-20 allow-git` uses sidecar registry reason matching
+- `RS-DENY-CONFIG-17 allow-git` uses sidecar registry reason matching
 - `RS-DENY-25 bans.allow` uses sidecar registry reason matching, but remains `Error` even when documented if policy stays “forbidden hatch”
 - add deny-family escape-hatch count summary
 
 Relevant files:
 
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/licenses/rs_deny_17_license_exceptions_inventory.rs`
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_20_allow_git_inventory.rs`
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_23_skip_hygiene.rs`
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_24_ignore_hygiene.rs`
+- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_config_17_allow_git_inventory.rs`
+- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_config_20_skip_hygiene.rs`
+- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_config_21_ignore_hygiene.rs`
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_25_allow_override_channel.rs`
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/bans/rs_deny_26_ban_reason_inventory.rs`
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_29_ignore_accumulation.rs`
+- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_config_26_ignore_accumulation.rs`
 
 ### `RS-CLIPPY`
 
@@ -435,7 +435,7 @@ Relevant files:
 
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_08_reason_quality.rs`
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_15_trivial_reason.rs`
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations.rs`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations.rs`
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/clippy_support.rs`
 
 ### `RS-CARGO`
@@ -521,7 +521,7 @@ Target:
 
 Relevant file:
 
-- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/inventory/rs_garde_09_query_as_inventory.rs`
+- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/inventory/rs_garde_ast_04_query_as_inventory.rs`
 
 ## Shared `guardrail3.toml` Parsing Changes
 

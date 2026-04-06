@@ -49,7 +49,7 @@ The family had already been split into an independently compilable unit, but sev
 - `apps/guardrail3/crates/app/rs/families/deny/README.md`
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/facts.rs`
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/facts_support.rs`
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_19_allow_registry_baseline.rs`
+- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_config_16_allow_registry_baseline.rs`
 - `apps/guardrail3/crates/domain/modules/deny.rs`
 - lean isolated family runs via `cargo check/build/run --no-default-features --features family-deny`
 - recent prior worklogs read at session start, especially:
@@ -67,9 +67,9 @@ The family had already been split into an independently compilable unit, but sev
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/facts.rs` — route-bounded deny discovery and effective coverage facts
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/facts_support.rs` — deny profile-map validation and coverage helpers
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_19_allow_registry_baseline.rs` — exact sparse crates.io policy
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_23_skip_hygiene.rs` — documented skip exception enforcement
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_24_ignore_hygiene.rs` — documented advisory-ignore enforcement
+- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_config_16_allow_registry_baseline.rs` — exact sparse crates.io policy
+- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_config_20_skip_hygiene.rs` — documented skip exception enforcement
+- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_config_21_ignore_hygiene.rs` — documented advisory-ignore enforcement
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/licenses/rs_deny_17_license_exceptions_inventory.rs` — documented license exception enforcement
 - `apps/guardrail3/crates/app/rs/family_mapper/src/views.rs` — deny route shape including validation scope
 - `apps/guardrail3/crates/domain/modules/deny.rs` — generator baseline for deny policy
