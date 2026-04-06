@@ -3,8 +3,8 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{
     cargo_role, error, info, is_weaker, lint_level, lint_priority, policy_lints, CargoRole,
-    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS,
-    LintExpectation,
+    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_CLIPPY_REQUIRED_ALLOW,
+    EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS, LintExpectation,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-02";
@@ -38,6 +38,18 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
                 &LintExpectation {
                     name: lint_name,
                     expected_level: "deny",
+                    priority: None,
+                },
+                results,
+            );
+        }
+        for required in EXPECTED_CLIPPY_REQUIRED_ALLOW {
+            violations += check_expected(
+                cargo_rel_path,
+                clippy_lints,
+                &LintExpectation {
+                    name: required.name,
+                    expected_level: "allow",
                     priority: None,
                 },
                 results,
@@ -83,20 +95,22 @@ fn check_expected(
     }
 
     if let Some(expected_priority) = expected.priority {
-        let actual_priority = lint_priority(lints, expected.name);
-        if actual_priority != Some(expected_priority) {
-            violations += 1;
-            results.push(error(
-                ID,
-                format!("lint `{}` has wrong priority", expected.name),
-                format!(
-                    "Expected priority `{expected_priority}`, got `{}`. Set the priority to `{expected_priority}`.",
-                    actual_priority
-                        .map(|priority| priority.to_string())
-                        .unwrap_or_else(|| "none".to_owned())
-                ),
-                cargo_rel_path,
-            ));
+        if lint_level(lints, expected.name).is_some() {
+            let actual_priority = lint_priority(lints, expected.name);
+            if actual_priority != Some(expected_priority) {
+                violations += 1;
+                results.push(error(
+                    ID,
+                    format!("lint `{}` has wrong priority", expected.name),
+                    format!(
+                        "Expected priority `{expected_priority}`, got `{}`. Set the priority to `{expected_priority}`.",
+                        actual_priority
+                            .map(|priority| priority.to_string())
+                            .unwrap_or_else(|| "none".to_owned())
+                    ),
+                    cargo_rel_path,
+                ));
+            }
         }
     }
 

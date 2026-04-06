@@ -15,7 +15,7 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
     };
 
     match lint_level(clippy_lints, "disallowed_macros") {
-        Some("deny") => {
+        Some("deny" | "forbid") => {
             results.push(info(
                 ID,
                 "disallowed macros lint enforced",

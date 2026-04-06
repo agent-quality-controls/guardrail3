@@ -17,7 +17,10 @@ pub fn ingest(
         .ok_or(IngestionError::CargoTomlNotFound)?;
 
     if !entry.readable {
-        return Err(IngestionError::Unreadable(entry.path.abs_path.clone()));
+        return Err(IngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: "file is not readable".to_owned(),
+        });
     }
 
     let cargo = crate::parse::parse_cargo_toml(&entry.path.abs_path)?;
