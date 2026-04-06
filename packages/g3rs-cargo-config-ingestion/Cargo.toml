@@ -24,6 +24,8 @@ api = [
     "dep:g3rs-cargo-config-ingestion-types",
 ]
 
+[package.metadata.guardrail3]
+shared = true
 [package.metadata.docs.rs]
 all-features = true
 

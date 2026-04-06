@@ -1,27 +1,27 @@
 [package]
-name = "g3rs-deps-config-checks"
+name = "g3rs-clippy-config-ingestion"
 version = "0.1.0"
 edition = "2024"
-description = "Facade crate for guardrail3 dependency-policy config checks"
+description = "Facade crate for guardrail3 clippy config ingestion"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
-keywords = ["guardrail3", "deps", "checks", "rust", "policy"]
+keywords = ["guardrail3", "clippy", "ingestion", "rust"]
 categories = ["development-tools"]
 publish = true
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
-g3rs-deps-config-checks-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
-g3rs-deps-config-checks-types = { path = "crates/types", version = "0.1.0", optional = true }
+g3rs-clippy-config-ingestion-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
+g3rs-clippy-config-ingestion-types = { path = "crates/types", version = "0.1.0", optional = true }
 
 [features]
 default = ["all"]
 all = ["api"]
 api = [
-    "dep:g3rs-deps-config-checks-runtime",
-    "dep:g3rs-deps-config-checks-types",
+    "dep:g3rs-clippy-config-ingestion-runtime",
+    "dep:g3rs-clippy-config-ingestion-types",
 ]
 
 [package.metadata.guardrail3]
