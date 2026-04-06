@@ -13,3 +13,5 @@ pub use cliff_toml_parser_types::{
 pub use error::Error;
 #[cfg(feature = "api")]
 pub use parser::{from_path, parse};
+#[cfg(feature = "api")]
+pub use toml::Value;
