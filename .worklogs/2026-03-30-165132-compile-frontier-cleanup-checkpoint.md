@@ -78,7 +78,7 @@ Important practical findings:
 
 ## Next Steps / Continuation Plan
 1. Repair the remaining malformed runtime files directly:
-   - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_23_skip_hygiene.rs`
+   - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/sources/rs_deny_config_20_skip_hygiene.rs`
    - `apps/guardrail3/crates/app/rs/families/hooks-rs/src/hook_rs_10_test_uses_workspace.rs`
    - `apps/guardrail3/crates/app/rs/families/test/crates/runtime/src/structure/rs_test_18_test_support_generic.rs`
    - `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/api_shape/rs_code_33_public_weak_error_forms.rs`

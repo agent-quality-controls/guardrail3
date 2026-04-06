@@ -48,13 +48,13 @@ Major code themes in this batch:
 Current compile status at commit time:
 - `cargo check --manifest-path apps/guardrail3/Cargo.toml --quiet` still fails.
 - Remaining reported frontier when I stopped:
-  - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_06_edition_mismatch.rs`
-  - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/bans/rs_deny_10_multiple_versions_floor.rs`
+  - `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/src/rs_fmt_config_04_edition_mismatch.rs`
+  - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/bans/rs_deny_config_07_multiple_versions_floor.rs`
   - `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/cfg_and_paths/rs_code_17_impl_allow_blast_radius.rs`
   - `apps/guardrail3/crates/app/rs/families/hexarch/crates/runtime/src/dependency_integrity/rs_hexarch_21_domain_purity.rs`
-  - `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/derive_checks/rs_garde_14_guardrail_config_validate_call.rs`
+  - `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/derive_checks/rs_garde_ast_08_guardrail_config_validate_call.rs`
   - `apps/guardrail3/crates/app/rs/families/hooks-shared/src/shell_safety/hook_shared_19_real_dispatcher_syntax_only.rs`
-  - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/policy/rs_deps_12_direct_dependency_cap.rs`
+  - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/policy/rs_deps_config_05_direct_dependency_cap.rs`
   - `apps/guardrail3/crates/app/rs/families/release/src/repo_policy/rs_release_04_cliff_exists.rs`
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_16_avoid_breaking_exported_api.rs`
   - `apps/guardrail3/crates/app/rs/families/libarch/crates/runtime/src/rs_libarch_11_root_facade_exports_api.rs`

@@ -405,7 +405,7 @@ Required fixes:
 
 - tighten fail-closed behavior for unreadable routed root Cargo manifests
 - decide whether fixture exclusions are shared policy or a family-local bug
-- align severity/docs for `RS-GARDE-09`
+- align severity/docs for `RS-GARDE-AST-04`
 
 ### 13. `libarch`
 

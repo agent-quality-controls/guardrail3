@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::advisories::rs_deny_04_deprecated_advisories as assertions;
+use guardrail3_app_rs_family_deny_assertions::advisories::rs_deny_config_01_deprecated_advisories as assertions;
 
 use super::helpers::build_fixture_deny_toml;
 

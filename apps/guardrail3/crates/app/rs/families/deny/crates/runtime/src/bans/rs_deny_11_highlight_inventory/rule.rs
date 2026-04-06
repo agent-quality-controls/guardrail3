@@ -13,7 +13,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     if actual.map(str::to_owned) != expected_highlight {
         results.push(
             CheckResult::from_parts(
-                "RS-DENY-11".to_owned(),
+                "RS-DENY-CONFIG-07".to_owned(),
                 Severity::Info,
                 "highlight differs from baseline".to_owned(),
                 format!(

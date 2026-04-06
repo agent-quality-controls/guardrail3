@@ -98,7 +98,7 @@ allowed_deps = ["serde"]
 garde = true
 
 [[waivers]]
-rule = "RS-GARDE-09"
+rule = "RS-GARDE-AST-04"
 file = "src/adapters/db.rs"
 selector = "sqlx::query_as@L42"
 reason = "legacy row type"

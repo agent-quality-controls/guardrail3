@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::super::{collect, family_route};
-use crate::root_policy::rs_garde_02_core_method_bans;
+use crate::root_policy::rs_garde_config_02_core_method_bans;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -29,7 +29,7 @@ garde = { version = "0.22", features = ["derive"] }
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
             (
                 "clippy.toml",
-                &rs_garde_02_core_method_bans::canonical_clippy_toml(),
+                &rs_garde_config_02_core_method_bans::canonical_clippy_toml(),
             ),
             (in_scope_rel, source_fixture("InScope")),
             (out_of_scope_rel, source_fixture("OutOfScope")),
@@ -119,7 +119,7 @@ garde = { version = "0.22", features = ["derive"] }
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
             (
                 "clippy.toml",
-                &rs_garde_02_core_method_bans::canonical_clippy_toml(),
+                &rs_garde_config_02_core_method_bans::canonical_clippy_toml(),
             ),
             (in_scope_rel, "pub struct Healthy;\n"),
             (out_of_scope_rel, "fn broken(\n"),

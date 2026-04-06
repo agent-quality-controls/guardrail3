@@ -1,0 +1,15 @@
+use clippy_toml_parser::parse as parse_clippy_toml;
+use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
+use guardrail3_check_types::G3CheckResult;
+
+use crate::rs_clippy_config_02_max_fn_params_bools::check;
+
+pub(super) fn run_check(clippy_toml: &str) -> Vec<G3CheckResult> {
+    let input = G3RsClippyConfigChecksInput {
+        clippy_rel_path: "clippy.toml".to_owned(),
+        clippy: parse_clippy_toml(clippy_toml).expect("clippy fixture should parse"),
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}

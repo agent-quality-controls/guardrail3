@@ -66,7 +66,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         for (name, count) in deny_counts {
             if count > 1 {
                 results.push(CheckResult::from_parts(
-                    "RS-DENY-27".to_owned(),
+                    "RS-DENY-CONFIG-20".to_owned(),
                     Severity::Warn,
                     "duplicate deny entry".to_owned(),
                     format!("`{}` has duplicate deny entry `{name}`.", config.rel_path),
@@ -92,7 +92,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         for (name, count) in skip_counts {
             if count > 1 {
                 results.push(CheckResult::from_parts(
-                    "RS-DENY-27".to_owned(),
+                    "RS-DENY-CONFIG-20".to_owned(),
                     Severity::Warn,
                     "duplicate skip entry".to_owned(),
                     format!("`{}` has duplicate skip entry `{name}`.", config.rel_path),
@@ -126,7 +126,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     for (id, count) in ignore_counts {
         if count > 1 {
             results.push(CheckResult::from_parts(
-                "RS-DENY-27".to_owned(),
+                "RS-DENY-CONFIG-20".to_owned(),
                 Severity::Warn,
                 "duplicate advisory ignore entry".to_owned(),
                 format!(
@@ -147,7 +147,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     for (name, count) in feature_counts {
         if count > 1 {
             results.push(CheckResult::from_parts(
-                "RS-DENY-27".to_owned(),
+                "RS-DENY-CONFIG-20".to_owned(),
                 Severity::Warn,
                 "duplicate feature-ban entry".to_owned(),
                 format!(

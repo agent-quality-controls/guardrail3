@@ -8,7 +8,7 @@ This pass tightened the `RS-CARGO` family plan so it is much closer to a finishe
 
 ## Context & Problem
 The user asked for a careful review of the cargo family plan because it was still the obvious outlier among the Rust family plans. The plan had already been improved earlier in the day, but it still had real defects:
-- `RS-CARGO-08` was scoped as a policy-root rule even though resolver is a workspace concern
+- `RS-CARGO-CONFIG-06` was scoped as a policy-root rule even though resolver is a workspace concern
 - the plan required fail-closed behavior but did not give cargo-family input failures their own rule
 - standalone-package expectations were still only implied
 - profile resolution for `guardrail3.toml` in multi-root repos was not explicit enough
@@ -33,29 +33,29 @@ The user explicitly did not want hidden unilateral policy decisions. The right m
   - Leave input failures undocumented until implementation — rejected because the plan itself should encode fail-closed ownership.
 
 ### Freeze only-weaker-fails semantics for lint levels
-- **Chose:** Set `RS-CARGO-02` so weaker-than-baseline levels are errors, while stricter-than-baseline settings are accepted silently.
+- **Chose:** Set `RS-CARGO-CONFIG-02` so weaker-than-baseline levels are errors, while stricter-than-baseline settings are accepted silently.
 - **Why:** This is the most robust satisfiable option: it prevents agents from weakening policy while not punishing tighter local hardening.
 - **Alternatives considered:**
   - Require exact canonical levels — rejected because it would produce unnecessary noise for benign tightening.
   - Warn on stronger-than-baseline levels — rejected because it comments on code that is not actually weakening policy.
 
 ### Split edition policy from rust-version / MSRV policy
-- **Chose:** Convert the old mixed `RS-CARGO-05` concept into:
-  - `RS-CARGO-05` for edition policy
+- **Chose:** Convert the old mixed `RS-CARGO-CONFIG-04` concept into:
+  - `RS-CARGO-CONFIG-04` for edition policy
   - `RS-CARGO-15` for `rust-version` / MSRV policy
 - **Why:** Edition and MSRV are related but distinct concerns. Splitting them keeps rule ownership crisp and makes both implementation and testing cleaner.
 - **Alternatives considered:**
   - Keep one combined metadata rule — rejected because it hides two separate policies behind one result surface.
 
 ### Require explicit workspace resolver
-- **Chose:** Make `RS-CARGO-08` require explicit `resolver = "2"` or `"3"` for every workspace root, with standalone packages out of scope.
+- **Chose:** Make `RS-CARGO-CONFIG-06` require explicit `resolver = "2"` or `"3"` for every workspace root, with standalone packages out of scope.
 - **Why:** Explicit resolver is easier to audit and harder for agents to bypass by relying on Cargo inference.
 - **Alternatives considered:**
   - Allow omission on modern non-virtual workspaces — rejected because it is technically acceptable but weaker policy and less explicit.
 
 ### Treat manifest-side escape hatches as hard failures
 - **Chose:** Freeze:
-  - `RS-CARGO-11` as `Error`
+  - `RS-CARGO-CONFIG-07` as `Error`
   - `RS-CARGO-12` as `Error`
 - **Why:** Missing `clippy::disallowed_macros = "deny"` makes macro bans toothless, and unapproved manifest-level `allow`s are exactly the kind of escape hatch guardrail3 exists to block.
 - **Alternatives considered:**
@@ -78,7 +78,7 @@ This means cargo still needs a more involved orchestrator rewrite than clippy/de
 ## Information Sources
 - `.plans/todo/checks/rs/cargo.md`
 - `apps/guardrail3/crates/app/rs/checks/rs/cargo/{mod.rs,discover.rs,facts.rs,inputs.rs}`
-- `apps/guardrail3/crates/app/rs/checks/rs/cargo/{rs_cargo_01_workspace_lints.rs,rs_cargo_04_lint_inheritance.rs,rs_cargo_05_workspace_metadata.rs,rs_cargo_08_resolver.rs}`
+- `apps/guardrail3/crates/app/rs/checks/rs/cargo/{rs_cargo_config_01_workspace_lints.rs,rs_cargo_04_lint_inheritance.rs,rs_cargo_config_04_workspace_metadata.rs,rs_cargo_config_06_resolver.rs}`
 - `apps/guardrail3/crates/app/rs/checks/rs/clippy/{mod.rs,facts.rs}`
 - `apps/guardrail3/crates/app/rs/checks/rs/deny/{mod.rs,facts.rs}`
 - `.worklogs/2026-03-24-082050-reconcile-rust-plan-contracts.md`
@@ -100,5 +100,5 @@ This means cargo still needs a more involved orchestrator rewrite than clippy/de
 ## Next Steps / Continuation Plan
 1. Do not hand `cargo` to a hardening agent yet unless the agent is explicitly tasked with orchestrator/discovery redesign, not just test hardening.
 2. When `cargo` work resumes, start with `discover.rs`, `facts.rs`, and `inputs.rs` so the family truly becomes multi-root and root-local.
-3. After the ownership rewrite, split the current mixed metadata implementation into `RS-CARGO-05` and `RS-CARGO-15`.
+3. After the ownership rewrite, split the current mixed metadata implementation into `RS-CARGO-CONFIG-04` and `RS-CARGO-15`.
 4. Then convert cargo rule tests from `*_tests.rs` to rule-specific `*_tests/` directories and harden them under the attack-vector model.

@@ -12,7 +12,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let actual = bans.get("wildcards").and_then(toml::Value::as_str);
     if actual.map(str::to_owned) != expected {
         results.push(CheckResult::from_parts(
-            "RS-DENY-13".to_owned(),
+            "RS-DENY-CONFIG-09".to_owned(),
             Severity::Warn,
             "wildcards differs from baseline".to_owned(),
             format!(

@@ -1,0 +1,1 @@
+crate::define_rule_assertions!("RS-GARDE-AST-08");

@@ -1,7 +1,7 @@
 # Add TODO Ledgers To Content-Check Packages
 
 **Date:** 2026-04-05 13:49
-**Scope:** `packages/g3-deny-content-checks/TODO.md`, `packages/g3-fmt-content-checks/TODO.md`, `packages/g3-toolchain-content-checks/TODO.md`
+**Scope:** `packages/g3rs-deny-config-checks/TODO.md`, `packages/g3rs-fmt-config-checks/TODO.md`, `packages/g3rs-toolchain-config-checks/TODO.md`
 
 ## Summary
 Added package-local `TODO.md` files to the existing content-check packages so known defects and boundary issues are recorded next to the packages they affect. This captures the deny extraction attack findings plus the current fmt/toolchain compile drift against parser API changes.
@@ -41,26 +41,26 @@ The TODO files reinforce the current extraction boundary:
 This was especially important for the deny findings, where malformed typed-parse rejection belongs to the app family rather than the content package itself.
 
 ## Information Sources
-- `packages/g3-deny-content-checks/`
-- `packages/g3-fmt-content-checks/`
-- `packages/g3-toolchain-content-checks/`
+- `packages/g3rs-deny-config-checks/`
+- `packages/g3rs-fmt-config-checks/`
+- `packages/g3rs-toolchain-config-checks/`
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/run.rs`
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/facts/mod.rs`
-- `cargo test --manifest-path packages/g3-deny-content-checks/Cargo.toml --workspace -- --list`
-- `cargo test --manifest-path packages/g3-fmt-content-checks/Cargo.toml --workspace -- --list`
-- `cargo test --manifest-path packages/g3-toolchain-content-checks/Cargo.toml --workspace -- --list`
+- `cargo test --manifest-path packages/g3rs-deny-config-checks/Cargo.toml --workspace -- --list`
+- `cargo test --manifest-path packages/g3rs-fmt-config-checks/Cargo.toml --workspace -- --list`
+- `cargo test --manifest-path packages/g3rs-toolchain-config-checks/Cargo.toml --workspace -- --list`
 
 ## Open Questions / Future Considerations
 - Whether deny malformed-schema expectations should be reintroduced as dedicated structural rule IDs or attached to existing structural deny reporting.
 - Whether all future content-check packages should require a `TODO.md` from initial scaffold time rather than adding them later.
 
 ## Key Files for Context
-- `packages/g3-deny-content-checks/TODO.md` — deny package-local follow-up items from the extraction attack.
-- `packages/g3-fmt-content-checks/TODO.md` — fmt compile drift and boundary reminders.
-- `packages/g3-toolchain-content-checks/TODO.md` — toolchain compile drift and boundary reminders.
+- `packages/g3rs-deny-config-checks/TODO.md` — deny package-local follow-up items from the extraction attack.
+- `packages/g3rs-fmt-config-checks/TODO.md` — fmt compile drift and boundary reminders.
+- `packages/g3rs-toolchain-config-checks/TODO.md` — toolchain compile drift and boundary reminders.
 - `.worklogs/2026-04-05-131948-g3-rename-and-deny-content-checks.md` — prior extraction worklog that provides deny package background.
 
 ## Next Steps / Continuation Plan
-1. Fix the `cargo-toml-parser` API drift in `g3-fmt-content-checks` and `g3-toolchain-content-checks`, then rerun their package and app-family tests.
-2. Add structural deny findings for typed parser/schema rejection in the app deny family before calling `g3-deny-content-checks`.
-3. Add direct package tests to `g3-deny-content-checks` so migrated rule behavior is exercised inside the package itself.
+1. Fix the `cargo-toml-parser` API drift in `g3rs-fmt-config-checks` and `g3rs-toolchain-config-checks`, then rerun their package and app-family tests.
+2. Add structural deny findings for typed parser/schema rejection in the app deny family before calling `g3rs-deny-config-checks`.
+3. Add direct package tests to `g3rs-deny-config-checks` so migrated rule behavior is exercised inside the package itself.

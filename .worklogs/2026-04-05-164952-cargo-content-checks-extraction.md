@@ -1,10 +1,10 @@
 # Cargo Content Checks Extraction
 
 **Date:** 2026-04-05 16:49
-**Scope:** `packages/g3-cargo-content-checks`, `apps/guardrail3/crates/app/rs/families/cargo`, `apps/guardrail3/Cargo.lock`, `.plans/2026-04-04-142819-family-checks-packages.md`
+**Scope:** `packages/g3rs-cargo-config-checks`, `apps/guardrail3/crates/app/rs/families/cargo`, `apps/guardrail3/Cargo.lock`, `.plans/2026-04-04-142819-family-checks-packages.md`
 
 ## Summary
-Extracted the first single-file cargo content rules into `g3-cargo-content-checks`, rewired the app cargo family to call the package for those moved rules, and cleaned the app tree so the old root-rule implementations no longer remain live. The cargo family now follows the same boundary used in the other extracted families: structural parse failures stay in the app and typed content checks only run on parsed files.
+Extracted the first single-file cargo content rules into `g3rs-cargo-config-checks`, rewired the app cargo family to call the package for those moved rules, and cleaned the app tree so the old root-rule implementations no longer remain live. The cargo family now follows the same boundary used in the other extracted families: structural parse failures stay in the app and typed content checks only run on parsed files.
 
 ## Context & Problem
 The cargo content-check package had drifted into the wrong architecture. Instead of taking a parsed `Cargo.toml` file, it had started accumulating invented policy/profile/waiver subset types and workspace-level bag inputs. That broke the extraction goal for these packages, which is to validate file content only and leave routing, policy interpretation, and parse failure handling in the app family orchestrator.
@@ -14,7 +14,7 @@ The user explicitly called out that the package boundary must be parsed files on
 ## Decisions Made
 
 ### Rebuilt the cargo package around a single-file contract
-- **Chose:** `G3CargoContentChecksInput { cargo_rel_path, cargo }` as the only public input.
+- **Chose:** `G3RsCargoConfigChecksInput { cargo_rel_path, cargo }` as the only public input.
 - **Why:** Cargo content checks should operate on one parsed `Cargo.toml` at a time. The file itself already tells the package whether it is a workspace root, package root, or both.
 - **Alternatives considered:**
   - Workspace root + member manifest bag input — rejected because it turns the package into an orchestrator.
@@ -22,7 +22,7 @@ The user explicitly called out that the package boundary must be parsed files on
   - Policy profile / waiver subset structs — rejected because they partialize external files instead of passing parsed files.
 
 ### Moved only single-file cargo rules into the package
-- **Chose:** move `RS-CARGO-01`, `02`, `05`, `07`, `08`, and `11`.
+- **Chose:** move `RS-CARGO-CONFIG-01`, `02`, `05`, `07`, `08`, and `11`.
 - **Why:** These are content checks on one `Cargo.toml` file and do not need workspace/member pairing or external policy files.
 - **Alternatives considered:**
   - Moving `RS-CARGO-04` too — rejected because it needs workspace/member relationship context and is not a pure single-file content check.
@@ -55,8 +55,8 @@ For cargo specifically, the package determines how to treat the file by inspecti
 ## Information Sources
 - `AGENTS.md` — repo worklog requirements and current family extraction direction
 - `.plans/2026-04-04-142819-family-checks-packages.md` — extraction ledger updated for cargo
-- `packages/g3-fmt-content-checks` — specimen for extracted content-check package shape
-- `packages/g3-clippy-content-checks` — specimen for package/app bridge plus structural parse ownership
+- `packages/g3rs-fmt-config-checks` — specimen for extracted content-check package shape
+- `packages/g3rs-clippy-config-checks` — specimen for package/app bridge plus structural parse ownership
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/*` — existing cargo family behavior and tests
 - `.worklogs/2026-04-05-145142-clippy-extraction-and-parser-contract-fixes.md` — prior extraction boundary decisions
 
@@ -66,9 +66,9 @@ For cargo specifically, the package determines how to treat the file by inspecti
 - The remaining dirty tree includes a large deny-package refactor/test migration that should be audited separately before any commit.
 
 ## Key Files for Context
-- `packages/g3-cargo-content-checks/crates/types/src/lib.rs` — package input contract
-- `packages/g3-cargo-content-checks/crates/runtime/src/run.rs` — package entrypoint and moved rule orchestration
-- `packages/g3-cargo-content-checks/crates/runtime/src/support.rs` — shared cargo-content helpers
+- `packages/g3rs-cargo-config-checks/crates/types/src/lib.rs` — package input contract
+- `packages/g3rs-cargo-config-checks/crates/runtime/src/run.rs` — package entrypoint and moved rule orchestration
+- `packages/g3rs-cargo-config-checks/crates/runtime/src/support.rs` — shared cargo-content helpers
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/run.rs` — app/package bridge for moved cargo rules
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/discover.rs` — root parse failure ownership and typed parse gating
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/member_policy/rs_cargo_14_input_failures/tests/family_bridge.rs` — app-layer bridge smoke tests for moved rules
@@ -76,6 +76,6 @@ For cargo specifically, the package determines how to treat the file by inspecti
 - `.worklogs/2026-04-05-145142-clippy-extraction-and-parser-contract-fixes.md` — prior extracted-family boundary precedent
 
 ## Next Steps / Continuation Plan
-1. Audit the remaining dirty tree outside the cargo family, starting with `packages/g3-deny-content-checks`, to determine whether the current deny refactor is coherent enough to commit or still needs structural fixes.
+1. Audit the remaining dirty tree outside the cargo family, starting with `packages/g3rs-deny-config-checks`, to determine whether the current deny refactor is coherent enough to commit or still needs structural fixes.
 2. If the deny work is sound, create a separate worklog and commit it independently from cargo; do not mix family extractions.
 3. If the deny work is not sound, leave it uncommitted and produce a concrete fix list describing which package/runtime/test surfaces still violate the extracted-family architecture.

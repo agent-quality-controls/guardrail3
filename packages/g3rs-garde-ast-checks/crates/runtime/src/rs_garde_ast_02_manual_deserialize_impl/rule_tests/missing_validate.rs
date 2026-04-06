@@ -1,0 +1,24 @@
+use g3rs_garde_ast_checks_assertions::rs_garde_ast_02_manual_deserialize_impl as assertions;
+
+#[test]
+fn errors_on_manual_deserialize_without_validate() {
+    let fixture = crate::test_support::fixture(
+        &[(
+            "src/input.rs",
+            "use serde::Deserialize;\n\nstruct Input {\n    name: String,\n}\n\nimpl<'de> Deserialize<'de> for Input {\n    fn deserialize<D>(_deserializer: D) -> Result<Self, D::Error>\n    where\n        D: serde::Deserializer<'de>,\n    {\n        todo!()\n    }\n}\n",
+        )],
+        crate::test_support::default_guardrail_toml(),
+    );
+
+    let results = fixture.run();
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Error),
+            file: Some("src/input.rs"),
+            title: Some("manual Deserialize impl for `Input` without Validate"),
+            message_contains: Some("bypasses derive-based garde checks"),
+            ..Default::default()
+        }],
+    );
+}

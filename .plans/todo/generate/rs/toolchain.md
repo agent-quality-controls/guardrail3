@@ -35,11 +35,11 @@ It must never generate:
 
 The generated result must satisfy:
 - `RS-TOOLCHAIN-01`
-- `RS-TOOLCHAIN-02`
+- `RS-TOOLCHAIN-CONFIG-01`
 - `RS-TOOLCHAIN-04`
 
 It also participates in:
-- `RS-TOOLCHAIN-03`
+- `RS-TOOLCHAIN-CONFIG-02`
 
 ## Parity contract
 

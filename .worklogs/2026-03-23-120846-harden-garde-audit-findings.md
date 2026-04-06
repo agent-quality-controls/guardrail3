@@ -1,14 +1,14 @@
 # Harden Garde Audit Findings
 
 **Date:** 2026-03-23 12:08
-**Scope:** `apps/guardrail3/crates/app/rs/checks/rs/garde/discover.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/facts.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/parse.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_01_dependency_present_tests.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_07_manual_deserialize_impl_tests.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_09_query_as_inventory_tests.rs`
+**Scope:** `apps/guardrail3/crates/app/rs/checks/rs/garde/discover.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/facts.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/parse.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_config_01_dependency_present_tests.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_ast_02_manual_deserialize_impl_tests.rs`, `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_ast_04_query_as_inventory_tests.rs`
 
 ## Summary
-Ran an adversarial hardening pass over the newly added `rs/garde` family and fixed the first real semantic hole it exposed: `RS-GARDE-07` missed generic-form `Deserialize<'de>` impls. The pass also tightened alias handling, reduced same-file name-collision risk for manual impl resolution, narrowed the test-path skip heuristic, and added family-path tests for previously under-defended branches.
+Ran an adversarial hardening pass over the newly added `rs/garde` family and fixed the first real semantic hole it exposed: `RS-GARDE-AST-02` missed generic-form `Deserialize<'de>` impls. The pass also tightened alias handling, reduced same-file name-collision risk for manual impl resolution, narrowed the test-path skip heuristic, and added family-path tests for previously under-defended branches.
 
 ## Context & Problem
 Immediately after landing the new `rs/garde` family, an adversarial review surfaced that the breadth-first implementation was structurally correct but still had real semantic blind spots:
-- `RS-GARDE-07` could miss manual `Deserialize<'de>` impls because the trait matcher compared rendered token text too literally.
+- `RS-GARDE-AST-02` could miss manual `Deserialize<'de>` impls because the trait matcher compared rendered token text too literally.
 - Alias forms like `use serde::Deserialize as De` and `use sqlx::query_as as qa` were not covered.
 - Same-file module/type name collisions could cause manual impl resolution to match the wrong local type.
 - The family’s test-path heuristic was broad enough to let production-ish paths like `src/tests.rs` evade source analysis.
@@ -18,7 +18,7 @@ The user explicitly wants the guardrails to fail hard and to keep hardening what
 ## Decisions Made
 
 ### Make manual impl matching alias-aware and generic-safe
-- **Chose:** Switch `RS-GARDE-07` trait detection from rendered path-string comparison to last-segment ident matching, and add alias collection from `use` trees for `Deserialize` / `Validate`.
+- **Chose:** Switch `RS-GARDE-AST-02` trait detection from rendered path-string comparison to last-segment ident matching, and add alias collection from `use` trees for `Deserialize` / `Validate`.
 - **Why:** The rendered-path approach missed `Deserialize<'de>` and aliased imports. The family-path test immediately proved that gap was real.
 - **Alternatives considered:**
   - Keep the rendered-token comparison and just special-case `<...>` stripping — rejected because alias forms would still bypass it.
@@ -72,9 +72,9 @@ This keeps the family within the current architecture instead of reaching for a 
 - `apps/guardrail3/crates/app/rs/checks/rs/garde/parse.rs` — source-analysis logic that needed hardening
 - `apps/guardrail3/crates/app/rs/checks/rs/garde/facts.rs` — manual impl target resolution
 - `apps/guardrail3/crates/app/rs/checks/rs/garde/discover.rs` — test-path filtering
-- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_01_dependency_present_tests.rs`
-- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_07_manual_deserialize_impl_tests.rs`
-- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_09_query_as_inventory_tests.rs`
+- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_config_01_dependency_present_tests.rs`
+- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_ast_02_manual_deserialize_impl_tests.rs`
+- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_ast_04_query_as_inventory_tests.rs`
 - `.worklogs/2026-03-23-120029-complete-garde-family.md` — initial garde family implementation
 - Explorer findings from the adversarial pass, especially the bypass analysis around aliasing and same-file collisions
 
@@ -89,8 +89,8 @@ This keeps the family within the current architecture instead of reaching for a 
 - `apps/guardrail3/crates/app/rs/checks/rs/garde/parse.rs` — garde source-analysis logic
 - `apps/guardrail3/crates/app/rs/checks/rs/garde/facts.rs` — garde root and source fact collection
 - `apps/guardrail3/crates/app/rs/checks/rs/garde/discover.rs` — source file discovery / skip heuristic
-- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_07_manual_deserialize_impl.rs` — rule affected by the main semantic bug
-- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_09_query_as_inventory.rs` — alias-aware macro inventory surface
+- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_ast_02_manual_deserialize_impl.rs` — rule affected by the main semantic bug
+- `apps/guardrail3/crates/app/rs/checks/rs/garde/rs_garde_ast_04_query_as_inventory.rs` — alias-aware macro inventory surface
 - `.worklogs/2026-03-23-120029-complete-garde-family.md` — prior garde implementation checkpoint
 
 ## Next Steps / Continuation Plan

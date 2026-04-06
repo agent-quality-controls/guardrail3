@@ -61,7 +61,7 @@ Current migrated structural coverage:
 
 | Old ID | What | New location | Why |
 |--------|------|-------------|-----|
-| RS-TOPOLOGY-05 (R55) | Workspace edition + rust-version metadata | RS-CARGO-05 | Workspace metadata, not hex topology |
+| RS-TOPOLOGY-05 (R55) | Workspace edition + rust-version metadata | RS-CARGO-CONFIG-04 | Workspace metadata, not hex topology |
 | RS-TOPOLOGY-06 (R56) | Publish status inventory | RS-RELEASE-09 | Release concern, not hex topology |
 | RS-TOPOLOGY-07 (R57) | Release profile settings inventory | RS-RELEASE-10 | Release concern, not hex topology |
 | RS-TOPOLOGY-08 (R58) | Direct std::fs usage | RS-CODE-15 | Code scan, not hex topology |

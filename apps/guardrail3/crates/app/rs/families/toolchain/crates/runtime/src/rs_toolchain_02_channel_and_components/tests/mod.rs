@@ -1,5 +1,5 @@
 mod helpers;
-use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_02_channel_and_components::{
+use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_config_01_channel_and_components::{
     ExpectedRuleResult, Severity, assert_rule_results,
 };
 

@@ -1,10 +1,10 @@
 # Wire Deps Content Checks
 
 **Date:** 2026-04-05 20:07
-**Scope:** `packages/g3-deps-content-checks`, `apps/guardrail3/crates/app/rs/families/deps`, `.plans/2026-04-04-142819-family-checks-packages.md`
+**Scope:** `packages/g3rs-deps-config-checks`, `apps/guardrail3/crates/app/rs/families/deps`, `.plans/2026-04-04-142819-family-checks-packages.md`
 
 ## Summary
-Wired `g3-deps-content-checks` into the app `deps` family for `RS-DEPS-05`, `06`, `07`, `08`, and `12`. The package boundary was corrected to the repo’s actual current policy surface, using parsed workspace `Cargo.toml`, crate `Cargo.toml`, and legacy workspace `guardrail3.toml`, and the app now owns malformed-input signaling without duplicating `RS-DEPS-11`.
+Wired `g3rs-deps-config-checks` into the app `deps` family for `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12`. The package boundary was corrected to the repo’s actual current policy surface, using parsed workspace `Cargo.toml`, crate `Cargo.toml`, and legacy workspace `guardrail3.toml`, and the app now owns malformed-input signaling without duplicating `RS-DEPS-11`.
 
 ## Context & Problem
 The extracted deps package had been built but not wired into the app family. The initial package draft also drifted from repo reality in two important ways:
@@ -38,7 +38,7 @@ When the bridge work started, the first compile failures were stale test helpers
   - Store a borrowed config in facts — rejected because the facts model is owned, cloneable runtime data.
 
 ### Remove dead app-side surfaces for moved deps rules
-- **Chose:** delete the old app runtime rule directories and assertion modules for `RS-DEPS-05`, `06`, `07`, `08`, and `12`.
+- **Chose:** delete the old app runtime rule directories and assertion modules for `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12`.
 - **Why:** once the app family routes those rules through the package, leaving old rule files around creates false ownership and future confusion.
 - **Alternatives considered:**
   - Keep the old files as dormant historical references — rejected because this repo has already cleaned that pattern out in other extracted families.
@@ -58,16 +58,16 @@ deps app family
   -> validates legacy guardrail3.toml + dependency-table shape
   -> emits RS-DEPS-11 for malformed inputs
   -> constructs parsed workspace/crate Cargo.toml + guardrail3.toml package sites
-  -> calls g3-deps-content-checks
+  -> calls g3rs-deps-config-checks
   -> keeps RS-DEPS-01..04 and RS-DEPS-09..11 in-app
 ```
 
 The package owns:
-- `RS-DEPS-05`
-- `RS-DEPS-06`
-- `RS-DEPS-07`
-- `RS-DEPS-08`
-- `RS-DEPS-12`
+- `RS-DEPS-CONFIG-01`
+- `RS-DEPS-CONFIG-02`
+- `RS-DEPS-CONFIG-03`
+- `RS-DEPS-CONFIG-04`
+- `RS-DEPS-CONFIG-05`
 
 The app keeps:
 - `RS-DEPS-01`
@@ -87,19 +87,19 @@ The package boundary is still wider than ideal from a local code-style point of 
 - `.worklogs/2026-04-05-193452-restore-sidecar-rule-tests.md`
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/facts/guardrail.rs`
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/facts/dependency_entries.rs`
-- `packages/g3-deps-content-checks/crates/runtime/src/support.rs`
-- `cargo test --workspace --manifest-path packages/g3-deps-content-checks/Cargo.toml`
+- `packages/g3rs-deps-config-checks/crates/runtime/src/support.rs`
+- `cargo test --workspace --manifest-path packages/g3rs-deps-config-checks/Cargo.toml`
 - `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-deps --lib`
 - `cargo run --quiet --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 -- rs validate <temp repo> --family deps --format json`
 
 ## Open Questions / Future Considerations
-- `g3-deps-content-checks` still has the known skipped local package-rule debt around input width and local complexity.
+- `g3rs-deps-config-checks` still has the known skipped local package-rule debt around input width and local complexity.
 - The package still uses current legacy `guardrail3.toml`. If deps policy later migrates to `guardrail3-rs.toml`, this bridge will need another contract change.
 - There is still an exactness gap for some local path dependencies without explicit `package = "..."` naming if we ever want to match package identity more strictly than the current logic.
 
 ## Key Files for Context
-- `packages/g3-deps-content-checks/crates/types/src/input.rs` — actual deps package input contracts after the bridge correction
-- `packages/g3-deps-content-checks/crates/runtime/src/support.rs` — dependency identity and allowlist logic used by moved rules
+- `packages/g3rs-deps-config-checks/crates/types/src/input.rs` — actual deps package input contracts after the bridge correction
+- `packages/g3rs-deps-config-checks/crates/runtime/src/support.rs` — dependency identity and allowlist logic used by moved rules
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/run.rs` — app/package bridge and `G3CheckResult -> CheckResult` conversion
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/facts/dependency_entries.rs` — package-site collection and structural-failure ownership boundary
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/facts/guardrail.rs` — legacy guardrail parsing and deps-specific shape validation
@@ -111,5 +111,5 @@ The package boundary is still wider than ideal from a local code-style point of 
 ## Next Steps / Continuation Plan
 1. Run an adversarial test-attack over the wired deps family, focusing on: duplicate structural failures, package/app rule overlap, moved-rule bridge behavior, and malformed-input ownership.
 2. If the attack finds no must-fix bugs, keep the deps family in the extracted set and move on to the next package in the sequence.
-3. If parity concerns remain around local path dependency identity, add targeted package tests in `packages/g3-deps-content-checks/crates/runtime/src/.../rule_tests/`.
+3. If parity concerns remain around local path dependency identity, add targeted package tests in `packages/g3rs-deps-config-checks/crates/runtime/src/.../rule_tests/`.
 4. Only revisit the skipped package-local architecture debt after the extraction track is stable across all current families.

@@ -7,7 +7,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
     let Some(advisories) = section(config, "advisories") else {
         results.push(CheckResult::from_parts(
-            "RS-DENY-05".to_owned(),
+            "RS-DENY-CONFIG-02".to_owned(),
             Severity::Error,
             "[advisories] section missing".to_owned(),
             format!("`{}` has no `[advisories]` section.", config.rel_path),
@@ -45,7 +45,7 @@ fn check_value(
     match actual {
         Some(value) if value == expected => {}
         Some(value) => results.push(CheckResult::from_parts(
-            "RS-DENY-05".to_owned(),
+            "RS-DENY-CONFIG-02".to_owned(),
             Severity::Error,
             format!("advisories `{key}` has wrong value"),
             format!(
@@ -57,7 +57,7 @@ fn check_value(
             false,
         )),
         None => results.push(CheckResult::from_parts(
-            "RS-DENY-05".to_owned(),
+            "RS-DENY-CONFIG-02".to_owned(),
             Severity::Error,
             format!("advisories `{key}` missing"),
             format!(

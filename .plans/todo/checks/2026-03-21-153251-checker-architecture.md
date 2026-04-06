@@ -387,11 +387,11 @@ checks/rs/fmt/
 ├── facts.rs
 ├── inputs.rs
 ├── rs_fmt_01_exists.rs
-├── rs_fmt_02_settings.rs
-├── rs_fmt_03_extra_settings.rs
+├── rs_fmt_config_01_settings.rs
+├── rs_fmt_config_02_extra_settings.rs
 ├── rs_fmt_04_nightly_on_stable.rs
 ├── rs_fmt_05_per_crate_override.rs
-├── rs_fmt_06_edition_mismatch.rs
+├── rs_fmt_config_04_edition_mismatch.rs
 ├── rs_fmt_07_ignore_escape_hatch.rs
 └── rs_fmt_08_dual_file_conflict.rs
 ```
@@ -471,14 +471,14 @@ checks/rs/cargo/
 ├── facts.rs
 ├── inputs.rs
 ├── discover.rs
-├── rs_cargo_01_workspace_lints.rs
-├── rs_cargo_02_lint_levels.rs
+├── rs_cargo_config_01_workspace_lints.rs
+├── rs_cargo_config_02_lint_levels.rs
 ├── rs_cargo_03_allow_inventory.rs
 ├── rs_cargo_04_lint_inheritance.rs
-├── rs_cargo_05_workspace_metadata.rs
+├── rs_cargo_config_04_workspace_metadata.rs
 ├── rs_cargo_06_no_weakened_overrides.rs
-├── rs_cargo_07_priority_order.rs
-├── rs_cargo_08_resolver.rs
+├── rs_cargo_config_05_priority_order.rs
+├── rs_cargo_config_06_resolver.rs
 └── rs_cargo_09_member_edition_drift.rs
 ```
 
@@ -531,7 +531,7 @@ pub struct WorkspaceMembersSetInput<'a> {
 
 ### Fan-out strategy
 
-- `RS-CARGO-01`, `02`, `03`, `05`, `08` run once on `WorkspaceCargoInput`
+- `RS-CARGO-CONFIG-01`, `02`, `03`, `05`, `08` run once on `WorkspaceCargoInput`
 - `RS-CARGO-04`, `06`, `09` run once per `WorkspaceMemberInput`
 - any rule that compares membership sets runs once on `WorkspaceMembersSetInput`
 

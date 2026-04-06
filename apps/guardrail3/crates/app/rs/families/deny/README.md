@@ -107,8 +107,8 @@ The family-level test suite is currently green from the app workspace:
 
 Recent hardening that is now part of the real contract:
 
-- `RS-DENY-19` is intentionally strict: `[sources].allow-registry` must contain exactly one canonical crates.io entry, `sparse+https://index.crates.io/`
-- `RS-DENY-28` now warns on unsupported schema in critical deny sections instead of silently skipping wrong-type containers
+- `RS-DENY-CONFIG-14` is intentionally strict: `[sources].allow-registry` must contain exactly one canonical crates.io entry, `sparse+https://index.crates.io/`
+- `RS-DENY-CONFIG-21` now warns on unsupported schema in critical deny sections instead of silently skipping wrong-type containers
 
 So `deny` is no longer missing its rule corpus or family structure. The remaining work is semantic hardening and fail-closed cleanup, not basic migration.
 
@@ -130,8 +130,8 @@ Resolved recent drift:
 - malformed `guardrail3.toml` no longer fails open for deny profile selection
   - deny now emits an explicit `guardrail3.toml` policy-context error instead of silently degrading profile-sensitive rules to service defaults
   - profile-sensitive rules (`RS-DENY-09`, `RS-DENY-25`, `RS-DENY-30`) now stand down when deny cannot trust the active profile context
-- the old `RS-DENY-19` plan/code mismatch is gone; the plan now matches the stricter runtime behavior
-- the old `RS-DENY-28` unsupported-schema gap is closed for critical section/container shapes
+- the old `RS-DENY-CONFIG-14` plan/code mismatch is gone; the plan now matches the stricter runtime behavior
+- the old `RS-DENY-CONFIG-21` unsupported-schema gap is closed for critical section/container shapes
 
 ## Next Work
 

@@ -70,8 +70,8 @@ The practical effect is that `RS-CODE` is no longer dominated by path-comment de
 ## Key Files for Context
 - `apps/guardrail3/crates/app/core/project_walker_tests.rs` — representative upgrade from placeholder fixture messages to precise setup diagnostics.
 - `apps/guardrail3/crates/app/core/project_walker_lossless_tests.rs` — lossless golden tests with previously-weak `strip` / `ft` messages.
-- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/rs_garde_08_enum_derive_validate_tests/false_positives.rs` — representative high-count `RS-CODE-32` target.
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_01_workspace_lints_tests/mod.rs` — representative `cases.rs` `#[path]` justification pattern.
+- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/rs_garde_ast_03_enum_derive_validate_tests/false_positives.rs` — representative high-count `RS-CODE-32` target.
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_01_workspace_lints_tests/mod.rs` — representative `cases.rs` `#[path]` justification pattern.
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_16_avoid_breaking_exported_api_tests/mod.rs` — representative test-matrix `#[path]` justification pattern.
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/rs_deny_09_ban_baseline_complete_tests/mod.rs` — representative deny-family `#[path]` justification pattern.
 - `.worklogs/2026-03-29-220421-continue-rs-code-allow-removal.md` — immediately previous `RS-CODE-04` reduction slice that this checkpoint builds on.

@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_28_unknown_keys as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_config_21_unknown_keys as assertions;
 
 use super::helpers::{
     add_skip_entry, build_fixture_deny_toml, set_advisory_ignores, set_feature_entries,

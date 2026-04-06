@@ -2,7 +2,7 @@
 
 ## Package
 
-- `packages/g3-deny-content-checks`
+- `packages/g3rs-deny-config-checks`
 
 This package owns only typed `deny.toml` content validation. It does not own
 file discovery, root selection, profile resolution, coverage, or same-root
@@ -14,12 +14,12 @@ conflict analysis.
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-pub struct G3DenyContentChecksInput {
+pub struct G3RsDenyConfigChecksInput {
     pub deny_rel_path: String,
     pub deny: DenyToml,
 }
 
-pub fn check(input: &G3DenyContentChecksInput) -> Vec<G3CheckResult>;
+pub fn check(input: &G3RsDenyConfigChecksInput) -> Vec<G3CheckResult>;
 ```
 
 ## App / Package Split
@@ -34,28 +34,28 @@ pub fn check(input: &G3DenyContentChecksInput) -> Vec<G3CheckResult>;
 
 ### Moves into package
 
-- `RS-DENY-04`
-- `RS-DENY-05`
-- `RS-DENY-06`
-- `RS-DENY-07`
-- `RS-DENY-08`
-- `RS-DENY-10`
-- `RS-DENY-11`
-- `RS-DENY-12`
-- `RS-DENY-13`
-- `RS-DENY-14`
-- `RS-DENY-15`
-- `RS-DENY-16`
-- `RS-DENY-18`
-- `RS-DENY-19`
-- `RS-DENY-20`
-- `RS-DENY-21`
-- `RS-DENY-22`
-- `RS-DENY-23`
-- `RS-DENY-24`
-- `RS-DENY-27`
-- `RS-DENY-28`
-- `RS-DENY-29`
+- `RS-DENY-CONFIG-01`
+- `RS-DENY-CONFIG-02`
+- `RS-DENY-CONFIG-03`
+- `RS-DENY-CONFIG-04`
+- `RS-DENY-CONFIG-05`
+- `RS-DENY-CONFIG-07`
+- `RS-DENY-CONFIG-08`
+- `RS-DENY-CONFIG-09`
+- `RS-DENY-CONFIG-10`
+- `RS-DENY-CONFIG-11`
+- `RS-DENY-CONFIG-12`
+- `RS-DENY-CONFIG-13`
+- `RS-DENY-CONFIG-15`
+- `RS-DENY-CONFIG-16`
+- `RS-DENY-CONFIG-17`
+- `RS-DENY-CONFIG-18`
+- `RS-DENY-CONFIG-19`
+- `RS-DENY-CONFIG-20`
+- `RS-DENY-CONFIG-21`
+- `RS-DENY-CONFIG-24`
+- `RS-DENY-CONFIG-25`
+- `RS-DENY-CONFIG-26`
 
 ### Deferred for parser / policy-context reasons
 
@@ -73,7 +73,7 @@ exception policy handling with the app-owned rules.
 ## Internal Layout
 
 ```text
-packages/g3-deny-content-checks/
+packages/g3rs-deny-config-checks/
   Cargo.toml
   README.md
   src/
@@ -107,25 +107,25 @@ packages/g3-deny-content-checks/
 
 ## Rule Organization
 
-- `advisories/` owns `RS-DENY-04..08`
-- `bans/` owns `RS-DENY-10..13`, `21`, `22`, `27`
-- `licenses/` owns `RS-DENY-14..16`
-- `sources/` owns `RS-DENY-18..20`, `23`, `24`, `28`, `29`
+- `advisories/` owns `RS-DENY-CONFIG-01..08`
+- `bans/` owns `RS-DENY-CONFIG-07..13`, `21`, `22`, `27`
+- `licenses/` owns `RS-DENY-CONFIG-11..16`
+- `sources/` owns `RS-DENY-CONFIG-15..20`, `23`, `24`, `28`, `29`
 
-The runtime `check(&G3DenyContentChecksInput)` entrypoint fans out into these
+The runtime `check(&G3RsDenyConfigChecksInput)` entrypoint fans out into these
 areas. Internal rule functions should take direct params, not extra typed
 wrapper structs.
 
 ## Parser Dependency
 
-`g3-deny-content-checks` depends on `deny-toml-parser` only. The package
+`g3rs-deny-config-checks` depends on `deny-toml-parser` only. The package
 receives an already parsed `DenyToml` from the app orchestrator.
 
 ## Current Status
 
 Completed:
-1. `g3-deny-content-checks` is scaffolded and compiles.
-2. The package owns `RS-DENY-04`, `05`, `06`, `07`, `08`, `10`, `11`, `12`,
+1. `g3rs-deny-config-checks` is scaffolded and compiles.
+2. The package owns `RS-DENY-CONFIG-01`, `05`, `06`, `07`, `08`, `10`, `11`, `12`,
    `13`, `14`, `15`, `16`, `18`, `19`, `20`, `21`, `22`, `23`, `24`, `27`,
    `28`, and `29`.
 3. The app deny family delegates those rules to the package and keeps

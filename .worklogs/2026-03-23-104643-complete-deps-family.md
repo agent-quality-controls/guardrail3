@@ -25,7 +25,7 @@ The immediate goal was breadth-first completion of the remaining Rust families w
   - Fold lockfile policy into `deny` or `release` — rejected because `RS-DEPS` is the family that owns dependency-policy preconditions and external tooling expectations.
 
 ### Keep Allowlist Enforcement Silent When No Allowlist Exists
-- **Chose:** `RS-DEPS-05..07` now run only when a crate actually has an `allowed_deps` policy; missing allowlists are handled separately by `RS-DEPS-08` for library-profile crates.
+- **Chose:** `RS-DEPS-CONFIG-01..07` now run only when a crate actually has an `allowed_deps` policy; missing allowlists are handled separately by `RS-DEPS-CONFIG-04` for library-profile crates.
 - **Why:** An adversarial audit caught that the first pass treated `allowed_deps = None` as “all dependencies unauthorized,” which flooded service/binary crates with false findings and was stricter than the plan.
 - **Alternatives considered:**
   - Treat missing allowlists as “empty allowlist” for every crate — rejected because it makes the family unusably noisy and contradicts the plan’s separate library-only coverage warning.
@@ -33,7 +33,7 @@ The immediate goal was breadth-first completion of the remaining Rust families w
 
 ### Treat Hybrid `[workspace]` + `[package]` Roots As Real Dependency Roots
 - **Chose:** Included hybrid root crates in dependency discovery and coverage.
-- **Why:** The first pass only included standalone packages when they were not also workspaces, which silently skipped a common monorepo shape and failed open for `RS-DEPS-05..08`.
+- **Why:** The first pass only included standalone packages when they were not also workspaces, which silently skipped a common monorepo shape and failed open for `RS-DEPS-CONFIG-01..08`.
 - **Alternatives considered:**
   - Keep hybrid roots excluded and rely on workspace members only — rejected because root dependencies and root allowlist coverage would never be checked.
   - Model root hybrid crates as a separate special-case family — rejected because this is a normal `rs/deps` discovery concern, not a new family boundary.

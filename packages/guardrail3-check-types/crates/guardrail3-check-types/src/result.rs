@@ -6,7 +6,7 @@ use crate::G3Severity;
 /// collects results from all packages and renders the report.
 #[derive(Debug, Clone)]
 pub struct G3CheckResult {
-    /// Rule identifier (e.g., "RS-CLIPPY-02").
+    /// Rule identifier (e.g., "RS-CLIPPY-CONFIG-01").
     id: String,
     /// How severe this finding is.
     severity: G3Severity,

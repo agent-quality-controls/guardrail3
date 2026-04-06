@@ -1,13 +1,13 @@
-# Scaffold g3-cargo-content-checks
+# Scaffold g3rs-cargo-config-checks
 
 **Date:** 2026-04-05 15:24
-**Scope:** `packages/g3-cargo-content-checks/`, `.plans/2026-04-04-142819-family-checks-packages.md`
+**Scope:** `packages/g3rs-cargo-config-checks/`, `.plans/2026-04-04-142819-family-checks-packages.md`
 
 ## Summary
-Scaffolded the new `g3-cargo-content-checks` package in the same facade/runtime/assertions/types shape as the existing extracted checks packages, but intentionally stopped at the package boundary and input contract. The package currently has a stub runtime and no app wiring; the main deliverable is the locked split between cargo content rules and app-owned structural routing.
+Scaffolded the new `g3rs-cargo-config-checks` package in the same facade/runtime/assertions/types shape as the existing extracted checks packages, but intentionally stopped at the package boundary and input contract. The package currently has a stub runtime and no app wiring; the main deliverable is the locked split between cargo content rules and app-owned structural routing.
 
 ## Context & Problem
-The user asked for the next extracted family package to be `g3-cargo-content-checks`, with the same discipline already established for `fmt` and the emerging `clippy` split:
+The user asked for the next extracted family package to be `g3rs-cargo-config-checks`, with the same discipline already established for `fmt` and the emerging `clippy` split:
 
 - package owns parsed-file content validation only
 - app owns discovery, coverage, and parse-failure routing
@@ -25,8 +25,8 @@ Before extracting rule code, the package needed a stable contract saying what be
 
 ### Split Cargo Rules Into Content vs Structural Ownership
 - **Chose:** Keep these in the package:
-  - `RS-CARGO-01..09`
-  - `RS-CARGO-11..13`
+  - `RS-CARGO-CONFIG-01..09`
+  - `RS-CARGO-CONFIG-07..13`
   - `RS-CARGO-15`
 - **Why:** These rules are fundamentally about the semantics of parsed Cargo manifests plus small normalized policy inputs such as profile/waiver context.
 - **Alternatives considered:**
@@ -79,7 +79,7 @@ That matches the project’s direction that extracted family packages should acc
 - `AGENTS.md` — current repo rules, worklog discipline, and Rust-only direction
 - `.plans/todo/checks/2026-03-21-153251-checker-architecture.md` — extracted-check architecture and rule/input discipline
 - `.plans/2026-04-04-142819-family-checks-packages.md` — existing family checks package plan note
-- `packages/g3-fmt-content-checks/` — specimen facade/runtime/assertions/types package shape
+- `packages/g3rs-fmt-config-checks/` — specimen facade/runtime/assertions/types package shape
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/run.rs` — current cargo rule fan-out
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/facts.rs` — current cargo fact model
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/inputs.rs` — current cargo rule input shapes
@@ -92,19 +92,19 @@ That matches the project’s direction that extracted family packages should acc
 - If cargo content rules later need more normalized policy data, add that as package-local types instead of importing app-domain config wholesale.
 
 ## Key Files for Context
-- `packages/g3-cargo-content-checks/Cargo.toml` — package facade/workspace shape
-- `packages/g3-cargo-content-checks/crates/types/src/lib.rs` — locked package input contract
-- `packages/g3-cargo-content-checks/crates/runtime/src/run.rs` — current stub runtime entrypoint
-- `packages/g3-cargo-content-checks/README.md` — package boundary summary
-- `packages/g3-cargo-content-checks/TODO.md` — next extraction target and rule split
+- `packages/g3rs-cargo-config-checks/Cargo.toml` — package facade/workspace shape
+- `packages/g3rs-cargo-config-checks/crates/types/src/lib.rs` — locked package input contract
+- `packages/g3rs-cargo-config-checks/crates/runtime/src/run.rs` — current stub runtime entrypoint
+- `packages/g3rs-cargo-config-checks/README.md` — package boundary summary
+- `packages/g3rs-cargo-config-checks/TODO.md` — next extraction target and rule split
 - `.plans/2026-04-04-142819-family-checks-packages.md` — updated family checks package boundary note
-- `packages/g3-fmt-content-checks/crates/types/src/lib.rs` — specimen extracted content-package contract
+- `packages/g3rs-fmt-config-checks/crates/types/src/lib.rs` — specimen extracted content-package contract
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/run.rs` — source rule inventory and current app-side ownership
 
 ## Next Steps / Continuation Plan
-1. Commit only the new `g3-cargo-content-checks` package, the package plan note update, and this worklog without sweeping in unrelated clippy-family edits.
+1. Commit only the new `g3rs-cargo-config-checks` package, the package plan note update, and this worklog without sweeping in unrelated clippy-family edits.
 2. Run an adversarial test-attack pass against the scaffold boundary itself:
    - verify every `RS-CARGO-*` rule really belongs on the chosen side of the split
    - verify the package contract contains all content-owned policy data and no app-owned structural data
    - verify the new package has no accidental app/runtime coupling
-3. After that review, extract the first small rule set into `g3-cargo-content-checks-runtime` rather than migrating the entire cargo family in one shot.
+3. After that review, extract the first small rule set into `g3rs-cargo-config-checks-runtime` rather than migrating the entire cargo family in one shot.

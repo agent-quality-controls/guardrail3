@@ -60,8 +60,8 @@ This also makes the family a better specimen for future `RS-TEST` migrations in 
 - `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/lib.rs` — family orchestrator and remaining family-wide module surface
 - `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/facts.rs` — root discovery facts plus test-only route wrapper used by `facts_tests`
 - `apps/guardrail3/crates/app/rs/families/garde/crates/assertions/src/common.rs` — shared result matching helpers/macros for garde assertions
-- `apps/guardrail3/crates/app/rs/families/garde/crates/assertions/src/rs_garde_11_field_level_constraints.rs` — representative cross-rule quiet proof without local-private imports
-- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/rs_garde_12_nested_validation_dive_tests/golden.rs` — representative sidecar after `RS-TEST-16` migration
+- `apps/guardrail3/crates/app/rs/families/garde/crates/assertions/src/rs_garde_ast_05_field_level_constraints.rs` — representative cross-rule quiet proof without local-private imports
+- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/rs_garde_ast_06_nested_validation_dive_tests/golden.rs` — representative sidecar after `RS-TEST-16` migration
 - `.worklogs/2026-03-29-142354-finish-rs-test-release-family.md` — previous family-level migration pattern that informed this sweep
 
 ## Next Steps / Continuation Plan

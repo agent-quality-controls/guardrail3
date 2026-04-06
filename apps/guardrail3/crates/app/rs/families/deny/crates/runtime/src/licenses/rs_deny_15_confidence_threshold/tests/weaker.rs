@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::licenses::rs_deny_15_confidence_threshold as assertions;
+use guardrail3_app_rs_family_deny_assertions::licenses::rs_deny_config_11_confidence_threshold as assertions;
 
 use super::helpers::{build_fixture_deny_toml, set_license_confidence_threshold};
 

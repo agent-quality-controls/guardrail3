@@ -66,9 +66,9 @@ Recently hardened:
 
 - `RS-DEPS-11` now ignores foreign `rust.*` and crate-policy keys when deps-owned fields are valid
 - local path dependencies that point at undeclared Cargo packages under a workspace root now fail closed through `RS-DEPS-11`
-- malformed `target.*` dependency tables now fail closed through `RS-DEPS-11` without suppressing top-level `RS-DEPS-05..07` findings
-- `RS-DEPS-05..07` now explicitly cover both top-level and `target.*` dependency tables for their owned section kinds
-- subtree regressions now prove routed `RS-DEPS-05` and `RS-DEPS-12` findings do not leak into sibling crates
+- malformed `target.*` dependency tables now fail closed through `RS-DEPS-11` without suppressing top-level `RS-DEPS-CONFIG-01..07` findings
+- `RS-DEPS-CONFIG-01..07` now explicitly cover both top-level and `target.*` dependency tables for their owned section kinds
+- subtree regressions now prove routed `RS-DEPS-CONFIG-01` and `RS-DEPS-CONFIG-05` findings do not leak into sibling crates
 - `RS-DEPS-09/10` no longer invent nested non-member helper crates under a workspace root as separate lockfile roots
 - deps routing/runtime now preserve ancestor workspace roots needed for lockfile policy when scoped app/package config enables the family
 
@@ -106,7 +106,7 @@ Recently hardened:
 
 ## Recently Closed Inventory Gap
 
-### `RS-DEPS-12`
+### `RS-DEPS-CONFIG-05`
 
 This was the last still-planned rule needed to make the dependency-policy inventory complete.
 
@@ -141,7 +141,7 @@ The family is now explicit about those choices in code, tests, and docs.
 
 `RS-DEPS` is only in a strong target state when all of the following are true:
 
-- `RS-DEPS-12` is implemented and stays fact-driven rather than reparsing manifests per rule
+- `RS-DEPS-CONFIG-05` is implemented and stays fact-driven rather than reparsing manifests per rule
 - the workspace-local contract remains explicit and visible in docs
 - dependency counting semantics are centralized instead of re-parsed ad hoc in each rule
 - `workspace = true`, renamed dependencies, and internal workspace-path exclusions behave consistently between allowlist ownership and dependency-count ownership
@@ -195,7 +195,7 @@ If a change does not make these cases clearer, it is probably not hardening the 
 
 Near-term priority:
 
-1. keep the counted universe for `RS-DEPS-12` explicit and minimal
+1. keep the counted universe for `RS-DEPS-CONFIG-05` explicit and minimal
 2. preserve the existing family boundary with `deny`, `hexarch`, and `release`
 3. keep target-specific allowlist ownership explicit and tested
 4. continue adversarial pressure on workspace-local and fail-closed cases
@@ -207,7 +207,7 @@ It is now a family-hardening lane.
 
 The current deps lane is in a good state when:
 
-- `RS-DEPS-12` stays live in `crates/runtime`
+- `RS-DEPS-CONFIG-05` stays live in `crates/runtime`
 - matching assertions and sidecar regressions stay in place
 - family tests keep passing
 - the deps ledger and local README stay aligned with the live contract

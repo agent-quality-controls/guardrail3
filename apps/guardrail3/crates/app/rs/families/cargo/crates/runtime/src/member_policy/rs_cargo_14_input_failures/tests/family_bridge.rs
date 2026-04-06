@@ -73,7 +73,7 @@ fn inventories_migrated_workspace_lints_rule_through_family_package_bridge() {
         &[("Cargo.toml", &manifest)],
     ));
 
-    let package_results = results_for_id(&results, "RS-CARGO-01");
+    let package_results = results_for_id(&results, "RS-CARGO-CONFIG-01");
     assert_eq!(package_results.len(), 1);
     assert_eq!(package_results[0].severity(), Severity::Info);
     assert!(package_results[0].inventory());
@@ -106,7 +106,7 @@ fn reports_migrated_workspace_lints_failure_through_family_package_bridge() {
         &[("Cargo.toml", &manifest)],
     ));
 
-    let package_results = results_for_id(&results, "RS-CARGO-01");
+    let package_results = results_for_id(&results, "RS-CARGO-CONFIG-01");
     assert_eq!(package_results.len(), 1);
     assert_eq!(package_results[0].severity(), Severity::Error);
     assert!(!package_results[0].inventory());

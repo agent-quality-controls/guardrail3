@@ -17,7 +17,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         .collect::<Vec<_>>();
     if tokio_entries.is_empty() {
         results.push(CheckResult::from_parts(
-            "RS-DENY-21".to_owned(),
+            "RS-DENY-CONFIG-16".to_owned(),
             Severity::Warn,
             "tokio full feature not banned".to_owned(),
             format!(
@@ -36,7 +36,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         .any(|entry| !entry.deny.contains("full"))
     {
         results.push(CheckResult::from_parts(
-            "RS-DENY-21".to_owned(),
+            "RS-DENY-CONFIG-16".to_owned(),
             Severity::Warn,
             "tokio full feature not banned".to_owned(),
             format!(
@@ -55,7 +55,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         .any(|entry| entry.allow != expected_allow)
     {
         results.push(CheckResult::from_parts(
-            "RS-DENY-21".to_owned(),
+            "RS-DENY-CONFIG-16".to_owned(),
             Severity::Warn,
             "tokio allowed features changed".to_owned(),
             format!(

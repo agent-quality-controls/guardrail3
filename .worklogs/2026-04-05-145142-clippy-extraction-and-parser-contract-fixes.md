@@ -1,10 +1,10 @@
 # Extract Clippy Content Checks And Align Parser Consumers
 
 **Date:** 2026-04-05 14:51
-**Scope:** `packages/g3-clippy-content-checks/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/`, `packages/g3-fmt-content-checks/`, `packages/g3-toolchain-content-checks/`, `packages/g3-deny-content-checks/`, `apps/guardrail3/Cargo.lock`, `.plans/2026-04-04-142819-family-checks-packages.md`
+**Scope:** `packages/g3rs-clippy-config-checks/`, `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/`, `packages/g3rs-fmt-config-checks/`, `packages/g3rs-toolchain-config-checks/`, `packages/g3rs-deny-config-checks/`, `apps/guardrail3/Cargo.lock`, `.plans/2026-04-04-142819-family-checks-packages.md`
 
 ## Summary
-Extracted the first `clippy` content-check slice into `packages/g3-clippy-content-checks` and rewired the app family to call it for typed `clippy.toml` inputs. Then fixed the extracted `fmt`, `toolchain`, and `deny` packages to compile against the finalized parser types so the real `guardrail3` binary path runs again instead of stopping in compile errors.
+Extracted the first `clippy` content-check slice into `packages/g3rs-clippy-config-checks` and rewired the app family to call it for typed `clippy.toml` inputs. Then fixed the extracted `fmt`, `toolchain`, and `deny` packages to compile against the finalized parser types so the real `guardrail3` binary path runs again instead of stopping in compile errors.
 
 ## Context & Problem
 The repo had reached two overlapping states:
@@ -17,7 +17,7 @@ That left the package tests mostly green in isolation while the real validator b
 ## Decisions Made
 
 ### Extract only the typed-content `clippy` slice
-- **Chose:** Create `g3-clippy-content-checks` for rules `RS-CLIPPY-02`, `03`, `09`, `10`, `11`, `17`, `21`, and `22`, and keep structural/parse-policy ownership in the app family.
+- **Chose:** Create `g3rs-clippy-config-checks` for rules `RS-CLIPPY-CONFIG-01`, `03`, `09`, `10`, `11`, `17`, `21`, and `22`, and keep structural/parse-policy ownership in the app family.
 - **Why:** These rules operate on valid parsed `clippy.toml` content and fit the content-package boundary cleanly. Coverage, same-root precedence, cargo-config override handling, and typed parse rejection remain orchestrator concerns.
 - **Alternatives considered:**
   - Move more `clippy` rules immediately — rejected because `RS-CLIPPY-24` still depends on cargo config discovery and `RS-CLIPPY-25` must own typed parse failure.
@@ -44,7 +44,7 @@ The important boundary in this batch is:
 - app families discover files, parse them once, and own malformed parse signaling
 - content-check packages only consume valid typed parsed files
 
-For `clippy`, that means `g3-clippy-content-checks` takes parsed `ClippyToml` and the app family still owns `RS-CLIPPY-25`.
+For `clippy`, that means `g3rs-clippy-config-checks` takes parsed `ClippyToml` and the app family still owns `RS-CLIPPY-25`.
 
 For the parser-compatibility fixes:
 
@@ -61,19 +61,19 @@ The extracted packages were updated to read those contracts directly instead of 
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/run.rs`
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_25_config_parseable/rule.rs`
 - Extracted packages:
-  - `packages/g3-clippy-content-checks/`
-  - `packages/g3-fmt-content-checks/`
-  - `packages/g3-toolchain-content-checks/`
-  - `packages/g3-deny-content-checks/`
+  - `packages/g3rs-clippy-config-checks/`
+  - `packages/g3rs-fmt-config-checks/`
+  - `packages/g3rs-toolchain-config-checks/`
+  - `packages/g3rs-deny-config-checks/`
 - Finalized parser types:
   - `packages/cargo-toml-parser/crates/parser/types/src/cargo_toml.rs`
   - `packages/rustfmt-toml-parser/crates/parser/types/src/rustfmt_toml.rs`
   - `packages/deny-toml-parser/crates/parser/types/src/advisories.rs`
 - Verification commands:
-  - `cargo test --workspace --manifest-path packages/g3-clippy-content-checks/Cargo.toml`
-  - `cargo test --workspace --manifest-path packages/g3-fmt-content-checks/Cargo.toml`
-  - `cargo test --workspace --manifest-path packages/g3-toolchain-content-checks/Cargo.toml`
-  - `cargo test --workspace --manifest-path packages/g3-deny-content-checks/Cargo.toml`
+  - `cargo test --workspace --manifest-path packages/g3rs-clippy-config-checks/Cargo.toml`
+  - `cargo test --workspace --manifest-path packages/g3rs-fmt-config-checks/Cargo.toml`
+  - `cargo test --workspace --manifest-path packages/g3rs-toolchain-config-checks/Cargo.toml`
+  - `cargo test --workspace --manifest-path packages/g3rs-deny-config-checks/Cargo.toml`
   - `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-clippy --lib`
   - `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-fmt --lib`
   - `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-toolchain --lib`
@@ -85,22 +85,22 @@ The extracted packages were updated to read those contracts directly instead of 
   - `.worklogs/2026-04-05-143457-parser-contract-fixes-batch-2.md`
 
 ## Open Questions / Future Considerations
-- `g3-clippy-content-checks` still covers only the first typed-content slice. The remaining content rules should be migrated rule-by-rule, keeping `RS-CLIPPY-24` app-side until the package intentionally expands to consume cargo config files.
+- `g3rs-clippy-config-checks` still covers only the first typed-content slice. The remaining content rules should be migrated rule-by-rule, keeping `RS-CLIPPY-24` app-side until the package intentionally expands to consume cargo config files.
 - The moved `clippy` slice has good package tests, but app-level smoke coverage for “package wired correctly through family run.rs” is still indirect rather than explicit.
-- `g3-deny-content-checks` still needs direct package tests; its app-family tests are currently carrying most of the confidence.
+- `g3rs-deny-config-checks` still needs direct package tests; its app-family tests are currently carrying most of the confidence.
 
 ## Key Files for Context
-- `packages/g3-clippy-content-checks/crates/runtime/src/run.rs` — package entrypoint for the extracted clippy slice.
-- `packages/g3-clippy-content-checks/crates/types/src/lib.rs` — public typed package boundary for clippy content checks.
+- `packages/g3rs-clippy-config-checks/crates/runtime/src/run.rs` — package entrypoint for the extracted clippy slice.
+- `packages/g3rs-clippy-config-checks/crates/types/src/lib.rs` — public typed package boundary for clippy content checks.
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/run.rs` — app/package bridge for moved clippy rules.
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_25_config_parseable/rule.rs` — app-owned typed parse failure rule.
-- `packages/g3-fmt-content-checks/crates/runtime/src/inputs.rs` — updated cargo/rustfmt accessor logic against typed parser surfaces.
-- `packages/g3-toolchain-content-checks/crates/runtime/src/rs_toolchain_03_msrv_consistency/rule.rs` — updated Cargo rust-version handling through inheritable values.
-- `packages/g3-deny-content-checks/crates/runtime/src/advisories/rs_deny_05_advisories_baseline.rs` — typed advisory-scope consumption after parser tightening.
+- `packages/g3rs-fmt-config-checks/crates/runtime/src/inputs.rs` — updated cargo/rustfmt accessor logic against typed parser surfaces.
+- `packages/g3rs-toolchain-config-checks/crates/runtime/src/rs_toolchain_config_02_msrv_consistency/rule.rs` — updated Cargo rust-version handling through inheritable values.
+- `packages/g3rs-deny-config-checks/crates/runtime/src/advisories/rs_deny_config_02_advisories_baseline.rs` — typed advisory-scope consumption after parser tightening.
 - `.plans/2026-04-04-142819-family-checks-packages.md` — current extraction ledger for content packages.
 - `.worklogs/2026-04-05-143457-parser-contract-fixes-batch-2.md` — parser finalization context that caused the downstream package fixes.
 
 ## Next Steps / Continuation Plan
 1. Add explicit app-family smoke tests for one passing and one failing migrated `clippy` rule so the package bridge is pinned at the family layer, not only through package tests.
-2. Add direct runtime tests inside `g3-deny-content-checks` so deny package behavior is exercised locally instead of relying mostly on app-family tests.
+2. Add direct runtime tests inside `g3rs-deny-config-checks` so deny package behavior is exercised locally instead of relying mostly on app-family tests.
 3. Start the next content package with the same boundary discipline: typed parsed files only, structural discovery and parse rejection left in the app family.

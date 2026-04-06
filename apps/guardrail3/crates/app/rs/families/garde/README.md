@@ -4,7 +4,7 @@ Rust garde boundary validation family.
 
 This family is conditional per owned Rust root:
 
-- `RS-GARDE-01` checks whether the root is actually using `garde`
+- `RS-GARDE-CONFIG-01` checks whether the root is actually using `garde`
 - if `garde` is absent for that root, the ban and source-enforcement rules stay inactive
 - if `garde` is present, the family enforces clippy-ban completeness plus AST-side boundary rules
 

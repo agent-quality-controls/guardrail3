@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_11_highlight_inventory as assertions;
+use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_config_07_highlight_inventory as assertions;
 
 use super::helpers::{build_fixture_deny_toml, set_section_string};
 

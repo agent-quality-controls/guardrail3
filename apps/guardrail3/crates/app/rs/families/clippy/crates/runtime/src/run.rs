@@ -1,4 +1,4 @@
-use g3_clippy_content_checks::G3ClippyContentChecksInput;
+use g3rs_clippy_config_checks::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_app_rs_family_view::FamilyView;
@@ -91,11 +91,11 @@ fn run_content_checks(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResu
         return;
     };
 
-    let package_input = G3ClippyContentChecksInput {
+    let package_input = G3RsClippyConfigChecksInput {
         clippy_rel_path: input.config.rel_path.clone(),
         clippy,
     };
-    let package_results = g3_clippy_content_checks::check(&package_input);
+    let package_results = g3rs_clippy_config_checks::check(&package_input);
     results.extend(package_results.into_iter().map(convert_check_result));
 }
 

@@ -39,7 +39,7 @@ While checking the runtime expectations, I also found that `allow-panic-in-tests
 
 ### Commit the `allow-panic-in-tests` domain constant export with this slice
 - **Chose:** Include the already-prepared domain module updates that add `ALLOW_PANIC_IN_TESTS` to the exported settings surface.
-- **Why:** Runtime `RS-CLIPPY-17` and local-baseline checks already depend on this managed key. Leaving the domain settings export behind would keep the generated baseline and runtime expectations out of sync.
+- **Why:** Runtime `RS-CLIPPY-CONFIG-15` and local-baseline checks already depend on this managed key. Leaving the domain settings export behind would keep the generated baseline and runtime expectations out of sync.
 - **Alternatives considered:**
   - Leave the domain-module staging for a later commit — rejected because this slice is about policy-context correctness, and the managed test-relaxation setting is part of that same contract.
 

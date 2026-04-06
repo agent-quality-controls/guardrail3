@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::advisories::rs_deny_07_graph_all_features as assertions;
+use guardrail3_app_rs_family_deny_assertions::advisories::rs_deny_config_04_graph_all_features as assertions;
 
 use crate::inputs::ConfigDenyInput;
 use super::super::check;

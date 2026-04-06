@@ -1,9 +1,9 @@
 pub mod rs_deny_09_ban_baseline_complete;
-pub mod rs_deny_10_multiple_versions_floor;
-pub mod rs_deny_11_highlight_inventory;
-pub mod rs_deny_12_allow_wildcard_paths;
-pub mod rs_deny_13_wildcards_inventory;
-pub mod rs_deny_21_tokio_full_ban;
-pub mod rs_deny_22_extra_feature_bans_inventory;
+pub mod rs_deny_config_06_multiple_versions_floor;
+pub mod rs_deny_config_07_highlight_inventory;
+pub mod rs_deny_config_08_allow_wildcard_paths;
+pub mod rs_deny_config_09_wildcards_inventory;
+pub mod rs_deny_config_16_tokio_full_ban;
+pub mod rs_deny_config_17_extra_feature_bans_inventory;
 pub mod rs_deny_26_ban_reason_inventory;
-pub mod rs_deny_27_duplicate_entries;
+pub mod rs_deny_config_20_duplicate_entries;

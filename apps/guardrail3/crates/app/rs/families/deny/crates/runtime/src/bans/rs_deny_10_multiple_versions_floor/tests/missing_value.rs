@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_10_multiple_versions_floor as assertions;
+use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_config_06_multiple_versions_floor as assertions;
 
 use super::helpers::{build_fixture_deny_toml, remove_section_key};
 

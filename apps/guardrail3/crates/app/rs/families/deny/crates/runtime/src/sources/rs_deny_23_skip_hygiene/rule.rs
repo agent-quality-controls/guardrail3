@@ -14,7 +14,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     };
     let Some(skip_entries) = skip_value.as_array() else {
         results.push(CheckResult::from_parts(
-            "RS-DENY-23".to_owned(),
+            "RS-DENY-CONFIG-18".to_owned(),
             Severity::Error,
             "malformed skip container".to_owned(),
             format!(
@@ -35,7 +35,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         let Some(table) = entry.as_table() else {
             if let Some(name) = entry.as_str() {
                 results.push(CheckResult::from_parts(
-                    "RS-DENY-23".to_owned(),
+                    "RS-DENY-CONFIG-18".to_owned(),
                     Severity::Error,
                     "skip entry must use table form".to_owned(),
                     format!(
@@ -48,7 +48,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 ));
             } else {
                 results.push(CheckResult::from_parts(
-                    "RS-DENY-23".to_owned(),
+                    "RS-DENY-CONFIG-18".to_owned(),
                     Severity::Error,
                     "malformed skip entry".to_owned(),
                     format!(
@@ -73,7 +73,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             name.to_owned()
         } else {
             results.push(CheckResult::from_parts(
-                "RS-DENY-23".to_owned(),
+                "RS-DENY-CONFIG-18".to_owned(),
                 Severity::Error,
                 "malformed skip entry".to_owned(),
                 format!(
@@ -92,7 +92,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         if reason_value.is_some() && reason.is_none() {
             missing_or_invalid_reason_count += 1;
             results.push(CheckResult::from_parts(
-                "RS-DENY-23".to_owned(),
+                "RS-DENY-CONFIG-18".to_owned(),
                 Severity::Error,
                 "skip reason must be a string".to_owned(),
                 format!(
@@ -109,7 +109,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         let Some(reason) = reason else {
             missing_or_invalid_reason_count += 1;
             results.push(CheckResult::from_parts(
-                "RS-DENY-23".to_owned(),
+                "RS-DENY-CONFIG-18".to_owned(),
                 Severity::Error,
                 "skip entry missing reason".to_owned(),
                 format!("`{}` skips `{name}` without a `reason`.", config.rel_path),
@@ -126,7 +126,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             Err(issue) => {
                 weak_reason_count += 1;
                 results.push(CheckResult::from_parts(
-                    "RS-DENY-23".to_owned(),
+                    "RS-DENY-CONFIG-18".to_owned(),
                     Severity::Error,
                     "skip entry reason too weak".to_owned(),
                     format!(
@@ -143,7 +143,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         }
 
         results.push(CheckResult {
-            id: "RS-DENY-23".to_owned(),
+            id: "RS-DENY-CONFIG-18".to_owned(),
             severity: Severity::Warn,
             title: "skip entry".to_owned(),
             message: format!("`{}` has documented skip entry `{name}`.", config.rel_path),
@@ -156,7 +156,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let total = documented_count + missing_or_invalid_reason_count + weak_reason_count;
     if total > 0 {
         results.push(CheckResult::from_parts(
-            "RS-DENY-23".to_owned(),
+            "RS-DENY-CONFIG-18".to_owned(),
             Severity::Warn,
             "skip entry count".to_owned(),
             format!(

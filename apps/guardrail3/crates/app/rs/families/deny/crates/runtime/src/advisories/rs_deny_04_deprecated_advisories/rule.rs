@@ -16,7 +16,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             .is_some()
         {
             results.push(CheckResult::from_parts(
-                "RS-DENY-04".to_owned(),
+                "RS-DENY-CONFIG-01".to_owned(),
                 Severity::Warn,
                 format!("deprecated advisory field `{deprecated}`"),
                 format!(

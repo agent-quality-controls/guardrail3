@@ -13,7 +13,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     match graph.get("all-features").and_then(toml::Value::as_bool) {
         Some(value) if value == expected_all_features => {}
         _ => results.push(CheckResult::from_parts(
-            "RS-DENY-07".to_owned(),
+            "RS-DENY-CONFIG-04".to_owned(),
             Severity::Error,
             "graph all-features must be true".to_owned(),
             format!(
@@ -29,7 +29,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
 fn push_missing(config: &crate::facts::DenyConfigFacts, results: &mut Vec<CheckResult>) {
     results.push(CheckResult::from_parts(
-        "RS-DENY-07".to_owned(),
+        "RS-DENY-CONFIG-04".to_owned(),
         Severity::Error,
         "[graph] section missing".to_owned(),
         format!(

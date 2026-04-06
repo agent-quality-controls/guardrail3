@@ -1,10 +1,10 @@
 # Build And Reshape Deps Content Checks
 
 **Date:** 2026-04-05 19:14
-**Scope:** `.plans/2026-04-04-142819-family-checks-packages.md`, `packages/g3-deps-content-checks`
+**Scope:** `.plans/2026-04-04-142819-family-checks-packages.md`, `packages/g3rs-deps-config-checks`
 
 ## Summary
-Added the new `g3-deps-content-checks` package for the `deps` family content rules and then reshaped its internals to match the extracted-package architecture more closely. The package now owns `RS-DEPS-05`, `06`, `07`, `08`, and `12`, uses full parsed files as input, and follows the rule-directory plus sidecar-test pattern instead of the first flat-file draft.
+Added the new `g3rs-deps-config-checks` package for the `deps` family content rules and then reshaped its internals to match the extracted-package architecture more closely. The package now owns `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12`, uses full parsed files as input, and follows the rule-directory plus sidecar-test pattern instead of the first flat-file draft.
 
 ## Context & Problem
 The next family in the extraction sequence was `deps`. The intended split was:
@@ -22,7 +22,7 @@ But structurally it drifted from the extracted-package specimen. In particular:
 - the assertions crate was effectively a stub
 - `types` exported directly from `lib.rs` instead of through a facade module
 
-The user explicitly asked for an architecture check against the existing extracted packages, especially `g3-toolchain-content-checks`, and requested that the package-specific structural damage be fixed while skipping two known issues for now:
+The user explicitly asked for an architecture check against the existing extracted packages, especially `g3rs-toolchain-config-checks`, and requested that the package-specific structural damage be fixed while skipping two known issues for now:
 - oversized public input
 - runtime sibling-directory complexity threshold
 
@@ -33,17 +33,17 @@ The user explicitly asked for an architecture check against the existing extract
   - workspace `Cargo.toml`
   - crate `Cargo.toml`
   - workspace `guardrail3-rs.toml`
-- **Why:** `RS-DEPS-05..08` need both the crate manifest and workspace manifest to resolve dependency identity correctly, and the user required that content packages receive parsed files rather than scoped helper subsets.
+- **Why:** `RS-DEPS-CONFIG-01..08` need both the crate manifest and workspace manifest to resolve dependency identity correctly, and the user required that content packages receive parsed files rather than scoped helper subsets.
 - **Alternatives considered:**
   - One giant workspace bag with derived policy state — rejected because it smuggles orchestrator logic into the package.
   - One-file-only input — rejected because the dependency allowlist rules need workspace resolution for `workspace = true` and internal/external path classification.
 
 ### Limit the extracted rule set to pure content checks
-- **Chose:** move `RS-DEPS-05`, `06`, `07`, `08`, and `12` into the package, and keep `RS-DEPS-01..04`, `09`, `10`, and `11` in the app.
+- **Chose:** move `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12` into the package, and keep `RS-DEPS-01..04`, `09`, `10`, and `11` in the app.
 - **Why:** tool-installation, lockfile presence, gitignore handling, and malformed-input reporting are not content checks.
 - **Alternatives considered:**
   - Move all deps rules together — rejected because it would collapse structural/orchestrator concerns into the package.
-  - Extract only `RS-DEPS-12` first — rejected because the workspace-level policy simplification now makes `05..08` viable without recreating the old crate-scoped legacy config model.
+  - Extract only `RS-DEPS-CONFIG-05` first — rejected because the workspace-level policy simplification now makes `05..08` viable without recreating the old crate-scoped legacy config model.
 
 ### Reshape the runtime crate to the rule-directory pattern
 - **Chose:** convert each deps rule from a flat file to a directory with `mod.rs`, `rule.rs`, and `tests/mod.rs`.
@@ -74,7 +74,7 @@ app deps family
   -> discovers workspace + crate + workspace policy files
   -> parses them
   -> emits structural / malformed-input findings
-  -> calls g3-deps-content-checks with parsed files
+  -> calls g3rs-deps-config-checks with parsed files
   -> package runs pure dependency-policy content rules
 ```
 
@@ -85,17 +85,17 @@ Important current state:
 
 After the structural cleanup, the remaining validator findings are mostly either:
 - the two intentionally skipped issues
-- the same cross-package dependency/facade rule debt already present in older extracted packages like `g3-toolchain-content-checks`
+- the same cross-package dependency/facade rule debt already present in older extracted packages like `g3rs-toolchain-config-checks`
 
 ## Information Sources
 - `AGENTS.md`
 - `.plans/2026-04-04-142819-family-checks-packages.md`
-- `packages/g3-toolchain-content-checks` — extracted-package specimen used for structural comparison
+- `packages/g3rs-toolchain-config-checks` — extracted-package specimen used for structural comparison
 - `apps/guardrail3/crates/app/rs/families/deps/README.md`
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/facts/dependency_entries.rs`
-- `packages/g3-deps-content-checks`
-- `cargo test --workspace --manifest-path packages/g3-deps-content-checks/Cargo.toml`
-- `cargo run --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 -- rs validate packages/g3-deps-content-checks --family arch --family code --format json`
+- `packages/g3rs-deps-config-checks`
+- `cargo test --workspace --manifest-path packages/g3rs-deps-config-checks/Cargo.toml`
+- `cargo run --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 -- rs validate packages/g3rs-deps-config-checks --family arch --family code --format json`
 
 ## Open Questions / Future Considerations
 - The package still trips the local complexity threshold because the runtime crate now has five rule directories.
@@ -105,16 +105,16 @@ After the structural cleanup, the remaining validator findings are mostly either
 
 ## Key Files for Context
 - `.plans/2026-04-04-142819-family-checks-packages.md` — source-of-truth rule split for the deps extraction
-- `packages/g3-deps-content-checks/crates/types/src/input.rs` — current parsed-file contract for the deps package
-- `packages/g3-deps-content-checks/crates/runtime/src/run.rs` — package entrypoint and moved rule wiring
-- `packages/g3-deps-content-checks/crates/runtime/src/support.rs` — shared dependency resolution logic
-- `packages/g3-deps-content-checks/crates/assertions/src/common.rs` — package-local assertion helpers
-- `packages/g3-toolchain-content-checks/crates/runtime/src` — comparison specimen used during the architecture cleanup
+- `packages/g3rs-deps-config-checks/crates/types/src/input.rs` — current parsed-file contract for the deps package
+- `packages/g3rs-deps-config-checks/crates/runtime/src/run.rs` — package entrypoint and moved rule wiring
+- `packages/g3rs-deps-config-checks/crates/runtime/src/support.rs` — shared dependency resolution logic
+- `packages/g3rs-deps-config-checks/crates/assertions/src/common.rs` — package-local assertion helpers
+- `packages/g3rs-toolchain-config-checks/crates/runtime/src` — comparison specimen used during the architecture cleanup
 - `.worklogs/2026-04-05-145142-clippy-extraction-and-parser-contract-fixes.md` — previous extracted-package and parser-contract context
 - `.worklogs/2026-04-05-165315-deny-content-package-tests.md` — recent package-local test-surface precedent
 
 ## Next Steps / Continuation Plan
-1. Wire the app `deps` family to parse the authoritative workspace manifest, crate manifest, and workspace `guardrail3-rs.toml`, then call `g3-deps-content-checks` for `RS-DEPS-05`, `06`, `07`, `08`, and `12`.
+1. Wire the app `deps` family to parse the authoritative workspace manifest, crate manifest, and workspace `guardrail3-rs.toml`, then call `g3rs-deps-config-checks` for `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12`.
 2. Keep `RS-DEPS-01..04`, `09`, `10`, and `11` in the app and make the app own malformed-input reporting explicitly before package calls.
 3. After the app wiring is in place, add bridge smoke tests at the family layer similar to the clippy and cargo migrations.
 4. Revisit the skipped issues only after wiring:

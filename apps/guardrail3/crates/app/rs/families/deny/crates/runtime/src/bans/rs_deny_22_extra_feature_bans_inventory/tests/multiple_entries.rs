@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_22_extra_feature_bans_inventory as assertions;
+use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_config_17_extra_feature_bans_inventory as assertions;
 
 use super::helpers::{build_fixture_deny_toml, set_feature_entries};
 

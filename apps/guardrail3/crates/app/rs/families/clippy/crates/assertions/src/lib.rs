@@ -6,9 +6,9 @@ pub mod facts;
 #[cfg(feature = "checks")]
 pub mod rs_clippy_01_coverage;
 #[cfg(feature = "checks")]
-pub mod rs_clippy_02_max_struct_bools;
+pub mod rs_clippy_config_01_max_struct_bools;
 #[cfg(feature = "checks")]
-pub mod rs_clippy_03_max_fn_params_bools;
+pub mod rs_clippy_config_02_max_fn_params_bools;
 #[cfg(feature = "checks")]
 pub mod rs_clippy_04_missing_method_ban;
 #[cfg(feature = "checks")]
@@ -20,11 +20,11 @@ pub mod rs_clippy_07_extra_type_ban;
 #[cfg(feature = "checks")]
 pub mod rs_clippy_08_reason_quality;
 #[cfg(feature = "checks")]
-pub mod rs_clippy_09_too_many_lines_threshold;
+pub mod rs_clippy_config_03_too_many_lines_threshold;
 #[cfg(feature = "checks")]
-pub mod rs_clippy_10_too_many_arguments_threshold;
+pub mod rs_clippy_config_04_too_many_arguments_threshold;
 #[cfg(feature = "checks")]
-pub mod rs_clippy_11_excessive_nesting_threshold;
+pub mod rs_clippy_config_05_excessive_nesting_threshold;
 #[cfg(feature = "checks")]
 pub mod rs_clippy_12_allowed_placement;
 #[cfg(feature = "checks")]
@@ -36,7 +36,7 @@ pub mod rs_clippy_15_trivial_reason;
 #[cfg(feature = "checks")]
 pub mod rs_clippy_16_avoid_breaking_exported_api;
 #[cfg(feature = "checks")]
-pub mod rs_clippy_17_test_relaxations;
+pub mod rs_clippy_config_06_test_relaxations;
 #[cfg(feature = "checks")]
 pub mod rs_clippy_18_duplicate_bans;
 #[cfg(feature = "checks")]
@@ -44,9 +44,9 @@ pub mod rs_clippy_19_unknown_keys;
 #[cfg(feature = "checks")]
 pub mod rs_clippy_20_macro_bans;
 #[cfg(feature = "checks")]
-pub mod rs_clippy_21_cognitive_complexity_threshold;
+pub mod rs_clippy_config_07_cognitive_complexity_threshold;
 #[cfg(feature = "checks")]
-pub mod rs_clippy_22_type_complexity_threshold;
+pub mod rs_clippy_config_08_type_complexity_threshold;
 #[cfg(feature = "checks")]
 pub mod rs_clippy_23_policy_context_parseable;
 #[cfg(feature = "checks")]

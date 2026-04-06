@@ -26,7 +26,7 @@ reorder_modules = true
 group_imports = "StdExternalCrate"
 "#,
             )
-            .expect("RS-FMT-04 in-memory rustfmt TOML fixture should parse"),
+            .expect("RS-FMT-CONFIG-03 in-memory rustfmt TOML fixture should parse"),
         ),
         escape_hatches: Vec::new(),
         cargo_edition: crate::facts::CargoEditionState::Present("2024".to_owned()),

@@ -63,7 +63,7 @@ This follow-up reinforces two points from the broader `RS-TEST` migration:
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/toolchain/crates/assertions/src/rs_toolchain_01_exists.rs` — now owns the cross-rule family proof helpers that the sidecar is allowed to call
 - `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/src/rs_toolchain_01_exists_tests/mod.rs` — representative migrated sidecar staying within its owned assertions boundary
-- `apps/guardrail3/crates/app/rs/families/toolchain/crates/assertions/src/rs_toolchain_02_channel_and_components.rs` — representative `Severity` re-export used to remove sidecar-local `domain_report` imports
+- `apps/guardrail3/crates/app/rs/families/toolchain/crates/assertions/src/rs_toolchain_config_01_channel_components.rs` — representative `Severity` re-export used to remove sidecar-local `domain_report` imports
 - `apps/guardrail3/crates/app/rs/families/arch/crates/assertions/Cargo.toml` — cleaned assertions-crate dependency boundary for `arch`
 - `.worklogs/2026-03-29-161458-finish-rs-test-arch-family.md` — immediate background on the earlier `arch` family cleanup
 

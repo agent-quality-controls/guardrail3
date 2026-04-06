@@ -1,0 +1,27 @@
+[package]
+name = "g3rs-deny-config-checks-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3 deny config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[lints]
+workspace = true
+
+[dependencies]
+deny-toml-parser = { path = "../../../deny-toml-parser" }
+g3rs-deny-config-checks-types = { path = "../types", version = "0.1.0" }
+guardrail3-domain-modules = { path = "../../../../apps/guardrail3/crates/domain/modules" }
+guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-reason-policy = { path = "../../../reason-policy/crates/reason-policy", version = "0.0.0" }
+toml = "0.8"
+
+[dev-dependencies]
+g3rs-deny-config-checks-assertions = { path = "../assertions" }

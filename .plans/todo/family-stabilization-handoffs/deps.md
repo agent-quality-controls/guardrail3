@@ -203,13 +203,13 @@ Use this approach:
    - path dependencies that are and are not workspace-owned
    - `.gitignore` ancestor precedence and nested unignore
    - malformed `guardrail3.toml`, workspace manifests, and member manifests
-5. Treat `RS-DEPS-12` as planned only. Do not invent it unless explicitly asked.
+5. Treat `RS-DEPS-CONFIG-05` as planned only. Do not invent it unless explicitly asked.
 
 ## High-Value Attack Targets
 
 Attack these first:
 
-- `RS-DEPS-05..07`
+- `RS-DEPS-CONFIG-01..07`
   - unauthorized dependency detection by section
   - `workspace = true` resolution
   - renamed dependencies

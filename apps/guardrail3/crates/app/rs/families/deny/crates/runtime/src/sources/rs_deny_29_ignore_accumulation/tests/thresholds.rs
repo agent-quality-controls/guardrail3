@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_29_ignore_accumulation as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_config_22_ignore_accumulation as assertions;
 
 use crate::inputs::ConfigDenyInput;
 use super::helpers::{build_fixture_deny_toml, config_facts};

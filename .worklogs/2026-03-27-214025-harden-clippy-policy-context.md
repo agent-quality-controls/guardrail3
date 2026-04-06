@@ -18,7 +18,7 @@ This contradicted both the family README and the plan, which already said the fa
 At the same time, the clippy worktree already contained a coherent but uncommitted sub-slice:
 
 - `allow-panic-in-tests = false` had been added to the family root config and support helpers
-- `RS-CLIPPY-17` tests had been updated for that managed key
+- `RS-CLIPPY-CONFIG-15` tests had been updated for that managed key
 - published-library workspace helpers/tests had been added for `RS-CLIPPY-14` and `RS-CLIPPY-16`
 
 Leaving those changes out would keep the family half-updated and the nested workspace green only by accident.
@@ -36,14 +36,14 @@ Leaving those changes out would keep the family half-updated and the nested work
 - **Chose:** Store `policy_context_parse_error` in `ClippyFacts` and each `ClippyConfigFacts`, then make the profile/garde-dependent rules (`04`, `05`, `06`, `07`, `13`, `14`, `16`) return early when that failure is present.
 - **Why:** Those rules need trustworthy profile/garde context. If the context is broken, `RS-CLIPPY-23` should own the failure instead of letting dependent rules misclassify.
 - **Alternatives considered:**
-  - Suppress every config rule on policy-context failure — rejected because rules like `RS-CLIPPY-17` do not depend on `guardrail3.toml` and can still evaluate meaningfully.
+  - Suppress every config rule on policy-context failure — rejected because rules like `RS-CLIPPY-CONFIG-15` do not depend on `guardrail3.toml` and can still evaluate meaningfully.
   - Leave dependent rules running alongside `RS-CLIPPY-23` — rejected because they can still emit misleading results from defaulted profile/garde values.
 
-### Keep `RS-CLIPPY-17` independent of guardrail policy context
-- **Chose:** Do not short-circuit `RS-CLIPPY-17` on malformed `guardrail3.toml`.
+### Keep `RS-CLIPPY-CONFIG-15` independent of guardrail policy context
+- **Chose:** Do not short-circuit `RS-CLIPPY-CONFIG-15` on malformed `guardrail3.toml`.
 - **Why:** Its managed booleans are fixed Clippy policy knobs and do not depend on profile/garde resolution.
 - **Alternatives considered:**
-  - Treat `RS-CLIPPY-17` like the profile-sensitive rules and suppress it — rejected because that would hide real misconfiguration unrelated to profile resolution.
+  - Treat `RS-CLIPPY-CONFIG-15` like the profile-sensitive rules and suppress it — rejected because that would hide real misconfiguration unrelated to profile resolution.
 
 ### Fold in the already-live `allow-panic-in-tests` and published-library workspace coverage changes
 - **Chose:** Include the dirty-but-coherent clippy changes that were already in the worktree: managed `allow-panic-in-tests = false`, updated key parity tests, and the missing workspace publishability regressions/helpers.
@@ -75,7 +75,7 @@ Leaving those changes out would keep the family half-updated and the nested work
 - Key implementation files:
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs`
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_16_avoid_breaking_exported_api.rs`
-  - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations.rs`
+  - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations.rs`
   - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_23_policy_context_parseable.rs`
 - Verification:
   - `cargo test --manifest-path apps/guardrail3/crates/app/rs/families/clippy/Cargo.toml -p guardrail3-app-rs-family-clippy --lib`
@@ -94,7 +94,7 @@ Leaving those changes out would keep the family half-updated and the nested work
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/lib.rs` — orchestration order including the new `RS-CLIPPY-23`
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_23_policy_context_parseable.rs` — dedicated fail-closed rule for malformed active `guardrail3.toml`
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_16_avoid_breaking_exported_api.rs` — profile-sensitive rule now guarded by policy-context validity
-- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations.rs` — managed test-relaxation policy, including `allow-panic-in-tests`
+- `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_config_15_test_relaxations.rs` — managed test-relaxation policy, including `allow-panic-in-tests`
 - `apps/guardrail3/crates/app/rs/families/clippy/test_support/src/lib.rs` — workspace/package publishability fixtures for library-policy tests
 - `.plans/todo/checks/rs/clippy.md` — updated family contract and rule inventory
 - `.worklogs/2026-03-27-212709-fix-clippy-macro-ban-paths.md` — previous semantic correctness checkpoint before this fail-closed pass

@@ -55,8 +55,8 @@ That separation better matches the stricter `RS-TEST-18` expectation and keeps t
 - `apps/guardrail3/crates/app/rs/families/cargo/test_support/src/lib.rs` — generic-only tree and entry helpers.
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/lib.rs` — runtime module wiring for the cargo family.
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/lint_support.rs` — production lint helper functions and expectation tables.
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_01_workspace_lints_tests/cases.rs` — example of inlined local fixture bodies.
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_01_workspace_lints_tests/mod.rs` — example of the removed dead helper surface.
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_01_workspace_lints_tests/cases.rs` — example of inlined local fixture bodies.
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_01_workspace_lints_tests/mod.rs` — example of the removed dead helper surface.
 
 ## Next Steps / Continuation Plan
 1. Stage only the cargo-family files touched in this slice.

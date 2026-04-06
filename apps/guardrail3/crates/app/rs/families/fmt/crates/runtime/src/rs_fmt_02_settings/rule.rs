@@ -5,7 +5,7 @@ use guardrail3_domain_report::{CheckResult, Severity};
 use crate::facts::CargoEditionState;
 use crate::inputs::RustfmtRootInput;
 
-const ID: &str = "RS-FMT-02";
+const ID: &str = "RS-FMT-CONFIG-01";
 
 pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
     let Some(rel) = input.config_rel.as_deref() else {

@@ -32,7 +32,7 @@ Unlike `garde`, the `deps` family already had a sibling assertions crate, so the
   - collapse everything into one family-level assertions module — rejected because it weakens one-rule/one-owned-proof traceability
 
 ### Keep cross-rule exactness assertions inside owned rule assertions
-- **Chose:** add exactness helpers to `RS-DEPS-01..04` assertions and a broad dependency-routing helper to `RS-DEPS-05`
+- **Chose:** add exactness helpers to `RS-DEPS-01..04` assertions and a broad dependency-routing helper to `RS-DEPS-CONFIG-01`
 - **Why:** those tests intentionally reason about multiple rule IDs at once, but sidecars are not allowed to import sibling assertions modules or inspect result IDs directly.
 - **Alternatives considered:**
   - let sidecars import multiple sibling assertions modules — rejected because `RS-TEST-03` correctly forbids sibling assertions reach-through
@@ -68,7 +68,7 @@ The family is also a useful specimen for config-heavy families where many tests 
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/lib.rs` — family orchestrator after removal of the crate-root test harness
 - `apps/guardrail3/crates/app/rs/families/deps/crates/assertions/src/common.rs` — shared deps assertions primitives and macro
-- `apps/guardrail3/crates/app/rs/families/deps/crates/assertions/src/rs_deps_05_dependencies_allowlisted.rs` — representative cross-rule assertion ownership helper
+- `apps/guardrail3/crates/app/rs/families/deps/crates/assertions/src/rs_deps_config_01_dependencies_allowlisted.rs` — representative cross-rule assertion ownership helper
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/rs_deps_01_cargo_deny_installed.rs` — representative rule-local test wrappers replacing the shared harness
 - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/rs_deps_10_gitignore_not_ignoring_cargo_lock_tests/precedence.rs` — representative same-rule summary test after sidecar semantic proof migration
 - `.worklogs/2026-03-29-152209-finish-rs-test-garde-family.md` — previous family-level migration specimen

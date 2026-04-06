@@ -58,9 +58,9 @@ That matches the hardened `RS-TEST` contract while preserving the existing cargo
 - If the validator tightens further, the next likely pressure point is whether other helper crates are being treated as semantic backdoors.
 
 ## Key Files for Context
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/assertions/src/rs_cargo_01_workspace_lints.rs` - representative proof-bearing assertions module.
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/assertions/src/rs_cargo_config_01_workspace_lints.rs` - representative proof-bearing assertions module.
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/assertions/src/rs_cargo_03_allow_inventory.rs` - cargo-specific inventory helper that now asserts directly.
-- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_01_workspace_lints_tests/cases.rs` - representative sidecar with the runtime alias removed.
+- `apps/guardrail3/crates/app/rs/families/cargo/crates/runtime/src/rs_cargo_config_01_workspace_lints_tests/cases.rs` - representative sidecar with the runtime alias removed.
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/assertions_common/src/lib.rs` - shared generic execution/result helper crate.
 - `apps/guardrail3/crates/app/rs/families/cargo/crates/assertions/Cargo.toml` - dependency surface after dropping the unused `project-tree` dependency.
 

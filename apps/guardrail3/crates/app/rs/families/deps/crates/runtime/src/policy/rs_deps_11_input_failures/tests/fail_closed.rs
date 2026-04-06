@@ -100,7 +100,7 @@ fn guardrail_policy_unknown_crate_key_is_ignored_when_owned_fields_are_valid() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-DEPS-05"
+            result.id() == "RS-DEPS-CONFIG-01"
                 && result.file() == Some("apps/api/Cargo.toml")
                 && result
                     .message()
@@ -208,7 +208,7 @@ fn guardrail_policy_unknown_rust_key_is_ignored_when_owned_fields_are_valid() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-DEPS-08"
+            result.id() == "RS-DEPS-CONFIG-04"
                 && result.file() == Some("packages/core/Cargo.toml")
                 && result.inventory()
         }),

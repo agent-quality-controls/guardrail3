@@ -1,10 +1,10 @@
 # Extract garde root-policy content checks
 
 **Date:** 2026-04-05 21:12
-**Scope:** `packages/g3-garde-content-checks`, `apps/guardrail3/crates/app/rs/families/garde`, `.plans/2026-04-04-142819-family-checks-packages.md`
+**Scope:** `packages/g3rs-garde-config-checks`, `apps/guardrail3/crates/app/rs/families/garde`, `.plans/2026-04-04-142819-family-checks-packages.md`
 
 ## Summary
-Extracted the parsed-file root-policy slice of the `garde` family into a new `g3-garde-content-checks` package and wired the app family to call it for valid typed `Cargo.toml` and `clippy.toml` inputs. The app still owns garde applicability gating, malformed-input reporting, and the fallback warning path for missing or unparseable covering clippy configs.
+Extracted the parsed-file root-policy slice of the `garde` family into a new `g3rs-garde-config-checks` package and wired the app family to call it for valid typed `Cargo.toml` and `clippy.toml` inputs. The app still owns garde applicability gating, malformed-input reporting, and the fallback warning path for missing or unparseable covering clippy configs.
 
 ## Context & Problem
 After `fmt`, `toolchain`, `deny`, `clippy`, `cargo`, and `deps`, the next content-check candidate was `garde`. The family mixes two very different surfaces:
@@ -19,23 +19,23 @@ There was also a bridge-specific risk: the new package can only operate on typed
 ## Decisions Made
 
 ### Extract only the garde root-policy slice
-- **Chose:** Move `RS-GARDE-01`, `RS-GARDE-02`, `RS-GARDE-03`, `RS-GARDE-04`, and `RS-GARDE-06` into `g3-garde-content-checks`.
+- **Chose:** Move `RS-GARDE-CONFIG-01`, `RS-GARDE-CONFIG-02`, `RS-GARDE-CONFIG-03`, `RS-GARDE-CONFIG-04`, and `RS-GARDE-CONFIG-05` into `g3rs-garde-config-checks`.
 - **Why:** Those rules operate on one root `Cargo.toml` and one covering `clippy.toml`, which fits the parsed-files-only package boundary cleanly.
 - **Alternatives considered:**
-  - Moving the whole family — rejected because `RS-GARDE-05`, `07`, `08`, `09`, `11`, `12`, `13`, and `14` currently depend on analyzed Rust source facts, not parsed config files.
+  - Moving the whole family — rejected because `RS-GARDE-AST-01`, `07`, `08`, `09`, `11`, `12`, `13`, and `14` currently depend on analyzed Rust source facts, not parsed config files.
   - Keeping even the root-policy rules app-side — rejected because they are genuine content checks over parsed files and fit the extraction architecture.
 
 ### Split package inputs by actual file surface
 - **Chose:** Define two package inputs:
-  - `G3GardeDependencyCheckInput { cargo_rel_path, cargo }`
-  - `G3GardeClippyBanChecksInput { clippy_rel_path, clippy }`
-- **Why:** `RS-GARDE-01` only needs parsed `Cargo.toml`; `RS-GARDE-02/03/04/06` only need parsed `clippy.toml`. This keeps the package contracts honest and avoids a mixed bag input that pretends every rule needs both files.
+  - `G3RsGardeConfigDependencyCheckInput { cargo_rel_path, cargo }`
+  - `G3RsGardeConfigClippyBanChecksInput { clippy_rel_path, clippy }`
+- **Why:** `RS-GARDE-CONFIG-01` only needs parsed `Cargo.toml`; `RS-GARDE-CONFIG-02/03/04/06` only need parsed `clippy.toml`. This keeps the package contracts honest and avoids a mixed bag input that pretends every rule needs both files.
 - **Alternatives considered:**
   - One giant garde package input — rejected because it couples unrelated rule surfaces and widens the public contract without need.
   - Subset helper types carrying derived booleans or ban lists — rejected because content packages must receive parsed files, not app-computed policy fragments.
 
 ### Keep missing and typed-invalid covering clippy handling in the app
-- **Chose:** The app bridge only calls the package when `clippy_toml_parser::parse(...)` succeeds. Otherwise it falls back to the legacy app-side warning rules for `RS-GARDE-02/03/04/06`.
+- **Chose:** The app bridge only calls the package when `clippy_toml_parser::parse(...)` succeeds. Otherwise it falls back to the legacy app-side warning rules for `RS-GARDE-CONFIG-02/03/04/06`.
 - **Why:** The package should never see malformed or absent inputs. The family still needs the pre-existing “cannot verify ...” warnings when the covering clippy config is missing or unparseable.
 - **Alternatives considered:**
   - Making the package own malformed-input warnings — rejected because malformed-input ownership belongs in the app/orchestrator boundary.
@@ -51,24 +51,24 @@ There was also a bridge-specific risk: the new package can only operate on typed
 ## Architectural Notes
 The `garde` family is now split this way:
 
-- **Package `g3-garde-content-checks`:**
-  - `RS-GARDE-01`
-  - `RS-GARDE-02`
-  - `RS-GARDE-03`
-  - `RS-GARDE-04`
-  - `RS-GARDE-06`
+- **Package `g3rs-garde-config-checks`:**
+  - `RS-GARDE-CONFIG-01`
+  - `RS-GARDE-CONFIG-02`
+  - `RS-GARDE-CONFIG-03`
+  - `RS-GARDE-CONFIG-04`
+  - `RS-GARDE-CONFIG-05`
 - **App family remains owner of:**
   - garde applicability gating from routed policy and source adoption
   - missing / unparseable covering clippy handling for `02/03/04/06`
-  - `RS-GARDE-05`
-  - `RS-GARDE-07`
-  - `RS-GARDE-08`
-  - `RS-GARDE-09`
+  - `RS-GARDE-AST-01`
+  - `RS-GARDE-AST-02`
+  - `RS-GARDE-AST-03`
+  - `RS-GARDE-AST-04`
   - `RS-GARDE-10`
-  - `RS-GARDE-11`
-  - `RS-GARDE-12`
-  - `RS-GARDE-13`
-  - `RS-GARDE-14`
+  - `RS-GARDE-AST-05`
+  - `RS-GARDE-AST-06`
+  - `RS-GARDE-AST-07`
+  - `RS-GARDE-AST-08`
 
 This keeps the extracted package on the same architecture as the earlier content-check packages:
 
@@ -86,8 +86,8 @@ app garde family
 - `apps/guardrail3/crates/app/rs/families/garde/README.md`
 - `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/run.rs`
 - `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/facts/clippy.rs`
-- `packages/g3-garde-content-checks/README.md`
-- `cargo test --workspace --manifest-path packages/g3-garde-content-checks/Cargo.toml`
+- `packages/g3rs-garde-config-checks/README.md`
+- `cargo test --workspace --manifest-path packages/g3rs-garde-config-checks/Cargo.toml`
 - `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-garde --lib`
 - manual validator attacks on:
   - valid baseline root
@@ -98,20 +98,20 @@ app garde family
 ## Open Questions / Future Considerations
 - `RS-GARDE-10` currently remains the malformed-input sink for source and policy failures, while typed-invalid covering clippy still falls back to rule-specific warning ownership for `02/03/04/06`. If the family ever wants a single malformed-input owner for covering-clippy schema failures, that should be redesigned deliberately rather than smuggled through the package.
 - The AST/source garde rules still need a clean package boundary if they are ever extracted. Right now their inputs are normalized analysis facts, not parser-file types.
-- `packages/g3-garde-content-checks` inherits the same shared package-level dependency-rule debt as the older extracted packages, plus the tolerated runtime sibling-directory complexity finding.
+- `packages/g3rs-garde-config-checks` inherits the same shared package-level dependency-rule debt as the older extracted packages, plus the tolerated runtime sibling-directory complexity finding.
 
 ## Key Files for Context
-- `packages/g3-garde-content-checks/crates/types/src/lib.rs` — package input contracts for dependency and clippy-ban checks
-- `packages/g3-garde-content-checks/crates/runtime/src/run.rs` — package entrypoints for the moved rule slice
-- `packages/g3-garde-content-checks/crates/runtime/src/support.rs` — garde dependency detection and canonical ban sets
+- `packages/g3rs-garde-config-checks/crates/types/src/lib.rs` — package input contracts for dependency and clippy-ban checks
+- `packages/g3rs-garde-config-checks/crates/runtime/src/run.rs` — package entrypoints for the moved rule slice
+- `packages/g3rs-garde-config-checks/crates/runtime/src/support.rs` — garde dependency detection and canonical ban sets
 - `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/run.rs` — app/package bridge and fallback behavior
 - `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/facts/clippy.rs` — covering-clippy discovery and typed parse fallback behavior
-- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/root_policy/rs_garde_02_core_method_bans/tests/typed_parse_fallback.rs` — family-layer regression test for typed-invalid covering clippy
+- `apps/guardrail3/crates/app/rs/families/garde/crates/runtime/src/root_policy/rs_garde_config_02_core_method_bans/tests/typed_parse_fallback.rs` — family-layer regression test for typed-invalid covering clippy
 - `.plans/2026-04-04-142819-family-checks-packages.md` — extraction ledger updated to the actual garde split
 - `.worklogs/2026-04-05-203355-deps-local-path-parity.md` — previous extraction-pattern work that informed the same package/app boundary discipline
 
 ## Next Steps / Continuation Plan
 1. Commit this garde root-policy extraction batch and keep `garde` recorded as a partial family extraction, not a full package migration.
-2. If more `garde` hardening is needed, add direct app-family bridge coverage for the package path of `RS-GARDE-01` and one additional clippy-ban rule beyond `RS-GARDE-02`.
+2. If more `garde` hardening is needed, add direct app-family bridge coverage for the package path of `RS-GARDE-CONFIG-01` and one additional clippy-ban rule beyond `RS-GARDE-CONFIG-02`.
 3. When returning to extraction sequencing, read `apps/guardrail3/crates/app/rs/families/test` and decide whether `test` or a deeper `garde` AST extraction design is the cleaner next family.
 4. Do not move the AST/source garde rules until there is a parsed-file package boundary that does not require smuggling normalized analysis bundles into the package.

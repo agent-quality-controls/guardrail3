@@ -1,5 +1,5 @@
-use g3_garde_ast_checks::{G3AstFile, G3GardeAstChecksInput};
-use g3_garde_content_checks::{G3GardeClippyBanChecksInput, G3GardeDependencyCheckInput};
+use g3rs_garde_ast_checks::{G3RsAstFile, G3RsGardeAstChecksInput};
+use g3rs_garde_config_checks::{G3RsGardeConfigClippyBanChecksInput, G3RsGardeConfigDependencyCheckInput};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
 use guardrail3_app_rs_ownership::RustFamilyFileKind;
@@ -41,16 +41,16 @@ pub fn check(surface: &FamilyView, route: &RsGardeRoute) -> Vec<CheckResult> {
 
 fn run_dependency_check(input: &crate::inputs::GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(cargo) = input.root.cargo_parsed_typed.clone() else {
-        crate::root_policy::rs_garde_01_dependency_present::check(input, results);
+        crate::root_policy::rs_garde_config_01_dependency_present::check(input, results);
         return;
     };
 
-    let package_input = G3GardeDependencyCheckInput {
+    let package_input = G3RsGardeConfigDependencyCheckInput {
         cargo_rel_path: input.root.cargo_rel_path.clone(),
         cargo,
     };
     results.extend(
-        g3_garde_content_checks::check_dependency_present(&package_input)
+        g3rs_garde_config_checks::check_dependency_present(&package_input)
             .into_iter()
             .map(convert_check_result),
     );
@@ -64,19 +64,19 @@ fn run_clippy_ban_checks(
         input.root.clippy_rel_path.clone(),
         input.root.clippy_parsed_typed.clone(),
     ) else {
-        crate::root_policy::rs_garde_02_core_method_bans::check(input, results);
-        crate::root_policy::rs_garde_03_extractor_type_bans::check(input, results);
-        crate::root_policy::rs_garde_04_reqwest_json_ban::check(input, results);
-        crate::root_policy::rs_garde_06_additional_method_bans::check(input, results);
+        crate::root_policy::rs_garde_config_02_core_method_bans::check(input, results);
+        crate::root_policy::rs_garde_config_03_extractor_type_bans::check(input, results);
+        crate::root_policy::rs_garde_config_04_reqwest_json_ban::check(input, results);
+        crate::root_policy::rs_garde_config_05_additional_method_bans::check(input, results);
         return;
     };
 
-    let package_input = G3GardeClippyBanChecksInput {
+    let package_input = G3RsGardeConfigClippyBanChecksInput {
         clippy_rel_path,
         clippy,
     };
     results.extend(
-        g3_garde_content_checks::check_clippy_bans(&package_input)
+        g3rs_garde_config_checks::check_clippy_bans(&package_input)
             .into_iter()
             .map(convert_check_result),
     );
@@ -123,7 +123,7 @@ fn run_ast_checks(
             })
             .filter(|rel_path| owning_root_dir(rel_path, &root_dirs) == Some(root.rel_dir.as_str()))
             .filter_map(|rel_path| {
-                surface.abs_path(&rel_path).map(|abs_path| G3AstFile {
+                surface.abs_path(&rel_path).map(|abs_path| G3RsAstFile {
                     rel_path,
                     abs_path,
                 })
@@ -134,15 +134,15 @@ fn run_ast_checks(
             continue;
         }
 
-        let package_input = G3GardeAstChecksInput {
+        let package_input = G3RsGardeAstChecksInput {
             source_files,
-            guardrail_toml: G3AstFile {
+            guardrail_toml: G3RsAstFile {
                 rel_path: guardrail_rel_path,
                 abs_path: guardrail_abs_path,
             },
         };
         results.extend(
-            g3_garde_ast_checks::check(&package_input)
+            g3rs_garde_ast_checks::check(&package_input)
                 .into_iter()
                 .map(convert_check_result),
         );

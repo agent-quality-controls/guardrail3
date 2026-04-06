@@ -12,7 +12,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         if entry.name != "tokio" {
             results.push(
                 CheckResult::from_parts(
-                    "RS-DENY-22".to_owned(),
+                    "RS-DENY-CONFIG-17".to_owned(),
                     Severity::Info,
                     "extra feature ban".to_owned(),
                     format!(

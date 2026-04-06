@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_12_allow_wildcard_paths as assertions;
+use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_config_08_allow_wildcard_paths as assertions;
 
 use super::helpers::{build_fixture_deny_toml, remove_section};
 

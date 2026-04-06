@@ -79,7 +79,7 @@ This family is now self-hosted in the same stabilized shape as the other migrate
 - one production rule file per `RS-FMT-*`
 - one rule-specific sidecar test directory per rule
 - family-local assertions crate for reusable result-shape checks
-- fail-closed coverage for required root Cargo/toolchain inputs used by `RS-FMT-04` and `RS-FMT-06`
+- fail-closed coverage for required root Cargo/toolchain inputs used by `RS-FMT-CONFIG-03` and `RS-FMT-CONFIG-04`
 - quiet success on `RS-FMT-01`; missing root config is the only finding path for that rule
 
 Placement split:

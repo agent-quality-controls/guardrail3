@@ -1,4 +1,4 @@
-use g3_cargo_content_checks::G3CargoContentChecksInput;
+use g3rs_cargo_config_checks::G3RsCargoConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsCargoRoute;
 use guardrail3_app_rs_family_view::FamilyView;
@@ -56,11 +56,11 @@ fn run_content_checks(
         return;
     };
 
-    let package_input = G3CargoContentChecksInput {
+    let package_input = G3RsCargoConfigChecksInput {
         cargo_rel_path: input.root.cargo_rel_path.clone(),
         cargo,
     };
-    let package_results = g3_cargo_content_checks::check(&package_input);
+    let package_results = g3rs_cargo_config_checks::check(&package_input);
     results.extend(package_results.into_iter().map(convert_check_result));
 }
 

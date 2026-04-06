@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_27_duplicate_entries as assertions;
+use guardrail3_app_rs_family_deny_assertions::bans::rs_deny_config_20_duplicate_entries as assertions;
 
 use super::helpers::{
     add_deny_ban_entry, add_skip_entry, build_fixture_deny_toml, set_advisory_ignores,

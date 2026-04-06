@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_20_allow_git_inventory as assertions;
+use guardrail3_app_rs_family_deny_assertions::sources::rs_deny_config_15_allow_git_inventory as assertions;
 
 use super::helpers::{build_fixture_deny_toml, set_allow_git_sources};
 

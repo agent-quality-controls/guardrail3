@@ -11,7 +11,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     if let Some(allow_git) = sources.get("allow-git").and_then(toml::Value::as_array) {
         if !allow_git.is_empty() {
             results.push(CheckResult::from_parts(
-                "RS-DENY-20".to_owned(),
+                "RS-DENY-CONFIG-15".to_owned(),
                 Severity::Warn,
                 "allow-git is non-empty".to_owned(),
                 format!("`{}` has non-empty `[sources].allow-git`.", config.rel_path),
@@ -23,7 +23,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         for entry in allow_git.iter().filter_map(toml::Value::as_str) {
             if entry.trim().is_empty() {
                 results.push(CheckResult::from_parts(
-                    "RS-DENY-20".to_owned(),
+                    "RS-DENY-CONFIG-15".to_owned(),
                     Severity::Error,
                     "allow-git entry must be non-empty".to_owned(),
                     format!(
@@ -38,7 +38,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             }
             results.push(
                 CheckResult::from_parts(
-                    "RS-DENY-20".to_owned(),
+                    "RS-DENY-CONFIG-15".to_owned(),
                     Severity::Info,
                     "allow-git entry".to_owned(),
                     format!("`{}` allows git source `{entry}`.", config.rel_path),

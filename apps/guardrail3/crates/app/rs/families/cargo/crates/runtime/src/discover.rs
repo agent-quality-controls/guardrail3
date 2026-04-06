@@ -301,7 +301,7 @@ fn push_policy_root(
         input_failures.push(InputFailureFacts {
             rel_path: snapshot.cargo_rel_path.clone(),
             message: format!(
-                "Failed to parse owned policy-root Cargo.toml against cargo-toml-parser for cargo content checks: {parse_error}"
+                "Failed to parse owned policy-root Cargo.toml against cargo-toml-parser for cargo config checks: {parse_error}"
             ),
         });
     }

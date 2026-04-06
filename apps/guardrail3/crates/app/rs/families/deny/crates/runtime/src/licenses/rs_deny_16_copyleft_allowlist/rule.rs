@@ -43,7 +43,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     for license in actual {
         if COPYLEFT_LICENSES.contains(&license.as_str()) {
             results.push(CheckResult::from_parts(
-                "RS-DENY-16".to_owned(),
+                "RS-DENY-CONFIG-12".to_owned(),
                 Severity::Warn,
                 "copyleft license allowed".to_owned(),
                 format!("`{}` allows copyleft license `{license}`.", config.rel_path),

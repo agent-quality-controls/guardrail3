@@ -1,0 +1,37 @@
+use guardrail3_app_rs_family_garde_assertions::rs_garde_config_04_reqwest_json_ban as assertions;
+use test_support::{dir_entry, project_tree, temp_root};
+
+#[test]
+fn warns_when_bans_missing() {
+    let root = temp_root("partial-garde-04");
+    let clippy_toml = super::helpers::remove_clippy_ban_path(
+        &super::helpers::canonical_clippy_toml(),
+        "disallowed-methods",
+        "reqwest::Response::json",
+    );
+    let tree = project_tree(
+        vec![("", dir_entry(&[], &["Cargo.toml", "clippy.toml"]))],
+        vec![
+            (
+                "Cargo.toml",
+                "[workspace]\nmembers = []\n[package]\nname = \"demo\"\nversion = \"0.1.0\"\n[dependencies]\ngarde = \"0.1\"\n",
+            ),
+            ("clippy.toml", clippy_toml.as_str()),
+        ],
+        root.clone(),
+    );
+    let results = super::helpers::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-CONFIG-04 findings: {findings:#?}"
+    );
+    assertions::assert_missing(
+        &results,
+        "clippy.toml",
+        "Missing `reqwest::Response::json` from `disallowed-methods`. Add it to `disallowed-methods` in clippy.toml.",
+    );
+
+    std::fs::remove_dir_all(&root).expect("remove temp root");
+}

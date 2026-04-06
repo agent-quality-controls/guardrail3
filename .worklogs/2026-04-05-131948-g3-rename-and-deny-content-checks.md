@@ -1,13 +1,13 @@
 # Rename Shared Check Types And Extract Deny Content Checks
 
 **Date:** 2026-04-05 13:19
-**Scope:** `packages/guardrail3-check-types`, `packages/g3-deny-content-checks`, `packages/deny-toml-parser`, `packages/g3-fmt-content-checks`, `packages/g3-toolchain-content-checks`, `packages/rust-toolchain-toml-parser`, `apps/guardrail3/crates/app/rs/families/{deny,fmt,toolchain}`, `.plans/2026-04-04-142819-family-checks-packages.md`, `.plans/2026-04-04-143500-toolchain-checks-extraction.md`, `.plans/2026-04-05-deny-content-checks-extraction.md`
+**Scope:** `packages/guardrail3-check-types`, `packages/g3rs-deny-config-checks`, `packages/deny-toml-parser`, `packages/g3rs-fmt-config-checks`, `packages/g3rs-toolchain-config-checks`, `packages/rust-toolchain-toml-parser`, `apps/guardrail3/crates/app/rs/families/{deny,fmt,toolchain}`, `.plans/2026-04-04-142819-family-checks-packages.md`, `.plans/2026-04-04-143500-toolchain-checks-extraction.md`, `.plans/2026-04-05-deny-content-checks-extraction.md`
 
 ## Summary
-Renamed the shared extracted-check result/profile/severity types from `Grdz*` to `G3*` across the extracted package surface, then completed the `deny` content-check extraction. `g3-deny-content-checks` now owns the agreed pure `deny.toml` content rules, and the app deny family delegates those rules while keeping coverage, profile-sensitive, and shadowing logic in-app.
+Renamed the shared extracted-check result/profile/severity types from `Grdz*` to `G3*` across the extracted package surface, then completed the `deny` content-check extraction. `g3rs-deny-config-checks` now owns the agreed pure `deny.toml` content rules, and the app deny family delegates those rules while keeping coverage, profile-sensitive, and shadowing logic in-app.
 
 ## Context & Problem
-The extracted package surface had drifted: the shared types crate still exposed `Grdz*` names while the newer package naming and public contract had already moved toward `G3*`. At the same time, `g3-deny-content-checks` was only a scaffold. The user explicitly wanted the shared types renamed and the deny content package finished, but also wanted the deny extraction done cleanly rather than by brute-force copying the old app raw-TOML rules.
+The extracted package surface had drifted: the shared types crate still exposed `Grdz*` names while the newer package naming and public contract had already moved toward `G3*`. At the same time, `g3rs-deny-config-checks` was only a scaffold. The user explicitly wanted the shared types renamed and the deny content package finished, but also wanted the deny extraction done cleanly rather than by brute-force copying the old app raw-TOML rules.
 
 The main architectural constraint was the already agreed split:
 - parser packages represent files faithfully
@@ -24,7 +24,7 @@ The main architectural constraint was the already agreed split:
   - Leave the old names in `guardrail3-check-types` and only rename package-local wrappers — rejected because it preserves public inconsistency.
   - Add temporary aliases and defer the real rename — rejected because the user asked for the rename to be completed rather than prolonged.
 
-### Build `g3-deny-content-checks` Against The Typed Parser Model
+### Build `g3rs-deny-config-checks` Against The Typed Parser Model
 - **Chose:** Implement the deny package rules directly against `deny_toml_parser::DenyToml` and its typed sections instead of porting the app’s raw `toml::Value` helpers unchanged.
 - **Why:** The parser had already been expanded into a file-faithful representation. Rebuilding the package around raw TOML would have duplicated obsolete app assumptions and ignored the actual package boundary.
 - **Alternatives considered:**
@@ -46,14 +46,14 @@ The main architectural constraint was the already agreed split:
   - Delete all old rule files immediately — rejected because removing them from the module graph was sufficient for this change and less disruptive.
 
 ## Architectural Notes
-- `g3-deny-content-checks` now owns:
-  - `RS-DENY-04`, `05`, `06`, `07`, `08`
-  - `RS-DENY-10`, `11`, `12`, `13`
-  - `RS-DENY-14`, `15`, `16`
-  - `RS-DENY-18`, `19`, `20`
-  - `RS-DENY-21`, `22`
-  - `RS-DENY-23`, `24`
-  - `RS-DENY-27`, `28`, `29`
+- `g3rs-deny-config-checks` now owns:
+  - `RS-DENY-CONFIG-01`, `05`, `06`, `07`, `08`
+  - `RS-DENY-CONFIG-07`, `11`, `12`, `13`
+  - `RS-DENY-CONFIG-11`, `15`, `16`
+  - `RS-DENY-CONFIG-15`, `19`, `20`
+  - `RS-DENY-CONFIG-18`, `22`
+  - `RS-DENY-CONFIG-20`, `24`
+  - `RS-DENY-CONFIG-24`, `28`, `29`
 - The app deny family still owns:
   - `RS-DENY-01`, `03`
   - `RS-DENY-09`
@@ -72,7 +72,7 @@ The main architectural constraint was the already agreed split:
 - `.plans/2026-04-04-143500-toolchain-checks-extraction.md`
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/run.rs`
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/facts/mod.rs`
-- `packages/g3-deny-content-checks/crates/runtime/src/support.rs`
+- `packages/g3rs-deny-config-checks/crates/runtime/src/support.rs`
 - `packages/deny-toml-parser/crates/parser/types/src/*.rs`
 
 ## Open Questions / Future Considerations
@@ -82,8 +82,8 @@ The main architectural constraint was the already agreed split:
 
 ## Key Files for Context
 - `packages/guardrail3-check-types/crates/guardrail3-check-types/src/lib.rs` — shared `G3*` result/profile/severity exports
-- `packages/g3-deny-content-checks/crates/runtime/src/run.rs` — deny package entrypoint and rule fanout
-- `packages/g3-deny-content-checks/crates/runtime/src/support.rs` — typed deny helpers and baseline knowledge
+- `packages/g3rs-deny-config-checks/crates/runtime/src/run.rs` — deny package entrypoint and rule fanout
+- `packages/g3rs-deny-config-checks/crates/runtime/src/support.rs` — typed deny helpers and baseline knowledge
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/run.rs` — app/package split for deny
 - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/facts/mod.rs` — raw+typed parse handling for deny config facts
 - `packages/deny-toml-parser/crates/parser/types/src/deny_toml.rs` — typed deny file contract consumed by the package
@@ -91,6 +91,6 @@ The main architectural constraint was the already agreed split:
 - `.worklogs/2026-04-05-125907-deny-toml-parser-full-schema-handoff.md` — parser expansion rationale that this extraction now relies on
 
 ## Next Steps / Continuation Plan
-1. Add dedicated rule tests inside `packages/g3-deny-content-checks` so deny package behavior is directly verified without depending only on app-family coverage.
+1. Add dedicated rule tests inside `packages/g3rs-deny-config-checks` so deny package behavior is directly verified without depending only on app-family coverage.
 2. Revisit the remaining app-owned deny rules (`RS-DENY-17`, `25`, `26`, `30`) and decide whether any can move once their policy-context or malformed-shape dependencies are clarified.
 3. Continue the extraction sequence after deny, using the same pattern: typed parser input at the package boundary, app-owned malformed-file routing, and no raw-TOML leakage into content packages.

@@ -12,7 +12,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     match licenses.get("confidence-threshold") {
         Some(toml::Value::Float(value)) if *value < expected => {
             results.push(CheckResult::from_parts(
-                "RS-DENY-15".to_owned(),
+                "RS-DENY-CONFIG-11".to_owned(),
                 Severity::Warn,
                 "confidence-threshold weaker than baseline".to_owned(),
                 format!(
@@ -26,7 +26,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         }
         Some(toml::Value::Integer(value)) if (*value as f64) < expected => {
             results.push(CheckResult::from_parts(
-                "RS-DENY-15".to_owned(),
+                "RS-DENY-CONFIG-11".to_owned(),
                 Severity::Warn,
                 "confidence-threshold weaker than baseline".to_owned(),
                 format!(
@@ -41,7 +41,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         Some(toml::Value::Float(value)) if *value > expected => {
             results.push(
                 CheckResult::from_parts(
-                    "RS-DENY-15".to_owned(),
+                    "RS-DENY-CONFIG-11".to_owned(),
                     Severity::Info,
                     "confidence-threshold stricter than baseline".to_owned(),
                     format!(
@@ -58,7 +58,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         Some(toml::Value::Integer(value)) if (*value as f64) > expected => {
             results.push(
                 CheckResult::from_parts(
-                    "RS-DENY-15".to_owned(),
+                    "RS-DENY-CONFIG-11".to_owned(),
                     Severity::Info,
                     "confidence-threshold stricter than baseline".to_owned(),
                     format!(
@@ -75,7 +75,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         Some(toml::Value::Float(_)) | Some(toml::Value::Integer(_)) => {}
         _ => {
             results.push(CheckResult::from_parts(
-                "RS-DENY-15".to_owned(),
+                "RS-DENY-CONFIG-11".to_owned(),
                 Severity::Warn,
                 "confidence-threshold missing or invalid".to_owned(),
                 format!(

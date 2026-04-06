@@ -3,7 +3,7 @@ use guardrail3_domain_report::{CheckResult, Severity};
 use crate::facts::ToolchainChannelState;
 use crate::inputs::RustfmtRootInput;
 
-const ID: &str = "RS-FMT-04";
+const ID: &str = "RS-FMT-CONFIG-03";
 const NIGHTLY_KEYS: &[&str] = &[
     "group_imports",
     "imports_granularity",

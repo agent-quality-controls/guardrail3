@@ -42,7 +42,7 @@ Primary implementation roots:
 
 - thresholds distinguish missing from malformed non-integer values
 - `RS-CLIPPY-16` distinguishes missing from non-bool `avoid-breaking-exported-api`
-- `RS-CLIPPY-17` distinguishes missing from wrong-type managed test-relaxation keys
+- `RS-CLIPPY-CONFIG-15` distinguishes missing from wrong-type managed test-relaxation keys
 
 ### 6. `RS-CLIPPY-04/05` completeness proofs are exact
 

@@ -58,7 +58,7 @@ The immediate goal for this batch was to remove the smallest remaining live shim
 - `apps/guardrail3/crates/app/rs/families/toolchain/src/lib.rs` — real toolchain family entrypoint after cutover.
 - `apps/guardrail3/crates/app/rs/families/toolchain/src/discover.rs` — family-local discovery now owned by the family crate.
 - `apps/guardrail3/crates/app/rs/families/toolchain/src/inputs.rs` — minimal rule input for toolchain checks.
-- `apps/guardrail3/crates/app/rs/families/toolchain/src/rs_toolchain_02_channel_and_components.rs` — representative rule file in the new family-owned location.
+- `apps/guardrail3/crates/app/rs/families/toolchain/src/rs_toolchain_config_01_channel_components.rs` — representative rule file in the new family-owned location.
 - `.worklogs/2026-03-25-004019-runtime-applicability-and-rs-ast-split.md` — prior runtime-path cleanup context.
 - `.worklogs/2026-03-25-011145-coverage-baselines-off-legacy-validate.md` — prior legacy-validate backedge cleanup context.
 

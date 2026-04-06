@@ -48,7 +48,7 @@ fn inventories_migrated_dependency_policy_rules_through_family_package_bridge() 
 
     let deps_05 = results
         .iter()
-        .filter(|result| result.id() == "RS-DEPS-05")
+        .filter(|result| result.id() == "RS-DEPS-CONFIG-01")
         .collect::<Vec<_>>();
     assert_eq!(deps_05.len(), 1);
     assert_eq!(deps_05[0].severity(), Severity::Info);
@@ -57,7 +57,7 @@ fn inventories_migrated_dependency_policy_rules_through_family_package_bridge() 
 
     let deps_08 = results
         .iter()
-        .filter(|result| result.id() == "RS-DEPS-08")
+        .filter(|result| result.id() == "RS-DEPS-CONFIG-04")
         .collect::<Vec<_>>();
     assert_eq!(deps_08.len(), 1);
     assert_eq!(deps_08[0].severity(), Severity::Info);
@@ -118,7 +118,7 @@ fn reports_migrated_dependency_policy_failure_through_family_package_bridge() {
 
     let deps_05 = results
         .iter()
-        .filter(|result| result.id() == "RS-DEPS-05")
+        .filter(|result| result.id() == "RS-DEPS-CONFIG-01")
         .collect::<Vec<_>>();
     assert_eq!(deps_05.len(), 1);
     assert_eq!(deps_05[0].severity(), Severity::Error);
@@ -191,7 +191,7 @@ fn undeclared_local_cargo_package_under_workspace_root_stays_owned_by_input_fail
 
     let deps_05 = results
         .iter()
-        .filter(|result| result.id() == "RS-DEPS-05")
+        .filter(|result| result.id() == "RS-DEPS-CONFIG-01")
         .collect::<Vec<_>>();
     assert!(
         deps_05.is_empty(),

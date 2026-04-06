@@ -56,7 +56,7 @@ As of handoff time:
   - `inputs.rs`
   - `parse.rs`
   - `test_support.rs`
-  - rule files `RS-GARDE-01..13`
+  - rule files `RS-GARDE-CONFIG-01..13`
   - rule-specific sidecar dirs already exist for all live rules
 - size is medium:
   - about `90` Rust files
@@ -219,15 +219,15 @@ Use this approach:
 
 Attack these first:
 
-- `RS-GARDE-02/03/04/06`
+- `RS-GARDE-CONFIG-02/03/04/06`
   - correct clippy-ban ownership and per-root covering-config lookup
   - false greens when garde is enabled but a local covering config is incomplete
   - false positives when garde is disabled
-- `RS-GARDE-05/07/08`
+- `RS-GARDE-AST-01/07/08`
   - derive / manual-impl bypasses
   - primitive-only false positives
   - enum variant-shape edge cases
-- `RS-GARDE-11/12/13`
+- `RS-GARDE-AST-05/12/13`
   - field-level semantic enforcement
   - nested validated types
   - context-driven validators

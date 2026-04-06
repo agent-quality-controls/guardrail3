@@ -1,0 +1,55 @@
+use guardrail3_domain_report::{CheckResult, Severity};
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Finding<'a> {
+    pub severity: Severity,
+    pub title: &'a str,
+    pub message: &'a str,
+    pub file: Option<&'a str>,
+    pub inventory: bool,
+}
+
+const ID: &str = "RS-FMT-CONFIG-02";
+
+#[must_use]
+pub fn findings(results: &[CheckResult]) -> Vec<Finding<'_>> {
+    results
+        .iter()
+        .filter(|result| result.id() == ID)
+        .map(|result| Finding {
+            severity: result.severity(),
+            title: result.title(),
+            message: result.message(),
+            file: result.file(),
+            inventory: result.inventory(),
+        })
+        .collect()
+}
+
+pub fn assert_findings(results: &[CheckResult], expected: &[Finding<'_>]) {
+    assert_eq!(findings(results), expected);
+}
+
+pub fn assert_no_findings(results: &[CheckResult]) {
+    assert!(findings(results).is_empty());
+}
+
+pub fn assert_extra_setting_inventory(results: &[CheckResult], key: &str, file: &str) {
+    let findings = findings(results);
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-FMT-CONFIG-02 findings: {findings:#?}"
+    );
+    let finding = &findings[0];
+    assert_eq!(finding.severity, Severity::Info);
+    assert_eq!(finding.title, format!("rustfmt extra setting: {key}"));
+    assert_eq!(
+        finding.message,
+        format!(
+            "`{key}` in `{file}` is not part of the standard rustfmt baseline. Verify it is intentional."
+        )
+    );
+    assert_eq!(finding.file, Some(file));
+    assert!(finding.inventory);
+}

@@ -318,7 +318,7 @@ fn invalid_rust_version_type_is_error() {
     assert!(
         input_failures[0]
             .message()
-            .contains("against cargo-toml-parser for cargo content checks"),
+            .contains("against cargo-toml-parser for cargo config checks"),
         "expected typed cargo parser failure to be owned by RS-CARGO-14: {results:#?}"
     );
 }
@@ -415,7 +415,7 @@ fn invalid_workspace_package_rust_version_does_not_fallback_to_local_package_val
     assert!(
         input_failures[0]
             .message()
-            .contains("against cargo-toml-parser for cargo content checks"),
+            .contains("against cargo-toml-parser for cargo config checks"),
         "expected typed cargo parser failure to be owned by RS-CARGO-14: {results:#?}"
     );
 }

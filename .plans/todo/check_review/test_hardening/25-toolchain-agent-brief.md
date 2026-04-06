@@ -25,8 +25,8 @@ Important family files:
 
 Rules:
 - `rs_toolchain_01_exists.rs`
-- `rs_toolchain_02_channel_and_components.rs`
-- `rs_toolchain_03_msrv_consistency.rs`
+- `rs_toolchain_config_01_channel_components.rs`
+- `rs_toolchain_config_02_msrv_consistency.rs`
 - `rs_toolchain_04_legacy_file.rs`
 
 ## Legacy Seed Material
@@ -149,7 +149,7 @@ The pass is not done until:
 2. audit `discover.rs` / `facts.rs` / `inputs.rs` for root-only ownership
 3. convert all `rs_toolchain_*_tests.rs` files to `*_tests/`
 4. harden the highest-risk rules first:
-   - `RS-TOOLCHAIN-02`
-   - `RS-TOOLCHAIN-03`
+   - `RS-TOOLCHAIN-CONFIG-01`
+   - `RS-TOOLCHAIN-CONFIG-02`
    - `RS-TOOLCHAIN-04`
 5. finish malformed-input and exact-severity coverage before stopping
