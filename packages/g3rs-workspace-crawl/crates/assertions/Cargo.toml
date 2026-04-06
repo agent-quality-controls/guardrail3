@@ -1,0 +1,25 @@
+[package]
+name = "g3rs-workspace-crawl-assertions"
+version = "0.1.0"
+edition = "2024"
+description = "Assertions for g3rs workspace crawl tests"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "workspace", "crawl", "assertions"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["crawl"]
+crawl = []
+
+[lints]
+workspace = true
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+g3rs-workspace-crawl-types = { path = "../types" }
