@@ -23,4 +23,5 @@ guardrail3-check-types = { path = "../../../guardrail3-check-types/crates/guardr
 workspace = true
 
 [dev-dependencies]
+g3rs-deps-config-checks-assertions = { path = "../assertions" }
 toml = "0.8"
