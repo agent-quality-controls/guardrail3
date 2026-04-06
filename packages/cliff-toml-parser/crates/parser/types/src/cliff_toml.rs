@@ -44,6 +44,8 @@ pub struct CliffChangelogSection {
     pub body: Option<String>,
     /// Footer template for the changelog.
     pub footer: Option<String>,
+    /// Whether to trim leading/trailing whitespace from the rendered output.
+    pub trim: Option<bool>,
     /// Unknown keys in the `[changelog]` section.
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
