@@ -1,6 +1,4 @@
-use g3rs_toolchain_config_checks::{
-    G3RsToolchainConfigChannelComponentsInput, G3RsToolchainConfigMsrvConsistencyInput,
-};
+use g3rs_toolchain_config_checks::G3RsToolchainConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsToolchainRoute;
 use guardrail3_app_rs_family_view::FamilyView;
@@ -56,47 +54,46 @@ fn run_content_checks(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<Ch
         return;
     };
 
-    let channel_input = G3RsToolchainConfigChannelComponentsInput {
-        toolchain_rel_path: toolchain_rel_path.to_owned(),
-        toolchain_toml: toolchain_toml.clone(),
-    };
-    let package_results = g3rs_toolchain_config_checks::check_channel_and_components(&channel_input);
-    results.extend(package_results.into_iter().map(convert_check_result));
-
-    if !uses_pinned_stable_channel(&toolchain_toml) {
-        return;
-    }
-
-    let Some(cargo_toml) = input.cargo.cloned() else {
-        results.push(CheckResult::from_parts(
-            "RS-TOOLCHAIN-CONFIG-02".to_owned(),
-            Severity::Error,
-            match input.cargo_parse_error {
-                Some(_) => "Cargo.toml parse error blocks MSRV check".to_owned(),
-                None => "Cargo.toml missing blocks MSRV check".to_owned(),
-            },
-            match input.cargo_parse_error {
-                Some(parse_error) => format!("Invalid root Cargo.toml: {parse_error}"),
-                None => {
+    let (cargo_rel_path, cargo_toml) = if let Some(cargo) = input.cargo.cloned() {
+        (Some(input.cargo_rel_path.to_owned()), Some(cargo))
+    } else {
+        if input.cargo_parse_error.is_some() || uses_pinned_stable_channel(&toolchain_toml) {
+            if let Some(parse_error) = input.cargo_parse_error {
+                results.push(CheckResult::from_parts(
+                    "RS-TOOLCHAIN-CONFIG-02".to_owned(),
+                    Severity::Error,
+                    "Cargo.toml parse error blocks MSRV check".to_owned(),
+                    format!("Invalid root Cargo.toml: {parse_error}"),
+                    Some(input.cargo_rel_path.to_owned()),
+                    None,
+                    false,
+                ));
+                return;
+            } else if input.cargo.is_none() {
+                results.push(CheckResult::from_parts(
+                    "RS-TOOLCHAIN-CONFIG-02".to_owned(),
+                    Severity::Error,
+                    "Cargo.toml missing blocks MSRV check".to_owned(),
                     "Cargo.toml is required to compare pinned toolchain against declared MSRV."
-                        .to_owned()
-                }
-            },
-            Some(input.cargo_rel_path.to_owned()),
-            None,
-            false,
-        ));
-        return;
+                        .to_owned(),
+                    Some(input.cargo_rel_path.to_owned()),
+                    None,
+                    false,
+                ));
+                return;
+            }
+        }
+        (None, None)
     };
 
-    let msrv_input = G3RsToolchainConfigMsrvConsistencyInput {
+    let checks_input = G3RsToolchainConfigChecksInput {
         toolchain_rel_path: toolchain_rel_path.to_owned(),
         toolchain_toml,
-        cargo_rel_path: input.cargo_rel_path.to_owned(),
+        cargo_rel_path,
         cargo_toml,
     };
-    let msrv_results = g3rs_toolchain_config_checks::check_msrv_consistency(&msrv_input);
-    results.extend(msrv_results.into_iter().map(convert_check_result));
+    let package_results = g3rs_toolchain_config_checks::check(&checks_input);
+    results.extend(package_results.into_iter().map(convert_check_result));
 }
 
 fn uses_pinned_stable_channel(toolchain_toml: &rust_toolchain_toml_parser::RustToolchainToml) -> bool {

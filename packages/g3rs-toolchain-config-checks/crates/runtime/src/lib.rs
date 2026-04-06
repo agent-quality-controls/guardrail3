@@ -3,4 +3,4 @@ mod rs_toolchain_config_02_msrv_consistency;
 mod run;
 
 #[cfg(feature = "checks")]
-pub use run::{check_channel_and_components, check_msrv_consistency};
+pub use run::check;
