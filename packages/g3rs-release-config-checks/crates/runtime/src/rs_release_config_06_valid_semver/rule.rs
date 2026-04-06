@@ -53,3 +53,7 @@ fn has_major_minor(version: &str) -> bool {
     let minor_ok = parts.next().is_some_and(|s| !s.is_empty());
     major_ok && minor_ok
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"]
+mod tests;

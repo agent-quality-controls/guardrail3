@@ -1,0 +1,22 @@
+[package]
+name = "golden-crate"
+version = "1.0.0"
+edition = "2024"
+description = "A golden test crate"
+license = "MIT"
+repository = "https://github.com/example/golden"
+keywords = ["test", "golden"]
+categories = ["development-tools"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.binstall]
+pkg-url = "https://example.com"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "golden-bin"
+path = "src/main.rs"
