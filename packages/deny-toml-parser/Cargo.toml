@@ -23,6 +23,9 @@ api = ["dep:deny-toml-parser-runtime"]
 [lints]
 workspace = true
 
+[package.metadata.guardrail3]
+shared = true
+
 [package.metadata.docs.rs]
 all-features = true
 
