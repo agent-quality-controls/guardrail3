@@ -1,0 +1,22 @@
+[package]
+name = "cliff-toml-parser-runtime-assertions"
+version = "0.0.0"
+edition = "2024"
+description = "Assertion helpers for cliff-toml parser tests"
+license.workspace = true
+repository.workspace = true
+publish = true
+readme = "README.md"
+keywords = ["cliff", "toml", "assertions", "parser", "rust"]
+categories = ["config", "development-tools", "parser-implementations"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[dependencies]
+cliff-toml-parser-runtime = { path = "../runtime" }
