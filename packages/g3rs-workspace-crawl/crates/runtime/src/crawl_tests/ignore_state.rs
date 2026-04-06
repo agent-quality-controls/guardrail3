@@ -241,3 +241,124 @@ fn recovery_finds_ignored_config_in_non_banned_directory() {
         true,
     );
 }
+
+#[test]
+fn golden_baseline_no_gitignore() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+    write(root.join("src/lib.rs"), "pub fn demo() {}\n");
+    write(root.join("README.md"), "# demo\n");
+
+    let crawl = crate::crawl(root).expect("crawl should succeed for workspace with no .gitignore");
+
+    for entry in &crawl.entries {
+        assert_eq!(
+            entry.ignore_state,
+            G3RsWorkspaceIgnoreState::Included,
+            "every entry should be Included when no .gitignore exists, but {rel} was not",
+            rel = entry.path.rel_path,
+        );
+    }
+    // Verify all expected files are present
+    assert!(
+        crawl.entry("Cargo.toml").is_some(),
+        "Cargo.toml should be present in crawl with no .gitignore"
+    );
+    assert!(
+        crawl.entry("src/lib.rs").is_some(),
+        "src/lib.rs should be present in crawl with no .gitignore"
+    );
+    assert!(
+        crawl.entry("README.md").is_some(),
+        "README.md should be present in crawl with no .gitignore"
+    );
+}
+
+#[test]
+fn directory_only_gitignore_pattern() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join(".gitignore"), "build/\n");
+    write(root.join("build/output.txt"), "artifact");
+    write(root.join("build-notes.txt"), "keep this");
+    write(root.join("src/lib.rs"), "");
+
+    let crawl = crate::crawl(root).expect("crawl should succeed with directory-only gitignore pattern");
+
+    // build/ directory and its contents should not appear (ignored, not recoverable)
+    assert!(
+        crawl.entry("build").is_none(),
+        "build/ directory should be excluded by trailing-slash gitignore pattern"
+    );
+    assert!(
+        crawl.entry("build/output.txt").is_none(),
+        "build/output.txt should be excluded because its parent is ignored by trailing-slash pattern"
+    );
+
+    // build-notes.txt should be included — the trailing slash means the pattern
+    // only matches directories named "build", not files with "build" prefix
+    assert_entry(
+        crawl.entry("build-notes.txt").expect("build-notes.txt should be included because the trailing-slash gitignore pattern only matches directories"),
+        G3RsWorkspaceEntryKind::File,
+        G3RsWorkspaceIgnoreState::Included,
+        true,
+    );
+}
+
+#[test]
+fn non_git_workspace_includes_everything() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    // Deliberately no git_init — testing behavior without a git repository
+
+    write(root.join(".gitignore"), "*.log\n");
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+    write(root.join("src/lib.rs"), "");
+    write(root.join("debug.log"), "some log");
+
+    let crawl = crate::crawl(root).expect("crawl should succeed in non-git workspace");
+
+    // WalkBuilder reads .gitignore even without .git, so .gitignore rules
+    // still apply. Verify that .gitignore itself is present.
+    assert!(
+        crawl.entry(".gitignore").is_some(),
+        ".gitignore file itself should be present in non-git workspace crawl"
+    );
+    assert!(
+        crawl.entry("Cargo.toml").is_some(),
+        "Cargo.toml should be present in non-git workspace crawl"
+    );
+    assert!(
+        crawl.entry("src/lib.rs").is_some(),
+        "src/lib.rs should be present in non-git workspace crawl"
+    );
+}
+
+#[test]
+fn claude_worktrees_banned_from_recovery() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join(".gitignore"), ".claude/\n");
+    write(root.join(".claude/worktrees/Cargo.toml"), "[package]\nname = \"worktree\"\n");
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+
+    let crawl = crate::crawl(root).expect("crawl should succeed with .claude/worktrees banned");
+
+    // .claude/worktrees/ is a banned root — Cargo.toml inside it should NOT
+    // be recovered even though Cargo.toml is on the recovery list
+    assert!(
+        crawl.entry(".claude/worktrees/Cargo.toml").is_none(),
+        ".claude/worktrees/Cargo.toml should not be recovered because .claude/worktrees is a banned recovery root"
+    );
+    assert!(
+        crawl.entry(".claude").is_none(),
+        ".claude directory should not appear because it is gitignored"
+    );
+}

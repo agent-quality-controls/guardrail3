@@ -1,3 +1,4 @@
+use std::process::Command;
 use std::{fs, path::Path};
 
 use g3rs_workspace_crawl_assertions::workspace_queries::{
@@ -5,10 +6,19 @@ use g3rs_workspace_crawl_assertions::workspace_queries::{
 };
 use tempfile::tempdir;
 
+fn git_init(path: &Path) {
+    let _status = Command::new("git")
+        .args(["init", "--quiet"])
+        .current_dir(path)
+        .status()
+        .expect("git init should succeed");
+}
+
 #[test]
 fn supports_basic_queries_over_the_crawl() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
+    git_init(root);
     fs::create_dir_all(root.join("src")).expect("create source directory for query test");
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write(root.join("src/lib.rs"), "pub fn demo() {}\n");

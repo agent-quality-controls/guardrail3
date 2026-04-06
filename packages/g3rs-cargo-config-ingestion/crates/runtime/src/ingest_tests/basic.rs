@@ -121,3 +121,103 @@ fn ingests_package_cargo_toml() {
         "parsed package name should match the fixture"
     );
 }
+
+#[test]
+fn empty_cargo_toml_parses_to_hollow_input() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join("Cargo.toml"), "");
+
+    let crawl = crawl(root);
+    let result = crate::ingest(&crawl);
+
+    let input = result.expect("ingestion should succeed for an empty Cargo.toml");
+    assert!(
+        input.cargo.package.is_none(),
+        "empty Cargo.toml should have no [package] section"
+    );
+    assert!(
+        input.cargo.workspace.is_none(),
+        "empty Cargo.toml should have no [workspace] section"
+    );
+}
+
+#[test]
+fn nested_cargo_toml_is_not_selected() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"packages/foo\"]\nresolver = \"2\"\n",
+    );
+    write(
+        root.join("packages/foo/Cargo.toml"),
+        "[package]\nname = \"foo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("packages/foo/src/lib.rs"), "");
+
+    let crawl = crawl(root);
+    let result = crate::ingest(&crawl);
+
+    let input = result.expect("ingestion should succeed when a root Cargo.toml exists");
+    assert_eq!(
+        input.cargo_rel_path, "Cargo.toml",
+        "ingestion should select the root Cargo.toml, not a nested one"
+    );
+}
+
+#[test]
+fn ignored_but_recovered_cargo_toml_is_ingested() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join(".gitignore"), "Cargo.toml\n");
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"recovered\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+
+    let crawl = crawl(root);
+    let result = crate::ingest(&crawl);
+
+    let input = result.expect(
+        "ingestion should succeed for a gitignored Cargo.toml recovered by the crawl recovery phase",
+    );
+    assert_eq!(
+        input.cargo_rel_path, "Cargo.toml",
+        "recovered Cargo.toml should still resolve to the root-relative path"
+    );
+}
+
+#[test]
+fn workspace_and_package_combined() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = []\nresolver = \"2\"\n\n[package]\nname = \"combined\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("src/lib.rs"), "");
+
+    let crawl = crawl(root);
+    let result = crate::ingest(&crawl);
+
+    let input = result.expect(
+        "ingestion should succeed for a Cargo.toml with both [workspace] and [package] sections",
+    );
+    assert!(
+        input.cargo.workspace.is_some(),
+        "parsed Cargo.toml should contain the [workspace] section"
+    );
+    assert!(
+        input.cargo.package.is_some(),
+        "parsed Cargo.toml should contain the [package] section"
+    );
+}

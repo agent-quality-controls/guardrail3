@@ -1,3 +1,4 @@
+/// Error types for Cargo config ingestion.
 mod error;
 
 #[cfg(feature = "api")]
