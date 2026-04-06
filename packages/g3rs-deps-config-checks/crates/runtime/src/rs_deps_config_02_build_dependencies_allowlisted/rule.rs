@@ -1,11 +1,11 @@
-use g3rs_deps_config_checks_types::G3RsDepsConfigPolicyChecksInput;
+use g3rs_deps_config_checks_types::G3RsDepsConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{DependencySectionKind, allowlist_present, allowlisted, dependency_entries_from_policy_input, error, info};
 
 const ID: &str = "RS-DEPS-CONFIG-02";
 
-pub(crate) fn check(input: &G3RsDepsConfigPolicyChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3RsDepsConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !allowlist_present(input) {
         return;
     }

@@ -7,4 +7,4 @@ mod run;
 mod support;
 
 #[cfg(feature = "checks")]
-pub use run::{check_direct_dependency_cap, check_policy};
+pub use run::check;

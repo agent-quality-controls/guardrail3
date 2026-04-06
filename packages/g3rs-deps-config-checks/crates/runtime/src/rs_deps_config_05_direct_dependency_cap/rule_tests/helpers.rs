@@ -1,6 +1,7 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
-use g3rs_deps_config_checks_types::{G3RsDepsConfigDirectDependencyCapInput, G3RsDepsConfigLocalPathCargoManifest};
+use g3rs_deps_config_checks_types::{G3RsDepsConfigChecksInput, G3RsDepsConfigLocalPathCargoManifest};
 use guardrail3_check_types::G3CheckResult;
+use guardrail3_domain_config::types::GuardrailConfig;
 
 use crate::rs_deps_config_05_direct_dependency_cap::rule::check;
 
@@ -14,12 +15,15 @@ pub(super) fn run_check_with_local_paths(
     local_path_cargo_rel_paths: &[&str],
     local_path_cargo_manifests: &[(&str, &str)],
 ) -> Vec<G3CheckResult> {
-    let input = G3RsDepsConfigDirectDependencyCapInput {
+    let input = G3RsDepsConfigChecksInput {
         workspace_cargo_rel_path: "Cargo.toml".to_owned(),
         workspace_cargo: parse_cargo_toml(workspace_cargo_toml)
             .expect("workspace Cargo.toml fixture should parse"),
         crate_cargo_rel_path: "apps/api/Cargo.toml".to_owned(),
         crate_cargo: parse_cargo_toml(crate_cargo_toml).expect("crate Cargo.toml fixture should parse"),
+        guardrail_rel_path: "guardrail3.toml".to_owned(),
+        guardrail: toml::from_str::<GuardrailConfig>("")
+            .expect("empty guardrail3.toml fixture should parse"),
         local_path_cargo_rel_paths: local_path_cargo_rel_paths
             .iter()
             .map(|path| (*path).to_owned())
