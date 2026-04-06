@@ -1,28 +1,33 @@
 [package]
-name = "g3rs-garde-config-checks"
+name = "g3rs-garde-config-ingestion"
 version = "0.1.0"
 edition = "2024"
-description = "Facade crate for guardrail3 garde root-policy config checks"
+description = "Facade crate for guardrail3 garde config ingestion"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
-keywords = ["guardrail3", "garde", "checks", "rust", "policy"]
+keywords = ["guardrail3", "garde", "ingestion", "rust"]
 categories = ["development-tools"]
 publish = true
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
-g3rs-garde-config-checks-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
-g3rs-garde-config-checks-types = { path = "crates/types", version = "0.1.0", optional = true }
+g3rs-garde-config-ingestion-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
+g3rs-garde-config-ingestion-types = { path = "crates/types", version = "0.1.0", optional = true }
 
 [features]
 default = ["all"]
 all = ["api"]
 api = [
-    "dep:g3rs-garde-config-checks-runtime",
-    "dep:g3rs-garde-config-checks-types",
+    "dep:g3rs-garde-config-ingestion-runtime",
+    "dep:g3rs-garde-config-ingestion-types",
 ]
+
+[dev-dependencies]
+g3rs-garde-config-checks = { path = "../g3rs-garde-config-checks", version = "0.1.0" }
+g3rs-workspace-crawl = { path = "../g3rs-workspace-crawl", version = "0.1.0" }
+guardrail3-check-types = { path = "../guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 
 [package.metadata.guardrail3]
 shared = true
