@@ -42,6 +42,8 @@ pub struct ReleasePlzWorkspace {
 pub struct ReleasePlzPackage {
     /// The package name this override applies to.
     pub name: Option<String>,
+    /// Whether this package should be published.
+    pub publish: Option<bool>,
     /// Unknown package keys preserved for forward compatibility.
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
