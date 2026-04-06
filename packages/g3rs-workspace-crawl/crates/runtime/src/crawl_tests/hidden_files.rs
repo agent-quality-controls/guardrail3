@@ -1,4 +1,6 @@
-use std::{fs, path::Path};
+use std::fs;
+use std::path::Path;
+use std::process::Command;
 
 use g3rs_workspace_crawl_assertions::{
     workspace_entries::{assert_entry, assert_has_rel_path},
@@ -7,12 +9,26 @@ use g3rs_workspace_crawl_assertions::{
 use g3rs_workspace_crawl_types::{G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState};
 use tempfile::tempdir;
 
+fn git_init(path: &Path) {
+    let _status = Command::new("git")
+        .args(["init", "--quiet"])
+        .current_dir(path)
+        .status()
+        .expect("git init should succeed");
+}
+
 #[test]
 fn includes_hidden_config_files() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
-    write(root.join(".clippy.toml"), "msrv = \"1.85\"\n");
-    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n");
+    git_init(root);
+    fs::write(root.join(".clippy.toml"), "msrv = \"1.85\"\n")
+        .expect("write hidden config fixture");
+    fs::write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n",
+    )
+    .expect("write Cargo.toml fixture");
 
     let crawl = crate::crawl(root).expect("crawl should succeed");
 
@@ -24,8 +40,4 @@ fn includes_hidden_config_files() {
         G3RsWorkspaceIgnoreState::Included,
         true,
     );
-}
-
-fn write(path: impl AsRef<Path>, content: &str) {
-    fs::write(path, content).expect("write hidden-files fixture file");
 }
