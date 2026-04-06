@@ -323,8 +323,9 @@ fn non_git_workspace_includes_everything() {
 
     let crawl = crate::crawl(root).expect("crawl should succeed in non-git workspace");
 
-    // WalkBuilder reads .gitignore even without .git, so .gitignore rules
-    // still apply. Verify that .gitignore itself is present.
+    // Without .git, the ignore crate's require_git default (true) means
+    // .gitignore rules may or may not be applied depending on whether a
+    // .git exists above the temp dir. Verify core files are present.
     assert!(
         crawl.entry(".gitignore").is_some(),
         ".gitignore file itself should be present in non-git workspace crawl"
@@ -337,6 +338,8 @@ fn non_git_workspace_includes_everything() {
         crawl.entry("src/lib.rs").is_some(),
         "src/lib.rs should be present in non-git workspace crawl"
     );
+    // debug.log may or may not be ignored depending on whether a .git dir
+    // exists above the tempdir. We don't assert on it to avoid test flakiness.
 }
 
 #[test]

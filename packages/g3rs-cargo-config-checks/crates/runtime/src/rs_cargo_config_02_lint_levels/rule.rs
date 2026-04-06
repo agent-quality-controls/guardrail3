@@ -76,13 +76,18 @@ fn check_expected(
     let mut violations = 0usize;
 
     if let Some(actual_level) = lint_level(lints, expected.name) {
-        if actual_level != expected.expected_level && is_weaker(expected.expected_level, actual_level) {
+        if actual_level != expected.expected_level {
+            let direction = if is_weaker(expected.expected_level, actual_level) {
+                "weaker"
+            } else {
+                "different"
+            };
             violations += 1;
             results.push(error(
                 ID,
-                format!("lint `{}` weakens policy", expected.name),
+                format!("lint `{}` deviates from policy", expected.name),
                 format!(
-                    "Expected `{}`, got weaker level `{}`. Change `{}` to `{}` in `{}`.",
+                    "Expected `{}`, got {direction} level `{}`. Change `{}` to `{}` in `{}`.",
                     expected.expected_level,
                     actual_level,
                     expected.name,

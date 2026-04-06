@@ -25,7 +25,9 @@ pub(crate) fn crawl_workspace(
     // Phase 1: Walk with ignore crate for correct gitignore semantics.
     // Handles ancestor gitignores (parents), nested gitignores during descent,
     // and dotfiles as normal entries. No global or exclude-file semantics
-    // so validation is machine-independent.
+    // so validation is machine-independent. Banned directories (target,
+    // node_modules) are excluded even if not gitignored.
+    let root_for_filter = workspace_root.to_path_buf();
     let walker = WalkBuilder::new(workspace_root)
         .hidden(false)
         .git_ignore(true)
@@ -34,6 +36,16 @@ pub(crate) fn crawl_workspace(
         .parents(true)
         .ignore(false)
         .follow_links(false)
+        .filter_entry(move |entry| {
+            if !entry.file_type().is_some_and(|ft| ft.is_dir()) {
+                return true;
+            }
+            let Ok(rel) = entry.path().strip_prefix(&root_for_filter) else {
+                return true;
+            };
+            let rel = rel.to_string_lossy();
+            !crate::recovery::is_banned(&rel)
+        })
         .build();
 
     for entry in walker.flatten() {
