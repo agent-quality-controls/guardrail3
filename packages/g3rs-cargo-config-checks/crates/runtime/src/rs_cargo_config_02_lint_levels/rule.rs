@@ -44,16 +44,20 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
             );
         }
         for required in EXPECTED_CLIPPY_REQUIRED_ALLOW {
-            violations += check_expected(
-                cargo_rel_path,
-                clippy_lints,
-                &LintExpectation {
-                    name: required.name,
-                    expected_level: "allow",
-                    priority: None,
-                },
-                results,
-            );
+            if let Some(actual_level) = lint_level(clippy_lints, required.name) {
+                if actual_level != "allow" {
+                    violations += 1;
+                    results.push(error(
+                        ID,
+                        format!("lint `{}` must be allow", required.name),
+                        format!(
+                            "`{}` must be `\"allow\"` (got `\"{actual_level}\"`). Reason: {}",
+                            required.name, required.reason
+                        ),
+                        cargo_rel_path,
+                    ));
+                }
+            }
         }
     }
 
@@ -76,18 +80,13 @@ fn check_expected(
     let mut violations = 0usize;
 
     if let Some(actual_level) = lint_level(lints, expected.name) {
-        if actual_level != expected.expected_level {
-            let direction = if is_weaker(expected.expected_level, actual_level) {
-                "weaker"
-            } else {
-                "different"
-            };
+        if actual_level != expected.expected_level && is_weaker(expected.expected_level, actual_level) {
             violations += 1;
             results.push(error(
                 ID,
-                format!("lint `{}` deviates from policy", expected.name),
+                format!("lint `{}` weakens policy", expected.name),
                 format!(
-                    "Expected `{}`, got {direction} level `{}`. Change `{}` to `{}` in `{}`.",
+                    "Expected at least `{}`, got weaker level `{}`. Change `{}` to `{}` in `{}`.",
                     expected.expected_level,
                     actual_level,
                     expected.name,

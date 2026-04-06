@@ -35,7 +35,7 @@ pub(crate) const EXPECTED_RUST_LINTS: &[LintExpectation] = &[
     },
     LintExpectation {
         name: "missing_debug_implementations",
-        expected_level: "deny",
+        expected_level: "warn",
         priority: None,
     },
 ];

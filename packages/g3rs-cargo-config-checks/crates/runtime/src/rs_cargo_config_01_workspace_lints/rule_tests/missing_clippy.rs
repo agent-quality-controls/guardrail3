@@ -15,7 +15,7 @@ unsafe_code = "forbid"
 dead_code = "deny"
 unused_results = "deny"
 unused_crate_dependencies = "deny"
-missing_debug_implementations = "deny"
+missing_debug_implementations = "warn"
 unreachable_pub = "deny"
 "#,
     );
