@@ -76,8 +76,15 @@ fn prefers_deny_toml_over_dot_variant() {
     let root = temp.path();
     git_init(root);
 
-    write(root.join("deny.toml"), "[advisories]\n");
-    write(root.join(".deny.toml"), "[advisories]\n");
+    // Write distinguishable content so we can verify which file was actually read
+    write(
+        root.join("deny.toml"),
+        "[advisories]\ndb-path = \"from-deny-toml\"\n",
+    );
+    write(
+        root.join(".deny.toml"),
+        "[advisories]\ndb-path = \"from-dot-deny-toml\"\n",
+    );
 
     let crawl = crawl(root);
     let result = crate::ingest(&crawl);
@@ -87,6 +94,18 @@ fn prefers_deny_toml_over_dot_variant() {
     assert_eq!(
         input.deny_rel_path, "deny.toml",
         "deny.toml should be preferred over .deny.toml when both exist"
+    );
+    let db_path = input
+        .deny
+        .advisories
+        .as_ref()
+        .expect("parsed deny.toml should have [advisories] section to verify correct file was read")
+        .db_path
+        .as_deref();
+    assert_eq!(
+        db_path,
+        Some("from-deny-toml"),
+        "content should come from deny.toml, not .deny.toml, when both exist"
     );
 }
 
@@ -137,6 +156,17 @@ fn ignored_but_recovered_deny_toml_is_ingested() {
     );
 
     let crawl = crawl(root);
+
+    // Verify the crawl actually marked this as Ignored (proving recovery path)
+    let crawl_entry = crawl
+        .entry("deny.toml")
+        .expect("deny.toml should be present in crawl via recovery even when gitignored");
+    assert_eq!(
+        crawl_entry.ignore_state,
+        g3rs_workspace_crawl::G3RsWorkspaceIgnoreState::Ignored,
+        "deny.toml should have Ignored state when gitignored, proving the recovery path was exercised"
+    );
+
     let result = crate::ingest(&crawl);
 
     let input = result.expect(
@@ -145,6 +175,31 @@ fn ignored_but_recovered_deny_toml_is_ingested() {
     assert_eq!(
         input.deny_rel_path, "deny.toml",
         "recovered deny.toml should still resolve to the root-relative path"
+    );
+}
+
+#[test]
+fn nested_deny_toml_is_not_selected() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("deny.toml"),
+        "[advisories]\ndb-path = \"root\"\n",
+    );
+    write(
+        root.join("packages/foo/deny.toml"),
+        "[advisories]\ndb-path = \"nested\"\n",
+    );
+
+    let crawl = crawl(root);
+    let result = crate::ingest(&crawl);
+
+    let input = result.expect("ingestion should succeed when root deny.toml exists");
+    assert_eq!(
+        input.deny_rel_path, "deny.toml",
+        "ingestion should select the root deny.toml, not a nested one"
     );
 }
 

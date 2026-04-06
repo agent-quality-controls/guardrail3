@@ -225,9 +225,9 @@ g3rs-toolchain-config-checks = { path = "../../../g3rs-toolchain-config-checks",
 ```
 (Needs the checks types for the result struct fields.)
 
-## Packages that need `shared = true` added
+## Packages that need `shared = true` (already present)
 
-Add `[package.metadata.guardrail3]\nshared = true` to:
+Verify `[package.metadata.guardrail3] shared = true` exists in these Cargo.toml files (it was already added — do NOT add a duplicate section):
 - `packages/rust-toolchain-toml-parser/Cargo.toml`
 - `packages/g3rs-toolchain-config-checks/Cargo.toml`
 

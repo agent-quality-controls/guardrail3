@@ -183,6 +183,17 @@ fn ignored_but_recovered_cargo_toml_is_ingested() {
     );
 
     let crawl = crawl(root);
+
+    // Verify the crawl actually marked this as Ignored (proving recovery path)
+    let crawl_entry = crawl
+        .entry("Cargo.toml")
+        .expect("Cargo.toml should be present in crawl via recovery even when gitignored");
+    assert_eq!(
+        crawl_entry.ignore_state,
+        g3rs_workspace_crawl::G3RsWorkspaceIgnoreState::Ignored,
+        "Cargo.toml should have Ignored state when gitignored, proving the recovery path was exercised"
+    );
+
     let result = crate::ingest(&crawl);
 
     let input = result.expect(

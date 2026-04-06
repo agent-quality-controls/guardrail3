@@ -365,3 +365,37 @@ fn claude_worktrees_banned_from_recovery() {
         ".claude directory should not appear because it is gitignored"
     );
 }
+
+#[test]
+fn banned_dirs_excluded_from_phase1_without_gitignore() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    // node_modules is NOT in .gitignore, but is a banned dir name.
+    // Phase 1's filter_entry should exclude it even without gitignore.
+    fs::create_dir_all(root.join("node_modules")).expect("create node_modules dir");
+    write(
+        root.join("node_modules/package.json"),
+        "{\"name\": \"dep\"}\n",
+    );
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+
+    let crawl =
+        crate::crawl(root).expect("crawl should succeed with un-gitignored banned directory");
+
+    // node_modules/ should not appear as Included despite not being gitignored
+    assert!(
+        crawl.entry("node_modules").is_none(),
+        "node_modules directory should be excluded by Phase 1 banned-dir filter even without .gitignore"
+    );
+    assert!(
+        crawl.entry("node_modules/package.json").is_none(),
+        "files inside banned node_modules/ should not appear even without .gitignore"
+    );
+    // Cargo.toml at root should still be included
+    assert!(
+        crawl.entry("Cargo.toml").is_some(),
+        "root Cargo.toml should be present when only node_modules is banned"
+    );
+}

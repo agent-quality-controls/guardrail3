@@ -186,9 +186,9 @@ No external dependencies. Just `[lints] workspace = true` and `[package.metadata
 g3rs-clippy-config-ingestion-types = { path = "../types" }
 ```
 
-## Packages that need `shared = true` added
+## Packages that need `shared = true` (already present)
 
-Add `[package.metadata.guardrail3]\nshared = true` to these Cargo.toml files (BEFORE `[package.metadata.docs.rs]` if it exists):
+Verify `[package.metadata.guardrail3] shared = true` exists in these Cargo.toml files (it was already added — do NOT add a duplicate section):
 - `packages/clippy-toml-parser/Cargo.toml`
 - `packages/g3rs-clippy-config-checks/Cargo.toml`
 
