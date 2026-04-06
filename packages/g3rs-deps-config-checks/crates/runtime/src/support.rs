@@ -3,7 +3,7 @@ use std::path::{Component, Path};
 
 use cargo_toml_parser::{CargoToml, Dependency, TargetDependencyTables};
 use g3rs_deps_config_checks_types::{
-    G3RsDepsConfigDirectDependencyCapInput, G3RsDepsConfigLocalPathCargoManifest, G3RsDepsConfigPolicyChecksInput,
+    G3RsDepsConfigChecksInput, G3RsDepsConfigLocalPathCargoManifest,
 };
 use glob::Pattern;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
@@ -67,12 +67,12 @@ pub(crate) fn crate_name(cargo_rel_path: &str, cargo: &CargoToml) -> String {
         .unwrap_or_else(|| fallback_name(cargo_rel_path))
 }
 
-pub(crate) fn allowlist_present(input: &G3RsDepsConfigPolicyChecksInput) -> bool {
+pub(crate) fn allowlist_present(input: &G3RsDepsConfigChecksInput) -> bool {
     crate_policy(input).and_then(CrateConfig::allowed_deps).is_some()
 }
 
 pub(crate) fn allowlisted(
-    input: &G3RsDepsConfigPolicyChecksInput,
+    input: &G3RsDepsConfigChecksInput,
     dep_package_name: &str,
 ) -> bool {
     crate_policy(input)
@@ -80,13 +80,13 @@ pub(crate) fn allowlisted(
         .is_some_and(|allowed| allowed.iter().any(|dep| dep == dep_package_name))
 }
 
-pub(crate) fn workspace_is_library(input: &G3RsDepsConfigPolicyChecksInput) -> bool {
+pub(crate) fn workspace_is_library(input: &G3RsDepsConfigChecksInput) -> bool {
     effective_profile_name(&input.guardrail, crate_rel_dir(&input.crate_cargo_rel_path))
         .is_some_and(|profile| profile == "library")
 }
 
 pub(crate) fn dependency_entries_from_policy_input(
-    input: &G3RsDepsConfigPolicyChecksInput,
+    input: &G3RsDepsConfigChecksInput,
 ) -> Vec<DependencyEntry<'_>> {
     let lookup = local_path_cargo_lookup(
         &input.local_path_cargo_rel_paths,
@@ -102,7 +102,7 @@ pub(crate) fn dependency_entries_from_policy_input(
 }
 
 pub(crate) fn dependency_entries_from_cap_input(
-    input: &G3RsDepsConfigDirectDependencyCapInput,
+    input: &G3RsDepsConfigChecksInput,
 ) -> Vec<DependencyEntry<'_>> {
     let lookup = local_path_cargo_lookup(
         &input.local_path_cargo_rel_paths,
@@ -118,7 +118,7 @@ pub(crate) fn dependency_entries_from_cap_input(
 }
 
 pub(crate) fn unique_direct_dependency_names(
-    input: &G3RsDepsConfigDirectDependencyCapInput,
+    input: &G3RsDepsConfigChecksInput,
 ) -> BTreeSet<String> {
     dependency_entries_from_cap_input(input)
         .into_iter()
@@ -497,7 +497,7 @@ fn fallback_name(cargo_rel_path: &str) -> String {
         })
 }
 
-fn crate_policy(input: &G3RsDepsConfigPolicyChecksInput) -> Option<&CrateConfig> {
+fn crate_policy(input: &G3RsDepsConfigChecksInput) -> Option<&CrateConfig> {
     crate_policy_from_guardrail(&input.guardrail, crate_rel_dir(&input.crate_cargo_rel_path))
 }
 

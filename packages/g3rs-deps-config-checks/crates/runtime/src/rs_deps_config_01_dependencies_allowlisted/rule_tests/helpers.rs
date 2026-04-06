@@ -1,5 +1,5 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
-use g3rs_deps_config_checks_types::{G3RsDepsConfigLocalPathCargoManifest, G3RsDepsConfigPolicyChecksInput};
+use g3rs_deps_config_checks_types::{G3RsDepsConfigLocalPathCargoManifest, G3RsDepsConfigChecksInput};
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_domain_config::types::GuardrailConfig;
 
@@ -29,7 +29,7 @@ pub(super) fn run_check_with_local_paths(
     local_path_cargo_rel_paths: &[&str],
     local_path_cargo_manifests: &[(&str, &str)],
 ) -> Vec<G3CheckResult> {
-    let input = G3RsDepsConfigPolicyChecksInput {
+    let input = G3RsDepsConfigChecksInput {
         workspace_cargo_rel_path: "Cargo.toml".to_owned(),
         workspace_cargo: parse_cargo_toml(workspace_cargo_toml)
             .expect("workspace Cargo.toml fixture should parse"),

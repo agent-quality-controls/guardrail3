@@ -1,6 +1,6 @@
 #[cfg(feature = "api")]
-pub use g3rs_deps_config_checks_runtime::{check_direct_dependency_cap, check_policy};
+pub use g3rs_deps_config_checks_runtime::check;
 #[cfg(feature = "api")]
 pub use g3rs_deps_config_checks_types::{
-    G3RsDepsConfigDirectDependencyCapInput, G3RsDepsConfigLocalPathCargoManifest, G3RsDepsConfigPolicyChecksInput,
+    G3RsDepsConfigChecksInput, G3RsDepsConfigLocalPathCargoManifest,
 };
