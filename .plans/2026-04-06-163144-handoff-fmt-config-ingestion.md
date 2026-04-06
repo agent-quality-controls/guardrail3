@@ -238,12 +238,12 @@ tempfile = "3"
 ### Types Cargo.toml
 No external dependencies (error type only uses std::path::PathBuf).
 
-## Packages that need `shared = true` added
+## Packages that need `shared = true` (already present)
 
-Add `[package.metadata.guardrail3]\nshared = true` to:
+Verify `[package.metadata.guardrail3] shared = true` exists in these Cargo.toml files (it was already added — do NOT add a duplicate section):
 - `packages/rustfmt-toml-parser/Cargo.toml`
 - `packages/g3rs-fmt-config-checks/Cargo.toml`
-- `packages/rust-toolchain-toml-parser/Cargo.toml` (if not already done by toolchain ingestion agent)
+- `packages/rust-toolchain-toml-parser/Cargo.toml`
 
 ## Tests (in ingest_tests/basic.rs)
 
