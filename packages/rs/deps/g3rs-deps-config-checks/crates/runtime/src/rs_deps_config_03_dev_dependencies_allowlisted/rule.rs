@@ -1,4 +1,5 @@
 use g3rs_deps_config_checks_types::G3RsDepsConfigChecksInput;
+use g3rs_deps_types::G3RsDepsDependencySection;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{allowlist_present, allowlisted, dependencies_in_section, info, warn};
@@ -10,10 +11,7 @@ pub(crate) fn check(input: &G3RsDepsConfigChecksInput, results: &mut Vec<G3Check
         return;
     }
 
-    for entry in dependencies_in_section(
-        input,
-        g3rs_deps_config_checks_types::G3RsDepsDependencySection::DevDependencies,
-    ) {
+    for entry in dependencies_in_section(input, G3RsDepsDependencySection::DevDependencies) {
         if allowlisted(input, &entry.package_name) {
             results.push(info(
                 ID,

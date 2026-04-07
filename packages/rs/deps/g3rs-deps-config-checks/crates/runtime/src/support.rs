@@ -1,6 +1,7 @@
 use std::collections::BTreeSet;
 
-use g3rs_deps_config_checks_types::{G3RsDepsConfigChecksInput, G3RsDepsDependencySection};
+use g3rs_deps_config_checks_types::G3RsDepsConfigChecksInput;
+use g3rs_deps_types::{G3RsDepsDependencySection, G3RsDepsResolvedDependency};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_rs_toml_parser::RustProfile;
 
@@ -61,7 +62,7 @@ pub(crate) fn unique_direct_dependency_names(input: &G3RsDepsConfigChecksInput) 
 pub(crate) fn dependencies_in_section<'a>(
     input: &'a G3RsDepsConfigChecksInput,
     section: G3RsDepsDependencySection,
-) -> impl Iterator<Item = &'a g3rs_deps_config_checks_types::G3RsDepsResolvedDependency> {
+) -> impl Iterator<Item = &'a G3RsDepsResolvedDependency> {
     input
         .dependencies
         .iter()
