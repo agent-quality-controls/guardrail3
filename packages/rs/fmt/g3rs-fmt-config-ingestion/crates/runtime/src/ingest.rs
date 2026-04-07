@@ -1,6 +1,6 @@
 /// Assemble the checks input from selected and parsed data.
 use cargo_toml_parser::CargoToml;
-use g3rs_fmt_config_checks::G3RsFmtConfigChecksInput;
+use g3rs_fmt_types::G3RsFmtConfigChecksInput;
 use rust_toolchain_toml_parser::RustToolchainToml;
 use rustfmt_toml_parser::RustfmtToml;
 

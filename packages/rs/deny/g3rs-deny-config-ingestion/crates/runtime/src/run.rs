@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_deny_config_checks::G3RsDenyConfigChecksInput;
+use g3rs_deny_types::G3RsDenyConfigChecksInput;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsDenyConfigIngestionError` so the facade can reach it.

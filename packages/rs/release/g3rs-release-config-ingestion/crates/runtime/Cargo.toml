@@ -24,7 +24,7 @@ shared = true
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 cliff-toml-parser = { path = "../../../../../parsers/cliff-toml-parser", version = "0.1.0" }
-g3rs-release-config-checks = { path = "../../../g3rs-release-config-checks", version = "0.1.0" }
+g3rs-release-types = { path = "../../../g3rs-release-types", version = "0.1.0" }
 g3rs-release-config-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 release-plz-toml-parser = { path = "../../../../../parsers/release-plz-toml-parser", version = "0.1.0" }

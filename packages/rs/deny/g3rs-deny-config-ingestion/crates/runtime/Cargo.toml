@@ -23,7 +23,7 @@ shared = true
 
 [dependencies]
 deny-toml-parser = { path = "../../../../../parsers/deny-toml-parser", version = "0.1.0" }
-g3rs-deny-config-checks = { path = "../../../g3rs-deny-config-checks", version = "0.1.0" }
+g3rs-deny-types = { path = "../../../g3rs-deny-types", version = "0.1.0" }
 g3rs-deny-config-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 

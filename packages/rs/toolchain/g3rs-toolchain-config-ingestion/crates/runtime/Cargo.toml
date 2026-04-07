@@ -23,7 +23,7 @@ shared = true
 
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
-g3rs-toolchain-config-checks = { path = "../../../g3rs-toolchain-config-checks", version = "0.1.0" }
+g3rs-toolchain-types = { path = "../../../g3rs-toolchain-types", version = "0.1.0" }
 g3rs-toolchain-config-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser", version = "0.1.0" }

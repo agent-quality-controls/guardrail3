@@ -1,0 +1,33 @@
+[package]
+name = "g3rs-clippy-types"
+version = "0.1.0"
+edition = "2024"
+description = "Shared types for g3rs clippy family"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["guardrail3", "clippy", "types", "rust"]
+categories = ["development-tools"]
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints.rust]
+warnings = "deny"
+unsafe_code = "forbid"
+dead_code = "deny"
+unused_results = "deny"
+unused_crate_dependencies = "deny"
+missing_debug_implementations = "deny"
+unreachable_pub = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+cargo = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+redundant_pub_crate = "allow"
+module_name_repetitions = "allow"
+
+[dependencies]
+clippy-toml-parser = { path = "../../../parsers/clippy-toml-parser" }

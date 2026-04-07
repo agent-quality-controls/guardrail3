@@ -23,7 +23,7 @@ shared = true
 
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
-g3rs-cargo-config-checks = { path = "../../../g3rs-cargo-config-checks", version = "0.1.0" }
+g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
 g3rs-cargo-config-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 

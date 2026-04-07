@@ -87,6 +87,13 @@ dependencies = [
 name = "g3rs-release-config-checks-types"
 version = "0.1.0"
 dependencies = [
+ "g3rs-release-types",
+]
+
+[[package]]
+name = "g3rs-release-types"
+version = "0.1.0"
+dependencies = [
  "cargo-toml-parser",
  "cliff-toml-parser",
  "release-plz-toml-parser",

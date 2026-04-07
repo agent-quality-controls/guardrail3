@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_toolchain_config_checks::G3RsToolchainConfigChecksInput;
+use g3rs_toolchain_types::G3RsToolchainConfigChecksInput;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsToolchainConfigIngestionError` so the facade can reach it.

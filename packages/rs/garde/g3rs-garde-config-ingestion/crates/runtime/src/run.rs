@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_garde_config_checks::G3RsGardeConfigChecksInput;
+use g3rs_garde_types::G3RsGardeConfigChecksInput;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsGardeConfigIngestionError` so the facade can reach it.

@@ -61,6 +61,13 @@ dependencies = [
 name = "g3rs-cargo-config-checks-types"
 version = "0.1.0"
 dependencies = [
+ "g3rs-cargo-types",
+]
+
+[[package]]
+name = "g3rs-cargo-types"
+version = "0.1.0"
+dependencies = [
  "cargo-toml-parser",
 ]
 

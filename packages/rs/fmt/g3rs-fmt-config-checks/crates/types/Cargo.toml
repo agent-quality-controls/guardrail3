@@ -12,6 +12,4 @@ readme = "README.md"
 workspace = true
 
 [dependencies]
-cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser" }
-rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser" }
-rustfmt-toml-parser = { path = "../../../../../parsers/rustfmt-toml-parser" }
+g3rs-fmt-types = { path = "../../../g3rs-fmt-types" }

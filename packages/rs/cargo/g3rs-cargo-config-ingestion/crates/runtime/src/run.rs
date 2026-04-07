@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_cargo_config_checks::G3RsCargoConfigChecksInput;
+use g3rs_cargo_types::G3RsCargoConfigChecksInput;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsCargoConfigIngestionError` so the facade can reach it.
