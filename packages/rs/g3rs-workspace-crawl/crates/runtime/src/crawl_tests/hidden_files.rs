@@ -22,8 +22,7 @@ fn includes_hidden_config_files() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
-    fs::write(root.join(".clippy.toml"), "msrv = \"1.85\"\n")
-        .expect("write hidden config fixture");
+    fs::write(root.join(".clippy.toml"), "msrv = \"1.85\"\n").expect("write hidden config fixture");
     fs::write(
         root.join("Cargo.toml"),
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n",

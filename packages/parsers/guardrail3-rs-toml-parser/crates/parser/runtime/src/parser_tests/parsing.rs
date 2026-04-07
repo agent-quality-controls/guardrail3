@@ -1,5 +1,5 @@
-use helpers::{parse_fixture, parse_fixture_file, parse_from_tempfile};
 use guardrail3_rs_toml_parser_runtime_assertions::parser as assertions;
+use helpers::{parse_fixture, parse_fixture_file, parse_from_tempfile};
 
 use super::helpers;
 
@@ -52,7 +52,11 @@ reviewer = "guardrail-team"
 
     assertions::assert_version(&cfg, Some("1"));
     assertions::assert_profile(&cfg, Some(crate::RustProfile::Library));
-    assertions::assert_string_list(&cfg.excluded_paths, &["legacy", "tests/fixtures"], "excluded_paths");
+    assertions::assert_string_list(
+        &cfg.excluded_paths,
+        &["legacy", "tests/fixtures"],
+        "excluded_paths",
+    );
     assertions::assert_string_list(&cfg.allowed_deps, &["serde", "toml"], "allowed_deps");
     assertions::assert_check_value(cfg.checks.as_ref(), "fmt", Some(true));
     assertions::assert_check_value(cfg.checks.as_ref(), "clippy", Some(true));
@@ -127,7 +131,11 @@ fn realistic_workspace_fixture_file_parses() {
 
     assertions::assert_version(&cfg, Some("1"));
     assertions::assert_profile(&cfg, Some(crate::RustProfile::Service));
-    assertions::assert_string_list(&cfg.excluded_paths, &["legacy", "tests/fixtures"], "excluded_paths");
+    assertions::assert_string_list(
+        &cfg.excluded_paths,
+        &["legacy", "tests/fixtures"],
+        "excluded_paths",
+    );
     assertions::assert_string_list(&cfg.allowed_deps, &["serde", "toml"], "allowed_deps");
     assertions::assert_check_value(cfg.checks.as_ref(), "fmt", Some(true));
     assertions::assert_check_value(cfg.checks.as_ref(), "hooks_rs", Some(true));

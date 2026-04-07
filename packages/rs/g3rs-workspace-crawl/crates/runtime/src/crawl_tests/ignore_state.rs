@@ -39,7 +39,9 @@ fn marks_gitignored_files_as_included_via_recovery() {
     // Cargo.lock is ignored but recoverable — should appear as Ignored
     assert_has_rel_path(&crawl.entries, "Cargo.lock");
     assert_entry(
-        crawl.entry("Cargo.lock").expect("Cargo.lock should be recovered from ignored space because it is on the recovery list"),
+        crawl.entry("Cargo.lock").expect(
+            "Cargo.lock should be recovered from ignored space because it is on the recovery list",
+        ),
         G3RsWorkspaceEntryKind::File,
         G3RsWorkspaceIgnoreState::Ignored,
         true,
@@ -47,7 +49,9 @@ fn marks_gitignored_files_as_included_via_recovery() {
 
     // Cargo.toml is not ignored
     assert_entry(
-        crawl.entry("Cargo.toml").expect("Cargo.toml should be present as an included entry in the crawl result"),
+        crawl
+            .entry("Cargo.toml")
+            .expect("Cargo.toml should be present as an included entry in the crawl result"),
         G3RsWorkspaceEntryKind::File,
         G3RsWorkspaceIgnoreState::Included,
         true,
@@ -82,7 +86,10 @@ fn nested_gitignore_is_respected() {
     write(root.join("src/lib.rs"), "");
     write(root.join("src/.gitignore"), "*.tmp\n");
     write(root.join("src/temp.tmp"), "junk");
-    write(root.join("root.tmp"), "also tmp but not ignored by nested rule");
+    write(
+        root.join("root.tmp"),
+        "also tmp but not ignored by nested rule",
+    );
 
     let crawl = crate::crawl(root).expect("crawl should succeed");
 
@@ -94,7 +101,9 @@ fn nested_gitignore_is_respected() {
 
     // root.tmp is NOT ignored (the nested .gitignore only applies to src/)
     assert_entry(
-        crawl.entry("root.tmp").expect("root.tmp should be included"),
+        crawl
+            .entry("root.tmp")
+            .expect("root.tmp should be included"),
         G3RsWorkspaceEntryKind::File,
         G3RsWorkspaceIgnoreState::Included,
         true,
@@ -127,7 +136,9 @@ fn ancestor_gitignore_is_respected() {
 
     // Cargo.toml is included
     assert_entry(
-        crawl.entry("Cargo.toml").expect("Cargo.toml should be present as an included entry in the crawl result"),
+        crawl
+            .entry("Cargo.toml")
+            .expect("Cargo.toml should be present as an included entry in the crawl result"),
         G3RsWorkspaceEntryKind::File,
         G3RsWorkspaceIgnoreState::Included,
         true,
@@ -176,13 +187,17 @@ fn hidden_dotfiles_are_included_normally() {
     let crawl = crate::crawl(root).expect("crawl should succeed");
 
     assert_entry(
-        crawl.entry(".clippy.toml").expect(".clippy.toml should be included as a normal dotfile entry"),
+        crawl
+            .entry(".clippy.toml")
+            .expect(".clippy.toml should be included as a normal dotfile entry"),
         G3RsWorkspaceEntryKind::File,
         G3RsWorkspaceIgnoreState::Included,
         true,
     );
     assert_entry(
-        crawl.entry(".rustfmt.toml").expect(".rustfmt.toml should be included as a normal dotfile entry"),
+        crawl
+            .entry(".rustfmt.toml")
+            .expect(".rustfmt.toml should be included as a normal dotfile entry"),
         G3RsWorkspaceEntryKind::File,
         G3RsWorkspaceIgnoreState::Included,
         true,
@@ -288,7 +303,8 @@ fn directory_only_gitignore_pattern() {
     write(root.join("build-notes.txt"), "keep this");
     write(root.join("src/lib.rs"), "");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed with directory-only gitignore pattern");
+    let crawl =
+        crate::crawl(root).expect("crawl should succeed with directory-only gitignore pattern");
 
     // build/ directory and its contents should not appear (ignored, not recoverable)
     assert!(
@@ -349,7 +365,10 @@ fn claude_worktrees_banned_from_recovery() {
     git_init(root);
 
     write(root.join(".gitignore"), ".claude/\n");
-    write(root.join(".claude/worktrees/Cargo.toml"), "[package]\nname = \"worktree\"\n");
+    write(
+        root.join(".claude/worktrees/Cargo.toml"),
+        "[package]\nname = \"worktree\"\n",
+    );
     write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
 
     let crawl = crate::crawl(root).expect("crawl should succeed with .claude/worktrees banned");

@@ -13,7 +13,10 @@ use guardrail3_rs_toml_parser_runtime::{
 pub fn assert_core_fields_empty(cfg: &Guardrail3RsToml) {
     assert_eq!(cfg.version, None, "version should be None for empty input");
     assert_eq!(cfg.profile, None, "profile should be None for empty input");
-    assert!(cfg.excluded_paths.is_empty(), "excluded_paths should be empty");
+    assert!(
+        cfg.excluded_paths.is_empty(),
+        "excluded_paths should be empty"
+    );
     assert!(cfg.allowed_deps.is_empty(), "allowed_deps should be empty");
     assert_eq!(cfg.checks, None, "checks should be None for empty input");
     assert!(cfg.waivers.is_empty(), "waivers should be empty");
@@ -87,15 +90,14 @@ pub fn assert_waiver(
     let waiver = waiver.expect("waiver should exist");
     assert_eq!(waiver.rule, expected_rule, "waiver rule mismatch");
     assert_eq!(waiver.file, expected_file, "waiver file mismatch");
-    assert_eq!(waiver.selector, expected_selector, "waiver selector mismatch");
+    assert_eq!(
+        waiver.selector, expected_selector,
+        "waiver selector mismatch"
+    );
     assert_eq!(waiver.reason, expected_reason, "waiver reason mismatch");
 }
 
-pub fn assert_waiver_extra_string(
-    waiver: Option<&WaiverConfig>,
-    key: &str,
-    expected: &str,
-) {
+pub fn assert_waiver_extra_string(waiver: Option<&WaiverConfig>, key: &str, expected: &str) {
     assert_eq!(
         waiver
             .and_then(|waiver| waiver.extra.get(key))

@@ -168,8 +168,9 @@ impl<'de> Deserialize<'de> for TomlTrimPaths {
             where
                 A: de::SeqAccess<'de>,
             {
-                let values =
-                    Vec::<TomlTrimPathsValue>::deserialize(de::value::SeqAccessDeserializer::new(seq))?;
+                let values = Vec::<TomlTrimPathsValue>::deserialize(
+                    de::value::SeqAccessDeserializer::new(seq),
+                )?;
                 Ok(TomlTrimPaths::Values(values))
             }
         }
