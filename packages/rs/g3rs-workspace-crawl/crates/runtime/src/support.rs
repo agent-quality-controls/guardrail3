@@ -1,10 +1,7 @@
 use std::path::Path;
 
 use g3rs_workspace_crawl_types::{
-    G3RsWorkspaceEntry,
-    G3RsWorkspaceEntryKind,
-    G3RsWorkspaceIgnoreState,
-    G3RsWorkspacePath,
+    G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState, G3RsWorkspacePath,
 };
 pub(crate) fn build_entry(
     workspace_root: &Path,

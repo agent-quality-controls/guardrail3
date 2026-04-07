@@ -5,8 +5,5 @@ mod entry;
 pub use crawl::G3RsWorkspaceCrawl;
 #[cfg(feature = "api")]
 pub use entry::{
-    G3RsWorkspaceEntry,
-    G3RsWorkspaceEntryKind,
-    G3RsWorkspaceIgnoreState,
-    G3RsWorkspacePath,
+    G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState, G3RsWorkspacePath,
 };

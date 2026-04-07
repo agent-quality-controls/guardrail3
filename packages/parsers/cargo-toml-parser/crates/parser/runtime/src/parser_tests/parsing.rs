@@ -20,7 +20,10 @@ fn empty_string_yields_empty_manifest() {
 }
 
 #[test]
-#[allow(clippy::too_many_lines, reason = "one realistic fixture is the clearest way to prove manifest coverage")]
+#[allow(
+    clippy::too_many_lines,
+    reason = "one realistic fixture is the clearest way to prove manifest coverage"
+)]
 fn realistic_manifest_parses_known_sections() {
     let manifest = parse_fixture(
         r#"
@@ -183,12 +186,21 @@ serde = { version = "1.0.210", path = "vendor/serde" }
 "#,
     );
 
-    assert_eq!(manifest.cargo_features, vec!["profile-rustflags".to_owned()]);
+    assert_eq!(
+        manifest.cargo_features,
+        vec!["profile-rustflags".to_owned()]
+    );
     assertions::assert_top_level_extra_string(&manifest, "future-root", "keep-me");
 
     let package = manifest.package.as_ref().expect("package should exist");
-    assert!(matches!(package.version, Some(InheritableValue::Inherit(_))));
-    assert_eq!(package.edition.as_ref(), Some(&InheritableValue::Value("2024".to_owned())));
+    assert!(matches!(
+        package.version,
+        Some(InheritableValue::Inherit(_))
+    ));
+    assert_eq!(
+        package.edition.as_ref(),
+        Some(&InheritableValue::Value("2024".to_owned()))
+    );
     assert!(matches!(
         package.build.as_ref(),
         Some(PackageBuildValue::MultipleScript(scripts)) if scripts == &vec!["build.rs".to_owned(), "build-extra.rs".to_owned()]
@@ -206,12 +218,20 @@ serde = { version = "1.0.210", path = "vendor/serde" }
         })),
     );
     assert_eq!(
-        package.metadata.as_ref().and_then(|value| value.get("guardrail3")).and_then(|value| value.get("tier")).and_then(toml::Value::as_str),
+        package
+            .metadata
+            .as_ref()
+            .and_then(|value| value.get("guardrail3"))
+            .and_then(|value| value.get("tier"))
+            .and_then(toml::Value::as_str),
         Some("core"),
     );
 
     assert_eq!(
-        manifest.project.as_ref().and_then(|project| project.name.as_deref()),
+        manifest
+            .project
+            .as_ref()
+            .and_then(|project| project.name.as_deref()),
         Some("legacy-alias"),
     );
     assert_eq!(
@@ -222,7 +242,10 @@ serde = { version = "1.0.210", path = "vendor/serde" }
             .and_then(toml::Value::as_str),
         Some("actively-developed"),
     );
-    assert_eq!(manifest.features.get("default"), Some(&vec!["std".to_owned()]));
+    assert_eq!(
+        manifest.features.get("default"),
+        Some(&vec!["std".to_owned()])
+    );
 
     let lib = manifest.lib.as_ref().expect("lib target should exist");
     assert_eq!(lib.crate_type, vec!["rlib".to_owned(), "cdylib".to_owned()]);
@@ -232,13 +255,20 @@ serde = { version = "1.0.210", path = "vendor/serde" }
     let bin = manifest.bin.first().expect("bin target should exist");
     assert_eq!(bin.required_features, vec!["std".to_owned()]);
 
-    assertions::assert_simple_dep(manifest.dependencies.get("serde"), "1", "dependencies.serde");
+    assertions::assert_simple_dep(
+        manifest.dependencies.get("serde"),
+        "1",
+        "dependencies.serde",
+    );
     let detailed = match manifest.dependencies.get("internal") {
         Some(Dependency::Detailed(detail)) => detail,
         Some(Dependency::Simple(_)) => panic!("dependencies.internal should be detailed"),
         None => panic!("dependencies.internal should exist"),
     };
-    assert_eq!(detailed.registry_index.as_deref(), Some("https://example.com/index"));
+    assert_eq!(
+        detailed.registry_index.as_deref(),
+        Some("https://example.com/index")
+    );
     assert_eq!(detailed.base.as_deref(), Some("workspace"));
     assert_eq!(detailed.package.as_deref(), Some("internal-real"));
     assert_eq!(detailed.optional, Some(true));
@@ -302,16 +332,27 @@ serde = { version = "1.0.210", path = "vendor/serde" }
     let lints = manifest.lints.as_ref().expect("lints should exist");
     assert_eq!(lints.workspace, Some(true));
     assertions::assert_lint_level(
-        lints.tools.get("rust").and_then(|tool| tool.get("unsafe_code")),
+        lints
+            .tools
+            .get("rust")
+            .and_then(|tool| tool.get("unsafe_code")),
         "forbid",
         "lints.rust.unsafe_code",
     );
-    match lints.tools.get("rust").and_then(|tool| tool.get("unexpected_cfgs")) {
+    match lints
+        .tools
+        .get("rust")
+        .and_then(|tool| tool.get("unexpected_cfgs"))
+    {
         Some(LintValue::Detailed(detail)) => {
             assert_eq!(detail.level, "warn");
             assert_eq!(detail.priority, Some(2));
             assert_eq!(
-                detail.extra.get("check-cfg").and_then(toml::Value::as_array).map(Vec::len),
+                detail
+                    .extra
+                    .get("check-cfg")
+                    .and_then(toml::Value::as_array)
+                    .map(Vec::len),
                 Some(1),
             );
         }
@@ -347,7 +388,10 @@ serde = { version = "1.0.210", path = "vendor/serde" }
         Some("1.85"),
     );
 
-    let profile = manifest.profile.get("dev").expect("profile.dev should exist");
+    let profile = manifest
+        .profile
+        .get("dev")
+        .expect("profile.dev should exist");
     assert_eq!(profile.codegen_backend.as_deref(), Some("cranelift"));
     assert_eq!(profile.rustflags, vec!["-Dwarnings".to_owned()]);
     assert_eq!(
@@ -365,12 +409,18 @@ serde = { version = "1.0.210", path = "vendor/serde" }
         Some(false),
     );
     assert_eq!(
-        profile.package.get("image").and_then(|pkg| pkg.opt_level.as_ref()),
+        profile
+            .package
+            .get("image")
+            .and_then(|pkg| pkg.opt_level.as_ref()),
         Some(&IntegerOrString::String("z".to_owned())),
     );
 
     assertions::assert_detailed_dep_version(
-        manifest.patch.get("crates-io").and_then(|table| table.get("serde")),
+        manifest
+            .patch
+            .get("crates-io")
+            .and_then(|table| table.get("serde")),
         "1.0.210",
         "patch.crates-io.serde",
     );
@@ -428,15 +478,24 @@ trim-paths = "macro"
     );
 
     assert_eq!(
-        manifest.profile.get("release").and_then(|profile| profile.trim_paths.clone()),
+        manifest
+            .profile
+            .get("release")
+            .and_then(|profile| profile.trim_paths.clone()),
         Some(TomlTrimPaths::All),
     );
     assert_eq!(
-        manifest.profile.get("dev").and_then(|profile| profile.trim_paths.clone()),
+        manifest
+            .profile
+            .get("dev")
+            .and_then(|profile| profile.trim_paths.clone()),
         Some(TomlTrimPaths::Values(Vec::new())),
     );
     assert_eq!(
-        manifest.profile.get("test").and_then(|profile| profile.trim_paths.clone()),
+        manifest
+            .profile
+            .get("test")
+            .and_then(|profile| profile.trim_paths.clone()),
         Some(TomlTrimPaths::Values(vec![TomlTrimPathsValue::Macro])),
     );
 }
@@ -490,13 +549,17 @@ edition = "2024"
     );
 
     assert_eq!(
-        manifest.package.as_ref().and_then(|package| package.name.as_deref()),
+        manifest
+            .package
+            .as_ref()
+            .and_then(|package| package.name.as_deref()),
         Some("demo"),
     );
 }
 
 #[test]
 fn parse_error_on_invalid_toml() {
-    let err = crate::parse("this is not [[[valid toml").expect_err("invalid Cargo.toml should fail");
+    let err =
+        crate::parse("this is not [[[valid toml").expect_err("invalid Cargo.toml should fail");
     assertions::assert_parse_error(err);
 }

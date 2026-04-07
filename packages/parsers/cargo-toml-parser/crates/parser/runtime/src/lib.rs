@@ -6,10 +6,6 @@ mod fs;
 mod parser;
 
 #[cfg(feature = "api")]
-pub use error::Error;
-#[cfg(feature = "api")]
-pub use parser::{from_path, parse};
-#[cfg(feature = "api")]
 pub use cargo_toml_parser_types::{
     BadgeTable, Badges, CargoToml, Dependency, DependencyDetail, FeatureList, FeatureMap,
     HintsConfig, InheritableStrings, InheritableValue, IntegerOrBool, IntegerOrString, LintDetail,
@@ -18,5 +14,9 @@ pub use cargo_toml_parser_types::{
     TomlTrimPaths, TomlTrimPathsValue, ToolLints, VecStringOrBool, WorkspaceInheritance,
     WorkspacePackageSection, WorkspaceSection,
 };
+#[cfg(feature = "api")]
+pub use error::Error;
+#[cfg(feature = "api")]
+pub use parser::{from_path, parse};
 #[cfg(feature = "api")]
 pub use toml::Value;

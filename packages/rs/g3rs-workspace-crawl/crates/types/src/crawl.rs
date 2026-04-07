@@ -15,7 +15,9 @@ impl G3RsWorkspaceCrawl {
     /// Find an entry by exact workspace-relative path.
     #[must_use]
     pub fn entry(&self, rel_path: &str) -> Option<&G3RsWorkspaceEntry> {
-        self.entries.iter().find(|entry| entry.path.rel_path == rel_path)
+        self.entries
+            .iter()
+            .find(|entry| entry.path.rel_path == rel_path)
     }
 
     /// Find a root-level file by filename.

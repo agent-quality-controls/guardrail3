@@ -17,5 +17,8 @@ pub fn assert_entry(
         entry.ignore_state, ignore_state,
         "unexpected ignore state: {entry:#?}"
     );
-    assert_eq!(entry.readable, readable, "unexpected readability: {entry:#?}");
+    assert_eq!(
+        entry.readable, readable,
+        "unexpected readability: {entry:#?}"
+    );
 }
