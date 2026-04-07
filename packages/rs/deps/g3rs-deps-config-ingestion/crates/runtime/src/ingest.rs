@@ -8,6 +8,12 @@ use g3rs_deps_types::{
 };
 use guardrail3_rs_toml_parser::Guardrail3RsToml;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum NormalizedDependencyPath {
+    Relative(String),
+    Absolute(String),
+}
+
 /// Build one deps config checks input from parsed workspace and member data.
 pub(crate) fn assemble(
     crate_cargo_rel_path: String,
@@ -158,11 +164,18 @@ fn resolve_dependency_name(
 
             if let Some(path) = &detail.path {
                 let resolved = normalize_dependency_path(crate_cargo_rel_path, path);
-                if resolved_path_is_inside_workspace(&resolved) {
-                    if workspace_member_dirs.contains(resolved.as_str()) {
-                        return Ok(None);
+                match resolved {
+                    NormalizedDependencyPath::Absolute(_) => return Ok(Some(fallback_name)),
+                    NormalizedDependencyPath::Relative(resolved_rel_path) => {
+                        if resolved_path_is_inside_workspace(&resolved_rel_path) {
+                            if workspace_member_dirs.contains(resolved_rel_path.as_str()) {
+                                return Ok(None);
+                            }
+                            return Err(format!(
+                                "local path dependency `{alias}` resolves to in-workspace non-member `{resolved_rel_path}`"
+                            ));
+                        }
                     }
-                    return Ok(None);
                 }
             }
 
@@ -189,11 +202,18 @@ fn resolve_workspace_dependency(
 
             if let Some(path) = &detail.path {
                 let resolved = normalize_rel_path("", path);
-                if resolved_path_is_inside_workspace(&resolved) {
-                    if workspace_member_dirs.contains(resolved.as_str()) {
-                        return Ok(None);
+                match resolved {
+                    NormalizedDependencyPath::Absolute(_) => return Ok(Some(fallback_name)),
+                    NormalizedDependencyPath::Relative(resolved_rel_path) => {
+                        if resolved_path_is_inside_workspace(&resolved_rel_path) {
+                            if workspace_member_dirs.contains(resolved_rel_path.as_str()) {
+                                return Ok(None);
+                            }
+                            return Err(format!(
+                                "workspace dependency `{alias}` resolves to in-workspace non-member `{resolved_rel_path}`"
+                            ));
+                        }
                     }
-                    return Ok(None);
                 }
             }
 
@@ -202,19 +222,23 @@ fn resolve_workspace_dependency(
     }
 }
 
-fn normalize_dependency_path(cargo_rel_path: &str, dep_path: &str) -> String {
+fn normalize_dependency_path(cargo_rel_path: &str, dep_path: &str) -> NormalizedDependencyPath {
     let base_rel_dir = cargo_rel_path
         .rsplit_once('/')
         .map_or("", |(base_rel_dir, _)| base_rel_dir);
     normalize_rel_path(base_rel_dir, dep_path)
 }
 
-fn normalize_rel_path(base_rel_dir: &str, dep_path: &str) -> String {
+fn normalize_rel_path(base_rel_dir: &str, dep_path: &str) -> NormalizedDependencyPath {
     let joined = if base_rel_dir.is_empty() {
         Path::new(dep_path).to_path_buf()
     } else {
         Path::new(base_rel_dir).join(dep_path)
     };
+
+    if joined.is_absolute() {
+        return NormalizedDependencyPath::Absolute(joined.to_string_lossy().into_owned());
+    }
 
     let mut parts = Vec::new();
     for component in joined.components() {
@@ -232,7 +256,7 @@ fn normalize_rel_path(base_rel_dir: &str, dep_path: &str) -> String {
         }
     }
 
-    parts.join("/")
+    NormalizedDependencyPath::Relative(parts.join("/"))
 }
 
 fn resolved_path_is_inside_workspace(resolved_rel_path: &str) -> bool {

@@ -29,6 +29,7 @@ version = "0.1.0"
 dependencies = [
  "g3rs-deps-config-checks-assertions",
  "g3rs-deps-config-checks-types",
+ "g3rs-deps-types",
  "guardrail3-check-types",
  "guardrail3-rs-toml-parser",
 ]

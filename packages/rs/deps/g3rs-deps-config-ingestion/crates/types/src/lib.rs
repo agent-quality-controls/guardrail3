@@ -1,3 +1,4 @@
 mod error;
 
-pub use error::*;
+#[cfg(feature = "api")]
+pub use error::G3RsDepsConfigIngestionError;
