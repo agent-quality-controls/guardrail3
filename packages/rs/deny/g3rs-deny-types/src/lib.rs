@@ -12,3 +12,11 @@ pub struct G3RsDenyConfigChecksInput {
     /// Parsed deny config.
     pub deny: DenyToml,
 }
+
+/// Placeholder input contract for future deny AST checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsDenyAstChecksInput;
+
+/// Placeholder input contract for future deny file-tree checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsDenyFileTreeChecksInput;

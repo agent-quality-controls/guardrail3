@@ -44,7 +44,7 @@ fn ingests_all_three_files() {
     write(root.join("cliff.toml"), CLIFF_TOML);
 
     let crawl = crawl(root);
-    let input = crate::ingest(&crawl)
+    let input = crate::ingest_config(&crawl)
         .expect("ingestion should succeed when all three config files are present");
 
     assert_eq!(
@@ -93,7 +93,7 @@ fn ingests_without_release_plz() {
     write(root.join("cliff.toml"), CLIFF_TOML);
 
     let crawl = crawl(root);
-    let input = crate::ingest(&crawl)
+    let input = crate::ingest_config(&crawl)
         .expect("ingestion should succeed without release-plz.toml");
 
     assert_eq!(input.cargo_rel_path, "Cargo.toml");
@@ -125,7 +125,7 @@ fn ingests_without_cliff() {
     write(root.join("release-plz.toml"), RELEASE_PLZ_TOML);
 
     let crawl = crawl(root);
-    let input = crate::ingest(&crawl)
+    let input = crate::ingest_config(&crawl)
         .expect("ingestion should succeed without cliff.toml");
 
     assert_eq!(input.cargo_rel_path, "Cargo.toml");
@@ -156,7 +156,7 @@ fn ingests_cargo_only() {
     write(root.join("Cargo.toml"), CARGO_TOML);
 
     let crawl = crawl(root);
-    let input = crate::ingest(&crawl)
+    let input = crate::ingest_config(&crawl)
         .expect("ingestion should succeed with only Cargo.toml");
 
     assert_eq!(input.cargo_rel_path, "Cargo.toml");
@@ -192,7 +192,7 @@ fn fails_when_cargo_missing() {
     write(root.join("release-plz.toml"), RELEASE_PLZ_TOML);
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     assert!(
         matches!(result, Err(crate::IngestionError::CargoTomlNotFound)),
@@ -213,7 +213,7 @@ fn fails_on_malformed_cargo() {
     write(root.join("Cargo.toml"), "{{{{not valid toml}}}}");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     assert!(
         matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
@@ -235,7 +235,7 @@ fn malformed_release_plz_produces_none() {
     write(root.join("release-plz.toml"), "{{{{not valid toml}}}}");
 
     let crawl = crawl(root);
-    let input = crate::ingest(&crawl)
+    let input = crate::ingest_config(&crawl)
         .expect("ingestion should succeed even when release-plz.toml is malformed — graceful degradation");
 
     assert_eq!(input.cargo_rel_path, "Cargo.toml");

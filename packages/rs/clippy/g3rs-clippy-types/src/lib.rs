@@ -12,3 +12,11 @@ pub struct G3RsClippyConfigChecksInput {
     /// Parsed clippy config content.
     pub clippy: ClippyToml,
 }
+
+/// Placeholder input contract for future clippy AST checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsClippyAstChecksInput;
+
+/// Placeholder input contract for future clippy file-tree checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsClippyFileTreeChecksInput;

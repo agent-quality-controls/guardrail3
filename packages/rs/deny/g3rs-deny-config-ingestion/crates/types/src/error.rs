@@ -5,6 +5,10 @@ use std::path::PathBuf;
 pub enum G3RsDenyConfigIngestionError {
     /// No `deny.toml` or `.deny.toml` found at the workspace root.
     DenyTomlNotFound,
+    /// AST ingestion is planned but not implemented yet.
+    AstIngestionNotImplemented,
+    /// File-tree ingestion is planned but not implemented yet.
+    FileTreeIngestionNotImplemented,
     /// The deny config file exists but cannot be read.
     Unreadable {
         /// Absolute path to the unreadable file.
@@ -26,6 +30,12 @@ impl std::fmt::Display for G3RsDenyConfigIngestionError {
         match self {
             Self::DenyTomlNotFound => {
                 f.write_str("no deny.toml or .deny.toml found at the workspace root")
+            }
+            Self::AstIngestionNotImplemented => {
+                f.write_str("deny AST ingestion is not implemented yet")
+            }
+            Self::FileTreeIngestionNotImplemented => {
+                f.write_str("deny file-tree ingestion is not implemented yet")
             }
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())

@@ -9,6 +9,10 @@ pub enum G3RsFmtConfigIngestionError {
     CargoTomlNotFound,
     /// No `rust-toolchain.toml` found at the workspace root.
     ToolchainTomlNotFound,
+    /// AST ingestion is planned but not implemented yet.
+    AstIngestionNotImplemented,
+    /// File-tree ingestion is planned but not implemented yet.
+    FileTreeIngestionNotImplemented,
     /// A required file exists but cannot be read.
     Unreadable {
         /// Absolute path to the unreadable file.
@@ -36,6 +40,12 @@ impl std::fmt::Display for G3RsFmtConfigIngestionError {
             }
             Self::ToolchainTomlNotFound => {
                 f.write_str("no rust-toolchain.toml found at the workspace root")
+            }
+            Self::AstIngestionNotImplemented => {
+                f.write_str("fmt AST ingestion is not implemented yet")
+            }
+            Self::FileTreeIngestionNotImplemented => {
+                f.write_str("fmt file-tree ingestion is not implemented yet")
             }
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())

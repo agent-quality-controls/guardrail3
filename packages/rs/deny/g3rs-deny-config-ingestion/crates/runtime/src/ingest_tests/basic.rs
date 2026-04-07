@@ -36,7 +36,7 @@ fn ingests_deny_toml() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid deny.toml");
     assert_eq!(
@@ -61,7 +61,7 @@ fn ingests_dot_deny_toml() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid .deny.toml");
     assert_eq!(
@@ -87,7 +87,7 @@ fn prefers_deny_toml_over_dot_variant() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input =
         result.expect("ingestion should succeed when both deny.toml and .deny.toml exist");
@@ -118,7 +118,7 @@ fn fails_when_deny_toml_is_missing() {
     write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     assert!(
         matches!(result, Err(crate::IngestionError::DenyTomlNotFound)),
@@ -135,7 +135,7 @@ fn fails_on_malformed_deny_toml() {
     write(root.join("deny.toml"), "{{{{not valid toml}}}}");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     assert!(
         matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
@@ -167,7 +167,7 @@ fn ignored_but_recovered_deny_toml_is_ingested() {
         "deny.toml should have Ignored state when gitignored, proving the recovery path was exercised"
     );
 
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect(
         "ingestion should succeed for a gitignored deny.toml recovered by the crawl recovery phase",
@@ -194,7 +194,7 @@ fn nested_deny_toml_is_not_selected() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect("ingestion should succeed when root deny.toml exists");
     assert_eq!(
@@ -212,7 +212,7 @@ fn empty_deny_toml_parses_to_hollow_input() {
     write(root.join("deny.toml"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect("ingestion should succeed for an empty deny.toml");
     assert!(

@@ -1,11 +1,12 @@
 /// Public ingestion entry point.
-use g3rs_garde_types::G3RsGardeConfigChecksInput;
+use g3rs_garde_ast_checks_types::G3RsGardeAstChecksInput;
+use g3rs_garde_types::{G3RsGardeConfigChecksInput, G3RsGardeFileTreeChecksInput};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsGardeConfigIngestionError` so the facade can reach it.
 pub use g3rs_garde_config_ingestion_types::G3RsGardeConfigIngestionError as IngestionError;
 
-/// Ingest garde config from a workspace crawl into a checks input.
+/// Ingest garde config from a workspace crawl into a config checks input.
 ///
 /// Cargo.toml is required. Clippy config is optional — if absent,
 /// the clippy fields will be `None` in the result and clippy ban
@@ -15,7 +16,7 @@ pub use g3rs_garde_config_ingestion_types::G3RsGardeConfigIngestionError as Inge
 ///
 /// Returns an error if Cargo.toml is missing, unreadable, or unparseable.
 /// Clippy config errors are silently treated as absent.
-pub fn ingest(
+pub fn ingest_config(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeConfigChecksInput, IngestionError> {
     // 1. Select and parse Cargo.toml (required)
@@ -47,4 +48,16 @@ pub fn ingest(
         clippy_rel_path,
         clippy,
     ))
+}
+
+/// Stub AST ingestion entry point for the garde family.
+pub fn ingest_ast(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsGardeAstChecksInput, IngestionError> {
+    Err(IngestionError::AstIngestionNotImplemented)
+}
+
+/// Stub file-tree ingestion entry point for the garde family.
+pub fn ingest_file_tree(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsGardeFileTreeChecksInput, IngestionError> {
+    Err(IngestionError::FileTreeIngestionNotImplemented)
 }

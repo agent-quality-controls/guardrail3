@@ -26,3 +26,11 @@ pub struct G3RsReleaseConfigChecksInput {
     /// Parsed `cliff.toml` content, if present.
     pub cliff: Option<CliffToml>,
 }
+
+/// Placeholder input contract for future release AST checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsReleaseAstChecksInput;
+
+/// Placeholder input contract for future release file-tree checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsReleaseFileTreeChecksInput;

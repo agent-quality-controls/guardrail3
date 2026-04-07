@@ -8,7 +8,7 @@ mod parse;
 mod run;
 
 #[cfg(feature = "ingest")]
-pub use run::{IngestionError, ingest};
+pub use run::{IngestionError, ingest_ast, ingest_config, ingest_file_tree};
 
 #[cfg(test)]
 mod ingest_tests;

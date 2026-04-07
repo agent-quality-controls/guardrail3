@@ -5,6 +5,10 @@ use std::path::PathBuf;
 pub enum G3RsToolchainConfigIngestionError {
     /// No `rust-toolchain.toml` found at the workspace root.
     ToolchainTomlNotFound,
+    /// AST ingestion is planned but not implemented yet.
+    AstIngestionNotImplemented,
+    /// File-tree ingestion is planned but not implemented yet.
+    FileTreeIngestionNotImplemented,
     /// The toolchain config exists but cannot be read.
     Unreadable {
         /// Absolute path to the unreadable file.
@@ -26,6 +30,12 @@ impl std::fmt::Display for G3RsToolchainConfigIngestionError {
         match self {
             Self::ToolchainTomlNotFound => {
                 f.write_str("no rust-toolchain.toml found at the workspace root")
+            }
+            Self::AstIngestionNotImplemented => {
+                f.write_str("toolchain AST ingestion is not implemented yet")
+            }
+            Self::FileTreeIngestionNotImplemented => {
+                f.write_str("toolchain file-tree ingestion is not implemented yet")
             }
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())
