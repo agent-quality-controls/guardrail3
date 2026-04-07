@@ -12,4 +12,4 @@ readme = "README.md"
 workspace = true
 
 [dependencies]
-deny-toml-parser = { path = "../../../../../parsers/deny-toml-parser" }
+g3rs-deny-types = { path = "../../../g3rs-deny-types" }

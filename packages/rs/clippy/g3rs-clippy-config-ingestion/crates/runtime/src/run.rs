@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_clippy_config_checks::G3RsClippyConfigChecksInput;
+use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsClippyConfigIngestionError` so the facade can reach it.

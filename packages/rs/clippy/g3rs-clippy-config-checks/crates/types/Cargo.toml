@@ -12,4 +12,4 @@ readme = "README.md"
 workspace = true
 
 [dependencies]
-clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser" }
+g3rs-clippy-types = { path = "../../../g3rs-clippy-types" }

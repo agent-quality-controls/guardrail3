@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_release_config_checks::G3RsReleaseConfigChecksInput;
+use g3rs_release_types::G3RsReleaseConfigChecksInput;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsReleaseConfigIngestionError` so the facade can reach it.

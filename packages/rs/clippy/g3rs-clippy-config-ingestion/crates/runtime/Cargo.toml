@@ -23,7 +23,7 @@ shared = true
 
 [dependencies]
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
-g3rs-clippy-config-checks = { path = "../../../g3rs-clippy-config-checks", version = "0.1.0", default-features = false, features = ["types"] }
+g3rs-clippy-types = { path = "../../../g3rs-clippy-types", version = "0.1.0" }
 g3rs-clippy-config-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
 

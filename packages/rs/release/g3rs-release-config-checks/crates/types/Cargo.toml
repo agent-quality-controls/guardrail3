@@ -14,6 +14,4 @@ categories = ["development-tools"]
 workspace = true
 
 [dependencies]
-cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser" }
-cliff-toml-parser = { path = "../../../../../parsers/cliff-toml-parser" }
-release-plz-toml-parser = { path = "../../../../../parsers/release-plz-toml-parser" }
+g3rs-release-types = { path = "../../../g3rs-release-types" }

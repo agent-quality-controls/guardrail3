@@ -116,30 +116,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
-name = "g3rs-cargo-config-checks"
-version = "0.1.0"
-dependencies = [
- "g3rs-cargo-config-checks-runtime",
- "g3rs-cargo-config-checks-types",
-]
-
-[[package]]
-name = "g3rs-cargo-config-checks-runtime"
-version = "0.1.0"
-dependencies = [
- "cargo-toml-parser",
- "g3rs-cargo-config-checks-types",
- "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-cargo-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "cargo-toml-parser",
-]
-
-[[package]]
 name = "g3rs-cargo-config-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -159,9 +135,9 @@ name = "g3rs-cargo-config-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3rs-cargo-config-checks",
  "g3rs-cargo-config-ingestion-assertions",
  "g3rs-cargo-config-ingestion-types",
+ "g3rs-cargo-types",
  "g3rs-workspace-crawl",
  "tempfile",
 ]
@@ -169,6 +145,13 @@ dependencies = [
 [[package]]
 name = "g3rs-cargo-config-ingestion-types"
 version = "0.1.0"
+
+[[package]]
+name = "g3rs-cargo-types"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+]
 
 [[package]]
 name = "g3rs-workspace-crawl"
@@ -216,10 +199,6 @@ dependencies = [
  "regex-automata",
  "regex-syntax",
 ]
-
-[[package]]
-name = "guardrail3-check-types"
-version = "0.1.0"
 
 [[package]]
 name = "hashbrown"

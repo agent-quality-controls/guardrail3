@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_fmt_config_checks::G3RsFmtConfigChecksInput;
+use g3rs_fmt_types::G3RsFmtConfigChecksInput;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsFmtConfigIngestionError` so the facade can reach it.

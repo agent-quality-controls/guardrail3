@@ -1,7 +1,7 @@
 /// Assemble the checks input from selected and parsed data.
 use cargo_toml_parser::CargoToml;
 use cliff_toml_parser::CliffToml;
-use g3rs_release_config_checks::G3RsReleaseConfigChecksInput;
+use g3rs_release_types::G3RsReleaseConfigChecksInput;
 use release_plz_toml_parser::ReleasePlzToml;
 
 /// Build the checks input from the parsed config files and their relative paths.
