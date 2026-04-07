@@ -7,17 +7,17 @@ edition = "2024"
 workspace = true
 
 [dependencies]
-cargo-toml-parser = { path = "../../../../../../../../../packages/cargo-toml-parser" }
-g3rs-fmt-config-checks = { path = "../../../../../../../../../packages/g3rs-fmt-config-checks" }
+cargo-toml-parser = { path = "../../../../../../../../../packages/parsers/cargo-toml-parser" }
+g3rs-fmt-config-checks = { path = "../../../../../../../../../packages/rs/fmt/g3rs-fmt-config-checks" }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
 guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../../family_view" }
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../../../../ownership" }
-guardrail3_check_types = { package = "guardrail3-check-types", path = "../../../../../../../../../packages/guardrail3-check-types/crates/guardrail3-check-types" }
+guardrail3_check_types = { package = "guardrail3-check-types", path = "../../../../../../../../../packages/shared/guardrail3-check-types/crates/guardrail3-check-types" }
 guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../../../../domain/config" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
-guardrail3_reason_policy = { package = "guardrail3-reason-policy", path = "../../../../../../../../../packages/reason-policy/crates/reason-policy" }
-rust-toolchain-toml-parser = { path = "../../../../../../../../../packages/rust-toolchain-toml-parser" }
-rustfmt-toml-parser = { path = "../../../../../../../../../packages/rustfmt-toml-parser" }
+guardrail3_reason_policy = { package = "guardrail3-reason-policy", path = "../../../../../../../../../packages/shared/reason-policy/crates/reason-policy" }
+rust-toolchain-toml-parser = { path = "../../../../../../../../../packages/parsers/rust-toolchain-toml-parser" }
+rustfmt-toml-parser = { path = "../../../../../../../../../packages/parsers/rustfmt-toml-parser" }
 toml = "0.8"
 
 [dev-dependencies]

@@ -1,0 +1,23 @@
+[package]
+name = "g3rs-garde-config-checks-types"
+version = "0.1.0"
+edition = "2024"
+description = "Public types for g3 garde config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "garde", "checks", "rust", "policy"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[lints]
+workspace = true
+
+[dependencies]
+cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
+clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }

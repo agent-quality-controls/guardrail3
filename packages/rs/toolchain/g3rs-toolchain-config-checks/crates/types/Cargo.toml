@@ -1,0 +1,16 @@
+[package]
+name = "g3rs-toolchain-config-checks-types"
+version = "0.1.0"
+edition = "2024"
+description = "Public contract types for g3 toolchain config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+
+[lints]
+workspace = true
+
+[dependencies]
+cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser" }
+rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser" }

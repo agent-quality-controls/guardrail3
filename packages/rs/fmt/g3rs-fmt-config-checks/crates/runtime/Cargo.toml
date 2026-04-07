@@ -1,0 +1,27 @@
+[package]
+name = "g3rs-fmt-config-checks-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3 fmt config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[lints]
+workspace = true
+
+[dependencies]
+cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser" }
+g3rs-fmt-config-checks-types = { path = "../types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+rustfmt-toml-parser = { path = "../../../../../parsers/rustfmt-toml-parser" }
+toml = "0.8"
+
+[dev-dependencies]
+g3rs-fmt-config-checks-assertions = { path = "../assertions" }
+rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser" }

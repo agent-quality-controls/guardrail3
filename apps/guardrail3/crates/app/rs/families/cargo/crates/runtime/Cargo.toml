@@ -7,15 +7,15 @@ edition = "2024"
 workspace = true
 
 [dependencies]
-cargo-toml-parser = { path = "../../../../../../../../../packages/cargo-toml-parser" }
-g3rs-cargo-config-checks = { path = "../../../../../../../../../packages/g3rs-cargo-config-checks" }
+cargo-toml-parser = { path = "../../../../../../../../../packages/parsers/cargo-toml-parser" }
+g3rs-cargo-config-checks = { path = "../../../../../../../../../packages/rs/cargo/g3rs-cargo-config-checks" }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
 guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../../family_view" }
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../../../../ownership" }
-guardrail3-check-types = { path = "../../../../../../../../../packages/guardrail3-check-types/crates/guardrail3-check-types" }
+guardrail3-check-types = { path = "../../../../../../../../../packages/shared/guardrail3-check-types/crates/guardrail3-check-types" }
 guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../../../../domain/config" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
-guardrail3_reason_policy = { package = "guardrail3-reason-policy", path = "../../../../../../../../../packages/reason-policy/crates/reason-policy" }
+guardrail3_reason_policy = { package = "guardrail3-reason-policy", path = "../../../../../../../../../packages/shared/reason-policy/crates/reason-policy" }
 toml = "0.8"
 
 [dev-dependencies]

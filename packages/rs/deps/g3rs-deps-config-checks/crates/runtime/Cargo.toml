@@ -1,0 +1,27 @@
+[package]
+name = "g3rs-deps-config-checks-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = true
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[dependencies]
+cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
+g3rs-deps-config-checks-types = { path = "../types", version = "0.1.0" }
+glob = "0.3.3"
+guardrail3-domain-config = { path = "../../../../../../apps/guardrail3/crates/domain/config", version = "0.0.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+g3rs-deps-config-checks-assertions = { path = "../assertions" }
+toml = "0.8"
