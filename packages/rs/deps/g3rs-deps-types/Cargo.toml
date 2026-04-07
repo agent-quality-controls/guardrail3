@@ -30,5 +30,4 @@ redundant_pub_crate = "allow"
 module_name_repetitions = "allow"
 
 [dependencies]
-cargo-toml-parser = { path = "../../../parsers/cargo-toml-parser", version = "0.1.0" }
-guardrail3-domain-config = { path = "../../../../apps/guardrail3/crates/domain/config", version = "0.0.0" }
+guardrail3-rs-toml-parser = { path = "../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }

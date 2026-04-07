@@ -1,8 +1,9 @@
 use super::helpers::run_check;
+use guardrail3_rs_toml_parser::RustProfile;
 
 #[test]
 fn inventories_allowlist_when_present() {
-    let results = run_check("[profile]\nname = \"library\"\n[rust.packages]\nallowed_deps = [\"serde\"]\n");
+    let results = run_check(Some(RustProfile::Library), true);
 
     assert!(results.iter().any(|result| {
         result.id() == "RS-DEPS-CONFIG-04"
@@ -13,7 +14,7 @@ fn inventories_allowlist_when_present() {
 
 #[test]
 fn warns_when_allowlist_missing() {
-    let results = run_check("[profile]\nname = \"library\"\n");
+    let results = run_check(Some(RustProfile::Library), false);
 
     assert!(results.iter().any(|result| {
         result.id() == "RS-DEPS-CONFIG-04"

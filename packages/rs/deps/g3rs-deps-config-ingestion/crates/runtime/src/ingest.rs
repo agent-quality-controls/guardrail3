@@ -1,0 +1,257 @@
+/// Assemble the checks input from selected and parsed data.
+use std::collections::{BTreeMap, BTreeSet};
+use std::path::{Component, Path};
+
+use cargo_toml_parser::{CargoToml, Dependency, TargetDependencyTables};
+use g3rs_deps_types::{
+    G3RsDepsConfigChecksInput, G3RsDepsDependencySection, G3RsDepsResolvedDependency,
+};
+use guardrail3_rs_toml_parser::Guardrail3RsToml;
+
+/// Build one deps config checks input from parsed workspace and member data.
+pub(crate) fn assemble(
+    crate_cargo_rel_path: String,
+    crate_cargo: &CargoToml,
+    workspace_cargo: &CargoToml,
+    guardrail: &Guardrail3RsToml,
+    allowlist_present: bool,
+    workspace_member_dirs: &BTreeSet<String>,
+) -> Result<G3RsDepsConfigChecksInput, String> {
+    let mut dependencies = Vec::new();
+
+    collect_table_entries(
+        crate_cargo_rel_path.as_str(),
+        workspace_cargo,
+        workspace_member_dirs,
+        &crate_cargo.dependencies,
+        G3RsDepsDependencySection::Dependencies,
+        "[dependencies]",
+        &mut dependencies,
+    )?;
+    collect_table_entries(
+        crate_cargo_rel_path.as_str(),
+        workspace_cargo,
+        workspace_member_dirs,
+        &crate_cargo.build_dependencies,
+        G3RsDepsDependencySection::BuildDependencies,
+        "[build-dependencies]",
+        &mut dependencies,
+    )?;
+    collect_table_entries(
+        crate_cargo_rel_path.as_str(),
+        workspace_cargo,
+        workspace_member_dirs,
+        &crate_cargo.dev_dependencies,
+        G3RsDepsDependencySection::DevDependencies,
+        "[dev-dependencies]",
+        &mut dependencies,
+    )?;
+
+    for (target_key, target_tables) in &crate_cargo.target {
+        collect_target_entries(
+            crate_cargo_rel_path.as_str(),
+            workspace_cargo,
+            workspace_member_dirs,
+            target_key,
+            target_tables,
+            &mut dependencies,
+        )?;
+    }
+
+    Ok(G3RsDepsConfigChecksInput {
+        crate_name: crate_name(crate_cargo_rel_path.as_str(), crate_cargo),
+        crate_cargo_rel_path,
+        profile: guardrail.profile,
+        allowlist_present,
+        allowed_deps: guardrail.allowed_deps.clone(),
+        dependencies,
+    })
+}
+
+fn collect_target_entries(
+    crate_cargo_rel_path: &str,
+    workspace_cargo: &CargoToml,
+    workspace_member_dirs: &BTreeSet<String>,
+    target_key: &str,
+    target_tables: &TargetDependencyTables,
+    entries: &mut Vec<G3RsDepsResolvedDependency>,
+) -> Result<(), String> {
+    let dependencies_label = format!("[target.'{target_key}'.dependencies]");
+    collect_table_entries(
+        crate_cargo_rel_path,
+        workspace_cargo,
+        workspace_member_dirs,
+        &target_tables.dependencies,
+        G3RsDepsDependencySection::Dependencies,
+        &dependencies_label,
+        entries,
+    )?;
+
+    let build_label = format!("[target.'{target_key}'.build-dependencies]");
+    collect_table_entries(
+        crate_cargo_rel_path,
+        workspace_cargo,
+        workspace_member_dirs,
+        &target_tables.build_dependencies,
+        G3RsDepsDependencySection::BuildDependencies,
+        &build_label,
+        entries,
+    )?;
+
+    let dev_label = format!("[target.'{target_key}'.dev-dependencies]");
+    collect_table_entries(
+        crate_cargo_rel_path,
+        workspace_cargo,
+        workspace_member_dirs,
+        &target_tables.dev_dependencies,
+        G3RsDepsDependencySection::DevDependencies,
+        &dev_label,
+        entries,
+    )?;
+
+    Ok(())
+}
+
+fn collect_table_entries(
+    crate_cargo_rel_path: &str,
+    workspace_cargo: &CargoToml,
+    workspace_member_dirs: &BTreeSet<String>,
+    dependencies: &BTreeMap<String, Dependency>,
+    section: G3RsDepsDependencySection,
+    table_label: &str,
+    entries: &mut Vec<G3RsDepsResolvedDependency>,
+) -> Result<(), String> {
+    for (alias, dependency) in dependencies {
+        if let Some(package_name) = resolve_dependency_name(
+            crate_cargo_rel_path,
+            workspace_cargo,
+            workspace_member_dirs,
+            alias,
+            dependency,
+        )? {
+            entries.push(G3RsDepsResolvedDependency {
+                package_name,
+                section,
+                table_label: table_label.to_owned(),
+            });
+        }
+    }
+
+    Ok(())
+}
+
+fn resolve_dependency_name(
+    crate_cargo_rel_path: &str,
+    workspace_cargo: &CargoToml,
+    workspace_member_dirs: &BTreeSet<String>,
+    alias: &str,
+    dependency: &Dependency,
+) -> Result<Option<String>, String> {
+    match dependency {
+        Dependency::Simple(_) => Ok(Some(alias.to_owned())),
+        Dependency::Detailed(detail) => {
+            let fallback_name = detail.package.clone().unwrap_or_else(|| alias.to_owned());
+
+            if detail.workspace == Some(true) {
+                return resolve_workspace_dependency(workspace_cargo, workspace_member_dirs, alias);
+            }
+
+            if let Some(path) = &detail.path {
+                let resolved = normalize_dependency_path(crate_cargo_rel_path, path);
+                if resolved_path_is_inside_workspace(&resolved) {
+                    if workspace_member_dirs.contains(resolved.as_str()) {
+                        return Ok(None);
+                    }
+                    return Ok(None);
+                }
+            }
+
+            Ok(Some(fallback_name))
+        }
+    }
+}
+
+fn resolve_workspace_dependency(
+    workspace_cargo: &CargoToml,
+    workspace_member_dirs: &BTreeSet<String>,
+    alias: &str,
+) -> Result<Option<String>, String> {
+    let workspace_dependency = workspace_cargo
+        .workspace
+        .as_ref()
+        .and_then(|workspace| workspace.dependencies.get(alias))
+        .ok_or_else(|| format!("workspace dependency `{alias}` was requested but not defined"))?;
+
+    match workspace_dependency {
+        Dependency::Simple(_) => Ok(Some(alias.to_owned())),
+        Dependency::Detailed(detail) => {
+            let fallback_name = detail.package.clone().unwrap_or_else(|| alias.to_owned());
+
+            if let Some(path) = &detail.path {
+                let resolved = normalize_rel_path("", path);
+                if resolved_path_is_inside_workspace(&resolved) {
+                    if workspace_member_dirs.contains(resolved.as_str()) {
+                        return Ok(None);
+                    }
+                    return Ok(None);
+                }
+            }
+
+            Ok(Some(fallback_name))
+        }
+    }
+}
+
+fn normalize_dependency_path(cargo_rel_path: &str, dep_path: &str) -> String {
+    let base_rel_dir = cargo_rel_path
+        .rsplit_once('/')
+        .map_or("", |(base_rel_dir, _)| base_rel_dir);
+    normalize_rel_path(base_rel_dir, dep_path)
+}
+
+fn normalize_rel_path(base_rel_dir: &str, dep_path: &str) -> String {
+    let joined = if base_rel_dir.is_empty() {
+        Path::new(dep_path).to_path_buf()
+    } else {
+        Path::new(base_rel_dir).join(dep_path)
+    };
+
+    let mut parts = Vec::new();
+    for component in joined.components() {
+        match component {
+            Component::CurDir => {}
+            Component::Normal(part) => parts.push(part.to_string_lossy().into_owned()),
+            Component::ParentDir => {
+                if parts.last().is_some_and(|last| last != "..") {
+                    let _ = parts.pop();
+                } else {
+                    parts.push("..".to_owned());
+                }
+            }
+            Component::RootDir | Component::Prefix(_) => {}
+        }
+    }
+
+    parts.join("/")
+}
+
+fn resolved_path_is_inside_workspace(resolved_rel_path: &str) -> bool {
+    !resolved_rel_path.split('/').any(|segment| segment == "..")
+}
+
+fn crate_name(cargo_rel_path: &str, cargo: &CargoToml) -> String {
+    cargo
+        .package
+        .as_ref()
+        .and_then(|package| package.name.clone())
+        .filter(|name| !name.is_empty())
+        .unwrap_or_else(|| fallback_name(cargo_rel_path))
+}
+
+fn fallback_name(cargo_rel_path: &str) -> String {
+    cargo_rel_path
+        .rsplit_once('/')
+        .map_or("root".to_owned(), |(dir, _)| {
+            dir.rsplit('/').next().unwrap_or(dir).to_owned()
+        })
+}

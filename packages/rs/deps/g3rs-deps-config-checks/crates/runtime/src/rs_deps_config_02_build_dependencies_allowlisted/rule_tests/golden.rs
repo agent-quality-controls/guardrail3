@@ -1,12 +1,8 @@
-use super::helpers::run_check;
+use super::helpers::{build_dependency, run_check};
 
 #[test]
 fn workspace_true_external_build_dependency_is_checked() {
-    let results = run_check(
-        "[workspace]\nmembers = [\"packages/*\"]\n\n[workspace.dependencies]\nbindgen = \"0.70\"\n",
-        "[package]\nname = \"core\"\n\n[build-dependencies]\nbindgen = { workspace = true }\n",
-        "[profile]\nname = \"library\"\n[rust.packages]\nallowed_deps = [\"serde\"]\n",
-    );
+    let results = run_check(true, &["serde"], &[build_dependency("bindgen")]);
 
     assert!(results.iter().any(|result| {
         result.id() == "RS-DEPS-CONFIG-02"
@@ -17,11 +13,7 @@ fn workspace_true_external_build_dependency_is_checked() {
 
 #[test]
 fn build_rule_stays_silent_without_allowlist() {
-    let results = run_check(
-        "[workspace]\nmembers = [\"packages/*\"]\n",
-        "[package]\nname = \"core\"\n\n[build-dependencies]\nbindgen = \"0.70\"\n",
-        "[profile]\nname = \"library\"\n",
-    );
+    let results = run_check(false, &[], &[build_dependency("bindgen")]);
 
     assert!(results.is_empty());
 }
