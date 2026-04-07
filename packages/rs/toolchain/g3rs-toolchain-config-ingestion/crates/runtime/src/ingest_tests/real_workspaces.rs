@@ -9,8 +9,38 @@ fn packages_dir() -> PathBuf {
         .parent()
         .and_then(Path::parent)
         .and_then(Path::parent)
+        .and_then(Path::parent)
+        .and_then(Path::parent)
         .expect("should resolve packages/ directory from CARGO_MANIFEST_DIR")
         .to_path_buf()
+}
+
+/// Resolve one concrete package workspace root from the grouped `packages/` tree.
+fn package_dir(rel_path: &str) -> PathBuf {
+    packages_dir().join(rel_path)
+}
+
+/// Collect leaf package directories under the grouped `packages/` tree.
+fn collect_package_dirs(root: &Path) -> Vec<PathBuf> {
+    let mut packages = Vec::new();
+    let entries = std::fs::read_dir(root).expect("should be able to list package directories");
+
+    for entry in entries {
+        let entry = entry.expect("should read package directory entry");
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+
+        if path.join("Cargo.toml").exists() {
+            packages.push(path);
+            continue;
+        }
+
+        packages.extend(collect_package_dirs(&path));
+    }
+
+    packages
 }
 
 fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
@@ -20,13 +50,13 @@ fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
 /// Real workspace with `[package]` containing `rust-version = "1.85"`.
 #[test]
 fn ingests_real_workspace_with_package_rust_version() {
-    let root = packages_dir().join("clippy-toml-parser");
+    let root = package_dir("parsers/clippy-toml-parser");
     if !root.join("rust-toolchain.toml").exists() {
         return;
     }
 
     let crawl = crawl(&root);
-    let output = crate::ingest(&crawl)
+    let output = crate::ingest_config(&crawl)
         .expect("ingestion should succeed on clippy-toml-parser");
 
     assert_eq!(output.toolchain_rel_path, "rust-toolchain.toml");
@@ -61,13 +91,13 @@ fn ingests_real_workspace_with_package_rust_version() {
 /// Real workspace with `[workspace]` and no `rust-version` anywhere.
 #[test]
 fn ingests_real_workspace_without_rust_version() {
-    let root = packages_dir().join("guardrail3-check-types");
+    let root = package_dir("shared/guardrail3-check-types");
     if !root.join("rust-toolchain.toml").exists() {
         return;
     }
 
     let crawl = crawl(&root);
-    let output = crate::ingest(&crawl)
+    let output = crate::ingest_config(&crawl)
         .expect("ingestion should succeed on guardrail3-check-types");
 
     let section = output
@@ -97,14 +127,10 @@ fn ingests_real_workspace_without_rust_version() {
 /// Sweep all real workspaces that have `rust-toolchain.toml`.
 #[test]
 fn ingests_all_real_workspaces() {
-    let packages = packages_dir();
+    let packages = collect_package_dirs(&packages_dir());
     let mut tested = 0_u32;
 
-    let entries = std::fs::read_dir(&packages)
-        .expect("should be able to list the packages directory");
-    for entry in entries {
-        let entry = entry.expect("should read directory entry");
-        let pkg_dir = entry.path();
+    for pkg_dir in packages {
         if !pkg_dir.is_dir() || !pkg_dir.join("rust-toolchain.toml").exists() {
             continue;
         }
@@ -113,7 +139,7 @@ fn ingests_all_real_workspaces() {
         let pkg_name = pkg_dir
             .file_name()
             .map_or("unknown", |n| n.to_str().unwrap_or("unknown"));
-        let output = crate::ingest(&crawl)
+        let output = crate::ingest_config(&crawl)
             .unwrap_or_else(|err| panic!("ingestion failed for {pkg_name}: {err}"));
 
         let section = output

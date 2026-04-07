@@ -37,7 +37,7 @@ fn ingests_with_both_cargo_and_clippy() {
     write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result
         .expect("ingestion should succeed when both Cargo.toml and clippy.toml are present");
@@ -70,7 +70,7 @@ fn ingests_with_dot_clippy_toml() {
     write(root.join(".clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect("ingestion should succeed with .clippy.toml variant");
     assert_eq!(
@@ -89,7 +89,7 @@ fn clippy_is_none_without_clippy_config() {
     write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result
         .expect("ingestion should succeed even without clippy config (it is optional)");
@@ -116,7 +116,7 @@ fn fails_when_cargo_toml_is_missing() {
     write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     assert!(
         matches!(result, Err(crate::IngestionError::CargoTomlNotFound)),
@@ -134,7 +134,7 @@ fn fails_on_malformed_cargo_toml() {
     write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     assert!(
         matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
@@ -152,7 +152,7 @@ fn malformed_clippy_toml_produces_none_not_error() {
     write(root.join("clippy.toml"), "{{{{not valid toml}}}}");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect(
         "ingestion should succeed even with malformed clippy.toml (clippy config is optional)",
@@ -183,7 +183,7 @@ fn ignored_but_recovered_cargo_toml_is_ingested() {
         "Cargo.toml should have Ignored state when gitignored, proving recovery path was exercised"
     );
 
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
     let input = result.expect(
         "ingestion should succeed for a gitignored Cargo.toml recovered by the crawl recovery phase",
     );

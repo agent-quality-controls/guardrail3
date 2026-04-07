@@ -1,11 +1,13 @@
 /// Public ingestion entry point.
-use g3rs_release_types::G3RsReleaseConfigChecksInput;
+use g3rs_release_types::{
+    G3RsReleaseAstChecksInput, G3RsReleaseConfigChecksInput, G3RsReleaseFileTreeChecksInput,
+};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsReleaseConfigIngestionError` so the facade can reach it.
 pub use g3rs_release_config_ingestion_types::G3RsReleaseConfigIngestionError as IngestionError;
 
-/// Ingest release config from a workspace crawl into a checks input.
+/// Ingest release config from a workspace crawl into a config checks input.
 ///
 /// Parses `Cargo.toml` (required), `release-plz.toml` / `.release-plz.toml`
 /// (optional), and `cliff.toml` (optional) from the workspace root.
@@ -15,7 +17,7 @@ pub use g3rs_release_config_ingestion_types::G3RsReleaseConfigIngestionError as 
 /// Returns an error if `Cargo.toml` is missing, unreadable, or unparseable.
 /// Optional files that are missing, unreadable, or unparseable are silently
 /// treated as `None`.
-pub fn ingest(
+pub fn ingest_config(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsReleaseConfigChecksInput, IngestionError> {
     // --- Cargo.toml (required) ---
@@ -64,4 +66,18 @@ pub fn ingest(
         cliff_rel_path,
         cliff,
     ))
+}
+
+/// Stub AST ingestion entry point for the release family.
+pub fn ingest_ast(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsReleaseAstChecksInput, IngestionError> {
+    Err(IngestionError::AstIngestionNotImplemented)
+}
+
+/// Stub file-tree ingestion entry point for the release family.
+pub fn ingest_file_tree(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsReleaseFileTreeChecksInput, IngestionError> {
+    Err(IngestionError::FileTreeIngestionNotImplemented)
 }

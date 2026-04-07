@@ -139,35 +139,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
-name = "g3rs-release-config-checks"
-version = "0.1.0"
-dependencies = [
- "g3rs-release-config-checks-runtime",
- "g3rs-release-config-checks-types",
-]
-
-[[package]]
-name = "g3rs-release-config-checks-runtime"
-version = "0.1.0"
-dependencies = [
- "cargo-toml-parser",
- "cliff-toml-parser",
- "g3rs-release-config-checks-types",
- "guardrail3-check-types",
- "release-plz-toml-parser",
- "semver",
-]
-
-[[package]]
-name = "g3rs-release-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "cargo-toml-parser",
- "cliff-toml-parser",
- "release-plz-toml-parser",
-]
-
-[[package]]
 name = "g3rs-release-config-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -188,9 +159,9 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "cliff-toml-parser",
- "g3rs-release-config-checks",
  "g3rs-release-config-ingestion-assertions",
  "g3rs-release-config-ingestion-types",
+ "g3rs-release-types",
  "g3rs-workspace-crawl",
  "release-plz-toml-parser",
  "tempfile",
@@ -199,6 +170,15 @@ dependencies = [
 [[package]]
 name = "g3rs-release-config-ingestion-types"
 version = "0.1.0"
+
+[[package]]
+name = "g3rs-release-types"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "cliff-toml-parser",
+ "release-plz-toml-parser",
+]
 
 [[package]]
 name = "g3rs-workspace-crawl"
@@ -246,10 +226,6 @@ dependencies = [
  "regex-automata",
  "regex-syntax",
 ]
-
-[[package]]
-name = "guardrail3-check-types"
-version = "0.1.0"
 
 [[package]]
 name = "hashbrown"

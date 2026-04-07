@@ -20,3 +20,11 @@ pub struct G3RsToolchainConfigChecksInput {
     /// Parsed `Cargo.toml` content, if present.
     pub cargo_toml: Option<CargoToml>,
 }
+
+/// Placeholder input contract for future toolchain AST checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsToolchainAstChecksInput;
+
+/// Placeholder input contract for future toolchain file-tree checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsToolchainFileTreeChecksInput;

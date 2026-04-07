@@ -1,12 +1,9 @@
-/target/
-/apps/*/target/
+target/
 /legacy/
 .claude/
 .mcp.json
 .gitnexus
 .env
-fuzz/target/
 fuzz/corpus/
 fuzz/artifacts/
 .env.local
-/packages/*/target/

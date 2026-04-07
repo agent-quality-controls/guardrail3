@@ -19,3 +19,7 @@ pub struct G3RsGardeConfigChecksInput {
     /// Parsed clippy config content, if present.
     pub clippy: Option<ClippyToml>,
 }
+
+/// Placeholder input contract for future garde file-tree checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsGardeFileTreeChecksInput;

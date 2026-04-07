@@ -62,6 +62,13 @@ dependencies = [
 name = "g3rs-toolchain-config-checks-types"
 version = "0.1.0"
 dependencies = [
+ "g3rs-toolchain-types",
+]
+
+[[package]]
+name = "g3rs-toolchain-types"
+version = "0.1.0"
+dependencies = [
  "cargo-toml-parser",
  "rust-toolchain-toml-parser",
 ]

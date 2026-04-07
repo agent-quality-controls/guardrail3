@@ -1,11 +1,13 @@
 /// Public ingestion entry point.
-use g3rs_toolchain_types::G3RsToolchainConfigChecksInput;
+use g3rs_toolchain_types::{
+    G3RsToolchainAstChecksInput, G3RsToolchainConfigChecksInput, G3RsToolchainFileTreeChecksInput,
+};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsToolchainConfigIngestionError` so the facade can reach it.
 pub use g3rs_toolchain_config_ingestion_types::G3RsToolchainConfigIngestionError as IngestionError;
 
-/// Ingest toolchain config from a workspace crawl into a checks input.
+/// Ingest toolchain config from a workspace crawl into a config checks input.
 ///
 /// Parses `rust-toolchain.toml` (required) and `Cargo.toml` (optional) from the
 /// workspace root, returning the checks input directly.
@@ -13,7 +15,7 @@ pub use g3rs_toolchain_config_ingestion_types::G3RsToolchainConfigIngestionError
 /// # Errors
 ///
 /// Returns an error if `rust-toolchain.toml` is missing, unreadable, or unparseable.
-pub fn ingest(
+pub fn ingest_config(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainConfigChecksInput, IngestionError> {
     let toolchain_entry = crawl
@@ -48,4 +50,18 @@ pub fn ingest(
         cargo_rel_path,
         cargo_toml,
     ))
+}
+
+/// Stub AST ingestion entry point for the toolchain family.
+pub fn ingest_ast(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsToolchainAstChecksInput, IngestionError> {
+    Err(IngestionError::AstIngestionNotImplemented)
+}
+
+/// Stub file-tree ingestion entry point for the toolchain family.
+pub fn ingest_file_tree(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsToolchainFileTreeChecksInput, IngestionError> {
+    Err(IngestionError::FileTreeIngestionNotImplemented)
 }

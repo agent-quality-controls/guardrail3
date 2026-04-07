@@ -22,3 +22,11 @@ pub struct G3RsFmtConfigChecksInput {
     /// Parsed rust-toolchain manifest.
     pub toolchain: RustToolchainToml,
 }
+
+/// Placeholder input contract for future rustfmt AST checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsFmtAstChecksInput;
+
+/// Placeholder input contract for future rustfmt file-tree checks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct G3RsFmtFileTreeChecksInput;

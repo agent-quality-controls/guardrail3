@@ -24,6 +24,7 @@ shared = true
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
+g3rs-garde-ast-checks-types = { path = "../../../g3rs-garde-ast-checks/crates/types", version = "0.1.0" }
 g3rs-garde-types = { path = "../../../g3rs-garde-types", version = "0.1.0" }
 g3rs-garde-config-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }

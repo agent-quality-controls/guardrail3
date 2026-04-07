@@ -92,6 +92,13 @@ dependencies = [
 name = "g3rs-deps-config-checks-types"
 version = "0.1.0"
 dependencies = [
+ "g3rs-deps-types",
+]
+
+[[package]]
+name = "g3rs-deps-types"
+version = "0.1.0"
+dependencies = [
  "cargo-toml-parser",
  "guardrail3-domain-config",
 ]

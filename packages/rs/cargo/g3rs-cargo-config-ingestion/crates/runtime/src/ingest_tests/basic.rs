@@ -37,7 +37,7 @@ fn ingests_valid_workspace_cargo_toml() {
     write(root.join("src/lib.rs"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid Cargo.toml workspace");
     assert_eq!(
@@ -59,7 +59,7 @@ fn fails_when_cargo_toml_is_missing() {
     write(root.join("src/lib.rs"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     assert!(
         matches!(
@@ -79,7 +79,7 @@ fn fails_on_malformed_cargo_toml() {
     write(root.join("Cargo.toml"), "{{{{not valid toml at all}}}}");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     assert!(
         matches!(
@@ -103,7 +103,7 @@ fn ingests_package_cargo_toml() {
     write(root.join("src/lib.rs"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid package Cargo.toml");
     assert_eq!(
@@ -131,7 +131,7 @@ fn empty_cargo_toml_parses_to_hollow_input() {
     write(root.join("Cargo.toml"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect("ingestion should succeed for an empty Cargo.toml");
     assert!(
@@ -161,7 +161,7 @@ fn nested_cargo_toml_is_not_selected() {
     write(root.join("packages/foo/src/lib.rs"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect("ingestion should succeed when a root Cargo.toml exists");
     assert_eq!(
@@ -194,7 +194,7 @@ fn ignored_but_recovered_cargo_toml_is_ingested() {
         "Cargo.toml should have Ignored state when gitignored, proving the recovery path was exercised"
     );
 
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect(
         "ingestion should succeed for a gitignored Cargo.toml recovered by the crawl recovery phase",
@@ -218,7 +218,7 @@ fn workspace_and_package_combined() {
     write(root.join("src/lib.rs"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest(&crawl);
+    let result = crate::ingest_config(&crawl);
 
     let input = result.expect(
         "ingestion should succeed for a Cargo.toml with both [workspace] and [package] sections",

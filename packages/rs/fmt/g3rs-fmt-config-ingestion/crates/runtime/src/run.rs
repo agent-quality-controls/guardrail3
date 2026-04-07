@@ -1,11 +1,11 @@
 /// Public ingestion entry point.
-use g3rs_fmt_types::G3RsFmtConfigChecksInput;
+use g3rs_fmt_types::{G3RsFmtAstChecksInput, G3RsFmtConfigChecksInput, G3RsFmtFileTreeChecksInput};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsFmtConfigIngestionError` so the facade can reach it.
 pub use g3rs_fmt_config_ingestion_types::G3RsFmtConfigIngestionError as IngestionError;
 
-/// Ingest the root fmt config from a workspace crawl into a checks input.
+/// Ingest the root fmt config from a workspace crawl into a config checks input.
 ///
 /// Requires all three files at the workspace root:
 /// - `rustfmt.toml` (the dot-prefixed `.rustfmt.toml` is NOT accepted)
@@ -16,7 +16,7 @@ pub use g3rs_fmt_config_ingestion_types::G3RsFmtConfigIngestionError as Ingestio
 ///
 /// Returns an error if any of the three files is missing, unreadable, or
 /// unparseable.
-pub fn ingest(
+pub fn ingest_config(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsFmtConfigChecksInput, IngestionError> {
     // 1. Select rustfmt config (required — only rustfmt.toml, no dot variant).
@@ -63,4 +63,16 @@ pub fn ingest(
         toolchain_entry.path.rel_path.clone(),
         toolchain,
     ))
+}
+
+/// Stub AST ingestion entry point for the fmt family.
+pub fn ingest_ast(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsFmtAstChecksInput, IngestionError> {
+    Err(IngestionError::AstIngestionNotImplemented)
+}
+
+/// Stub file-tree ingestion entry point for the fmt family.
+pub fn ingest_file_tree(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsFmtFileTreeChecksInput, IngestionError> {
+    Err(IngestionError::FileTreeIngestionNotImplemented)
 }
