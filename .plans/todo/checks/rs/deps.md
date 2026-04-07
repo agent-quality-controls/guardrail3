@@ -2,9 +2,51 @@
 
 > Superseded as the primary family plan by [`.plans/by_family/rs/deps.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/deps.md).
 > Keep this file as a detailed rule ledger and migration/history reference.
+> Historical note: the legacy app-family mapper / `guardrail3.toml` model described below is no longer the target architecture for package work. The target package architecture uses required workspace `guardrail3-rs.toml`, package-owned ingestion, normalized dependency facts for config checks, and separate file-tree ownership for local path target validation.
 
-**Input:** Tool PATH checks + Cargo.lock + .gitignore + guardrail3.toml allowlists + Cargo.toml dependency tables
-**Current code:** `apps/guardrail3/crates/app/rs/families/deps/`
+**Historical input:** Tool PATH checks + Cargo.lock + .gitignore + guardrail3.toml allowlists + Cargo.toml dependency tables
+**Historical code:** `apps/guardrail3/crates/app/rs/families/deps/`
+
+## Target Package Architecture
+
+Package roots:
+
+- `packages/rs/deps/g3rs-deps-types`
+- `packages/rs/deps/g3rs-deps-config-checks`
+- `packages/rs/deps/g3rs-deps-config-ingestion` (planned)
+
+Required policy input:
+
+- workspace `guardrail3-rs.toml`
+
+Target config-check input contract:
+
+```rust
+pub struct G3RsDepsConfigChecksInput {
+    pub crate_cargo_rel_path: String,
+    pub crate_name: String,
+    pub profile: Option<RustProfile>,
+    pub allowlist_present: bool,
+    pub allowed_deps: Vec<String>,
+    pub dependencies: Vec<G3RsDepsResolvedDependency>,
+}
+```
+
+```rust
+pub struct G3RsDepsResolvedDependency {
+    pub package_name: String,
+    pub section: G3RsDepsDependencySection,
+    pub table_label: String,
+}
+```
+
+This means:
+
+- config checks consume normalized external dependency facts
+- config checks keep explicit `allowlist_present` because the current parser does not preserve missing-vs-empty `allowed_deps`
+- config checks do not consume raw local path target manifests
+- config checks do not consume app `GuardrailConfig`
+- local path target validation belongs to file-tree ownership, not config-check ownership
 
 This family owns:
 - required external Rust/tooling presence
@@ -35,12 +77,20 @@ The family must not collapse lockfile policy to repo-root-only behavior, and it 
 
 ## Policy ownership
 
+Historical app implementation:
+
 Dependency allowlist/profile policy comes from validation-root `guardrail3.toml`.
 
 That means:
 - the family resolves crate-local allowlist/profile policy from the one root policy surface
 - per-app / per-package entries inside that root policy file are still crate-local policy once resolved
 - future verification must not invent nearest-local `guardrail3.toml` semantics unless the plan changes explicitly
+
+Target package implementation:
+
+- dependency allowlist/profile policy comes from required workspace `guardrail3-rs.toml`
+- ingestion normalizes crate-local policy into config-check input
+- package code must not depend on app config types
 
 ## Tool installation rules
 
@@ -62,10 +112,10 @@ That means:
 
 Allowlist semantics:
 - no `allowed_deps` configured means `RS-DEPS-CONFIG-01..07` stay silent; only `RS-DEPS-CONFIG-04` warns for library-profile crates
-- path dependencies are skipped only when they resolve to workspace package paths
+- path dependencies are a normalization concern, not raw config-check input
 - `workspace = true` is **not** automatically skipped
 - if `workspace = true` resolves to an external workspace dependency, it must still be allowlisted
-- local path dependencies that resolve to a real Cargo package under a workspace root must be declared workspace members or they fail closed through `RS-DEPS-11`
+- local path dependencies that resolve to invalid or non-member local targets belong to file-tree ownership
 - renamed dependencies must be checked against the real `package` name when present
 
 Section ownership:
@@ -86,17 +136,18 @@ Section ownership:
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-DEPS-11 | Error | Required dependency-policy inputs unreadable or unparseable: member Cargo.toml, workspace Cargo.toml for `workspace = true` resolution, or `guardrail3.toml` when needed for profile/allowlist policy. | Implemented |
+| RS-DEPS-11 | Error | Required dependency-policy inputs unreadable or unparseable: member Cargo.toml, workspace Cargo.toml for `workspace = true` resolution, or `guardrail3-rs.toml` when needed for profile/allowlist policy. | Target contract |
 
 ## Input integrity / fail-closed expectations
 
 The family depends on:
 - readable local package manifests
 - readable workspace manifests when `workspace = true` resolution needs them
-- readable validation-root `guardrail3.toml` when crate policy/profile needs it
+- readable workspace `guardrail3-rs.toml` when crate policy/profile needs it
 - readable `.gitignore` inputs used for lockfile masking checks
 
-Malformed required inputs must surface through `RS-DEPS-11` rather than silently suppressing allowlist or lockfile findings.
+Malformed required config inputs must fail the config lane rather than silently suppressing allowlist or lockfile findings.
+Malformed local path target structure belongs to file-tree ownership rather than config-check ownership.
 
 ## Direct dependency cap rule
 
@@ -122,8 +173,8 @@ Malformed required inputs must surface through `RS-DEPS-11` rather than silently
 - unique dependency package names only
 - renamed dependencies count by real `package` name when present
 - `workspace = true` entries count when they resolve to external packages
-- non-workspace external path dependencies count
-- local path dependencies derive package identity from the target Cargo package when one exists
+- non-workspace external path dependencies count once normalized
+- local path dependency identity is resolved before config checks run
 
 **Do not count**
 - repeated occurrences of the same crate name across multiple sections/tables more than once
