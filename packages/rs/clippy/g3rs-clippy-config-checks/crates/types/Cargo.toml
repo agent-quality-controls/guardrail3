@@ -1,0 +1,15 @@
+[package]
+name = "g3rs-clippy-config-checks-types"
+version = "0.1.0"
+edition = "2024"
+description = "Public contract types for g3 clippy config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+
+[lints]
+workspace = true
+
+[dependencies]
+clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser" }

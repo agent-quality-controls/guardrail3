@@ -7,15 +7,15 @@ edition = "2024"
 workspace = true
 
 [dependencies]
-g3rs-deps-config-checks = { path = "../../../../../../../../../packages/g3rs-deps-config-checks", version = "0.1.0" }
+g3rs-deps-config-checks = { path = "../../../../../../../../../packages/rs/deps/g3rs-deps-config-checks", version = "0.1.0" }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
 guardrail3_app_rs_family_view = { package = "guardrail3-app-rs-family-view", path = "../../../../family_view" }
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../../../../ownership" }
-guardrail3-check-types = { path = "../../../../../../../../../packages/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../../../../../packages/shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 guardrail3-domain-config = { package = "guardrail3-domain-config", path = "../../../../../../domain/config" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
 guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../../../../ports/outbound/traits" }
-cargo-toml-parser = { path = "../../../../../../../../../packages/cargo-toml-parser", version = "0.1.0" }
+cargo-toml-parser = { path = "../../../../../../../../../packages/parsers/cargo-toml-parser", version = "0.1.0" }
 glob = { workspace = true }
 toml = "0.8"
 
