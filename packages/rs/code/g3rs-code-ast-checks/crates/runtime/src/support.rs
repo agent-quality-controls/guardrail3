@@ -29,7 +29,9 @@ impl<'a> From<&'a G3RsCodeSourceFileAst> for CodeSourceRuleInput<'a> {
     }
 }
 
-pub(crate) fn parse_input(input: &G3RsCodeAstChecksInput) -> Result<G3RsCodeSourceFileAst, syn::Error> {
+pub(crate) fn parse_input(
+    input: &G3RsCodeAstChecksInput,
+) -> Result<G3RsCodeSourceFileAst, syn::Error> {
     let ast = crate::parse::parse_rust_file(&input.source_file.content)?;
     Ok(G3RsCodeSourceFileAst {
         source_file: input.source_file.clone(),

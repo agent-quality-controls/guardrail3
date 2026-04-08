@@ -10,7 +10,8 @@ fn skips_test_owned_files() {
 
 #[test]
 fn skips_explicit_fs_boundary_module() {
-    let content = "use std::fs;\npub fn allowed_probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n";
+    let content =
+        "use std::fs;\npub fn allowed_probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n";
     let results = check_source("src/fs.rs", content, false);
     assert_rule_results(&results, &[]);
 }

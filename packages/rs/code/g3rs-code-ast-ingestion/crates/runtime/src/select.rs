@@ -12,7 +12,8 @@ pub(crate) struct SelectedCodeSourceFile<'a> {
 
 /// Select all owned Rust source files for the `code` AST lane.
 pub(crate) fn select_source_files(crawl: &G3RsWorkspaceCrawl) -> Vec<SelectedCodeSourceFile<'_>> {
-    crawl.entries
+    crawl
+        .entries
         .iter()
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
         .filter(|entry| entry.path.rel_path.ends_with(".rs"))

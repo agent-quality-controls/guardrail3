@@ -68,7 +68,10 @@ fn ingested_inputs_drive_code_ast_checks() {
     git_init(root);
 
     write(root.join("src/lib.rs"), "pub fn run() { todo!(); }\n");
-    write(root.join("tests/smoke.rs"), "#[test]\nfn smoke() { panic!(\"boom\"); }\n");
+    write(
+        root.join("tests/smoke.rs"),
+        "#[test]\nfn smoke() { panic!(\"boom\"); }\n",
+    );
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
     let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");

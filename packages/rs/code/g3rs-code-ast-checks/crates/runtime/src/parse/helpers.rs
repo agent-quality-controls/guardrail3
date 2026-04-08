@@ -1,7 +1,14 @@
 use proc_macro2::Span;
+use syn::spanned::Spanned;
+
+use super::types::{CfgAttrLintInfo, LintPolicyInfo, LintPolicyKind};
 
 pub(crate) fn span_line(span: Span) -> usize {
     span.start().line
+}
+
+pub(crate) fn span_end_line(span: Span) -> usize {
+    span.end().line
 }
 
 pub(crate) fn path_to_string(path: &syn::Path) -> String {
@@ -10,6 +17,46 @@ pub(crate) fn path_to_string(path: &syn::Path) -> String {
         .map(|segment| segment.ident.to_string())
         .collect::<Vec<_>>()
         .join("::")
+}
+
+pub(crate) fn trait_item_attrs(item: &syn::TraitItem) -> &[syn::Attribute] {
+    match item {
+        syn::TraitItem::Fn(f) => &f.attrs,
+        syn::TraitItem::Type(t) => &t.attrs,
+        syn::TraitItem::Const(c) => &c.attrs,
+        _ => &[],
+    }
+}
+
+pub(crate) fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
+    match item {
+        syn::ImplItem::Const(item) => &item.attrs,
+        syn::ImplItem::Fn(item) => &item.attrs,
+        syn::ImplItem::Macro(item) => &item.attrs,
+        syn::ImplItem::Type(item) => &item.attrs,
+        _ => &[],
+    }
+}
+
+pub(crate) fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
+    match item {
+        syn::Item::Const(item) => &item.attrs,
+        syn::Item::Enum(item) => &item.attrs,
+        syn::Item::ExternCrate(item) => &item.attrs,
+        syn::Item::Fn(item) => &item.attrs,
+        syn::Item::ForeignMod(item) => &item.attrs,
+        syn::Item::Impl(item) => &item.attrs,
+        syn::Item::Macro(item) => &item.attrs,
+        syn::Item::Mod(item) => &item.attrs,
+        syn::Item::Static(item) => &item.attrs,
+        syn::Item::Struct(item) => &item.attrs,
+        syn::Item::Trait(item) => &item.attrs,
+        syn::Item::TraitAlias(item) => &item.attrs,
+        syn::Item::Type(item) => &item.attrs,
+        syn::Item::Union(item) => &item.attrs,
+        syn::Item::Use(item) => &item.attrs,
+        _ => &[],
+    }
 }
 
 pub(crate) fn attrs_enter_test_context(attrs: &[syn::Attribute]) -> bool {
@@ -59,5 +106,73 @@ fn cfg_meta_mentions_test(meta: &syn::Meta, positive: bool) -> bool {
                     .any(|item| cfg_meta_mentions_test(item, !positive))
             }),
         _ => false,
+    }
+}
+
+fn lint_policy_kind(path: &syn::Path) -> Option<LintPolicyKind> {
+    if path.is_ident("allow") {
+        Some(LintPolicyKind::Allow)
+    } else if path.is_ident("expect") {
+        Some(LintPolicyKind::Expect)
+    } else {
+        None
+    }
+}
+
+pub(crate) fn collect_item_lint_policies(attrs: &[syn::Attribute]) -> Vec<LintPolicyInfo> {
+    let mut out = Vec::new();
+    for attr in attrs {
+        let Some(kind) = lint_policy_kind(attr.path()) else {
+            continue;
+        };
+        let line = span_end_line(attr.span());
+        let syn::Meta::List(list) = &attr.meta else {
+            continue;
+        };
+        let Ok(paths) = list.parse_args_with(
+            syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+        ) else {
+            continue;
+        };
+        for path in paths {
+            out.push(LintPolicyInfo {
+                line,
+                lint: path_to_string(&path),
+                kind,
+            });
+        }
+    }
+    out
+}
+
+pub(crate) fn collect_cfg_attr_lint_policies(
+    attrs: &[syn::Attribute],
+    out: &mut Vec<CfgAttrLintInfo>,
+) {
+    for attr in attrs {
+        if !attr.path().is_ident("cfg_attr") {
+            continue;
+        }
+        super::analysis_helpers::walk_cfg_attr_payloads(attr, |line, truth, meta| {
+            let syn::Meta::List(inner) = meta else {
+                return;
+            };
+            let Some(kind) = lint_policy_kind(&inner.path) else {
+                return;
+            };
+            let Ok(paths) = inner.parse_args_with(
+                syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+            ) else {
+                return;
+            };
+            for path in paths {
+                out.push(CfgAttrLintInfo {
+                    line,
+                    lint: path_to_string(&path),
+                    kind,
+                    truth,
+                });
+            }
+        });
     }
 }

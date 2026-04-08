@@ -15,7 +15,9 @@ fn errors_on_std_fs_import() {
             title: Some("direct std::fs import"),
             file: Some("src/foo.rs"),
             inventory: Some(false),
-            message: Some("Direct `use std::fs` import found: `use std::fs;`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly."),
+            message: Some(
+                "Direct `use std::fs` import found: `use std::fs;`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
+            ),
             line: Some(1),
         }],
     );
@@ -33,7 +35,9 @@ fn errors_on_inline_std_fs_call() {
             title: Some("direct std::fs call"),
             file: Some("src/foo.rs"),
             inventory: Some(false),
-            message: Some("Direct `std::fs::*` call found: `fn main() { let _ = std::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly."),
+            message: Some(
+                "Direct `std::fs::*` call found: `fn main() { let _ = std::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
+            ),
             line: Some(1),
         }],
     );
@@ -41,8 +45,7 @@ fn errors_on_inline_std_fs_call() {
 
 #[test]
 fn still_errors_inside_allow_scoped_std_fs_usage() {
-    let content =
-        "#[allow(clippy::disallowed_methods)]\nfn main() { let _ = std::fs::read_to_string(\"foo\"); }";
+    let content = "#[allow(clippy::disallowed_methods)]\nfn main() { let _ = std::fs::read_to_string(\"foo\"); }";
     let results = check_source("src/foo.rs", content, false);
 
     assert_rule_results(
@@ -52,7 +55,9 @@ fn still_errors_inside_allow_scoped_std_fs_usage() {
             title: Some("direct std::fs call"),
             file: Some("src/foo.rs"),
             inventory: Some(false),
-            message: Some("Direct `std::fs::*` call found: `fn main() { let _ = std::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly."),
+            message: Some(
+                "Direct `std::fs::*` call found: `fn main() { let _ = std::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
+            ),
             line: Some(2),
         }],
     );
@@ -70,7 +75,9 @@ fn errors_on_std_alias_fs_call() {
             title: Some("direct std::fs call"),
             file: Some("src/foo.rs"),
             inventory: Some(false),
-            message: Some("Direct `std::fs::*` call found: `fn main() { let _ = s::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly."),
+            message: Some(
+                "Direct `std::fs::*` call found: `fn main() { let _ = s::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
+            ),
             line: Some(2),
         }],
     );
@@ -88,7 +95,9 @@ fn errors_on_extern_crate_std_alias_fs_call() {
             title: Some("direct std::fs call"),
             file: Some("src/foo.rs"),
             inventory: Some(false),
-            message: Some("Direct `std::fs::*` call found: `fn main() { let _ = s::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly."),
+            message: Some(
+                "Direct `std::fs::*` call found: `fn main() { let _ = s::fs::read_to_string(\"foo\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
+            ),
             line: Some(2),
         }],
     );
@@ -107,7 +116,9 @@ fn prefers_import_hit_when_import_and_call_share_one_line() {
             title: Some("direct std::fs import"),
             file: Some("src/foo.rs"),
             inventory: Some(false),
-            message: Some("Direct `use std::fs` import found: `use std::fs; fn same_line_probe() { let _ = std::fs::read_to_string(\"same-line.txt\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly."),
+            message: Some(
+                "Direct `use std::fs` import found: `use std::fs; fn same_line_probe() { let _ = std::fs::read_to_string(\"same-line.txt\"); }`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
+            ),
             line: Some(1),
         }],
     );
