@@ -117,6 +117,84 @@ fn pipeline_reports_expected_findings_on_real_source_files() {
 }
 
 #[test]
+fn pipeline_reports_new_single_file_ast_rules() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("src/impl_allow.rs"),
+        "struct Foo;\n#[allow(clippy::too_many_lines)]\nimpl Foo { fn a(&self) {} fn b(&self) {} fn c(&self) {} fn d(&self) {} }\n",
+    );
+    write(
+        root.join("src/cfg_attr.rs"),
+        "#[cfg_attr(all(), allow(dead_code))]\nfn probe() {}\n",
+    );
+    write(
+        root.join("src/ffi.rs"),
+        "#[allow(improper_ctypes)]\nunsafe extern \"C\" { fn puts(s: *const i8); }\n",
+    );
+    write(
+        root.join("src/fs_glob.rs"),
+        "use std::fs::*;\nfn probe() {}\n",
+    );
+    write(
+        root.join("src/include_probe.rs"),
+        "include!(\"../generated.rs\");\n",
+    );
+    write(
+        root.join("tests/expect_probe.rs"),
+        "fn probe() { let _ = Some(1).expect(\"ok\"); }\n",
+    );
+    write(
+        root.join("src/generic_probe.rs"),
+        "pub fn build<A, B, C, D, E, F, G>() {}\n",
+    );
+    write(
+        root.join("src/string_dispatch.rs"),
+        "pub fn dispatch(value: &str) -> usize { if value == \"v0\" { 0 } else if value == \"v1\" { 1 } else if value == \"v2\" { 2 } else if value == \"v3\" { 3 } else if value == \"v4\" { 4 } else if value == \"v5\" { 5 } else if value == \"v6\" { 6 } else if value == \"v7\" { 7 } else if value == \"v8\" { 8 } else if value == \"v9\" { 9 } else if value == \"v10\" { 10 } else { 0 } }\n",
+    );
+
+    let results = run_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert_eq!(by_file["src/impl_allow.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/impl_allow.rs"][0].id(), "RS-CODE-17");
+
+    assert_eq!(by_file["src/cfg_attr.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/cfg_attr.rs"][0].id(), "RS-CODE-18");
+
+    assert_eq!(by_file["src/ffi.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/ffi.rs"][0].id(), "RS-CODE-20");
+
+    assert_eq!(by_file["src/fs_glob.rs"].len(), 2, "{results:#?}");
+    assert!(
+        by_file["src/fs_glob.rs"]
+            .iter()
+            .any(|result| result.id() == "RS-CODE-15"),
+        "{results:#?}"
+    );
+    assert!(
+        by_file["src/fs_glob.rs"]
+            .iter()
+            .any(|result| result.id() == "RS-CODE-21"),
+        "{results:#?}"
+    );
+
+    assert_eq!(by_file["src/include_probe.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/include_probe.rs"][0].id(), "RS-CODE-23");
+
+    assert_eq!(by_file["tests/expect_probe.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["tests/expect_probe.rs"][0].id(), "RS-CODE-32");
+
+    assert_eq!(by_file["src/generic_probe.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/generic_probe.rs"][0].id(), "RS-CODE-34");
+
+    assert_eq!(by_file["src/string_dispatch.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/string_dispatch.rs"][0].id(), "RS-CODE-36");
+}
+
+#[test]
 fn pipeline_rejects_known_false_positive_fixture_patterns() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
@@ -171,7 +249,11 @@ fn pipeline_emits_explicit_input_failure_for_parse_error() {
 
     let results = run_pipeline(root);
 
-    assert_eq!(results.len(), 1, "broken source should emit one input failure");
+    assert_eq!(
+        results.len(),
+        1,
+        "broken source should emit one input failure"
+    );
     let result = &results[0];
     assert_eq!(result.id(), "RS-CODE-30");
     assert_eq!(result.title(), "code-family input failure");

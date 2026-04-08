@@ -18,12 +18,13 @@ pub fn ingest_for_ast_checks(
                 });
             }
 
-            let content = crate::fs::read_to_string(&selected.entry.path.abs_path).map_err(|err| {
-                IngestionError::Unreadable {
-                    path: selected.entry.path.abs_path.clone(),
-                    reason: err.to_string(),
-                }
-            })?;
+            let content =
+                crate::fs::read_to_string(&selected.entry.path.abs_path).map_err(|err| {
+                    IngestionError::Unreadable {
+                        path: selected.entry.path.abs_path.clone(),
+                        reason: err.to_string(),
+                    }
+                })?;
 
             Ok(crate::ingest::assemble(
                 selected.entry.path.rel_path.clone(),

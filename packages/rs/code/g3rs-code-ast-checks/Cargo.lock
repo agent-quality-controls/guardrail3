@@ -26,6 +26,7 @@ dependencies = [
  "g3rs-code-ast-checks-types",
  "guardrail3-check-types",
  "proc-macro2",
+ "quote",
  "syn",
 ]
 

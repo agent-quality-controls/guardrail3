@@ -13,7 +13,11 @@ fn emits_code_family_input_failure_on_parse_error() {
     };
 
     let results = crate::run::check(&input);
-    assert_eq!(results.len(), 1, "unexpected parse-failure results: {results:#?}");
+    assert_eq!(
+        results.len(),
+        1,
+        "unexpected parse-failure results: {results:#?}"
+    );
     let result = &results[0];
 
     assert_eq!(result.id(), "RS-CODE-30");
