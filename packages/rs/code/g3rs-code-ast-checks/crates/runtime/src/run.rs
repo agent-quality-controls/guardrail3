@@ -4,7 +4,12 @@ use guardrail3_check_types::G3CheckResult;
 pub fn check(input: &G3RsCodeAstChecksInput) -> Vec<G3CheckResult> {
     let parsed = match crate::support::parse_input(input) {
         Ok(parsed) => parsed,
-        Err(_) => return Vec::new(),
+        Err(parse_error) => {
+            let parse_failure = crate::support::parse_failure_input(input, &parse_error);
+            let mut results = Vec::new();
+            crate::rs_code_ast_30_input_failures::check(&parse_failure, &mut results);
+            return results;
+        }
     };
     let rule_input = crate::support::CodeSourceRuleInput::from(&parsed);
     let mut results = Vec::new();

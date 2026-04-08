@@ -163,10 +163,12 @@ impl<'ast> Visit<'ast> for StdFsImportVisitor {
     }
 
     fn visit_item_use(&mut self, item_use: &'ast syn::ItemUse) {
+        let was = self.save_and_apply_test_context(&item_use.attrs);
         if !self.in_test_context && use_tree_matches_std_fs(&item_use.tree) {
             self.out.push(span_line(item_use.span()));
         }
         syn::visit::visit_item_use(self, item_use);
+        self.restore_test_context(was);
     }
 }
 
@@ -196,8 +198,10 @@ impl<'ast> Visit<'ast> for InlineStdFsVisitor {
     }
 
     fn visit_item_use(&mut self, item_use: &'ast syn::ItemUse) {
+        let was = self.save_and_apply_test_context(&item_use.attrs);
         collect_std_aliases(&item_use.tree, &mut self.std_aliases);
         syn::visit::visit_item_use(self, item_use);
+        self.restore_test_context(was);
     }
 
     fn visit_item_extern_crate(&mut self, item: &'ast syn::ItemExternCrate) {

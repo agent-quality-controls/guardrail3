@@ -5,6 +5,11 @@ pub(crate) struct G3RsCodeSourceFileAst {
     pub(crate) ast: syn::File,
 }
 
+pub(crate) struct CodeInputFailureRuleInput {
+    pub(crate) rel_path: String,
+    pub(crate) message: String,
+}
+
 #[derive(Clone, Copy)]
 pub(crate) struct CodeSourceRuleInput<'a> {
     pub(crate) rel_path: &'a str,
@@ -30,4 +35,14 @@ pub(crate) fn parse_input(input: &G3RsCodeAstChecksInput) -> Result<G3RsCodeSour
         source_file: input.source_file.clone(),
         ast,
     })
+}
+
+pub(crate) fn parse_failure_input(
+    input: &G3RsCodeAstChecksInput,
+    parse_error: &syn::Error,
+) -> CodeInputFailureRuleInput {
+    CodeInputFailureRuleInput {
+        rel_path: input.source_file.rel_path.clone(),
+        message: format!("Failed to parse Rust source file: {parse_error}"),
+    }
 }
