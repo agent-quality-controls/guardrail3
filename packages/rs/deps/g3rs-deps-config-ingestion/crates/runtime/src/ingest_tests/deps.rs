@@ -2,7 +2,7 @@ use g3rs_deps_types::G3RsDepsDependencySection;
 use g3rs_workspace_crawl::crawl;
 use guardrail3_rs_toml_parser::RustProfile;
 
-use crate::run::ingest_config;
+use crate::run::ingest_for_config_checks;
 
 use super::{temp_workspace, write_file};
 
@@ -79,7 +79,7 @@ fn ingests_member_crates_into_normalized_dependency_inputs() {
     );
 
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
-    let inputs = ingest_config(&crawl).expect("deps ingestion should succeed");
+    let inputs = ingest_for_config_checks(&crawl).expect("deps ingestion should succeed");
     assert_eq!(
         inputs.len(),
         3,
@@ -191,7 +191,7 @@ fn undefined_workspace_dependency_fails_ingestion() {
     );
 
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
-    let err = ingest_config(&crawl).expect_err("undefined workspace dependency should fail");
+    let err = ingest_for_config_checks(&crawl).expect_err("undefined workspace dependency should fail");
     assert!(matches!(
         err,
         crate::run::IngestionError::NormalizationFailed { reason, .. }

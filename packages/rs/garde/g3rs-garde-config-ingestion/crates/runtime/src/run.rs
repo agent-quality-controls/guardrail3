@@ -16,7 +16,7 @@ pub use g3rs_garde_config_ingestion_types::G3RsGardeConfigIngestionError as Inge
 ///
 /// Returns an error if Cargo.toml is missing, unreadable, or unparseable.
 /// Clippy config errors are silently treated as absent.
-pub fn ingest_config(
+pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeConfigChecksInput, IngestionError> {
     // 1. Select and parse Cargo.toml (required)
@@ -51,12 +51,12 @@ pub fn ingest_config(
 }
 
 /// Stub AST ingestion entry point for the garde family.
-pub fn ingest_ast(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsGardeAstChecksInput, IngestionError> {
+pub fn ingest_for_ast_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsGardeAstChecksInput, IngestionError> {
     Err(IngestionError::AstIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the garde family.
-pub fn ingest_file_tree(
+pub fn ingest_for_file_tree_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)

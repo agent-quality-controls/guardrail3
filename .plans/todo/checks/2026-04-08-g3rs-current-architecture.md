@@ -21,7 +21,7 @@ More explicitly:
 ```text
 workspace root
   -> G3RsWorkspaceCrawl
-  -> ingest_config / ingest_ast / ingest_file_tree
+  -> ingest_for_config_checks / ingest_for_ast_checks / ingest_for_file_tree_checks
   -> family-level checks input
   -> checks runtime/support mapping
   -> rule-specific tiny inputs
@@ -63,9 +63,9 @@ It owns:
 
 Each ingestion package exposes exactly three entry points:
 
-- `ingest_config`
-- `ingest_ast`
-- `ingest_file_tree`
+- `ingest_for_config_checks`
+- `ingest_for_ast_checks`
+- `ingest_for_file_tree_checks`
 
 Each of those returns the input type for the matching checks package.
 

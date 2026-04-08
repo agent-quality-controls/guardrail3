@@ -14,7 +14,7 @@ pub use g3rs_clippy_config_ingestion_types::G3RsClippyConfigIngestionError as In
 /// # Errors
 ///
 /// Returns an error if the clippy config is missing, unreadable, or unparseable.
-pub fn ingest_config(
+pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsClippyConfigChecksInput, IngestionError> {
     let entry = crate::select::select_clippy_toml(crawl)
@@ -33,14 +33,14 @@ pub fn ingest_config(
 }
 
 /// Stub AST ingestion entry point for the clippy family.
-pub fn ingest_ast(
+pub fn ingest_for_ast_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsClippyAstChecksInput, IngestionError> {
     Err(IngestionError::AstIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the clippy family.
-pub fn ingest_file_tree(
+pub fn ingest_for_file_tree_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsClippyFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)

@@ -5,7 +5,7 @@ mod run;
 mod select;
 
 #[cfg(feature = "ingest")]
-pub use run::{IngestionError, ingest_ast, ingest_config, ingest_file_tree};
+pub use run::{IngestionError, ingest_for_ast_checks, ingest_for_config_checks, ingest_for_file_tree_checks};
 
 #[cfg(test)]
 use g3rs_deps_config_ingestion_assertions as _;
