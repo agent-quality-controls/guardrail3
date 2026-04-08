@@ -17,7 +17,7 @@ pub use g3rs_release_config_ingestion_types::G3RsReleaseConfigIngestionError as 
 /// Returns an error if `Cargo.toml` is missing, unreadable, or unparseable.
 /// Optional files that are missing, unreadable, or unparseable are silently
 /// treated as `None`.
-pub fn ingest_config(
+pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsReleaseConfigChecksInput, IngestionError> {
     // --- Cargo.toml (required) ---
@@ -69,14 +69,14 @@ pub fn ingest_config(
 }
 
 /// Stub AST ingestion entry point for the release family.
-pub fn ingest_ast(
+pub fn ingest_for_ast_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsReleaseAstChecksInput, IngestionError> {
     Err(IngestionError::AstIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the release family.
-pub fn ingest_file_tree(
+pub fn ingest_for_file_tree_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsReleaseFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)

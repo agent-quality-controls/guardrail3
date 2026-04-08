@@ -56,7 +56,7 @@ fn ingests_real_workspace_with_package_rust_version() {
     }
 
     let crawl = crawl(&root);
-    let output = crate::ingest_config(&crawl)
+    let output = crate::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed on clippy-toml-parser");
 
     assert_eq!(output.toolchain_rel_path, "rust-toolchain.toml");
@@ -97,7 +97,7 @@ fn ingests_real_workspace_without_rust_version() {
     }
 
     let crawl = crawl(&root);
-    let output = crate::ingest_config(&crawl)
+    let output = crate::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed on guardrail3-check-types");
 
     let section = output
@@ -139,7 +139,7 @@ fn ingests_all_real_workspaces() {
         let pkg_name = pkg_dir
             .file_name()
             .map_or("unknown", |n| n.to_str().unwrap_or("unknown"));
-        let output = crate::ingest_config(&crawl)
+        let output = crate::ingest_for_config_checks(&crawl)
             .unwrap_or_else(|err| panic!("ingestion failed for {pkg_name}: {err}"));
 
         let section = output

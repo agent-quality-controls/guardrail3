@@ -15,7 +15,7 @@ pub use g3rs_toolchain_config_ingestion_types::G3RsToolchainConfigIngestionError
 /// # Errors
 ///
 /// Returns an error if `rust-toolchain.toml` is missing, unreadable, or unparseable.
-pub fn ingest_config(
+pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainConfigChecksInput, IngestionError> {
     let toolchain_entry = crawl
@@ -53,14 +53,14 @@ pub fn ingest_config(
 }
 
 /// Stub AST ingestion entry point for the toolchain family.
-pub fn ingest_ast(
+pub fn ingest_for_ast_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainAstChecksInput, IngestionError> {
     Err(IngestionError::AstIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the toolchain family.
-pub fn ingest_file_tree(
+pub fn ingest_for_file_tree_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)

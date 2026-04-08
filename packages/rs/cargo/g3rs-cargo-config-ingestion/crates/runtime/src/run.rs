@@ -12,7 +12,7 @@ pub use g3rs_cargo_config_ingestion_types::G3RsCargoConfigIngestionError as Inge
 /// # Errors
 ///
 /// Returns an error if the `Cargo.toml` is missing, unreadable, or unparseable.
-pub fn ingest_config(
+pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsCargoConfigChecksInput, IngestionError> {
     let entry = crate::select::select_root_cargo_toml(crawl)
@@ -31,12 +31,12 @@ pub fn ingest_config(
 }
 
 /// Stub AST ingestion entry point for the Cargo family.
-pub fn ingest_ast(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsCargoAstChecksInput, IngestionError> {
+pub fn ingest_for_ast_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsCargoAstChecksInput, IngestionError> {
     Err(IngestionError::AstIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the Cargo family.
-pub fn ingest_file_tree(
+pub fn ingest_for_file_tree_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsCargoFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)

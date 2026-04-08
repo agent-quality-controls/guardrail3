@@ -154,7 +154,7 @@ They do not need full workspace manifests, full crate manifests, or file-tree ta
 Target API:
 
 ```rust
-ingest_config(&crawl) -> Result<Vec<G3RsDepsConfigChecksInput>, Error>
+ingest_for_config_checks(&crawl) -> Result<Vec<G3RsDepsConfigChecksInput>, Error>
 ```
 
 Responsibilities:

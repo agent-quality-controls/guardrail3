@@ -10,7 +10,7 @@ use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 pub use g3rs_deps_config_ingestion_types::G3RsDepsConfigIngestionError as IngestionError;
 
 /// Ingest workspace deps config from a workspace crawl into per-crate checks inputs.
-pub fn ingest_config(
+pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<Vec<G3RsDepsConfigChecksInput>, IngestionError> {
     let workspace_cargo_entry = crate::select::select_workspace_cargo_toml(crawl)
@@ -74,12 +74,12 @@ pub fn ingest_config(
 }
 
 /// Stub AST ingestion entry point for the deps family.
-pub fn ingest_ast(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsDepsAstChecksInput, IngestionError> {
+pub fn ingest_for_ast_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsDepsAstChecksInput, IngestionError> {
     Err(IngestionError::AstIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the deps family.
-pub fn ingest_file_tree(
+pub fn ingest_for_file_tree_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsDepsFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)

@@ -33,7 +33,7 @@ fn ingests_clippy_toml() {
     write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid clippy.toml");
     assert_eq!(
@@ -56,7 +56,7 @@ fn ingests_dot_clippy_toml() {
     write(root.join(".clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid .clippy.toml");
     assert_eq!(
@@ -80,7 +80,7 @@ fn prefers_clippy_toml_over_dot_variant() {
     write(root.join(".clippy.toml"), "msrv = \"1.80\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed when both clippy config variants exist");
     assert_eq!(
@@ -101,7 +101,7 @@ fn fails_when_clippy_toml_is_missing() {
     git_init(root);
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     assert!(
         matches!(
@@ -121,7 +121,7 @@ fn fails_on_malformed_clippy_toml() {
     write(root.join("clippy.toml"), "{{{{not valid toml at all}}}}");
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     assert!(
         matches!(
@@ -144,7 +144,7 @@ fn fails_on_unknown_fields() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     assert!(
         matches!(
@@ -164,7 +164,7 @@ fn fails_on_wrong_value_type() {
     write(root.join("clippy.toml"), "msrv = 42\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     assert!(
         matches!(
@@ -184,7 +184,7 @@ fn empty_clippy_toml_parses_to_defaults() {
     write(root.join("clippy.toml"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for an empty clippy.toml");
     assert_eq!(
@@ -209,7 +209,7 @@ fn nested_clippy_toml_is_not_selected() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     assert!(
         matches!(
@@ -230,7 +230,7 @@ fn ignored_but_recovered_clippy_toml_is_ingested() {
     write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_config(&crawl);
+    let result = crate::ingest_for_config_checks(&crawl);
 
     let input = result.expect(
         "ingestion should succeed for a gitignored clippy.toml recovered by the crawl recovery phase",

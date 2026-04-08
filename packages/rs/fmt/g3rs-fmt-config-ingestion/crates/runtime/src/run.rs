@@ -16,7 +16,7 @@ pub use g3rs_fmt_config_ingestion_types::G3RsFmtConfigIngestionError as Ingestio
 ///
 /// Returns an error if any of the three files is missing, unreadable, or
 /// unparseable.
-pub fn ingest_config(
+pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsFmtConfigChecksInput, IngestionError> {
     // 1. Select rustfmt config (required — only rustfmt.toml, no dot variant).
@@ -66,12 +66,12 @@ pub fn ingest_config(
 }
 
 /// Stub AST ingestion entry point for the fmt family.
-pub fn ingest_ast(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsFmtAstChecksInput, IngestionError> {
+pub fn ingest_for_ast_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsFmtAstChecksInput, IngestionError> {
     Err(IngestionError::AstIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the fmt family.
-pub fn ingest_file_tree(
+pub fn ingest_for_file_tree_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsFmtFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)
