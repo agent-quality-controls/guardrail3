@@ -83,17 +83,32 @@ fn pipeline_reports_expected_findings_on_real_source_files() {
             .any(|result| result.id() == "RS-CODE-13"),
         "todo fixture should trigger RS-CODE-13: {results:#?}"
     );
+    assert_eq!(
+        by_file["src/has_todo.rs"].len(),
+        1,
+        "todo fixture should emit exactly one finding: {results:#?}"
+    );
     assert!(
         by_file["src/direct_std_fs.rs"]
             .iter()
             .any(|result| result.id() == "RS-CODE-15"),
         "direct std::fs fixture should trigger RS-CODE-15: {results:#?}"
     );
+    assert_eq!(
+        by_file["src/direct_std_fs.rs"].len(),
+        1,
+        "direct std::fs fixture should emit exactly one finding: {results:#?}"
+    );
     assert!(
         by_file["src/panic_probe.rs"]
             .iter()
             .any(|result| result.id() == "RS-CODE-16"),
         "panic fixture should trigger RS-CODE-16: {results:#?}"
+    );
+    assert_eq!(
+        by_file["src/panic_probe.rs"].len(),
+        1,
+        "panic fixture should emit exactly one finding: {results:#?}"
     );
     assert!(
         !by_file.contains_key("src/clean_file.rs"),
@@ -143,5 +158,72 @@ fn pipeline_preserves_current_test_owned_rule_behavior() {
     assert!(
         results.iter().all(|result| result.id() == "RS-CODE-13"),
         "test-owned files should currently suppress RS-CODE-15 and RS-CODE-16 only: {results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_emits_explicit_input_failure_for_parse_error() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("src/broken.rs"), "fn broken( {");
+
+    let results = run_pipeline(root);
+
+    assert_eq!(results.len(), 1, "broken source should emit one input failure");
+    let result = &results[0];
+    assert_eq!(result.id(), "RS-CODE-30");
+    assert_eq!(result.title(), "code-family input failure");
+    assert_eq!(result.file(), Some("src/broken.rs"));
+    assert!(
+        result
+            .message()
+            .starts_with("Failed to parse Rust source file:"),
+        "unexpected message: {result:#?}"
+    );
+}
+
+#[test]
+fn pipeline_stays_clean_on_small_workspace_baseline() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("src/clean_file.rs"), CLEAN_FILE);
+    write(root.join("src/string_todo.rs"), STRING_TODO);
+    write(root.join("src/comment_use_std_fs.rs"), COMMENT_USE_STD_FS);
+
+    let results = run_pipeline(root);
+
+    assert!(
+        results.is_empty(),
+        "clean baseline workspace should stay clean: {results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_keeps_other_findings_when_one_file_fails_to_parse() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("src/broken.rs"), "fn broken( {");
+    write(root.join("src/has_todo.rs"), HAS_TODO);
+
+    let results = run_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert!(
+        by_file["src/broken.rs"]
+            .iter()
+            .any(|result| result.id() == "RS-CODE-30"),
+        "broken file should still emit parse failure: {results:#?}"
+    );
+    assert!(
+        by_file["src/has_todo.rs"]
+            .iter()
+            .any(|result| result.id() == "RS-CODE-13"),
+        "valid file should still emit its finding: {results:#?}"
     );
 }

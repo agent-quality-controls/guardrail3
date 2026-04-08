@@ -8,3 +8,5 @@ pub mod rs_code_13_todo_macros;
 pub mod rs_code_15_direct_fs_usage;
 #[cfg(feature = "checks")]
 pub mod rs_code_16_panic_macro;
+#[cfg(feature = "checks")]
+pub mod rs_code_30_input_failures;
