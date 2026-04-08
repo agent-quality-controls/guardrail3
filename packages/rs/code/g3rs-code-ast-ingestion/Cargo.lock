@@ -138,6 +138,7 @@ dependencies = [
  "g3rs-code-ast-ingestion-assertions",
  "g3rs-code-ast-ingestion-types",
  "g3rs-workspace-crawl",
+ "guardrail3-check-types",
  "tempfile",
 ]
 
