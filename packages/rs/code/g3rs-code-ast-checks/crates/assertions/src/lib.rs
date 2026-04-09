@@ -3,6 +3,20 @@ use g3rs_code_ast_checks_runtime as _;
 mod common;
 
 #[cfg(feature = "checks")]
+pub mod rs_code_01_crate_level_allow;
+#[cfg(feature = "checks")]
+pub mod rs_code_02_unused_crate_dependencies_allow;
+#[cfg(feature = "checks")]
+pub mod rs_code_03_item_level_allow_without_reason;
+#[cfg(feature = "checks")]
+pub mod rs_code_04_item_level_allow_with_reason;
+#[cfg(feature = "checks")]
+pub mod rs_code_05_garde_skip_without_comment;
+#[cfg(feature = "checks")]
+pub mod rs_code_06_garde_skip_with_comment;
+#[cfg(feature = "checks")]
+pub mod rs_code_08_cfg_attr_allow_inventory;
+#[cfg(feature = "checks")]
 pub mod rs_code_13_todo_macros;
 #[cfg(feature = "checks")]
 pub mod rs_code_15_direct_fs_usage;
@@ -16,6 +30,8 @@ pub mod rs_code_18_always_true_cfg_attr_bypass;
 pub mod rs_code_20_extern_allow;
 #[cfg(feature = "checks")]
 pub mod rs_code_21_fs_glob_import;
+#[cfg(feature = "checks")]
+pub mod rs_code_22_deny_forbid_without_reason;
 #[cfg(feature = "checks")]
 pub mod rs_code_23_include_bypass;
 #[cfg(feature = "checks")]

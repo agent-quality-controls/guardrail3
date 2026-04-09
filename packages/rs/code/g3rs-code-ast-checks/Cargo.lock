@@ -25,6 +25,7 @@ dependencies = [
  "g3rs-code-ast-checks-assertions",
  "g3rs-code-ast-checks-types",
  "guardrail3-check-types",
+ "guardrail3-reason-policy",
  "proc-macro2",
  "quote",
  "syn",
@@ -37,6 +38,10 @@ version = "0.1.0"
 [[package]]
 name = "guardrail3-check-types"
 version = "0.1.0"
+
+[[package]]
+name = "guardrail3-reason-policy"
+version = "0.0.0"
 
 [[package]]
 name = "proc-macro2"
