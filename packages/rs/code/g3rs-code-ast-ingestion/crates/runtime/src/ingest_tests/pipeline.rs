@@ -123,8 +123,44 @@ fn pipeline_reports_new_single_file_ast_rules() {
     git_init(root);
 
     write(
+        root.join("src/crate_allow.rs"),
+        "#![allow(dead_code)]\nfn probe() {}\n",
+    );
+    write(
+        root.join("src/unused_crate_deps.rs"),
+        "#![allow(unused_crate_dependencies)]\nfn probe() {}\n",
+    );
+    write(
+        root.join("src/item_allow_missing_reason.rs"),
+        "#[allow(clippy::too_many_lines)]\nfn probe() {}\n",
+    );
+    write(
+        root.join("src/item_allow_with_reason.rs"),
+        "#[allow(clippy::too_many_lines)] // reason: generated ffi shim\nfn probe() {}\n",
+    );
+    write(
+        root.join("src/garde_skip.rs"),
+        "struct Form {\n    #[garde(skip)] // reason: validated upstream boundary\n    token: String,\n}\n",
+    );
+    write(
+        root.join("src/garde_skip_no_comment.rs"),
+        "struct Form {\n    #[garde(skip)]\n    token: String,\n}\n",
+    );
+    write(
+        root.join("src/cfg_attr_unknown.rs"),
+        "#[cfg_attr(feature = \"cli\", allow(dead_code))]\nfn probe() {}\n",
+    );
+    write(
+        root.join("src/deny_without_reason.rs"),
+        "#[deny(dead_code)]\nfn probe() {}\n",
+    );
+    write(
         root.join("src/impl_allow.rs"),
         "struct Foo;\n#[allow(clippy::too_many_lines)]\nimpl Foo { fn a(&self) {} fn b(&self) {} fn c(&self) {} fn d(&self) {} }\n",
+    );
+    write(
+        root.join("src/forbid_inventory.rs"),
+        "#![forbid(unsafe_code)]\nfn probe() {}\n",
     );
     write(
         root.join("src/cfg_attr.rs"),
@@ -158,8 +194,68 @@ fn pipeline_reports_new_single_file_ast_rules() {
     let results = run_pipeline(root);
     let by_file = findings_by_file(&results);
 
-    assert_eq!(by_file["src/impl_allow.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/impl_allow.rs"][0].id(), "RS-CODE-17");
+    assert_eq!(by_file["src/crate_allow.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/crate_allow.rs"][0].id(), "RS-CODE-01");
+
+    assert_eq!(by_file["src/unused_crate_deps.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/unused_crate_deps.rs"][0].id(), "RS-CODE-02");
+
+    assert_eq!(
+        by_file["src/item_allow_missing_reason.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(
+        by_file["src/item_allow_missing_reason.rs"][0].id(),
+        "RS-CODE-03"
+    );
+
+    assert_eq!(
+        by_file["src/item_allow_with_reason.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(
+        by_file["src/item_allow_with_reason.rs"][0].id(),
+        "RS-CODE-04"
+    );
+
+    assert_eq!(by_file["src/garde_skip.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/garde_skip.rs"][0].id(), "RS-CODE-06");
+
+    assert_eq!(
+        by_file["src/garde_skip_no_comment.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(
+        by_file["src/garde_skip_no_comment.rs"][0].id(),
+        "RS-CODE-05"
+    );
+
+    assert_eq!(by_file["src/cfg_attr_unknown.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/cfg_attr_unknown.rs"][0].id(), "RS-CODE-08");
+
+    assert_eq!(
+        by_file["src/deny_without_reason.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(by_file["src/deny_without_reason.rs"][0].id(), "RS-CODE-22");
+
+    assert_eq!(by_file["src/impl_allow.rs"].len(), 2, "{results:#?}");
+    assert!(
+        by_file["src/impl_allow.rs"]
+            .iter()
+            .any(|result| result.id() == "RS-CODE-03"),
+        "{results:#?}"
+    );
+    assert!(
+        by_file["src/impl_allow.rs"]
+            .iter()
+            .any(|result| result.id() == "RS-CODE-17"),
+        "{results:#?}"
+    );
 
     assert_eq!(by_file["src/cfg_attr.rs"].len(), 1, "{results:#?}");
     assert_eq!(by_file["src/cfg_attr.rs"][0].id(), "RS-CODE-18");
@@ -183,6 +279,13 @@ fn pipeline_reports_new_single_file_ast_rules() {
 
     assert_eq!(by_file["src/include_probe.rs"].len(), 1, "{results:#?}");
     assert_eq!(by_file["src/include_probe.rs"][0].id(), "RS-CODE-23");
+
+    assert_eq!(by_file["src/forbid_inventory.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/forbid_inventory.rs"][0].id(), "RS-CODE-22");
+    assert!(
+        by_file["src/forbid_inventory.rs"][0].inventory(),
+        "{results:#?}"
+    );
 
     assert_eq!(by_file["tests/expect_probe.rs"].len(), 1, "{results:#?}");
     assert_eq!(by_file["tests/expect_probe.rs"][0].id(), "RS-CODE-32");

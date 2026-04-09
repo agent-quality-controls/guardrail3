@@ -1,15 +1,55 @@
 use super::analysis_helpers;
 use super::helpers;
 use super::types::{
-    CfgAttrLintInfo, CfgPredicateTruth, ForeignModAllowInfo, ImplAllowInfo, IncludeMacroInfo,
+    CfgAttrLintInfo, CfgPredicateTruth, DenyForbidInfo, ForeignModAllowInfo, ImplAllowInfo,
+    IncludeMacroInfo, InlineModAllow, LintPolicyInfo,
 };
 use syn::spanned::Spanned;
 use syn::visit::Visit;
+
+pub(crate) fn find_crate_level_allows(ast: &syn::File) -> Vec<(usize, String)> {
+    let mut out = Vec::new();
+    for attr in &ast.attrs {
+        if matches!(attr.style, syn::AttrStyle::Inner(_)) && attr.path().is_ident("allow") {
+            out.extend(
+                helpers::collect_item_lint_policies(std::slice::from_ref(attr))
+                    .into_iter()
+                    .map(|info| (info.line, info.lint)),
+            );
+        }
+    }
+    out
+}
+
+pub(crate) fn find_inline_mod_allows(ast: &syn::File) -> Vec<InlineModAllow> {
+    let mut out = Vec::new();
+    for item in &ast.items {
+        if let syn::Item::Mod(item_mod) = item {
+            collect_mod_inner_allows(item_mod, &item_mod.ident.to_string(), &mut out);
+        }
+    }
+    out
+}
+
+pub(crate) fn find_item_lint_policies(ast: &syn::File) -> Vec<LintPolicyInfo> {
+    let mut visitor = ItemOnlyPolicyVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
 
 pub(crate) fn find_impl_block_allows(ast: &syn::File) -> Vec<ImplAllowInfo> {
     let mut visitor = ImplAllowVisitor { out: Vec::new() };
     visitor.visit_file(ast);
     visitor.out
+}
+
+pub(crate) fn find_deny_forbid_attrs(ast: &syn::File) -> Vec<DenyForbidInfo> {
+    let mut out = Vec::new();
+    helpers::collect_deny_forbid_attrs(&ast.attrs, true, &mut out);
+    helpers::collect_cfg_attr_deny_forbid_attrs(&ast.attrs, true, &mut out);
+    let mut visitor = DenyForbidVisitor { out: &mut out };
+    visitor.visit_file(ast);
+    out
 }
 
 pub(crate) fn find_foreign_mod_allows(ast: &syn::File) -> Vec<ForeignModAllowInfo> {
@@ -32,8 +72,41 @@ pub(crate) fn find_cfg_attr_lint_policies(ast: &syn::File) -> Vec<CfgAttrLintInf
     out
 }
 
+fn collect_mod_inner_allows(item_mod: &syn::ItemMod, path: &str, out: &mut Vec<InlineModAllow>) {
+    let Some((_, items)) = &item_mod.content else {
+        return;
+    };
+
+    for attr in &item_mod.attrs {
+        if matches!(attr.style, syn::AttrStyle::Inner(_)) && attr.path().is_ident("allow") {
+            for info in helpers::collect_item_lint_policies(std::slice::from_ref(attr)) {
+                out.push(InlineModAllow {
+                    line: info.line,
+                    lint: info.lint,
+                    module_path: path.to_owned(),
+                });
+            }
+        }
+    }
+
+    for item in items {
+        if let syn::Item::Mod(nested) = item {
+            let nested_path = format!("{path}::{}", nested.ident);
+            collect_mod_inner_allows(nested, &nested_path, out);
+        }
+    }
+}
+
+struct ItemOnlyPolicyVisitor {
+    out: Vec<LintPolicyInfo>,
+}
+
 struct ImplAllowVisitor {
     out: Vec<ImplAllowInfo>,
+}
+
+struct DenyForbidVisitor<'a> {
+    out: &'a mut Vec<DenyForbidInfo>,
 }
 
 struct ForeignModAllowVisitor {
@@ -46,6 +119,32 @@ struct IncludeMacroVisitor {
 
 struct CfgAttrPolicyVisitor<'a> {
     out: &'a mut Vec<CfgAttrLintInfo>,
+}
+
+impl<'ast> Visit<'ast> for ItemOnlyPolicyVisitor {
+    fn visit_item(&mut self, item: &'ast syn::Item) {
+        if !matches!(item, syn::Item::ForeignMod(_)) {
+            self.out
+                .extend(helpers::collect_item_lint_policies(helpers::item_attrs(
+                    item,
+                )));
+        }
+        syn::visit::visit_item(self, item);
+    }
+
+    fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
+        self.out.extend(helpers::collect_item_lint_policies(
+            helpers::impl_item_attrs(item),
+        ));
+        syn::visit::visit_impl_item(self, item);
+    }
+
+    fn visit_trait_item(&mut self, item: &'ast syn::TraitItem) {
+        self.out.extend(helpers::collect_item_lint_policies(
+            helpers::trait_item_attrs(item),
+        ));
+        syn::visit::visit_trait_item(self, item);
+    }
 }
 
 impl<'ast> Visit<'ast> for ImplAllowVisitor {
@@ -66,6 +165,34 @@ impl<'ast> Visit<'ast> for ImplAllowVisitor {
             }
         }
         syn::visit::visit_item_impl(self, item_impl);
+    }
+}
+
+impl<'ast> Visit<'ast> for DenyForbidVisitor<'ast> {
+    fn visit_item(&mut self, item: &'ast syn::Item) {
+        helpers::collect_deny_forbid_attrs(helpers::item_attrs(item), false, self.out);
+        helpers::collect_cfg_attr_deny_forbid_attrs(helpers::item_attrs(item), false, self.out);
+        syn::visit::visit_item(self, item);
+    }
+
+    fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
+        helpers::collect_deny_forbid_attrs(helpers::impl_item_attrs(item), false, self.out);
+        helpers::collect_cfg_attr_deny_forbid_attrs(
+            helpers::impl_item_attrs(item),
+            false,
+            self.out,
+        );
+        syn::visit::visit_impl_item(self, item);
+    }
+
+    fn visit_trait_item(&mut self, item: &'ast syn::TraitItem) {
+        helpers::collect_deny_forbid_attrs(helpers::trait_item_attrs(item), false, self.out);
+        helpers::collect_cfg_attr_deny_forbid_attrs(
+            helpers::trait_item_attrs(item),
+            false,
+            self.out,
+        );
+        syn::visit::visit_trait_item(self, item);
     }
 }
 

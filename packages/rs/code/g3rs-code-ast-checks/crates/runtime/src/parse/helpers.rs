@@ -176,3 +176,77 @@ pub(crate) fn collect_cfg_attr_lint_policies(
         });
     }
 }
+
+pub(crate) fn collect_deny_forbid_attrs(
+    attrs: &[syn::Attribute],
+    crate_level_inner: bool,
+    out: &mut Vec<super::types::DenyForbidInfo>,
+) {
+    for attr in attrs {
+        let level = if attr.path().is_ident("deny") {
+            "deny"
+        } else if attr.path().is_ident("forbid") {
+            "forbid"
+        } else {
+            continue;
+        };
+        let line = span_end_line(attr.span());
+        let syn::Meta::List(list) = &attr.meta else {
+            continue;
+        };
+        let Ok(paths) = list.parse_args_with(
+            syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+        ) else {
+            continue;
+        };
+        for path in paths {
+            out.push(super::types::DenyForbidInfo {
+                line,
+                lint: path_to_string(&path),
+                level: level.to_owned(),
+                crate_level_inner: crate_level_inner
+                    && matches!(attr.style, syn::AttrStyle::Inner(_)),
+                cfg_truth: super::types::CfgPredicateTruth::KnownTrue,
+            });
+        }
+    }
+}
+
+pub(crate) fn collect_cfg_attr_deny_forbid_attrs(
+    attrs: &[syn::Attribute],
+    crate_level_inner: bool,
+    out: &mut Vec<super::types::DenyForbidInfo>,
+) {
+    for attr in attrs {
+        if !attr.path().is_ident("cfg_attr") {
+            continue;
+        }
+        super::analysis_helpers::walk_cfg_attr_payloads(attr, |line, truth, meta| {
+            let syn::Meta::List(inner) = meta else {
+                return;
+            };
+            let level = if inner.path.is_ident("deny") {
+                "deny"
+            } else if inner.path.is_ident("forbid") {
+                "forbid"
+            } else {
+                return;
+            };
+            let Ok(paths) = inner.parse_args_with(
+                syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+            ) else {
+                return;
+            };
+            for path in paths {
+                out.push(super::types::DenyForbidInfo {
+                    line,
+                    lint: path_to_string(&path),
+                    level: level.to_owned(),
+                    crate_level_inner: crate_level_inner
+                        && matches!(attr.style, syn::AttrStyle::Inner(_)),
+                    cfg_truth: truth,
+                });
+            }
+        });
+    }
+}

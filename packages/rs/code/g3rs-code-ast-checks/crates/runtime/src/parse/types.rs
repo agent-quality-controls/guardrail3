@@ -86,3 +86,29 @@ pub(crate) struct CfgAttrLintInfo {
     pub(crate) kind: LintPolicyKind,
     pub(crate) truth: CfgPredicateTruth,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct DenyForbidInfo {
+    pub(crate) line: usize,
+    pub(crate) lint: String,
+    pub(crate) level: String,
+    pub(crate) crate_level_inner: bool,
+    pub(crate) cfg_truth: CfgPredicateTruth,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct InlineModAllow {
+    pub(crate) line: usize,
+    pub(crate) lint: String,
+    pub(crate) module_path: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct GardeSkipInfo {
+    pub(crate) line: usize,
+    pub(crate) field_name: String,
+    pub(crate) field_type: String,
+    pub(crate) is_type_level: bool,
+    pub(crate) is_exempt: bool,
+    pub(crate) has_subcommand_attr: bool,
+}
