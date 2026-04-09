@@ -16,14 +16,14 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Family configs: (family_dir, checks_pkg_name, types_pkg_name, ingestion_pkg_name_or_None)
 FAMILIES = [
-    ("cargo", "g3rs-cargo-config-checks", "g3rs-cargo-types", "g3rs-cargo-config-ingestion"),
-    ("clippy", "g3rs-clippy-config-checks", "g3rs-clippy-types", "g3rs-clippy-config-ingestion"),
-    ("deny", "g3rs-deny-config-checks", "g3rs-deny-types", "g3rs-deny-config-ingestion"),
+    ("cargo", "g3rs-cargo-config-checks", "g3rs-cargo-types", "g3rs-cargo-ingestion"),
+    ("clippy", "g3rs-clippy-config-checks", "g3rs-clippy-types", "g3rs-clippy-ingestion"),
+    ("deny", "g3rs-deny-config-checks", "g3rs-deny-types", "g3rs-deny-ingestion"),
     ("deps", "g3rs-deps-config-checks", "g3rs-deps-types", None),  # no ingestion yet
-    ("fmt", "g3rs-fmt-config-checks", "g3rs-fmt-types", "g3rs-fmt-config-ingestion"),
-    ("garde", "g3rs-garde-config-checks", "g3rs-garde-types", "g3rs-garde-config-ingestion"),
-    ("release", "g3rs-release-config-checks", "g3rs-release-types", "g3rs-release-config-ingestion"),
-    ("toolchain", "g3rs-toolchain-config-checks", "g3rs-toolchain-types", "g3rs-toolchain-config-ingestion"),
+    ("fmt", "g3rs-fmt-config-checks", "g3rs-fmt-types", "g3rs-fmt-ingestion"),
+    ("garde", "g3rs-garde-config-checks", "g3rs-garde-types", "g3rs-garde-ingestion"),
+    ("release", "g3rs-release-config-checks", "g3rs-release-types", "g3rs-release-ingestion"),
+    ("toolchain", "g3rs-toolchain-config-checks", "g3rs-toolchain-types", "g3rs-toolchain-ingestion"),
 ]
 
 WORKSPACE_LINTS = '''[workspace.lints.rust]

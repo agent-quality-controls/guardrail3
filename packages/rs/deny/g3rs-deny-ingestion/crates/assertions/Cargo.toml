@@ -1,0 +1,25 @@
+[package]
+name = "g3rs-deny-ingestion-assertions"
+version = "0.1.0"
+edition = "2024"
+description = "Assertion helpers for g3rs deny ingestion tests"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "deny", "ingestion", "assertions"]
+categories = ["development-tools"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["ingest"]
+ingest = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+g3rs-deny-ingestion-types = { path = "../types" }

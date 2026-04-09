@@ -1,0 +1,25 @@
+[package]
+name = "g3rs-code-ingestion-types"
+version = "0.1.0"
+edition = "2024"
+description = "Public types for g3rs code ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "code", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-code-ast-checks-types = { path = "../../../g3rs-code-ast-checks/crates/types", version = "0.1.0" }
+
+[package.metadata.guardrail3]
+shared = true

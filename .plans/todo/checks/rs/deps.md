@@ -13,7 +13,7 @@ Package roots:
 
 - `packages/rs/deps/g3rs-deps-types`
 - `packages/rs/deps/g3rs-deps-config-checks`
-- `packages/rs/deps/g3rs-deps-config-ingestion` (planned)
+- `packages/rs/deps/g3rs-deps-ingestion` (planned)
 
 Required policy input:
 

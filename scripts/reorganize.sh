@@ -41,28 +41,28 @@ git mv packages/g3rs-workspace-crawl packages/rs/
 
 echo "=== Moving family packages ==="
 git mv packages/g3rs-cargo-config-checks packages/rs/cargo/
-git mv packages/g3rs-cargo-config-ingestion packages/rs/cargo/
+git mv packages/g3rs-cargo-ingestion packages/rs/cargo/
 
 git mv packages/g3rs-clippy-config-checks packages/rs/clippy/
-git mv packages/g3rs-clippy-config-ingestion packages/rs/clippy/
+git mv packages/g3rs-clippy-ingestion packages/rs/clippy/
 
 git mv packages/g3rs-deny-config-checks packages/rs/deny/
-git mv packages/g3rs-deny-config-ingestion packages/rs/deny/
+git mv packages/g3rs-deny-ingestion packages/rs/deny/
 
 git mv packages/g3rs-deps-config-checks packages/rs/deps/
 
 git mv packages/g3rs-fmt-config-checks packages/rs/fmt/
-git mv packages/g3rs-fmt-config-ingestion packages/rs/fmt/
+git mv packages/g3rs-fmt-ingestion packages/rs/fmt/
 
 git mv packages/g3rs-garde-ast-checks packages/rs/garde/
 git mv packages/g3rs-garde-config-checks packages/rs/garde/
-git mv packages/g3rs-garde-config-ingestion packages/rs/garde/
+git mv packages/g3rs-garde-ingestion packages/rs/garde/
 
 git mv packages/g3rs-release-config-checks packages/rs/release/
-git mv packages/g3rs-release-config-ingestion packages/rs/release/
+git mv packages/g3rs-release-ingestion packages/rs/release/
 
 git mv packages/g3rs-toolchain-config-checks packages/rs/toolchain/
-git mv packages/g3rs-toolchain-config-ingestion packages/rs/toolchain/
+git mv packages/g3rs-toolchain-ingestion packages/rs/toolchain/
 
 echo "=== Rewriting path dependencies ==="
 
@@ -87,21 +87,21 @@ MOVES[packages/reason-policy]=packages/shared/reason-policy
 MOVES[packages/g3rs-workspace-crawl]=packages/rs/g3rs-workspace-crawl
 # Families
 MOVES[packages/g3rs-cargo-config-checks]=packages/rs/cargo/g3rs-cargo-config-checks
-MOVES[packages/g3rs-cargo-config-ingestion]=packages/rs/cargo/g3rs-cargo-config-ingestion
+MOVES[packages/g3rs-cargo-ingestion]=packages/rs/cargo/g3rs-cargo-ingestion
 MOVES[packages/g3rs-clippy-config-checks]=packages/rs/clippy/g3rs-clippy-config-checks
-MOVES[packages/g3rs-clippy-config-ingestion]=packages/rs/clippy/g3rs-clippy-config-ingestion
+MOVES[packages/g3rs-clippy-ingestion]=packages/rs/clippy/g3rs-clippy-ingestion
 MOVES[packages/g3rs-deny-config-checks]=packages/rs/deny/g3rs-deny-config-checks
-MOVES[packages/g3rs-deny-config-ingestion]=packages/rs/deny/g3rs-deny-config-ingestion
+MOVES[packages/g3rs-deny-ingestion]=packages/rs/deny/g3rs-deny-ingestion
 MOVES[packages/g3rs-deps-config-checks]=packages/rs/deps/g3rs-deps-config-checks
 MOVES[packages/g3rs-fmt-config-checks]=packages/rs/fmt/g3rs-fmt-config-checks
-MOVES[packages/g3rs-fmt-config-ingestion]=packages/rs/fmt/g3rs-fmt-config-ingestion
+MOVES[packages/g3rs-fmt-ingestion]=packages/rs/fmt/g3rs-fmt-ingestion
 MOVES[packages/g3rs-garde-ast-checks]=packages/rs/garde/g3rs-garde-ast-checks
 MOVES[packages/g3rs-garde-config-checks]=packages/rs/garde/g3rs-garde-config-checks
-MOVES[packages/g3rs-garde-config-ingestion]=packages/rs/garde/g3rs-garde-config-ingestion
+MOVES[packages/g3rs-garde-ingestion]=packages/rs/garde/g3rs-garde-ingestion
 MOVES[packages/g3rs-release-config-checks]=packages/rs/release/g3rs-release-config-checks
-MOVES[packages/g3rs-release-config-ingestion]=packages/rs/release/g3rs-release-config-ingestion
+MOVES[packages/g3rs-release-ingestion]=packages/rs/release/g3rs-release-ingestion
 MOVES[packages/g3rs-toolchain-config-checks]=packages/rs/toolchain/g3rs-toolchain-config-checks
-MOVES[packages/g3rs-toolchain-config-ingestion]=packages/rs/toolchain/g3rs-toolchain-config-ingestion
+MOVES[packages/g3rs-toolchain-ingestion]=packages/rs/toolchain/g3rs-toolchain-ingestion
 
 # For each Cargo.toml with path deps, resolve and rewrite
 find packages/ apps/ -name 'Cargo.toml' -not -path '*/target/*' | while read -r toml_file; do
