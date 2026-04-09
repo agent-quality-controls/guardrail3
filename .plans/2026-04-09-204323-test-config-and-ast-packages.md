@@ -49,6 +49,8 @@ These rules belong in `g3rs-test-ast-checks`:
   - real proof site
 - `RS-TEST-08`
   - weak wildcard `matches!`
+- `RS-TEST-10`
+  - AST parse/input failures for root-owned Rust source
 - `RS-TEST-16`
   - assertions modules prove
 - `RS-TEST-17`
@@ -62,14 +64,16 @@ Do not force these into the first config/AST extraction:
   - owned sidecar shape
 - `RS-TEST-03`
   - runtime/assertions split and import boundaries
-- `RS-TEST-10`
-  - input failures
 - `RS-TEST-18`
   - `test_support` stays generic
 
 Reason:
 - they depend on component layout, import boundaries, or family-wide
   fail-closed ownership more than on pure config or pure AST
+
+Exception:
+- direct Rust parse/input failures stay in the AST lane so `check(...)` does
+  not fail open on malformed owned source files
 
 ## Scope model
 
