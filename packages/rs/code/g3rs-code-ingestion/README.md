@@ -4,6 +4,8 @@ Builds `code` checks inputs from a workspace crawl.
 
 Current behavior:
 
+- scans owned config files for `EXCEPTION:` comments
+- parses workspace `Cargo.toml` files for `workspace.lints.rust.unsafe_code`
 - selects `.rs` files from the crawl
 - skips fixture paths
 - classifies `is_test`
@@ -15,5 +17,5 @@ Current behavior:
 Current lane support:
 
 - `ingest_for_ast_checks` is implemented
-- `ingest_for_config_checks` is a stub
+- `ingest_for_config_checks` is implemented
 - `ingest_for_file_tree_checks` is a stub

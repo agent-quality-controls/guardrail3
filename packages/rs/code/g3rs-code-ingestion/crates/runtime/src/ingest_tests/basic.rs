@@ -438,3 +438,119 @@ fn malformed_nearest_cargo_toml_fails_ingestion() {
         "unexpected error: {error:?}"
     );
 }
+
+#[test]
+fn ingests_exception_comments_from_owned_config_files() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n# EXCEPTION: temporary package carve-out\nquoted = \"# not a comment\"\n",
+    );
+    write(
+        root.join("deny.toml"),
+        "advisories = { ignore = [] } // EXCEPTION: ignore review debt\n",
+    );
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect("config ingestion should succeed");
+
+    assert_eq!(input.exception_comments.len(), 2, "{input:#?}");
+    assert!(
+        input.exception_comments.iter().any(|comment| {
+            comment.rel_path == "Cargo.toml"
+                && comment.line == 4
+                && comment.line_text == "# EXCEPTION: temporary package carve-out"
+        }),
+        "{input:#?}"
+    );
+    assert!(
+        input.exception_comments.iter().any(|comment| {
+            comment.rel_path == "deny.toml"
+                && comment.line == 1
+                && comment.line_text == "// EXCEPTION: ignore review debt"
+        }),
+        "{input:#?}"
+    );
+}
+
+#[test]
+fn ingests_workspace_unsafe_code_lints_from_cargo() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[workspace]\n\
+members = [\"crates/core\"]\n\
+\n\
+[workspace.lints.rust]\n\
+unsafe_code = \"deny\"\n",
+    );
+    write(
+        root.join("crates/core/Cargo.toml"),
+        "[package]\nname = \"core\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect("config ingestion should succeed");
+
+    assert_eq!(input.unsafe_code_lints.len(), 1, "{input:#?}");
+    assert_eq!(input.unsafe_code_lints[0].cargo_rel_path, "Cargo.toml");
+    assert_eq!(
+        input.unsafe_code_lints[0].lint_level.as_deref(),
+        Some("deny")
+    );
+}
+
+#[test]
+fn malformed_cargo_toml_fails_config_ingestion() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("Cargo.toml"), "[workspace\nbroken = true");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let error = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect_err("malformed cargo should fail config ingestion");
+
+    assert!(
+        matches!(error, crate::IngestionError::ParseFailed { .. }),
+        "unexpected error: {error:?}"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn unreadable_owned_config_file_fails_config_ingestion() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    let deny_toml = root.join("deny.toml");
+    write(&deny_toml, "# EXCEPTION: hidden\n");
+
+    let mut permissions = fs::metadata(&deny_toml)
+        .expect("metadata should exist")
+        .permissions();
+    permissions.set_mode(0o000);
+    fs::set_permissions(&deny_toml, permissions).expect("chmod should succeed");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let error = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect_err("unreadable config should fail config ingestion");
+
+    assert!(
+        matches!(error, crate::IngestionError::Unreadable { .. }),
+        "unexpected error: {error:?}"
+    );
+}

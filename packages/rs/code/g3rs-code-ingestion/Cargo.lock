@@ -140,6 +140,26 @@ name = "g3rs-code-ast-checks-types"
 version = "0.1.0"
 
 [[package]]
+name = "g3rs-code-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-config-checks-runtime",
+ "g3rs-code-config-checks-types",
+]
+
+[[package]]
+name = "g3rs-code-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-config-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-code-config-checks-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3rs-code-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -160,6 +180,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-code-ast-checks",
+ "g3rs-code-config-checks",
  "g3rs-code-ingestion-assertions",
  "g3rs-code-ingestion-types",
  "g3rs-workspace-crawl",
@@ -172,6 +193,7 @@ name = "g3rs-code-ingestion-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-code-ast-checks-types",
+ "g3rs-code-config-checks-types",
 ]
 
 [[package]]
