@@ -43,7 +43,7 @@
 | RS-CODE-16 | Warn | `panic!` macro in non-test code. Detected by AST walker but currently silently dropped (catch-all `_ => {}`). Strictly worse than `todo!` — crashes in production. Clippy has no lint for this. | Implemented |
 | RS-CODE-17 | Error | Blanket `#[allow]` on `impl` block covering >3 methods. No legitimate use case — always apply `#[allow]` to individual methods. Invisible blast radius otherwise. | Implemented |
 | RS-CODE-18 | Error | Always-true `cfg_attr` bypass. Own only demonstrably unconditional predicates such as `all()` or `not(any())`; keep unknown/platform-specific predicates conservative instead of guessing they are exhaustive. | Implemented |
-| RS-CODE-19 | Info | Large struct (>15 fields) or enum (>20 variants). Architectural smell inventory. Not error, just visibility. | Implemented |
+| RS-CODE-19 | Warn | Large struct (>15 fields) or enum (>20 variants). Architectural smell inventory. Not error, just visibility. | Implemented |
 | RS-CODE-20 | Error | `#[allow]` on `extern "C"` blocks. `item_attrs` returns `&[]` for ForeignMod — one-line fix to add `ForeignMod(f) => &f.attrs`. | Implemented |
 | RS-CODE-21 | Error | `use std::fs::*` glob import bypass, including std-alias forms such as `use std as s; use s::fs::*;`. Variant of the filesystem hole that `RS-CODE-15` covers for direct imports/calls. | Implemented |
 

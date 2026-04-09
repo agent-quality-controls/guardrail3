@@ -153,7 +153,8 @@ fn is_test_sidecar_exempt(item_mod: &syn::ItemMod, path_value: &str) -> bool {
     if !helpers::attrs_enter_test_context(&item_mod.attrs) {
         return false;
     }
-    path_value == "rule_tests/mod.rs" || path_value.ends_with("_tests/mod.rs")
+    item_mod.ident.to_string().ends_with("_tests")
+        && path_value == format!("{}/mod.rs", item_mod.ident)
 }
 
 impl<'ast> Visit<'ast> for ItemOnlyPolicyVisitor {

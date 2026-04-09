@@ -19,3 +19,15 @@ fn ignores_comment_only_lines() {
 
     assert!(results.is_empty(), "{results:#?}");
 }
+
+#[test]
+fn ignores_raw_string_payload_only_lines() {
+    let payload = (0..600)
+        .map(|i| format!("payload-{i}\n"))
+        .collect::<String>();
+    let content = format!("const BIG: &str = r#\"\n{payload}\"#;\n");
+
+    let results = check_source("src/lib.rs", &content, false);
+
+    assert!(results.is_empty(), "{results:#?}");
+}
