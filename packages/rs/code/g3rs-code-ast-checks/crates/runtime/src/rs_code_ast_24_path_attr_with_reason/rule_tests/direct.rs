@@ -71,3 +71,26 @@ fn warns_on_path_with_useful_reason() {
         }],
     );
 }
+
+#[test]
+fn warns_on_conditional_path_with_useful_reason() {
+    let results = check_source(
+        "src/lib.rs",
+        "#[cfg_attr(feature = \"cli\", path = \"generated.rs\")] // reason: generated bridge shim\nmod generated;\n",
+        false,
+    );
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Warn),
+            title: Some("#[path] with reason"),
+            file: Some("src/lib.rs"),
+            inventory: Some(false),
+            message: Some(
+                "`#[path = \"generated.rs\"]` on `mod generated` reason: generated bridge shim",
+            ),
+            line: Some(1),
+        }],
+    );
+}
