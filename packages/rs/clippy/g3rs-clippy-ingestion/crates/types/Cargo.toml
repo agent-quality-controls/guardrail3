@@ -1,0 +1,22 @@
+[package]
+name = "g3rs-clippy-ingestion-types"
+version = "0.1.0"
+edition = "2024"
+description = "Public types for g3rs clippy ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "clippy", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[lints]
+workspace = true
+
+[package.metadata.guardrail3]
+shared = true

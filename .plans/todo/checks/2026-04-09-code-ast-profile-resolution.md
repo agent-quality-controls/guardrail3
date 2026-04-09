@@ -4,7 +4,7 @@
 
 ## Goal
 
-Teach `g3rs-code-ast-ingestion` to classify each Rust source file with the
+Teach `g3rs-code-ingestion` to classify each Rust source file with the
 minimum crate/profile context needed by the remaining single-file `code` AST
 rules.
 
@@ -148,7 +148,7 @@ Reason:
 
 1. Add `is_library_root` to `G3RsSourceFile`
 2. Replace the current stub `resolve_profile_name(...)`
-3. Add target ownership helpers in `g3rs-code-ast-ingestion`
+3. Add target ownership helpers in `g3rs-code-ingestion`
 4. Add ingestion tests for:
    - library root
    - library non-root module
@@ -172,7 +172,7 @@ Reason:
 
 ## Success criteria
 
-- `g3rs-code-ast-ingestion` emits stable library/binary context
+- `g3rs-code-ingestion` emits stable library/binary context
 - `lib.rs`-specific rules no longer rely on raw path heuristics
 - remaining library-sensitive single-file `code` AST rules can migrate without
   adding workspace discovery to the checks runtime
