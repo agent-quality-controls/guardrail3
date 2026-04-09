@@ -20,6 +20,7 @@ workspace = true
 
 [dependencies]
 g3rs-code-ast-checks-types = { path = "../../../g3rs-code-ast-checks/crates/types", version = "0.1.0" }
+g3rs-code-config-checks-types = { path = "../../../g3rs-code-config-checks/crates/types", version = "0.1.0" }
 
 [package.metadata.guardrail3]
 shared = true

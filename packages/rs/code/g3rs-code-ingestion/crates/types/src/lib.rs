@@ -1,10 +1,9 @@
 mod error;
 
 pub use g3rs_code_ast_checks_types::{G3RsCodeAstChecksInput, G3RsSourceFile};
-
-/// Placeholder config-lane input until `g3rs-code-config-checks` exists.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsCodeConfigChecksInput;
+pub use g3rs_code_config_checks_types::{
+    G3RsCodeConfigChecksInput, G3RsCodeExceptionCommentFact, G3RsCodeUnsafeCodeLintFact,
+};
 
 /// Placeholder file-tree-lane input until `g3rs-code-file-tree-checks` exists.
 #[derive(Debug, Clone, PartialEq, Eq)]

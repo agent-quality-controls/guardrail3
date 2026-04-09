@@ -51,6 +51,12 @@ fn flatten_results(inputs: &[G3RsCodeAstChecksInput]) -> Vec<G3CheckResult> {
         .collect::<Vec<_>>()
 }
 
+fn run_config_pipeline(root: &Path) -> Vec<G3CheckResult> {
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
+    g3rs_code_config_checks::check(&input)
+}
+
 fn findings_by_file(results: &[G3CheckResult]) -> BTreeMap<String, Vec<&G3CheckResult>> {
     let mut by_file = BTreeMap::<String, Vec<&G3CheckResult>>::new();
     for result in results {
@@ -113,6 +119,55 @@ fn pipeline_reports_expected_findings_on_real_source_files() {
     assert!(
         !by_file.contains_key("src/clean_file.rs"),
         "clean source should not produce findings: {results:#?}"
+    );
+}
+
+#[test]
+fn config_pipeline_reports_exception_comments_and_unsafe_code_lints() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[workspace]\n\
+members = [\"crates/core\"]\n\
+\n\
+[workspace.lints.rust]\n\
+unsafe_code = \"forbid\"\n\
+\n\
+# EXCEPTION: temporary workspace suppression\n",
+    );
+    write(
+        root.join("deny.toml"),
+        "advisories = { ignore = [] } // EXCEPTION: temporary advisory hold\n",
+    );
+    write(
+        root.join("crates/core/Cargo.toml"),
+        "[package]\nname = \"core\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+
+    let results = run_config_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert!(
+        by_file["Cargo.toml"]
+            .iter()
+            .any(|result| result.id() == "RS-CODE-07"),
+        "{results:#?}"
+    );
+    assert!(
+        by_file["Cargo.toml"]
+            .iter()
+            .any(|result| result.id() == "RS-CODE-12" && result.severity() == G3Severity::Info),
+        "{results:#?}"
+    );
+    assert!(
+        by_file["deny.toml"]
+            .iter()
+            .any(|result| result.id() == "RS-CODE-07"),
+        "{results:#?}"
     );
 }
 

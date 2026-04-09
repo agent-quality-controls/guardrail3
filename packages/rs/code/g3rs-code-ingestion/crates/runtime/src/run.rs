@@ -6,11 +6,12 @@ use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 /// Re-export of `G3RsCodeIngestionError` so the facade can reach it.
 pub use g3rs_code_ingestion_types::G3RsCodeIngestionError as IngestionError;
 
-/// Stub config ingestion entry point for the code family.
 pub fn ingest_for_config_checks(
-    _crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsCodeConfigChecksInput, IngestionError> {
-    Err(IngestionError::ConfigIngestionNotImplemented)
+    let exception_comments = crate::config_comments::collect_exception_comments(crawl)?;
+    let unsafe_code_lints = crate::unsafe_code_lints::collect_unsafe_code_lints(crawl)?;
+    Ok(crate::config::assemble(exception_comments, unsafe_code_lints))
 }
 
 /// Ingest `code` AST checks input from a workspace crawl.
