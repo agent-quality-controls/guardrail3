@@ -18,7 +18,7 @@
 | RS-CODE-05 | R34 | Error | `#[garde(skip)]` on non-primitive WITHOUT comment | Implemented |
 | RS-CODE-06 | R35 | Warn/Error | Non-exempt `#[garde(skip)]` WITH same-line comment. Error if the comment lacks exact `// reason:` or if the reason is too weak; Warn if a useful reason is present, because documented validation bypasses stay visible. | Implemented |
 | RS-CODE-07 | R36 | Info | EXCEPTION comments in config files (audit trail inventory) | Implemented |
-| RS-CODE-08 | R37 | Info | `#[cfg_attr(..., allow(...))]` with genuinely conditional predicate (inventory) | Implemented |
+| RS-CODE-08 | R37 | Warn | `#[cfg_attr(..., allow(...))]` with genuinely conditional predicate. Visible in normal output, not inventory. | Implemented |
 
 ## Structure rules
 
