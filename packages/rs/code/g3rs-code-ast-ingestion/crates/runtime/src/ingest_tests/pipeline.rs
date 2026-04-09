@@ -258,6 +258,26 @@ fn pipeline_reports_new_single_file_ast_rules() {
         "pub fn build<A, B, C, D, E, F, G>() {}\n",
     );
     write(
+        root.join("src/large_trait.rs"),
+        "pub trait Service {\n    fn m0(&self);\n    fn m1(&self);\n    fn m2(&self);\n    fn m3(&self);\n    fn m4(&self);\n    fn m5(&self);\n    fn m6(&self);\n    fn m7(&self);\n    fn m8(&self);\n}\n",
+    );
+    write(
+        root.join("src/public_field_bag.rs"),
+        "pub struct User { pub id: String, pub email: String }\n",
+    );
+    write(
+        root.join("src/private_field_struct.rs"),
+        "pub struct User { id: String, email: String }\n",
+    );
+    write(
+        root.join("src/public_weak_error.rs"),
+        "pub fn parse() -> Result<(), String> { Ok(()) }\n",
+    );
+    write(
+        root.join("src/typed_public_error.rs"),
+        "pub fn parse() -> Result<(), ParseError> { Ok(()) }\n",
+    );
+    write(
         root.join("src/string_dispatch.rs"),
         "pub fn dispatch(value: &str) -> usize { if value == \"v0\" { 0 } else if value == \"v1\" { 1 } else if value == \"v2\" { 2 } else if value == \"v3\" { 3 } else if value == \"v4\" { 4 } else if value == \"v5\" { 5 } else if value == \"v6\" { 6 } else if value == \"v7\" { 7 } else if value == \"v8\" { 8 } else if value == \"v9\" { 9 } else if value == \"v10\" { 10 } else { 0 } }\n",
     );
@@ -442,6 +462,23 @@ fn pipeline_reports_new_single_file_ast_rules() {
 
     assert_eq!(by_file["src/generic_probe.rs"].len(), 1, "{results:#?}");
     assert_eq!(by_file["src/generic_probe.rs"][0].id(), "RS-CODE-34");
+
+    assert_eq!(by_file["src/large_trait.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/large_trait.rs"][0].id(), "RS-CODE-29");
+
+    assert_eq!(by_file["src/public_field_bag.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/public_field_bag.rs"][0].id(), "RS-CODE-31");
+    assert!(
+        !by_file.contains_key("src/private_field_struct.rs"),
+        "{results:#?}"
+    );
+
+    assert_eq!(by_file["src/public_weak_error.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/public_weak_error.rs"][0].id(), "RS-CODE-33");
+    assert!(
+        !by_file.contains_key("src/typed_public_error.rs"),
+        "{results:#?}"
+    );
 
     assert_eq!(by_file["src/string_dispatch.rs"].len(), 1, "{results:#?}");
     assert_eq!(by_file["src/string_dispatch.rs"][0].id(), "RS-CODE-36");

@@ -206,3 +206,109 @@ fn path_string_has_parent_segment(path: &str) -> bool {
     path.split('/').any(|segment| segment == "..")
         || path.split('\\').any(|segment| segment == "..")
 }
+
+pub(crate) fn result_error_kind(ty: &syn::Type) -> Option<crate::parse::PublicResultErrorKind> {
+    let syn::Type::Path(type_path) = ty else {
+        return None;
+    };
+    let last = type_path.path.segments.iter().next_back()?;
+    if last.ident != "Result" {
+        return None;
+    }
+    let syn::PathArguments::AngleBracketed(args) = &last.arguments else {
+        return None;
+    };
+    let second = args.args.iter().nth(1)?;
+    let syn::GenericArgument::Type(err_ty) = second else {
+        return None;
+    };
+    if is_string_type(err_ty) {
+        return Some(crate::parse::PublicResultErrorKind::String);
+    }
+    if is_str_ref_type(err_ty) {
+        return Some(crate::parse::PublicResultErrorKind::StrRef);
+    }
+    if is_anyhow_error_type(err_ty) {
+        return Some(crate::parse::PublicResultErrorKind::AnyhowError);
+    }
+    if is_box_dyn_error(err_ty) {
+        return Some(crate::parse::PublicResultErrorKind::BoxDynError);
+    }
+    None
+}
+
+fn is_string_type(ty: &syn::Type) -> bool {
+    let syn::Type::Path(type_path) = ty else {
+        return false;
+    };
+    type_path
+        .path
+        .segments
+        .iter()
+        .next_back()
+        .is_some_and(|segment| segment.ident == "String")
+}
+
+fn is_str_ref_type(ty: &syn::Type) -> bool {
+    let syn::Type::Reference(reference) = ty else {
+        return false;
+    };
+    let syn::Type::Path(type_path) = &*reference.elem else {
+        return false;
+    };
+    type_path
+        .path
+        .segments
+        .iter()
+        .next_back()
+        .is_some_and(|segment| segment.ident == "str")
+}
+
+fn is_anyhow_error_type(ty: &syn::Type) -> bool {
+    let syn::Type::Path(type_path) = ty else {
+        return false;
+    };
+    let mut segments = type_path
+        .path
+        .segments
+        .iter()
+        .map(|segment| segment.ident.to_string());
+    matches!(
+        (
+            segments.next().as_deref(),
+            segments.next().as_deref(),
+            segments.next()
+        ),
+        (Some("anyhow"), Some("Error"), None) | (Some("Error"), None, None)
+    )
+}
+
+fn is_box_dyn_error(ty: &syn::Type) -> bool {
+    let syn::Type::Path(type_path) = ty else {
+        return false;
+    };
+    let Some(last) = type_path.path.segments.iter().next_back() else {
+        return false;
+    };
+    if last.ident != "Box" {
+        return false;
+    }
+    let syn::PathArguments::AngleBracketed(args) = &last.arguments else {
+        return false;
+    };
+    let Some(syn::GenericArgument::Type(syn::Type::TraitObject(trait_object))) = args.args.first()
+    else {
+        return false;
+    };
+    trait_object.bounds.iter().any(|bound| {
+        let syn::TypeParamBound::Trait(trait_bound) = bound else {
+            return false;
+        };
+        trait_bound
+            .path
+            .segments
+            .iter()
+            .next_back()
+            .is_some_and(|segment| segment.ident == "Error")
+    })
+}

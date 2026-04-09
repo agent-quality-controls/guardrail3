@@ -64,6 +64,35 @@ pub(crate) enum LargeTypeItem {
     },
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct PublicStructFieldBagInfo {
+    pub(crate) line: usize,
+    pub(crate) struct_name: String,
+    pub(crate) public_field_count: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum PublicResultErrorKind {
+    String,
+    StrRef,
+    AnyhowError,
+    BoxDynError,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct PublicResultErrorInfo {
+    pub(crate) line: usize,
+    pub(crate) fn_name: String,
+    pub(crate) kind: PublicResultErrorKind,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct TraitMethodCountInfo {
+    pub(crate) line: usize,
+    pub(crate) trait_name: String,
+    pub(crate) method_count: usize,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum LintPolicyKind {
     Allow,

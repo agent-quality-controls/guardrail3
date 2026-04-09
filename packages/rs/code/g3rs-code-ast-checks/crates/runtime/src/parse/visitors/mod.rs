@@ -6,7 +6,8 @@ use syn::visit::Visit;
 
 use super::helpers::{attrs_enter_test_context, path_to_string, span_line};
 use super::types::{
-    ForbiddenMacroInfo, GenericParameterCapInfo, LargeTypeItem as LargeTypeFact, TestExpectCallInfo,
+    ForbiddenMacroInfo, GenericParameterCapInfo, LargeTypeItem as LargeTypeFact,
+    TestExpectCallInfo, TraitMethodCountInfo,
 };
 
 pub(crate) fn find_forbidden_macros(
@@ -52,6 +53,12 @@ pub(crate) fn find_large_type_items(ast: &syn::File) -> Vec<LargeTypeFact> {
     visitor.out
 }
 
+pub(crate) fn find_large_traits(ast: &syn::File) -> Vec<TraitMethodCountInfo> {
+    let mut visitor = LargeTraitVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
 struct ForbiddenMacroVisitor {
     out: Vec<ForbiddenMacroInfo>,
     in_test_context: bool,
@@ -68,6 +75,10 @@ struct GenericParameterCapVisitor {
 
 struct LargeTypeVisitor {
     out: Vec<LargeTypeFact>,
+}
+
+struct LargeTraitVisitor {
+    out: Vec<TraitMethodCountInfo>,
 }
 
 pub(super) trait TestContextAware {
@@ -312,5 +323,23 @@ impl<'ast> Visit<'ast> for LargeTypeVisitor {
             });
         }
         syn::visit::visit_item_enum(self, item_enum);
+    }
+}
+
+impl<'ast> Visit<'ast> for LargeTraitVisitor {
+    fn visit_item_trait(&mut self, item_trait: &'ast syn::ItemTrait) {
+        let method_count = item_trait
+            .items
+            .iter()
+            .filter(|item| matches!(item, syn::TraitItem::Fn(_)))
+            .count();
+        if method_count > 8 {
+            self.out.push(TraitMethodCountInfo {
+                line: span_line(item_trait.ident.span()),
+                trait_name: item_trait.ident.to_string(),
+                method_count,
+            });
+        }
+        syn::visit::visit_item_trait(self, item_trait);
     }
 }
