@@ -24,7 +24,7 @@
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-CODE-09 | R38 | Error | File >500 effective code-bearing lines. Comment-only lines and string-literal payload-only lines do not count. Test files exempt. | Implemented |
+| RS-CODE-09 | R38 | Error | Too many effective code lines (>500). Comment-only lines and string-literal payload-only lines do not count. Test files exempt. | Implemented |
 | RS-CODE-10 | R40 | Error | >20 use-imports (AST-counted). Test files exempt. | Implemented |
 | RS-CODE-11 | R41 | Warn | 16-20 use-imports (warning threshold). Test files exempt. | Implemented |
 | RS-CODE-12 | R53 | Error/Info | unsafe_code lint level in workspace lints (Info if forbid, Error if deny) | Implemented |

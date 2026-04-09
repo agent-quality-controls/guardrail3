@@ -1,3 +1,9 @@
+type NumberedLine = (usize, ());
+
+pub(crate) fn effective_non_comment_line_count(content: &str) -> usize {
+    filter_non_comment_lines(content).len()
+}
+
 pub(crate) fn line_text<'a>(content: &'a str, line: usize) -> &'a str {
     content
         .lines()
@@ -32,6 +38,117 @@ pub(crate) fn same_line_has_comment(content: &str, line: usize) -> bool {
             let stripped = strip_string_literals(source_line);
             stripped.contains("//") || stripped.contains("/*")
         })
+}
+
+fn filter_non_comment_lines(content: &str) -> Vec<NumberedLine> {
+    let mut result = Vec::new();
+    let bytes = content.as_bytes();
+    let mut i = 0usize;
+    let mut line_num = 0usize;
+    let mut line_has_code = false;
+
+    #[derive(Clone, Copy)]
+    enum ScanState {
+        Normal,
+        LineComment,
+        BlockComment(usize),
+        String { escaped: bool },
+        RawString { hashes: usize },
+    }
+
+    let mut state = ScanState::Normal;
+
+    while i < bytes.len() {
+        let byte = bytes[i];
+        if byte == b'\n' {
+            if line_has_code {
+                result.push((line_num, ()));
+            }
+            line_num = line_num.saturating_add(1);
+            line_has_code = false;
+            if matches!(state, ScanState::LineComment) {
+                state = ScanState::Normal;
+            }
+            i = i.saturating_add(1);
+            continue;
+        }
+
+        state = match state {
+            ScanState::Normal => {
+                if starts_line_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    ScanState::LineComment
+                } else if starts_block_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    ScanState::BlockComment(1)
+                } else if let Some((prefix_len, hashes)) = raw_string_prefix(bytes, i) {
+                    line_has_code = true;
+                    i = i.saturating_add(prefix_len);
+                    ScanState::RawString { hashes }
+                } else if starts_byte_or_plain_string(bytes, i) {
+                    line_has_code = true;
+                    i = i.saturating_add(if bytes[i] == b'b' { 2 } else { 1 });
+                    ScanState::String { escaped: false }
+                } else {
+                    if !bytes[i].is_ascii_whitespace() {
+                        line_has_code = true;
+                    }
+                    i = i.saturating_add(1);
+                    ScanState::Normal
+                }
+            }
+            ScanState::LineComment => {
+                i = i.saturating_add(1);
+                ScanState::LineComment
+            }
+            ScanState::BlockComment(depth) => {
+                if starts_block_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    ScanState::BlockComment(depth.saturating_add(1))
+                } else if ends_block_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    if depth == 1 {
+                        ScanState::Normal
+                    } else {
+                        ScanState::BlockComment(depth.saturating_sub(1))
+                    }
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::BlockComment(depth)
+                }
+            }
+            ScanState::String { escaped } => {
+                if escaped {
+                    i = i.saturating_add(1);
+                    ScanState::String { escaped: false }
+                } else if byte == b'\\' {
+                    i = i.saturating_add(1);
+                    ScanState::String { escaped: true }
+                } else if byte == b'"' {
+                    i = i.saturating_add(1);
+                    ScanState::Normal
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::String { escaped: false }
+                }
+            }
+            ScanState::RawString { hashes } => {
+                if raw_string_terminator(bytes, i, hashes) {
+                    i = i.saturating_add(1 + hashes);
+                    ScanState::Normal
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::RawString { hashes }
+                }
+            }
+        };
+    }
+
+    if line_has_code {
+        result.push((line_num, ()));
+    }
+
+    result
 }
 
 fn starts_line_comment(bytes: &[u8], index: usize) -> bool {

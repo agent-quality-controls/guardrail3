@@ -2,7 +2,7 @@ use super::analysis_helpers;
 use super::helpers;
 use super::types::{
     CfgAttrLintInfo, CfgPredicateTruth, DenyForbidInfo, ForeignModAllowInfo, ImplAllowInfo,
-    IncludeMacroInfo, InlineModAllow, LintPolicyInfo,
+    IncludeMacroInfo, InlineModAllow, LintPolicyInfo, PathAttrInfo,
 };
 use syn::spanned::Spanned;
 use syn::visit::Visit;
@@ -72,6 +72,12 @@ pub(crate) fn find_cfg_attr_lint_policies(ast: &syn::File) -> Vec<CfgAttrLintInf
     out
 }
 
+pub(crate) fn find_path_attrs(ast: &syn::File) -> Vec<PathAttrInfo> {
+    let mut visitor = PathAttrVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
 fn collect_mod_inner_allows(item_mod: &syn::ItemMod, path: &str, out: &mut Vec<InlineModAllow>) {
     let Some((_, items)) = &item_mod.content else {
         return;
@@ -119,6 +125,35 @@ struct IncludeMacroVisitor {
 
 struct CfgAttrPolicyVisitor<'a> {
     out: &'a mut Vec<CfgAttrLintInfo>,
+}
+
+struct PathAttrVisitor {
+    out: Vec<PathAttrInfo>,
+}
+
+fn extract_path_attr(attr: &syn::Attribute) -> Option<String> {
+    let syn::Meta::NameValue(name_value) = &attr.meta else {
+        return None;
+    };
+    let syn::Expr::Lit(expr_lit) = &name_value.value else {
+        return None;
+    };
+    let syn::Lit::Str(value) = &expr_lit.lit else {
+        return None;
+    };
+    Some(value.value())
+}
+
+fn path_string_has_parent_segment(path: &str) -> bool {
+    path.split('/').any(|segment| segment == "..")
+        || path.split('\\').any(|segment| segment == "..")
+}
+
+fn is_test_sidecar_exempt(item_mod: &syn::ItemMod, path_value: &str) -> bool {
+    if !helpers::attrs_enter_test_context(&item_mod.attrs) {
+        return false;
+    }
+    path_value == "rule_tests/mod.rs" || path_value.ends_with("_tests/mod.rs")
 }
 
 impl<'ast> Visit<'ast> for ItemOnlyPolicyVisitor {
@@ -260,5 +295,57 @@ impl<'ast> Visit<'ast> for CfgAttrPolicyVisitor<'ast> {
     fn visit_trait_item(&mut self, item: &'ast syn::TraitItem) {
         helpers::collect_cfg_attr_lint_policies(helpers::trait_item_attrs(item), self.out);
         syn::visit::visit_trait_item(self, item);
+    }
+}
+
+impl<'ast> Visit<'ast> for PathAttrVisitor {
+    fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
+        for attr in &item_mod.attrs {
+            if attr.path().is_ident("path") {
+                if let Some(path_value) = extract_path_attr(attr) {
+                    self.out.push(PathAttrInfo {
+                        line: helpers::span_line(attr.span()),
+                        module_name: item_mod.ident.to_string(),
+                        path_value: path_value.clone(),
+                        via_cfg_attr: false,
+                        cfg_truth: CfgPredicateTruth::KnownTrue,
+                        is_test_sidecar_exempt: is_test_sidecar_exempt(item_mod, &path_value),
+                        escapes_parent: path_string_has_parent_segment(&path_value),
+                    });
+                }
+                continue;
+            }
+
+            if !attr.path().is_ident("cfg_attr") {
+                continue;
+            }
+
+            analysis_helpers::walk_cfg_attr_payloads(attr, |line, truth, meta| {
+                let syn::Meta::NameValue(name_value) = meta else {
+                    return;
+                };
+                if !name_value.path.is_ident("path") {
+                    return;
+                }
+                let syn::Expr::Lit(expr_lit) = &name_value.value else {
+                    return;
+                };
+                let syn::Lit::Str(value) = &expr_lit.lit else {
+                    return;
+                };
+                let path_value = value.value();
+                self.out.push(PathAttrInfo {
+                    line,
+                    module_name: item_mod.ident.to_string(),
+                    path_value: path_value.clone(),
+                    via_cfg_attr: true,
+                    cfg_truth: truth,
+                    is_test_sidecar_exempt: is_test_sidecar_exempt(item_mod, &path_value),
+                    escapes_parent: path_string_has_parent_segment(&path_value),
+                });
+            });
+        }
+
+        syn::visit::visit_item_mod(self, item_mod);
     }
 }

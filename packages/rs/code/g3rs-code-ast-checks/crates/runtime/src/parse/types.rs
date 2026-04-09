@@ -50,6 +50,20 @@ pub(crate) struct StringDispatchInfo {
     pub(crate) string_literal_branch_count: usize,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum LargeTypeItem {
+    Struct {
+        line: usize,
+        name: String,
+        field_count: usize,
+    },
+    Enum {
+        line: usize,
+        name: String,
+        variant_count: usize,
+    },
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum LintPolicyKind {
     Allow,
@@ -85,6 +99,17 @@ pub(crate) struct CfgAttrLintInfo {
     pub(crate) lint: String,
     pub(crate) kind: LintPolicyKind,
     pub(crate) truth: CfgPredicateTruth,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct PathAttrInfo {
+    pub(crate) line: usize,
+    pub(crate) module_name: String,
+    pub(crate) path_value: String,
+    pub(crate) via_cfg_attr: bool,
+    pub(crate) cfg_truth: CfgPredicateTruth,
+    pub(crate) is_test_sidecar_exempt: bool,
+    pub(crate) escapes_parent: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
