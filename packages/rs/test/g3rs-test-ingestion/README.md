@@ -9,10 +9,12 @@ Current behavior:
 - parses optional `nextest.toml` and `.cargo/mutants.toml`
 - detects test and tokio-test activity from owned Rust files
 - detects active mutation hooks
+- classifies owned Rust files for the root-scoped AST lane
+- emits one `G3RsTestAstChecksInput` per owned test root
 - emits one `G3RsTestConfigChecksInput` per owned test root
 
 Current lane support:
 
 - `ingest_for_config_checks` is implemented
-- `ingest_for_ast_checks` is a stub
+- `ingest_for_ast_checks` is implemented
 - `ingest_for_file_tree_checks` is a stub

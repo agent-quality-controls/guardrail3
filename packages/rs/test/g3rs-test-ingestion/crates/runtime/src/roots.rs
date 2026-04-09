@@ -39,7 +39,12 @@ pub(crate) fn discover(crawl: &G3RsWorkspaceCrawl) -> Result<TestRootDiscovery, 
     };
 
     let mut owned_root_dirs = BTreeSet::from([String::new()]);
-    owned_root_dirs.extend(workspace_members.iter().cloned());
+    owned_root_dirs.extend(
+        workspace_members
+            .iter()
+            .map(|member_dir| component_container_root(member_dir, crawl))
+            .collect::<BTreeSet<_>>(),
+    );
 
     let mut roots = owned_root_dirs
         .into_iter()
@@ -93,6 +98,42 @@ fn build_owned_root(
         cargo,
         root_manifest,
     }))
+}
+
+fn component_container_root(rel_dir: &str, crawl: &G3RsWorkspaceCrawl) -> String {
+    let candidate = if matches!(
+        rel_dir,
+        "crates/runtime"
+            | "crates/assertions"
+            | "crates/assertions_common"
+            | "assertions"
+            | "crates/test_support"
+            | "test_support"
+    ) {
+        Some(String::new())
+    } else {
+        rel_dir
+            .strip_suffix("/crates/runtime")
+            .or_else(|| rel_dir.strip_suffix("/crates/assertions"))
+            .or_else(|| rel_dir.strip_suffix("/crates/assertions_common"))
+            .or_else(|| rel_dir.strip_suffix("/assertions"))
+            .or_else(|| rel_dir.strip_suffix("/crates/test_support"))
+            .or_else(|| rel_dir.strip_suffix("/test_support"))
+            .map(ToOwned::to_owned)
+    };
+
+    let Some(candidate) = candidate else {
+        return rel_dir.to_owned();
+    };
+    let candidate_has_package = crawl.entry(&join_under_root(&candidate, "Cargo.toml")).is_some();
+    let candidate_has_runtime = crawl
+        .entry(&join_under_root(&candidate, "crates/runtime/Cargo.toml"))
+        .is_some();
+    if candidate_has_package || candidate_has_runtime {
+        candidate
+    } else {
+        rel_dir.to_owned()
+    }
 }
 
 fn parse_required_manifest(

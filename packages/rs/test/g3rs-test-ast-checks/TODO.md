@@ -1,1 +1,2 @@
-- Build the real `test` AST lane.
+- add broader parity smoke tests against the legacy `test` AST family
+- design the deferred mixed lane for `RS-TEST-02`, `03`, `10`, and `18`

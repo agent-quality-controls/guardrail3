@@ -53,9 +53,24 @@ pub(crate) fn ingest_for_config_checks_with_tool_state(
 }
 
 pub fn ingest_for_ast_checks(
-    _crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3RsWorkspaceCrawl,
 ) -> Result<Vec<G3RsTestAstChecksInput>, IngestionError> {
-    Err(IngestionError::AstIngestionNotImplemented)
+    let discovery = crate::roots::discover(crawl)?;
+
+    discovery
+        .roots
+        .iter()
+        .map(|root| {
+            let components = crate::components::collect_components(crawl, root)?;
+            let files = crate::components::collect_ast_files(crawl, root, &components)?;
+            Ok(G3RsTestAstChecksInput {
+                root_rel_dir: root.root_rel_dir.clone(),
+                cargo_rel_path: root.cargo_rel_path.clone(),
+                files,
+                components: crate::components::public_component_facts(&components),
+            })
+        })
+        .collect()
 }
 
 pub fn ingest_for_file_tree_checks(
