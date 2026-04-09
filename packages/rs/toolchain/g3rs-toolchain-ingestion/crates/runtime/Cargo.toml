@@ -29,6 +29,7 @@ g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0
 rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser", version = "0.1.0" }
 
 [dev-dependencies]
+g3rs-toolchain-config-checks = { path = "../../../g3rs-toolchain-config-checks" }
 g3rs-toolchain-ingestion-assertions = { path = "../assertions" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 tempfile = "3"

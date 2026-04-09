@@ -231,11 +231,11 @@ fn ignored_but_recovered_toolchain_toml_is_ingested() {
 }
 
 // ---------------------------------------------------------------------------
-// Graceful degradation: malformed Cargo.toml → cargo fields None
+// Present malformed Cargo.toml fails closed
 // ---------------------------------------------------------------------------
 
 #[test]
-fn malformed_cargo_toml_produces_cargo_none() {
+fn malformed_cargo_toml_returns_error() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -247,13 +247,12 @@ fn malformed_cargo_toml_produces_cargo_none() {
     write(root.join("Cargo.toml"), "{{{{not valid toml}}}}");
 
     let crawl = crawl(root);
-    let output = crate::ingest_for_config_checks(&crawl).expect(
-        "ingestion should succeed even when Cargo.toml is malformed — graceful degradation",
-    );
+    let result = crate::ingest_for_config_checks(&crawl);
 
-    assert!(output.cargo_toml.is_none());
-    assert!(output.cargo_rel_path.is_none());
-    assert_eq!(output.toolchain_rel_path, "rust-toolchain.toml");
+    assert!(
+        matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
+        "ingestion should fail closed when Cargo.toml exists but is malformed"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -420,11 +419,11 @@ fn unreadable_toolchain_toml_returns_error() {
 }
 
 // ---------------------------------------------------------------------------
-// Unreadable Cargo.toml (readable flag = false) → cargo fields None
+// Unreadable Cargo.toml (readable flag = false) → Unreadable error
 // ---------------------------------------------------------------------------
 
 #[test]
-fn unreadable_cargo_toml_produces_cargo_none() {
+fn unreadable_cargo_toml_returns_error() {
     use g3rs_workspace_crawl::{
         G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind,
         G3RsWorkspaceIgnoreState, G3RsWorkspacePath,
@@ -462,13 +461,16 @@ fn unreadable_cargo_toml_produces_cargo_none() {
         ],
     };
 
-    let output = crate::ingest_for_config_checks(&crawl).expect(
-        "ingestion should succeed when Cargo.toml is unreadable — graceful degradation",
-    );
+    let err = crate::ingest_for_config_checks(&crawl)
+        .expect_err("ingestion should fail closed when Cargo.toml is unreadable");
 
-    assert!(output.cargo_toml.is_none());
-    assert!(output.cargo_rel_path.is_none());
-    assert_eq!(output.toolchain_rel_path, "rust-toolchain.toml");
+    match &err {
+        crate::IngestionError::Unreadable { path, reason } => {
+            assert!(path.ends_with("Cargo.toml"), "got: {path:?}");
+            assert!(!reason.is_empty(), "got: {reason}");
+        }
+        other => panic!("expected Unreadable, got: {other:?}"),
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -504,11 +506,11 @@ fn toolchain_deleted_after_crawl_returns_unreadable() {
 }
 
 // ---------------------------------------------------------------------------
-// TOCTOU: Cargo.toml deleted between crawl and read → cargo fields None
+// TOCTOU: Cargo.toml deleted between crawl and read → Unreadable error
 // ---------------------------------------------------------------------------
 
 #[test]
-fn cargo_deleted_after_crawl_produces_cargo_none() {
+fn cargo_deleted_after_crawl_returns_unreadable() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -523,12 +525,16 @@ fn cargo_deleted_after_crawl_produces_cargo_none() {
     fs::remove_file(root.join("Cargo.toml"))
         .expect("should delete Cargo.toml for TOCTOU test");
 
-    let output = crate::ingest_for_config_checks(&crawl).expect(
-        "ingestion should succeed when Cargo.toml vanishes after crawl — graceful degradation",
-    );
+    let err = crate::ingest_for_config_checks(&crawl)
+        .expect_err("ingestion should fail closed when Cargo.toml vanishes after crawl");
 
-    assert!(output.cargo_toml.is_none());
-    assert!(output.cargo_rel_path.is_none());
+    match &err {
+        crate::IngestionError::Unreadable { path, reason } => {
+            assert!(path.ends_with("Cargo.toml"), "got: {path:?}");
+            assert!(!reason.is_empty(), "got: {reason}");
+        }
+        other => panic!("expected Unreadable, got: {other:?}"),
+    }
 }
 
 // ---------------------------------------------------------------------------

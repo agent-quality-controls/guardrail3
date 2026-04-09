@@ -15,6 +15,7 @@ pub use g3rs_toolchain_ingestion_types::G3RsToolchainIngestionError as Ingestion
 /// # Errors
 ///
 /// Returns an error if `rust-toolchain.toml` is missing, unreadable, or unparseable.
+/// `Cargo.toml` may be absent, but if present it must be readable and parseable.
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainConfigChecksInput, IngestionError> {
@@ -32,17 +33,18 @@ pub fn ingest_for_config_checks(
     let toolchain_toml = crate::parse::parse_toolchain_toml(&toolchain_entry.path.abs_path)?;
     let toolchain_rel_path = toolchain_entry.path.rel_path.clone();
 
-    let (cargo_rel_path, cargo_toml) = crawl
-        .root_file("Cargo.toml")
-        .and_then(|cargo_entry| {
-            if !cargo_entry.readable {
-                return None;
-            }
-            crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)
-                .ok()
-                .map(|cargo| (cargo_entry.path.rel_path.clone(), cargo))
-        })
-        .map_or((None, None), |(path, toml)| (Some(path), Some(toml)));
+    let (cargo_rel_path, cargo_toml) = if let Some(cargo_entry) = crawl.root_file("Cargo.toml") {
+        if !cargo_entry.readable {
+            return Err(IngestionError::Unreadable {
+                path: cargo_entry.path.abs_path.clone(),
+                reason: "file is not readable".to_owned(),
+            });
+        }
+        let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
+        (Some(cargo_entry.path.rel_path.clone()), Some(cargo))
+    } else {
+        (None, None)
+    };
 
     Ok(crate::ingest::assemble(
         toolchain_rel_path,

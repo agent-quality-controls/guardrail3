@@ -15,8 +15,8 @@ pub use g3rs_release_ingestion_types::G3RsReleaseIngestionError as IngestionErro
 /// # Errors
 ///
 /// Returns an error if `Cargo.toml` is missing, unreadable, or unparseable.
-/// Optional files that are missing, unreadable, or unparseable are silently
-/// treated as `None`.
+/// Optional files may be absent, but if present they must be readable and
+/// parseable.
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsReleaseConfigChecksInput, IngestionError> {
@@ -35,28 +35,32 @@ pub fn ingest_for_config_checks(
     let cargo_rel_path = cargo_entry.path.rel_path.clone();
 
     // --- release-plz.toml (optional) ---
-    let (release_plz_rel_path, release_plz) = crate::select::select_release_plz_toml(crawl)
-        .and_then(|entry| {
-            if !entry.readable {
-                return None;
-            }
-            crate::parse::parse_release_plz_toml(&entry.path.abs_path)
-                .ok()
-                .map(|parsed| (entry.path.rel_path.clone(), parsed))
-        })
-        .map_or((None, None), |(path, toml)| (Some(path), Some(toml)));
+    let (release_plz_rel_path, release_plz) = if let Some(entry) = crate::select::select_release_plz_toml(crawl) {
+        if !entry.readable {
+            return Err(IngestionError::Unreadable {
+                path: entry.path.abs_path.clone(),
+                reason: "file is not readable".to_owned(),
+            });
+        }
+        let parsed = crate::parse::parse_release_plz_toml(&entry.path.abs_path)?;
+        (Some(entry.path.rel_path.clone()), Some(parsed))
+    } else {
+        (None, None)
+    };
 
     // --- cliff.toml (optional) ---
-    let (cliff_rel_path, cliff) = crate::select::select_cliff_toml(crawl)
-        .and_then(|entry| {
-            if !entry.readable {
-                return None;
-            }
-            crate::parse::parse_cliff_toml(&entry.path.abs_path)
-                .ok()
-                .map(|parsed| (entry.path.rel_path.clone(), parsed))
-        })
-        .map_or((None, None), |(path, toml)| (Some(path), Some(toml)));
+    let (cliff_rel_path, cliff) = if let Some(entry) = crate::select::select_cliff_toml(crawl) {
+        if !entry.readable {
+            return Err(IngestionError::Unreadable {
+                path: entry.path.abs_path.clone(),
+                reason: "file is not readable".to_owned(),
+            });
+        }
+        let parsed = crate::parse::parse_cliff_toml(&entry.path.abs_path)?;
+        (Some(entry.path.rel_path.clone()), Some(parsed))
+    } else {
+        (None, None)
+    };
 
     Ok(crate::ingest::assemble(
         cargo_rel_path,

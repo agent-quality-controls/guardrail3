@@ -30,5 +30,6 @@ g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0
 release-plz-toml-parser = { path = "../../../../../parsers/release-plz-toml-parser", version = "0.1.0" }
 
 [dev-dependencies]
+g3rs-release-config-checks = { path = "../../../g3rs-release-config-checks" }
 g3rs-release-ingestion-assertions = { path = "../assertions" }
 tempfile = "3"

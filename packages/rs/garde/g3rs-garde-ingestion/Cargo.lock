@@ -143,6 +143,31 @@ name = "g3rs-garde-ast-checks-types"
 version = "0.1.0"
 
 [[package]]
+name = "g3rs-garde-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-garde-config-checks-runtime",
+ "g3rs-garde-config-checks-types",
+]
+
+[[package]]
+name = "g3rs-garde-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "clippy-toml-parser",
+ "g3rs-garde-config-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-garde-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-garde-types",
+]
+
+[[package]]
 name = "g3rs-garde-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -164,6 +189,7 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-garde-ast-checks-types",
+ "g3rs-garde-config-checks",
  "g3rs-garde-ingestion-assertions",
  "g3rs-garde-ingestion-types",
  "g3rs-garde-types",
@@ -229,6 +255,10 @@ dependencies = [
  "regex-automata",
  "regex-syntax",
 ]
+
+[[package]]
+name = "guardrail3-check-types"
+version = "0.1.0"
 
 [[package]]
 name = "hashbrown"

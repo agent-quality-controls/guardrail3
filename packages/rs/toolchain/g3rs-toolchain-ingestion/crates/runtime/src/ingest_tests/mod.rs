@@ -9,4 +9,5 @@
 
 mod basic;
 mod deps;
+mod pipeline;
 mod real_workspaces;

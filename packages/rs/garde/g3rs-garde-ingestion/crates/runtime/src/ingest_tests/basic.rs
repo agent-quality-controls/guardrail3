@@ -143,7 +143,7 @@ fn fails_on_malformed_cargo_toml() {
 }
 
 #[test]
-fn malformed_clippy_toml_produces_none_not_error() {
+fn malformed_clippy_toml_returns_error() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -154,12 +154,9 @@ fn malformed_clippy_toml_produces_none_not_error() {
     let crawl = crawl(root);
     let result = crate::ingest_for_config_checks(&crawl);
 
-    let input = result.expect(
-        "ingestion should succeed even with malformed clippy.toml (clippy config is optional)",
-    );
     assert!(
-        input.clippy.is_none(),
-        "clippy should be None when clippy.toml fails to parse"
+        matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
+        "ingestion should fail closed when clippy.toml exists but is malformed"
     );
 }
 
