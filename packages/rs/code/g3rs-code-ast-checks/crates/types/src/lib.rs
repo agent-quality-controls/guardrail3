@@ -9,6 +9,8 @@ pub struct G3RsSourceFile {
     pub is_test: bool,
     /// Optional profile name already resolved by ingestion.
     pub profile_name: Option<String>,
+    /// Whether this file is the actual library root source for its owning crate.
+    pub is_library_root: bool,
 }
 
 /// Input contract for `g3rs-code-ast-checks`.
