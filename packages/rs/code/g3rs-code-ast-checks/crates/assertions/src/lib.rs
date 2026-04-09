@@ -45,9 +45,15 @@ pub mod rs_code_23_include_bypass;
 #[cfg(feature = "checks")]
 pub mod rs_code_24_path_attr_with_reason;
 #[cfg(feature = "checks")]
+pub mod rs_code_29_large_trait_surface;
+#[cfg(feature = "checks")]
 pub mod rs_code_30_input_failures;
 #[cfg(feature = "checks")]
+pub mod rs_code_31_public_struct_named_fields;
+#[cfg(feature = "checks")]
 pub mod rs_code_32_test_expect_message_quality;
+#[cfg(feature = "checks")]
+pub mod rs_code_33_public_weak_error_forms;
 #[cfg(feature = "checks")]
 pub mod rs_code_34_generic_parameter_cap;
 #[cfg(feature = "checks")]

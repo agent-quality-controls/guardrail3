@@ -35,7 +35,10 @@ pub fn check(input: &G3RsCodeAstChecksInput) -> Vec<G3CheckResult> {
     crate::rs_code_ast_22_deny_forbid_without_reason::check(&rule_input, &mut results);
     crate::rs_code_ast_23_include_bypass::check(&rule_input, &mut results);
     crate::rs_code_ast_24_path_attr_with_reason::check(&rule_input, &mut results);
+    crate::rs_code_ast_29_large_trait_surface::check(&rule_input, &mut results);
     crate::rs_code_ast_32_test_expect_message_quality::check(&rule_input, &mut results);
+    crate::rs_code_ast_31_public_struct_named_fields::check(&rule_input, &mut results);
+    crate::rs_code_ast_33_public_weak_error_forms::check(&rule_input, &mut results);
     crate::rs_code_ast_34_generic_parameter_cap::check(&rule_input, &mut results);
     crate::rs_code_ast_36_string_dispatch_cap::check(&rule_input, &mut results);
 
