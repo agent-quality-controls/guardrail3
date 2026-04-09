@@ -485,6 +485,160 @@ fn pipeline_reports_new_single_file_ast_rules() {
 }
 
 #[test]
+fn pipeline_reports_effective_line_and_dispatch_boundaries() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("src/line_cap.rs"),
+        &(0..500)
+            .map(|i| format!("fn f{i}() {{}}\n"))
+            .collect::<String>(),
+    );
+    write(
+        root.join("src/line_over_cap.rs"),
+        &(0..501)
+            .map(|i| format!("fn g{i}() {{}}\n"))
+            .collect::<String>(),
+    );
+    write(
+        root.join("src/string_dispatch_clean.rs"),
+        "pub fn dispatch(value: &str) -> usize { match value { \"v0\" => 0, \"v1\" => 1, \"v2\" => 2, \"v3\" => 3, \"v4\" => 4, \"v5\" => 5, \"v6\" => 6, \"v7\" => 7, \"v8\" => 8, \"v9\" => 9, _ => 0 } }",
+    );
+
+    let results = run_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert!(
+        !by_file.contains_key("src/line_cap.rs"),
+        "exactly 500 effective lines should stay clean: {results:#?}"
+    );
+    assert_eq!(by_file["src/line_over_cap.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/line_over_cap.rs"][0].id(), "RS-CODE-09");
+    assert!(
+        !by_file.contains_key("src/string_dispatch_clean.rs"),
+        "exactly 10 string branches should stay clean: {results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_reports_trait_and_public_error_boundaries() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("src/trait_clean.rs"),
+        "pub trait Service {\n    fn m0(&self);\n    fn m1(&self);\n    fn m2(&self);\n    fn m3(&self);\n    fn m4(&self);\n    fn m5(&self);\n    fn m6(&self);\n    fn m7(&self);\n}\n",
+    );
+    write(
+        root.join("src/trait_warn.rs"),
+        "pub trait Service {\n    fn m0(&self);\n    fn m1(&self);\n    fn m2(&self);\n    fn m3(&self);\n    fn m4(&self);\n    fn m5(&self);\n    fn m6(&self);\n    fn m7(&self);\n    fn m8(&self);\n}\n",
+    );
+    write(
+        root.join("src/trait_error.rs"),
+        "pub trait Service {\n    fn m0(&self);\n    fn m1(&self);\n    fn m2(&self);\n    fn m3(&self);\n    fn m4(&self);\n    fn m5(&self);\n    fn m6(&self);\n    fn m7(&self);\n    fn m8(&self);\n    fn m9(&self);\n    fn m10(&self);\n    fn m11(&self);\n    fn m12(&self);\n}\n",
+    );
+    write(
+        root.join("src/public_string_error.rs"),
+        "pub fn parse() -> Result<(), String> { Ok(()) }\n",
+    );
+    write(
+        root.join("src/public_str_error.rs"),
+        "pub fn label() -> Result<(), &str> { Ok(()) }\n",
+    );
+    write(
+        root.join("src/public_anyhow_error.rs"),
+        "pub fn parse() -> Result<(), anyhow::Error> { Ok(()) }\n",
+    );
+    write(
+        root.join("src/public_box_error.rs"),
+        "pub fn parse() -> Result<(), Box<dyn std::error::Error>> { Ok(()) }\n",
+    );
+    write(
+        root.join("src/private_string_error.rs"),
+        "fn parse() -> Result<(), String> { Ok(()) }\n",
+    );
+    write(
+        root.join("src/public_trait_error.rs"),
+        "pub trait Api {\n    fn parse(&self) -> Result<(), String>;\n    fn typed(&self) -> Result<(), ParseError>;\n}\n",
+    );
+    write(
+        root.join("src/public_impl_error.rs"),
+        "pub struct Api;\nimpl Api {\n    pub fn parse(&self) -> Result<(), String> { Ok(()) }\n    pub fn typed(&self) -> Result<(), ParseError> { Ok(()) }\n}\n",
+    );
+
+    let results = run_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert!(
+        !by_file.contains_key("src/trait_clean.rs"),
+        "8-method trait should stay clean: {results:#?}"
+    );
+    assert_eq!(by_file["src/trait_warn.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/trait_warn.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(by_file["src/trait_error.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/trait_error.rs"][0].id(), "RS-CODE-29");
+
+    assert_eq!(
+        by_file["src/public_string_error.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(by_file["src/public_string_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_str_error.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/public_str_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(
+        by_file["src/public_anyhow_error.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(by_file["src/public_anyhow_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_box_error.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/public_box_error.rs"][0].id(), "RS-CODE-33");
+    assert!(
+        !by_file.contains_key("src/private_string_error.rs"),
+        "private weak error helper should stay clean: {results:#?}"
+    );
+    assert_eq!(
+        by_file["src/public_trait_error.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(by_file["src/public_trait_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_impl_error.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/public_impl_error.rs"][0].id(), "RS-CODE-33");
+}
+
+#[test]
+fn pipeline_reports_include_str_traversal() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("src/include_str_escape.rs"),
+        "const TEMPLATE: &str = include_str!(\"../templates/payload.txt\");\n",
+    );
+
+    let results = run_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert_eq!(
+        by_file["src/include_str_escape.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(by_file["src/include_str_escape.rs"][0].id(), "RS-CODE-23");
+    assert_eq!(
+        by_file["src/include_str_escape.rs"][0].title(),
+        "include path traversal",
+        "{results:#?}"
+    );
+}
+
+#[test]
 fn pipeline_rejects_known_false_positive_fixture_patterns() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

@@ -142,6 +142,94 @@ fn classifies_binary_root_in_mixed_package() {
 }
 
 #[test]
+fn classifies_custom_library_root_path() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[lib]\npath = \"src/custom_lib.rs\"\n",
+    );
+    write(root.join("src/custom_lib.rs"), "pub fn api() {}\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    assert_source_file(
+        require_source_file(&inputs, "src/custom_lib.rs"),
+        "src/custom_lib.rs",
+        false,
+        Some("library"),
+        true,
+        "pub fn api() {}\n",
+    );
+}
+
+#[test]
+fn classifies_explicit_binary_path() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[[bin]]\nname = \"tool\"\npath = \"src/tool.rs\"\n",
+    );
+    write(root.join("src/tool.rs"), "fn main() {}\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    assert_source_file(
+        require_source_file(&inputs, "src/tool.rs"),
+        "src/tool.rs",
+        false,
+        Some("binary"),
+        false,
+        "fn main() {}\n",
+    );
+}
+
+#[test]
+fn classifies_nested_workspace_member_ownership() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"crates/core\"]\n",
+    );
+    write(
+        root.join("crates/core/Cargo.toml"),
+        "[package]\nname = \"core\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("crates/core/src/lib.rs"), "pub fn api() {}\n");
+    write(root.join("crates/core/src/main.rs"), "fn main() {}\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    assert_source_file(
+        require_source_file(&inputs, "crates/core/src/lib.rs"),
+        "crates/core/src/lib.rs",
+        false,
+        Some("library"),
+        true,
+        "pub fn api() {}\n",
+    );
+    assert_source_file(
+        require_source_file(&inputs, "crates/core/src/main.rs"),
+        "crates/core/src/main.rs",
+        false,
+        Some("binary"),
+        false,
+        "fn main() {}\n",
+    );
+}
+
+#[test]
 fn leaves_unowned_source_without_profile() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
