@@ -68,12 +68,6 @@ pub(crate) fn collect_ast_files(
                 path: entry.path.abs_path.clone(),
                 reason: err.to_string(),
             })?;
-            let _ = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(&content)).map_err(|err| {
-                IngestionError::ParseFailed {
-                    path: entry.path.abs_path.clone(),
-                    reason: err.to_string(),
-                }
-            })?;
             file.content = content;
             Ok(file)
         })

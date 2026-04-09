@@ -44,3 +44,45 @@ fn inventories_assertions_module_with_real_assertions() {
         "assertions/src/lib.rs",
     );
 }
+
+#[test]
+fn reports_sidecar_owning_semantic_result_assertions() {
+    let results = run_input(input(
+        vec![file(
+            "src/feature_tests/mod.rs",
+            G3RsTestFileKind::InternalSidecarMod,
+            Some("demo_assertions"),
+            "#[test]\nfn sidecar() {\n    let result = CheckResult::new(String::new(), Severity::Info, String::new(), String::new(), None, None);\n    assert_eq!(result.id(), \"\");\n}\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_result(
+        &results,
+        "RS-TEST-16",
+        G3Severity::Error,
+        "sidecar owns semantic result assertion",
+        "src/feature_tests/mod.rs",
+        Some(2),
+    );
+}
+
+#[test]
+fn inventories_sidecar_delegating_semantic_proof() {
+    let results = run_input(input(
+        vec![file(
+            "src/feature_tests/mod.rs",
+            G3RsTestFileKind::InternalSidecarMod,
+            Some("demo_assertions"),
+            "#[test]\nfn sidecar() {\n    let result = returns_result().expect(\"should fail\");\n    assert_demo(result);\n}\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_inventory(
+        &results,
+        "RS-TEST-16",
+        "sidecar delegates semantic proof",
+        "src/feature_tests/mod.rs",
+    );
+}

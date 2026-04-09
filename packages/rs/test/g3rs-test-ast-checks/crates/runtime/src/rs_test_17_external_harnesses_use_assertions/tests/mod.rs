@@ -52,3 +52,25 @@ fn inventories_external_harness_using_assertions_crate() {
         "tests/harness.rs",
     );
 }
+
+#[test]
+fn reports_external_harness_using_local_assertion_helper() {
+    let results = run_input(input(
+        vec![file(
+            "tests/helper.rs",
+            G3RsTestFileKind::ExternalHarness,
+            Some("demo_assertions"),
+            "fn local_assertion_helper() { assert_eq!(1, 1); }\n#[test]\nfn harness() { local_assertion_helper(); }\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_result(
+        &results,
+        "RS-TEST-17",
+        G3Severity::Error,
+        "external harness asserts directly",
+        "tests/helper.rs",
+        Some(3),
+    );
+}
