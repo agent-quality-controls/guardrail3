@@ -17,6 +17,12 @@ pub mod rs_code_06_garde_skip_with_comment;
 #[cfg(feature = "checks")]
 pub mod rs_code_08_cfg_attr_allow_inventory;
 #[cfg(feature = "checks")]
+pub mod rs_code_09_too_many_effective_code_lines;
+#[cfg(feature = "checks")]
+pub mod rs_code_10_too_many_use_imports;
+#[cfg(feature = "checks")]
+pub mod rs_code_11_many_use_imports;
+#[cfg(feature = "checks")]
 pub mod rs_code_13_todo_macros;
 #[cfg(feature = "checks")]
 pub mod rs_code_15_direct_fs_usage;
@@ -27,6 +33,8 @@ pub mod rs_code_17_impl_allow_blast_radius;
 #[cfg(feature = "checks")]
 pub mod rs_code_18_always_true_cfg_attr_bypass;
 #[cfg(feature = "checks")]
+pub mod rs_code_19_large_type_inventory;
+#[cfg(feature = "checks")]
 pub mod rs_code_20_extern_allow;
 #[cfg(feature = "checks")]
 pub mod rs_code_21_fs_glob_import;
@@ -34,6 +42,8 @@ pub mod rs_code_21_fs_glob_import;
 pub mod rs_code_22_deny_forbid_without_reason;
 #[cfg(feature = "checks")]
 pub mod rs_code_23_include_bypass;
+#[cfg(feature = "checks")]
+pub mod rs_code_24_path_attr_with_reason;
 #[cfg(feature = "checks")]
 pub mod rs_code_30_input_failures;
 #[cfg(feature = "checks")]

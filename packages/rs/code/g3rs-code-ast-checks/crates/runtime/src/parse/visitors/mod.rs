@@ -5,7 +5,9 @@ use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 use super::helpers::{attrs_enter_test_context, path_to_string, span_line};
-use super::types::{ForbiddenMacroInfo, GenericParameterCapInfo, TestExpectCallInfo};
+use super::types::{
+    ForbiddenMacroInfo, GenericParameterCapInfo, LargeTypeItem as LargeTypeFact, TestExpectCallInfo,
+};
 
 pub(crate) fn find_forbidden_macros(
     ast: &syn::File,
@@ -44,6 +46,12 @@ pub(crate) fn find_string_dispatch_sites(
     string_dispatch::find_string_dispatch_sites(ast, file_is_test_root)
 }
 
+pub(crate) fn find_large_type_items(ast: &syn::File) -> Vec<LargeTypeFact> {
+    let mut visitor = LargeTypeVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
 struct ForbiddenMacroVisitor {
     out: Vec<ForbiddenMacroInfo>,
     in_test_context: bool,
@@ -56,6 +64,10 @@ struct TestExpectVisitor {
 
 struct GenericParameterCapVisitor {
     out: Vec<GenericParameterCapInfo>,
+}
+
+struct LargeTypeVisitor {
+    out: Vec<LargeTypeFact>,
 }
 
 pub(super) trait TestContextAware {
@@ -270,5 +282,35 @@ impl<'ast> Visit<'ast> for GenericParameterCapVisitor {
             &item_fn.sig.generics,
         );
         syn::visit::visit_item_fn(self, item_fn);
+    }
+}
+
+impl<'ast> Visit<'ast> for LargeTypeVisitor {
+    fn visit_item_struct(&mut self, item_struct: &'ast syn::ItemStruct) {
+        let field_count = match &item_struct.fields {
+            syn::Fields::Named(fields) => fields.named.len(),
+            syn::Fields::Unnamed(fields) => fields.unnamed.len(),
+            syn::Fields::Unit => 0,
+        };
+        if field_count > 15 {
+            self.out.push(LargeTypeFact::Struct {
+                line: span_line(item_struct.ident.span()),
+                name: item_struct.ident.to_string(),
+                field_count,
+            });
+        }
+        syn::visit::visit_item_struct(self, item_struct);
+    }
+
+    fn visit_item_enum(&mut self, item_enum: &'ast syn::ItemEnum) {
+        let variant_count = item_enum.variants.len();
+        if variant_count > 20 {
+            self.out.push(LargeTypeFact::Enum {
+                line: span_line(item_enum.ident.span()),
+                name: item_enum.ident.to_string(),
+                variant_count,
+            });
+        }
+        syn::visit::visit_item_enum(self, item_enum);
     }
 }

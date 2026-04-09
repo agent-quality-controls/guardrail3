@@ -147,6 +147,28 @@ fn pipeline_reports_new_single_file_ast_rules() {
         "struct Form {\n    #[garde(skip)]\n    token: String,\n}\n",
     );
     write(
+        root.join("src/too_many_lines.rs"),
+        &(0..501)
+            .map(|i| format!("fn f{i}() {{}}\n"))
+            .collect::<String>(),
+    );
+    write(
+        root.join("src/too_many_uses.rs"),
+        "use a::{b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15,b16,b17,b18,b19,b20};\nfn probe() {}\n",
+    );
+    write(
+        root.join("src/many_uses.rs"),
+        "use a::{b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15};\nfn probe() {}\n",
+    );
+    write(
+        root.join("src/large_struct.rs"),
+        "struct Big { f0: u8, f1: u8, f2: u8, f3: u8, f4: u8, f5: u8, f6: u8, f7: u8, f8: u8, f9: u8, f10: u8, f11: u8, f12: u8, f13: u8, f14: u8, f15: u8 }\n",
+    );
+    write(
+        root.join("src/path_reason.rs"),
+        "#[path = \"generated.rs\"] // reason: generated bridge shim\nmod generated;\n",
+    );
+    write(
         root.join("src/cfg_attr_unknown.rs"),
         "#[cfg_attr(feature = \"cli\", allow(dead_code))]\nfn probe() {}\n",
     );
@@ -232,6 +254,21 @@ fn pipeline_reports_new_single_file_ast_rules() {
         by_file["src/garde_skip_no_comment.rs"][0].id(),
         "RS-CODE-05"
     );
+
+    assert_eq!(by_file["src/too_many_lines.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/too_many_lines.rs"][0].id(), "RS-CODE-09");
+
+    assert_eq!(by_file["src/too_many_uses.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/too_many_uses.rs"][0].id(), "RS-CODE-10");
+
+    assert_eq!(by_file["src/many_uses.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/many_uses.rs"][0].id(), "RS-CODE-11");
+
+    assert_eq!(by_file["src/large_struct.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/large_struct.rs"][0].id(), "RS-CODE-19");
+
+    assert_eq!(by_file["src/path_reason.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["src/path_reason.rs"][0].id(), "RS-CODE-24");
 
     assert_eq!(by_file["src/cfg_attr_unknown.rs"].len(), 1, "{results:#?}");
     assert_eq!(by_file["src/cfg_attr_unknown.rs"][0].id(), "RS-CODE-08");
