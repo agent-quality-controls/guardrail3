@@ -116,6 +116,33 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "g3rs-deny-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deny-config-checks-runtime",
+ "g3rs-deny-config-checks-types",
+]
+
+[[package]]
+name = "g3rs-deny-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "deny-toml-parser",
+ "g3rs-deny-config-checks-types",
+ "guardrail3-check-types",
+ "guardrail3-domain-modules",
+ "guardrail3-reason-policy",
+ "toml",
+]
+
+[[package]]
+name = "g3rs-deny-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deny-types",
+]
+
+[[package]]
 name = "g3rs-deny-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -135,6 +162,7 @@ name = "g3rs-deny-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
+ "g3rs-deny-config-checks",
  "g3rs-deny-ingestion-assertions",
  "g3rs-deny-ingestion-types",
  "g3rs-deny-types",
@@ -199,6 +227,18 @@ dependencies = [
  "regex-automata",
  "regex-syntax",
 ]
+
+[[package]]
+name = "guardrail3-check-types"
+version = "0.1.0"
+
+[[package]]
+name = "guardrail3-domain-modules"
+version = "0.0.0"
+
+[[package]]
+name = "guardrail3-reason-policy"
+version = "0.0.0"
 
 [[package]]
 name = "hashbrown"

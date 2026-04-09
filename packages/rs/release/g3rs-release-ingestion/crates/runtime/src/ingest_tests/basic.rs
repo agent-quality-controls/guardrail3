@@ -222,11 +222,11 @@ fn fails_on_malformed_cargo() {
 }
 
 // ---------------------------------------------------------------------------
-// 7. Malformed release-plz.toml produces None, not error
+// 7. Malformed release-plz.toml fails closed
 // ---------------------------------------------------------------------------
 
 #[test]
-fn malformed_release_plz_produces_none() {
+fn malformed_release_plz_returns_error() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -235,16 +235,10 @@ fn malformed_release_plz_produces_none() {
     write(root.join("release-plz.toml"), "{{{{not valid toml}}}}");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl)
-        .expect("ingestion should succeed even when release-plz.toml is malformed — graceful degradation");
+    let result = crate::ingest_for_config_checks(&crawl);
 
-    assert_eq!(input.cargo_rel_path, "Cargo.toml");
     assert!(
-        input.release_plz_rel_path.is_none(),
-        "release_plz_rel_path should be None when release-plz.toml is malformed"
-    );
-    assert!(
-        input.release_plz.is_none(),
-        "release_plz should be None when release-plz.toml is malformed"
+        matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
+        "ingestion should fail closed when release-plz.toml exists but is malformed"
     );
 }

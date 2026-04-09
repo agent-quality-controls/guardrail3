@@ -116,6 +116,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "g3rs-fmt-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-fmt-config-checks-runtime",
+ "g3rs-fmt-config-checks-types",
+]
+
+[[package]]
+name = "g3rs-fmt-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "g3rs-fmt-config-checks-types",
+ "guardrail3-check-types",
+ "rustfmt-toml-parser",
+ "toml",
+]
+
+[[package]]
+name = "g3rs-fmt-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-fmt-types",
+]
+
+[[package]]
 name = "g3rs-fmt-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -135,6 +161,7 @@ name = "g3rs-fmt-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3rs-fmt-config-checks",
  "g3rs-fmt-ingestion-assertions",
  "g3rs-fmt-ingestion-types",
  "g3rs-fmt-types",
@@ -203,6 +230,10 @@ dependencies = [
  "regex-automata",
  "regex-syntax",
 ]
+
+[[package]]
+name = "guardrail3-check-types"
+version = "0.1.0"
 
 [[package]]
 name = "hashbrown"

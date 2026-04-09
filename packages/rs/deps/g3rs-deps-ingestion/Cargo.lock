@@ -116,6 +116,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "g3rs-deps-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deps-config-checks-runtime",
+ "g3rs-deps-config-checks-types",
+]
+
+[[package]]
+name = "g3rs-deps-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deps-config-checks-types",
+ "g3rs-deps-types",
+ "guardrail3-check-types",
+ "guardrail3-rs-toml-parser",
+]
+
+[[package]]
+name = "g3rs-deps-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deps-types",
+]
+
+[[package]]
 name = "g3rs-deps-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -135,6 +160,7 @@ name = "g3rs-deps-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3rs-deps-config-checks",
  "g3rs-deps-ingestion-assertions",
  "g3rs-deps-ingestion-types",
  "g3rs-deps-types",
@@ -208,6 +234,10 @@ dependencies = [
  "regex-automata",
  "regex-syntax",
 ]
+
+[[package]]
+name = "guardrail3-check-types"
+version = "0.1.0"
 
 [[package]]
 name = "guardrail3-rs-toml-parser"

@@ -28,5 +28,6 @@ g3rs-cargo-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 
 [dev-dependencies]
+g3rs-cargo-config-checks = { path = "../../../g3rs-cargo-config-checks" }
 g3rs-cargo-ingestion-assertions = { path = "../assertions" }
 tempfile = "3"

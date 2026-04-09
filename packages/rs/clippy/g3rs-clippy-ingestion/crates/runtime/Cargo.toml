@@ -28,6 +28,7 @@ g3rs-clippy-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
 
 [dev-dependencies]
+g3rs-clippy-config-checks = { path = "../../../g3rs-clippy-config-checks" }
 g3rs-clippy-ingestion-assertions = { path = "../assertions" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 tempfile = "3"

@@ -15,7 +15,8 @@ pub use g3rs_garde_ingestion_types::G3RsGardeIngestionError as IngestionError;
 /// # Errors
 ///
 /// Returns an error if Cargo.toml is missing, unreadable, or unparseable.
-/// Clippy config errors are silently treated as absent.
+/// If a clippy config file is present, unreadable or unparseable input is also
+/// an error.
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeConfigChecksInput, IngestionError> {
@@ -33,14 +34,18 @@ pub fn ingest_for_config_checks(
     let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
 
     // 2. Select and parse clippy config (optional)
-    let (clippy_rel_path, clippy) = crate::select::select_clippy_toml(crawl)
-        .filter(|entry| entry.readable)
-        .and_then(|entry| {
-            crate::parse::parse_clippy_toml(&entry.path.abs_path)
-                .ok()
-                .map(|parsed| (entry.path.rel_path.clone(), parsed))
-        })
-        .map_or((None, None), |(path, parsed)| (Some(path), Some(parsed)));
+    let (clippy_rel_path, clippy) = if let Some(entry) = crate::select::select_clippy_toml(crawl) {
+        if !entry.readable {
+            return Err(IngestionError::Unreadable {
+                path: entry.path.abs_path.clone(),
+                reason: "file is not readable".to_owned(),
+            });
+        }
+        let parsed = crate::parse::parse_clippy_toml(&entry.path.abs_path)?;
+        (Some(entry.path.rel_path.clone()), Some(parsed))
+    } else {
+        (None, None)
+    };
 
     Ok(crate::ingest::assemble(
         cargo_entry.path.rel_path.clone(),

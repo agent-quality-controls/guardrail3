@@ -1,5 +1,6 @@
 mod basic;
 mod deps;
+mod pipeline;
 
 use std::path::Path;
 

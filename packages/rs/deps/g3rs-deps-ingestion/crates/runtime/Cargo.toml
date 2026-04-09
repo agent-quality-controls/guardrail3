@@ -30,5 +30,6 @@ guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-
 toml = "0.8"
 
 [dev-dependencies]
+g3rs-deps-config-checks = { path = "../../../g3rs-deps-config-checks" }
 g3rs-deps-ingestion-assertions = { path = "../assertions" }
 tempfile = "3"
