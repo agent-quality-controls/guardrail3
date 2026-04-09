@@ -1,6 +1,7 @@
 mod classify;
 mod config;
 mod config_comments;
+mod config_scope;
 mod fs;
 mod ingest;
 mod run;

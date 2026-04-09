@@ -478,6 +478,69 @@ fn ingests_exception_comments_from_owned_config_files() {
 }
 
 #[test]
+fn ingests_multiple_exception_comments_from_one_owned_file_with_exact_lines() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("deny.toml"),
+        "\
+# EXCEPTION: first\n\
+advisories = []\n\
+// EXCEPTION: second\n",
+    );
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect("config ingestion should succeed");
+
+    assert_eq!(input.exception_comments.len(), 2, "{input:#?}");
+    assert!(
+        input.exception_comments.iter().any(|comment| {
+            comment.rel_path == "deny.toml"
+                && comment.line == 1
+                && comment.line_text == "# EXCEPTION: first"
+        }),
+        "{input:#?}"
+    );
+    assert!(
+        input.exception_comments.iter().any(|comment| {
+            comment.rel_path == "deny.toml"
+                && comment.line == 3
+                && comment.line_text == "// EXCEPTION: second"
+        }),
+        "{input:#?}"
+    );
+}
+
+#[test]
+fn ingests_exception_comments_from_all_supported_owned_config_filenames() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n# EXCEPTION: cargo\n",
+    );
+    write(root.join("guardrail3.toml"), "# EXCEPTION: guardrail\n");
+    write(root.join("clippy.toml"), "# EXCEPTION: clippy\n");
+    write(root.join(".clippy.toml"), "# EXCEPTION: dot clippy\n");
+    write(root.join("deny.toml"), "# EXCEPTION: deny\n");
+    write(root.join(".deny.toml"), "# EXCEPTION: dot deny\n");
+    write(root.join("rustfmt.toml"), "# EXCEPTION: rustfmt\n");
+    write(root.join("rust-toolchain.toml"), "# EXCEPTION: toolchain toml\n");
+    write(root.join("rust-toolchain"), "# EXCEPTION: toolchain file\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect("config ingestion should succeed");
+
+    assert_eq!(input.exception_comments.len(), 9, "{input:#?}");
+}
+
+#[test]
 fn ingests_workspace_unsafe_code_lints_from_cargo() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
@@ -506,6 +569,89 @@ unsafe_code = \"deny\"\n",
     assert_eq!(
         input.unsafe_code_lints[0].lint_level.as_deref(),
         Some("deny")
+    );
+}
+
+#[test]
+fn ingests_workspace_unsafe_code_lints_from_detailed_form() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[workspace]\n\
+members = []\n\
+\n\
+[workspace.lints.rust]\n\
+unsafe_code = { level = \"forbid\", priority = 0 }\n",
+    );
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect("config ingestion should succeed");
+
+    assert_eq!(input.unsafe_code_lints.len(), 1, "{input:#?}");
+    assert_eq!(
+        input.unsafe_code_lints[0].lint_level.as_deref(),
+        Some("forbid")
+    );
+}
+
+#[test]
+fn ignores_foreign_nested_repo_config_files() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[workspace]\n\
+members = [\"crates/core\"]\n\
+\n\
+[workspace.lints.rust]\n\
+unsafe_code = \"forbid\"\n\
+\n\
+# EXCEPTION: root workspace inventory\n",
+    );
+    write(
+        root.join("crates/core/Cargo.toml"),
+        "[package]\nname = \"core\"\nversion = \"0.1.0\"\nedition = \"2024\"\n# EXCEPTION: member cargo inventory\n",
+    );
+    write(
+        root.join("vendor/foreign/Cargo.toml"),
+        "\
+[workspace]\n\
+members = []\n\
+\n\
+[workspace.lints.rust]\n\
+unsafe_code = \"deny\"\n\
+\n\
+# EXCEPTION: foreign workspace inventory\n",
+    );
+    write(
+        root.join("vendor/foreign/deny.toml"),
+        "# EXCEPTION: foreign deny inventory\n",
+    );
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect("config ingestion should succeed");
+
+    assert_eq!(input.exception_comments.len(), 2, "{input:#?}");
+    assert!(
+        input.exception_comments.iter().all(|fact| {
+            fact.rel_path == "Cargo.toml" || fact.rel_path == "crates/core/Cargo.toml"
+        }),
+        "{input:#?}"
+    );
+    assert_eq!(input.unsafe_code_lints.len(), 1, "{input:#?}");
+    assert_eq!(input.unsafe_code_lints[0].cargo_rel_path, "Cargo.toml");
+    assert_eq!(
+        input.unsafe_code_lints[0].lint_level.as_deref(),
+        Some("forbid")
     );
 }
 
@@ -553,4 +699,34 @@ fn unreadable_owned_config_file_fails_config_ingestion() {
         matches!(error, crate::IngestionError::Unreadable { .. }),
         "unexpected error: {error:?}"
     );
+}
+
+#[cfg(unix)]
+#[test]
+fn unreadable_foreign_config_file_does_not_fail_config_ingestion() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    let foreign_deny = root.join("vendor/foreign/deny.toml");
+    write(&foreign_deny, "# EXCEPTION: foreign hidden\n");
+
+    let mut permissions = fs::metadata(&foreign_deny)
+        .expect("metadata should exist")
+        .permissions();
+    permissions.set_mode(0o000);
+    fs::set_permissions(&foreign_deny, permissions).expect("chmod should succeed");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect("foreign unreadable config should be ignored");
+
+    assert!(input.exception_comments.is_empty(), "{input:#?}");
+    assert!(input.unsafe_code_lints.is_empty(), "{input:#?}");
 }
