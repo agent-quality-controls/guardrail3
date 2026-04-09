@@ -9,6 +9,7 @@ fn emits_code_family_input_failure_on_parse_error() {
             content: "fn broken( {".to_owned(),
             is_test: false,
             profile_name: None,
+            is_library_root: false,
         },
     };
 

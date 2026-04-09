@@ -8,7 +8,7 @@ pub use g3rs_code_ast_ingestion_types::G3RsCodeAstIngestionError as IngestionErr
 pub fn ingest_for_ast_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<Vec<G3RsCodeAstChecksInput>, IngestionError> {
-    crate::select::select_source_files(crawl)
+    crate::select::select_source_files(crawl)?
         .into_iter()
         .map(|selected| {
             if !selected.entry.readable {
@@ -31,6 +31,7 @@ pub fn ingest_for_ast_checks(
                 content,
                 selected.is_test,
                 selected.profile_name,
+                selected.is_library_root,
             ))
         })
         .collect()

@@ -12,6 +12,7 @@ pub(super) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<
             content: content.to_owned(),
             is_test,
             profile_name: None,
+            is_library_root: false,
         },
         ast,
     };

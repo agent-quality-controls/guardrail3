@@ -6,6 +6,7 @@ pub(crate) fn assemble(
     content: String,
     is_test: bool,
     profile_name: Option<String>,
+    is_library_root: bool,
 ) -> G3RsCodeAstChecksInput {
     G3RsCodeAstChecksInput {
         source_file: G3RsSourceFile {
@@ -13,6 +14,7 @@ pub(crate) fn assemble(
             content,
             is_test,
             profile_name,
+            is_library_root,
         },
     }
 }

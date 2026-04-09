@@ -43,6 +43,7 @@ fn ingests_owned_rust_files_and_classifies_tests() {
         "src/lib.rs",
         false,
         None,
+        false,
         "pub fn run() {}\n",
     );
     assert_source_file(
@@ -50,6 +51,7 @@ fn ingests_owned_rust_files_and_classifies_tests() {
         "src/http_tests.rs",
         true,
         None,
+        false,
         "pub fn helper() {}\n",
     );
     assert_source_file(
@@ -57,7 +59,106 @@ fn ingests_owned_rust_files_and_classifies_tests() {
         "tests/smoke.rs",
         true,
         None,
+        false,
         "#[test]\nfn smoke() {}\n",
+    );
+}
+
+#[test]
+fn classifies_library_root_and_library_module() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("src/lib.rs"), "mod helper;\npub fn run() {}\n");
+    write(root.join("src/helper.rs"), "pub struct Helper;\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    assert_source_file(
+        require_source_file(&inputs, "src/lib.rs"),
+        "src/lib.rs",
+        false,
+        Some("library"),
+        true,
+        "mod helper;\npub fn run() {}\n",
+    );
+    assert_source_file(
+        require_source_file(&inputs, "src/helper.rs"),
+        "src/helper.rs",
+        false,
+        Some("library"),
+        false,
+        "pub struct Helper;\n",
+    );
+}
+
+#[test]
+fn classifies_binary_root_in_mixed_package() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("src/lib.rs"), "pub fn api() {}\n");
+    write(root.join("src/main.rs"), "fn main() {}\n");
+    write(root.join("src/bin/tool.rs"), "fn main() {}\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    assert_source_file(
+        require_source_file(&inputs, "src/lib.rs"),
+        "src/lib.rs",
+        false,
+        Some("library"),
+        true,
+        "pub fn api() {}\n",
+    );
+    assert_source_file(
+        require_source_file(&inputs, "src/main.rs"),
+        "src/main.rs",
+        false,
+        Some("binary"),
+        false,
+        "fn main() {}\n",
+    );
+    assert_source_file(
+        require_source_file(&inputs, "src/bin/tool.rs"),
+        "src/bin/tool.rs",
+        false,
+        Some("binary"),
+        false,
+        "fn main() {}\n",
+    );
+}
+
+#[test]
+fn leaves_unowned_source_without_profile() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("tools/probe.rs"), "pub fn probe() {}\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    assert_source_file(
+        require_source_file(&inputs, "tools/probe.rs"),
+        "tools/probe.rs",
+        false,
+        None,
+        false,
+        "pub fn probe() {}\n",
     );
 }
 
@@ -113,6 +214,25 @@ fn unreadable_selected_source_fails_ingestion() {
 
     assert!(
         matches!(error, crate::IngestionError::Unreadable { .. }),
+        "unexpected error: {error:?}"
+    );
+}
+
+#[test]
+fn malformed_nearest_cargo_toml_fails_ingestion() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("Cargo.toml"), "{{{{not valid toml}}}}");
+    write(root.join("src/lib.rs"), "pub fn run() {}\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let error = crate::ingest_for_ast_checks(&workspace_crawl)
+        .expect_err("malformed owning Cargo.toml should fail ingestion");
+
+    assert!(
+        matches!(error, crate::IngestionError::ParseFailed { .. }),
         "unexpected error: {error:?}"
     );
 }

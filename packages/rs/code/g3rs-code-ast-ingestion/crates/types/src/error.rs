@@ -10,6 +10,13 @@ pub enum G3RsCodeAstIngestionError {
         /// Underlying IO error or readability reason.
         reason: String,
     },
+    /// A Cargo.toml needed for target classification could not be parsed.
+    ParseFailed {
+        /// Absolute path to the malformed manifest.
+        path: PathBuf,
+        /// Parser failure details.
+        reason: String,
+    },
 }
 
 impl std::fmt::Display for G3RsCodeAstIngestionError {
@@ -17,6 +24,9 @@ impl std::fmt::Display for G3RsCodeAstIngestionError {
         match self {
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())
+            }
+            Self::ParseFailed { path, reason } => {
+                write!(f, "cannot parse {}: {reason}", path.display())
             }
         }
     }
