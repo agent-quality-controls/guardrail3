@@ -140,3 +140,107 @@ fn pipeline_reports_assertions_boundary_rules() {
         "{results:#?}"
     );
 }
+
+#[test]
+fn pipeline_reports_malformed_owned_source_as_rs_test_10() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("src/lib.rs"), "pub fn ok() {}\n");
+    write(root.join("tests/broken.rs"), "#[test]\nfn broken( {\n");
+
+    let results = run_ast_pipeline(root);
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-TEST-10"
+                && result.file() == Some("tests/broken.rs")
+                && result.title() == "failed to read test input"
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn ingest_for_ast_checks_classifies_root_files_by_role() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\nresolver = \"2\"\n",
+    );
+    write(
+        root.join("crates/runtime/Cargo.toml"),
+        "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("crates/runtime/src/lib.rs"), "pub fn smoke() {}\n");
+    write(
+        root.join("crates/runtime/src/feature_tests/mod.rs"),
+        "#[test]\nfn sidecar() {}\n",
+    );
+    write(
+        root.join("crates/runtime/src/feature_tests/helper.rs"),
+        "pub fn helper() {}\n",
+    );
+    write(
+        root.join("crates/runtime/src/feature_tests/fixtures/skip.rs"),
+        "pub fn fixture() {}\n",
+    );
+    write(
+        root.join("crates/runtime/tests/api.rs"),
+        "#[test]\nfn api() {}\n",
+    );
+    write(
+        root.join("crates/assertions/Cargo.toml"),
+        "[package]\nname = \"demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(
+        root.join("crates/assertions/src/lib.rs"),
+        "pub fn assert_demo() { assert_eq!(1, 1); }\n",
+    );
+    write(
+        root.join("crates/assertions/src/fixtures/skip.rs"),
+        "pub fn fixture() {}\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_ast_checks(&crawl).expect("AST ingestion should succeed");
+
+    assert_eq!(inputs.len(), 1, "{inputs:#?}");
+    let input = &inputs[0];
+    let file_kinds = input
+        .files
+        .iter()
+        .map(|file| (file.rel_path.as_str(), file.kind))
+        .collect::<BTreeMap<_, _>>();
+
+    assert_eq!(
+        file_kinds.get("crates/runtime/src/lib.rs"),
+        Some(&g3rs_test_types::G3RsTestFileKind::Source)
+    );
+    assert_eq!(
+        file_kinds.get("crates/runtime/src/feature_tests/mod.rs"),
+        Some(&g3rs_test_types::G3RsTestFileKind::InternalSidecarMod)
+    );
+    assert_eq!(
+        file_kinds.get("crates/runtime/src/feature_tests/helper.rs"),
+        Some(&g3rs_test_types::G3RsTestFileKind::InternalSidecarSupport)
+    );
+    assert_eq!(
+        file_kinds.get("crates/runtime/tests/api.rs"),
+        Some(&g3rs_test_types::G3RsTestFileKind::ExternalHarness)
+    );
+    assert_eq!(
+        file_kinds.get("crates/assertions/src/lib.rs"),
+        Some(&g3rs_test_types::G3RsTestFileKind::AssertionsModule)
+    );
+    assert!(!file_kinds.contains_key("crates/runtime/src/feature_tests/fixtures/skip.rs"));
+    assert!(!file_kinds.contains_key("crates/assertions/src/fixtures/skip.rs"));
+}

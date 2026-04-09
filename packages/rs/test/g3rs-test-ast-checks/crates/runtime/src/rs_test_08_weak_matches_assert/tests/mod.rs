@@ -44,3 +44,33 @@ fn inventories_specific_matches_assertions() {
         "tests/matches.rs",
     );
 }
+
+#[test]
+fn reports_assert_matches_and_debug_assert_wildcards() {
+    let results = run_input(input(
+        vec![file(
+            "tests/weak.rs",
+            G3RsTestFileKind::ExternalHarness,
+            None,
+            "#[test]\nfn weak() {\n    assert_matches!(Some(1), Some(_));\n    debug_assert!(matches!(Some(1), Some(_)));\n}\n",
+        )],
+        None,
+    ));
+
+    assert_has_result(
+        &results,
+        "RS-TEST-08",
+        G3Severity::Error,
+        "weak matches assertion",
+        "tests/weak.rs",
+        Some(3),
+    );
+    assert_has_result(
+        &results,
+        "RS-TEST-08",
+        G3Severity::Error,
+        "weak matches assertion",
+        "tests/weak.rs",
+        Some(4),
+    );
+}

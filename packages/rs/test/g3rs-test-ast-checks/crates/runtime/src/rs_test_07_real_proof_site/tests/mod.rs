@@ -44,3 +44,59 @@ fn inventories_assertion_macro_proof() {
         "tests/ok.rs",
     );
 }
+
+#[test]
+fn inventories_owned_assertions_proof_via_alias_import() {
+    let results = run_input(input(
+        vec![
+            file(
+                "assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo_assertions"),
+                "pub fn assert_demo() { assert_eq!(1, 1); }\n",
+            ),
+            file(
+                "tests/alias.rs",
+                G3RsTestFileKind::ExternalHarness,
+                Some("demo_assertions"),
+                "use demo_assertions::assert_demo as prove;\n#[test]\nfn alias() { prove(); }\n",
+            ),
+        ],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_inventory(
+        &results,
+        "RS-TEST-07",
+        "real proof site present",
+        "tests/alias.rs",
+    );
+}
+
+#[test]
+fn inventories_owned_assertions_proof_via_glob_import() {
+    let results = run_input(input(
+        vec![
+            file(
+                "assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo_assertions"),
+                "pub fn assert_demo() { assert_eq!(1, 1); }\n",
+            ),
+            file(
+                "tests/glob.rs",
+                G3RsTestFileKind::ExternalHarness,
+                Some("demo_assertions"),
+                "use demo_assertions::*;\n#[test]\nfn glob() { assert_demo(); }\n",
+            ),
+        ],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_inventory(
+        &results,
+        "RS-TEST-07",
+        "real proof site present",
+        "tests/glob.rs",
+    );
+}
