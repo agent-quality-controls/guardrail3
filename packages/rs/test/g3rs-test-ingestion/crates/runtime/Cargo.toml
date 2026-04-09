@@ -1,0 +1,35 @@
+[package]
+name = "g3rs-test-ingestion-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3rs test ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "test", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["ingest"]
+ingest = []
+
+[lints]
+workspace = true
+
+[dependencies]
+cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
+g3rs-test-ingestion-types = { path = "../types", version = "0.1.0" }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+glob = "0.3"
+mutants-toml-parser = { path = "../../../../../parsers/mutants-toml-parser", version = "0.1.0" }
+nextest-toml-parser = { path = "../../../../../parsers/nextest-toml-parser", version = "0.1.0" }
+syn = { version = "2", features = ["full", "visit"] }
+
+[dev-dependencies]
+g3rs-test-config-checks = { path = "../../../g3rs-test-config-checks", version = "0.1.0" }
+g3rs-test-ingestion-assertions = { path = "../assertions" }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+tempfile = "3"
