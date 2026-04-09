@@ -142,6 +142,120 @@ fn classifies_binary_root_in_mixed_package() {
 }
 
 #[test]
+fn classifies_custom_library_and_binary_target_paths() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[package]\n\
+name = \"demo\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n\
+\n\
+[lib]\n\
+path = \"lib/api.rs\"\n\
+\n\
+[[bin]]\n\
+name = \"worker\"\n\
+path = \"cmd/worker.rs\"\n",
+    );
+    write(root.join("lib/api.rs"), "mod helper;\npub fn api() {}\n");
+    write(root.join("lib/helper.rs"), "pub struct Helper;\n");
+    write(root.join("cmd/worker.rs"), "mod support;\nfn main() {}\n");
+    write(root.join("cmd/support.rs"), "pub fn support() {}\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    assert_source_file(
+        require_source_file(&inputs, "lib/api.rs"),
+        "lib/api.rs",
+        false,
+        Some("library"),
+        true,
+        "mod helper;\npub fn api() {}\n",
+    );
+    assert_source_file(
+        require_source_file(&inputs, "lib/helper.rs"),
+        "lib/helper.rs",
+        false,
+        Some("library"),
+        false,
+        "pub struct Helper;\n",
+    );
+    assert_source_file(
+        require_source_file(&inputs, "cmd/worker.rs"),
+        "cmd/worker.rs",
+        false,
+        Some("binary"),
+        false,
+        "mod support;\nfn main() {}\n",
+    );
+    assert_source_file(
+        require_source_file(&inputs, "cmd/support.rs"),
+        "cmd/support.rs",
+        false,
+        Some("binary"),
+        false,
+        "pub fn support() {}\n",
+    );
+}
+
+#[test]
+fn classifies_nested_workspace_members_from_their_own_manifest() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[workspace]\n\
+members = [\"crates/api\"]\n\
+resolver = \"2\"\n",
+    );
+    write(
+        root.join("crates/api/Cargo.toml"),
+        "\
+[package]\n\
+name = \"api\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n",
+    );
+    write(
+        root.join("crates/api/src/lib.rs"),
+        "mod helper;\npub fn api() {}\n",
+    );
+    write(
+        root.join("crates/api/src/helper.rs"),
+        "pub struct Helper;\n",
+    );
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    assert_source_file(
+        require_source_file(&inputs, "crates/api/src/lib.rs"),
+        "crates/api/src/lib.rs",
+        false,
+        Some("library"),
+        true,
+        "mod helper;\npub fn api() {}\n",
+    );
+    assert_source_file(
+        require_source_file(&inputs, "crates/api/src/helper.rs"),
+        "crates/api/src/helper.rs",
+        false,
+        Some("library"),
+        false,
+        "pub struct Helper;\n",
+    );
+}
+
+#[test]
 fn classifies_custom_library_root_path() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

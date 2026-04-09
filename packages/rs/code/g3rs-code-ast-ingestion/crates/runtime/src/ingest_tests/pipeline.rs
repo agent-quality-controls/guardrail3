@@ -4,7 +4,7 @@ use std::path::Path;
 use std::process::Command;
 
 use g3rs_code_ast_checks_types::G3RsCodeAstChecksInput;
-use guardrail3_check_types::G3CheckResult;
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 use tempfile::tempdir;
 
 const HAS_TODO: &str =
@@ -262,8 +262,24 @@ fn pipeline_reports_new_single_file_ast_rules() {
         "pub trait Service {\n    fn m0(&self);\n    fn m1(&self);\n    fn m2(&self);\n    fn m3(&self);\n    fn m4(&self);\n    fn m5(&self);\n    fn m6(&self);\n    fn m7(&self);\n    fn m8(&self);\n}\n",
     );
     write(
+        root.join("src/large_trait_boundary.rs"),
+        "pub trait Service {\n    fn m0(&self);\n    fn m1(&self);\n    fn m2(&self);\n    fn m3(&self);\n    fn m4(&self);\n    fn m5(&self);\n    fn m6(&self);\n    fn m7(&self);\n    fn m8(&self);\n    fn m9(&self);\n    fn m10(&self);\n    fn m11(&self);\n}\n",
+    );
+    write(
+        root.join("src/small_trait.rs"),
+        "pub trait Service {\n    fn m0(&self);\n    fn m1(&self);\n    fn m2(&self);\n    fn m3(&self);\n    fn m4(&self);\n    fn m5(&self);\n    fn m6(&self);\n    fn m7(&self);\n}\n",
+    );
+    write(
         root.join("src/public_field_bag.rs"),
         "pub struct User { pub id: String, pub email: String }\n",
+    );
+    write(
+        root.join("src/public_field_warn_boundary.rs"),
+        "pub struct User { pub a: u8, pub b: u8, pub c: u8, pub d: u8 }\n",
+    );
+    write(
+        root.join("src/public_field_error_boundary.rs"),
+        "pub struct User { pub a: u8, pub b: u8, pub c: u8, pub d: u8, pub e: u8 }\n",
     );
     write(
         root.join("src/private_field_struct.rs"),
@@ -274,8 +290,24 @@ fn pipeline_reports_new_single_file_ast_rules() {
         "pub fn parse() -> Result<(), String> { Ok(()) }\n",
     );
     write(
+        root.join("src/public_trait_weak_error.rs"),
+        "pub trait Service { fn parse(&self) -> Result<(), anyhow::Error>; }\n",
+    );
+    write(
+        root.join("src/public_impl_weak_error.rs"),
+        "pub struct Gateway;\nimpl Gateway { pub fn boxed(&self) -> Result<(), Box<dyn std::error::Error>> { Ok(()) } }\n",
+    );
+    write(
+        root.join("src/public_str_ref_error.rs"),
+        "pub fn label() -> Result<(), &str> { Ok(()) }\n",
+    );
+    write(
         root.join("src/typed_public_error.rs"),
         "pub fn parse() -> Result<(), ParseError> { Ok(()) }\n",
+    );
+    write(
+        root.join("src/private_weak_error.rs"),
+        "fn parse() -> Result<(), String> { Ok(()) }\n",
     );
     write(
         root.join("src/string_dispatch.rs"),
@@ -465,9 +497,54 @@ fn pipeline_reports_new_single_file_ast_rules() {
 
     assert_eq!(by_file["src/large_trait.rs"].len(), 1, "{results:#?}");
     assert_eq!(by_file["src/large_trait.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(
+        by_file["src/large_trait.rs"][0].severity(),
+        G3Severity::Warn
+    );
+    assert_eq!(
+        by_file["src/large_trait_boundary.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(by_file["src/large_trait_boundary.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(
+        by_file["src/large_trait_boundary.rs"][0].severity(),
+        G3Severity::Warn
+    );
+    assert!(!by_file.contains_key("src/small_trait.rs"), "{results:#?}");
 
     assert_eq!(by_file["src/public_field_bag.rs"].len(), 1, "{results:#?}");
     assert_eq!(by_file["src/public_field_bag.rs"][0].id(), "RS-CODE-31");
+    assert_eq!(
+        by_file["src/public_field_bag.rs"][0].severity(),
+        G3Severity::Warn
+    );
+    assert_eq!(
+        by_file["src/public_field_warn_boundary.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(
+        by_file["src/public_field_warn_boundary.rs"][0].id(),
+        "RS-CODE-31"
+    );
+    assert_eq!(
+        by_file["src/public_field_warn_boundary.rs"][0].severity(),
+        G3Severity::Warn
+    );
+    assert_eq!(
+        by_file["src/public_field_error_boundary.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(
+        by_file["src/public_field_error_boundary.rs"][0].id(),
+        "RS-CODE-31"
+    );
+    assert_eq!(
+        by_file["src/public_field_error_boundary.rs"][0].severity(),
+        G3Severity::Error
+    );
     assert!(
         !by_file.contains_key("src/private_field_struct.rs"),
         "{results:#?}"
@@ -475,8 +552,36 @@ fn pipeline_reports_new_single_file_ast_rules() {
 
     assert_eq!(by_file["src/public_weak_error.rs"].len(), 1, "{results:#?}");
     assert_eq!(by_file["src/public_weak_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(
+        by_file["src/public_trait_weak_error.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(
+        by_file["src/public_trait_weak_error.rs"][0].id(),
+        "RS-CODE-33"
+    );
+    assert_eq!(
+        by_file["src/public_impl_weak_error.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(
+        by_file["src/public_impl_weak_error.rs"][0].id(),
+        "RS-CODE-33"
+    );
+    assert_eq!(
+        by_file["src/public_str_ref_error.rs"].len(),
+        1,
+        "{results:#?}"
+    );
+    assert_eq!(by_file["src/public_str_ref_error.rs"][0].id(), "RS-CODE-33");
     assert!(
         !by_file.contains_key("src/typed_public_error.rs"),
+        "{results:#?}"
+    );
+    assert!(
+        !by_file.contains_key("src/private_weak_error.rs"),
         "{results:#?}"
     );
 
@@ -752,4 +857,45 @@ fn pipeline_keeps_other_findings_when_one_file_fails_to_parse() {
             .any(|result| result.id() == "RS-CODE-13"),
         "valid file should still emit its finding: {results:#?}"
     );
+}
+
+#[test]
+fn pipeline_classifies_custom_target_paths_before_checks_run() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[package]\n\
+name = \"demo\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n\
+\n\
+[lib]\n\
+path = \"lib/api.rs\"\n\
+\n\
+[[bin]]\n\
+name = \"worker\"\n\
+path = \"cmd/worker.rs\"\n",
+    );
+    write(
+        root.join("lib/api.rs"),
+        "pub trait Service { fn m0(&self); fn m1(&self); fn m2(&self); fn m3(&self); fn m4(&self); fn m5(&self); fn m6(&self); fn m7(&self); fn m8(&self); }\n",
+    );
+    write(
+        root.join("cmd/worker.rs"),
+        "pub trait Service { fn m0(&self); fn m1(&self); fn m2(&self); fn m3(&self); fn m4(&self); fn m5(&self); fn m6(&self); fn m7(&self); fn m8(&self); fn m9(&self); fn m10(&self); fn m11(&self); fn m12(&self); }\n",
+    );
+
+    let results = run_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert_eq!(by_file["lib/api.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["lib/api.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(by_file["lib/api.rs"][0].severity(), G3Severity::Warn);
+    assert_eq!(by_file["cmd/worker.rs"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["cmd/worker.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(by_file["cmd/worker.rs"][0].severity(), G3Severity::Error);
 }
