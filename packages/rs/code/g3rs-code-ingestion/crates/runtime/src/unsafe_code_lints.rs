@@ -1,6 +1,6 @@
 use cargo_toml_parser::{LintValue, parse};
 use g3rs_code_ingestion_types::G3RsCodeUnsafeCodeLintFact;
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
+use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::run::IngestionError;
 
@@ -9,9 +9,7 @@ pub(crate) fn collect_unsafe_code_lints(
 ) -> Result<Vec<G3RsCodeUnsafeCodeLintFact>, IngestionError> {
     let mut lints = Vec::new();
 
-    for entry in crawl.entries.iter().filter(|entry| {
-        entry.kind == G3RsWorkspaceEntryKind::File && entry.path.rel_path.ends_with("Cargo.toml")
-    }) {
+    for entry in crate::config_scope::select_owned_cargo_entries(crawl)? {
         if !entry.readable {
             return Err(IngestionError::Unreadable {
                 path: entry.path.abs_path.clone(),

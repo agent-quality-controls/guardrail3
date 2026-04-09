@@ -1,7 +1,5 @@
-use std::path::Path;
-
 use g3rs_code_ingestion_types::G3RsCodeExceptionCommentFact;
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
+use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::run::IngestionError;
 
@@ -22,13 +20,7 @@ pub(crate) fn collect_exception_comments(
 ) -> Result<Vec<G3RsCodeExceptionCommentFact>, IngestionError> {
     let mut comments = Vec::new();
 
-    for entry in crawl.entries.iter().filter(|entry| {
-        entry.kind == G3RsWorkspaceEntryKind::File
-            && Path::new(entry.path.rel_path.as_str())
-                .file_name()
-                .and_then(|name| name.to_str())
-                .is_some_and(|name| CONFIG_COMMENT_FILE_NAMES.contains(&name))
-    }) {
+    for entry in crate::config_scope::select_owned_config_entries(crawl, CONFIG_COMMENT_FILE_NAMES)? {
         if !entry.readable {
             return Err(IngestionError::Unreadable {
                 path: entry.path.abs_path.clone(),

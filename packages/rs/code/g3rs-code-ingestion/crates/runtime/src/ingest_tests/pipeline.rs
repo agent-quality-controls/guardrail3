@@ -172,6 +172,228 @@ unsafe_code = \"forbid\"\n\
 }
 
 #[test]
+fn config_pipeline_stays_clean_for_harmless_comments_and_non_workspace_manifests() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[workspace]\n\
+members = [\"crates/core\"]\n\
+\n\
+[workspace.lints.rust]\n\
+unsafe_code = \"warn\"\n\
+\n\
+quoted = \"# EXCEPTION: not real\"\n\
+# note: harmless\n",
+    );
+    write(
+        root.join("deny.toml"),
+        "value = \"// EXCEPTION: still not real\"\n// temporary note only\n",
+    );
+    write(
+        root.join("crates/core/Cargo.toml"),
+        "\
+[package]\n\
+name = \"core\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n\
+# EXCEPTION: package inventory still counts\n",
+    );
+
+    let results = run_config_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert_eq!(results.len(), 1, "{results:#?}");
+    assert_eq!(by_file["crates/core/Cargo.toml"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["crates/core/Cargo.toml"][0].id(), "RS-CODE-07");
+    assert!(
+        !by_file.contains_key("Cargo.toml"),
+        "root workspace warn plus harmless comments should stay clean: {results:#?}"
+    );
+    assert!(
+        !by_file.contains_key("deny.toml"),
+        "harmless deny comments should stay clean: {results:#?}"
+    );
+}
+
+#[test]
+fn config_pipeline_reports_exact_exception_comment_counts() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[package]\n\
+name = \"demo\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n\
+# EXCEPTION: one\n\
+# EXCEPTION: two\n",
+    );
+    write(
+        root.join("deny.toml"),
+        "# EXCEPTION: three\n",
+    );
+
+    let results = run_config_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert_eq!(results.len(), 3, "{results:#?}");
+    assert_eq!(by_file["Cargo.toml"].len(), 2, "{results:#?}");
+    assert_eq!(by_file["deny.toml"].len(), 1, "{results:#?}");
+}
+
+#[test]
+fn config_pipeline_ignores_foreign_nested_repo_findings() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[workspace]\n\
+members = [\"crates/core\"]\n\
+\n\
+[workspace.lints.rust]\n\
+unsafe_code = \"deny\"\n",
+    );
+    write(
+        root.join("crates/core/Cargo.toml"),
+        "[package]\nname = \"core\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(
+        root.join("vendor/foreign/Cargo.toml"),
+        "\
+[workspace]\n\
+members = []\n\
+\n\
+[workspace.lints.rust]\n\
+unsafe_code = \"deny\"\n\
+\n\
+# EXCEPTION: foreign workspace suppression\n",
+    );
+    write(
+        root.join("vendor/foreign/deny.toml"),
+        "# EXCEPTION: foreign deny suppression\n",
+    );
+
+    let results = run_config_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert_eq!(results.len(), 1, "{results:#?}");
+    assert_eq!(by_file["Cargo.toml"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["Cargo.toml"][0].id(), "RS-CODE-12");
+    assert!(
+        !by_file.contains_key("vendor/foreign/Cargo.toml"),
+        "{results:#?}"
+    );
+    assert!(
+        !by_file.contains_key("vendor/foreign/deny.toml"),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn config_pipeline_reports_deny_through_full_lane() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[workspace]\n\
+members = []\n\
+\n\
+[workspace.lints.rust]\n\
+unsafe_code = \"deny\"\n",
+    );
+
+    let results = run_config_pipeline(root);
+    let by_file = findings_by_file(&results);
+
+    assert_eq!(results.len(), 1, "{results:#?}");
+    assert_eq!(by_file["Cargo.toml"].len(), 1, "{results:#?}");
+    assert_eq!(by_file["Cargo.toml"][0].id(), "RS-CODE-12");
+    assert_eq!(by_file["Cargo.toml"][0].severity(), G3Severity::Error);
+}
+
+#[test]
+fn config_pipeline_stays_clean_for_root_manifest_without_workspace() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[package]\n\
+name = \"demo\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n",
+    );
+
+    let results = run_config_pipeline(root);
+    assert!(results.is_empty(), "unexpected results: {results:#?}");
+}
+
+#[test]
+fn config_ingestion_fails_closed_for_malformed_owned_root_cargo() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("Cargo.toml"), "[workspace\nbroken = true");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let error = crate::ingest_for_config_checks(&crawl)
+        .expect_err("malformed owned root cargo should fail config ingestion");
+
+    assert!(
+        matches!(error, crate::IngestionError::ParseFailed { .. }),
+        "unexpected error: {error:?}"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn config_ingestion_fails_closed_for_unreadable_owned_config_file() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    let deny_toml = root.join("deny.toml");
+    write(&deny_toml, "# EXCEPTION: hidden\n");
+
+    let mut permissions = fs::metadata(&deny_toml)
+        .expect("metadata should exist")
+        .permissions();
+    permissions.set_mode(0o000);
+    fs::set_permissions(&deny_toml, permissions).expect("chmod should succeed");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let error = crate::ingest_for_config_checks(&crawl)
+        .expect_err("unreadable owned config should fail config ingestion");
+
+    assert!(
+        matches!(error, crate::IngestionError::Unreadable { .. }),
+        "unexpected error: {error:?}"
+    );
+}
+
+#[test]
 fn pipeline_reports_new_single_file_ast_rules() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
