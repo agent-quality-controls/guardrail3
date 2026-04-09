@@ -42,3 +42,23 @@ fn errors_on_public_struct_with_five_public_fields() {
         }],
     );
 }
+
+#[test]
+fn warns_on_public_struct_with_four_public_fields() {
+    let content = "pub struct User { pub a: u8, pub b: u8, pub c: u8, pub d: u8 }";
+    let results = check_source("src/lib.rs", content);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Warn),
+            title: Some("public struct exposes named public fields"),
+            file: Some("src/lib.rs"),
+            inventory: Some(false),
+            message: Some(
+                "Public struct `User` exposes 4 named `pub` fields (warn below 5, error at 5+). Prefer private fields and explicit accessors or constructors.",
+            ),
+            line: Some(1),
+        }],
+    );
+}

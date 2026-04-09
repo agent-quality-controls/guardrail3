@@ -12,3 +12,25 @@ fn skips_small_sites_and_test_contexts() {
     assert_rule_results(&check_source("src/lib.rs", test_only_dispatch, false), &[]);
     assert_rule_results(&check_source("src/lib.rs", mixed_chain, false), &[]);
 }
+
+#[test]
+fn skips_sites_at_the_exact_string_dispatch_cap() {
+    let match_arms = (0..10)
+        .map(|index| format!("\"v{index}\" => {index},"))
+        .collect::<Vec<_>>()
+        .join(" ");
+    let exact_match = format!(
+        "pub fn dispatch(value: &str) -> usize {{ match value {{ {match_arms} _ => 0 }} }}"
+    );
+
+    let mut chain = String::new();
+    for index in 0..10 {
+        let prefix = if index == 0 { "if" } else { "else if" };
+        chain.push_str(&format!("{prefix} value == \"v{index}\" {{ {index} }} "));
+    }
+    chain.push_str("else { 0 }");
+    let exact_chain = format!("pub fn dispatch(value: &str) -> usize {{ {chain} }}");
+
+    assert_rule_results(&check_source("src/lib.rs", &exact_match, false), &[]);
+    assert_rule_results(&check_source("src/lib.rs", &exact_chain, false), &[]);
+}
