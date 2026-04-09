@@ -1,4 +1,4 @@
-# RS-CODE — Rust code file checker (29 implemented rules + 5 next-wave planned rules)
+# RS-CODE — Rust code file checker ledger
 
 > Superseded as the primary family plan by [`.plans/by_family/rs/code.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/code.md).
 > Keep this file as a detailed rule ledger and migration/history reference.
@@ -53,11 +53,11 @@
 |--------|----------|------|--------|
 | RS-CODE-22 | Error | `#[deny]`/`#[forbid]` attributes without a useful `// reason:`. Undocumented or weakly documented lint level overrides are the same class as `#[allow]`. `#![deny(warnings)]` is an anti-pattern. Exception: `#![forbid(unsafe_code)]` is Info (strengthens safety). | Implemented |
 | RS-CODE-23 | Error | `include!()` pulls in unscanned code. Direct bypass of all code scanning. Exception: `include!(concat!(env!("OUT_DIR"), ...))` is Info (build-script pattern). Warn for `include_str!()`/`include_bytes!()` with path traversal (`..`). | Implemented |
-| RS-CODE-24 | Error/Warn | `#[path = "..."]` redirects module paths. Error if path contains `..` (escaping directory), or if the same-line `// reason:` is missing or too weak. Warn for any `#[path]` usage with a useful reason (breaks standard file layout). Canonical `#[cfg(test)]` sidecar wiring to `<rule>_tests/mod.rs` is exempt. | Implemented |
-| RS-CODE-25 | Warn | Legacy placeholder for weak public `Result` error forms. Live enforcement ownership moved to `RS-CODE-33`; `RS-CODE-25` stays intentionally non-firing to avoid overlap. **Library profile only.** | Implemented (legacy silent) |
-| RS-CODE-26 | Warn | `pub use foo::*` glob re-export in lib.rs. Unpredictable API surface — any change to inner module changes library API. **Library profile only.** | Implemented |
-| RS-CODE-27 | Error | Facade-only lib.rs: should contain only `mod`, `pub use`, doc comments, type/const definitions. No inline module bodies, no function bodies, no impl blocks. **Library profile only.** | Implemented |
-| RS-CODE-29 | Warn/Error | Trait with >8 methods (Warn) or >12 methods (Error). Nearly unimplementable traits. **Library profile only.** | Implemented |
+| RS-CODE-24 | Error/Warn | `#[path = "..."]` redirects module paths. Error if path contains `..` (escaping directory), or if the same-line `// reason:` is missing or too weak. Warn for any `#[path]` usage with a useful reason (breaks standard file layout). Canonical `#[cfg(test)]` sidecar wiring to `<rule>_tests/mod.rs` is exempt. This ledger keeps the rule here as the extracted code-lane contract; legacy notes also show drift, but the live row stays here. | Implemented |
+| RS-CODE-25 | Warn | Silent placeholder for weak public `Result` error forms. Live enforcement ownership moved to `RS-CODE-33`; `RS-CODE-25` stays intentionally non-firing to avoid overlap. | Implemented (legacy silent) |
+| RS-CODE-26 | Warn | Moved-redundant `pub use foo::*` glob re-export in lib.rs. Unpredictable API surface - any change to inner module changes library API. Kept here as migration history, not a migration target. | Implemented |
+| RS-CODE-27 | Error | Facade-only lib.rs: should contain only `mod`, `pub use`, doc comments, type/const definitions. No inline module bodies, no function bodies, no impl blocks. Not a migration target; kept here as the historical facade rule contract. | Implemented |
+| RS-CODE-29 | Warn/Error | Trait with >8 methods (Warn) or >12 methods (Error). Nearly unimplementable traits. | Implemented |
 | RS-CODE-30 | Error | Source/config input failures that would otherwise fail the family open: unreadable Rust source, unparsable Rust source, or unparsable code-family policy inputs (`Cargo.toml`, `guardrail3.toml`). | Implemented |
 | RS-CODE-32 | Error | Test-only `expect(...)` messages must be useful string literals. Non-literal messages or trivial literals like `"ok"` are forbidden. Production `expect(...)` ownership belongs to Clippy/Cargo policy instead. | Implemented |
 
@@ -69,8 +69,8 @@ These rules are now implemented in the live family. Keep the sections below as t
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-CODE-31 | Error | `pub struct` with named `pub` fields. Public structs should not expose field bags as their default API shape. | Implemented |
-| RS-CODE-33 | Error | Public function returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. | Implemented |
+| RS-CODE-31 | Warn/Error | `pub struct` with named `pub` fields. Warn for 1-4 named public fields; error at 5+ named public fields. Public structs should not expose field bags as their default API shape. | Implemented |
+| RS-CODE-33 | Error | Public function or method returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. This covers public free functions, public trait methods, and public methods on public types. | Implemented |
 | RS-CODE-34 | Error | More than 6 type/const generic parameters on a `struct`, `enum`, `trait`, or `fn`. Lifetimes do not count. | Implemented |
 | RS-CODE-35 | Error | Per-crate source tree exceeds structural caps: module depth >6, sibling subdirectories >12, or sibling `.rs` files >20 in one Rust source directory. | Implemented |
 | RS-CODE-36 | Error | One string-dispatch site has more than 10 string-literal branches. Applies to `match` and `if/else if` chains on the same expression. Test files exempt. | Implemented |
@@ -91,7 +91,8 @@ These rules are now implemented in the live family. Keep the sections below as t
 - named fields without `pub`
 
 **Severity**
-- `Error`
+- `Warn` at 1-4 named public fields
+- `Error` at 5+ named public fields
 
 **Open policy point**
 - whether tuple structs / newtypes remain the only built-in exemption in v1
@@ -126,11 +127,13 @@ pub struct UserId(pub String);
 - prevent obviously bad public error contracts without requiring project-specific “ideal” error design
 
 **Trigger surface**
-- public functions returning:
+- public functions or methods returning:
   - `Result<_, String>`
   - `Result<_, &str>`
   - `Result<_, anyhow::Error>`
   - `Result<_, Box<dyn Error>>`
+
+This includes public free functions, public trait methods, and public methods on public types.
 
 **Initial exclusions**
 - non-public functions
