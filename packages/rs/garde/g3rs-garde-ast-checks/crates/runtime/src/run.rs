@@ -5,6 +5,9 @@ pub fn check(input: &G3RsGardeAstChecksInput) -> Vec<G3CheckResult> {
     let analysis = crate::support::analyze_input(input);
     let mut results = Vec::new();
 
+    for failure in &analysis.input_failures {
+        crate::rs_garde_10_input_failures::check(failure, &mut results);
+    }
     for target in &analysis.struct_targets {
         crate::rs_garde_ast_01_struct_derive_validate::check(target, &mut results);
     }

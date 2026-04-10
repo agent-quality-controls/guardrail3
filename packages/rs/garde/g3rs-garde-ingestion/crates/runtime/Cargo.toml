@@ -30,6 +30,7 @@ g3rs-garde-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 
 [dev-dependencies]
+g3rs-garde-ast-checks = { path = "../../../g3rs-garde-ast-checks" }
 g3rs-garde-config-checks = { path = "../../../g3rs-garde-config-checks" }
 g3rs-garde-ingestion-assertions = { path = "../assertions" }
 tempfile = "3"

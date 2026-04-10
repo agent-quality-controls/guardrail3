@@ -56,8 +56,15 @@ pub(crate) struct GuardrailConfigValidationSite {
     pub(crate) parse_kind: GuardrailConfigParseKind,
 }
 
+#[derive(Debug, Clone)]
+pub(crate) struct InputFailureSite {
+    pub(crate) rel_path: String,
+    pub(crate) message: String,
+}
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct GardeAstAnalysis {
+    pub(crate) input_failures: Vec<InputFailureSite>,
     pub(crate) struct_targets: Vec<DerivedBoundaryTypeSite>,
     pub(crate) enum_targets: Vec<DerivedBoundaryTypeSite>,
     pub(crate) manual_deserialize_impls: Vec<ManualDeserializeImplSite>,
@@ -73,20 +80,59 @@ struct ParsedSourceFile {
 }
 
 pub(crate) fn analyze_input(input: &G3RsGardeAstChecksInput) -> GardeAstAnalysis {
-    let guardrail_config = std::fs::read_to_string(&input.guardrail_toml.abs_path)
-        .ok()
-        .and_then(|content| toml::from_str::<GuardrailConfig>(&content).ok());
+    let mut input_failures = Vec::new();
+    let guardrail_config = match std::fs::read_to_string(&input.guardrail_toml.abs_path) {
+        Ok(content) => match toml::from_str::<GuardrailConfig>(&content) {
+            Ok(config) => Some(config),
+            Err(parse_error) => {
+                input_failures.push(InputFailureSite {
+                    rel_path: input.guardrail_toml.rel_path.clone(),
+                    message: format!(
+                        "Failed to parse guardrail3.toml for garde policy resolution: {parse_error}"
+                    ),
+                });
+                None
+            }
+        },
+        Err(read_error) => {
+            input_failures.push(InputFailureSite {
+                rel_path: input.guardrail_toml.rel_path.clone(),
+                message: format!(
+                    "Failed to read guardrail3.toml for garde policy resolution: {read_error}"
+                ),
+            });
+            None
+        }
+    };
 
     let mut parsed_files = Vec::new();
     let mut source_files = input.source_files.clone();
     source_files.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
 
     for source_file in &source_files {
-        let Ok(content) = std::fs::read_to_string(&source_file.abs_path) else {
-            continue;
+        let content = match std::fs::read_to_string(&source_file.abs_path) {
+            Ok(content) => content,
+            Err(read_error) => {
+                input_failures.push(InputFailureSite {
+                    rel_path: source_file.rel_path.clone(),
+                    message: format!(
+                        "Failed to read Rust source file for garde checks: {read_error}"
+                    ),
+                });
+                continue;
+            }
         };
-        let Ok(ast) = parse::parse_rust_file(&content) else {
-            continue;
+        let ast = match parse::parse_rust_file(&content) {
+            Ok(ast) => ast,
+            Err(parse_error) => {
+                input_failures.push(InputFailureSite {
+                    rel_path: source_file.rel_path.clone(),
+                    message: format!(
+                        "Failed to parse Rust source file for garde checks: {parse_error}"
+                    ),
+                });
+                continue;
+            }
         };
         parsed_files.push(ParsedSourceFile {
             rel_path: source_file.rel_path.clone(),
@@ -251,6 +297,7 @@ pub(crate) fn analyze_input(input: &G3RsGardeAstChecksInput) -> GardeAstAnalysis
         .sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
 
     GardeAstAnalysis {
+        input_failures,
         struct_targets,
         enum_targets,
         manual_deserialize_impls,
