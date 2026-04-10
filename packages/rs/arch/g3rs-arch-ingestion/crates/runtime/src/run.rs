@@ -615,6 +615,9 @@ fn collect_section_edges(
         let target_is_crate = resolved_target_rel
             .as_ref()
             .is_some_and(|rel| node_map.contains_key(rel.as_str()));
+        if !target_is_crate {
+            continue;
+        }
         let crossed_boundary = resolved_target_rel
             .as_ref()
             .and_then(|target_rel| boundary_violation(crate_nodes, source_rel_dir, target_rel));

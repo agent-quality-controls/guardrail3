@@ -466,3 +466,35 @@ members = ["crates/ports/*"]
 
     assert!(err.to_string().contains("did not resolve"));
 }
+
+#[test]
+fn invalid_workspace_exclude_pattern_fails_closed() {
+    let root = tempdir().expect("tempdir");
+
+    fs::create_dir_all(root.path().join("crates/ports/http/src")).expect("dirs");
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/ports/http"]
+exclude = ["crates/[broken"]
+"#,
+    )
+    .expect("workspace cargo");
+    fs::write(
+        root.path().join("crates/ports/http/Cargo.toml"),
+        r#"
+[package]
+name = "ports-http"
+version = "0.1.0"
+"#,
+    )
+    .expect("member cargo");
+    fs::write(root.path().join("crates/ports/http/src/lib.rs"), "pub fn leaked() {}\n")
+        .expect("member lib");
+
+    let crawl = super::crawl_workspace(root.path());
+    let err = crate::ingest_for_source_checks(&crawl).expect_err("invalid exclude pattern should fail");
+
+    assert!(err.to_string().contains("invalid workspace exclude pattern"));
+}
