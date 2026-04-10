@@ -1,0 +1,32 @@
+[package]
+name = "g3rs-hexarch-ingestion-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3rs hexarch ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "hexarch", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["ingest"]
+ingest = []
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-hexarch-ingestion-types = { path = "../types", version = "0.1.0" }
+g3rs-hexarch-types = { path = "../../../g3rs-hexarch-types", version = "0.1.0" }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+syn = { version = "2", features = ["full", "parsing"] }
+toml = "0.8"
+
+[dev-dependencies]
+g3rs-hexarch-ingestion-assertions = { path = "../assertions" }
+g3rs-hexarch-source-checks = { path = "../../../g3rs-hexarch-source-checks", version = "0.1.0" }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
+tempfile = "3"

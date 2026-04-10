@@ -1,0 +1,14 @@
+[package]
+name = "g3rs-hexarch-ingestion-assertions"
+version = "0.1.0"
+edition = "2024"
+description = "Test assertions for g3rs hexarch ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "hexarch", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[lints]
+workspace = true
