@@ -1,0 +1,17 @@
+[package]
+name = "g3rs-hexarch-source-checks-assertions"
+version = "0.1.0"
+edition = "2024"
+description = "Test assertions for g3rs hexarch source checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "hexarch", "source", "checks", "rust"]
+categories = ["development-tools"]
+
+[lints]
+workspace = true
+
+[dependencies]
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
