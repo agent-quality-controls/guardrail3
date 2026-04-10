@@ -23,9 +23,9 @@ pub struct G3RsFmtConfigChecksInput {
     pub toolchain: RustToolchainToml,
 }
 
-/// Placeholder input contract for future rustfmt AST checks.
+/// Placeholder input contract for future rustfmt source checks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsFmtAstChecksInput;
+pub struct G3RsFmtSourceChecksInput;
 
 /// Placeholder input contract for future rustfmt file-tree checks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]

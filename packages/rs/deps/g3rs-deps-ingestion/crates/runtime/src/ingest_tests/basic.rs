@@ -1,6 +1,6 @@
 use g3rs_workspace_crawl::crawl;
 
-use crate::run::{IngestionError, ingest_for_ast_checks, ingest_for_config_checks, ingest_for_file_tree_checks};
+use crate::run::{IngestionError, ingest_for_source_checks, ingest_for_config_checks, ingest_for_file_tree_checks};
 
 use super::{temp_workspace, write_file};
 
@@ -29,8 +29,8 @@ fn ast_and_file_tree_entrypoints_stay_stubbed() {
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
 
     assert!(matches!(
-        ingest_for_ast_checks(&crawl),
-        Err(IngestionError::AstIngestionNotImplemented)
+        ingest_for_source_checks(&crawl),
+        Err(IngestionError::SourceIngestionNotImplemented)
     ));
     assert!(matches!(
         ingest_for_file_tree_checks(&crawl),

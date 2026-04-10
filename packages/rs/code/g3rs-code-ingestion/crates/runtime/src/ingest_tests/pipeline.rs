@@ -3,7 +3,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use g3rs_code_ingestion_types::G3RsCodeAstChecksInput;
+use g3rs_code_ingestion_types::G3RsCodeSourceChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use tempfile::tempdir;
 
@@ -40,14 +40,14 @@ fn write(path: impl AsRef<Path>, content: &str) {
 
 fn run_pipeline(root: &Path) -> Vec<G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     flatten_results(&inputs)
 }
 
-fn flatten_results(inputs: &[G3RsCodeAstChecksInput]) -> Vec<G3CheckResult> {
+fn flatten_results(inputs: &[G3RsCodeSourceChecksInput]) -> Vec<G3CheckResult> {
     inputs
         .iter()
-        .flat_map(g3rs_code_ast_checks::check)
+        .flat_map(g3rs_code_source_checks::check)
         .collect::<Vec<_>>()
 }
 
@@ -1033,7 +1033,7 @@ fn pipeline_rejects_known_false_positive_fixture_patterns() {
 
     assert!(
         results.is_empty(),
-        "comment/string fixtures should stay clean under AST pipeline: {results:#?}"
+        "comment/string fixtures should stay clean under source pipeline: {results:#?}"
     );
 }
 

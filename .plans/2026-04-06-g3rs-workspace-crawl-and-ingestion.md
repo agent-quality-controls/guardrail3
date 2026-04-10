@@ -28,7 +28,7 @@ Examples:
 - `g3rs-fmt-config-ingestion`
 - `g3rs-fmt-config-checks`
 - `g3rs-garde-ast-ingestion`
-- `g3rs-garde-ast-checks`
+- `g3rs-garde-source-checks`
 
 ## Core Decision
 
@@ -239,7 +239,7 @@ Examples:
 
 - `g3rs-garde-ast-ingestion`
   - input: `&G3RsWorkspaceCrawl`
-  - output: `G3RsGardeAstChecksInput`
+  - output: `G3RsGardeSourceChecksInput`
 
 It may also expose structured ingestion failures if the new app wants to report
 them independently of the checks packages.
@@ -408,7 +408,7 @@ Checks:
 - `g3rs-deny-config-checks`
 - `g3rs-deps-config-checks`
 - `g3rs-garde-config-checks`
-- `g3rs-garde-ast-checks`
+- `g3rs-garde-source-checks`
 
 ## Open Questions
 

@@ -8,5 +8,5 @@ Current ingestion reads:
 - workspace `guardrail3-rs.toml`
 - member `Cargo.toml` files selected from `[workspace].members`
 
-It normalizes external dependency facts for config checks and leaves AST/file-tree
+It normalizes external dependency facts for config checks and leaves source/file-tree
 ingestion as explicit stubs.

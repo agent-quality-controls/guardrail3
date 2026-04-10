@@ -33,9 +33,9 @@ root.
 - mapping source file -> owning crate target
 - deciding whether the owning target is a library target
 - deciding whether the file is that target's `lib.rs`
-- attaching this context to `G3RsCodeAstChecksInput`
+- attaching this context to `G3RsCodeSourceChecksInput`
 
-### AST checks runtime owns
+### source checks runtime owns
 
 - parsing source content once
 - deriving small AST facts

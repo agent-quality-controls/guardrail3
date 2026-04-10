@@ -42,7 +42,7 @@ pub(crate) fn summarize_root(
             path: entry.path.abs_path.clone(),
             reason: err.to_string(),
         })?;
-        let ast = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(&content)).map_err(|err| {
+        let source = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(&content)).map_err(|err| {
             IngestionError::ParseFailed {
                 path: entry.path.abs_path.clone(),
                 reason: err.to_string(),
@@ -50,7 +50,7 @@ pub(crate) fn summarize_root(
         })?;
 
         let mut visitor = ActivationVisitor::default();
-        visitor.visit_file(&ast);
+        visitor.visit_file(&source);
 
         if rel_path.starts_with(&runtime_tests)
             || is_sidecar_path(rel_path, &runtime_src)
@@ -177,20 +177,20 @@ struct ActivationVisitor {
     has_cfg_test_module: bool,
 }
 
-impl<'ast> Visit<'ast> for ActivationVisitor {
-    fn visit_item_mod(&mut self, item: &'ast syn::ItemMod) {
+impl<'source> Visit<'source> for ActivationVisitor {
+    fn visit_item_mod(&mut self, item: &'source syn::ItemMod) {
         if item.attrs.iter().any(is_cfg_test_attr) {
             self.has_cfg_test_module = true;
         }
         syn::visit::visit_item_mod(self, item);
     }
 
-    fn visit_item_fn(&mut self, item: &'ast syn::ItemFn) {
+    fn visit_item_fn(&mut self, item: &'source syn::ItemFn) {
         self.scan_attrs(&item.attrs);
         syn::visit::visit_item_fn(self, item);
     }
 
-    fn visit_impl_item_fn(&mut self, item: &'ast syn::ImplItemFn) {
+    fn visit_impl_item_fn(&mut self, item: &'source syn::ImplItemFn) {
         self.scan_attrs(&item.attrs);
         syn::visit::visit_impl_item_fn(self, item);
     }

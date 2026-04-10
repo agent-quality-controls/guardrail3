@@ -116,30 +116,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
-name = "g3rs-code-ast-checks"
-version = "0.1.0"
-dependencies = [
- "g3rs-code-ast-checks-runtime",
- "g3rs-code-ast-checks-types",
-]
-
-[[package]]
-name = "g3rs-code-ast-checks-runtime"
-version = "0.1.0"
-dependencies = [
- "g3rs-code-ast-checks-types",
- "guardrail3-check-types",
- "guardrail3-reason-policy",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "g3rs-code-ast-checks-types"
-version = "0.1.0"
-
-[[package]]
 name = "g3rs-code-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -171,7 +147,7 @@ dependencies = [
 name = "g3rs-code-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-code-ast-checks-types",
+ "g3rs-code-source-checks-types",
 ]
 
 [[package]]
@@ -179,10 +155,10 @@ name = "g3rs-code-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3rs-code-ast-checks",
  "g3rs-code-config-checks",
  "g3rs-code-ingestion-assertions",
  "g3rs-code-ingestion-types",
+ "g3rs-code-source-checks",
  "g3rs-workspace-crawl",
  "glob",
  "guardrail3-check-types",
@@ -193,9 +169,33 @@ dependencies = [
 name = "g3rs-code-ingestion-types"
 version = "0.1.0"
 dependencies = [
- "g3rs-code-ast-checks-types",
  "g3rs-code-config-checks-types",
+ "g3rs-code-source-checks-types",
 ]
+
+[[package]]
+name = "g3rs-code-source-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-source-checks-runtime",
+ "g3rs-code-source-checks-types",
+]
+
+[[package]]
+name = "g3rs-code-source-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-source-checks-types",
+ "guardrail3-check-types",
+ "guardrail3-reason-policy",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "g3rs-code-source-checks-types"
+version = "0.1.0"
 
 [[package]]
 name = "g3rs-workspace-crawl"

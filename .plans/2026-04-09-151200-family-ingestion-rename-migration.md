@@ -7,7 +7,7 @@ Make ingestion package names match the architecture we already settled on:
 - one ingestion package per family
 - three public entrypoints per family ingestion package:
   - `ingest_for_config_checks`
-  - `ingest_for_ast_checks`
+  - `ingest_for_source_checks`
   - `ingest_for_file_tree_checks`
 
 Target naming:
@@ -73,12 +73,12 @@ Replace `g3rs-code-ast-ingestion` with `g3rs-code-ingestion`.
 `g3rs-code-ingestion` should expose:
 
 - `ingest_for_config_checks`
-- `ingest_for_ast_checks`
+- `ingest_for_source_checks`
 - `ingest_for_file_tree_checks`
 
 Initial implementation:
 
-- real `ingest_for_ast_checks`
+- real `ingest_for_source_checks`
 - stub `ingest_for_config_checks`
 - stub `ingest_for_file_tree_checks`
 
@@ -140,7 +140,7 @@ Reason:
 
 5. Keep public function names unchanged:
    - `ingest_for_config_checks`
-   - `ingest_for_ast_checks`
+   - `ingest_for_source_checks`
    - `ingest_for_file_tree_checks`
 
 6. For `code`:
@@ -197,6 +197,6 @@ Planning/docs:
 - all ingestion packages are named `g3rs-{family}-ingestion`
 - all family ingestion packages expose exactly:
   - `ingest_for_config_checks`
-  - `ingest_for_ast_checks`
+  - `ingest_for_source_checks`
   - `ingest_for_file_tree_checks`
 - tests pass for every renamed ingestion workspace

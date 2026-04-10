@@ -5,8 +5,8 @@ use std::path::PathBuf;
 pub enum G3RsToolchainIngestionError {
     /// No `rust-toolchain.toml` found at the workspace root.
     ToolchainTomlNotFound,
-    /// AST ingestion is planned but not implemented yet.
-    AstIngestionNotImplemented,
+    /// source ingestion is not implemented yet.
+    SourceIngestionNotImplemented,
     /// File-tree ingestion is planned but not implemented yet.
     FileTreeIngestionNotImplemented,
     /// The toolchain config exists but cannot be read.
@@ -31,8 +31,8 @@ impl std::fmt::Display for G3RsToolchainIngestionError {
             Self::ToolchainTomlNotFound => {
                 f.write_str("no rust-toolchain.toml found at the workspace root")
             }
-            Self::AstIngestionNotImplemented => {
-                f.write_str("toolchain AST ingestion is not implemented yet")
+            Self::SourceIngestionNotImplemented => {
+                f.write_str("toolchain source ingestion is not implemented yet")
             }
             Self::FileTreeIngestionNotImplemented => {
                 f.write_str("toolchain file-tree ingestion is not implemented yet")

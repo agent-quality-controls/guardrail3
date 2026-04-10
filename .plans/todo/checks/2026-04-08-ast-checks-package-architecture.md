@@ -2,22 +2,22 @@
 
 **Status:** working design
 
-This file defines the AST lane template for the new `g3rs` package pipeline.
+This file defines the source lane template for the new `g3rs` package pipeline.
 
 It is intentionally independent of current `garde` implementation details.
 
 ## Goal
 
-Define how AST checks should work in the package world:
+Define how source checks should work in the package world:
 
 - what ingestion owns
-- what AST checks runtime owns
+- what source checks runtime owns
 - what rules own
-- what the public AST input contract should look like
+- what the public source input contract should look like
 
 ## Core Decision
 
-AST checks packages should consume **bounded source contents**, not filesystem paths.
+source checks packages should consume **bounded source contents**, not filesystem paths.
 
 That means:
 
@@ -26,7 +26,7 @@ That means:
 - checks runtime parses and maps within that bounded input
 - rules stay tiny and pure
 
-AST checks packages should not do workspace discovery.
+source checks packages should not do workspace discovery.
 
 They should also avoid direct filesystem reads as part of the intended final boundary.
 
@@ -34,26 +34,26 @@ They should also avoid direct filesystem reads as part of the intended final bou
 
 ```text
 workspace crawl
-  -> AST ingestion
-  -> AST checks input
-  -> AST checks runtime/support
+  -> source ingestion
+  -> source checks input
+  -> source checks runtime/support
   -> tiny rule inputs
   -> pure rules
 ```
 
 ## Responsibilities
 
-### AST ingestion owns
+### source ingestion owns
 
 - choosing AST scope
 - selecting files in that scope
 - reading those files
 - attaching family-local non-AST supporting inputs when needed
-- constructing the public AST checks input
+- constructing the public source checks input
 
-AST ingestion does **not** need to fan out to rule-level facts.
+source ingestion does **not** need to fan out to rule-level facts.
 
-### AST checks runtime owns
+### source checks runtime owns
 
 - parsing source contents once
 - building family-local maps and indexes
@@ -92,7 +92,7 @@ Not allowed by default:
 
 ## Public Input Shape
 
-AST checks input should carry source contents, not `abs_path`.
+source checks input should carry source contents, not `abs_path`.
 
 Base source item:
 
@@ -116,7 +116,7 @@ The exact family input then wraps those in the correct scope.
 
 ## Runtime-local parsed shape
 
-AST checks runtimes may keep one small parsed container local to the runtime/support layer.
+source checks runtimes may keep one small parsed container local to the runtime/support layer.
 
 For the single-file `code` specimen, use:
 
@@ -147,7 +147,7 @@ Use this when every rule is local to one source file.
 Example shape:
 
 ```rust
-pub struct G3RsCodeAstChecksInput {
+pub struct G3RsCodeSourceChecksInput {
     pub source_file: G3RsSourceFile,
 }
 ```
@@ -165,7 +165,7 @@ Best first specimen:
 
 Why:
 
-- simplest AST lane
+- simplest source lane
 - proves the package split with the least complexity
 - does not require cross-file maps
 
@@ -176,7 +176,7 @@ Use this when rules need cross-file facts inside a bounded scope.
 Example shape:
 
 ```rust
-pub struct G3RsGardeAstChecksInput {
+pub struct G3RsGardeSourceChecksInput {
     pub root_rel_dir: String,
     pub source_files: Vec<G3RsSourceFile>,
     pub policy_file: Option<G3RsTextFile>,
@@ -232,7 +232,7 @@ Important:
 
 - not every `test` rule belongs in AST
 - AST package should only own source-semantic rules
-- config/tool/hook checks stay outside the AST lane
+- config/tool/hook checks stay outside the source lane
 
 ### `hexarch`
 
@@ -248,10 +248,10 @@ Runtime owns:
 
 ## Package Structure
 
-AST checks packages should follow the same package scaffold as other checks packages:
+source checks packages should follow the same package scaffold as other checks packages:
 
 ```text
-g3rs-{family}-ast-checks/
+g3rs-{family}-source-checks/
   Cargo.toml
   README.md
   TODO.md
@@ -283,14 +283,14 @@ crates/runtime/src/
 
 ## Boundary Rules
 
-### Allowed in AST ingestion
+### Allowed in source ingestion
 
 - file selection
 - file reads
 - family-scope grouping
-- passing source text into AST input
+- passing source text into source input
 
-### Allowed in AST checks runtime
+### Allowed in source checks runtime
 
 - syn parsing
 - parse-once caching local to one checks call
@@ -314,7 +314,7 @@ Build the first clean AST package specimen as `code`.
 Reason:
 
 - one-file AST is the simplest case
-- proves the AST lane without cross-file complexity
+- proves the source lane without cross-file complexity
 
 ### Phase 2
 
@@ -335,8 +335,8 @@ Use lessons from `code` and `garde` to design:
 ## Short Version
 
 - ingestion chooses AST scope and reads files
-- AST checks input carries source contents, not file paths
-- AST checks runtime does parse-once and heavy semantic mapping
+- source checks input carries source contents, not file paths
+- source checks runtime does parse-once and heavy semantic mapping
 - small runtime-local parsed containers are allowed
 - rules stay tiny and pure
 - first AST specimen should be `code`

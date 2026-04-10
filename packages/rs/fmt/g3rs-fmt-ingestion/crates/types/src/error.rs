@@ -9,8 +9,8 @@ pub enum G3RsFmtIngestionError {
     CargoTomlNotFound,
     /// No `rust-toolchain.toml` found at the workspace root.
     ToolchainTomlNotFound,
-    /// AST ingestion is planned but not implemented yet.
-    AstIngestionNotImplemented,
+    /// source ingestion is not implemented yet.
+    SourceIngestionNotImplemented,
     /// File-tree ingestion is planned but not implemented yet.
     FileTreeIngestionNotImplemented,
     /// A required file exists but cannot be read.
@@ -41,8 +41,8 @@ impl std::fmt::Display for G3RsFmtIngestionError {
             Self::ToolchainTomlNotFound => {
                 f.write_str("no rust-toolchain.toml found at the workspace root")
             }
-            Self::AstIngestionNotImplemented => {
-                f.write_str("fmt AST ingestion is not implemented yet")
+            Self::SourceIngestionNotImplemented => {
+                f.write_str("fmt source ingestion is not implemented yet")
             }
             Self::FileTreeIngestionNotImplemented => {
                 f.write_str("fmt file-tree ingestion is not implemented yet")

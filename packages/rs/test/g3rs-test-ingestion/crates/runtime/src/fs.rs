@@ -1,6 +1,6 @@
 use std::path::Path;
 
-/// Centralized filesystem access for AST ingestion.
+/// Centralized filesystem access for source ingestion.
 #[allow(
     clippy::disallowed_methods,
     reason = "fs.rs IS the centralized fs boundary"

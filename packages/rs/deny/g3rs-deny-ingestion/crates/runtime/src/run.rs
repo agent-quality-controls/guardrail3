@@ -1,6 +1,6 @@
 /// Public ingestion entry point.
 use g3rs_deny_types::{
-    G3RsDenyAstChecksInput, G3RsDenyConfigChecksInput, G3RsDenyFileTreeChecksInput,
+    G3RsDenySourceChecksInput, G3RsDenyConfigChecksInput, G3RsDenyFileTreeChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -33,9 +33,9 @@ pub fn ingest_for_config_checks(
     Ok(crate::ingest::assemble(deny_rel_path, deny))
 }
 
-/// Stub AST ingestion entry point for the deny family.
-pub fn ingest_for_ast_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsDenyAstChecksInput, IngestionError> {
-    Err(IngestionError::AstIngestionNotImplemented)
+/// Stub source ingestion entry point for the deny family.
+pub fn ingest_for_source_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsDenySourceChecksInput, IngestionError> {
+    Err(IngestionError::SourceIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the deny family.

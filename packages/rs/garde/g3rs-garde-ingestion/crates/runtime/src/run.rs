@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_garde_ast_checks_types::{G3RsAstFile, G3RsGardeAstChecksInput};
+use g3rs_garde_source_checks_types::{G3RsSourceFile, G3RsGardeSourceChecksInput};
 use cargo_toml_parser::CargoToml;
 use g3rs_garde_types::{G3RsGardeConfigChecksInput, G3RsGardeFileTreeChecksInput};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
@@ -56,10 +56,10 @@ pub fn ingest_for_config_checks(
     ))
 }
 
-/// Ingest garde AST input from a workspace crawl.
-pub fn ingest_for_ast_checks(
+/// Ingest garde source input from a workspace crawl.
+pub fn ingest_for_source_checks(
     crawl: &G3RsWorkspaceCrawl,
-) -> Result<G3RsGardeAstChecksInput, IngestionError> {
+) -> Result<G3RsGardeSourceChecksInput, IngestionError> {
     let cargo_entry = crate::select::select_cargo_toml(crawl)
         .ok_or(IngestionError::CargoTomlNotFound)?;
     if !cargo_entry.readable {
@@ -73,16 +73,16 @@ pub fn ingest_for_ast_checks(
         crate::select::select_guardrail_toml(crawl).ok_or(IngestionError::GuardrailTomlNotFound)?;
     let source_files = crate::select::select_ast_source_files(crawl)
         .into_iter()
-        .map(|entry| G3RsAstFile {
+        .map(|entry| G3RsSourceFile {
             rel_path: entry.path.rel_path.clone(),
             abs_path: entry.path.abs_path.clone(),
         })
         .collect::<Vec<_>>();
 
-    Ok(G3RsGardeAstChecksInput {
+    Ok(G3RsGardeSourceChecksInput {
         garde_dependency_present: has_garde_dependency(&cargo),
         source_files,
-        guardrail_toml: G3RsAstFile {
+        guardrail_toml: G3RsSourceFile {
             rel_path: guardrail_entry.path.rel_path.clone(),
             abs_path: guardrail_entry.path.abs_path.clone(),
         },

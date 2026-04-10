@@ -19,4 +19,4 @@ checks = []
 workspace = true
 
 [dependencies]
-g3rs-code-ast-checks-types = { path = "../../../g3rs-code-ast-checks/crates/types", version = "0.1.0" }
+g3rs-code-source-checks-types = { path = "../../../g3rs-code-source-checks/crates/types", version = "0.1.0" }

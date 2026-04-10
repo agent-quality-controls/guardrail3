@@ -5,8 +5,8 @@ use std::path::PathBuf;
 pub enum G3RsClippyIngestionError {
     /// No `clippy.toml` or `.clippy.toml` found at the workspace root.
     ClippyTomlNotFound,
-    /// AST ingestion is planned but not implemented yet.
-    AstIngestionNotImplemented,
+    /// source ingestion is not implemented yet.
+    SourceIngestionNotImplemented,
     /// File-tree ingestion is planned but not implemented yet.
     FileTreeIngestionNotImplemented,
     /// The clippy config exists but cannot be read.
@@ -31,8 +31,8 @@ impl std::fmt::Display for G3RsClippyIngestionError {
             Self::ClippyTomlNotFound => {
                 f.write_str("no clippy.toml or .clippy.toml found at the workspace root")
             }
-            Self::AstIngestionNotImplemented => {
-                f.write_str("clippy AST ingestion is not implemented yet")
+            Self::SourceIngestionNotImplemented => {
+                f.write_str("clippy source ingestion is not implemented yet")
             }
             Self::FileTreeIngestionNotImplemented => {
                 f.write_str("clippy file-tree ingestion is not implemented yet")

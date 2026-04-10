@@ -29,7 +29,7 @@ nextest-toml-parser = { path = "../../../../../parsers/nextest-toml-parser", ver
 syn = { version = "2", features = ["full", "visit"] }
 
 [dev-dependencies]
-g3rs-test-ast-checks = { path = "../../../g3rs-test-ast-checks", version = "0.1.0" }
+g3rs-test-source-checks = { path = "../../../g3rs-test-source-checks", version = "0.1.0" }
 g3rs-test-config-checks = { path = "../../../g3rs-test-config-checks", version = "0.1.0" }
 g3rs-test-ingestion-assertions = { path = "../assertions" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }

@@ -21,7 +21,7 @@ More explicitly:
 ```text
 workspace root
   -> G3RsWorkspaceCrawl
-  -> ingest_for_config_checks / ingest_for_ast_checks / ingest_for_file_tree_checks
+  -> ingest_for_config_checks / ingest_for_source_checks / ingest_for_file_tree_checks
   -> family-level checks input
   -> checks runtime/support mapping
   -> rule-specific tiny inputs
@@ -64,7 +64,7 @@ It owns:
 Each ingestion package exposes exactly three entry points:
 
 - `ingest_for_config_checks`
-- `ingest_for_ast_checks`
+- `ingest_for_source_checks`
 - `ingest_for_file_tree_checks`
 
 Each of those returns the input type for the matching checks package.
@@ -73,7 +73,7 @@ Examples:
 
 - config ingestion may return one input for one config file
 - deps config ingestion may return many per-crate inputs
-- AST ingestion may return one input per file, per crate, per root, or per package
+- source ingestion may return one input per file, per crate, per root, or per package
 - file-tree ingestion may return one input per structural scope
 
 ### 3. Family checks package runtime
@@ -128,7 +128,7 @@ Config rules may be:
 
 But they should only receive the smallest surface they actually need.
 
-### AST lane
+### source lane
 
 AST is **not** always one file.
 
@@ -142,9 +142,9 @@ Valid AST scopes:
 - one assertions package
 - another family-owned bounded scope
 
-AST ingestion chooses that scope.
+source ingestion chooses that scope.
 
-AST checks runtime then:
+source checks runtime then:
 
 - parses once inside that scope
 - builds cross-file maps if needed
@@ -189,7 +189,7 @@ This is the target architecture, but current code is not fully there yet.
 
 Known drift:
 
-- `g3rs-garde-ast-checks` still reads source files itself from explicit file paths
+- `g3rs-garde-source-checks` still reads source files itself from explicit file paths
 - that works, but it is looser than the clean target boundary
 - the file-tree lane is still mostly stubbed across the new package tree
 - some current packages still reflect transitional contracts from the legacy app split

@@ -42,9 +42,9 @@ pub struct G3RsDepsConfigChecksInput {
     pub dependencies: Vec<G3RsDepsResolvedDependency>,
 }
 
-/// Placeholder input contract for future deps AST checks.
+/// Placeholder input contract for future deps source checks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsDepsAstChecksInput;
+pub struct G3RsDepsSourceChecksInput;
 
 /// Placeholder input contract for future deps file-tree checks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]

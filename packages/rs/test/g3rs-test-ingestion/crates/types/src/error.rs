@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 pub enum G3RsTestIngestionError {
-    AstIngestionNotImplemented,
+    SourceIngestionNotImplemented,
     FileTreeIngestionNotImplemented,
     Unreadable {
         path: PathBuf,
@@ -17,7 +17,7 @@ pub enum G3RsTestIngestionError {
 impl std::fmt::Display for G3RsTestIngestionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AstIngestionNotImplemented => f.write_str("test AST ingestion is not implemented yet"),
+            Self::SourceIngestionNotImplemented => f.write_str("test source ingestion is not implemented yet"),
             Self::FileTreeIngestionNotImplemented => {
                 f.write_str("test file-tree ingestion is not implemented yet")
             }

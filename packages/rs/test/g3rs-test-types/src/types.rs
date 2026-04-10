@@ -21,11 +21,11 @@ pub struct G3RsTestConfigChecksInput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsTestAstChecksInput {
+pub struct G3RsTestSourceChecksInput {
     pub root_rel_dir: String,
     pub cargo_rel_path: String,
     pub files: Vec<G3RsTestSourceFile>,
-    pub components: Vec<G3RsTestComponentAstFacts>,
+    pub components: Vec<G3RsTestComponentSourceFacts>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -49,7 +49,7 @@ pub enum G3RsTestFileKind {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsTestComponentAstFacts {
+pub struct G3RsTestComponentSourceFacts {
     pub rel_dir: String,
     pub runtime_rel_dir: String,
     pub runtime_package_name: Option<String>,

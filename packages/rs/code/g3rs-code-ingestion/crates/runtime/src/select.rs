@@ -13,7 +13,7 @@ pub(crate) struct SelectedCodeSourceFile<'a> {
     pub(crate) is_library_root: bool,
 }
 
-/// Select all owned Rust source files for the `code` AST lane.
+/// Select all owned Rust source files for the `code` source lane.
 pub(crate) fn select_source_files(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<Vec<SelectedCodeSourceFile<'_>>, IngestionError> {

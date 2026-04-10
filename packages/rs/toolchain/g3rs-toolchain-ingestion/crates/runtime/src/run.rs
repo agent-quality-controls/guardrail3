@@ -1,6 +1,6 @@
 /// Public ingestion entry point.
 use g3rs_toolchain_types::{
-    G3RsToolchainAstChecksInput, G3RsToolchainConfigChecksInput, G3RsToolchainFileTreeChecksInput,
+    G3RsToolchainSourceChecksInput, G3RsToolchainConfigChecksInput, G3RsToolchainFileTreeChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -54,11 +54,11 @@ pub fn ingest_for_config_checks(
     ))
 }
 
-/// Stub AST ingestion entry point for the toolchain family.
-pub fn ingest_for_ast_checks(
+/// Stub source ingestion entry point for the toolchain family.
+pub fn ingest_for_source_checks(
     _crawl: &G3RsWorkspaceCrawl,
-) -> Result<G3RsToolchainAstChecksInput, IngestionError> {
-    Err(IngestionError::AstIngestionNotImplemented)
+) -> Result<G3RsToolchainSourceChecksInput, IngestionError> {
+    Err(IngestionError::SourceIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the toolchain family.

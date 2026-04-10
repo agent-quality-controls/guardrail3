@@ -1,10 +1,10 @@
-use g3rs_code_ast_checks_types::G3RsCodeAstChecksInput;
+use g3rs_code_source_checks_types::G3RsCodeSourceChecksInput;
 
 /// Find one ingested source file by repo-relative path.
 pub fn require_source_file<'a>(
-    inputs: &'a [G3RsCodeAstChecksInput],
+    inputs: &'a [G3RsCodeSourceChecksInput],
     rel_path: &str,
-) -> &'a G3RsCodeAstChecksInput {
+) -> &'a G3RsCodeSourceChecksInput {
     inputs
         .iter()
         .find(|input| input.source_file.rel_path == rel_path)
@@ -13,7 +13,7 @@ pub fn require_source_file<'a>(
 
 /// Assert one ingested source file matches the expected metadata and content.
 pub fn assert_source_file(
-    input: &G3RsCodeAstChecksInput,
+    input: &G3RsCodeSourceChecksInput,
     rel_path: &str,
     is_test: bool,
     profile_name: Option<&str>,

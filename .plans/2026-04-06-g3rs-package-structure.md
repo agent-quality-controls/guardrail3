@@ -9,7 +9,7 @@ Rust-only app.
 This plan is deliberately based on the packages that already exist and compile,
 especially:
 
-- `packages/g3rs-garde-ast-checks`
+- `packages/g3rs-garde-source-checks`
 - `packages/g3rs-fmt-config-checks`
 
 Those are the current structural specimens. The new packages should conform to
@@ -35,7 +35,7 @@ packages/<package-name>/
 
 That pattern is already real in:
 
-- `packages/g3rs-garde-ast-checks`
+- `packages/g3rs-garde-source-checks`
 - `packages/g3rs-fmt-config-checks`
 - the other renamed `g3rs-*-config-checks` packages
 
@@ -87,7 +87,7 @@ Facade `Cargo.toml` pattern:
 
 This is the current live pattern in:
 
-- `packages/g3rs-garde-ast-checks/Cargo.toml`
+- `packages/g3rs-garde-source-checks/Cargo.toml`
 - `packages/g3rs-fmt-config-checks/Cargo.toml`
 
 ## Types Crate Convention
@@ -114,7 +114,7 @@ Examples:
 
 - checks packages:
   - `G3RsFmtConfigChecksInput`
-  - `G3RsGardeAstChecksInput`
+  - `G3RsGardeSourceChecksInput`
 - future crawl package:
   - `G3RsWorkspaceCrawl`
   - `G3RsWorkspacePath`
@@ -404,7 +404,7 @@ Checks-specific rule:
 
 The current baseline for this is:
 
-- `packages/g3rs-garde-ast-checks`
+- `packages/g3rs-garde-source-checks`
 - `packages/g3rs-fmt-config-checks`
 
 ## Feature Naming Convention
@@ -447,7 +447,7 @@ Package names:
 - `g3rs-fmt-config-ingestion`
 - `g3rs-fmt-config-checks`
 - `g3rs-garde-ast-ingestion`
-- `g3rs-garde-ast-checks`
+- `g3rs-garde-source-checks`
 
 Public type names:
 
@@ -498,5 +498,5 @@ Why this order:
 Use this package-structure plan together with
 `.plans/2026-04-06-g3rs-workspace-crawl-and-ingestion.md` and scaffold
 `packages/g3rs-workspace-crawl` in the same style as
-`packages/g3rs-garde-ast-checks`, but with `crawl`-oriented runtime modules
+`packages/g3rs-garde-source-checks`, but with `crawl`-oriented runtime modules
 instead of rule directories.

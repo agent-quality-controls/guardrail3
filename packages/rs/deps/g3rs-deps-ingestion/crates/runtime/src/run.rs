@@ -2,7 +2,7 @@
 use std::collections::BTreeSet;
 
 use g3rs_deps_types::{
-    G3RsDepsAstChecksInput, G3RsDepsConfigChecksInput, G3RsDepsFileTreeChecksInput,
+    G3RsDepsSourceChecksInput, G3RsDepsConfigChecksInput, G3RsDepsFileTreeChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -73,9 +73,9 @@ pub fn ingest_for_config_checks(
     Ok(inputs)
 }
 
-/// Stub AST ingestion entry point for the deps family.
-pub fn ingest_for_ast_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsDepsAstChecksInput, IngestionError> {
-    Err(IngestionError::AstIngestionNotImplemented)
+/// Stub source ingestion entry point for the deps family.
+pub fn ingest_for_source_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsDepsSourceChecksInput, IngestionError> {
+    Err(IngestionError::SourceIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the deps family.

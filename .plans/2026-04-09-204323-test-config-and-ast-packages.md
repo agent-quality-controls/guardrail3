@@ -9,10 +9,10 @@ Target package set:
 
 - `packages/rs/test/g3rs-test-types`
 - `packages/rs/test/g3rs-test-config-checks`
-- `packages/rs/test/g3rs-test-ast-checks`
+- `packages/rs/test/g3rs-test-source-checks`
 - `packages/rs/test/g3rs-test-ingestion`
 
-This plan covers the config and AST lanes only.
+This plan covers the config and source lanes only.
 
 ## Rule split
 
@@ -33,9 +33,9 @@ These rules belong in `g3rs-test-config-checks`:
 - `RS-TEST-15`
   - mutants config is sane
 
-### AST lane
+### source lane
 
-These rules belong in `g3rs-test-ast-checks`:
+These rules belong in `g3rs-test-source-checks`:
 
 - `RS-TEST-01`
   - inline `#[cfg(test)] mod ... { ... }`
@@ -72,7 +72,7 @@ Reason:
   fail-closed ownership more than on pure config or pure AST
 
 Exception:
-- direct Rust parse/input failures stay in the AST lane so `check(...)` does
+- direct Rust parse/input failures stay in the source lane so `check(...)` does
   not fail open on malformed owned source files
 
 ## Scope model
@@ -141,16 +141,16 @@ Keep only the truly orchestration-level derived facts normalized:
 - hook activation and matched hook files
 - file existence flags where the rule is about presence
 
-### AST checks input
+### source checks input
 
 Use one root-scoped source bundle:
 
 ```rust
-pub struct G3RsTestAstChecksInput {
+pub struct G3RsTestSourceChecksInput {
     pub root_rel_dir: String,
     pub cargo_rel_path: String,
     pub files: Vec<G3RsTestSourceFile>,
-    pub components: Vec<G3RsTestComponentAstFacts>,
+    pub components: Vec<G3RsTestComponentSourceFacts>,
 }
 ```
 
@@ -177,7 +177,7 @@ pub enum G3RsTestFileKind {
 ```
 
 ```rust
-pub struct G3RsTestComponentAstFacts {
+pub struct G3RsTestComponentSourceFacts {
     pub rel_dir: String,
     pub runtime_rel_dir: String,
     pub runtime_package_name: Option<String>,
@@ -187,7 +187,7 @@ pub struct G3RsTestComponentAstFacts {
 }
 ```
 
-This keeps the public AST input bounded:
+This keeps the public source input bounded:
 
 - root metadata
 - source contents
@@ -200,7 +200,7 @@ The AST runtime still owns parse-once and proof-catalog construction.
 `g3rs-test-ingestion` stays family-wide and exposes:
 
 - `ingest_for_config_checks`
-- `ingest_for_ast_checks`
+- `ingest_for_source_checks`
 - `ingest_for_file_tree_checks`
 
 ### Shared discovery inside ingestion
@@ -242,16 +242,16 @@ Important detail:
 - the config checks package should receive parsed config files plus derived
   activation facts
 
-### AST ingestion
+### source ingestion
 
-`ingest_for_ast_checks(&crawl) -> Result<Vec<G3RsTestAstChecksInput>, G3RsTestIngestionError>`
+`ingest_for_source_checks(&crawl) -> Result<Vec<G3RsTestSourceChecksInput>, G3RsTestIngestionError>`
 
 It owns:
 
 - root discovery
 - file-kind classification
 - reading source contents
-- bundling one root-scoped AST input
+- bundling one root-scoped source input
 
 It does not:
 
@@ -272,7 +272,7 @@ It does not:
 
 ### AST runtime
 
-`g3rs-test-ast-checks` runtime:
+`g3rs-test-source-checks` runtime:
 
 - parses all files in one root input once
 - builds root-local proof-bearing assertion catalogs
@@ -291,7 +291,7 @@ This is the same pattern we already settled on:
 
 1. create `g3rs-test-types`
 2. create `g3rs-test-config-checks`
-3. create `g3rs-test-ast-checks`
+3. create `g3rs-test-source-checks`
 4. create `g3rs-test-ingestion`
 5. wire stub entrypoints for all three lanes
 
@@ -310,7 +310,7 @@ Reason:
 - this gives a clean root-scoped config specimen
 - it also forces hook parsing and root activation into the new ingestion package
 
-### Stage 3 - AST lane initial slice
+### Stage 3 - source lane initial slice
 
 Implement:
 
@@ -348,13 +348,13 @@ After config and AST are real, design the remaining lane for:
 
 - `packages/rs/test/g3rs-test-types`
 - `packages/rs/test/g3rs-test-config-checks`
-- `packages/rs/test/g3rs-test-ast-checks`
+- `packages/rs/test/g3rs-test-source-checks`
 - `packages/rs/test/g3rs-test-ingestion`
 
 ## Done means
 
 - `test` has real extracted config and AST packages
 - config lane owns `09` and `11-15`
-- AST lane owns `01`, `04-08`, `16`, `17`
+- source lane owns `01`, `04-08`, `16`, `17`
 - mixed rules are explicitly deferred, not silently lost
 - family ingestion is the only discovery/orchestration surface

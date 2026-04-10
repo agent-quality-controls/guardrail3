@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_fmt_types::{G3RsFmtAstChecksInput, G3RsFmtConfigChecksInput, G3RsFmtFileTreeChecksInput};
+use g3rs_fmt_types::{G3RsFmtSourceChecksInput, G3RsFmtConfigChecksInput, G3RsFmtFileTreeChecksInput};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsFmtIngestionError` so the facade can reach it.
@@ -65,9 +65,9 @@ pub fn ingest_for_config_checks(
     ))
 }
 
-/// Stub AST ingestion entry point for the fmt family.
-pub fn ingest_for_ast_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsFmtAstChecksInput, IngestionError> {
-    Err(IngestionError::AstIngestionNotImplemented)
+/// Stub source ingestion entry point for the fmt family.
+pub fn ingest_for_source_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsFmtSourceChecksInput, IngestionError> {
+    Err(IngestionError::SourceIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the fmt family.

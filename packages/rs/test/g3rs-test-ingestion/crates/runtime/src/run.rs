@@ -1,5 +1,5 @@
 use g3rs_test_ingestion_types::{
-    G3RsTestAstChecksInput, G3RsTestConfigChecksInput, G3RsTestFileTreeChecksInput,
+    G3RsTestSourceChecksInput, G3RsTestConfigChecksInput, G3RsTestFileTreeChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -52,9 +52,9 @@ pub(crate) fn ingest_for_config_checks_with_tool_state(
         .collect()
 }
 
-pub fn ingest_for_ast_checks(
+pub fn ingest_for_source_checks(
     crawl: &G3RsWorkspaceCrawl,
-) -> Result<Vec<G3RsTestAstChecksInput>, IngestionError> {
+) -> Result<Vec<G3RsTestSourceChecksInput>, IngestionError> {
     let discovery = crate::roots::discover(crawl)?;
 
     discovery
@@ -63,7 +63,7 @@ pub fn ingest_for_ast_checks(
         .map(|root| {
             let components = crate::components::collect_components(crawl, root)?;
             let files = crate::components::collect_ast_files(crawl, root, &components)?;
-            Ok(G3RsTestAstChecksInput {
+            Ok(G3RsTestSourceChecksInput {
                 root_rel_dir: root.root_rel_dir.clone(),
                 cargo_rel_path: root.cargo_rel_path.clone(),
                 files,

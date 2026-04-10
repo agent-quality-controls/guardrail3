@@ -31,7 +31,7 @@ packages/
   g3rs-deps-config-checks/
   g3rs-fmt-config-checks/
   g3rs-fmt-config-ingestion/
-  g3rs-garde-ast-checks/
+  g3rs-garde-source-checks/
   g3rs-garde-config-checks/
   g3rs-garde-config-ingestion/
   g3rs-release-config-checks/
@@ -70,7 +70,7 @@ packages/
       g3rs-garde-types/
       g3rs-garde-config-checks/
       g3rs-garde-config-ingestion/
-      g3rs-garde-ast-checks/
+      g3rs-garde-source-checks/
       # g3rs-garde-ast-ingestion/ (TODO)
     release/
       g3rs-release-types/
