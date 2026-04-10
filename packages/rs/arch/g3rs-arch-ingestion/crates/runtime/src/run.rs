@@ -137,12 +137,11 @@ fn select_workspace_member_dirs(
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    let member_dirs = view
+    let all_matching_member_dirs = view
         .all_dir_rels()
         .filter(|rel_dir| !rel_dir.is_empty())
         .filter(|rel_dir| view.file_exists(&CrawlView::join_rel(rel_dir, "Cargo.toml")))
         .filter(|rel_dir| member_patterns.iter().any(|pattern| pattern.matches(rel_dir)))
-        .filter(|rel_dir| !exclude_patterns.iter().any(|pattern| pattern.matches(rel_dir)))
         .map(str::to_owned)
         .collect::<Vec<_>>();
 
@@ -157,7 +156,10 @@ fn select_workspace_member_dirs(
             path: view.root_abs_path().join("Cargo.toml"),
             reason: format!("invalid workspace member pattern `{pattern}`: {err}"),
         })?;
-        if !member_dirs.iter().any(|member_dir| parsed_pattern.matches(member_dir)) {
+        if !all_matching_member_dirs
+            .iter()
+            .any(|member_dir| parsed_pattern.matches(member_dir))
+        {
             return Err(G3RsArchIngestionError::ParseFailed {
                 path: view.root_abs_path().join("Cargo.toml"),
                 reason: format!("workspace member pattern `{pattern}` did not resolve to any Cargo.toml"),
@@ -165,7 +167,10 @@ fn select_workspace_member_dirs(
         }
     }
 
-    Ok(member_dirs)
+    Ok(all_matching_member_dirs
+        .into_iter()
+        .filter(|rel_dir| !exclude_patterns.iter().any(|pattern| pattern.matches(rel_dir)))
+        .collect())
 }
 
 fn build_crate_node(
@@ -262,6 +267,7 @@ fn collect_facade_surfaces(
     crate_nodes: &[G3RsArchCrateNode],
 ) -> Vec<G3RsArchFacadeSurface> {
     let mut surfaces = Vec::new();
+    let crate_dirs = crate_nodes.iter().map(|node| node.rel_dir.as_str()).collect::<Vec<_>>();
 
     for node in crate_nodes {
         if let Some(lib_rel) = &node.lib_rs_rel {
@@ -272,7 +278,7 @@ fn collect_facade_surfaces(
     }
 
     for node in crate_nodes {
-        collect_mod_rs_recursive(view, &node.rel_dir, &mut surfaces);
+        collect_mod_rs_recursive(view, &node.rel_dir, &node.rel_dir, &crate_dirs, &mut surfaces);
     }
 
     surfaces
@@ -280,7 +286,9 @@ fn collect_facade_surfaces(
 
 fn collect_mod_rs_recursive(
     view: &CrawlView<'_>,
+    root_dir: &str,
     dir: &str,
+    crate_dirs: &[&str],
     surfaces: &mut Vec<G3RsArchFacadeSurface>,
 ) {
     let Some(entry) = view.dir_contents(dir) else {
@@ -293,7 +301,11 @@ fn collect_mod_rs_recursive(
         }
     }
     for subdir in entry.dirs() {
-        collect_mod_rs_recursive(view, &CrawlView::join_rel(dir, subdir), surfaces);
+        let child_dir = CrawlView::join_rel(dir, subdir);
+        if should_stop_at_nested_crate(view, root_dir, &child_dir, crate_dirs) {
+            continue;
+        }
+        collect_mod_rs_recursive(view, root_dir, &child_dir, crate_dirs, surfaces);
     }
 }
 
@@ -473,8 +485,9 @@ fn collect_rs_files(
     crate_nodes: &[G3RsArchCrateNode],
 ) -> Result<Vec<G3RsArchSourceFile>, G3RsArchIngestionError> {
     let mut rel_paths = Vec::new();
+    let crate_dirs = crate_nodes.iter().map(|node| node.rel_dir.as_str()).collect::<Vec<_>>();
     for node in crate_nodes {
-        collect_rs_files_recursive(view, &node.rel_dir, &mut rel_paths);
+        collect_rs_files_recursive(view, &node.rel_dir, &node.rel_dir, &crate_dirs, &mut rel_paths);
     }
     rel_paths.sort();
     rel_paths.dedup();
@@ -501,7 +514,13 @@ fn collect_rs_files(
         .collect()
 }
 
-fn collect_rs_files_recursive(view: &CrawlView<'_>, dir: &str, rel_paths: &mut Vec<String>) {
+fn collect_rs_files_recursive(
+    view: &CrawlView<'_>,
+    root_dir: &str,
+    dir: &str,
+    crate_dirs: &[&str],
+    rel_paths: &mut Vec<String>,
+) {
     let Some(entry) = view.dir_contents(dir) else {
         return;
     };
@@ -511,8 +530,25 @@ fn collect_rs_files_recursive(view: &CrawlView<'_>, dir: &str, rel_paths: &mut V
         }
     }
     for subdir in entry.dirs() {
-        collect_rs_files_recursive(view, &CrawlView::join_rel(dir, subdir), rel_paths);
+        let child_dir = CrawlView::join_rel(dir, subdir);
+        if should_stop_at_nested_crate(view, root_dir, &child_dir, crate_dirs) {
+            continue;
+        }
+        collect_rs_files_recursive(view, root_dir, &child_dir, crate_dirs, rel_paths);
     }
+}
+
+fn should_stop_at_nested_crate(
+    view: &CrawlView<'_>,
+    root_dir: &str,
+    child_dir: &str,
+    crate_dirs: &[&str],
+) -> bool {
+    if child_dir == root_dir {
+        return false;
+    }
+    crate_dirs.iter().any(|crate_dir| *crate_dir == child_dir)
+        || view.file_exists(&CrawlView::join_rel(child_dir, "Cargo.toml"))
 }
 
 fn collect_dependency_edges(

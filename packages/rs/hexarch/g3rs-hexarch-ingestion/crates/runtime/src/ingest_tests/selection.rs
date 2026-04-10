@@ -395,3 +395,74 @@ version = "0.1.0"
     assert!(adapter.title().contains("source analysis failed"));
     assert!(adapter.message().contains("file is not readable"));
 }
+
+#[test]
+fn workspace_exclude_keeps_excluded_members_out_of_source_lane() {
+    let root = tempdir().expect("tempdir");
+
+    fs::create_dir_all(root.path().join("crates/ports/http/src")).expect("real dirs");
+    fs::create_dir_all(root.path().join("crates/adapters/sql/src")).expect("excluded dirs");
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/ports/http", "crates/adapters/sql"]
+exclude = ["crates/adapters/sql"]
+"#,
+    )
+    .expect("workspace cargo");
+    fs::write(
+        root.path().join("crates/ports/http/Cargo.toml"),
+        r#"
+[package]
+name = "ports-http"
+version = "0.1.0"
+"#,
+    )
+    .expect("real cargo");
+    fs::write(root.path().join("crates/ports/http/src/lib.rs"), "pub fn leaked() {}\n")
+        .expect("real lib");
+    fs::write(
+        root.path().join("crates/adapters/sql/Cargo.toml"),
+        r#"
+[package]
+name = "adapter-sql"
+version = "0.1.0"
+"#,
+    )
+    .expect("excluded cargo");
+    fs::write(
+        root.path().join("crates/adapters/sql/src/lib.rs"),
+        "pub trait BadAdapterTrait {}\n",
+    )
+    .expect("excluded lib");
+
+    let crawl = super::crawl_workspace(root.path());
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
+    let results = run_source_from_crawl(&crawl);
+
+    assert_eq!(inputs.len(), 1);
+    assert_eq!(inputs[0].crate_facts.rel_dir, "crates/ports/http");
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].file(), Some("crates/ports/http"));
+}
+
+#[test]
+fn unresolved_workspace_member_pattern_fails_closed() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/ports/*"]
+"#,
+    )
+    .expect("workspace cargo");
+
+    let crawl = super::crawl_workspace(root.path());
+    let err = crate::ingest_for_source_checks(&crawl).expect_err("missing member pattern should fail");
+
+    assert!(err.to_string().contains("did not resolve"));
+}

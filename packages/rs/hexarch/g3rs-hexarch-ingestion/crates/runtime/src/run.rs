@@ -42,7 +42,7 @@ fn discover_member_crates(
     let Some(root_workspace) = discover_pointed_workspace(view)? else {
         return Ok(Vec::new());
     };
-    member_dirs.extend(workspace_member_dirs(view, "", &root_workspace));
+    member_dirs.extend(workspace_member_dirs(view, "", &root_workspace)?);
 
     let mut crates = Vec::new();
     for rel_dir in member_dirs {
@@ -83,17 +83,57 @@ fn workspace_member_dirs(
     view: &CrawlView<'_>,
     app_root_rel_dir: &str,
     parsed: &Value,
-) -> Vec<String> {
-    parsed
-        .get("workspace")
-        .and_then(Value::as_table)
-        .and_then(|table| table.get("members"))
+) -> Result<Vec<String>, G3RsHexarchIngestionError> {
+    let Some(workspace) = parsed.get("workspace").and_then(Value::as_table) else {
+        return Ok(Vec::new());
+    };
+
+    let exclude_patterns = workspace
+        .get("exclude")
         .and_then(Value::as_array)
         .into_iter()
         .flatten()
         .filter_map(Value::as_str)
-        .flat_map(|member| resolve_member_pattern(view, app_root_rel_dir, member))
-        .collect()
+        .map(|pattern| {
+            Pattern::new(&CrawlView::join_rel(app_root_rel_dir, pattern)).map_err(|err| {
+                G3RsHexarchIngestionError::ParseFailed {
+                    path: view
+                        .entry("Cargo.toml")
+                        .map(|entry| entry.path.abs_path.clone())
+                        .unwrap_or_else(|| std::path::PathBuf::from("Cargo.toml")),
+                    reason: format!("invalid workspace exclude pattern `{pattern}`: {err}"),
+                }
+            })
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let mut resolved_dirs = BTreeSet::new();
+
+    for member in workspace
+        .get("members")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+    {
+        let resolved = resolve_member_pattern(view, app_root_rel_dir, member);
+        if resolved.is_empty() {
+            return Err(G3RsHexarchIngestionError::ParseFailed {
+                path: view
+                    .entry("Cargo.toml")
+                    .map(|entry| entry.path.abs_path.clone())
+                    .unwrap_or_else(|| std::path::PathBuf::from("Cargo.toml")),
+                reason: format!("workspace member pattern `{member}` did not resolve to any Cargo.toml"),
+            });
+        }
+        for rel_dir in resolved {
+            if !exclude_patterns.iter().any(|pattern| pattern.matches(&rel_dir)) {
+                let _ = resolved_dirs.insert(rel_dir);
+            }
+        }
+    }
+
+    Ok(resolved_dirs.into_iter().collect())
 }
 
 fn resolve_member_pattern(view: &CrawlView<'_>, workspace_root_rel_dir: &str, member: &str) -> Vec<String> {
