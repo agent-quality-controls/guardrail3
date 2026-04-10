@@ -21,6 +21,7 @@ pub fn check(input: &G3RsHooksSharedSourceChecksInput) -> Vec<G3CheckResult> {
     };
     let fail_open_input = crate::inputs::FailOpenWrapperInput {
         rel_path: &input.rel_path,
+        parsed: &parsed,
         executable_lines: parsed.executable_lines(),
     };
     let mut results = Vec::new();

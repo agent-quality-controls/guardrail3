@@ -31,6 +31,22 @@ fn passes_when_assignment_runs_git_cat_file_size() {
 }
 
 #[test]
+fn passes_when_called_function_runs_env_wrapped_stat_bytes() {
+    let results = run_case(
+        "check_size() {\n    env -i stat -c%s \"$file\"\n}\ncheck_size\n",
+    );
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("file-size check step present"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn warns_when_only_max_file_size_threshold_is_referenced() {
     let results = run_case(
         r#"

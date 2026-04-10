@@ -173,7 +173,7 @@ pub(super) fn extract_command_segment(line: &str) -> &str {
 }
 
 fn heredoc_delimiter(line: &str) -> Option<&str> {
-    let marker = line.find("<<")?;
+    let marker = heredoc_marker_index(line)?;
     let suffix = line.get(marker + 2..)?.trim_start();
     let delimiter = suffix
         .strip_prefix('\'')
@@ -189,6 +189,50 @@ fn heredoc_delimiter(line: &str) -> Option<&str> {
     } else {
         Some(delimiter)
     }
+}
+
+fn heredoc_marker_index(line: &str) -> Option<usize> {
+    let mut single_quoted = false;
+    let mut double_quoted = false;
+    let chars: Vec<(usize, char)> = line.char_indices().collect();
+    let mut i = 0usize;
+
+    while i < chars.len() {
+        let (idx, ch) = chars[i];
+        match ch {
+            '\'' if !double_quoted && !is_escaped(chars.as_slice(), i) => {
+                single_quoted = !single_quoted;
+            }
+            '"' if !single_quoted && !is_escaped(chars.as_slice(), i) => {
+                double_quoted = !double_quoted;
+            }
+            '<' if !single_quoted && !double_quoted => {
+                if chars.get(i + 1).is_some_and(|(_, next)| *next == '<') {
+                    return Some(idx);
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+
+    None
+}
+
+fn is_escaped(chars: &[(usize, char)], index: usize) -> bool {
+    let mut backslashes = 0usize;
+    let mut cursor = index;
+
+    while cursor > 0 {
+        cursor -= 1;
+        if chars[cursor].1 == '\\' {
+            backslashes += 1;
+        } else {
+            break;
+        }
+    }
+
+    backslashes % 2 == 1
 }
 
 pub(super) fn strip_inline_comment(line: &str) -> &str {

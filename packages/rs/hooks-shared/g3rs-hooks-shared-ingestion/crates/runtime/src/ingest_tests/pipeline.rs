@@ -115,3 +115,62 @@ fn pipeline_works_through_hooks_pre_commit_fallback() {
         "{results:#?}"
     );
 }
+
+#[test]
+fn pipeline_keeps_inert_guardrail_text_quiet_when_wrapped_command_executes() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "# guardrail3 rs validate --staged .\nenv -i guardrail3 rs validate --staged .\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_shared_source_checks::check)
+        .collect::<Vec<_>>();
+
+    let inert_text_results = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-SHARED-18")
+        .collect::<Vec<_>>();
+
+    assert!(inert_text_results.is_empty(), "{results:#?}");
+}
+
+#[test]
+fn pipeline_reports_fail_open_wrapper_on_called_function() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "run_tests() {\n    cargo test --workspace\n}\nrun_tests || true\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_shared_source_checks::check)
+        .collect::<Vec<_>>();
+
+    let fail_open_results = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-SHARED-21")
+        .collect::<Vec<_>>();
+
+    assert_eq!(fail_open_results.len(), 1, "{results:#?}");
+    assert!(
+        fail_open_results.iter().any(|result| {
+            result.file() == Some(".githooks/pre-commit")
+                && result.title() == "critical hook command is fail-open"
+                && result.line() == Some(4)
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}

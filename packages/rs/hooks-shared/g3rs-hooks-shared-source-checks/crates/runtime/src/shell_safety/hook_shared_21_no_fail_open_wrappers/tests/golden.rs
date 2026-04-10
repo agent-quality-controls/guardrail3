@@ -18,6 +18,53 @@ fn reports_fail_open_wrapper_on_critical_command() {
 }
 
 #[test]
+fn reports_fail_open_wrapper_on_env_wrapped_critical_command() {
+    let results = run_case("env -i cargo test --workspace || true\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("critical hook command is fail-open"),
+            line: Some(1),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn reports_fail_open_wrapper_on_path_qualified_critical_command() {
+    let results = run_case("/usr/local/bin/guardrail3 rs validate --staged . || :\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("critical hook command is fail-open"),
+            line: Some(1),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn reports_fail_open_wrapper_on_called_function_that_runs_critical_command() {
+    let results = run_case(
+        "run_tests() {\n    cargo test --workspace\n}\nrun_tests || true\n",
+    );
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("critical hook command is fail-open"),
+            line: Some(4),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn ignores_fail_open_wrapper_on_non_critical_command() {
     let results = run_case("grep -q needle file || true\n");
     assertions::assert_rule_quiet(&results);

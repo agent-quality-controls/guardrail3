@@ -1,3 +1,5 @@
+use crate::command_query::{ResolvedCommand, any_resolved_command};
+
 use super::{FailOpenWrapper, parse_script};
 
 #[test]
@@ -248,6 +250,21 @@ fn keeps_inline_command_after_single_line_function_definition() {
     assert_eq!(parsed.functions[0].name, "guardrail_validate");
     assert_eq!(parsed.executable_lines.len(), 1);
     assert_eq!(parsed.executable_lines[0].command_name, "echo");
+}
+
+fn is_rg_conflict_scan(command: &ResolvedCommand) -> bool {
+    command.command_name() == "rg" && command.command_text().contains("<<<<<<<")
+}
+
+#[test]
+fn resolves_called_function_with_path_qualified_command() {
+    let parsed = parse_script("check_conflicts() {\n    /usr/bin/rg '<<<<<<<' .\n}\ncheck_conflicts\n");
+
+    assert_eq!(parsed.functions.len(), 1);
+    let function_body = parse_script(parsed.functions[0].body());
+    assert_eq!(function_body.executable_lines.len(), 1);
+    assert_eq!(function_body.executable_lines[0].command_name, "/usr/bin/rg");
+    assert!(any_resolved_command(&parsed, is_rg_conflict_scan));
 }
 
 #[test]

@@ -1,11 +1,12 @@
 use crate::compat::{G3CheckResult, G3Severity};
+use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use crate::inputs::ExecutableCommandContextInput;
 
 const ID: &str = "HOOK-SHARED-20";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
-    if has_concrete_lockfile_command(input.parsed.executable_lines.as_slice()) {
+    if has_concrete_lockfile_command(input.parsed) {
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
@@ -32,14 +33,14 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
     ));
 }
 
-fn has_concrete_lockfile_command(
-    executable_lines: &[hook_shell_parser::ExecutableLine<'_>],
-) -> bool {
-    executable_lines.iter().any(|line| {
-        line.command_name == "pnpm"
-            && (line.command_text.contains("pnpm install") || line.command_text.contains("pnpm i"))
-            && line.command_text.contains("--frozen-lockfile")
-    })
+fn has_concrete_lockfile_command(parsed: &hook_shell_parser::ParsedShellScript<'_>) -> bool {
+    any_resolved_command(parsed, is_concrete_lockfile_command)
+}
+
+fn is_concrete_lockfile_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "pnpm"
+        && (command.command_text().contains(" install") || command.command_text().contains(" i"))
+        && command.command_text().contains("--frozen-lockfile")
 }
 
 #[cfg(test)]
