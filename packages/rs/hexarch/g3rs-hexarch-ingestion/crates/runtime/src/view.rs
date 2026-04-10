@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::path::Path;
 
 use g3rs_workspace_crawl::{
     G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
@@ -90,6 +89,18 @@ impl<'a> CrawlView<'a> {
         })
     }
 
+    pub(crate) fn dir_exists(&self, rel_path: &str) -> bool {
+        self.crawl.entries.iter().any(|entry| {
+            entry.path.rel_path == rel_path
+                && entry.kind == G3RsWorkspaceEntryKind::Directory
+                && entry.ignore_state == G3RsWorkspaceIgnoreState::Included
+        })
+    }
+
+    pub(crate) fn all_dir_rels(&self) -> impl Iterator<Item = &str> {
+        self.dirs.keys().map(String::as_str)
+    }
+
     pub(crate) fn entry(&self, rel_path: &str) -> Option<&G3RsWorkspaceEntry> {
         self.crawl.entry(rel_path)
     }
@@ -101,10 +112,6 @@ impl<'a> CrawlView<'a> {
             .map(|entry| entry.path.abs_path.clone())
             .unwrap_or_else(|| self.crawl.root_abs_path.join(rel_path));
         std::fs::read_to_string(path)
-    }
-
-    pub(crate) fn root_abs_path(&self) -> &Path {
-        &self.crawl.root_abs_path
     }
 
     pub(crate) fn join_rel(dir: &str, child: &str) -> String {

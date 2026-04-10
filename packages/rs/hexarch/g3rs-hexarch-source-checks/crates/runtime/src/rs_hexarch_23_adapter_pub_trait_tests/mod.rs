@@ -27,16 +27,16 @@ fn errors_for_public_adapter_traits() {
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id(), "RS-HEXARCH-23");
     assert_eq!(results[0].severity(), G3Severity::Error);
+    assert_eq!(results[0].file(), Some("apps/demo/crates/adapters/sql"));
     assert!(results[0].title().contains("defines public traits"));
+    assert!(results[0].message().contains("1 public trait"));
 }
 
 #[test]
 fn ignores_non_adapter_crates() {
-    let results = crate::run::check(&input(Some(G3RsHexarchLayer::Ports), 1, None));
+    let results = crate::run::check(&input(Some(G3RsHexarchLayer::Domain), 1, None));
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-22");
-    assert!(results[0].inventory());
+    assert!(results.is_empty());
 }
 
 #[test]
@@ -46,6 +46,7 @@ fn inventories_clean_adapter_surface() {
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].severity(), G3Severity::Info);
     assert!(results[0].inventory());
+    assert_eq!(results[0].file(), Some("apps/demo/crates/adapters/sql"));
 }
 
 #[test]
@@ -58,5 +59,6 @@ fn errors_on_source_analysis_failure() {
 
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].severity(), G3Severity::Error);
+    assert_eq!(results[0].file(), Some("apps/demo/crates/adapters/sql/src/lib.rs"));
     assert!(results[0].title().contains("source analysis failed"));
 }

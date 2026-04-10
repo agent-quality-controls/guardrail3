@@ -10,6 +10,14 @@ fn source_pipeline_reports_ports_behavior_and_adapter_public_trait() {
 
     fs::create_dir_all(root.path().join("apps/demo/crates/ports/http/src")).expect("ports dirs");
     fs::create_dir_all(root.path().join("apps/demo/crates/adapters/sql/src")).expect("adapter dirs");
+    fs::write(
+        root.path().join("apps/demo/Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/ports/http", "crates/adapters/sql"]
+"#,
+    )
+    .expect("workspace cargo");
 
     fs::write(
         root.path().join("apps/demo/crates/ports/http/Cargo.toml"),
@@ -25,7 +33,6 @@ version = "0.1.0"
         "pub fn leaked() {}",
     )
     .expect("ports lib");
-
     fs::write(
         root.path().join("apps/demo/crates/adapters/sql/Cargo.toml"),
         r#"
@@ -49,8 +56,22 @@ version = "0.1.0"
         .iter()
         .flat_map(check_source)
         .collect::<Vec<_>>();
-    let mut ids = results.iter().map(|result| result.id().to_owned()).collect::<Vec<_>>();
-    ids.sort();
 
-    assert_eq!(ids, vec!["RS-HEXARCH-22".to_owned(), "RS-HEXARCH-23".to_owned()]);
+    assert_eq!(results.len(), 2);
+
+    let ports = results
+        .iter()
+        .find(|result| result.id() == "RS-HEXARCH-22")
+        .expect("ports result");
+    assert_eq!(ports.file(), Some("apps/demo/crates/ports/http"));
+    assert!(!ports.inventory());
+    assert!(ports.title().contains("public free functions"));
+
+    let adapter = results
+        .iter()
+        .find(|result| result.id() == "RS-HEXARCH-23")
+        .expect("adapter result");
+    assert_eq!(adapter.file(), Some("apps/demo/crates/adapters/sql"));
+    assert!(!adapter.inventory());
+    assert!(adapter.title().contains("defines public traits"));
 }
