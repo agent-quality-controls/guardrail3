@@ -1,18 +1,17 @@
 # g3rs-hexarch-source-checks
 
-Extracted single-file Rust source checks for the `code` family.
+Extracted `hexarch` source checks for the Rust family.
 
 Initial rules in this package:
 
-- `RS-CODE-13`
-- `RS-CODE-15`
-- `RS-CODE-16`
+- `RS-HEXARCH-22`
+- `RS-HEXARCH-23`
 
-This package validates one Rust source file at a time.
+This package validates one source crate surface at a time.
 
 It does not own:
 
-- workspace/root discovery
+- workspace/member discovery
 - config checks
-- root/workspace structural checks
-- cross-file or repo-global legality
+- file-tree structural checks
+- repo-global legality

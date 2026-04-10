@@ -22,6 +22,7 @@ workspace = true
 g3rs-hexarch-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-hexarch-types = { path = "../../../g3rs-hexarch-types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+glob = "0.3"
 syn = { version = "2", features = ["full", "parsing"] }
 toml = "0.8"
 
@@ -29,4 +30,5 @@ toml = "0.8"
 g3rs-hexarch-ingestion-assertions = { path = "../assertions" }
 g3rs-hexarch-source-checks = { path = "../../../g3rs-hexarch-source-checks", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 tempfile = "3"

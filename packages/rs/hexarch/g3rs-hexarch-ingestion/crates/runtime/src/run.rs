@@ -1,5 +1,6 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
+use glob::Pattern;
 use g3rs_hexarch_ingestion_types::{
     G3RsHexarchConfigChecksInput, G3RsHexarchFileTreeChecksInput, G3RsHexarchIngestionError,
     G3RsHexarchSourceChecksInput,
@@ -36,82 +37,176 @@ pub fn ingest_for_file_tree_checks(
 fn discover_member_crates(
     view: &CrawlView<'_>,
 ) -> Result<Vec<G3RsHexarchSourceCrateFacts>, G3RsHexarchIngestionError> {
-    let mut rel_dirs = Vec::new();
-    collect_app_cargo_dirs(view, "apps", &mut rel_dirs);
-    rel_dirs.sort();
-    rel_dirs.dedup();
+    let app_workspaces = discover_app_workspaces(view)?;
+    let mut member_dirs = BTreeSet::new();
 
-    rel_dirs
-        .into_iter()
-        .filter(|rel_dir| !rel_dir.contains("/tests/fixtures/"))
-        .map(|rel_dir| summarize_crate(view, &rel_dir))
-        .collect()
+    for (app_root_rel_dir, parsed) in app_workspaces {
+        member_dirs.extend(workspace_member_dirs(view, &app_root_rel_dir, &parsed));
+    }
+
+    let mut crates = Vec::new();
+    for rel_dir in member_dirs {
+        if rel_dir.contains("/tests/fixtures/") {
+            continue;
+        }
+        if let Some(crate_facts) = summarize_crate(view, &rel_dir) {
+            crates.push(crate_facts);
+        }
+    }
+
+    Ok(crates)
 }
 
-fn collect_app_cargo_dirs(view: &CrawlView<'_>, dir: &str, rel_dirs: &mut Vec<String>) {
+fn discover_app_workspaces(
+    view: &CrawlView<'_>,
+) -> Result<BTreeMap<String, Value>, G3RsHexarchIngestionError> {
+    let mut cargo_dirs = BTreeSet::new();
+    collect_workspace_candidate_dirs(view, "apps", &mut cargo_dirs);
+
+    let mut workspaces = BTreeMap::new();
+    for cargo_dir in cargo_dirs {
+        let cargo_rel_path = CrawlView::join_rel(&cargo_dir, "Cargo.toml");
+        let Some(entry) = view.entry(&cargo_rel_path) else {
+            continue;
+        };
+        if !entry.readable {
+            continue;
+        }
+
+        let Ok(content) = view.read_file(&cargo_rel_path) else {
+            continue;
+        };
+        let Ok(parsed) = toml::from_str::<Value>(&content) else {
+            continue;
+        };
+
+        if parsed.get("workspace").is_some() {
+            let _ = workspaces.insert(cargo_dir, parsed);
+        }
+    }
+
+    Ok(workspaces)
+}
+
+fn collect_workspace_candidate_dirs(
+    view: &CrawlView<'_>,
+    dir: &str,
+    rel_dirs: &mut BTreeSet<String>,
+) {
     let Some(contents) = view.dir_contents(dir) else {
         return;
     };
 
     if contents.files().iter().any(|file| file == "Cargo.toml") {
-        rel_dirs.push(dir.to_owned());
+        let _ = rel_dirs.insert(dir.to_owned());
     }
 
     for subdir in contents.dirs() {
-        collect_app_cargo_dirs(view, &CrawlView::join_rel(dir, subdir), rel_dirs);
+        collect_workspace_candidate_dirs(view, &CrawlView::join_rel(dir, subdir), rel_dirs);
     }
 }
 
-fn summarize_crate(
+fn workspace_member_dirs(
     view: &CrawlView<'_>,
-    rel_dir: &str,
-) -> Result<G3RsHexarchSourceCrateFacts, G3RsHexarchIngestionError> {
-    let cargo_rel_path = CrawlView::join_rel(rel_dir, "Cargo.toml");
-    let Some(entry) = view.entry(&cargo_rel_path) else {
-        return Err(G3RsHexarchIngestionError::Unreadable {
-            path: view.root_abs_path().join(&cargo_rel_path),
-            reason: "selected Cargo.toml missing from crawl".to_owned(),
-        });
-    };
-    if !entry.readable {
-        return Err(G3RsHexarchIngestionError::Unreadable {
-            path: entry.path.abs_path.clone(),
-            reason: "file is not readable".to_owned(),
-        });
+    app_root_rel_dir: &str,
+    parsed: &Value,
+) -> Vec<String> {
+    parsed
+        .get("workspace")
+        .and_then(Value::as_table)
+        .and_then(|table| table.get("members"))
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .flat_map(|member| resolve_member_pattern(view, app_root_rel_dir, member))
+        .collect()
+}
+
+fn resolve_member_pattern(view: &CrawlView<'_>, workspace_root_rel_dir: &str, member: &str) -> Vec<String> {
+    let pattern = CrawlView::join_rel(workspace_root_rel_dir, member);
+    let has_glob = member.contains('*') || member.contains('?') || member.contains('[');
+
+    if has_glob {
+        let Ok(glob) = Pattern::new(&pattern) else {
+            return Vec::new();
+        };
+        return view
+            .all_dir_rels()
+            .filter(|rel_dir| glob.matches(rel_dir))
+            .filter(|rel_dir| view.file_exists(&CrawlView::join_rel(rel_dir, "Cargo.toml")))
+            .map(str::to_owned)
+            .collect();
     }
 
-    let content = view
-        .read_file(&cargo_rel_path)
-        .map_err(|err| G3RsHexarchIngestionError::Unreadable {
-            path: entry.path.abs_path.clone(),
-            reason: err.to_string(),
-        })?;
-    let parsed = toml::from_str::<Value>(&content).map_err(|err| G3RsHexarchIngestionError::ParseFailed {
-        path: entry.path.abs_path.clone(),
-        reason: err.to_string(),
-    })?;
+    view.file_exists(&CrawlView::join_rel(&pattern, "Cargo.toml"))
+        .then_some(pattern)
+        .into_iter()
+        .collect()
+}
 
-    let Some(crate_name) = parsed
+fn summarize_crate(view: &CrawlView<'_>, rel_dir: &str) -> Option<G3RsHexarchSourceCrateFacts> {
+    let cargo_rel_path = CrawlView::join_rel(rel_dir, "Cargo.toml");
+    let fallback_name = rel_dir.rsplit('/').next().unwrap_or(rel_dir).to_owned();
+
+    let Some(entry) = view.entry(&cargo_rel_path) else {
+        return Some(error_facts(
+            fallback_name,
+            rel_dir,
+            cargo_rel_path,
+            "Failed to read member Cargo.toml while determining Rust source entrypoints for hexarch checks: selected Cargo.toml missing from crawl.".to_owned(),
+        ));
+    };
+    if !entry.readable {
+        return Some(error_facts(
+            fallback_name,
+            rel_dir,
+            cargo_rel_path,
+            "Failed to read member Cargo.toml while determining Rust source entrypoints for hexarch checks: file is not readable.".to_owned(),
+        ));
+    }
+
+    let content = match view.read_file(&cargo_rel_path) {
+        Ok(content) => content,
+        Err(read_error) => {
+            return Some(error_facts(
+                fallback_name,
+                rel_dir,
+                cargo_rel_path,
+                format!(
+                    "Failed to read member Cargo.toml while determining Rust source entrypoints for hexarch checks: {read_error}"
+                ),
+            ));
+        }
+    };
+    let parsed = match toml::from_str::<Value>(&content) {
+        Ok(parsed) => parsed,
+        Err(parse_error) => {
+            return Some(error_facts(
+                fallback_name,
+                rel_dir,
+                cargo_rel_path,
+                format!(
+                    "Failed to parse member Cargo.toml while determining Rust source entrypoints for hexarch checks: {parse_error}"
+                ),
+            ));
+        }
+    };
+
+    let crate_name = parsed
         .get("package")
         .and_then(|package| package.get("name"))
         .and_then(Value::as_str)
         .map(str::to_owned)
-    else {
-        return Ok(G3RsHexarchSourceCrateFacts {
-            crate_name: rel_dir.rsplit('/').next().unwrap_or(rel_dir).to_owned(),
-            rel_dir: rel_dir.to_owned(),
-            layer: layer_from_path(rel_dir),
-            pub_trait_count: 0,
-            public_free_fn_count: 0,
-            public_inherent_method_count: 0,
-            source_error_rel_path: None,
-            source_error_message: None,
-        });
-    };
+        .unwrap_or(fallback_name);
 
     let mut source_error = None;
     let mut visited = BTreeSet::new();
     let entrypoints = determine_entrypoints(view, rel_dir, &cargo_rel_path, &parsed, &mut source_error);
+
+    if entrypoints.is_empty() && source_error.is_none() {
+        return None;
+    }
 
     let mut pub_trait_count = 0;
     let mut public_free_fn_count = 0;
@@ -124,7 +219,7 @@ fn summarize_crate(
         public_inherent_method_count += stats.public_inherent_method_count;
     }
 
-    Ok(G3RsHexarchSourceCrateFacts {
+    Some(G3RsHexarchSourceCrateFacts {
         crate_name,
         rel_dir: rel_dir.to_owned(),
         layer: layer_from_path(rel_dir),
@@ -134,6 +229,24 @@ fn summarize_crate(
         source_error_rel_path: source_error.as_ref().map(|(path, _)| path.clone()),
         source_error_message: source_error.map(|(_, message)| message),
     })
+}
+
+fn error_facts(
+    crate_name: String,
+    rel_dir: &str,
+    error_rel_path: String,
+    error_message: String,
+) -> G3RsHexarchSourceCrateFacts {
+    G3RsHexarchSourceCrateFacts {
+        crate_name,
+        rel_dir: rel_dir.to_owned(),
+        layer: layer_from_path(rel_dir),
+        pub_trait_count: 0,
+        public_free_fn_count: 0,
+        public_inherent_method_count: 0,
+        source_error_rel_path: Some(error_rel_path),
+        source_error_message: Some(error_message),
+    }
 }
 
 #[derive(Default)]
@@ -150,6 +263,82 @@ fn determine_entrypoints(
     parsed: &Value,
     source_error: &mut Option<(String, String)>,
 ) -> Vec<String> {
+    let mut explicit_entrypoints = BTreeSet::new();
+
+    if let Some(lib_path) = parsed
+        .get("lib")
+        .and_then(Value::as_table)
+        .and_then(|table| table.get("path"))
+        .and_then(Value::as_str)
+    {
+        let _ = explicit_entrypoints.insert(CrawlView::join_rel(rel_dir, lib_path));
+    }
+
+    if let Some(bin_array) = parsed.get("bin").and_then(Value::as_array) {
+        for bin in bin_array.iter().filter_map(Value::as_table) {
+            if let Some(path) = bin.get("path").and_then(Value::as_str) {
+                let _ = explicit_entrypoints.insert(CrawlView::join_rel(rel_dir, path));
+            }
+        }
+    }
+
+    if explicit_entrypoints.is_empty() {
+        let src_rel = CrawlView::join_rel(rel_dir, "src");
+        if !view.dir_exists(&src_rel) {
+            return Vec::new();
+        }
+
+        for fallback in [
+            CrawlView::join_rel(rel_dir, "src/lib.rs"),
+            CrawlView::join_rel(rel_dir, "src/main.rs"),
+        ] {
+            if view.file_exists(&fallback) {
+                let _ = explicit_entrypoints.insert(fallback);
+            }
+        }
+    }
+
+    let existing = explicit_entrypoints
+        .into_iter()
+        .filter(|entrypoint| view.file_exists(entrypoint))
+        .collect::<Vec<_>>();
+
+    if existing.is_empty() {
+        let has_explicit = parsed
+            .get("lib")
+            .and_then(Value::as_table)
+            .and_then(|table| table.get("path"))
+            .and_then(Value::as_str)
+            .is_some()
+            || parsed
+                .get("bin")
+                .and_then(Value::as_array)
+                .is_some_and(|bins| {
+                    bins.iter().filter_map(Value::as_table).any(|bin| {
+                        bin.get("path").and_then(Value::as_str).is_some()
+                    })
+                });
+
+        *source_error = Some(if has_explicit {
+            (
+                cargo_rel_path.to_owned(),
+                format!(
+                    "Failed to determine Rust source entrypoint for hexarch checks: configured target path(s) not found: {}.",
+                    collect_configured_entrypoints(rel_dir, parsed).join(", ")
+                ),
+            )
+        } else {
+            (
+                CrawlView::join_rel(rel_dir, "src"),
+                "Failed to determine Rust source entrypoint for hexarch checks: expected src/lib.rs or src/main.rs.".to_owned(),
+            )
+        });
+    }
+
+    existing
+}
+
+fn collect_configured_entrypoints(rel_dir: &str, parsed: &Value) -> Vec<String> {
     let mut entrypoints = BTreeSet::new();
 
     if let Some(lib_path) = parsed
@@ -169,30 +358,7 @@ fn determine_entrypoints(
         }
     }
 
-    if entrypoints.is_empty() {
-        for fallback in [
-            CrawlView::join_rel(rel_dir, "src/lib.rs"),
-            CrawlView::join_rel(rel_dir, "src/main.rs"),
-        ] {
-            if view.file_exists(&fallback) {
-                let _ = entrypoints.insert(fallback);
-            }
-        }
-    }
-
-    let existing = entrypoints
-        .into_iter()
-        .filter(|entrypoint| view.file_exists(entrypoint))
-        .collect::<Vec<_>>();
-
-    if existing.is_empty() {
-        *source_error = Some((
-            cargo_rel_path.to_owned(),
-            "Failed to determine Rust source entrypoint for hexarch checks: expected configured targets or src/lib.rs or src/main.rs.".to_owned(),
-        ));
-    }
-
-    existing
+    entrypoints.into_iter().collect()
 }
 
 fn walk_module_file(
