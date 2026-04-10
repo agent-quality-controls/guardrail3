@@ -114,7 +114,7 @@ fn register_canonical_alias(
     module_path_aliases: &mut BTreeMap<String, String>,
 ) {
     let path = qualified_use_target(prefix, target);
-    if alias != target {
+    if path != alias {
         let _ = module_path_aliases.insert(alias.to_owned(), path.clone());
     }
     match path.as_str() {

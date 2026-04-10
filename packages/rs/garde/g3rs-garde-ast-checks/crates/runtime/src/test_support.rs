@@ -70,6 +70,7 @@ pub(crate) fn fixture(source_files: &[(&str, &str)], guardrail_toml: &str) -> Fi
     Fixture {
         _tempdir: tempdir,
         input: G3RsGardeAstChecksInput {
+            garde_dependency_present: true,
             source_files: ast_files,
             guardrail_toml: G3RsAstFile {
                 rel_path: guardrail_rel_path.to_owned(),

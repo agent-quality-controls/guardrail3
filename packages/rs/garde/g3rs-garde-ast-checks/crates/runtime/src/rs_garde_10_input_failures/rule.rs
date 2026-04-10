@@ -13,3 +13,7 @@ pub(crate) fn check(site: &InputFailureSite, results: &mut Vec<G3CheckResult>) {
         None,
     ));
 }
+
+#[cfg(test)]
+#[path = "tests/mod.rs"]
+mod tests;
