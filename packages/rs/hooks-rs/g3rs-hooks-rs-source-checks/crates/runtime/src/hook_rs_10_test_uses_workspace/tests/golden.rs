@@ -1,6 +1,6 @@
 use g3rs_hooks_rs_source_checks_assertions::hook_rs_10_test_uses_workspace as assertions;
 
-use crate::hook_rs_10_test_uses_workspace::run_case;
+use crate::hook_rs_10_test_uses_workspace::{run_case, run_case_with_workspace};
 
 #[test]
 fn reports_info_when_workspace_flag_missing() {
@@ -14,6 +14,12 @@ fn reports_info_when_workspace_flag_missing() {
             ..Default::default()
         }],
     );
+}
+
+#[test]
+fn stays_inventory_only_when_repo_is_not_a_workspace_project() {
+    let results = run_case_with_workspace("cargo test\n", false);
+    assertions::assert_not_required(&results);
 }
 
 #[test]

@@ -7,6 +7,7 @@ pub fn check(input: &G3RsHooksRsSourceChecksInput) -> Vec<G3CheckResult> {
     let rule_input = crate::inputs::RustHookCommandInput {
         rel_path: &input.rel_path,
         parsed: &parsed,
+        is_workspace_project: input.is_workspace_project,
     };
     let mut results = Vec::new();
 

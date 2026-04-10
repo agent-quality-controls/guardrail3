@@ -114,7 +114,7 @@ When the shared hook family determines there is no effective pre-commit script, 
 | HOOK-RS-13 | Info | cargo-dupes uses `--exclude-tests`. CLAUDE.md calls out `cargo-dupes --exclude-tests` specifically. This avoids noise from deliberate duplication in tests while still checking production dependency duplication. | Implemented |
 | HOOK-RS-14 | Error | `guardrail3` installed when Rust validation is expected to run. The generated hook currently treats missing `guardrail3` as a warning and skips AST-based validation, but that is a fail-open path for the meta-guardrail. This rule makes the contract explicit on the validation side. | Implemented |
 | HOOK-RS-15 | Error | `cargo-dupes` installed when Rust duplication checks are required. The current tool-install check does not cover cargo-dupes even though the Rust hook plan now requires a cargo-dupes step. | Implemented |
-| HOOK-RS-16 | Warn | Rust guardrail config changes trigger Rust hook validation. Changes to `clippy.toml`, `deny.toml`, `rustfmt.toml`, `rust-toolchain.toml`, `guardrail3.toml`, and similar Rust guardrail config files must cause the Rust hook path to run, even if no `.rs` file changed. Otherwise config-only weakening can bypass hook enforcement. | Implemented |
+| HOOK-RS-16 | Warn | Rust guardrail config changes trigger Rust hook validation. Changes to `clippy.toml`, `deny.toml`, `rustfmt.toml`, `rust-toolchain.toml`, `guardrail3-rs.toml`, and similar Rust guardrail config files must cause the Rust hook path to run, even if no `.rs` file changed. Otherwise config-only weakening can bypass hook enforcement. | Implemented |
 
 ## Hook-to-Rust-checker mapping
 

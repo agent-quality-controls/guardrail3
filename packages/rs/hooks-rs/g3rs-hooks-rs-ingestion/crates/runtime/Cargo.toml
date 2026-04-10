@@ -19,6 +19,7 @@ ingest = []
 workspace = true
 
 [dependencies]
+cargo-toml-parser = { path = "../../../../../../packages/parsers/cargo-toml-parser", version = "0.1.0" }
 g3rs-hooks-rs-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
 
