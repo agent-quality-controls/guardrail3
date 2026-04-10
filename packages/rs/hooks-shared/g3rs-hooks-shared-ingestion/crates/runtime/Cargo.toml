@@ -1,0 +1,28 @@
+[package]
+name = "g3rs-hooks-shared-ingestion-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3rs hooks-shared ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "code", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["ingest"]
+ingest = []
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-hooks-shared-ingestion-types = { path = "../types", version = "0.1.0" }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+
+[dev-dependencies]
+g3rs-hooks-shared-source-checks = { path = "../../../g3rs-hooks-shared-source-checks", version = "0.1.0" }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
+tempfile = "3"

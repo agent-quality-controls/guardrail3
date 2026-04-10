@@ -1,0 +1,25 @@
+crate::define_rule_assertions!("HOOK-RS-13");
+
+pub fn assert_present(results: &[G3CheckResult]) {
+    self::assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Info),
+            title: Some("cargo-dupes excludes tests"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+pub fn assert_missing(results: &[G3CheckResult]) {
+    self::assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Info),
+            title: Some("cargo dupes step does not exclude tests"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
