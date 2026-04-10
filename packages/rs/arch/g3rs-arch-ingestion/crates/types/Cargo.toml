@@ -1,0 +1,24 @@
+[package]
+name = "g3rs-arch-ingestion-types"
+version = "0.1.0"
+edition = "2024"
+description = "Public types for g3rs arch ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "arch", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-arch-config-checks-types = { path = "../../../g3rs-arch-config-checks/crates/types", version = "0.1.0" }
+g3rs-arch-source-checks-types = { path = "../../../g3rs-arch-source-checks/crates/types", version = "0.1.0" }
+g3rs-arch-types = { path = "../../../g3rs-arch-types", version = "0.1.0" }
