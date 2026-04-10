@@ -99,12 +99,16 @@ impl<'a> CrawlView<'a> {
         self.crawl.entry(rel_path).map(|entry| entry.path.abs_path.clone())
     }
 
+    pub(crate) fn all_dir_rels(&self) -> impl Iterator<Item = &str> {
+        self.dirs.keys().map(String::as_str)
+    }
+
     pub(crate) fn read_file(&self, rel_path: &str) -> Result<String, std::io::Error> {
         let path = self
             .crawl
             .entry(rel_path)
             .map(|entry| entry.path.abs_path.clone())
-            .unwrap_or_else(|| self.crawl.root_abs_path.join(rel_path));
+            .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "entry missing from crawl"))?;
         std::fs::read_to_string(path)
     }
 

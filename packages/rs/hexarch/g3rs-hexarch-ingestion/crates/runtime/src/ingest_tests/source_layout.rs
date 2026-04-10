@@ -1,7 +1,6 @@
 use std::fs;
 
 use g3rs_hexarch_source_checks::check as check_source;
-use g3rs_workspace_crawl::crawl;
 use guardrail3_check_types::G3Severity;
 use tempfile::tempdir;
 
@@ -41,13 +40,13 @@ path = "mod.rs"
     )
     .expect("ports api");
 
-    let crawl = crawl(root.path()).expect("crawl");
+    let crawl = super::crawl_workspace(root.path());
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = inputs.iter().flat_map(check_source).collect::<Vec<_>>();
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id(), "RS-HEXARCH-22");
     assert_eq!(results[0].severity(), G3Severity::Warn);
-    assert_eq!(results[0].file(), Some("apps/demo/crates/ports/http"));
+    assert_eq!(results[0].file(), Some("crates/ports/http"));
     assert!(results[0].title().contains("public inherent methods"));
 }
 
@@ -84,7 +83,7 @@ version = "0.1.0"
     )
     .expect("adapter internal");
 
-    let crawl = crawl(root.path()).expect("crawl");
+    let crawl = super::crawl_workspace(root.path());
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = inputs.iter().flat_map(check_source).collect::<Vec<_>>();
     assert_eq!(results.len(), 1);
@@ -126,7 +125,7 @@ version = "0.1.0"
     )
     .expect("adapter extra");
 
-    let crawl = crawl(root.path()).expect("crawl");
+    let crawl = super::crawl_workspace(root.path());
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = inputs.iter().flat_map(check_source).collect::<Vec<_>>();
     assert_eq!(results.len(), 1);
@@ -135,6 +134,6 @@ version = "0.1.0"
     assert!(results[0].title().contains("source analysis failed"));
     assert_eq!(
         results[0].file(),
-        Some("apps/demo/crates/adapters/sql/src/extra.rs")
+        Some("crates/adapters/sql/src/extra.rs")
     );
 }
