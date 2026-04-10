@@ -115,3 +115,100 @@ version = "0.1.0"
     assert!(results.iter().any(|result| result.id() == "RS-ARCH-05"));
     assert!(results.iter().any(|result| result.id() == "RS-ARCH-06"));
 }
+
+#[test]
+fn source_ingestion_stays_inside_the_pointed_workspace() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("crate_a/src")).expect("crate dirs");
+    fs::create_dir_all(root.path().join("foreign/src")).expect("foreign dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(root.path().join("crate_a/src/lib.rs"), "pub fn leaked() {}\n").expect("crate lib");
+    fs::write(
+        root.path().join("foreign/Cargo.toml"),
+        r#"
+[package]
+name = "foreign"
+version = "0.1.0"
+"#,
+    )
+    .expect("foreign cargo");
+    fs::write(root.path().join("foreign/src/lib.rs"), "pub fn stray() {}\n").expect("foreign lib");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
+
+    assert_eq!(inputs.len(), 1);
+    assert_eq!(inputs[0].crate_nodes.len(), 1);
+    assert_eq!(inputs[0].crate_nodes[0].rel_dir, "crate_a");
+    assert!(inputs[0]
+        .source_files
+        .iter()
+        .all(|file| file.rel_path.starts_with("crate_a/")));
+}
+
+#[test]
+fn config_ingestion_stays_inside_the_pointed_workspace() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("crate_a/src")).expect("crate dirs");
+    fs::create_dir_all(root.path().join("foreign/src")).expect("foreign dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(root.path().join("crate_a/src/lib.rs"), "pub mod api;\n").expect("crate lib");
+    fs::write(
+        root.path().join("foreign/Cargo.toml"),
+        r#"
+[package]
+name = "foreign"
+version = "0.1.0"
+
+[dependencies]
+crate_a = { path = "../crate_a" }
+"#,
+    )
+    .expect("foreign cargo");
+    fs::write(root.path().join("foreign/src/lib.rs"), "pub fn stray() {}\n").expect("foreign lib");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
+
+    assert_eq!(inputs.len(), 1);
+    assert_eq!(inputs[0].crate_nodes.len(), 1);
+    assert_eq!(inputs[0].crate_nodes[0].rel_dir, "crate_a");
+    assert!(inputs[0]
+        .dependency_edges
+        .iter()
+        .all(|edge| edge.source_rel_dir == "crate_a"));
+}

@@ -1,13 +1,13 @@
 use std::fs;
 
 use g3rs_hexarch_source_checks::check as check_source;
-use g3rs_workspace_crawl::{crawl, G3RsWorkspaceIgnoreState};
+use g3rs_workspace_crawl::G3RsWorkspaceIgnoreState;
 use guardrail3_check_types::G3Severity;
 use guardrail3_check_types::G3CheckResult;
 use tempfile::tempdir;
 
 fn source_results(root: &std::path::Path) -> Vec<G3CheckResult> {
-    let crawl = crawl(root).expect("crawl");
+    let crawl = super::crawl_workspace(root);
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     inputs.iter().flat_map(check_source).collect()
 }
@@ -99,7 +99,7 @@ version = "0.1.0"
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id(), "RS-HEXARCH-23");
     assert_eq!(results[0].severity(), G3Severity::Error);
-    assert_eq!(results[0].file(), Some("apps/demo/crates/adapters/sql"));
+    assert_eq!(results[0].file(), Some("crates/adapters/sql"));
     assert!(!results[0].inventory());
     assert!(results[0].title().contains("defines public traits"));
 }
@@ -269,7 +269,7 @@ version = "0.1.0"
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id(), "RS-HEXARCH-22");
     assert_eq!(results[0].severity(), G3Severity::Warn);
-    assert_eq!(results[0].file(), Some("apps/demo/crates/ports/http/src/extra.rs"));
+    assert_eq!(results[0].file(), Some("crates/ports/http/src/extra.rs"));
     assert!(results[0].title().contains("source analysis failed"));
 }
 
@@ -304,7 +304,7 @@ version = "0.1.0"
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id(), "RS-HEXARCH-22");
-    assert_eq!(results[0].file(), Some("apps/demo/crates/ports/http/src"));
+    assert_eq!(results[0].file(), Some("crates/ports/http/src"));
     assert!(results[0].message().contains("expected src/lib.rs or src/main.rs"));
 }
 
@@ -439,7 +439,7 @@ path = "missing.rs"
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id(), "RS-HEXARCH-23");
-    assert_eq!(results[0].file(), Some("apps/demo/crates/adapters/sql/Cargo.toml"));
+    assert_eq!(results[0].file(), Some("crates/adapters/sql/Cargo.toml"));
     assert!(results[0].message().contains("configured target path(s) not found"));
 }
 
@@ -476,11 +476,11 @@ version = "0.1.0"
     )
     .expect("extra");
 
-    let mut crawl = crawl(root.path()).expect("crawl");
+    let mut crawl = super::crawl_workspace(root.path());
     let entry = crawl
         .entries
         .iter_mut()
-        .find(|entry| entry.path.rel_path == "apps/demo/crates/adapters/sql/src/extra.rs")
+        .find(|entry| entry.path.rel_path == "crates/adapters/sql/src/extra.rs")
         .expect("entry");
     entry.readable = false;
 
@@ -490,7 +490,7 @@ version = "0.1.0"
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id(), "RS-HEXARCH-23");
     assert_eq!(results[0].severity(), G3Severity::Error);
-    assert_eq!(results[0].file(), Some("apps/demo/crates/adapters/sql/src/extra.rs"));
+    assert_eq!(results[0].file(), Some("crates/adapters/sql/src/extra.rs"));
     assert!(results[0].message().contains("file is not readable"));
 }
 
@@ -527,11 +527,11 @@ version = "0.1.0"
     )
     .expect("extra");
 
-    let mut crawl = crawl(root.path()).expect("crawl");
+    let mut crawl = super::crawl_workspace(root.path());
     crawl
         .entries
         .iter_mut()
-        .find(|entry| entry.path.rel_path == "apps/demo/crates/adapters/sql/src/extra.rs")
+        .find(|entry| entry.path.rel_path == "crates/adapters/sql/src/extra.rs")
         .expect("ignored entry")
         .ignore_state = G3RsWorkspaceIgnoreState::Ignored;
 

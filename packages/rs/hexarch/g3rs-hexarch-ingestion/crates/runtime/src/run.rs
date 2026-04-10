@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
 use glob::Pattern;
 use g3rs_hexarch_ingestion_types::{
@@ -37,16 +37,16 @@ pub fn ingest_for_file_tree_checks(
 fn discover_member_crates(
     view: &CrawlView<'_>,
 ) -> Result<Vec<G3RsHexarchSourceCrateFacts>, G3RsHexarchIngestionError> {
-    let app_workspaces = discover_app_workspaces(view)?;
     let mut member_dirs = BTreeSet::new();
 
-    for (app_root_rel_dir, parsed) in app_workspaces {
-        member_dirs.extend(workspace_member_dirs(view, &app_root_rel_dir, &parsed));
-    }
+    let Some(root_workspace) = discover_pointed_workspace(view)? else {
+        return Ok(Vec::new());
+    };
+    member_dirs.extend(workspace_member_dirs(view, "", &root_workspace));
 
     let mut crates = Vec::new();
     for rel_dir in member_dirs {
-        if rel_dir.contains("/tests/fixtures/") {
+        if rel_dir.contains("tests/fixtures/") {
             continue;
         }
         if let Some(crate_facts) = summarize_crate(view, &rel_dir) {
@@ -57,53 +57,26 @@ fn discover_member_crates(
     Ok(crates)
 }
 
-fn discover_app_workspaces(
-    view: &CrawlView<'_>,
-) -> Result<BTreeMap<String, Value>, G3RsHexarchIngestionError> {
-    let mut cargo_dirs = BTreeSet::new();
-    collect_workspace_candidate_dirs(view, "apps", &mut cargo_dirs);
-
-    let mut workspaces = BTreeMap::new();
-    for cargo_dir in cargo_dirs {
-        let cargo_rel_path = CrawlView::join_rel(&cargo_dir, "Cargo.toml");
-        let Some(entry) = view.entry(&cargo_rel_path) else {
-            continue;
-        };
-        if !entry.readable {
-            continue;
-        }
-
-        let Ok(content) = view.read_file(&cargo_rel_path) else {
-            continue;
-        };
-        let Ok(parsed) = toml::from_str::<Value>(&content) else {
-            continue;
-        };
-
-        if parsed.get("workspace").is_some() {
-            let _ = workspaces.insert(cargo_dir, parsed);
-        }
-    }
-
-    Ok(workspaces)
-}
-
-fn collect_workspace_candidate_dirs(
-    view: &CrawlView<'_>,
-    dir: &str,
-    rel_dirs: &mut BTreeSet<String>,
-) {
-    let Some(contents) = view.dir_contents(dir) else {
-        return;
+fn discover_pointed_workspace(view: &CrawlView<'_>) -> Result<Option<Value>, G3RsHexarchIngestionError> {
+    let Some(entry) = view.entry("Cargo.toml") else {
+        return Ok(None);
     };
-
-    if contents.files().iter().any(|file| file == "Cargo.toml") {
-        let _ = rel_dirs.insert(dir.to_owned());
+    if !entry.readable {
+        return Err(G3RsHexarchIngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: "file is not readable".to_owned(),
+        });
     }
+    let content = view.read_file("Cargo.toml").map_err(|err| G3RsHexarchIngestionError::Unreadable {
+        path: entry.path.abs_path.clone(),
+        reason: err.to_string(),
+    })?;
+    let parsed = toml::from_str::<Value>(&content).map_err(|err| G3RsHexarchIngestionError::ParseFailed {
+        path: entry.path.abs_path.clone(),
+        reason: err.to_string(),
+    })?;
 
-    for subdir in contents.dirs() {
-        collect_workspace_candidate_dirs(view, &CrawlView::join_rel(dir, subdir), rel_dirs);
-    }
+    Ok(parsed.get("workspace").is_some().then_some(parsed))
 }
 
 fn workspace_member_dirs(

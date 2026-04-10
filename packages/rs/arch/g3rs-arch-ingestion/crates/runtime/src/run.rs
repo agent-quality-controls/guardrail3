@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+use glob::Pattern;
 use g3rs_arch_ingestion_types::{
     G3RsArchConfigChecksInput, G3RsArchFileTreeChecksInput, G3RsArchIngestionError,
     G3RsArchSourceChecksInput,
@@ -51,7 +52,7 @@ pub fn ingest_for_file_tree_checks(
 }
 
 fn collect_crate_nodes(view: &CrawlView<'_>) -> Result<Vec<G3RsArchCrateNode>, G3RsArchIngestionError> {
-    let mut cargo_dirs = find_cargo_dirs(view, &[String::new()]);
+    let mut cargo_dirs = discover_crate_dirs(view)?;
     cargo_dirs.sort();
     cargo_dirs.dedup();
 
@@ -69,6 +70,102 @@ fn collect_crate_nodes(view: &CrawlView<'_>) -> Result<Vec<G3RsArchCrateNode>, G
     }
 
     Ok(nodes)
+}
+
+fn discover_crate_dirs(view: &CrawlView<'_>) -> Result<Vec<String>, G3RsArchIngestionError> {
+    let Some(root_entry) = view.entry("Cargo.toml") else {
+        return Ok(Vec::new());
+    };
+    if !root_entry.readable {
+        return Err(G3RsArchIngestionError::Unreadable {
+            path: root_entry.path.abs_path.clone(),
+            reason: "file is not readable".to_owned(),
+        });
+    }
+
+    let content = view.read_file("Cargo.toml").map_err(|err| G3RsArchIngestionError::Unreadable {
+        path: root_entry.path.abs_path.clone(),
+        reason: err.to_string(),
+    })?;
+    let parsed = toml::from_str::<Value>(&content).map_err(|err| G3RsArchIngestionError::ParseFailed {
+        path: root_entry.path.abs_path.clone(),
+        reason: err.to_string(),
+    })?;
+
+    let mut dirs = Vec::new();
+    if parsed.get("package").is_some() {
+        dirs.push(String::new());
+    }
+    dirs.extend(select_workspace_member_dirs(view, &parsed)?);
+
+    Ok(dirs)
+}
+
+fn select_workspace_member_dirs(
+    view: &CrawlView<'_>,
+    root_manifest: &Value,
+) -> Result<Vec<String>, G3RsArchIngestionError> {
+    let Some(workspace) = root_manifest.get("workspace").and_then(Value::as_table) else {
+        return Ok(Vec::new());
+    };
+
+    let member_patterns = workspace
+        .get("members")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .map(|pattern| {
+            Pattern::new(pattern).map_err(|err| G3RsArchIngestionError::ParseFailed {
+                path: view.root_abs_path().join("Cargo.toml"),
+                reason: format!("invalid workspace member pattern `{pattern}`: {err}"),
+            })
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let exclude_patterns = workspace
+        .get("exclude")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .map(|pattern| {
+            Pattern::new(pattern).map_err(|err| G3RsArchIngestionError::ParseFailed {
+                path: view.root_abs_path().join("Cargo.toml"),
+                reason: format!("invalid workspace exclude pattern `{pattern}`: {err}"),
+            })
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let member_dirs = view
+        .all_dir_rels()
+        .filter(|rel_dir| !rel_dir.is_empty())
+        .filter(|rel_dir| view.file_exists(&CrawlView::join_rel(rel_dir, "Cargo.toml")))
+        .filter(|rel_dir| member_patterns.iter().any(|pattern| pattern.matches(rel_dir)))
+        .filter(|rel_dir| !exclude_patterns.iter().any(|pattern| pattern.matches(rel_dir)))
+        .map(str::to_owned)
+        .collect::<Vec<_>>();
+
+    for pattern in workspace
+        .get("members")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+    {
+        let parsed_pattern = Pattern::new(pattern).map_err(|err| G3RsArchIngestionError::ParseFailed {
+            path: view.root_abs_path().join("Cargo.toml"),
+            reason: format!("invalid workspace member pattern `{pattern}`: {err}"),
+        })?;
+        if !member_dirs.iter().any(|member_dir| parsed_pattern.matches(member_dir)) {
+            return Err(G3RsArchIngestionError::ParseFailed {
+                path: view.root_abs_path().join("Cargo.toml"),
+                reason: format!("workspace member pattern `{pattern}` did not resolve to any Cargo.toml"),
+            });
+        }
+    }
+
+    Ok(member_dirs)
 }
 
 fn build_crate_node(
@@ -590,26 +687,6 @@ fn normalize_path(base: &str, rel: &str) -> String {
         }
     }
     parts.join("/")
-}
-
-fn find_cargo_dirs(view: &CrawlView<'_>, root_dirs: &[String]) -> Vec<String> {
-    let mut dirs = Vec::new();
-    for root in root_dirs {
-        find_cargo_dirs_recursive(view, root, &mut dirs);
-    }
-    dirs
-}
-
-fn find_cargo_dirs_recursive(view: &CrawlView<'_>, dir: &str, dirs: &mut Vec<String>) {
-    let Some(entry) = view.dir_contents(dir) else {
-        return;
-    };
-    if entry.files().iter().any(|file| file == "Cargo.toml") {
-        dirs.push(dir.to_owned());
-    }
-    for subdir in entry.dirs() {
-        find_cargo_dirs_recursive(view, &CrawlView::join_rel(dir, subdir), dirs);
-    }
 }
 
 fn feature_list(value: Option<&Value>) -> Vec<String> {

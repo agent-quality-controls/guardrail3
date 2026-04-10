@@ -1,7 +1,6 @@
 use std::fs;
 
 use g3rs_hexarch_source_checks::check as check_source;
-use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
 
 #[test]
@@ -48,7 +47,7 @@ version = "0.1.0"
     )
     .expect("adapter lib");
 
-    let crawl = crawl(root.path()).expect("crawl");
+    let crawl = super::crawl_workspace(root.path());
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     assert_eq!(inputs.len(), 2, "expected one source input per crate");
 
@@ -63,7 +62,7 @@ version = "0.1.0"
         .iter()
         .find(|result| result.id() == "RS-HEXARCH-22")
         .expect("ports result");
-    assert_eq!(ports.file(), Some("apps/demo/crates/ports/http"));
+    assert_eq!(ports.file(), Some("crates/ports/http"));
     assert!(!ports.inventory());
     assert!(ports.title().contains("public free functions"));
 
@@ -71,7 +70,7 @@ version = "0.1.0"
         .iter()
         .find(|result| result.id() == "RS-HEXARCH-23")
         .expect("adapter result");
-    assert_eq!(adapter.file(), Some("apps/demo/crates/adapters/sql"));
+    assert_eq!(adapter.file(), Some("crates/adapters/sql"));
     assert!(!adapter.inventory());
     assert!(adapter.title().contains("defines public traits"));
 }

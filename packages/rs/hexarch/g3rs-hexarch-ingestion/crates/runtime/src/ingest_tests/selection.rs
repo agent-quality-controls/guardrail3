@@ -1,12 +1,12 @@
 use std::fs;
 
 use g3rs_hexarch_source_checks::check as check_source;
-use g3rs_workspace_crawl::{crawl, G3RsWorkspaceCrawl};
+use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use guardrail3_check_types::G3CheckResult;
 use tempfile::tempdir;
 
 fn run_source(root: &std::path::Path) -> Vec<G3CheckResult> {
-    let crawl = crawl(root).expect("crawl");
+    let crawl = super::crawl_workspace(root);
     run_source_from_crawl(&crawl)
 }
 
@@ -15,6 +15,96 @@ fn run_source_from_crawl(crawl: &G3RsWorkspaceCrawl) -> Vec<G3CheckResult> {
     inputs.iter().flat_map(check_source).collect()
 }
 
+#[test]
+fn pointed_workspace_root_is_used_for_member_discovery() {
+    let root = tempdir().expect("tempdir");
+
+    fs::create_dir_all(root.path().join("crates/ports/http/src")).expect("dirs");
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/ports/http"]
+"#,
+    )
+    .expect("workspace cargo");
+    fs::write(
+        root.path().join("crates/ports/http/Cargo.toml"),
+        r#"
+[package]
+name = "ports-http"
+version = "0.1.0"
+"#,
+    )
+    .expect("member cargo");
+    fs::write(root.path().join("crates/ports/http/src/lib.rs"), "pub fn leaked() {}\n")
+        .expect("member lib");
+
+    let crawl = super::crawl_workspace(root.path());
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
+
+    assert_eq!(inputs.len(), 1);
+    assert_eq!(inputs[0].crate_facts.rel_dir, "crates/ports/http");
+}
+
+#[test]
+fn pointed_workspace_ignores_nested_foreign_workspaces() {
+    let root = tempdir().expect("tempdir");
+
+    fs::create_dir_all(root.path().join("crates/ports/http/src")).expect("real dirs");
+    fs::create_dir_all(root.path().join("apps/foreign/crates/adapters/sql/src")).expect("foreign dirs");
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/ports/http"]
+"#,
+    )
+    .expect("workspace cargo");
+    fs::write(
+        root.path().join("crates/ports/http/Cargo.toml"),
+        r#"
+[package]
+name = "ports-http"
+version = "0.1.0"
+"#,
+    )
+    .expect("real cargo");
+    fs::write(root.path().join("crates/ports/http/src/lib.rs"), "pub fn leaked() {}\n")
+        .expect("real lib");
+    fs::write(
+        root.path().join("apps/foreign/Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/adapters/sql"]
+"#,
+    )
+    .expect("foreign workspace cargo");
+    fs::write(
+        root.path().join("apps/foreign/crates/adapters/sql/Cargo.toml"),
+        r#"
+[package]
+name = "adapter-sql"
+version = "0.1.0"
+"#,
+    )
+    .expect("foreign cargo");
+    fs::write(
+        root.path().join("apps/foreign/crates/adapters/sql/src/lib.rs"),
+        "pub trait BadAdapterTrait {}\n",
+    )
+    .expect("foreign lib");
+
+    let crawl = super::crawl_workspace(root.path());
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
+    let results = run_source_from_crawl(&crawl);
+
+    assert_eq!(inputs.len(), 1);
+    assert_eq!(inputs[0].crate_facts.rel_dir, "crates/ports/http");
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].file(), Some("crates/ports/http"));
+}
 #[test]
 fn app_root_workspace_manifest_is_not_treated_as_source_crate() {
     let root = tempdir().expect("tempdir");
@@ -43,11 +133,11 @@ version = "0.1.0"
     )
     .expect("member lib");
 
-    let crawl = crawl(root.path()).expect("crawl");
+    let crawl = super::crawl_workspace(root.path());
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
 
     assert_eq!(inputs.len(), 1);
-    assert_eq!(inputs[0].crate_facts.rel_dir, "apps/demo/crates/ports/http");
+    assert_eq!(inputs[0].crate_facts.rel_dir, "crates/ports/http");
 }
 
 #[test]
@@ -93,7 +183,7 @@ version = "0.1.0"
         .iter()
         .find(|result| result.id() == "RS-HEXARCH-23")
         .expect("adapter result");
-    assert_eq!(adapter.file(), Some("apps/demo/crates/adapters/sql/Cargo.toml"));
+    assert_eq!(adapter.file(), Some("crates/adapters/sql/Cargo.toml"));
     assert!(adapter.title().contains("source analysis failed"));
 }
 
@@ -120,7 +210,7 @@ version = "0.1.0"
     )
     .expect("member cargo");
 
-    let crawl = crawl(root.path()).expect("crawl");
+    let crawl = super::crawl_workspace(root.path());
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
 
     assert!(inputs.is_empty());
@@ -169,11 +259,11 @@ version = "0.1.0"
     )
     .expect("real lib");
 
-    let crawl = crawl(root.path()).expect("crawl");
+    let crawl = super::crawl_workspace(root.path());
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
 
     assert_eq!(inputs.len(), 1);
-    assert_eq!(inputs[0].crate_facts.rel_dir, "apps/demo/crates/ports/http");
+    assert_eq!(inputs[0].crate_facts.rel_dir, "crates/ports/http");
 }
 
 #[test]
@@ -206,7 +296,8 @@ version = "0.1.0"
     )
     .expect("member lib");
 
-    let results = run_source(root.path());
+    let crawl = g3rs_workspace_crawl::crawl(&root.path().join("apps/good")).expect("crawl");
+    let results = run_source_from_crawl(&crawl);
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id(), "RS-HEXARCH-22");
 }
@@ -240,11 +331,11 @@ version = "0.1.0"
     )
     .expect("member lib");
 
-    let crawl = crawl(root.path()).expect("crawl");
+    let crawl = super::crawl_workspace(root.path());
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
 
     assert_eq!(inputs.len(), 1);
-    assert_eq!(inputs[0].crate_facts.rel_dir, "apps/demo/crates/ports/http");
+    assert_eq!(inputs[0].crate_facts.rel_dir, "crates/ports/http");
 }
 
 #[test]
@@ -285,11 +376,11 @@ version = "0.1.0"
     )
     .expect("adapter cargo");
 
-    let mut crawl = crawl(root.path()).expect("crawl");
+    let mut crawl = super::crawl_workspace(root.path());
     crawl
         .entries
         .iter_mut()
-        .find(|entry| entry.path.rel_path == "apps/demo/crates/adapters/sql/Cargo.toml")
+        .find(|entry| entry.path.rel_path == "crates/adapters/sql/Cargo.toml")
         .expect("entry")
         .readable = false;
 
@@ -300,7 +391,7 @@ version = "0.1.0"
         .expect("adapter result");
 
     assert_eq!(results.len(), 2);
-    assert_eq!(adapter.file(), Some("apps/demo/crates/adapters/sql/Cargo.toml"));
+    assert_eq!(adapter.file(), Some("crates/adapters/sql/Cargo.toml"));
     assert!(adapter.title().contains("source analysis failed"));
     assert!(adapter.message().contains("file is not readable"));
 }
