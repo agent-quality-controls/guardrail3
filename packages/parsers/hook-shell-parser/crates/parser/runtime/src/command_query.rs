@@ -88,6 +88,17 @@ pub fn any_resolved_command(
 }
 
 #[must_use]
+pub fn any_resolved_command_on_line(
+    parsed: &ParsedShellScript<'_>,
+    raw: &str,
+    line_no: usize,
+    predicate: fn(&ResolvedCommand) -> bool,
+) -> bool {
+    let mut visiting = Vec::new();
+    line_matches(raw, parsed, &mut visiting, predicate, line_no)
+}
+
+#[must_use]
 pub fn any_resolved_command_relaxed(
     parsed: &ParsedShellScript<'_>,
     predicate: fn(&ResolvedCommand) -> bool,

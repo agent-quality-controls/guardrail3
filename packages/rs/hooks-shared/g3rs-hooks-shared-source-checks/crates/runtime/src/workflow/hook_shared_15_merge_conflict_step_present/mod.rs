@@ -1,11 +1,12 @@
 use crate::compat::{G3CheckResult, G3Severity};
+use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use crate::inputs::ExecutableCommandContextInput;
 
 const ID: &str = "HOOK-SHARED-15";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
-    if has_merge_conflict_check(input.parsed.executable_lines.as_slice()) {
+    if has_merge_conflict_check(input.parsed) {
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
@@ -32,18 +33,18 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
     ));
 }
 
-fn has_merge_conflict_check(executable_lines: &[hook_shell_parser::ExecutableLine<'_>]) -> bool {
-    executable_lines.iter().any(|line| {
-        let command = line.command_text.trim();
-        let command_name = command.split_whitespace().next().unwrap_or_default();
-        matches!(command_name, "grep" | "rg")
-            && (command.contains("<{7}")
-                || command.contains("<<<<<<<")
-                || command.contains("=======")
-                || command.contains(">>>>>>>")
-                || command.contains("conflict marker")
-                || command.contains("merge conflict"))
-    })
+fn has_merge_conflict_check(parsed: &hook_shell_parser::ParsedShellScript<'_>) -> bool {
+    any_resolved_command(parsed, is_merge_conflict_command)
+}
+
+fn is_merge_conflict_command(command: &ResolvedCommand) -> bool {
+    matches!(command.command_name(), "grep" | "rg")
+        && (command.command_text().contains("<{7}")
+            || command.command_text().contains("<<<<<<<")
+            || command.command_text().contains("=======")
+            || command.command_text().contains(">>>>>>>")
+            || command.command_text().contains("conflict marker")
+            || command.command_text().contains("merge conflict"))
 }
 
 #[cfg(test)]

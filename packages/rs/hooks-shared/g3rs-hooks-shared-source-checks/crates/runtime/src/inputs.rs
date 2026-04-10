@@ -16,5 +16,6 @@ pub(crate) struct DispatcherSyntaxInput<'a> {
 
 pub(crate) struct FailOpenWrapperInput<'a> {
     pub(crate) rel_path: &'a str,
+    pub(crate) parsed: &'a ParsedShellScript<'a>,
     pub(crate) executable_lines: &'a [ExecutableLine<'a>],
 }

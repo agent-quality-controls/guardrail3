@@ -31,6 +31,48 @@ fn passes_when_real_frozen_lockfile_command_exists() {
 }
 
 #[test]
+fn passes_when_env_wrapper_executes_real_frozen_lockfile_command() {
+    let results = run_case("env -i pnpm install --frozen-lockfile\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Info),
+            title: Some("concrete lockfile integrity command present"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn passes_when_path_qualified_pnpm_executes_real_frozen_lockfile_command() {
+    let results = run_case("/usr/local/bin/pnpm install --frozen-lockfile\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Info),
+            title: Some("concrete lockfile integrity command present"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn passes_when_called_function_executes_real_frozen_lockfile_command() {
+    let results = run_case("verify_lockfile() {\n    pnpm i --frozen-lockfile\n}\nverify_lockfile\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Info),
+            title: Some("concrete lockfile integrity command present"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn warns_when_frozen_lockfile_command_is_echoed() {
     let results = run_case("echo \"pnpm install --frozen-lockfile\"\n");
     assertions::assert_rule_results(

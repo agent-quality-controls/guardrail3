@@ -1,17 +1,12 @@
 use crate::compat::{G3CheckResult, G3Severity};
+use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use crate::inputs::ExecutableCommandContextInput;
 
 const ID: &str = "HOOK-SHARED-16";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
-    let found = input.parsed.executable_lines().iter().any(|line| {
-        (line.command_name() == "git" && line.command_text().contains("git cat-file -s"))
-            || (matches!(line.command_name(), "stat" | "wc" | "du")
-                && (line.command_text().contains(" -c%s")
-                    || line.command_text().contains(" --bytes")
-                    || line.command_text().contains(" -c ")))
-    });
+    let found = any_resolved_command(input.parsed, is_file_size_command);
 
     if found {
         results.push(
@@ -37,6 +32,14 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
             false,
         ));
     }
+}
+
+fn is_file_size_command(command: &ResolvedCommand) -> bool {
+    (command.command_name() == "git" && command.command_text().contains("cat-file -s"))
+        || (matches!(command.command_name(), "stat" | "wc" | "du")
+            && (command.command_text().contains(" -c%s")
+                || command.command_text().contains(" --bytes")
+                || command.command_text().contains(" -c ")))
 }
 
 #[cfg(test)]

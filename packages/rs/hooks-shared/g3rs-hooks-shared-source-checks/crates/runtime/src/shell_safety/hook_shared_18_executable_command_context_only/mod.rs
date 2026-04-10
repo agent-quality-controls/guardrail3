@@ -1,4 +1,5 @@
 use crate::compat::{G3CheckResult, G3Severity};
+use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use crate::facts::HookScriptKind;
 use crate::inputs::ExecutableCommandContextInput;
@@ -17,11 +18,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
         let Some(step) = suspicious_step(trimmed) else {
             continue;
         };
-        let is_executable_match = input
-            .parsed
-            .executable_lines()
-            .iter()
-            .any(|line| matches_step_family(line, step));
+        let is_executable_match = matches_step_family(input.parsed, step);
         if !is_executable_match {
             suspicious_lines.push((line_no, step));
         }
@@ -75,35 +72,64 @@ fn step_family_from_text(line: &str) -> Option<&'static str> {
         .find_map(|(needle, family)| line.contains(needle).then_some(family))
 }
 
-fn matches_step_family(line: &hook_shell_parser::ExecutableLine<'_>, family: &str) -> bool {
-    let command_text = line.command_text();
+fn matches_step_family(parsed: &hook_shell_parser::ParsedShellScript<'_>, family: &str) -> bool {
+    any_resolved_command(parsed, predicate_for_step_family(family))
+}
+
+fn predicate_for_step_family(family: &str) -> fn(&ResolvedCommand) -> bool {
     match family {
-        "guardrail3 rs validate" => {
-            line.command_name() == "guardrail3" && command_text.contains("guardrail3 rs validate")
-        }
-        "guardrail3 validate" => {
-            line.command_name() == "guardrail3" && command_text.contains("guardrail3 validate")
-        }
-        "cargo clippy" => line.command_name() == "cargo" && command_text.contains("cargo clippy"),
-        "cargo deny" => {
-            (line.command_name() == "cargo" && command_text.contains("cargo deny"))
-                || line.command_name() == "cargo-deny"
-        }
-        "cargo test" => line.command_name() == "cargo" && command_text.contains("cargo test"),
-        "cargo machete" => {
-            (line.command_name() == "cargo" && command_text.contains("cargo machete"))
-                || line.command_name() == "cargo-machete"
-        }
-        "cargo dupes" => {
-            (line.command_name() == "cargo" && command_text.contains("cargo dupes"))
-                || line.command_name() == "cargo-dupes"
-        }
-        "gitleaks" => line.command_name() == "gitleaks",
-        "pnpm install --frozen-lockfile" => {
-            line.command_name() == "pnpm" && command_text.contains("--frozen-lockfile")
-        }
-        _ => false,
+        "guardrail3 rs validate" => is_guardrail_rs_validate_command,
+        "guardrail3 validate" => is_guardrail_validate_command,
+        "cargo clippy" => is_cargo_clippy_command,
+        "cargo deny" => is_cargo_deny_command,
+        "cargo test" => is_cargo_test_command,
+        "cargo machete" => is_cargo_machete_command,
+        "cargo dupes" => is_cargo_dupes_command,
+        "gitleaks" => is_gitleaks_command,
+        "pnpm install --frozen-lockfile" => is_frozen_lockfile_command,
+        _ => |_| false,
     }
+}
+
+fn is_guardrail_rs_validate_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "guardrail3" && command.command_text().contains(" rs validate")
+}
+
+fn is_guardrail_validate_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "guardrail3"
+        && command.command_text().contains(" validate")
+        && !command.command_text().contains(" rs validate")
+}
+
+fn is_cargo_clippy_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "cargo" && command.command_text().contains(" clippy")
+}
+
+fn is_cargo_deny_command(command: &ResolvedCommand) -> bool {
+    (command.command_name() == "cargo" && command.command_text().contains(" deny"))
+        || command.command_name() == "cargo-deny"
+}
+
+fn is_cargo_test_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "cargo" && command.command_text().contains(" test")
+}
+
+fn is_cargo_machete_command(command: &ResolvedCommand) -> bool {
+    (command.command_name() == "cargo" && command.command_text().contains(" machete"))
+        || command.command_name() == "cargo-machete"
+}
+
+fn is_cargo_dupes_command(command: &ResolvedCommand) -> bool {
+    (command.command_name() == "cargo" && command.command_text().contains(" dupes"))
+        || command.command_name() == "cargo-dupes"
+}
+
+fn is_gitleaks_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "gitleaks"
+}
+
+fn is_frozen_lockfile_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "pnpm" && command.command_text().contains("--frozen-lockfile")
 }
 
 #[cfg(test)]
