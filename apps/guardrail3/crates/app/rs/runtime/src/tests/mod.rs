@@ -432,8 +432,6 @@ fn hexarch_runtime_stays_decoupled_from_topology_exactness() {
             "RS-TOPOLOGY-12",
             "RS-HEXARCH-07",
             "RS-HEXARCH-09",
-            "RS-LIBARCH-05",
-            "RS-LIBARCH-06",
         ],
     );
 
@@ -667,7 +665,7 @@ fn fmt_runtime_validation_scope_does_not_narrow_global_family() {
         &report,
         "fmt",
         "RS-FMT-01",
-        Some(""),
+        Some("rustfmt.toml"),
         Some(false),
         Some("rustfmt config missing"),
     );
@@ -1137,7 +1135,7 @@ fn fmt_runtime_validation_scope_keeps_repo_global_surface() {
         &report,
         "fmt",
         "RS-FMT-01",
-        Some(""),
+        Some("rustfmt.toml"),
         Some(false),
         Some("rustfmt config missing"),
     );

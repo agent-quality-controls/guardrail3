@@ -79,9 +79,8 @@ The Rust validation family set is:
 - `hooks-shared`
 - `hooks-rs`
 
-`arch` and `libarch` are part of the target Rust family model, but neither is part of the live runtime until there is a checker module under:
+`arch` is part of the target Rust family model, but it is not part of the live runtime until there is a checker module under:
 - `crates/app/rs/checks/rs/arch/`
-- `crates/app/rs/checks/rs/libarch/`
 
 ## CLI contract
 

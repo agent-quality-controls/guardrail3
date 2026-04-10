@@ -93,7 +93,7 @@ The Rust validation family set is:
 - `hooks-shared`
 - `hooks-rs`
 
-`libarch` is not part of runtime validation yet.
+The retired package-only layered family is not part of runtime validation.
 
 ## Important semantics
 

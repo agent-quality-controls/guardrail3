@@ -55,7 +55,6 @@ Family specs must remain correct in that mixed shape.
 - `release.md`
 - `hooks.md`
 - `hexarch.md`
-- `libarch.md`
 
 ## Required questions per family
 

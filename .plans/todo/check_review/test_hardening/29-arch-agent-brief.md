@@ -19,7 +19,6 @@ Read these in order:
 4. `.plans/todo/check_review/test_hardening/99-family-agent-playbook.md`
 5. `.plans/todo/checks/rs/arch.md`
 6. `.plans/todo/checks/rs/hexarch.md`
-7. `.plans/todo/checks/rs/libarch.md`
 8. `.plans/todo/checks/2026-03-24-rust-validation-cutover.md`
 
 ## Primary Code
@@ -78,7 +77,7 @@ Every discovered Rust `Cargo.toml` root must classify as exactly one of:
 
 Ownership:
 - `app` roots are candidates for `rs/hexarch`
-- `package` roots are candidates for `rs/libarch`
+- `package` roots are candidates for `rs/arch`
 - `other` roots are misplaced when Rust architecture enforcement is active
 
 `rs/arch` is the only family that should emit repo-global misplaced-root findings.
@@ -88,7 +87,7 @@ Ownership:
 Discovery/classification always happens.
 
 Reporting is conditional:
-- if `hexarch` and/or `libarch` is enabled, misplaced `other` roots are errors
+- if `hexarch` and/or `arch` is enabled, misplaced `other` roots are errors
 - if both are disabled, no misplaced-root finding is emitted
 
 `rs/arch` must not fail open by silently skipping discovery when family enablement changes.
@@ -131,7 +130,7 @@ Highest-signal attacks for this family:
 - ambiguous or overlapping path ownership
 - illegal nesting between app/package architecture boundaries
 - config states where only `hexarch` is enabled
-- config states where only `libarch` is enabled
+- config states where only `arch` is enabled
 - config states where both are enabled
 - config states where both are disabled
 - malformed placement/config inputs that must fail closed
@@ -146,7 +145,7 @@ Required outcomes:
 - add golden coverage for every rule
 - add at least one real attack-vector test for every rule
 - use exact owned hit/non-hit assertions
-- introduce shared placement facts reusable by `hexarch` and `libarch`
+- introduce shared placement facts reusable by `hexarch` and `arch`
 - update `.plans/todo/checks/rs/arch.md` with:
   - implementation notes
   - gaps closed
@@ -154,7 +153,7 @@ Required outcomes:
 
 ## Do Not
 
-- duplicate misplaced-root rule bodies in `hexarch` and `libarch`
+- duplicate misplaced-root rule bodies in `hexarch` and `arch`
 - move repo-global placement into `cargo`
 - let enablement change discovery
 - collapse this family back into `hexarch`
@@ -176,7 +175,7 @@ The pass is not done until:
 ## Suggested Start Order
 
 1. read `arch.md` fully and map the 5 planned rules into likely fact/input shapes
-2. inspect `hexarch` and `libarch` for reusable root/workspace/dependency facts
+2. inspect `hexarch` and `arch` for reusable root/workspace/dependency facts
 3. build `facts.rs` and `inputs.rs` first, especially root classification and ownership facts
 4. implement and test the classification/placement rules first:
    - `RS-ARCH-01`

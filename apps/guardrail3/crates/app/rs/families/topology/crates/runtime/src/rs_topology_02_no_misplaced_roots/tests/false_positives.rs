@@ -29,24 +29,17 @@ fn app_and_package_roots_do_not_trigger_misplaced_root_reporting() {
 }
 
 #[test]
-fn excluded_fixture_and_target_roots_do_not_trigger_misplaced_reporting() {
+fn target_roots_do_not_trigger_misplaced_reporting() {
     let config = "[rust.checks]\ntopology = true\nhexarch = true\n";
     let results = check_results(&tree(
         &[
-            ("", entry(&["tests", "target"], &["guardrail3.toml"])),
-            ("tests", entry(&["fixtures"], &[])),
-            ("tests/fixtures", entry(&["worker"], &[])),
-            ("tests/fixtures/worker", entry(&[], &["Cargo.toml"])),
+            ("", entry(&["target"], &["guardrail3.toml"])),
             ("target", entry(&["debug"], &[])),
             ("target/debug", entry(&["scratch"], &[])),
             ("target/debug/scratch", entry(&[], &["Cargo.toml"])),
         ],
         &[
             ("guardrail3.toml", config),
-            (
-                "tests/fixtures/worker/Cargo.toml",
-                "[package]\nname = \"fixture\"\n",
-            ),
             (
                 "target/debug/scratch/Cargo.toml",
                 "[package]\nname = \"scratch\"\n",
@@ -78,7 +71,7 @@ fn declared_auxiliary_roots_do_not_trigger_misplaced_reporting() {
 }
 
 #[test]
-fn excluded_validation_root_does_not_treat_its_own_cargo_manifest_as_live_topology() {
+fn excluded_validation_root_is_still_reported_when_not_excluded_by_builtins() {
     let config = "[rust.checks]\ntopology = true\nhexarch = true\n";
     let results = check_results(&tree_at(
         "/tmp/repo/tests/fixtures/rust-app",
@@ -89,7 +82,7 @@ fn excluded_validation_root_does_not_treat_its_own_cargo_manifest_as_live_topolo
         ],
     ));
 
-    assertions::assert_no_error_files(&results, "RS-TOPOLOGY-02");
+    assertions::assert_error_files(&results, "RS-TOPOLOGY-02", &["Cargo.toml"]);
 }
 
 #[test]

@@ -20,5 +20,4 @@ Closed packets kept as closure records:
 - `code.md`
 - `deps.md`
 - `hooks-rs.md`
-- `libarch.md`
 - `test.md`

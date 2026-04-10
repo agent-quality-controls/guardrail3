@@ -21,9 +21,7 @@ fn misplaced_roots_fire_when_hexarch_is_enabled() {
 
 #[test]
 fn misplaced_roots_fire_even_when_hexarch_is_disabled() {
-    // After libarch retirement, package roots are unconditionally governed,
-    // so misplaced-root reporting stays active regardless of hexarch.
-    let config = "[rust.checks]\nhexarch = false\n";
+    let config = "[rust.checks]\narch = true\nhexarch = false\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["tools"], &["guardrail3.toml"])),

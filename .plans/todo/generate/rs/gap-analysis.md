@@ -58,7 +58,7 @@ Current canonical/builders:
 ### hexarch
 - current code does not scaffold Rust hex architecture
 
-### libarch
+### package-scoped arch
 - current code does not scaffold library architecture
 
 ## Golden-fixture shape the generator must respect
@@ -84,4 +84,4 @@ Important supporting adversarial fixtures:
 - generator family drafts originally described ownership in terms of current helpers like `resolve_rust_root(cfg)` instead of project-shape roots
 - release parity requires workflow generation, not only config-file generation
 - hook parity requires generator-owned structural shape, not only semantic line content
-- `libarch` in a mixed monorepo needs its own workspace boundary and must not be silently treated as an ordinary member of an ancestor workspace
+- package-scoped `arch` in a mixed monorepo needs its own workspace boundary and must not be silently treated as an ordinary member of an ancestor workspace

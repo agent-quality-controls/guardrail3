@@ -62,7 +62,7 @@ Added `rs/rust_root_placement.rs` to centralize:
   - `ambiguous`
 - owner-family candidate detection:
   - `hexarch`
-  - `libarch`
+  - package-owned `arch`
 - illegal app/package zone overlap pair collection
 - fail-closed discovery/input failures for missing cached `Cargo.toml` content
 
@@ -79,7 +79,7 @@ The orchestrator currently:
 
 - collects shared placement facts
 - parses `guardrail3.toml`
-- resolves effective `hexarch` / `libarch` enablement
+- resolves effective `hexarch` / `arch` enablement
 - builds typed inputs per rule
 
 ### 3. Implemented rules
@@ -98,7 +98,7 @@ Flags `other` roots when architecture enforcement is active.
 
 Current reporting rule:
 
-- if `hexarch` or `libarch` is effectively enabled anywhere relevant, `other` roots error
+- if `hexarch` or `arch` is effectively enabled anywhere relevant, `other` roots error
 - if both are disabled, `RS-ARCH-02` stays quiet
 
 #### `RS-ARCH-03`
@@ -235,9 +235,9 @@ Not completed:
 
 ## Current Gaps / Follow-ups
 
-### 1. `libarch` is still not implemented
+### 1. Package-owned architecture was not yet implemented
 
-`rs/arch` now reasons about `libarch` ownership and enablement, but the actual `rs/libarch` family does not yet exist in runtime.
+`rs/arch` now owns package-root architecture and topology enablement should route package roots through `arch`.
 
 ### 2. Shared placement substrate is not yet adopted by `hexarch`
 
@@ -246,9 +246,9 @@ Not completed:
 Next logical cleanup:
 
 - make `hexarch` consume the shared root inventory where appropriate
-- use the same substrate when `libarch` lands
+- use the same substrate when package-root `arch` routing lands
 
-### 3. `RS-ARCH-05` may need expansion once `libarch` is real
+### 3. `RS-ARCH-05` may need expansion once package-root `arch` routing is real
 
 Right now `RS-ARCH-05` covers:
 
@@ -256,7 +256,7 @@ Right now `RS-ARCH-05` covers:
 - malformed config
 - missing cached Cargo content
 
-Once `libarch` exists, revisit whether any additional cross-family coherence states belong in this rule.
+Once package-root `arch` routing exists, revisit whether any additional cross-family coherence states belong in this rule.
 
 ## Recommended Next Steps
 
@@ -267,7 +267,7 @@ Once `libarch` exists, revisit whether any additional cross-family coherence sta
    - `cargo run -p guardrail3 -- rs validate . --family arch`
 4. Capture the actual findings from the current repo and compare them against expected root-placement policy.
 5. Decide whether `rs/arch` should also be included by default in any generated/init config templates beyond the current `arch = true` insertion.
-6. After that, start `rs/libarch` using `rust_root_placement.rs` as the base discovery layer.
+6. After that, keep expanding `rs/arch` using `rust_root_placement.rs` as the base discovery layer.
 
 ## Cold Start Read List For This Work
 

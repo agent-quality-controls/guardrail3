@@ -1,7 +1,7 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RustTopologyOwner {
     Hexarch,
-    Libarch,
+    Arch,
 }
 
 impl RustTopologyOwner {
@@ -9,7 +9,7 @@ impl RustTopologyOwner {
     pub const fn label(self) -> &'static str {
         match self {
             Self::Hexarch => "app",
-            Self::Libarch => "package",
+            Self::Arch => "package",
         }
     }
 }
@@ -129,7 +129,7 @@ pub fn classify_root(
         owner_families.push(RustTopologyOwner::Hexarch);
     }
     if !package_zone_candidates.is_empty() {
-        owner_families.push(RustTopologyOwner::Libarch);
+        owner_families.push(RustTopologyOwner::Arch);
     }
 
     RustRootPlacementRootFacts::new(

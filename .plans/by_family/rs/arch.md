@@ -16,7 +16,7 @@ Current state:
 
 - runtime/model/config/reporting selection know `arch`
 - lean app builds and runs through `--features family-arch`
-- current live rules own the generic split-library contract that used to sit in `libarch`:
+- current live rules own the generic split-library contract that used to sit in the retired package-only layered family:
   - escalation from flat library into split architecture
   - split root must remain a workspace facade package
   - split root must actually own internal member crates
@@ -48,16 +48,13 @@ Done means:
 - flat package libraries over threshold emit `RS-ARCH-01`
 - broken split roots emit `RS-ARCH-02/03`
 - direct dependencies on internal member crates emit `RS-ARCH-04`
-- `libarch` no longer emits the migrated generic split rules
-- lean CLI runs show `RS-ARCH-*` without `RS-LIBARCH-01/02/03`
+- lean CLI runs show only `RS-ARCH-*`
 
 Historical/supplemental references:
 
-- `.plans/todo/arch-topology-libarch-migration-handoff.md`
 - `.plans/todo/arch-workspace-membership-exactness-handoff.md`
-- `.plans/todo/checks/rs/libarch.md`
 
 Next planning focus:
 
 - broaden `arch` from package-scoped split-library candidates toward the final repo-wide crate-architecture surface
-- continue shrinking `libarch` until only genuinely obsolete legacy layered-shape checks remain
+- keep the remaining package-scoped architecture rules stable while the repo finishes removing stale retired-family references

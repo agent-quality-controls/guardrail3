@@ -44,7 +44,7 @@ fn misplaced_workspace_local_file_is_reported_by_topology() {
     assert!(
         result
             .message()
-            .contains("outside every legal workspace root for `clippy`"),
+            .contains("not inside any workspace that has `clippy` checks enabled"),
         "unexpected message: {}",
         result.message()
     );

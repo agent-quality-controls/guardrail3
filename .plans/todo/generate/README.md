@@ -44,7 +44,7 @@ apps/guardrail3/crates/app/rs/generate/
     ├── release/
     ├── hooks/
     ├── hexarch/
-    └── libarch/
+    └── arch-package/
 ```
 
 Within each family:
