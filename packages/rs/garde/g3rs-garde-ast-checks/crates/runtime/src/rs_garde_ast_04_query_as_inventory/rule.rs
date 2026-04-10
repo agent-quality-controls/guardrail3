@@ -8,6 +8,9 @@ use crate::support::{QueryAsMacroSite, error, warn};
 const ID: &str = "RS-GARDE-AST-04";
 
 pub(crate) fn check(macro_use: &QueryAsMacroSite, results: &mut Vec<G3CheckResult>) {
+    if !macro_use.policy_available {
+        return;
+    }
     match macro_use.escape_hatch_reason.as_deref() {
         None => results.push(error(
             ID,
@@ -48,6 +51,9 @@ pub(crate) fn check(macro_use: &QueryAsMacroSite, results: &mut Vec<G3CheckResul
 pub(crate) fn check_count(macro_uses: &[QueryAsMacroSite], results: &mut Vec<G3CheckResult>) {
     let mut counts = BTreeMap::<String, usize>::new();
     for macro_use in macro_uses {
+        if !macro_use.policy_available {
+            continue;
+        }
         *counts.entry(macro_use.rel_path.clone()).or_default() += 1;
     }
 

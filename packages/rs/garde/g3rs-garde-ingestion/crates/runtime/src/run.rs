@@ -1,5 +1,6 @@
 /// Public ingestion entry point.
 use g3rs_garde_ast_checks_types::{G3RsAstFile, G3RsGardeAstChecksInput};
+use cargo_toml_parser::CargoToml;
 use g3rs_garde_types::{G3RsGardeConfigChecksInput, G3RsGardeFileTreeChecksInput};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -59,6 +60,15 @@ pub fn ingest_for_config_checks(
 pub fn ingest_for_ast_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeAstChecksInput, IngestionError> {
+    let cargo_entry = crate::select::select_cargo_toml(crawl)
+        .ok_or(IngestionError::CargoTomlNotFound)?;
+    if !cargo_entry.readable {
+        return Err(IngestionError::Unreadable {
+            path: cargo_entry.path.abs_path.clone(),
+            reason: "file is not readable".to_owned(),
+        });
+    }
+    let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
     let guardrail_entry =
         crate::select::select_guardrail_toml(crawl).ok_or(IngestionError::GuardrailTomlNotFound)?;
     let source_files = crate::select::select_ast_source_files(crawl)
@@ -70,12 +80,21 @@ pub fn ingest_for_ast_checks(
         .collect::<Vec<_>>();
 
     Ok(G3RsGardeAstChecksInput {
+        garde_dependency_present: has_garde_dependency(&cargo),
         source_files,
         guardrail_toml: G3RsAstFile {
             rel_path: guardrail_entry.path.rel_path.clone(),
             abs_path: guardrail_entry.path.abs_path.clone(),
         },
     })
+}
+
+fn has_garde_dependency(cargo: &CargoToml) -> bool {
+    cargo.dependencies.contains_key("garde")
+        || cargo
+            .workspace
+            .as_ref()
+            .is_some_and(|workspace| workspace.dependencies.contains_key("garde"))
 }
 
 /// Stub file-tree ingestion entry point for the garde family.

@@ -31,6 +31,7 @@ pub(crate) struct QueryAsMacroSite {
     pub(crate) line: usize,
     pub(crate) macro_name: String,
     pub(crate) escape_hatch_reason: Option<String>,
+    pub(crate) policy_available: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -138,6 +139,18 @@ pub(crate) fn analyze_input(input: &G3RsGardeAstChecksInput) -> GardeAstAnalysis
             rel_path: source_file.rel_path.clone(),
             parsed: parse::analyze(&ast),
         });
+    }
+
+    let garde_applicable = input.garde_dependency_present
+        || parsed_files
+            .iter()
+            .any(|parsed_file| parsed_file_shows_garde_adoption(&parsed_file.parsed));
+
+    if !garde_applicable {
+        return GardeAstAnalysis {
+            input_failures,
+            ..GardeAstAnalysis::default()
+        };
     }
 
     let mut global_type_validation_map = BTreeMap::<String, (bool, bool)>::new();
@@ -266,6 +279,7 @@ pub(crate) fn analyze_input(input: &G3RsGardeAstChecksInput) -> GardeAstAnalysis
                 rel_path: parsed_file.rel_path.clone(),
                 line: macro_use.line,
                 macro_name: macro_use.macro_name,
+                policy_available: guardrail_config.is_some(),
                 escape_hatch_reason: guardrail_config.as_ref().and_then(|config| {
                     config
                         .escape_hatch_reason(
@@ -305,6 +319,16 @@ pub(crate) fn analyze_input(input: &G3RsGardeAstChecksInput) -> GardeAstAnalysis
         query_as_macros,
         guardrail_config_validation_sites,
     }
+}
+
+fn parsed_file_shows_garde_adoption(parsed: &ParsedGardeFile) -> bool {
+    !parsed.derived_types.is_empty()
+        || !parsed.manual_deserialize_impls.is_empty()
+        || !parsed.manual_validate_impls.is_empty()
+        || parsed
+            .type_validation_map
+            .values()
+            .any(|(_has_non_primitive_fields, has_validate)| *has_validate)
 }
 
 fn resolve_validation_state(

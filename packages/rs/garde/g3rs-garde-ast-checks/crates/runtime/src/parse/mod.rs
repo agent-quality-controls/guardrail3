@@ -190,6 +190,7 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
                 .extend(collect_unvalidated_guardrail_sites(
                     &item.block,
                     &item.sig.output,
+                    &self.module_path_aliases,
                 ));
         }
         syn::visit::visit_item_fn(self, item);
@@ -201,6 +202,7 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
                 .extend(collect_unvalidated_guardrail_sites(
                     &item.block,
                     &item.sig.output,
+                    &self.module_path_aliases,
                 ));
         }
         syn::visit::visit_impl_item_fn(self, item);

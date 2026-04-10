@@ -23,11 +23,22 @@ pub(crate) fn select_ast_source_files(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWo
     let mut files = crawl
         .files_with_extension("rs")
         .into_iter()
+        .filter(|entry| is_runtime_source_path(entry.path.rel_path.as_str()))
         .filter(|entry| !is_fixture_path(entry.path.rel_path.as_str()))
         .filter(|entry| !is_test_path(entry.path.rel_path.as_str()))
         .collect::<Vec<_>>();
     files.sort_by(|left, right| left.path.rel_path.cmp(&right.path.rel_path));
     files
+}
+
+fn is_runtime_source_path(rel_path: &str) -> bool {
+    rel_path == "src/lib.rs"
+        || rel_path == "src/main.rs"
+        || rel_path
+            .strip_prefix("src/")
+            .is_some_and(|rest| rest.ends_with(".rs"))
+        || rel_path
+            .contains("/src/")
 }
 
 fn is_fixture_path(rel_path: &str) -> bool {

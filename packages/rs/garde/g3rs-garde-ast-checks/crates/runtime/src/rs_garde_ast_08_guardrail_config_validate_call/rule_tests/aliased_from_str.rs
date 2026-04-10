@@ -1,11 +1,11 @@
 use g3rs_garde_ast_checks_assertions::rs_garde_ast_08_guardrail_config_validate_call as assertions;
 
 #[test]
-fn errors_on_toml_from_str_without_validate() {
+fn errors_on_imported_from_str_without_validate() {
     let fixture = crate::test_support::fixture(
         &[(
             "src/load_config.rs",
-            "use guardrail3_domain_config::types::GuardrailConfig;\n\nfn load_config(content: &str) -> Option<GuardrailConfig> {\n    toml::from_str(content).ok()\n}\n",
+            "use guardrail3_domain_config::types::GuardrailConfig;\nuse toml::from_str;\n\nfn load_config(content: &str) -> Option<GuardrailConfig> {\n    from_str(content).ok()\n}\n",
         )],
         crate::test_support::default_guardrail_toml(),
     );
@@ -24,11 +24,11 @@ fn errors_on_toml_from_str_without_validate() {
 }
 
 #[test]
-fn errors_on_explicit_toml_from_str_without_validate() {
+fn errors_on_module_aliased_toml_without_validate() {
     let fixture = crate::test_support::fixture(
         &[(
             "src/load_config.rs",
-            "use guardrail3_domain_config::types::GuardrailConfig;\n\nfn load_config(content: &str) -> Option<GuardrailConfig> {\n    toml::from_str::<GuardrailConfig>(content).ok()\n}\n",
+            "use guardrail3_domain_config::types::GuardrailConfig;\nuse toml as t;\n\nfn load_config(content: &str) -> Option<GuardrailConfig> {\n    t::from_str(content).ok()\n}\n",
         )],
         crate::test_support::default_guardrail_toml(),
     );
