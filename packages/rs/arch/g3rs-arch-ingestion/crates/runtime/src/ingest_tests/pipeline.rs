@@ -272,3 +272,54 @@ version = "0.1.0"
         .iter()
         .all(|surface| !surface.rel_path.starts_with("pkg/crates/inner/")));
 }
+
+#[test]
+fn config_ingestion_respects_workspace_exclude() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["pkg", "pkg/crates/inner"]
+exclude = ["pkg/crates/inner"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("pkg/src")).expect("pkg src");
+    fs::create_dir_all(root.path().join("pkg/crates/inner/src")).expect("inner src");
+
+    fs::write(
+        root.path().join("pkg/Cargo.toml"),
+        r#"
+[package]
+name = "pkg"
+version = "0.1.0"
+
+[dependencies]
+inner = { path = "crates/inner" }
+"#,
+    )
+    .expect("pkg cargo");
+    fs::write(root.path().join("pkg/src/lib.rs"), "pub mod api;\n").expect("pkg lib");
+
+    fs::write(
+        root.path().join("pkg/crates/inner/Cargo.toml"),
+        r#"
+[package]
+name = "inner"
+version = "0.1.0"
+"#,
+    )
+    .expect("inner cargo");
+    fs::write(root.path().join("pkg/crates/inner/src/lib.rs"), "pub struct Inner;")
+        .expect("inner lib");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
+
+    assert_eq!(inputs.len(), 1);
+    assert_eq!(inputs[0].crate_nodes.len(), 1);
+    assert_eq!(inputs[0].crate_nodes[0].rel_dir, "pkg");
+    assert!(inputs[0].dependency_edges.is_empty());
+}
