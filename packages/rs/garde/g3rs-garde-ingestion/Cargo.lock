@@ -162,32 +162,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
-name = "g3rs-garde-ast-checks"
-version = "0.1.0"
-dependencies = [
- "g3rs-garde-ast-checks-runtime",
- "g3rs-garde-ast-checks-types",
-]
-
-[[package]]
-name = "g3rs-garde-ast-checks-runtime"
-version = "0.1.0"
-dependencies = [
- "g3rs-garde-ast-checks-types",
- "guardrail3-check-types",
- "guardrail3-domain-config",
- "guardrail3-reason-policy",
- "proc-macro2",
- "quote",
- "syn",
- "toml",
-]
-
-[[package]]
-name = "g3rs-garde-ast-checks-types"
-version = "0.1.0"
-
-[[package]]
 name = "g3rs-garde-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -233,11 +207,11 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3rs-garde-ast-checks",
- "g3rs-garde-ast-checks-types",
  "g3rs-garde-config-checks",
  "g3rs-garde-ingestion-assertions",
  "g3rs-garde-ingestion-types",
+ "g3rs-garde-source-checks",
+ "g3rs-garde-source-checks-types",
  "g3rs-garde-types",
  "g3rs-workspace-crawl",
  "tempfile",
@@ -245,6 +219,32 @@ dependencies = [
 
 [[package]]
 name = "g3rs-garde-ingestion-types"
+version = "0.1.0"
+
+[[package]]
+name = "g3rs-garde-source-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-garde-source-checks-runtime",
+ "g3rs-garde-source-checks-types",
+]
+
+[[package]]
+name = "g3rs-garde-source-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-garde-source-checks-types",
+ "guardrail3-check-types",
+ "guardrail3-domain-config",
+ "guardrail3-reason-policy",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "toml",
+]
+
+[[package]]
+name = "g3rs-garde-source-checks-types"
 version = "0.1.0"
 
 [[package]]

@@ -5,8 +5,8 @@ use std::path::PathBuf;
 pub enum G3RsCargoIngestionError {
     /// No `Cargo.toml` found at the workspace root.
     CargoTomlNotFound,
-    /// AST ingestion is planned but not implemented yet.
-    AstIngestionNotImplemented,
+    /// source ingestion is not implemented yet.
+    SourceIngestionNotImplemented,
     /// File-tree ingestion is planned but not implemented yet.
     FileTreeIngestionNotImplemented,
     /// The `Cargo.toml` exists but cannot be read.
@@ -31,8 +31,8 @@ impl std::fmt::Display for G3RsCargoIngestionError {
             Self::CargoTomlNotFound => {
                 f.write_str("no Cargo.toml found at the workspace root")
             }
-            Self::AstIngestionNotImplemented => {
-                f.write_str("Cargo AST ingestion is not implemented yet")
+            Self::SourceIngestionNotImplemented => {
+                f.write_str("Cargo source ingestion is not implemented yet")
             }
             Self::FileTreeIngestionNotImplemented => {
                 f.write_str("Cargo file-tree ingestion is not implemented yet")

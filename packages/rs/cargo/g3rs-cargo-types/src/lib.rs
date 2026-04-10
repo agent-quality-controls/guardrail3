@@ -13,9 +13,9 @@ pub struct G3RsCargoConfigChecksInput {
     pub cargo: CargoToml,
 }
 
-/// Placeholder input contract for future Cargo AST checks.
+/// Placeholder input contract for future Cargo source checks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsCargoAstChecksInput;
+pub struct G3RsCargoSourceChecksInput;
 
 /// Placeholder input contract for future Cargo file-tree checks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]

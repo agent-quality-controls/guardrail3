@@ -1,5 +1,5 @@
 use g3rs_code_ingestion_types::{
-    G3RsCodeAstChecksInput, G3RsCodeConfigChecksInput, G3RsCodeFileTreeChecksInput,
+    G3RsCodeSourceChecksInput, G3RsCodeConfigChecksInput, G3RsCodeFileTreeChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -14,10 +14,10 @@ pub fn ingest_for_config_checks(
     Ok(crate::config::assemble(exception_comments, unsafe_code_lints))
 }
 
-/// Ingest `code` AST checks input from a workspace crawl.
-pub fn ingest_for_ast_checks(
+/// Ingest `code` source checks input from a workspace crawl.
+pub fn ingest_for_source_checks(
     crawl: &G3RsWorkspaceCrawl,
-) -> Result<Vec<G3RsCodeAstChecksInput>, IngestionError> {
+) -> Result<Vec<G3RsCodeSourceChecksInput>, IngestionError> {
     crate::select::select_source_files(crawl)?
         .into_iter()
         .map(|selected| {

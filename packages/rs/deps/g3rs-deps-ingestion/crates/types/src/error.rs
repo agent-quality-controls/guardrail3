@@ -7,8 +7,8 @@ pub enum G3RsDepsIngestionError {
     CargoTomlNotFound,
     /// No `guardrail3-rs.toml` found at the workspace root.
     Guardrail3RsTomlNotFound,
-    /// AST ingestion is planned but not implemented yet.
-    AstIngestionNotImplemented,
+    /// source ingestion is not implemented yet.
+    SourceIngestionNotImplemented,
     /// File-tree ingestion is planned but not implemented yet.
     FileTreeIngestionNotImplemented,
     /// A required file exists but cannot be read.
@@ -41,8 +41,8 @@ impl std::fmt::Display for G3RsDepsIngestionError {
             Self::Guardrail3RsTomlNotFound => {
                 f.write_str("no guardrail3-rs.toml found at the workspace root")
             }
-            Self::AstIngestionNotImplemented => {
-                f.write_str("deps AST ingestion is not implemented yet")
+            Self::SourceIngestionNotImplemented => {
+                f.write_str("deps source ingestion is not implemented yet")
             }
             Self::FileTreeIngestionNotImplemented => {
                 f.write_str("deps file-tree ingestion is not implemented yet")

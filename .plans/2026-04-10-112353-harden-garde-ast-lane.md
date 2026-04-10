@@ -52,13 +52,13 @@ Fix the real garde AST lane bugs found by the attack pass and close the missing 
 
 ## Files to modify
 
-- `packages/rs/garde/g3rs-garde-ast-checks/crates/types/src/lib.rs`
-- `packages/rs/garde/g3rs-garde-ast-checks/crates/types/Cargo.toml`
-- `packages/rs/garde/g3rs-garde-ast-checks/crates/runtime/src/support.rs`
-- `packages/rs/garde/g3rs-garde-ast-checks/crates/runtime/src/test_support.rs`
-- `packages/rs/garde/g3rs-garde-ast-checks/crates/runtime/src/rs_garde_10_input_failures/mod.rs`
-- `packages/rs/garde/g3rs-garde-ast-checks/crates/runtime/src/rs_garde_ast_01_struct_derive_validate/rule_tests/*`
-- `packages/rs/garde/g3rs-garde-ast-checks/crates/runtime/src/rs_garde_ast_08_guardrail_config_validate_call/rule_tests/*`
+- `packages/rs/garde/g3rs-garde-source-checks/crates/types/src/lib.rs`
+- `packages/rs/garde/g3rs-garde-source-checks/crates/types/Cargo.toml`
+- `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/support.rs`
+- `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/test_support.rs`
+- `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/rs_garde_10_input_failures/mod.rs`
+- `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/rs_garde_ast_01_struct_derive_validate/rule_tests/*`
+- `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/rs_garde_ast_08_guardrail_config_validate_call/rule_tests/*`
 - `packages/rs/garde/g3rs-garde-ingestion/crates/runtime/src/run.rs`
 - `packages/rs/garde/g3rs-garde-ingestion/crates/runtime/src/parse.rs`
 - `packages/rs/garde/g3rs-garde-ingestion/crates/runtime/src/select.rs`

@@ -1,6 +1,6 @@
 /// Public ingestion entry point.
 use g3rs_cargo_types::{
-    G3RsCargoAstChecksInput, G3RsCargoConfigChecksInput, G3RsCargoFileTreeChecksInput,
+    G3RsCargoSourceChecksInput, G3RsCargoConfigChecksInput, G3RsCargoFileTreeChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -30,9 +30,9 @@ pub fn ingest_for_config_checks(
     Ok(crate::ingest::assemble(cargo_rel_path, cargo))
 }
 
-/// Stub AST ingestion entry point for the Cargo family.
-pub fn ingest_for_ast_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsCargoAstChecksInput, IngestionError> {
-    Err(IngestionError::AstIngestionNotImplemented)
+/// Stub source ingestion entry point for the Cargo family.
+pub fn ingest_for_source_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsCargoSourceChecksInput, IngestionError> {
+    Err(IngestionError::SourceIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the Cargo family.

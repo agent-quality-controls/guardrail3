@@ -1,6 +1,6 @@
 /// Public ingestion entry point.
 use g3rs_release_types::{
-    G3RsReleaseAstChecksInput, G3RsReleaseConfigChecksInput, G3RsReleaseFileTreeChecksInput,
+    G3RsReleaseSourceChecksInput, G3RsReleaseConfigChecksInput, G3RsReleaseFileTreeChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -72,11 +72,11 @@ pub fn ingest_for_config_checks(
     ))
 }
 
-/// Stub AST ingestion entry point for the release family.
-pub fn ingest_for_ast_checks(
+/// Stub source ingestion entry point for the release family.
+pub fn ingest_for_source_checks(
     _crawl: &G3RsWorkspaceCrawl,
-) -> Result<G3RsReleaseAstChecksInput, IngestionError> {
-    Err(IngestionError::AstIngestionNotImplemented)
+) -> Result<G3RsReleaseSourceChecksInput, IngestionError> {
+    Err(IngestionError::SourceIngestionNotImplemented)
 }
 
 /// Stub file-tree ingestion entry point for the release family.

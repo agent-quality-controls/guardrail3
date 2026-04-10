@@ -1,5 +1,5 @@
 use cargo_toml_parser::{CargoToml, parse};
-use g3rs_test_types::{G3RsTestComponentAstFacts, G3RsTestFileKind, G3RsTestSourceFile};
+use g3rs_test_types::{G3RsTestComponentSourceFacts, G3RsTestFileKind, G3RsTestSourceFile};
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 
 use crate::roots::{OwnedTestRoot, join_under_root, parent_dir};
@@ -79,10 +79,10 @@ pub(crate) fn collect_ast_files(
 
 pub(crate) fn public_component_facts(
     components: &[OwnedTestComponent],
-) -> Vec<G3RsTestComponentAstFacts> {
+) -> Vec<G3RsTestComponentSourceFacts> {
     components
         .iter()
-        .map(|component| G3RsTestComponentAstFacts {
+        .map(|component| G3RsTestComponentSourceFacts {
             rel_dir: component.rel_dir.clone(),
             runtime_rel_dir: component.runtime_rel_dir.clone(),
             runtime_package_name: component.runtime_package_name.clone(),

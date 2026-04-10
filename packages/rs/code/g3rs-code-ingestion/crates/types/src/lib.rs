@@ -1,6 +1,6 @@
 mod error;
 
-pub use g3rs_code_ast_checks_types::{G3RsCodeAstChecksInput, G3RsSourceFile};
+pub use g3rs_code_source_checks_types::{G3RsCodeSourceChecksInput, G3RsSourceFile};
 pub use g3rs_code_config_checks_types::{
     G3RsCodeConfigChecksInput, G3RsCodeExceptionCommentFact, G3RsCodeUnsafeCodeLintFact,
 };

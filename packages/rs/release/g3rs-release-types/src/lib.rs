@@ -27,9 +27,9 @@ pub struct G3RsReleaseConfigChecksInput {
     pub cliff: Option<CliffToml>,
 }
 
-/// Placeholder input contract for future release AST checks.
+/// Placeholder input contract for future release source checks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsReleaseAstChecksInput;
+pub struct G3RsReleaseSourceChecksInput;
 
 /// Placeholder input contract for future release file-tree checks.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]

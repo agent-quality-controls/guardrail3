@@ -12,7 +12,7 @@ The app family still owns:
 - routed root discovery
 - garde applicability gating from policy and source adoption
 - missing / unparseable clippy handling for the garde ban rules
-- AST/source garde rules
+- source garde rules
 - `RS-GARDE-10` malformed-input reporting
 
 Current package rules:

@@ -195,21 +195,21 @@ pub fn check_clippy_bans(
     input: &G3RsGardeConfigClippyBanChecksInput,
 ) -> Vec<G3CheckResult>;
 
-pub struct G3RsAstFile {
+pub struct G3RsSourceFile {
     pub rel_path: String,
     pub abs_path: PathBuf,
 }
 
-pub struct G3RsGardeAstChecksInput {
-    pub source_files: Vec<G3RsAstFile>,
-    pub guardrail_toml: G3RsAstFile,
+pub struct G3RsGardeSourceChecksInput {
+    pub source_files: Vec<G3RsSourceFile>,
+    pub guardrail_toml: G3RsSourceFile,
 }
 
-pub fn check(input: &G3RsGardeAstChecksInput) -> Vec<G3CheckResult>;
+pub fn check(input: &G3RsGardeSourceChecksInput) -> Vec<G3CheckResult>;
 ```
 
 Rules in `g3rs-garde-config-checks`: RS-GARDE-CONFIG-01, RS-GARDE-CONFIG-02, RS-GARDE-CONFIG-03, RS-GARDE-CONFIG-04, RS-GARDE-CONFIG-05
-Rules in `g3rs-garde-ast-checks`: RS-GARDE-AST-01, RS-GARDE-AST-02, RS-GARDE-AST-03, RS-GARDE-AST-04, RS-GARDE-AST-05, RS-GARDE-AST-06, RS-GARDE-AST-07, RS-GARDE-AST-08
+Rules in `g3rs-garde-source-checks`: RS-GARDE-AST-01, RS-GARDE-AST-02, RS-GARDE-AST-03, RS-GARDE-AST-04, RS-GARDE-AST-05, RS-GARDE-AST-06, RS-GARDE-AST-07, RS-GARDE-AST-08
 Rules in app: RS-GARDE-10
 
 Current bridge note:
@@ -219,7 +219,7 @@ Current bridge note:
   `RS-GARDE-CONFIG-02/03/04/06`
 - app still owns malformed-input reporting through `RS-GARDE-10`
 - `g3rs-garde-config-checks` owns the typed parsed-file path for root-policy checks
-- `g3rs-garde-ast-checks` owns the governed Rust source-file path and required
+- `g3rs-garde-source-checks` owns the governed Rust source-file path and required
   `guardrail3.toml` path for AST/source checks
 
 ### Deps

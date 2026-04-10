@@ -34,7 +34,7 @@ fn ingests_owned_rust_files_and_classifies_tests() {
     write(root.join("tests/fixtures/probe.rs"), "fn fixture() {}\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_eq!(inputs.len(), 3, "fixture file should be excluded");
 
@@ -78,7 +78,7 @@ fn classifies_library_root_and_library_module() {
     write(root.join("src/helper.rs"), "pub struct Helper;\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_source_file(
         require_source_file(&inputs, "src/lib.rs"),
@@ -113,7 +113,7 @@ fn classifies_binary_root_in_mixed_package() {
     write(root.join("src/bin/tool.rs"), "fn main() {}\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_source_file(
         require_source_file(&inputs, "src/lib.rs"),
@@ -168,7 +168,7 @@ path = \"cmd/worker.rs\"\n",
     write(root.join("cmd/support.rs"), "pub fn support() {}\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_source_file(
         require_source_file(&inputs, "lib/api.rs"),
@@ -235,7 +235,7 @@ edition = \"2024\"\n",
     );
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_source_file(
         require_source_file(&inputs, "crates/api/src/lib.rs"),
@@ -268,7 +268,7 @@ fn classifies_custom_library_root_path() {
     write(root.join("src/custom_lib.rs"), "pub fn api() {}\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_source_file(
         require_source_file(&inputs, "src/custom_lib.rs"),
@@ -293,7 +293,7 @@ fn classifies_explicit_binary_path() {
     write(root.join("src/tool.rs"), "fn main() {}\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_source_file(
         require_source_file(&inputs, "src/tool.rs"),
@@ -323,7 +323,7 @@ fn classifies_nested_workspace_member_ownership() {
     write(root.join("crates/core/src/main.rs"), "fn main() {}\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_source_file(
         require_source_file(&inputs, "crates/core/src/lib.rs"),
@@ -352,7 +352,7 @@ fn leaves_unowned_source_without_profile() {
     write(root.join("tools/probe.rs"), "pub fn probe() {}\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_source_file(
         require_source_file(&inputs, "tools/probe.rs"),
@@ -377,10 +377,10 @@ fn ingested_inputs_drive_code_ast_checks() {
     );
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_ast_checks(&workspace_crawl).expect("ingestion should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
-    let lib_results = g3rs_code_ast_checks::check(require_source_file(&inputs, "src/lib.rs"));
-    let test_results = g3rs_code_ast_checks::check(require_source_file(&inputs, "tests/smoke.rs"));
+    let lib_results = g3rs_code_source_checks::check(require_source_file(&inputs, "src/lib.rs"));
+    let test_results = g3rs_code_source_checks::check(require_source_file(&inputs, "tests/smoke.rs"));
 
     assert!(
         lib_results.iter().any(|result| result.id() == "RS-CODE-13"),
@@ -411,7 +411,7 @@ fn unreadable_selected_source_fails_ingestion() {
     fs::set_permissions(&secret, permissions).expect("chmod should succeed");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed even with unreadable files");
-    let error = crate::ingest_for_ast_checks(&workspace_crawl)
+    let error = crate::ingest_for_source_checks(&workspace_crawl)
         .expect_err("selected unreadable source should fail ingestion");
 
     assert!(
@@ -430,7 +430,7 @@ fn malformed_nearest_cargo_toml_fails_ingestion() {
     write(root.join("src/lib.rs"), "pub fn run() {}\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let error = crate::ingest_for_ast_checks(&workspace_crawl)
+    let error = crate::ingest_for_source_checks(&workspace_crawl)
         .expect_err("malformed owning Cargo.toml should fail ingestion");
 
     assert!(

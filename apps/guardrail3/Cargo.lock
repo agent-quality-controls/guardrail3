@@ -473,18 +473,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3rs-garde-ast-checks"
+name = "g3rs-garde-source-checks"
 version = "0.1.0"
 dependencies = [
- "g3rs-garde-ast-checks-runtime",
- "g3rs-garde-ast-checks-types",
+ "g3rs-garde-source-checks-runtime",
+ "g3rs-garde-source-checks-types",
 ]
 
 [[package]]
-name = "g3rs-garde-ast-checks-runtime"
+name = "g3rs-garde-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-garde-ast-checks-types",
+ "g3rs-garde-source-checks-types",
  "guardrail3-check-types",
  "guardrail3-domain-config",
  "guardrail3-reason-policy",
@@ -495,7 +495,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3rs-garde-ast-checks-types"
+name = "g3rs-garde-source-checks-types"
 version = "0.1.0"
 
 [[package]]
@@ -1040,7 +1040,7 @@ version = "0.0.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3rs-garde-ast-checks",
+ "g3rs-garde-source-checks",
  "g3rs-garde-config-checks",
  "glob",
  "guardrail3-app-core",

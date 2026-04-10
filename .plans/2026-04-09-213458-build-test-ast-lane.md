@@ -4,8 +4,8 @@
 
 Replace the `test` AST stubs with a real root-scoped AST lane:
 
-- `packages/rs/test/g3rs-test-ast-checks`
-- `packages/rs/test/g3rs-test-ingestion::ingest_for_ast_checks`
+- `packages/rs/test/g3rs-test-source-checks`
+- `packages/rs/test/g3rs-test-ingestion::ingest_for_source_checks`
 
 The resulting lane should run the planned AST rules end to end:
 
@@ -27,7 +27,7 @@ The resulting lane should run the planned AST rules end to end:
      - root-owned Rust source contents
      - component facts needed for assertions/runtime relationships
 
-2. Implement `ingest_for_ast_checks` in `g3rs-test-ingestion`.
+2. Implement `ingest_for_source_checks` in `g3rs-test-ingestion`.
    - Read owned Rust files only.
    - Reuse the same ownership rules already used by the config lane.
    - Classify files into:
@@ -37,9 +37,9 @@ The resulting lane should run the planned AST rules end to end:
      - `ExternalHarness`
      - `AssertionsModule`
      - `Other`
-   - Emit one `G3RsTestAstChecksInput` per owned root.
+   - Emit one `G3RsTestSourceChecksInput` per owned root.
 
-3. Build parse-once runtime support in `g3rs-test-ast-checks`.
+3. Build parse-once runtime support in `g3rs-test-source-checks`.
    - Port the legacy test-family AST parser into the package runtime.
    - Keep parsing and proof-catalog construction in runtime support, not rules.
    - Use the public source bundle from `g3rs-test-types` as the only package input.
@@ -57,10 +57,10 @@ The resulting lane should run the planned AST rules end to end:
      - `RS-TEST-17`
 
 5. Add tests at three levels.
-   - rule-local tests in `g3rs-test-ast-checks`
+   - rule-local tests in `g3rs-test-source-checks`
    - ingestion tests in `g3rs-test-ingestion`
    - pipeline tests:
-     - `crawl -> ingest_for_ast_checks -> g3rs-test-ast-checks::check`
+     - `crawl -> ingest_for_source_checks -> g3rs-test-source-checks::check`
 
 ## Key decisions
 
@@ -86,14 +86,14 @@ The resulting lane should run the planned AST rules end to end:
 - new or expanded shared discovery files under:
   - `packages/rs/test/g3rs-test-ingestion/crates/runtime/src`
 
-- `packages/rs/test/g3rs-test-ast-checks/Cargo.toml`
-- `packages/rs/test/g3rs-test-ast-checks/src/lib.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/Cargo.toml`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/lib.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/run.rs`
+- `packages/rs/test/g3rs-test-source-checks/Cargo.toml`
+- `packages/rs/test/g3rs-test-source-checks/src/lib.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/Cargo.toml`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/lib.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/run.rs`
 - new parser/support/rule files under:
-  - `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src`
+  - `packages/rs/test/g3rs-test-source-checks/crates/runtime/src`
 
 - tests under:
-  - `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/*/rule_tests`
+  - `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/*/rule_tests`
   - `packages/rs/test/g3rs-test-ingestion/crates/runtime/src/ingest_tests`

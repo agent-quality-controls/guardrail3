@@ -9,7 +9,7 @@ tests.
 1. Fix the malformed-source boundary in `g3rs-test-ingestion`.
    - Stop reparsing owned Rust files during AST ingestion.
    - Let ingestion classify and read files only.
-   - Let `g3rs-test-ast-checks` own Rust parse failures so malformed owned
+   - Let `g3rs-test-source-checks` own Rust parse failures so malformed owned
      source produces `RS-TEST-10` through the real lane.
 
 2. Restore the package test pattern for `RS-TEST-10`.
@@ -44,11 +44,11 @@ tests.
 
 - `packages/rs/test/g3rs-test-ingestion/crates/runtime/src/components.rs`
 - `packages/rs/test/g3rs-test-ingestion/crates/runtime/src/ingest_tests/ast.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/rs_test_10_input_failures/mod.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/rs_test_10_input_failures/tests/mod.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/rs_test_04_ignore_reason/tests/mod.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/rs_test_05_should_panic_expected/tests/mod.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/rs_test_07_real_proof_site/tests/mod.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/rs_test_08_weak_matches_assert/tests/mod.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/rs_test_16_assertions_modules_prove/tests/mod.rs`
-- `packages/rs/test/g3rs-test-ast-checks/crates/runtime/src/rs_test_17_external_harnesses_use_assertions/tests/mod.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/rs_test_10_input_failures/mod.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/rs_test_10_input_failures/tests/mod.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/rs_test_04_ignore_reason/tests/mod.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/rs_test_05_should_panic_expected/tests/mod.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/rs_test_07_real_proof_site/tests/mod.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/rs_test_08_weak_matches_assert/tests/mod.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/rs_test_16_assertions_modules_prove/tests/mod.rs`
+- `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/rs_test_17_external_harnesses_use_assertions/tests/mod.rs`
