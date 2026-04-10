@@ -23,3 +23,15 @@ pub fn assert_missing(results: &[G3CheckResult]) {
         }],
     );
 }
+
+pub fn assert_not_required(results: &[G3CheckResult]) {
+    self::assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Info),
+            title: Some("cargo test workspace scope not required"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}

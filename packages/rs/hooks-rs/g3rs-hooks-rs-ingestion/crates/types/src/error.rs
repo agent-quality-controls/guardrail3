@@ -8,6 +8,10 @@ pub enum G3RsHooksRsIngestionError {
         path: PathBuf,
         reason: String,
     },
+    ParseFailed {
+        path: PathBuf,
+        reason: String,
+    },
 }
 
 impl std::fmt::Display for G3RsHooksRsIngestionError {
@@ -21,6 +25,9 @@ impl std::fmt::Display for G3RsHooksRsIngestionError {
             }
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())
+            }
+            Self::ParseFailed { path, reason } => {
+                write!(f, "cannot parse {}: {reason}", path.display())
             }
         }
     }

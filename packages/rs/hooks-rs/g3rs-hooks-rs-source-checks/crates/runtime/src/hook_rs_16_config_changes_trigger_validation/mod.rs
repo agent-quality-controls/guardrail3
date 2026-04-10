@@ -9,7 +9,7 @@ const ID: &str = "HOOK-RS-16";
 
 pub(crate) fn check(content: &str, input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     let config_needles = [
-        "guardrail3.toml",
+        "guardrail3-rs.toml",
         "clippy.toml",
         ".clippy.toml",
         "deny.toml",
@@ -599,6 +599,7 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
     let input = RustHookCommandInput {
         rel_path: ".githooks/pre-commit",
         parsed: &parsed,
+        is_workspace_project: true,
     };
     let mut results = Vec::new();
     check(content, &input, &mut results);

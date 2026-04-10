@@ -9,6 +9,23 @@ use super::inputs::RustHookCommandInput;
 const ID: &str = "HOOK-RS-10";
 
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
+    if !input.is_workspace_project {
+        results.push(
+            G3CheckResult::from_parts(
+                ID.to_owned(),
+                G3Severity::Info,
+                "cargo test workspace scope not required".to_owned(),
+                "Hook is not attached to a Cargo workspace project, so `cargo test --workspace` is not required."
+                    .to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
+            .into_inventory(),
+        );
+        return;
+    }
+
     let found = script_contains_workspace_test(input.parsed);
 
     if found {
@@ -114,10 +131,19 @@ fn is_help_or_version_flag(token: &str) -> bool {
 
 #[cfg(test)]
 pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
+    run_case_with_workspace(content, true)
+}
+
+#[cfg(test)]
+pub(crate) fn run_case_with_workspace(
+    content: &str,
+    is_workspace_project: bool,
+) -> Vec<guardrail3_check_types::G3CheckResult> {
     let parsed = hook_shell_parser::parse_script(content);
     let input = RustHookCommandInput {
         rel_path: ".githooks/pre-commit",
         parsed: &parsed,
+        is_workspace_project,
     };
     let mut results = Vec::new();
     check(&input, &mut results);

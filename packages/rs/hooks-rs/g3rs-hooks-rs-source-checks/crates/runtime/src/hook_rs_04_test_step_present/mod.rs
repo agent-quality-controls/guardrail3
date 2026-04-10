@@ -170,6 +170,7 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
     let input = RustHookCommandInput {
         rel_path: ".githooks/pre-commit",
         parsed: &parsed,
+        is_workspace_project: true,
     };
     let mut results = Vec::new();
     check(&input, &mut results);

@@ -2,4 +2,5 @@
 pub struct G3RsHooksRsSourceChecksInput {
     pub rel_path: String,
     pub content: String,
+    pub is_workspace_project: bool,
 }

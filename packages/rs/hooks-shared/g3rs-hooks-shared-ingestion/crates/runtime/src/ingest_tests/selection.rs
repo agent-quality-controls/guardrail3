@@ -61,6 +61,31 @@ fn prefers_githooks_pre_commit_and_includes_modular_scripts() {
 }
 
 #[test]
+fn ignores_nested_files_under_pre_commit_d() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
+    write(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo fmt --check\n");
+    write(
+        root.join(".githooks/pre-commit.d/nested/20-hidden.sh"),
+        "cargo test --workspace\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let rel_paths = inputs
+        .iter()
+        .map(|input| input.rel_path.as_str())
+        .collect::<Vec<_>>();
+
+    assert_eq!(
+        rel_paths,
+        vec![".githooks/pre-commit", ".githooks/pre-commit.d/10-rust.sh"]
+    );
+}
+
+#[test]
 fn falls_back_to_hooks_pre_commit_when_githooks_script_is_absent() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = temp_dir.path();

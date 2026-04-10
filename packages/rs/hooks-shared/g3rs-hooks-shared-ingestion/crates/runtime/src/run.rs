@@ -42,7 +42,7 @@ pub fn ingest_for_source_checks(
 
     for entry in &crawl.entries {
         if entry.kind != G3RsWorkspaceEntryKind::File
-            || !entry.path.rel_path.starts_with(".githooks/pre-commit.d/")
+            || !is_direct_modular_script(&entry.path.rel_path)
         {
             continue;
         }
@@ -65,6 +65,13 @@ pub fn ingest_for_source_checks(
     }
 
     Ok(inputs)
+}
+
+fn is_direct_modular_script(rel_path: &str) -> bool {
+    let Some(suffix) = rel_path.strip_prefix(".githooks/pre-commit.d/") else {
+        return false;
+    };
+    !suffix.is_empty() && !suffix.contains('/')
 }
 
 pub fn ingest_for_file_tree_checks(
