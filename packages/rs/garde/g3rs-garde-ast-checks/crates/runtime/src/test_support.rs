@@ -13,6 +13,39 @@ impl Fixture {
     pub(crate) fn run(&self) -> Vec<G3CheckResult> {
         crate::run::check(&self.input)
     }
+
+    #[cfg(unix)]
+    pub(crate) fn make_source_unreadable(&self, rel_path: &str) {
+        use std::os::unix::fs::PermissionsExt;
+
+        let path = self
+            .input
+            .source_files
+            .iter()
+            .find(|file| file.rel_path == rel_path)
+            .expect("fixture source file should exist")
+            .abs_path
+            .clone();
+        let mut permissions = std::fs::metadata(&path)
+            .expect("fixture source metadata should exist")
+            .permissions();
+        permissions.set_mode(0o000);
+        std::fs::set_permissions(&path, permissions)
+            .expect("should make fixture source unreadable");
+    }
+
+    #[cfg(unix)]
+    pub(crate) fn make_guardrail_unreadable(&self) {
+        use std::os::unix::fs::PermissionsExt;
+
+        let path = self.input.guardrail_toml.abs_path.clone();
+        let mut permissions = std::fs::metadata(&path)
+            .expect("fixture guardrail metadata should exist")
+            .permissions();
+        permissions.set_mode(0o000);
+        std::fs::set_permissions(&path, permissions)
+            .expect("should make fixture guardrail unreadable");
+    }
 }
 
 pub(crate) fn fixture(source_files: &[(&str, &str)], guardrail_toml: &str) -> Fixture {

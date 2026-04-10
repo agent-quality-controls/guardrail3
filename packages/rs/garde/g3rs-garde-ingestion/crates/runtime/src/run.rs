@@ -1,5 +1,5 @@
 /// Public ingestion entry point.
-use g3rs_garde_ast_checks_types::G3RsGardeAstChecksInput;
+use g3rs_garde_ast_checks_types::{G3RsAstFile, G3RsGardeAstChecksInput};
 use g3rs_garde_types::{G3RsGardeConfigChecksInput, G3RsGardeFileTreeChecksInput};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -55,9 +55,27 @@ pub fn ingest_for_config_checks(
     ))
 }
 
-/// Stub AST ingestion entry point for the garde family.
-pub fn ingest_for_ast_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsGardeAstChecksInput, IngestionError> {
-    Err(IngestionError::AstIngestionNotImplemented)
+/// Ingest garde AST input from a workspace crawl.
+pub fn ingest_for_ast_checks(
+    crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsGardeAstChecksInput, IngestionError> {
+    let guardrail_entry =
+        crate::select::select_guardrail_toml(crawl).ok_or(IngestionError::GuardrailTomlNotFound)?;
+    let source_files = crate::select::select_ast_source_files(crawl)
+        .into_iter()
+        .map(|entry| G3RsAstFile {
+            rel_path: entry.path.rel_path.clone(),
+            abs_path: entry.path.abs_path.clone(),
+        })
+        .collect::<Vec<_>>();
+
+    Ok(G3RsGardeAstChecksInput {
+        source_files,
+        guardrail_toml: G3RsAstFile {
+            rel_path: guardrail_entry.path.rel_path.clone(),
+            abs_path: guardrail_entry.path.abs_path.clone(),
+        },
+    })
 }
 
 /// Stub file-tree ingestion entry point for the garde family.
