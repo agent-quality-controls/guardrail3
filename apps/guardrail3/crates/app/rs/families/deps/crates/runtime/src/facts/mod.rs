@@ -68,12 +68,14 @@ pub struct DirectDependencyCapFacts {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct LocalPathCargoManifestFacts {
     pub(crate) cargo_rel_path: String,
     pub(crate) cargo: CargoToml,
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct PolicyContentCheckFacts {
     pub(crate) workspace_cargo_rel_path: String,
     pub(crate) workspace_cargo: CargoToml,
@@ -86,6 +88,7 @@ pub struct PolicyContentCheckFacts {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct DirectDependencyCapContentFacts {
     pub(crate) workspace_cargo_rel_path: String,
     pub(crate) workspace_cargo: CargoToml,
@@ -112,6 +115,7 @@ pub struct DepsFacts {
     #[allow(dead_code)]
     pub(crate) direct_dependency_caps: Vec<DirectDependencyCapFacts>,
     pub(crate) policy_content_checks: Vec<PolicyContentCheckFacts>,
+    #[allow(dead_code)]
     pub(crate) direct_dependency_cap_content_checks: Vec<DirectDependencyCapContentFacts>,
     pub(crate) input_failures: Vec<InputFailureFacts>,
 }

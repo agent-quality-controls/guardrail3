@@ -31,7 +31,7 @@ It exists to ensure:
 
 The Rust work currently includes:
 - config families: clippy, deny, fmt, toolchain, cargo
-- topology/architecture families: topology, arch, hexarch, libarch (retiring)
+- topology/architecture families: topology, arch, hexarch
 - code families: code, garde, test, deps, release
 - shared hook architecture and Rust hook checks
 

@@ -407,7 +407,7 @@ Required fixes:
 - decide whether fixture exclusions are shared policy or a family-local bug
 - align severity/docs for `RS-GARDE-AST-04`
 
-### 13. `libarch`
+### 13. package-scoped `arch`
 
 Status:
 
@@ -416,7 +416,7 @@ Status:
 
 Required fixes:
 
-- settle whether `libarch` is intentionally `packages/*`-only
+- settle whether package-scoped `arch` is intentionally `packages/*`-only
 - fix the incorrect quiet-path test for broken layered roots
 - add runtime proof for the zone boundary
 
@@ -439,7 +439,7 @@ Recommended order:
 11. `fmt`
 12. `cargo`
 13. `garde`
-14. `libarch`
+14. package-scoped `arch`
 15. docs reconciliation pass
 
 Reason:

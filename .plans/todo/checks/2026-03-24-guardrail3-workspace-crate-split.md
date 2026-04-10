@@ -97,7 +97,6 @@ The workspace should contain real members for the existing boundary lines:
 - `crates/app/rs/families/release`
 - `crates/app/rs/families/hooks-shared`
 - `crates/app/rs/families/hooks-rs`
-- `crates/app/rs/families/libarch`
 - `crates/app/hooks`
 - `crates/adapters/inbound/cli`
 
@@ -365,7 +364,6 @@ Final target family shape:
 - `crates/app/rs/families/release`
 - `crates/app/rs/families/hooks-shared`
 - `crates/app/rs/families/hooks-rs`
-- `crates/app/rs/families/libarch`
 
 `hooks` should stay outside this split only after the hook-support substrate is real and the ownership boundary is explicit.
 The target hook shape is:
@@ -411,7 +409,7 @@ Minimum shared set:
 - `shared-fs`
 - reduced `domain-report`
 - reduced `domain-config`
-- explicit architecture/root-placement shared facts substrate if `arch`, `hexarch`, and `libarch` would otherwise duplicate it
+- explicit architecture/root-placement shared facts substrate if `arch` and `hexarch` would otherwise duplicate it
 - `ports-outbound-traits`
 - `app/commands`
 - `app-core`

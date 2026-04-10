@@ -21,4 +21,4 @@ Those remain in:
 
 - `RS-TOPOLOGY` for placement and workspace legality
 - `RS-HEXARCH` for app-local structure
-- `RS-LIBARCH` only for remaining legacy layered-shape checks until retirement
+- no separate package-only layered family

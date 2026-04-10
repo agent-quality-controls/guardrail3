@@ -36,7 +36,7 @@ target/clippy
 target/deny
 target/hooks-rs
 target/hooks-shared
-target/libarch
+target/arch-package
 ```
 
 Canonical family map:
@@ -70,8 +70,8 @@ Canonical family map:
   - owned by work under `apps/guardrail3/crates/app/rs/checks/hooks/rs/`
 - `target/hooks-shared`
   - owned by `apps/guardrail3/crates/app/rs/checks/hooks/shared/`
-- `target/libarch`
-  - reserved for the planned `rs/libarch` family named in `.plans/todo/checks/rs/libarch.md`
+- `target/arch-package`
+  - reserved for package-scoped `rs/arch` work
 
 Rule: the target dir name should match the family folder name, not the person or the session.
 If the plan names a family before the folder exists yet, reserve the target name from the plan name itself.

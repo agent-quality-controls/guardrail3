@@ -99,7 +99,7 @@ That means:
 - workspace metadata used as part of lint/toolchain compatibility belongs here
 
 It does not own:
-- dependency direction (`RS-HEXARCH`, `RS-LIBARCH`)
+- dependency direction (`RS-HEXARCH`, `RS-ARCH`)
 - dependency allowlists (`RS-DEPS`)
 - release metadata (`RS-RELEASE`)
 - toolchain file settings (`RS-TOOLCHAIN`)

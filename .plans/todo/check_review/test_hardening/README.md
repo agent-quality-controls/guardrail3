@@ -34,7 +34,6 @@ The purpose is not to “add more tests”. The purpose is to make every rule ha
   - current droppable packet for rewriting `rs/test` to the accepted family README contract
 - `35-arch-family-rewrite-agent-brief.md`
   - current droppable packet for rewriting `rs/arch` to the accepted family README contract
-- `27-libarch-agent-brief.md`
 - `28-rust-validation-cutover-agent-brief.md`
 - `29-arch-agent-brief.md`
   - droppable family/combined-lane agent packets
@@ -46,8 +45,6 @@ The purpose is not to “add more tests”. The purpose is to make every rule ha
   - current operational cutover packet for wiring `hooks-rs` into the live runtime
 - `40-test-remaining-agent-brief.md`
   - current closure packet for finishing `rs/test`
-- `41-libarch-implementation-agent-brief.md`
-  - current implementation packet for the not-yet-live `rs/libarch` family
 - `31-hexarch-layered-test-map.md`
   - concrete rule/facts/integration split for `rs/hexarch`
 - `32-hexarch-01-06-layered-migration-checklist.md`

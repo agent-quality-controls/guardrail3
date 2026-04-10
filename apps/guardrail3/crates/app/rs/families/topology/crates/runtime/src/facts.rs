@@ -94,8 +94,8 @@ pub struct TopologyFacts {
 
 #[derive(Debug, Clone)]
 struct ConfigResolution {
+    global_arch_enabled: bool,
     global_hexarch_enabled: bool,
-    packages_libarch_enabled: bool,
     app_hexarch_enabled: BTreeMap<String, bool>,
     failures: Vec<TopologyInputFailureFacts>,
 }
@@ -203,8 +203,8 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
     let Some(content) = tree.file_content("guardrail3.toml") else {
         if tree.file_exists("guardrail3.toml") {
             return ConfigResolution {
+                global_arch_enabled: true,
                 global_hexarch_enabled: true,
-                packages_libarch_enabled: true,
                 app_hexarch_enabled: BTreeMap::new(),
                 failures: vec![TopologyInputFailureFacts {
                     rel_path: "guardrail3.toml".to_owned(),
@@ -217,8 +217,8 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
         }
 
         return ConfigResolution {
+            global_arch_enabled: true,
             global_hexarch_enabled: true,
-            packages_libarch_enabled: true,
             app_hexarch_enabled: BTreeMap::new(),
             failures: Vec::new(),
         };
@@ -227,6 +227,10 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
     match toml::from_str::<GuardrailConfig>(content) {
         Ok(config) => {
             let rust = config.rust();
+            let global_arch_enabled = rust
+                .and_then(guardrail3_domain_config::types::RustConfig::checks)
+                .and_then(guardrail3_domain_config::types::RustChecksConfig::arch)
+                .unwrap_or(true);
             let global_hexarch_enabled = rust
                 .and_then(guardrail3_domain_config::types::RustConfig::checks)
                 .and_then(guardrail3_domain_config::types::RustChecksConfig::hexarch)
@@ -248,23 +252,20 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
                         .collect::<BTreeMap<_, _>>()
                 })
                 .unwrap_or_default();
-            // Package roots are always governed — the libarch family was
-            // retired and its rules merged into arch.
-            let packages_libarch_enabled = true;
 
             let mut failures = scoped_topology_failures(&config);
             failures.sort_by(|left, right| left.message.cmp(&right.message));
 
             ConfigResolution {
+                global_arch_enabled,
                 global_hexarch_enabled,
-                packages_libarch_enabled,
                 app_hexarch_enabled,
                 failures,
             }
         }
         Err(parse_error) => ConfigResolution {
+            global_arch_enabled: true,
             global_hexarch_enabled: true,
-            packages_libarch_enabled: true,
             app_hexarch_enabled: BTreeMap::new(),
             failures: vec![TopologyInputFailureFacts {
                 rel_path: "guardrail3.toml".to_owned(),
@@ -278,13 +279,13 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
 }
 
 fn misplaced_root_reporting_enabled(config: &ConfigResolution) -> bool {
-    config.global_hexarch_enabled
+    config.global_arch_enabled
+        || config.global_hexarch_enabled
         || config
             .app_hexarch_enabled
             .values()
             .copied()
             .any(std::convert::identity)
-        || config.packages_libarch_enabled
 }
 
 fn scoped_topology_failures(config: &GuardrailConfig) -> Vec<TopologyInputFailureFacts> {
@@ -345,15 +346,15 @@ fn governed_root(root: &TopologyRootFacts, config: &ConfigResolution) -> Option<
                 effective_enabled,
             })
         }
-        [RustTopologyOwner::Libarch] => {
+        [RustTopologyOwner::Arch] => {
             let owner_root_rel = root.package_zone_candidates.first()?.clone();
             let _owner_name = owner_root_rel.rsplit('/').next()?;
             Some(GovernedRootFacts {
                 rel_dir: root.rel_dir.clone(),
                 cargo_rel_path: root.cargo_rel_path.clone(),
-                owner: RustTopologyOwner::Libarch,
+                owner: RustTopologyOwner::Arch,
                 owner_root_rel,
-                effective_enabled: config.packages_libarch_enabled,
+                effective_enabled: config.global_arch_enabled,
             })
         }
         _ => None,
@@ -366,7 +367,7 @@ fn root_from_route(root: &RsTopologyRootView) -> TopologyRootFacts {
         owner_families.push(RustTopologyOwner::Hexarch);
     }
     if !root.package_zone_candidates().is_empty() {
-        owner_families.push(RustTopologyOwner::Libarch);
+        owner_families.push(RustTopologyOwner::Arch);
     }
 
     TopologyRootFacts {

@@ -242,7 +242,7 @@ fn run_cargo(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 #[cfg(feature = "family-code")]
 fn run_code(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     let route = ctx.mapper.map_rs_code();
-    let root_rels = scoped_route_root_rels(route.roots());
+    let root_rels = vec![String::new()];
     let extra = code_extra_file_rels(ctx.legality.dir_structure(), route.roots());
     let view = FamilyView::build(
         ctx.legality.root_path().clone(),
@@ -263,6 +263,7 @@ fn run_hexarch(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
     route
         .roots()
         .iter()
+        .filter(|root| hexarch_root_is_active_in_scope(root, route.scoped_files()))
         .flat_map(|root| {
             let workspace_route = route.for_workspace(root.rel_dir());
             let root_rels = vec![root.rel_dir().to_owned()];
@@ -470,6 +471,24 @@ fn scoped_route_root_rels(roots: &[RsScopedRootView]) -> Vec<String> {
         .iter()
         .map(|root| root.root().rel_dir().to_owned())
         .collect()
+}
+
+#[cfg(feature = "family-hexarch")]
+fn hexarch_root_is_active_in_scope(
+    root: &RsRootView,
+    scoped_files: Option<&std::collections::BTreeSet<String>>,
+) -> bool {
+    let Some(scoped_files) = scoped_files else {
+        return true;
+    };
+
+    scoped_files.contains(root.rel_dir())
+        || scoped_files.contains(root.cargo_rel_path())
+        || scoped_files.iter().any(|rel_path| {
+            rel_path
+                .strip_prefix(root.rel_dir())
+                .is_some_and(|suffix| suffix.starts_with('/'))
+        })
 }
 
 #[cfg(feature = "family-topology")]

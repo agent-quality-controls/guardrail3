@@ -22,7 +22,7 @@ This family enforces a target state where Rust topology ownership is:
 ## What This Family Prevents
 
 - misplaced Rust roots drifting outside governed topology zones
-- `hexarch` and `libarch` rediscovering roots differently and disagreeing
+- `hexarch` and `arch` disagreeing about root ownership
 - fixture `Cargo.toml` files polluting live topology results
 - app/package dual ownership and illegal nesting
 - dead scoped `topology` config that looks supported but does nothing
@@ -50,7 +50,7 @@ It does not own:
 Those belong to:
 
 - `RS-HEXARCH`
-- `RS-LIBARCH`
+- `RS-ARCH`
 - `RS-CARGO`
 
 ## Global-Only Family
@@ -91,7 +91,7 @@ For `RS-TOPOLOGY`, the important contract is:
 - family routing comes from shared `FamilyMapper`
 - `RS-TOPOLOGY` is the family that emits repo-global placement findings and exact workspace-membership topology findings over that shared scope
 
-`RS-HEXARCH` and `RS-LIBARCH` may consume the same placement facts, but must not emit misplaced-root findings.
+`RS-HEXARCH` and `RS-ARCH` may consume the same placement facts, but must not emit misplaced-root findings.
 
 ## Live Root Discovery Domain
 
@@ -152,7 +152,7 @@ That means:
 
 - `RS-TOPOLOGY` reports `other`
 - `RS-HEXARCH` does not report `other`
-- `RS-LIBARCH` does not report `other`
+- `RS-ARCH` does not report `other`
 - `RS-TOPOLOGY` does not report declared `auxiliary` roots as misplaced
 
 This avoids:
@@ -297,8 +297,8 @@ Severity:
 Activation:
 
 - active when global `topology` is enabled and at least one owner family is enabled:
+  - `arch`
   - `hexarch`
-  - `libarch`
 - inactive when both owner families are disabled
 
 Detection:
@@ -390,7 +390,7 @@ Detection:
 
 - for governed roots:
   - app-owned roots require effective `hexarch = true`
-  - package-owned roots require effective `libarch = true`
+  - package-owned roots require effective `arch = true`
   - app-scoped `hexarch` overrides win over the global `hexarch` default for every root under that app
 
 ### RS-TOPOLOGY-07

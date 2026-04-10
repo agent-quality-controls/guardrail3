@@ -1,4 +1,4 @@
-use g3rs_garde_ast_checks::{G3RsAstFile, G3RsGardeAstChecksInput};
+use g3rs_garde_source_checks::{G3RsGardeSourceChecksInput, G3RsSourceFile};
 use g3rs_garde_config_checks::G3RsGardeConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
@@ -128,28 +128,28 @@ fn run_ast_checks(
                     .is_none_or(|files| files.contains(rel_path))
             })
             .filter(|rel_path| owning_root_dir(rel_path, &root_dirs) == Some(root.rel_dir.as_str()))
-            .filter_map(|rel_path| {
-                surface.abs_path(&rel_path).map(|abs_path| G3RsAstFile {
-                    rel_path,
-                    abs_path,
-                })
-            })
+            .filter_map(|rel_path| surface.abs_path(&rel_path).map(|abs_path| G3RsSourceFile {
+                rel_path,
+                abs_path,
+            }))
             .collect::<Vec<_>>();
 
         if source_files.is_empty() {
             continue;
         }
 
-        let package_input = G3RsGardeAstChecksInput {
+        let package_input = G3RsGardeSourceChecksInput {
+            garde_dependency_present: root.garde_dependency_present,
             source_files,
-            guardrail_toml: G3RsAstFile {
+            guardrail_toml: G3RsSourceFile {
                 rel_path: guardrail_rel_path,
                 abs_path: guardrail_abs_path,
             },
         };
         results.extend(
-            g3rs_garde_ast_checks::check(&package_input)
+            g3rs_garde_source_checks::check(&package_input)
                 .into_iter()
+                .filter(|result| result.id() != "RS-GARDE-10")
                 .map(convert_check_result),
         );
     }

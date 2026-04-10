@@ -9,7 +9,7 @@ pub fn check(input: &OwnerFamilyCoherenceInput<'_>, results: &mut Vec<CheckResul
     if !input.root.effective_enabled {
         let family_label = match input.root.owner {
             RustTopologyOwner::Hexarch => "hexarch",
-            RustTopologyOwner::Libarch => "libarch",
+            RustTopologyOwner::Arch => "arch",
         };
         results.push(CheckResult::from_parts(
             ID.to_owned(),
@@ -33,7 +33,7 @@ pub fn check(input: &OwnerFamilyCoherenceInput<'_>, results: &mut Vec<CheckResul
 
     let family_label = match input.root.owner {
         RustTopologyOwner::Hexarch => "hexarch",
-        RustTopologyOwner::Libarch => "libarch",
+        RustTopologyOwner::Arch => "arch",
     };
     results.push(
         CheckResult::from_parts(
@@ -60,4 +60,3 @@ pub fn check(input: &OwnerFamilyCoherenceInput<'_>, results: &mut Vec<CheckResul
 fn display_dir(rel_dir: &str) -> &str {
     if rel_dir.is_empty() { "." } else { rel_dir }
 }
-

@@ -33,7 +33,6 @@ Rust validation families covered here:
 - `RS-FMT`
 - `RS-GARDE`
 - `RS-HEXARCH`
-- `RS-LIBARCH`
 - `RS-RELEASE`
 - `RS-TEST`
 - `RS-TOOLCHAIN`
@@ -87,7 +86,6 @@ Status snapshot / dispatch map:
 | `fmt` | global | `apps/guardrail3/crates/app/rs/families/fmt/` | yes | current |
 | `garde` | workspace-local | `apps/guardrail3/crates/app/rs/families/garde/` | yes | current |
 | `hexarch` | workspace-local under `apps/*` | `apps/guardrail3/crates/app/rs/families/hexarch/` | yes | current |
-| `libarch` | workspace-local under `packages/*`, retiring | `apps/guardrail3/crates/app/rs/families/libarch/` | yes | current |
 | `release` | workspace-local | `apps/guardrail3/crates/app/rs/families/release/` | yes | current |
 | `test` | global | `apps/guardrail3/crates/app/rs/families/test/` | yes | current |
 | `toolchain` | workspace-local | `apps/guardrail3/crates/app/rs/families/toolchain/` | yes | current |

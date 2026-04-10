@@ -415,11 +415,10 @@ dependencies = [
 name = "g3rs-deps-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "cargo-toml-parser",
  "g3rs-deps-config-checks-types",
- "glob",
+ "g3rs-deps-types",
  "guardrail3-check-types",
- "guardrail3-domain-config",
+ "guardrail3-rs-toml-parser",
 ]
 
 [[package]]
@@ -433,8 +432,7 @@ dependencies = [
 name = "g3rs-deps-types"
 version = "0.1.0"
 dependencies = [
- "cargo-toml-parser",
- "guardrail3-domain-config",
+ "guardrail3-rs-toml-parser",
 ]
 
 [[package]]
@@ -473,6 +471,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-garde-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-garde-config-checks-runtime",
+ "g3rs-garde-config-checks-types",
+]
+
+[[package]]
+name = "g3rs-garde-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "clippy-toml-parser",
+ "g3rs-garde-config-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-garde-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-garde-types",
+]
+
+[[package]]
 name = "g3rs-garde-source-checks"
 version = "0.1.0"
 dependencies = [
@@ -497,31 +520,6 @@ dependencies = [
 [[package]]
 name = "g3rs-garde-source-checks-types"
 version = "0.1.0"
-
-[[package]]
-name = "g3rs-garde-config-checks"
-version = "0.1.0"
-dependencies = [
- "g3rs-garde-config-checks-runtime",
- "g3rs-garde-config-checks-types",
-]
-
-[[package]]
-name = "g3rs-garde-config-checks-runtime"
-version = "0.1.0"
-dependencies = [
- "cargo-toml-parser",
- "clippy-toml-parser",
- "g3rs-garde-config-checks-types",
- "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-garde-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-garde-types",
-]
 
 [[package]]
 name = "g3rs-garde-types"
@@ -957,6 +955,7 @@ version = "0.0.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-deps-config-checks",
+ "g3rs-deps-types",
  "glob",
  "guardrail3-app-rs-family-deps-assertions",
  "guardrail3-app-rs-family-deps-test-support",
@@ -971,6 +970,7 @@ dependencies = [
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
+ "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -1040,8 +1040,8 @@ version = "0.0.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3rs-garde-source-checks",
  "g3rs-garde-config-checks",
+ "g3rs-garde-source-checks",
  "glob",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-garde-test-support",
@@ -1526,6 +1526,29 @@ version = "0.0.0"
 [[package]]
 name = "guardrail3-reason-policy"
 version = "0.0.0"
+
+[[package]]
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "guardrail3-shared-fs"

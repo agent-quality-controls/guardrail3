@@ -10,7 +10,7 @@
 ## Why this family exists
 
 `RS-HEXARCH` owns app architecture inside `apps/*`.
-`RS-LIBARCH` owns library/package architecture inside `packages/*`.
+`RS-ARCH` owns package/library architecture inside `packages/*`.
 
 What neither family should own is the repo-global question:
 
@@ -18,7 +18,7 @@ What neither family should own is the repo-global question:
 - which architecture family owns a given Rust root
 - whether a Rust root is misplaced or ambiguously owned
 
-That is a separate concern. It should not be duplicated in both `hexarch` and `libarch`, and it should not be buried in `cargo`.
+That is a separate concern. It should not be duplicated in both `hexarch` and `arch`, and it should not be buried in `cargo`.
 
 `RS-TOPOLOGY` exists to own that global placement and ownership contract once.
 
@@ -48,7 +48,7 @@ It does **not** own:
 - generic Cargo manifest policy
 - family-local config content validation
 
-Those remain in `RS-HEXARCH`, `RS-LIBARCH`, and `RS-CARGO`.
+Those remain in `RS-HEXARCH`, `RS-ARCH`, and `RS-CARGO`.
 
 Important architecture split:
 
@@ -128,7 +128,7 @@ Every discovered Rust `Cargo.toml` root is classified as exactly one of:
 Architecture families then apply by zone:
 
 - `app` roots are candidates for `RS-HEXARCH`
-- `package` roots are candidates for `RS-LIBARCH`
+- `package` roots are candidates for `RS-ARCH`
 - `other` roots are misplaced when Rust architecture enforcement is active
 
 The topology policy above is orthogonal to zone ownership:
@@ -143,13 +143,13 @@ This family owns repo-global topology and placement findings.
 
 That means:
 - `RS-HEXARCH` must not emit “Cargo root misplaced globally”
-- `RS-LIBARCH` must not emit it either
+- `RS-ARCH` must not emit it either
 - workspace-local families must not emit repo-global misplaced-file findings either
 - `RS-TOPOLOGY` emits those structural failures once
 
 This avoids:
 - double signaling
-- drift between `hexarch` and `libarch`
+- drift between `hexarch` and `arch`
 - hidden policy duplication
 - workspace-local families re-growing global placement logic
 
@@ -189,11 +189,11 @@ Placement reporting depends on architecture-family enablement.
 
 The intended behavior is:
 
-- if both `hexarch` and `libarch` are enabled
+- if both `hexarch` and `arch` are enabled
   - misplaced `other` roots are `Error`
 - if only `hexarch` is enabled
   - misplaced `other` roots are `Error`
-- if only `libarch` is enabled
+- if only `arch` is enabled
   - misplaced `other` roots are `Error`
 - if both are disabled
   - no placement finding is emitted
@@ -245,7 +245,7 @@ This catches:
 
 ### RS-TOPOLOGY-02 — No misplaced Rust roots
 
-When either `hexarch` or `libarch` is enabled, an unexpected Rust root in `other` is an error.
+When either `hexarch` or `arch` is enabled, an unexpected Rust root in `other` is an error.
 
 This is the missing global-placement rule.
 
@@ -272,7 +272,7 @@ Treat this as a layout-level rule, not a duplicate root-level one:
 
 For a governed root:
 - app-zone ownership maps to `hexarch`
-- package-zone ownership maps to `libarch`
+- package-zone ownership maps to `arch`
 - app-scoped `hexarch` overrides win over the global `hexarch` default for every root under that app
 
 The family should surface impossible or contradictory ownership states explicitly.
@@ -392,9 +392,9 @@ It is the global architectural assertion that placement legality is settled befo
 
 It does **not** own repo-global misplaced-root detection.
 
-### RS-LIBARCH
+### RS-ARCH
 
-`RS-LIBARCH` owns:
+`RS-ARCH` owns:
 - layered library/package structure
 - package workspace/member rules
 - package dependency direction
@@ -424,7 +424,7 @@ This family should introduce shared architecture-placement facts that other arch
 
 Those shared facts may later be consumed by:
 - `RS-HEXARCH`
-- `RS-LIBARCH`
+- `RS-ARCH`
 
 But `RS-TOPOLOGY` remains the only family that emits repo-global placement findings.
 
@@ -434,7 +434,7 @@ But `RS-TOPOLOGY` remains the only family that emits repo-global placement findi
 |---------|-------------|
 | Moving misplaced-root detection into `cargo` | Placement is architecture policy, not Cargo policy |
 | Moving top-level workspace enforcement into `cargo` | Root topology is architecture policy; `cargo` should only run after `topology` has accepted the root shape |
-| Duplicating misplaced-root rules in both `hexarch` and `libarch` | Causes double signaling and drift |
+| Duplicating misplaced-root rules in both `hexarch` and `arch` | Causes double signaling and drift |
 | Letting enable/disable change discovery | Discovery must stay complete; only reporting is conditional |
 
 ## Current family shape
@@ -471,12 +471,12 @@ apps/guardrail3/crates/app/rs/placement/
 ## Implementation notes
 
 - `rs/topology` is implemented as a repo-global family with one production file per rule and one rule-specific `*_tests/` directory per rule.
-- Shared Rust root discovery/classification lives under `rs/placement/` so future `hexarch` and `libarch` work can reuse the same root inventory instead of rediscovering `Cargo.toml` roots independently.
+- Shared Rust root discovery/classification lives under `rs/placement/` so `hexarch` and `arch` can reuse the same root inventory instead of rediscovering `Cargo.toml` roots independently.
 - Classification is segment-based rather than top-level-only. This intentionally makes illegal nested shapes such as `apps/<app>/packages/<pkg>` and `packages/<pkg>/apps/<app>` visible as:
   - `RS-TOPOLOGY-01` ambiguous roots
   - `RS-TOPOLOGY-03` dual ownership
   - `RS-TOPOLOGY-04` illegal layout overlap pairs
-- `RS-TOPOLOGY-02` resolves reporting from `hexarch` / `libarch` enablement only. Discovery always runs even when both owner families are disabled.
+- `RS-TOPOLOGY-02` resolves reporting from `hexarch` / `arch` enablement only. Discovery always runs even when both owner families are disabled.
 - `RS-TOPOLOGY-07` owns fail-closed input integrity for this family:
   - malformed `guardrail3.toml`
   - unreadable-present `guardrail3.toml`
@@ -484,7 +484,7 @@ apps/guardrail3/crates/app/rs/placement/
   - malformed governed app/package `Cargo.toml`
   - malformed eligible live out-of-zone `Cargo.toml`
   - governed app/package roots that declare `arch_role`
-- The next `topology` hardening pass should move "workspace only at the top, packages only below" into explicit root-topology rules here rather than leaving it split across `hexarch`, `libarch`, and `cargo`.
+- The next `topology` hardening pass should move "workspace only at the top, packages only below" into explicit root-topology rules here rather than leaving it split across `hexarch`, `arch`, and `cargo`.
 - Nested-workspace prohibition must be repo-global, not only app-local. `hexarch` already forbids nested workspaces inside app roots, but the harsher contract belongs at the shared placement/topology layer.
 - The next architectural pass should stop thinking in terms of "run `topology` first as a family."
   Instead:
@@ -502,8 +502,8 @@ apps/guardrail3/crates/app/rs/placement/
 
 ## Remaining gaps
 
-- Shared placement facts are still consumed directly by too few families; `rs/hexarch` and future `rs/libarch` still need to finish migrating onto the same routed root substrate.
-- `libarch` is still not an implemented runtime family, even though `rs/topology` now understands `libarch` enablement for ownership coherence and misplaced-root reporting.
+- Shared placement facts are still consumed directly by too few families; `rs/hexarch` and `rs/arch` still need to finish migrating onto the same routed root substrate.
+- `arch` now owns package-root architecture enablement and the old package-only layered family no longer exists as a runtime family.
 - Full `cargo test -p guardrail3` verification is currently blocked by unrelated existing test-callsite signature drift in other families (`code`, `garde`, and `test`) that predates this family.
 - The family still does not implement the intended repo-global Rust topology contract:
   - top-level roots must be workspaces
