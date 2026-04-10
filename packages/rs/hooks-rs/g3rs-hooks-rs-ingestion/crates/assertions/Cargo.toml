@@ -1,0 +1,22 @@
+[package]
+name = "g3rs-hooks-rs-ingestion-assertions"
+version = "0.1.0"
+edition = "2024"
+description = "Assertions for g3rs hooks-rs ingestion tests"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "code", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-hooks-rs-source-checks-types = { path = "../../../g3rs-hooks-rs-source-checks/crates/types", version = "0.1.0" }

@@ -1,0 +1,26 @@
+[package]
+name = "hook-shell-parser-runtime"
+version.workspace = true
+edition = "2024"
+description = "Runtime parser for executable shell hook content"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["hook", "shell", "parser", "guardrail3", "rust"]
+categories = ["development-tools", "parser-implementations"]
+publish = true
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+
+[package.metadata.docs.rs]
+all-features = true
