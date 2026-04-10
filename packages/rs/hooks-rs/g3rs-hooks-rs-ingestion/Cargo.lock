@@ -63,6 +63,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
+name = "clippy-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-runtime",
+]
+
+[[package]]
+name = "clippy-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "clippy-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "crossbeam-deque"
 version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -116,6 +139,114 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "g3rs-clippy-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-config-checks-runtime",
+ "g3rs-clippy-config-checks-types",
+]
+
+[[package]]
+name = "g3rs-clippy-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser",
+ "g3rs-clippy-config-checks-types",
+ "guardrail3-check-types",
+ "guardrail3-domain-modules",
+]
+
+[[package]]
+name = "g3rs-clippy-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-types",
+]
+
+[[package]]
+name = "g3rs-clippy-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-ingestion-runtime",
+ "g3rs-clippy-ingestion-types",
+]
+
+[[package]]
+name = "g3rs-clippy-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser",
+ "g3rs-clippy-ingestion-types",
+ "g3rs-clippy-types",
+ "g3rs-workspace-crawl",
+]
+
+[[package]]
+name = "g3rs-clippy-ingestion-types"
+version = "0.1.0"
+
+[[package]]
+name = "g3rs-clippy-types"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser",
+]
+
+[[package]]
+name = "g3rs-code-config-checks-types"
+version = "0.1.0"
+
+[[package]]
+name = "g3rs-code-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-ingestion-runtime",
+ "g3rs-code-ingestion-types",
+]
+
+[[package]]
+name = "g3rs-code-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "g3rs-code-ingestion-types",
+ "g3rs-workspace-crawl",
+ "glob",
+]
+
+[[package]]
+name = "g3rs-code-ingestion-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-config-checks-types",
+ "g3rs-code-source-checks-types",
+]
+
+[[package]]
+name = "g3rs-code-source-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-source-checks-runtime",
+ "g3rs-code-source-checks-types",
+]
+
+[[package]]
+name = "g3rs-code-source-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-source-checks-types",
+ "guardrail3-check-types",
+ "guardrail3-reason-policy",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "g3rs-code-source-checks-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3rs-hooks-rs-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -135,9 +266,14 @@ name = "g3rs-hooks-rs-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3rs-clippy-config-checks",
+ "g3rs-clippy-ingestion",
+ "g3rs-code-ingestion",
+ "g3rs-code-source-checks",
  "g3rs-hooks-rs-ingestion-types",
  "g3rs-hooks-rs-source-checks",
  "g3rs-workspace-crawl",
+ "guardrail3-check-types",
  "tempfile",
 ]
 
@@ -204,6 +340,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "glob"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
+
+[[package]]
 name = "globset"
 version = "0.4.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -219,6 +361,14 @@ dependencies = [
 [[package]]
 name = "guardrail3-check-types"
 version = "0.1.0"
+
+[[package]]
+name = "guardrail3-domain-modules"
+version = "0.0.0"
+
+[[package]]
+name = "guardrail3-reason-policy"
+version = "0.0.0"
 
 [[package]]
 name = "hashbrown"

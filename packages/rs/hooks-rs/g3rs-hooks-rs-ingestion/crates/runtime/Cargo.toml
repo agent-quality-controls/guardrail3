@@ -24,6 +24,11 @@ g3rs-hooks-rs-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
 
 [dev-dependencies]
+g3rs-clippy-config-checks = { path = "../../../../clippy/g3rs-clippy-config-checks", version = "0.1.0" }
+g3rs-clippy-ingestion = { path = "../../../../clippy/g3rs-clippy-ingestion", version = "0.1.0" }
+g3rs-code-ingestion = { path = "../../../../code/g3rs-code-ingestion", version = "0.1.0" }
+g3rs-code-source-checks = { path = "../../../../code/g3rs-code-source-checks", version = "0.1.0" }
 g3rs-hooks-rs-source-checks = { path = "../../../g3rs-hooks-rs-source-checks", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
+guardrail3-check-types = { path = "../../../../../../packages/shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 tempfile = "3"
