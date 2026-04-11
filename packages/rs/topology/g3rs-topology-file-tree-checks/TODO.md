@@ -1,0 +1,2 @@
+- Keep the package scoped to the workspace-local topology subset only.
+- Do not re-grow old repo-global topology ownership here.
