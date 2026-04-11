@@ -50,7 +50,8 @@ pub(crate) struct TopologyFacts {
 #[derive(Debug, Clone)]
 struct ResolvedMemberPattern {
     raw: String,
-    resolved_dirs: Vec<String>,
+    matched_descendant_dirs: Vec<String>,
+    resolved_child_dirs: Vec<String>,
 }
 
 pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> TopologyFacts {
@@ -94,7 +95,7 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
     for child in &actual_children {
         let declared = member_patterns.iter().any(|member| {
             member
-                .resolved_dirs
+                .resolved_child_dirs
                 .iter()
                 .any(|resolved| resolved == child)
         });
@@ -113,12 +114,12 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
 
     let actual_children_set = actual_children.iter().cloned().collect::<BTreeSet<_>>();
     for member in &member_patterns {
-        let covers_real_child = !member.resolved_dirs.is_empty()
+        let covers_real_child = !member.resolved_child_dirs.is_empty()
             && member
-                .resolved_dirs
+                .resolved_child_dirs
                 .iter()
                 .all(|resolved| actual_children_set.contains(resolved));
-        if covers_real_child {
+        if covers_real_child || !member.matched_descendant_dirs.is_empty() {
             continue;
         }
         issues.push(TopologyIssue {
@@ -150,7 +151,7 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
                     && root.manifest_kind == Some(G3RsTopologyCargoManifestKind::Package)
                     && member_patterns.iter().any(|member| {
                         member
-                            .resolved_dirs
+                            .resolved_child_dirs
                             .iter()
                             .any(|resolved| resolved == *rel_dir)
                     })
@@ -238,6 +239,12 @@ fn collect_member_patterns(input: &G3RsTopologyFileTreeChecksInput) -> Vec<Resol
         .iter()
         .map(|root| root.rel_dir.clone())
         .collect::<Vec<_>>();
+    let child_root_rels = input
+        .descendant_cargo_roots
+        .iter()
+        .filter(|root| root.manifest_kind == Some(G3RsTopologyCargoManifestKind::Package))
+        .map(|root| root.rel_dir.clone())
+        .collect::<Vec<_>>();
 
     input
         .workspace_manifest
@@ -250,10 +257,15 @@ fn collect_member_patterns(input: &G3RsTopologyFileTreeChecksInput) -> Vec<Resol
                 .filter(|member| !member_pattern_escapes_root(member))
                 .map(|member| ResolvedMemberPattern {
                     raw: member.clone(),
-                    resolved_dirs: resolve_member_pattern(
+                    matched_descendant_dirs: resolve_member_pattern(
                         workspace_root_rel,
                         member,
                         &descendant_root_rels,
+                    ),
+                    resolved_child_dirs: resolve_member_pattern(
+                        workspace_root_rel,
+                        member,
+                        &child_root_rels,
                     ),
                 })
                 .collect::<Vec<_>>()
@@ -270,6 +282,7 @@ fn collect_actual_children(
         .descendant_cargo_roots
         .iter()
         .filter(|root| root.rel_dir != workspace_root_rel)
+        .filter(|root| root.manifest_kind == Some(G3RsTopologyCargoManifestKind::Package))
         .filter(|root| {
             nearest_ancestor_workspace(&root.rel_dir, workspace_roots) == Some(workspace_root_rel)
         })
@@ -285,7 +298,11 @@ fn resolve_member_pattern(
     let normalized = normalize_member_pattern(member);
     let pattern = join_rel(workspace_root_rel, &normalized);
     if !contains_glob_meta(&normalized) {
-        return vec![pattern];
+        return descendant_root_rels
+            .iter()
+            .filter(|rel_dir| *rel_dir == &pattern)
+            .cloned()
+            .collect();
     }
 
     let Ok(pattern) = Pattern::new(&pattern) else {
