@@ -21,7 +21,7 @@ pub(crate) fn check(input: &TopologyIssue, results: &mut Vec<G3CheckResult>) {
             display_dir(workspace_root_rel)
         ),
         format!(
-            "`{}` declares member pattern `{member_pattern}`, which points outside the workspace directory using `..`. Workspace members must be subdirectories of the workspace. Change the pattern to a relative subdirectory path, or move the target crate inside the workspace.",
+            "`{}` declares member pattern `{member_pattern}`, which points outside the workspace directory. Workspace members must be relative subdirectory paths inside the workspace root, not absolute paths or `..` escapes. Change the pattern to a relative subdirectory path, or move the target crate inside the workspace.",
             input.cargo_rel_path,
         ),
         Some(input.cargo_rel_path.clone()),

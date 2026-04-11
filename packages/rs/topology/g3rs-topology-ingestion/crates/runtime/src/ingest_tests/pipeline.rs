@@ -168,6 +168,29 @@ fn exact_membership_fires_end_to_end() {
 }
 
 #[test]
+fn dot_slash_member_path_stays_quiet_end_to_end() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = [\"./crates/api\"]\n",
+    );
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
+    write(
+        root.path().join("crates/api/Cargo.toml"),
+        "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
+    );
+    write(
+        root.path().join("crates/api/src/lib.rs"),
+        "pub struct Api;\n",
+    );
+
+    let results = run_results(root.path());
+
+    assert!(results.iter().all(|result| result.id() != "RS-TOPOLOGY-12"));
+}
+
+#[test]
 fn escaping_member_path_fires_end_to_end() {
     let root = tempdir().expect("tempdir");
 
@@ -183,6 +206,25 @@ fn escaping_member_path_fires_end_to_end() {
     write(
         root.path().join("crates/api/src/lib.rs"),
         "pub struct Api;\n",
+    );
+
+    let results = run_results(root.path());
+    let rule_results = results
+        .iter()
+        .filter(|result| result.id() == "RS-TOPOLOGY-13")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rule_results.len(), 1);
+    assert_eq!(rule_results[0].file(), Some("Cargo.toml"));
+}
+
+#[test]
+fn absolute_member_path_fires_end_to_end() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = [\"/tmp/shared\"]\n",
     );
 
     let results = run_results(root.path());
@@ -228,6 +270,43 @@ fn illegal_family_file_placement_fires_end_to_end() {
         rule_results
             .iter()
             .all(|result| result.file() == Some("crates/api/clippy.toml"))
+    );
+}
+
+#[test]
+fn member_cargo_sidecar_illegal_placement_fires_end_to_end() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = [\"crates/api\"]\n",
+    );
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
+    fs::create_dir_all(root.path().join("crates/api/.cargo")).expect("cargo dir");
+    write(
+        root.path().join("crates/api/Cargo.toml"),
+        "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
+    );
+    write(
+        root.path().join("crates/api/src/lib.rs"),
+        "pub struct Api;\n",
+    );
+    write(
+        root.path().join("crates/api/.cargo/config.toml"),
+        "[alias]\n",
+    );
+
+    let results = run_results(root.path());
+    let rule_results = results
+        .iter()
+        .filter(|result| result.id() == "RS-TOPOLOGY-16")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rule_results.len(), 2);
+    assert!(
+        rule_results
+            .iter()
+            .all(|result| result.file() == Some("crates/api/.cargo/config.toml"))
     );
 }
 
@@ -328,6 +407,34 @@ fn legal_root_sidecar_configs_stay_quiet() {
     let results = run_results(root.path());
 
     assert!(results.iter().all(|result| result.id() != "RS-TOPOLOGY-16"));
+}
+
+#[test]
+fn descendant_manifest_failure_fails_closed_end_to_end() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = [\"good\", \"bad\"]\n",
+    );
+    fs::create_dir_all(root.path().join("good/src")).expect("good dirs");
+    fs::create_dir_all(root.path().join("bad/src")).expect("bad dirs");
+    write(
+        root.path().join("good/Cargo.toml"),
+        "[package]\nname = \"good\"\nversion = \"0.1.0\"\n",
+    );
+    write(root.path().join("good/src/lib.rs"), "pub struct Good;\n");
+    write(root.path().join("bad/Cargo.toml"), "[package");
+    write(root.path().join("bad/src/lib.rs"), "pub struct Bad;\n");
+
+    let results = run_results(root.path());
+    let rule_results = results
+        .iter()
+        .filter(|result| result.id() == "RS-TOPOLOGY-07")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rule_results.len(), 1);
+    assert_eq!(rule_results[0].file(), Some("bad/Cargo.toml"));
 }
 
 fn write(path: std::path::PathBuf, content: &str) {

@@ -23,6 +23,25 @@ fn nested_workspace_root_fires() {
 }
 
 #[test]
+fn nested_hybrid_workspace_root_fires() {
+    let input = input(
+        "[workspace]\nmembers = [\"crates/api\"]\n",
+        vec![
+            ("crates/api", Some(G3RsTopologyCargoManifestKind::Package)),
+            (
+                "crates/api/nested",
+                Some(G3RsTopologyCargoManifestKind::Hybrid),
+            ),
+        ],
+        Vec::new(),
+    );
+
+    let results = crate::check(&input);
+
+    assert!(has_rule(&results, "RS-TOPOLOGY-11"));
+}
+
+#[test]
 fn nested_workspace_listed_in_members_still_fires() {
     let input = input(
         "[workspace]\nmembers = [\"crates/api\", \"crates/api/nested\"]\n",

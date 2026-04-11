@@ -31,6 +31,7 @@ Current package-architecture interpretation:
 - for the new workspace-local package pipeline, most repo-global `topology`
   reporting is not a remaining migration target
 - the still-relevant subset is the workspace-legality slice:
+  - `RS-TOPOLOGY-07`
   - `RS-TOPOLOGY-11`
   - `RS-TOPOLOGY-12`
   - `RS-TOPOLOGY-13`

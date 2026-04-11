@@ -1,9 +1,9 @@
 use cargo_toml_parser::parse;
 use g3rs_topology_file_tree_checks_types::G3RsTopologyFileTreeChecksInput;
 use g3rs_topology_types::{
-    G3RsTopologyCargoManifestKind, G3RsTopologyDescendantCargoRoot, G3RsTopologyWorkspaceFamily,
-    G3RsTopologyWorkspaceFamilyFile, G3RsTopologyWorkspaceFamilyFileAttachment,
-    G3RsTopologyWorkspaceFamilyFileKind,
+    G3RsTopologyCargoManifestKind, G3RsTopologyDescendantCargoRoot,
+    G3RsTopologyFileTreeInputFailure, G3RsTopologyWorkspaceFamily, G3RsTopologyWorkspaceFamilyFile,
+    G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
 };
 use guardrail3_check_types::G3CheckResult;
 
@@ -11,6 +11,15 @@ pub(crate) fn input(
     workspace_toml: &str,
     descendants: Vec<(&str, Option<G3RsTopologyCargoManifestKind>)>,
     family_files: Vec<G3RsTopologyWorkspaceFamilyFile>,
+) -> G3RsTopologyFileTreeChecksInput {
+    input_with_failures(workspace_toml, descendants, family_files, Vec::new())
+}
+
+pub(crate) fn input_with_failures(
+    workspace_toml: &str,
+    descendants: Vec<(&str, Option<G3RsTopologyCargoManifestKind>)>,
+    family_files: Vec<G3RsTopologyWorkspaceFamilyFile>,
+    input_failures: Vec<G3RsTopologyFileTreeInputFailure>,
 ) -> G3RsTopologyFileTreeChecksInput {
     G3RsTopologyFileTreeChecksInput {
         workspace_root_rel_dir: String::new(),
@@ -25,7 +34,7 @@ pub(crate) fn input(
             })
             .collect(),
         family_files,
-        input_failures: Vec::new(),
+        input_failures,
     }
 }
 
