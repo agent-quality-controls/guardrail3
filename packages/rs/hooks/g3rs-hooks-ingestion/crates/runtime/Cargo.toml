@@ -1,0 +1,34 @@
+[package]
+name = "g3rs-hooks-ingestion-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3rs hooks ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "code", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["ingest"]
+ingest = []
+
+[lints]
+workspace = true
+
+[dependencies]
+cargo-toml-parser = { path = "../../../../../../packages/parsers/cargo-toml-parser", version = "0.1.0" }
+g3rs-hooks-ingestion-types = { path = "../types", version = "0.1.0" }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+
+[dev-dependencies]
+g3rs-clippy-config-checks = { path = "../../../../clippy/g3rs-clippy-config-checks", version = "0.1.0" }
+g3rs-clippy-ingestion = { path = "../../../../clippy/g3rs-clippy-ingestion", version = "0.1.0" }
+g3rs-code-ingestion = { path = "../../../../code/g3rs-code-ingestion", version = "0.1.0" }
+g3rs-code-source-checks = { path = "../../../../code/g3rs-code-source-checks", version = "0.1.0" }
+g3rs-hooks-source-checks = { path = "../../../g3rs-hooks-source-checks", version = "0.1.0" }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
+guardrail3-check-types = { path = "../../../../../../packages/shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+tempfile = "3"

@@ -1,5 +1,9 @@
 # HOOK-SHARED — Language-agnostic hook structure checker (21 rules)
 
+Public package boundary note:
+- `HOOK-SHARED` no longer ships as a separate public package family.
+- These rules now execute through the merged `g3rs-hooks` package family together with the old `HOOK-RS` source rules.
+
 **Input:** effective pre-commit hook artifacts + modular hook files + hook-path/trust artifacts + executable-bit metadata
 **Current code:** `crates/app/rs/checks/hooks/shared/**` (old `hook_checks.rs` / `hook_script_checks.rs` are legacy seed material only)
 
