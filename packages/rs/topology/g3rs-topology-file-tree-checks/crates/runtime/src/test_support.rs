@@ -5,7 +5,6 @@ use g3rs_topology_types::{
     G3RsTopologyFileTreeInputFailure, G3RsTopologyWorkspaceFamily, G3RsTopologyWorkspaceFamilyFile,
     G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
 };
-use guardrail3_check_types::G3CheckResult;
 
 pub(crate) fn input(
     workspace_toml: &str,
@@ -50,12 +49,4 @@ pub(crate) fn family_file(
         kind,
         attachment,
     }
-}
-
-pub(crate) fn titles(results: &[G3CheckResult], rule_id: &str) -> Vec<String> {
-    results
-        .iter()
-        .filter(|result| result.id() == rule_id)
-        .map(|result| result.title().to_owned())
-        .collect()
 }

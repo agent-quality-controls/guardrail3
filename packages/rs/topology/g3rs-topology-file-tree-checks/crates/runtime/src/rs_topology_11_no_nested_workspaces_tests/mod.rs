@@ -1,5 +1,6 @@
-use g3rs_topology_file_tree_checks_assertions::has_rule;
+use g3rs_topology_file_tree_checks_assertions::{ExpectedRuleResult, assert_rule_results};
 use g3rs_topology_types::G3RsTopologyCargoManifestKind;
+use guardrail3_check_types::G3Severity;
 
 use crate::test_support::input;
 
@@ -19,7 +20,17 @@ fn nested_workspace_root_fires() {
 
     let results = crate::check(&input);
 
-    assert!(has_rule(&results, "RS-TOPOLOGY-11"));
+    assert_rule_results(
+        &results,
+        "RS-TOPOLOGY-11",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("Nested workspace `crates/api/nested` is forbidden"),
+            file: Some("crates/api/nested/Cargo.toml"),
+            inventory: Some(false),
+            message: None,
+        }],
+    );
 }
 
 #[test]
@@ -38,7 +49,17 @@ fn nested_hybrid_workspace_root_fires() {
 
     let results = crate::check(&input);
 
-    assert!(has_rule(&results, "RS-TOPOLOGY-11"));
+    assert_rule_results(
+        &results,
+        "RS-TOPOLOGY-11",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("Nested workspace `crates/api/nested` is forbidden"),
+            file: Some("crates/api/nested/Cargo.toml"),
+            inventory: Some(false),
+            message: None,
+        }],
+    );
 }
 
 #[test]
@@ -57,7 +78,17 @@ fn nested_workspace_listed_in_members_still_fires() {
 
     let results = crate::check(&input);
 
-    assert!(has_rule(&results, "RS-TOPOLOGY-11"));
+    assert_rule_results(
+        &results,
+        "RS-TOPOLOGY-11",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("Nested workspace `crates/api/nested` is forbidden"),
+            file: Some("crates/api/nested/Cargo.toml"),
+            inventory: Some(false),
+            message: None,
+        }],
+    );
 }
 
 #[test]
@@ -76,7 +107,17 @@ fn nested_workspace_excluded_from_parent_still_fires() {
 
     let results = crate::check(&input);
 
-    assert!(has_rule(&results, "RS-TOPOLOGY-11"));
+    assert_rule_results(
+        &results,
+        "RS-TOPOLOGY-11",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("Nested workspace `crates/api/nested` is forbidden"),
+            file: Some("crates/api/nested/Cargo.toml"),
+            inventory: Some(false),
+            message: None,
+        }],
+    );
 }
 
 #[test]
@@ -89,5 +130,5 @@ fn package_child_does_not_fire_nested_workspace_rule() {
 
     let results = crate::check(&input);
 
-    assert!(!has_rule(&results, "RS-TOPOLOGY-11"));
+    assert_rule_results(&results, "RS-TOPOLOGY-11", &[]);
 }
