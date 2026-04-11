@@ -164,6 +164,14 @@ Typical file-tree concerns:
 
 File-tree checks should not be smuggled into config rules just because the config mentions a path.
 
+Example:
+
+- `topology` rules about nested workspaces, exact workspace membership, member
+  path escapes, and illegal placement of workspace-local family files are
+  file-tree legality checks
+- they are not `arch`
+- they are not config/source checks
+
 ## Scope Rule
 
 The important rule is:

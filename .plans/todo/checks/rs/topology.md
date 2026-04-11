@@ -57,6 +57,20 @@ Important architecture split:
 - `RS-TOPOLOGY` is the reporting surface for that legality stage
 - workspace-local families consume only legal local surfaces after that stage
 
+For the new package architecture, this means:
+
+- repo-global placement rules are not part of the remaining config/source
+  migration work
+- the still-relevant extracted subset is:
+  - `RS-TOPOLOGY-11`
+  - `RS-TOPOLOGY-12`
+  - `RS-TOPOLOGY-13`
+  - `RS-TOPOLOGY-16`
+- those four rules are semantically workspace/file-tree legality, not `arch`
+  and not config/source
+- they should land as shared workspace-legality file-tree checks rather than
+  being absorbed into `arch`
+
 So `topology` should not be modeled as "a family that must run first."
 It should be modeled as the visible report surface for legality facts the mapper and runners also rely on.
 
