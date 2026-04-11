@@ -14,6 +14,10 @@ pub struct G3RsArchCrateNode {
     pub has_all_feature: bool,
     pub all_feature_deps: Vec<String>,
     pub default_feature_deps: Vec<String>,
+    pub dependency_count: usize,
+    pub sibling_rs_file_count: usize,
+    pub sibling_dir_count: usize,
+    pub max_module_depth: usize,
     pub cargo_parse_error: Option<String>,
 }
 
@@ -98,5 +102,8 @@ pub struct G3RsArchConfigChecksInput {
     pub dependency_edges: Vec<G3RsArchDependencyEdge>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsArchFileTreeChecksInput;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsArchFileTreeChecksInput {
+    pub crate_nodes: Vec<G3RsArchCrateNode>,
+    pub module_dirs: Vec<G3RsArchModuleDir>,
+}

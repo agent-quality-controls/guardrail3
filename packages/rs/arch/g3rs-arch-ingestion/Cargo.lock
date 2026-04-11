@@ -117,6 +117,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-arch-file-tree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-arch-file-tree-checks-runtime",
+ "g3rs-arch-file-tree-checks-types",
+]
+
+[[package]]
+name = "g3rs-arch-file-tree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-arch-file-tree-checks-types",
+ "g3rs-arch-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-arch-file-tree-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-arch-types",
+]
+
+[[package]]
 name = "g3rs-arch-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -133,6 +157,7 @@ name = "g3rs-arch-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-arch-config-checks",
+ "g3rs-arch-file-tree-checks",
  "g3rs-arch-ingestion-assertions",
  "g3rs-arch-ingestion-types",
  "g3rs-arch-source-checks",
@@ -151,8 +176,8 @@ name = "g3rs-arch-ingestion-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-arch-config-checks-types",
+ "g3rs-arch-file-tree-checks-types",
  "g3rs-arch-source-checks-types",
- "g3rs-arch-types",
 ]
 
 [[package]]
