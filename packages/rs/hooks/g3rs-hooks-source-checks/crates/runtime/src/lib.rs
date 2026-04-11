@@ -17,6 +17,7 @@ mod hook_rs_16_config_changes_trigger_validation;
 mod inputs;
 mod run;
 mod shell_safety;
+mod support;
 mod workflow;
 
 #[cfg(feature = "checks")]

@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
-keywords = ["guardrail3", "code", "ingestion", "rust"]
+keywords = ["guardrail3", "hooks", "ingestion", "rust"]
 categories = ["development-tools"]
 
 [features]
@@ -19,6 +19,8 @@ api = []
 workspace = true
 
 [dependencies]
+g3rs-hooks-config-checks-types = { path = "../../../g3rs-hooks-config-checks/crates/types", version = "0.1.0" }
+g3rs-hooks-file-tree-checks-types = { path = "../../../g3rs-hooks-file-tree-checks/crates/types", version = "0.1.0" }
 g3rs-hooks-source-checks-types = { path = "../../../g3rs-hooks-source-checks/crates/types", version = "0.1.0" }
 
 [package.metadata.guardrail3]

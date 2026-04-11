@@ -39,8 +39,8 @@ fn has_concrete_lockfile_command(parsed: &hook_shell_parser::ParsedShellScript<'
 
 fn is_concrete_lockfile_command(command: &ResolvedCommand) -> bool {
     command.command_name() == "pnpm"
-        && (command.command_text().contains(" install") || command.command_text().contains(" i"))
-        && command.command_text().contains("--frozen-lockfile")
+        && matches!(command.args().first().map(String::as_str), Some("install" | "i"))
+        && command.args().iter().any(|arg| arg == "--frozen-lockfile")
 }
 
 #[cfg(test)]

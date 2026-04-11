@@ -87,6 +87,7 @@ pub struct ShellFunction {
     pub name: String,
     pub line_no: usize,
     pub body: String,
+    pub body_starts_on_definition_line: bool,
 }
 
 impl ShellFunction {
@@ -103,6 +104,11 @@ impl ShellFunction {
     #[must_use]
     pub fn body(&self) -> &str {
         &self.body
+    }
+
+    #[must_use]
+    pub fn body_starts_on_definition_line(&self) -> bool {
+        self.body_starts_on_definition_line
     }
 }
 
@@ -136,10 +142,10 @@ pub fn parse_script(content: &str) -> ParsedShellScript<'_> {
             continue;
         }
         if let Some(taken_branch) = single_line_constant_if_taken_branch(raw) {
-            if let Some(executable) =
-                taken_branch.and_then(|branch| parse_executable_line(branch, line_no))
-            {
-                executable_lines.push(executable);
+            if let Some(branch) = taken_branch {
+                for executable in parse_executable_segments(branch, line_no) {
+                    executable_lines.push(executable);
+                }
             }
             continue;
         }
@@ -161,10 +167,12 @@ pub fn parse_script(content: &str) -> ParsedShellScript<'_> {
         }
         if is_function_definition_line(trimmed) {
             function_brace_depth = function_scope_depth_after_definition(trimmed);
+            let body = initial_function_body_fragment(raw);
             let function = ShellFunction {
                 name: function_definition_name(trimmed).unwrap_or_default(),
                 line_no,
-                body: initial_function_body_fragment(raw),
+                body_starts_on_definition_line: !body.is_empty(),
+                body,
             };
             if function_brace_depth == 0 {
                 functions.push(function);

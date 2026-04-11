@@ -46,10 +46,15 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
 }
 
 fn suspicious_step(line: &str) -> Option<&'static str> {
-    if line.starts_with('#') || line.starts_with("echo ") {
-        return step_family_from_text(line);
+    if line.starts_with("#!") {
+        return None;
     }
-    None
+
+    if let Some(comment) = crate::support::inline_comment_text(line) {
+        return step_family_from_text(comment);
+    }
+
+    step_family_from_text(line)
 }
 
 fn step_family_from_text(line: &str) -> Option<&'static str> {
@@ -129,7 +134,9 @@ fn is_gitleaks_command(command: &ResolvedCommand) -> bool {
 }
 
 fn is_frozen_lockfile_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "pnpm" && command.command_text().contains("--frozen-lockfile")
+    command.command_name() == "pnpm"
+        && matches!(command.args().first().map(String::as_str), Some("install" | "i"))
+        && command.args().iter().any(|arg| arg == "--frozen-lockfile")
 }
 
 #[cfg(test)]

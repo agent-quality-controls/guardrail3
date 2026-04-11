@@ -29,6 +29,13 @@ fi
 }
 
 #[test]
+fn passes_when_direct_grep_and_validation_chain_covers_all_configs() {
+    let content = r#"echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$' && g3rs rs validate --staged ."#;
+    let results = run_case(content);
+    assertions::assert_present(&results);
+}
+
+#[test]
 fn passes_when_trigger_logic_checks_all_rust_guardrail_configs() {
     let content = r#"
 if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
@@ -42,6 +49,43 @@ fi
 #[test]
 fn warns_when_config_names_only_appear_in_echo_banner() {
     let content = r#"echo "$STAGED_FILES guardrail3-rs.toml clippy.toml .clippy.toml deny.toml .deny.toml rustfmt.toml .rustfmt.toml rust-toolchain.toml""#;
+    let results = run_case(content);
+    assertions::assert_missing(&results);
+}
+
+#[test]
+fn warns_when_printf_prose_mentions_configs_before_validation() {
+    let content = r#"
+if printf '%s\n' 'guardrail3-rs.toml clippy.toml .clippy.toml deny.toml .deny.toml rustfmt.toml .rustfmt.toml rust-toolchain.toml'; then
+    g3rs rs validate --staged .
+fi
+"#;
+    let results = run_case(content);
+    assertions::assert_missing(&results);
+}
+
+#[test]
+fn warns_when_heredoc_mentions_configs_before_validation() {
+    let content = r#"
+cat <<'EOF'
+guardrail3-rs.toml
+clippy.toml
+.clippy.toml
+deny.toml
+.deny.toml
+rustfmt.toml
+.rustfmt.toml
+rust-toolchain.toml
+EOF
+g3rs rs validate --staged .
+"#;
+    let results = run_case(content);
+    assertions::assert_missing(&results);
+}
+
+#[test]
+fn warns_when_doc_grep_mentions_configs_before_validation() {
+    let content = r#"grep -q 'guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml' README.md && g3rs rs validate --staged ."#;
     let results = run_case(content);
     assertions::assert_missing(&results);
 }

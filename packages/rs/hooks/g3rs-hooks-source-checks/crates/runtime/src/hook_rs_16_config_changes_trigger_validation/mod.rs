@@ -25,7 +25,7 @@ pub(crate) fn check(content: &str, input: &RustHookCommandInput<'_>, results: &m
             block_branches(block)
                 .into_iter()
                 .any(|branch| branch_covers_needle(&branch, needle))
-        })
+        }) || content_has_direct_trigger_line_for_needle(content, needle)
     });
 
     if covered {
@@ -348,13 +348,8 @@ fn block_mentions_config_trigger(block: &str, needle: &str) -> bool {
         let is_match = !trimmed.starts_with('#')
             && !trimmed.is_empty()
             && mentions_config_exact(line, needle)
-            && ((!trimmed.starts_with("echo ")
-                && (trimmed.starts_with("if ")
-                    || trimmed.starts_with("elif ")
-                    || trimmed.starts_with("case ")
-                    || line.contains("git diff")
-                    || line.contains("grep")
-                    || in_condition_now))
+            && (is_trigger_like_line(trimmed)
+                || (in_condition_now && is_trigger_like_line(trimmed))
                 || (case_block && looks_like_case_pattern_line(trimmed)));
 
         if in_if_condition && line_contains_then(trimmed) {
@@ -363,6 +358,42 @@ fn block_mentions_config_trigger(block: &str, needle: &str) -> bool {
 
         is_match
     })
+}
+
+fn content_has_direct_trigger_line_for_needle(content: &str, needle: &str) -> bool {
+    content.lines().any(|line| {
+        let trimmed = line.trim();
+        !trimmed.is_empty()
+            && !trimmed.starts_with('#')
+            && mentions_config_exact(line, needle)
+            && is_trigger_like_line(trimmed)
+            && block_contains_validation(line)
+    })
+}
+
+fn is_trigger_like_line(line: &str) -> bool {
+    if line.starts_with("printf ") || line.starts_with("cat ") {
+        return false;
+    }
+
+    if line.starts_with("case ") || looks_like_case_pattern_line(line) {
+        return true;
+    }
+
+    let mentions_changed_source = line.contains("git diff")
+        || line.contains("$STAGED_FILES")
+        || line.contains("$changed")
+        || line.contains("$changed_path");
+
+    mentions_changed_source
+        && (line.contains("grep")
+            || line.starts_with("[[ ")
+            || line.starts_with("[ ")
+            || line.starts_with("test ")
+            || line.starts_with("if ")
+            || line.starts_with("elif ")
+            || line.contains("==")
+            || line.contains(" = "))
 }
 
 fn mentions_config_exact(line: &str, needle: &str) -> bool {

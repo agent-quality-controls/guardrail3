@@ -42,9 +42,7 @@ fn is_merge_conflict_command(command: &ResolvedCommand) -> bool {
         && (command.command_text().contains("<{7}")
             || command.command_text().contains("<<<<<<<")
             || command.command_text().contains("=======")
-            || command.command_text().contains(">>>>>>>")
-            || command.command_text().contains("conflict marker")
-            || command.command_text().contains("merge conflict"))
+            || command.command_text().contains(">>>>>>>"))
 }
 
 #[cfg(test)]

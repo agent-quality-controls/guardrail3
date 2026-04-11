@@ -30,3 +30,18 @@ fn passes_when_exit_zero_only_appears_in_comment() {
         }],
     );
 }
+
+#[test]
+fn warns_when_called_function_contains_exit_zero() {
+    let results = run_case("finish() {\n    exit 0\n}\nfinish\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("unconditional exit 0 bypass present"),
+            line: Some(2),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
