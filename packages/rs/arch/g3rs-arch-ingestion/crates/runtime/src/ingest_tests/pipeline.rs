@@ -1,6 +1,7 @@
 use std::fs;
 
 use g3rs_arch_config_checks::check as check_config;
+use g3rs_arch_file_tree_checks::check as check_file_tree;
 use g3rs_arch_source_checks::check as check_source;
 use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
@@ -322,4 +323,230 @@ version = "0.1.0"
     assert_eq!(inputs[0].crate_nodes.len(), 1);
     assert_eq!(inputs[0].crate_nodes[0].rel_dir, "pkg");
     assert!(inputs[0].dependency_edges.is_empty());
+}
+
+#[test]
+fn file_tree_pipeline_reports_missing_facade_and_complexity() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("crate_a/src/deep/a/b/c")).expect("crate dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+
+[dependencies]
+one = "1"
+two = "1"
+three = "1"
+four = "1"
+five = "1"
+six = "1"
+seven = "1"
+eight = "1"
+nine = "1"
+ten = "1"
+eleven = "1"
+twelve = "1"
+thirteen = "1"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(root.path().join("crate_a/src/api.rs"), "pub struct Api;\n").expect("api");
+    fs::write(root.path().join("crate_a/src/one.rs"), "pub struct One;\n").expect("one");
+    fs::write(root.path().join("crate_a/src/two.rs"), "pub struct Two;\n").expect("two");
+    fs::write(root.path().join("crate_a/src/three.rs"), "pub struct Three;\n").expect("three");
+    fs::write(root.path().join("crate_a/src/four.rs"), "pub struct Four;\n").expect("four");
+    fs::write(root.path().join("crate_a/src/five.rs"), "pub struct Five;\n").expect("five");
+    fs::write(root.path().join("crate_a/src/six.rs"), "pub struct Six;\n").expect("six");
+    fs::write(root.path().join("crate_a/src/seven.rs"), "pub struct Seven;\n").expect("seven");
+    fs::write(root.path().join("crate_a/src/eight.rs"), "pub struct Eight;\n").expect("eight");
+    fs::write(root.path().join("crate_a/src/nine.rs"), "pub struct Nine;\n").expect("nine");
+    fs::write(root.path().join("crate_a/src/ten.rs"), "pub struct Ten;\n").expect("ten");
+    fs::write(root.path().join("crate_a/src/eleven.rs"), "pub struct Eleven;\n").expect("eleven");
+    fs::write(root.path().join("crate_a/src/deep/a/b/c/mod.rs"), "pub struct Deep;\n")
+        .expect("deep");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let results = check_file_tree(&input);
+
+    let rule_01 = results
+        .iter()
+        .filter(|result| result.id() == "RS-ARCH-01")
+        .collect::<Vec<_>>();
+    let rule_07 = results
+        .iter()
+        .filter(|result| result.id() == "RS-ARCH-07")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rule_01.len(), 1);
+    assert_eq!(rule_01[0].file(), Some("crate_a/Cargo.toml"));
+    assert_eq!(rule_01[0].inventory(), false);
+
+    assert_eq!(rule_07.len(), 1);
+    assert_eq!(rule_07[0].file(), Some("crate_a/Cargo.toml"));
+    assert_eq!(rule_07[0].inventory(), false);
+}
+
+#[test]
+fn file_tree_pipeline_reports_missing_mod_rs() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("crate_a/src/nested")).expect("crate dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(root.path().join("crate_a/src/lib.rs"), "pub mod nested;\n").expect("lib");
+    fs::write(
+        root.path().join("crate_a/src/nested/thing.rs"),
+        "pub struct Thing;\n",
+    )
+    .expect("thing");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let results = check_file_tree(&input);
+
+    let rule_03 = results
+        .iter()
+        .filter(|result| result.id() == "RS-ARCH-03")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rule_03.len(), 1);
+    assert_eq!(rule_03[0].file(), Some("crate_a/src/lib.rs"));
+    assert_eq!(rule_03[0].inventory(), false);
+}
+
+#[test]
+fn file_tree_ingestion_stays_inside_the_pointed_workspace() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("crate_a/src/nested")).expect("crate dirs");
+    fs::create_dir_all(root.path().join("foreign/src/nested")).expect("foreign dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(root.path().join("crate_a/src/lib.rs"), "pub mod nested;\n").expect("crate lib");
+    fs::write(
+        root.path().join("crate_a/src/nested/thing.rs"),
+        "pub struct Thing;\n",
+    )
+    .expect("crate thing");
+    fs::write(
+        root.path().join("foreign/Cargo.toml"),
+        r#"
+[package]
+name = "foreign"
+version = "0.1.0"
+"#,
+    )
+    .expect("foreign cargo");
+    fs::write(root.path().join("foreign/src/lib.rs"), "pub mod nested;\n").expect("foreign lib");
+    fs::write(
+        root.path().join("foreign/src/nested/thing.rs"),
+        "pub struct Thing;\n",
+    )
+    .expect("foreign thing");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+
+    assert_eq!(input.crate_nodes.len(), 1);
+    assert_eq!(input.crate_nodes[0].rel_dir, "crate_a");
+    assert!(input
+        .module_dirs
+        .iter()
+        .all(|module_dir| module_dir.dir_rel.starts_with("crate_a/")));
+}
+
+#[test]
+fn file_tree_complexity_ignores_excluded_nested_crates_for_root_level_layouts() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["pkg", "pkg/crates/inner"]
+exclude = ["pkg/crates/inner"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("pkg/crates/inner/src/deep/a/b/c"))
+        .expect("inner dirs");
+
+    fs::write(
+        root.path().join("pkg/Cargo.toml"),
+        r#"
+[package]
+name = "pkg"
+version = "0.1.0"
+
+[lib]
+path = "lib.rs"
+"#,
+    )
+    .expect("pkg cargo");
+    fs::write(root.path().join("pkg/lib.rs"), "pub mod api;\n").expect("pkg lib");
+    fs::write(root.path().join("pkg/api.rs"), "pub struct Api;\n").expect("pkg api");
+
+    fs::write(
+        root.path().join("pkg/crates/inner/Cargo.toml"),
+        r#"
+[package]
+name = "inner"
+version = "0.1.0"
+"#,
+    )
+    .expect("inner cargo");
+    fs::write(
+        root.path().join("pkg/crates/inner/src/deep/a/b/c/mod.rs"),
+        "pub struct Deep;\n",
+    )
+    .expect("inner deep");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let results = check_file_tree(&input);
+
+    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-07"));
 }

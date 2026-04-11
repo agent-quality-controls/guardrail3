@@ -1,21 +1,19 @@
 # g3rs-arch-ingestion
 
-Builds `code` checks inputs from a workspace crawl.
+Builds `arch` checks inputs from a workspace crawl.
 
 Current behavior:
 
-- scans owned config files for `EXCEPTION:` comments
-- parses workspace `Cargo.toml` files for `workspace.lints.rust.unsafe_code`
-- selects `.rs` files from the crawl
-- skips fixture paths
-- classifies `is_test`
-- resolves `profile_name` as `library` or `binary` when Cargo target ownership is clear
-- marks the exact library root file with `is_library_root`
-- reads source content
-- emits one `G3RsCodeSourceChecksInput` per file
+- parses the pointed root `Cargo.toml`
+- resolves workspace members from `[workspace].members` and `[workspace].exclude`
+- builds crate-node facts from member `Cargo.toml` files
+- derives dependency-edge facts for config checks
+- derives facade surfaces and owned source files for source checks
+- derives module-directory structural facts for file-tree checks
+- stays inside the pointed workspace crawl
 
 Current lane support:
 
 - `ingest_for_source_checks` is implemented
 - `ingest_for_config_checks` is implemented
-- `ingest_for_file_tree_checks` is a stub
+- `ingest_for_file_tree_checks` is implemented

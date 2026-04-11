@@ -1,8 +1,8 @@
 # g3rs-arch-config-checks
 
-Runs the `code` family config checks.
+Runs the `arch` family config checks.
 
 Current rules:
 
-- `RS-CODE-07` EXCEPTION comment inventory
-- `RS-CODE-12` workspace `unsafe_code` lint level
+- `RS-ARCH-05` no boundary-crossing crate dependencies
+- `RS-ARCH-06` non-child dependencies require `shared = true`

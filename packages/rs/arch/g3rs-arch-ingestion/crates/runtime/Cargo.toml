@@ -29,6 +29,7 @@ toml = "0.8"
 
 [dev-dependencies]
 g3rs-arch-config-checks = { path = "../../../g3rs-arch-config-checks", version = "0.1.0" }
+g3rs-arch-file-tree-checks = { path = "../../../g3rs-arch-file-tree-checks", version = "0.1.0" }
 g3rs-arch-ingestion-assertions = { path = "../assertions" }
 g3rs-arch-source-checks = { path = "../../../g3rs-arch-source-checks", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
