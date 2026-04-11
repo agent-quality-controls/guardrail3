@@ -26,6 +26,21 @@ Current state:
   - explicit `--family topology` still runs even when `[rust.checks] topology = false`
   - app-scoped `hexarch` overrides are covered
 
+Current package-architecture interpretation:
+
+- for the new workspace-local package pipeline, most repo-global `topology`
+  reporting is not a remaining migration target
+- the still-relevant subset is the workspace-legality slice:
+  - `RS-TOPOLOGY-11`
+  - `RS-TOPOLOGY-12`
+  - `RS-TOPOLOGY-13`
+  - `RS-TOPOLOGY-16`
+- that subset is not `arch`
+- that subset is not config/source
+- that subset should become shared workspace/file-tree legality checks
+- `arch` should consume the resulting legal workspace surface, not re-own
+  those checks
+
 Scope model:
 
 - repo-global reporting family over shared Rust structure and legality facts
