@@ -1,4 +1,5 @@
 # g3rs-test-ingestion TODO
 
-- build `ingest_for_file_tree_checks` for the deferred mixed lane
+- keep the file-tree lane aligned with the old `RS-TEST-02`, `03`, and `18` attack matrices
+- harden root-local stray harness coverage before deleting the old app family
 - add broader package-level parity smoke tests against legacy `test` behavior

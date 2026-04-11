@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use cargo_toml_parser::CargoToml;
 use mutants_toml_parser::MutantsToml;
 use nextest_toml_parser::NextestToml;
@@ -45,6 +47,7 @@ pub enum G3RsTestFileKind {
     InternalSidecarSupport,
     ExternalHarness,
     AssertionsModule,
+    TestSupport,
     Other,
 }
 
@@ -58,5 +61,41 @@ pub struct G3RsTestComponentSourceFacts {
     pub assertions_package_name: Option<String>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsTestFileTreeChecksInput;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsTestFileTreeChecksInput {
+    pub root_rel_dir: String,
+    pub cargo_rel_path: String,
+    pub files: Vec<G3RsTestSourceFile>,
+    pub components: Vec<G3RsTestComponentFileTreeFacts>,
+    pub local_package_names: BTreeSet<String>,
+    pub input_failures: Vec<G3RsTestFileTreeInputFailure>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsTestComponentFileTreeFacts {
+    pub rel_dir: String,
+    pub runtime_rel_dir: String,
+    pub runtime_cargo_rel_path: String,
+    pub runtime_package_name: Option<String>,
+    pub runtime_normal_dependencies: BTreeSet<String>,
+    pub runtime_dev_dependencies: BTreeSet<String>,
+    pub assertions_rel_dir: String,
+    pub assertions_cargo_rel_path: String,
+    pub assertions_exists: bool,
+    pub assertions_package_name: Option<String>,
+    pub assertions_dependencies: BTreeSet<String>,
+    pub sidecars: Vec<G3RsTestOwnedSidecarFacts>,
+    pub external_harnesses: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsTestOwnedSidecarFacts {
+    pub mod_rel_path: String,
+    pub assertions_module_rel_path: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsTestFileTreeInputFailure {
+    pub rel_path: String,
+    pub message: String,
+}
