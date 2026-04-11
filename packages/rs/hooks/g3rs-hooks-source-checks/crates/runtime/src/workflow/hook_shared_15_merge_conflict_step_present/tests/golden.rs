@@ -59,3 +59,17 @@ fn warns_when_only_echo_mentions_conflict_markers() {
         }],
     );
 }
+
+#[test]
+fn warns_when_grep_only_mentions_merge_conflict_prose() {
+    let results = run_case("grep -q \"merge conflict\" README.md\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("merge-conflict check step missing"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}

@@ -107,6 +107,15 @@ run-parts .githooks/pre-commit.d
 }
 
 #[test]
+fn does_not_mark_echoed_dispatcher_text_as_dispatcher_syntax() {
+    let parsed = parse_script("echo run-parts .githooks/pre-commit.d\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "echo");
+    assert!(!parsed.executable_lines[0].is_dispatcher_syntax);
+}
+
+#[test]
 fn ignores_standalone_shell_assignments() {
     let parsed = parse_script(
         r#"RUST_WORKSPACE="${GUARDRAIL3_RUST_WORKSPACE:-.}"
@@ -184,6 +193,16 @@ fn strips_inline_comments_from_executable_commands() {
 #[test]
 fn ignores_heredoc_body_command_text() {
     let parsed = parse_script("cat <<'EOF'\nguardrail3 rs validate --staged .\nEOF\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "cat");
+}
+
+#[test]
+fn ignores_tab_stripped_heredoc_body_command_text() {
+    let parsed = parse_script(
+        "cat <<-EOF\n\tg3rs rs validate --staged .\n\tcargo test --workspace\n\tEOF\n",
+    );
 
     assert_eq!(parsed.executable_lines.len(), 1);
     assert_eq!(parsed.executable_lines[0].command_name, "cat");
@@ -294,6 +313,21 @@ fn keeps_elif_body_after_dead_if_condition() {
 
     assert_eq!(parsed.executable_lines.len(), 1);
     assert_eq!(parsed.executable_lines[0].command_name, "guardrail3");
+}
+
+#[test]
+fn keeps_all_semicolon_separated_commands_in_single_line_true_if_branch() {
+    let parsed = parse_script(
+        "if true; then echo ok; g3rs rs validate --staged .; fi\n",
+    );
+
+    assert_eq!(parsed.executable_lines.len(), 2);
+    assert_eq!(parsed.executable_lines[0].command_name, "echo");
+    assert_eq!(parsed.executable_lines[1].command_name, "g3rs");
+    assert_eq!(
+        parsed.executable_lines[1].command_text,
+        "g3rs rs validate --staged ."
+    );
 }
 
 #[test]

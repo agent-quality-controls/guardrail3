@@ -6,8 +6,10 @@ const ID: &str = "HOOK-SHARED-14";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
     for (index, raw_line) in input.content.lines().enumerate() {
-        let trimmed = raw_line.trim();
-        if !trimmed.starts_with('#') || !trimmed.contains("--no-verify") {
+        let Some(comment) = crate::support::inline_comment_text(raw_line) else {
+            continue;
+        };
+        if !comment.contains("--no-verify") {
             continue;
         }
 

@@ -39,6 +39,8 @@ Compatibility note:
 - `.githooks/pre-commit` is the preferred contract
 - `hooks/pre-commit` is a compatibility surface only
 - modular discovery remains rooted under `.githooks/pre-commit.d`
+- only `.githooks` and `hooks` are owned active-hook surfaces in the merged package family
+- other `core.hooksPath` values are treated as out-of-contract and are not analyzed as active hook paths
 - future verification must not treat `hooks/pre-commit` as equivalent to a full modular `.githooks` layout unless the rule explicitly says so
 
 ## Executable-command contract
@@ -123,7 +125,7 @@ Even without a dedicated input-failure rule yet, the plan intent is fail-closed 
 | HOOK-SHARED-18 | Error | Executable command context only. Required steps must be detected on executable command lines, not by raw substring presence in comments, echoed messages, or unrelated text. This is the core rule that prevents false passes from commented-out commands. | Implemented |
 | HOOK-SHARED-19 | Warn | Real dispatcher syntax only. `HOOK-SHARED-04` owns whether modular mode actually dispatches. `HOOK-SHARED-19` owns the narrower syntax-hardening contract that the detected dispatcher must come from real executable dispatch syntax, not loose tokens like `. ` or `for ` in unrelated text. | Implemented |
 | HOOK-SHARED-20 | Warn | Concrete lockfile integrity command. The lockfile check must validate a real command shape such as `pnpm install --frozen-lockfile`, not just the appearance of the word `lockfile`. | Implemented |
-| HOOK-SHARED-21 | Warn | No fail-open wrappers on guardrail-critical commands. Commands such as gitleaks, guardrail3 validate, cargo clippy, cargo deny, cargo test, cargo machete, and cargo dupes must not be softened with `|| true`, `|| :`, or similar patterns that mask failure. | Implemented |
+| HOOK-SHARED-21 | Warn | No fail-open wrappers on guardrail-critical commands. Commands such as gitleaks, g3rs validate, cargo clippy, cargo deny, cargo test, cargo machete, and cargo dupes must not be softened with `|| true`, `|| :`, or similar patterns that mask failure. | Implemented |
 
 ## Explicitly rejected
 

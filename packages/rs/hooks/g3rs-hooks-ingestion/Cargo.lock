@@ -247,6 +247,47 @@ name = "g3rs-code-source-checks-types"
 version = "0.1.0"
 
 [[package]]
+name = "g3rs-hooks-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-config-checks-runtime",
+ "g3rs-hooks-config-checks-types",
+]
+
+[[package]]
+name = "g3rs-hooks-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-config-checks-types",
+ "guardrail3-check-types",
+ "hook-shell-parser",
+]
+
+[[package]]
+name = "g3rs-hooks-config-checks-types"
+version = "0.1.0"
+
+[[package]]
+name = "g3rs-hooks-file-tree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-file-tree-checks-runtime",
+ "g3rs-hooks-file-tree-checks-types",
+]
+
+[[package]]
+name = "g3rs-hooks-file-tree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-file-tree-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-hooks-file-tree-checks-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3rs-hooks-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -270,6 +311,10 @@ dependencies = [
  "g3rs-clippy-ingestion",
  "g3rs-code-ingestion",
  "g3rs-code-source-checks",
+ "g3rs-hooks-config-checks",
+ "g3rs-hooks-config-checks-types",
+ "g3rs-hooks-file-tree-checks",
+ "g3rs-hooks-file-tree-checks-types",
  "g3rs-hooks-ingestion-types",
  "g3rs-hooks-source-checks",
  "g3rs-workspace-crawl",
@@ -281,6 +326,8 @@ dependencies = [
 name = "g3rs-hooks-ingestion-types"
 version = "0.1.0"
 dependencies = [
+ "g3rs-hooks-config-checks-types",
+ "g3rs-hooks-file-tree-checks-types",
  "g3rs-hooks-source-checks-types",
 ]
 

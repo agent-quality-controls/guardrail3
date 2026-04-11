@@ -1,4 +1,5 @@
 use std::fs;
+use std::process::Command;
 
 use tempfile::tempdir;
 
@@ -7,6 +8,33 @@ fn write(path: impl AsRef<std::path::Path>, content: &str) {
         fs::create_dir_all(parent).expect("create parent directory");
     }
     fs::write(path, content).expect("write fixture");
+}
+
+fn git_init(path: &std::path::Path) {
+    let status = Command::new("git")
+        .args(["init", "--quiet"])
+        .current_dir(path)
+        .status()
+        .expect("git init should succeed");
+    assert!(status.success(), "git init should exit successfully");
+}
+
+fn git_config_hooks_path(path: &std::path::Path, hooks_path: &str) {
+    let status = Command::new("git")
+        .args(["config", "core.hooksPath", hooks_path])
+        .current_dir(path)
+        .status()
+        .expect("git config should succeed");
+    assert!(status.success(), "git config should exit successfully");
+}
+
+#[cfg(unix)]
+fn make_executable(path: &std::path::Path) {
+    use std::os::unix::fs::PermissionsExt as _;
+
+    let mut permissions = fs::metadata(path).expect("metadata").permissions();
+    permissions.set_mode(0o755);
+    fs::set_permissions(path, permissions).expect("set executable bit");
 }
 
 #[test]
@@ -135,6 +163,27 @@ fn pipeline_works_through_hooks_pre_commit_fallback() {
 }
 
 #[test]
+fn pipeline_fallback_hook_stays_quiet_about_inactive_modular_layout() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join("hooks/pre-commit"), "cargo fmt --check\n");
+    write(root.join(".githooks/pre-commit.d/10-rust.sh"), "echo cargo test --workspace\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    assert!(
+        results.iter().all(|result| result.file() != Some(".githooks/pre-commit.d/10-rust.sh")),
+        "{results:#?}"
+    );
+}
+
+#[test]
 fn pipeline_reports_rs_config_trigger_for_guardrail3_rs_toml() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = temp_dir.path();
@@ -164,6 +213,255 @@ fn pipeline_reports_rs_config_trigger_for_guardrail3_rs_toml() {
         }),
         "{results:#?}"
     );
+}
+
+#[test]
+fn pipeline_reports_top_level_g3rs_validate_step_inventory() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join(".githooks/pre-commit"), "g3rs validate --staged .\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    let matching = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-RS-08")
+        .collect::<Vec<_>>();
+
+    assert_eq!(matching.len(), 1, "{results:#?}");
+    assert!(
+        matching.iter().any(|result| {
+            result.file() == Some(".githooks/pre-commit")
+                && result.title() == "Rust guardrail validate step present"
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_stays_clean_for_valid_githooks_setup() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
+    fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
+    write(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nset -e\nrun-parts .githooks/pre-commit.d\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ngitleaks protect --staged --no-banner\ncargo dupes check --exclude-tests\ng3rs rs validate --staged .\npnpm install --frozen-lockfile\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs rs validate --staged .\nfi\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .filter(|result| !result.inventory())
+        .collect::<Vec<_>>();
+
+    assert!(results.is_empty(), "{results:#?}");
+}
+
+#[test]
+fn pipeline_reports_inventory_for_valid_rust_hook_steps() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
+    write(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nset -e\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ncargo dupes check --exclude-tests\ngitleaks protect --staged --no-banner\ng3rs rs validate --staged .\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\npnpm install --frozen-lockfile\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs rs validate --staged .\nfi\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    for (rule_id, title) in [
+        ("HOOK-RS-02", "cargo clippy step present"),
+        ("HOOK-RS-03", "cargo deny check step present"),
+        ("HOOK-RS-04", "cargo test step present"),
+        ("HOOK-RS-05", "cargo machete step present"),
+        (
+            "HOOK-RS-07",
+            "cargo-dupes selected for Rust duplication checks",
+        ),
+        ("HOOK-RS-09", "cargo clippy denies warnings"),
+        ("HOOK-RS-11", "gitleaks step present"),
+        ("HOOK-RS-12", "cargo dupes step present"),
+        ("HOOK-RS-13", "cargo-dupes excludes tests"),
+    ] {
+        let matching = results
+            .iter()
+            .filter(|result| result.id() == rule_id)
+            .collect::<Vec<_>>();
+        assert_eq!(matching.len(), 1, "{rule_id}: {results:#?}");
+        assert!(
+            matching.iter().any(|result| {
+                result.file() == Some(".githooks/pre-commit")
+                    && result.title() == title
+                    && result.inventory()
+            }),
+            "{rule_id}: {results:#?}"
+        );
+    }
+}
+
+#[test]
+fn pipeline_reports_inventory_for_command_substitution_and_binary_aliases() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nset -e\nOUT=\"$(g3rs validate --staged .)\"\ncargo-deny check\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    for (rule_id, title) in [
+        ("HOOK-RS-03", "cargo deny check step present"),
+        ("HOOK-RS-08", "Rust guardrail validate step present"),
+    ] {
+        let matching = results
+            .iter()
+            .filter(|result| result.id() == rule_id)
+            .collect::<Vec<_>>();
+        assert_eq!(matching.len(), 1, "{rule_id}: {results:#?}");
+        assert!(
+            matching.iter().any(|result| {
+                result.file() == Some(".githooks/pre-commit")
+                    && result.title() == title
+                    && result.inventory()
+            }),
+            "{rule_id}: {results:#?}"
+        );
+    }
+}
+
+#[test]
+fn pipeline_reports_inventory_for_called_function_commands() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nrun_guardrails() {\n    g3rs validate --staged .\n}\nrun_guardrails\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    let matching = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-RS-08")
+        .collect::<Vec<_>>();
+
+    assert_eq!(matching.len(), 1, "{results:#?}");
+    assert!(
+        matching.iter().any(|result| {
+            result.file() == Some(".githooks/pre-commit")
+                && result.title() == "Rust guardrail validate step present"
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_reports_inventory_for_executed_subshell_commands() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\n(g3rs validate --staged .)\n(cargo-deny check)\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    for (rule_id, title) in [
+        ("HOOK-RS-03", "cargo deny check step present"),
+        ("HOOK-RS-08", "Rust guardrail validate step present"),
+    ] {
+        let matching = results
+            .iter()
+            .filter(|result| result.id() == rule_id)
+            .collect::<Vec<_>>();
+        assert_eq!(matching.len(), 1, "{rule_id}: {results:#?}");
+        assert!(
+            matching.iter().any(|result| {
+                result.file() == Some(".githooks/pre-commit")
+                    && result.title() == title
+                    && result.inventory()
+            }),
+            "{rule_id}: {results:#?}"
+        );
+    }
+}
+
+#[test]
+fn pipeline_reports_inventory_for_valid_shell_hook_steps() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nset -e\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\npnpm install --frozen-lockfile\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    for (rule_id, title) in [
+        ("HOOK-SHARED-15", "merge-conflict check step present"),
+        ("HOOK-SHARED-16", "file-size check step present"),
+        (
+            "HOOK-SHARED-20",
+            "concrete lockfile integrity command present",
+        ),
+    ] {
+        let matching = results
+            .iter()
+            .filter(|result| result.id() == rule_id)
+            .collect::<Vec<_>>();
+        assert_eq!(matching.len(), 1, "{rule_id}: {results:#?}");
+        assert!(
+            matching.iter().any(|result| {
+                result.file() == Some(".githooks/pre-commit")
+                    && result.title() == title
+                    && result.inventory()
+            }),
+            "{rule_id}: {results:#?}"
+        );
+    }
 }
 
 #[test]
@@ -211,10 +509,583 @@ fn pipeline_reports_dispatcher_findings_for_real_pre_commit_script() {
 }
 
 #[test]
+fn pipeline_source_reports_missing_dispatcher_pattern_when_modular_dir_is_only_echoed() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join(".githooks/pre-commit"), "echo run-parts .githooks/pre-commit.d\n");
+    fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-04"
+                && result.file() == Some(".githooks/pre-commit")
+                && result.title() == "dispatcher pattern missing"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-19"
+                && result.file() == Some(".githooks/pre-commit")
+                && result.title() == "dispatcher syntax missing"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_config_reports_missing_g3rs_binary_when_required() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join(".githooks/pre-commit"), "g3rs rs validate --staged .\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input =
+        crate::run::ingest_for_config_checks_with_path(&crawl, None).expect("ingestion should succeed");
+    let results = g3rs_hooks_config_checks::check(&input);
+
+    let rule_results = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-RS-14")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rule_results.len(), 1, "{results:#?}");
+    assert!(
+        rule_results.iter().any(|result| {
+            result.file() == Some(".githooks/pre-commit")
+                && result.title() == "g3rs binary missing"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_config_reports_tool_inventory_and_missing_cargo_dupes() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+    let bin_dir = root.join("bin");
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "g3rs rs validate --staged .\ncargo dupes check --exclude-tests\n",
+    );
+    write(bin_dir.join("gitleaks"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-deny"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-machete"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("g3rs"), "#!/usr/bin/env bash\n");
+    #[cfg(unix)]
+    {
+        make_executable(&bin_dir.join("gitleaks"));
+        make_executable(&bin_dir.join("cargo-deny"));
+        make_executable(&bin_dir.join("cargo-machete"));
+        make_executable(&bin_dir.join("g3rs"));
+    }
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let path_env = std::env::join_paths([bin_dir.as_path()]).expect("join path");
+    let input =
+        crate::run::ingest_for_config_checks_with_path(&crawl, Some(path_env.as_os_str()))
+            .expect("ingestion should succeed");
+    let results = g3rs_hooks_config_checks::check(&input);
+
+    let rs06 = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-RS-06")
+        .collect::<Vec<_>>();
+    let rs15 = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-RS-15")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rs06.len(), 3, "{results:#?}");
+    assert_eq!(rs15.len(), 1, "{results:#?}");
+    assert!(
+        rs06.iter().any(|result| result.title() == "gitleaks installed" && result.inventory()),
+        "{results:#?}"
+    );
+    assert!(
+        rs06
+            .iter()
+            .any(|result| result.title() == "cargo-deny installed" && result.inventory()),
+        "{results:#?}"
+    );
+    assert!(
+        rs06
+            .iter()
+            .any(|result| result.title() == "cargo-machete installed" && result.inventory()),
+        "{results:#?}"
+    );
+    assert!(
+        rs15.iter().any(|result| {
+            result.title() == "cargo-dupes missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_config_reports_present_g3rs_and_cargo_dupes_binaries() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+    let bin_dir = root.join("bin");
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "g3rs rs validate --staged .\ncargo dupes check --exclude-tests\n",
+    );
+    write(bin_dir.join("g3rs"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-dupes"), "#!/usr/bin/env bash\n");
+    #[cfg(unix)]
+    {
+        make_executable(&bin_dir.join("g3rs"));
+        make_executable(&bin_dir.join("cargo-dupes"));
+    }
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let path_env = std::env::join_paths([bin_dir.as_path()]).expect("join path");
+    let input =
+        crate::run::ingest_for_config_checks_with_path(&crawl, Some(path_env.as_os_str()))
+            .expect("ingestion should succeed");
+    let results = g3rs_hooks_config_checks::check(&input);
+
+    for (rule_id, title) in [
+        ("HOOK-RS-14", "g3rs binary available"),
+        ("HOOK-RS-15", "cargo-dupes installed"),
+    ] {
+        let matching = results
+            .iter()
+            .filter(|result| result.id() == rule_id)
+            .collect::<Vec<_>>();
+        assert_eq!(matching.len(), 1, "{rule_id}: {results:#?}");
+        assert!(
+            matching.iter().any(|result| {
+                result.file() == Some(".githooks/pre-commit")
+                    && result.title() == title
+                    && result.inventory()
+            }),
+            "{rule_id}: {results:#?}"
+        );
+    }
+}
+
+#[test]
+fn pipeline_config_honors_hooks_path_selected_hook_for_binary_requirements() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+    let bin_dir = root.join("bin");
+    git_init(root);
+    git_config_hooks_path(root, "hooks");
+
+    write(root.join(".githooks/pre-commit"), "gitleaks protect --staged --no-banner\n");
+    write(
+        root.join("hooks/pre-commit"),
+        "g3rs rs validate --staged .\ncargo dupes check --exclude-tests\ngitleaks protect --staged --no-banner\ncargo-deny check\ncargo-machete\n",
+    );
+    write(bin_dir.join("g3rs"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-dupes"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("gitleaks"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-deny"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-machete"), "#!/usr/bin/env bash\n");
+    #[cfg(unix)]
+    {
+        make_executable(&bin_dir.join("g3rs"));
+        make_executable(&bin_dir.join("cargo-dupes"));
+        make_executable(&bin_dir.join("gitleaks"));
+        make_executable(&bin_dir.join("cargo-deny"));
+        make_executable(&bin_dir.join("cargo-machete"));
+    }
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let path_env = std::env::join_paths([bin_dir.as_path()]).expect("join path");
+    let input =
+        crate::run::ingest_for_config_checks_with_path(&crawl, Some(path_env.as_os_str()))
+            .expect("ingestion should succeed");
+    let results = g3rs_hooks_config_checks::check(&input);
+
+    for (rule_id, title) in [
+        ("HOOK-RS-06", "gitleaks installed"),
+        ("HOOK-RS-06", "cargo-deny installed"),
+        ("HOOK-RS-06", "cargo-machete installed"),
+        ("HOOK-RS-14", "g3rs binary available"),
+        ("HOOK-RS-15", "cargo-dupes installed"),
+    ] {
+        let matching = results
+            .iter()
+            .filter(|result| result.id() == rule_id)
+            .collect::<Vec<_>>();
+        assert!(
+            matching.iter().any(|result| {
+                result.file() == Some("hooks/pre-commit")
+                    && result.title() == title
+                    && result.inventory()
+            }),
+            "{rule_id}: {results:#?}"
+        );
+    }
+}
+
+#[test]
+fn pipeline_config_treats_path_qualified_tools_as_installed() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "/opt/bin/gitleaks protect --staged --no-banner\n/opt/bin/cargo-deny check\n/opt/bin/cargo-machete\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input =
+        crate::run::ingest_for_config_checks_with_path(&crawl, None).expect("ingestion should succeed");
+    let results = g3rs_hooks_config_checks::check(&input);
+
+    let rs06 = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-RS-06")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rs06.len(), 3, "{results:#?}");
+    assert!(rs06.iter().all(|result| result.inventory()), "{results:#?}");
+}
+
+#[test]
+fn pipeline_file_tree_reports_existing_pre_commit_hook() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_hooks_file_tree_checks::check(&input);
+
+    let matching = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-SHARED-01")
+        .collect::<Vec<_>>();
+
+    assert_eq!(matching.len(), 1, "{results:#?}");
+    assert!(
+        matching.iter().any(|result| {
+            result.file() == Some(".githooks/pre-commit")
+                && result.title() == "pre-commit hook exists"
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_file_tree_treats_non_compat_hooks_path_as_out_of_contract() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+    git_init(root);
+    git_config_hooks_path(root, "custom-hooks");
+
+    write(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
+    write(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo test --workspace\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_hooks_file_tree_checks::check(&input);
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-01"
+                && result.title() == "pre-commit hook missing"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-02"
+                && result.title() == "core.hooksPath has wrong value"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_file_tree_reports_modular_inventory_for_hooks_compat_path() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+    git_init(root);
+    git_config_hooks_path(root, "hooks");
+
+    write(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
+    write(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "#!/usr/bin/env bash\ncargo test --workspace\n",
+    );
+    #[cfg(unix)]
+    {
+        make_executable(&root.join(".githooks/pre-commit.d/10-rust.sh"));
+    }
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_hooks_file_tree_checks::check(&input);
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-03"
+                && result.title() == "pre-commit.d directory exists"
+                && result.file() == Some(".githooks/pre-commit.d")
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-07"
+                && result.title() == "modular hook scripts inventory"
+                && result.message().contains(".githooks/pre-commit.d/10-rust.sh")
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-12"
+                && result.file() == Some(".githooks/pre-commit.d/10-rust.sh")
+                && result.title() == "modular hook script is executable"
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_file_tree_reports_missing_pre_commit_hook() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_hooks_file_tree_checks::check(&input);
+
+    let rule_results = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-SHARED-01")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rule_results.len(), 1, "{results:#?}");
+    assert!(
+        rule_results.iter().any(|result| {
+            result.file() == Some(".githooks/pre-commit")
+                && result.title() == "pre-commit hook missing"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_file_tree_reports_trust_risk() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\nexit 0\n");
+    write(root.join(".git/hooks/pre-commit"), "#!/usr/bin/env bash\nexit 0\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_hooks_file_tree_checks::check(&input);
+
+    let rule_results = results
+        .iter()
+        .filter(|result| result.id() == "HOOK-SHARED-17")
+        .collect::<Vec<_>>();
+
+    assert_eq!(rule_results.len(), 1, "{results:#?}");
+    assert!(
+        rule_results.iter().any(|result| {
+            result.title() == "competing hook system detected"
+                && result.message().contains(".git/hooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_file_tree_keeps_hooks_path_compat_mode_free_of_git_hook_shadow_risk() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+    git_init(root);
+    git_config_hooks_path(root, "hooks");
+
+    write(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
+    write(root.join(".git/hooks/pre-commit"), "#!/usr/bin/env bash\nexit 0\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_hooks_file_tree_checks::check(&input);
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-17"
+                && result.title() == "no competing hook systems detected"
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+    git_init(root);
+    git_config_hooks_path(root, ".githooks");
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nrun-parts .githooks/pre-commit.d\n",
+    );
+    write(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "#!/usr/bin/env bash\ncargo fmt --check\n",
+    );
+    write(
+        root.join(".githooks/pre-commit.d/20-rust.sh"),
+        "#!/usr/bin/env bash\ncargo test --workspace\n",
+    );
+    write(
+        root.join(".guardrail3/overrides/pre-commit.d/90-local.sh"),
+        "#!/usr/bin/env bash\necho override\n",
+    );
+    #[cfg(unix)]
+    {
+        make_executable(&root.join(".githooks/pre-commit.d/10-rust.sh"));
+    }
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_hooks_file_tree_checks::check(&input);
+
+    for rule_id in [
+        "HOOK-SHARED-02",
+        "HOOK-SHARED-03",
+        "HOOK-SHARED-05",
+        "HOOK-SHARED-06",
+        "HOOK-SHARED-07",
+        "HOOK-SHARED-08",
+        "HOOK-SHARED-09",
+        "HOOK-SHARED-12",
+    ] {
+        assert!(
+            results.iter().any(|result| result.id() == rule_id),
+            "missing {rule_id}: {results:#?}"
+        );
+    }
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-02"
+                && result.title() == "core.hooksPath configured"
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-03"
+                && result.title() == "pre-commit.d directory exists"
+                && result.file() == Some(".githooks/pre-commit.d")
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-05"
+                && result.title() == "pre-commit hook is not executable"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-06"
+                && result.title() == "pre-commit script stats"
+                && result.file() == Some(".githooks/pre-commit")
+                && result.message() == "2 lines, 53 bytes"
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-07"
+                && result.message().contains(".githooks/pre-commit.d/10-rust.sh")
+                && result.message().contains(".githooks/pre-commit.d/20-rust.sh")
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-08"
+                && result.title() == "pre-commit file size"
+                && result.file() == Some(".githooks/pre-commit")
+                && result.message() == "53 bytes"
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-09"
+                && result.message().contains("90-local.sh")
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-12"
+                && result.file() == Some(".githooks/pre-commit.d/10-rust.sh")
+                && result.title() == "modular hook script is executable"
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-12"
+                && result.file() == Some(".githooks/pre-commit.d/20-rust.sh")
+                && result.title() == "modular hook script is not executable"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
 fn pipeline_runs_shared_source_checks_on_modular_scripts() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = temp_dir.path();
 
+    write(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
     write(root.join(".githooks/pre-commit.d/10-rust.sh"), "echo cargo fmt --check\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -229,11 +1100,320 @@ fn pipeline_runs_shared_source_checks_on_modular_scripts() {
         .filter(|result| result.id() == "HOOK-SHARED-11")
         .collect::<Vec<_>>();
 
-    assert_eq!(shebang_results.len(), 1, "{results:#?}");
     assert!(
         shebang_results.iter().any(|result| {
             result.file() == Some(".githooks/pre-commit.d/10-rust.sh")
                 && result.title() == "hook shebang missing"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_source_reports_shell_safety_inventory_for_valid_hook() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nset -e\ncargo fmt --check\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    for (rule_id, title) in [
+        ("HOOK-SHARED-10", "shell error handling present"),
+        ("HOOK-SHARED-11", "valid hook shebang present"),
+    ] {
+        let matching = results
+            .iter()
+            .filter(|result| result.id() == rule_id)
+            .collect::<Vec<_>>();
+        assert_eq!(matching.len(), 1, "{rule_id}: {results:#?}");
+        assert!(
+            matching.iter().any(|result| {
+                result.file() == Some(".githooks/pre-commit")
+                    && result.title() == title
+                    && result.inventory()
+            }),
+            "{rule_id}: {results:#?}"
+        );
+    }
+}
+
+#[test]
+fn pipeline_source_reports_inventory_for_normalized_wrapped_commands() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nset -e\nif true; then /opt/bin/g3rs rs validate --staged .; fi\ncargo +nightly clippy -- -D warnings\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    for (rule_id, title) in [
+        ("HOOK-RS-08", "Rust guardrail validate step present"),
+        ("HOOK-RS-09", "cargo clippy denies warnings"),
+    ] {
+        let matching = results
+            .iter()
+            .filter(|result| result.id() == rule_id)
+            .collect::<Vec<_>>();
+        assert_eq!(matching.len(), 1, "{rule_id}: {results:#?}");
+        assert!(
+            matching.iter().any(|result| {
+                result.file() == Some(".githooks/pre-commit")
+                    && result.title() == title
+                    && result.inventory()
+            }),
+            "{rule_id}: {results:#?}"
+        );
+    }
+}
+
+#[test]
+fn pipeline_source_reports_missing_rust_and_shell_steps() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
+    write(root.join(".githooks/pre-commit"), "echo nothing useful\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-02"
+                && result.title() == "cargo clippy step missing"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-03"
+                && result.title() == "cargo deny check step missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-04"
+                && result.title() == "cargo test step missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-05"
+                && result.title() == "cargo machete step missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-07"
+                && result.title() == "Rust duplication tool missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-09"
+                && result.title() == "cargo clippy deny-warnings step missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-11"
+                && result.title() == "gitleaks step missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-12"
+                && result.title() == "cargo dupes step missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-13"
+                && result.title() == "cargo dupes step does not exclude tests"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-16"
+                && result.title() == "Rust config-change trigger coverage incomplete"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-10"
+                && result.title() == "shell error handling missing"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-13"
+                && result.title() == "no unconditional exit 0 bypass"
+                && result.file() == Some(".githooks/pre-commit")
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-14"
+                && result.title() == "no hook bypass instructions"
+                && result.file() == Some(".githooks/pre-commit")
+                && result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-15"
+                && result.title() == "merge-conflict check step missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-16"
+                && result.title() == "file-size check step missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-20"
+                && result.title() == "concrete lockfile integrity command missing"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_source_reports_inert_text_false_pass_risk() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(
+        root.join(".githooks/pre-commit"),
+        "STEP='g3rs rs validate --staged .'\nprintf '%s\n' 'cargo fmt --check'\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-18"
+                && result.file() == Some(".githooks/pre-commit")
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_source_reports_missing_workspace_scope_for_workspace_project() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
+    write(root.join(".githooks/pre-commit"), "cargo test\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-RS-10"
+                && result.title() == "cargo test missing --workspace"
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_source_reports_invalid_dispatcher_syntax() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path();
+
+    write(root.join(".githooks/pre-commit"), "echo run-parts .githooks/pre-commit.d\n");
+    fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "HOOK-SHARED-19"
+                && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
         }),
         "{results:#?}"

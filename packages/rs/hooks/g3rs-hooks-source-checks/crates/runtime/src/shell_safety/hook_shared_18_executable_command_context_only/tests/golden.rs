@@ -18,6 +18,36 @@ fn reports_guardrail_command_mentioned_only_in_comment() {
 }
 
 #[test]
+fn reports_guardrail_command_mentioned_only_in_assignment_text() {
+    let results = run_case("VALIDATE_CMD='g3rs rs validate --staged .'\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Error),
+            title: Some("required hook step appears only in inert text"),
+            line: Some(1),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn reports_guardrail_command_mentioned_only_in_heredoc_body() {
+    let results = run_case("cat <<'EOF'\ng3rs rs validate --staged .\nEOF\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Error),
+            title: Some("required hook step appears only in inert text"),
+            line: Some(2),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn ignores_echo_or_comment_when_real_command_exists() {
     let results = run_case(
         r#"echo "g3rs rs validate --staged ."

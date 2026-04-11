@@ -1,11 +1,17 @@
 use super::{ExecutableLine, FailOpenWrapper, ShellFunction};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct HeredocTerminator {
+    value: String,
+    strip_tabs: bool,
+}
+
 pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, &str)> {
     let mut logical_lines = Vec::new();
     let mut continuation_start: Option<usize> = None;
     let mut continuation_line_no: Option<usize> = None;
     let mut offset = 0usize;
-    let mut heredoc_terminator: Option<String> = None;
+    let mut heredoc_terminator: Option<HeredocTerminator> = None;
 
     for (index, raw) in content.lines().enumerate() {
         let line_no = index + 1;
@@ -13,8 +19,13 @@ pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, &str)> {
         let line_end = line_start + raw.len();
         offset = line_end + 1;
 
-        if let Some(terminator) = heredoc_terminator.as_deref() {
-            if raw.trim() == terminator {
+        if let Some(terminator) = heredoc_terminator.as_ref() {
+            let candidate = if terminator.strip_tabs {
+                raw.trim_start_matches('\t').trim()
+            } else {
+                raw.trim()
+            };
+            if candidate == terminator.value {
                 heredoc_terminator = None;
             }
             continue;
@@ -33,7 +44,7 @@ pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, &str)> {
         let end = line_end;
         let logical = &content[start..end];
         if let Some(terminator) = heredoc_delimiter(logical) {
-            heredoc_terminator = Some(terminator.to_owned());
+            heredoc_terminator = Some(terminator);
         }
         logical_lines.push((continuation_line_no.unwrap_or(line_no), logical));
         continuation_start = None;
@@ -91,6 +102,13 @@ pub(super) fn parse_executable_line(raw: &str, line_no: usize) -> Option<Executa
     })
 }
 
+pub(super) fn parse_executable_segments(raw: &str, line_no: usize) -> Vec<ExecutableLine<'_>> {
+    split_semicolon_segments(raw)
+        .into_iter()
+        .filter_map(|segment| parse_executable_line(segment, line_no))
+        .collect()
+}
+
 pub(super) fn single_line_constant_if_taken_branch(raw: &str) -> Option<Option<&str>> {
     let trimmed = strip_inline_comment(raw).trim();
     if !trimmed.starts_with("if ") || !trimmed.contains("then") || !trimmed.contains("fi") {
@@ -143,6 +161,39 @@ fn branch_before_fi(branch: &str) -> &str {
         .trim()
 }
 
+fn split_semicolon_segments(raw: &str) -> Vec<&str> {
+    let mut segments = Vec::new();
+    let mut single_quoted = false;
+    let mut double_quoted = false;
+    let mut start = 0usize;
+
+    for (index, ch) in raw.char_indices() {
+        match ch {
+            '\'' if !double_quoted => {
+                single_quoted = !single_quoted;
+            }
+            '"' if !single_quoted => {
+                double_quoted = !double_quoted;
+            }
+            ';' if !single_quoted && !double_quoted => {
+                let segment = raw[start..index].trim();
+                if !segment.is_empty() {
+                    segments.push(segment);
+                }
+                start = index + 1;
+            }
+            _ => {}
+        }
+    }
+
+    let tail = raw[start..].trim();
+    if !tail.is_empty() {
+        segments.push(tail);
+    }
+
+    segments
+}
+
 pub(super) fn extract_command_segment(line: &str) -> &str {
     let mut segment = strip_inline_comment(line).trim();
 
@@ -172,9 +223,10 @@ pub(super) fn extract_command_segment(line: &str) -> &str {
     segment
 }
 
-fn heredoc_delimiter(line: &str) -> Option<&str> {
-    let marker = heredoc_marker_index(line)?;
-    let suffix = line.get(marker + 2..)?.trim_start();
+fn heredoc_delimiter(line: &str) -> Option<HeredocTerminator> {
+    let (marker, strip_tabs) = heredoc_marker_index(line)?;
+    let suffix_start = marker + if strip_tabs { 3 } else { 2 };
+    let suffix = line.get(suffix_start..)?.trim_start();
     let delimiter = suffix
         .strip_prefix('\'')
         .and_then(|rest| rest.split_once('\'').map(|(token, _)| token))
@@ -187,11 +239,14 @@ fn heredoc_delimiter(line: &str) -> Option<&str> {
     if delimiter.is_empty() {
         None
     } else {
-        Some(delimiter)
+        Some(HeredocTerminator {
+            value: delimiter.to_owned(),
+            strip_tabs,
+        })
     }
 }
 
-fn heredoc_marker_index(line: &str) -> Option<usize> {
+fn heredoc_marker_index(line: &str) -> Option<(usize, bool)> {
     let mut single_quoted = false;
     let mut double_quoted = false;
     let chars: Vec<(usize, char)> = line.char_indices().collect();
@@ -208,7 +263,8 @@ fn heredoc_marker_index(line: &str) -> Option<usize> {
             }
             '<' if !single_quoted && !double_quoted => {
                 if chars.get(i + 1).is_some_and(|(_, next)| *next == '<') {
-                    return Some(idx);
+                    let strip_tabs = chars.get(i + 2).is_some_and(|(_, next)| *next == '-');
+                    return Some((idx, strip_tabs));
                 }
             }
             _ => {}
@@ -277,9 +333,8 @@ fn detect_fail_open_wrapper(line: &str) -> Option<FailOpenWrapper<'_>> {
 }
 
 fn is_dispatcher_command(command_text: &str) -> bool {
-    command_text.starts_with("source ")
-        || command_text.starts_with(". ")
-        || command_text.contains("run-parts")
+    leading_command_name(command_text)
+        .is_some_and(|command_name| matches!(command_name, "source" | "." | "run-parts"))
 }
 
 fn argument_starts_with_zero(command_text: &str) -> bool {
