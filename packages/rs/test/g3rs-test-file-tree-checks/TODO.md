@@ -1,0 +1,2 @@
+- keep parity with the old app `RS-TEST-02`, `03`, and `18` attack matrices
+- harden the structural lane with end-to-end tests before deleting the old app implementation

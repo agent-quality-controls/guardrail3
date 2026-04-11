@@ -140,6 +140,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-test-file-tree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-test-file-tree-checks-runtime",
+ "g3rs-test-file-tree-checks-types",
+]
+
+[[package]]
+name = "g3rs-test-file-tree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-test-file-tree-checks-types",
+ "g3rs-test-types",
+ "guardrail3-check-types",
+ "proc-macro2",
+ "syn",
+]
+
+[[package]]
+name = "g3rs-test-file-tree-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-test-types",
+]
+
+[[package]]
 name = "g3rs-test-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -160,6 +186,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-test-config-checks",
+ "g3rs-test-file-tree-checks",
  "g3rs-test-ingestion-assertions",
  "g3rs-test-ingestion-types",
  "g3rs-test-source-checks",

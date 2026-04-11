@@ -74,9 +74,37 @@ pub fn ingest_for_source_checks(
 }
 
 pub fn ingest_for_file_tree_checks(
-    _crawl: &G3RsWorkspaceCrawl,
-) -> Result<G3RsTestFileTreeChecksInput, IngestionError> {
-    Err(IngestionError::FileTreeIngestionNotImplemented)
+    crawl: &G3RsWorkspaceCrawl,
+) -> Result<Vec<G3RsTestFileTreeChecksInput>, IngestionError> {
+    let discovery = crate::roots::discover(crawl)?;
+
+    discovery
+        .roots
+        .iter()
+        .map(|root| {
+            let (components, mut input_failures) =
+                crate::components::collect_file_tree_components(crawl, root);
+            let (files, mut file_failures) =
+                crate::components::collect_file_tree_files(crawl, root, &components);
+            let (local_package_names, mut package_failures) =
+                crate::components::collect_local_package_names(crawl, root);
+            input_failures.append(&mut file_failures);
+            input_failures.append(&mut package_failures);
+            input_failures.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
+            input_failures.dedup_by(|left, right| {
+                left.rel_path == right.rel_path && left.message == right.message
+            });
+
+            Ok(G3RsTestFileTreeChecksInput {
+                root_rel_dir: root.root_rel_dir.clone(),
+                cargo_rel_path: root.cargo_rel_path.clone(),
+                files,
+                components: crate::components::public_file_tree_component_facts(&components),
+                local_package_names,
+                input_failures,
+            })
+        })
+        .collect()
 }
 
 fn parse_optional_nextest(

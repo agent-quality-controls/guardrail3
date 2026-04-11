@@ -10,11 +10,13 @@ Current behavior:
 - detects test and tokio-test activity from owned Rust files
 - detects active mutation hooks
 - classifies owned Rust files for the root-scoped source lane
+- classifies owned structural files for the root-scoped file-tree lane
 - emits one `G3RsTestSourceChecksInput` per owned test root
 - emits one `G3RsTestConfigChecksInput` per owned test root
+- emits one `G3RsTestFileTreeChecksInput` per owned test root
 
 Current lane support:
 
 - `ingest_for_config_checks` is implemented
 - `ingest_for_source_checks` is implemented
-- `ingest_for_file_tree_checks` is a stub
+- `ingest_for_file_tree_checks` is implemented

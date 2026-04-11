@@ -1,0 +1,26 @@
+[package]
+name = "g3rs-test-file-tree-checks-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3rs test file-tree checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "test", "file-tree", "checks", "rust"]
+categories = ["development-tools"]
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-test-file-tree-checks-types = { path = "../types", version = "0.1.0" }
+g3rs-test-types = { path = "../../../g3rs-test-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+proc-macro2 = { version = "1", features = ["span-locations"] }
+syn = { version = "2", features = ["full", "parsing", "visit"] }
