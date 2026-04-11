@@ -1,3 +1,3 @@
 - Build `g3rs-topology-file-tree-checks` on top of this ingestion input.
-- Keep `RS-TOPOLOGY-11`, `12`, `13`, and `16` in the extracted file-tree lane.
+- Keep `RS-TOPOLOGY-07`, `11`, `12`, `13`, and `16` in the extracted file-tree lane.
 - Leave config/source entrypoints as stubs until a real topology need exists.

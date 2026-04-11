@@ -229,7 +229,7 @@ The family depends on:
 
 Malformed required placement/config inputs must not silently suppress misplaced-root findings.
 
-## Planned rules
+## Rule ledger
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
@@ -243,12 +243,12 @@ Malformed required placement/config inputs must not silently suppress misplaced-
 | RS-TOPOLOGY-08 | Info | Declared auxiliary roots are surfaced explicitly in reports | Implemented |
 | RS-TOPOLOGY-09 | Error | Every live top-level Rust root must be a workspace root | Planned |
 | RS-TOPOLOGY-10 | Error | Loose top-level package roots are forbidden | Planned |
-| RS-TOPOLOGY-11 | Error | Nested workspaces are forbidden even when excluded or not referenced by the parent workspace | Planned |
+| RS-TOPOLOGY-11 | Error | Nested workspaces are forbidden even when excluded or not referenced by the parent workspace | Implemented |
 | RS-TOPOLOGY-12 | Error | Workspace membership must exactly match real owned child Rust crates beneath a governed workspace | Implemented |
-| RS-TOPOLOGY-13 | Error | Workspace member paths must not escape the workspace root | Planned |
+| RS-TOPOLOGY-13 | Error | Workspace member paths must not escape the workspace root | Implemented |
 | RS-TOPOLOGY-14 | Error | Auxiliary top-level Rust roots must obey the same top-level workspace rule | Planned |
 | RS-TOPOLOGY-15 | Policy | Hybrid top-level workspace roots need an explicit allow/forbid decision | Planned |
-| RS-TOPOLOGY-16 | Error | Workspace-local family-owned files must be legally placed before local family validation | Planned |
+| RS-TOPOLOGY-16 | Error | Workspace-local family-owned files must be legally placed before local family validation | Implemented |
 
 ## Rule intent
 
@@ -299,7 +299,18 @@ The family should surface impossible or contradictory ownership states explicitl
 
 Unreadable-present or malformed required `topology` inputs must surface explicit errors instead of silently degrading into absence.
 
+In the workspace-local package layer, that now specifically includes descendant
+member-manifest failures inside an otherwise valid pointed workspace. Those are
+not ingestion-fatal, but they still need visible fail-closed reporting because
+they weaken workspace-legality checks if ignored.
+
 That includes:
+
+- malformed governed app/package `Cargo.toml`
+- governed roots that declare `arch_role`
+- malformed auxiliary metadata on out-of-zone roots
+- malformed or unreadable descendant member `Cargo.toml` inside a valid pointed
+  workspace
 
 ## Active migration note
 
@@ -311,9 +322,6 @@ Specifically:
 - those tests must be rewritten, not masked with synthetic routes
 - when a historical test is really about illegal placement or illegal topology, it must move to `RS-TOPOLOGY`
 - when a historical test is really about rule semantics, it should become a direct typed-input sidecar test
-- malformed governed app/package `Cargo.toml`
-- governed roots that declare `arch_role`
-- malformed auxiliary metadata on out-of-zone roots
 
 ### RS-TOPOLOGY-08 — Declared auxiliary roots are explicit
 
