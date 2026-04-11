@@ -1,5 +1,9 @@
 # HOOK-RS — Rust-specific hook step checker (16 rules)
 
+Public package boundary note:
+- `HOOK-RS` no longer ships as a separate public package family.
+- These rules now execute through the merged `g3rs-hooks` package family together with the old `HOOK-SHARED` source rules.
+
 **Input:** effective pre-commit executable command context + Rust hook tool availability
 **Current code:** `crates/app/rs/checks/hooks/rs/**` (old `hook_checks.rs` / `tool_checks.rs` are legacy seed material only)
 
