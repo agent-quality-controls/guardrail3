@@ -1,7 +1,8 @@
 use std::fs;
 
 use g3rs_topology_types::{
-    G3RsTopologyCargoManifestKind, G3RsTopologyWorkspaceFamily, G3RsTopologyWorkspaceFamilyFileKind,
+    G3RsTopologyCargoManifestKind, G3RsTopologyWorkspaceFamily,
+    G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
 };
 use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
@@ -164,6 +165,44 @@ fn malformed_root_cargo_fails_ingestion() {
 }
 
 #[test]
+fn non_workspace_root_cargo_fails_ingestion() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[package]
+name = "demo"
+version = "0.1.0"
+"#,
+    );
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let err = crate::ingest_for_file_tree_checks(&crawl).expect_err("root must be workspace");
+
+    assert!(matches!(
+        err,
+        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::RootManifestNotWorkspace { path }
+        if path.ends_with("Cargo.toml")
+    ));
+}
+
+#[test]
+fn missing_root_cargo_in_crawl_fails_ingestion() {
+    let root = tempdir().expect("tempdir");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let err =
+        crate::ingest_for_file_tree_checks(&crawl).expect_err("missing root cargo should fail");
+
+    assert!(matches!(
+        err,
+        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::Unreadable { path, .. }
+        if path.ends_with("Cargo.toml")
+    ));
+}
+
+#[test]
 fn malformed_descendant_cargo_becomes_input_failure() {
     let root = tempdir().expect("tempdir");
 
@@ -259,6 +298,135 @@ version = "0.1.0"
             .iter()
             .any(|failure| failure.rel_path == "bad/Cargo.toml")
     );
+}
+
+#[test]
+fn hybrid_descendant_manifest_is_classified_as_hybrid() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["hybrid"]
+"#,
+    );
+
+    fs::create_dir_all(root.path().join("hybrid/src")).expect("hybrid dirs");
+    write(
+        root.path().join("hybrid/Cargo.toml"),
+        r#"
+[package]
+name = "hybrid"
+version = "0.1.0"
+
+[workspace]
+members = []
+"#,
+    );
+    write(
+        root.path().join("hybrid/src/lib.rs"),
+        "pub struct Hybrid;\n",
+    );
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+
+    assert!(input.descendant_cargo_roots.iter().any(|root| {
+        root.rel_dir == "hybrid"
+            && root.manifest_kind == Some(G3RsTopologyCargoManifestKind::Hybrid)
+    }));
+}
+
+#[test]
+fn descendant_manifest_with_no_workspace_or_package_classifies_as_none() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["empty"]
+"#,
+    );
+
+    fs::create_dir_all(root.path().join("empty")).expect("empty dirs");
+    write(root.path().join("empty/Cargo.toml"), "[bad]\nvalue = 1\n");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+
+    assert!(
+        input
+            .descendant_cargo_roots
+            .iter()
+            .any(|root| root.rel_dir == "empty" && root.manifest_kind.is_none())
+    );
+    assert!(input.input_failures.is_empty());
+}
+
+#[test]
+fn unreferenced_and_excluded_real_child_roots_still_appear() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["declared"]
+exclude = ["excluded"]
+"#,
+    );
+
+    fs::create_dir_all(root.path().join("declared/src")).expect("declared dirs");
+    fs::create_dir_all(root.path().join("excluded/src")).expect("excluded dirs");
+    fs::create_dir_all(root.path().join("stray/src")).expect("stray dirs");
+
+    write(
+        root.path().join("declared/Cargo.toml"),
+        r#"
+[package]
+name = "declared"
+version = "0.1.0"
+"#,
+    );
+    write(
+        root.path().join("declared/src/lib.rs"),
+        "pub struct Declared;\n",
+    );
+
+    write(
+        root.path().join("excluded/Cargo.toml"),
+        r#"
+[package]
+name = "excluded"
+version = "0.1.0"
+"#,
+    );
+    write(
+        root.path().join("excluded/src/lib.rs"),
+        "pub struct Excluded;\n",
+    );
+
+    write(
+        root.path().join("stray/Cargo.toml"),
+        r#"
+[package]
+name = "stray"
+version = "0.1.0"
+"#,
+    );
+    write(root.path().join("stray/src/lib.rs"), "pub struct Stray;\n");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+
+    let rel_dirs = input
+        .descendant_cargo_roots
+        .iter()
+        .map(|root| root.rel_dir.as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(rel_dirs, vec!["declared", "excluded", "stray"]);
 }
 
 #[test]
@@ -430,6 +598,18 @@ version = "0.1.0"
             .iter()
             .all(|file| !file.rel_path.starts_with("tests/snapshots/"))
     );
+    assert!(
+        input
+            .family_files
+            .iter()
+            .all(|file| !file.rel_path.starts_with("target/"))
+    );
+    assert!(
+        input
+            .family_files
+            .iter()
+            .all(|file| !file.rel_path.starts_with(".claude/worktrees/"))
+    );
 }
 
 #[test]
@@ -484,9 +664,27 @@ fn family_file_mapping_covers_supported_workspace_local_files() {
     );
     assert_family_file(
         &input,
+        G3RsTopologyWorkspaceFamily::Cargo,
+        "Cargo.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
+    );
+    assert_family_file(
+        &input,
+        G3RsTopologyWorkspaceFamily::Release,
+        "Cargo.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
+    );
+    assert_family_file(
+        &input,
         G3RsTopologyWorkspaceFamily::Garde,
         "guardrail3.toml",
         G3RsTopologyWorkspaceFamilyFileKind::GuardrailToml,
+    );
+    assert_family_file(
+        &input,
+        G3RsTopologyWorkspaceFamily::Cargo,
+        "guardrail3-rs.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
     );
     assert_family_file(
         &input,
@@ -526,6 +724,12 @@ fn family_file_mapping_covers_supported_workspace_local_files() {
     );
     assert_family_file(
         &input,
+        G3RsTopologyWorkspaceFamily::Garde,
+        "clippy.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::ClippyToml,
+    );
+    assert_family_file(
+        &input,
         G3RsTopologyWorkspaceFamily::Clippy,
         ".clippy.toml",
         G3RsTopologyWorkspaceFamilyFileKind::ClippyDotToml,
@@ -533,6 +737,12 @@ fn family_file_mapping_covers_supported_workspace_local_files() {
     assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Clippy,
+        ".cargo/config.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
+    );
+    assert_family_file(
+        &input,
+        G3RsTopologyWorkspaceFamily::Garde,
         ".cargo/config.toml",
         G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
     );
@@ -584,6 +794,454 @@ fn family_file_mapping_covers_supported_workspace_local_files() {
         ".config/nextest.toml",
         G3RsTopologyWorkspaceFamilyFileKind::NextestToml,
     );
+
+    assert_exact_family_file_count(&input, "Cargo.toml", 7);
+    assert_exact_family_file_count(&input, "guardrail3.toml", 1);
+    assert_exact_family_file_count(&input, "guardrail3-rs.toml", 2);
+    assert_exact_family_file_count(&input, "clippy.toml", 2);
+    assert_exact_family_file_count(&input, ".cargo/config.toml", 2);
+    assert_exact_family_file_count(&input, ".cargo/config", 2);
+    assert_exact_family_file_count(&input, ".cargo/mutants.toml", 1);
+    assert_exact_family_file_count(&input, ".config/nextest.toml", 1);
+}
+
+#[test]
+fn descendant_cargo_toml_files_map_to_all_supported_families() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    );
+    fs::create_dir_all(root.path().join("crate_a/src")).expect("crate dirs");
+    write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+"#,
+    );
+    write(root.path().join("crate_a/src/lib.rs"), "pub struct A;\n");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+
+    for family in [
+        G3RsTopologyWorkspaceFamily::Toolchain,
+        G3RsTopologyWorkspaceFamily::Clippy,
+        G3RsTopologyWorkspaceFamily::Deny,
+        G3RsTopologyWorkspaceFamily::Cargo,
+        G3RsTopologyWorkspaceFamily::Deps,
+        G3RsTopologyWorkspaceFamily::Garde,
+        G3RsTopologyWorkspaceFamily::Release,
+    ] {
+        assert_family_file(
+            &input,
+            family,
+            "crate_a/Cargo.toml",
+            G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
+        );
+    }
+    assert_exact_family_file_count(&input, "crate_a/Cargo.toml", 7);
+}
+
+#[test]
+fn root_read_failure_after_crawl_fails_ingestion() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = []\n",
+    );
+    let crawl = crawl(root.path()).expect("crawl");
+    fs::remove_file(root.path().join("Cargo.toml")).expect("remove root cargo");
+
+    let err =
+        crate::ingest_for_file_tree_checks(&crawl).expect_err("deleted root cargo should fail");
+
+    assert!(matches!(
+        err,
+        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::Unreadable { path, .. }
+        if path.ends_with("Cargo.toml")
+    ));
+}
+
+#[test]
+fn descendant_read_failure_after_crawl_becomes_input_failure() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["bad"]
+"#,
+    );
+    fs::create_dir_all(root.path().join("bad/src")).expect("bad dirs");
+    write(
+        root.path().join("bad/Cargo.toml"),
+        r#"
+[package]
+name = "bad"
+version = "0.1.0"
+"#,
+    );
+    write(root.path().join("bad/src/lib.rs"), "pub struct Bad;\n");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    fs::remove_file(root.path().join("bad/Cargo.toml")).expect("remove bad cargo");
+
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+
+    assert_eq!(input.input_failures.len(), 1);
+    assert_eq!(input.input_failures[0].rel_path, "bad/Cargo.toml");
+    assert_eq!(input.descendant_cargo_roots.len(), 1);
+    assert_eq!(input.descendant_cargo_roots[0].rel_dir, "bad");
+    assert!(input.descendant_cargo_roots[0].manifest_kind.is_none());
+}
+
+#[test]
+fn file_tree_input_preserves_workspace_member_exactness_shapes() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/*", "missing", "shared"]
+"#,
+    );
+
+    fs::create_dir_all(root.path().join("crates/app/src")).expect("app dirs");
+    fs::create_dir_all(root.path().join("crates/extra/src")).expect("extra dirs");
+    fs::create_dir_all(root.path().join("shared/src")).expect("shared dirs");
+
+    write(
+        root.path().join("crates/app/Cargo.toml"),
+        r#"
+[package]
+name = "app"
+version = "0.1.0"
+"#,
+    );
+    write(
+        root.path().join("crates/app/src/lib.rs"),
+        "pub struct App;\n",
+    );
+
+    write(
+        root.path().join("crates/extra/Cargo.toml"),
+        r#"
+[package]
+name = "extra"
+version = "0.1.0"
+"#,
+    );
+    write(
+        root.path().join("crates/extra/src/lib.rs"),
+        "pub struct Extra;\n",
+    );
+
+    write(
+        root.path().join("shared/Cargo.toml"),
+        r#"
+[package]
+name = "shared"
+version = "0.1.0"
+"#,
+    );
+    write(
+        root.path().join("shared/src/lib.rs"),
+        "pub struct Shared;\n",
+    );
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let workspace = input
+        .workspace_manifest
+        .workspace
+        .as_ref()
+        .expect("workspace");
+
+    assert_eq!(
+        workspace.members,
+        vec![
+            "crates/*".to_owned(),
+            "missing".to_owned(),
+            "shared".to_owned()
+        ]
+    );
+    assert!(
+        input
+            .descendant_cargo_roots
+            .iter()
+            .any(|root| root.rel_dir == "crates/app")
+    );
+    assert!(
+        input
+            .descendant_cargo_roots
+            .iter()
+            .any(|root| root.rel_dir == "crates/extra")
+    );
+    assert!(
+        input
+            .descendant_cargo_roots
+            .iter()
+            .any(|root| root.rel_dir == "shared")
+    );
+}
+
+#[test]
+fn file_tree_input_preserves_escaping_member_patterns() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/*", "../shared"]
+"#,
+    );
+
+    fs::create_dir_all(root.path().join("crates/app/src")).expect("app dirs");
+    write(
+        root.path().join("crates/app/Cargo.toml"),
+        r#"
+[package]
+name = "app"
+version = "0.1.0"
+"#,
+    );
+    write(
+        root.path().join("crates/app/src/lib.rs"),
+        "pub struct App;\n",
+    );
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let workspace = input
+        .workspace_manifest
+        .workspace
+        .as_ref()
+        .expect("workspace");
+
+    assert_eq!(
+        workspace.members,
+        vec!["crates/*".to_owned(), "../shared".to_owned()]
+    );
+    assert!(
+        input
+            .descendant_cargo_roots
+            .iter()
+            .all(|root| root.rel_dir != "../shared")
+    );
+}
+
+#[test]
+fn file_tree_input_preserves_illegal_family_file_placement_shapes() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["apps/api", "packages/lib"]
+"#,
+    );
+
+    fs::create_dir_all(root.path().join("apps/api/src")).expect("api dirs");
+    fs::create_dir_all(root.path().join("packages/lib/src")).expect("lib dirs");
+    fs::create_dir_all(root.path().join("packages/lib/.cargo")).expect("cargo dirs");
+    fs::create_dir_all(root.path().join("tools/helper")).expect("helper dirs");
+    fs::create_dir_all(root.path().join("apps/api/nested")).expect("nested dirs");
+
+    write(
+        root.path().join("apps/api/Cargo.toml"),
+        r#"
+[package]
+name = "api"
+version = "0.1.0"
+"#,
+    );
+    write(root.path().join("apps/api/src/lib.rs"), "pub struct Api;\n");
+
+    write(
+        root.path().join("packages/lib/Cargo.toml"),
+        r#"
+[package]
+name = "lib"
+version = "0.1.0"
+"#,
+    );
+    write(
+        root.path().join("packages/lib/src/lib.rs"),
+        "pub struct Lib;\n",
+    );
+
+    write(
+        root.path().join("rust-toolchain.toml"),
+        "[toolchain]\nchannel = \"stable\"\n",
+    );
+    write(
+        root.path().join("apps/api/nested/clippy.toml"),
+        "msrv = \"1.85\"\n",
+    );
+    write(
+        root.path().join("packages/lib/.cargo/config.toml"),
+        "[alias]\n",
+    );
+    write(
+        root.path().join("tools/helper/guardrail3.toml"),
+        "[profile]\nname = \"service\"\n",
+    );
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+
+    assert_family_file(
+        &input,
+        G3RsTopologyWorkspaceFamily::Toolchain,
+        "rust-toolchain.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::RustToolchainToml,
+    );
+    assert_family_file_attachment(
+        &input,
+        G3RsTopologyWorkspaceFamily::Toolchain,
+        "rust-toolchain.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::RustToolchainToml,
+        G3RsTopologyWorkspaceFamilyFileAttachment::ExactRoot {
+            root_rel: "".to_owned(),
+        },
+    );
+    assert_family_file(
+        &input,
+        G3RsTopologyWorkspaceFamily::Clippy,
+        "apps/api/nested/clippy.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::ClippyToml,
+    );
+    assert_family_file_attachment(
+        &input,
+        G3RsTopologyWorkspaceFamily::Clippy,
+        "apps/api/nested/clippy.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::ClippyToml,
+        G3RsTopologyWorkspaceFamilyFileAttachment::NestedUnderRoot {
+            root_rel: "apps/api".to_owned(),
+            owner_rel: "apps/api/nested".to_owned(),
+        },
+    );
+    assert_family_file(
+        &input,
+        G3RsTopologyWorkspaceFamily::Clippy,
+        "packages/lib/.cargo/config.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
+    );
+    assert_family_file_attachment(
+        &input,
+        G3RsTopologyWorkspaceFamily::Clippy,
+        "packages/lib/.cargo/config.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
+        G3RsTopologyWorkspaceFamilyFileAttachment::ExactRoot {
+            root_rel: "packages/lib".to_owned(),
+        },
+    );
+    assert_family_file(
+        &input,
+        G3RsTopologyWorkspaceFamily::Garde,
+        "tools/helper/guardrail3.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::GuardrailToml,
+    );
+    assert_family_file_attachment(
+        &input,
+        G3RsTopologyWorkspaceFamily::Garde,
+        "tools/helper/guardrail3.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::GuardrailToml,
+        G3RsTopologyWorkspaceFamilyFileAttachment::NestedUnderRoot {
+            root_rel: "".to_owned(),
+            owner_rel: "tools/helper".to_owned(),
+        },
+    );
+}
+
+#[test]
+fn attachment_normalizes_cargo_and_config_owner_dirs() {
+    let root = tempdir().expect("tempdir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["member"]
+"#,
+    );
+    fs::create_dir_all(root.path().join("member/src")).expect("member dirs");
+    fs::create_dir_all(root.path().join("member/.cargo")).expect("member cargo");
+    fs::create_dir_all(root.path().join("member/.config")).expect("member config");
+
+    write(
+        root.path().join("member/Cargo.toml"),
+        r#"
+[package]
+name = "member"
+version = "0.1.0"
+"#,
+    );
+    write(
+        root.path().join("member/src/lib.rs"),
+        "pub struct Member;\n",
+    );
+    write(root.path().join("member/.cargo/config.toml"), "[alias]\n");
+    write(
+        root.path().join("member/.cargo/deny.toml"),
+        "advisories = {}\n",
+    );
+    write(
+        root.path().join("member/.cargo/mutants.toml"),
+        "timeout_multiplier = 2.0\n",
+    );
+    write(
+        root.path().join("member/.config/nextest.toml"),
+        "[profile.default]\n",
+    );
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+
+    for (family, rel_path, kind) in [
+        (
+            G3RsTopologyWorkspaceFamily::Clippy,
+            "member/.cargo/config.toml",
+            G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
+        ),
+        (
+            G3RsTopologyWorkspaceFamily::Deny,
+            "member/.cargo/deny.toml",
+            G3RsTopologyWorkspaceFamilyFileKind::CargoDenyToml,
+        ),
+        (
+            G3RsTopologyWorkspaceFamily::Test,
+            "member/.cargo/mutants.toml",
+            G3RsTopologyWorkspaceFamilyFileKind::MutantsToml,
+        ),
+        (
+            G3RsTopologyWorkspaceFamily::Test,
+            "member/.config/nextest.toml",
+            G3RsTopologyWorkspaceFamilyFileKind::NextestToml,
+        ),
+    ] {
+        assert_family_file_attachment(
+            &input,
+            family,
+            rel_path,
+            kind,
+            G3RsTopologyWorkspaceFamilyFileAttachment::ExactRoot {
+                root_rel: "member".to_owned(),
+            },
+        );
+    }
 }
 
 fn write(path: std::path::PathBuf, content: &str) {
@@ -601,6 +1259,40 @@ fn assert_family_file(
             file.family == family && file.rel_path == rel_path && file.kind == kind
         }),
         "expected family file mapping for {rel_path}"
+    );
+}
+
+fn assert_family_file_attachment(
+    input: &g3rs_topology_types::G3RsTopologyFileTreeChecksInput,
+    family: G3RsTopologyWorkspaceFamily,
+    rel_path: &str,
+    kind: G3RsTopologyWorkspaceFamilyFileKind,
+    attachment: G3RsTopologyWorkspaceFamilyFileAttachment,
+) {
+    assert!(
+        input.family_files.iter().any(|file| {
+            file.family == family
+                && file.rel_path == rel_path
+                && file.kind == kind
+                && file.attachment == attachment
+        }),
+        "expected family file attachment for {rel_path}"
+    );
+}
+
+fn assert_exact_family_file_count(
+    input: &g3rs_topology_types::G3RsTopologyFileTreeChecksInput,
+    rel_path: &str,
+    expected: usize,
+) {
+    let actual = input
+        .family_files
+        .iter()
+        .filter(|file| file.rel_path == rel_path)
+        .count();
+    assert_eq!(
+        actual, expected,
+        "unexpected family file count for {rel_path}"
     );
 }
 

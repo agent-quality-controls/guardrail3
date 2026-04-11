@@ -43,6 +43,12 @@ pub enum G3RsTopologyWorkspaceFamilyFileKind {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum G3RsTopologyWorkspaceFamilyFileAttachment {
+    ExactRoot { root_rel: String },
+    NestedUnderRoot { root_rel: String, owner_rel: String },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsTopologyDescendantCargoRoot {
     pub rel_dir: String,
     pub cargo_rel_path: String,
@@ -54,6 +60,7 @@ pub struct G3RsTopologyWorkspaceFamilyFile {
     pub family: G3RsTopologyWorkspaceFamily,
     pub rel_path: String,
     pub kind: G3RsTopologyWorkspaceFamilyFileKind,
+    pub attachment: G3RsTopologyWorkspaceFamilyFileAttachment,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
