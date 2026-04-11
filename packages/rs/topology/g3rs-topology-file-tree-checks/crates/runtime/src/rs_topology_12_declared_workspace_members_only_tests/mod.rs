@@ -58,6 +58,35 @@ fn exact_match_stays_quiet() {
 }
 
 #[test]
+fn dot_slash_member_path_stays_quiet() {
+    let input = input(
+        "[workspace]\nmembers = [\"./crates/api\"]\n",
+        vec![("crates/api", Some(G3RsTopologyCargoManifestKind::Package))],
+        Vec::new(),
+    );
+
+    let results = crate::check(&input);
+
+    assert!(!has_rule(&results, "RS-TOPOLOGY-12"));
+}
+
+#[test]
+fn dot_slash_glob_member_path_stays_quiet() {
+    let input = input(
+        "[workspace]\nmembers = [\"./crates/*\"]\n",
+        vec![
+            ("crates/api", Some(G3RsTopologyCargoManifestKind::Package)),
+            ("crates/lib", Some(G3RsTopologyCargoManifestKind::Package)),
+        ],
+        Vec::new(),
+    );
+
+    let results = crate::check(&input);
+
+    assert!(!has_rule(&results, "RS-TOPOLOGY-12"));
+}
+
+#[test]
 fn missing_and_extra_are_both_reported() {
     let input = input(
         "[workspace]\nmembers = [\"crates/api\", \"crates/ghost\"]\n",

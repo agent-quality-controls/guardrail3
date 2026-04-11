@@ -62,10 +62,14 @@ For the new package architecture, this means:
 - repo-global placement rules are not part of the remaining config/source
   migration work
 - the still-relevant extracted subset is:
+  - `RS-TOPOLOGY-07`
   - `RS-TOPOLOGY-11`
   - `RS-TOPOLOGY-12`
   - `RS-TOPOLOGY-13`
   - `RS-TOPOLOGY-16`
+- descendant manifest failures inside an otherwise valid pointed workspace
+  still need visible fail-closed reporting in the workspace-local package
+  layer, because ignoring them weakens `11/12/13/16`
 - those four rules are semantically workspace/file-tree legality, not `arch`
   and not config/source
 - they should land as shared workspace-legality file-tree checks rather than

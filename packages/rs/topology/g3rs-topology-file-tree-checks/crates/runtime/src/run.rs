@@ -5,6 +5,10 @@ pub fn check(input: &G3RsTopologyFileTreeChecksInput) -> Vec<G3CheckResult> {
     let facts = crate::support::collect_facts(input);
     let mut results = Vec::new();
 
+    for failure in &facts.input_failures {
+        crate::rs_topology_07_required_inputs_fail_closed::check(failure, &mut results);
+    }
+
     for issue in &facts.issues {
         match &issue.kind {
             crate::support::TopologyIssueKind::NestedWorkspace { .. } => {

@@ -2,8 +2,9 @@ use std::collections::BTreeSet;
 
 use g3rs_topology_file_tree_checks_types::G3RsTopologyFileTreeChecksInput;
 use g3rs_topology_types::{
-    G3RsTopologyCargoManifestKind, G3RsTopologyWorkspaceFamily, G3RsTopologyWorkspaceFamilyFile,
-    G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
+    G3RsTopologyCargoManifestKind, G3RsTopologyFileTreeInputFailure, G3RsTopologyWorkspaceFamily,
+    G3RsTopologyWorkspaceFamilyFile, G3RsTopologyWorkspaceFamilyFileAttachment,
+    G3RsTopologyWorkspaceFamilyFileKind,
 };
 use glob::Pattern;
 
@@ -41,6 +42,7 @@ pub(crate) struct IllegalFamilyFilePlacement {
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct TopologyFacts {
+    pub(crate) input_failures: Vec<G3RsTopologyFileTreeInputFailure>,
     pub(crate) issues: Vec<TopologyIssue>,
     pub(crate) illegal_family_files: Vec<IllegalFamilyFilePlacement>,
 }
@@ -177,6 +179,7 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
     });
 
     TopologyFacts {
+        input_failures: input.input_failures.clone(),
         issues,
         illegal_family_files,
     }
@@ -279,9 +282,9 @@ fn resolve_member_pattern(
     member: &str,
     descendant_root_rels: &[String],
 ) -> Vec<String> {
-    let trimmed = member.trim_matches('/');
-    let pattern = join_rel(workspace_root_rel, trimmed);
-    if !contains_glob_meta(trimmed) {
+    let normalized = normalize_member_pattern(member);
+    let pattern = join_rel(workspace_root_rel, &normalized);
+    if !contains_glob_meta(&normalized) {
         return vec![pattern];
     }
 
@@ -429,7 +432,15 @@ fn join_rel(parent: &str, child: &str) -> String {
 }
 
 fn member_pattern_escapes_root(member: &str) -> bool {
-    member.split('/').any(|segment| segment == "..")
+    member.starts_with('/') || member.split('/').any(|segment| segment == "..")
+}
+
+fn normalize_member_pattern(member: &str) -> String {
+    member
+        .split('/')
+        .filter(|segment| !segment.is_empty() && *segment != ".")
+        .collect::<Vec<_>>()
+        .join("/")
 }
 
 fn contains_glob_meta(member: &str) -> bool {
