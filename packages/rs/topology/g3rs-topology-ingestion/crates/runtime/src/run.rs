@@ -6,7 +6,7 @@ use g3rs_topology_ingestion_types::{
 use g3rs_topology_types::{
     G3RsTopologyCargoManifestKind, G3RsTopologyDescendantCargoRoot,
     G3RsTopologyFileTreeInputFailure, G3RsTopologyWorkspaceFamily, G3RsTopologyWorkspaceFamilyFile,
-    G3RsTopologyWorkspaceFamilyFileKind,
+    G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -30,7 +30,7 @@ pub fn ingest_for_file_tree_checks(
     let view = CrawlView::new(crawl);
     let workspace_manifest = parse_required_root_manifest(&view)?;
     let (descendant_cargo_roots, input_failures) = collect_descendant_cargo_roots(&view);
-    let family_files = collect_family_files(&view);
+    let family_files = collect_family_files(&view, &descendant_cargo_roots);
 
     Ok(G3RsTopologyFileTreeChecksInput {
         workspace_root_rel_dir: String::new(),
@@ -62,10 +62,16 @@ fn parse_required_root_manifest(view: &CrawlView<'_>) -> Result<CargoToml, Inges
             path: entry.path.abs_path.clone(),
             reason: err.to_string(),
         })?;
-    cargo_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+    let parsed = cargo_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
         path: entry.path.abs_path.clone(),
         reason: err.to_string(),
-    })
+    })?;
+    if parsed.workspace.is_none() {
+        return Err(IngestionError::RootManifestNotWorkspace {
+            path: entry.path.abs_path.clone(),
+        });
+    }
+    Ok(parsed)
 }
 
 fn collect_descendant_cargo_roots(
@@ -155,11 +161,21 @@ fn classify_manifest_kind(parsed: &CargoToml) -> Option<G3RsTopologyCargoManifes
     }
 }
 
-fn collect_family_files(view: &CrawlView<'_>) -> Vec<G3RsTopologyWorkspaceFamilyFile> {
+fn collect_family_files(
+    view: &CrawlView<'_>,
+    descendant_cargo_roots: &[G3RsTopologyDescendantCargoRoot],
+) -> Vec<G3RsTopologyWorkspaceFamilyFile> {
+    let root_rels = std::iter::once(String::new())
+        .chain(
+            descendant_cargo_roots
+                .iter()
+                .map(|root| root.rel_dir.clone()),
+        )
+        .collect::<Vec<_>>();
     let mut files = view
         .included_file_entries()
         .filter(|entry| !is_excluded_live_topology_path(&entry.path.rel_path))
-        .flat_map(|entry| classify_family_file(&entry.path.rel_path))
+        .flat_map(|entry| classify_family_file(&entry.path.rel_path, &root_rels))
         .collect::<Vec<_>>();
     files.sort_by(|left, right| {
         left.family
@@ -171,197 +187,173 @@ fn collect_family_files(view: &CrawlView<'_>) -> Vec<G3RsTopologyWorkspaceFamily
     files
 }
 
-fn classify_family_file(rel_path: &str) -> Vec<G3RsTopologyWorkspaceFamilyFile> {
+fn classify_family_file(
+    rel_path: &str,
+    root_rels: &[String],
+) -> Vec<G3RsTopologyWorkspaceFamilyFile> {
+    let file = |family, kind| family_file(family, rel_path, kind, root_rels);
+
     if rel_path == "Cargo.toml" || rel_path.ends_with("/Cargo.toml") {
         return vec![
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Toolchain,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Clippy,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Deny,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Cargo,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Deps,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Garde,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Release,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
             ),
         ];
     }
     if rel_path == "guardrail3.toml" || rel_path.ends_with("/guardrail3.toml") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Garde,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::GuardrailToml,
         )];
     }
     if rel_path == "guardrail3-rs.toml" || rel_path.ends_with("/guardrail3-rs.toml") {
         return vec![
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Cargo,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Deps,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
             ),
         ];
     }
     if rel_path == "rustfmt.toml" || rel_path.ends_with("/rustfmt.toml") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Fmt,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::RustfmtToml,
         )];
     }
     if rel_path == ".rustfmt.toml" || rel_path.ends_with("/.rustfmt.toml") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Fmt,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::DotRustfmtToml,
         )];
     }
     if rel_path == "rust-toolchain.toml" || rel_path.ends_with("/rust-toolchain.toml") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Toolchain,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::RustToolchainToml,
         )];
     }
     if rel_path == "rust-toolchain" || rel_path.ends_with("/rust-toolchain") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Toolchain,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::RustToolchainLegacy,
         )];
     }
     if rel_path == "clippy.toml" || rel_path.ends_with("/clippy.toml") {
         return vec![
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Clippy,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::ClippyToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Garde,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::ClippyToml,
             ),
         ];
     }
     if rel_path == ".clippy.toml" || rel_path.ends_with("/.clippy.toml") {
         return vec![
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Clippy,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::ClippyDotToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Garde,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::ClippyDotToml,
             ),
         ];
     }
     if rel_path == ".cargo/config.toml" || rel_path.ends_with("/.cargo/config.toml") {
         return vec![
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Clippy,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Garde,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
             ),
         ];
     }
     if rel_path == ".cargo/config" || rel_path.ends_with("/.cargo/config") {
         return vec![
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Clippy,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoConfigLegacy,
             ),
-            family_file(
+            file(
                 G3RsTopologyWorkspaceFamily::Garde,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoConfigLegacy,
             ),
         ];
     }
     if rel_path == "deny.toml" || rel_path.ends_with("/deny.toml") {
         if rel_path == ".cargo/deny.toml" || rel_path.ends_with("/.cargo/deny.toml") {
-            return vec![family_file(
+            return vec![file(
                 G3RsTopologyWorkspaceFamily::Deny,
-                rel_path,
                 G3RsTopologyWorkspaceFamilyFileKind::CargoDenyToml,
             )];
         }
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Deny,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::DenyToml,
         )];
     }
     if rel_path == ".deny.toml" || rel_path.ends_with("/.deny.toml") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Deny,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::DenyDotToml,
         )];
     }
     if rel_path == "release-plz.toml" || rel_path.ends_with("/release-plz.toml") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Release,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::ReleasePlzToml,
         )];
     }
     if rel_path == "cliff.toml" || rel_path.ends_with("/cliff.toml") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Release,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::CliffToml,
         )];
     }
     if rel_path == ".cargo/mutants.toml" || rel_path.ends_with("/.cargo/mutants.toml") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Test,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::MutantsToml,
         )];
     }
     if rel_path == ".config/nextest.toml" || rel_path.ends_with("/.config/nextest.toml") {
-        return vec![family_file(
+        return vec![file(
             G3RsTopologyWorkspaceFamily::Test,
-            rel_path,
             G3RsTopologyWorkspaceFamilyFileKind::NextestToml,
         )];
     }
@@ -373,16 +365,78 @@ fn family_file(
     family: G3RsTopologyWorkspaceFamily,
     rel_path: &str,
     kind: G3RsTopologyWorkspaceFamilyFileKind,
+    root_rels: &[String],
 ) -> G3RsTopologyWorkspaceFamilyFile {
     G3RsTopologyWorkspaceFamilyFile {
         family,
         rel_path: rel_path.to_owned(),
         kind,
+        attachment: attach_owner_rel(&logical_owner_rel(rel_path, kind), root_rels),
     }
 }
 
 fn parent_dir(rel_path: &str) -> &str {
     rel_path.rsplit_once('/').map_or("", |(dir, _)| dir)
+}
+
+fn logical_owner_rel(rel_path: &str, kind: G3RsTopologyWorkspaceFamilyFileKind) -> String {
+    match kind {
+        G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml
+        | G3RsTopologyWorkspaceFamilyFileKind::CargoConfigLegacy
+        | G3RsTopologyWorkspaceFamilyFileKind::CargoDenyToml
+        | G3RsTopologyWorkspaceFamilyFileKind::MutantsToml => parent_dir(rel_path)
+            .strip_suffix("/.cargo")
+            .unwrap_or("")
+            .trim_matches('/')
+            .to_owned(),
+        G3RsTopologyWorkspaceFamilyFileKind::NextestToml => parent_dir(rel_path)
+            .strip_suffix("/.config")
+            .unwrap_or("")
+            .trim_matches('/')
+            .to_owned(),
+        _ => parent_dir(rel_path).to_owned(),
+    }
+}
+
+fn attach_owner_rel(
+    owner_rel: &str,
+    root_rels: &[String],
+) -> G3RsTopologyWorkspaceFamilyFileAttachment {
+    if root_rels.iter().any(|root_rel| root_rel == owner_rel) {
+        return G3RsTopologyWorkspaceFamilyFileAttachment::ExactRoot {
+            root_rel: owner_rel.to_owned(),
+        };
+    }
+
+    if let Some(root_rel) = nearest_ancestor_root(owner_rel, root_rels) {
+        return G3RsTopologyWorkspaceFamilyFileAttachment::NestedUnderRoot {
+            root_rel: root_rel.to_owned(),
+            owner_rel: owner_rel.to_owned(),
+        };
+    }
+
+    panic!("topology family file owner `{owner_rel}` is outside the pointed workspace roots");
+}
+
+fn nearest_ancestor_root<'a>(owner_rel: &str, root_rels: &'a [String]) -> Option<&'a str> {
+    root_rels
+        .iter()
+        .filter_map(|root_rel| {
+            if path_is_under(owner_rel, root_rel) {
+                Some(root_rel.as_str())
+            } else {
+                None
+            }
+        })
+        .max_by_key(|root_rel| root_rel.len())
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn is_excluded_live_topology_path(rel_path: &str) -> bool {

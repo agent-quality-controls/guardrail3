@@ -4,6 +4,7 @@ use std::path::PathBuf;
 pub enum G3RsTopologyIngestionError {
     ConfigIngestionNotImplemented,
     SourceIngestionNotImplemented,
+    RootManifestNotWorkspace { path: PathBuf },
     Unreadable { path: PathBuf, reason: String },
     ParseFailed { path: PathBuf, reason: String },
 }
@@ -16,6 +17,9 @@ impl std::fmt::Display for G3RsTopologyIngestionError {
             }
             Self::SourceIngestionNotImplemented => {
                 f.write_str("topology source ingestion is not implemented yet")
+            }
+            Self::RootManifestNotWorkspace { path } => {
+                write!(f, "{} is not a workspace Cargo.toml", path.display())
             }
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())
