@@ -1,18 +1,10 @@
 # g3rs-arch-source-checks
 
-Extracted single-file Rust source checks for the `code` family.
+Runs the `arch` family source checks.
 
-Initial rules in this package:
+Current rules:
 
-- `RS-CODE-13`
-- `RS-CODE-15`
-- `RS-CODE-16`
-
-This package validates one Rust source file at a time.
-
-It does not own:
-
-- workspace/root discovery
-- config checks
-- root/workspace structural checks
-- cross-file or repo-global legality
+- `RS-ARCH-02` lib.rs must be facade-only
+- `RS-ARCH-04` mod.rs must be facade-only
+- `RS-ARCH-08A` facade exports must be feature-gated
+- `RS-ARCH-09` no `#[path = ...]`

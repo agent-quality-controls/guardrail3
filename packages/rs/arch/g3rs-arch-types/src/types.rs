@@ -90,20 +90,52 @@ pub struct G3RsArchSourceFile {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsArchSourceCrate {
+    pub rel_dir: String,
+    pub lib_rs_rel: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsArchSourceChecksInput {
-    pub crate_nodes: Vec<G3RsArchCrateNode>,
+    pub crates: Vec<G3RsArchSourceCrate>,
     pub facade_surfaces: Vec<G3RsArchFacadeSurface>,
     pub source_files: Vec<G3RsArchSourceFile>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsArchConfigCrate {
+    pub rel_dir: String,
+    pub cargo_rel_path: String,
+    pub shared: bool,
+    pub dependency_count: usize,
+    pub requires_feature_contract: bool,
+    pub has_default_feature: bool,
+    pub has_all_feature: bool,
+    pub all_feature_deps: Vec<String>,
+    pub default_feature_deps: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsArchConfigChecksInput {
-    pub crate_nodes: Vec<G3RsArchCrateNode>,
+    pub crates: Vec<G3RsArchConfigCrate>,
     pub dependency_edges: Vec<G3RsArchDependencyEdge>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsArchFileTreeCrate {
+    pub rel_dir: String,
+    pub cargo_rel_path: String,
+    pub has_package: bool,
+    pub has_lib_rs: bool,
+    pub has_main_rs: bool,
+    pub sibling_rs_file_count: usize,
+    pub sibling_dir_count: usize,
+    pub max_module_depth: usize,
+    pub cargo_parse_error: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsArchFileTreeChecksInput {
-    pub crate_nodes: Vec<G3RsArchCrateNode>,
+    pub crates: Vec<G3RsArchFileTreeCrate>,
     pub module_dirs: Vec<G3RsArchModuleDir>,
 }

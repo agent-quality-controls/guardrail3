@@ -7,9 +7,9 @@ Current behavior:
 - parses the pointed root `Cargo.toml`
 - resolves workspace members from `[workspace].members` and `[workspace].exclude`
 - builds crate-node facts from member `Cargo.toml` files
-- derives dependency-edge facts for config checks
-- derives facade surfaces and owned source files for source checks
-- derives module-directory structural facts for file-tree checks
+- fans out lane-pure config inputs, including dependency thresholds and feature-contract facts
+- fans out lane-pure source inputs, including facade-export gating facts
+- fans out lane-pure file-tree inputs, including structural split-threshold facts
 - stays inside the pointed workspace crawl
 
 Current lane support:

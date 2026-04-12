@@ -4,9 +4,9 @@ use guardrail3_check_types::G3CheckResult;
 pub fn check(input: &G3RsArchFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
-    for node in &input.crate_nodes {
+    for node in &input.crates {
         crate::rs_arch_01_crate_has_facade::check(node, &mut results);
-        crate::rs_arch_07_force_crate_split::check(node, &mut results);
+        crate::rs_arch_07a_structural_split::check(node, &mut results);
     }
 
     for module_dir in &input.module_dirs {
