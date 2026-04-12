@@ -3,8 +3,6 @@ use std::path::PathBuf;
 /// Ingestion failure for `code`.
 #[derive(Debug)]
 pub enum G3RsCodeIngestionError {
-    /// File-tree ingestion is planned but not implemented yet.
-    FileTreeIngestionNotImplemented,
     /// A selected Rust source file exists but cannot be read.
     Unreadable {
         /// Absolute path to the unreadable file.
@@ -24,9 +22,6 @@ pub enum G3RsCodeIngestionError {
 impl std::fmt::Display for G3RsCodeIngestionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::FileTreeIngestionNotImplemented => {
-                f.write_str("code file-tree ingestion is not implemented yet")
-            }
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())
             }

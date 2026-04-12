@@ -18,4 +18,4 @@ Current lane support:
 
 - `ingest_for_source_checks` is implemented
 - `ingest_for_config_checks` is implemented
-- `ingest_for_file_tree_checks` is a stub
+- `ingest_for_file_tree_checks` is implemented
