@@ -9,3 +9,7 @@ pub fn check(input: &G3RsToolchainFileTreeChecksInput) -> Vec<G3CheckResult> {
 
     results
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"]
+mod tests;
