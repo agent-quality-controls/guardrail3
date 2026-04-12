@@ -169,6 +169,80 @@ src/
         crawl-complete/route.ts  # webhook from crawler backend
 ```
 
+## Service-to-service contracts (OpenAPI)
+
+### Approach
+
+Code-first OpenAPI. Each service that exposes an API generates its own `openapi.json` from source code annotations. Consumer services generate typed clients from those specs. Everything is committed - the repo is always self-contained.
+
+### Spec generation per language
+
+**Rust/Axum**: `utoipa` crate annotates handlers, generates OpenAPI at build time. A small binary dumps the spec:
+```rust
+// bins/openapi-dump
+fn main() {
+    let spec = ApiDoc::openapi().to_json().unwrap();
+    std::fs::write("openapi.json", spec).unwrap();
+}
+```
+
+**Python/FastAPI**: FastAPI generates OpenAPI natively. Extract via script:
+```python
+import json
+from app.main import app
+with open("openapi.json", "w") as f:
+    json.dump(app.openapi(), f, indent=2)
+```
+
+**Next.js**: typically a consumer, not a provider. If it exposes API routes consumed by other services, same approach with a spec generation library.
+
+### Client generation
+
+TypeScript typed clients generated from specs using Hey API (`@hey-api/openapi-ts`) or `openapi-typescript`. Each consumer gets a generated client in its adapters/ layer.
+
+### Where specs and generated clients live
+
+```
+apps/
+  backend/
+    openapi.json                    # generated from Rust source, committed
+  crawler/
+    openapi.json                    # generated from Python source, committed
+  web/
+    src/adapters/
+      api/
+        backend-client/             # generated from apps/backend/openapi.json
+        crawler-client/             # generated from apps/crawler/openapi.json
+  landing/
+    src/adapters/
+      api/
+        backend-client/             # generated from apps/backend/openapi.json
+```
+
+Generated specs and generated clients are both committed. No generation step needed to build.
+
+### Pre-commit hook enforcement
+
+No CI. The pre-commit hook keeps specs and clients in sync:
+
+1. If Rust source changed in `apps/backend/` -> rebuild and dump `openapi.json`
+2. If Python source changed in `apps/crawler/` -> extract `openapi.json`
+3. If any `openapi.json` changed -> regenerate typed clients in consumer apps
+4. If generated clients changed -> auto-stage them with the commit
+5. If consumer TypeScript fails type check against new client -> commit blocked
+
+This guarantees every commit has matching source, specs, and clients. Contract mismatches are caught before the commit lands.
+
+### Contract mismatch detection
+
+When a provider changes its API:
+1. Pre-commit regenerates the spec
+2. Pre-commit regenerates consumer clients
+3. `tsc --noEmit` runs on consumers (already in the hook)
+4. Type errors in consumers surface immediately - the developer fixes them in the same commit
+
+No runtime surprises. The type system catches contract drift at commit time.
+
 ## Relation to backend apparch
 
 This is the same architecture with the same dependency rules. The enforcement mechanism differs (ESLint vs Cargo.toml) but the layers, dependency matrix, and placement test are equivalent plus one additional layer (components/).
