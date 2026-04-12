@@ -4,18 +4,20 @@ Extracted dependency-policy config checks for guardrail3 Rust workspaces.
 
 ## Boundary
 
-This package validates content only. The app family still owns:
+This package validates content only. Other deps package lanes own:
 
-- tool presence on `PATH`
-- `Cargo.lock` presence and `.gitignore` masking
-- file discovery and authoritative file selection
-- malformed-input fail-closed reporting
+- `g3rs-deps-filetree-checks`
+  - root `Cargo.lock` presence
+  - root `.gitignore` masking of `Cargo.lock`
+- `g3rs-deps-ingestion`
+  - file discovery and authoritative file selection
+  - fail-closed ingestion errors for unreadable, malformed, or untrustworthy deps inputs
 
 The package receives full parsed files only:
 
 - workspace `Cargo.toml`
 - crate `Cargo.toml`
-- workspace `guardrail3.toml`
+- workspace `guardrail3-rs.toml`
 
 It does not receive derived helper structs, resolved allowlists, or ad hoc
 subset policy types.

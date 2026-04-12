@@ -29,10 +29,7 @@ fn pipeline_reports_missing_dependency_allowlist_for_library() {
         root.join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/core\"]\nresolver = \"2\"\n",
     );
-    write(
-        root.join("guardrail3-rs.toml"),
-        "profile = \"library\"\n",
-    );
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
     write(
         root.join("crates/core/Cargo.toml"),
         "[package]\nname = \"core\"\nversion = \"0.1.0\"\n",

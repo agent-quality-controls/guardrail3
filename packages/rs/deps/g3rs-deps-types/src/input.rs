@@ -46,6 +46,17 @@ pub struct G3RsDepsConfigChecksInput {
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct G3RsDepsSourceChecksInput;
 
-/// Placeholder input contract for future deps file-tree checks.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsDepsFileTreeChecksInput;
+/// Input contract for deps file-tree checks at one pointed workspace root.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsDepsFileTreeChecksInput {
+    /// Workspace policy profile from `guardrail3-rs.toml`, when parseable.
+    pub profile: Option<RustProfile>,
+    /// Repo-relative root `Cargo.lock` path owned by this workspace.
+    pub cargo_lock_rel_path: String,
+    /// Whether the root `Cargo.lock` exists.
+    pub cargo_lock_exists: bool,
+    /// Whether a relevant root `.gitignore` masks `Cargo.lock`.
+    pub cargo_lock_ignored: bool,
+    /// `.gitignore` path responsible for masking `Cargo.lock`, when any.
+    pub gitignore_rel_path: Option<String>,
+}

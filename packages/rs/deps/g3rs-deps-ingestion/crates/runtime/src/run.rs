@@ -1,10 +1,11 @@
-/// Public ingestion entry points.
 use std::collections::BTreeSet;
 
 use g3rs_deps_types::{
-    G3RsDepsSourceChecksInput, G3RsDepsConfigChecksInput, G3RsDepsFileTreeChecksInput,
+    G3RsDepsConfigChecksInput, G3RsDepsFileTreeChecksInput, G3RsDepsSourceChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use glob::Pattern;
+use guardrail3_rs_toml_parser::RustProfile;
 
 /// Re-export of `G3RsDepsIngestionError` so the facade can reach it.
 pub use g3rs_deps_ingestion_types::G3RsDepsIngestionError as IngestionError;
@@ -33,15 +34,34 @@ pub fn ingest_for_config_checks(
 
     let workspace_cargo = crate::parse::parse_cargo_toml(&workspace_cargo_entry.path.abs_path)?;
     let guardrail = crate::parse::parse_guardrail3_rs_toml(&guardrail_entry.path.abs_path)?;
+    if guardrail
+        .config
+        .allowed_deps
+        .iter()
+        .any(|dependency| dependency.trim().is_empty())
+    {
+        return Err(IngestionError::NormalizationFailed {
+            path: guardrail_entry.path.abs_path.clone(),
+            reason: "allowed_deps must not contain empty dependency names".to_owned(),
+        });
+    }
 
     let member_entries = crate::select::select_member_cargo_tomls(crawl, &workspace_cargo)
         .map_err(|reason| IngestionError::NormalizationFailed {
             path: workspace_cargo_entry.path.abs_path.clone(),
             reason,
         })?;
+    let workspace_root_abs_dir = workspace_cargo_entry
+        .path
+        .abs_path
+        .parent()
+        .ok_or_else(|| IngestionError::NormalizationFailed {
+            path: workspace_cargo_entry.path.abs_path.clone(),
+            reason: "workspace root Cargo.toml has no parent directory".to_owned(),
+        })?;
     let workspace_member_dirs = member_entries
         .iter()
-        .filter_map(|entry| entry.path.rel_path.strip_suffix("/Cargo.toml"))
+        .filter_map(|entry| crate::select::member_dir_from_manifest_path(&entry.path.rel_path))
         .map(str::to_owned)
         .collect::<BTreeSet<_>>();
 
@@ -62,6 +82,7 @@ pub fn ingest_for_config_checks(
             &guardrail.config,
             guardrail.allowlist_present,
             &workspace_member_dirs,
+            workspace_root_abs_dir,
         )
         .map_err(|reason| IngestionError::NormalizationFailed {
             path: member_entry.path.abs_path.clone(),
@@ -74,13 +95,109 @@ pub fn ingest_for_config_checks(
 }
 
 /// Stub source ingestion entry point for the deps family.
-pub fn ingest_for_source_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsDepsSourceChecksInput, IngestionError> {
+pub fn ingest_for_source_checks(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsDepsSourceChecksInput, IngestionError> {
     Err(IngestionError::SourceIngestionNotImplemented)
 }
 
-/// Stub file-tree ingestion entry point for the deps family.
 pub fn ingest_for_file_tree_checks(
-    _crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsDepsFileTreeChecksInput, IngestionError> {
-    Err(IngestionError::FileTreeIngestionNotImplemented)
+    let cargo_lock_rel_path = "Cargo.lock".to_owned();
+    let cargo_lock_exists = crawl.root_file(cargo_lock_rel_path.as_str()).is_some();
+    let profile = read_root_profile(crawl)?;
+    let (cargo_lock_ignored, gitignore_rel_path) = read_lockfile_ignore_state(crawl)?;
+
+    Ok(G3RsDepsFileTreeChecksInput {
+        profile,
+        cargo_lock_rel_path,
+        cargo_lock_exists,
+        cargo_lock_ignored,
+        gitignore_rel_path,
+    })
+}
+
+fn read_root_profile(crawl: &G3RsWorkspaceCrawl) -> Result<Option<RustProfile>, IngestionError> {
+    let Some(guardrail_entry) = crate::select::select_workspace_guardrail3_rs_toml(crawl) else {
+        return Ok(None);
+    };
+    if !guardrail_entry.readable {
+        return Err(IngestionError::Unreadable {
+            path: guardrail_entry.path.abs_path.clone(),
+            reason: "file is not readable".to_owned(),
+        });
+    }
+
+    let guardrail = crate::parse::parse_guardrail3_rs_toml(&guardrail_entry.path.abs_path)?;
+    Ok(guardrail.config.profile)
+}
+
+fn read_lockfile_ignore_state(
+    crawl: &G3RsWorkspaceCrawl,
+) -> Result<(bool, Option<String>), IngestionError> {
+    let Some(gitignore_entry) = crawl.root_file(".gitignore") else {
+        return Ok((false, None));
+    };
+    if !gitignore_entry.readable {
+        return Err(IngestionError::Unreadable {
+            path: gitignore_entry.path.abs_path.clone(),
+            reason: "file is not readable".to_owned(),
+        });
+    }
+
+    let content = crate::fs::read_to_string(&gitignore_entry.path.abs_path).map_err(|err| {
+        IngestionError::Unreadable {
+            path: gitignore_entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        }
+    })?;
+
+    let mut ignored = false;
+    for line in content.lines() {
+        if let Some(next_ignored) = cargo_lock_ignore_match(line) {
+            ignored = next_ignored;
+        }
+    }
+
+    Ok((
+        ignored,
+        ignored.then(|| gitignore_entry.path.rel_path.clone()),
+    ))
+}
+
+fn cargo_lock_ignore_match(line: &str) -> Option<bool> {
+    let trimmed = line.trim();
+    if trimmed.is_empty() || trimmed.starts_with('#') {
+        return None;
+    }
+
+    let (ignored, pattern_text) = if let Some(pattern) = trimmed.strip_prefix('!') {
+        (false, pattern)
+    } else {
+        (true, trimmed)
+    };
+    let anchored = pattern_text.starts_with('/');
+    let normalized = pattern_text.trim_start_matches('/');
+    if normalized.is_empty() {
+        return None;
+    }
+
+    let matched = if normalized == "Cargo.lock" {
+        true
+    } else if normalized.contains('/') {
+        Pattern::new(normalized)
+            .ok()
+            .is_some_and(|pattern| pattern.matches("Cargo.lock"))
+    } else {
+        Pattern::new(normalized).ok().is_some_and(|pattern| {
+            if anchored {
+                pattern.matches("Cargo.lock")
+            } else {
+                pattern.matches("Cargo.lock")
+            }
+        })
+    };
+
+    matched.then_some(ignored)
 }

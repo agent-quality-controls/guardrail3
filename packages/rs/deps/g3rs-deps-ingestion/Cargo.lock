@@ -141,6 +141,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-deps-filetree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deps-filetree-checks-runtime",
+ "g3rs-deps-filetree-checks-types",
+]
+
+[[package]]
+name = "g3rs-deps-filetree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deps-filetree-checks-types",
+ "guardrail3-check-types",
+ "guardrail3-rs-toml-parser",
+]
+
+[[package]]
+name = "g3rs-deps-filetree-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deps-types",
+]
+
+[[package]]
 name = "g3rs-deps-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -161,11 +185,13 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-deps-config-checks",
+ "g3rs-deps-filetree-checks",
  "g3rs-deps-ingestion-assertions",
  "g3rs-deps-ingestion-types",
  "g3rs-deps-types",
  "g3rs-workspace-crawl",
  "glob",
+ "guardrail3-check-types",
  "guardrail3-rs-toml-parser",
  "tempfile",
  "toml",

@@ -9,8 +9,6 @@ pub enum G3RsDepsIngestionError {
     Guardrail3RsTomlNotFound,
     /// source ingestion is not implemented yet.
     SourceIngestionNotImplemented,
-    /// File-tree ingestion is planned but not implemented yet.
-    FileTreeIngestionNotImplemented,
     /// A required file exists but cannot be read.
     Unreadable {
         /// Absolute path to the unreadable file.
@@ -43,9 +41,6 @@ impl std::fmt::Display for G3RsDepsIngestionError {
             }
             Self::SourceIngestionNotImplemented => {
                 f.write_str("deps source ingestion is not implemented yet")
-            }
-            Self::FileTreeIngestionNotImplemented => {
-                f.write_str("deps file-tree ingestion is not implemented yet")
             }
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())

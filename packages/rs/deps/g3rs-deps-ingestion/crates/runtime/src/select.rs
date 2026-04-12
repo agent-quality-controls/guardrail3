@@ -94,7 +94,7 @@ fn is_member_manifest_path(rel_path: &str) -> bool {
     rel_path == "Cargo.toml" || rel_path.ends_with("/Cargo.toml")
 }
 
-fn member_dir_from_manifest_path(rel_path: &str) -> Option<&str> {
+pub(crate) fn member_dir_from_manifest_path(rel_path: &str) -> Option<&str> {
     if rel_path == "Cargo.toml" {
         return Some("");
     }

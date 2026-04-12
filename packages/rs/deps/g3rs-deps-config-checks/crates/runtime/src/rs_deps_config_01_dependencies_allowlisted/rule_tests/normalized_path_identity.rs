@@ -1,7 +1,7 @@
 use super::helpers::{dependency, run_check, target_dependency};
 
 #[test]
-fn normalized_external_path_dependency_uses_package_identity_for_allowlist() {
+fn normalized_dependency_identity_uses_package_name_for_allowlist() {
     let results = run_check(true, &["serde"], &[dependency("serde")]);
 
     assert_eq!(results.len(), 1);
@@ -9,12 +9,12 @@ fn normalized_external_path_dependency_uses_package_identity_for_allowlist() {
     assert!(results[0].inventory());
     assert!(
         results[0].message().contains("Dependency `serde`"),
-        "expected target package name in allowlist result: {results:#?}"
+        "expected normalized package identity in allowlist result: {results:#?}"
     );
 }
 
 #[test]
-fn target_table_dependency_uses_same_allowlist_contract() {
+fn normalized_target_dependency_uses_same_allowlist_contract() {
     let results = run_check(true, &["serde"], &[target_dependency("serde", "cfg(unix)")]);
 
     assert_eq!(results.len(), 1);

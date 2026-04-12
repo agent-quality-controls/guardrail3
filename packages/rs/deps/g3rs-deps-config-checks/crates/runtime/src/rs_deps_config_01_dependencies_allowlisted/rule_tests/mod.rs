@@ -1,4 +1,4 @@
 mod golden;
 mod helpers;
-mod local_path;
-mod workspace;
+mod normalized_path_identity;
+mod normalized_workspace_identity;
