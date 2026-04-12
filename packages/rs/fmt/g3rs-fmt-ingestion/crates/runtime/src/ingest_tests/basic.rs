@@ -92,6 +92,9 @@ fn assert_all_rel_paths(input: &g3rs_fmt_types::G3RsFmtConfigChecksInput) {
 fn assert_parsed_content(input: &g3rs_fmt_types::G3RsFmtConfigChecksInput) {
     let rustfmt = match &input.rustfmt_state {
         g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt,
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => {
+            panic!("expected parsed rustfmt content")
+        }
         g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => {
             panic!("expected parsed rustfmt content")
         }
@@ -158,6 +161,7 @@ fn dot_rustfmt_toml_is_accepted_when_root_rustfmt_toml_is_absent() {
     assert_eq!(
         match &input.rustfmt_state {
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => None,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
         },
         Some(rustfmt_toml_parser::Edition::Edition2024),
@@ -203,6 +207,7 @@ fn ignores_dot_rustfmt_toml_when_rustfmt_toml_exists() {
     assert_eq!(
         match &input.rustfmt_state {
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => None,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
         },
         Some(rustfmt_toml_parser::Edition::Edition2024),
@@ -421,6 +426,9 @@ fn empty_rustfmt_toml_is_valid() {
     assert_eq!(
         match &input.rustfmt_state {
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => {
+                panic!("empty rustfmt.toml should parse")
+            }
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => {
                 panic!("empty rustfmt.toml should parse")
             }
@@ -509,6 +517,9 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
     // Verify all 8 settings that RS-FMT-CONFIG-01 reads from rustfmt.toml.
     let rustfmt = match &input.rustfmt_state {
         g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt,
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => {
+            panic!("realistic rustfmt should parse")
+        }
         g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => {
             panic!("realistic rustfmt should parse")
         }
@@ -643,7 +654,7 @@ fn unreadable_rustfmt_toml_becomes_parse_error_state() {
 
     assert!(matches!(
         input.rustfmt_state,
-        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable
     ));
 }
 
@@ -669,7 +680,7 @@ fn unreadable_cargo_toml_becomes_parse_error_state() {
 
     assert!(matches!(
         input.cargo_state,
-        g3rs_fmt_types::G3RsFmtCargoState::ParseError
+        g3rs_fmt_types::G3RsFmtCargoState::Unreadable
     ));
 }
 
@@ -695,7 +706,7 @@ fn unreadable_toolchain_toml_becomes_parse_error_state() {
 
     assert!(matches!(
         input.toolchain_state,
-        g3rs_fmt_types::G3RsFmtToolchainState::ParseError
+        g3rs_fmt_types::G3RsFmtToolchainState::Unreadable
     ));
 }
 
@@ -715,7 +726,7 @@ fn deleted_after_crawl_rustfmt_toml_becomes_parse_error_state() {
 
     assert!(matches!(
         input.rustfmt_state,
-        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable
     ));
 }
 
@@ -735,7 +746,7 @@ fn deleted_after_crawl_cargo_toml_becomes_parse_error_state() {
 
     assert!(matches!(
         input.cargo_state,
-        g3rs_fmt_types::G3RsFmtCargoState::ParseError
+        g3rs_fmt_types::G3RsFmtCargoState::Unreadable
     ));
 }
 
@@ -755,7 +766,7 @@ fn deleted_after_crawl_toolchain_toml_becomes_parse_error_state() {
 
     assert!(matches!(
         input.toolchain_state,
-        g3rs_fmt_types::G3RsFmtToolchainState::ParseError
+        g3rs_fmt_types::G3RsFmtToolchainState::Unreadable
     ));
 }
 
@@ -779,6 +790,6 @@ fn deleted_after_crawl_dot_rustfmt_toml_becomes_parse_error_state() {
     assert_eq!(input.rustfmt_rel_path, ".rustfmt.toml");
     assert!(matches!(
         input.rustfmt_state,
-        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable
     ));
 }

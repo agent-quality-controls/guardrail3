@@ -5,3 +5,4 @@ mod no_nightly_keys;
 mod non_stable;
 mod parse_error;
 mod stable;
+mod unreadable;

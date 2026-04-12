@@ -8,16 +8,26 @@ use rustfmt_toml_parser::RustfmtToml;
 use crate::run::IngestionError;
 
 /// Read the file at `abs_path` and parse it as a `RustfmtToml`.
-pub(crate) fn parse_rustfmt_toml(abs_path: &Path) -> Result<RustfmtToml, IngestionError> {
+pub(crate) fn parse_rustfmt_toml(
+    abs_path: &Path,
+) -> Result<(RustfmtToml, Vec<String>), IngestionError> {
     let content =
         crate::fs::read_to_string(abs_path).map_err(|err| IngestionError::Unreadable {
             path: abs_path.to_path_buf(),
             reason: err.to_string(),
         })?;
-    rustfmt_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+    let parsed = rustfmt_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
         path: abs_path.to_path_buf(),
         reason: err.to_string(),
-    })
+    })?;
+    Ok((parsed, explicit_rustfmt_keys(&content)))
+}
+
+fn explicit_rustfmt_keys(content: &str) -> Vec<String> {
+    match toml::from_str::<toml::Value>(content) {
+        Ok(toml::Value::Table(table)) => table.keys().cloned().collect(),
+        _ => Vec::new(),
+    }
 }
 
 /// Read the file at `abs_path` and parse it as a `CargoToml`.

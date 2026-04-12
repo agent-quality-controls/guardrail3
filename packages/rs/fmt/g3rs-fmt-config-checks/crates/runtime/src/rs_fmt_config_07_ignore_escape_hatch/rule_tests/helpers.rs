@@ -16,6 +16,7 @@ pub(super) fn run_check(
         rustfmt_state: G3RsFmtRustfmtConfigState::Parsed(
             parse_rustfmt_toml(rustfmt_toml).expect("rustfmt fixture should parse"),
         ),
+        rustfmt_explicit_keys: Vec::new(),
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo_state: G3RsFmtCargoState::Missing,
         toolchain_rel_path: "rust-toolchain.toml".to_owned(),

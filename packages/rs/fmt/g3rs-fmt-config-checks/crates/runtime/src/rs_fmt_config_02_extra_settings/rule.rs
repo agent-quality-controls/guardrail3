@@ -3,20 +3,16 @@ use std::collections::BTreeSet;
 use g3rs_fmt_config_checks_types::G3RsFmtConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::inputs::{rustfmt, rustfmt_table};
+use crate::inputs::rustfmt;
 
 const ID: &str = "RS-FMT-CONFIG-02";
 
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let Some(rustfmt) = rustfmt(input) else {
+    let Some(_rustfmt) = rustfmt(input) else {
         return;
     };
     let expected = expected_keys();
-    let table = rustfmt_table(rustfmt);
-    for key in table.keys() {
-        if key == "skip_macro_invocations" && rustfmt.skip_macro_invocations.is_empty() {
-            continue;
-        }
+    for key in &input.rustfmt_explicit_keys {
         if !expected.contains(key.as_str()) {
             results.push(
                 G3CheckResult::new(
@@ -24,7 +20,7 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
                     G3Severity::Info,
                     format!("rustfmt extra setting: {key}"),
                     format!(
-                        "`{key}` in `{}` is not part of the standard rustfmt baseline. Verify it is intentional.",
+                    "`{key}` in `{}` is not part of the standard rustfmt baseline. Verify it is intentional.",
                         input.rustfmt_rel_path
                     ),
                     Some(input.rustfmt_rel_path.clone()),

@@ -7,3 +7,4 @@ mod no_rustfmt_edition;
 mod precedence;
 mod package_edition;
 mod parse_error;
+mod unreadable;

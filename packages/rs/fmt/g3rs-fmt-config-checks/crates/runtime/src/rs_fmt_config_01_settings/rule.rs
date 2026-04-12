@@ -7,11 +7,24 @@ const ID: &str = "RS-FMT-CONFIG-01";
 
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(rustfmt) = rustfmt(input) else {
+        let (title, message) = match &input.rustfmt_state {
+            g3rs_fmt_config_checks_types::G3RsFmtRustfmtConfigState::Unreadable => (
+                "rustfmt config unreadable".to_owned(),
+                "rustfmt config exists but could not be read from disk".to_owned(),
+            ),
+            g3rs_fmt_config_checks_types::G3RsFmtRustfmtConfigState::ParseError => (
+                "rustfmt config parse error".to_owned(),
+                "rustfmt config exists but could not be parsed as a TOML table".to_owned(),
+            ),
+            g3rs_fmt_config_checks_types::G3RsFmtRustfmtConfigState::Parsed(_) => {
+                unreachable!("parsed rustfmt should not hit the unreadable/parse fallback")
+            }
+        };
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
-            "rustfmt config parse error".to_owned(),
-            "rustfmt config exists but could not be parsed as a TOML table".to_owned(),
+            title,
+            message,
             Some(input.rustfmt_rel_path.clone()),
             None,
         ));
