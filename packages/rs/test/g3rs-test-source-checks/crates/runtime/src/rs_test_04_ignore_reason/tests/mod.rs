@@ -17,7 +17,7 @@ fn reports_missing_ignore_reason() {
 
     assert_has_result(
         &results,
-        "RS-TEST-04",
+        "RS-TEST-SOURCE-04",
         G3Severity::Error,
         "ignored test lacks reason",
         "tests/slow.rs",
@@ -39,7 +39,7 @@ fn inventories_clean_file_without_ignored_tests() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-04",
+        "RS-TEST-SOURCE-04",
         "ignored tests have reasons",
         "tests/ok.rs",
     );
@@ -59,7 +59,7 @@ fn accepts_previous_line_and_inline_ignore_reasons() {
 
     assert_has_result(
         &results,
-        "RS-TEST-04",
+        "RS-TEST-SOURCE-04",
         G3Severity::Warn,
         "ignored test has documented reason",
         "tests/documented.rs",
@@ -67,7 +67,7 @@ fn accepts_previous_line_and_inline_ignore_reasons() {
     );
     assert_has_result(
         &results,
-        "RS-TEST-04",
+        "RS-TEST-SOURCE-04",
         G3Severity::Warn,
         "ignored test has documented reason",
         "tests/documented.rs",
@@ -76,7 +76,7 @@ fn accepts_previous_line_and_inline_ignore_reasons() {
     assert_eq!(
         results
             .iter()
-            .filter(|result| result.id() == "RS-TEST-04" && result.title() == "ignored test count")
+            .filter(|result| result.id() == "RS-TEST-SOURCE-04" && result.title() == "ignored test count")
             .count(),
         1,
         "{results:#?}"
@@ -97,7 +97,7 @@ fn accepts_ignore_string_argument_and_cfg_attr_ignore() {
 
     assert_has_result(
         &results,
-        "RS-TEST-04",
+        "RS-TEST-SOURCE-04",
         G3Severity::Warn,
         "ignored test has documented reason",
         "tests/attrs.rs",
@@ -105,7 +105,7 @@ fn accepts_ignore_string_argument_and_cfg_attr_ignore() {
     );
     assert_has_result(
         &results,
-        "RS-TEST-04",
+        "RS-TEST-SOURCE-04",
         G3Severity::Warn,
         "ignored test has documented reason",
         "tests/attrs.rs",
@@ -127,7 +127,7 @@ fn reports_weak_ignore_reason_and_aggregate_counts() {
 
     assert_has_result(
         &results,
-        "RS-TEST-04",
+        "RS-TEST-SOURCE-04",
         G3Severity::Error,
         "ignored test reason too weak",
         "tests/mixed.rs",
@@ -135,7 +135,7 @@ fn reports_weak_ignore_reason_and_aggregate_counts() {
     );
     assert_has_result(
         &results,
-        "RS-TEST-04",
+        "RS-TEST-SOURCE-04",
         G3Severity::Error,
         "ignored test lacks reason",
         "tests/mixed.rs",
@@ -143,7 +143,7 @@ fn reports_weak_ignore_reason_and_aggregate_counts() {
     );
     assert_has_result(
         &results,
-        "RS-TEST-04",
+        "RS-TEST-SOURCE-04",
         G3Severity::Warn,
         "ignored test has documented reason",
         "tests/mixed.rs",
@@ -153,7 +153,7 @@ fn reports_weak_ignore_reason_and_aggregate_counts() {
     let count_results = results
         .iter()
         .filter(|result| {
-            result.id() == "RS-TEST-04"
+            result.id() == "RS-TEST-SOURCE-04"
                 && result.title() == "ignored test count"
                 && result.message()
                     == "`tests/mixed.rs` has 3 ignored tests (1 documented, 1 missing reasons, 1 weak reasons)."

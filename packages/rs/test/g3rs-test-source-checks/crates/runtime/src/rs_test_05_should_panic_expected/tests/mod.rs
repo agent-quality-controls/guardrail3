@@ -17,7 +17,7 @@ fn reports_missing_should_panic_expected_string() {
 
     assert_has_result(
         &results,
-        "RS-TEST-05",
+        "RS-TEST-SOURCE-05",
         G3Severity::Error,
         "should_panic missing expected string",
         "tests/panic.rs",
@@ -39,7 +39,7 @@ fn inventories_explicit_should_panic_expected_string() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-05",
+        "RS-TEST-SOURCE-05",
         "should_panic expected string present",
         "tests/panic.rs",
     );
@@ -59,7 +59,7 @@ fn reports_blank_should_panic_expected_string() {
 
     assert_has_result(
         &results,
-        "RS-TEST-05",
+        "RS-TEST-SOURCE-05",
         G3Severity::Error,
         "should_panic missing expected string",
         "tests/panic.rs",
@@ -81,7 +81,7 @@ fn inventories_cfg_attr_should_panic_with_expected_string() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-05",
+        "RS-TEST-SOURCE-05",
         "should_panic expected string present",
         "tests/panic.rs",
     );

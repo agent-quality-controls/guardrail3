@@ -17,7 +17,7 @@ fn reports_test_without_real_proof_site() {
 
     assert_has_result(
         &results,
-        "RS-TEST-07",
+        "RS-TEST-SOURCE-07",
         G3Severity::Error,
         "test lacks real proof site",
         "tests/missing.rs",
@@ -39,7 +39,7 @@ fn inventories_assertion_macro_proof() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-07",
+        "RS-TEST-SOURCE-07",
         "real proof site present",
         "tests/ok.rs",
     );
@@ -67,7 +67,7 @@ fn inventories_owned_assertions_proof_via_alias_import() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-07",
+        "RS-TEST-SOURCE-07",
         "real proof site present",
         "tests/alias.rs",
     );
@@ -95,7 +95,7 @@ fn inventories_owned_assertions_proof_via_glob_import() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-07",
+        "RS-TEST-SOURCE-07",
         "real proof site present",
         "tests/glob.rs",
     );

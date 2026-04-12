@@ -1,7 +1,7 @@
 use g3rs_hooks_file_tree_checks_types::G3RsHooksScriptFileFact;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "HOOK-SHARED-01";
+const ID: &str = "RS-HOOKS-FILETREE-01";
 
 pub(crate) fn check(input: Option<&G3RsHooksScriptFileFact>, results: &mut Vec<G3CheckResult>) {
     match input {

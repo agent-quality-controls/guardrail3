@@ -4,7 +4,7 @@ use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 use crate::facts::HookScriptKind;
 use crate::inputs::ExecutableCommandContextInput;
 
-const ID: &str = "HOOK-SHARED-18";
+const ID: &str = "RS-HOOKS-SOURCE-22";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
     let mut suspicious_lines = Vec::new();

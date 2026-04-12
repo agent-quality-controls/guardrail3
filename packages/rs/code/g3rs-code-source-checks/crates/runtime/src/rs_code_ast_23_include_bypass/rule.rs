@@ -3,7 +3,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use crate::parse::find_include_macros;
 use crate::support::CodeSourceRuleInput;
 
-const ID: &str = "RS-CODE-23";
+const ID: &str = "RS-CODE-SOURCE-23";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_include_macros(input.source) {

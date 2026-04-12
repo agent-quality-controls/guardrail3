@@ -13,7 +13,7 @@ The app family still owns:
 - garde applicability gating from policy and source adoption
 - missing / unparseable clippy handling for the garde ban rules
 - source garde rules
-- `RS-GARDE-10` malformed-input reporting
+- `RS-GARDE-SOURCE-10` malformed-input reporting
 
 Current package rules:
 

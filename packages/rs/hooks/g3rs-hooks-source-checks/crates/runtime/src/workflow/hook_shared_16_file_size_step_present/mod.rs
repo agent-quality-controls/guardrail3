@@ -3,7 +3,7 @@ use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use crate::inputs::ExecutableCommandContextInput;
 
-const ID: &str = "HOOK-SHARED-16";
+const ID: &str = "RS-HOOKS-SOURCE-21";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
     let found = any_resolved_command(input.parsed, is_file_size_command);

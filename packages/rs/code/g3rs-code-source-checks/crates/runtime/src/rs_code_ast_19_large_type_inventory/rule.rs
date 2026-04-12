@@ -3,7 +3,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use crate::parse::{LargeTypeItem, find_large_type_items};
 use crate::support::CodeSourceRuleInput;
 
-const ID: &str = "RS-CODE-19";
+const ID: &str = "RS-CODE-SOURCE-19";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for item in find_large_type_items(input.source) {

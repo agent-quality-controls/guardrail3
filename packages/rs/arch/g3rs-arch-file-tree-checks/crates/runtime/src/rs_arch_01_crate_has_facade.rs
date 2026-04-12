@@ -1,7 +1,7 @@
 use g3rs_arch_types::G3RsArchFileTreeCrate;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-ARCH-01";
+const ID: &str = "RS-ARCH-FILETREE-01";
 
 pub(crate) fn check(node: &G3RsArchFileTreeCrate, results: &mut Vec<G3CheckResult>) {
     if node.cargo_parse_error.is_some() || !node.has_package {

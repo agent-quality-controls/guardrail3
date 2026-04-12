@@ -1,7 +1,7 @@
 use g3rs_arch_types::G3RsArchConfigCrate;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-ARCH-08B";
+const ID: &str = "RS-ARCH-CONFIG-08";
 
 pub(crate) fn check(node: &G3RsArchConfigCrate, results: &mut Vec<G3CheckResult>) {
     if !node.requires_feature_contract {

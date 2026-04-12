@@ -1,7 +1,7 @@
 use g3rs_test_types::G3RsTestConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-TEST-09";
+const ID: &str = "RS-TEST-CONFIG-09";
 
 pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let async_active =

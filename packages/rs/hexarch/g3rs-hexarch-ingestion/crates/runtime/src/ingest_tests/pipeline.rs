@@ -60,7 +60,7 @@ version = "0.1.0"
 
     let ports = results
         .iter()
-        .find(|result| result.id() == "RS-HEXARCH-22")
+        .find(|result| result.id() == "RS-HEXARCH-SOURCE-22")
         .expect("ports result");
     assert_eq!(ports.file(), Some("crates/ports/http"));
     assert!(!ports.inventory());
@@ -68,7 +68,7 @@ version = "0.1.0"
 
     let adapter = results
         .iter()
-        .find(|result| result.id() == "RS-HEXARCH-23")
+        .find(|result| result.id() == "RS-HEXARCH-SOURCE-23")
         .expect("adapter result");
     assert_eq!(adapter.file(), Some("crates/adapters/sql"));
     assert!(!adapter.inventory());

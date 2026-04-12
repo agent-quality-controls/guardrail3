@@ -2,7 +2,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::TestFunctionInput;
 
-const ID: &str = "RS-TEST-05";
+const ID: &str = "RS-TEST-SOURCE-05";
 
 pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResult>) {
     let Some(line) = input.function.should_panic_line else {

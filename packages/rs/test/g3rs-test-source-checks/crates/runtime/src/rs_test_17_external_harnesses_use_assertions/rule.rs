@@ -5,7 +5,7 @@ use crate::parse::FunctionInfo;
 use crate::rs_test_07_real_proof_site::has_owned_assertion_proof;
 use crate::support::TestFunctionInput;
 
-const ID: &str = "RS-TEST-17";
+const ID: &str = "RS-TEST-SOURCE-17";
 
 pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResult>) {
     if !matches!(input.file.kind, G3RsTestFileKind::ExternalHarness) {

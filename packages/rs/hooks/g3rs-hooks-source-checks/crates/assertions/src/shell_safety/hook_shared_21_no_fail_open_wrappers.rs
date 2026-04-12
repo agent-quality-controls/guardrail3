@@ -1,1 +1,1 @@
-crate::define_rule_assertions!("HOOK-SHARED-21");
+crate::define_rule_assertions!("RS-HOOKS-SOURCE-24");

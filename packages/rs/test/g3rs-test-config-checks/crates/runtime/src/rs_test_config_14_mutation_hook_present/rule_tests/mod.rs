@@ -10,7 +10,7 @@ fn reports_missing_hook_step() {
 
     assert_has_result(
         &results,
-        "RS-TEST-14",
+        "RS-TEST-CONFIG-14",
         G3Severity::Error,
         "mutation hook step missing",
         "Cargo.toml",
@@ -27,7 +27,7 @@ fn inventories_present_hook_files() {
 
     assert_has_result(
         &results,
-        "RS-TEST-14",
+        "RS-TEST-CONFIG-14",
         G3Severity::Info,
         "mutation hook step present",
         ".githooks/pre-commit",

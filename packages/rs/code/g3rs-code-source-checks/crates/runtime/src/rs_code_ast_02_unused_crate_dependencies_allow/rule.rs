@@ -3,7 +3,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use crate::parse::{find_crate_level_allows, find_inline_mod_allows};
 use crate::support::CodeSourceRuleInput;
 
-const ID: &str = "RS-CODE-02";
+const ID: &str = "RS-CODE-SOURCE-02";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for (line, lint) in find_crate_level_allows(input.source) {

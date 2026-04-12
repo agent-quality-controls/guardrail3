@@ -12,7 +12,7 @@ fn reports_exclude_everything_pattern() {
 
     assert_has_result(
         &results,
-        "RS-TEST-15",
+        "RS-TEST-CONFIG-15",
         G3Severity::Error,
         "mutants config excludes everything",
         ".cargo/mutants.toml",
@@ -30,7 +30,7 @@ fn reports_low_timeout_multiplier() {
 
     assert_has_result(
         &results,
-        "RS-TEST-15",
+        "RS-TEST-CONFIG-15",
         G3Severity::Error,
         "mutants timeout multiplier too low",
         ".cargo/mutants.toml",
@@ -48,7 +48,7 @@ fn inventories_sane_config() {
 
     assert_has_result(
         &results,
-        "RS-TEST-15",
+        "RS-TEST-CONFIG-15",
         G3Severity::Info,
         "mutants config looks sane",
         ".cargo/mutants.toml",

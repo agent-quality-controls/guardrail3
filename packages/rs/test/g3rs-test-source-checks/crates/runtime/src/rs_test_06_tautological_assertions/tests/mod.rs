@@ -17,7 +17,7 @@ fn reports_literal_only_assertions() {
 
     assert_has_result(
         &results,
-        "RS-TEST-06",
+        "RS-TEST-SOURCE-06",
         G3Severity::Error,
         "tautological assertion",
         "tests/lit.rs",
@@ -39,7 +39,7 @@ fn inventories_real_assertions() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-06",
+        "RS-TEST-SOURCE-06",
         "tautological assertions absent",
         "tests/real.rs",
     );

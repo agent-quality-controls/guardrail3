@@ -10,7 +10,7 @@ fn simple_crate_stays_quiet() {
 
     let results = crate::check(&input(vec![node], Vec::new()));
 
-    assert!(!has_rule(&results, "RS-ARCH-07A"));
+    assert!(!has_rule(&results, "RS-ARCH-FILETREE-07"));
 }
 
 #[test]
@@ -23,7 +23,7 @@ fn exact_thresholds_stay_quiet() {
 
     let results = crate::check(&input(vec![node], Vec::new()));
 
-    assert!(!has_rule(&results, "RS-ARCH-07A"));
+    assert!(!has_rule(&results, "RS-ARCH-FILETREE-07"));
 }
 
 #[test]
@@ -38,7 +38,7 @@ fn structural_threshold_over_limit_fires() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-07A",
+        "RS-ARCH-FILETREE-07",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("crate structure too complex, must split"),

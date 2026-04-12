@@ -2,7 +2,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::TestFunctionInput;
 
-const ID: &str = "RS-TEST-08";
+const ID: &str = "RS-TEST-SOURCE-08";
 
 pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResult>) {
     for line in &input.function.weak_matches_lines {

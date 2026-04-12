@@ -29,7 +29,7 @@ fn ungated_exports_fire_source_rule() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-08A",
+        "RS-ARCH-SOURCE-08",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("facade exports not feature-gated"),
@@ -65,7 +65,7 @@ fn properly_gated_exports_inventory_without_feature_table_facts() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-08A",
+        "RS-ARCH-SOURCE-08",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Info),
             title: Some("facade exports properly feature-gated"),
@@ -74,5 +74,5 @@ fn properly_gated_exports_inventory_without_feature_table_facts() {
             message: None,
         }],
     );
-    assert!(!has_rule(&results, "RS-ARCH-08B"));
+    assert!(!has_rule(&results, "RS-ARCH-CONFIG-08"));
 }

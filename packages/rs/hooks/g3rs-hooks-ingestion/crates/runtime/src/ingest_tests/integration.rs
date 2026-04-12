@@ -63,7 +63,7 @@ fn integration_reports_hook_breakage_when_rust_hook_is_misconfigured() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-08"
+            result.id() == "RS-HOOKS-SOURCE-09"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.title() == "Rust guardrail validate step missing"
                 && !result.inventory()
@@ -72,7 +72,7 @@ fn integration_reports_hook_breakage_when_rust_hook_is_misconfigured() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-16"
+            result.id() == "RS-HOOKS-SOURCE-15"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.title() == "Rust config-change trigger coverage incomplete"
                 && !result.inventory()
@@ -98,7 +98,7 @@ fn integration_aligns_hook_validation_step_with_source_family_breakage() {
 
     assert!(
         hook_results.iter().any(|result| {
-            result.id() == "HOOK-RS-08"
+            result.id() == "RS-HOOKS-SOURCE-09"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.title() == "Rust guardrail validate step present"
                 && result.inventory()
@@ -107,7 +107,7 @@ fn integration_aligns_hook_validation_step_with_source_family_breakage() {
     );
     assert!(
         code_results.iter().any(|result| {
-            result.id() == "RS-CODE-13"
+            result.id() == "RS-CODE-SOURCE-13"
                 && result.file() == Some("src/lib.rs")
                 && !result.inventory()
         }),
@@ -133,7 +133,7 @@ fn integration_aligns_hook_config_trigger_with_config_family_breakage() {
 
     assert!(
         hook_results.iter().any(|result| {
-            result.id() == "HOOK-RS-16"
+            result.id() == "RS-HOOKS-SOURCE-15"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.title() == "Rust config changes trigger hook validation"
                 && result.inventory()

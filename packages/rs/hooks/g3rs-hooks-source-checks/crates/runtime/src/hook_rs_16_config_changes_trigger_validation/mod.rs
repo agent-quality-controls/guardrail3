@@ -5,7 +5,7 @@ use super::hook_rs_08_guardrail_validate_staged_present::{
 };
 use super::inputs::RustHookCommandInput;
 
-const ID: &str = "HOOK-RS-16";
+const ID: &str = "RS-HOOKS-SOURCE-15";
 
 pub(crate) fn check(content: &str, input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     let config_needles = [

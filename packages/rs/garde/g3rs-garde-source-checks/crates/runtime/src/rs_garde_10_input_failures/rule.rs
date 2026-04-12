@@ -2,7 +2,7 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{InputFailureSite, error};
 
-const ID: &str = "RS-GARDE-10";
+const ID: &str = "RS-GARDE-SOURCE-10";
 
 pub(crate) fn check(site: &InputFailureSite, results: &mut Vec<G3CheckResult>) {
     results.push(error(

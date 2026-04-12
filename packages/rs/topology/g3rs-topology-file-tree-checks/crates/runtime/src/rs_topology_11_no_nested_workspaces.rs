@@ -2,7 +2,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{TopologyIssue, TopologyIssueKind, display_dir};
 
-const ID: &str = "RS-TOPOLOGY-11";
+const ID: &str = "RS-TOPOLOGY-FILETREE-11";
 
 pub(crate) fn check(input: &TopologyIssue, results: &mut Vec<G3CheckResult>) {
     let TopologyIssueKind::NestedWorkspace {

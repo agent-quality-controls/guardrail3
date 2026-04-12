@@ -3,7 +3,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use crate::parse::{find_forbidden_macros, line_text};
 use crate::support::CodeSourceRuleInput;
 
-const ID: &str = "RS-CODE-13";
+const ID: &str = "RS-CODE-SOURCE-13";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_forbidden_macros(input.source, input.is_test) {

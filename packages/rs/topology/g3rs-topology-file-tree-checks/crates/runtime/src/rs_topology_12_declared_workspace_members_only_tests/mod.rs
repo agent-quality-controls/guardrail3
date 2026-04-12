@@ -19,7 +19,7 @@ fn undeclared_child_root_fires() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-12",
+        "RS-TOPOLOGY-FILETREE-12",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("Workspace child `crates/extra` must be declared explicitly"),
@@ -42,7 +42,7 @@ fn extra_workspace_member_fires() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-12",
+        "RS-TOPOLOGY-FILETREE-12",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("Workspace `.` has extra member `crates/ghost`"),
@@ -66,7 +66,7 @@ fn exact_match_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-12", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-12", &[]);
 }
 
 #[test]
@@ -79,7 +79,7 @@ fn dot_slash_member_path_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-12", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-12", &[]);
 }
 
 #[test]
@@ -95,7 +95,7 @@ fn dot_slash_glob_member_path_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-12", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-12", &[]);
 }
 
 #[test]
@@ -113,7 +113,7 @@ fn missing_and_extra_are_both_reported() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-12",
+        "RS-TOPOLOGY-FILETREE-12",
         &[
             ExpectedRuleResult {
                 severity: Some(G3Severity::Error),
@@ -146,11 +146,11 @@ fn nested_workspace_does_not_also_fire_membership_rule() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-12", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-12", &[]);
     assert_eq!(
         results
             .iter()
-            .filter(|result| result.id() == "RS-TOPOLOGY-11")
+            .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
             .count(),
         1
     );
@@ -169,11 +169,11 @@ fn hybrid_descendant_does_not_also_fire_membership_rule() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-12", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-12", &[]);
     assert_eq!(
         results
             .iter()
-            .filter(|result| result.id() == "RS-TOPOLOGY-11")
+            .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
             .count(),
         1
     );
@@ -196,11 +196,11 @@ fn parse_failed_descendant_does_not_also_fire_membership_rule() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-12", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-12", &[]);
     assert_eq!(
         results
             .iter()
-            .filter(|result| result.id() == "RS-TOPOLOGY-07")
+            .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-07")
             .count(),
         1
     );

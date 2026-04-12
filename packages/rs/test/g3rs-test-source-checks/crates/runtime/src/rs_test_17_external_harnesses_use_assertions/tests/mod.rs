@@ -17,7 +17,7 @@ fn reports_external_harness_direct_assertions() {
 
     assert_has_result(
         &results,
-        "RS-TEST-17",
+        "RS-TEST-SOURCE-17",
         G3Severity::Error,
         "external harness asserts directly",
         "tests/direct.rs",
@@ -47,7 +47,7 @@ fn inventories_external_harness_using_assertions_crate() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-17",
+        "RS-TEST-SOURCE-17",
         "external harness uses owned assertions",
         "tests/harness.rs",
     );
@@ -67,7 +67,7 @@ fn reports_external_harness_using_local_assertion_helper() {
 
     assert_has_result(
         &results,
-        "RS-TEST-17",
+        "RS-TEST-SOURCE-17",
         G3Severity::Error,
         "external harness asserts directly",
         "tests/helper.rs",

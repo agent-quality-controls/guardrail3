@@ -69,31 +69,31 @@ tokio = { version = \"1\", features = [\"macros\"] }\n",
     assert!(
         by_file[".config/nextest.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-09"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-09"),
         "{results:#?}"
     );
     assert!(
         by_file["Cargo.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-11"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-11"),
         "{results:#?}"
     );
     assert!(
         by_file[".cargo/mutants.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-12"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-12"),
         "{results:#?}"
     );
     assert!(
         by_file["Cargo.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-13"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-13"),
         "{results:#?}"
     );
     assert!(
         by_file["Cargo.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-14"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-14"),
         "{results:#?}"
     );
 }
@@ -132,37 +132,37 @@ tokio = { version = \"1\", features = [\"macros\"] }\n",
     assert!(
         by_file[".config/nextest.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-09"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-09"),
         "{results:#?}"
     );
     assert!(
         by_file["Cargo.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-11"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-11"),
         "{results:#?}"
     );
     assert!(
         by_file[".cargo/mutants.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-12"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-12"),
         "{results:#?}"
     );
     assert!(
         by_file["Cargo.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-13"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-13"),
         "{results:#?}"
     );
     assert!(
         by_file[".githooks/pre-commit"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-14"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-14"),
         "{results:#?}"
     );
     assert!(
         by_file[".cargo/mutants.toml"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-15"),
+            .any(|result| result.id() == "RS-TEST-CONFIG-15"),
         "{results:#?}"
     );
 }

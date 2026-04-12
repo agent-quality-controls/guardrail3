@@ -6,7 +6,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::AnalyzedFile;
 
-const ID: &str = "RS-TEST-02";
+const ID: &str = "RS-TEST-FILETREE-02";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct SidecarViolation {

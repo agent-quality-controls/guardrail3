@@ -1,7 +1,7 @@
 use g3rs_test_types::G3RsTestConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-TEST-13";
+const ID: &str = "RS-TEST-CONFIG-13";
 
 pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if input.cargo.profile.contains_key("mutants") {

@@ -53,13 +53,13 @@ fn pipeline_reports_fmt_step_when_real_command_exists() {
 
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-01")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-03")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1, "{results:#?}");
     assert!(
         rule_results.iter().any(|result| {
-            result.id() == "HOOK-RS-01"
+            result.id() == "RS-HOOKS-SOURCE-03"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.title() == "cargo fmt --check step present"
                 && result.inventory()
@@ -88,7 +88,7 @@ fn pipeline_keeps_hook_rs_10_quiet_for_single_crate_repo() {
 
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-10")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-11")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1, "{results:#?}");
@@ -116,13 +116,13 @@ fn pipeline_keeps_echoed_fmt_text_as_missing_step() {
 
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-01")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-03")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1, "{results:#?}");
     assert!(
         rule_results.iter().any(|result| {
-            result.id() == "HOOK-RS-01"
+            result.id() == "RS-HOOKS-SOURCE-03"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.title() == "cargo fmt --check step missing"
                 && !result.inventory()
@@ -147,13 +147,13 @@ fn pipeline_works_through_hooks_pre_commit_fallback() {
 
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-01")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-03")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1, "{results:#?}");
     assert!(
         rule_results.iter().any(|result| {
-            result.id() == "HOOK-RS-01"
+            result.id() == "RS-HOOKS-SOURCE-03"
                 && result.file() == Some("hooks/pre-commit")
                 && result.title() == "cargo fmt --check step present"
                 && result.inventory()
@@ -203,7 +203,7 @@ fn pipeline_reports_rs_config_trigger_for_guardrail3_rs_toml() {
 
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-16")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-15")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1, "{results:#?}");
@@ -231,7 +231,7 @@ fn pipeline_reports_top_level_g3rs_validate_step_inventory() {
 
     let matching = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-08")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-09")
         .collect::<Vec<_>>();
 
     assert_eq!(matching.len(), 1, "{results:#?}");
@@ -287,18 +287,18 @@ fn pipeline_reports_inventory_for_valid_rust_hook_steps() {
         .collect::<Vec<_>>();
 
     for (rule_id, title) in [
-        ("HOOK-RS-02", "cargo clippy step present"),
-        ("HOOK-RS-03", "cargo deny check step present"),
-        ("HOOK-RS-04", "cargo test step present"),
-        ("HOOK-RS-05", "cargo machete step present"),
+        ("RS-HOOKS-SOURCE-04", "cargo clippy step present"),
+        ("RS-HOOKS-SOURCE-05", "cargo deny check step present"),
+        ("RS-HOOKS-SOURCE-06", "cargo test step present"),
+        ("RS-HOOKS-SOURCE-07", "cargo machete step present"),
         (
-            "HOOK-RS-07",
+            "RS-HOOKS-SOURCE-08",
             "cargo-dupes selected for Rust duplication checks",
         ),
-        ("HOOK-RS-09", "cargo clippy denies warnings"),
-        ("HOOK-RS-11", "gitleaks step present"),
-        ("HOOK-RS-12", "cargo dupes step present"),
-        ("HOOK-RS-13", "cargo-dupes excludes tests"),
+        ("RS-HOOKS-SOURCE-10", "cargo clippy denies warnings"),
+        ("RS-HOOKS-SOURCE-12", "gitleaks step present"),
+        ("RS-HOOKS-SOURCE-13", "cargo dupes step present"),
+        ("RS-HOOKS-SOURCE-14", "cargo-dupes excludes tests"),
     ] {
         let matching = results
             .iter()
@@ -334,8 +334,8 @@ fn pipeline_reports_inventory_for_command_substitution_and_binary_aliases() {
         .collect::<Vec<_>>();
 
     for (rule_id, title) in [
-        ("HOOK-RS-03", "cargo deny check step present"),
-        ("HOOK-RS-08", "Rust guardrail validate step present"),
+        ("RS-HOOKS-SOURCE-05", "cargo deny check step present"),
+        ("RS-HOOKS-SOURCE-09", "Rust guardrail validate step present"),
     ] {
         let matching = results
             .iter()
@@ -372,7 +372,7 @@ fn pipeline_reports_inventory_for_called_function_commands() {
 
     let matching = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-08")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-09")
         .collect::<Vec<_>>();
 
     assert_eq!(matching.len(), 1, "{results:#?}");
@@ -404,8 +404,8 @@ fn pipeline_reports_inventory_for_executed_subshell_commands() {
         .collect::<Vec<_>>();
 
     for (rule_id, title) in [
-        ("HOOK-RS-03", "cargo deny check step present"),
-        ("HOOK-RS-08", "Rust guardrail validate step present"),
+        ("RS-HOOKS-SOURCE-05", "cargo deny check step present"),
+        ("RS-HOOKS-SOURCE-09", "Rust guardrail validate step present"),
     ] {
         let matching = results
             .iter()
@@ -441,10 +441,10 @@ fn pipeline_reports_inventory_for_valid_shell_hook_steps() {
         .collect::<Vec<_>>();
 
     for (rule_id, title) in [
-        ("HOOK-SHARED-15", "merge-conflict check step present"),
-        ("HOOK-SHARED-16", "file-size check step present"),
+        ("RS-HOOKS-SOURCE-20", "merge-conflict check step present"),
+        ("RS-HOOKS-SOURCE-21", "file-size check step present"),
         (
-            "HOOK-SHARED-20",
+            "RS-HOOKS-SOURCE-23",
             "concrete lockfile integrity command present",
         ),
     ] {
@@ -481,11 +481,11 @@ fn pipeline_reports_dispatcher_findings_for_real_pre_commit_script() {
 
     let dispatcher_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-SHARED-04")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-01")
         .collect::<Vec<_>>();
     let syntax_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-SHARED-19")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-02")
         .collect::<Vec<_>>();
 
     assert_eq!(dispatcher_results.len(), 1, "{results:#?}");
@@ -525,7 +525,7 @@ fn pipeline_source_reports_missing_dispatcher_pattern_when_modular_dir_is_only_e
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-04"
+            result.id() == "RS-HOOKS-SOURCE-01"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.title() == "dispatcher pattern missing"
                 && !result.inventory()
@@ -534,7 +534,7 @@ fn pipeline_source_reports_missing_dispatcher_pattern_when_modular_dir_is_only_e
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-19"
+            result.id() == "RS-HOOKS-SOURCE-02"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.title() == "dispatcher syntax missing"
                 && !result.inventory()
@@ -557,7 +557,7 @@ fn pipeline_config_reports_missing_g3rs_binary_when_required() {
 
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-14")
+        .filter(|result| result.id() == "RS-HOOKS-CONFIG-02")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1, "{results:#?}");
@@ -602,11 +602,11 @@ fn pipeline_config_reports_tool_inventory_and_missing_cargo_dupes() {
 
     let rs06 = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-06")
+        .filter(|result| result.id() == "RS-HOOKS-CONFIG-01")
         .collect::<Vec<_>>();
     let rs15 = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-15")
+        .filter(|result| result.id() == "RS-HOOKS-CONFIG-03")
         .collect::<Vec<_>>();
 
     assert_eq!(rs06.len(), 3, "{results:#?}");
@@ -663,8 +663,8 @@ fn pipeline_config_reports_present_g3rs_and_cargo_dupes_binaries() {
     let results = g3rs_hooks_config_checks::check(&input);
 
     for (rule_id, title) in [
-        ("HOOK-RS-14", "g3rs binary available"),
-        ("HOOK-RS-15", "cargo-dupes installed"),
+        ("RS-HOOKS-CONFIG-02", "g3rs binary available"),
+        ("RS-HOOKS-CONFIG-03", "cargo-dupes installed"),
     ] {
         let matching = results
             .iter()
@@ -717,11 +717,11 @@ fn pipeline_config_honors_hooks_path_selected_hook_for_binary_requirements() {
     let results = g3rs_hooks_config_checks::check(&input);
 
     for (rule_id, title) in [
-        ("HOOK-RS-06", "gitleaks installed"),
-        ("HOOK-RS-06", "cargo-deny installed"),
-        ("HOOK-RS-06", "cargo-machete installed"),
-        ("HOOK-RS-14", "g3rs binary available"),
-        ("HOOK-RS-15", "cargo-dupes installed"),
+        ("RS-HOOKS-CONFIG-01", "gitleaks installed"),
+        ("RS-HOOKS-CONFIG-01", "cargo-deny installed"),
+        ("RS-HOOKS-CONFIG-01", "cargo-machete installed"),
+        ("RS-HOOKS-CONFIG-02", "g3rs binary available"),
+        ("RS-HOOKS-CONFIG-03", "cargo-dupes installed"),
     ] {
         let matching = results
             .iter()
@@ -755,7 +755,7 @@ fn pipeline_config_treats_path_qualified_tools_as_installed() {
 
     let rs06 = results
         .iter()
-        .filter(|result| result.id() == "HOOK-RS-06")
+        .filter(|result| result.id() == "RS-HOOKS-CONFIG-01")
         .collect::<Vec<_>>();
 
     assert_eq!(rs06.len(), 3, "{results:#?}");
@@ -775,7 +775,7 @@ fn pipeline_file_tree_reports_existing_pre_commit_hook() {
 
     let matching = results
         .iter()
-        .filter(|result| result.id() == "HOOK-SHARED-01")
+        .filter(|result| result.id() == "RS-HOOKS-FILETREE-01")
         .collect::<Vec<_>>();
 
     assert_eq!(matching.len(), 1, "{results:#?}");
@@ -805,7 +805,7 @@ fn pipeline_file_tree_treats_non_compat_hooks_path_as_out_of_contract() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-01"
+            result.id() == "RS-HOOKS-FILETREE-01"
                 && result.title() == "pre-commit hook missing"
                 && !result.inventory()
         }),
@@ -813,7 +813,7 @@ fn pipeline_file_tree_treats_non_compat_hooks_path_as_out_of_contract() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-02"
+            result.id() == "RS-HOOKS-FILETREE-02"
                 && result.title() == "core.hooksPath has wrong value"
                 && !result.inventory()
         }),
@@ -844,7 +844,7 @@ fn pipeline_file_tree_reports_modular_inventory_for_hooks_compat_path() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-03"
+            result.id() == "RS-HOOKS-FILETREE-03"
                 && result.title() == "pre-commit.d directory exists"
                 && result.file() == Some(".githooks/pre-commit.d")
                 && result.inventory()
@@ -853,7 +853,7 @@ fn pipeline_file_tree_reports_modular_inventory_for_hooks_compat_path() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-07"
+            result.id() == "RS-HOOKS-FILETREE-04"
                 && result.title() == "modular hook scripts inventory"
                 && result.message().contains(".githooks/pre-commit.d/10-rust.sh")
                 && result.inventory()
@@ -862,7 +862,7 @@ fn pipeline_file_tree_reports_modular_inventory_for_hooks_compat_path() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-12"
+            result.id() == "RS-HOOKS-FILETREE-06"
                 && result.file() == Some(".githooks/pre-commit.d/10-rust.sh")
                 && result.title() == "modular hook script is executable"
                 && result.inventory()
@@ -882,7 +882,7 @@ fn pipeline_file_tree_reports_missing_pre_commit_hook() {
 
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-SHARED-01")
+        .filter(|result| result.id() == "RS-HOOKS-FILETREE-01")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1, "{results:#?}");
@@ -911,7 +911,7 @@ fn pipeline_file_tree_reports_trust_risk() {
 
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-SHARED-17")
+        .filter(|result| result.id() == "RS-HOOKS-FILETREE-07")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1, "{results:#?}");
@@ -941,7 +941,7 @@ fn pipeline_file_tree_keeps_hooks_path_compat_mode_free_of_git_hook_shadow_risk(
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-17"
+            result.id() == "RS-HOOKS-FILETREE-07"
                 && result.title() == "no competing hook systems detected"
                 && result.inventory()
         }),
@@ -982,14 +982,14 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     let results = g3rs_hooks_file_tree_checks::check(&input);
 
     for rule_id in [
-        "HOOK-SHARED-02",
-        "HOOK-SHARED-03",
-        "HOOK-SHARED-05",
-        "HOOK-SHARED-06",
-        "HOOK-SHARED-07",
-        "HOOK-SHARED-08",
-        "HOOK-SHARED-09",
-        "HOOK-SHARED-12",
+        "RS-HOOKS-FILETREE-02",
+        "RS-HOOKS-FILETREE-03",
+        "RS-HOOKS-FILETREE-08",
+        "RS-HOOKS-FILETREE-09",
+        "RS-HOOKS-FILETREE-04",
+        "RS-HOOKS-FILETREE-10",
+        "RS-HOOKS-FILETREE-05",
+        "RS-HOOKS-FILETREE-06",
     ] {
         assert!(
             results.iter().any(|result| result.id() == rule_id),
@@ -999,7 +999,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-02"
+            result.id() == "RS-HOOKS-FILETREE-02"
                 && result.title() == "core.hooksPath configured"
                 && result.inventory()
         }),
@@ -1007,7 +1007,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-03"
+            result.id() == "RS-HOOKS-FILETREE-03"
                 && result.title() == "pre-commit.d directory exists"
                 && result.file() == Some(".githooks/pre-commit.d")
                 && result.inventory()
@@ -1016,7 +1016,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-05"
+            result.id() == "RS-HOOKS-FILETREE-08"
                 && result.title() == "pre-commit hook is not executable"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1025,7 +1025,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-06"
+            result.id() == "RS-HOOKS-FILETREE-09"
                 && result.title() == "pre-commit script stats"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.message() == "2 lines, 53 bytes"
@@ -1035,7 +1035,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-07"
+            result.id() == "RS-HOOKS-FILETREE-04"
                 && result.message().contains(".githooks/pre-commit.d/10-rust.sh")
                 && result.message().contains(".githooks/pre-commit.d/20-rust.sh")
                 && result.inventory()
@@ -1044,7 +1044,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-08"
+            result.id() == "RS-HOOKS-FILETREE-10"
                 && result.title() == "pre-commit file size"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.message() == "53 bytes"
@@ -1054,7 +1054,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-09"
+            result.id() == "RS-HOOKS-FILETREE-05"
                 && result.message().contains("90-local.sh")
                 && result.inventory()
         }),
@@ -1062,7 +1062,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-12"
+            result.id() == "RS-HOOKS-FILETREE-06"
                 && result.file() == Some(".githooks/pre-commit.d/10-rust.sh")
                 && result.title() == "modular hook script is executable"
                 && result.inventory()
@@ -1071,7 +1071,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-12"
+            result.id() == "RS-HOOKS-FILETREE-06"
                 && result.file() == Some(".githooks/pre-commit.d/20-rust.sh")
                 && result.title() == "modular hook script is not executable"
                 && !result.inventory()
@@ -1097,7 +1097,7 @@ fn pipeline_runs_shared_source_checks_on_modular_scripts() {
 
     let shebang_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-SHARED-11")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-17")
         .collect::<Vec<_>>();
 
     assert!(
@@ -1128,8 +1128,8 @@ fn pipeline_source_reports_shell_safety_inventory_for_valid_hook() {
         .collect::<Vec<_>>();
 
     for (rule_id, title) in [
-        ("HOOK-SHARED-10", "shell error handling present"),
-        ("HOOK-SHARED-11", "valid hook shebang present"),
+        ("RS-HOOKS-SOURCE-16", "shell error handling present"),
+        ("RS-HOOKS-SOURCE-17", "valid hook shebang present"),
     ] {
         let matching = results
             .iter()
@@ -1165,8 +1165,8 @@ fn pipeline_source_reports_inventory_for_normalized_wrapped_commands() {
         .collect::<Vec<_>>();
 
     for (rule_id, title) in [
-        ("HOOK-RS-08", "Rust guardrail validate step present"),
-        ("HOOK-RS-09", "cargo clippy denies warnings"),
+        ("RS-HOOKS-SOURCE-09", "Rust guardrail validate step present"),
+        ("RS-HOOKS-SOURCE-10", "cargo clippy denies warnings"),
     ] {
         let matching = results
             .iter()
@@ -1201,7 +1201,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-02"
+            result.id() == "RS-HOOKS-SOURCE-04"
                 && result.title() == "cargo clippy step missing"
                 && !result.inventory()
         }),
@@ -1209,7 +1209,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-03"
+            result.id() == "RS-HOOKS-SOURCE-05"
                 && result.title() == "cargo deny check step missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1218,7 +1218,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-04"
+            result.id() == "RS-HOOKS-SOURCE-06"
                 && result.title() == "cargo test step missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1227,7 +1227,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-05"
+            result.id() == "RS-HOOKS-SOURCE-07"
                 && result.title() == "cargo machete step missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1236,7 +1236,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-07"
+            result.id() == "RS-HOOKS-SOURCE-08"
                 && result.title() == "Rust duplication tool missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1245,7 +1245,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-09"
+            result.id() == "RS-HOOKS-SOURCE-10"
                 && result.title() == "cargo clippy deny-warnings step missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1254,7 +1254,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-11"
+            result.id() == "RS-HOOKS-SOURCE-12"
                 && result.title() == "gitleaks step missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1263,7 +1263,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-12"
+            result.id() == "RS-HOOKS-SOURCE-13"
                 && result.title() == "cargo dupes step missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1272,7 +1272,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-13"
+            result.id() == "RS-HOOKS-SOURCE-14"
                 && result.title() == "cargo dupes step does not exclude tests"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1281,7 +1281,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-16"
+            result.id() == "RS-HOOKS-SOURCE-15"
                 && result.title() == "Rust config-change trigger coverage incomplete"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1290,7 +1290,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-10"
+            result.id() == "RS-HOOKS-SOURCE-16"
                 && result.title() == "shell error handling missing"
                 && !result.inventory()
         }),
@@ -1298,7 +1298,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-13"
+            result.id() == "RS-HOOKS-SOURCE-18"
                 && result.title() == "no unconditional exit 0 bypass"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.inventory()
@@ -1307,7 +1307,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-14"
+            result.id() == "RS-HOOKS-SOURCE-19"
                 && result.title() == "no hook bypass instructions"
                 && result.file() == Some(".githooks/pre-commit")
                 && result.inventory()
@@ -1316,7 +1316,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-15"
+            result.id() == "RS-HOOKS-SOURCE-20"
                 && result.title() == "merge-conflict check step missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1325,7 +1325,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-16"
+            result.id() == "RS-HOOKS-SOURCE-21"
                 && result.title() == "file-size check step missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1334,7 +1334,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-20"
+            result.id() == "RS-HOOKS-SOURCE-23"
                 && result.title() == "concrete lockfile integrity command missing"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
@@ -1362,7 +1362,7 @@ fn pipeline_source_reports_inert_text_false_pass_risk() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-18"
+            result.id() == "RS-HOOKS-SOURCE-22"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
         }),
@@ -1387,7 +1387,7 @@ fn pipeline_source_reports_missing_workspace_scope_for_workspace_project() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-RS-10"
+            result.id() == "RS-HOOKS-SOURCE-11"
                 && result.title() == "cargo test missing --workspace"
                 && !result.inventory()
         }),
@@ -1412,7 +1412,7 @@ fn pipeline_source_reports_invalid_dispatcher_syntax() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "HOOK-SHARED-19"
+            result.id() == "RS-HOOKS-SOURCE-02"
                 && result.file() == Some(".githooks/pre-commit")
                 && !result.inventory()
         }),
@@ -1439,7 +1439,7 @@ fn pipeline_keeps_inert_g3rs_text_quiet_when_wrapped_command_executes() {
 
     let inert_text_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-SHARED-18")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-22")
         .collect::<Vec<_>>();
 
     assert!(inert_text_results.is_empty(), "{results:#?}");
@@ -1464,7 +1464,7 @@ fn pipeline_reports_fail_open_wrapper_on_called_function() {
 
     let fail_open_results = results
         .iter()
-        .filter(|result| result.id() == "HOOK-SHARED-21")
+        .filter(|result| result.id() == "RS-HOOKS-SOURCE-24")
         .collect::<Vec<_>>();
 
     assert_eq!(fail_open_results.len(), 1, "{results:#?}");

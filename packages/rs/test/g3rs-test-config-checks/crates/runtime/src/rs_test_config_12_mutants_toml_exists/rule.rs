@@ -1,7 +1,7 @@
 use g3rs_test_types::G3RsTestConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-TEST-12";
+const ID: &str = "RS-TEST-CONFIG-12";
 
 pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if input.mutants_exists && input.mutants.is_some() {

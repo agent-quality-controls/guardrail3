@@ -15,7 +15,7 @@ fn escaping_member_path_fires() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-13",
+        "RS-TOPOLOGY-FILETREE-13",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("Workspace `.` uses escaping member path `../shared`"),
@@ -38,7 +38,7 @@ fn absolute_member_path_fires() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-13",
+        "RS-TOPOLOGY-FILETREE-13",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("Workspace `.` uses escaping member path `/tmp/shared`"),
@@ -59,5 +59,5 @@ fn normal_member_path_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-13", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-13", &[]);
 }

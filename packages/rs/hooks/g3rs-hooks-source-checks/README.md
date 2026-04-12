@@ -2,10 +2,9 @@
 
 Extracted hook script source checks for the `hooks` family.
 
-This package runs:
+This package runs the merged `hooks` source lane.
 
-- Rust hook command rules from the old `HOOK-RS-*` slice
-- Hook script safety and dispatcher rules from the old `HOOK-SHARED-*` slice
+The rule set comes from the old Rust hook-command slice and the old shared hook-script slice, but the package IDs are now normalized under `RS-HOOKS-SOURCE-*`.
 
 It validates one hook script at a time.
 

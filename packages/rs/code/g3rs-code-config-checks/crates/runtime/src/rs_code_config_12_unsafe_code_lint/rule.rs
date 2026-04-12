@@ -1,6 +1,6 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-CODE-12";
+const ID: &str = "RS-CODE-CONFIG-12";
 
 pub(crate) fn check(
     cargo_rel_path: &str,

@@ -4,7 +4,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use crate::parse::{FieldAccessInfo, FunctionInfo};
 use crate::support::{AssertionsModuleInput, TestFunctionInput};
 
-const ID: &str = "RS-TEST-16";
+const ID: &str = "RS-TEST-SOURCE-16";
 const REPORT_FIELDS: &[&str] = &[
     "file",
     "id",

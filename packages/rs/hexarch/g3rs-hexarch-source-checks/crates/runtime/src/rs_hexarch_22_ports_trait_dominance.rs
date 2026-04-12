@@ -1,7 +1,7 @@
 use g3rs_hexarch_types::{G3RsHexarchLayer, G3RsHexarchSourceCrateFacts};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-HEXARCH-22";
+const ID: &str = "RS-HEXARCH-SOURCE-22";
 
 pub(crate) fn check(source: &G3RsHexarchSourceCrateFacts, results: &mut Vec<G3CheckResult>) {
     if source.layer != Some(G3RsHexarchLayer::Ports) {

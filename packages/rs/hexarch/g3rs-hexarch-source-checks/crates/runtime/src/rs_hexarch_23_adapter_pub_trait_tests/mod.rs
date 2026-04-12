@@ -25,7 +25,7 @@ fn errors_for_public_adapter_traits() {
     let results = crate::run::check(&input(Some(G3RsHexarchLayer::Adapters), 1, None));
 
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-23");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-23");
     assert_eq!(results[0].severity(), G3Severity::Error);
     assert_eq!(results[0].file(), Some("apps/demo/crates/adapters/sql"));
     assert!(results[0].title().contains("defines public traits"));

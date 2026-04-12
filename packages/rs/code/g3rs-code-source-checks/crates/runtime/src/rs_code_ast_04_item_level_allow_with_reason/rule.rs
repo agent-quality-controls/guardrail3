@@ -4,7 +4,7 @@ use guardrail3_reason_policy::reason_text_is_useful;
 use crate::parse::{find_item_lint_policies, same_line_reason};
 use crate::support::CodeSourceRuleInput;
 
-const ID: &str = "RS-CODE-04";
+const ID: &str = "RS-CODE-SOURCE-04";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_item_lint_policies(input.source) {

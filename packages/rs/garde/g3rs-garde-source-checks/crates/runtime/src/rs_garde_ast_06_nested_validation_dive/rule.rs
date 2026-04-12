@@ -2,7 +2,7 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{BoundaryFieldSite, error};
 
-const ID: &str = "RS-GARDE-AST-06";
+const ID: &str = "RS-GARDE-SOURCE-06";
 
 pub(crate) fn check(field: &BoundaryFieldSite, results: &mut Vec<G3CheckResult>) {
     if !field.nested_validated || field.has_garde_skip || field.has_garde_dive {

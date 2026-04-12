@@ -11,7 +11,7 @@ fn reports_missing_mutants_profile() {
 
     assert_has_result(
         &results,
-        "RS-TEST-13",
+        "RS-TEST-CONFIG-13",
         G3Severity::Error,
         "profile.mutants missing",
         "Cargo.toml",
@@ -31,7 +31,7 @@ fn reports_mutants_profile_as_inventory() {
 
     assert_has_result(
         &results,
-        "RS-TEST-13",
+        "RS-TEST-CONFIG-13",
         G3Severity::Info,
         "profile.mutants configured",
         "Cargo.toml",

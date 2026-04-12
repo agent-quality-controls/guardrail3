@@ -1,7 +1,7 @@
 use g3rs_arch_types::G3RsArchFacadeSurface;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-ARCH-04";
+const ID: &str = "RS-ARCH-SOURCE-04";
 
 pub(crate) fn check(surface: &G3RsArchFacadeSurface, results: &mut Vec<G3CheckResult>) {
     for item in &surface.body_items {

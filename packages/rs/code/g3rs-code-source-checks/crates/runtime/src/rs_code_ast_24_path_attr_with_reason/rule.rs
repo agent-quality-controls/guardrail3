@@ -4,7 +4,7 @@ use guardrail3_reason_policy::reason_text_is_useful;
 use crate::parse::{CfgPredicateTruth, find_path_attrs, same_line_reason};
 use crate::support::CodeSourceRuleInput;
 
-const ID: &str = "RS-CODE-24";
+const ID: &str = "RS-CODE-SOURCE-24";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_path_attrs(input.source) {

@@ -11,7 +11,7 @@ fn reports_missing_nextest_when_async_surface_is_active() {
 
     assert_has_result(
         &results,
-        "RS-TEST-09",
+        "RS-TEST-CONFIG-09",
         G3Severity::Error,
         "nextest config missing",
         ".config/nextest.toml",
@@ -32,7 +32,7 @@ fn reports_configured_timeouts_as_inventory() {
 
     assert_has_result(
         &results,
-        "RS-TEST-09",
+        "RS-TEST-CONFIG-09",
         G3Severity::Info,
         "nextest timeouts configured",
         ".config/nextest.toml",

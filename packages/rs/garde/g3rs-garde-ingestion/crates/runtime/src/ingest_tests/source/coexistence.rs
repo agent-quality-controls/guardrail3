@@ -43,13 +43,13 @@ fn pipeline_can_report_input_failures_and_ast_findings_together() {
     assert!(
         results
             .iter()
-            .any(|result| result.id() == "RS-GARDE-10" && result.file() == Some("src/broken.rs")),
+            .any(|result| result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("src/broken.rs")),
         "{results:#?}"
     );
     assert!(
         results
             .iter()
-            .any(|result| result.id() == "RS-GARDE-AST-01" && result.file() == Some("src/input.rs")),
+            .any(|result| result.id() == "RS-GARDE-SOURCE-01" && result.file() == Some("src/input.rs")),
         "{results:#?}"
     );
 }
@@ -76,7 +76,7 @@ fn pipeline_reports_guardrail_config_parse_without_validate() {
     assert!(
         results
             .iter()
-            .any(|result| result.id() == "RS-GARDE-AST-08" && result.file() == Some("src/load_config.rs")),
+            .any(|result| result.id() == "RS-GARDE-SOURCE-08" && result.file() == Some("src/load_config.rs")),
         "{results:#?}"
     );
 }

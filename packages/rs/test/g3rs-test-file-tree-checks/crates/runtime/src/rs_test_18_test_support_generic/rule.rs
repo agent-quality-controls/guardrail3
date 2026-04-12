@@ -5,7 +5,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use crate::parse::{PublicValueKind, ReturnKind};
 use crate::support::TestSupportFileInput;
 
-const ID: &str = "RS-TEST-18";
+const ID: &str = "RS-TEST-FILETREE-18";
 const REPORT_FIELDS: &[&str] = &[
     "file",
     "id",

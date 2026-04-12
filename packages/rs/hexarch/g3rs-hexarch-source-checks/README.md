@@ -4,8 +4,8 @@ Extracted `hexarch` source checks for the Rust family.
 
 Initial rules in this package:
 
-- `RS-HEXARCH-22`
-- `RS-HEXARCH-23`
+- `RS-HEXARCH-SOURCE-22`
+- `RS-HEXARCH-SOURCE-23`
 
 This package validates one source crate surface at a time.
 

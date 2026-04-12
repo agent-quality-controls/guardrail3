@@ -6,7 +6,7 @@ use crate::compat::{G3CheckResult, G3Severity};
 use self::support::*;
 use super::inputs::RustHookCommandInput;
 
-const ID: &str = "HOOK-RS-09";
+const ID: &str = "RS-HOOKS-SOURCE-10";
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct EnvState {

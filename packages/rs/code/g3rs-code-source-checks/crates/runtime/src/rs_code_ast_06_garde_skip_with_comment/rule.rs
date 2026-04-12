@@ -6,7 +6,7 @@ use crate::parse::{
 };
 use crate::support::CodeSourceRuleInput;
 
-const ID: &str = "RS-CODE-06";
+const ID: &str = "RS-CODE-SOURCE-06";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_garde_skips_with_types(input.source) {

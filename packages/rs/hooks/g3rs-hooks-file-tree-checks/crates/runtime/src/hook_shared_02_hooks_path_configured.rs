@@ -1,6 +1,6 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "HOOK-SHARED-02";
+const ID: &str = "RS-HOOKS-FILETREE-02";
 
 pub(crate) fn check(hooks_path: Option<&str>, results: &mut Vec<G3CheckResult>) {
     match hooks_path {

@@ -17,7 +17,7 @@ fn reports_inline_cfg_test_body() {
 
     assert_has_result(
         &results,
-        "RS-TEST-01",
+        "RS-TEST-SOURCE-01",
         G3Severity::Error,
         "inline cfg(test) body in src",
         "src/lib.rs",
@@ -39,7 +39,7 @@ fn inventories_sidecar_cfg_test_module() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-01",
+        "RS-TEST-SOURCE-01",
         "inline cfg(test) body absent",
         "src/lib.rs",
     );

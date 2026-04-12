@@ -1,4 +1,4 @@
-crate::define_rule_assertions!("HOOK-RS-10");
+crate::define_rule_assertions!("RS-HOOKS-SOURCE-11");
 
 pub fn assert_present(results: &[G3CheckResult]) {
     self::assert_rule_results(

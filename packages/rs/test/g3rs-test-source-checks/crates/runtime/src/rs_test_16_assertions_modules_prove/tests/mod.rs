@@ -17,7 +17,7 @@ fn reports_assertions_module_without_proof_bearing_export() {
 
     assert_has_result(
         &results,
-        "RS-TEST-16",
+        "RS-TEST-SOURCE-16",
         G3Severity::Error,
         "assertions module lacks proof-bearing export",
         "assertions/src/lib.rs",
@@ -39,7 +39,7 @@ fn inventories_assertions_module_with_real_assertions() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-16",
+        "RS-TEST-SOURCE-16",
         "assertions module proves runtime",
         "assertions/src/lib.rs",
     );
@@ -59,7 +59,7 @@ fn reports_sidecar_owning_semantic_result_assertions() {
 
     assert_has_result(
         &results,
-        "RS-TEST-16",
+        "RS-TEST-SOURCE-16",
         G3Severity::Error,
         "sidecar owns semantic result assertion",
         "src/feature_tests/mod.rs",
@@ -81,7 +81,7 @@ fn inventories_sidecar_delegating_semantic_proof() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-16",
+        "RS-TEST-SOURCE-16",
         "sidecar delegates semantic proof",
         "src/feature_tests/mod.rs",
     );

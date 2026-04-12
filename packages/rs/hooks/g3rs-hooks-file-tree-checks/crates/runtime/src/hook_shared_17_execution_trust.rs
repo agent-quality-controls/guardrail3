@@ -1,6 +1,6 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "HOOK-SHARED-17";
+const ID: &str = "RS-HOOKS-FILETREE-07";
 
 pub(crate) fn check(trust_risks: &[String], results: &mut Vec<G3CheckResult>) {
     if trust_risks.is_empty() {

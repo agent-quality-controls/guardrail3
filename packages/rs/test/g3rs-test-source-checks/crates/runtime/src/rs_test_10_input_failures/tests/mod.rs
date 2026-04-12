@@ -13,7 +13,7 @@ fn reports_parse_failure_as_error_result() {
 
     assert_eq!(results.len(), 1, "{results:#?}");
     let result = &results[0];
-    assert_eq!(result.id(), "RS-TEST-10");
+    assert_eq!(result.id(), "RS-TEST-SOURCE-10");
     assert_eq!(result.severity(), G3Severity::Error);
     assert_eq!(result.title(), "failed to read test input");
     assert_eq!(result.file(), Some("tests/broken.rs"));

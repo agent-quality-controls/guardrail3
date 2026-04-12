@@ -3,7 +3,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::run::CrateMap;
 
-const ID: &str = "RS-ARCH-06";
+const ID: &str = "RS-ARCH-CONFIG-06";
 
 pub(crate) fn check(
     edge: &G3RsArchDependencyEdge,

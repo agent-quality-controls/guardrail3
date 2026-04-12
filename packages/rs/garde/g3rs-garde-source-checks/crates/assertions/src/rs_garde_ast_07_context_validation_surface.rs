@@ -1,1 +1,1 @@
-crate::define_rule_assertions!("RS-GARDE-AST-07");
+crate::define_rule_assertions!("RS-GARDE-SOURCE-07");

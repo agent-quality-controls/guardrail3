@@ -50,8 +50,8 @@ pub mod nested;
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = check_source(&inputs[0]);
 
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-02"));
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-09"));
+    assert!(results.iter().any(|result| result.id() == "RS-ARCH-SOURCE-02"));
+    assert!(results.iter().any(|result| result.id() == "RS-ARCH-SOURCE-09"));
 }
 
 #[test]
@@ -88,8 +88,8 @@ pub mod api;
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = check_source(&inputs[0]);
 
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-08A"));
-    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-08B"));
+    assert!(results.iter().any(|result| result.id() == "RS-ARCH-SOURCE-08"));
+    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-CONFIG-08"));
 }
 
 #[test]
@@ -154,9 +154,9 @@ version = "0.1.0"
     let inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
     let results = check_config(&inputs[0]);
 
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-05"));
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-06"));
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-08B"));
+    assert!(results.iter().any(|result| result.id() == "RS-ARCH-CONFIG-05"));
+    assert!(results.iter().any(|result| result.id() == "RS-ARCH-CONFIG-06"));
+    assert!(results.iter().any(|result| result.id() == "RS-ARCH-CONFIG-08"));
 }
 
 #[test]
@@ -425,11 +425,11 @@ thirteen = "1"
 
     let rule_01 = results
         .iter()
-        .filter(|result| result.id() == "RS-ARCH-01")
+        .filter(|result| result.id() == "RS-ARCH-FILETREE-01")
         .collect::<Vec<_>>();
     let rule_07 = results
         .iter()
-        .filter(|result| result.id() == "RS-ARCH-07A")
+        .filter(|result| result.id() == "RS-ARCH-FILETREE-07")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_01.len(), 1);
@@ -476,7 +476,7 @@ version = "0.1.0"
 
     let rule_03 = results
         .iter()
-        .filter(|result| result.id() == "RS-ARCH-03")
+        .filter(|result| result.id() == "RS-ARCH-FILETREE-03")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_03.len(), 1);
@@ -590,7 +590,7 @@ version = "0.1.0"
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
     let results = check_file_tree(&input);
 
-    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-07A"));
+    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-FILETREE-07"));
 }
 
 #[test]
@@ -640,8 +640,8 @@ thirteen = "1"
 
     assert!(config_results
         .iter()
-        .any(|result| result.id() == "RS-ARCH-07B"));
+        .any(|result| result.id() == "RS-ARCH-CONFIG-07"));
     assert!(!file_tree_results
         .iter()
-        .any(|result| result.id() == "RS-ARCH-07A"));
+        .any(|result| result.id() == "RS-ARCH-FILETREE-07"));
 }

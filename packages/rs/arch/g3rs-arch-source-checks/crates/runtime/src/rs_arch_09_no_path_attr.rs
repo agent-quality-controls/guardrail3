@@ -2,7 +2,7 @@ use g3rs_arch_types::G3RsArchSourceFile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use syn::spanned::Spanned;
 
-const ID: &str = "RS-ARCH-09";
+const ID: &str = "RS-ARCH-SOURCE-09";
 
 pub(crate) fn check_file(file: &G3RsArchSourceFile, results: &mut Vec<G3CheckResult>) {
     let Ok(ast) = syn::parse_file(file.content.strip_prefix('\u{feff}').unwrap_or(&file.content))

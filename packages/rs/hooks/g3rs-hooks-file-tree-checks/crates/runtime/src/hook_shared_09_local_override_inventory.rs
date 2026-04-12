@@ -1,6 +1,6 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "HOOK-SHARED-09";
+const ID: &str = "RS-HOOKS-FILETREE-05";
 
 pub(crate) fn check(local_override_scripts: &[String], results: &mut Vec<G3CheckResult>) {
     if local_override_scripts.is_empty() {

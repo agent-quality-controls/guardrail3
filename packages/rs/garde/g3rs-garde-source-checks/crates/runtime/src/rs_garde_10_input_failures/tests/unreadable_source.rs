@@ -10,7 +10,7 @@ fn reports_unreadable_rust_source() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-GARDE-10"
+            result.id() == "RS-GARDE-SOURCE-10"
                 && result.file() == Some("src/lib.rs")
                 && result.title() == "garde-family input failure"
         }),

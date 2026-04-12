@@ -1,7 +1,7 @@
 use g3rs_arch_types::G3RsArchModuleDir;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-ARCH-03";
+const ID: &str = "RS-ARCH-FILETREE-03";
 
 pub(crate) fn check(module_dir: &G3RsArchModuleDir, results: &mut Vec<G3CheckResult>) {
     if module_dir.has_sibling_file && !module_dir.has_mod_rs {

@@ -4,5 +4,5 @@ Runs the `code` family config checks.
 
 Current rules:
 
-- `HOOK-RS-07` EXCEPTION comment inventory
-- `HOOK-RS-12` workspace `unsafe_code` lint level
+- `RS-HOOKS-SOURCE-08` EXCEPTION comment inventory
+- `RS-HOOKS-SOURCE-13` workspace `unsafe_code` lint level
