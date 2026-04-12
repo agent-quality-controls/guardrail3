@@ -24,6 +24,7 @@ pub(crate) fn select_ast_source_files(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWo
         .files_with_extension("rs")
         .into_iter()
         .filter(|entry| is_runtime_source_path(entry.path.rel_path.as_str()))
+        .filter(|entry| !is_nested_cargo_root_member(crawl, entry.path.rel_path.as_str()))
         .filter(|entry| !is_fixture_path(entry.path.rel_path.as_str()))
         .filter(|entry| !is_test_path(entry.path.rel_path.as_str()))
         .collect::<Vec<_>>();
@@ -37,8 +38,6 @@ fn is_runtime_source_path(rel_path: &str) -> bool {
         || rel_path
             .strip_prefix("src/")
             .is_some_and(|rest| rest.ends_with(".rs"))
-        || rel_path
-            .contains("/src/")
 }
 
 fn is_fixture_path(rel_path: &str) -> bool {
@@ -47,10 +46,28 @@ fn is_fixture_path(rel_path: &str) -> bool {
 
 fn is_test_path(rel_path: &str) -> bool {
     rel_path == "tests.rs"
+        || rel_path == "src/test.rs"
+        || rel_path == "src/tests.rs"
         || rel_path.starts_with("tests/")
         || rel_path.contains("/tests/")
         || rel_path.contains("_tests/")
+        || rel_path.contains("/test/")
         || rel_path.contains("__tests__")
+        || rel_path.ends_with("/test.rs")
+        || rel_path.ends_with("/tests.rs")
         || rel_path.ends_with("_test.rs")
         || rel_path.ends_with("_tests.rs")
+}
+
+fn is_nested_cargo_root_member(crawl: &G3RsWorkspaceCrawl, rel_path: &str) -> bool {
+    let mut prefix = rel_path.rsplit_once('/').map(|(parent, _)| parent);
+
+    while let Some(dir) = prefix {
+        if !dir.is_empty() && crawl.entry(&format!("{dir}/Cargo.toml")).is_some() {
+            return true;
+        }
+        prefix = dir.rsplit_once('/').map(|(parent, _)| parent);
+    }
+
+    false
 }

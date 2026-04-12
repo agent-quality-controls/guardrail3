@@ -19,11 +19,18 @@ fn ingests_root_scoped_ast_input() {
     super::write(root.join("src/support_tests.rs"), "#[test]\nfn ignored() {}\n");
     super::write(root.join("src/helpers_tests/mod.rs"), "#[test]\nfn ignored() {}\n");
     super::write(root.join("src/__tests__/ignored.rs"), "#[test]\nfn ignored() {}\n");
+    super::write(root.join("src/test.rs"), "#[test]\nfn ignored() {}\n");
+    super::write(root.join("src/tests.rs"), "#[test]\nfn ignored() {}\n");
     super::write(root.join("src/main.rs"), "fn main() {}\n");
     super::write(root.join("src/tests/fixtures/broken.rs"), "fn broken( {\n");
     super::write(root.join("build.rs"), "fn broken( {\n");
     super::write(root.join("examples/demo.rs"), "fn broken( {\n");
     super::write(root.join("crates/member/src/lib.rs"), "fn nested() {}\n");
+    super::write(
+        root.join("src/member/Cargo.toml"),
+        "[package]\nname = \"nested\"\nversion = \"0.1.0\"\n",
+    );
+    super::write(root.join("src/member/src/lib.rs"), "fn nested_root() {}\n");
 
     let crawl = super::crawl(root);
     let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
@@ -35,7 +42,7 @@ fn ingests_root_scoped_ast_input() {
             .iter()
             .map(|file| file.rel_path.as_str())
             .collect::<Vec<_>>(),
-        vec!["crates/member/src/lib.rs", "src/lib.rs", "src/main.rs"],
+        vec!["src/lib.rs", "src/main.rs"],
         "{input:#?}"
     );
 }
