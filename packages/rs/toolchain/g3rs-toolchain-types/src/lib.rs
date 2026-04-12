@@ -25,6 +25,14 @@ pub struct G3RsToolchainConfigChecksInput {
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct G3RsToolchainSourceChecksInput;
 
-/// Placeholder input contract for future toolchain file-tree checks.
+/// Input contract for extracted rust-toolchain filetree checks.
+///
+/// The package model validates one pointed workspace root. This input therefore
+/// only describes root-level toolchain file presence.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsToolchainFileTreeChecksInput;
+pub struct G3RsToolchainFileTreeChecksInput {
+    /// Repo-relative path to `rust-toolchain.toml`, when present at the root.
+    pub toolchain_toml_rel_path: Option<String>,
+    /// Repo-relative path to legacy `rust-toolchain`, when present at the root.
+    pub legacy_toolchain_rel_path: Option<String>,
+}
