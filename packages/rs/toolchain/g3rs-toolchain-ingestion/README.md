@@ -1,16 +1,19 @@
 # g3rs-toolchain-ingestion
 
-Ingestion package for toolchain config checks. Takes a workspace crawl result,
-selects the root `rust-toolchain.toml` (and optionally `Cargo.toml`), parses
-them, and produces two input types for `g3rs-toolchain-config-checks`.
+Ingestion package for toolchain family packages. Takes a workspace crawl
+result, selects root toolchain files, parses config files when needed, and
+builds lane-specific package inputs.
 
 ## Pipeline
 
 ```
-g3rs-workspace-crawl → g3rs-toolchain-ingestion → g3rs-toolchain-config-checks
+g3rs-workspace-crawl
+  -> g3rs-toolchain-ingestion
+  -> g3rs-toolchain-config-checks
+  -> g3rs-toolchain-filetree-checks
 ```
 
 ## Outputs
 
-- **Channel & Components** — always produced when `rust-toolchain.toml` exists
-- **MSRV Consistency** — only produced when both `rust-toolchain.toml` and `Cargo.toml` are present
+- **Config** - parsed `rust-toolchain.toml` and optional root `Cargo.toml`
+- **Filetree** - root `rust-toolchain.toml` and legacy `rust-toolchain` presence

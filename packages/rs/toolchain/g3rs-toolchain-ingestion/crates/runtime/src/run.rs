@@ -1,6 +1,7 @@
 /// Public ingestion entry point.
 use g3rs_toolchain_types::{
-    G3RsToolchainSourceChecksInput, G3RsToolchainConfigChecksInput, G3RsToolchainFileTreeChecksInput,
+    G3RsToolchainConfigChecksInput, G3RsToolchainFileTreeChecksInput,
+    G3RsToolchainSourceChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -61,9 +62,15 @@ pub fn ingest_for_source_checks(
     Err(IngestionError::SourceIngestionNotImplemented)
 }
 
-/// Stub file-tree ingestion entry point for the toolchain family.
 pub fn ingest_for_file_tree_checks(
-    _crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainFileTreeChecksInput, IngestionError> {
-    Err(IngestionError::FileTreeIngestionNotImplemented)
+    Ok(G3RsToolchainFileTreeChecksInput {
+        toolchain_toml_rel_path: crawl
+            .root_file("rust-toolchain.toml")
+            .map(|entry| entry.path.rel_path.clone()),
+        legacy_toolchain_rel_path: crawl
+            .root_file("rust-toolchain")
+            .map(|entry| entry.path.rel_path.clone()),
+    })
 }

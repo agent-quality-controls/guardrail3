@@ -18,5 +18,5 @@ The app remains responsible for:
 
 - file discovery
 - workspace routing
-- placement / shadowing / coverage rules
+- filetree rules
 - upstream parse failures for files it chooses not to pass into this package

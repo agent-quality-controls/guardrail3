@@ -141,6 +141,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-toolchain-filetree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toolchain-filetree-checks-runtime",
+ "g3rs-toolchain-filetree-checks-types",
+]
+
+[[package]]
+name = "g3rs-toolchain-filetree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toolchain-filetree-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-toolchain-filetree-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toolchain-types",
+]
+
+[[package]]
 name = "g3rs-toolchain-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -161,6 +184,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-toolchain-config-checks",
+ "g3rs-toolchain-filetree-checks",
  "g3rs-toolchain-ingestion-assertions",
  "g3rs-toolchain-ingestion-types",
  "g3rs-toolchain-types",
