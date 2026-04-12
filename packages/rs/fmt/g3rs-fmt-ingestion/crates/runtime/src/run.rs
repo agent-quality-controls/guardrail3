@@ -54,6 +54,7 @@ fn ingest_rustfmt_state(
     match crate::parse::parse_rustfmt_toml(&entry.path.abs_path) {
         Ok(rustfmt) => Ok(G3RsFmtRustfmtConfigState::Parsed(rustfmt)),
         Err(IngestionError::ParseFailed { .. }) => Ok(G3RsFmtRustfmtConfigState::ParseError),
+        Err(IngestionError::Unreadable { .. }) => Ok(G3RsFmtRustfmtConfigState::ParseError),
         Err(err) => Err(err),
     }
 }

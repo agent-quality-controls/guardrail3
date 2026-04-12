@@ -130,6 +130,50 @@ fn filetree_ignores_fixture_and_target_configs() {
 }
 
 #[test]
+fn filetree_ignores_claude_worktrees_configs() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join(".claude/worktrees/agent/rustfmt.toml"),
+        "edition = \"2024\"\n",
+    );
+    write(
+        root.join(".claude/worktrees/agent/.rustfmt.toml"),
+        "edition = \"2024\"\n",
+    );
+
+    let input = crate::ingest_for_file_tree_checks(&crawl(root))
+        .expect("filetree ingestion should succeed");
+
+    assert!(input.nested_config_files.is_empty());
+    assert!(input.dual_conflict_dirs.is_empty());
+}
+
+#[test]
+fn filetree_ignores_snapshot_configs() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("tests/snapshots/case/rustfmt.toml"),
+        "edition = \"2024\"\n",
+    );
+    write(
+        root.join("tests/snapshots/case/.rustfmt.toml"),
+        "edition = \"2024\"\n",
+    );
+
+    let input = crate::ingest_for_file_tree_checks(&crawl(root))
+        .expect("filetree ingestion should succeed");
+
+    assert!(input.nested_config_files.is_empty());
+    assert!(input.dual_conflict_dirs.is_empty());
+}
+
+#[test]
 fn pipeline_reports_missing_root_config() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
