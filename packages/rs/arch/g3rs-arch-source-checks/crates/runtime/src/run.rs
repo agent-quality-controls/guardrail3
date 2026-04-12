@@ -13,13 +13,13 @@ pub fn check(input: &G3RsArchSourceChecksInput) -> Vec<G3CheckResult> {
 
     let mut results = Vec::new();
 
-    for node in &input.crate_nodes {
+    for node in &input.crates {
         let lib_surface = node
             .lib_rs_rel
             .as_deref()
             .and_then(|rel_path| facade_map.get(rel_path).copied());
         crate::rs_arch_02_lib_facade_only::check(node, lib_surface, &mut results);
-        crate::rs_arch_08_feature_gated_exports::check(node, lib_surface, &mut results);
+        crate::rs_arch_08a_feature_gated_exports::check(node, lib_surface, &mut results);
     }
 
     for surface in &input.facade_surfaces {

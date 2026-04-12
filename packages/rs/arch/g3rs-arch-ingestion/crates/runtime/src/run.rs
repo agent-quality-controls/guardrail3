@@ -7,8 +7,9 @@ use g3rs_arch_ingestion_types::{
     G3RsArchSourceChecksInput,
 };
 use g3rs_arch_types::{
-    G3RsArchBoundaryRef, G3RsArchCrateNode, G3RsArchDependencyEdge, G3RsArchFacadeItem,
-    G3RsArchFacadeSurface, G3RsArchFeatureExport, G3RsArchModuleDir, G3RsArchSourceFile,
+    G3RsArchBoundaryRef, G3RsArchConfigCrate, G3RsArchCrateNode, G3RsArchDependencyEdge,
+    G3RsArchFacadeItem, G3RsArchFacadeSurface, G3RsArchFeatureExport,
+    G3RsArchFileTreeCrate, G3RsArchModuleDir, G3RsArchSourceCrate, G3RsArchSourceFile,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use proc_macro2::Span;
@@ -26,7 +27,7 @@ pub fn ingest_for_source_checks(
     let source_files = collect_rs_files(&view, &crate_nodes)?;
 
     Ok(vec![G3RsArchSourceChecksInput {
-        crate_nodes,
+        crates: collect_source_crates(&crate_nodes),
         facade_surfaces,
         source_files,
     }])
@@ -37,10 +38,11 @@ pub fn ingest_for_config_checks(
 ) -> Result<Vec<G3RsArchConfigChecksInput>, G3RsArchIngestionError> {
     let view = CrawlView::new(crawl);
     let crate_nodes = collect_crate_nodes(&view)?;
+    let facade_surfaces = collect_facade_surfaces(&view, &crate_nodes);
     let dependency_edges = collect_dependency_edges(&view, &crate_nodes)?;
 
     Ok(vec![G3RsArchConfigChecksInput {
-        crate_nodes,
+        crates: collect_config_crates(&crate_nodes, &facade_surfaces),
         dependency_edges,
     }])
 }
@@ -53,9 +55,65 @@ pub fn ingest_for_file_tree_checks(
     let module_dirs = collect_module_dirs(&view, &crate_nodes)?;
 
     Ok(G3RsArchFileTreeChecksInput {
-        crate_nodes,
+        crates: collect_file_tree_crates(&crate_nodes),
         module_dirs,
     })
+}
+
+fn collect_source_crates(crate_nodes: &[G3RsArchCrateNode]) -> Vec<G3RsArchSourceCrate> {
+    crate_nodes
+        .iter()
+        .map(|node| G3RsArchSourceCrate {
+            rel_dir: node.rel_dir.clone(),
+            lib_rs_rel: node.lib_rs_rel.clone(),
+        })
+        .collect()
+}
+
+fn collect_config_crates(
+    crate_nodes: &[G3RsArchCrateNode],
+    facade_surfaces: &[G3RsArchFacadeSurface],
+) -> Vec<G3RsArchConfigCrate> {
+    let requires_feature_contract = facade_surfaces
+        .iter()
+        .filter(|surface| surface.is_lib_rs && surface.pub_export_count > 0)
+        .map(|surface| surface.rel_path.as_str())
+        .collect::<std::collections::BTreeSet<_>>();
+
+    crate_nodes
+        .iter()
+        .map(|node| G3RsArchConfigCrate {
+            rel_dir: node.rel_dir.clone(),
+            cargo_rel_path: node.cargo_rel_path.clone(),
+            shared: node.shared,
+            dependency_count: node.dependency_count,
+            requires_feature_contract: node
+                .lib_rs_rel
+                .as_deref()
+                .is_some_and(|rel| requires_feature_contract.contains(rel)),
+            has_default_feature: node.has_default_feature,
+            has_all_feature: node.has_all_feature,
+            all_feature_deps: node.all_feature_deps.clone(),
+            default_feature_deps: node.default_feature_deps.clone(),
+        })
+        .collect()
+}
+
+fn collect_file_tree_crates(crate_nodes: &[G3RsArchCrateNode]) -> Vec<G3RsArchFileTreeCrate> {
+    crate_nodes
+        .iter()
+        .map(|node| G3RsArchFileTreeCrate {
+            rel_dir: node.rel_dir.clone(),
+            cargo_rel_path: node.cargo_rel_path.clone(),
+            has_package: node.has_package,
+            has_lib_rs: node.has_lib_rs,
+            has_main_rs: node.has_main_rs,
+            sibling_rs_file_count: node.sibling_rs_file_count,
+            sibling_dir_count: node.sibling_dir_count,
+            max_module_depth: node.max_module_depth,
+            cargo_parse_error: node.cargo_parse_error.clone(),
+        })
+        .collect()
 }
 
 fn collect_crate_nodes(view: &CrawlView<'_>) -> Result<Vec<G3RsArchCrateNode>, G3RsArchIngestionError> {

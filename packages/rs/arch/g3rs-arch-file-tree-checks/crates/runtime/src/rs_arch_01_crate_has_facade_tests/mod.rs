@@ -7,7 +7,6 @@ use crate::test_support::{crate_node, input};
 fn crate_with_lib_rs_inventories_facade() {
     let mut node = crate_node("crate_a");
     node.has_lib_rs = true;
-    node.lib_rs_rel = Some("crate_a/src/lib.rs".to_owned());
 
     let results = crate::check(&input(vec![node], Vec::new()));
 

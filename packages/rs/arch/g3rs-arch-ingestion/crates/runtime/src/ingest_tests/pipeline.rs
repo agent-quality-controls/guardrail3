@@ -55,7 +55,45 @@ pub mod nested;
 }
 
 #[test]
-fn config_pipeline_reports_boundary_crossing_and_missing_shared_flag() {
+fn source_pipeline_reports_only_source_half_of_feature_gating_rule() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("crate_a/src")).expect("crate dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(
+        root.path().join("crate_a/src/lib.rs"),
+        r#"
+pub mod api;
+"#,
+    )
+    .expect("lib");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
+    let results = check_source(&inputs[0]);
+
+    assert!(results.iter().any(|result| result.id() == "RS-ARCH-08A"));
+    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-08B"));
+}
+
+#[test]
+fn config_pipeline_reports_boundary_crossing_missing_shared_and_split_rules() {
     let root = tempdir().expect("tempdir");
 
     fs::write(
@@ -77,6 +115,9 @@ members = ["pkg", "pkg/crates/inner", "other"]
 [package]
 name = "pkg"
 version = "0.1.0"
+
+[features]
+api = []
 
 [dependencies]
 inner = { path = "crates/inner" }
@@ -115,6 +156,7 @@ version = "0.1.0"
 
     assert!(results.iter().any(|result| result.id() == "RS-ARCH-05"));
     assert!(results.iter().any(|result| result.id() == "RS-ARCH-06"));
+    assert!(results.iter().any(|result| result.id() == "RS-ARCH-08B"));
 }
 
 #[test]
@@ -156,8 +198,8 @@ version = "0.1.0"
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
 
     assert_eq!(inputs.len(), 1);
-    assert_eq!(inputs[0].crate_nodes.len(), 1);
-    assert_eq!(inputs[0].crate_nodes[0].rel_dir, "crate_a");
+    assert_eq!(inputs[0].crates.len(), 1);
+    assert_eq!(inputs[0].crates[0].rel_dir, "crate_a");
     assert!(inputs[0]
         .source_files
         .iter()
@@ -206,8 +248,8 @@ crate_a = { path = "../crate_a" }
     let inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
 
     assert_eq!(inputs.len(), 1);
-    assert_eq!(inputs[0].crate_nodes.len(), 1);
-    assert_eq!(inputs[0].crate_nodes[0].rel_dir, "crate_a");
+    assert_eq!(inputs[0].crates.len(), 1);
+    assert_eq!(inputs[0].crates[0].rel_dir, "crate_a");
     assert!(inputs[0]
         .dependency_edges
         .iter()
@@ -262,8 +304,8 @@ version = "0.1.0"
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
 
     assert_eq!(inputs.len(), 1);
-    assert_eq!(inputs[0].crate_nodes.len(), 1);
-    assert_eq!(inputs[0].crate_nodes[0].rel_dir, "pkg");
+    assert_eq!(inputs[0].crates.len(), 1);
+    assert_eq!(inputs[0].crates[0].rel_dir, "pkg");
     assert!(inputs[0]
         .source_files
         .iter()
@@ -320,8 +362,8 @@ version = "0.1.0"
     let inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
 
     assert_eq!(inputs.len(), 1);
-    assert_eq!(inputs[0].crate_nodes.len(), 1);
-    assert_eq!(inputs[0].crate_nodes[0].rel_dir, "pkg");
+    assert_eq!(inputs[0].crates.len(), 1);
+    assert_eq!(inputs[0].crates[0].rel_dir, "pkg");
     assert!(inputs[0].dependency_edges.is_empty());
 }
 
@@ -387,7 +429,7 @@ thirteen = "1"
         .collect::<Vec<_>>();
     let rule_07 = results
         .iter()
-        .filter(|result| result.id() == "RS-ARCH-07")
+        .filter(|result| result.id() == "RS-ARCH-07A")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_01.len(), 1);
@@ -490,8 +532,8 @@ version = "0.1.0"
     let crawl = crawl(root.path()).expect("crawl");
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
 
-    assert_eq!(input.crate_nodes.len(), 1);
-    assert_eq!(input.crate_nodes[0].rel_dir, "crate_a");
+    assert_eq!(input.crates.len(), 1);
+    assert_eq!(input.crates[0].rel_dir, "crate_a");
     assert!(input
         .module_dirs
         .iter()
@@ -548,5 +590,58 @@ version = "0.1.0"
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
     let results = check_file_tree(&input);
 
-    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-07"));
+    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-07A"));
+}
+
+#[test]
+fn split_rule_pipeline_routes_dependency_threshold_to_config_only() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("crate_a/src")).expect("crate dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+
+[dependencies]
+one = "1"
+two = "1"
+three = "1"
+four = "1"
+five = "1"
+six = "1"
+seven = "1"
+eight = "1"
+nine = "1"
+ten = "1"
+eleven = "1"
+twelve = "1"
+thirteen = "1"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(root.path().join("crate_a/src/lib.rs"), "pub mod api;\n").expect("lib");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let config_inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
+    let config_results = check_config(&config_inputs[0]);
+    let file_tree_input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let file_tree_results = check_file_tree(&file_tree_input);
+
+    assert!(config_results
+        .iter()
+        .any(|result| result.id() == "RS-ARCH-07B"));
+    assert!(!file_tree_results
+        .iter()
+        .any(|result| result.id() == "RS-ARCH-07A"));
 }

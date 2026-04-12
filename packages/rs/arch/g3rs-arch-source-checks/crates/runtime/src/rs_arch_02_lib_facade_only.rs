@@ -1,10 +1,10 @@
-use g3rs_arch_types::{G3RsArchCrateNode, G3RsArchFacadeSurface};
+use g3rs_arch_types::{G3RsArchFacadeSurface, G3RsArchSourceCrate};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-ARCH-02";
 
 pub(crate) fn check(
-    node: &G3RsArchCrateNode,
+    node: &G3RsArchSourceCrate,
     surface: Option<&G3RsArchFacadeSurface>,
     results: &mut Vec<G3CheckResult>,
 ) {
