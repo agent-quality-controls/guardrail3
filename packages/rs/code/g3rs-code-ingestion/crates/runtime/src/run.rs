@@ -51,7 +51,7 @@ pub fn ingest_for_source_checks(
         .collect()
 }
 
-/// Stub file-tree ingestion entry point for the code family.
+/// Ingest `code` file-tree checks input from a workspace crawl.
 pub fn ingest_for_file_tree_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsCodeFileTreeChecksInput, IngestionError> {
