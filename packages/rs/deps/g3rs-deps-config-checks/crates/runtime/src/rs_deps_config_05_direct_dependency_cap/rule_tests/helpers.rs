@@ -1,5 +1,7 @@
 use g3rs_deps_config_checks_types::G3RsDepsConfigChecksInput;
-use g3rs_deps_types::{G3RsDepsDependencySection, G3RsDepsResolvedDependency};
+use g3rs_deps_types::{
+    G3RsDepsConfigInputScope, G3RsDepsDependencySection, G3RsDepsResolvedDependency,
+};
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_rs_toml_parser::RustProfile;
 
@@ -7,12 +9,14 @@ use crate::rs_deps_config_05_direct_dependency_cap::rule::check;
 
 pub(super) fn run_check(dependencies: &[G3RsDepsResolvedDependency]) -> Vec<G3CheckResult> {
     let input = G3RsDepsConfigChecksInput {
+        scope: G3RsDepsConfigInputScope::CratePolicy,
         crate_cargo_rel_path: "apps/api/Cargo.toml".to_owned(),
         crate_name: "api".to_owned(),
         profile: Some(RustProfile::Service),
         allowlist_present: false,
         allowed_deps: Vec::new(),
         dependencies: dependencies.to_vec(),
+        installed_tools: Vec::new(),
     };
     let mut results = Vec::new();
     check(&input, &mut results);

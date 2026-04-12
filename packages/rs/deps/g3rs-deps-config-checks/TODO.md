@@ -1,11 +1,12 @@
 # g3rs-deps-config-checks TODO
 
-## Deferred Family Split
+## Current Ownership
 
-- Keep `RS-DEPS-01..04` outside the current extracted package lanes.
-
-Reason:
-- `01..04` are environment/tooling checks
+- `RS-DEPS-CONFIG-06..09` own workspace-scoped tool presence for:
+  - `cargo-deny`
+  - `cargo-machete`
+  - `cargo-dupes`
+  - `gitleaks`
 
 ## Boundary Notes
 

@@ -13,6 +13,7 @@ The extracted package [g3rs-deps-config-checks](/Users/tartakovsky/Projects/webs
 - crate-local `allowed_deps` enforcement from workspace-root `guardrail3-rs.toml`
 - library allowlist coverage policy
 - direct dependency cap enforcement across top-level and target-specific dependency tables
+- required deps tool presence on PATH
 
 The extracted package [g3rs-deps-filetree-checks](/Users/tartakovsky/Projects/websmasher/guardrail3/packages/rs/deps/g3rs-deps-filetree-checks) owns the workspace-root filetree checks:
 
@@ -32,10 +33,11 @@ rediscover Cargo-root scope outside that pointed workspace.
 
 ## Boundary notes
 
-- `RS-DEPS-CONFIG-01..05` run in `g3rs-deps-config-checks` on parsed files only.
+- `RS-DEPS-CONFIG-01..09` run in `g3rs-deps-config-checks`.
 - deps ingestion owns fail-closed handling for unreadable, malformed, or untrustworthy deps inputs.
 - `RS-DEPS-CONFIG-01..03` own both top-level and `target.*` dependency tables for their respective sections.
 - `RS-DEPS-CONFIG-05` owns the direct-dependency cap across both top-level and `target.*` dependency tables.
+- `RS-DEPS-CONFIG-06..09` own workspace-scoped tool presence discovered from process PATH.
 - `RS-DEPS-FILETREE-09/10` bind to the pointed workspace root rather than repo-global placement.
 - local path dependencies that resolve to a real Cargo package under the pointed workspace root must either be declared workspace packages or fail closed in deps ingestion.
 - malformed `target.*` dependency tables must fail closed in deps ingestion, but they must not suppress top-level allowlist findings from `RS-DEPS-CONFIG-01..05`.

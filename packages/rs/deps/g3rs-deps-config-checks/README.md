@@ -18,6 +18,7 @@ The package receives full parsed files only:
 - workspace `Cargo.toml`
 - crate `Cargo.toml`
 - workspace `guardrail3-rs.toml`
+- process PATH tool-discovery facts from ingestion
 
 It does not receive derived helper structs, resolved allowlists, or ad hoc
 subset policy types.
@@ -31,3 +32,7 @@ This package owns:
 - `RS-DEPS-CONFIG-03`
 - `RS-DEPS-CONFIG-04`
 - `RS-DEPS-CONFIG-05`
+- `RS-DEPS-CONFIG-06`
+- `RS-DEPS-CONFIG-07`
+- `RS-DEPS-CONFIG-08`
+- `RS-DEPS-CONFIG-09`

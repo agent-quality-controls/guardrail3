@@ -1,5 +1,14 @@
 use guardrail3_rs_toml_parser::RustProfile;
 
+/// Scope of one deps config input.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum G3RsDepsConfigInputScope {
+    /// One workspace-scoped tooling snapshot.
+    WorkspaceTooling,
+    /// One crate-scoped dependency policy input.
+    CratePolicy,
+}
+
 /// Normalized section kind for one dependency entry.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum G3RsDepsDependencySection {
@@ -28,6 +37,8 @@ pub struct G3RsDepsResolvedDependency {
 /// resolution, and normalization into external dependency facts.
 #[derive(Debug, Clone)]
 pub struct G3RsDepsConfigChecksInput {
+    /// Whether this input is workspace tooling or crate policy.
+    pub scope: G3RsDepsConfigInputScope,
     /// Repo-relative path to the crate `Cargo.toml` being checked.
     pub crate_cargo_rel_path: String,
     /// Resolved crate identity for messages.
@@ -40,6 +51,8 @@ pub struct G3RsDepsConfigChecksInput {
     pub allowed_deps: Vec<String>,
     /// Normalized external dependency entries owned by config checks.
     pub dependencies: Vec<G3RsDepsResolvedDependency>,
+    /// Tool names discovered on PATH for the pointed workspace process environment.
+    pub installed_tools: Vec<String>,
 }
 
 /// Placeholder input contract for future deps source checks.

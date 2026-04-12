@@ -1,4 +1,5 @@
 use g3rs_workspace_crawl::crawl;
+use g3rs_deps_types::G3RsDepsConfigInputScope;
 
 use crate::run::{IngestionError, ingest_for_config_checks, ingest_for_source_checks};
 
@@ -229,9 +230,13 @@ fn unknown_guardrail_key_is_ignored_when_owned_fields_are_valid() {
 
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let inputs = ingest_for_config_checks(&crawl).expect("unknown foreign key should be ignored");
-    assert_eq!(inputs.len(), 1);
-    assert!(inputs[0].allowlist_present);
-    assert_eq!(inputs[0].allowed_deps, vec!["serde".to_owned()]);
+    let crate_inputs = inputs
+        .iter()
+        .filter(|input| input.scope == G3RsDepsConfigInputScope::CratePolicy)
+        .collect::<Vec<_>>();
+    assert_eq!(crate_inputs.len(), 1);
+    assert!(crate_inputs[0].allowlist_present);
+    assert_eq!(crate_inputs[0].allowed_deps, vec!["serde".to_owned()]);
 }
 
 #[test]
@@ -299,12 +304,16 @@ fn empty_allowlist_stays_present_while_missing_allowlist_stays_absent() {
     );
     let workspace_crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let inputs = ingest_for_config_checks(&workspace_crawl).expect("empty allowlist should ingest");
+    let crate_inputs = inputs
+        .iter()
+        .filter(|input| input.scope == G3RsDepsConfigInputScope::CratePolicy)
+        .collect::<Vec<_>>();
     assert!(
-        inputs.iter().all(|input| input.allowlist_present),
+        crate_inputs.iter().all(|input| input.allowlist_present),
         "empty allowlist should still be marked as present: {inputs:#?}"
     );
     assert!(
-        inputs.iter().all(|input| input.allowed_deps.is_empty()),
+        crate_inputs.iter().all(|input| input.allowed_deps.is_empty()),
         "empty allowlist should stay empty: {inputs:#?}"
     );
 
@@ -318,12 +327,16 @@ fn empty_allowlist_stays_present_while_missing_allowlist_stays_absent() {
     let workspace_crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let inputs =
         ingest_for_config_checks(&workspace_crawl).expect("missing allowlist should ingest");
+    let crate_inputs = inputs
+        .iter()
+        .filter(|input| input.scope == G3RsDepsConfigInputScope::CratePolicy)
+        .collect::<Vec<_>>();
     assert!(
-        inputs.iter().all(|input| !input.allowlist_present),
+        crate_inputs.iter().all(|input| !input.allowlist_present),
         "missing allowlist should stay absent: {inputs:#?}"
     );
     assert!(
-        inputs.iter().all(|input| input.allowed_deps.is_empty()),
+        crate_inputs.iter().all(|input| input.allowed_deps.is_empty()),
         "missing allowlist should still have an empty vector payload: {inputs:#?}"
     );
 }
