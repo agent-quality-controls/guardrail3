@@ -14,7 +14,7 @@ pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Ve
             ID,
             "garde extractor bans present",
             "All required Axum extractor bans are present in the covering clippy configuration.",
-            clippy_rel_path,
+            Some(clippy_rel_path),
         ));
         return;
     }
@@ -26,6 +26,19 @@ pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Ve
             "Missing extractor type bans from `disallowed-types`: {}. Add these entries to `disallowed-types` in clippy.toml.",
             missing.join(", ")
         ),
+        Some(clippy_rel_path),
+    ));
+}
+
+pub(crate) fn check_unverifiable(
+    clippy_rel_path: Option<&str>,
+    message: &str,
+    results: &mut Vec<G3CheckResult>,
+) {
+    results.push(warn(
+        ID,
+        "cannot verify garde extractor bans",
+        message,
         clippy_rel_path,
     ));
 }

@@ -1,6 +1,6 @@
 use clippy_toml_parser::parse;
 use g3rs_garde_config_checks_assertions::rs_garde_config_04_reqwest_json_ban as assertions;
-use g3rs_garde_config_checks_types::G3RsGardeConfigChecksInput;
+use g3rs_garde_config_checks_types::{G3RsGardeClippyInput, G3RsGardeConfigChecksInput};
 
 #[test]
 fn warns_when_reqwest_json_ban_missing() {
@@ -12,10 +12,14 @@ fn warns_when_reqwest_json_ban_missing() {
     .expect("valid clippy");
     let input = G3RsGardeConfigChecksInput {
         cargo_rel_path: "Cargo.toml".to_owned(),
-        cargo: cargo_toml_parser::parse("[workspace]\nmembers = []\n")
+        cargo: cargo_toml_parser::parse(
+            "[workspace]\nmembers = []\n[workspace.dependencies]\ngarde = \"0.22\"\n",
+        )
             .expect("minimal cargo fixture should parse"),
-        clippy_rel_path: Some("clippy.toml".to_owned()),
-        clippy: Some(clippy),
+        clippy_input: G3RsGardeClippyInput::Parsed {
+            rel_path: "clippy.toml".to_owned(),
+            clippy,
+        },
     };
 
     let results = crate::run::check(&input);

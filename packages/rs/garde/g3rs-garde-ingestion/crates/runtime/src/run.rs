@@ -1,7 +1,9 @@
 /// Public ingestion entry point.
 use g3rs_garde_source_checks_types::{G3RsSourceFile, G3RsGardeSourceChecksInput};
 use cargo_toml_parser::CargoToml;
-use g3rs_garde_types::{G3RsGardeConfigChecksInput, G3RsGardeFileTreeChecksInput};
+use g3rs_garde_types::{
+    G3RsGardeClippyInput, G3RsGardeConfigChecksInput, G3RsGardeFileTreeChecksInput,
+};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsGardeIngestionError` so the facade can reach it.
@@ -10,14 +12,12 @@ pub use g3rs_garde_ingestion_types::G3RsGardeIngestionError as IngestionError;
 /// Ingest garde config from a workspace crawl into a config checks input.
 ///
 /// Cargo.toml is required. Clippy config is optional — if absent,
-/// the clippy fields will be `None` in the result and clippy ban
-/// checks will be skipped by the checks package.
+/// the clippy state will be `Missing` in the result and the config lane
+/// will emit its own "cannot verify" warnings when garde is present.
 ///
 /// # Errors
 ///
 /// Returns an error if Cargo.toml is missing, unreadable, or unparseable.
-/// If a clippy config file is present, unreadable or unparseable input is also
-/// an error.
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeConfigChecksInput, IngestionError> {
@@ -34,26 +34,44 @@ pub fn ingest_for_config_checks(
 
     let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
 
-    // 2. Select and parse clippy config (optional)
-    let (clippy_rel_path, clippy) = if let Some(entry) = crate::select::select_clippy_toml(crawl) {
+    // 2. Select and classify clippy config (optional)
+    let clippy_input = if let Some(entry) = crate::select::select_clippy_toml(crawl) {
         if !entry.readable {
-            return Err(IngestionError::Unreadable {
-                path: entry.path.abs_path.clone(),
-                reason: "file is not readable".to_owned(),
-            });
+            G3RsGardeClippyInput::Invalid {
+                rel_path: entry.path.rel_path.clone(),
+                message: format!(
+                    "Failed to read `{}` for garde clippy-ban validation: file is not readable",
+                    entry.path.rel_path
+                ),
+            }
+        } else {
+            match crate::parse::parse_clippy_toml(&entry.path.abs_path) {
+                Ok(parsed) => G3RsGardeClippyInput::Parsed {
+                    rel_path: entry.path.rel_path.clone(),
+                    clippy: parsed,
+                },
+                Err(IngestionError::Unreadable { reason, .. }) => G3RsGardeClippyInput::Invalid {
+                    rel_path: entry.path.rel_path.clone(),
+                    message: format!(
+                        "Failed to read `{}` for garde clippy-ban validation: {reason}",
+                        entry.path.rel_path
+                    ),
+                },
+                Err(IngestionError::ParseFailed { reason, .. }) => G3RsGardeClippyInput::Invalid {
+                    rel_path: entry.path.rel_path.clone(),
+                    message: format!(
+                        "Failed to parse `{}` for garde clippy-ban validation: {reason}",
+                        entry.path.rel_path
+                    ),
+                },
+                Err(other) => return Err(other),
+            }
         }
-        let parsed = crate::parse::parse_clippy_toml(&entry.path.abs_path)?;
-        (Some(entry.path.rel_path.clone()), Some(parsed))
     } else {
-        (None, None)
+        G3RsGardeClippyInput::Missing
     };
 
-    Ok(crate::ingest::assemble(
-        cargo_entry.path.rel_path.clone(),
-        cargo,
-        clippy_rel_path,
-        clippy,
-    ))
+    Ok(crate::ingest::assemble(cargo_entry.path.rel_path.clone(), cargo, clippy_input))
 }
 
 /// Ingest garde source input from a workspace crawl.

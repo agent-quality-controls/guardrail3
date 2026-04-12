@@ -1,9 +1,20 @@
 # g3rs-garde-ingestion
 
-Ingestion package for garde config checks. Takes a workspace crawl result,
-selects `Cargo.toml` and `clippy.toml`/`.clippy.toml`, parses both, and
-produces the input types for `g3rs-garde-config-checks`.
+Ingestion package for garde checks. It converts one workspace crawl into the
+typed inputs for:
 
-Returns a result with:
-- `dependency`: always present (from Cargo.toml)
-- `clippy_bans`: present only when a clippy config exists
+- `g3rs-garde-config-checks`
+- `g3rs-garde-source-checks`
+
+Config ingestion:
+- requires root `Cargo.toml`
+- preserves covering clippy state as:
+  - parsed
+  - missing
+  - invalid
+
+Source ingestion:
+- requires root `Cargo.toml`
+- requires root `guardrail3.toml`
+- selects governed non-test Rust source files
+- leaves source and guardrail read/parse failures to `RS-GARDE-SOURCE-10`

@@ -13,7 +13,7 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
             format!(
                 "garde is present in `{cargo_rel_path}` for this workspace root. Garde-specific boundary checks are active."
             ),
-            cargo_rel_path,
+            Some(cargo_rel_path),
         ));
         return;
     }
@@ -24,7 +24,7 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
         format!(
             "Missing `garde` dependency in `{cargo_rel_path}`. Add `garde` to `[dependencies]` or `[workspace.dependencies]` in this Cargo.toml."
         ),
-        cargo_rel_path,
+        Some(cargo_rel_path),
     ));
 }
 

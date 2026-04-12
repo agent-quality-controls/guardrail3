@@ -1,6 +1,6 @@
 use cargo_toml_parser::parse;
 use g3rs_garde_config_checks_assertions::rs_garde_config_01_dependency_present as assertions;
-use g3rs_garde_config_checks_types::G3RsGardeConfigChecksInput;
+use g3rs_garde_config_checks_types::{G3RsGardeClippyInput, G3RsGardeConfigChecksInput};
 
 #[test]
 fn errors_when_garde_dependency_missing() {
@@ -8,8 +8,7 @@ fn errors_when_garde_dependency_missing() {
     let input = G3RsGardeConfigChecksInput {
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo,
-        clippy_rel_path: None,
-        clippy: None,
+        clippy_input: G3RsGardeClippyInput::Missing,
     };
 
     let results = crate::run::check(&input);
