@@ -1,7 +1,7 @@
-use g3rs_fmt_config_checks_types::G3RsFmtConfigChecksInput;
+use g3rs_fmt_config_checks_types::{G3RsFmtConfigChecksInput, G3RsFmtToolchainState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::inputs::rustfmt_table;
+use crate::inputs::{rustfmt, rustfmt_table};
 
 const ID: &str = "RS-FMT-CONFIG-03";
 pub(crate) const NIGHTLY_KEYS: &[&str] = &[
@@ -19,7 +19,10 @@ pub(crate) const NIGHTLY_KEYS: &[&str] = &[
 ];
 
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let table = rustfmt_table(&input.rustfmt);
+    let Some(rustfmt) = rustfmt(input) else {
+        return;
+    };
+    let table = rustfmt_table(rustfmt);
     let nightly_keys = NIGHTLY_KEYS
         .iter()
         .copied()
@@ -29,15 +32,15 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
         return;
     }
 
-    match input
-        .toolchain
-        .toolchain
-        .as_ref()
-        .and_then(|toolchain| toolchain.channel.as_deref())
-    {
-        Some("stable") => {
-            for key in nightly_keys {
-                results.push(G3CheckResult::new(
+    match &input.toolchain_state {
+        G3RsFmtToolchainState::Parsed(toolchain) => match toolchain
+            .toolchain
+            .as_ref()
+            .and_then(|toolchain| toolchain.channel.as_deref())
+        {
+            Some("stable") => {
+                for key in nightly_keys {
+                    results.push(G3CheckResult::new(
                     ID.to_owned(),
                     G3Severity::Warn,
                     format!("nightly-only rustfmt setting `{key}` on stable"),
@@ -48,15 +51,38 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
                     Some(input.rustfmt_rel_path.clone()),
                     None,
                 ));
+                }
             }
-        }
-        Some(_) => {}
-        None => results.push(G3CheckResult::new(
+            Some(_) => {}
+            None => results.push(G3CheckResult::new(
+                ID.to_owned(),
+                G3Severity::Error,
+                "rust-toolchain channel missing".to_owned(),
+                format!(
+                    "Nightly-only rustfmt settings require `[toolchain].channel` in {}.",
+                    input.toolchain_rel_path
+                ),
+                Some(input.toolchain_rel_path.clone()),
+                None,
+            )),
+        },
+        G3RsFmtToolchainState::Missing => results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
-            "rust-toolchain channel missing".to_owned(),
+            "rust-toolchain.toml missing".to_owned(),
             format!(
-                "Nightly-only rustfmt settings require `[toolchain].channel` in {}.",
+                "Nightly-only rustfmt settings require a root {} to verify the channel.",
+                input.toolchain_rel_path
+            ),
+            Some(input.toolchain_rel_path.clone()),
+            None,
+        )),
+        G3RsFmtToolchainState::ParseError => results.push(G3CheckResult::new(
+            ID.to_owned(),
+            G3Severity::Error,
+            "rust-toolchain.toml parse error".to_owned(),
+            format!(
+                "Nightly-only rustfmt settings require a parseable root {}.",
                 input.toolchain_rel_path
             ),
             Some(input.toolchain_rel_path.clone()),

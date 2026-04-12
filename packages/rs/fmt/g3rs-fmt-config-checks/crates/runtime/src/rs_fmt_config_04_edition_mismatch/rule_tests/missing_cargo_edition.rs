@@ -1,4 +1,5 @@
 use g3rs_fmt_config_checks_assertions::rs_fmt_config_04_edition_mismatch as assertions;
+use g3rs_fmt_config_checks_types::G3RsFmtCargoState;
 
 use super::helpers::run_check;
 
@@ -8,10 +9,15 @@ fn errors_when_cargo_edition_is_missing() {
         r#"
 edition = "2024"
 "#,
-        r#"
+        G3RsFmtCargoState::Parsed(
+            cargo_toml_parser::parse(
+                r#"
 [workspace]
 members = ["crates/*"]
 "#,
+            )
+            .expect("cargo fixture should parse"),
+        ),
     );
 
     assertions::assert_findings(

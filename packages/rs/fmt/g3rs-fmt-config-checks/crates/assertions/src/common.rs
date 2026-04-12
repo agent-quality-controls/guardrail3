@@ -41,11 +41,7 @@ pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Findin
     findings
 }
 
-pub(crate) fn assert_findings(
-    results: &[G3CheckResult],
-    id: &str,
-    expected: &[Finding<'_>],
-) {
+pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[Finding<'_>]) {
     let mut expected_vec = expected.to_vec();
     expected_vec.sort_by(|left, right| {
         (

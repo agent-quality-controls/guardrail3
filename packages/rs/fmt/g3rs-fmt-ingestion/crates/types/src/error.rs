@@ -32,12 +32,8 @@ pub enum G3RsFmtIngestionError {
 impl std::fmt::Display for G3RsFmtIngestionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::RustfmtTomlNotFound => {
-                f.write_str("no rustfmt.toml found at the workspace root")
-            }
-            Self::CargoTomlNotFound => {
-                f.write_str("no Cargo.toml found at the workspace root")
-            }
+            Self::RustfmtTomlNotFound => f.write_str("no rustfmt.toml found at the workspace root"),
+            Self::CargoTomlNotFound => f.write_str("no Cargo.toml found at the workspace root"),
             Self::ToolchainTomlNotFound => {
                 f.write_str("no rust-toolchain.toml found at the workspace root")
             }

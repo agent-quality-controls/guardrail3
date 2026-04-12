@@ -1,11 +1,12 @@
 use g3rs_fmt_config_checks_assertions::rs_fmt_config_01_settings as assertions;
 
-use super::helpers::run_check;
+use super::helpers::{parsed_rustfmt, run_check};
 
 #[test]
 fn emits_no_findings_for_baseline_settings() {
     let results = run_check(
-        r#"
+        parsed_rustfmt(
+            r#"
 edition = "2024"
 style_edition = "2024"
 max_width = 100
@@ -15,6 +16,7 @@ use_try_shorthand = true
 reorder_imports = true
 reorder_modules = true
 "#,
+        ),
         r#"
 [workspace.package]
 edition = "2024"

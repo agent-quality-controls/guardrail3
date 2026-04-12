@@ -55,6 +55,7 @@ dependencies = [
  "g3rs-fmt-config-checks-assertions",
  "g3rs-fmt-config-checks-types",
  "guardrail3-check-types",
+ "guardrail3-reason-policy",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
  "toml",
@@ -79,6 +80,10 @@ dependencies = [
 [[package]]
 name = "guardrail3-check-types"
 version = "0.1.0"
+
+[[package]]
+name = "guardrail3-reason-policy"
+version = "0.0.0"
 
 [[package]]
 name = "hashbrown"

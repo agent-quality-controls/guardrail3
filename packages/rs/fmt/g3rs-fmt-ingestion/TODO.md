@@ -1,0 +1,5 @@
+- Keep config ingestion stateful:
+  - root rustfmt parse failures stay visible to `RS-FMT-CONFIG-01`
+  - missing or malformed cargo/toolchain stay visible to `RS-FMT-CONFIG-03/04`
+- Keep filetree ingestion content-blind:
+  - presence and placement only

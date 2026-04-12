@@ -1,14 +1,16 @@
 use g3rs_fmt_config_checks_assertions::rs_fmt_config_01_settings as assertions;
 
-use super::helpers::run_check;
+use super::helpers::{parsed_rustfmt, run_check};
 
 #[test]
 fn warns_for_missing_and_wrong_settings() {
     let results = run_check(
-        r#"
+        parsed_rustfmt(
+            r#"
 edition = "2021"
 max_width = 120
 "#,
+        ),
         r#"
 [workspace.package]
 edition = "2024"

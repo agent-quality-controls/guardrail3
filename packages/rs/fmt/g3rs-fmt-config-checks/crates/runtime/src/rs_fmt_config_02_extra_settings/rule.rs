@@ -3,15 +3,18 @@ use std::collections::BTreeSet;
 use g3rs_fmt_config_checks_types::G3RsFmtConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::inputs::rustfmt_table;
+use crate::inputs::{rustfmt, rustfmt_table};
 
 const ID: &str = "RS-FMT-CONFIG-02";
 
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+    let Some(rustfmt) = rustfmt(input) else {
+        return;
+    };
     let expected = expected_keys();
-    let table = rustfmt_table(&input.rustfmt);
+    let table = rustfmt_table(rustfmt);
     for key in table.keys() {
-        if key == "skip_macro_invocations" && input.rustfmt.skip_macro_invocations.is_empty() {
+        if key == "skip_macro_invocations" && rustfmt.skip_macro_invocations.is_empty() {
             continue;
         }
         if !expected.contains(key.as_str()) {
