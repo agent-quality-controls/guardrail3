@@ -21,7 +21,10 @@ pub fn assert_top_level_extra_empty(cfg: &RustToolchainToml) {
 }
 
 pub fn assert_toolchain_extra_empty(cfg: &RustToolchainToml) {
-    assert!(toolchain(cfg).extra.is_empty(), "toolchain extra should be empty");
+    assert!(
+        toolchain(cfg).extra.is_empty(),
+        "toolchain extra should be empty"
+    );
 }
 
 pub fn assert_toolchain_fields(
@@ -35,9 +38,15 @@ pub fn assert_toolchain_fields(
     let toolchain = toolchain(cfg);
     assert_eq!(toolchain.channel.as_deref(), channel, "channel mismatch");
     assert_eq!(toolchain.path.as_deref(), path, "path mismatch");
-    let expected_components = components.iter().map(ToString::to_string).collect::<Vec<_>>();
+    let expected_components = components
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>();
     let expected_targets = targets.iter().map(ToString::to_string).collect::<Vec<_>>();
-    assert_eq!(toolchain.components, expected_components, "components mismatch");
+    assert_eq!(
+        toolchain.components, expected_components,
+        "components mismatch"
+    );
     assert_eq!(toolchain.targets, expected_targets, "targets mismatch");
     assert_eq!(toolchain.profile.as_deref(), profile, "profile mismatch");
 }

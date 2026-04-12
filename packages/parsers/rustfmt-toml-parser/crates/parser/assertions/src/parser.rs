@@ -8,8 +8,14 @@
 use rustfmt_toml_parser_runtime::{RustfmtToml, Value};
 
 pub fn assert_core_fields_empty(cfg: &RustfmtToml) {
-    assert_eq!(cfg.max_width, None, "max_width should be None for empty input");
-    assert_eq!(cfg.hard_tabs, None, "hard_tabs should be None for empty input");
+    assert_eq!(
+        cfg.max_width, None,
+        "max_width should be None for empty input"
+    );
+    assert_eq!(
+        cfg.hard_tabs, None,
+        "hard_tabs should be None for empty input"
+    );
     assert_eq!(cfg.edition, None, "edition should be None for empty input");
     assert_eq!(
         cfg.newline_style, None,
@@ -18,7 +24,10 @@ pub fn assert_core_fields_empty(cfg: &RustfmtToml) {
 }
 
 pub fn assert_collections_empty(cfg: &RustfmtToml) {
-    assert!(cfg.ignore.is_empty(), "ignore should be empty for empty input");
+    assert!(
+        cfg.ignore.is_empty(),
+        "ignore should be empty for empty input"
+    );
     assert!(
         cfg.skip_macro_invocations.is_empty(),
         "skip_macro_invocations should be empty"
