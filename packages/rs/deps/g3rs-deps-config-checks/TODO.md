@@ -2,18 +2,15 @@
 
 ## Deferred Family Split
 
-- Keep `RS-DEPS-01..04`, `RS-DEPS-09..11` in the app family.
+- Keep `RS-DEPS-01..04` outside the current extracted package lanes.
 
 Reason:
 - `01..04` are environment/tooling checks
-- `09..10` are lockfile / `.gitignore` structural checks
-- `11` is the structural fail-closed owner for malformed or untrustworthy input
 
 ## Boundary Notes
 
-- The current package boundary uses the live legacy workspace policy file:
-  parsed `guardrail3.toml`
-- It does not yet use `guardrail3-rs.toml`
+- The package boundary uses the root `guardrail3-rs.toml`.
+- It no longer depends on the legacy repo-global `guardrail3.toml`.
 - The package also accepts parsed local path Cargo manifests when the app has
   already discovered them, because dependency identity sometimes depends on the
   target crate's real `package.name`
@@ -36,5 +33,5 @@ Follow-up:
 
 ## Boundary Guard
 
-- Keep structural malformed-input ownership in the app family.
-- Package input-site collection must not duplicate `RS-DEPS-11`.
+- Keep fail-closed ownership in package ingestion.
+- Package input-site collection must not duplicate file discovery inside checks.
