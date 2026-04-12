@@ -116,3 +116,37 @@ fn pipeline_keeps_ban_rules_quiet_when_garde_is_missing() {
         "{results:#?}"
     );
 }
+
+#[test]
+fn pipeline_warns_when_clippy_is_invalid_for_garde_root() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = []\n[workspace.dependencies]\ngarde = \"0.22\"\n",
+    );
+    write(root.join("clippy.toml"), "{{{{not valid toml}}}}");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_garde_config_checks::check(&input);
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-GARDE-CONFIG-02"
+                && result.title() == "cannot verify core garde method bans"
+                && result.file() == Some("clippy.toml")
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-GARDE-CONFIG-05"
+                && result.title() == "cannot verify additional garde method bans"
+                && result.file() == Some("clippy.toml")
+        }),
+        "{results:#?}"
+    );
+}
