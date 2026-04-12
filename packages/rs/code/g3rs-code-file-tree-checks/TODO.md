@@ -1,0 +1,2 @@
+- Keep the lane limited to file-tree checks only.
+- Do not widen this package into config or source responsibilities.

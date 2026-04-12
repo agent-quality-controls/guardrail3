@@ -10,7 +10,7 @@ pub(crate) fn select_owned_config_entries<'a>(
     crawl: &'a G3RsWorkspaceCrawl,
     file_names: &[&str],
 ) -> Result<Vec<&'a G3RsWorkspaceEntry>, IngestionError> {
-    let owned_roots = owned_config_roots(crawl)?;
+    let owned_roots = owned_root_dirs(crawl)?;
     let mut entries = crawl
         .entries
         .iter()
@@ -31,7 +31,7 @@ pub(crate) fn select_owned_config_entries<'a>(
 pub(crate) fn select_owned_cargo_entries<'a>(
     crawl: &'a G3RsWorkspaceCrawl,
 ) -> Result<Vec<&'a G3RsWorkspaceEntry>, IngestionError> {
-    let owned_roots = owned_config_roots(crawl)?;
+    let owned_roots = owned_root_dirs(crawl)?;
     let mut entries = owned_roots
         .iter()
         .filter_map(|root| cargo_manifest_rel_path(root))
@@ -44,7 +44,7 @@ pub(crate) fn select_owned_cargo_entries<'a>(
     Ok(entries)
 }
 
-fn owned_config_roots(crawl: &G3RsWorkspaceCrawl) -> Result<BTreeSet<String>, IngestionError> {
+pub(crate) fn owned_root_dirs(crawl: &G3RsWorkspaceCrawl) -> Result<BTreeSet<String>, IngestionError> {
     let mut roots = BTreeSet::from([String::new()]);
 
     let Some(root_cargo_entry) = crawl.root_file("Cargo.toml") else {
