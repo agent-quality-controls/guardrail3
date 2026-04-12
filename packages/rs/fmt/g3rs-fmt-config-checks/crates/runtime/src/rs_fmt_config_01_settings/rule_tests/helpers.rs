@@ -15,6 +15,7 @@ pub(super) fn run_check(
     let input = G3RsFmtConfigChecksInput {
         rustfmt_rel_path: "rustfmt.toml".to_owned(),
         rustfmt_state,
+        rustfmt_explicit_keys: Vec::new(),
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo_state: G3RsFmtCargoState::Parsed(
             parse_cargo_toml(cargo_toml).expect("cargo test fixture should parse"),

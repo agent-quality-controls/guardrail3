@@ -13,11 +13,12 @@ pub fn ingest_for_config_checks(
 ) -> Result<G3RsFmtConfigChecksInput, IngestionError> {
     let rustfmt_entry = crate::select::select_active_rustfmt_config(crawl)
         .ok_or(IngestionError::RustfmtTomlNotFound)?;
-    let rustfmt_state = ingest_rustfmt_state(rustfmt_entry)?;
+    let (rustfmt_state, rustfmt_explicit_keys) = ingest_rustfmt_state(rustfmt_entry)?;
 
     Ok(G3RsFmtConfigChecksInput {
         rustfmt_rel_path: rustfmt_entry.path.rel_path.clone(),
         rustfmt_state,
+        rustfmt_explicit_keys,
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo_state: ingest_cargo_state(crawl),
         toolchain_rel_path: "rust-toolchain.toml".to_owned(),
@@ -47,15 +48,19 @@ pub fn ingest_for_file_tree_checks(
 
 fn ingest_rustfmt_state(
     entry: &g3rs_workspace_crawl::G3RsWorkspaceEntry,
-) -> Result<G3RsFmtRustfmtConfigState, IngestionError> {
+) -> Result<(G3RsFmtRustfmtConfigState, Vec<String>), IngestionError> {
     if !entry.readable {
-        return Ok(G3RsFmtRustfmtConfigState::ParseError);
+        return Ok((G3RsFmtRustfmtConfigState::Unreadable, Vec::new()));
     }
     match crate::parse::parse_rustfmt_toml(&entry.path.abs_path) {
-        Ok(rustfmt) => Ok(G3RsFmtRustfmtConfigState::Parsed(rustfmt)),
-        Err(IngestionError::ParseFailed { .. }) => Ok(G3RsFmtRustfmtConfigState::ParseError),
-        Err(IngestionError::Unreadable { .. }) => Ok(G3RsFmtRustfmtConfigState::ParseError),
-        Err(err) => Err(err),
+        Ok((rustfmt, explicit_keys)) => Ok((
+            G3RsFmtRustfmtConfigState::Parsed(rustfmt),
+            explicit_keys,
+        )),
+        Err(IngestionError::Unreadable { .. }) => {
+            Ok((G3RsFmtRustfmtConfigState::Unreadable, Vec::new()))
+        }
+        Err(_) => Ok((G3RsFmtRustfmtConfigState::ParseError, Vec::new())),
     }
 }
 
@@ -64,12 +69,12 @@ fn ingest_cargo_state(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtCargoState {
         return G3RsFmtCargoState::Missing;
     };
     if !entry.readable {
-        return G3RsFmtCargoState::ParseError;
+        return G3RsFmtCargoState::Unreadable;
     }
     match crate::parse::parse_cargo_toml(&entry.path.abs_path) {
         Ok(cargo) => G3RsFmtCargoState::Parsed(cargo),
         Err(IngestionError::ParseFailed { .. }) => G3RsFmtCargoState::ParseError,
-        Err(IngestionError::Unreadable { .. }) => G3RsFmtCargoState::ParseError,
+        Err(IngestionError::Unreadable { .. }) => G3RsFmtCargoState::Unreadable,
         Err(_) => G3RsFmtCargoState::ParseError,
     }
 }
@@ -79,12 +84,12 @@ fn ingest_toolchain_state(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtToolchainState {
         return G3RsFmtToolchainState::Missing;
     };
     if !entry.readable {
-        return G3RsFmtToolchainState::ParseError;
+        return G3RsFmtToolchainState::Unreadable;
     }
     match crate::parse::parse_toolchain_toml(&entry.path.abs_path) {
         Ok(toolchain) => G3RsFmtToolchainState::Parsed(toolchain),
         Err(IngestionError::ParseFailed { .. }) => G3RsFmtToolchainState::ParseError,
-        Err(IngestionError::Unreadable { .. }) => G3RsFmtToolchainState::ParseError,
+        Err(IngestionError::Unreadable { .. }) => G3RsFmtToolchainState::Unreadable,
         Err(_) => G3RsFmtToolchainState::ParseError,
     }
 }

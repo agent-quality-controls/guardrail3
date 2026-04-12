@@ -39,6 +39,18 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
             Some(input.cargo_rel_path.clone()),
             None,
         )),
+        None if matches!(&input.cargo_state, G3RsFmtCargoState::Unreadable) => results.push(
+            G3CheckResult::new(
+            ID.to_owned(),
+            G3Severity::Error,
+            "Cargo.toml unreadable".to_owned(),
+            format!(
+                "rustfmt edition checks require a readable root {}.",
+                input.cargo_rel_path
+            ),
+            Some(input.cargo_rel_path.clone()),
+            None,
+        )),
         None if matches!(&input.cargo_state, G3RsFmtCargoState::ParseError) => results.push(
             G3CheckResult::new(
             ID.to_owned(),

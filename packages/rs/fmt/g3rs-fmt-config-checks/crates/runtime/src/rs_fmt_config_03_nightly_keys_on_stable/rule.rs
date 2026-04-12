@@ -77,6 +77,17 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
             Some(input.toolchain_rel_path.clone()),
             None,
         )),
+        G3RsFmtToolchainState::Unreadable => results.push(G3CheckResult::new(
+            ID.to_owned(),
+            G3Severity::Error,
+            "rust-toolchain.toml unreadable".to_owned(),
+            format!(
+                "Nightly-only rustfmt settings require a readable root {}.",
+                input.toolchain_rel_path
+            ),
+            Some(input.toolchain_rel_path.clone()),
+            None,
+        )),
         G3RsFmtToolchainState::ParseError => results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,

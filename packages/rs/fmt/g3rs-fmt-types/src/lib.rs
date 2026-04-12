@@ -5,6 +5,7 @@ use rustfmt_toml_parser::RustfmtToml;
 #[derive(Debug, Clone)]
 pub enum G3RsFmtRustfmtConfigState {
     Parsed(RustfmtToml),
+    Unreadable,
     ParseError,
 }
 
@@ -12,6 +13,7 @@ pub enum G3RsFmtRustfmtConfigState {
 pub enum G3RsFmtCargoState {
     Parsed(CargoToml),
     Missing,
+    Unreadable,
     ParseError,
 }
 
@@ -19,6 +21,7 @@ pub enum G3RsFmtCargoState {
 pub enum G3RsFmtToolchainState {
     Parsed(RustToolchainToml),
     Missing,
+    Unreadable,
     ParseError,
 }
 
@@ -35,6 +38,7 @@ pub struct G3RsFmtEscapeHatch {
 pub struct G3RsFmtConfigChecksInput {
     pub rustfmt_rel_path: String,
     pub rustfmt_state: G3RsFmtRustfmtConfigState,
+    pub rustfmt_explicit_keys: Vec<String>,
     pub cargo_rel_path: String,
     pub cargo_state: G3RsFmtCargoState,
     pub toolchain_rel_path: String,

@@ -7,7 +7,7 @@ use rustfmt_toml_parser::{Edition, RustfmtToml, StyleEdition};
 pub(crate) fn rustfmt(input: &G3RsFmtConfigChecksInput) -> Option<&RustfmtToml> {
     match &input.rustfmt_state {
         G3RsFmtRustfmtConfigState::Parsed(rustfmt) => Some(rustfmt),
-        G3RsFmtRustfmtConfigState::ParseError => None,
+        G3RsFmtRustfmtConfigState::Unreadable | G3RsFmtRustfmtConfigState::ParseError => None,
     }
 }
 
@@ -23,7 +23,7 @@ pub(crate) fn rustfmt_table(rustfmt: &RustfmtToml) -> toml::value::Table {
 pub(crate) fn cargo(input: &G3RsFmtConfigChecksInput) -> Option<&CargoToml> {
     match &input.cargo_state {
         G3RsFmtCargoState::Parsed(cargo) => Some(cargo),
-        G3RsFmtCargoState::Missing | G3RsFmtCargoState::ParseError => None,
+        G3RsFmtCargoState::Missing | G3RsFmtCargoState::Unreadable | G3RsFmtCargoState::ParseError => None,
     }
 }
 
