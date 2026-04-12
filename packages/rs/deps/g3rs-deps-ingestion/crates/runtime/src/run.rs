@@ -1,7 +1,10 @@
 use std::collections::BTreeSet;
+use std::ffi::OsStr;
+use std::path::Path;
 
 use g3rs_deps_types::{
-    G3RsDepsConfigChecksInput, G3RsDepsFileTreeChecksInput, G3RsDepsSourceChecksInput,
+    G3RsDepsConfigChecksInput, G3RsDepsConfigInputScope, G3RsDepsFileTreeChecksInput,
+    G3RsDepsSourceChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use glob::Pattern;
@@ -13,6 +16,13 @@ pub use g3rs_deps_ingestion_types::G3RsDepsIngestionError as IngestionError;
 /// Ingest workspace deps config from a workspace crawl into per-crate checks inputs.
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
+) -> Result<Vec<G3RsDepsConfigChecksInput>, IngestionError> {
+    ingest_for_config_checks_with_path(crawl, std::env::var_os("PATH").as_deref())
+}
+
+pub(crate) fn ingest_for_config_checks_with_path(
+    crawl: &G3RsWorkspaceCrawl,
+    path_env: Option<&OsStr>,
 ) -> Result<Vec<G3RsDepsConfigChecksInput>, IngestionError> {
     let workspace_cargo_entry = crate::select::select_workspace_cargo_toml(crawl)
         .ok_or(IngestionError::CargoTomlNotFound)?;
@@ -66,6 +76,16 @@ pub fn ingest_for_config_checks(
         .collect::<BTreeSet<_>>();
 
     let mut inputs = Vec::new();
+    inputs.push(G3RsDepsConfigChecksInput {
+        scope: G3RsDepsConfigInputScope::WorkspaceTooling,
+        crate_cargo_rel_path: workspace_cargo_entry.path.rel_path.clone(),
+        crate_name: "workspace".to_owned(),
+        profile: None,
+        allowlist_present: false,
+        allowed_deps: Vec::new(),
+        dependencies: Vec::new(),
+        installed_tools: discover_installed_tools(path_env),
+    });
     for member_entry in member_entries {
         if !member_entry.readable {
             return Err(IngestionError::Unreadable {
@@ -200,4 +220,41 @@ fn cargo_lock_ignore_match(line: &str) -> Option<bool> {
     };
 
     matched.then_some(ignored)
+}
+
+fn discover_installed_tools(path_env: Option<&OsStr>) -> Vec<String> {
+    let mut installed = BTreeSet::new();
+    for tool in ["cargo-deny", "cargo-machete", "cargo-dupes", "gitleaks"] {
+        if tool_is_available(tool, path_env) {
+            let _ = installed.insert(tool.to_owned());
+        }
+    }
+    installed.into_iter().collect()
+}
+
+fn tool_is_available(tool: &str, path_env: Option<&OsStr>) -> bool {
+    let Some(path_env) = path_env else {
+        return false;
+    };
+
+    std::env::split_paths(path_env).any(|dir| candidate_is_executable(&dir.join(tool)))
+}
+
+fn candidate_is_executable(path: &Path) -> bool {
+    let Ok(metadata) = std::fs::metadata(path) else {
+        return false;
+    };
+    if !metadata.is_file() {
+        return false;
+    }
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt as _;
+        metadata.permissions().mode() & 0o111 != 0
+    }
+    #[cfg(not(unix))]
+    {
+        true
+    }
 }

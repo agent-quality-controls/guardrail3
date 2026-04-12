@@ -1,4 +1,5 @@
 use g3rs_deps_types::G3RsDepsDependencySection;
+use g3rs_deps_types::G3RsDepsConfigInputScope;
 use g3rs_workspace_crawl::crawl;
 use guardrail3_rs_toml_parser::RustProfile;
 
@@ -80,25 +81,29 @@ fn ingests_member_crates_into_normalized_dependency_inputs() {
 
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let inputs = ingest_for_config_checks(&crawl).expect("deps ingestion should succeed");
+    let crate_inputs = inputs
+        .iter()
+        .filter(|input| input.scope == G3RsDepsConfigInputScope::CratePolicy)
+        .collect::<Vec<_>>();
     assert_eq!(
-        inputs.len(),
+        crate_inputs.len(),
         3,
         "root + core + support should each get one input"
     );
     assert!(
-        inputs.iter().any(|input| input.crate_name == "root-crate"),
+        crate_inputs.iter().any(|input| input.crate_name == "root-crate"),
         "hybrid workspace root should be ingested: {inputs:#?}"
     );
     assert!(
-        inputs.iter().any(|input| input.crate_name == "support"),
+        crate_inputs.iter().any(|input| input.crate_name == "support"),
         "dependency-free member should still be ingested: {inputs:#?}"
     );
     assert!(
-        inputs.iter().all(|input| input.crate_name != "excluded"),
+        crate_inputs.iter().all(|input| input.crate_name != "excluded"),
         "excluded workspace members should not be ingested: {inputs:#?}"
     );
 
-    let core_input = inputs
+    let core_input = crate_inputs
         .iter()
         .find(|input| input.crate_name == "core")
         .expect("core input should exist");

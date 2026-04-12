@@ -4,7 +4,8 @@ use std::path::{Component, Path};
 
 use cargo_toml_parser::{CargoToml, Dependency, TargetDependencyTables};
 use g3rs_deps_types::{
-    G3RsDepsConfigChecksInput, G3RsDepsDependencySection, G3RsDepsResolvedDependency,
+    G3RsDepsConfigChecksInput, G3RsDepsConfigInputScope, G3RsDepsDependencySection,
+    G3RsDepsResolvedDependency,
 };
 use guardrail3_rs_toml_parser::Guardrail3RsToml;
 
@@ -70,12 +71,14 @@ pub(crate) fn assemble(
     }
 
     Ok(G3RsDepsConfigChecksInput {
+        scope: G3RsDepsConfigInputScope::CratePolicy,
         crate_name: crate_name(crate_cargo_rel_path.as_str(), crate_cargo),
         crate_cargo_rel_path,
         profile: guardrail.profile,
         allowlist_present,
         allowed_deps: guardrail.allowed_deps.clone(),
         dependencies,
+        installed_tools: Vec::new(),
     })
 }
 

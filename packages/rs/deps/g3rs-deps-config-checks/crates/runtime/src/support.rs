@@ -1,7 +1,9 @@
 use std::collections::BTreeSet;
 
 use g3rs_deps_config_checks_types::G3RsDepsConfigChecksInput;
-use g3rs_deps_types::{G3RsDepsDependencySection, G3RsDepsResolvedDependency};
+use g3rs_deps_types::{
+    G3RsDepsConfigInputScope, G3RsDepsDependencySection, G3RsDepsResolvedDependency,
+};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_rs_toml_parser::RustProfile;
 
@@ -41,6 +43,14 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: &str) -> G3Che
 
 pub(crate) fn allowlist_present(input: &G3RsDepsConfigChecksInput) -> bool {
     input.allowlist_present
+}
+
+pub(crate) fn is_workspace_tooling(input: &G3RsDepsConfigChecksInput) -> bool {
+    input.scope == G3RsDepsConfigInputScope::WorkspaceTooling
+}
+
+pub(crate) fn tool_installed(input: &G3RsDepsConfigChecksInput, tool: &str) -> bool {
+    input.installed_tools.iter().any(|installed| installed == tool)
 }
 
 pub(crate) fn allowlisted(input: &G3RsDepsConfigChecksInput, dep_package_name: &str) -> bool {
