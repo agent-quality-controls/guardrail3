@@ -1,7 +1,5 @@
+use crate::{Color, Edition, EmitMode, Heuristics, NewlineStyle};
 use helpers::{parse_fixture, parse_from_tempfile};
-use crate::{
-    Color, Edition, EmitMode, Heuristics, NewlineStyle,
-};
 use rustfmt_toml_parser_runtime_assertions::parser as assertions;
 
 use super::helpers;
@@ -41,8 +39,16 @@ merge_derives = true
     assert_eq!(cfg.edition, Some(Edition::Edition2021));
     assert_eq!(cfg.newline_style, Some(NewlineStyle::Unix));
     assert_eq!(cfg.use_small_heuristics, Some(Heuristics::Default));
-    assert_eq!(cfg.blank_lines_lower_bound, Some(1), "blank_lines_lower_bound");
-    assert_eq!(cfg.blank_lines_upper_bound, Some(2), "blank_lines_upper_bound");
+    assert_eq!(
+        cfg.blank_lines_lower_bound,
+        Some(1),
+        "blank_lines_lower_bound"
+    );
+    assert_eq!(
+        cfg.blank_lines_upper_bound,
+        Some(2),
+        "blank_lines_upper_bound"
+    );
     assert_eq!(cfg.color, Some(Color::Always));
     assertions::assert_bool_field(
         cfg.overflow_delimited_expr,
@@ -88,11 +94,7 @@ disable_all_formatting = false
     );
 
     assertions::assert_basic_width_fields(&cfg, Some(120), None, None);
-    assertions::assert_string_list(
-        &cfg.ignore,
-        &["generated.rs", "vendor/"],
-        "ignore",
-    );
+    assertions::assert_string_list(&cfg.ignore, &["generated.rs", "vendor/"], "ignore");
     assertions::assert_string_list(
         &cfg.skip_macro_invocations,
         &["bitflags"],
