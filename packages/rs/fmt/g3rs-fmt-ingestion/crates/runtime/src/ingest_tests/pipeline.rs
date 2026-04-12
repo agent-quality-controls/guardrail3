@@ -173,3 +173,90 @@ fn pipeline_reports_rustfmt_ignore_escape_hatch() {
         "{results:#?}"
     );
 }
+
+#[test]
+fn pipeline_uses_root_dot_rustfmt_toml_for_config_checks() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join(".rustfmt.toml"),
+        "group_imports = \"StdExternalCrate\"\n",
+    );
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(
+        root.join("rust-toolchain.toml"),
+        "[toolchain]\nchannel = \"stable\"\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+
+    assert_eq!(input.rustfmt_rel_path, ".rustfmt.toml");
+
+    let results = g3rs_fmt_config_checks::check(&input);
+
+    assert_eq!(
+        results
+            .iter()
+            .filter(|result| result.id() == "RS-FMT-CONFIG-03")
+            .map(|result| (result.title().to_owned(), result.file().map(str::to_owned)))
+            .collect::<Vec<_>>(),
+        vec![(
+            "nightly-only rustfmt setting `group_imports` on stable".to_owned(),
+            Some(".rustfmt.toml".to_owned())
+        )],
+        "{results:#?}"
+    );
+}
+
+#[test]
+fn pipeline_keeps_config_01_active_when_cargo_is_parse_error() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("rustfmt.toml"),
+        "edition = \"2024\"\nstyle_edition = \"2024\"\nmax_width = 90\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
+    );
+    write(root.join("Cargo.toml"), "[package]\nname = [\n");
+    write(
+        root.join("rust-toolchain.toml"),
+        "[toolchain]\nchannel = \"stable\"\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_fmt_config_checks::check(&input);
+
+    assert_eq!(
+        results
+            .iter()
+            .map(|result| {
+                (
+                    result.id().to_owned(),
+                    result.title().to_owned(),
+                    result.file().map(str::to_owned),
+                )
+            })
+            .collect::<Vec<_>>(),
+        vec![
+            (
+                "RS-FMT-CONFIG-01".to_owned(),
+                "rustfmt max_width wrong".to_owned(),
+                Some("rustfmt.toml".to_owned()),
+            ),
+            (
+                "RS-FMT-CONFIG-04".to_owned(),
+                "Cargo.toml parse error".to_owned(),
+                Some("Cargo.toml".to_owned()),
+            ),
+        ],
+        "{results:#?}"
+    );
+}

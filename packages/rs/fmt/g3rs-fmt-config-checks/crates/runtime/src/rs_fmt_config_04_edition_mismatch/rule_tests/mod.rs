@@ -3,4 +3,7 @@ mod matching;
 mod mismatched;
 mod missing_cargo_edition;
 mod missing_manifest;
+mod no_rustfmt_edition;
+mod precedence;
+mod package_edition;
 mod parse_error;

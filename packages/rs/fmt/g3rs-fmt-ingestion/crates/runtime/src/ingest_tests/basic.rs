@@ -698,3 +698,87 @@ fn unreadable_toolchain_toml_becomes_parse_error_state() {
         g3rs_fmt_types::G3RsFmtToolchainState::ParseError
     ));
 }
+
+#[test]
+fn deleted_after_crawl_rustfmt_toml_becomes_parse_error_state() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+    write_all_configs(root);
+
+    let rustfmt_path = root.join("rustfmt.toml");
+    let crawl = crawl(root);
+    fs::remove_file(&rustfmt_path).expect("should remove rustfmt.toml after crawl");
+
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve deleted-after-crawl rustfmt.toml as state");
+
+    assert!(matches!(
+        input.rustfmt_state,
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError
+    ));
+}
+
+#[test]
+fn deleted_after_crawl_cargo_toml_becomes_parse_error_state() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+    write_all_configs(root);
+
+    let cargo_path = root.join("Cargo.toml");
+    let crawl = crawl(root);
+    fs::remove_file(&cargo_path).expect("should remove Cargo.toml after crawl");
+
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve deleted-after-crawl Cargo.toml as state");
+
+    assert!(matches!(
+        input.cargo_state,
+        g3rs_fmt_types::G3RsFmtCargoState::ParseError
+    ));
+}
+
+#[test]
+fn deleted_after_crawl_toolchain_toml_becomes_parse_error_state() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+    write_all_configs(root);
+
+    let toolchain_path = root.join("rust-toolchain.toml");
+    let crawl = crawl(root);
+    fs::remove_file(&toolchain_path).expect("should remove rust-toolchain.toml after crawl");
+
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve deleted-after-crawl rust-toolchain.toml as state");
+
+    assert!(matches!(
+        input.toolchain_state,
+        g3rs_fmt_types::G3RsFmtToolchainState::ParseError
+    ));
+}
+
+#[test]
+fn deleted_after_crawl_dot_rustfmt_toml_becomes_parse_error_state() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join(".rustfmt.toml"), RUSTFMT_CONTENT);
+    write(root.join("Cargo.toml"), CARGO_CONTENT);
+    write(root.join("rust-toolchain.toml"), TOOLCHAIN_CONTENT);
+
+    let dot_rustfmt_path = root.join(".rustfmt.toml");
+    let crawl = crawl(root);
+    fs::remove_file(&dot_rustfmt_path).expect("should remove .rustfmt.toml after crawl");
+
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve deleted-after-crawl .rustfmt.toml as state");
+
+    assert_eq!(input.rustfmt_rel_path, ".rustfmt.toml");
+    assert!(matches!(
+        input.rustfmt_state,
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError
+    ));
+}
