@@ -33,3 +33,10 @@ fn errors_when_legacy_and_modern_toolchains_both_exist() {
         )],
     );
 }
+
+#[test]
+fn stays_quiet_when_only_modern_toolchain_exists() {
+    let results = crate::check(&input(Some("rust-toolchain.toml"), None));
+
+    assert_findings(&results, &[]);
+}

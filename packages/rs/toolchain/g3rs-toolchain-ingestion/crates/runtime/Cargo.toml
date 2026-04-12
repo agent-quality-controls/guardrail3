@@ -33,4 +33,5 @@ g3rs-toolchain-config-checks = { path = "../../../g3rs-toolchain-config-checks" 
 g3rs-toolchain-filetree-checks = { path = "../../../g3rs-toolchain-filetree-checks" }
 g3rs-toolchain-ingestion-assertions = { path = "../assertions" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 tempfile = "3"
