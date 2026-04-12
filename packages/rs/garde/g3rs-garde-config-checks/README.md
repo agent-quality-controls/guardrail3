@@ -1,19 +1,20 @@
 # g3rs-garde-config-checks
 
-Extracted garde root-policy config checks.
+Extracted garde config checks.
 
-This package owns only the parsed-file garde checks that operate on:
+This package owns the garde rules that operate on:
 
 - one root `Cargo.toml`
-- one covering `clippy.toml` / `.clippy.toml`
+- one covering clippy input state:
+  - parsed `clippy.toml` / `.clippy.toml`
+  - missing clippy config
+  - invalid or unreadable clippy config
 
-The app family still owns:
+This package is responsible for:
 
-- routed root discovery
-- garde applicability gating from policy and source adoption
-- missing / unparseable clippy handling for the garde ban rules
-- source garde rules
-- `RS-GARDE-SOURCE-10` malformed-input reporting
+- garde dependency presence
+- quiet gating of ban rules when `garde` is absent
+- warn-level "cannot verify" results when covering clippy config is missing or invalid
 
 Current package rules:
 

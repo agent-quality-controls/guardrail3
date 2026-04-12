@@ -1,19 +1,16 @@
 /// Assemble the checks input from selected and parsed data.
 use cargo_toml_parser::CargoToml;
-use clippy_toml_parser::ClippyToml;
-use g3rs_garde_types::G3RsGardeConfigChecksInput;
+use g3rs_garde_types::{G3RsGardeClippyInput, G3RsGardeConfigChecksInput};
 
 /// Build the checks input from parsed config files.
 pub(crate) fn assemble(
     cargo_rel_path: String,
     cargo: CargoToml,
-    clippy_rel_path: Option<String>,
-    clippy: Option<ClippyToml>,
+    clippy_input: G3RsGardeClippyInput,
 ) -> G3RsGardeConfigChecksInput {
     G3RsGardeConfigChecksInput {
         cargo_rel_path,
         cargo,
-        clippy_rel_path,
-        clippy,
+        clippy_input,
     }
 }

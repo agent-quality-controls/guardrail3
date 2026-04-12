@@ -13,7 +13,7 @@ pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Ve
             ID,
             "reqwest garde ban present",
             "`reqwest::Response::json` is banned in the covering clippy configuration.",
-            clippy_rel_path,
+            Some(clippy_rel_path),
         ));
         return;
     }
@@ -22,6 +22,19 @@ pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Ve
         ID,
         "missing reqwest garde ban",
         "Missing `reqwest::Response::json` from `disallowed-methods`. Add it to `disallowed-methods` in clippy.toml.",
+        Some(clippy_rel_path),
+    ));
+}
+
+pub(crate) fn check_unverifiable(
+    clippy_rel_path: Option<&str>,
+    message: &str,
+    results: &mut Vec<G3CheckResult>,
+) {
+    results.push(warn(
+        ID,
+        "cannot verify reqwest garde ban",
+        message,
         clippy_rel_path,
     ));
 }

@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+use g3rs_garde_types::G3RsGardeClippyInput;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -49,14 +50,12 @@ fn ingests_with_both_cargo_and_clippy() {
         input.cargo.workspace.is_some(),
         "parsed Cargo.toml should contain a [workspace] section"
     );
-    assert_eq!(
-        input.clippy_rel_path.as_deref(),
-        Some("clippy.toml"),
-        "clippy_rel_path should reference the root clippy.toml when present"
-    );
     assert!(
-        input.clippy.is_some(),
-        "clippy should be Some when clippy.toml exists and parses successfully"
+        matches!(
+            input.clippy_input,
+            G3RsGardeClippyInput::Parsed { ref rel_path, .. } if rel_path == "clippy.toml"
+        ),
+        "clippy_input should preserve the parsed root clippy.toml"
     );
 }
 
@@ -73,15 +72,17 @@ fn ingests_with_dot_clippy_toml() {
     let result = crate::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed with .clippy.toml variant");
-    assert_eq!(
-        input.clippy_rel_path.as_deref(),
-        Some(".clippy.toml"),
-        "clippy_rel_path should reference .clippy.toml when only the dotfile variant exists"
+    assert!(
+        matches!(
+            input.clippy_input,
+            G3RsGardeClippyInput::Parsed { ref rel_path, .. } if rel_path == ".clippy.toml"
+        ),
+        "clippy_input should reference .clippy.toml when only the dotfile variant exists"
     );
 }
 
 #[test]
-fn clippy_is_none_without_clippy_config() {
+fn clippy_is_missing_without_clippy_config() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -98,12 +99,33 @@ fn clippy_is_none_without_clippy_config() {
         "cargo_rel_path should still be present without clippy config"
     );
     assert!(
-        input.clippy.is_none(),
-        "clippy should be None when no clippy config file exists"
+        matches!(input.clippy_input, G3RsGardeClippyInput::Missing),
+        "clippy_input should be Missing when no clippy config file exists"
     );
+}
+
+#[test]
+fn malformed_clippy_toml_is_preserved_for_package_warnings() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = []\n[workspace.dependencies]\ngarde = \"0.22\"\n",
+    );
+    write(root.join("clippy.toml"), "{{{{not valid toml}}}}");
+
+    let crawl = crawl(root);
+    let result = crate::ingest_for_config_checks(&crawl);
+
+    let input = result.expect("ingestion should preserve invalid clippy for package warnings");
     assert!(
-        input.clippy_rel_path.is_none(),
-        "clippy_rel_path should be None when no clippy config file exists"
+        matches!(
+            input.clippy_input,
+            G3RsGardeClippyInput::Invalid { ref rel_path, .. } if rel_path == "clippy.toml"
+        ),
+        "invalid clippy input should still carry its path"
     );
 }
 
@@ -139,24 +161,6 @@ fn fails_on_malformed_cargo_toml() {
     assert!(
         matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
         "ingestion should return ParseFailed when Cargo.toml contains invalid TOML"
-    );
-}
-
-#[test]
-fn malformed_clippy_toml_returns_error() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
-    let root = temp.path();
-    git_init(root);
-
-    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
-    write(root.join("clippy.toml"), "{{{{not valid toml}}}}");
-
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
-
-    assert!(
-        matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
-        "ingestion should fail closed when clippy.toml exists but is malformed"
     );
 }
 

@@ -14,7 +14,7 @@ pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Ve
             ID,
             "core garde method bans present",
             "All core serde/toml/yaml deserialization bans are present in the covering clippy configuration.",
-            clippy_rel_path,
+            Some(clippy_rel_path),
         ));
         return;
     }
@@ -26,6 +26,19 @@ pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Ve
             "Missing core deserialization bans from `disallowed-methods`: {}. Add these entries to `disallowed-methods` in clippy.toml.",
             missing.join(", ")
         ),
+        Some(clippy_rel_path),
+    ));
+}
+
+pub(crate) fn check_unverifiable(
+    clippy_rel_path: Option<&str>,
+    message: &str,
+    results: &mut Vec<G3CheckResult>,
+) {
+    results.push(warn(
+        ID,
+        "cannot verify core garde method bans",
+        message,
         clippy_rel_path,
     ));
 }
