@@ -2,31 +2,65 @@ use cargo_toml_parser::CargoToml;
 use rust_toolchain_toml_parser::RustToolchainToml;
 use rustfmt_toml_parser::RustfmtToml;
 
-/// Input contract for extracted rustfmt config checks.
-///
-/// The app owns discovery, authoritative-file selection, and parse-failure
-/// routing. This package receives already-selected typed parsed files and
-/// validates only their config semantics.
 #[derive(Debug, Clone)]
-pub struct G3RsFmtConfigChecksInput {
-    /// Repo-relative path to the active `rustfmt.toml` / `.rustfmt.toml`.
-    pub rustfmt_rel_path: String,
-    /// Parsed rustfmt config.
-    pub rustfmt: RustfmtToml,
-    /// Repo-relative path to the authoritative Cargo manifest.
-    pub cargo_rel_path: String,
-    /// Parsed Cargo manifest.
-    pub cargo: CargoToml,
-    /// Repo-relative path to the authoritative rust-toolchain file.
-    pub toolchain_rel_path: String,
-    /// Parsed rust-toolchain manifest.
-    pub toolchain: RustToolchainToml,
+pub enum G3RsFmtRustfmtConfigState {
+    Parsed(RustfmtToml),
+    ParseError,
 }
 
-/// Placeholder input contract for future rustfmt source checks.
+#[derive(Debug, Clone)]
+pub enum G3RsFmtCargoState {
+    Parsed(CargoToml),
+    Missing,
+    ParseError,
+}
+
+#[derive(Debug, Clone)]
+pub enum G3RsFmtToolchainState {
+    Parsed(RustToolchainToml),
+    Missing,
+    ParseError,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsFmtEscapeHatch {
+    pub family: String,
+    pub file: String,
+    pub kind: String,
+    pub selector: String,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct G3RsFmtConfigChecksInput {
+    pub rustfmt_rel_path: String,
+    pub rustfmt_state: G3RsFmtRustfmtConfigState,
+    pub cargo_rel_path: String,
+    pub cargo_state: G3RsFmtCargoState,
+    pub toolchain_rel_path: String,
+    pub toolchain_state: G3RsFmtToolchainState,
+    pub escape_hatches: Vec<G3RsFmtEscapeHatch>,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct G3RsFmtSourceChecksInput;
 
-/// Placeholder input contract for future rustfmt file-tree checks.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum G3RsFmtConfigFileKind {
+    RustfmtToml,
+    DotRustfmtToml,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsFmtNestedConfigFile {
+    pub rel_path: String,
+    pub kind: G3RsFmtConfigFileKind,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsFmtFileTreeChecksInput;
+pub struct G3RsFmtFileTreeChecksInput {
+    pub root_rustfmt_toml_rel_path: Option<String>,
+    pub root_dot_rustfmt_toml_rel_path: Option<String>,
+    pub nested_config_files: Vec<G3RsFmtNestedConfigFile>,
+    pub dual_conflict_dirs: Vec<String>,
+}

@@ -1,66 +1,77 @@
 use g3rs_fmt_config_checks_types::G3RsFmtConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::inputs::{cargo_edition, rustfmt_edition, rustfmt_style_edition};
+use crate::inputs::{cargo, cargo_edition, rustfmt, rustfmt_edition, rustfmt_style_edition};
 
 const ID: &str = "RS-FMT-CONFIG-01";
 
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let expected_edition = cargo_edition(&input.cargo).unwrap_or("2024");
+    let Some(rustfmt) = rustfmt(input) else {
+        results.push(G3CheckResult::new(
+            ID.to_owned(),
+            G3Severity::Error,
+            "rustfmt config parse error".to_owned(),
+            "rustfmt config exists but could not be parsed as a TOML table".to_owned(),
+            Some(input.rustfmt_rel_path.clone()),
+            None,
+        ));
+        return;
+    };
+    let expected_edition = cargo(input).and_then(cargo_edition).unwrap_or("2024");
 
     check_string(
         &input.rustfmt_rel_path,
         "edition",
-        rustfmt_edition(input.rustfmt.edition),
+        rustfmt_edition(rustfmt.edition),
         expected_edition,
         results,
     );
     check_string(
         &input.rustfmt_rel_path,
         "style_edition",
-        rustfmt_style_edition(input.rustfmt.style_edition),
+        rustfmt_style_edition(rustfmt.style_edition),
         expected_edition,
         results,
     );
     check_int(
         &input.rustfmt_rel_path,
         "max_width",
-        input.rustfmt.max_width.map(i64::from),
+        rustfmt.max_width.map(i64::from),
         100,
         results,
     );
     check_int(
         &input.rustfmt_rel_path,
         "tab_spaces",
-        input.rustfmt.tab_spaces.map(i64::from),
+        rustfmt.tab_spaces.map(i64::from),
         4,
         results,
     );
     check_bool(
         &input.rustfmt_rel_path,
         "use_field_init_shorthand",
-        input.rustfmt.use_field_init_shorthand,
+        rustfmt.use_field_init_shorthand,
         true,
         results,
     );
     check_bool(
         &input.rustfmt_rel_path,
         "use_try_shorthand",
-        input.rustfmt.use_try_shorthand,
+        rustfmt.use_try_shorthand,
         true,
         results,
     );
     check_bool(
         &input.rustfmt_rel_path,
         "reorder_imports",
-        input.rustfmt.reorder_imports,
+        rustfmt.reorder_imports,
         true,
         results,
     );
     check_bool(
         &input.rustfmt_rel_path,
         "reorder_modules",
-        input.rustfmt.reorder_modules,
+        rustfmt.reorder_modules,
         true,
         results,
     );

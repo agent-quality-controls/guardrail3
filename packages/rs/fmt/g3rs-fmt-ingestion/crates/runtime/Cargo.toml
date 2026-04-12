@@ -28,9 +28,12 @@ g3rs-fmt-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
 rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser", version = "0.1.0" }
 rustfmt-toml-parser = { path = "../../../../../parsers/rustfmt-toml-parser", version = "0.1.0" }
+toml = "0.8"
 
 [dev-dependencies]
 g3rs-fmt-config-checks = { path = "../../../g3rs-fmt-config-checks" }
+g3rs-fmt-filetree-checks = { path = "../../../g3rs-fmt-filetree-checks" }
 g3rs-fmt-ingestion-assertions = { path = "../assertions" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 tempfile = "3"

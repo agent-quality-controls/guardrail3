@@ -1,6 +1,6 @@
 use g3rs_fmt_config_checks_assertions::rs_fmt_config_03_nightly_keys_on_stable as assertions;
 
-use super::helpers::run_check;
+use super::helpers::{parsed_toolchain, run_check};
 
 #[test]
 fn warns_when_nightly_keys_are_used_on_stable() {
@@ -9,11 +9,13 @@ fn warns_when_nightly_keys_are_used_on_stable() {
 edition = "2024"
 group_imports = "StdExternalCrate"
 "#,
-        r#"
+        parsed_toolchain(
+            r#"
 [toolchain]
 channel = "stable"
 components = ["clippy", "rustfmt"]
 "#,
+        ),
     );
 
     assertions::assert_findings(

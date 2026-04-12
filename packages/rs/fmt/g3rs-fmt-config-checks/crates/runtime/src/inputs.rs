@@ -1,5 +1,15 @@
 use cargo_toml_parser::{CargoToml, InheritableValue};
+use g3rs_fmt_config_checks_types::{
+    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustfmtConfigState,
+};
 use rustfmt_toml_parser::{Edition, RustfmtToml, StyleEdition};
+
+pub(crate) fn rustfmt(input: &G3RsFmtConfigChecksInput) -> Option<&RustfmtToml> {
+    match &input.rustfmt_state {
+        G3RsFmtRustfmtConfigState::Parsed(rustfmt) => Some(rustfmt),
+        G3RsFmtRustfmtConfigState::ParseError => None,
+    }
+}
 
 pub(crate) fn rustfmt_table(rustfmt: &RustfmtToml) -> toml::value::Table {
     let value = toml::Value::try_from(rustfmt.clone())
@@ -10,6 +20,13 @@ pub(crate) fn rustfmt_table(rustfmt: &RustfmtToml) -> toml::value::Table {
         .expect("typed RustfmtToml should serialize as a table")
 }
 
+pub(crate) fn cargo(input: &G3RsFmtConfigChecksInput) -> Option<&CargoToml> {
+    match &input.cargo_state {
+        G3RsFmtCargoState::Parsed(cargo) => Some(cargo),
+        G3RsFmtCargoState::Missing | G3RsFmtCargoState::ParseError => None,
+    }
+}
+
 pub(crate) fn cargo_edition(cargo: &CargoToml) -> Option<&str> {
     cargo
         .workspace
@@ -17,7 +34,8 @@ pub(crate) fn cargo_edition(cargo: &CargoToml) -> Option<&str> {
         .and_then(|workspace| workspace.package.as_ref())
         .and_then(|package| package.edition.as_deref())
         .or_else(|| {
-            cargo.package
+            cargo
+                .package
                 .as_ref()
                 .and_then(|package| inheritable_string(package.edition.as_ref()))
         })

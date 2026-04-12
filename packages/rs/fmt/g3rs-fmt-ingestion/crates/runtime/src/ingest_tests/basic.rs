@@ -90,20 +90,32 @@ fn assert_all_rel_paths(input: &g3rs_fmt_types::G3RsFmtConfigChecksInput) {
 
 /// Assert that parsed content matches the fixture constants.
 fn assert_parsed_content(input: &g3rs_fmt_types::G3RsFmtConfigChecksInput) {
+    let rustfmt = match &input.rustfmt_state {
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt,
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => {
+            panic!("expected parsed rustfmt content")
+        }
+    };
+    let cargo = match &input.cargo_state {
+        g3rs_fmt_types::G3RsFmtCargoState::Parsed(cargo) => cargo,
+        other => panic!("expected parsed Cargo.toml, got {other:?}"),
+    };
+    let toolchain = match &input.toolchain_state {
+        g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
+        other => panic!("expected parsed rust-toolchain.toml, got {other:?}"),
+    };
     assert_eq!(
-        input.rustfmt.edition,
+        rustfmt.edition,
         Some(rustfmt_toml_parser::Edition::Edition2024),
         "parsed rustfmt should have edition 2024 from fixture content"
     );
     assert!(
-        input.cargo.workspace.is_some(),
+        cargo.workspace.is_some(),
         "parsed Cargo.toml should have a [workspace] section from fixture content"
     );
-    let toolchain_section = input
-        .toolchain
-        .toolchain
-        .as_ref()
-        .expect("parsed rust-toolchain.toml should have a [toolchain] section from fixture content");
+    let toolchain_section = toolchain.toolchain.as_ref().expect(
+        "parsed rust-toolchain.toml should have a [toolchain] section from fixture content",
+    );
     assert_eq!(
         toolchain_section.channel.as_deref(),
         Some("1.85.0"),
@@ -128,10 +140,8 @@ fn ingests_all_three_files() {
     assert_parsed_content(&input);
 }
 
-// ── Dot-prefixed .rustfmt.toml is NOT accepted ─────────────────────────
-
 #[test]
-fn dot_rustfmt_toml_is_not_accepted() {
+fn dot_rustfmt_toml_is_accepted_when_root_rustfmt_toml_is_absent() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -141,13 +151,35 @@ fn dot_rustfmt_toml_is_not_accepted() {
     write(root.join("rust-toolchain.toml"), TOOLCHAIN_CONTENT);
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should accept root .rustfmt.toml when rustfmt.toml is absent");
 
-    assert!(
-        matches!(result, Err(crate::IngestionError::RustfmtTomlNotFound)),
-        "ingestion should return RustfmtTomlNotFound when only .rustfmt.toml exists \
-         (dot-prefixed variant is a policy violation, not an acceptable config)"
+    assert_eq!(input.rustfmt_rel_path, ".rustfmt.toml");
+    assert_eq!(
+        match &input.rustfmt_state {
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
+        },
+        Some(rustfmt_toml_parser::Edition::Edition2024),
+        "parsed edition should come from .rustfmt.toml"
     );
+}
+
+#[test]
+fn invalid_root_rustfmt_toml_is_preserved_for_config_rule_reporting() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join("rustfmt.toml"), "edition = [\n");
+    write(root.join("Cargo.toml"), CARGO_CONTENT);
+    write(root.join("rust-toolchain.toml"), TOOLCHAIN_CONTENT);
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve rustfmt parse failure for RS-FMT-CONFIG-01 reporting");
+
+    assert_eq!(input.rustfmt_rel_path, "rustfmt.toml");
 }
 
 #[test]
@@ -169,7 +201,10 @@ fn ignores_dot_rustfmt_toml_when_rustfmt_toml_exists() {
 
     // Verify the correct file was parsed (2024 from rustfmt.toml, not 2021 from .rustfmt.toml).
     assert_eq!(
-        input.rustfmt.edition,
+        match &input.rustfmt_state {
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
+        },
         Some(rustfmt_toml_parser::Edition::Edition2024),
         "parsed edition should come from rustfmt.toml (2024), not .rustfmt.toml (2021)"
     );
@@ -196,7 +231,7 @@ fn fails_when_rustfmt_toml_is_missing() {
 }
 
 #[test]
-fn fails_when_cargo_toml_is_missing() {
+fn preserves_missing_cargo_toml_for_config_blockers() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -205,16 +240,17 @@ fn fails_when_cargo_toml_is_missing() {
     write(root.join("rust-toolchain.toml"), TOOLCHAIN_CONTENT);
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve missing Cargo.toml for config rules");
 
-    assert!(
-        matches!(result, Err(crate::IngestionError::CargoTomlNotFound)),
-        "ingestion should return CargoTomlNotFound when Cargo.toml is absent"
-    );
+    assert!(matches!(
+        input.cargo_state,
+        g3rs_fmt_types::G3RsFmtCargoState::Missing
+    ));
 }
 
 #[test]
-fn fails_when_toolchain_toml_is_missing() {
+fn preserves_missing_toolchain_toml_for_config_blockers() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -223,12 +259,13 @@ fn fails_when_toolchain_toml_is_missing() {
     write(root.join("Cargo.toml"), CARGO_CONTENT);
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve missing rust-toolchain.toml for config rules");
 
-    assert!(
-        matches!(result, Err(crate::IngestionError::ToolchainTomlNotFound)),
-        "ingestion should return ToolchainTomlNotFound when rust-toolchain.toml is absent"
-    );
+    assert!(matches!(
+        input.toolchain_state,
+        g3rs_fmt_types::G3RsFmtToolchainState::Missing
+    ));
 }
 
 #[test]
@@ -250,7 +287,7 @@ fn fails_when_all_files_are_missing() {
 // ── Parse failure errors ────────────────────────────────────────────────
 
 #[test]
-fn fails_on_malformed_rustfmt_toml() {
+fn preserves_malformed_rustfmt_toml_for_config_rule_reporting() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -260,23 +297,17 @@ fn fails_on_malformed_rustfmt_toml() {
     write(root.join("rust-toolchain.toml"), TOOLCHAIN_CONTENT);
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve malformed rustfmt.toml");
 
-    match result {
-        Err(crate::IngestionError::ParseFailed { ref path, .. }) => {
-            assert!(
-                path.ends_with("rustfmt.toml"),
-                "ParseFailed path should point to rustfmt.toml, got: {path:?}"
-            );
-        }
-        ref other => panic!(
-            "expected ParseFailed for rustfmt.toml, got: {other:?}"
-        ),
-    }
+    assert!(matches!(
+        input.rustfmt_state,
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError
+    ));
 }
 
 #[test]
-fn fails_on_malformed_cargo_toml() {
+fn preserves_malformed_cargo_toml_for_config_rule_reporting() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -286,23 +317,17 @@ fn fails_on_malformed_cargo_toml() {
     write(root.join("rust-toolchain.toml"), TOOLCHAIN_CONTENT);
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve malformed Cargo.toml");
 
-    match result {
-        Err(crate::IngestionError::ParseFailed { ref path, .. }) => {
-            assert!(
-                path.ends_with("Cargo.toml"),
-                "ParseFailed path should point to Cargo.toml, got: {path:?}"
-            );
-        }
-        ref other => panic!(
-            "expected ParseFailed for Cargo.toml, got: {other:?}"
-        ),
-    }
+    assert!(matches!(
+        input.cargo_state,
+        g3rs_fmt_types::G3RsFmtCargoState::ParseError
+    ));
 }
 
 #[test]
-fn fails_on_malformed_toolchain_toml() {
+fn preserves_malformed_toolchain_toml_for_config_rule_reporting() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -312,19 +337,13 @@ fn fails_on_malformed_toolchain_toml() {
     write(root.join("rust-toolchain.toml"), "{{{{not valid toml}}}}");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve malformed rust-toolchain.toml");
 
-    match result {
-        Err(crate::IngestionError::ParseFailed { ref path, .. }) => {
-            assert!(
-                path.ends_with("rust-toolchain.toml"),
-                "ParseFailed path should point to rust-toolchain.toml, got: {path:?}"
-            );
-        }
-        ref other => panic!(
-            "expected ParseFailed for rust-toolchain.toml, got: {other:?}"
-        ),
-    }
+    assert!(matches!(
+        input.toolchain_state,
+        g3rs_fmt_types::G3RsFmtToolchainState::ParseError
+    ));
 }
 
 // ── Gitignored but recovered files ──────────────────────────────────────
@@ -400,7 +419,13 @@ fn empty_rustfmt_toml_is_valid() {
         .expect("empty rustfmt.toml is valid TOML (all fields are optional)");
 
     assert_eq!(
-        input.rustfmt.edition, None,
+        match &input.rustfmt_state {
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => {
+                panic!("empty rustfmt.toml should parse")
+            }
+        },
+        None,
         "empty rustfmt.toml should have no edition set"
     );
 }
@@ -408,7 +433,7 @@ fn empty_rustfmt_toml_is_valid() {
 // ── Error precedence (selection before parsing) ─────────────────────────
 
 #[test]
-fn malformed_rustfmt_plus_missing_cargo_returns_cargo_not_found() {
+fn malformed_rustfmt_plus_missing_cargo_preserves_both_states() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -418,15 +443,22 @@ fn malformed_rustfmt_plus_missing_cargo_returns_cargo_not_found() {
     write(root.join("rust-toolchain.toml"), TOOLCHAIN_CONTENT);
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("config ingestion should preserve rule-owned blocker states");
 
-    // Selection happens before parsing: rustfmt.toml passes selection (exists),
-    // then Cargo.toml selection fails with CargoTomlNotFound. The malformed
-    // rustfmt.toml is never parsed.
     assert!(
-        matches!(result, Err(crate::IngestionError::CargoTomlNotFound)),
-        "selection errors should take precedence over parse errors \
-         because all three files are selected before any parsing occurs"
+        matches!(
+            input.rustfmt_state,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError
+        ),
+        "invalid rustfmt.toml should stay visible to RS-FMT-CONFIG-01"
+    );
+    assert!(
+        matches!(
+            input.cargo_state,
+            g3rs_fmt_types::G3RsFmtCargoState::Missing
+        ),
+        "missing Cargo.toml should stay visible to RS-FMT-CONFIG-04"
     );
 }
 
@@ -475,51 +507,60 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
     assert_all_rel_paths(&input);
 
     // Verify all 8 settings that RS-FMT-CONFIG-01 reads from rustfmt.toml.
+    let rustfmt = match &input.rustfmt_state {
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt,
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => {
+            panic!("realistic rustfmt should parse")
+        }
+    };
     assert_eq!(
-        input.rustfmt.edition,
+        rustfmt.edition,
         Some(rustfmt_toml_parser::Edition::Edition2024),
         "realistic rustfmt should have edition 2024"
     );
     assert_eq!(
-        input.rustfmt.style_edition,
+        rustfmt.style_edition,
         Some(rustfmt_toml_parser::StyleEdition::Edition2024),
         "realistic rustfmt should have style_edition 2024"
     );
     assert_eq!(
-        input.rustfmt.max_width,
+        rustfmt.max_width,
         Some(100),
         "realistic rustfmt should have max_width 100"
     );
     assert_eq!(
-        input.rustfmt.tab_spaces,
+        rustfmt.tab_spaces,
         Some(4),
         "realistic rustfmt should have tab_spaces 4"
     );
     assert_eq!(
-        input.rustfmt.use_field_init_shorthand,
+        rustfmt.use_field_init_shorthand,
         Some(true),
         "realistic rustfmt should have use_field_init_shorthand true"
     );
     assert_eq!(
-        input.rustfmt.use_try_shorthand,
+        rustfmt.use_try_shorthand,
         Some(true),
         "realistic rustfmt should have use_try_shorthand true"
     );
     assert_eq!(
-        input.rustfmt.reorder_imports,
+        rustfmt.reorder_imports,
         Some(true),
         "realistic rustfmt should have reorder_imports true"
     );
     assert_eq!(
-        input.rustfmt.reorder_modules,
+        rustfmt.reorder_modules,
         Some(true),
         "realistic rustfmt should have reorder_modules true"
     );
 
     // Verify workspace.package.edition that RS-FMT-CONFIG-04 reads for
     // edition mismatch detection.
-    let workspace = input
-        .cargo
+    let cargo = match &input.cargo_state {
+        g3rs_fmt_types::G3RsFmtCargoState::Parsed(cargo) => cargo,
+        other => panic!("realistic Cargo.toml should parse, got {other:?}"),
+    };
+    let workspace = cargo
         .workspace
         .as_ref()
         .expect("realistic Cargo.toml should have a [workspace] section");
@@ -535,8 +576,11 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
 
     // Verify toolchain channel and components that RS-FMT-CONFIG-03 reads for
     // nightly key detection.
-    let toolchain_section = input
-        .toolchain
+    let toolchain = match &input.toolchain_state {
+        g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
+        other => panic!("realistic toolchain should parse, got {other:?}"),
+    };
+    let toolchain_section = toolchain
         .toolchain
         .as_ref()
         .expect("realistic rust-toolchain.toml should have a [toolchain] section");
@@ -577,7 +621,7 @@ fn rustfmt_toml_in_subdirectory_is_not_selected() {
 
 #[cfg(unix)]
 #[test]
-fn unreadable_rustfmt_toml_returns_unreadable_error() {
+fn unreadable_rustfmt_toml_becomes_parse_error_state() {
     use std::os::unix::fs::PermissionsExt;
 
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -591,30 +635,21 @@ fn unreadable_rustfmt_toml_returns_unreadable_error() {
         .expect("should set permissions on rustfmt.toml");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve unreadable rustfmt.toml as state");
 
     // Restore permissions so temp cleanup succeeds.
     let _ignore = fs::set_permissions(&rustfmt_path, fs::Permissions::from_mode(0o644));
 
-    match result {
-        Err(crate::IngestionError::Unreadable { ref path, .. }) => {
-            assert!(
-                path.ends_with("rustfmt.toml"),
-                "Unreadable path should point to rustfmt.toml, got: {path:?}"
-            );
-        }
-        // The crawl may also mark the file as unreadable via its `readable` flag,
-        // which produces the same error variant from a different code path. Both
-        // are correct — the important thing is it's `Unreadable` for rustfmt.toml.
-        ref other => panic!(
-            "expected Unreadable error for rustfmt.toml, got: {other:?}"
-        ),
-    }
+    assert!(matches!(
+        input.rustfmt_state,
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError
+    ));
 }
 
 #[cfg(unix)]
 #[test]
-fn unreadable_cargo_toml_returns_unreadable_error() {
+fn unreadable_cargo_toml_becomes_parse_error_state() {
     use std::os::unix::fs::PermissionsExt;
 
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -627,26 +662,20 @@ fn unreadable_cargo_toml_returns_unreadable_error() {
         .expect("should set permissions on Cargo.toml");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve unreadable Cargo.toml as state");
 
     let _ignore = fs::set_permissions(&cargo_path, fs::Permissions::from_mode(0o644));
 
-    match result {
-        Err(crate::IngestionError::Unreadable { ref path, .. }) => {
-            assert!(
-                path.ends_with("Cargo.toml"),
-                "Unreadable path should point to Cargo.toml, got: {path:?}"
-            );
-        }
-        ref other => panic!(
-            "expected Unreadable error for Cargo.toml, got: {other:?}"
-        ),
-    }
+    assert!(matches!(
+        input.cargo_state,
+        g3rs_fmt_types::G3RsFmtCargoState::ParseError
+    ));
 }
 
 #[cfg(unix)]
 #[test]
-fn unreadable_toolchain_toml_returns_unreadable_error() {
+fn unreadable_toolchain_toml_becomes_parse_error_state() {
     use std::os::unix::fs::PermissionsExt;
 
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -659,19 +688,13 @@ fn unreadable_toolchain_toml_returns_unreadable_error() {
         .expect("should set permissions on rust-toolchain.toml");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("ingestion should preserve unreadable rust-toolchain.toml as state");
 
     let _ignore = fs::set_permissions(&toolchain_path, fs::Permissions::from_mode(0o644));
 
-    match result {
-        Err(crate::IngestionError::Unreadable { ref path, .. }) => {
-            assert!(
-                path.ends_with("rust-toolchain.toml"),
-                "Unreadable path should point to rust-toolchain.toml, got: {path:?}"
-            );
-        }
-        ref other => panic!(
-            "expected Unreadable error for rust-toolchain.toml, got: {other:?}"
-        ),
-    }
+    assert!(matches!(
+        input.toolchain_state,
+        g3rs_fmt_types::G3RsFmtToolchainState::ParseError
+    ));
 }

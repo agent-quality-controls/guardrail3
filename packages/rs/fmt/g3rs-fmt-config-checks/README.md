@@ -1,23 +1,25 @@
 # g3rs-fmt-config-checks
 
-Extracted rustfmt config checks for guardrail3.
+Config checks for the `fmt` family.
 
-This package is intentionally narrower than the in-app `fmt` family:
+This package validates typed root config content only.
 
-- it validates typed parsed config content only
-- it does not discover authoritative files
-- it does not decide repo-global ownership
-- it does not report nested override placement, dual-file conflicts, or guardrail escape hatches
+- It does not discover root files.
+- It does not own nested placement.
+- It does not own dual-file conflicts.
 
 Current scope:
 
 - `RS-FMT-CONFIG-01`: baseline rustfmt settings
 - `RS-FMT-CONFIG-02`: extra setting inventory
-- `RS-FMT-CONFIG-03`: nightly-only rustfmt keys on stable toolchains
-- `RS-FMT-CONFIG-04`: rustfmt/Cargo edition consistency
+- `RS-FMT-CONFIG-03`: nightly-only rustfmt keys on stable toolchains, including missing and parse blockers
+- `RS-FMT-CONFIG-04`: rustfmt/Cargo edition consistency, including missing and parse blockers
+- `RS-FMT-CONFIG-07`: documented rustfmt `ignore` escape hatches
 
-The app remains responsible for:
+Ingestion remains responsible for:
 
-- selecting the authoritative `rustfmt.toml`, `Cargo.toml`, and `rust-toolchain.toml`
-- upstream parse-failure and missing-file reporting
-- `RS-FMT-01`, `RS-FMT-05`, `RS-FMT-07`, and `RS-FMT-08`
+- selecting the active root rustfmt config
+- parsing root config files into typed or blocker states
+- extracting escape hatch entries from `guardrail3.toml`
+
+`RS-FMT-FILETREE-01`, `RS-FMT-FILETREE-05`, and `RS-FMT-FILETREE-08` live in `g3rs-fmt-filetree-checks`.
