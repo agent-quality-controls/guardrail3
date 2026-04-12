@@ -10,7 +10,7 @@ fn reports_missing_mutants_file() {
 
     assert_has_result(
         &results,
-        "RS-TEST-12",
+        "RS-TEST-CONFIG-12",
         G3Severity::Error,
         "mutants config missing",
         ".cargo/mutants.toml",
@@ -28,7 +28,7 @@ fn reports_present_mutants_file_as_inventory() {
 
     assert_has_result(
         &results,
-        "RS-TEST-12",
+        "RS-TEST-CONFIG-12",
         G3Severity::Info,
         "mutants config exists",
         ".cargo/mutants.toml",

@@ -3,7 +3,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::TestFileInput;
 
-const ID: &str = "RS-TEST-04";
+const ID: &str = "RS-TEST-SOURCE-04";
 
 pub(crate) fn check(input: &TestFileInput<'_>, results: &mut Vec<G3CheckResult>) {
     let mut documented = 0usize;

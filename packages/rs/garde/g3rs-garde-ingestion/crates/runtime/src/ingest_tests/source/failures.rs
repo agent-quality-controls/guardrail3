@@ -94,7 +94,7 @@ fn pipeline_reports_malformed_source_via_garde_10() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-GARDE-10" && result.file() == Some("src/lib.rs")
+            result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("src/lib.rs")
         }),
         "{results:#?}"
     );
@@ -121,12 +121,12 @@ fn pipeline_reports_malformed_guardrail_via_garde_10() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-GARDE-10" && result.file() == Some("guardrail3.toml")
+            result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("guardrail3.toml")
         }),
         "{results:#?}"
     );
     assert!(
-        results.iter().all(|result| result.id() != "RS-GARDE-AST-04"),
+        results.iter().all(|result| result.id() != "RS-GARDE-SOURCE-04"),
         "{results:#?}"
     );
 }
@@ -151,7 +151,7 @@ fn pipeline_reports_unreadable_source_via_garde_10() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-GARDE-10" && result.file() == Some("src/lib.rs")
+            result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("src/lib.rs")
         }),
         "{results:#?}"
     );
@@ -177,12 +177,12 @@ fn pipeline_reports_unreadable_guardrail_via_garde_10() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-GARDE-10" && result.file() == Some("guardrail3.toml")
+            result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("guardrail3.toml")
         }),
         "{results:#?}"
     );
     assert!(
-        results.iter().all(|result| result.id() != "RS-GARDE-AST-04"),
+        results.iter().all(|result| result.id() != "RS-GARDE-SOURCE-04"),
         "{results:#?}"
     );
 }

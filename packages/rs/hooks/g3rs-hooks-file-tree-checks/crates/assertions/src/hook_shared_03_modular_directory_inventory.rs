@@ -1,1 +1,1 @@
-crate::define_rule_assertions!("HOOK-SHARED-03");
+crate::define_rule_assertions!("RS-HOOKS-FILETREE-03");

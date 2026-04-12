@@ -7,7 +7,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use super::helpers;
 use crate::support::{AnalyzedFile, RootAnalysis};
 
-const ID: &str = "RS-TEST-03";
+const ID: &str = "RS-TEST-FILETREE-03";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct RuntimeAssertionsViolation {

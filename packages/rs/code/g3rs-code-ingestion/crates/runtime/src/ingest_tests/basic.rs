@@ -383,7 +383,7 @@ fn ingested_inputs_drive_code_ast_checks() {
     let test_results = g3rs_code_source_checks::check(require_source_file(&inputs, "tests/smoke.rs"));
 
     assert!(
-        lib_results.iter().any(|result| result.id() == "RS-CODE-13"),
+        lib_results.iter().any(|result| result.id() == "RS-CODE-SOURCE-13"),
         "lib input should preserve todo! detection"
     );
     assert!(

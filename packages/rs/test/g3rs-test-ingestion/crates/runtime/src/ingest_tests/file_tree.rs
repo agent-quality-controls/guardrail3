@@ -138,15 +138,15 @@ fn file_tree_pipeline_reports_structural_test_findings() {
     let results = run_file_tree_pipeline(root);
 
     assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-02" && result.file() == Some("src/tests")
+        result.id() == "RS-TEST-FILETREE-02" && result.file() == Some("src/tests")
     }), "{results:#?}");
     assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-03"
+        result.id() == "RS-TEST-FILETREE-03"
             && result.title() == "assertions crate missing"
             && result.file() == Some("crates/assertions/Cargo.toml")
     }), "{results:#?}");
     assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-18"
+        result.id() == "RS-TEST-FILETREE-18"
             && result.title() == "test_support imports local component crate"
             && result.file() == Some("test_support/src/lib.rs")
     }), "{results:#?}");
@@ -196,7 +196,7 @@ fn file_tree_pipeline_reports_input_failures_as_rs_test_10() {
     }
 
     assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-10"
+        result.id() == "RS-TEST-FILETREE-10"
             && result.file() == Some("crates/runtime/tests/broken.rs")
             && result.title() == "failed to read test input"
     }), "{results:#?}");
@@ -231,7 +231,7 @@ fn file_tree_pipeline_reports_nested_ad_hoc_src_tests_tree() {
     let results = run_file_tree_pipeline(root);
 
     assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-02"
+        result.id() == "RS-TEST-FILETREE-02"
             && result.title() == "ad hoc src/tests tree"
             && result.file() == Some("crates/runtime/src/foo/tests")
     }), "{results:#?}");

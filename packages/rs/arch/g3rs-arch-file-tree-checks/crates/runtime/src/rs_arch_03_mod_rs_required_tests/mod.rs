@@ -14,7 +14,7 @@ fn sibling_file_without_mod_rs_uses_forbidden_convention() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-03",
+        "RS-ARCH-FILETREE-03",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("module directory uses foo.rs convention"),
@@ -35,7 +35,7 @@ fn declared_module_directory_without_mod_rs_fires() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-03",
+        "RS-ARCH-FILETREE-03",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("module directory missing mod.rs"),
@@ -54,7 +54,7 @@ fn path_wired_directory_without_mod_declaration_fires_on_directory() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-03",
+        "RS-ARCH-FILETREE-03",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("module directory missing mod.rs"),
@@ -76,7 +76,7 @@ fn module_directory_with_mod_rs_inventories() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-03",
+        "RS-ARCH-FILETREE-03",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Info),
             title: Some("module directory has mod.rs"),

@@ -2,7 +2,7 @@ use crate::compat::{G3CheckResult, G3Severity};
 
 use crate::inputs::DispatcherSyntaxInput;
 
-const ID: &str = "HOOK-SHARED-19";
+const ID: &str = "RS-HOOKS-SOURCE-02";
 
 pub(crate) fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<G3CheckResult>) {
     if !input.has_modular_dir {

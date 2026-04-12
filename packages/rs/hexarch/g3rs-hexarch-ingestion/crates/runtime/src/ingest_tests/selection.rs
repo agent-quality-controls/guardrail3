@@ -102,7 +102,7 @@ version = "0.1.0"
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].crate_facts.rel_dir, "crates/ports/http");
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-22");
     assert_eq!(results[0].file(), Some("crates/ports/http"));
 }
 #[test]
@@ -178,10 +178,10 @@ version = "0.1.0"
     let mut ids = results.iter().map(|result| result.id().to_owned()).collect::<Vec<_>>();
     ids.sort();
 
-    assert_eq!(ids, vec!["RS-HEXARCH-22".to_owned(), "RS-HEXARCH-23".to_owned()]);
+    assert_eq!(ids, vec!["RS-HEXARCH-SOURCE-22".to_owned(), "RS-HEXARCH-SOURCE-23".to_owned()]);
     let adapter = results
         .iter()
-        .find(|result| result.id() == "RS-HEXARCH-23")
+        .find(|result| result.id() == "RS-HEXARCH-SOURCE-23")
         .expect("adapter result");
     assert_eq!(adapter.file(), Some("crates/adapters/sql/Cargo.toml"));
     assert!(adapter.title().contains("source analysis failed"));
@@ -299,7 +299,7 @@ version = "0.1.0"
     let crawl = g3rs_workspace_crawl::crawl(&root.path().join("apps/good")).expect("crawl");
     let results = run_source_from_crawl(&crawl);
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-22");
 }
 
 #[test]
@@ -387,7 +387,7 @@ version = "0.1.0"
     let results = run_source_from_crawl(&crawl);
     let adapter = results
         .iter()
-        .find(|result| result.id() == "RS-HEXARCH-23")
+        .find(|result| result.id() == "RS-HEXARCH-SOURCE-23")
         .expect("adapter result");
 
     assert_eq!(results.len(), 2);
@@ -444,7 +444,7 @@ version = "0.1.0"
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].crate_facts.rel_dir, "crates/ports/http");
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-22");
     assert_eq!(results[0].file(), Some("crates/ports/http"));
 }
 

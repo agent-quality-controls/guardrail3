@@ -6,7 +6,7 @@ use crate::compat::{G3CheckResult, G3Severity};
 
 use super::inputs::RustHookCommandInput;
 
-const ID: &str = "HOOK-RS-10";
+const ID: &str = "RS-HOOKS-SOURCE-11";
 
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     if !input.is_workspace_project {

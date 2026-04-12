@@ -10,7 +10,7 @@ fn empty_failure_list_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-07", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-07", &[]);
 }
 
 #[test]
@@ -29,7 +29,7 @@ fn descendant_manifest_failure_fires() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-07",
+        "RS-TOPOLOGY-FILETREE-07",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("Rust topology required input failed closed"),
@@ -61,7 +61,7 @@ fn multiple_failures_emit_one_result_each() {
     let results = crate::check(&input);
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-07",
+        "RS-TOPOLOGY-FILETREE-07",
         &[
             ExpectedRuleResult {
                 severity: Some(G3Severity::Error),
@@ -101,21 +101,21 @@ fn failures_coexist_with_other_topology_rules() {
     assert_eq!(
         results
             .iter()
-            .filter(|result| result.id() == "RS-TOPOLOGY-07")
+            .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-07")
             .count(),
         1
     );
     assert_eq!(
         results
             .iter()
-            .filter(|result| result.id() == "RS-TOPOLOGY-11")
+            .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
             .count(),
         1
     );
     assert_eq!(
         results
             .iter()
-            .filter(|result| result.id() == "RS-TOPOLOGY-12")
+            .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12")
             .count(),
         1
     );

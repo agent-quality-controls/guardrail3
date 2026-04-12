@@ -2,7 +2,7 @@ use crate::compat::{G3CheckResult, G3Severity};
 
 use crate::inputs::ExecutableCommandContextInput;
 
-const ID: &str = "HOOK-SHARED-13";
+const ID: &str = "RS-HOOKS-SOURCE-18";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
     if let Some(raw_line) = first_exit_zero_line(input.parsed, &mut Vec::new()) {

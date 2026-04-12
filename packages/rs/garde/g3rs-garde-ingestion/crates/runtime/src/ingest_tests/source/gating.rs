@@ -40,7 +40,7 @@ fn pipeline_activates_for_source_adoption_markers_without_garde_dependency() {
     let results = g3rs_garde_source_checks::check(&input);
 
     assert!(
-        results.iter().any(|result| result.id() == "RS-GARDE-AST-01"),
+        results.iter().any(|result| result.id() == "RS-GARDE-SOURCE-01"),
         "{results:#?}"
     );
 }
@@ -67,7 +67,7 @@ fn pipeline_activates_for_manual_deserialize_adoption_without_garde_dependency()
     assert!(
         results
             .iter()
-            .any(|result| result.id() == "RS-GARDE-AST-02" && result.file() == Some("src/input.rs")),
+            .any(|result| result.id() == "RS-GARDE-SOURCE-02" && result.file() == Some("src/input.rs")),
         "{results:#?}"
     );
 }
@@ -94,7 +94,7 @@ fn pipeline_activates_for_manual_validate_adoption_without_garde_dependency() {
     assert!(
         results
             .iter()
-            .any(|result| result.id() == "RS-GARDE-AST-08" && result.file() == Some("src/validate.rs")),
+            .any(|result| result.id() == "RS-GARDE-SOURCE-08" && result.file() == Some("src/validate.rs")),
         "{results:#?}"
     );
 }
@@ -121,7 +121,7 @@ fn pipeline_activates_for_derived_validate_adoption_without_garde_dependency() {
     assert!(
         results
             .iter()
-            .any(|result| result.id() == "RS-GARDE-AST-08" && result.file() == Some("src/validate.rs")),
+            .any(|result| result.id() == "RS-GARDE-SOURCE-08" && result.file() == Some("src/validate.rs")),
         "{results:#?}"
     );
 }

@@ -72,7 +72,7 @@ fn reports_inventory_for_valid_runtime_assertions_split() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-03",
+        "RS-TEST-FILETREE-03",
         "runtime/assertions split confirmed",
         "Cargo.toml",
     );
@@ -98,7 +98,7 @@ fn reports_missing_assertions_crate() {
 
     assert_has_result(
         &results,
-        "RS-TEST-03",
+        "RS-TEST-FILETREE-03",
         G3Severity::Error,
         "assertions crate missing",
         "crates/assertions/Cargo.toml",
@@ -147,7 +147,7 @@ fn reports_runtime_depends_on_assertions_at_normal_scope() {
 
     assert_has_result(
         &results,
-        "RS-TEST-03",
+        "RS-TEST-FILETREE-03",
         G3Severity::Error,
         "runtime depends on assertions at normal scope",
         "crates/runtime/Cargo.toml",
@@ -193,7 +193,7 @@ fn reports_assertions_missing_runtime_dependency() {
 
     assert_has_result(
         &results,
-        "RS-TEST-03",
+        "RS-TEST-FILETREE-03",
         G3Severity::Error,
         "assertions missing runtime dependency",
         "crates/assertions/Cargo.toml",
@@ -227,7 +227,7 @@ fn reports_external_harness_reaching_private_runtime_glue() {
 
     assert_has_result(
         &results,
-        "RS-TEST-03",
+        "RS-TEST-FILETREE-03",
         G3Severity::Error,
         "external harness reaches private runtime glue",
         "crates/runtime/tests/public_surface.rs",
@@ -261,7 +261,7 @@ fn reports_external_harness_path_including_local_source() {
 
     assert_has_result(
         &results,
-        "RS-TEST-03",
+        "RS-TEST-FILETREE-03",
         G3Severity::Error,
         "external harness path-includes local source",
         "crates/runtime/tests/public_surface.rs",
@@ -329,7 +329,7 @@ fn reports_sidecar_importing_sibling_production_module() {
 
     assert_has_result(
         &results,
-        "RS-TEST-03",
+        "RS-TEST-FILETREE-03",
         G3Severity::Error,
         "sidecar imports sibling production module",
         "crates/runtime/src/foo_tests/mod.rs",
@@ -353,7 +353,7 @@ fn reports_test_harness_outside_runtime_assertions_split() {
 
     assert_has_result(
         &results,
-        "RS-TEST-03",
+        "RS-TEST-FILETREE-03",
         G3Severity::Error,
         "test harness outside runtime/assertions split",
         "src/lib_tests/mod.rs",

@@ -12,7 +12,7 @@ fn reports_malformed_guardrail_config() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-GARDE-10"
+            result.id() == "RS-GARDE-SOURCE-10"
                 && result.file() == Some("guardrail3.toml")
                 && result.title() == "garde-family input failure"
         }),

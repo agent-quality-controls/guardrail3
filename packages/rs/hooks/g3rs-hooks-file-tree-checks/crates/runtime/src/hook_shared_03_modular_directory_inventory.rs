@@ -1,6 +1,6 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "HOOK-SHARED-03";
+const ID: &str = "RS-HOOKS-FILETREE-03";
 
 pub(crate) fn check(has_modular_dir: bool, results: &mut Vec<G3CheckResult>) {
     let (title, message, file) = if has_modular_dir {

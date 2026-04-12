@@ -21,7 +21,7 @@ fn emits_code_family_input_failure_on_parse_error() {
     );
     let result = &results[0];
 
-    assert_eq!(result.id(), "RS-CODE-30");
+    assert_eq!(result.id(), "RS-CODE-SOURCE-30");
     assert_eq!(result.severity(), G3Severity::Error);
     assert_eq!(result.title(), "code-family input failure");
     assert_eq!(result.file(), Some("src/lib.rs"));

@@ -2,7 +2,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{IllegalFamilyFilePlacement, family_label};
 
-const ID: &str = "RS-TOPOLOGY-16";
+const ID: &str = "RS-TOPOLOGY-FILETREE-16";
 
 pub(crate) fn check(input: &IllegalFamilyFilePlacement, results: &mut Vec<G3CheckResult>) {
     results.push(G3CheckResult::new(

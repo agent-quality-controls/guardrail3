@@ -1,6 +1,6 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-TEST-10";
+const ID: &str = "RS-TEST-SOURCE-10";
 
 pub(crate) fn check(
     _root_rel_dir: &str,

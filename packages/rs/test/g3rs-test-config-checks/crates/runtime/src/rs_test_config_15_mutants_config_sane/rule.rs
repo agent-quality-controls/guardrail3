@@ -1,7 +1,7 @@
 use g3rs_test_types::G3RsTestConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-TEST-15";
+const ID: &str = "RS-TEST-CONFIG-15";
 
 pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(mutants) = input.mutants.as_ref() else {

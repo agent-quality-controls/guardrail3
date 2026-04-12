@@ -62,25 +62,25 @@ fn pipeline_reports_simple_test_ast_findings() {
     assert!(
         by_file["src/lib.rs"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-01"),
+            .any(|result| result.id() == "RS-TEST-SOURCE-01"),
         "{results:#?}"
     );
     assert!(
         by_file["tests/quality.rs"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-04"),
+            .any(|result| result.id() == "RS-TEST-SOURCE-04"),
         "{results:#?}"
     );
     assert!(
         by_file["tests/quality.rs"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-05"),
+            .any(|result| result.id() == "RS-TEST-SOURCE-05"),
         "{results:#?}"
     );
     assert!(
         by_file["tests/quality.rs"]
             .iter()
-            .any(|result| result.id() == "RS-TEST-08"),
+            .any(|result| result.id() == "RS-TEST-SOURCE-08"),
         "{results:#?}"
     );
 }
@@ -120,21 +120,21 @@ fn pipeline_reports_assertions_boundary_rules() {
     let results = run_ast_pipeline(root);
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-TEST-16"
+            result.id() == "RS-TEST-SOURCE-16"
                 && result.file() == Some("crates/assertions/src/lib.rs")
         }),
         "{results:#?}"
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-TEST-17"
+            result.id() == "RS-TEST-SOURCE-17"
                 && result.file() == Some("crates/runtime/tests/api.rs")
         }),
         "{results:#?}"
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-TEST-16"
+            result.id() == "RS-TEST-SOURCE-16"
                 && result.file() == Some("crates/runtime/src/feature_tests/mod.rs")
         }),
         "{results:#?}"
@@ -158,7 +158,7 @@ fn pipeline_reports_malformed_owned_source_as_rs_test_10() {
 
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-TEST-10"
+            result.id() == "RS-TEST-SOURCE-10"
                 && result.file() == Some("tests/broken.rs")
                 && result.title() == "failed to read test input"
         }),

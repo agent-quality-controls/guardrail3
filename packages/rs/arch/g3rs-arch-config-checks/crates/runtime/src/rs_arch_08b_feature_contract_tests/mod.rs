@@ -9,7 +9,7 @@ fn crates_without_public_exports_do_not_require_feature_contract() {
 
     let results = crate::check(&input(vec![node], Vec::new()));
 
-    assert!(!has_rule(&results, "RS-ARCH-08B"));
+    assert!(!has_rule(&results, "RS-ARCH-CONFIG-08"));
 }
 
 #[test]
@@ -21,7 +21,7 @@ fn missing_all_feature_fires() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-08B",
+        "RS-ARCH-CONFIG-08",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("missing `all` feature"),
@@ -45,7 +45,7 @@ fn valid_feature_contract_inventories() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-08B",
+        "RS-ARCH-CONFIG-08",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Info),
             title: Some("feature contract supports facade exports"),

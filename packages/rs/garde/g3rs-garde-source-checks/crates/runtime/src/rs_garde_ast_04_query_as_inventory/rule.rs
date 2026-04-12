@@ -5,7 +5,7 @@ use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{QueryAsMacroSite, error, warn};
 
-const ID: &str = "RS-GARDE-AST-04";
+const ID: &str = "RS-GARDE-SOURCE-04";
 
 pub(crate) fn check(macro_use: &QueryAsMacroSite, results: &mut Vec<G3CheckResult>) {
     if !macro_use.policy_available {

@@ -27,7 +27,7 @@ fn nested_policy_file_fires() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-16",
+        "RS-TOPOLOGY-FILETREE-16",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("`clippy` file `crates/api/nested/clippy.toml` is illegally placed"),
@@ -57,7 +57,7 @@ fn member_root_policy_file_fires() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-16",
+        "RS-TOPOLOGY-FILETREE-16",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("`clippy` file `crates/api/clippy.toml` is illegally placed"),
@@ -87,7 +87,7 @@ fn member_nextest_file_fires() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-16",
+        "RS-TOPOLOGY-FILETREE-16",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("`test` file `crates/api/.config/nextest.toml` is illegally placed"),
@@ -117,7 +117,7 @@ fn illegal_child_root_branch_is_reported() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-16",
+        "RS-TOPOLOGY-FILETREE-16",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("`deny` file `crates/api/deny.toml` is illegally placed"),
@@ -147,7 +147,7 @@ fn non_member_root_branch_is_reported() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-16",
+        "RS-TOPOLOGY-FILETREE-16",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("`release` file `vendor/release-plz.toml` is illegally placed"),
@@ -177,7 +177,7 @@ fn misplaced_fmt_file_fires() {
 
     assert_rule_results(
         &results,
-        "RS-TOPOLOGY-16",
+        "RS-TOPOLOGY-FILETREE-16",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("`fmt` file `crates/api/rustfmt.toml` is illegally placed"),
@@ -205,7 +205,7 @@ fn root_level_fmt_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-16", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-16", &[]);
 }
 
 #[test]
@@ -226,7 +226,7 @@ fn root_level_cargo_config_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-16", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-16", &[]);
 }
 
 #[test]
@@ -247,7 +247,7 @@ fn root_level_cargo_config_legacy_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-16", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-16", &[]);
 }
 
 #[test]
@@ -268,7 +268,7 @@ fn root_level_cargo_deny_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-16", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-16", &[]);
 }
 
 #[test]
@@ -289,5 +289,5 @@ fn root_level_nextest_config_stays_quiet() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-16", &[]);
+    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-16", &[]);
 }

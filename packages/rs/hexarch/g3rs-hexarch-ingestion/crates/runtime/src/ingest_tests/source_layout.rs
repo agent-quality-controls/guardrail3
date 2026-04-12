@@ -44,7 +44,7 @@ path = "mod.rs"
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = inputs.iter().flat_map(check_source).collect::<Vec<_>>();
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-22");
     assert_eq!(results[0].severity(), G3Severity::Warn);
     assert_eq!(results[0].file(), Some("crates/ports/http"));
     assert!(results[0].title().contains("public inherent methods"));
@@ -87,7 +87,7 @@ version = "0.1.0"
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = inputs.iter().flat_map(check_source).collect::<Vec<_>>();
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-23");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-23");
     assert_eq!(results[0].severity(), G3Severity::Info);
     assert!(results[0].inventory());
 }
@@ -129,7 +129,7 @@ version = "0.1.0"
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = inputs.iter().flat_map(check_source).collect::<Vec<_>>();
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-23");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-23");
     assert_eq!(results[0].severity(), G3Severity::Error);
     assert!(results[0].title().contains("source analysis failed"));
     assert_eq!(

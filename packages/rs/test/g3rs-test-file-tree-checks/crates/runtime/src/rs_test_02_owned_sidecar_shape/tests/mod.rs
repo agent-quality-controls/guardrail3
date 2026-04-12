@@ -31,7 +31,7 @@ fn reports_inventory_for_owned_sidecar_shape() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-02",
+        "RS-TEST-FILETREE-02",
         "owned sidecar shape confirmed",
         "Cargo.toml",
     );
@@ -53,7 +53,7 @@ fn reports_ad_hoc_src_tests_tree() {
 
     assert_has_result(
         &results,
-        "RS-TEST-02",
+        "RS-TEST-FILETREE-02",
         G3Severity::Error,
         "ad hoc src/tests tree",
         "src/tests",
@@ -77,7 +77,7 @@ fn reports_nested_ad_hoc_src_tests_tree() {
 
     assert_has_result(
         &results,
-        "RS-TEST-02",
+        "RS-TEST-FILETREE-02",
         G3Severity::Error,
         "ad hoc src/tests tree",
         "src/foo/tests",
@@ -101,7 +101,7 @@ fn reports_flat_sidecar_file() {
 
     assert_has_result(
         &results,
-        "RS-TEST-02",
+        "RS-TEST-FILETREE-02",
         G3Severity::Error,
         "flat sidecar test file",
         "src/lib_tests.rs",
@@ -125,7 +125,7 @@ fn reports_bad_cfg_test_declaration() {
 
     assert_has_result(
         &results,
-        "RS-TEST-02",
+        "RS-TEST-FILETREE-02",
         G3Severity::Error,
         "ad hoc cfg(test) module declaration",
         "src/lib.rs",
@@ -149,7 +149,7 @@ fn reports_orphaned_sidecar_harness() {
 
     assert_has_result(
         &results,
-        "RS-TEST-02",
+        "RS-TEST-FILETREE-02",
         G3Severity::Error,
         "orphaned sidecar harness",
         "src/foo_tests/mod.rs",
@@ -183,7 +183,7 @@ fn reports_sidecar_directory_missing_mod_rs() {
 
     assert_has_result(
         &results,
-        "RS-TEST-02",
+        "RS-TEST-FILETREE-02",
         G3Severity::Error,
         "sidecar directory missing mod.rs",
         "src/foo_tests",

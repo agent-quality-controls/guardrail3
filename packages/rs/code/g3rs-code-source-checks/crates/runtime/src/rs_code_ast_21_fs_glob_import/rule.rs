@@ -3,7 +3,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use crate::parse::find_std_fs_glob_import_lines;
 use crate::support::CodeSourceRuleInput;
 
-const ID: &str = "RS-CODE-21";
+const ID: &str = "RS-CODE-SOURCE-21";
 
 fn is_filesystem_boundary_module(rel_path: &str) -> bool {
     rel_path.ends_with("src/fs.rs")

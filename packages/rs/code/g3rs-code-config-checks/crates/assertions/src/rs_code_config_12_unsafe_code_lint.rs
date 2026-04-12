@@ -1,7 +1,7 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 pub fn assert_forbid_inventory_info(result: &G3CheckResult, rel_path: &str) {
-    assert_eq!(result.id(), "RS-CODE-12");
+    assert_eq!(result.id(), "RS-CODE-CONFIG-12");
     assert_eq!(result.severity(), G3Severity::Info);
     assert_eq!(result.title(), "unsafe_code = forbid");
     assert_eq!(
@@ -14,7 +14,7 @@ pub fn assert_forbid_inventory_info(result: &G3CheckResult, rel_path: &str) {
 }
 
 pub fn assert_deny_error(result: &G3CheckResult, rel_path: &str) {
-    assert_eq!(result.id(), "RS-CODE-12");
+    assert_eq!(result.id(), "RS-CODE-CONFIG-12");
     assert_eq!(result.severity(), G3Severity::Error);
     assert_eq!(result.title(), "unsafe_code should be forbid");
     assert_eq!(

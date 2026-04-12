@@ -1,7 +1,7 @@
 use g3rs_arch_types::{G3RsArchBoundaryRef, G3RsArchDependencyEdge};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-ARCH-05";
+const ID: &str = "RS-ARCH-CONFIG-05";
 
 pub(crate) fn check(edge: &G3RsArchDependencyEdge, results: &mut Vec<G3CheckResult>) {
     let Some(target_rel) = &edge.resolved_target_rel else {

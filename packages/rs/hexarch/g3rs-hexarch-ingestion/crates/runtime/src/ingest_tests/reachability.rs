@@ -52,7 +52,7 @@ pub fn counted_helper() {}
 
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-22");
     assert_eq!(results[0].severity(), G3Severity::Warn);
     assert!(results[0].message().contains("1 public free function"));
 }
@@ -97,7 +97,7 @@ version = "0.1.0"
 
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-23");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-23");
     assert_eq!(results[0].severity(), G3Severity::Error);
     assert_eq!(results[0].file(), Some("crates/adapters/sql"));
     assert!(!results[0].inventory());
@@ -155,7 +155,7 @@ version = "0.1.0"
     let mut ids = results.iter().map(|result| result.id().to_owned()).collect::<Vec<_>>();
     ids.sort();
 
-    assert_eq!(ids, vec!["RS-HEXARCH-22".to_owned(), "RS-HEXARCH-23".to_owned()]);
+    assert_eq!(ids, vec!["RS-HEXARCH-SOURCE-22".to_owned(), "RS-HEXARCH-SOURCE-23".to_owned()]);
 }
 
 #[test]
@@ -193,7 +193,7 @@ version = "0.1.0"
 
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-23");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-23");
     assert!(results[0].inventory());
 }
 
@@ -227,7 +227,7 @@ version = "0.1.0"
 
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-23");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-23");
     assert_eq!(results[0].severity(), G3Severity::Error);
     assert!(!results[0].inventory());
 }
@@ -267,7 +267,7 @@ version = "0.1.0"
 
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-22");
     assert_eq!(results[0].severity(), G3Severity::Warn);
     assert_eq!(results[0].file(), Some("crates/ports/http/src/extra.rs"));
     assert!(results[0].title().contains("source analysis failed"));
@@ -303,7 +303,7 @@ version = "0.1.0"
 
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-22");
     assert_eq!(results[0].file(), Some("crates/ports/http/src"));
     assert!(results[0].message().contains("expected src/lib.rs or src/main.rs"));
 }
@@ -348,7 +348,7 @@ impl PortApi for Repo {
 
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-22");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-22");
     assert!(results[0].inventory());
 }
 
@@ -438,7 +438,7 @@ path = "missing.rs"
 
     let results = source_results(root.path());
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-23");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-23");
     assert_eq!(results[0].file(), Some("crates/adapters/sql/Cargo.toml"));
     assert!(results[0].message().contains("configured target path(s) not found"));
 }
@@ -488,7 +488,7 @@ version = "0.1.0"
     let results = inputs.iter().flat_map(check_source).collect::<Vec<_>>();
 
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-23");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-23");
     assert_eq!(results[0].severity(), G3Severity::Error);
     assert_eq!(results[0].file(), Some("crates/adapters/sql/src/extra.rs"));
     assert!(results[0].message().contains("file is not readable"));
@@ -539,6 +539,6 @@ version = "0.1.0"
     let results = inputs.iter().flat_map(check_source).collect::<Vec<_>>();
 
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id(), "RS-HEXARCH-23");
+    assert_eq!(results[0].id(), "RS-HEXARCH-SOURCE-23");
     assert!(results[0].inventory());
 }

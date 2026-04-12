@@ -6,7 +6,7 @@ use crate::compat::{G3CheckResult, G3Severity};
 
 use super::inputs::RustHookCommandInput;
 
-const ID: &str = "HOOK-RS-11";
+const ID: &str = "RS-HOOKS-SOURCE-12";
 
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     let found = script_contains_gitleaks(input.parsed);

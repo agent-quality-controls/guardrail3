@@ -6,7 +6,7 @@ pub fn assert_inventory_warn(
     line: usize,
     line_text: &str,
 ) {
-    assert_eq!(result.id(), "RS-CODE-07");
+    assert_eq!(result.id(), "RS-CODE-CONFIG-07");
     assert_eq!(result.severity(), G3Severity::Warn);
     assert_eq!(result.title(), "EXCEPTION comment inventory");
     assert_eq!(

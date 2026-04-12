@@ -1,7 +1,7 @@
 use g3rs_arch_types::{G3RsArchFacadeSurface, G3RsArchSourceCrate};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-ARCH-02";
+const ID: &str = "RS-ARCH-SOURCE-02";
 
 pub(crate) fn check(
     node: &G3RsArchSourceCrate,

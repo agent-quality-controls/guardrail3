@@ -10,7 +10,7 @@ fn reports_missing_tool() {
 
     assert_has_result(
         &results,
-        "RS-TEST-11",
+        "RS-TEST-CONFIG-11",
         G3Severity::Error,
         "cargo-mutants missing",
         "Cargo.toml",
@@ -27,7 +27,7 @@ fn reports_present_tool_as_inventory() {
 
     assert_has_result(
         &results,
-        "RS-TEST-11",
+        "RS-TEST-CONFIG-11",
         G3Severity::Info,
         "cargo-mutants installed",
         "Cargo.toml",

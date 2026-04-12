@@ -2,7 +2,7 @@ use crate::compat::{G3CheckResult, G3Severity};
 
 use super::inputs::RustHookCommandInput;
 
-const ID: &str = "HOOK-RS-03";
+const ID: &str = "RS-HOOKS-SOURCE-05";
 
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     let found = input

@@ -1,7 +1,7 @@
 use g3rs_arch_types::G3RsArchConfigCrate;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-ARCH-07B";
+const ID: &str = "RS-ARCH-CONFIG-07";
 const MAX_DEPENDENCIES: usize = 12;
 
 pub(crate) fn check(node: &G3RsArchConfigCrate, results: &mut Vec<G3CheckResult>) {

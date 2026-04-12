@@ -40,7 +40,7 @@ fn nested_workspace_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-11")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1);
@@ -77,7 +77,7 @@ fn excluded_nested_workspace_still_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-11")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1);
@@ -114,7 +114,7 @@ fn unreferenced_nested_workspace_still_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-11")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1);
@@ -152,7 +152,7 @@ fn exact_membership_fires_end_to_end() {
 
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-12")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12")
         .collect::<Vec<_>>();
     assert_eq!(rule_results.len(), 2);
     assert!(rule_results.iter().any(|result| {
@@ -192,11 +192,11 @@ fn nested_workspace_does_not_also_fire_membership_rule_end_to_end() {
     let results = run_results(root.path());
 
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-11").count(),
+        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11").count(),
         1
     );
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-12").count(),
+        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12").count(),
         0
     );
 }
@@ -221,7 +221,7 @@ fn dot_slash_member_path_stays_quiet_end_to_end() {
 
     let results = run_results(root.path());
 
-    assert!(results.iter().all(|result| result.id() != "RS-TOPOLOGY-12"));
+    assert!(results.iter().all(|result| result.id() != "RS-TOPOLOGY-FILETREE-12"));
 }
 
 #[test]
@@ -245,7 +245,7 @@ fn escaping_member_path_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-13")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-13")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1);
@@ -264,7 +264,7 @@ fn absolute_member_path_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-13")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-13")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1);
@@ -296,7 +296,7 @@ fn illegal_family_file_placement_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-16")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 2);
@@ -335,7 +335,7 @@ fn member_cargo_sidecar_illegal_placement_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-16")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 2);
@@ -375,7 +375,7 @@ fn illegal_root_nested_family_file_placement_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-16")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 2);
@@ -404,7 +404,7 @@ fn illegal_child_root_fmt_file_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-16")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1);
@@ -437,7 +437,7 @@ fn member_fmt_file_fires_end_to_end() {
     let results = run_results(root.path());
     let rule_results = results
         .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-16")
+        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
         .collect::<Vec<_>>();
 
     assert_eq!(rule_results.len(), 1);
@@ -533,15 +533,15 @@ fn descendant_manifest_failure_fails_closed_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-07").count(),
+        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-07").count(),
         1
     );
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-12").count(),
+        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12").count(),
         0
     );
     assert!(results.iter().any(|result| {
-        result.id() == "RS-TOPOLOGY-07" && result.file() == Some("bad/Cargo.toml")
+        result.id() == "RS-TOPOLOGY-FILETREE-07" && result.file() == Some("bad/Cargo.toml")
     }));
 }
 
@@ -572,15 +572,15 @@ fn unreadable_descendant_manifest_fails_closed_end_to_end() {
     restore_readable(&bad_manifest);
 
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-07").count(),
+        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-07").count(),
         1
     );
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-12").count(),
+        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12").count(),
         0
     );
     assert!(results.iter().any(|result| {
-        result.id() == "RS-TOPOLOGY-07" && result.file() == Some("bad/Cargo.toml")
+        result.id() == "RS-TOPOLOGY-FILETREE-07" && result.file() == Some("bad/Cargo.toml")
     }));
 }
 
@@ -612,15 +612,15 @@ fn stale_read_descendant_manifest_fails_closed_end_to_end() {
     let results = check(&input);
 
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-07").count(),
+        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-07").count(),
         1
     );
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-12").count(),
+        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12").count(),
         0
     );
     assert!(results.iter().any(|result| {
-        result.id() == "RS-TOPOLOGY-07" && result.file() == Some("bad/Cargo.toml")
+        result.id() == "RS-TOPOLOGY-FILETREE-07" && result.file() == Some("bad/Cargo.toml")
     }));
 }
 

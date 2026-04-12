@@ -1,7 +1,7 @@
 use g3rs_hooks_config_checks_types::G3RsHooksSelectedHookConfigFact;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "HOOK-RS-14";
+const ID: &str = "RS-HOOKS-CONFIG-02";
 
 pub(crate) fn check(
     selected_hook: &G3RsHooksSelectedHookConfigFact,

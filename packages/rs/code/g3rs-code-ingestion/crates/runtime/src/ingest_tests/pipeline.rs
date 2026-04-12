@@ -86,8 +86,8 @@ fn pipeline_reports_expected_findings_on_real_source_files() {
     assert!(
         by_file["src/has_todo.rs"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-13"),
-        "todo fixture should trigger RS-CODE-13: {results:#?}"
+            .any(|result| result.id() == "RS-CODE-SOURCE-13"),
+        "todo fixture should trigger RS-CODE-SOURCE-13: {results:#?}"
     );
     assert_eq!(
         by_file["src/has_todo.rs"].len(),
@@ -97,8 +97,8 @@ fn pipeline_reports_expected_findings_on_real_source_files() {
     assert!(
         by_file["src/direct_std_fs.rs"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-15"),
-        "direct std::fs fixture should trigger RS-CODE-15: {results:#?}"
+            .any(|result| result.id() == "RS-CODE-SOURCE-15"),
+        "direct std::fs fixture should trigger RS-CODE-SOURCE-15: {results:#?}"
     );
     assert_eq!(
         by_file["src/direct_std_fs.rs"].len(),
@@ -108,8 +108,8 @@ fn pipeline_reports_expected_findings_on_real_source_files() {
     assert!(
         by_file["src/panic_probe.rs"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-16"),
-        "panic fixture should trigger RS-CODE-16: {results:#?}"
+            .any(|result| result.id() == "RS-CODE-SOURCE-16"),
+        "panic fixture should trigger RS-CODE-SOURCE-16: {results:#?}"
     );
     assert_eq!(
         by_file["src/panic_probe.rs"].len(),
@@ -154,19 +154,19 @@ unsafe_code = \"forbid\"\n\
     assert!(
         by_file["Cargo.toml"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-07"),
+            .any(|result| result.id() == "RS-CODE-CONFIG-07"),
         "{results:#?}"
     );
     assert!(
         by_file["Cargo.toml"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-12" && result.severity() == G3Severity::Info),
+            .any(|result| result.id() == "RS-CODE-CONFIG-12" && result.severity() == G3Severity::Info),
         "{results:#?}"
     );
     assert!(
         by_file["deny.toml"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-07"),
+            .any(|result| result.id() == "RS-CODE-CONFIG-07"),
         "{results:#?}"
     );
 }
@@ -208,7 +208,7 @@ edition = \"2024\"\n\
 
     assert_eq!(results.len(), 1, "{results:#?}");
     assert_eq!(by_file["crates/core/Cargo.toml"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["crates/core/Cargo.toml"][0].id(), "RS-CODE-07");
+    assert_eq!(by_file["crates/core/Cargo.toml"][0].id(), "RS-CODE-CONFIG-07");
     assert!(
         !by_file.contains_key("Cargo.toml"),
         "root workspace warn plus harmless comments should stay clean: {results:#?}"
@@ -288,7 +288,7 @@ unsafe_code = \"deny\"\n\
 
     assert_eq!(results.len(), 1, "{results:#?}");
     assert_eq!(by_file["Cargo.toml"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["Cargo.toml"][0].id(), "RS-CODE-12");
+    assert_eq!(by_file["Cargo.toml"][0].id(), "RS-CODE-CONFIG-12");
     assert!(
         !by_file.contains_key("vendor/foreign/Cargo.toml"),
         "{results:#?}"
@@ -320,7 +320,7 @@ unsafe_code = \"deny\"\n",
 
     assert_eq!(results.len(), 1, "{results:#?}");
     assert_eq!(by_file["Cargo.toml"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["Cargo.toml"][0].id(), "RS-CODE-12");
+    assert_eq!(by_file["Cargo.toml"][0].id(), "RS-CODE-CONFIG-12");
     assert_eq!(by_file["Cargo.toml"][0].severity(), G3Severity::Error);
 }
 
@@ -595,10 +595,10 @@ fn pipeline_reports_new_single_file_ast_rules() {
     let by_file = findings_by_file(&results);
 
     assert_eq!(by_file["src/crate_allow.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/crate_allow.rs"][0].id(), "RS-CODE-01");
+    assert_eq!(by_file["src/crate_allow.rs"][0].id(), "RS-CODE-SOURCE-01");
 
     assert_eq!(by_file["src/unused_crate_deps.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/unused_crate_deps.rs"][0].id(), "RS-CODE-02");
+    assert_eq!(by_file["src/unused_crate_deps.rs"][0].id(), "RS-CODE-SOURCE-02");
 
     assert_eq!(
         by_file["src/item_allow_missing_reason.rs"].len(),
@@ -607,7 +607,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
     assert_eq!(
         by_file["src/item_allow_missing_reason.rs"][0].id(),
-        "RS-CODE-03"
+        "RS-CODE-SOURCE-03"
     );
 
     assert_eq!(
@@ -617,11 +617,11 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
     assert_eq!(
         by_file["src/item_allow_with_reason.rs"][0].id(),
-        "RS-CODE-04"
+        "RS-CODE-SOURCE-04"
     );
 
     assert_eq!(by_file["src/garde_skip.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/garde_skip.rs"][0].id(), "RS-CODE-06");
+    assert_eq!(by_file["src/garde_skip.rs"][0].id(), "RS-CODE-SOURCE-06");
 
     assert_eq!(
         by_file["src/garde_skip_no_comment.rs"].len(),
@@ -630,18 +630,18 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
     assert_eq!(
         by_file["src/garde_skip_no_comment.rs"][0].id(),
-        "RS-CODE-05"
+        "RS-CODE-SOURCE-05"
     );
 
     assert_eq!(by_file["src/too_many_lines.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/too_many_lines.rs"][0].id(), "RS-CODE-09");
+    assert_eq!(by_file["src/too_many_lines.rs"][0].id(), "RS-CODE-SOURCE-09");
     assert!(
         !by_file.contains_key("src/raw_string_payload_only.rs"),
         "{results:#?}"
     );
 
     assert_eq!(by_file["src/too_many_uses.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/too_many_uses.rs"][0].id(), "RS-CODE-10");
+    assert_eq!(by_file["src/too_many_uses.rs"][0].id(), "RS-CODE-SOURCE-10");
     assert_eq!(
         by_file["src/use_error_boundary_clean.rs"].len(),
         1,
@@ -649,11 +649,11 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
     assert_eq!(
         by_file["src/use_error_boundary_clean.rs"][0].id(),
-        "RS-CODE-11"
+        "RS-CODE-SOURCE-11"
     );
 
     assert_eq!(by_file["src/many_uses.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/many_uses.rs"][0].id(), "RS-CODE-11");
+    assert_eq!(by_file["src/many_uses.rs"][0].id(), "RS-CODE-SOURCE-11");
     assert!(
         !by_file.contains_key("src/use_warn_boundary_clean.rs"),
         "{results:#?}"
@@ -661,12 +661,12 @@ fn pipeline_reports_new_single_file_ast_rules() {
     assert!(!by_file.contains_key("tests/use_exempt.rs"), "{results:#?}");
 
     assert_eq!(by_file["src/large_struct.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/large_struct.rs"][0].id(), "RS-CODE-19");
+    assert_eq!(by_file["src/large_struct.rs"][0].id(), "RS-CODE-SOURCE-19");
     assert_eq!(by_file["src/large_enum.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/large_enum.rs"][0].id(), "RS-CODE-19");
+    assert_eq!(by_file["src/large_enum.rs"][0].id(), "RS-CODE-SOURCE-19");
 
     assert_eq!(by_file["src/path_reason.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/path_reason.rs"][0].id(), "RS-CODE-24");
+    assert_eq!(by_file["src/path_reason.rs"][0].id(), "RS-CODE-SOURCE-24");
     assert_eq!(
         by_file["src/path_reason.rs"][0].title(),
         "#[path] with reason",
@@ -677,21 +677,21 @@ fn pipeline_reports_new_single_file_ast_rules() {
         1,
         "{results:#?}"
     );
-    assert_eq!(by_file["src/path_missing_reason.rs"][0].id(), "RS-CODE-24");
+    assert_eq!(by_file["src/path_missing_reason.rs"][0].id(), "RS-CODE-SOURCE-24");
     assert_eq!(
         by_file["src/path_missing_reason.rs"][0].title(),
         "#[path] without reason",
         "{results:#?}"
     );
     assert_eq!(by_file["src/path_weak_reason.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/path_weak_reason.rs"][0].id(), "RS-CODE-24");
+    assert_eq!(by_file["src/path_weak_reason.rs"][0].id(), "RS-CODE-SOURCE-24");
     assert_eq!(
         by_file["src/path_weak_reason.rs"][0].title(),
         "#[path] reason too weak",
         "{results:#?}"
     );
     assert_eq!(by_file["src/path_escape.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/path_escape.rs"][0].id(), "RS-CODE-24");
+    assert_eq!(by_file["src/path_escape.rs"][0].id(), "RS-CODE-SOURCE-24");
     assert_eq!(
         by_file["src/path_escape.rs"][0].title(),
         "#[path] escapes parent directory",
@@ -702,7 +702,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
         1,
         "{results:#?}"
     );
-    assert_eq!(by_file["src/path_cfg_attr_reason.rs"][0].id(), "RS-CODE-24");
+    assert_eq!(by_file["src/path_cfg_attr_reason.rs"][0].id(), "RS-CODE-SOURCE-24");
     assert!(
         !by_file.contains_key("src/path_cfg_attr_known_false.rs"),
         "{results:#?}"
@@ -713,67 +713,67 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
 
     assert_eq!(by_file["src/cfg_attr_unknown.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/cfg_attr_unknown.rs"][0].id(), "RS-CODE-08");
+    assert_eq!(by_file["src/cfg_attr_unknown.rs"][0].id(), "RS-CODE-SOURCE-08");
 
     assert_eq!(
         by_file["src/deny_without_reason.rs"].len(),
         1,
         "{results:#?}"
     );
-    assert_eq!(by_file["src/deny_without_reason.rs"][0].id(), "RS-CODE-22");
+    assert_eq!(by_file["src/deny_without_reason.rs"][0].id(), "RS-CODE-SOURCE-22");
 
     assert_eq!(by_file["src/impl_allow.rs"].len(), 2, "{results:#?}");
     assert!(
         by_file["src/impl_allow.rs"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-03"),
+            .any(|result| result.id() == "RS-CODE-SOURCE-03"),
         "{results:#?}"
     );
     assert!(
         by_file["src/impl_allow.rs"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-17"),
+            .any(|result| result.id() == "RS-CODE-SOURCE-17"),
         "{results:#?}"
     );
 
     assert_eq!(by_file["src/cfg_attr.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/cfg_attr.rs"][0].id(), "RS-CODE-18");
+    assert_eq!(by_file["src/cfg_attr.rs"][0].id(), "RS-CODE-SOURCE-18");
 
     assert_eq!(by_file["src/ffi.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/ffi.rs"][0].id(), "RS-CODE-20");
+    assert_eq!(by_file["src/ffi.rs"][0].id(), "RS-CODE-SOURCE-20");
 
     assert_eq!(by_file["src/fs_glob.rs"].len(), 2, "{results:#?}");
     assert!(
         by_file["src/fs_glob.rs"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-15"),
+            .any(|result| result.id() == "RS-CODE-SOURCE-15"),
         "{results:#?}"
     );
     assert!(
         by_file["src/fs_glob.rs"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-21"),
+            .any(|result| result.id() == "RS-CODE-SOURCE-21"),
         "{results:#?}"
     );
 
     assert_eq!(by_file["src/include_probe.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/include_probe.rs"][0].id(), "RS-CODE-23");
+    assert_eq!(by_file["src/include_probe.rs"][0].id(), "RS-CODE-SOURCE-23");
 
     assert_eq!(by_file["src/forbid_inventory.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/forbid_inventory.rs"][0].id(), "RS-CODE-22");
+    assert_eq!(by_file["src/forbid_inventory.rs"][0].id(), "RS-CODE-SOURCE-22");
     assert!(
         by_file["src/forbid_inventory.rs"][0].inventory(),
         "{results:#?}"
     );
 
     assert_eq!(by_file["tests/expect_probe.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["tests/expect_probe.rs"][0].id(), "RS-CODE-32");
+    assert_eq!(by_file["tests/expect_probe.rs"][0].id(), "RS-CODE-SOURCE-32");
 
     assert_eq!(by_file["src/generic_probe.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/generic_probe.rs"][0].id(), "RS-CODE-34");
+    assert_eq!(by_file["src/generic_probe.rs"][0].id(), "RS-CODE-SOURCE-34");
 
     assert_eq!(by_file["src/large_trait.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/large_trait.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(by_file["src/large_trait.rs"][0].id(), "RS-CODE-SOURCE-29");
     assert_eq!(
         by_file["src/large_trait.rs"][0].severity(),
         G3Severity::Warn
@@ -783,7 +783,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
         1,
         "{results:#?}"
     );
-    assert_eq!(by_file["src/large_trait_boundary.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(by_file["src/large_trait_boundary.rs"][0].id(), "RS-CODE-SOURCE-29");
     assert_eq!(
         by_file["src/large_trait_boundary.rs"][0].severity(),
         G3Severity::Warn
@@ -791,7 +791,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
     assert!(!by_file.contains_key("src/small_trait.rs"), "{results:#?}");
 
     assert_eq!(by_file["src/public_field_bag.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/public_field_bag.rs"][0].id(), "RS-CODE-31");
+    assert_eq!(by_file["src/public_field_bag.rs"][0].id(), "RS-CODE-SOURCE-31");
     assert_eq!(
         by_file["src/public_field_bag.rs"][0].severity(),
         G3Severity::Warn
@@ -803,7 +803,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
     assert_eq!(
         by_file["src/public_field_warn_boundary.rs"][0].id(),
-        "RS-CODE-31"
+        "RS-CODE-SOURCE-31"
     );
     assert_eq!(
         by_file["src/public_field_warn_boundary.rs"][0].severity(),
@@ -816,7 +816,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
     assert_eq!(
         by_file["src/public_field_error_boundary.rs"][0].id(),
-        "RS-CODE-31"
+        "RS-CODE-SOURCE-31"
     );
     assert_eq!(
         by_file["src/public_field_error_boundary.rs"][0].severity(),
@@ -828,7 +828,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
 
     assert_eq!(by_file["src/public_weak_error.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/public_weak_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_weak_error.rs"][0].id(), "RS-CODE-SOURCE-33");
     assert_eq!(
         by_file["src/public_trait_weak_error.rs"].len(),
         1,
@@ -836,7 +836,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
     assert_eq!(
         by_file["src/public_trait_weak_error.rs"][0].id(),
-        "RS-CODE-33"
+        "RS-CODE-SOURCE-33"
     );
     assert_eq!(
         by_file["src/public_impl_weak_error.rs"].len(),
@@ -845,14 +845,14 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
     assert_eq!(
         by_file["src/public_impl_weak_error.rs"][0].id(),
-        "RS-CODE-33"
+        "RS-CODE-SOURCE-33"
     );
     assert_eq!(
         by_file["src/public_str_ref_error.rs"].len(),
         1,
         "{results:#?}"
     );
-    assert_eq!(by_file["src/public_str_ref_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_str_ref_error.rs"][0].id(), "RS-CODE-SOURCE-33");
     assert!(
         !by_file.contains_key("src/typed_public_error.rs"),
         "{results:#?}"
@@ -863,7 +863,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
 
     assert_eq!(by_file["src/string_dispatch.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/string_dispatch.rs"][0].id(), "RS-CODE-36");
+    assert_eq!(by_file["src/string_dispatch.rs"][0].id(), "RS-CODE-SOURCE-36");
 }
 
 #[test]
@@ -897,7 +897,7 @@ fn pipeline_reports_effective_line_and_dispatch_boundaries() {
         "exactly 500 effective lines should stay clean: {results:#?}"
     );
     assert_eq!(by_file["src/line_over_cap.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/line_over_cap.rs"][0].id(), "RS-CODE-09");
+    assert_eq!(by_file["src/line_over_cap.rs"][0].id(), "RS-CODE-SOURCE-09");
     assert!(
         !by_file.contains_key("src/string_dispatch_clean.rs"),
         "exactly 10 string branches should stay clean: {results:#?}"
@@ -959,26 +959,26 @@ fn pipeline_reports_trait_and_public_error_boundaries() {
         "8-method trait should stay clean: {results:#?}"
     );
     assert_eq!(by_file["src/trait_warn.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/trait_warn.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(by_file["src/trait_warn.rs"][0].id(), "RS-CODE-SOURCE-29");
     assert_eq!(by_file["src/trait_error.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/trait_error.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(by_file["src/trait_error.rs"][0].id(), "RS-CODE-SOURCE-29");
 
     assert_eq!(
         by_file["src/public_string_error.rs"].len(),
         1,
         "{results:#?}"
     );
-    assert_eq!(by_file["src/public_string_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_string_error.rs"][0].id(), "RS-CODE-SOURCE-33");
     assert_eq!(by_file["src/public_str_error.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/public_str_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_str_error.rs"][0].id(), "RS-CODE-SOURCE-33");
     assert_eq!(
         by_file["src/public_anyhow_error.rs"].len(),
         1,
         "{results:#?}"
     );
-    assert_eq!(by_file["src/public_anyhow_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_anyhow_error.rs"][0].id(), "RS-CODE-SOURCE-33");
     assert_eq!(by_file["src/public_box_error.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/public_box_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_box_error.rs"][0].id(), "RS-CODE-SOURCE-33");
     assert!(
         !by_file.contains_key("src/private_string_error.rs"),
         "private weak error helper should stay clean: {results:#?}"
@@ -988,9 +988,9 @@ fn pipeline_reports_trait_and_public_error_boundaries() {
         1,
         "{results:#?}"
     );
-    assert_eq!(by_file["src/public_trait_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_trait_error.rs"][0].id(), "RS-CODE-SOURCE-33");
     assert_eq!(by_file["src/public_impl_error.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["src/public_impl_error.rs"][0].id(), "RS-CODE-33");
+    assert_eq!(by_file["src/public_impl_error.rs"][0].id(), "RS-CODE-SOURCE-33");
 }
 
 #[test]
@@ -1012,7 +1012,7 @@ fn pipeline_reports_include_str_traversal() {
         1,
         "{results:#?}"
     );
-    assert_eq!(by_file["src/include_str_escape.rs"][0].id(), "RS-CODE-23");
+    assert_eq!(by_file["src/include_str_escape.rs"][0].id(), "RS-CODE-SOURCE-23");
     assert_eq!(
         by_file["src/include_str_escape.rs"][0].title(),
         "include path traversal",
@@ -1060,8 +1060,8 @@ fn pipeline_preserves_current_test_owned_rule_behavior() {
         "only todo! should currently fire in test-owned files: {results:#?}"
     );
     assert!(
-        results.iter().all(|result| result.id() == "RS-CODE-13"),
-        "test-owned files should currently suppress RS-CODE-15 and RS-CODE-16 only: {results:#?}"
+        results.iter().all(|result| result.id() == "RS-CODE-SOURCE-13"),
+        "test-owned files should currently suppress RS-CODE-SOURCE-15 and RS-CODE-SOURCE-16 only: {results:#?}"
     );
 }
 
@@ -1081,7 +1081,7 @@ fn pipeline_emits_explicit_input_failure_for_parse_error() {
         "broken source should emit one input failure"
     );
     let result = &results[0];
-    assert_eq!(result.id(), "RS-CODE-30");
+    assert_eq!(result.id(), "RS-CODE-SOURCE-30");
     assert_eq!(result.title(), "code-family input failure");
     assert_eq!(result.file(), Some("src/broken.rs"));
     assert!(
@@ -1125,13 +1125,13 @@ fn pipeline_keeps_other_findings_when_one_file_fails_to_parse() {
     assert!(
         by_file["src/broken.rs"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-30"),
+            .any(|result| result.id() == "RS-CODE-SOURCE-30"),
         "broken file should still emit parse failure: {results:#?}"
     );
     assert!(
         by_file["src/has_todo.rs"]
             .iter()
-            .any(|result| result.id() == "RS-CODE-13"),
+            .any(|result| result.id() == "RS-CODE-SOURCE-13"),
         "valid file should still emit its finding: {results:#?}"
     );
 }
@@ -1170,9 +1170,9 @@ path = \"cmd/worker.rs\"\n",
     let by_file = findings_by_file(&results);
 
     assert_eq!(by_file["lib/api.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["lib/api.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(by_file["lib/api.rs"][0].id(), "RS-CODE-SOURCE-29");
     assert_eq!(by_file["lib/api.rs"][0].severity(), G3Severity::Warn);
     assert_eq!(by_file["cmd/worker.rs"].len(), 1, "{results:#?}");
-    assert_eq!(by_file["cmd/worker.rs"][0].id(), "RS-CODE-29");
+    assert_eq!(by_file["cmd/worker.rs"][0].id(), "RS-CODE-SOURCE-29");
     assert_eq!(by_file["cmd/worker.rs"][0].severity(), G3Severity::Error);
 }

@@ -2,7 +2,7 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{ManualDeserializeImplSite, error};
 
-const ID: &str = "RS-GARDE-AST-02";
+const ID: &str = "RS-GARDE-SOURCE-02";
 
 pub(crate) fn check(target: &ManualDeserializeImplSite, results: &mut Vec<G3CheckResult>) {
     if !target.needs_validate || target.has_validate {

@@ -1,1 +1,1 @@
-crate::define_rule_assertions!("HOOK-RS-06");
+crate::define_rule_assertions!("RS-HOOKS-CONFIG-01");

@@ -6,7 +6,7 @@ use crate::compat::{G3CheckResult, G3Severity};
 
 use super::inputs::RustHookCommandInput;
 
-const ID: &str = "HOOK-RS-12";
+const ID: &str = "RS-HOOKS-SOURCE-13";
 
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     let found = script_contains_cargo_dupes(input.parsed);

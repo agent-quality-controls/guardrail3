@@ -12,7 +12,7 @@ fn crate_with_lib_rs_inventories_facade() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-01",
+        "RS-ARCH-FILETREE-01",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Info),
             title: Some("crate has facade entry point"),
@@ -32,7 +32,7 @@ fn crate_with_main_rs_inventories_facade() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-01",
+        "RS-ARCH-FILETREE-01",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Info),
             title: Some("crate has facade entry point"),
@@ -51,7 +51,7 @@ fn crate_without_lib_or_main_fires() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-01",
+        "RS-ARCH-FILETREE-01",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("crate missing facade entry point"),

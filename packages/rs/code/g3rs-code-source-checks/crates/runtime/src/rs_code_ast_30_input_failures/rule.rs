@@ -2,7 +2,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::CodeInputFailureRuleInput;
 
-const ID: &str = "RS-CODE-30";
+const ID: &str = "RS-CODE-SOURCE-30";
 
 pub(crate) fn check(input: &CodeInputFailureRuleInput, results: &mut Vec<G3CheckResult>) {
     results.push(G3CheckResult::new(

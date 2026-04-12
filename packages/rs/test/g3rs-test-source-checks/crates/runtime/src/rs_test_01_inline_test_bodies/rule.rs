@@ -2,7 +2,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::CfgTestModuleInput;
 
-const ID: &str = "RS-TEST-01";
+const ID: &str = "RS-TEST-SOURCE-01";
 
 pub(crate) fn check(input: &CfgTestModuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     if !input.module.has_body {

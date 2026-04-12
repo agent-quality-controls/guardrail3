@@ -3,7 +3,7 @@ use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command_on_
 
 use crate::inputs::FailOpenWrapperInput;
 
-const ID: &str = "HOOK-SHARED-21";
+const ID: &str = "RS-HOOKS-SOURCE-24";
 
 pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckResult>) {
     if let Some((line_no, command_text)) =

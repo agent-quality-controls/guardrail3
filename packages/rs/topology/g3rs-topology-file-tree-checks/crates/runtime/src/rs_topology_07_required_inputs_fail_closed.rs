@@ -1,7 +1,7 @@
 use g3rs_topology_file_tree_checks_types::G3RsTopologyFileTreeInputFailure;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const ID: &str = "RS-TOPOLOGY-07";
+const ID: &str = "RS-TOPOLOGY-FILETREE-07";
 
 pub(crate) fn check(input: &G3RsTopologyFileTreeInputFailure, results: &mut Vec<G3CheckResult>) {
     results.push(G3CheckResult::new(

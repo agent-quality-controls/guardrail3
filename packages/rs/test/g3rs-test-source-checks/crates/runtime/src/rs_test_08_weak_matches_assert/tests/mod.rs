@@ -17,7 +17,7 @@ fn reports_weak_matches_assertions() {
 
     assert_has_result(
         &results,
-        "RS-TEST-08",
+        "RS-TEST-SOURCE-08",
         G3Severity::Error,
         "weak matches assertion",
         "tests/matches.rs",
@@ -39,7 +39,7 @@ fn inventories_specific_matches_assertions() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-08",
+        "RS-TEST-SOURCE-08",
         "weak matches assertion absent",
         "tests/matches.rs",
     );
@@ -59,7 +59,7 @@ fn reports_assert_matches_and_debug_assert_wildcards() {
 
     assert_has_result(
         &results,
-        "RS-TEST-08",
+        "RS-TEST-SOURCE-08",
         G3Severity::Error,
         "weak matches assertion",
         "tests/weak.rs",
@@ -67,7 +67,7 @@ fn reports_assert_matches_and_debug_assert_wildcards() {
     );
     assert_has_result(
         &results,
-        "RS-TEST-08",
+        "RS-TEST-SOURCE-08",
         G3Severity::Error,
         "weak matches assertion",
         "tests/weak.rs",

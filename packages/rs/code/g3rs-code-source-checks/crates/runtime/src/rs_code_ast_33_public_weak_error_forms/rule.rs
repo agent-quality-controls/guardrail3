@@ -3,7 +3,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use crate::parse::{PublicResultErrorKind, find_public_result_error_types};
 use crate::support::CodeSourceRuleInput;
 
-const ID: &str = "RS-CODE-33";
+const ID: &str = "RS-CODE-SOURCE-33";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_public_result_error_types(input.source) {

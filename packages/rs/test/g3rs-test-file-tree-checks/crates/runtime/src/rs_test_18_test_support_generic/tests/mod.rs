@@ -64,7 +64,7 @@ fn reports_inventory_for_generic_test_support() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-18",
+        "RS-TEST-FILETREE-18",
         "test_support stays generic",
         "test_support/src/lib.rs",
     );
@@ -85,7 +85,7 @@ fn reports_inventory_for_crates_test_support_layout() {
 
     assert_has_inventory(
         &results,
-        "RS-TEST-18",
+        "RS-TEST-FILETREE-18",
         "test_support stays generic",
         "crates/test_support/src/lib.rs",
     );
@@ -106,7 +106,7 @@ fn reports_importing_runtime() {
 
     assert_has_result(
         &results,
-        "RS-TEST-18",
+        "RS-TEST-FILETREE-18",
         G3Severity::Error,
         "test_support imports local component crate",
         "test_support/src/lib.rs",
@@ -129,7 +129,7 @@ fn reports_direct_runtime_call() {
 
     assert_has_result(
         &results,
-        "RS-TEST-18",
+        "RS-TEST-FILETREE-18",
         G3Severity::Error,
         "test_support calls local component crate",
         "test_support/src/lib.rs",
@@ -152,7 +152,7 @@ fn reports_route_construction_import() {
 
     assert_has_result(
         &results,
-        "RS-TEST-18",
+        "RS-TEST-FILETREE-18",
         G3Severity::Error,
         "test_support imports route construction infrastructure",
         "test_support/src/lib.rs",
@@ -169,13 +169,13 @@ fn reports_public_semantic_constant() {
             None,
             Some("lib"),
             None,
-            "pub const EXPECTED_ID: &str = \"RS-TEST-03\";\n",
+            "pub const EXPECTED_ID: &str = \"RS-TEST-FILETREE-03\";\n",
         ));
     let results = run_input(input(files, vec![active_component()]));
 
     assert_has_result(
         &results,
-        "RS-TEST-18",
+        "RS-TEST-FILETREE-18",
         G3Severity::Error,
         "test_support exports public semantic constant",
         "test_support/src/lib.rs",
@@ -198,7 +198,7 @@ fn reports_canned_path_or_string_helper() {
 
     assert_has_result(
         &results,
-        "RS-TEST-18",
+        "RS-TEST-FILETREE-18",
         G3Severity::Error,
         "test_support exports canned path or string helper",
         "test_support/src/lib.rs",
@@ -221,7 +221,7 @@ fn reports_canned_fixture_helper() {
 
     assert_has_result(
         &results,
-        "RS-TEST-18",
+        "RS-TEST-FILETREE-18",
         G3Severity::Error,
         "test_support exports canned fixture helper",
         "test_support/src/lib.rs",
@@ -244,7 +244,7 @@ fn reports_semantic_finding_helper() {
 
     assert_has_result(
         &results,
-        "RS-TEST-18",
+        "RS-TEST-FILETREE-18",
         G3Severity::Error,
         "test_support exports semantic finding helper",
         "test_support/src/lib.rs",

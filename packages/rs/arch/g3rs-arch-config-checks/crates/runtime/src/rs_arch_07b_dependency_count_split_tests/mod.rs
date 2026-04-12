@@ -10,7 +10,7 @@ fn exact_dependency_threshold_stays_quiet() {
 
     let results = crate::check(&input(vec![node], Vec::new()));
 
-    assert!(!has_rule(&results, "RS-ARCH-07B"));
+    assert!(!has_rule(&results, "RS-ARCH-CONFIG-07"));
 }
 
 #[test]
@@ -22,7 +22,7 @@ fn dependency_threshold_over_limit_fires_config_rule() {
 
     assert_rule_results(
         &results,
-        "RS-ARCH-07B",
+        "RS-ARCH-CONFIG-07",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
             title: Some("crate has too many direct dependencies, must split"),
