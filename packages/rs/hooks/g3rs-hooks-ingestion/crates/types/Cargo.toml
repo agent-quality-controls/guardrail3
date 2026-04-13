@@ -19,9 +19,7 @@ api = []
 workspace = true
 
 [dependencies]
-g3rs-hooks-config-checks-types = { path = "../../../g3rs-hooks-config-checks/crates/types", version = "0.1.0" }
-g3rs-hooks-file-tree-checks-types = { path = "../../../g3rs-hooks-file-tree-checks/crates/types", version = "0.1.0" }
-g3rs-hooks-source-checks-types = { path = "../../../g3rs-hooks-source-checks/crates/types", version = "0.1.0" }
+g3rs-hooks-types = { path = "../../../g3rs-hooks-types", version = "0.1.0" }
 
 [package.metadata.guardrail3]
 shared = true

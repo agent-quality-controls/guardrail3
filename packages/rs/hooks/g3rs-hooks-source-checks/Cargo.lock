@@ -31,6 +31,13 @@ dependencies = [
 [[package]]
 name = "g3rs-hooks-source-checks-types"
 version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-types",
+]
+
+[[package]]
+name = "g3rs-hooks-types"
+version = "0.1.0"
 
 [[package]]
 name = "guardrail3-check-types"
