@@ -1,0 +1,11 @@
+[package]
+name = "guardrail3-rs-app-types"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+guardrail3-check-types.workspace = true
+g3rs-workspace-crawl.workspace = true
+
+[lints]
+workspace = true

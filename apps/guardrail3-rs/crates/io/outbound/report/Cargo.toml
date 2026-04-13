@@ -1,0 +1,13 @@
+[package]
+name = "guardrail3-rs-report"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+guardrail3-rs-app-types = { path = "../../../types/app-types" }
+
+[dev-dependencies]
+guardrail3-check-types.workspace = true
+
+[lints]
+workspace = true

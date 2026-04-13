@@ -1,0 +1,15 @@
+[package]
+name = "guardrail3-rs-validate-command"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+guardrail3-rs-app-types = { path = "../../types/app-types" }
+guardrail3-check-types.workspace = true
+
+[dev-dependencies]
+g3rs-workspace-crawl.workspace = true
+tempfile = "3.18.0"
+
+[lints]
+workspace = true
