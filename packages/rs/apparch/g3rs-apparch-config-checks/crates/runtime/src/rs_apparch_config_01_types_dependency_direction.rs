@@ -22,7 +22,8 @@ pub(crate) fn check(
         .filter(|target| {
             matches!(
                 target.layer,
-                Some(G3RsApparchLayer::Logic)
+                Some(G3RsApparchLayer::Types)
+                    | Some(G3RsApparchLayer::Logic)
                     | Some(G3RsApparchLayer::IoInbound)
                     | Some(G3RsApparchLayer::IoOutbound)
             )
@@ -39,7 +40,7 @@ pub(crate) fn check(
                     crate::run::display_crate(krate)
                 ),
                 format!(
-                    "Types crate `{}` has no workspace-internal dependencies on logic or io layers.",
+                    "Types crate `{}` has no workspace-internal dependencies on other apparch layers.",
                     crate::run::display_crate(krate)
                 ),
                 Some(krate.cargo_rel_path.clone()),
@@ -60,7 +61,7 @@ pub(crate) fn check(
                 crate::run::display_crate(target)
             ),
             format!(
-                "Types crate `{}` must not depend on logic or io crates. Remove the dependency on `{}` or move the shared contract into `types/`.",
+                "Types crate `{}` must not depend on other apparch crates, including other `types/` crates. Remove the dependency on `{}` or move the shared contract into one owning `types/` crate.",
                 crate::run::display_crate(krate),
                 crate::run::display_crate(target)
             ),

@@ -22,7 +22,9 @@ pub(crate) fn check(
         .filter(|target| {
             matches!(
                 target.layer,
-                Some(G3RsApparchLayer::Logic) | Some(G3RsApparchLayer::IoInbound)
+                Some(G3RsApparchLayer::Logic)
+                    | Some(G3RsApparchLayer::IoInbound)
+                    | Some(G3RsApparchLayer::IoOutbound)
             )
         })
         .collect::<Vec<_>>();
@@ -37,7 +39,7 @@ pub(crate) fn check(
                     crate::run::display_crate(krate)
                 ),
                 format!(
-                    "io/outbound crate `{}` has no workspace-internal dependencies on logic or io/inbound crates.",
+                    "io/outbound crate `{}` has no workspace-internal dependencies on forbidden apparch layers.",
                     crate::run::display_crate(krate)
                 ),
                 Some(krate.cargo_rel_path.clone()),
@@ -58,8 +60,9 @@ pub(crate) fn check(
                 crate::run::display_crate(target)
             ),
             format!(
-                "io/outbound crate `{}` must not depend on logic or io/inbound crates. Extract the shared contract into `types/` or move the orchestration outward into `io/inbound/`.",
-                crate::run::display_crate(krate)
+                "io/outbound crate `{}` must not depend on other `io/outbound/` crates, `logic/`, or `io/inbound/`. Remove the dependency on `{}` or extract a shared contract into `types/`.",
+                crate::run::display_crate(krate),
+                crate::run::display_crate(target)
             ),
             Some(krate.cargo_rel_path.clone()),
             None,
