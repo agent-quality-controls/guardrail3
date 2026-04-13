@@ -16,7 +16,9 @@ fn input(edges: &[(&str, &str)]) -> G3RsApparchConfigChecksInput {
     G3RsApparchConfigChecksInput {
         crates: vec![
             crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml"),
+            crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/cache/Cargo.toml"),
             crate_input(G3RsApparchLayer::Logic, "logic/service/Cargo.toml"),
+            crate_input(G3RsApparchLayer::IoInbound, "io/inbound/http/Cargo.toml"),
             crate_input(G3RsApparchLayer::Types, "types/core/Cargo.toml"),
         ],
         dependency_edges: edges
@@ -36,6 +38,30 @@ fn forbidden_logic_dependency_fires() {
         .iter()
         .find(|result| result.id() == "RS-APPARCH-CONFIG-03")
         .expect("outbound violation");
+
+    assert_eq!(result.severity(), G3Severity::Error);
+    assert_eq!(result.file(), Some("io/outbound/db/Cargo.toml"));
+}
+
+#[test]
+fn forbidden_io_inbound_dependency_fires() {
+    let results = crate::check(&input(&[("io/outbound/db/Cargo.toml", "io/inbound/http/Cargo.toml")]));
+    let result = results
+        .iter()
+        .find(|result| result.id() == "RS-APPARCH-CONFIG-03")
+        .expect("outbound io/inbound violation");
+
+    assert_eq!(result.severity(), G3Severity::Error);
+    assert_eq!(result.file(), Some("io/outbound/db/Cargo.toml"));
+}
+
+#[test]
+fn forbidden_same_layer_dependency_fires() {
+    let results = crate::check(&input(&[("io/outbound/db/Cargo.toml", "io/outbound/cache/Cargo.toml")]));
+    let result = results
+        .iter()
+        .find(|result| result.id() == "RS-APPARCH-CONFIG-03")
+        .expect("outbound same-layer violation");
 
     assert_eq!(result.severity(), G3Severity::Error);
     assert_eq!(result.file(), Some("io/outbound/db/Cargo.toml"));

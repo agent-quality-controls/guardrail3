@@ -16,6 +16,7 @@ fn input(edges: &[(&str, &str)]) -> G3RsApparchConfigChecksInput {
     G3RsApparchConfigChecksInput {
         crates: vec![
             crate_input(G3RsApparchLayer::Types, "types/core/Cargo.toml"),
+            crate_input(G3RsApparchLayer::Types, "types/shared/Cargo.toml"),
             crate_input(G3RsApparchLayer::Logic, "logic/service/Cargo.toml"),
             crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml"),
         ],
@@ -40,6 +41,18 @@ fn forbidden_logic_dependency_fires() {
     assert_eq!(result.severity(), G3Severity::Error);
     assert_eq!(result.file(), Some("types/core/Cargo.toml"));
     assert!(result.title().contains("depends on forbidden crate"));
+}
+
+#[test]
+fn forbidden_same_layer_dependency_fires() {
+    let results = crate::check(&input(&[("types/core/Cargo.toml", "types/shared/Cargo.toml")]));
+    let result = results
+        .iter()
+        .find(|result| result.id() == "RS-APPARCH-CONFIG-01")
+        .expect("types same-layer violation");
+
+    assert_eq!(result.severity(), G3Severity::Error);
+    assert_eq!(result.file(), Some("types/core/Cargo.toml"));
 }
 
 #[test]

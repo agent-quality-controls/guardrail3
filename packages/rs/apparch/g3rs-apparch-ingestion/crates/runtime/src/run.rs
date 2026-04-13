@@ -72,7 +72,10 @@ fn load_workspace_root(view: &CrawlView<'_>) -> Result<WorkspaceRoot, G3RsApparc
     })?;
 
     if cargo.workspace.is_none() {
-        return Ok(WorkspaceRoot { cargo });
+        return Err(G3RsApparchIngestionError::NormalizationFailed {
+            path: entry.path.abs_path.clone(),
+            reason: "root Cargo.toml must declare a [workspace] table".to_owned(),
+        });
     }
 
     Ok(WorkspaceRoot { cargo })
@@ -149,7 +152,8 @@ fn resolve_member_dirs(
         .exclude
         .iter()
         .map(|pattern| {
-            Pattern::new(pattern).map_err(|error| G3RsApparchIngestionError::NormalizationFailed {
+            let pattern = normalize_member_pattern(pattern);
+            Pattern::new(&pattern).map_err(|error| G3RsApparchIngestionError::NormalizationFailed {
                 path: std::path::PathBuf::from("Cargo.toml"),
                 reason: format!("invalid workspace exclude pattern `{pattern}`: {error}"),
             })
@@ -158,7 +162,7 @@ fn resolve_member_dirs(
 
     let mut resolved = BTreeSet::new();
     for member in &workspace.members {
-        for rel_dir in resolve_member_pattern(view, member) {
+        for rel_dir in resolve_member_pattern(view, member)? {
             if !exclude_patterns.iter().any(|pattern| pattern.matches(&rel_dir)) {
                 let _ = resolved.insert(rel_dir);
             }
@@ -168,28 +172,51 @@ fn resolve_member_dirs(
     Ok(resolved)
 }
 
-fn resolve_member_pattern(view: &CrawlView<'_>, member: &str) -> Vec<String> {
-    if matches!(member, "." | "./") {
-        return view.file_exists("Cargo.toml").then_some(String::new()).into_iter().collect();
+fn resolve_member_pattern(
+    view: &CrawlView<'_>,
+    member: &str,
+) -> Result<Vec<String>, G3RsApparchIngestionError> {
+    let member = normalize_member_pattern(member);
+    if member.is_empty() {
+        return Ok(view.file_exists("Cargo.toml").then_some(String::new()).into_iter().collect());
     }
 
     let has_glob = member.contains('*') || member.contains('?') || member.contains('[');
     if has_glob {
-        let Ok(glob) = Pattern::new(member) else {
-            return Vec::new();
-        };
-        return view
+        let glob = Pattern::new(&member).map_err(|error| G3RsApparchIngestionError::NormalizationFailed {
+            path: std::path::PathBuf::from("Cargo.toml"),
+            reason: format!("invalid workspace member pattern `{member}`: {error}"),
+        })?;
+        let matches = view
             .all_dir_rels()
             .filter(|rel_dir| glob.matches(rel_dir))
             .filter(|rel_dir| view.file_exists(&CrawlView::join_rel(rel_dir, "Cargo.toml")))
             .map(str::to_owned)
-            .collect();
+            .collect::<Vec<_>>();
+        if matches.is_empty() {
+            return Err(G3RsApparchIngestionError::NormalizationFailed {
+                path: std::path::PathBuf::from("Cargo.toml"),
+                reason: format!("workspace member pattern `{member}` did not resolve to any Cargo.toml"),
+            });
+        }
+        return Ok(matches);
     }
 
-    view.file_exists(&CrawlView::join_rel(member, "Cargo.toml"))
-        .then_some(member.trim_start_matches("./").to_owned())
-        .into_iter()
-        .collect()
+    if view.file_exists(&CrawlView::join_rel(&member, "Cargo.toml")) {
+        return Ok(vec![member]);
+    }
+
+    Err(G3RsApparchIngestionError::NormalizationFailed {
+        path: std::path::PathBuf::from("Cargo.toml"),
+        reason: format!("workspace member `{member}` did not resolve to a Cargo.toml"),
+    })
+}
+
+fn normalize_member_pattern(member: &str) -> String {
+    match member {
+        "." | "./" => String::new(),
+        _ => member.strip_prefix("./").unwrap_or(member).to_owned(),
+    }
 }
 
 fn collect_dependency_edges(
@@ -214,10 +241,38 @@ fn collect_dependency_edges(
             &crates_by_name,
             &mut edges,
         );
+        collect_edges_from_table(
+            &record.krate.cargo_rel_path,
+            &record.cargo.dev_dependencies,
+            workspace_dependencies,
+            &crates_by_name,
+            &mut edges,
+        );
+        collect_edges_from_table(
+            &record.krate.cargo_rel_path,
+            &record.cargo.build_dependencies,
+            workspace_dependencies,
+            &crates_by_name,
+            &mut edges,
+        );
         for target in record.cargo.target.values() {
             collect_edges_from_table(
                 &record.krate.cargo_rel_path,
                 &target.dependencies,
+                workspace_dependencies,
+                &crates_by_name,
+                &mut edges,
+            );
+            collect_edges_from_table(
+                &record.krate.cargo_rel_path,
+                &target.dev_dependencies,
+                workspace_dependencies,
+                &crates_by_name,
+                &mut edges,
+            );
+            collect_edges_from_table(
+                &record.krate.cargo_rel_path,
+                &target.build_dependencies,
                 workspace_dependencies,
                 &crates_by_name,
                 &mut edges,
@@ -273,7 +328,7 @@ fn collect_public_traits_for_crate(
 ) -> Result<Vec<G3RsApparchPublicTrait>, G3RsApparchIngestionError> {
     let entrypoints = determine_entrypoints(view, record);
     let mut public_traits = Vec::new();
-    let mut visited = BTreeSet::new();
+    let mut visited = BTreeMap::new();
     for entrypoint in entrypoints {
         walk_module_file(view, &entrypoint, &record.krate.cargo_rel_path, &mut visited, true, &mut public_traits)?;
     }
@@ -302,14 +357,12 @@ fn determine_entrypoints(view: &CrawlView<'_>, record: &CrateRecord) -> Vec<Stri
         }
     }
 
-    if entrypoints.is_empty() {
-        for rel_path in [
-            CrawlView::join_rel(rel_dir, "src/lib.rs"),
-            CrawlView::join_rel(rel_dir, "src/main.rs"),
-        ] {
-            if view.file_exists(&rel_path) {
-                let _ = entrypoints.insert(rel_path);
-            }
+    for rel_path in [
+        CrawlView::join_rel(rel_dir, "src/lib.rs"),
+        CrawlView::join_rel(rel_dir, "src/main.rs"),
+    ] {
+        if view.file_exists(&rel_path) {
+            let _ = entrypoints.insert(rel_path);
         }
     }
 
@@ -320,12 +373,16 @@ fn walk_module_file(
     view: &CrawlView<'_>,
     rel_path: &str,
     cargo_rel_path: &str,
-    visited: &mut BTreeSet<String>,
+    visited: &mut BTreeMap<String, bool>,
     public_module: bool,
     public_traits: &mut Vec<G3RsApparchPublicTrait>,
 ) -> Result<(), G3RsApparchIngestionError> {
-    if !visited.insert(rel_path.to_owned()) {
-        return Ok(());
+    match visited.get(rel_path).copied() {
+        Some(true) => return Ok(()),
+        Some(false) if !public_module => return Ok(()),
+        _ => {
+            let _ = visited.insert(rel_path.to_owned(), public_module);
+        }
     }
     let Some(entry) = view.entry(rel_path) else {
         return Err(G3RsApparchIngestionError::NormalizationFailed {
@@ -347,6 +404,9 @@ fn walk_module_file(
         path: entry.path.abs_path.clone(),
         reason: error.to_string(),
     })?;
+    if is_cfg_test_only(&parsed.attrs) {
+        return Ok(());
+    }
     walk_items(view, rel_path, cargo_rel_path, &parsed.items, visited, public_module, public_traits)
 }
 
@@ -355,7 +415,7 @@ fn walk_items(
     rel_path: &str,
     cargo_rel_path: &str,
     items: &[syn::Item],
-    visited: &mut BTreeSet<String>,
+    visited: &mut BTreeMap<String, bool>,
     public_module: bool,
     public_traits: &mut Vec<G3RsApparchPublicTrait>,
 ) -> Result<(), G3RsApparchIngestionError> {
@@ -374,10 +434,11 @@ fn walk_items(
                 }
             }
             syn::Item::Mod(item_mod) => {
-                let child_public = public_module && matches!(item_mod.vis, syn::Visibility::Public(_));
+                let child_public = public_module;
                 if let Some((_, nested_items)) = &item_mod.content {
                     walk_items(view, rel_path, cargo_rel_path, nested_items, visited, child_public, public_traits)?;
-                } else if let Some(module_path) = resolve_module_path(view, rel_path, item_mod) {
+                } else {
+                    let module_path = resolve_module_path(view, rel_path, item_mod)?;
                     walk_module_file(view, &module_path, cargo_rel_path, visited, child_public, public_traits)?;
                 }
             }
@@ -387,11 +448,23 @@ fn walk_items(
     Ok(())
 }
 
-fn resolve_module_path(view: &CrawlView<'_>, rel_path: &str, item_mod: &syn::ItemMod) -> Option<String> {
+fn resolve_module_path(
+    view: &CrawlView<'_>,
+    rel_path: &str,
+    item_mod: &syn::ItemMod,
+) -> Result<String, G3RsApparchIngestionError> {
     let file_dir = rel_path.rsplit_once('/').map_or("", |(dir, _)| dir);
     if let Some(path_attr) = module_path_attr(item_mod) {
         let candidate = CrawlView::join_rel(file_dir, &path_attr);
-        return view.file_exists(&candidate).then_some(candidate);
+        return view.file_exists(&candidate).then_some(candidate).ok_or_else(|| {
+            G3RsApparchIngestionError::NormalizationFailed {
+                path: std::path::PathBuf::from(rel_path),
+                reason: format!(
+                    "declared module `{}` points to missing file `{}`",
+                    item_mod.ident, path_attr
+                ),
+            }
+        });
     }
 
     let module_name = item_mod.ident.to_string();
@@ -405,11 +478,21 @@ fn resolve_module_path(view: &CrawlView<'_>, rel_path: &str, item_mod: &syn::Ite
 
     let direct = CrawlView::join_rel(&module_dir, &format!("{module_name}.rs"));
     if view.file_exists(&direct) {
-        return Some(direct);
+        return Ok(direct);
     }
 
     let nested = CrawlView::join_rel(&module_dir, &format!("{module_name}/mod.rs"));
-    view.file_exists(&nested).then_some(nested)
+    if view.file_exists(&nested) {
+        return Ok(nested);
+    }
+
+    Err(G3RsApparchIngestionError::NormalizationFailed {
+        path: std::path::PathBuf::from(rel_path),
+        reason: format!(
+            "declared module `{}` has no backing file under `{}`",
+            item_mod.ident, file_dir
+        ),
+    })
 }
 
 fn module_path_attr(item_mod: &syn::ItemMod) -> Option<String> {

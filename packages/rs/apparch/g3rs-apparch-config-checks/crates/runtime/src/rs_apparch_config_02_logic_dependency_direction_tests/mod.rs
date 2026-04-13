@@ -16,6 +16,7 @@ fn input(edges: &[(&str, &str)]) -> G3RsApparchConfigChecksInput {
     G3RsApparchConfigChecksInput {
         crates: vec![
             crate_input(G3RsApparchLayer::Logic, "logic/service/Cargo.toml"),
+            crate_input(G3RsApparchLayer::Logic, "logic/shared/Cargo.toml"),
             crate_input(G3RsApparchLayer::IoInbound, "io/inbound/http/Cargo.toml"),
             crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml"),
         ],
@@ -39,6 +40,42 @@ fn forbidden_io_dependency_fires() {
 
     assert_eq!(result.severity(), G3Severity::Error);
     assert_eq!(result.file(), Some("logic/service/Cargo.toml"));
+}
+
+#[test]
+fn forbidden_io_inbound_dependency_fires() {
+    let results = crate::check(&input(&[("logic/service/Cargo.toml", "io/inbound/http/Cargo.toml")]));
+    let result = results
+        .iter()
+        .find(|result| result.id() == "RS-APPARCH-CONFIG-02")
+        .expect("logic io/inbound violation");
+
+    assert_eq!(result.severity(), G3Severity::Error);
+    assert_eq!(result.file(), Some("logic/service/Cargo.toml"));
+}
+
+#[test]
+fn forbidden_same_layer_dependency_fires() {
+    let results = crate::check(&input(&[("logic/service/Cargo.toml", "logic/shared/Cargo.toml")]));
+    let result = results
+        .iter()
+        .find(|result| result.id() == "RS-APPARCH-CONFIG-02")
+        .expect("logic same-layer violation");
+
+    assert_eq!(result.severity(), G3Severity::Error);
+    assert_eq!(result.file(), Some("logic/service/Cargo.toml"));
+}
+
+#[test]
+fn logic_depends_on_types_stays_allowed() {
+    let results = crate::check(&input(&[("logic/service/Cargo.toml", "types/core/Cargo.toml")]));
+    let result = results
+        .iter()
+        .find(|result| result.id() == "RS-APPARCH-CONFIG-02")
+        .expect("logic inventory");
+
+    assert_eq!(result.severity(), G3Severity::Info);
+    assert!(result.inventory());
 }
 
 #[test]

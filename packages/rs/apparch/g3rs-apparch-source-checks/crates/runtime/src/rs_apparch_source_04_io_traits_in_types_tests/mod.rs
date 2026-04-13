@@ -34,6 +34,27 @@ fn io_public_trait_fires() {
 }
 
 #[test]
+fn io_inbound_public_trait_fires() {
+    let input = G3RsApparchSourceChecksInput {
+        crates: vec![crate_input(G3RsApparchLayer::IoInbound, "io/inbound/http/Cargo.toml")],
+        public_traits: vec![G3RsApparchPublicTrait {
+            cargo_rel_path: "io/inbound/http/Cargo.toml".to_owned(),
+            rel_path: "io/inbound/http/src/lib.rs".to_owned(),
+            trait_name: "InboundPort".to_owned(),
+        }],
+    };
+
+    let results = crate::check(&input);
+    let result = results
+        .iter()
+        .find(|result| result.id() == "RS-APPARCH-SOURCE-04")
+        .expect("source inbound violation");
+
+    assert_eq!(result.severity(), G3Severity::Error);
+    assert_eq!(result.file(), Some("io/inbound/http/src/lib.rs"));
+}
+
+#[test]
 fn logic_public_trait_stays_quiet() {
     let input = G3RsApparchSourceChecksInput {
         crates: vec![crate_input(G3RsApparchLayer::Logic, "logic/service/Cargo.toml")],
@@ -60,6 +81,23 @@ fn clean_io_crate_emits_inventory() {
         .iter()
         .find(|result| result.id() == "RS-APPARCH-SOURCE-04")
         .expect("source inventory");
+
+    assert_eq!(result.severity(), G3Severity::Info);
+    assert!(result.inventory());
+}
+
+#[test]
+fn clean_outbound_io_crate_emits_inventory() {
+    let input = G3RsApparchSourceChecksInput {
+        crates: vec![crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml")],
+        public_traits: Vec::new(),
+    };
+
+    let results = crate::check(&input);
+    let result = results
+        .iter()
+        .find(|result| result.id() == "RS-APPARCH-SOURCE-04")
+        .expect("outbound source inventory");
 
     assert_eq!(result.severity(), G3Severity::Info);
     assert!(result.inventory());
