@@ -25,7 +25,7 @@ pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckR
 }
 
 fn first_fail_open_critical_command(
-    parsed: &hook_shell_parser::ParsedShellScript<'_>,
+    parsed: &hook_shell_parser::ParsedShellScript,
     line_offset: usize,
     visiting: &mut Vec<String>,
 ) -> Option<(usize, String)> {
@@ -55,7 +55,7 @@ fn first_fail_open_critical_command(
 }
 
 fn called_function_fail_open(
-    parsed: &hook_shell_parser::ParsedShellScript<'_>,
+    parsed: &hook_shell_parser::ParsedShellScript,
     command_name: &str,
     call_line_no: usize,
     line_offset: usize,

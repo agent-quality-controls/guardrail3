@@ -252,6 +252,9 @@ dependencies = [
 [[package]]
 name = "g3rs-code-types"
 version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+]
 
 [[package]]
 name = "g3rs-hooks-config-checks"
@@ -332,6 +335,7 @@ dependencies = [
  "g3rs-hooks-source-checks",
  "g3rs-workspace-crawl",
  "guardrail3-check-types",
+ "hook-shell-parser",
  "tempfile",
 ]
 
@@ -369,6 +373,9 @@ dependencies = [
 [[package]]
 name = "g3rs-hooks-types"
 version = "0.1.0"
+dependencies = [
+ "hook-shell-parser",
+]
 
 [[package]]
 name = "g3rs-workspace-crawl"

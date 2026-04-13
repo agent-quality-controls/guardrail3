@@ -12,7 +12,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
             "unconditional exit 0 bypass present".to_owned(),
             "Hook contains an executable `exit 0`, which can mask failures.".to_owned(),
             Some(input.rel_path.to_owned()),
-            locate_line_no(input.content, &raw_line),
+            locate_line_no(input.parsed, &raw_line),
             false,
         ));
     } else {
@@ -32,7 +32,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
 }
 
 fn first_exit_zero_line(
-    parsed: &hook_shell_parser::ParsedShellScript<'_>,
+    parsed: &hook_shell_parser::ParsedShellScript,
     visiting: &mut Vec<String>,
 )-> Option<String> {
     for line in parsed.executable_lines() {
@@ -50,7 +50,7 @@ fn first_exit_zero_line(
 }
 
 fn called_function_exit_zero_line(
-    parsed: &hook_shell_parser::ParsedShellScript<'_>,
+    parsed: &hook_shell_parser::ParsedShellScript,
     command_name: &str,
     call_line_no: usize,
     visiting: &mut Vec<String>,
@@ -70,11 +70,12 @@ fn called_function_exit_zero_line(
     line_no
 }
 
-fn locate_line_no(content: &str, raw_line: &str) -> Option<usize> {
-    content
-        .lines()
-        .position(|line| line.trim() == raw_line.trim())
-        .map(|index| index + 1)
+fn locate_line_no(parsed: &hook_shell_parser::ParsedShellScript, raw_line: &str) -> Option<usize> {
+    parsed
+        .source_lines()
+        .iter()
+        .find(|line| line.raw().trim() == raw_line.trim())
+        .map(|line| line.line_no())
 }
 
 #[cfg(test)]
@@ -83,7 +84,6 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
     let input = ExecutableCommandContextInput {
         rel_path: ".githooks/pre-commit",
         kind: crate::facts::HookScriptKind::PreCommit,
-        content,
         parsed: &parsed,
     };
     let mut results = Vec::new();

@@ -5,3 +5,17 @@ version = 4
 [[package]]
 name = "g3rs-hooks-types"
 version = "0.1.0"
+dependencies = [
+ "hook-shell-parser",
+]
+
+[[package]]
+name = "hook-shell-parser"
+version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-runtime",
+]
+
+[[package]]
+name = "hook-shell-parser-runtime"
+version = "0.1.0"

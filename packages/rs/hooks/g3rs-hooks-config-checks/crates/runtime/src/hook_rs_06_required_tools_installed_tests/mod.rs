@@ -3,7 +3,7 @@ use g3rs_hooks_config_checks_assertions::hook_rs_06_required_tools_installed as 
 fn selected_hook(content: &str) -> g3rs_hooks_config_checks_types::G3RsHooksSelectedHookConfigFact {
     g3rs_hooks_config_checks_types::G3RsHooksSelectedHookConfigFact {
         rel_path: ".githooks/pre-commit".to_owned(),
-        content: content.to_owned(),
+        parsed: hook_shell_parser::parse_script(content),
     }
 }
 

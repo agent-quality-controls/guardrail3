@@ -1,32 +1,29 @@
 use g3rs_hooks_source_checks_types::{G3RsHookScriptKind, G3RsHooksSourceChecksInput};
-use hook_shell_parser::parse_script;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
-    let parsed = parse_script(&input.content);
     let kind = match input.kind {
         G3RsHookScriptKind::PreCommit => crate::facts::HookScriptKind::PreCommit,
         G3RsHookScriptKind::Modular => crate::facts::HookScriptKind::Modular,
     };
     let rust_input = crate::inputs::RustHookCommandInput {
         rel_path: &input.rel_path,
-        parsed: &parsed,
+        parsed: &input.parsed,
         is_workspace_project: input.is_workspace_project,
     };
     let executable_input = crate::inputs::ExecutableCommandContextInput {
         rel_path: &input.rel_path,
         kind,
-        content: &input.content,
-        parsed: &parsed,
+        parsed: &input.parsed,
     };
     let dispatcher_input = crate::inputs::DispatcherSyntaxInput {
         rel_path: &input.rel_path,
         has_modular_dir: input.has_modular_dir,
-        parsed: &parsed,
+        parsed: &input.parsed,
     };
     let fail_open_input = crate::inputs::FailOpenWrapperInput {
         rel_path: &input.rel_path,
-        parsed: &parsed,
+        parsed: &input.parsed,
     };
     let mut results = Vec::new();
 
@@ -50,7 +47,6 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
         crate::hook_rs_12_cargo_dupes_step_present::check(&rust_input, &mut results);
         crate::hook_rs_13_cargo_dupes_excludes::check(&rust_input, &mut results);
         crate::hook_rs_16_config_changes_trigger_validation::check(
-            &input.content,
             &rust_input,
             &mut results,
         );

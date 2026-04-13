@@ -6,8 +6,8 @@ use self::helpers::*;
 
 pub(crate) fn env_wrapper_contains_cargo_dupes<'a, I>(
     mut parts: std::iter::Peekable<I>,
-    current: &ParsedShellScript<'_>,
-    root: &ParsedShellScript<'_>,
+    current: &ParsedShellScript,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     want_exclude_tests: bool,
     current_cutoff: usize,
@@ -102,8 +102,8 @@ where
 
 pub(crate) fn shell_wrapper_contains_cargo_dupes<'a, I>(
     parts: std::iter::Peekable<I>,
-    _current: &ParsedShellScript<'_>,
-    _root: &ParsedShellScript<'_>,
+    _current: &ParsedShellScript,
+    _root: &ParsedShellScript,
     _visiting: &mut Vec<String>,
     want_exclude_tests: bool,
     _current_cutoff: usize,
@@ -169,8 +169,8 @@ where
 
 pub(crate) fn command_wrapper_contains_cargo_dupes<'a, I>(
     parts: std::iter::Peekable<I>,
-    current: &ParsedShellScript<'_>,
-    root: &ParsedShellScript<'_>,
+    current: &ParsedShellScript,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     want_exclude_tests: bool,
     current_cutoff: usize,
@@ -211,8 +211,8 @@ where
 
 pub(crate) fn exec_wrapper_contains_cargo_dupes<'a, I>(
     parts: std::iter::Peekable<I>,
-    current: &ParsedShellScript<'_>,
-    root: &ParsedShellScript<'_>,
+    current: &ParsedShellScript,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     want_exclude_tests: bool,
     current_cutoff: usize,
@@ -264,8 +264,8 @@ where
 fn wrapper_or_command_contains_cargo_dupes<'a, I>(
     token: &'a str,
     parts: &mut std::iter::Peekable<I>,
-    current: &ParsedShellScript<'_>,
-    root: &ParsedShellScript<'_>,
+    current: &ParsedShellScript,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     want_exclude_tests: bool,
     current_cutoff: usize,

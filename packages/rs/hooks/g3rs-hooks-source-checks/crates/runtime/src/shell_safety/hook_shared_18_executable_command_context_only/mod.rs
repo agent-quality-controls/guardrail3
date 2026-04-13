@@ -9,9 +9,9 @@ const ID: &str = "RS-HOOKS-SOURCE-22";
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
     let mut suspicious_lines = Vec::new();
 
-    for (index, raw_line) in input.content.lines().enumerate() {
-        let line_no = index + 1;
-        let trimmed = raw_line.trim();
+    for logical_line in input.parsed.source_lines() {
+        let line_no = logical_line.line_no();
+        let trimmed = logical_line.raw().trim();
         if trimmed.is_empty() {
             continue;
         }
@@ -77,7 +77,7 @@ fn step_family_from_text(line: &str) -> Option<&'static str> {
         .find_map(|(needle, family)| line.contains(needle).then_some(family))
 }
 
-fn matches_step_family(parsed: &hook_shell_parser::ParsedShellScript<'_>, family: &str) -> bool {
+fn matches_step_family(parsed: &hook_shell_parser::ParsedShellScript, family: &str) -> bool {
     any_resolved_command(parsed, predicate_for_step_family(family))
 }
 
@@ -145,7 +145,6 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
     let input = ExecutableCommandContextInput {
         rel_path: ".githooks/pre-commit",
         kind: crate::facts::HookScriptKind::PreCommit,
-        content,
         parsed: &parsed,
     };
     let mut results = Vec::new();

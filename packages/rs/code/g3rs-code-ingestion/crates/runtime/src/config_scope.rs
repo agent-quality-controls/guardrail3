@@ -28,22 +28,6 @@ pub(crate) fn select_owned_config_entries<'a>(
     Ok(entries)
 }
 
-pub(crate) fn select_owned_cargo_entries<'a>(
-    crawl: &'a G3RsWorkspaceCrawl,
-) -> Result<Vec<&'a G3RsWorkspaceEntry>, IngestionError> {
-    let owned_roots = owned_root_dirs(crawl)?;
-    let mut entries = owned_roots
-        .iter()
-        .filter_map(|root| cargo_manifest_rel_path(root))
-        .filter_map(|rel_path| crawl.entry(&rel_path))
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
-        .collect::<Vec<_>>();
-
-    entries.sort_by(|left, right| left.path.rel_path.cmp(&right.path.rel_path));
-    entries.dedup_by(|left, right| left.path.rel_path == right.path.rel_path);
-    Ok(entries)
-}
-
 pub(crate) fn owned_root_dirs(crawl: &G3RsWorkspaceCrawl) -> Result<BTreeSet<String>, IngestionError> {
     let mut roots = BTreeSet::from([String::new()]);
 
@@ -135,14 +119,6 @@ fn select_workspace_member_dirs(
     }
 
     Ok(member_dirs)
-}
-
-fn cargo_manifest_rel_path(root: &str) -> Option<String> {
-    if root.is_empty() {
-        return Some("Cargo.toml".to_owned());
-    }
-
-    Some(format!("{root}/Cargo.toml"))
 }
 
 fn manifest_dir_from_manifest_path(rel_path: &str) -> Option<&str> {

@@ -127,6 +127,7 @@ dependencies = [
 name = "g3rs-code-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "g3rs-code-config-checks-types",
  "guardrail3-check-types",
 ]
@@ -229,6 +230,9 @@ dependencies = [
 [[package]]
 name = "g3rs-code-types"
 version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+]
 
 [[package]]
 name = "g3rs-workspace-crawl"

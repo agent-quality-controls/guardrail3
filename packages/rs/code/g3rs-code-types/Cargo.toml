@@ -28,3 +28,6 @@ cargo = { level = "deny", priority = -1 }
 nursery = { level = "deny", priority = -1 }
 redundant_pub_crate = "allow"
 module_name_repetitions = "allow"
+
+[dependencies]
+cargo-toml-parser = { path = "../../../parsers/cargo-toml-parser", version = "0.1.0" }

@@ -81,7 +81,7 @@ impl<'a> TokenCursor<'a> {
 
 #[must_use]
 pub fn any_resolved_command(
-    parsed: &ParsedShellScript<'_>,
+    parsed: &ParsedShellScript,
     predicate: fn(&ResolvedCommand) -> bool,
 ) -> bool {
     any_resolved_command_with_mode(parsed, predicate, false)
@@ -89,7 +89,7 @@ pub fn any_resolved_command(
 
 #[must_use]
 pub fn any_resolved_command_on_line(
-    parsed: &ParsedShellScript<'_>,
+    parsed: &ParsedShellScript,
     raw: &str,
     line_no: usize,
     predicate: fn(&ResolvedCommand) -> bool,
@@ -100,14 +100,14 @@ pub fn any_resolved_command_on_line(
 
 #[must_use]
 pub fn any_resolved_command_relaxed(
-    parsed: &ParsedShellScript<'_>,
+    parsed: &ParsedShellScript,
     predicate: fn(&ResolvedCommand) -> bool,
 ) -> bool {
     any_resolved_command_with_mode(parsed, predicate, true)
 }
 
 fn any_resolved_command_with_mode(
-    parsed: &ParsedShellScript<'_>,
+    parsed: &ParsedShellScript,
     predicate: fn(&ResolvedCommand) -> bool,
     allow_detached: bool,
 ) -> bool {
@@ -126,7 +126,7 @@ fn any_resolved_command_with_mode(
 
 fn line_matches(
     raw: &str,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -136,7 +136,7 @@ fn line_matches(
 
 fn line_matches_with_mode(
     raw: &str,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -189,7 +189,7 @@ fn line_matches_with_mode(
 
 fn segment_matches(
     segment: &str,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -199,7 +199,7 @@ fn segment_matches(
 
 fn token_sequence_matches(
     tokens: Vec<String>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -224,7 +224,7 @@ fn token_sequence_matches(
 fn dispatch_token(
     token: &str,
     cursor: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -247,7 +247,7 @@ fn dispatch_token(
 fn dispatch_external_token(
     token: &str,
     cursor: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -263,7 +263,7 @@ fn dispatch_external_token(
 
 fn function_defined_before(
     command_name: &str,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     line_no: usize,
 ) -> bool {
     root.functions()
@@ -273,7 +273,7 @@ fn function_defined_before(
 
 fn called_function_matches(
     command_name: &str,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -315,7 +315,7 @@ fn resolved_command(token: &str, cursor: &TokenCursor<'_>, line_no: usize) -> Re
 
 fn env_wrapper_matches(
     cursor: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -376,7 +376,7 @@ fn env_wrapper_matches(
 
 fn shell_wrapper_matches(
     cursor: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -456,7 +456,7 @@ fn shell_cluster_uses_next_script(flag: &str) -> bool {
 
 fn command_wrapper_matches(
     cursor: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,
@@ -483,7 +483,7 @@ fn command_wrapper_matches(
 
 fn exec_wrapper_matches(
     cursor: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
     predicate: fn(&ResolvedCommand) -> bool,
     line_no: usize,

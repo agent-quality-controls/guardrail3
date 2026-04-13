@@ -1,12 +1,10 @@
 mod classify;
-mod config;
-mod config_comments;
+mod config_files;
 mod config_scope;
 mod fs;
 mod ingest;
 mod run;
 mod select;
-mod unsafe_code_lints;
 
 #[cfg(feature = "ingest")]
 pub use run::{

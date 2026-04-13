@@ -2,7 +2,7 @@ use super::ParsedShellScript;
 
 pub(super) fn exec_wrapper_contains_cargo_dupes<'a, I>(
     parts: std::iter::Peekable<I>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
 ) -> bool
 where
@@ -28,7 +28,7 @@ where
 
 pub(super) fn exec_wrapper_contains_path_qualified_cargo_dupes<'a, I>(
     parts: std::iter::Peekable<I>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
 ) -> bool
 where
@@ -55,7 +55,7 @@ where
 pub(super) fn wrapper_or_command_contains_cargo_dupes<'a, I>(
     token: &'a str,
     parts: &mut std::iter::Peekable<I>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
 ) -> bool
 where
@@ -79,7 +79,7 @@ where
 pub(super) fn wrapper_or_command_contains_path_qualified_cargo_dupes<'a, I>(
     token: &'a str,
     parts: &mut std::iter::Peekable<I>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     visiting: &mut Vec<String>,
 ) -> bool
 where

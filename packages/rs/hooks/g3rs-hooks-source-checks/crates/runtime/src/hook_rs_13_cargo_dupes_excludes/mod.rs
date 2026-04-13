@@ -37,7 +37,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
-fn script_contains_cargo_dupes_with_exclude_tests(parsed: &ParsedShellScript<'_>) -> bool {
+fn script_contains_cargo_dupes_with_exclude_tests(parsed: &ParsedShellScript) -> bool {
     any_resolved_command_relaxed(parsed, cargo_dupes_with_exclude_tests)
         && !any_resolved_command_relaxed(parsed, cargo_dupes_without_exclude_tests)
 }

@@ -3,6 +3,7 @@ use std::path::Path;
 use std::process::Command;
 
 use g3rs_code_ingestion_assertions::{assert_source_file, require_source_file};
+use g3rs_code_ingestion_types::{G3RsCodeConfigChecksInput, G3RsCodeConfigFileKind};
 use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
 
@@ -20,6 +21,17 @@ fn write(path: impl AsRef<Path>, content: &str) {
         fs::create_dir_all(parent).expect("create parent directory for fixture");
     }
     fs::write(path, content).expect("write fixture file");
+}
+
+fn require_config_file<'a>(
+    input: &'a G3RsCodeConfigChecksInput,
+    rel_path: &str,
+) -> &'a g3rs_code_ingestion_types::G3RsCodeConfigFile {
+    input
+        .files
+        .iter()
+        .find(|file| file.rel_path == rel_path)
+        .unwrap_or_else(|| panic!("missing config file {rel_path}; input: {input:#?}"))
 }
 
 #[test]
@@ -458,22 +470,14 @@ fn ingests_exception_comments_from_owned_config_files() {
     let input = crate::ingest_for_config_checks(&workspace_crawl)
         .expect("config ingestion should succeed");
 
-    assert_eq!(input.exception_comments.len(), 2, "{input:#?}");
-    assert!(
-        input.exception_comments.iter().any(|comment| {
-            comment.rel_path == "Cargo.toml"
-                && comment.line == 4
-                && comment.line_text == "# EXCEPTION: temporary package carve-out"
-        }),
-        "{input:#?}"
+    assert_eq!(input.files.len(), 2, "{input:#?}");
+    assert_eq!(
+        require_config_file(&input, "Cargo.toml").content,
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n# EXCEPTION: temporary package carve-out\nquoted = \"# not a comment\"\n"
     );
-    assert!(
-        input.exception_comments.iter().any(|comment| {
-            comment.rel_path == "deny.toml"
-                && comment.line == 1
-                && comment.line_text == "// EXCEPTION: ignore review debt"
-        }),
-        "{input:#?}"
+    assert_eq!(
+        require_config_file(&input, "deny.toml").content,
+        "advisories = { ignore = [] } // EXCEPTION: ignore review debt\n"
     );
 }
 
@@ -495,22 +499,10 @@ advisories = []\n\
     let input = crate::ingest_for_config_checks(&workspace_crawl)
         .expect("config ingestion should succeed");
 
-    assert_eq!(input.exception_comments.len(), 2, "{input:#?}");
-    assert!(
-        input.exception_comments.iter().any(|comment| {
-            comment.rel_path == "deny.toml"
-                && comment.line == 1
-                && comment.line_text == "# EXCEPTION: first"
-        }),
-        "{input:#?}"
-    );
-    assert!(
-        input.exception_comments.iter().any(|comment| {
-            comment.rel_path == "deny.toml"
-                && comment.line == 3
-                && comment.line_text == "// EXCEPTION: second"
-        }),
-        "{input:#?}"
+    assert_eq!(input.files.len(), 1, "{input:#?}");
+    assert_eq!(
+        require_config_file(&input, "deny.toml").content,
+        "# EXCEPTION: first\nadvisories = []\n// EXCEPTION: second\n"
     );
 }
 
@@ -537,7 +529,7 @@ fn ingests_exception_comments_from_all_supported_owned_config_filenames() {
     let input = crate::ingest_for_config_checks(&workspace_crawl)
         .expect("config ingestion should succeed");
 
-    assert_eq!(input.exception_comments.len(), 9, "{input:#?}");
+    assert_eq!(input.files.len(), 9, "{input:#?}");
 }
 
 #[test]
@@ -564,12 +556,18 @@ unsafe_code = \"deny\"\n",
     let input = crate::ingest_for_config_checks(&workspace_crawl)
         .expect("config ingestion should succeed");
 
-    assert_eq!(input.unsafe_code_lints.len(), 1, "{input:#?}");
-    assert_eq!(input.unsafe_code_lints[0].cargo_rel_path, "Cargo.toml");
-    assert_eq!(
-        input.unsafe_code_lints[0].lint_level.as_deref(),
-        Some("deny")
-    );
+    let cargo_file = require_config_file(&input, "Cargo.toml");
+    match &cargo_file.kind {
+        G3RsCodeConfigFileKind::CargoToml { cargo } => assert_eq!(
+            cargo.workspace
+                .as_ref()
+                .and_then(|workspace| workspace.lints.as_ref())
+                .and_then(|lints| lints.tools.get("rust"))
+                .and_then(|tool| tool.get("unsafe_code")),
+            Some(&cargo_toml_parser::LintValue::Level("deny".to_owned()))
+        ),
+        G3RsCodeConfigFileKind::Text => panic!("expected Cargo.toml config file"),
+    }
 }
 
 #[test]
@@ -592,11 +590,24 @@ unsafe_code = { level = \"forbid\", priority = 0 }\n",
     let input = crate::ingest_for_config_checks(&workspace_crawl)
         .expect("config ingestion should succeed");
 
-    assert_eq!(input.unsafe_code_lints.len(), 1, "{input:#?}");
-    assert_eq!(
-        input.unsafe_code_lints[0].lint_level.as_deref(),
-        Some("forbid")
-    );
+    let cargo_file = require_config_file(&input, "Cargo.toml");
+    match &cargo_file.kind {
+        G3RsCodeConfigFileKind::CargoToml { cargo } => {
+            let value = cargo
+                .workspace
+                .as_ref()
+                .and_then(|workspace| workspace.lints.as_ref())
+                .and_then(|lints| lints.tools.get("rust"))
+                .and_then(|tool| tool.get("unsafe_code"));
+            match value {
+                Some(cargo_toml_parser::LintValue::Detailed(detail)) => {
+                    assert_eq!(detail.level, "forbid");
+                }
+                other => panic!("expected detailed unsafe_code lint, got {other:?}"),
+            }
+        }
+        G3RsCodeConfigFileKind::Text => panic!("expected Cargo.toml config file"),
+    }
 }
 
 #[test]
@@ -640,19 +651,21 @@ unsafe_code = \"deny\"\n\
     let input = crate::ingest_for_config_checks(&workspace_crawl)
         .expect("config ingestion should succeed");
 
-    assert_eq!(input.exception_comments.len(), 2, "{input:#?}");
-    assert!(
-        input.exception_comments.iter().all(|fact| {
-            fact.rel_path == "Cargo.toml" || fact.rel_path == "crates/core/Cargo.toml"
-        }),
-        "{input:#?}"
-    );
-    assert_eq!(input.unsafe_code_lints.len(), 1, "{input:#?}");
-    assert_eq!(input.unsafe_code_lints[0].cargo_rel_path, "Cargo.toml");
-    assert_eq!(
-        input.unsafe_code_lints[0].lint_level.as_deref(),
-        Some("forbid")
-    );
+    assert_eq!(input.files.len(), 2, "{input:#?}");
+    assert!(input.files.iter().all(|file| {
+        file.rel_path == "Cargo.toml" || file.rel_path == "crates/core/Cargo.toml"
+    }));
+    match &require_config_file(&input, "Cargo.toml").kind {
+        G3RsCodeConfigFileKind::CargoToml { cargo } => assert_eq!(
+            cargo.workspace
+                .as_ref()
+                .and_then(|workspace| workspace.lints.as_ref())
+                .and_then(|lints| lints.tools.get("rust"))
+                .and_then(|tool| tool.get("unsafe_code")),
+            Some(&cargo_toml_parser::LintValue::Level("forbid".to_owned()))
+        ),
+        G3RsCodeConfigFileKind::Text => panic!("expected Cargo.toml config file"),
+    }
 }
 
 #[test]
@@ -727,6 +740,6 @@ fn unreadable_foreign_config_file_does_not_fail_config_ingestion() {
     let input = crate::ingest_for_config_checks(&workspace_crawl)
         .expect("foreign unreadable config should be ignored");
 
-    assert!(input.exception_comments.is_empty(), "{input:#?}");
-    assert!(input.unsafe_code_lints.is_empty(), "{input:#?}");
+    assert_eq!(input.files.len(), 1, "{input:#?}");
+    assert_eq!(require_config_file(&input, "Cargo.toml").rel_path, "Cargo.toml");
 }

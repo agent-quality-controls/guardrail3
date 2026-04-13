@@ -37,7 +37,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
-fn script_contains_gitleaks(parsed: &ParsedShellScript<'_>) -> bool {
+fn script_contains_gitleaks(parsed: &ParsedShellScript) -> bool {
     any_resolved_command(parsed, is_gitleaks_command)
 }
 

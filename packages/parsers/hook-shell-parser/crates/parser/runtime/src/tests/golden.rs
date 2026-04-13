@@ -13,7 +13,7 @@ guardrail3 rs validate --staged .
 "#,
     );
 
-    assert_eq!(parsed.shebang, Some("#!/usr/bin/env bash"));
+    assert_eq!(parsed.shebang(), Some("#!/usr/bin/env bash"));
     assert_eq!(parsed.executable_lines.len(), 2);
     assert_eq!(parsed.executable_lines[0].command_name, "echo");
     assert_eq!(parsed.executable_lines[1].command_name, "guardrail3");

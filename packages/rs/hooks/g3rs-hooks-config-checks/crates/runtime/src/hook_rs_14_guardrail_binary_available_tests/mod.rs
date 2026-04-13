@@ -4,7 +4,7 @@ use g3rs_hooks_config_checks_types::G3RsHooksSelectedHookConfigFact;
 fn hook(content: &str) -> G3RsHooksSelectedHookConfigFact {
     G3RsHooksSelectedHookConfigFact {
         rel_path: ".githooks/pre-commit".to_owned(),
-        content: content.to_owned(),
+        parsed: hook_shell_parser::parse_script(content),
     }
 }
 

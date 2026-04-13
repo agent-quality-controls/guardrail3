@@ -1,10 +1,5 @@
 use g3rs_hooks_config_checks_types::G3RsHooksSelectedHookConfigFact;
-use hook_shell_parser::ParsedShellScript;
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
-
-pub(crate) fn parsed(selected_hook: &G3RsHooksSelectedHookConfigFact) -> ParsedShellScript<'_> {
-    hook_shell_parser::parse_script(&selected_hook.content)
-}
 
 pub(crate) fn tool_installed(installed_tools: &[String], tool: &str) -> bool {
     installed_tools.iter().any(|installed| installed == tool)
@@ -14,39 +9,38 @@ pub(crate) fn hook_uses_path_qualified_required_tool(
     selected_hook: &G3RsHooksSelectedHookConfigFact,
     tool: &str,
 ) -> bool {
-    let parsed = parsed(selected_hook);
     match tool {
-        "gitleaks" => any_resolved_command(&parsed, is_path_qualified_gitleaks_command),
-        "cargo-deny" => any_resolved_command(&parsed, is_path_qualified_cargo_deny_command),
-        "cargo-machete" => any_resolved_command(&parsed, is_path_qualified_cargo_machete_command),
+        "gitleaks" => any_resolved_command(&selected_hook.parsed, is_path_qualified_gitleaks_command),
+        "cargo-deny" => {
+            any_resolved_command(&selected_hook.parsed, is_path_qualified_cargo_deny_command)
+        }
+        "cargo-machete" => {
+            any_resolved_command(&selected_hook.parsed, is_path_qualified_cargo_machete_command)
+        }
         _ => false,
     }
 }
 
 pub(crate) fn hook_requires_g3rs_validation(selected_hook: &G3RsHooksSelectedHookConfigFact) -> bool {
-    let parsed = parsed(selected_hook);
-    any_resolved_command(&parsed, is_g3rs_validate_staged_command)
+    any_resolved_command(&selected_hook.parsed, is_g3rs_validate_staged_command)
 }
 
 pub(crate) fn hook_uses_path_qualified_g3rs(
     selected_hook: &G3RsHooksSelectedHookConfigFact,
 ) -> bool {
-    let parsed = parsed(selected_hook);
-    any_resolved_command(&parsed, |command| {
+    any_resolved_command(&selected_hook.parsed, |command| {
         command.path_qualified() && is_g3rs_validate_staged_command(command)
     })
 }
 
 pub(crate) fn hook_requires_cargo_dupes(selected_hook: &G3RsHooksSelectedHookConfigFact) -> bool {
-    let parsed = parsed(selected_hook);
-    any_resolved_command(&parsed, is_cargo_dupes_command)
+    any_resolved_command(&selected_hook.parsed, is_cargo_dupes_command)
 }
 
 pub(crate) fn hook_uses_path_qualified_cargo_dupes(
     selected_hook: &G3RsHooksSelectedHookConfigFact,
 ) -> bool {
-    let parsed = parsed(selected_hook);
-    any_resolved_command(&parsed, |command| {
+    any_resolved_command(&selected_hook.parsed, |command| {
         command.path_qualified() && is_cargo_dupes_command(command)
     })
 }

@@ -48,7 +48,6 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
     let input = ExecutableCommandContextInput {
         rel_path: ".githooks/pre-commit",
         kind: crate::facts::HookScriptKind::PreCommit,
-        content,
         parsed: &parsed,
     };
     let mut results = Vec::new();
