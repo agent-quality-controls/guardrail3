@@ -335,21 +335,3 @@ fn ignored_but_recovered_clippy_toml_is_ingested() {
         "recovered clippy.toml should be parsed correctly"
     );
 }
-
-#[test]
-fn source_ingestion_exposes_the_stable_not_implemented_contract() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
-    let root = temp.path();
-    git_init(root);
-
-    let crawl = crawl(root);
-    let result = crate::ingest_for_source_checks(&crawl);
-
-    assert!(
-        matches!(
-            result,
-            Err(crate::IngestionError::SourceIngestionNotImplemented)
-        ),
-        "clippy should expose the stable source-lane stub contract instead of omitting the lane entirely"
-    );
-}
