@@ -73,6 +73,52 @@ fn windows_drive_absolute_member_path_fires() {
 }
 
 #[test]
+fn unc_absolute_member_path_fires() {
+    let input = input(
+        "[workspace]\nmembers = [\"\\\\\\\\server\\\\share\"]\n",
+        Vec::new(),
+        Vec::new(),
+    );
+
+    let results = crate::check(&input);
+
+    assert_rule_results(
+        &results,
+        "RS-TOPOLOGY-FILETREE-13",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("Workspace `.` uses escaping member path `\\\\server\\share`"),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            message: Some("`Cargo.toml` declares member pattern `\\\\server\\share`, which points outside the workspace directory. Workspace members must be relative subdirectory paths inside the workspace root, not absolute paths or `..` escapes. Change the pattern to a relative subdirectory path, or move the target crate inside the workspace."),
+        }],
+    );
+}
+
+#[test]
+fn backslash_absolute_member_path_fires() {
+    let input = input(
+        "[workspace]\nmembers = [\"\\\\tmp\\\\shared\"]\n",
+        Vec::new(),
+        Vec::new(),
+    );
+
+    let results = crate::check(&input);
+
+    assert_rule_results(
+        &results,
+        "RS-TOPOLOGY-FILETREE-13",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("Workspace `.` uses escaping member path `\\tmp\\shared`"),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            message: Some("`Cargo.toml` declares member pattern `\\tmp\\shared`, which points outside the workspace directory. Workspace members must be relative subdirectory paths inside the workspace root, not absolute paths or `..` escapes. Change the pattern to a relative subdirectory path, or move the target crate inside the workspace."),
+        }],
+    );
+}
+
+#[test]
 fn normal_member_path_stays_quiet() {
     let input = input(
         "[workspace]\nmembers = [\"crates/api\"]\n",
