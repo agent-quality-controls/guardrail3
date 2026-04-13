@@ -78,9 +78,3 @@ pub struct G3RsTopologyFileTreeChecksInput {
     pub family_files: Vec<G3RsTopologyWorkspaceFamilyFile>,
     pub input_failures: Vec<G3RsTopologyFileTreeInputFailure>,
 }
-
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsTopologyConfigChecksInput;
-
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsTopologySourceChecksInput;

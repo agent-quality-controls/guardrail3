@@ -166,7 +166,7 @@ fn exact_membership_fires_end_to_end() {
 }
 
 #[test]
-fn nested_workspace_does_not_also_fire_membership_rule_end_to_end() {
+fn nested_workspace_still_fires_membership_rule_end_to_end() {
     let root = tempdir().expect("tempdir");
 
     write(
@@ -197,8 +197,13 @@ fn nested_workspace_does_not_also_fire_membership_rule_end_to_end() {
     );
     assert_eq!(
         results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12").count(),
-        0
+        1
     );
+    assert!(results.iter().any(|result| {
+        result.id() == "RS-TOPOLOGY-FILETREE-12"
+            && result.file() == Some("Cargo.toml")
+            && result.title() == "Workspace `.` has extra member `crates/nested`"
+    }));
 }
 
 #[test]

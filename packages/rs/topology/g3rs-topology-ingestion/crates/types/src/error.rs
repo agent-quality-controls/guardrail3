@@ -2,8 +2,6 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 pub enum G3RsTopologyIngestionError {
-    ConfigIngestionNotImplemented,
-    SourceIngestionNotImplemented,
     RootManifestNotWorkspace { path: PathBuf },
     Unreadable { path: PathBuf, reason: String },
     ParseFailed { path: PathBuf, reason: String },
@@ -12,12 +10,6 @@ pub enum G3RsTopologyIngestionError {
 impl std::fmt::Display for G3RsTopologyIngestionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::ConfigIngestionNotImplemented => {
-                f.write_str("topology config ingestion is not implemented yet")
-            }
-            Self::SourceIngestionNotImplemented => {
-                f.write_str("topology source ingestion is not implemented yet")
-            }
             Self::RootManifestNotWorkspace { path } => {
                 write!(f, "{} is not a workspace Cargo.toml", path.display())
             }

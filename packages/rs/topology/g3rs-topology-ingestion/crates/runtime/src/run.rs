@@ -1,7 +1,6 @@
 use cargo_toml_parser::CargoToml;
 use g3rs_topology_ingestion_types::{
-    G3RsTopologyConfigChecksInput, G3RsTopologyFileTreeChecksInput,
-    G3RsTopologyIngestionError as IngestionError, G3RsTopologySourceChecksInput,
+    G3RsTopologyFileTreeChecksInput, G3RsTopologyIngestionError as IngestionError,
 };
 use g3rs_topology_types::{
     G3RsTopologyCargoManifestKind, G3RsTopologyDescendantCargoRoot,
@@ -11,18 +10,6 @@ use g3rs_topology_types::{
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::view::CrawlView;
-
-pub fn ingest_for_config_checks(
-    _crawl: &G3RsWorkspaceCrawl,
-) -> Result<Vec<G3RsTopologyConfigChecksInput>, IngestionError> {
-    Err(IngestionError::ConfigIngestionNotImplemented)
-}
-
-pub fn ingest_for_source_checks(
-    _crawl: &G3RsWorkspaceCrawl,
-) -> Result<Vec<G3RsTopologySourceChecksInput>, IngestionError> {
-    Err(IngestionError::SourceIngestionNotImplemented)
-}
 
 pub fn ingest_for_file_tree_checks(
     crawl: &G3RsWorkspaceCrawl,
