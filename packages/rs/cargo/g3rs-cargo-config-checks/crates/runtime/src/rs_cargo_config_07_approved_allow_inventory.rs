@@ -1,0 +1,97 @@
+use g3rs_cargo_types::G3RsCargoPolicyRoot;
+use guardrail3_check_types::G3CheckResult;
+use guardrail3_reason_policy::validate_reason_text;
+
+use crate::support::{
+    EXPECTED_CLIPPY_REQUIRED_ALLOW, allow_selector, escape_hatch_reason, explicit_allow_entries,
+    raw_policy_lints, warn,
+};
+
+const ID: &str = "RS-CARGO-CONFIG-07";
+
+pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>) {
+    let Some(clippy_lints) = raw_policy_lints(root, "clippy") else {
+        return;
+    };
+    if clippy_lints.as_table().is_none() {
+        return;
+    }
+
+    let mut documented_count = 0usize;
+    let mut missing_reason_count = 0usize;
+    let mut weak_reason_count = 0usize;
+
+    for lint_name in explicit_allow_entries(Some(clippy_lints)) {
+        if EXPECTED_CLIPPY_REQUIRED_ALLOW
+            .iter()
+            .any(|required| required.name == lint_name)
+        {
+            continue;
+        }
+        let selector = allow_selector("clippy", &lint_name);
+        let Some(reason) = escape_hatch_reason(
+            &root.escape_hatches,
+            "cargo",
+            &root.cargo_rel_path,
+            "lint_allow",
+            &selector,
+        ) else {
+            missing_reason_count += 1;
+            results.push(crate::support::error(
+                ID,
+                "approved allow entry missing reason",
+                format!(
+                    "`{}` explicitly allows `{lint_name}` in `clippy` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this lint with a reason.",
+                    root.cargo_rel_path
+                ),
+                &root.cargo_rel_path,
+            ));
+            continue;
+        };
+
+        match validate_reason_text(reason) {
+            Ok(()) => {
+                documented_count += 1;
+                results.push(warn(
+                    ID,
+                    "approved allow entry",
+                    format!(
+                        "`{}` explicitly allows `{lint_name}` in `clippy` with documented reason `{reason}`.",
+                        root.cargo_rel_path
+                    ),
+                    &root.cargo_rel_path,
+                ));
+            }
+            Err(issue) => {
+                weak_reason_count += 1;
+                results.push(crate::support::error(
+                    ID,
+                    "approved allow entry reason too weak",
+                    format!(
+                        "`{}` explicitly allows `{lint_name}` in `clippy` with a weak reason: {}. Provide a more specific reason.",
+                        root.cargo_rel_path,
+                        issue.message()
+                    ),
+                    &root.cargo_rel_path,
+                ));
+            }
+        }
+    }
+
+    let total = documented_count + missing_reason_count + weak_reason_count;
+    if total > 0 {
+        results.push(warn(
+            ID,
+            "approved allow count",
+            format!(
+                "`{}` has {total} approved manifest allow entries ({documented_count} documented, {missing_reason_count} missing reasons, {weak_reason_count} weak reasons).",
+                root.cargo_rel_path
+            ),
+            &root.cargo_rel_path,
+        ));
+    }
+}
+
+#[cfg(test)]
+#[path = "rs_cargo_config_07_approved_allow_inventory_tests/mod.rs"]
+mod tests;

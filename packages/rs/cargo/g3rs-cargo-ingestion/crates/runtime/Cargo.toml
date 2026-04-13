@@ -26,8 +26,11 @@ cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version
 g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
 g3rs-cargo-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
+glob = "0.3"
+toml = "0.8"
 
 [dev-dependencies]
 g3rs-cargo-config-checks = { path = "../../../g3rs-cargo-config-checks" }
+g3rs-cargo-filetree-checks = { path = "../../../g3rs-cargo-filetree-checks" }
 g3rs-cargo-ingestion-assertions = { path = "../assertions" }
 tempfile = "3"

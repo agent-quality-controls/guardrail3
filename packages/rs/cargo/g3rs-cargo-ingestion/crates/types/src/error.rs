@@ -23,6 +23,13 @@ pub enum G3RsCargoIngestionError {
         /// The underlying parse error message.
         reason: String,
     },
+    /// The discovered Cargo input surface was inconsistent or semantically invalid.
+    NormalizationFailed {
+        /// Absolute path to the input responsible for the normalization failure.
+        path: PathBuf,
+        /// The normalization failure reason.
+        reason: String,
+    },
 }
 
 impl std::fmt::Display for G3RsCargoIngestionError {
@@ -42,6 +49,9 @@ impl std::fmt::Display for G3RsCargoIngestionError {
             }
             Self::ParseFailed { path, reason } => {
                 write!(f, "cannot parse {}: {reason}", path.display())
+            }
+            Self::NormalizationFailed { path, reason } => {
+                write!(f, "cannot normalize {}: {reason}", path.display())
             }
         }
     }

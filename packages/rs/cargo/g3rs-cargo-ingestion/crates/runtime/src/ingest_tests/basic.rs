@@ -24,211 +24,592 @@ fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
     g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
 }
 
+#[cfg(unix)]
+fn make_unreadable(path: &Path) {
+    use std::os::unix::fs::PermissionsExt;
+
+    let mut permissions = fs::metadata(path).expect("stat should succeed").permissions();
+    permissions.set_mode(0o000);
+    fs::set_permissions(path, permissions).expect("chmod should succeed");
+}
+
 #[test]
-fn ingests_valid_workspace_cargo_toml() {
+fn ingests_workspace_root_with_members_for_config_checks() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
 
     write(
         root.join("Cargo.toml"),
-        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+
+            [workspace.lints.rust]
+            warnings = "deny"
+
+            [workspace.lints.clippy]
+            all = { level = "deny", priority = -1 }
+        "#,
     );
-    write(root.join("src/lib.rs"), "");
+    write(
+        root.join("crates/api/Cargo.toml"),
+        r#"
+            [package]
+            name = "api"
+            edition = "2024"
 
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+            [lints]
+            workspace = true
+        "#,
+    );
 
-    let input = result.expect("ingestion should succeed for a valid Cargo.toml workspace");
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("ingestion should succeed for a valid workspace root");
+
+    assert_eq!(input.root.cargo_rel_path, "Cargo.toml");
     assert_eq!(
-        input.cargo_rel_path, "Cargo.toml",
-        "cargo_rel_path should be the workspace-root-relative path"
+        input.root.kind,
+        g3rs_cargo_types::G3RsCargoPolicyRootKind::WorkspaceRoot
     );
-    assert!(
-        input.cargo.workspace.is_some(),
-        "parsed Cargo.toml should contain a workspace section when [workspace] is present"
-    );
+    assert_eq!(input.workspace_members.len(), 1);
+    assert_eq!(input.workspace_members[0].member_rel, "crates/api");
+    assert!(input.workspace_members[0].lint_workspace_true);
 }
 
 #[test]
-fn fails_when_cargo_toml_is_missing() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
-    let root = temp.path();
-    git_init(root);
-
-    write(root.join("src/lib.rs"), "");
-
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
-
-    assert!(
-        matches!(
-            result,
-            Err(crate::IngestionError::CargoTomlNotFound)
-        ),
-        "ingestion should return CargoTomlNotFound when no Cargo.toml exists in the workspace"
-    );
-}
-
-#[test]
-fn fails_on_malformed_cargo_toml() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
-    let root = temp.path();
-    git_init(root);
-
-    write(root.join("Cargo.toml"), "{{{{not valid toml at all}}}}");
-
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
-
-    assert!(
-        matches!(
-            result,
-            Err(crate::IngestionError::ParseFailed { .. })
-        ),
-        "ingestion should return ParseFailed when Cargo.toml contains invalid TOML"
-    );
-}
-
-#[test]
-fn ingests_package_cargo_toml() {
+fn ingests_hybrid_root_with_package_fallback_fields() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
 
     write(
         root.join("Cargo.toml"),
-        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-    write(root.join("src/lib.rs"), "");
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
 
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+            [package]
+            name = "hybrid"
+            version = "0.1.0"
+            edition = "2024"
 
-    let input = result.expect("ingestion should succeed for a valid package Cargo.toml");
-    assert_eq!(
-        input.cargo_rel_path, "Cargo.toml",
-        "cargo_rel_path should be the workspace-root-relative path"
+            [lints.rust]
+            warnings = "deny"
+        "#,
     );
-    let package = input
-        .cargo
-        .package
-        .as_ref()
-        .expect("parsed Cargo.toml should have a [package] section when one is defined");
+
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("ingestion should succeed for a valid hybrid root");
+
     assert_eq!(
-        package.name.as_deref(),
-        Some("demo"),
-        "parsed package name should match the fixture"
+        input.root.kind,
+        g3rs_cargo_types::G3RsCargoPolicyRootKind::WorkspaceRoot
+    );
+    assert_eq!(input.root.edition.as_deref(), Some("2024"));
+    assert!(
+        input.root
+            .raw_cargo
+            .get("lints")
+            .and_then(|value| value.get("rust"))
+            .is_some()
     );
 }
 
 #[test]
-fn empty_cargo_toml_parses_to_hollow_input() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
-    let root = temp.path();
-    git_init(root);
-
-    write(root.join("Cargo.toml"), "");
-
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
-
-    let input = result.expect("ingestion should succeed for an empty Cargo.toml");
-    assert!(
-        input.cargo.package.is_none(),
-        "empty Cargo.toml should have no [package] section"
-    );
-    assert!(
-        input.cargo.workspace.is_none(),
-        "empty Cargo.toml should have no [workspace] section"
-    );
-}
-
-#[test]
-fn nested_cargo_toml_is_not_selected() {
+fn malformed_guardrail_toml_degrades_to_guardrail_parse_error() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
 
     write(
         root.join("Cargo.toml"),
-        "[workspace]\nmembers = [\"packages/foo\"]\nresolver = \"2\"\n",
+        "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write(
-        root.join("packages/foo/Cargo.toml"),
-        "[package]\nname = \"foo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-    write(root.join("packages/foo/src/lib.rs"), "");
+    write(root.join("guardrail3.toml"), "[profile");
 
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("config ingestion should keep guardrail parse failures in state");
 
-    let input = result.expect("ingestion should succeed when a root Cargo.toml exists");
-    assert_eq!(
-        input.cargo_rel_path, "Cargo.toml",
-        "ingestion should select the root Cargo.toml, not a nested one"
-    );
+    assert!(input.root.guardrail_parse_error);
+    assert!(input.root.profile_name.is_none());
+    assert!(input.root.escape_hatches.is_empty());
 }
 
 #[test]
-fn ignored_but_recovered_cargo_toml_is_ingested() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
-    let root = temp.path();
-    git_init(root);
-
-    write(root.join(".gitignore"), "Cargo.toml\n");
-    write(
-        root.join("Cargo.toml"),
-        "[package]\nname = \"recovered\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
-    );
-
-    let crawl = crawl(root);
-
-    // Verify the crawl actually marked this as Ignored (proving recovery path)
-    let crawl_entry = crawl
-        .entry("Cargo.toml")
-        .expect("Cargo.toml should be present in crawl via recovery even when gitignored");
-    assert_eq!(
-        crawl_entry.ignore_state,
-        g3rs_workspace_crawl::G3RsWorkspaceIgnoreState::Ignored,
-        "Cargo.toml should have Ignored state when gitignored, proving the recovery path was exercised"
-    );
-
-    let result = crate::ingest_for_config_checks(&crawl);
-
-    let input = result.expect(
-        "ingestion should succeed for a gitignored Cargo.toml recovered by the crawl recovery phase",
-    );
-    assert_eq!(
-        input.cargo_rel_path, "Cargo.toml",
-        "recovered Cargo.toml should still resolve to the root-relative path"
-    );
-}
-
-#[test]
-fn workspace_and_package_combined() {
+fn invalid_guardrail_profile_name_degrades_to_guardrail_parse_error() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
 
     write(
         root.join("Cargo.toml"),
-        "[workspace]\nmembers = []\nresolver = \"2\"\n\n[package]\nname = \"combined\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+        "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write(root.join("src/lib.rs"), "");
+    write(root.join("guardrail3.toml"), "[profile]\nname = []\n");
 
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("config ingestion should keep guardrail shape failures in state");
+
+    assert!(input.root.guardrail_parse_error);
+    assert!(input.root.profile_name.is_none());
+    assert!(input.root.escape_hatches.is_empty());
+}
+
+#[test]
+fn invalid_guardrail_escape_hatch_degrades_to_guardrail_parse_error() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(
+        root.join("guardrail3.toml"),
+        r#"
+            [profile]
+            name = "library"
+
+            [[escape_hatches]]
+            family = "cargo"
+            file = "Cargo.toml"
+            kind = "lint_allow"
+            selector = "rust:warnings"
+            reason = []
+        "#,
+    );
+
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("config ingestion should keep invalid escape-hatch shape in state");
+
+    assert!(input.root.guardrail_parse_error);
+    assert!(input.root.profile_name.is_none());
+    assert!(input.root.escape_hatches.is_empty());
+}
+
+#[test]
+fn config_ingestion_fails_closed_on_invalid_workspace_members_shape() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = "crates/api"
+            resolver = "2"
+        "#,
+    );
+
+    let result = crate::ingest_for_config_checks(&crawl(root));
+
+    assert!(result.is_err(), "invalid workspace members must fail closed");
+}
+
+#[test]
+fn config_ingestion_fails_closed_on_invalid_workspace_member_glob() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/["]
+            resolver = "2"
+        "#,
+    );
+
+    let result = crate::ingest_for_config_checks(&crawl(root));
+
+    assert!(
+        result.is_err(),
+        "invalid workspace member glob syntax must fail closed"
+    );
+}
+
+#[test]
+fn config_ingestion_fails_closed_on_invalid_workspace_exclude_glob() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            exclude = ["crates/["]
+            resolver = "2"
+        "#,
+    );
+    write(
+        root.join("crates/api/Cargo.toml"),
+        r#"
+            [package]
+            name = "api"
+            edition = "2024"
+        "#,
+    );
+
+    let result = crate::ingest_for_config_checks(&crawl(root));
+
+    assert!(
+        result.is_err(),
+        "invalid workspace exclude glob syntax must fail closed"
+    );
+}
+
+#[test]
+fn config_ingestion_fails_closed_on_invalid_workspace_exclude_shape() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            exclude = [1]
+            resolver = "2"
+        "#,
+    );
+    write(
+        root.join("crates/api/Cargo.toml"),
+        r#"
+            [package]
+            name = "api"
+            edition = "2024"
+        "#,
+    );
+
+    let result = crate::ingest_for_config_checks(&crawl(root));
+
+    assert!(
+        result.is_err(),
+        "invalid workspace exclude entries must fail closed"
+    );
+}
+
+#[test]
+fn config_ingestion_normalizes_root_member_dot_patterns() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = [".", "./"]
+            resolver = "2"
+
+            [package]
+            name = "hybrid"
+            version = "0.1.0"
+            edition = "2024"
+        "#,
+    );
+
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("root member dot patterns should normalize to the root manifest");
+
+    assert_eq!(input.workspace_members.len(), 1, "{:#?}", input.workspace_members);
+    assert_eq!(input.workspace_members[0].member_rel, "");
+    assert_eq!(input.workspace_members[0].cargo_rel_path, "Cargo.toml");
+}
+
+#[test]
+fn config_ingestion_keeps_healthy_members_when_another_member_manifest_is_malformed() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api", "crates/broken"]
+            resolver = "2"
+        "#,
+    );
+    write(
+        root.join("crates/api/Cargo.toml"),
+        r#"
+            [package]
+            name = "api"
+            edition = "2024"
+
+            [lints]
+            workspace = true
+        "#,
+    );
+    write(root.join("crates/broken/Cargo.toml"), "[package");
+
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("malformed sibling member should not abort config ingestion");
+
+    assert_eq!(input.workspace_members.len(), 1, "{:#?}", input.workspace_members);
+    assert_eq!(input.workspace_members[0].member_rel, "crates/api");
+}
+
+#[test]
+fn config_ingestion_skips_missing_declared_member_manifest() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+        "#,
+    );
+
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("missing declared member should be left to filetree checks");
+
+    assert!(input.workspace_members.is_empty(), "{:#?}", input.workspace_members);
+}
+
+#[test]
+fn config_ingestion_preserves_invalid_lints_workspace_shape_per_member() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+        "#,
+    );
+    write(
+        root.join("crates/api/Cargo.toml"),
+        r#"
+            [package]
+            name = "api"
+            edition = "2024"
+
+            [lints]
+            workspace = "yes"
+        "#,
+    );
+
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("invalid [lints].workspace should remain member-scoped config state");
+
+    assert_eq!(input.workspace_members.len(), 1);
+    assert!(input.workspace_members[0].lint_workspace_invalid);
+    assert!(!input.workspace_members[0].lint_workspace_true);
+}
+
+#[cfg(unix)]
+#[test]
+fn unreadable_root_cargo_toml_fails_ingestion() {
+    use g3rs_cargo_ingestion_types::G3RsCargoIngestionError;
+    use std::os::unix::fs::PermissionsExt;
+
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    let cargo_path = root.join("Cargo.toml");
+    write(
+        &cargo_path,
+        r#"
+            [package]
+            name = "pkg"
+            edition = "2024"
+        "#,
+    );
+
+    make_unreadable(&cargo_path);
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let _restore = fs::set_permissions(&cargo_path, fs::Permissions::from_mode(0o644));
 
-    let input = result.expect(
-        "ingestion should succeed for a Cargo.toml with both [workspace] and [package] sections",
+    let err =
+        crate::ingest_for_config_checks(&crawl).expect_err("unreadable root Cargo.toml should fail");
+
+    assert!(matches!(err, G3RsCargoIngestionError::Unreadable { .. }), "{err:?}");
+}
+
+#[test]
+fn config_ingestion_keeps_healthy_members_when_another_member_has_invalid_lints_workspace() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api", "crates/bad"]
+            resolver = "2"
+        "#,
+    );
+    write(
+        root.join("crates/api/Cargo.toml"),
+        r#"
+            [package]
+            name = "api"
+            edition = "2024"
+
+            [lints]
+            workspace = true
+        "#,
+    );
+    write(
+        root.join("crates/bad/Cargo.toml"),
+        r#"
+            [package]
+            name = "bad"
+            edition = "2024"
+
+            [lints]
+            workspace = "yes"
+        "#,
+    );
+
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("invalid sibling member must not abort healthy config fan-out");
+
+    assert_eq!(input.workspace_members.len(), 2, "{:#?}", input.workspace_members);
+    assert!(
+        input.workspace_members.iter().any(|member| {
+            member.member_rel == "crates/api" && member.lint_workspace_true && !member.lint_workspace_invalid
+        }),
+        "{:#?}",
+        input.workspace_members
     );
     assert!(
-        input.cargo.workspace.is_some(),
-        "parsed Cargo.toml should contain the [workspace] section"
+        input.workspace_members.iter().any(|member| {
+            member.member_rel == "crates/bad" && !member.lint_workspace_true && member.lint_workspace_invalid
+        }),
+        "{:#?}",
+        input.workspace_members
     );
-    assert!(
-        input.cargo.package.is_some(),
-        "parsed Cargo.toml should contain the [package] section"
+}
+
+#[test]
+fn config_ingestion_fails_closed_on_invalid_workspace_rust_version_before_package_fallback() {
+    use g3rs_cargo_ingestion_types::G3RsCargoIngestionError;
+
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            [workspace.package]
+            rust-version = []
+
+            [package]
+            name = "hybrid"
+            version = "0.1.0"
+            edition = "2024"
+            rust-version = "1.84"
+        "#,
     );
+
+    let err = crate::ingest_for_config_checks(&crawl(root))
+        .expect_err("invalid workspace rust-version must fail before any package fallback");
+
+    assert!(matches!(err, G3RsCargoIngestionError::ParseFailed { .. }), "{err:?}");
+}
+
+#[cfg(unix)]
+#[test]
+fn config_ingestion_skips_unreadable_member_manifest() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api", "crates/secret"]
+            resolver = "2"
+        "#,
+    );
+    write(
+        root.join("crates/api/Cargo.toml"),
+        r#"
+            [package]
+            name = "api"
+            edition = "2024"
+
+            [lints]
+            workspace = true
+        "#,
+    );
+    let secret = root.join("crates/secret/Cargo.toml");
+    write(
+        &secret,
+        r#"
+            [package]
+            name = "secret"
+            edition = "2024"
+        "#,
+    );
+
+    make_unreadable(&secret);
+    let crawl = crawl(root);
+    let _restore = fs::set_permissions(&secret, fs::Permissions::from_mode(0o644));
+
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("unreadable sibling member must not abort healthy config fan-out");
+
+    assert_eq!(input.workspace_members.len(), 1, "{:#?}", input.workspace_members);
+    assert_eq!(input.workspace_members[0].member_rel, "crates/api");
+}
+
+#[cfg(unix)]
+#[test]
+fn unreadable_guardrail_toml_degrades_to_guardrail_parse_error() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    let guardrail = root.join("guardrail3.toml");
+    write(&guardrail, "[profile]\nname = \"library\"\n");
+
+    make_unreadable(&guardrail);
+    let crawl = crawl(root);
+    let _restore = fs::set_permissions(&guardrail, fs::Permissions::from_mode(0o644));
+
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("unreadable guardrail3.toml should stay in state");
+
+    assert!(input.root.guardrail_parse_error);
+    assert!(input.root.profile_name.is_none());
+    assert!(input.root.escape_hatches.is_empty());
 }

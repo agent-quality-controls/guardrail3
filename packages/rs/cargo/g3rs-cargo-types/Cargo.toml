@@ -31,3 +31,4 @@ module_name_repetitions = "allow"
 
 [dependencies]
 cargo-toml-parser = { path = "../../../parsers/cargo-toml-parser" }
+toml = "0.8"
