@@ -1,0 +1,48 @@
+use g3rs_release_filetree_checks_types::G3RsReleaseFileTreeRepo;
+use guardrail3_check_types::{G3CheckResult, G3Severity};
+
+const ID: &str = "RS-RELEASE-FILETREE-02";
+
+pub(crate) fn check(repo: &G3RsReleaseFileTreeRepo, results: &mut Vec<G3CheckResult>) {
+    if repo.release_plz_exists {
+        results.push(
+            G3CheckResult::new(
+                ID.to_owned(),
+                G3Severity::Info,
+                "release-plz.toml exists".to_owned(),
+                "Repo root includes `release-plz.toml`.".to_owned(),
+                Some(repo.release_plz_rel_path.clone()),
+                None,
+            )
+            .into_inventory(),
+        );
+    } else {
+        results.push(G3CheckResult::new(
+            ID.to_owned(),
+            G3Severity::Warn,
+            "release-plz.toml missing".to_owned(),
+            "Repo root is missing `release-plz.toml`. Create `release-plz.toml` at the repo root.".to_owned(),
+            Some(repo.release_plz_rel_path.clone()),
+            None,
+        ));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::check;
+    use crate::test_support::repo_input;
+
+    #[test]
+    fn warns_when_release_plz_is_missing() {
+        let mut input = repo_input();
+        input.repo.as_mut().unwrap().release_plz_exists = false;
+        let mut results = Vec::new();
+
+        check(input.repo.as_ref().unwrap(), &mut results);
+
+        assert_eq!(results[0].id(), "RS-RELEASE-FILETREE-02");
+        assert_eq!(results[0].title(), "release-plz.toml missing");
+        assert!(!results[0].inventory());
+    }
+}

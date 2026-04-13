@@ -1,45 +1,36 @@
-use g3rs_release_config_checks_types::G3RsReleaseConfigChecksInput;
+use g3rs_release_config_checks_types::G3RsReleaseConfigRepo;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{info, warn};
+use crate::support::{info, message_covers_prefix, warn};
 
-/// Check ID for cliff.toml baseline configuration.
 const ID: &str = "RS-RELEASE-CONFIG-11";
-
-/// Required commit message prefixes that should each have at least one parser.
 const REQUIRED_PREFIXES: &[&str] = &[
     "^feat", "^fix", "^doc", "^perf", "^refactor", "^style", "^test", "^chore",
 ];
 
-/// Verify baseline cliff.toml settings.
-pub(crate) fn check(input: &G3RsReleaseConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let cliff = match input.cliff.as_ref() {
-        Some(c) => c,
-        None => return,
+pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
+    if !repo.cliff_exists {
+        return;
+    }
+
+    let Some(cliff) = repo.cliff.as_ref() else {
+        return;
     };
-
-    let file = input.cliff_rel_path.as_deref().unwrap_or("cliff.toml");
-
-    // Check git section exists.
-    let git = match cliff.git.as_ref() {
-        Some(g) => g,
-        None => {
-            results.push(warn(
-                ID,
-                "cliff: missing [git] section".to_owned(),
-                "cliff.toml should have a [git] section.".to_owned(),
-                file,
-            ));
-            // Without git section, remaining checks cannot pass.
-            return;
-        }
+    let file = &repo.cliff_rel_path;
+    let Some(git) = cliff.git.as_ref() else {
+        results.push(warn(
+            ID,
+            "cliff: missing [git] section".to_owned(),
+            "cliff.toml should have a [git] section.".to_owned(),
+            file,
+        ));
+        return;
     };
 
     let mut issues = 0usize;
 
-    // Check conventional_commits == true.
-    if !git.conventional_commits.is_some_and(|v| v) {
-        issues = issues.saturating_add(1);
+    if !git.conventional_commits.is_some_and(|value| value) {
+        issues += 1;
         results.push(warn(
             ID,
             "cliff: conventional_commits should be true".to_owned(),
@@ -48,9 +39,8 @@ pub(crate) fn check(input: &G3RsReleaseConfigChecksInput, results: &mut Vec<G3Ch
         ));
     }
 
-    // Check filter_unconventional == true.
-    if !git.filter_unconventional.is_some_and(|v| v) {
-        issues = issues.saturating_add(1);
+    if !git.filter_unconventional.is_some_and(|value| value) {
+        issues += 1;
         results.push(warn(
             ID,
             "cliff: filter_unconventional should be true".to_owned(),
@@ -59,17 +49,20 @@ pub(crate) fn check(input: &G3RsReleaseConfigChecksInput, results: &mut Vec<G3Ch
         ));
     }
 
-    // Check commit_parsers cover required prefixes.
-    let parsers = git.commit_parsers.as_deref().unwrap_or(&[]);
-    let messages: Vec<&str> = parsers
+    let messages = git
+        .commit_parsers
+        .as_deref()
+        .unwrap_or(&[])
         .iter()
-        .filter_map(|p| p.message.as_deref())
-        .collect();
+        .filter_map(|parser| parser.message.as_deref())
+        .collect::<Vec<_>>();
 
     for prefix in REQUIRED_PREFIXES {
-        let covered = messages.iter().any(|m| m.starts_with(prefix));
+        let covered = messages
+            .iter()
+            .any(|message| message_covers_prefix(message, prefix));
         if !covered {
-            issues = issues.saturating_add(1);
+            issues += 1;
             results.push(warn(
                 ID,
                 format!("cliff: missing commit parser for prefix \"{prefix}\""),
