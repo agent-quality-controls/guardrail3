@@ -1,4 +1,7 @@
 use cargo_toml_parser::{CargoToml, InheritableValue, LintValue, ToolLints};
+use g3rs_cargo_types::{
+    G3RsCargoEscapeHatch, G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoWorkspaceMember,
+};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 pub(crate) struct LintExpectation {
@@ -113,6 +116,19 @@ pub(crate) const EXPECTED_CLIPPY_REQUIRED_ALLOW: &[RequiredAllowLint] = &[Requir
     reason: "Conflicts with rustc `unreachable_pub` lint. Keep `unreachable_pub = \"deny\"` and allow this clippy lint.",
 }];
 
+pub(crate) const EXPECTED_CLIPPY_ALLOW: &[&str] = &[
+    "missing_docs_in_private_items",
+    "module_name_repetitions",
+    "must_use_candidate",
+    "option_if_let_else",
+    "empty_line_after_doc_comments",
+    "single_match_else",
+    "ref_option_ref",
+    "trivially_copy_pass_by_ref",
+    "multiple_crate_versions",
+    "redundant_pub_crate",
+];
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum CargoRole {
     WorkspaceRoot,
@@ -140,7 +156,12 @@ pub(crate) fn role_label(role: CargoRole) -> &'static str {
 
 pub(crate) fn policy_lints<'a>(cargo: &'a CargoToml, family: &str) -> Option<&'a ToolLints> {
     match cargo_role(cargo) {
-        CargoRole::WorkspaceRoot => cargo.workspace.as_ref()?.lints.as_ref()?.tools.get(family),
+        CargoRole::WorkspaceRoot => cargo
+            .workspace
+            .as_ref()
+            .and_then(|workspace| workspace.lints.as_ref())
+            .and_then(|lints| lints.tools.get(family))
+            .or_else(|| cargo.lints.as_ref().and_then(|lints| lints.tools.get(family))),
         CargoRole::PackageRoot => cargo.lints.as_ref()?.tools.get(family),
         CargoRole::Other => None,
     }
@@ -148,11 +169,40 @@ pub(crate) fn policy_lints<'a>(cargo: &'a CargoToml, family: &str) -> Option<&'a
 
 pub(crate) fn policy_lints_table_label(cargo: &CargoToml, family: &str) -> &'static str {
     match (cargo_role(cargo), family) {
-        (CargoRole::WorkspaceRoot, "rust") => "[workspace.lints.rust]",
-        (CargoRole::WorkspaceRoot, "clippy") => "[workspace.lints.clippy]",
+        (CargoRole::WorkspaceRoot, "rust")
+            if cargo
+                .workspace
+                .as_ref()
+                .and_then(|workspace| workspace.lints.as_ref())
+                .and_then(|lints| lints.tools.get("rust"))
+                .is_some() =>
+        {
+            "[workspace.lints.rust]"
+        }
+        (CargoRole::WorkspaceRoot, "clippy")
+            if cargo
+                .workspace
+                .as_ref()
+                .and_then(|workspace| workspace.lints.as_ref())
+                .and_then(|lints| lints.tools.get("clippy"))
+                .is_some() =>
+        {
+            "[workspace.lints.clippy]"
+        }
+        (CargoRole::WorkspaceRoot, "rust") => "[lints.rust]",
+        (CargoRole::WorkspaceRoot, "clippy") => "[lints.clippy]",
         (CargoRole::PackageRoot, "rust") => "[lints.rust]",
         (CargoRole::PackageRoot, "clippy") => "[lints.clippy]",
-        (CargoRole::WorkspaceRoot, _) => "[workspace.lints]",
+        (CargoRole::WorkspaceRoot, _)
+            if cargo
+                .workspace
+                .as_ref()
+                .and_then(|workspace| workspace.lints.as_ref())
+                .is_some() =>
+        {
+            "[workspace.lints]"
+        }
+        (CargoRole::WorkspaceRoot, _) => "[lints]",
         (CargoRole::PackageRoot, _) => "[lints]",
         (CargoRole::Other, _) => "[lints]",
     }
@@ -189,11 +239,30 @@ pub(crate) fn is_weaker(expected_level: &str, actual_level: &str) -> bool {
 
 pub(crate) fn policy_root_edition(cargo: &CargoToml) -> Option<Result<&str, ()>> {
     match cargo_role(cargo) {
-        CargoRole::WorkspaceRoot => cargo
-            .workspace
-            .as_ref()
-            .and_then(|workspace| workspace.package.as_ref())
-            .map(|package| package.edition.as_deref().ok_or(())),
+        CargoRole::WorkspaceRoot => {
+            let workspace_edition = cargo
+                .workspace
+                .as_ref()
+                .and_then(|workspace| workspace.package.as_ref())
+                .and_then(|package| package.edition.as_deref());
+            if let Some(edition) = workspace_edition {
+                Some(Ok(edition))
+            } else if cargo
+                .workspace
+                .as_ref()
+                .and_then(|workspace| workspace.package.as_ref())
+                .is_some()
+            {
+                Some(Err(()))
+            } else {
+                cargo.package.as_ref().and_then(|package| {
+                    package.edition.as_ref().map(|edition| match edition {
+                        InheritableValue::Value(value) => Ok(value.as_str()),
+                        InheritableValue::Inherit(_) => Err(()),
+                    })
+                })
+            }
+        }
         CargoRole::PackageRoot => cargo.package.as_ref().and_then(|package| {
             package.edition.as_ref().map(|edition| match edition {
                 InheritableValue::Value(value) => Ok(value.as_str()),
@@ -204,8 +273,112 @@ pub(crate) fn policy_root_edition(cargo: &CargoToml) -> Option<Result<&str, ()>>
     }
 }
 
+pub(crate) fn raw_policy_lints<'a>(
+    root: &'a G3RsCargoPolicyRoot,
+    family: &str,
+) -> Option<&'a toml::Value> {
+    match root.kind {
+        G3RsCargoPolicyRootKind::WorkspaceRoot => root
+            .raw_cargo
+            .get("workspace")
+            .and_then(|value| value.get("lints"))
+            .and_then(|value| value.get(family))
+            .or_else(|| root.raw_cargo.get("lints").and_then(|value| value.get(family))),
+        G3RsCargoPolicyRootKind::StandalonePackageRoot => {
+            root.raw_cargo.get("lints").and_then(|value| value.get(family))
+        }
+        G3RsCargoPolicyRootKind::Other => None,
+    }
+}
+
+pub(crate) fn raw_member_lints<'a>(
+    member: &'a G3RsCargoWorkspaceMember,
+    family: &str,
+) -> Option<&'a toml::Value> {
+    member.raw_cargo.get("lints").and_then(|value| value.get(family))
+}
+
+pub(crate) fn explicit_allow_entries(lints: Option<&toml::Value>) -> Vec<String> {
+    let Some(table) = lints.and_then(toml::Value::as_table) else {
+        return Vec::new();
+    };
+    let mut entries = table
+        .iter()
+        .filter_map(|(name, value)| {
+            (lint_level_from_value(value) == Some("allow")).then(|| name.clone())
+        })
+        .collect::<Vec<_>>();
+    entries.sort();
+    entries
+}
+
+pub(crate) fn is_approved_allow(name: &str) -> bool {
+    EXPECTED_CLIPPY_ALLOW.contains(&name)
+}
+
+pub(crate) fn allow_selector(family: &str, lint_name: &str) -> String {
+    format!("{family}:{lint_name}")
+}
+
+pub(crate) fn escape_hatch_reason<'a>(
+    entries: &'a [G3RsCargoEscapeHatch],
+    family: &str,
+    file: &str,
+    kind: &str,
+    selector: &str,
+) -> Option<&'a str> {
+    entries
+        .iter()
+        .find(|entry| {
+            entry.family == family
+                && entry.file == file
+                && entry.kind == kind
+                && entry.selector == selector
+        })
+        .map(|entry| entry.reason.as_str())
+}
+
+pub(crate) fn lints_table_is_well_formed(lints: Option<&toml::Value>) -> bool {
+    let Some(lints) = lints else {
+        return false;
+    };
+    let Some(table) = lints.as_table() else {
+        return false;
+    };
+    table.values().all(has_valid_lint_level)
+}
+
+pub(crate) fn has_valid_lint_level(value: &toml::Value) -> bool {
+    matches!(
+        lint_level_from_value(value),
+        Some(level) if is_valid_lint_level(level)
+    ) && value.as_table().is_none_or(|table| {
+        table
+            .get("priority")
+            .is_none_or(|priority| priority.as_integer().is_some())
+    })
+}
+
+pub(crate) fn raw_lint_level(lints: &toml::Value, name: &str) -> Option<String> {
+    lints.get(name)
+        .and_then(lint_level_from_value)
+        .map(str::to_owned)
+}
+
+pub(crate) fn is_valid_lint_level(level: &str) -> bool {
+    matches!(level, "allow" | "warn" | "deny" | "forbid")
+}
+
 pub(crate) fn workspace_resolver(cargo: &CargoToml) -> Option<&str> {
     cargo.workspace.as_ref()?.resolver.as_deref()
+}
+
+fn lint_level_from_value(value: &toml::Value) -> Option<&str> {
+    match value {
+        toml::Value::String(level) => Some(level.as_str()),
+        toml::Value::Table(table) => table.get("level").and_then(toml::Value::as_str),
+        _ => None,
+    }
 }
 
 pub(crate) fn info(

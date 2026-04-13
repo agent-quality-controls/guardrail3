@@ -36,6 +36,7 @@ name = "g3rs-cargo-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "toml",
 ]
 
 [[package]]

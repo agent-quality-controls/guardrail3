@@ -129,11 +129,38 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-cargo-config-checks-types",
+ "g3rs-cargo-types",
  "guardrail3-check-types",
+ "guardrail3-reason-policy",
+ "toml",
 ]
 
 [[package]]
 name = "g3rs-cargo-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-cargo-types",
+]
+
+[[package]]
+name = "g3rs-cargo-filetree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-cargo-filetree-checks-runtime",
+ "g3rs-cargo-filetree-checks-types",
+]
+
+[[package]]
+name = "g3rs-cargo-filetree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-cargo-filetree-checks-types",
+ "g3rs-cargo-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-cargo-filetree-checks-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-cargo-types",
@@ -160,11 +187,14 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-cargo-config-checks",
+ "g3rs-cargo-filetree-checks",
  "g3rs-cargo-ingestion-assertions",
  "g3rs-cargo-ingestion-types",
  "g3rs-cargo-types",
  "g3rs-workspace-crawl",
+ "glob",
  "tempfile",
+ "toml",
 ]
 
 [[package]]
@@ -176,6 +206,7 @@ name = "g3rs-cargo-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "toml",
 ]
 
 [[package]]
@@ -213,6 +244,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "glob"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
+
+[[package]]
 name = "globset"
 version = "0.4.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -228,6 +265,10 @@ dependencies = [
 [[package]]
 name = "guardrail3-check-types"
 version = "0.1.0"
+
+[[package]]
+name = "guardrail3-reason-policy"
+version = "0.0.0"
 
 [[package]]
 name = "hashbrown"

@@ -18,3 +18,16 @@ pub(crate) fn parse_cargo_toml(abs_path: &Path) -> Result<CargoToml, IngestionEr
         reason: err.to_string(),
     })
 }
+
+pub(crate) fn parse_raw_toml(abs_path: &Path) -> Result<toml::Value, IngestionError> {
+    let content = crate::fs::read_to_string(abs_path).map_err(|err| {
+        IngestionError::Unreadable {
+            path: abs_path.to_path_buf(),
+            reason: err.to_string(),
+        }
+    })?;
+    toml::from_str(&content).map_err(|err| IngestionError::ParseFailed {
+        path: abs_path.to_path_buf(),
+        reason: err.to_string(),
+    })
+}

@@ -20,8 +20,11 @@ workspace = true
 
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
+g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
 g3rs-cargo-config-checks-types = { path = "../types", version = "0.1.0" }
+guardrail3-reason-policy = { path = "../../../../../shared/reason-policy/crates/reason-policy", version = "0.0.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+toml = "0.8"
 
 [dev-dependencies]
 g3rs-cargo-config-checks-assertions = { path = "../assertions" }

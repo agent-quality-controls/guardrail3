@@ -2,37 +2,33 @@
 
 Extracted Cargo config checks for guardrail3.
 
-This package is intentionally narrower than the in-app `cargo` family:
-
-- it validates one parsed `Cargo.toml` file at a time
-- it infers workspace/package applicability from the parsed file itself
-- it does not discover roots, members, or cross-file relationships
-- it does not report parse-failure/input-failure routing
-- it does not depend on app-domain config types or normalized policy subsets
-
 Current package boundary:
 
-- one public input: `G3RsCargoConfigChecksInput { cargo_rel_path, cargo }`
-- one call validates only what can be known from that single parsed file
+- one pointed workspace root
+- one parsed root `Cargo.toml`
+- zero or more parsed workspace member `Cargo.toml` files
+- optional root-local `guardrail3.toml` policy state
 
-The app remains responsible for:
+Package-owned config rules:
 
-- root and member discovery
-- workspace coverage and missing-member reporting
-- malformed-input fail-closed behavior
-- any cross-file comparisons between workspace and members
-- any policy that depends on parsed `guardrail3-rs.toml`
-- `RS-CARGO-10`
-- `RS-CARGO-14`
+- `RS-CARGO-CONFIG-01`
+- `RS-CARGO-CONFIG-02`
+- `RS-CARGO-CONFIG-03`
+- `RS-CARGO-CONFIG-04`
+- `RS-CARGO-CONFIG-05`
+- `RS-CARGO-CONFIG-06`
+- `RS-CARGO-CONFIG-07`
+- `RS-CARGO-CONFIG-08`
+- `RS-CARGO-CONFIG-09`
+- `RS-CARGO-CONFIG-10`
+- `RS-CARGO-CONFIG-11`
+- `RS-CARGO-CONFIG-12`
+- `RS-CARGO-CONFIG-13`
 
-Initial single-file rules that fit this boundary:
+Still outside this package:
 
-- workspace/package local config rules such as `RS-CARGO-CONFIG-01`, `02`, `05`, `07`, `08`, `11`
-
-Rules that do not fit this package boundary stay in the app until they are
-redesigned around full parsed-file inputs instead of derived subsets:
-
-- workspace-member relationship rules: `RS-CARGO-04`
-- cross-file comparison rules: `RS-CARGO-06`, `RS-CARGO-09`
-- structural rules: `RS-CARGO-10`, `RS-CARGO-14`
-- policy-file-dependent rules: `RS-CARGO-03`, `RS-CARGO-12`, `RS-CARGO-13`, `RS-CARGO-15`
+- filetree rules:
+  - `RS-CARGO-FILETREE-10`
+  - `RS-CARGO-FILETREE-14`
+- source lane:
+  - none
