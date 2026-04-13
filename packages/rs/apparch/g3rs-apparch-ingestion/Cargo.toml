@@ -1,0 +1,44 @@
+[package]
+name = "g3rs-apparch-ingestion"
+version = "0.1.0"
+edition = "2024"
+description = "Facade crate for guardrail3 apparch ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["guardrail3", "apparch", "ingestion", "rust"]
+categories = ["development-tools"]
+
+[dependencies]
+g3rs-apparch-ingestion-runtime = { path = "crates/runtime", version = "0.1.0" }
+g3rs-apparch-ingestion-types = { path = "crates/types", version = "0.1.0" }
+
+[workspace]
+members = [
+    "crates/runtime",
+    "crates/types",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+
+[workspace.lints.rust]
+warnings = "deny"
+unsafe_code = "forbid"
+dead_code = "deny"
+unused_results = "deny"
+unused_crate_dependencies = "deny"
+missing_debug_implementations = "deny"
+unreachable_pub = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+cargo = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+module_name_repetitions = "allow"

@@ -1,0 +1,6 @@
+mod rs_apparch_config_01_types_dependency_direction;
+mod rs_apparch_config_02_logic_dependency_direction;
+mod rs_apparch_config_03_io_outbound_dependency_direction;
+mod run;
+
+pub use run::check;
