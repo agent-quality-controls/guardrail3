@@ -1,20 +1,21 @@
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsCodeExceptionCommentFact {
+use cargo_toml_parser::CargoToml;
+
+#[derive(Debug, Clone)]
+pub enum G3RsCodeConfigFileKind {
+    CargoToml { cargo: CargoToml },
+    Text,
+}
+
+#[derive(Debug, Clone)]
+pub struct G3RsCodeConfigFile {
     pub rel_path: String,
-    pub line: usize,
-    pub line_text: String,
+    pub content: String,
+    pub kind: G3RsCodeConfigFileKind,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsCodeUnsafeCodeLintFact {
-    pub cargo_rel_path: String,
-    pub lint_level: Option<String>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct G3RsCodeConfigChecksInput {
-    pub exception_comments: Vec<G3RsCodeExceptionCommentFact>,
-    pub unsafe_code_lints: Vec<G3RsCodeUnsafeCodeLintFact>,
+    pub files: Vec<G3RsCodeConfigFile>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

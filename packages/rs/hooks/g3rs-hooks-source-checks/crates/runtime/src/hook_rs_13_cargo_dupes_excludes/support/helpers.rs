@@ -326,8 +326,8 @@ pub(super) fn split_string_is_assignment_only(payload: &str) -> bool {
 pub(crate) fn token_is_shadowed_function(
     token: &str,
     command_name: &str,
-    current: &ParsedShellScript<'_>,
-    root: &ParsedShellScript<'_>,
+    current: &ParsedShellScript,
+    root: &ParsedShellScript,
     current_cutoff: usize,
     root_cutoff: usize,
 ) -> bool {

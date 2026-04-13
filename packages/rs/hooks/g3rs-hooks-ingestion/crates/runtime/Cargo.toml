@@ -24,6 +24,7 @@ g3rs-hooks-config-checks-types = { path = "../../../g3rs-hooks-config-checks/cra
 g3rs-hooks-file-tree-checks-types = { path = "../../../g3rs-hooks-file-tree-checks/crates/types", version = "0.1.0" }
 g3rs-hooks-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+hook-shell-parser = { path = "../../../../../../packages/parsers/hook-shell-parser", version = "0.1.0" }
 
 [dev-dependencies]
 g3rs-clippy-config-checks = { path = "../../../../clippy/g3rs-clippy-config-checks", version = "0.1.0" }

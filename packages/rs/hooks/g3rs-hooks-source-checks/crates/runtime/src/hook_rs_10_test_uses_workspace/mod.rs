@@ -54,7 +54,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
-fn script_contains_workspace_test(parsed: &ParsedShellScript<'_>) -> bool {
+fn script_contains_workspace_test(parsed: &ParsedShellScript) -> bool {
     any_resolved_command(parsed, is_workspace_test_command)
 }
 

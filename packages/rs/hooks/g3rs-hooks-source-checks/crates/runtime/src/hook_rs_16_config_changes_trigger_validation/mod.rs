@@ -7,7 +7,7 @@ use super::inputs::RustHookCommandInput;
 
 const ID: &str = "RS-HOOKS-SOURCE-15";
 
-pub(crate) fn check(content: &str, input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     let config_needles = [
         "guardrail3-rs.toml",
         "clippy.toml",
@@ -19,13 +19,14 @@ pub(crate) fn check(content: &str, input: &RustHookCommandInput<'_>, results: &m
         "rust-toolchain.toml",
     ];
 
-    let blocks = conditional_blocks(content);
+    let content = script_text(input.parsed);
+    let blocks = conditional_blocks(content.as_str());
     let covered = config_needles.iter().all(|needle| {
         blocks.iter().any(|block| {
             block_branches(block)
                 .into_iter()
                 .any(|branch| branch_covers_needle(&branch, needle))
-        }) || content_has_direct_trigger_line_for_needle(content, needle)
+        }) || content_has_direct_trigger_line_for_needle(content.as_str(), needle)
     });
 
     if covered {
@@ -371,6 +372,15 @@ fn content_has_direct_trigger_line_for_needle(content: &str, needle: &str) -> bo
     })
 }
 
+fn script_text(parsed: &hook_shell_parser::ParsedShellScript) -> String {
+    parsed
+        .source_lines()
+        .iter()
+        .map(|line| line.raw())
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 fn is_trigger_like_line(line: &str) -> bool {
     if line.starts_with("printf ") || line.starts_with("cat ") {
         return false;
@@ -633,7 +643,7 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
         is_workspace_project: true,
     };
     let mut results = Vec::new();
-    check(content, &input, &mut results);
+    check(&input, &mut results);
     crate::compat::finish(results)
 }
 

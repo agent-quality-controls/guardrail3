@@ -37,6 +37,9 @@ dependencies = [
 [[package]]
 name = "g3rs-hooks-types"
 version = "0.1.0"
+dependencies = [
+ "hook-shell-parser",
+]
 
 [[package]]
 name = "guardrail3-check-types"

@@ -37,7 +37,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
-pub(crate) fn script_contains_cargo_dupes(parsed: &ParsedShellScript<'_>) -> bool {
+pub(crate) fn script_contains_cargo_dupes(parsed: &ParsedShellScript) -> bool {
     any_resolved_command(parsed, is_cargo_dupes_command)
 }
 

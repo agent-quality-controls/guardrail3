@@ -5,7 +5,11 @@ use crate::inputs::ExecutableCommandContextInput;
 const ID: &str = "RS-HOOKS-SOURCE-16";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
-    let has_shell_error_handling = input.content.lines().any(has_shell_error_handling_line);
+    let has_shell_error_handling = input
+        .parsed
+        .source_lines()
+        .iter()
+        .any(|line| has_shell_error_handling_line(line.raw()));
 
     if has_shell_error_handling {
         results.push(
@@ -47,7 +51,6 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
     let input = ExecutableCommandContextInput {
         rel_path: ".githooks/pre-commit",
         kind: crate::facts::HookScriptKind::PreCommit,
-        content,
         parsed: &parsed,
     };
     let mut results = Vec::new();

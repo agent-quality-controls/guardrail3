@@ -6,7 +6,7 @@ struct HeredocTerminator {
     strip_tabs: bool,
 }
 
-pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, &str)> {
+pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, String)> {
     let mut logical_lines = Vec::new();
     let mut continuation_start: Option<usize> = None;
     let mut continuation_line_no: Option<usize> = None;
@@ -46,7 +46,7 @@ pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, &str)> {
         if let Some(terminator) = heredoc_delimiter(logical) {
             heredoc_terminator = Some(terminator);
         }
-        logical_lines.push((continuation_line_no.unwrap_or(line_no), logical));
+        logical_lines.push((continuation_line_no.unwrap_or(line_no), logical.to_owned()));
         continuation_start = None;
         continuation_line_no = None;
     }
@@ -54,13 +54,13 @@ pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, &str)> {
     if let Some(start) = continuation_start
         && start < content.len()
     {
-        logical_lines.push((continuation_line_no.unwrap_or(1), &content[start..]));
+        logical_lines.push((continuation_line_no.unwrap_or(1), content[start..].to_owned()));
     }
 
     logical_lines
 }
 
-pub(super) fn parse_executable_line(raw: &str, line_no: usize) -> Option<ExecutableLine<'_>> {
+pub(super) fn parse_executable_line(raw: &str, line_no: usize) -> Option<ExecutableLine> {
     let trimmed = strip_inline_comment(raw).trim();
     if trimmed.is_empty() || trimmed.starts_with('#') || is_shell_control_line(trimmed) {
         return None;
@@ -75,9 +75,9 @@ pub(super) fn parse_executable_line(raw: &str, line_no: usize) -> Option<Executa
 
         return Some(ExecutableLine {
             line_no,
-            raw,
-            command_text,
-            command_name,
+            raw: raw.to_owned(),
+            command_text: command_text.to_owned(),
+            command_name: command_name.to_owned(),
             softened_by,
             is_dispatcher_syntax: is_dispatcher_command(command_text),
             is_exit_zero: command_name == "exit" && argument_starts_with_zero(command_text),
@@ -93,16 +93,16 @@ pub(super) fn parse_executable_line(raw: &str, line_no: usize) -> Option<Executa
 
     Some(ExecutableLine {
         line_no,
-        raw,
-        command_text,
-        command_name,
+        raw: raw.to_owned(),
+        command_text: command_text.to_owned(),
+        command_name: command_name.to_owned(),
         softened_by,
         is_dispatcher_syntax: is_dispatcher_command(command_text),
         is_exit_zero: command_name == "exit" && argument_starts_with_zero(command_text),
     })
 }
 
-pub(super) fn parse_executable_segments(raw: &str, line_no: usize) -> Vec<ExecutableLine<'_>> {
+pub(super) fn parse_executable_segments(raw: &str, line_no: usize) -> Vec<ExecutableLine> {
     split_semicolon_segments(raw)
         .into_iter()
         .filter_map(|segment| parse_executable_line(segment, line_no))
@@ -317,7 +317,7 @@ fn leading_command_name(command_text: &str) -> Option<&str> {
     if token.is_empty() { None } else { Some(token) }
 }
 
-fn detect_fail_open_wrapper(line: &str) -> Option<FailOpenWrapper<'_>> {
+fn detect_fail_open_wrapper(line: &str) -> Option<FailOpenWrapper> {
     let (_, rhs) = line.split_once("||")?;
     let rhs = rhs.trim();
     if rhs == "true" || rhs.starts_with("true;") {
@@ -327,7 +327,7 @@ fn detect_fail_open_wrapper(line: &str) -> Option<FailOpenWrapper<'_>> {
         return Some(FailOpenWrapper::NoOp);
     }
     if rhs.starts_with("echo ") {
-        return Some(FailOpenWrapper::Echo(rhs));
+        return Some(FailOpenWrapper::Echo(rhs.to_owned()));
     }
     None
 }

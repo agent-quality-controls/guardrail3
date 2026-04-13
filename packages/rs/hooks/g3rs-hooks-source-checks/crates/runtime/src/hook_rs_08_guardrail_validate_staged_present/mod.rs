@@ -22,12 +22,12 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     );
 }
 
-pub(crate) fn script_contains_guardrail_step(parsed: &ParsedShellScript<'_>) -> bool {
+pub(crate) fn script_contains_guardrail_step(parsed: &ParsedShellScript) -> bool {
     any_resolved_command(parsed, is_guardrail_validate_staged_command)
 }
 
 pub(crate) fn script_contains_path_qualified_guardrail_step(
-    parsed: &ParsedShellScript<'_>,
+    parsed: &ParsedShellScript,
 ) -> bool {
     any_resolved_command(parsed, is_path_qualified_guardrail_validate_staged_command)
 }

@@ -77,7 +77,11 @@ fn prefers_githooks_pre_commit_over_hooks_pre_commit() {
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].rel_path, ".githooks/pre-commit");
     assert_eq!(inputs[0].kind, G3RsHookScriptKind::PreCommit);
-    assert!(inputs[0].content.contains("cargo fmt --check"));
+    assert!(inputs[0]
+        .parsed
+        .source_lines()
+        .iter()
+        .any(|line| line.raw().contains("cargo fmt --check")));
     assert!(!inputs[0].has_modular_dir);
     assert!(!inputs[0].is_workspace_project);
 }
@@ -95,7 +99,11 @@ fn falls_back_to_hooks_pre_commit_when_githooks_script_is_absent() {
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].rel_path, "hooks/pre-commit");
     assert_eq!(inputs[0].kind, G3RsHookScriptKind::PreCommit);
-    assert!(inputs[0].content.contains("cargo test --workspace"));
+    assert!(inputs[0]
+        .parsed
+        .source_lines()
+        .iter()
+        .any(|line| line.raw().contains("cargo test --workspace")));
     assert!(!inputs[0].has_modular_dir);
     assert!(!inputs[0].is_workspace_project);
 }
@@ -455,7 +463,11 @@ fn config_ingestion_selects_effective_hook_and_detects_installed_tools() {
 
     let selected_hook = input.selected_hook.expect("selected hook");
     assert_eq!(selected_hook.rel_path, ".githooks/pre-commit");
-    assert!(selected_hook.content.contains("g3rs rs validate --staged"));
+    assert!(selected_hook
+        .parsed
+        .source_lines()
+        .iter()
+        .any(|line| line.raw().contains("g3rs rs validate --staged")));
     assert_eq!(input.installed_tools, vec!["g3rs".to_owned(), "gitleaks".to_owned()]);
 }
 

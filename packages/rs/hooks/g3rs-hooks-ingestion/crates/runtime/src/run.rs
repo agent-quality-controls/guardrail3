@@ -10,6 +10,7 @@ use g3rs_hooks_ingestion_types::{
     G3RsHookScriptKind, G3RsHooksIngestionError as IngestionError, G3RsHooksSourceChecksInput,
 };
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
+use hook_shell_parser::parse_script;
 
 struct SelectedHookSurface<'a> {
     entry: &'a g3rs_workspace_crawl::G3RsWorkspaceEntry,
@@ -45,7 +46,7 @@ pub fn ingest_for_source_checks(
     inputs.push(G3RsHooksSourceChecksInput {
         rel_path: selected_rel_path.to_owned(),
         kind: G3RsHookScriptKind::PreCommit,
-        content,
+        parsed: parse_script(&content),
         has_modular_dir: selected.has_modular_dir,
         is_workspace_project,
     });
@@ -68,7 +69,7 @@ pub fn ingest_for_source_checks(
         inputs.push(G3RsHooksSourceChecksInput {
             rel_path: entry.path.rel_path.clone(),
             kind: G3RsHookScriptKind::Modular,
-            content,
+            parsed: parse_script(&content),
             has_modular_dir: selected.has_modular_dir,
             is_workspace_project,
         });
@@ -222,7 +223,7 @@ fn read_selected_hook_config_fact(
 
     Ok(G3RsHooksSelectedHookConfigFact {
         rel_path: entry.path.rel_path.clone(),
-        content: read_entry(entry.path.abs_path.as_path())?,
+        parsed: parse_script(&read_entry(entry.path.abs_path.as_path())?),
     })
 }
 

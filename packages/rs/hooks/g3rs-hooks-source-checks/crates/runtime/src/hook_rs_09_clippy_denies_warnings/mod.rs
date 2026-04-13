@@ -54,13 +54,13 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
-fn script_contains_clippy_deny(parsed: &ParsedShellScript<'_>) -> bool {
+fn script_contains_clippy_deny(parsed: &ParsedShellScript) -> bool {
     execute_script_for_clippy(parsed, parsed, &mut EnvState::default(), &mut Vec::new())
 }
 
 fn execute_script_for_clippy(
-    parsed: &ParsedShellScript<'_>,
-    root: &ParsedShellScript<'_>,
+    parsed: &ParsedShellScript,
+    root: &ParsedShellScript,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {
@@ -75,7 +75,7 @@ fn execute_script_for_clippy(
 
 fn line_contains_clippy_deny(
     raw: &str,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {
@@ -122,7 +122,7 @@ fn line_contains_clippy_deny(
 
 fn segment_evaluation(
     segment: &str,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> SegmentEvaluation {
@@ -207,7 +207,7 @@ fn segment_evaluation(
 
 fn called_function_contains_clippy_deny(
     command_name: &str,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {
@@ -231,7 +231,7 @@ fn called_function_contains_clippy_deny(
 
 fn env_wrapper_contains_clippy_deny(
     parts: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {
@@ -293,7 +293,7 @@ fn env_wrapper_contains_clippy_deny(
 
 fn shell_wrapper_contains_clippy_deny(
     parts: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {
@@ -324,7 +324,7 @@ fn shell_wrapper_contains_clippy_deny(
 
 fn command_wrapper_contains_clippy_deny(
     parts: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {
@@ -350,7 +350,7 @@ fn command_wrapper_contains_clippy_deny(
 
 fn exec_wrapper_contains_clippy_deny(
     parts: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {
@@ -374,7 +374,7 @@ fn exec_wrapper_contains_clippy_deny(
 fn wrapper_or_command_contains_clippy_deny(
     token: &str,
     parts: &mut TokenCursor<'_>,
-    root: &ParsedShellScript<'_>,
+    root: &ParsedShellScript,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {

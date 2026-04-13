@@ -3,48 +3,48 @@ mod support;
 
 use self::support::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum FailOpenWrapper<'a> {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum FailOpenWrapper {
     True,
     NoOp,
-    Echo(&'a str),
+    Echo(String),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ExecutableLine<'a> {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ExecutableLine {
     pub line_no: usize,
-    pub raw: &'a str,
-    pub command_text: &'a str,
-    pub command_name: &'a str,
-    pub softened_by: Option<FailOpenWrapper<'a>>,
+    pub raw: String,
+    pub command_text: String,
+    pub command_name: String,
+    pub softened_by: Option<FailOpenWrapper>,
     pub is_dispatcher_syntax: bool,
     pub is_exit_zero: bool,
 }
 
-impl<'a> ExecutableLine<'a> {
+impl ExecutableLine {
     #[must_use]
     pub fn line_no(&self) -> usize {
         self.line_no
     }
 
     #[must_use]
-    pub fn raw(&self) -> &'a str {
-        self.raw
+    pub fn raw(&self) -> &str {
+        &self.raw
     }
 
     #[must_use]
-    pub fn command_text(&self) -> &'a str {
-        self.command_text
+    pub fn command_text(&self) -> &str {
+        &self.command_text
     }
 
     #[must_use]
-    pub fn command_name(&self) -> &'a str {
-        self.command_name
+    pub fn command_name(&self) -> &str {
+        &self.command_name
     }
 
     #[must_use]
-    pub fn softened_by(&self) -> Option<FailOpenWrapper<'a>> {
-        self.softened_by
+    pub fn softened_by(&self) -> Option<&FailOpenWrapper> {
+        self.softened_by.as_ref()
     }
 
     #[must_use]
@@ -59,20 +59,44 @@ impl<'a> ExecutableLine<'a> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ParsedShellScript<'a> {
-    pub shebang: Option<&'a str>,
-    pub executable_lines: Vec<ExecutableLine<'a>>,
-    pub functions: Vec<ShellFunction>,
+pub struct SourceLine {
+    pub line_no: usize,
+    pub raw: String,
 }
 
-impl<'a> ParsedShellScript<'a> {
+impl SourceLine {
     #[must_use]
-    pub fn shebang(&self) -> Option<&'a str> {
-        self.shebang
+    pub fn line_no(&self) -> usize {
+        self.line_no
     }
 
     #[must_use]
-    pub fn executable_lines(&self) -> &[ExecutableLine<'a>] {
+    pub fn raw(&self) -> &str {
+        &self.raw
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ParsedShellScript {
+    pub shebang: Option<String>,
+    pub source_lines: Vec<SourceLine>,
+    pub executable_lines: Vec<ExecutableLine>,
+    pub functions: Vec<ShellFunction>,
+}
+
+impl ParsedShellScript {
+    #[must_use]
+    pub fn shebang(&self) -> Option<&str> {
+        self.shebang.as_deref()
+    }
+
+    #[must_use]
+    pub fn source_lines(&self) -> &[SourceLine] {
+        self.source_lines.as_slice()
+    }
+
+    #[must_use]
+    pub fn executable_lines(&self) -> &[ExecutableLine] {
         self.executable_lines.as_slice()
     }
 
@@ -113,11 +137,19 @@ impl ShellFunction {
 }
 
 #[must_use]
-pub fn parse_script(content: &str) -> ParsedShellScript<'_> {
+pub fn parse_script(content: &str) -> ParsedShellScript {
     let mut shebang = None;
+    let logical_lines = collect_logical_lines(content);
+    let source_lines = content
+        .lines()
+        .enumerate()
+        .map(|(index, raw)| SourceLine {
+            line_no: index + 1,
+            raw: raw.to_owned(),
+        })
+        .collect();
     let mut executable_lines = Vec::new();
     let mut functions = Vec::new();
-    let logical_lines = collect_logical_lines(content);
     let mut function_brace_depth = 0usize;
     let mut current_function: Option<ShellFunction> = None;
     let mut dead_if_depth = 0usize;
@@ -125,10 +157,12 @@ pub fn parse_script(content: &str) -> ParsedShellScript<'_> {
     let mut dead_loop_depth = 0usize;
     let mut live_true_if_depth = 0usize;
 
-    for (line_no, raw) in logical_lines {
+    for (line_no, raw) in &logical_lines {
+        let line_no = *line_no;
+        let raw = raw.as_str();
         let trimmed = raw.trim();
         if line_no == 1 && trimmed.starts_with("#!") {
-            shebang = Some(trimmed);
+            shebang = Some(trimmed.to_owned());
             continue;
         }
         if let Some(current) = current_function.as_mut() {
@@ -212,6 +246,7 @@ pub fn parse_script(content: &str) -> ParsedShellScript<'_> {
 
     ParsedShellScript {
         shebang,
+        source_lines,
         executable_lines,
         functions,
     }

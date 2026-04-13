@@ -1,7 +1,9 @@
+use hook_shell_parser::ParsedShellScript;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsHooksSelectedHookConfigFact {
     pub rel_path: String,
-    pub content: String,
+    pub parsed: ParsedShellScript,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -20,7 +22,7 @@ pub enum G3RsHookScriptKind {
 pub struct G3RsHooksSourceChecksInput {
     pub rel_path: String,
     pub kind: G3RsHookScriptKind,
-    pub content: String,
+    pub parsed: ParsedShellScript,
     pub has_modular_dir: bool,
     pub is_workspace_project: bool,
 }

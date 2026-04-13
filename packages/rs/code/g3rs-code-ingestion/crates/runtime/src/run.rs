@@ -13,9 +13,7 @@ pub use g3rs_code_ingestion_types::G3RsCodeIngestionError as IngestionError;
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsCodeConfigChecksInput, IngestionError> {
-    let exception_comments = crate::config_comments::collect_exception_comments(crawl)?;
-    let unsafe_code_lints = crate::unsafe_code_lints::collect_unsafe_code_lints(crawl)?;
-    Ok(crate::config::assemble(exception_comments, unsafe_code_lints))
+    crate::config_files::collect_config_files(crawl)
 }
 
 /// Ingest `code` source checks input from a workspace crawl.
