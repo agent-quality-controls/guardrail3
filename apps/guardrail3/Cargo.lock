@@ -320,7 +320,10 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-cargo-config-checks-types",
+ "g3rs-cargo-types",
  "guardrail3-check-types",
+ "guardrail3-reason-policy",
+ "toml",
 ]
 
 [[package]]
@@ -335,6 +338,7 @@ name = "g3rs-cargo-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "toml",
 ]
 
 [[package]]

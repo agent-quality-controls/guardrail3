@@ -71,14 +71,14 @@ pub(crate) fn finding<'a>(
     severity: G3Severity,
     title: &'a str,
     message: &'a str,
-    file: &'a str,
+    file: Option<&'a str>,
     inventory: bool,
 ) -> Finding<'a> {
     Finding {
         severity,
         title,
         message,
-        file: Some(file),
+        file,
         inventory,
     }
 }
@@ -115,7 +115,22 @@ macro_rules! define_result_assertions {
                 guardrail3_check_types::G3Severity::Error,
                 title,
                 message,
-                file,
+                Some(file),
+                inventory,
+            )
+        }
+
+        #[must_use]
+        pub fn error_no_file<'a>(
+            title: &'a str,
+            message: &'a str,
+            inventory: bool,
+        ) -> Finding<'a> {
+            crate::common::finding(
+                guardrail3_check_types::G3Severity::Error,
+                title,
+                message,
+                None,
                 inventory,
             )
         }
@@ -131,7 +146,22 @@ macro_rules! define_result_assertions {
                 guardrail3_check_types::G3Severity::Warn,
                 title,
                 message,
-                file,
+                Some(file),
+                inventory,
+            )
+        }
+
+        #[must_use]
+        pub fn warn_no_file<'a>(
+            title: &'a str,
+            message: &'a str,
+            inventory: bool,
+        ) -> Finding<'a> {
+            crate::common::finding(
+                guardrail3_check_types::G3Severity::Warn,
+                title,
+                message,
+                None,
                 inventory,
             )
         }
@@ -147,7 +177,22 @@ macro_rules! define_result_assertions {
                 guardrail3_check_types::G3Severity::Info,
                 title,
                 message,
-                file,
+                Some(file),
+                inventory,
+            )
+        }
+
+        #[must_use]
+        pub fn info_no_file<'a>(
+            title: &'a str,
+            message: &'a str,
+            inventory: bool,
+        ) -> Finding<'a> {
+            crate::common::finding(
+                guardrail3_check_types::G3Severity::Info,
+                title,
+                message,
+                None,
                 inventory,
             )
         }

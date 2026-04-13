@@ -1,3 +1,3 @@
 # TODO
 
-- [ ] Consider supporting deny.exceptions.toml alongside deny.toml
+- [ ] Decide whether deny needs a real source lane

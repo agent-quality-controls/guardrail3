@@ -43,13 +43,36 @@ fn check_value(
     expected: &str,
     results: &mut Vec<G3CheckResult>,
 ) {
-    if matches!(actual, Some("deny")) && expected != "deny" {
+    if is_stricter(actual, expected) {
         results.push(inventory(
             ID,
             format!("advisories `{key}` stricter than baseline"),
-            format!("`{deny_rel_path}` sets `[advisories].{key} = \"deny\"`."),
+            format!(
+                "`{deny_rel_path}` sets `[advisories].{key} = \"{}\"`.",
+                actual.unwrap_or_default()
+            ),
             deny_rel_path,
         ));
+    }
+}
+
+fn is_stricter(actual: Option<&str>, expected: &str) -> bool {
+    match (actual, advisory_rank(expected)) {
+        (Some(actual), Some(expected_rank)) => advisory_rank(actual).is_some_and(|actual_rank| actual_rank > expected_rank),
+        _ => false,
+    }
+}
+
+fn advisory_rank(value: &str) -> Option<u8> {
+    match value {
+        "none" => Some(0),
+        "transitive" => Some(1),
+        "workspace" => Some(2),
+        "all" => Some(3),
+        "allow" => Some(0),
+        "warn" => Some(1),
+        "deny" => Some(2),
+        _ => None,
     }
 }
 

@@ -26,8 +26,12 @@ deny-toml-parser = { path = "../../../../../parsers/deny-toml-parser", version =
 g3rs-deny-types = { path = "../../../g3rs-deny-types", version = "0.1.0" }
 g3rs-deny-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
+toml = "0.8"
 
 [dev-dependencies]
 g3rs-deny-config-checks = { path = "../../../g3rs-deny-config-checks" }
+g3rs-deny-config-checks-assertions = { path = "../../../g3rs-deny-config-checks/crates/assertions" }
+g3rs-deny-filetree-checks = { path = "../../../g3rs-deny-filetree-checks" }
+g3rs-deny-filetree-checks-assertions = { path = "../../../g3rs-deny-filetree-checks/crates/assertions" }
 g3rs-deny-ingestion-assertions = { path = "../assertions" }
 tempfile = "3"

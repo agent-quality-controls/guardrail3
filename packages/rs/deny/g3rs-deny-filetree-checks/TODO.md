@@ -1,0 +1,1 @@
+- Keep deny filetree checks package-owned and workspace-local.

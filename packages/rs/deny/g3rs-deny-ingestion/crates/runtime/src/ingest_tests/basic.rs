@@ -20,6 +20,16 @@ fn write(path: impl AsRef<Path>, content: &str) {
     fs::write(path, content).expect("should write test fixture file to disk");
 }
 
+fn make_unreadable(path: &Path) {
+    use std::os::unix::fs::PermissionsExt;
+
+    let mut permissions = fs::metadata(path)
+        .expect("fixture file should exist before chmod")
+        .permissions();
+    permissions.set_mode(0o000);
+    fs::set_permissions(path, permissions).expect("should chmod fixture file unreadable");
+}
+
 fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
     g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
 }
@@ -67,6 +77,27 @@ fn ingests_dot_deny_toml() {
     assert_eq!(
         input.deny_rel_path, ".deny.toml",
         "deny_rel_path should be .deny.toml when only the dotfile variant exists"
+    );
+}
+
+#[test]
+fn ingests_root_cargo_deny_toml_when_no_higher_precedence_root_file_exists() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join(".cargo/deny.toml"),
+        "[advisories]\ndb-path = \"~/.cargo/advisory-db\"\n",
+    );
+
+    let crawl = crawl(root);
+    let result = crate::ingest_for_config_checks(&crawl);
+
+    let input = result.expect("ingestion should succeed for root .cargo/deny.toml");
+    assert_eq!(
+        input.deny_rel_path, ".cargo/deny.toml",
+        "deny_rel_path should prefer root .cargo/deny.toml when no root deny.toml or .deny.toml exists"
     );
 }
 
@@ -140,6 +171,29 @@ fn fails_on_malformed_deny_toml() {
     assert!(
         matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
         "ingestion should return ParseFailed when deny.toml contains invalid TOML"
+    );
+}
+
+#[test]
+fn fails_on_unreadable_selected_deny_file() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    let deny_path = root.join("deny.toml");
+    write(
+        &deny_path,
+        "[advisories]\ndb-path = \"~/.cargo/advisory-db\"\n",
+    );
+
+    let crawl = crawl(root);
+    make_unreadable(&deny_path);
+
+    let result = crate::ingest_for_config_checks(&crawl);
+
+    assert!(
+        matches!(result, Err(crate::IngestionError::Unreadable { .. })),
+        "ingestion should return Unreadable when the selected deny file cannot be read"
     );
 }
 

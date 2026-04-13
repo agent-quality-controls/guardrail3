@@ -29,6 +29,14 @@ pub mod rs_deny_config_16_tokio_full_ban;
 pub mod rs_deny_config_17_extra_feature_bans_inventory;
 #[cfg(feature = "checks")]
 pub mod rs_deny_config_20_duplicate_entries;
+#[cfg(feature = "checks")]
+pub mod rs_deny_config_23_ban_baseline_complete;
+#[cfg(feature = "checks")]
+pub mod rs_deny_config_25_allow_override_channel;
+#[cfg(feature = "checks")]
+pub mod rs_deny_config_26_extra_deny_bans_inventory;
+#[cfg(feature = "checks")]
+pub mod rs_deny_config_27_wrappers;
 
 // Licenses
 #[cfg(feature = "checks")]
@@ -37,6 +45,8 @@ pub mod rs_deny_config_10_license_allow_baseline;
 pub mod rs_deny_config_11_confidence_threshold;
 #[cfg(feature = "checks")]
 pub mod rs_deny_config_12_copyleft_allowlist;
+#[cfg(feature = "checks")]
+pub mod rs_deny_config_24_license_exceptions_inventory;
 
 // Sources
 #[cfg(feature = "checks")]

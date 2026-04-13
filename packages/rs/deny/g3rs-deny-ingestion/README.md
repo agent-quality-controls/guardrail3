@@ -1,5 +1,10 @@
 # g3rs-deny-ingestion
 
-Ingestion package for deny config checks. Takes a workspace crawl result,
-selects `deny.toml` / `.deny.toml`, parses it, and produces the input type
-for `g3rs-deny-config-checks`.
+Ingestion package for deny checks. Takes a workspace crawl result, selects the
+root deny config surface, parses typed config state, resolves deny policy
+context, and produces:
+
+- `G3RsDenyConfigChecksInput`
+- `G3RsDenyFileTreeChecksInput`
+
+Source ingestion is still intentionally unimplemented.
