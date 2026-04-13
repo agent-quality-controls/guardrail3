@@ -56,9 +56,6 @@ impl G3RsClippyConfigChecksInput {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsClippySourceChecksInput;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsClippyShadowedConfig {
     pub rel_path: String,

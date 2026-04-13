@@ -5,10 +5,13 @@ use std::path::PathBuf;
 pub enum G3RsReleaseIngestionError {
     /// No `Cargo.toml` found at the workspace root.
     CargoTomlNotFound,
-    /// source ingestion is not implemented yet.
-    SourceIngestionNotImplemented,
-    /// File-tree ingestion is planned but not implemented yet.
-    FileTreeIngestionNotImplemented,
+    /// The crawl root is not a pointed workspace root.
+    NormalizationFailed {
+        /// Path related to the normalization failure.
+        path: PathBuf,
+        /// Human-readable explanation.
+        reason: String,
+    },
     /// A config file exists but cannot be read.
     Unreadable {
         /// Absolute path to the unreadable file.
@@ -31,11 +34,8 @@ impl std::fmt::Display for G3RsReleaseIngestionError {
             Self::CargoTomlNotFound => {
                 f.write_str("no Cargo.toml found at the workspace root")
             }
-            Self::SourceIngestionNotImplemented => {
-                f.write_str("release source ingestion is not implemented yet")
-            }
-            Self::FileTreeIngestionNotImplemented => {
-                f.write_str("release file-tree ingestion is not implemented yet")
+            Self::NormalizationFailed { path, reason } => {
+                write!(f, "cannot normalize {}: {reason}", path.display())
             }
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())

@@ -5,8 +5,6 @@ use std::path::PathBuf;
 pub enum G3RsClippyIngestionError {
     /// No `clippy.toml` or `.clippy.toml` found at the workspace root.
     ClippyTomlNotFound,
-    /// Source ingestion is planned but not implemented yet.
-    SourceIngestionNotImplemented,
     /// The clippy config exists but cannot be read.
     Unreadable {
         /// Absolute path to the unreadable file.
@@ -28,9 +26,6 @@ impl std::fmt::Display for G3RsClippyIngestionError {
         match self {
             Self::ClippyTomlNotFound => {
                 f.write_str("no clippy.toml or .clippy.toml found at the workspace root")
-            }
-            Self::SourceIngestionNotImplemented => {
-                f.write_str("clippy source ingestion is not implemented yet")
             }
             Self::Unreadable { path, reason } => {
                 write!(f, "cannot read {}: {reason}", path.display())

@@ -191,3 +191,44 @@ fn pipeline_reports_malformed_clippy_conf_dir_override_surface() {
         "{results:#?}"
     );
 }
+
+#[test]
+fn pipeline_still_runs_config_checks_for_raw_parseable_typed_invalid_clippy() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("clippy.toml"),
+        "totally_fake_field = true\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let results = g3rs_clippy_config_checks::check(&input);
+    let summarized = results
+        .iter()
+        .filter(|result| result.id() == "RS-CLIPPY-CONFIG-21")
+        .map(|result| {
+            (
+                result.id().to_owned(),
+                format!("{:?}", result.severity()),
+                result.title().to_owned(),
+                result.file().map(str::to_owned),
+                result.inventory(),
+            )
+        })
+        .collect::<Vec<_>>();
+
+    assert_eq!(
+        summarized,
+        vec![(
+            "RS-CLIPPY-CONFIG-21".to_owned(),
+            "Error".to_owned(),
+            "clippy.toml parse error".to_owned(),
+            Some("clippy.toml".to_owned()),
+            false,
+        )],
+        "{results:#?}"
+    );
+}

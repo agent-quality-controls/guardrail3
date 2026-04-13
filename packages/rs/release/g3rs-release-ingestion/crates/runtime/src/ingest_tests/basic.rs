@@ -83,6 +83,29 @@ include = ["src/**", "Cargo.toml", "README.md", "LICENSE"]
 }
 
 #[test]
+fn non_workspace_root_fails_all_release_lanes() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+[package]
+name = "demo"
+version = "0.1.0"
+edition = "2024"
+"#,
+    );
+
+    let crawl = crawl(root);
+
+    assert!(crate::ingest_for_config_checks(&crawl).is_err());
+    assert!(crate::ingest_for_file_tree_checks(&crawl).is_err());
+    assert!(crate::ingest_for_source_checks(&crawl).is_err());
+}
+
+#[test]
 fn ingests_workspace_inherited_readme_path() {
     let temp = tempdir().expect("create temporary workspace");
     let root = temp.path();

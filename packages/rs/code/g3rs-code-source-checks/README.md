@@ -10,6 +10,11 @@ Initial rules in this package:
 
 This package validates one Rust source file at a time.
 
+Intentional divergence from the retired old app runtime:
+
+- `RS-CODE-SOURCE-24` stays in `code` as the documented `#[path]` policy.
+- `arch` also owns the stricter blanket ban `RS-ARCH-SOURCE-09`.
+
 It does not own:
 
 - workspace/root discovery
