@@ -3,7 +3,9 @@ use std::path::Path;
 use std::process::Command;
 
 use g3rs_code_ingestion_assertions::{assert_source_file, require_source_file};
-use g3rs_code_ingestion_types::{G3RsCodeConfigChecksInput, G3RsCodeConfigFileKind};
+use g3rs_code_ingestion_types::{
+    G3RsCodeConfigChecksInput, G3RsCodeConfigFileKind, G3RsCodeExceptionComment,
+};
 use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
 
@@ -32,6 +34,29 @@ fn require_config_file<'a>(
         .iter()
         .find(|file| file.rel_path == rel_path)
         .unwrap_or_else(|| panic!("missing config file {rel_path}; input: {input:#?}"))
+}
+
+fn exception_comments_for<'a>(
+    input: &'a G3RsCodeConfigChecksInput,
+    rel_path: &str,
+) -> Vec<&'a G3RsCodeExceptionComment> {
+    input
+        .exception_comments
+        .iter()
+        .filter(|comment| comment.rel_path == rel_path)
+        .collect()
+}
+
+fn is_parser_backed_kind(kind: &G3RsCodeConfigFileKind) -> bool {
+    matches!(
+        kind,
+        G3RsCodeConfigFileKind::Guardrail3Toml { .. }
+            | G3RsCodeConfigFileKind::ClippyToml { .. }
+            | G3RsCodeConfigFileKind::DenyToml { .. }
+            | G3RsCodeConfigFileKind::CargoToml { .. }
+            | G3RsCodeConfigFileKind::RustfmtToml { .. }
+            | G3RsCodeConfigFileKind::RustToolchainToml { .. }
+    )
 }
 
 #[test]
@@ -463,7 +488,7 @@ fn ingests_exception_comments_from_owned_config_files() {
     );
     write(
         root.join("deny.toml"),
-        "advisories = { ignore = [] } // EXCEPTION: ignore review debt\n",
+        "advisories = { ignore = [] }\n# EXCEPTION: ignore review debt\n",
     );
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
@@ -471,14 +496,18 @@ fn ingests_exception_comments_from_owned_config_files() {
         .expect("config ingestion should succeed");
 
     assert_eq!(input.files.len(), 2, "{input:#?}");
+    let cargo_comments = exception_comments_for(&input, "Cargo.toml");
+    assert_eq!(cargo_comments.len(), 1, "{input:#?}");
+    assert_eq!(cargo_comments[0].line, 4);
     assert_eq!(
-        require_config_file(&input, "Cargo.toml").content,
-        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n# EXCEPTION: temporary package carve-out\nquoted = \"# not a comment\"\n"
+        cargo_comments[0].text,
+        "# EXCEPTION: temporary package carve-out"
     );
-    assert_eq!(
-        require_config_file(&input, "deny.toml").content,
-        "advisories = { ignore = [] } // EXCEPTION: ignore review debt\n"
-    );
+
+    let deny_comments = exception_comments_for(&input, "deny.toml");
+    assert_eq!(deny_comments.len(), 1, "{input:#?}");
+    assert_eq!(deny_comments[0].line, 2);
+    assert_eq!(deny_comments[0].text, "# EXCEPTION: ignore review debt");
 }
 
 #[test]
@@ -491,8 +520,8 @@ fn ingests_multiple_exception_comments_from_one_owned_file_with_exact_lines() {
         root.join("deny.toml"),
         "\
 # EXCEPTION: first\n\
-advisories = []\n\
-// EXCEPTION: second\n",
+advisories = { ignore = [] }\n\
+# EXCEPTION: second\n",
     );
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
@@ -500,10 +529,12 @@ advisories = []\n\
         .expect("config ingestion should succeed");
 
     assert_eq!(input.files.len(), 1, "{input:#?}");
-    assert_eq!(
-        require_config_file(&input, "deny.toml").content,
-        "# EXCEPTION: first\nadvisories = []\n// EXCEPTION: second\n"
-    );
+    let comments = exception_comments_for(&input, "deny.toml");
+    assert_eq!(comments.len(), 2, "{input:#?}");
+    assert_eq!(comments[0].line, 1);
+    assert_eq!(comments[0].text, "# EXCEPTION: first");
+    assert_eq!(comments[1].line, 3);
+    assert_eq!(comments[1].text, "# EXCEPTION: second");
 }
 
 #[test]
@@ -529,7 +560,43 @@ fn ingests_exception_comments_from_all_supported_owned_config_filenames() {
     let input = crate::ingest_for_config_checks(&workspace_crawl)
         .expect("config ingestion should succeed");
 
-    assert_eq!(input.files.len(), 9, "{input:#?}");
+    assert_eq!(input.files.len(), 8, "{input:#?}");
+    assert_eq!(input.exception_comments.len(), 9, "{input:#?}");
+}
+
+#[test]
+fn ingests_only_parser_backed_code_config_files() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("guardrail3.toml"), "# guardrail config\n");
+    write(root.join("clippy.toml"), "# clippy config\n");
+    write(root.join(".clippy.toml"), "# dot clippy config\n");
+    write(root.join("deny.toml"), "# deny config\n");
+    write(root.join(".deny.toml"), "# dot deny config\n");
+    write(root.join("rustfmt.toml"), "# rustfmt config\n");
+    write(
+        root.join("rust-toolchain.toml"),
+        "[toolchain]\nchannel = \"stable\"\n",
+    );
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let input = crate::ingest_for_config_checks(&workspace_crawl)
+        .expect("config ingestion should succeed");
+
+    assert_eq!(input.files.len(), 8, "{input:#?}");
+    assert!(
+        input
+            .files
+            .iter()
+            .all(|file| is_parser_backed_kind(&file.kind)),
+        "code config inputs must not expose raw Text files: {input:#?}"
+    );
 }
 
 #[test]
@@ -566,7 +633,7 @@ unsafe_code = \"deny\"\n",
                 .and_then(|tool| tool.get("unsafe_code")),
             Some(&cargo_toml_parser::LintValue::Level("deny".to_owned()))
         ),
-        G3RsCodeConfigFileKind::Text => panic!("expected Cargo.toml config file"),
+        other => panic!("expected Cargo.toml config file, got {other:?}"),
     }
 }
 
@@ -606,7 +673,7 @@ unsafe_code = { level = \"forbid\", priority = 0 }\n",
                 other => panic!("expected detailed unsafe_code lint, got {other:?}"),
             }
         }
-        G3RsCodeConfigFileKind::Text => panic!("expected Cargo.toml config file"),
+        other => panic!("expected Cargo.toml config file, got {other:?}"),
     }
 }
 
@@ -664,7 +731,7 @@ unsafe_code = \"deny\"\n\
                 .and_then(|tool| tool.get("unsafe_code")),
             Some(&cargo_toml_parser::LintValue::Level("forbid".to_owned()))
         ),
-        G3RsCodeConfigFileKind::Text => panic!("expected Cargo.toml config file"),
+        other => panic!("expected Cargo.toml config file, got {other:?}"),
     }
 }
 

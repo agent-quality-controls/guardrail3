@@ -1,21 +1,37 @@
 use cargo_toml_parser::CargoToml;
+use clippy_toml_parser::ClippyToml;
+use deny_toml_parser::DenyToml;
+use guardrail3_rs_toml_parser::Guardrail3RsToml;
+use rust_toolchain_toml_parser::RustToolchainToml;
+use rustfmt_toml_parser::RustfmtToml;
 
 #[derive(Debug, Clone)]
 pub enum G3RsCodeConfigFileKind {
+    Guardrail3Toml { guardrail3: Guardrail3RsToml },
+    ClippyToml { clippy: ClippyToml },
+    DenyToml { deny: DenyToml },
     CargoToml { cargo: CargoToml },
-    Text,
+    RustfmtToml { rustfmt: RustfmtToml },
+    RustToolchainToml { toolchain: RustToolchainToml },
 }
 
 #[derive(Debug, Clone)]
 pub struct G3RsCodeConfigFile {
     pub rel_path: String,
-    pub content: String,
     pub kind: G3RsCodeConfigFileKind,
+}
+
+#[derive(Debug, Clone)]
+pub struct G3RsCodeExceptionComment {
+    pub rel_path: String,
+    pub line: usize,
+    pub text: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct G3RsCodeConfigChecksInput {
     pub files: Vec<G3RsCodeConfigFile>,
+    pub exception_comments: Vec<G3RsCodeExceptionComment>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

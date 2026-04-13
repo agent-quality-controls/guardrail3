@@ -5,13 +5,15 @@ use g3rs_code_config_checks_types::{
 use guardrail3_check_types::G3CheckResult;
 
 pub(super) fn run_check(files: Vec<G3RsCodeConfigFile>) -> Vec<G3CheckResult> {
-    crate::run::check(&G3RsCodeConfigChecksInput { files })
+    crate::run::check(&G3RsCodeConfigChecksInput {
+        files,
+        exception_comments: Vec::new(),
+    })
 }
 
 pub(super) fn cargo_file(rel_path: &str, content: &str) -> G3RsCodeConfigFile {
     G3RsCodeConfigFile {
         rel_path: rel_path.to_owned(),
-        content: content.to_owned(),
         kind: G3RsCodeConfigFileKind::CargoToml {
             cargo: parse(content).expect("test cargo fixture should parse"),
         },

@@ -63,6 +63,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
+name = "clippy-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-runtime",
+]
+
+[[package]]
+name = "clippy-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "clippy-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "crossbeam-deque"
 version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -86,6 +109,29 @@ name = "crossbeam-utils"
 version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
+
+[[package]]
+name = "deny-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "deny-toml-parser-runtime",
+]
+
+[[package]]
+name = "deny-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "deny-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "deny-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "equivalent"
@@ -182,6 +228,8 @@ name = "g3rs-code-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "clippy-toml-parser",
+ "deny-toml-parser",
  "g3rs-code-config-checks",
  "g3rs-code-file-tree-checks",
  "g3rs-code-ingestion-assertions",
@@ -190,6 +238,9 @@ dependencies = [
  "g3rs-workspace-crawl",
  "glob",
  "guardrail3-check-types",
+ "guardrail3-rs-toml-parser",
+ "rust-toolchain-toml-parser",
+ "rustfmt-toml-parser",
  "tempfile",
 ]
 
@@ -232,6 +283,11 @@ name = "g3rs-code-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "clippy-toml-parser",
+ "deny-toml-parser",
+ "guardrail3-rs-toml-parser",
+ "rust-toolchain-toml-parser",
+ "rustfmt-toml-parser",
 ]
 
 [[package]]
@@ -294,6 +350,29 @@ version = "0.1.0"
 [[package]]
 name = "guardrail3-reason-policy"
 version = "0.0.0"
+
+[[package]]
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "hashbrown"
@@ -442,6 +521,52 @@ name = "regex-syntax"
 version = "0.8.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
+
+[[package]]
+name = "rust-toolchain-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-runtime",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
+name = "rustfmt-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "rustfmt-toml-parser-runtime",
+]
+
+[[package]]
+name = "rustfmt-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "rustfmt-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "rustfmt-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "rustix"
