@@ -154,6 +154,7 @@ dependencies = [
  "g3rs-clippy-config-checks-types",
  "guardrail3-check-types",
  "guardrail3-domain-modules",
+ "toml",
 ]
 
 [[package]]
@@ -175,10 +176,13 @@ dependencies = [
 name = "g3rs-clippy-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-clippy-ingestion-types",
  "g3rs-clippy-types",
  "g3rs-workspace-crawl",
+ "glob",
+ "toml",
 ]
 
 [[package]]
@@ -190,11 +194,8 @@ name = "g3rs-clippy-types"
 version = "0.1.0"
 dependencies = [
  "clippy-toml-parser",
+ "toml",
 ]
-
-[[package]]
-name = "g3rs-code-config-checks-types"
-version = "0.1.0"
 
 [[package]]
 name = "g3rs-code-ingestion"
@@ -218,8 +219,7 @@ dependencies = [
 name = "g3rs-code-ingestion-types"
 version = "0.1.0"
 dependencies = [
- "g3rs-code-config-checks-types",
- "g3rs-code-source-checks-types",
+ "g3rs-code-types",
 ]
 
 [[package]]
@@ -245,6 +245,13 @@ dependencies = [
 [[package]]
 name = "g3rs-code-source-checks-types"
 version = "0.1.0"
+dependencies = [
+ "g3rs-code-types",
+]
+
+[[package]]
+name = "g3rs-code-types"
+version = "0.1.0"
 
 [[package]]
 name = "g3rs-hooks-config-checks"
@@ -266,6 +273,9 @@ dependencies = [
 [[package]]
 name = "g3rs-hooks-config-checks-types"
 version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-types",
+]
 
 [[package]]
 name = "g3rs-hooks-file-tree-checks"
@@ -286,6 +296,9 @@ dependencies = [
 [[package]]
 name = "g3rs-hooks-file-tree-checks-types"
 version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-types",
+]
 
 [[package]]
 name = "g3rs-hooks-ingestion"
@@ -326,9 +339,7 @@ dependencies = [
 name = "g3rs-hooks-ingestion-types"
 version = "0.1.0"
 dependencies = [
- "g3rs-hooks-config-checks-types",
- "g3rs-hooks-file-tree-checks-types",
- "g3rs-hooks-source-checks-types",
+ "g3rs-hooks-types",
 ]
 
 [[package]]
@@ -350,6 +361,13 @@ dependencies = [
 
 [[package]]
 name = "g3rs-hooks-source-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-types",
+]
+
+[[package]]
+name = "g3rs-hooks-types"
 version = "0.1.0"
 
 [[package]]

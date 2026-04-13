@@ -17,3 +17,6 @@ api = []
 
 [lints]
 workspace = true
+
+[dependencies]
+g3rs-garde-types = { path = "../../../g3rs-garde-types" }

@@ -15,6 +15,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
 
 [[package]]
+name = "cargo-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-runtime",
+]
+
+[[package]]
+name = "cargo-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "cargo-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "castaway"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -28,6 +51,29 @@ name = "cfg-if"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
+
+[[package]]
+name = "clippy-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-runtime",
+]
+
+[[package]]
+name = "clippy-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "clippy-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "compact_str"
@@ -106,6 +152,17 @@ dependencies = [
 [[package]]
 name = "g3rs-garde-source-checks-types"
 version = "0.1.0"
+dependencies = [
+ "g3rs-garde-types",
+]
+
+[[package]]
+name = "g3rs-garde-types"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "clippy-toml-parser",
+]
 
 [[package]]
 name = "garde"

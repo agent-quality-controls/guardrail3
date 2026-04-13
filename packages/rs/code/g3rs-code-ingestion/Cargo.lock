@@ -134,6 +134,9 @@ dependencies = [
 [[package]]
 name = "g3rs-code-config-checks-types"
 version = "0.1.0"
+dependencies = [
+ "g3rs-code-types",
+]
 
 [[package]]
 name = "g3rs-code-file-tree-checks"
@@ -154,6 +157,9 @@ dependencies = [
 [[package]]
 name = "g3rs-code-file-tree-checks-types"
 version = "0.1.0"
+dependencies = [
+ "g3rs-code-types",
+]
 
 [[package]]
 name = "g3rs-code-ingestion"
@@ -190,9 +196,7 @@ dependencies = [
 name = "g3rs-code-ingestion-types"
 version = "0.1.0"
 dependencies = [
- "g3rs-code-config-checks-types",
- "g3rs-code-file-tree-checks-types",
- "g3rs-code-source-checks-types",
+ "g3rs-code-types",
 ]
 
 [[package]]
@@ -217,6 +221,13 @@ dependencies = [
 
 [[package]]
 name = "g3rs-code-source-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-types",
+]
+
+[[package]]
+name = "g3rs-code-types"
 version = "0.1.0"
 
 [[package]]

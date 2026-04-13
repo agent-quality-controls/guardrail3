@@ -1,5 +1,6 @@
 use cargo_toml_parser::CargoToml;
 use clippy_toml_parser::ClippyToml;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 pub enum G3RsGardeClippyInput {
@@ -20,6 +21,19 @@ pub struct G3RsGardeConfigChecksInput {
     pub cargo: CargoToml,
     /// Covering clippy config state for garde ban checks.
     pub clippy_input: G3RsGardeClippyInput,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsSourceFile {
+    pub rel_path: String,
+    pub abs_path: PathBuf,
+}
+
+#[derive(Debug, Clone)]
+pub struct G3RsGardeSourceChecksInput {
+    pub garde_dependency_present: bool,
+    pub source_files: Vec<G3RsSourceFile>,
+    pub guardrail_toml: G3RsSourceFile,
 }
 
 /// Placeholder input contract for future garde file-tree checks.

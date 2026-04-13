@@ -1,6 +1,6 @@
 use g3rs_clippy_types::{
-    G3RsClippyFileTreeChecksInput, G3RsClippyPolicyContextState, G3RsClippyShadowedConfig,
-    G3RsClippyConfigChecksInput,
+    G3RsClippyConfigChecksInput, G3RsClippyFileTreeChecksInput, G3RsClippyPolicyContextState,
+    G3RsClippyShadowedConfig, G3RsClippySourceChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -71,4 +71,10 @@ pub fn ingest_for_file_tree_checks(
         preferred,
         shadowed_same_root_configs,
     ))
+}
+
+pub fn ingest_for_source_checks(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsClippySourceChecksInput, IngestionError> {
+    Err(IngestionError::SourceIngestionNotImplemented)
 }
