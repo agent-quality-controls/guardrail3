@@ -146,14 +146,18 @@ fn nested_workspace_does_not_also_fire_membership_rule() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-12", &[]);
-    assert_eq!(
-        results
-            .iter()
-            .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
-            .count(),
-        1
+    assert_rule_results(
+        &results,
+        "RS-TOPOLOGY-FILETREE-12",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("Workspace `.` has extra member `crates/nested`"),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            message: None,
+        }],
     );
+    assert_eq!(results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11").count(), 1);
 }
 
 #[test]
@@ -169,14 +173,45 @@ fn hybrid_descendant_does_not_also_fire_membership_rule() {
 
     let results = crate::check(&input);
 
-    assert_rule_results(&results, "RS-TOPOLOGY-FILETREE-12", &[]);
-    assert_eq!(
-        results
-            .iter()
-            .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
-            .count(),
-        1
+    assert_rule_results(
+        &results,
+        "RS-TOPOLOGY-FILETREE-12",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("Workspace `.` has extra member `crates/nested`"),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            message: None,
+        }],
     );
+    assert_eq!(results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11").count(), 1);
+}
+
+#[test]
+fn member_pattern_matching_only_nested_workspace_packages_is_extra() {
+    let input = input(
+        "[workspace]\nmembers = [\"crates/nested/*\"]\n",
+        vec![
+            ("crates/nested", Some(G3RsTopologyCargoManifestKind::Workspace)),
+            ("crates/nested/member", Some(G3RsTopologyCargoManifestKind::Package)),
+        ],
+        Vec::new(),
+    );
+
+    let results = crate::check(&input);
+
+    assert_rule_results(
+        &results,
+        "RS-TOPOLOGY-FILETREE-12",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("Workspace `.` has extra member `crates/nested/*`"),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            message: None,
+        }],
+    );
+    assert_eq!(results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11").count(), 1);
 }
 
 #[test]

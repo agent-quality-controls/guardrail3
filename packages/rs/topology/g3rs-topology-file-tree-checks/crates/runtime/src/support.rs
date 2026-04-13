@@ -50,7 +50,7 @@ pub(crate) struct TopologyFacts {
 #[derive(Debug, Clone)]
 struct ResolvedMemberPattern {
     raw: String,
-    matched_descendant_dirs: Vec<String>,
+    matched_unresolved_dirs: Vec<String>,
     resolved_child_dirs: Vec<String>,
 }
 
@@ -76,8 +76,8 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
 
     let mut issues = collect_nested_workspace_issues(input, &workspace_roots);
     let escaping_patterns = collect_escaping_member_patterns(input);
-    let member_patterns = collect_member_patterns(input);
     let actual_children = collect_actual_children(input, &workspace_roots);
+    let member_patterns = collect_member_patterns(input, &actual_children);
 
     issues.extend(
         escaping_patterns
@@ -114,12 +114,8 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
 
     let actual_children_set = actual_children.iter().cloned().collect::<BTreeSet<_>>();
     for member in &member_patterns {
-        let covers_real_child = !member.resolved_child_dirs.is_empty()
-            && member
-                .resolved_child_dirs
-                .iter()
-                .all(|resolved| actual_children_set.contains(resolved));
-        if covers_real_child || !member.matched_descendant_dirs.is_empty() {
+        let covers_real_child = !member.resolved_child_dirs.is_empty();
+        if covers_real_child || !member.matched_unresolved_dirs.is_empty() {
             continue;
         }
         issues.push(TopologyIssue {
@@ -232,17 +228,15 @@ fn collect_escaping_member_patterns(input: &G3RsTopologyFileTreeChecksInput) -> 
         .unwrap_or_default()
 }
 
-fn collect_member_patterns(input: &G3RsTopologyFileTreeChecksInput) -> Vec<ResolvedMemberPattern> {
+fn collect_member_patterns(
+    input: &G3RsTopologyFileTreeChecksInput,
+    actual_children: &[String],
+) -> Vec<ResolvedMemberPattern> {
     let workspace_root_rel = input.workspace_root_rel_dir.as_str();
-    let descendant_root_rels = input
+    let unresolved_descendant_rels = input
         .descendant_cargo_roots
         .iter()
-        .map(|root| root.rel_dir.clone())
-        .collect::<Vec<_>>();
-    let child_root_rels = input
-        .descendant_cargo_roots
-        .iter()
-        .filter(|root| root.manifest_kind == Some(G3RsTopologyCargoManifestKind::Package))
+        .filter(|root| root.manifest_kind.is_none())
         .map(|root| root.rel_dir.clone())
         .collect::<Vec<_>>();
 
@@ -257,15 +251,15 @@ fn collect_member_patterns(input: &G3RsTopologyFileTreeChecksInput) -> Vec<Resol
                 .filter(|member| !member_pattern_escapes_root(member))
                 .map(|member| ResolvedMemberPattern {
                     raw: member.clone(),
-                    matched_descendant_dirs: resolve_member_pattern(
+                    matched_unresolved_dirs: resolve_member_pattern(
                         workspace_root_rel,
                         member,
-                        &descendant_root_rels,
+                        &unresolved_descendant_rels,
                     ),
                     resolved_child_dirs: resolve_member_pattern(
                         workspace_root_rel,
                         member,
-                        &child_root_rels,
+                        actual_children,
                     ),
                 })
                 .collect::<Vec<_>>()
@@ -449,7 +443,20 @@ fn join_rel(parent: &str, child: &str) -> String {
 }
 
 fn member_pattern_escapes_root(member: &str) -> bool {
-    member.starts_with('/') || member.split('/').any(|segment| segment == "..")
+    member.starts_with('/')
+        || member.starts_with('\\')
+        || has_windows_drive_absolute_prefix(member)
+        || member
+            .split(|ch| ch == '/' || ch == '\\')
+            .any(|segment| segment == "..")
+}
+
+fn has_windows_drive_absolute_prefix(member: &str) -> bool {
+    let bytes = member.as_bytes();
+    bytes.len() >= 3
+        && bytes[0].is_ascii_alphabetic()
+        && bytes[1] == b':'
+        && (bytes[2] == b'/' || bytes[2] == b'\\')
 }
 
 fn normalize_member_pattern(member: &str) -> String {

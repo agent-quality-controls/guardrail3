@@ -5,5 +5,5 @@ Workspace-local ingestion for extracted topology checks.
 Current state:
 
 - file-tree ingestion is implemented
-- config ingestion is not implemented
-- source ingestion is not implemented
+- config lane is not part of this package contract
+- source lane is not part of this package contract

@@ -1,7 +1,7 @@
 mod error;
 
 pub use g3rs_topology_types::{
-    G3RsTopologyConfigChecksInput, G3RsTopologyFileTreeChecksInput, G3RsTopologySourceChecksInput,
+    G3RsTopologyFileTreeChecksInput,
 };
 
 #[cfg(feature = "api")]
