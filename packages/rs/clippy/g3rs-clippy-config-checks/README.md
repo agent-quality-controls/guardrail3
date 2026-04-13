@@ -1,14 +1,6 @@
 # g3rs-clippy-config-checks
 
-Extracted typed `clippy.toml` config checks for guardrail3.
-
-This package is intentionally narrower than the in-app `clippy` family:
-
-- it validates already parsed `ClippyToml` content only
-- it does not discover or route policy roots
-- it does not report malformed parse/schema inputs
-- it does not inspect `.cargo/config.toml` override surfaces
-- it does not resolve guardrail profile or garde policy context
+Extracted `clippy.toml`, `guardrail3.toml`, and `.cargo/config*` config checks for guardrail3.
 
 Current scope:
 
@@ -20,11 +12,25 @@ Current scope:
 - `RS-CLIPPY-CONFIG-06`: test relaxation exactness
 - `RS-CLIPPY-CONFIG-07`: `cognitive-complexity-threshold`
 - `RS-CLIPPY-CONFIG-08`: `type-complexity-threshold`
+- `RS-CLIPPY-CONFIG-09`: missing method bans
+- `RS-CLIPPY-CONFIG-10`: missing type bans
+- `RS-CLIPPY-CONFIG-11`: extra method bans
+- `RS-CLIPPY-CONFIG-12`: extra type bans
+- `RS-CLIPPY-CONFIG-13`: ban reason quality
+- `RS-CLIPPY-CONFIG-14`: library global-state bans
+- `RS-CLIPPY-CONFIG-15`: `avoid-breaking-exported-api`
+- `RS-CLIPPY-CONFIG-16`: duplicate bans
+- `RS-CLIPPY-CONFIG-17`: suspicious managed-key typos
+- `RS-CLIPPY-CONFIG-18`: macro bans
+- `RS-CLIPPY-CONFIG-19`: `guardrail3.toml` policy-context parseability
+- `RS-CLIPPY-CONFIG-20`: forbidden `CLIPPY_CONF_DIR` override surfaces
+- `RS-CLIPPY-CONFIG-21`: `clippy.toml` parseability
 
-The app remains responsible for:
+This package intentionally keeps the package model boundary:
 
-- coverage, placement, shadowing, and routing
-- `RS-CLIPPY-25` parse/schema gating
-- policy-context failures from `guardrail3.toml`
-- `RS-CLIPPY-24` cargo-config override checks
-- the remaining raw-section and policy-context-sensitive clippy rules
+- one pointed workspace at a time
+- root-local policy context
+- root-local cargo override surfaces
+- no source lane
+
+Old app-only repo-wide routed descendants do not carry over as a separate package lane.

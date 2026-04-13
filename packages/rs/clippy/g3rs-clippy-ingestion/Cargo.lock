@@ -34,6 +34,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-runtime",
+]
+
+[[package]]
+name = "cargo-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "cargo-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -131,10 +154,34 @@ dependencies = [
  "g3rs-clippy-config-checks-types",
  "guardrail3-check-types",
  "guardrail3-domain-modules",
+ "toml",
 ]
 
 [[package]]
 name = "g3rs-clippy-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-types",
+]
+
+[[package]]
+name = "g3rs-clippy-filetree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-filetree-checks-runtime",
+ "g3rs-clippy-filetree-checks-types",
+]
+
+[[package]]
+name = "g3rs-clippy-filetree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-filetree-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-clippy-filetree-checks-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-clippy-types",
@@ -159,13 +206,17 @@ dependencies = [
 name = "g3rs-clippy-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-clippy-config-checks",
+ "g3rs-clippy-filetree-checks",
  "g3rs-clippy-ingestion-assertions",
  "g3rs-clippy-ingestion-types",
  "g3rs-clippy-types",
  "g3rs-workspace-crawl",
+ "glob",
  "tempfile",
+ "toml",
 ]
 
 [[package]]
@@ -177,6 +228,7 @@ name = "g3rs-clippy-types"
 version = "0.1.0"
 dependencies = [
  "clippy-toml-parser",
+ "toml",
 ]
 
 [[package]]
@@ -212,6 +264,12 @@ dependencies = [
  "wasip2",
  "wasip3",
 ]
+
+[[package]]
+name = "glob"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
 
 [[package]]
 name = "globset"

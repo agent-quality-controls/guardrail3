@@ -31,3 +31,4 @@ module_name_repetitions = "allow"
 
 [dependencies]
 clippy-toml-parser = { path = "../../../parsers/clippy-toml-parser" }
+toml = "0.8"

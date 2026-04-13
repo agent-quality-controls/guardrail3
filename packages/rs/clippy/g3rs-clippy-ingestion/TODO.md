@@ -1,3 +1,3 @@
 # TODO
 
-- [ ] Consider sub-package `clippy.toml` ingestion (currently root only)
+- [ ] Add more direct bridge tests if future clippy rules widen the boundary.
