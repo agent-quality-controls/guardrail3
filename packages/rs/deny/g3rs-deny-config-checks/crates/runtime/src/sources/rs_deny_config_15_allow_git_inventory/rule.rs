@@ -1,7 +1,7 @@
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{inventory, warn};
+use crate::support::{error, inventory, warn};
 
 const ID: &str = "RS-DENY-CONFIG-15";
 
@@ -21,7 +21,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
     for entry in &sources.allow_git {
         if entry.trim().is_empty() {
-            results.push(warn(
+            results.push(error(
                 ID,
                 "allow-git entry must be non-empty",
                 format!("`{deny_rel_path}` has blank `[sources].allow-git` entry."),

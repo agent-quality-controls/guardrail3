@@ -22,7 +22,7 @@ allow-git = [""]
                 "deny.toml",
                 false,
             ),
-            assertions::warn(
+            assertions::error(
                 "allow-git entry must be non-empty",
                 "`deny.toml` has blank `[sources].allow-git` entry.",
                 "deny.toml",

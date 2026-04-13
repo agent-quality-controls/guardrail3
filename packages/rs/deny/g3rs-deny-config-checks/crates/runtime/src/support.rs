@@ -2,8 +2,9 @@ use std::collections::BTreeSet;
 
 use deny_toml_parser::{
     AdvisoriesConfig, AdvisoryIgnoreEntry, BanDenyDetail, BanDenyEntry, BanFeatureEntry,
-    BanSkipDetail, BanSkipEntry, BansConfig, LicenseException, LicensesConfig,
-    LicensesPrivateConfig, SourcesConfig,
+    BanSkipDetail, BanSkipEntry, BanSkipTreeEntry, BanWorkspaceDependenciesConfig, BansConfig,
+    GraphTargetEntry, LicenseClarification, LicenseClarificationFile, LicenseException,
+    LicensesConfig, LicensesPrivateConfig, SourcesConfig,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_domain_modules::deny;
@@ -98,6 +99,31 @@ pub(crate) fn expected_bans_settings() -> (Option<String>, bool, Option<String>)
     )
 }
 
+#[derive(Debug, Clone)]
+pub(crate) struct BanExpectation {
+    pub(crate) wrappers: BTreeSet<String>,
+}
+
+pub(crate) fn expected_bans(profile: Option<&str>) -> std::collections::BTreeMap<String, BanExpectation> {
+    let modules = if profile == Some("library") {
+        deny::library_profile_ban_entries()
+    } else {
+        deny::service_profile_ban_entries()
+    };
+
+    let mut map = std::collections::BTreeMap::new();
+    for module in modules {
+        for (name, wrappers) in parse_ban_entries(module.content()) {
+            let _ = map.insert(name, BanExpectation { wrappers });
+        }
+    }
+    map
+}
+
+pub(crate) fn expected_ban_names(profile: Option<&str>) -> BTreeSet<String> {
+    expected_bans(profile).into_keys().collect()
+}
+
 pub(crate) fn expected_licenses() -> BTreeSet<String> {
     let parsed = toml::from_str::<toml::Value>(deny::DENY_LICENSES.content()).ok();
     parsed
@@ -164,6 +190,36 @@ pub(crate) fn join_set(values: &BTreeSet<String>) -> String {
     values.iter().cloned().collect::<Vec<_>>().join(", ")
 }
 
+pub(crate) fn ban_name(entry: &BanDenyEntry) -> Option<String> {
+    match entry {
+        BanDenyEntry::Simple(name) => normalized_name(name),
+        BanDenyEntry::Detailed(detail) => deny_detail_name(detail),
+    }
+}
+
+pub(crate) fn allow_name(entry: &deny_toml_parser::BanAllowEntry) -> Option<String> {
+    match entry {
+        deny_toml_parser::BanAllowEntry::Simple(name) => normalized_name(name),
+        deny_toml_parser::BanAllowEntry::Detailed(detail) => detail
+            .name
+            .as_deref()
+            .and_then(normalized_name)
+            .or_else(|| {
+                detail
+                    .crate_name
+                    .as_deref()
+                    .and_then(|crate_name| normalized_name(crate_name.split('@').next().unwrap_or(crate_name)))
+            }),
+    }
+}
+
+pub(crate) fn wrappers(entry: &BanDenyEntry) -> BTreeSet<String> {
+    match entry {
+        BanDenyEntry::Simple(_) => BTreeSet::new(),
+        BanDenyEntry::Detailed(detail) => detail.wrappers.iter().cloned().collect(),
+    }
+}
+
 pub(crate) fn known_top_level_keys() -> BTreeSet<&'static str> {
     BTreeSet::from([
         "graph",
@@ -187,6 +243,7 @@ pub(crate) fn known_section_keys(section: &str) -> BTreeSet<&'static str> {
             "exclude-dev",
             "exclude-unpublished",
         ]),
+        "graph-target" => BTreeSet::from(["triple", "features"]),
         "bans" => BTreeSet::from([
             "multiple-versions",
             "multiple-versions-include-dev",
@@ -204,6 +261,33 @@ pub(crate) fn known_section_keys(section: &str) -> BTreeSet<&'static str> {
             "workspace-dependencies",
             "build",
         ]),
+        "allow" => BTreeSet::from(["name", "crate", "version", "reason"]),
+        "skip-tree" => BTreeSet::from(["name", "crate", "version", "depth", "reason"]),
+        "workspace-dependencies" => {
+            BTreeSet::from(["duplicates", "include-path-dependencies", "unused"])
+        }
+        "build" => BTreeSet::from([
+            "allow-build-scripts",
+            "executables",
+            "interpreted",
+            "script-extensions",
+            "enable-builtin-globs",
+            "include-dependencies",
+            "include-workspace",
+            "include-archives",
+            "bypass",
+        ]),
+        "build-allow-build-scripts" => BTreeSet::from(["name", "crate", "version"]),
+        "build-bypass" => BTreeSet::from([
+            "name",
+            "crate",
+            "version",
+            "build-script",
+            "required-features",
+            "allow-globs",
+            "allow",
+        ]),
+        "build-bypass-allow" => BTreeSet::from(["path", "checksum"]),
         "licenses" => BTreeSet::from([
             "version",
             "include-dev",
@@ -216,6 +300,8 @@ pub(crate) fn known_section_keys(section: &str) -> BTreeSet<&'static str> {
             "exceptions",
             "clarify",
         ]),
+        "clarify" => BTreeSet::from(["name", "crate", "version", "expression", "license-files"]),
+        "clarify-file" => BTreeSet::from(["path", "hash"]),
         "advisories" => BTreeSet::from([
             "db-path",
             "db-urls",
@@ -311,6 +397,38 @@ pub(crate) fn feature_entry_unknown_keys(entry: &BanFeatureEntry) -> Vec<String>
         .collect()
 }
 
+pub(crate) fn graph_target_unknown_keys(entry: &GraphTargetEntry) -> Vec<String> {
+    match entry {
+        GraphTargetEntry::Simple(_) => Vec::new(),
+        GraphTargetEntry::Detailed(detail) => detail
+            .extra
+            .keys()
+            .filter(|key| !known_section_keys("graph-target").contains(key.as_str()))
+            .cloned()
+            .collect(),
+    }
+}
+
+pub(crate) fn license_clarification_unknown_keys(entry: &LicenseClarification) -> Vec<String> {
+    entry
+        .extra
+        .keys()
+        .filter(|key| !known_section_keys("clarify").contains(key.as_str()))
+        .cloned()
+        .collect()
+}
+
+pub(crate) fn license_clarification_file_unknown_keys(
+    entry: &LicenseClarificationFile,
+) -> Vec<String> {
+    entry
+        .extra
+        .keys()
+        .filter(|key| !known_section_keys("clarify-file").contains(key.as_str()))
+        .cloned()
+        .collect()
+}
+
 pub(crate) fn license_exception_name(entry: &LicenseException) -> Option<String> {
     entry
         .name
@@ -326,6 +444,18 @@ pub(crate) fn license_exception_unknown_keys(entry: &LicenseException) -> Vec<St
         .filter(|key| !known_section_keys("exception").contains(key.as_str()))
         .cloned()
         .collect()
+}
+
+pub(crate) fn allow_entry_unknown_keys(entry: &deny_toml_parser::BanAllowEntry) -> Vec<String> {
+    match entry {
+        deny_toml_parser::BanAllowEntry::Simple(_) => Vec::new(),
+        deny_toml_parser::BanAllowEntry::Detailed(detail) => detail
+            .extra
+            .keys()
+            .filter(|key| !known_section_keys("allow").contains(key.as_str()))
+            .cloned()
+            .collect(),
+    }
 }
 
 pub(crate) fn advisory_ignore_unknown_keys(entry: &AdvisoryIgnoreEntry) -> Vec<String> {
@@ -437,6 +567,72 @@ pub(crate) fn sources_unknown_keys(config: &SourcesConfig) -> Vec<String> {
         .collect()
 }
 
+pub(crate) fn skip_tree_unknown_keys(entry: &BanSkipTreeEntry) -> Vec<String> {
+    match entry {
+        BanSkipTreeEntry::Simple(_) => Vec::new(),
+        BanSkipTreeEntry::Detailed(detail) => detail
+            .extra
+            .keys()
+            .filter(|key| !known_section_keys("skip-tree").contains(key.as_str()))
+            .cloned()
+            .collect(),
+    }
+}
+
+pub(crate) fn workspace_dependencies_unknown_keys(
+    config: &BanWorkspaceDependenciesConfig,
+) -> Vec<String> {
+    config
+        .extra
+        .keys()
+        .filter(|key| !known_section_keys("workspace-dependencies").contains(key.as_str()))
+        .cloned()
+        .collect()
+}
+
+pub(crate) fn build_unknown_keys(config: &deny_toml_parser::BanBuildConfig) -> Vec<String> {
+    config
+        .extra
+        .keys()
+        .filter(|key| !known_section_keys("build").contains(key.as_str()))
+        .cloned()
+        .collect()
+}
+
+pub(crate) fn build_allow_build_script_unknown_keys(
+    entry: &deny_toml_parser::BanBuildAllowBuildScriptEntry,
+) -> Vec<String> {
+    match entry {
+        deny_toml_parser::BanBuildAllowBuildScriptEntry::Simple(_) => Vec::new(),
+        deny_toml_parser::BanBuildAllowBuildScriptEntry::Detailed(detail) => detail
+            .extra
+            .keys()
+            .filter(|key| !known_section_keys("build-allow-build-scripts").contains(key.as_str()))
+            .cloned()
+            .collect(),
+    }
+}
+
+pub(crate) fn build_bypass_unknown_keys(entry: &deny_toml_parser::BanBuildBypassEntry) -> Vec<String> {
+    entry
+        .extra
+        .keys()
+        .filter(|key| !known_section_keys("build-bypass").contains(key.as_str()))
+        .cloned()
+        .collect()
+}
+
+pub(crate) fn build_bypass_allow_unknown_keys(
+    entry: &deny_toml_parser::BanBuildBypassAllowEntry,
+) -> Vec<String> {
+    entry
+        .extra
+        .keys()
+        .filter(|key| !known_section_keys("build-bypass-allow").contains(key.as_str()))
+        .cloned()
+        .collect()
+}
+
 pub(crate) fn output_unknown_keys(config: &deny_toml_parser::OutputConfig) -> Vec<String> {
     config
         .extra
@@ -472,8 +668,39 @@ fn deny_detail_name(detail: &BanDenyDetail) -> Option<String> {
     detail
         .name
         .as_deref()
-        .map(str::to_owned)
-        .or_else(|| detail.crate_name.as_deref().map(|crate_name| crate_name.split('@').next().unwrap_or(crate_name).to_owned()))
+        .and_then(normalized_name)
+        .or_else(|| {
+            detail
+                .crate_name
+                .as_deref()
+                .and_then(|crate_name| normalized_name(crate_name.split('@').next().unwrap_or(crate_name)))
+        })
+}
+
+fn normalized_name(raw: &str) -> Option<String> {
+    let trimmed = raw.trim();
+    (!trimmed.is_empty()).then(|| trimmed.to_owned())
+}
+
+fn parse_ban_entries(content: &str) -> Vec<(String, BTreeSet<String>)> {
+    let wrapped = format!("bans = {{ deny = [{content}] }}");
+    let Ok(parsed) = toml::from_str::<toml::Value>(&wrapped) else {
+        return Vec::new();
+    };
+    parsed
+        .get("bans")
+        .and_then(|value| value.get("deny"))
+        .and_then(toml::Value::as_array)
+        .map(|entries| {
+            entries
+                .iter()
+                .filter_map(|entry| {
+                    let name = entry.get("name").and_then(toml::Value::as_str)?;
+                    Some((name.to_owned(), string_set_from_value(entry.get("wrappers"))))
+                })
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn skip_detail_name(detail: &BanSkipDetail) -> Option<String> {

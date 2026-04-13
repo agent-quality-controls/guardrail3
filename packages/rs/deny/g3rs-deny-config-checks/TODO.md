@@ -1,41 +1,5 @@
 # g3rs-deny-config-checks TODO
 
-## Known Issue
-
-### Structural typed-parse failures can still go silent in the app boundary
-
-- The package correctly assumes typed `DenyToml` input.
-- The app deny family still skips package execution when typed parsing fails and
-  does not always emit a structural finding for that case.
-- This means malformed-schema cases can disappear instead of surfacing as deny
-  findings.
-
-Relevant files:
-
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/facts/mod.rs`
-- `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/run.rs`
-
-Examples seen during attack:
-
-- `[advisories].ignore = [{ id = "RUSTSEC-...", reason = 7 }]`
-- `[bans].skip = [{ crate = "regex@1.0.0", reason = 7 }]`
-- wrong-type containers such as `[sources].allow-git = "https://..."`
-
-Follow-up:
-
-- Add structural deny findings for typed parser/schema rejection before calling
-  the package.
-- Reassign malformed-schema expectations to app-level structural tests rather
-  than package-level content tests.
-
-## Test Status
-
-- 121 package-level tests cover all 22 migrated config rules.
-- Each migrated rule has package-local sidecar tests.
-
-## Boundary Reminder
-
-- `RS-DENY-CONFIG-18`, `RS-DENY-CONFIG-19`, and `RS-DENY-CONFIG-21` now operate on valid typed
-  inputs only.
-- Any malformed raw-schema expectations that used to be attached to those rules
-  belong in the app once structural signaling is fixed.
+- Keep deny config rules typed and package-local.
+- Keep raw file selection, unreadable handling, and profile-resolution failures in ingestion.
+- If deny ever grows a source lane, do not move filetree or config semantics into it.

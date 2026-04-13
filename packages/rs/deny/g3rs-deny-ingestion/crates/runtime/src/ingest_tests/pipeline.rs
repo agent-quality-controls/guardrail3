@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+use g3rs_deny_config_checks_assertions::rs_deny_config_05_graph_no_default_features as graph_no_default_features_assertions;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -31,10 +32,13 @@ fn pipeline_reports_missing_graph_section() {
     let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_deny_config_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-DENY-CONFIG-05" && result.title() == "[graph] section missing"
-        }),
-        "{results:#?}"
+    graph_no_default_features_assertions::assert_findings(
+        &results,
+        &[graph_no_default_features_assertions::error(
+            "[graph] section missing",
+            "`deny.toml` must contain `[graph]` coverage settings.",
+            "deny.toml",
+            false,
+        )],
     );
 }

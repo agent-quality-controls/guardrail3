@@ -124,6 +124,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-deny-config-checks-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deny-config-checks-runtime",
+ "guardrail3-check-types",
+]
+
+[[package]]
 name = "g3rs-deny-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
@@ -137,6 +145,37 @@ dependencies = [
 
 [[package]]
 name = "g3rs-deny-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deny-types",
+]
+
+[[package]]
+name = "g3rs-deny-filetree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deny-filetree-checks-runtime",
+ "g3rs-deny-filetree-checks-types",
+]
+
+[[package]]
+name = "g3rs-deny-filetree-checks-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deny-filetree-checks-runtime",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-deny-filetree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deny-filetree-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-deny-filetree-checks-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-deny-types",
@@ -163,11 +202,15 @@ version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
  "g3rs-deny-config-checks",
+ "g3rs-deny-config-checks-assertions",
+ "g3rs-deny-filetree-checks",
+ "g3rs-deny-filetree-checks-assertions",
  "g3rs-deny-ingestion-assertions",
  "g3rs-deny-ingestion-types",
  "g3rs-deny-types",
  "g3rs-workspace-crawl",
  "tempfile",
+ "toml",
 ]
 
 [[package]]

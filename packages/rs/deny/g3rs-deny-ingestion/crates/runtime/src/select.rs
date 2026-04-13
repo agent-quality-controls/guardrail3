@@ -1,9 +1,29 @@
-/// Select the deny config entry from a workspace crawl.
+/// Select deny-family files from a workspace crawl.
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry};
 
-/// Find `deny.toml` or `.deny.toml` at the workspace root.
+/// Find the highest-precedence deny config at the workspace root.
 pub(crate) fn select_deny_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl
-        .root_file("deny.toml")
-        .or_else(|| crawl.root_file(".deny.toml"))
+    root_deny_entries(crawl).into_iter().next()
+}
+
+pub(crate) fn root_deny_entries(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWorkspaceEntry> {
+    let mut entries = ["deny.toml", ".deny.toml", ".cargo/deny.toml"]
+        .into_iter()
+        .filter_map(|rel_path| crawl.root_file(rel_path))
+        .collect::<Vec<_>>();
+    entries.sort_by_key(|entry| deny_precedence(&entry.path.rel_path));
+    entries
+}
+
+pub(crate) fn select_guardrail3_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
+    crawl.root_file("guardrail3.toml")
+}
+
+fn deny_precedence(rel_path: &str) -> usize {
+    match rel_path {
+        "deny.toml" => 0,
+        ".deny.toml" => 1,
+        ".cargo/deny.toml" => 2,
+        _ => 0,
+    }
 }

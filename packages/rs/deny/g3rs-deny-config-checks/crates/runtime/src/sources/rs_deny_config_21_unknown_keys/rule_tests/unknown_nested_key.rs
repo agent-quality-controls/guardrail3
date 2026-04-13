@@ -129,3 +129,85 @@ bogus = true
         )],
     );
 }
+
+#[test]
+fn unknown_graph_target_key_warns() {
+    let results = run_check(
+        r#"
+[graph]
+targets = [
+  { triple = "aarch64-apple-darwin", bogus = true },
+]
+"#,
+    );
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "unknown graph.targets key",
+            "`deny.toml` uses unknown `[[graph.targets]].bogus` at index 0.",
+            "deny.toml",
+            false,
+        )],
+    );
+}
+
+#[test]
+fn unknown_license_clarify_key_warns() {
+    let results = run_check(
+        r#"
+[licenses]
+clarify = [
+  { crate = "ring", expression = "MIT", license-files = [{ path = "LICENSE", hash = 1 }], bogus = true },
+]
+"#,
+    );
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "unknown licenses.clarify key",
+            "`deny.toml` uses unknown `[[licenses.clarify]].bogus` at index 0.",
+            "deny.toml",
+            false,
+        )],
+    );
+}
+
+#[test]
+fn unknown_bans_workspace_dependencies_key_warns() {
+    let results = run_check(
+        r#"
+[bans.workspace-dependencies]
+duplicates = "deny"
+bogus = true
+"#,
+    );
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "unknown bans.workspace-dependencies key",
+            "`deny.toml` uses unknown `[bans.workspace-dependencies].bogus`.",
+            "deny.toml",
+            false,
+        )],
+    );
+}
+
+#[test]
+fn unknown_bans_build_key_warns() {
+    let results = run_check(
+        r#"
+[bans.build]
+executables = "deny"
+bogus = true
+"#,
+    );
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "unknown bans.build key",
+            "`deny.toml` uses unknown `[bans.build].bogus`.",
+            "deny.toml",
+            false,
+        )],
+    );
+}
