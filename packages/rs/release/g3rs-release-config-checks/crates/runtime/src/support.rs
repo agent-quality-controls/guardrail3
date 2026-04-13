@@ -1,53 +1,5 @@
-/// Shared helpers for release config checks.
-use cargo_toml_parser::{CargoToml, InheritableValue, VecStringOrBool};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-// Silence unused-crate-dependencies for parser crates used transitively via types.
-use cliff_toml_parser as _;
-use release_plz_toml_parser as _;
-
-/// Whether the crate is publishable.
-///
-/// Not publishable when:
-/// - No `[package]` section (workspace-only root)
-/// - `publish = false`
-/// - `publish = []` (empty registry list)
-pub(crate) fn is_publishable(cargo: &CargoToml) -> bool {
-    let Some(package) = cargo.package.as_ref() else {
-        return false;
-    };
-    package
-        .publish
-        .as_ref()
-        .map_or(true, |publish| match publish {
-            InheritableValue::Value(VecStringOrBool::Bool(false)) => false,
-            InheritableValue::Value(VecStringOrBool::VecString(registries)) => {
-                !registries.is_empty()
-            }
-            _ => true,
-        })
-}
-
-/// Whether the crate has a `[lib]` section (is a library).
-pub(crate) fn is_library(cargo: &CargoToml) -> bool {
-    cargo.lib.is_some()
-}
-
-/// Whether the crate has `[[bin]]` entries (is a binary).
-pub(crate) fn is_binary(cargo: &CargoToml) -> bool {
-    !cargo.bin.is_empty()
-}
-
-/// Extract the crate name from `[package].name`, falling back to the rel path.
-pub(crate) fn crate_name(cargo: &CargoToml, cargo_rel_path: &str) -> String {
-    cargo
-        .package
-        .as_ref()
-        .and_then(|package| package.name.clone())
-        .unwrap_or_else(|| cargo_rel_path.to_owned())
-}
-
-/// Build an error result.
 pub(crate) fn error(
     id: &str,
     title: impl Into<String>,
@@ -64,7 +16,6 @@ pub(crate) fn error(
     )
 }
 
-/// Build a warn result.
 pub(crate) fn warn(
     id: &str,
     title: impl Into<String>,
@@ -81,7 +32,6 @@ pub(crate) fn warn(
     )
 }
 
-/// Build an info result.
 pub(crate) fn info(
     id: &str,
     title: impl Into<String>,
@@ -97,4 +47,36 @@ pub(crate) fn info(
         None,
     )
     .into_inventory()
+}
+
+pub(crate) fn message_covers_prefix(message: &str, prefix: &str) -> bool {
+    if message == prefix {
+        return true;
+    }
+
+    let Some(prefix_body) = prefix.strip_prefix('^') else {
+        return false;
+    };
+    let Some(message_body) = message.strip_prefix('^') else {
+        return false;
+    };
+
+    if let Some(stripped) = message_body.strip_prefix(prefix_body) {
+        return has_valid_commit_suffix(stripped);
+    }
+
+    let Some(grouped) = message_body.strip_prefix('(') else {
+        return false;
+    };
+    let Some(group_end) = grouped.find(')') else {
+        return false;
+    };
+    let heads = &grouped[..group_end];
+    let suffix = &grouped[(group_end + 1)..];
+
+    heads.split('|').any(|head| head == prefix_body) && has_valid_commit_suffix(suffix)
+}
+
+fn has_valid_commit_suffix(suffix: &str) -> bool {
+    suffix.starts_with(':') || (suffix.starts_with('(') && suffix.ends_with(':'))
 }

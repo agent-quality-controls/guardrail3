@@ -1,18 +1,15 @@
-use cargo_toml_parser::parse as parse_cargo;
-use g3rs_release_config_checks_types::G3RsReleaseConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub(super) fn run_check(cargo_toml: &str) -> Vec<G3CheckResult> {
-    let cargo = parse_cargo(cargo_toml).expect("cargo fixture should parse");
-    let input = G3RsReleaseConfigChecksInput {
-        cargo_rel_path: "Cargo.toml".to_owned(),
-        cargo,
-        release_plz_rel_path: None,
-        release_plz: None,
-        cliff_rel_path: None,
-        cliff: None,
-    };
+    run_check_with_workspace(cargo_toml, None)
+}
+
+pub(super) fn run_check_with_workspace(
+    cargo_toml: &str,
+    workspace_cargo_toml: Option<&str>,
+) -> Vec<G3CheckResult> {
+    let input = crate::test_support::config_input_for_crate(cargo_toml, workspace_cargo_toml);
     let mut results = Vec::new();
-    crate::rs_release_config_01_description_present::check(&input, &mut results);
+    crate::rs_release_config_01_description_present::check(&input.crates[0], &mut results);
     results
 }

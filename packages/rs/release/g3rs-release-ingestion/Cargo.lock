@@ -166,6 +166,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-release-filetree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-filetree-checks-runtime",
+ "g3rs-release-filetree-checks-types",
+]
+
+[[package]]
+name = "g3rs-release-filetree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-filetree-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-release-filetree-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-types",
+]
+
+[[package]]
 name = "g3rs-release-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -187,17 +210,46 @@ dependencies = [
  "cargo-toml-parser",
  "cliff-toml-parser",
  "g3rs-release-config-checks",
+ "g3rs-release-filetree-checks",
  "g3rs-release-ingestion-assertions",
  "g3rs-release-ingestion-types",
+ "g3rs-release-source-checks",
  "g3rs-release-types",
  "g3rs-workspace-crawl",
+ "glob",
  "release-plz-toml-parser",
+ "semver",
+ "serde_yaml",
  "tempfile",
+ "toml",
 ]
 
 [[package]]
 name = "g3rs-release-ingestion-types"
 version = "0.1.0"
+
+[[package]]
+name = "g3rs-release-source-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-source-checks-runtime",
+ "g3rs-release-source-checks-types",
+]
+
+[[package]]
+name = "g3rs-release-source-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-source-checks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-release-source-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-types",
+]
 
 [[package]]
 name = "g3rs-release-types"
@@ -241,6 +293,12 @@ dependencies = [
  "wasip2",
  "wasip3",
 ]
+
+[[package]]
+name = "glob"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
 
 [[package]]
 name = "globset"
@@ -444,6 +502,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ryu"
+version = "1.0.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
+
+[[package]]
 name = "same-file"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -508,6 +572,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf41e0cfaf7226dca15e8197172c295a782857fcb97fad1808a166870dee75a3"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "serde_yaml"
+version = "0.9.34+deprecated"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
+dependencies = [
+ "indexmap",
+ "itoa",
+ "ryu",
+ "serde",
+ "unsafe-libyaml",
 ]
 
 [[package]]
@@ -586,6 +663,12 @@ name = "unicode-xid"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
+
+[[package]]
+name = "unsafe-libyaml"
+version = "0.2.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "673aac59facbab8a9007c7f6108d11f63b603f7cabff99fabf650fea5c32b861"
 
 [[package]]
 name = "walkdir"
