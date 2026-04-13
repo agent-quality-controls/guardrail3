@@ -1,0 +1,13 @@
+[package]
+name = "g3rs-apparch-source-checks-types"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[dependencies]
+g3rs-apparch-types = { path = "../../../g3rs-apparch-types" }
+
+[lints]
+workspace = true
