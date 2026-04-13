@@ -1,0 +1,62 @@
+[package]
+name = "guardrail3-rs-packages"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+guardrail3-rs-app-types = { path = "../../../types/app-types" }
+guardrail3-check-types.workspace = true
+g3rs-workspace-crawl.workspace = true
+
+g3rs-apparch-config-checks.workspace = true
+g3rs-apparch-ingestion.workspace = true
+g3rs-apparch-source-checks.workspace = true
+g3rs-arch-config-checks.workspace = true
+g3rs-arch-file-tree-checks.workspace = true
+g3rs-arch-ingestion.workspace = true
+g3rs-arch-source-checks.workspace = true
+g3rs-cargo-config-checks.workspace = true
+g3rs-cargo-filetree-checks.workspace = true
+g3rs-cargo-ingestion.workspace = true
+g3rs-clippy-config-checks.workspace = true
+g3rs-clippy-filetree-checks.workspace = true
+g3rs-clippy-ingestion.workspace = true
+g3rs-code-config-checks.workspace = true
+g3rs-code-file-tree-checks.workspace = true
+g3rs-code-ingestion.workspace = true
+g3rs-code-source-checks.workspace = true
+g3rs-deps-config-checks.workspace = true
+g3rs-deps-filetree-checks.workspace = true
+g3rs-deps-ingestion.workspace = true
+g3rs-deny-config-checks.workspace = true
+g3rs-deny-filetree-checks.workspace = true
+g3rs-deny-ingestion.workspace = true
+g3rs-fmt-config-checks.workspace = true
+g3rs-fmt-filetree-checks.workspace = true
+g3rs-fmt-ingestion.workspace = true
+g3rs-garde-config-checks.workspace = true
+g3rs-garde-ingestion.workspace = true
+g3rs-garde-source-checks.workspace = true
+g3rs-hooks-config-checks.workspace = true
+g3rs-hooks-file-tree-checks.workspace = true
+g3rs-hooks-ingestion.workspace = true
+g3rs-hooks-source-checks.workspace = true
+g3rs-release-config-checks.workspace = true
+g3rs-release-filetree-checks.workspace = true
+g3rs-release-ingestion.workspace = true
+g3rs-release-source-checks.workspace = true
+g3rs-test-config-checks.workspace = true
+g3rs-test-file-tree-checks.workspace = true
+g3rs-test-ingestion.workspace = true
+g3rs-test-source-checks.workspace = true
+g3rs-toolchain-config-checks.workspace = true
+g3rs-toolchain-filetree-checks.workspace = true
+g3rs-toolchain-ingestion.workspace = true
+g3rs-topology-file-tree-checks.workspace = true
+g3rs-topology-ingestion.workspace = true
+
+[dev-dependencies]
+tempfile = "3.18.0"
+
+[lints]
+workspace = true
