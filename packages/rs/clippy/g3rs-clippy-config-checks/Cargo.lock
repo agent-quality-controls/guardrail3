@@ -56,6 +56,7 @@ dependencies = [
  "g3rs-clippy-config-checks-types",
  "guardrail3-check-types",
  "guardrail3-domain-modules",
+ "toml",
 ]
 
 [[package]]
@@ -70,6 +71,7 @@ name = "g3rs-clippy-types"
 version = "0.1.0"
 dependencies = [
  "clippy-toml-parser",
+ "toml",
 ]
 
 [[package]]

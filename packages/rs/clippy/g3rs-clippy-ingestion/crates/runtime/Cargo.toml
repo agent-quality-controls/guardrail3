@@ -6,7 +6,6 @@ description = "Runtime implementation for g3rs clippy ingestion"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
-readme = "README.md"
 keywords = ["guardrail3", "clippy", "ingestion", "rust"]
 categories = ["development-tools"]
 
@@ -22,13 +21,17 @@ workspace = true
 shared = true
 
 [dependencies]
+cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
 g3rs-clippy-types = { path = "../../../g3rs-clippy-types", version = "0.1.0" }
 g3rs-clippy-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+glob = "0.3"
+toml = "0.8"
 
 [dev-dependencies]
 g3rs-clippy-config-checks = { path = "../../../g3rs-clippy-config-checks" }
+g3rs-clippy-filetree-checks = { path = "../../../g3rs-clippy-filetree-checks" }
 g3rs-clippy-ingestion-assertions = { path = "../assertions" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 tempfile = "3"

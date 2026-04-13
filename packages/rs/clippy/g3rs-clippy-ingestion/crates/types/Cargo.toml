@@ -6,7 +6,6 @@ description = "Public types for g3rs clippy ingestion"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
-readme = "README.md"
 keywords = ["guardrail3", "clippy", "ingestion", "rust"]
 categories = ["development-tools"]
 

@@ -6,8 +6,23 @@ mod rs_clippy_config_05_excessive_nesting_threshold;
 mod rs_clippy_config_06_test_relaxations;
 mod rs_clippy_config_07_cognitive_complexity_threshold;
 mod rs_clippy_config_08_type_complexity_threshold;
+mod rs_clippy_config_09_missing_method_ban;
+mod rs_clippy_config_10_missing_type_ban;
+mod rs_clippy_config_11_extra_method_ban;
+mod rs_clippy_config_12_extra_type_ban;
+mod rs_clippy_config_13_ban_reason_quality;
+mod rs_clippy_config_14_library_global_state;
+mod rs_clippy_config_15_avoid_breaking_exported_api;
+mod rs_clippy_config_16_duplicate_bans;
+mod rs_clippy_config_17_unknown_keys;
+mod rs_clippy_config_18_macro_bans;
+mod rs_clippy_config_19_policy_context_parseable;
+mod rs_clippy_config_20_forbid_clippy_conf_dir_override;
+mod rs_clippy_config_21_config_parseable;
 mod run;
 mod support;
+#[cfg(test)]
+mod test_support;
 
 #[cfg(feature = "checks")]
 pub use run::check;
