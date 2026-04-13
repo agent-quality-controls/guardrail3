@@ -1,16 +1,21 @@
-use g3rs_code_config_checks_types::{
-    G3RsCodeConfigChecksInput, G3RsCodeConfigFile, G3RsCodeConfigFileKind,
-};
+use g3rs_code_config_checks_types::{G3RsCodeConfigChecksInput, G3RsCodeExceptionComment};
 use guardrail3_check_types::G3CheckResult;
 
-pub(super) fn run_check(files: Vec<G3RsCodeConfigFile>) -> Vec<G3CheckResult> {
-    crate::run::check(&G3RsCodeConfigChecksInput { files })
+pub(super) fn run_check(exception_comments: Vec<G3RsCodeExceptionComment>) -> Vec<G3CheckResult> {
+    crate::run::check(&G3RsCodeConfigChecksInput {
+        files: Vec::new(),
+        exception_comments,
+    })
 }
 
-pub(super) fn text_file(rel_path: &str, content: &str) -> G3RsCodeConfigFile {
-    G3RsCodeConfigFile {
+pub(super) fn exception_comment(
+    rel_path: &str,
+    line: usize,
+    text: &str,
+) -> G3RsCodeExceptionComment {
+    G3RsCodeExceptionComment {
         rel_path: rel_path.to_owned(),
-        content: content.to_owned(),
-        kind: G3RsCodeConfigFileKind::Text,
+        line,
+        text: text.to_owned(),
     }
 }

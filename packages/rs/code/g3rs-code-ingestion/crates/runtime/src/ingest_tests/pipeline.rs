@@ -141,7 +141,7 @@ unsafe_code = \"forbid\"\n\
     );
     write(
         root.join("deny.toml"),
-        "advisories = { ignore = [] } // EXCEPTION: temporary advisory hold\n",
+        "advisories = { ignore = [] }\n# EXCEPTION: temporary advisory hold\n",
     );
     write(
         root.join("crates/core/Cargo.toml"),
@@ -191,7 +191,7 @@ quoted = \"# EXCEPTION: not real\"\n\
     );
     write(
         root.join("deny.toml"),
-        "value = \"// EXCEPTION: still not real\"\n// temporary note only\n",
+        "value = \"// EXCEPTION: still not real\"\n# temporary note only\n",
     );
     write(
         root.join("crates/core/Cargo.toml"),

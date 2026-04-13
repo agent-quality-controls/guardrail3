@@ -1,12 +1,12 @@
 use g3rs_code_config_checks_assertions::rs_code_config_07_exception_comment_inventory::assert_inventory_warn;
 
-use super::helpers::{run_check, text_file};
+use super::helpers::{exception_comment, run_check};
 
 #[test]
 fn emits_warn_for_each_exception_comment() {
     let results = run_check(vec![
-        text_file("deny.toml", "\n\n\n# EXCEPTION: temporary\n"),
-        text_file("Cargo.toml", "\n\n\n\n\n\n\n// EXCEPTION: another\n"),
+        exception_comment("deny.toml", 4, "# EXCEPTION: temporary"),
+        exception_comment("Cargo.toml", 8, "// EXCEPTION: another"),
     ]);
 
     assert_eq!(results.len(), 2, "{results:#?}");

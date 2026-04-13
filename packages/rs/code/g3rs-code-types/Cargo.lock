@@ -26,6 +26,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "clippy-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-runtime",
+]
+
+[[package]]
+name = "clippy-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "clippy-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "clippy-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
+name = "deny-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "deny-toml-parser-runtime",
+]
+
+[[package]]
+name = "deny-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "deny-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "deny-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -36,6 +82,34 @@ name = "g3rs-code-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "clippy-toml-parser",
+ "deny-toml-parser",
+ "guardrail3-rs-toml-parser",
+ "rust-toolchain-toml-parser",
+ "rustfmt-toml-parser",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
 ]
 
 [[package]]
@@ -76,6 +150,52 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-runtime",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
+name = "rustfmt-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "rustfmt-toml-parser-runtime",
+]
+
+[[package]]
+name = "rustfmt-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "rustfmt-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "rustfmt-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
 ]
 
 [[package]]
