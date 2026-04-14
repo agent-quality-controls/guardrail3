@@ -1,13 +1,20 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::path::{Component, Path};
 
 use cargo_toml_parser::{CargoToml, Dependency};
-use g3rs_apparch_ingestion_types::{G3RsApparchConfigChecksInput, G3RsApparchIngestionError, G3RsApparchSourceChecksInput};
+use g3rs_apparch_ingestion_types::{
+    G3RsApparchConfigChecksInput, G3RsApparchIngestionError, G3RsApparchSourceChecksInput,
+};
 use g3rs_apparch_types::{
-    G3RsApparchConfigChecksInput as PublicConfigInput, G3RsApparchCrate, G3RsApparchDependencyEdge,
-    G3RsApparchLayer, G3RsApparchPublicTrait, G3RsApparchSourceChecksInput as PublicSourceInput,
+    G3RsApparchConfigChecksInput as PublicConfigInput, G3RsApparchCrate,
+    G3RsApparchDependencyEdge, G3RsApparchDependencyKind, G3RsApparchExternalDependency,
+    G3RsApparchLayer, G3RsApparchPatchBypass, G3RsApparchPatchKind, G3RsApparchPublicItem,
+    G3RsApparchPublicItemKind, G3RsApparchRustPolicyState,
+    G3RsApparchSourceChecksInput as PublicSourceInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use glob::Pattern;
+use guardrail3_rs_toml_parser::from_path as parse_guardrail3_rs_toml;
 
 use crate::view::CrawlView;
 
@@ -17,10 +24,15 @@ pub fn ingest_for_config_checks(
     let view = CrawlView::new(crawl);
     let workspace = load_workspace_root(&view)?;
     let records = collect_workspace_crates(&view, &workspace)?;
+    let dependencies = collect_dependency_collections(&records, &workspace.cargo);
+    let patch_bypasses = collect_patch_bypasses(&view, &records, &workspace.cargo);
 
     Ok(PublicConfigInput {
         crates: records.iter().map(|record| record.krate.clone()).collect(),
-        dependency_edges: collect_dependency_edges(&records, &workspace.cargo),
+        dependency_edges: dependencies.internal_edges,
+        external_dependencies: dependencies.external_dependencies,
+        patch_bypasses,
+        rust_policy: workspace.rust_policy,
     })
 }
 
@@ -31,26 +43,33 @@ pub fn ingest_for_source_checks(
     let workspace = load_workspace_root(&view)?;
     let records = collect_workspace_crates(&view, &workspace)?;
 
-    let mut public_traits = Vec::new();
+    let mut public_items = Vec::new();
     for record in &records {
-        public_traits.extend(collect_public_traits_for_crate(&view, record)?);
+        public_items.extend(collect_public_items_for_crate(&view, record)?);
     }
 
     Ok(PublicSourceInput {
         crates: records.iter().map(|record| record.krate.clone()).collect(),
-        public_traits,
+        public_items,
     })
 }
 
 #[derive(Debug, Clone)]
 struct WorkspaceRoot {
     cargo: CargoToml,
+    rust_policy: G3RsApparchRustPolicyState,
 }
 
 #[derive(Debug, Clone)]
 struct CrateRecord {
     krate: G3RsApparchCrate,
     cargo: CargoToml,
+}
+
+#[derive(Debug, Default)]
+struct DependencyCollections {
+    internal_edges: Vec<G3RsApparchDependencyEdge>,
+    external_dependencies: Vec<G3RsApparchExternalDependency>,
 }
 
 fn load_workspace_root(view: &CrawlView<'_>) -> Result<WorkspaceRoot, G3RsApparchIngestionError> {
@@ -78,7 +97,36 @@ fn load_workspace_root(view: &CrawlView<'_>) -> Result<WorkspaceRoot, G3RsApparc
         });
     }
 
-    Ok(WorkspaceRoot { cargo })
+    Ok(WorkspaceRoot {
+        cargo,
+        rust_policy: load_rust_policy(view),
+    })
+}
+
+fn load_rust_policy(view: &CrawlView<'_>) -> G3RsApparchRustPolicyState {
+    let Some(entry) = view.entry("guardrail3-rs.toml") else {
+        return G3RsApparchRustPolicyState::Missing;
+    };
+    let rel_path = "guardrail3-rs.toml".to_owned();
+    if !entry.readable {
+        return G3RsApparchRustPolicyState::Unreadable {
+            rel_path,
+            reason: "file is not readable".to_owned(),
+        };
+    }
+
+    match parse_guardrail3_rs_toml(&entry.path.abs_path) {
+        Ok(parsed) => G3RsApparchRustPolicyState::Parsed {
+            rel_path,
+            profile: parsed.profile,
+            allowed_deps: parsed.allowed_deps,
+            waivers: parsed.waivers,
+        },
+        Err(error) => G3RsApparchRustPolicyState::ParseError {
+            rel_path,
+            reason: error.to_string(),
+        },
+    }
 }
 
 fn collect_workspace_crates(
@@ -96,10 +144,12 @@ fn collect_workspace_crates(
             continue;
         }
         let cargo_rel_path = CrawlView::join_rel(&rel_dir, "Cargo.toml");
-        let entry = view.entry(&cargo_rel_path).ok_or_else(|| G3RsApparchIngestionError::NormalizationFailed {
-            path: std::path::PathBuf::from(cargo_rel_path.clone()),
-            reason: "workspace member pattern did not resolve to a Cargo.toml".to_owned(),
-        })?;
+        let entry = view
+            .entry(&cargo_rel_path)
+            .ok_or_else(|| G3RsApparchIngestionError::NormalizationFailed {
+                path: std::path::PathBuf::from(cargo_rel_path.clone()),
+                reason: "workspace member pattern did not resolve to a Cargo.toml".to_owned(),
+            })?;
         if !entry.readable {
             return Err(G3RsApparchIngestionError::Unreadable {
                 path: entry.path.abs_path.clone(),
@@ -178,7 +228,11 @@ fn resolve_member_pattern(
 ) -> Result<Vec<String>, G3RsApparchIngestionError> {
     let member = normalize_member_pattern(member);
     if member.is_empty() {
-        return Ok(view.file_exists("Cargo.toml").then_some(String::new()).into_iter().collect());
+        return Ok(view
+            .file_exists("Cargo.toml")
+            .then_some(String::new())
+            .into_iter()
+            .collect());
     }
 
     let has_glob = member.contains('*') || member.contains('?') || member.contains('[');
@@ -219,10 +273,10 @@ fn normalize_member_pattern(member: &str) -> String {
     }
 }
 
-fn collect_dependency_edges(
+fn collect_dependency_collections(
     records: &[CrateRecord],
     root_cargo: &CargoToml,
-) -> Vec<G3RsApparchDependencyEdge> {
+) -> DependencyCollections {
     let crates_by_name = records
         .iter()
         .map(|record| (record.krate.crate_name.clone(), record.krate.cargo_rel_path.clone()))
@@ -232,74 +286,112 @@ fn collect_dependency_edges(
         .as_ref()
         .map(|workspace| &workspace.dependencies);
 
-    let mut edges = BTreeSet::new();
+    let mut internal_edges = BTreeSet::new();
+    let mut external_dependencies = BTreeSet::new();
     for record in records {
-        collect_edges_from_table(
+        collect_dependency_table(
             &record.krate.cargo_rel_path,
             &record.cargo.dependencies,
             workspace_dependencies,
             &crates_by_name,
-            &mut edges,
+            G3RsApparchDependencyKind::Dependency,
+            &mut internal_edges,
+            &mut external_dependencies,
         );
-        collect_edges_from_table(
+        collect_dependency_table(
             &record.krate.cargo_rel_path,
             &record.cargo.dev_dependencies,
             workspace_dependencies,
             &crates_by_name,
-            &mut edges,
+            G3RsApparchDependencyKind::DevDependency,
+            &mut internal_edges,
+            &mut external_dependencies,
         );
-        collect_edges_from_table(
+        collect_dependency_table(
             &record.krate.cargo_rel_path,
             &record.cargo.build_dependencies,
             workspace_dependencies,
             &crates_by_name,
-            &mut edges,
+            G3RsApparchDependencyKind::BuildDependency,
+            &mut internal_edges,
+            &mut external_dependencies,
         );
         for target in record.cargo.target.values() {
-            collect_edges_from_table(
+            collect_dependency_table(
                 &record.krate.cargo_rel_path,
                 &target.dependencies,
                 workspace_dependencies,
                 &crates_by_name,
-                &mut edges,
+                G3RsApparchDependencyKind::TargetDependency,
+                &mut internal_edges,
+                &mut external_dependencies,
             );
-            collect_edges_from_table(
+            collect_dependency_table(
                 &record.krate.cargo_rel_path,
                 &target.dev_dependencies,
                 workspace_dependencies,
                 &crates_by_name,
-                &mut edges,
+                G3RsApparchDependencyKind::TargetDevDependency,
+                &mut internal_edges,
+                &mut external_dependencies,
             );
-            collect_edges_from_table(
+            collect_dependency_table(
                 &record.krate.cargo_rel_path,
                 &target.build_dependencies,
                 workspace_dependencies,
                 &crates_by_name,
-                &mut edges,
+                G3RsApparchDependencyKind::TargetBuildDependency,
+                &mut internal_edges,
+                &mut external_dependencies,
             );
         }
     }
 
-    edges
-        .into_iter()
-        .map(|(from_cargo_rel_path, to_cargo_rel_path)| G3RsApparchDependencyEdge {
-            from_cargo_rel_path,
-            to_cargo_rel_path,
-        })
-        .collect()
+    DependencyCollections {
+        internal_edges: internal_edges
+            .into_iter()
+            .map(|(from_cargo_rel_path, to_cargo_rel_path, dep_name, kind)| G3RsApparchDependencyEdge {
+                from_cargo_rel_path,
+                to_cargo_rel_path,
+                dep_name,
+                kind,
+            })
+            .collect(),
+        external_dependencies: external_dependencies
+            .into_iter()
+            .map(|(cargo_rel_path, dep_name, kind)| G3RsApparchExternalDependency {
+                cargo_rel_path,
+                dep_name,
+                kind,
+            })
+            .collect(),
+    }
 }
 
-fn collect_edges_from_table(
+fn collect_dependency_table(
     from_cargo_rel_path: &str,
     dependencies: &BTreeMap<String, Dependency>,
     workspace_dependencies: Option<&BTreeMap<String, Dependency>>,
     crates_by_name: &BTreeMap<String, String>,
-    edges: &mut BTreeSet<(String, String)>,
+    kind: G3RsApparchDependencyKind,
+    internal_edges: &mut BTreeSet<(String, String, String, G3RsApparchDependencyKind)>,
+    external_dependencies: &mut BTreeSet<(String, String, G3RsApparchDependencyKind)>,
 ) {
     for (dep_name, dependency) in dependencies {
         let package_name = dependency_package(dep_name, dependency, workspace_dependencies);
         if let Some(to_cargo_rel_path) = crates_by_name.get(&package_name) {
-            let _ = edges.insert((from_cargo_rel_path.to_owned(), to_cargo_rel_path.clone()));
+            let _ = internal_edges.insert((
+                from_cargo_rel_path.to_owned(),
+                to_cargo_rel_path.clone(),
+                package_name,
+                kind,
+            ));
+        } else {
+            let _ = external_dependencies.insert((
+                from_cargo_rel_path.to_owned(),
+                package_name,
+                kind,
+            ));
         }
     }
 }
@@ -322,17 +414,120 @@ fn dependency_package(
     }
 }
 
-fn collect_public_traits_for_crate(
+fn collect_patch_bypasses(
+    view: &CrawlView<'_>,
+    records: &[CrateRecord],
+    root_cargo: &CargoToml,
+) -> Vec<G3RsApparchPatchBypass> {
+    let records_by_cargo_rel_path = records
+        .iter()
+        .map(|record| (record.krate.cargo_rel_path.clone(), &record.krate))
+        .collect::<BTreeMap<_, _>>();
+    let mut patch_bypasses = BTreeSet::new();
+
+    for (registry, patch_table) in &root_cargo.patch {
+        for (name, dependency) in patch_table {
+            let Some(target_cargo_rel_path) = resolve_dependency_to_cargo_rel_path(view, dependency) else {
+                continue;
+            };
+            let Some(target) = records_by_cargo_rel_path.get(&target_cargo_rel_path).copied() else {
+                continue;
+            };
+            let _ = patch_bypasses.insert((
+                format!("patch.{registry}.{name}"),
+                G3RsApparchPatchKind::Patch,
+                target.cargo_rel_path.clone(),
+                target.rel_dir.clone(),
+                target.layer,
+            ));
+        }
+    }
+
+    for (name, dependency) in &root_cargo.replace {
+        let Some(target_cargo_rel_path) = resolve_dependency_to_cargo_rel_path(view, dependency) else {
+            continue;
+        };
+        let Some(target) = records_by_cargo_rel_path.get(&target_cargo_rel_path).copied() else {
+            continue;
+        };
+        let _ = patch_bypasses.insert((
+            format!("replace.{name}"),
+            G3RsApparchPatchKind::Replace,
+            target.cargo_rel_path.clone(),
+            target.rel_dir.clone(),
+            target.layer,
+        ));
+    }
+
+    patch_bypasses
+        .into_iter()
+        .map(
+            |(key, kind, target_cargo_rel_path, target_rel_dir, target_layer)| G3RsApparchPatchBypass {
+                cargo_rel_path: "Cargo.toml".to_owned(),
+                key,
+                kind,
+                target_cargo_rel_path,
+                target_rel_dir,
+                target_layer,
+            },
+        )
+        .collect()
+}
+
+fn resolve_dependency_to_cargo_rel_path(view: &CrawlView<'_>, dependency: &Dependency) -> Option<String> {
+    let Dependency::Detailed(detail) = dependency else {
+        return None;
+    };
+    let path = detail.path.as_deref()?;
+    let normalized = normalize_relative_path(path);
+    let direct = if normalized.is_empty() {
+        "Cargo.toml".to_owned()
+    } else {
+        normalized.clone()
+    };
+    if view.file_exists(&direct) {
+        return Some(direct);
+    }
+
+    let cargo_rel_path = CrawlView::join_rel(&normalized, "Cargo.toml");
+    view.file_exists(&cargo_rel_path).then_some(cargo_rel_path)
+}
+
+fn normalize_relative_path(path: &str) -> String {
+    let mut normalized = Vec::new();
+    for component in Path::new(path).components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                let _ = normalized.pop();
+            }
+            Component::Normal(part) => normalized.push(part.to_string_lossy().into_owned()),
+            Component::RootDir | Component::Prefix(_) => {
+                return path.replace('\\', "/");
+            }
+        }
+    }
+    normalized.join("/")
+}
+
+fn collect_public_items_for_crate(
     view: &CrawlView<'_>,
     record: &CrateRecord,
-) -> Result<Vec<G3RsApparchPublicTrait>, G3RsApparchIngestionError> {
+) -> Result<Vec<G3RsApparchPublicItem>, G3RsApparchIngestionError> {
     let entrypoints = determine_entrypoints(view, record);
-    let mut public_traits = Vec::new();
+    let mut public_items = Vec::new();
     let mut visited = BTreeMap::new();
     for entrypoint in entrypoints {
-        walk_module_file(view, &entrypoint, &record.krate.cargo_rel_path, &mut visited, true, &mut public_traits)?;
+        walk_module_file(
+            view,
+            &entrypoint,
+            &record.krate.cargo_rel_path,
+            &mut visited,
+            true,
+            &mut public_items,
+        )?;
     }
-    Ok(public_traits)
+    Ok(public_items)
 }
 
 fn determine_entrypoints(view: &CrawlView<'_>, record: &CrateRecord) -> Vec<String> {
@@ -375,7 +570,7 @@ fn walk_module_file(
     cargo_rel_path: &str,
     visited: &mut BTreeMap<String, bool>,
     public_module: bool,
-    public_traits: &mut Vec<G3RsApparchPublicTrait>,
+    public_items: &mut Vec<G3RsApparchPublicItem>,
 ) -> Result<(), G3RsApparchIngestionError> {
     match visited.get(rel_path).copied() {
         Some(true) => return Ok(()),
@@ -396,10 +591,12 @@ fn walk_module_file(
             reason: "file is not readable".to_owned(),
         });
     }
-    let content = view.read_file(rel_path).map_err(|error| G3RsApparchIngestionError::Unreadable {
-        path: entry.path.abs_path.clone(),
-        reason: error.to_string(),
-    })?;
+    let content = view
+        .read_file(rel_path)
+        .map_err(|error| G3RsApparchIngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: error.to_string(),
+        })?;
     let parsed = syn::parse_file(&content).map_err(|error| G3RsApparchIngestionError::ParseFailed {
         path: entry.path.abs_path.clone(),
         reason: error.to_string(),
@@ -407,7 +604,15 @@ fn walk_module_file(
     if is_cfg_test_only(&parsed.attrs) {
         return Ok(());
     }
-    walk_items(view, rel_path, cargo_rel_path, &parsed.items, visited, public_module, public_traits)
+    walk_items(
+        view,
+        rel_path,
+        cargo_rel_path,
+        &parsed.items,
+        visited,
+        public_module,
+        public_items,
+    )
 }
 
 fn walk_items(
@@ -417,7 +622,7 @@ fn walk_items(
     items: &[syn::Item],
     visited: &mut BTreeMap<String, bool>,
     public_module: bool,
-    public_traits: &mut Vec<G3RsApparchPublicTrait>,
+    public_items: &mut Vec<G3RsApparchPublicItem>,
 ) -> Result<(), G3RsApparchIngestionError> {
     for item in items {
         if is_cfg_test_only(item.attrs()) {
@@ -426,26 +631,86 @@ fn walk_items(
         match item {
             syn::Item::Trait(item_trait) => {
                 if public_module && matches!(item_trait.vis, syn::Visibility::Public(_)) {
-                    public_traits.push(G3RsApparchPublicTrait {
+                    public_items.push(G3RsApparchPublicItem {
                         cargo_rel_path: cargo_rel_path.to_owned(),
                         rel_path: rel_path.to_owned(),
-                        trait_name: item_trait.ident.to_string(),
+                        item_name: item_trait.ident.to_string(),
+                        owner_name: None,
+                        kind: G3RsApparchPublicItemKind::Trait,
+                    });
+                }
+            }
+            syn::Item::Fn(item_fn) => {
+                if public_module && matches!(item_fn.vis, syn::Visibility::Public(_)) {
+                    public_items.push(G3RsApparchPublicItem {
+                        cargo_rel_path: cargo_rel_path.to_owned(),
+                        rel_path: rel_path.to_owned(),
+                        item_name: item_fn.sig.ident.to_string(),
+                        owner_name: None,
+                        kind: G3RsApparchPublicItemKind::FreeFunction,
+                    });
+                }
+            }
+            syn::Item::Impl(item_impl) => {
+                if !public_module || item_impl.trait_.is_some() {
+                    continue;
+                }
+                let owner_name = self_type_name(item_impl.self_ty.as_ref());
+                for impl_item in &item_impl.items {
+                    let syn::ImplItem::Fn(method) = impl_item else {
+                        continue;
+                    };
+                    if !matches!(method.vis, syn::Visibility::Public(_)) {
+                        continue;
+                    }
+                    public_items.push(G3RsApparchPublicItem {
+                        cargo_rel_path: cargo_rel_path.to_owned(),
+                        rel_path: rel_path.to_owned(),
+                        item_name: method.sig.ident.to_string(),
+                        owner_name: owner_name.clone(),
+                        kind: G3RsApparchPublicItemKind::InherentMethod,
                     });
                 }
             }
             syn::Item::Mod(item_mod) => {
                 let child_public = public_module;
                 if let Some((_, nested_items)) = &item_mod.content {
-                    walk_items(view, rel_path, cargo_rel_path, nested_items, visited, child_public, public_traits)?;
+                    walk_items(
+                        view,
+                        rel_path,
+                        cargo_rel_path,
+                        nested_items,
+                        visited,
+                        child_public,
+                        public_items,
+                    )?;
                 } else {
                     let module_path = resolve_module_path(view, rel_path, item_mod)?;
-                    walk_module_file(view, &module_path, cargo_rel_path, visited, child_public, public_traits)?;
+                    walk_module_file(
+                        view,
+                        &module_path,
+                        cargo_rel_path,
+                        visited,
+                        child_public,
+                        public_items,
+                    )?;
                 }
             }
             _ => {}
         }
     }
     Ok(())
+}
+
+fn self_type_name(self_ty: &syn::Type) -> Option<String> {
+    match self_ty {
+        syn::Type::Path(type_path) => type_path
+            .path
+            .segments
+            .last()
+            .map(|segment| segment.ident.to_string()),
+        _ => None,
+    }
 }
 
 fn resolve_module_path(

@@ -1,6 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchLayer, G3RsApparchSourceChecksInput};
+use g3rs_apparch_types::{
+    G3RsApparchCrate, G3RsApparchLayer, G3RsApparchPublicItemKind, G3RsApparchSourceChecksInput,
+};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-APPARCH-SOURCE-04";
@@ -12,7 +14,11 @@ pub(crate) fn check(
 ) {
     let mut crates_with_traits = BTreeSet::new();
 
-    for fact in &input.public_traits {
+    for fact in input
+        .public_items
+        .iter()
+        .filter(|fact| fact.kind == G3RsApparchPublicItemKind::Trait)
+    {
         let Some(krate) = crates_by_path.get(&fact.cargo_rel_path).copied() else {
             continue;
         };
@@ -29,11 +35,11 @@ pub(crate) fn check(
             format!(
                 "io crate `{}` defines public trait `{}`",
                 crate::run::display_crate(krate),
-                fact.trait_name
+                fact.item_name
             ),
             format!(
                 "io crates must not define public traits. Move trait `{}` into `types/` so both logic and io/outbound can share the contract without leaking transport or implementation concerns.",
-                fact.trait_name
+                fact.item_name
             ),
             Some(fact.rel_path.clone()),
             None,

@@ -130,6 +130,7 @@ dependencies = [
  "g3rs-apparch-config-checks-types",
  "g3rs-apparch-types",
  "guardrail3-check-types",
+ "guardrail3-reason-policy",
 ]
 
 [[package]]
@@ -159,6 +160,7 @@ dependencies = [
  "g3rs-workspace-crawl",
  "glob",
  "guardrail3-check-types",
+ "guardrail3-rs-toml-parser",
  "syn",
  "tempfile",
 ]
@@ -197,6 +199,9 @@ dependencies = [
 [[package]]
 name = "g3rs-apparch-types"
 version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser",
+]
 
 [[package]]
 name = "g3rs-workspace-crawl"
@@ -254,6 +259,33 @@ dependencies = [
 [[package]]
 name = "guardrail3-check-types"
 version = "0.1.0"
+
+[[package]]
+name = "guardrail3-reason-policy"
+version = "0.0.0"
+
+[[package]]
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "hashbrown"

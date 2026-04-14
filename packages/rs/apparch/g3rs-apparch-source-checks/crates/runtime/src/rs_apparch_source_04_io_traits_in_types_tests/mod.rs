@@ -1,5 +1,6 @@
 use g3rs_apparch_types::{
-    G3RsApparchCrate, G3RsApparchLayer, G3RsApparchPublicTrait, G3RsApparchSourceChecksInput,
+    G3RsApparchCrate, G3RsApparchLayer, G3RsApparchPublicItem, G3RsApparchPublicItemKind,
+    G3RsApparchSourceChecksInput,
 };
 use guardrail3_check_types::G3Severity;
 
@@ -16,10 +17,12 @@ fn crate_input(layer: G3RsApparchLayer, cargo_rel_path: &str) -> G3RsApparchCrat
 fn io_public_trait_fires() {
     let input = G3RsApparchSourceChecksInput {
         crates: vec![crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml")],
-        public_traits: vec![G3RsApparchPublicTrait {
+        public_items: vec![G3RsApparchPublicItem {
             cargo_rel_path: "io/outbound/db/Cargo.toml".to_owned(),
             rel_path: "io/outbound/db/src/lib.rs".to_owned(),
-            trait_name: "DbPort".to_owned(),
+            item_name: "DbPort".to_owned(),
+            owner_name: None,
+            kind: G3RsApparchPublicItemKind::Trait,
         }],
     };
 
@@ -37,10 +40,12 @@ fn io_public_trait_fires() {
 fn io_inbound_public_trait_fires() {
     let input = G3RsApparchSourceChecksInput {
         crates: vec![crate_input(G3RsApparchLayer::IoInbound, "io/inbound/http/Cargo.toml")],
-        public_traits: vec![G3RsApparchPublicTrait {
+        public_items: vec![G3RsApparchPublicItem {
             cargo_rel_path: "io/inbound/http/Cargo.toml".to_owned(),
             rel_path: "io/inbound/http/src/lib.rs".to_owned(),
-            trait_name: "InboundPort".to_owned(),
+            item_name: "InboundPort".to_owned(),
+            owner_name: None,
+            kind: G3RsApparchPublicItemKind::Trait,
         }],
     };
 
@@ -58,10 +63,12 @@ fn io_inbound_public_trait_fires() {
 fn logic_public_trait_stays_quiet() {
     let input = G3RsApparchSourceChecksInput {
         crates: vec![crate_input(G3RsApparchLayer::Logic, "logic/service/Cargo.toml")],
-        public_traits: vec![G3RsApparchPublicTrait {
+        public_items: vec![G3RsApparchPublicItem {
             cargo_rel_path: "logic/service/Cargo.toml".to_owned(),
             rel_path: "logic/service/src/lib.rs".to_owned(),
-            trait_name: "ServiceRule".to_owned(),
+            item_name: "ServiceRule".to_owned(),
+            owner_name: None,
+            kind: G3RsApparchPublicItemKind::Trait,
         }],
     };
 
@@ -73,7 +80,7 @@ fn logic_public_trait_stays_quiet() {
 fn clean_io_crate_emits_inventory() {
     let input = G3RsApparchSourceChecksInput {
         crates: vec![crate_input(G3RsApparchLayer::IoInbound, "io/inbound/http/Cargo.toml")],
-        public_traits: Vec::new(),
+        public_items: Vec::new(),
     };
 
     let results = crate::check(&input);
@@ -90,7 +97,7 @@ fn clean_io_crate_emits_inventory() {
 fn clean_outbound_io_crate_emits_inventory() {
     let input = G3RsApparchSourceChecksInput {
         crates: vec![crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml")],
-        public_traits: Vec::new(),
+        public_items: Vec::new(),
     };
 
     let results = crate::check(&input);

@@ -18,6 +18,7 @@ pub(crate) fn check(
     let violating = dependency_edges
         .iter()
         .filter(|edge| edge.from_cargo_rel_path == krate.cargo_rel_path)
+        .filter(|edge| !edge.kind.is_dev())
         .filter_map(|edge| crates_by_path.get(&edge.to_cargo_rel_path).copied())
         .filter(|target| {
             matches!(

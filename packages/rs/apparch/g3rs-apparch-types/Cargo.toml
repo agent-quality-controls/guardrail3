@@ -12,6 +12,9 @@ categories = ["development-tools"]
 [package.metadata.guardrail3]
 shared = true
 
+[dependencies]
+guardrail3-rs-toml-parser = { path = "../../../parsers/guardrail3-rs-toml-parser", features = ["api"] }
+
 [lints.rust]
 warnings = "deny"
 unsafe_code = "forbid"

@@ -158,8 +158,18 @@ types-core = { path = "../../../types/core", package = "types-core" }
             .filter(|edge| edge.from_cargo_rel_path == "io/outbound/db/Cargo.toml"
                 && edge.to_cargo_rel_path == "logic/shared/Cargo.toml")
             .count(),
-        1
+        2
     );
+    assert!(input.dependency_edges.iter().any(|edge| {
+        edge.from_cargo_rel_path == "io/outbound/db/Cargo.toml"
+            && edge.to_cargo_rel_path == "logic/shared/Cargo.toml"
+            && edge.kind.label() == "build-dependencies"
+    }));
+    assert!(input.dependency_edges.iter().any(|edge| {
+        edge.from_cargo_rel_path == "io/outbound/db/Cargo.toml"
+            && edge.to_cargo_rel_path == "logic/shared/Cargo.toml"
+            && edge.kind.label() == "target.*.dev-dependencies"
+    }));
     assert!(input.dependency_edges.iter().any(|edge| {
         edge.from_cargo_rel_path == "io/outbound/db/Cargo.toml"
             && edge.to_cargo_rel_path == "types/core/Cargo.toml"
@@ -226,9 +236,9 @@ fn source_ingest_collects_public_traits_from_nested_modules() {
     let input = crate::ingest_for_source_checks(&super::crawl_workspace(root.path())).expect("source ingest");
 
     assert_eq!(input.crates.len(), 1);
-    assert_eq!(input.public_traits.len(), 1);
-    assert_eq!(input.public_traits[0].rel_path, "io/outbound/db/src/adapter.rs");
-    assert_eq!(input.public_traits[0].trait_name, "DbTrait");
+    assert_eq!(input.public_items.len(), 1);
+    assert_eq!(input.public_items[0].rel_path, "io/outbound/db/src/adapter.rs");
+    assert_eq!(input.public_items[0].item_name, "DbTrait");
 }
 
 #[test]
@@ -248,9 +258,9 @@ fn source_ingest_collects_public_trait_from_private_module() {
     let input = crate::ingest_for_source_checks(&super::crawl_workspace(root.path())).expect("source ingest");
 
     assert!(input
-        .public_traits
+        .public_items
         .iter()
-        .any(|fact| fact.rel_path == "io/outbound/db/src/adapter.rs" && fact.trait_name == "HiddenPort"));
+        .any(|fact| fact.rel_path == "io/outbound/db/src/adapter.rs" && fact.item_name == "HiddenPort"));
 }
 
 #[test]
@@ -273,9 +283,9 @@ fn source_ingest_collects_public_trait_reexported_from_private_module() {
     let input = crate::ingest_for_source_checks(&super::crawl_workspace(root.path())).expect("source ingest");
 
     assert!(input
-        .public_traits
+        .public_items
         .iter()
-        .any(|fact| fact.rel_path == "io/outbound/db/src/adapter.rs" && fact.trait_name == "DbTrait"));
+        .any(|fact| fact.rel_path == "io/outbound/db/src/adapter.rs" && fact.item_name == "DbTrait"));
 }
 
 #[test]
@@ -313,9 +323,9 @@ path = "src/a_main.rs"
     let input = crate::ingest_for_source_checks(&super::crawl_workspace(root.path())).expect("source ingest");
 
     assert!(input
-        .public_traits
+        .public_items
         .iter()
-        .any(|fact| fact.rel_path == "io/outbound/db/src/shared.rs" && fact.trait_name == "SharedTrait"));
+        .any(|fact| fact.rel_path == "io/outbound/db/src/shared.rs" && fact.item_name == "SharedTrait"));
 }
 
 #[test]
@@ -343,9 +353,9 @@ path = "src/custom_bin.rs"
     let input = crate::ingest_for_source_checks(&super::crawl_workspace(root.path())).expect("source ingest");
 
     assert!(input
-        .public_traits
+        .public_items
         .iter()
-        .any(|fact| fact.rel_path == "io/outbound/db/src/lib.rs" && fact.trait_name == "LibTrait"));
+        .any(|fact| fact.rel_path == "io/outbound/db/src/lib.rs" && fact.item_name == "LibTrait"));
 }
 
 #[test]
@@ -383,5 +393,5 @@ fn source_ingest_ignores_file_level_cfg_test_module() {
 
     let input = crate::ingest_for_source_checks(&super::crawl_workspace(root.path())).expect("source ingest");
 
-    assert!(input.public_traits.is_empty());
+    assert!(input.public_items.is_empty());
 }
