@@ -16,7 +16,9 @@ fn stays_quiet_for_canonical_library_bans() {
 
 #[test]
 fn errors_when_canonical_library_ban_is_missing() {
-    let deny_toml = canonical_bans_toml("library").replace("\"actix-web\",\n", "");
+    let deny_toml = canonical_bans_toml("library")
+        .replace("\"axum\",\n", "")
+        .replace("\"tokio\",\n", "");
     let results = run(
         &deny_toml,
         Some("library"),
@@ -26,11 +28,19 @@ fn errors_when_canonical_library_ban_is_missing() {
 
     assertions::assert_findings(
         &results,
-        &[assertions::error(
-            "missing canonical ban",
-            "`deny.toml` is missing deny ban `actix-web`.",
-            "deny.toml",
-            false,
-        )],
+        &[
+            assertions::error(
+                "missing canonical ban",
+                "`deny.toml` is missing deny ban `axum`.",
+                "deny.toml",
+                false,
+            ),
+            assertions::error(
+                "missing canonical ban",
+                "`deny.toml` is missing deny ban `tokio`.",
+                "deny.toml",
+                false,
+            ),
+        ],
     );
 }

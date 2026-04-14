@@ -1,6 +1,7 @@
 /// Public ingestion entry point.
 use g3rs_deny_types::{
     G3RsDenySourceChecksInput, G3RsDenyConfigChecksInput, G3RsDenyFileTreeChecksInput,
+    G3RsDenyRustPolicyState,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -30,8 +31,8 @@ pub fn ingest_for_config_checks(
 
     let deny = crate::parse::parse_deny_toml(&entry.path.abs_path)?;
     let deny_rel_path = entry.path.rel_path.clone();
-    let guardrail = read_guardrail_state(crawl);
-    Ok(crate::ingest::assemble(deny_rel_path, deny, &guardrail))
+    let rust_policy = read_rust_policy_state(crawl);
+    Ok(crate::ingest::assemble(deny_rel_path, deny, &rust_policy))
 }
 
 /// Stub source ingestion entry point for the deny family.
@@ -83,36 +84,29 @@ pub fn ingest_for_file_tree_checks(
         }
     }
 
-    if let Some(entry) = crate::select::select_guardrail3_toml(crawl) {
-        if !entry.readable {
-            input_failures.push(crate::ingest::input_failure(
-                "deny policy context is not parseable",
-                entry.path.rel_path.clone(),
-                "Failed to parse root-local guardrail3.toml for deny profile resolution: file is not readable.",
-            ));
-        } else {
-            match crate::parse::parse_raw_toml(&entry.path.abs_path) {
-                Ok(raw_guardrail) => {
-                    if crate::ingest::profile_name_from_guardrail(&raw_guardrail).is_err() {
-                        input_failures.push(crate::ingest::input_failure(
-                            "deny policy context is not parseable",
-                            entry.path.rel_path.clone(),
-                            "Failed to parse root-local guardrail3.toml for deny profile resolution: unsupported policy shape.".to_owned(),
-                        ));
-                    }
-                }
-                Err(IngestionError::ParseFailed { reason, .. }) => input_failures.push(crate::ingest::input_failure(
-                    "deny policy context is not parseable",
+    if let Some(entry) = crate::select::select_guardrail3_rs_toml(crawl) {
+        match crate::parse::parse_rust_policy_state(&entry.path.rel_path, &entry.path.abs_path) {
+            G3RsDenyRustPolicyState::Missing | G3RsDenyRustPolicyState::Parsed { .. } => {}
+            G3RsDenyRustPolicyState::ParseError { reason, .. } => input_failures.push(
+                crate::ingest::input_failure(
+                    "deny rust policy is not parseable",
                     entry.path.rel_path.clone(),
-                    format!("Failed to parse root-local guardrail3.toml for deny profile resolution: {reason}"),
-                )),
-                Err(IngestionError::Unreadable { reason, .. }) => input_failures.push(crate::ingest::input_failure(
-                    "deny policy context is not parseable",
+                    format!(
+                        "Failed to parse root Rust policy `{}` for deny profile resolution: {reason}",
+                        entry.path.rel_path
+                    ),
+                ),
+            ),
+            G3RsDenyRustPolicyState::Unreadable { reason, .. } => input_failures.push(
+                crate::ingest::input_failure(
+                    "deny rust policy is not parseable",
                     entry.path.rel_path.clone(),
-                    format!("Failed to parse root-local guardrail3.toml for deny profile resolution: {reason}"),
-                )),
-                Err(other) => return Err(other),
-            }
+                    format!(
+                        "Failed to parse root Rust policy `{}` for deny profile resolution: {reason}",
+                        entry.path.rel_path
+                    ),
+                ),
+            ),
         }
     }
 
@@ -123,32 +117,9 @@ pub fn ingest_for_file_tree_checks(
     ))
 }
 
-fn read_guardrail_state(crawl: &G3RsWorkspaceCrawl) -> crate::ingest::GuardrailState {
-    let Some(entry) = crate::select::select_guardrail3_toml(crawl) else {
-        return crate::ingest::GuardrailState::default();
+fn read_rust_policy_state(crawl: &G3RsWorkspaceCrawl) -> G3RsDenyRustPolicyState {
+    let Some(entry) = crate::select::select_guardrail3_rs_toml(crawl) else {
+        return G3RsDenyRustPolicyState::Missing;
     };
-    if !entry.readable {
-        return crate::ingest::GuardrailState {
-            profile_name: None,
-            parse_error: true,
-        };
-    }
-
-    let Ok(raw_guardrail) = crate::parse::parse_raw_toml(&entry.path.abs_path) else {
-        return crate::ingest::GuardrailState {
-            profile_name: None,
-            parse_error: true,
-        };
-    };
-    let Ok(profile_name) = crate::ingest::profile_name_from_guardrail(&raw_guardrail) else {
-        return crate::ingest::GuardrailState {
-            profile_name: None,
-            parse_error: true,
-        };
-    };
-
-    crate::ingest::GuardrailState {
-        profile_name,
-        parse_error: false,
-    }
+    crate::parse::parse_rust_policy_state(&entry.path.rel_path, &entry.path.abs_path)
 }

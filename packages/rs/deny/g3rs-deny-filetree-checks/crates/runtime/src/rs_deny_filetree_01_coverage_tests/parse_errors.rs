@@ -39,8 +39,8 @@ fn reports_policy_context_failures_without_hiding_selected_coverage() {
         Some("deny.toml"),
         vec!["deny.toml"],
         vec![(
-            "guardrail3.toml",
-            "Failed to parse root-local guardrail3.toml for deny profile resolution: unsupported policy shape.",
+            "guardrail3-rs.toml",
+            "Failed to parse root Rust policy `guardrail3-rs.toml` for deny profile resolution: invalid policy.",
         )],
     );
     let mut results = Vec::new();
@@ -51,9 +51,9 @@ fn reports_policy_context_failures_without_hiding_selected_coverage() {
         &results,
         &[
             assertions::error(
-                "deny policy context is not parseable",
-                "Failed to parse root-local guardrail3.toml for deny profile resolution: unsupported policy shape.",
-                "guardrail3.toml",
+                "deny rust policy is not parseable",
+                "Failed to parse root Rust policy `guardrail3-rs.toml` for deny profile resolution: invalid policy.",
+                "guardrail3-rs.toml",
                 false,
             ),
             assertions::info(

@@ -3,12 +3,12 @@ use std::collections::BTreeSet;
 use g3rs_deny_config_checks_types::G3RsDenyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{allow_name, expected_bans, join_set};
+use crate::support::{allow_name, expected_bans, join_set, managed_profile_name, rust_policy_valid};
 
 const ID: &str = "RS-DENY-CONFIG-25";
 
 pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    if !input.policy_context_valid {
+    if !rust_policy_valid(input) {
         return;
     }
 
@@ -49,7 +49,7 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         ));
     }
 
-    let expected = expected_bans(input.profile_name.as_deref());
+    let expected = expected_bans(managed_profile_name(input));
     let actual_deny = bans.deny.iter().filter_map(crate::support::ban_name).collect::<BTreeSet<_>>();
     for name in allow_names {
         if expected.contains_key(&name) || actual_deny.contains(&name) {

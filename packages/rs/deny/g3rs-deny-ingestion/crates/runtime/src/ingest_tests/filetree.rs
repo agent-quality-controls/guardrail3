@@ -133,13 +133,13 @@ fn pipeline_reports_selected_deny_parse_failures() {
 }
 
 #[test]
-fn pipeline_reports_policy_context_parse_failures_without_hiding_selected_coverage() {
+fn pipeline_reports_rust_policy_parse_failures_without_hiding_selected_coverage() {
     let temp = tempdir().expect("create temporary workspace");
     let root = temp.path();
     git_init(root);
 
     write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
-    write(root.join("guardrail3.toml"), "[profile =");
+    write(root.join("guardrail3-rs.toml"), "profile = \"invalid\"\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
@@ -149,9 +149,9 @@ fn pipeline_reports_policy_context_parse_failures_without_hiding_selected_covera
         &results,
         &[
             coverage_assertions::error(
-                "deny policy context is not parseable",
-                "Failed to parse root-local guardrail3.toml for deny profile resolution: TOML parse error at line 1, column 10\n  |\n1 | [profile =\n  |          ^\ninvalid table header\nexpected `.`, `]`\n",
-                "guardrail3.toml",
+                "deny rust policy is not parseable",
+                "Failed to parse root Rust policy `guardrail3-rs.toml` for deny profile resolution: invalid guardrail3-rs.toml: TOML parse error at line 1, column 11\n  |\n1 | profile = \"invalid\"\n  |           ^^^^^^^^^\nunknown variant `invalid`, expected `service` or `library`\n",
+                "guardrail3-rs.toml",
                 false,
             ),
             coverage_assertions::info(
@@ -205,7 +205,7 @@ fn pipeline_reports_unreadable_selected_deny_file() {
 }
 
 #[test]
-fn pipeline_reports_unreadable_guardrail_policy_context() {
+fn pipeline_reports_unreadable_rust_policy() {
     use std::os::unix::fs::PermissionsExt;
 
     let temp = tempdir().expect("create temporary workspace");
@@ -213,8 +213,8 @@ fn pipeline_reports_unreadable_guardrail_policy_context() {
     git_init(root);
 
     write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
-    let guardrail_path = root.join("guardrail3.toml");
-    write(&guardrail_path, "[profile]\nname = \"service\"\n");
+    let guardrail_path = root.join("guardrail3-rs.toml");
+    write(&guardrail_path, "profile = \"service\"\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let mut permissions = fs::metadata(&guardrail_path)
@@ -230,9 +230,9 @@ fn pipeline_reports_unreadable_guardrail_policy_context() {
         &results,
         &[
             coverage_assertions::error(
-                "deny policy context is not parseable",
-                "Failed to parse root-local guardrail3.toml for deny profile resolution: file is not readable",
-                "guardrail3.toml",
+                "deny rust policy is not parseable",
+                "Failed to parse root Rust policy `guardrail3-rs.toml` for deny profile resolution: file is not readable",
+                "guardrail3-rs.toml",
                 false,
             ),
             coverage_assertions::info(

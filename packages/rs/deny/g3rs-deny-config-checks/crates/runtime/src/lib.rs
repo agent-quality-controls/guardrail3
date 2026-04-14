@@ -1,4 +1,5 @@
 mod advisories;
+mod baseline;
 mod bans;
 mod licenses;
 mod rs_deny_config_23_ban_baseline_complete;
