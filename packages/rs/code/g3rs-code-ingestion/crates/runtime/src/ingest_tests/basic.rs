@@ -50,7 +50,7 @@ fn exception_comments_for<'a>(
 fn is_parser_backed_kind(kind: &G3RsCodeConfigFileKind) -> bool {
     matches!(
         kind,
-        G3RsCodeConfigFileKind::Guardrail3Toml { .. }
+        G3RsCodeConfigFileKind::Guardrail3RsToml { .. }
             | G3RsCodeConfigFileKind::ClippyToml { .. }
             | G3RsCodeConfigFileKind::DenyToml { .. }
             | G3RsCodeConfigFileKind::CargoToml { .. }
@@ -547,7 +547,7 @@ fn ingests_exception_comments_from_all_supported_owned_config_filenames() {
         root.join("Cargo.toml"),
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n# EXCEPTION: cargo\n",
     );
-    write(root.join("guardrail3.toml"), "# EXCEPTION: guardrail\n");
+    write(root.join("guardrail3-rs.toml"), "# EXCEPTION: guardrail\n");
     write(root.join("clippy.toml"), "# EXCEPTION: clippy\n");
     write(root.join(".clippy.toml"), "# EXCEPTION: dot clippy\n");
     write(root.join("deny.toml"), "# EXCEPTION: deny\n");
@@ -574,7 +574,7 @@ fn ingests_only_parser_backed_code_config_files() {
         root.join("Cargo.toml"),
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write(root.join("guardrail3.toml"), "# guardrail config\n");
+    write(root.join("guardrail3-rs.toml"), "# guardrail config\n");
     write(root.join("clippy.toml"), "# clippy config\n");
     write(root.join(".clippy.toml"), "# dot clippy config\n");
     write(root.join("deny.toml"), "# deny config\n");
