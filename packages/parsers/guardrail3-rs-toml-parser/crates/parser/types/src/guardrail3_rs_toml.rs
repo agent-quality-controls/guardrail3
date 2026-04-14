@@ -47,7 +47,6 @@ pub struct RustChecksConfig {
     pub deny: Option<bool>,
     pub cargo: Option<bool>,
     pub code: Option<bool>,
-    pub hexarch: Option<bool>,
     pub deps: Option<bool>,
     pub garde: Option<bool>,
     pub test: Option<bool>,

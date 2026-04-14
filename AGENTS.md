@@ -31,7 +31,7 @@ It exists to ensure:
 
 The Rust work currently includes:
 - config families: clippy, deny, fmt, toolchain, cargo
-- topology/architecture families: topology, arch, hexarch
+- topology/architecture families: topology, arch, apparch
 - code families: code, garde, test, deps, release
 - shared hook architecture and Rust hook checks
 
@@ -94,38 +94,30 @@ Source file content is still streamed by orchestrators on demand.
 
 ## Code Layout
 
-The repo is no longer a single `src/...` tree. The real layout is under:
-- [`apps/guardrail3/crates`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates)
+The active Rust CLI lives under:
+- [`apps/guardrail3-rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3-rs)
 
-Important roots:
-- [`apps/guardrail3/Cargo.toml`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/Cargo.toml)
-- [`apps/guardrail3/crates/bin/guardrail3/src/main.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/bin/guardrail3/src/main.rs)
-- [`apps/guardrail3/crates/app/core`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/core)
-- [`apps/guardrail3/crates/app/rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs)
-- [`apps/guardrail3/crates/domain/project-tree/src/lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/domain/project-tree/src/lib.rs)
+The old multi-language app is archived under:
+- [`legacy/apps/guardrail3-current`](/Users/tartakovsky/Projects/websmasher/guardrail3/legacy/apps/guardrail3-current)
 
-## New Checks Layout
+Important active roots:
+- [`apps/guardrail3-rs/Cargo.toml`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3-rs/Cargo.toml)
+- [`apps/guardrail3-rs/crates/io/inbound/cli/src/main.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3-rs/crates/io/inbound/cli/src/main.rs)
+- [`apps/guardrail3-rs/crates/logic/validate-command/src/lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3-rs/crates/logic/validate-command/src/lib.rs)
+- [`apps/guardrail3-rs/crates/io/outbound/packages/src/lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3-rs/crates/io/outbound/packages/src/lib.rs)
+- [`packages/rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/packages/rs)
 
-The new Rust checks live under:
-- [`apps/guardrail3/crates/app/rs/checks`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/checks)
+## Package Checks Layout
+
+The active Rust checks live under:
+- [`packages/rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/packages/rs)
 
 Pattern per family:
-- `mod.rs` — orchestrator
-- `facts.rs` — normalized family facts
-- `inputs.rs` — minimal typed rule inputs
-- exactly one production file per rule
-- exactly one rule-specific sidecar test module directory per rule
+- `g3rs-<family>-types` owns the public family contract
+- `g3rs-<family>-ingestion` owns discovery, parsing, and normalization
+- `g3rs-<family>-config-checks`, `-source-checks`, and `-filetree-checks` own pure rules for the implemented lanes
 
-Example family:
-- [`apps/guardrail3/crates/app/rs/checks/rs/fmt`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/checks/rs/fmt)
-
-This `fmt` family is the current architecture specimen:
-- it proves the new layout
-- it proves family-local facts and inputs
-- it proves orchestrator fan-out
-- it proves the test pattern
-
-Do not treat it as fully migrated production wiring yet. It is the reference shape for the next families.
+Do not treat `legacy/apps/guardrail3-current` as an active implementation target.
 
 ## Test Pattern
 
@@ -163,7 +155,7 @@ Rust families should be built in this order:
 4. `rs/deny`
 5. `rs/cargo`
 6. `rs/code`
-7. `rs/hexarch`
+7. `rs/apparch`
 8. `rs/deps`
 9. `rs/garde`
 10. `rs/test`
@@ -232,7 +224,7 @@ If starting fresh, read in this order:
 3. [`.plans/todo/checks/rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs)
 4. [`.plans/todo/checks/hooks/shared.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/hooks/shared.md)
 5. [`.plans/todo/checks/hooks/rs.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/hooks/rs.md)
-6. [`apps/guardrail3/crates/domain/project-tree/src/lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/domain/project-tree/src/lib.rs)
-7. [`apps/guardrail3/crates/app/core/project_walker.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/core/project_walker.rs)
-8. [`apps/guardrail3/crates/app/rs/checks/rs/fmt`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/checks/rs/fmt)
+6. [`apps/guardrail3-rs/crates/logic/validate-command/src/lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3-rs/crates/logic/validate-command/src/lib.rs)
+7. [`apps/guardrail3-rs/crates/io/outbound/packages/src/lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3-rs/crates/io/outbound/packages/src/lib.rs)
+8. one representative finished family under [`packages/rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/packages/rs)
 9. recent files in [`.worklogs`](/Users/tartakovsky/Projects/websmasher/guardrail3/.worklogs)

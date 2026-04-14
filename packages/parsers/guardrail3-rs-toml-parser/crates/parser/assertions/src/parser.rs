@@ -49,7 +49,6 @@ pub fn assert_check_value(checks: Option<&RustChecksConfig>, key: &str, expected
         "deny" => checks.deny,
         "cargo" => checks.cargo,
         "code" => checks.code,
-        "hexarch" => checks.hexarch,
         "deps" => checks.deps,
         "garde" => checks.garde,
         "test" => checks.test,
@@ -68,6 +67,16 @@ pub fn assert_check_extra_string(checks: Option<&RustChecksConfig>, key: &str, e
             .and_then(Value::as_str),
         Some(expected),
         "check extra value mismatch",
+    );
+}
+
+pub fn assert_check_extra_bool(checks: Option<&RustChecksConfig>, key: &str, expected: bool) {
+    assert_eq!(
+        checks
+            .and_then(|checks| checks.extra.get(key))
+            .and_then(Value::as_bool),
+        Some(expected),
+        "check extra bool mismatch",
     );
 }
 

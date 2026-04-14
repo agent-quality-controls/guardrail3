@@ -60,7 +60,7 @@ reviewer = "guardrail-team"
     assertions::assert_string_list(&cfg.allowed_deps, &["serde", "toml"], "allowed_deps");
     assertions::assert_check_value(cfg.checks.as_ref(), "fmt", Some(true));
     assertions::assert_check_value(cfg.checks.as_ref(), "clippy", Some(true));
-    assertions::assert_check_value(cfg.checks.as_ref(), "hexarch", Some(false));
+    assertions::assert_check_extra_bool(cfg.checks.as_ref(), "hexarch", false);
     assertions::assert_check_extra_string(cfg.checks.as_ref(), "future_check", "preserve-me");
     assertions::assert_waiver(
         cfg.waivers.first(),
@@ -71,6 +71,18 @@ reviewer = "guardrail-team"
     );
     assertions::assert_waiver_extra_string(cfg.waivers.first(), "reviewer", "guardrail-team");
     assertions::assert_top_level_string_extra(&cfg, "future-key", "keep-me");
+}
+
+#[test]
+fn removed_hexarch_key_is_treated_as_extra() {
+    let cfg = parse_fixture(
+        r#"
+[checks]
+hexarch = true
+"#,
+    );
+
+    assertions::assert_check_extra_bool(cfg.checks.as_ref(), "hexarch", true);
 }
 
 #[test]

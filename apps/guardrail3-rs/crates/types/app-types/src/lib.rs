@@ -153,4 +153,9 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn removed_hexarch_family_is_not_parseable() {
+        assert_eq!(SupportedFamily::parse_cli("hexarch"), None);
+    }
 }
