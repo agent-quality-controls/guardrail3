@@ -4,6 +4,7 @@ use g3rs_arch_config_checks::check as check_config;
 use g3rs_arch_file_tree_checks::check as check_file_tree;
 use g3rs_arch_source_checks::check as check_source;
 use g3rs_workspace_crawl::crawl;
+use guardrail3_check_types::G3Severity;
 use tempfile::tempdir;
 
 #[test]
@@ -43,15 +44,26 @@ pub mod nested;
 "#,
     )
     .expect("lib");
-    fs::write(root.path().join("crate_a/src/nested/custom.rs"), "pub struct Value;")
-        .expect("custom");
+    fs::write(
+        root.path().join("crate_a/src/nested/custom.rs"),
+        "pub struct Value;",
+    )
+    .expect("custom");
 
     let crawl = crawl(root.path()).expect("crawl");
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = check_source(&inputs[0]);
 
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-SOURCE-02"));
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-SOURCE-09"));
+    assert!(
+        results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-SOURCE-02")
+    );
+    assert!(
+        results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-SOURCE-09")
+    );
 }
 
 #[test]
@@ -88,8 +100,79 @@ pub mod api;
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
     let results = check_source(&inputs[0]);
 
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-SOURCE-08"));
-    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-CONFIG-08"));
+    assert!(
+        results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-SOURCE-08")
+    );
+    assert!(
+        !results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-CONFIG-08")
+    );
+}
+
+#[test]
+fn source_pipeline_allows_mod_dispatcher_with_restricted_use() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("crate_a/src/api")).expect("crate dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(
+        root.path().join("crate_a/src/lib.rs"),
+        r#"
+mod api;
+"#,
+    )
+    .expect("lib");
+    fs::write(
+        root.path().join("crate_a/src/api/mod.rs"),
+        r#"
+mod rule;
+
+pub(crate) use rule::check;
+"#,
+    )
+    .expect("api mod");
+    fs::write(
+        root.path().join("crate_a/src/api/rule.rs"),
+        r#"
+pub(crate) fn check() {}
+"#,
+    )
+    .expect("rule");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
+    let results = check_source(&inputs[0]);
+
+    assert!(
+        !results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-SOURCE-04"
+                && result.severity() == G3Severity::Error)
+    );
+    assert!(results.iter().any(|result| {
+        result.id() == "RS-ARCH-SOURCE-04"
+            && result.severity() == G3Severity::Info
+            && result.inventory()
+    }));
 }
 
 #[test]
@@ -136,8 +219,11 @@ version = "0.1.0"
 "#,
     )
     .expect("inner cargo");
-    fs::write(root.path().join("pkg/crates/inner/src/lib.rs"), "pub struct Inner;")
-        .expect("inner lib");
+    fs::write(
+        root.path().join("pkg/crates/inner/src/lib.rs"),
+        "pub struct Inner;",
+    )
+    .expect("inner lib");
 
     fs::write(
         root.path().join("other/Cargo.toml"),
@@ -154,9 +240,21 @@ version = "0.1.0"
     let inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
     let results = check_config(&inputs[0]);
 
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-CONFIG-05"));
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-CONFIG-06"));
-    assert!(results.iter().any(|result| result.id() == "RS-ARCH-CONFIG-08"));
+    assert!(
+        results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-CONFIG-05")
+    );
+    assert!(
+        results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-CONFIG-06")
+    );
+    assert!(
+        results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-CONFIG-08")
+    );
 }
 
 #[test]
@@ -182,7 +280,11 @@ version = "0.1.0"
 "#,
     )
     .expect("crate cargo");
-    fs::write(root.path().join("crate_a/src/lib.rs"), "pub fn leaked() {}\n").expect("crate lib");
+    fs::write(
+        root.path().join("crate_a/src/lib.rs"),
+        "pub fn leaked() {}\n",
+    )
+    .expect("crate lib");
     fs::write(
         root.path().join("foreign/Cargo.toml"),
         r#"
@@ -192,7 +294,11 @@ version = "0.1.0"
 "#,
     )
     .expect("foreign cargo");
-    fs::write(root.path().join("foreign/src/lib.rs"), "pub fn stray() {}\n").expect("foreign lib");
+    fs::write(
+        root.path().join("foreign/src/lib.rs"),
+        "pub fn stray() {}\n",
+    )
+    .expect("foreign lib");
 
     let crawl = crawl(root.path()).expect("crawl");
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingest");
@@ -200,10 +306,12 @@ version = "0.1.0"
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].crates.len(), 1);
     assert_eq!(inputs[0].crates[0].rel_dir, "crate_a");
-    assert!(inputs[0]
-        .source_files
-        .iter()
-        .all(|file| file.rel_path.starts_with("crate_a/")));
+    assert!(
+        inputs[0]
+            .source_files
+            .iter()
+            .all(|file| file.rel_path.starts_with("crate_a/"))
+    );
 }
 
 #[test]
@@ -242,7 +350,11 @@ crate_a = { path = "../crate_a" }
 "#,
     )
     .expect("foreign cargo");
-    fs::write(root.path().join("foreign/src/lib.rs"), "pub fn stray() {}\n").expect("foreign lib");
+    fs::write(
+        root.path().join("foreign/src/lib.rs"),
+        "pub fn stray() {}\n",
+    )
+    .expect("foreign lib");
 
     let crawl = crawl(root.path()).expect("crawl");
     let inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
@@ -250,10 +362,12 @@ crate_a = { path = "../crate_a" }
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].crates.len(), 1);
     assert_eq!(inputs[0].crates[0].rel_dir, "crate_a");
-    assert!(inputs[0]
-        .dependency_edges
-        .iter()
-        .all(|edge| edge.source_rel_dir == "crate_a"));
+    assert!(
+        inputs[0]
+            .dependency_edges
+            .iter()
+            .all(|edge| edge.source_rel_dir == "crate_a")
+    );
 }
 
 #[test]
@@ -280,11 +394,7 @@ version = "0.1.0"
 "#,
     )
     .expect("pkg cargo");
-    fs::write(
-        root.path().join("pkg/src/lib.rs"),
-        "pub mod api;\n",
-    )
-    .expect("pkg lib");
+    fs::write(root.path().join("pkg/src/lib.rs"), "pub mod api;\n").expect("pkg lib");
     fs::write(
         root.path().join("pkg/crates/inner/Cargo.toml"),
         r#"
@@ -306,14 +416,18 @@ version = "0.1.0"
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].crates.len(), 1);
     assert_eq!(inputs[0].crates[0].rel_dir, "pkg");
-    assert!(inputs[0]
-        .source_files
-        .iter()
-        .all(|file| !file.rel_path.starts_with("pkg/crates/inner/")));
-    assert!(inputs[0]
-        .facade_surfaces
-        .iter()
-        .all(|surface| !surface.rel_path.starts_with("pkg/crates/inner/")));
+    assert!(
+        inputs[0]
+            .source_files
+            .iter()
+            .all(|file| !file.rel_path.starts_with("pkg/crates/inner/"))
+    );
+    assert!(
+        inputs[0]
+            .facade_surfaces
+            .iter()
+            .all(|surface| !surface.rel_path.starts_with("pkg/crates/inner/"))
+    );
 }
 
 #[test]
@@ -355,8 +469,11 @@ version = "0.1.0"
 "#,
     )
     .expect("inner cargo");
-    fs::write(root.path().join("pkg/crates/inner/src/lib.rs"), "pub struct Inner;")
-        .expect("inner lib");
+    fs::write(
+        root.path().join("pkg/crates/inner/src/lib.rs"),
+        "pub struct Inner;",
+    )
+    .expect("inner lib");
 
     let crawl = crawl(root.path()).expect("crawl");
     let inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
@@ -456,17 +573,48 @@ thirteen = "1"
     fs::write(root.path().join("crate_a/src/api.rs"), "pub struct Api;\n").expect("api");
     fs::write(root.path().join("crate_a/src/one.rs"), "pub struct One;\n").expect("one");
     fs::write(root.path().join("crate_a/src/two.rs"), "pub struct Two;\n").expect("two");
-    fs::write(root.path().join("crate_a/src/three.rs"), "pub struct Three;\n").expect("three");
-    fs::write(root.path().join("crate_a/src/four.rs"), "pub struct Four;\n").expect("four");
-    fs::write(root.path().join("crate_a/src/five.rs"), "pub struct Five;\n").expect("five");
+    fs::write(
+        root.path().join("crate_a/src/three.rs"),
+        "pub struct Three;\n",
+    )
+    .expect("three");
+    fs::write(
+        root.path().join("crate_a/src/four.rs"),
+        "pub struct Four;\n",
+    )
+    .expect("four");
+    fs::write(
+        root.path().join("crate_a/src/five.rs"),
+        "pub struct Five;\n",
+    )
+    .expect("five");
     fs::write(root.path().join("crate_a/src/six.rs"), "pub struct Six;\n").expect("six");
-    fs::write(root.path().join("crate_a/src/seven.rs"), "pub struct Seven;\n").expect("seven");
-    fs::write(root.path().join("crate_a/src/eight.rs"), "pub struct Eight;\n").expect("eight");
-    fs::write(root.path().join("crate_a/src/nine.rs"), "pub struct Nine;\n").expect("nine");
+    fs::write(
+        root.path().join("crate_a/src/seven.rs"),
+        "pub struct Seven;\n",
+    )
+    .expect("seven");
+    fs::write(
+        root.path().join("crate_a/src/eight.rs"),
+        "pub struct Eight;\n",
+    )
+    .expect("eight");
+    fs::write(
+        root.path().join("crate_a/src/nine.rs"),
+        "pub struct Nine;\n",
+    )
+    .expect("nine");
     fs::write(root.path().join("crate_a/src/ten.rs"), "pub struct Ten;\n").expect("ten");
-    fs::write(root.path().join("crate_a/src/eleven.rs"), "pub struct Eleven;\n").expect("eleven");
-    fs::write(root.path().join("crate_a/src/deep/a/b/c/mod.rs"), "pub struct Deep;\n")
-        .expect("deep");
+    fs::write(
+        root.path().join("crate_a/src/eleven.rs"),
+        "pub struct Eleven;\n",
+    )
+    .expect("eleven");
+    fs::write(
+        root.path().join("crate_a/src/deep/a/b/c/mod.rs"),
+        "pub struct Deep;\n",
+    )
+    .expect("deep");
 
     let crawl = crawl(root.path()).expect("crawl");
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
@@ -583,10 +731,12 @@ version = "0.1.0"
 
     assert_eq!(input.crates.len(), 1);
     assert_eq!(input.crates[0].rel_dir, "crate_a");
-    assert!(input
-        .module_dirs
-        .iter()
-        .all(|module_dir| module_dir.dir_rel.starts_with("crate_a/")));
+    assert!(
+        input
+            .module_dirs
+            .iter()
+            .all(|module_dir| module_dir.dir_rel.starts_with("crate_a/"))
+    );
 }
 
 #[test]
@@ -602,8 +752,7 @@ exclude = ["pkg/crates/inner"]
 "#,
     )
     .expect("root cargo");
-    fs::create_dir_all(root.path().join("pkg/crates/inner/src/deep/a/b/c"))
-        .expect("inner dirs");
+    fs::create_dir_all(root.path().join("pkg/crates/inner/src/deep/a/b/c")).expect("inner dirs");
 
     fs::write(
         root.path().join("pkg/Cargo.toml"),
@@ -639,7 +788,11 @@ version = "0.1.0"
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
     let results = check_file_tree(&input);
 
-    assert!(!results.iter().any(|result| result.id() == "RS-ARCH-FILETREE-07"));
+    assert!(
+        !results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-FILETREE-07")
+    );
 }
 
 #[test]
@@ -687,10 +840,14 @@ thirteen = "1"
     let file_tree_input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
     let file_tree_results = check_file_tree(&file_tree_input);
 
-    assert!(config_results
-        .iter()
-        .any(|result| result.id() == "RS-ARCH-CONFIG-07"));
-    assert!(!file_tree_results
-        .iter()
-        .any(|result| result.id() == "RS-ARCH-FILETREE-07"));
+    assert!(
+        config_results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-CONFIG-07")
+    );
+    assert!(
+        !file_tree_results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-FILETREE-07")
+    );
 }
