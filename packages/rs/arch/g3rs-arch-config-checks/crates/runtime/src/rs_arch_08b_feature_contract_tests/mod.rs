@@ -13,9 +13,10 @@ fn crates_without_public_exports_do_not_require_feature_contract() {
 }
 
 #[test]
-fn missing_all_feature_fires() {
+fn missing_default_feature_fires_when_feature_contract_has_no_default() {
     let mut node = config_crate("crate_a");
     node.requires_feature_contract = true;
+    node.has_default_feature = false;
 
     let results = crate::check(&input(vec![node], Vec::new()));
 
@@ -24,7 +25,7 @@ fn missing_all_feature_fires() {
         "RS-ARCH-CONFIG-08",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
-            title: Some("missing `all` feature"),
+            title: Some("missing `default` feature"),
             file: Some("crate_a/Cargo.toml"),
             inventory: Some(false),
             message: None,
@@ -33,13 +34,33 @@ fn missing_all_feature_fires() {
 }
 
 #[test]
-fn valid_feature_contract_inventories() {
+fn empty_default_feature_fires_when_feature_contract_enables_nothing() {
     let mut node = config_crate("crate_a");
     node.requires_feature_contract = true;
-    node.has_all_feature = true;
-    node.all_feature_deps = vec!["api".to_owned()];
     node.has_default_feature = true;
-    node.default_feature_deps = vec!["all".to_owned()];
+    node.default_feature_deps = Vec::new();
+
+    let results = crate::check(&input(vec![node], Vec::new()));
+
+    assert_rule_results(
+        &results,
+        "RS-ARCH-CONFIG-08",
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("`default` feature is empty"),
+            file: Some("crate_a/Cargo.toml"),
+            inventory: Some(false),
+            message: None,
+        }],
+    );
+}
+
+#[test]
+fn valid_named_feature_contract_inventories_without_all() {
+    let mut node = config_crate("crate_a");
+    node.requires_feature_contract = true;
+    node.has_default_feature = true;
+    node.default_feature_deps = vec!["api".to_owned()];
 
     let results = crate::check(&input(vec![node], Vec::new()));
 

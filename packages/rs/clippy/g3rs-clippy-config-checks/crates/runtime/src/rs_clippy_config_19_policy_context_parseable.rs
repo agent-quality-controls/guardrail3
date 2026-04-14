@@ -1,4 +1,4 @@
-use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
+use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{rust_policy_failure, rust_policy_rel_path};
@@ -35,7 +35,3 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         }
     }
 }
-
-#[cfg(test)]
-#[path = "rs_clippy_config_19_policy_context_parseable_tests/mod.rs"]
-mod tests;

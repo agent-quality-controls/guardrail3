@@ -51,39 +51,18 @@ fn is_g3rs_validate_staged_command(command: &ResolvedCommand) -> bool {
     }
 
     let args = command.args();
-    let mut index = 0usize;
-
-    while let Some(token) = args.get(index).map(String::as_str) {
-        if !token.starts_with('-') {
-            break;
-        }
-
-        if is_help_or_version_flag(token) {
-            return false;
-        }
-        if let Some((flag_name, _)) = token.split_once('=')
-            && g3rs_global_flag_takes_value(flag_name)
-        {
-            index += 1;
-            continue;
-        }
-        if g3rs_global_flag_takes_value(token) {
-            index += 2;
-            continue;
-        }
-
-        index += 1;
+    if args
+        .first()
+        .is_some_and(|token| token.starts_with('-') || is_help_or_version_flag(token))
+    {
+        return false;
     }
 
-    let saw_validate = match args.get(index).map(String::as_str) {
-        Some("rs") => args.get(index + 1).map(String::as_str) == Some("validate"),
-        Some("validate") => true,
-        _ => false,
-    };
+    if args.first().map(String::as_str) != Some("validate") {
+        return false;
+    }
 
-    saw_validate
-        && args.iter().skip(index).all(|arg| !is_help_or_version_flag(arg))
-        && args.iter().skip(index).any(|arg| arg == "--staged")
+    parse_validate_args(&args[1..])
 }
 
 fn is_cargo_dupes_command(command: &ResolvedCommand) -> bool {
@@ -112,8 +91,58 @@ fn is_path_qualified_cargo_machete_command(command: &ResolvedCommand) -> bool {
         && !command.args().iter().any(|arg| is_help_or_version_flag(arg))
 }
 
-fn g3rs_global_flag_takes_value(flag: &str) -> bool {
-    matches!(flag, "--config" | "--format" | "--root" | "--cache-dir")
+fn parse_validate_args(args: &[String]) -> bool {
+    let mut saw_path = false;
+    let mut index = 0usize;
+
+    while let Some(arg) = args.get(index).map(String::as_str) {
+        if is_help_or_version_flag(arg) {
+            return false;
+        }
+        if let Some(path) = arg.strip_prefix("--path=") {
+            if path.is_empty() {
+                return false;
+            }
+            saw_path = true;
+            index += 1;
+            continue;
+        }
+        if arg == "--path" {
+            let Some(value) = args.get(index + 1).map(String::as_str) else {
+                return false;
+            };
+            if value.starts_with('-') {
+                return false;
+            }
+            saw_path = true;
+            index += 2;
+            continue;
+        }
+        if let Some(value) = arg.strip_prefix("--family=") {
+            if value.is_empty() {
+                return false;
+            }
+            index += 1;
+            continue;
+        }
+        if arg == "--family" {
+            let Some(value) = args.get(index + 1).map(String::as_str) else {
+                return false;
+            };
+            if value.starts_with('-') {
+                return false;
+            }
+            index += 2;
+            continue;
+        }
+        if arg == "--inventory" {
+            index += 1;
+            continue;
+        }
+        return false;
+    }
+
+    saw_path
 }
 
 fn is_help_or_version_flag(token: &str) -> bool {

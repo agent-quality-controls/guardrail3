@@ -1,0 +1,16 @@
+[workspace]
+changelog_config = "cliff.toml"
+git_release_enable = true
+release_always = false
+
+[[package]]
+name = "g3rs-clippy-config-checks"
+
+[[package]]
+name = "g3rs-clippy-config-checks-assertions"
+
+[[package]]
+name = "g3rs-clippy-config-checks-runtime"
+
+[[package]]
+name = "g3rs-clippy-config-checks-types"

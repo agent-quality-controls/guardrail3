@@ -2,6 +2,10 @@ use g3rs_hooks_config_checks_types::G3RsHooksConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsHooksConfigChecksInput) -> Vec<G3CheckResult> {
+    if !input.active {
+        return Vec::new();
+    }
+
     let Some(selected_hook) = &input.selected_hook else {
         return Vec::new();
     };

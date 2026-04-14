@@ -14,6 +14,12 @@ fn git_init(path: &Path) {
     assert!(status.success(), "git init should exit successfully");
 }
 
+fn repo_root(temp_dir: &tempfile::TempDir) -> &Path {
+    let root = temp_dir.path();
+    git_init(root);
+    root
+}
+
 fn write(path: impl AsRef<Path>, content: &str) {
     if let Some(parent) = path.as_ref().parent() {
         fs::create_dir_all(parent).expect("create parent directory");
@@ -50,8 +56,7 @@ fn clippy_results(root: &Path) -> Vec<G3CheckResult> {
 #[test]
 fn integration_reports_hook_breakage_when_rust_hook_is_misconfigured() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write(
@@ -84,12 +89,11 @@ fn integration_reports_hook_breakage_when_rust_hook_is_misconfigured() {
 #[test]
 fn integration_aligns_hook_validation_step_with_source_family_breakage() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\nset -e\ng3rs rs validate --staged .\n",
+        "#!/usr/bin/env bash\nset -e\ng3rs validate --path .\n",
     );
     write(root.join("src/lib.rs"), "pub fn demo() { todo!(\"broken\"); }\n");
 
@@ -118,13 +122,12 @@ fn integration_aligns_hook_validation_step_with_source_family_breakage() {
 #[test]
 fn integration_aligns_hook_config_trigger_with_config_family_breakage() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\nset -e\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs rs validate --staged .\nfi\n",
+        "#!/usr/bin/env bash\nset -e\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs validate --path .\nfi\n",
     );
     write(root.join("clippy.toml"), "too-many-lines-threshold = 1\n");
 

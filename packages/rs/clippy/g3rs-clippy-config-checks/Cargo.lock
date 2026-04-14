@@ -43,7 +43,6 @@ dependencies = [
 name = "g3rs-clippy-config-checks-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-clippy-config-checks-runtime",
  "guardrail3-check-types",
 ]
 
@@ -52,8 +51,7 @@ name = "g3rs-clippy-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "clippy-toml-parser",
- "g3rs-clippy-config-checks-assertions",
- "g3rs-clippy-config-checks-types",
+ "g3rs-clippy-types",
  "guardrail3-check-types",
  "guardrail3-rs-toml-parser",
  "toml",

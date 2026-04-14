@@ -1,4 +1,4 @@
-use super::check;
+use crate::rs_clippy_config_17_unknown_keys::check;
 use crate::test_support::{findings, input_from_raw};
 
 #[test]

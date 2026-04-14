@@ -1,4 +1,4 @@
-use super::check;
+use crate::rs_clippy_config_09_missing_method_ban::check;
 use crate::support::expected_method_bans;
 use crate::test_support::{findings, input_from_raw, parse_error_rust_policy, parsed_rust_policy};
 

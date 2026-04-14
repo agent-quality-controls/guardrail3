@@ -7,9 +7,22 @@ license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
+keywords = ["guardrail3", "clippy", "checks", "types"]
+categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[features]
+default = ["api"]
+api = []
 
 [lints]
 workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true
+
 [dependencies]
-g3rs-clippy-types = { path = "../../../g3rs-clippy-types" }
+g3rs-clippy-types = { path = "../../../g3rs-clippy-types", version = "0.1.0" }

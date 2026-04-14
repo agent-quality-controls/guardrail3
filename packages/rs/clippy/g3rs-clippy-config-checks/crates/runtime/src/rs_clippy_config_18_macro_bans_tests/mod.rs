@@ -1,4 +1,4 @@
-use super::check;
+use crate::rs_clippy_config_18_macro_bans::check;
 use crate::support::EXPECTED_MACRO_BANS;
 use crate::test_support::{findings, input_from_raw};
 

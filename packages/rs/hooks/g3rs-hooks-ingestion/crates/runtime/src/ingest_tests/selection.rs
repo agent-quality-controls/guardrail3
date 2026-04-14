@@ -24,6 +24,12 @@ fn git_init(path: &std::path::Path) {
     assert!(status.success(), "git init should exit successfully");
 }
 
+fn repo_root(temp_dir: &tempfile::TempDir) -> &std::path::Path {
+    let root = temp_dir.path();
+    git_init(root);
+    root
+}
+
 fn git_config_hooks_path(path: &std::path::Path, hooks_path: &str) {
     let status = Command::new("git")
         .args(["config", "core.hooksPath", hooks_path])
@@ -49,6 +55,7 @@ fn make_executable(path: &std::path::Path) {
 }
 
 fn unreadable_file_crawl(root: &std::path::Path) -> G3RsWorkspaceCrawl {
+    git_init(root);
     G3RsWorkspaceCrawl {
         root_abs_path: root.to_path_buf(),
         entries: vec![G3RsWorkspaceEntry {
@@ -66,7 +73,7 @@ fn unreadable_file_crawl(root: &std::path::Path) -> G3RsWorkspaceCrawl {
 #[test]
 fn prefers_githooks_pre_commit_over_hooks_pre_commit() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "cargo fmt --check\n");
     write(root.join("hooks/pre-commit"), "cargo test --workspace\n");
@@ -89,7 +96,7 @@ fn prefers_githooks_pre_commit_over_hooks_pre_commit() {
 #[test]
 fn falls_back_to_hooks_pre_commit_when_githooks_script_is_absent() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("hooks/pre-commit"), "cargo test --workspace\n");
 
@@ -111,8 +118,7 @@ fn falls_back_to_hooks_pre_commit_when_githooks_script_is_absent() {
 #[test]
 fn honors_core_hooks_path_when_hooks_pre_commit_is_configured() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "hooks");
 
     write(root.join(".githooks/pre-commit"), "cargo fmt --check\n");
@@ -130,8 +136,7 @@ fn honors_core_hooks_path_when_hooks_pre_commit_is_configured() {
 #[test]
 fn honors_normalized_core_hooks_path_variants() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "./hooks/");
 
     write(root.join("hooks/pre-commit"), "cargo test --workspace\n");
@@ -152,8 +157,7 @@ fn honors_normalized_core_hooks_path_variants() {
 #[test]
 fn keeps_non_compat_hooks_path_outside_owned_hook_surface() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "custom-hooks");
 
     write(root.join(".githooks/pre-commit"), "cargo fmt --check\n");
@@ -174,7 +178,7 @@ fn keeps_non_compat_hooks_path_outside_owned_hook_surface() {
 #[test]
 fn prefers_githooks_pre_commit_and_includes_direct_modular_scripts() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
     write(root.join("hooks/pre-commit"), "echo fallback\n");
@@ -205,7 +209,7 @@ fn prefers_githooks_pre_commit_and_includes_direct_modular_scripts() {
 #[test]
 fn fallback_hook_does_not_activate_githooks_modular_scripts() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("hooks/pre-commit"), "cargo fmt --check\n");
     write(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo test --workspace\n");
@@ -221,7 +225,7 @@ fn fallback_hook_does_not_activate_githooks_modular_scripts() {
 #[test]
 fn ignores_nested_files_under_pre_commit_d() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
     write(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo fmt --check\n");
@@ -246,7 +250,7 @@ fn ignores_nested_files_under_pre_commit_d() {
 #[test]
 fn marks_inputs_as_workspace_projects_when_root_manifest_has_workspace_section() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write(root.join(".githooks/pre-commit"), "cargo test --workspace\n");
@@ -261,7 +265,7 @@ fn marks_inputs_as_workspace_projects_when_root_manifest_has_workspace_section()
 #[test]
 fn fails_closed_when_root_manifest_is_malformed_for_hooked_repo() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace\n");
     write(root.join(".githooks/pre-commit"), "cargo test --workspace\n");
@@ -280,7 +284,7 @@ fn fails_closed_when_root_manifest_is_malformed_for_hooked_repo() {
 #[test]
 fn ignores_malformed_root_manifest_when_no_hook_exists() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace\n");
 
@@ -293,8 +297,7 @@ fn ignores_malformed_root_manifest_when_no_hook_exists() {
 #[test]
 fn source_ingestion_fails_closed_when_git_hooks_path_lookup_errors() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "cargo fmt --check\n");
     break_git_dir(root);
@@ -334,7 +337,7 @@ fn returns_unreadable_when_selected_pre_commit_cannot_be_read() {
 #[test]
 fn fails_closed_when_selected_pre_commit_disappears_after_crawl() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "cargo fmt --check\n");
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -352,7 +355,7 @@ fn fails_closed_when_selected_pre_commit_disappears_after_crawl() {
 #[test]
 fn returns_unreadable_when_modular_script_cannot_be_read() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
     let unreadable_path = root.join(".githooks/pre-commit.d/10-rust.sh");
 
     let crawl = G3RsWorkspaceCrawl {
@@ -404,7 +407,7 @@ fn returns_unreadable_when_modular_script_cannot_be_read() {
 #[test]
 fn fails_closed_when_selected_modular_script_disappears_after_crawl() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
     write(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo fmt --check\n");
@@ -424,7 +427,7 @@ fn fails_closed_when_selected_modular_script_disappears_after_crawl() {
 #[test]
 fn fails_closed_when_root_manifest_disappears_after_crawl_for_hooked_repo() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write(root.join(".githooks/pre-commit"), "cargo test --workspace\n");
@@ -443,10 +446,10 @@ fn fails_closed_when_root_manifest_disappears_after_crawl_for_hooked_repo() {
 #[test]
 fn config_ingestion_selects_effective_hook_and_detects_installed_tools() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
     let bin_dir = root.join("bin");
 
-    write(root.join(".githooks/pre-commit"), "g3rs rs validate --staged .\n");
+    write(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
     write(root.join("hooks/pre-commit"), "cargo fmt --check\n");
     write(bin_dir.join("g3rs"), "#!/usr/bin/env bash\n");
     write(bin_dir.join("gitleaks"), "#!/usr/bin/env bash\n");
@@ -467,7 +470,7 @@ fn config_ingestion_selects_effective_hook_and_detects_installed_tools() {
         .parsed
         .source_lines()
         .iter()
-        .any(|line| line.raw().contains("g3rs rs validate --staged")));
+        .any(|line| line.raw().contains("g3rs validate --path")));
     assert_eq!(input.installed_tools, vec!["g3rs".to_owned(), "gitleaks".to_owned()]);
 }
 
@@ -489,9 +492,9 @@ fn config_ingestion_fails_closed_when_selected_pre_commit_cannot_be_read() {
 #[test]
 fn config_ingestion_fails_closed_when_selected_pre_commit_disappears_after_crawl() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
-    write(root.join(".githooks/pre-commit"), "g3rs rs validate --staged .\n");
+    write(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     fs::remove_file(root.join(".githooks/pre-commit")).expect("remove selected hook");
 
@@ -508,11 +511,10 @@ fn config_ingestion_fails_closed_when_selected_pre_commit_disappears_after_crawl
 #[test]
 fn config_ingestion_honors_core_hooks_path_and_path_qualified_tools() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "hooks");
 
-    write(root.join(".githooks/pre-commit"), "g3rs rs validate --staged .\n");
+    write(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
     write(
         root.join("hooks/pre-commit"),
         "/opt/bin/gitleaks protect --staged --no-banner\n",
@@ -529,10 +531,9 @@ fn config_ingestion_honors_core_hooks_path_and_path_qualified_tools() {
 #[test]
 fn config_ingestion_fails_closed_when_git_hooks_path_lookup_errors() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
 
-    write(root.join(".githooks/pre-commit"), "g3rs rs validate --staged .\n");
+    write(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
     break_git_dir(root);
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let error =
@@ -560,8 +561,7 @@ fn config_ingestion_stays_quiet_without_hook() {
 #[test]
 fn file_tree_ingestion_collects_hook_layout_and_trust_surface() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, ".githooks");
 
     write(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\nrun-parts .githooks/pre-commit.d\n");
@@ -599,8 +599,7 @@ fn file_tree_ingestion_collects_hook_layout_and_trust_surface() {
 #[test]
 fn file_tree_ingestion_collects_modular_layout_for_hooks_compat_path() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "hooks");
 
     write(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\nrun-parts .githooks/pre-commit.d\n");
@@ -619,8 +618,7 @@ fn file_tree_ingestion_collects_modular_layout_for_hooks_compat_path() {
 #[test]
 fn file_tree_ingestion_reports_git_hook_shadow_when_hooks_path_is_wrong() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
 
     write(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
     write(root.join(".git/hooks/pre-commit"), "#!/usr/bin/env bash\nexit 0\n");
@@ -635,8 +633,7 @@ fn file_tree_ingestion_reports_git_hook_shadow_when_hooks_path_is_wrong() {
 #[test]
 fn file_tree_ingestion_does_not_report_git_hook_shadow_for_hooks_path_compat_mode() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "hooks");
 
     write(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
@@ -652,8 +649,7 @@ fn file_tree_ingestion_does_not_report_git_hook_shadow_for_hooks_path_compat_mod
 #[test]
 fn file_tree_ingestion_fails_closed_when_git_hooks_path_lookup_errors() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
     break_git_dir(root);
@@ -685,7 +681,7 @@ fn file_tree_ingestion_fails_closed_when_selected_pre_commit_cannot_be_read() {
 #[test]
 fn file_tree_ingestion_fails_closed_when_selected_pre_commit_disappears_after_crawl() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "cargo fmt --check\n");
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -703,7 +699,7 @@ fn file_tree_ingestion_fails_closed_when_selected_pre_commit_disappears_after_cr
 #[test]
 fn file_tree_ingestion_fails_closed_when_selected_modular_script_disappears_after_crawl() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
     write(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo fmt --check\n");

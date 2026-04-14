@@ -1,4 +1,4 @@
-use g3rs_clippy_config_checks_assertions::rs_clippy_config_02_max_fn_params_bools as assertions;
+use super::assertions;
 
 use super::helpers::run_check;
 

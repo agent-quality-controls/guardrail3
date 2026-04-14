@@ -6,6 +6,10 @@ description = "Assertion helpers for g3 clippy config checks tests"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "clippy", "checks", "assertions"]
+categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [lints]
 workspace = true
@@ -15,6 +19,11 @@ default = ["all"]
 all = ["checks"]
 checks = []
 
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true
+
 [dependencies]
-g3rs-clippy-config-checks-runtime = { path = "../runtime" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }

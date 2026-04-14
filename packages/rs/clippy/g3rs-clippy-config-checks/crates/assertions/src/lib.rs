@@ -1,5 +1,3 @@
-use g3rs_clippy_config_checks_runtime as _;
-
 mod common;
 
 #[cfg(feature = "checks")]

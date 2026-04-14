@@ -1,4 +1,4 @@
-use super::check;
+use crate::rs_clippy_config_10_missing_type_ban::check;
 use crate::support::expected_required_type_bans;
 use crate::test_support::{findings, input_from_raw, parsed_rust_policy};
 use guardrail3_rs_toml_parser::RustProfile;
