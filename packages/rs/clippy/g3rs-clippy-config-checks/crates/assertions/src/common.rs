@@ -2,11 +2,11 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
-    pub severity: G3Severity,
-    pub title: &'a str,
-    pub message: &'a str,
-    pub file: Option<&'a str>,
-    pub inventory: bool,
+    severity: G3Severity,
+    title: &'a str,
+    message: &'a str,
+    file: Option<&'a str>,
+    inventory: bool,
 }
 
 #[must_use]
@@ -152,4 +152,36 @@ macro_rules! define_result_assertions {
             )
         }
     };
+}
+
+#[cfg(test)]
+mod tests {
+    use guardrail3_check_types::G3CheckResult;
+
+    use super::*;
+
+    #[test]
+    fn opaque_finding_still_supports_helper_api() {
+        let results = vec![
+            G3CheckResult::new(
+                "RS-CLIPPY-CONFIG-01".to_owned(),
+                G3Severity::Info,
+                "golden".to_owned(),
+                "matches baseline".to_owned(),
+                Some("clippy.toml".to_owned()),
+                None,
+            )
+            .into_inventory(),
+        ];
+
+        crate::rs_clippy_config_01_max_struct_bools::assert_findings(
+            &results,
+            &[crate::rs_clippy_config_01_max_struct_bools::info(
+                "golden",
+                "matches baseline",
+                "clippy.toml",
+                true,
+            )],
+        );
+    }
 }

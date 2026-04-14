@@ -10,6 +10,7 @@ readme = "README.md"
 keywords = ["guardrail3", "clippy", "checks", "runtime"]
 categories = ["development-tools"]
 include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
 
 [features]
 default = ["all"]
