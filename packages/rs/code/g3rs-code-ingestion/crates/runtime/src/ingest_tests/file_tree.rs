@@ -32,22 +32,8 @@ fn run_file_tree_input(root: &Path) -> g3rs_code_ingestion_types::G3RsCodeFileTr
     crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed")
 }
 
-fn assert_structural_cap_result(
-    result: &G3CheckResult,
-    file: &str,
-    message: &str,
-) {
-    assert_eq!(result.id(), "RS-CODE-FILETREE-35");
-    assert_eq!(result.severity(), guardrail3_check_types::G3Severity::Error);
-    assert_eq!(result.title(), "crate source tree exceeds structural caps");
-    assert_eq!(result.file(), Some(file));
-    assert_eq!(result.line(), None);
-    assert!(!result.inventory(), "{result:#?}");
-    assert_eq!(result.message(), message);
-}
-
 #[test]
-fn pipeline_reports_structural_cap_violation() {
+fn pipeline_does_not_report_structural_split_because_arch_owns_that_policy() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
@@ -67,12 +53,7 @@ fn pipeline_reports_structural_cap_violation() {
 
     let results = run_file_tree_pipeline(root);
 
-    assert_eq!(results.len(), 1, "{results:#?}");
-    assert_structural_cap_result(
-        &results[0],
-        "Cargo.toml",
-        "Rust root `` exceeds structural caps: module depth 8 > 6, sibling source directories 14 > 12, sibling .rs files 22 > 20. Restructure the crate into smaller modules or sub-crates.",
-    );
+    assert!(results.is_empty(), "{results:#?}");
 }
 
 #[test]
@@ -100,7 +81,7 @@ fn pipeline_stays_quiet_at_exact_thresholds() {
 }
 
 #[test]
-fn pipeline_measures_workspace_member_separately() {
+fn pipeline_does_not_report_member_structural_split_because_arch_owns_that_policy() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
@@ -120,16 +101,11 @@ fn pipeline_measures_workspace_member_separately() {
 
     let results = run_file_tree_pipeline(root);
 
-    assert_eq!(results.len(), 1, "{results:#?}");
-    assert_structural_cap_result(
-        &results[0],
-        "crates/api/Cargo.toml",
-        "Rust root `crates/api` exceeds structural caps: sibling source directories 13 > 12. Restructure the crate into smaller modules or sub-crates.",
-    );
+    assert!(results.is_empty(), "{results:#?}");
 }
 
 #[test]
-fn pipeline_does_not_charge_member_structure_to_root_package() {
+fn pipeline_does_not_report_root_or_member_split_for_hybrid_workspace() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
@@ -158,12 +134,7 @@ resolver = \"2\"\n",
 
     let results = run_file_tree_pipeline(root);
 
-    assert_eq!(results.len(), 1, "{results:#?}");
-    assert_structural_cap_result(
-        &results[0],
-        "crates/api/Cargo.toml",
-        "Rust root `crates/api` exceeds structural caps: sibling source directories 13 > 12. Restructure the crate into smaller modules or sub-crates.",
-    );
+    assert!(results.is_empty(), "{results:#?}");
 }
 
 #[test]
@@ -277,17 +248,7 @@ resolver = \"2\"\n",
     let mut results = run_file_tree_pipeline(root);
     results.sort_by(|left, right| left.file().cmp(&right.file()));
 
-    assert_eq!(results.len(), 2, "{results:#?}");
-    assert_structural_cap_result(
-        &results[0],
-        "Cargo.toml",
-        "Rust root `` exceeds structural caps: sibling source directories 13 > 12. Restructure the crate into smaller modules or sub-crates.",
-    );
-    assert_structural_cap_result(
-        &results[1],
-        "crates/api/Cargo.toml",
-        "Rust root `crates/api` exceeds structural caps: sibling .rs files 22 > 20. Restructure the crate into smaller modules or sub-crates.",
-    );
+    assert!(results.is_empty(), "{results:#?}");
 }
 
 #[test]

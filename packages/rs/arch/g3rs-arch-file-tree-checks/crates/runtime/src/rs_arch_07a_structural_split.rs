@@ -1,13 +1,18 @@
-use g3rs_arch_types::G3RsArchFileTreeCrate;
+use g3rs_arch_types::{G3RsArchFileTreeCrate, G3RsArchRustPolicyState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-ARCH-FILETREE-07";
+const SELECTOR: &str = "structural-split";
 
 const MAX_MODULE_DEPTH: usize = 3;
 const MAX_SIBLING_DIRS: usize = 4;
 const MAX_SIBLING_RS_FILES: usize = 10;
 
-pub(crate) fn check(node: &G3RsArchFileTreeCrate, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(
+    node: &G3RsArchFileTreeCrate,
+    rust_policy: &G3RsArchRustPolicyState,
+    results: &mut Vec<G3CheckResult>,
+) {
     if node.cargo_parse_error.is_some() || !node.has_package {
         return;
     }
@@ -35,6 +40,20 @@ pub(crate) fn check(node: &G3RsArchFileTreeCrate, results: &mut Vec<G3CheckResul
 
     if reasons.is_empty() {
         return;
+    }
+
+    match rust_policy {
+        G3RsArchRustPolicyState::Parsed { waivers, .. } => {
+            if waivers.iter().any(|waiver| {
+                waiver.rule == ID
+                    && waiver.file == node.cargo_rel_path
+                    && waiver.selector == SELECTOR
+            }) {
+                return;
+            }
+        }
+        G3RsArchRustPolicyState::Missing => {}
+        G3RsArchRustPolicyState::Unreadable { .. } | G3RsArchRustPolicyState::ParseError { .. } => {}
     }
 
     results.push(G3CheckResult::new(
