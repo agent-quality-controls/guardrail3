@@ -1,19 +1,19 @@
 use g3rs_clippy_types::{
     G3RsClippyCargoConfigOverride, G3RsClippyConfigChecksInput, G3RsClippyConfigState,
-    G3RsClippyFileTreeChecksInput, G3RsClippyPolicyContextState, G3RsClippyShadowedConfig,
+    G3RsClippyFileTreeChecksInput, G3RsClippyRustPolicyState, G3RsClippyShadowedConfig,
 };
 
 pub(crate) fn assemble_config_input(
     clippy_rel_path: String,
     clippy: G3RsClippyConfigState,
-    policy_context: G3RsClippyPolicyContextState,
+    rust_policy: G3RsClippyRustPolicyState,
     published_library_policy: bool,
     cargo_config_overrides: Vec<G3RsClippyCargoConfigOverride>,
 ) -> G3RsClippyConfigChecksInput {
     G3RsClippyConfigChecksInput {
         clippy_rel_path,
         clippy,
-        policy_context,
+        rust_policy,
         published_library_policy,
         cargo_config_overrides,
     }

@@ -1,14 +1,15 @@
+use guardrail3_rs_toml_parser::RustProfile;
 use std::collections::BTreeSet;
 
 use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{EXPECTED_LIBRARY_GLOBAL_STATE_TYPES, parse_ban_section, policy_context_valid, profile_name, raw_clippy};
+use crate::support::{EXPECTED_LIBRARY_GLOBAL_STATE_TYPES, parse_ban_section, raw_clippy, rust_policy_valid, rust_profile};
 
 const ID: &str = "RS-CLIPPY-CONFIG-14";
 
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    if !policy_context_valid(input) || profile_name(input) != Some("library") {
+    if !rust_policy_valid(input) || rust_profile(input) != Some(RustProfile::Library) {
         return;
     }
     let Some(parsed) = raw_clippy(input) else {

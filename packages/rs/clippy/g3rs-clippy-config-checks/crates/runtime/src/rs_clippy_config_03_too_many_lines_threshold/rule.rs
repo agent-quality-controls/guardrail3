@@ -1,7 +1,7 @@
 use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
-use guardrail3_domain_modules::clippy::TOO_MANY_LINES_THRESHOLD;
 use guardrail3_check_types::G3CheckResult;
 
+use crate::baseline::TOO_MANY_LINES_THRESHOLD;
 use crate::support::{check_threshold, typed_clippy};
 
 const ID: &str = "RS-CLIPPY-CONFIG-03";

@@ -1,7 +1,7 @@
 use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
-use guardrail3_domain_modules::clippy::TYPE_COMPLEXITY_THRESHOLD;
 use guardrail3_check_types::G3CheckResult;
 
+use crate::baseline::TYPE_COMPLEXITY_THRESHOLD;
 use crate::support::{check_threshold, typed_clippy};
 
 const ID: &str = "RS-CLIPPY-CONFIG-08";

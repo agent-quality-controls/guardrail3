@@ -119,7 +119,7 @@ fn pipeline_warns_when_library_profile_cannot_prove_published_library_policy() {
     git_init(root);
 
     write(root.join("Cargo.toml"), "[workspace]\nnot = [valid");
-    write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
     write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");

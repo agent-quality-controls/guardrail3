@@ -3,7 +3,7 @@
 Ingestion package for clippy config and filetree checks.
 
 It takes a pointed-workspace crawl result, selects the root `clippy.toml` or
-`.clippy.toml`, reads root-local `guardrail3.toml` policy context and root-local
+`.clippy.toml`, reads root-local `guardrail3-rs.toml` Rust policy and root-local
 `.cargo/config*` override surfaces, and produces typed inputs for:
 
 - `g3rs-clippy-config-checks`

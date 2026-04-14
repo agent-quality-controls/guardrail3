@@ -1,6 +1,6 @@
 # g3rs-clippy-config-checks
 
-Extracted `clippy.toml`, `guardrail3.toml`, and `.cargo/config*` config checks for guardrail3.
+Extracted `clippy.toml`, `guardrail3-rs.toml`, and `.cargo/config*` config checks for guardrail3.
 
 Current scope:
 
@@ -22,14 +22,14 @@ Current scope:
 - `RS-CLIPPY-CONFIG-16`: duplicate bans
 - `RS-CLIPPY-CONFIG-17`: suspicious managed-key typos
 - `RS-CLIPPY-CONFIG-18`: macro bans
-- `RS-CLIPPY-CONFIG-19`: `guardrail3.toml` policy-context parseability
+- `RS-CLIPPY-CONFIG-19`: `guardrail3-rs.toml` rust-policy parseability
 - `RS-CLIPPY-CONFIG-20`: forbidden `CLIPPY_CONF_DIR` override surfaces
 - `RS-CLIPPY-CONFIG-21`: `clippy.toml` parseability
 
 This package intentionally keeps the package model boundary:
 
 - one pointed workspace at a time
-- root-local policy context
+- root-local Rust policy context
 - root-local cargo override surfaces
 - no source lane
 

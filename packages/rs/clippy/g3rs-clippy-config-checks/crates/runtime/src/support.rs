@@ -1,9 +1,9 @@
 use clippy_toml_parser::ClippyToml;
 use g3rs_clippy_config_checks_types::{
-    G3RsClippyConfigChecksInput, G3RsClippyConfigState, G3RsClippyPolicyContextState,
+    G3RsClippyConfigChecksInput, G3RsClippyConfigState, G3RsClippyRustPolicyState,
 };
+use guardrail3_rs_toml_parser::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_domain_modules::clippy as policy;
 
 #[derive(Debug)]
 pub(crate) struct ThresholdExpectation {
@@ -30,8 +30,9 @@ pub(crate) enum BoolSetting<'a> {
     Value(bool),
 }
 
-pub(crate) const EXPECTED_MACRO_BANS: &[&str] = policy::EXPECTED_MACRO_BANS;
-pub(crate) const EXPECTED_LIBRARY_GLOBAL_STATE_TYPES: &[&str] = policy::LIBRARY_EXTRA_TYPE_PATHS;
+pub(crate) const EXPECTED_MACRO_BANS: &[&str] = crate::baseline::EXPECTED_MACRO_BANS;
+pub(crate) const EXPECTED_LIBRARY_GLOBAL_STATE_TYPES: &[&str] =
+    crate::baseline::LIBRARY_EXTRA_TYPE_PATHS;
 const THRESHOLD_EXPECTATIONS: &[ThresholdExpectation] = &[
     ThresholdExpectation {
         key: "max-struct-bools",
@@ -205,51 +206,51 @@ pub(crate) fn raw_parse_error(input: &G3RsClippyConfigChecksInput) -> Option<&st
     }
 }
 
-pub(crate) fn policy_context_valid(input: &G3RsClippyConfigChecksInput) -> bool {
+pub(crate) fn rust_policy_valid(input: &G3RsClippyConfigChecksInput) -> bool {
     matches!(
-        input.policy_context,
-        G3RsClippyPolicyContextState::Missing | G3RsClippyPolicyContextState::Parsed { .. }
+        input.rust_policy,
+        G3RsClippyRustPolicyState::Missing | G3RsClippyRustPolicyState::Parsed { .. }
     )
 }
 
-pub(crate) fn profile_name(input: &G3RsClippyConfigChecksInput) -> Option<&str> {
-    match &input.policy_context {
-        G3RsClippyPolicyContextState::Parsed { profile_name, .. } => profile_name.as_deref(),
-        G3RsClippyPolicyContextState::Missing
-        | G3RsClippyPolicyContextState::Unreadable { .. }
-        | G3RsClippyPolicyContextState::ParseError { .. } => None,
+pub(crate) fn rust_profile(input: &G3RsClippyConfigChecksInput) -> Option<RustProfile> {
+    match &input.rust_policy {
+        G3RsClippyRustPolicyState::Parsed { profile, .. } => *profile,
+        G3RsClippyRustPolicyState::Missing
+        | G3RsClippyRustPolicyState::Unreadable { .. }
+        | G3RsClippyRustPolicyState::ParseError { .. } => None,
     }
 }
 
 pub(crate) fn garde_enabled(input: &G3RsClippyConfigChecksInput) -> bool {
-    match &input.policy_context {
-        G3RsClippyPolicyContextState::Parsed { garde_enabled, .. } => *garde_enabled,
-        G3RsClippyPolicyContextState::Missing => true,
-        G3RsClippyPolicyContextState::Unreadable { .. }
-        | G3RsClippyPolicyContextState::ParseError { .. } => true,
+    match &input.rust_policy {
+        G3RsClippyRustPolicyState::Parsed { garde_enabled, .. } => *garde_enabled,
+        G3RsClippyRustPolicyState::Missing => true,
+        G3RsClippyRustPolicyState::Unreadable { .. }
+        | G3RsClippyRustPolicyState::ParseError { .. } => true,
     }
 }
 
-pub(crate) fn policy_context_failure(
+pub(crate) fn rust_policy_failure(
     input: &G3RsClippyConfigChecksInput,
 ) -> Option<(&str, &str)> {
-    match &input.policy_context {
-        G3RsClippyPolicyContextState::Unreadable { rel_path, reason }
-        | G3RsClippyPolicyContextState::ParseError { rel_path, reason } => {
+    match &input.rust_policy {
+        G3RsClippyRustPolicyState::Unreadable { rel_path, reason }
+        | G3RsClippyRustPolicyState::ParseError { rel_path, reason } => {
             Some((rel_path, reason))
         }
-        G3RsClippyPolicyContextState::Missing | G3RsClippyPolicyContextState::Parsed { .. } => {
+        G3RsClippyRustPolicyState::Missing | G3RsClippyRustPolicyState::Parsed { .. } => {
             None
         }
     }
 }
 
-pub(crate) fn policy_context_rel_path(input: &G3RsClippyConfigChecksInput) -> Option<&str> {
-    match &input.policy_context {
-        G3RsClippyPolicyContextState::Unreadable { rel_path, .. }
-        | G3RsClippyPolicyContextState::ParseError { rel_path, .. }
-        | G3RsClippyPolicyContextState::Parsed { rel_path, .. } => Some(rel_path),
-        G3RsClippyPolicyContextState::Missing => None,
+pub(crate) fn rust_policy_rel_path(input: &G3RsClippyConfigChecksInput) -> Option<&str> {
+    match &input.rust_policy {
+        G3RsClippyRustPolicyState::Unreadable { rel_path, .. }
+        | G3RsClippyRustPolicyState::ParseError { rel_path, .. }
+        | G3RsClippyRustPolicyState::Parsed { rel_path, .. } => Some(rel_path),
+        G3RsClippyRustPolicyState::Missing => None,
     }
 }
 
@@ -293,7 +294,7 @@ pub(crate) const fn allow_unwrap_in_tests(clippy: &ClippyToml) -> Option<bool> {
 }
 
 pub(crate) fn expected_required_type_bans(garde_enabled: bool) -> Vec<&'static str> {
-    let mut bans = policy::BASE_TYPE_PATHS.to_vec();
+    let mut bans = crate::baseline::BASE_TYPE_PATHS.to_vec();
     if !garde_enabled {
         bans.retain(|path| !GARDE_TYPE_BANS.contains(path));
     }
@@ -301,18 +302,18 @@ pub(crate) fn expected_required_type_bans(garde_enabled: bool) -> Vec<&'static s
 }
 
 pub(crate) fn expected_type_bans(
-    profile_name: Option<&str>,
+    profile: Option<RustProfile>,
     garde_enabled: bool,
 ) -> Vec<&'static str> {
     let mut bans = expected_required_type_bans(garde_enabled);
-    if profile_name == Some("library") {
+    if profile == Some(RustProfile::Library) {
         bans.extend(EXPECTED_LIBRARY_GLOBAL_STATE_TYPES);
     }
     bans
 }
 
 pub(crate) fn expected_method_bans(garde_enabled: bool) -> Vec<&'static str> {
-    let mut bans = policy::SERVICE_METHOD_PATHS.to_vec();
+    let mut bans = crate::baseline::SERVICE_METHOD_PATHS.to_vec();
     if !garde_enabled {
         bans.retain(|path| !GARDE_METHOD_BANS.contains(path));
     }

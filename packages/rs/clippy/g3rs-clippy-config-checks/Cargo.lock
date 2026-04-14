@@ -55,7 +55,7 @@ dependencies = [
  "g3rs-clippy-config-checks-assertions",
  "g3rs-clippy-config-checks-types",
  "guardrail3-check-types",
- "guardrail3-domain-modules",
+ "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -71,6 +71,7 @@ name = "g3rs-clippy-types"
 version = "0.1.0"
 dependencies = [
  "clippy-toml-parser",
+ "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -79,8 +80,27 @@ name = "guardrail3-check-types"
 version = "0.1.0"
 
 [[package]]
-name = "guardrail3-domain-modules"
-version = "0.0.0"
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "hashbrown"

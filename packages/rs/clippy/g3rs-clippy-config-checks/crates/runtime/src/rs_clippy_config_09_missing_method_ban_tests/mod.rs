@@ -1,6 +1,6 @@
 use super::check;
 use crate::support::expected_method_bans;
-use crate::test_support::{findings, input_from_raw, parse_error_policy, parsed_policy};
+use crate::test_support::{findings, input_from_raw, parse_error_rust_policy, parsed_rust_policy};
 
 #[test]
 fn reports_missing_baseline_method_ban() {
@@ -27,7 +27,7 @@ fn stands_down_when_policy_context_is_invalid() {
     let input = crate::test_support::input_with_raw(
         "clippy.toml",
         "disallowed-methods = []\n",
-        parse_error_policy("guardrail3.toml", "bad profile"),
+        parse_error_rust_policy("guardrail3-rs.toml", "bad profile"),
         false,
         Vec::new(),
     );
@@ -42,7 +42,11 @@ fn reports_malformed_method_section() {
     let input = crate::test_support::input_with_raw(
         "clippy.toml",
         "disallowed-methods = [1]\n",
-        parsed_policy("guardrail3.toml", Some("service"), true),
+        parsed_rust_policy(
+            "guardrail3-rs.toml",
+            Some(guardrail3_rs_toml_parser::RustProfile::Service),
+            true,
+        ),
         false,
         Vec::new(),
     );
@@ -60,7 +64,11 @@ fn drops_garde_owned_method_bans_when_garde_is_disabled() {
     let input = crate::test_support::input_with_raw(
         "clippy.toml",
         "disallowed-methods = []\n",
-        parsed_policy("guardrail3.toml", Some("service"), false),
+        parsed_rust_policy(
+            "guardrail3-rs.toml",
+            Some(guardrail3_rs_toml_parser::RustProfile::Service),
+            false,
+        ),
         false,
         Vec::new(),
     );

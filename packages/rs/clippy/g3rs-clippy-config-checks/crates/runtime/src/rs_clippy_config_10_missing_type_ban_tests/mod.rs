@@ -1,6 +1,7 @@
 use super::check;
 use crate::support::expected_required_type_bans;
-use crate::test_support::{findings, input_from_raw, parsed_policy};
+use crate::test_support::{findings, input_from_raw, parsed_rust_policy};
+use guardrail3_rs_toml_parser::RustProfile;
 
 #[test]
 fn reports_missing_baseline_type_ban() {
@@ -31,7 +32,7 @@ fn reports_library_profile_specific_missing_type_ban() {
     let input = crate::test_support::input_with_raw(
         "clippy.toml",
         "disallowed-types = []\n",
-        parsed_policy("guardrail3.toml", Some("library"), true),
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
         false,
         Vec::new(),
     );
@@ -48,7 +49,7 @@ fn drops_garde_owned_type_bans_when_garde_is_disabled() {
     let input = crate::test_support::input_with_raw(
         "clippy.toml",
         "disallowed-types = []\n",
-        parsed_policy("guardrail3.toml", Some("service"), false),
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), false),
         false,
         Vec::new(),
     );

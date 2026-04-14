@@ -1,9 +1,10 @@
 use super::check;
 use crate::test_support::{baseline_toml, findings, input_from_raw};
+use guardrail3_rs_toml_parser::RustProfile;
 
 #[test]
 fn inventories_parseable_clippy_toml() {
-    let input = input_from_raw("clippy.toml", &baseline_toml("service", true));
+    let input = input_from_raw("clippy.toml", &baseline_toml(RustProfile::Service, true));
     let mut results = Vec::new();
     check(&input, &mut results);
 

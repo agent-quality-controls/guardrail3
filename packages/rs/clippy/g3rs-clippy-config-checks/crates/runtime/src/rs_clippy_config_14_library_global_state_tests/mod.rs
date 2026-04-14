@@ -1,12 +1,13 @@
 use super::check;
-use crate::test_support::{baseline_toml, findings, input_with_raw, parsed_policy};
+use crate::test_support::{baseline_toml, findings, input_with_raw, parsed_rust_policy};
+use guardrail3_rs_toml_parser::RustProfile;
 
 #[test]
 fn reports_missing_library_global_state_bans() {
     let input = input_with_raw(
         "clippy.toml",
         "disallowed-types = []\n",
-        parsed_policy("guardrail3.toml", Some("library"), true),
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
         false,
         Vec::new(),
     );
@@ -31,8 +32,8 @@ fn reports_missing_library_global_state_bans() {
 fn inventories_complete_library_global_state_bans() {
     let input = input_with_raw(
         "clippy.toml",
-        &baseline_toml("library", true),
-        parsed_policy("guardrail3.toml", Some("library"), true),
+        &baseline_toml(RustProfile::Library, true),
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
         false,
         Vec::new(),
     );

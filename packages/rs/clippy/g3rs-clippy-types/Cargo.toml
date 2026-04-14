@@ -31,4 +31,5 @@ module_name_repetitions = "allow"
 
 [dependencies]
 clippy-toml-parser = { path = "../../../parsers/clippy-toml-parser" }
+guardrail3-rs-toml-parser = { path = "../../../parsers/guardrail3-rs-toml-parser" }
 toml = "0.8"
