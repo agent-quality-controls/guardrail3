@@ -258,6 +258,32 @@ fn recovery_finds_ignored_config_in_non_banned_directory() {
 }
 
 #[test]
+fn recovery_uses_guardrail3_rs_toml_and_not_dead_guardrail3_toml() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join(".gitignore"), "guardrail3-rs.toml\nguardrail3.toml\n");
+    write(root.join("guardrail3-rs.toml"), "profile = \"service\"\n");
+    write(root.join("guardrail3.toml"), "[profile]\nname = \"service\"\n");
+
+    let crawl = crate::crawl(root).expect("crawl should succeed");
+
+    assert_entry(
+        crawl
+            .entry("guardrail3-rs.toml")
+            .expect("guardrail3-rs.toml should be recovered from ignored space"),
+        G3RsWorkspaceEntryKind::File,
+        G3RsWorkspaceIgnoreState::Ignored,
+        true,
+    );
+    assert!(
+        crawl.entry("guardrail3.toml").is_none(),
+        "dead universal guardrail3.toml should not be recovered"
+    );
+}
+
+#[test]
 fn golden_baseline_no_gitignore() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
