@@ -7,7 +7,7 @@ Current package boundary:
 - one pointed workspace root
 - one parsed root `Cargo.toml`
 - zero or more parsed workspace member `Cargo.toml` files
-- optional root-local `guardrail3.toml` policy state
+- optional root-local `guardrail3-rs.toml` Rust policy state
 
 Package-owned config rules:
 

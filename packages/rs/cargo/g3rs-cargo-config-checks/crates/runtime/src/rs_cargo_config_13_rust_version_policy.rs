@@ -1,10 +1,13 @@
 use g3rs_cargo_types::G3RsCargoPolicyRoot;
+use guardrail3_rs_toml_parser::RustProfile;
 use guardrail3_check_types::G3CheckResult;
+
+use crate::support::{rust_policy_valid, rust_profile};
 
 const ID: &str = "RS-CARGO-CONFIG-13";
 
 pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>) {
-    if root.guardrail_parse_error {
+    if !rust_policy_valid(root) {
         return;
     }
     if root.rust_version_invalid {
@@ -20,7 +23,7 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
         return;
     }
 
-    let is_library = root.profile_name.as_deref() == Some("library");
+    let is_library = rust_profile(root) == Some(RustProfile::Library);
     match (is_library, root.rust_version.as_deref()) {
         (true, Some(version)) => results.push(crate::support::info(
             ID,

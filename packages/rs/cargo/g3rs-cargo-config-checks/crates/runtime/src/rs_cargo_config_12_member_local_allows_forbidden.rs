@@ -3,8 +3,8 @@ use guardrail3_check_types::G3CheckResult;
 use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
-    allow_selector, escape_hatch_reason, explicit_allow_entries, has_valid_lint_level,
-    raw_member_lints, raw_policy_lints,
+    allow_selector, explicit_allow_entries, has_valid_lint_level, raw_member_lints,
+    raw_policy_lints, rust_policy_waivers, waiver_reason,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-12";
@@ -34,11 +34,10 @@ pub(crate) fn check(
     ] {
         for lint_name in explicit_allow_entries(lints) {
             let selector = allow_selector(family, &lint_name);
-            match escape_hatch_reason(
-                &root.escape_hatches,
-                "cargo",
+            match waiver_reason(
+                rust_policy_waivers(root),
+                ID,
                 &member.cargo_rel_path,
-                "lint_allow",
                 &selector,
             ) {
                 None => {
@@ -47,7 +46,7 @@ pub(crate) fn check(
                         ID,
                         "member-local allow entry missing reason",
                         format!(
-                            "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this lint with a reason.",
+                            "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}` without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml for this lint with a reason.",
                             member.cargo_rel_path
                         ),
                         &member.cargo_rel_path,

@@ -3,8 +3,8 @@ use guardrail3_check_types::G3CheckResult;
 use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
-    allow_selector, escape_hatch_reason, explicit_allow_entries, is_approved_allow,
-    lints_table_is_well_formed, raw_policy_lints,
+    allow_selector, explicit_allow_entries, is_approved_allow, lints_table_is_well_formed,
+    raw_policy_lints, rust_policy_valid, rust_policy_waivers, waiver_reason,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-11";
@@ -24,11 +24,10 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
                 continue;
             }
             let selector = allow_selector(family, &lint_name);
-            match escape_hatch_reason(
-                &root.escape_hatches,
-                "cargo",
+            match waiver_reason(
+                rust_policy_waivers(root),
+                ID,
                 &root.cargo_rel_path,
-                "lint_allow",
                 &selector,
             ) {
                 None => {
@@ -37,7 +36,7 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
                         ID,
                         "unapproved allow entry missing reason",
                         format!(
-                            "`{}` explicitly allows `{lint_name}` in `{family}` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this lint with a reason.",
+                            "`{}` explicitly allows `{lint_name}` in `{family}` without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml for this lint with a reason.",
                             root.cargo_rel_path
                         ),
                         &root.cargo_rel_path,
@@ -75,7 +74,7 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
     }
 
     let total = documented_count + missing_reason_count + weak_reason_count;
-    if total == 0 && lint_tables_well_formed && !root.guardrail_parse_error {
+    if total == 0 && lint_tables_well_formed && rust_policy_valid(root) {
         results.push(crate::support::info(
             ID,
             "no unapproved allow entries",

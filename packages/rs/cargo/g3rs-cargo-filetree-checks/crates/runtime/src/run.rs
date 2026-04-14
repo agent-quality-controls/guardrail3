@@ -21,7 +21,7 @@ pub fn check(input: &G3RsCargoFileTreeChecksInput) -> Vec<G3CheckResult> {
     crate::rs_cargo_filetree_14_input_failures::check_inventory(
         input.root.kind,
         &input.root.cargo_rel_path,
-        input.root.guardrail_rel_path.as_deref(),
+        input.root.rust_policy_rel_path.as_deref(),
         &input.input_failures,
         &mut results,
     );

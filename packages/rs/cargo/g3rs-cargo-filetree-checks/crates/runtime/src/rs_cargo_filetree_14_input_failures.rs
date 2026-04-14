@@ -17,7 +17,7 @@ pub(crate) fn check(input: &G3RsCargoInputFailure, results: &mut Vec<G3CheckResu
 pub(crate) fn check_inventory(
     kind: Option<G3RsCargoPolicyRootKind>,
     cargo_rel_path: &str,
-    guardrail_rel_path: Option<&str>,
+    rust_policy_rel_path: Option<&str>,
     input_failures: &[G3RsCargoInputFailure],
     results: &mut Vec<G3CheckResult>,
 ) {
@@ -26,7 +26,7 @@ pub(crate) fn check_inventory(
     };
 
     let has_input_failures = input_failures.iter().any(|failure| {
-        failure.rel_path == cargo_rel_path || Some(failure.rel_path.as_str()) == guardrail_rel_path
+        failure.rel_path == cargo_rel_path || Some(failure.rel_path.as_str()) == rust_policy_rel_path
     }) || input_failures
         .iter()
         .any(|failure| failure.rel_path.ends_with("/Cargo.toml"));

@@ -1,16 +1,15 @@
 use cargo_toml_parser::CargoToml;
 use g3rs_cargo_types::{
-    G3RsCargoEscapeHatch, G3RsCargoFileTreeRoot, G3RsCargoInputFailure,
+    G3RsCargoFileTreeRoot, G3RsCargoInputFailure,
     G3RsCargoMissingMember, G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind,
-    G3RsCargoWorkspaceMember,
+    G3RsCargoRustPolicyState, G3RsCargoWorkspaceMember,
 };
 
 pub(crate) fn build_root(
     cargo_rel_path: String,
     cargo: CargoToml,
     raw_cargo: toml::Value,
-    guardrail_rel_path: Option<String>,
-    guardrail_state: &GuardrailState,
+    rust_policy: G3RsCargoRustPolicyState,
 ) -> G3RsCargoPolicyRoot {
     let kind = crate::select::workspace_root_kind(&raw_cargo);
     let edition = root_package_field(&raw_cargo, kind, "edition");
@@ -22,10 +21,7 @@ pub(crate) fn build_root(
         cargo_rel_path,
         cargo,
         raw_cargo,
-        guardrail_rel_path,
-        profile_name: guardrail_state.profile_name.clone(),
-        escape_hatches: guardrail_state.escape_hatches.clone(),
-        guardrail_parse_error: guardrail_state.parse_error,
+        rust_policy,
         edition: edition.value,
         edition_invalid: edition.invalid,
         rust_version: rust_version.value,
@@ -64,14 +60,14 @@ pub(crate) fn build_member(
 
 pub(crate) fn filetree_root(
     kind: Option<G3RsCargoPolicyRootKind>,
-    guardrail_rel_path: Option<String>,
+    rust_policy_rel_path: Option<String>,
     members_parse_error: bool,
 ) -> G3RsCargoFileTreeRoot {
     G3RsCargoFileTreeRoot {
         kind,
         rel_dir: String::new(),
         cargo_rel_path: "Cargo.toml".to_owned(),
-        guardrail_rel_path,
+        rust_policy_rel_path,
         members_parse_error,
     }
 }
@@ -89,13 +85,6 @@ pub(crate) fn missing_member(member_rel: String) -> G3RsCargoMissingMember {
         workspace_cargo_rel_path: "Cargo.toml".to_owned(),
         member_rel,
     }
-}
-
-#[derive(Debug, Clone, Default)]
-pub(crate) struct GuardrailState {
-    pub(crate) profile_name: Option<String>,
-    pub(crate) escape_hatches: Vec<G3RsCargoEscapeHatch>,
-    pub(crate) parse_error: bool,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -145,43 +134,4 @@ fn string_field(table: Option<&toml::Value>, field: &str) -> StringFieldSnapshot
             invalid: true,
         },
     }
-}
-
-pub(crate) fn profile_name_from_guardrail(raw: &toml::Value) -> Result<Option<String>, ()> {
-    let Some(profile) = raw.get("profile") else {
-        return Ok(None);
-    };
-    let Some(name) = profile.get("name") else {
-        return Ok(None);
-    };
-
-    match name {
-        toml::Value::String(value) => Ok(Some(value.clone())),
-        _ => Err(()),
-    }
-}
-
-pub(crate) fn escape_hatches_from_guardrail(
-    raw: &toml::Value,
-) -> Result<Vec<G3RsCargoEscapeHatch>, ()> {
-    let Some(entries) = raw.get("escape_hatches") else {
-        return Ok(Vec::new());
-    };
-    let Some(entries) = entries.as_array() else {
-        return Err(());
-    };
-
-    entries
-        .iter()
-        .map(|entry| {
-            let table = entry.as_table().ok_or(())?;
-            Ok(G3RsCargoEscapeHatch {
-                family: table.get("family").and_then(toml::Value::as_str).ok_or(())?.to_owned(),
-                file: table.get("file").and_then(toml::Value::as_str).ok_or(())?.to_owned(),
-                kind: table.get("kind").and_then(toml::Value::as_str).ok_or(())?.to_owned(),
-                selector: table.get("selector").and_then(toml::Value::as_str).ok_or(())?.to_owned(),
-                reason: table.get("reason").and_then(toml::Value::as_str).ok_or(())?.to_owned(),
-            })
-        })
-        .collect()
 }

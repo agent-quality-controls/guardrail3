@@ -5,10 +5,10 @@ pub(crate) fn select_root_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3Rs
     crawl.root_file("Cargo.toml")
 }
 
-pub(crate) fn select_root_guardrail_toml(
+pub(crate) fn select_root_rust_policy_toml(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("guardrail3.toml")
+    crawl.root_file("guardrail3-rs.toml")
 }
 
 pub(crate) fn select_member_manifest<'a>(

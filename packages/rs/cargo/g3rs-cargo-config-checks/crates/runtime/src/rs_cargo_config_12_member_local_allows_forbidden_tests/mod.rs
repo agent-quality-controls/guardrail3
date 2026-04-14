@@ -1,6 +1,6 @@
 use guardrail3_check_types::G3Severity;
 
-use crate::test_support::{escape_hatch, member, root};
+use crate::test_support::{member, parsed_rust_policy, root, waiver};
 
 #[test]
 fn errors_on_member_local_allow_entries() {
@@ -16,9 +16,7 @@ fn errors_on_member_local_allow_entries() {
             [workspace.lints.clippy]
             all = { level = "deny", priority = -1 }
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -60,13 +58,15 @@ fn errors_on_documented_member_local_allow_entries() {
             [workspace.lints.clippy]
             all = { level = "deny", priority = -1 }
         "#,
-        None,
-        false,
-        vec![escape_hatch(
-            "crates/api/Cargo.toml",
-            "clippy:module_name_repetitions",
-            "Temporary lint suppression while API cleanup lands.",
-        )],
+        parsed_rust_policy(
+            None,
+            vec![waiver(
+                "RS-CARGO-CONFIG-12",
+                "crates/api/Cargo.toml",
+                "clippy:module_name_repetitions",
+                "Temporary lint suppression while API cleanup lands.",
+            )],
+        ),
     );
     let member = member(
         "crates/api",
@@ -108,9 +108,7 @@ fn inventories_when_member_has_no_local_allow_entries() {
             [workspace.lints.clippy]
             all = { level = "deny", priority = -1 }
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -151,9 +149,15 @@ fn errors_when_member_local_allow_reason_is_too_weak() {
             [workspace.lints.clippy]
             all = { level = "deny", priority = -1 }
         "#,
-        None,
-        false,
-        vec![escape_hatch("crates/api/Cargo.toml", "clippy:module_name_repetitions", "temp")],
+        parsed_rust_policy(
+            None,
+            vec![waiver(
+                "RS-CARGO-CONFIG-12",
+                "crates/api/Cargo.toml",
+                "clippy:module_name_repetitions",
+                "temp",
+            )],
+        ),
     );
     let member = member(
         "crates/api",
@@ -195,9 +199,7 @@ fn stays_quiet_when_member_override_shape_is_invalid() {
             [workspace.lints.clippy]
             all = { level = "deny", priority = -1 }
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -229,9 +231,7 @@ fn stays_quiet_when_workspace_policy_is_incomplete() {
             [workspace.lints.rust]
             warnings = "deny"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",

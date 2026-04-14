@@ -2,6 +2,7 @@
 use std::path::Path;
 
 use cargo_toml_parser::CargoToml;
+use g3rs_cargo_types::{G3RsCargoRustPolicyState, G3RsCargoWaiver};
 
 use crate::run::IngestionError;
 
@@ -30,4 +31,44 @@ pub(crate) fn parse_raw_toml(abs_path: &Path) -> Result<toml::Value, IngestionEr
         path: abs_path.to_path_buf(),
         reason: err.to_string(),
     })
+}
+
+pub(crate) fn parse_rust_policy_state(
+    rel_path: &str,
+    abs_path: &Path,
+) -> G3RsCargoRustPolicyState {
+    let content = match crate::fs::read_to_string(abs_path) {
+        Ok(content) => content,
+        Err(err) => {
+            return G3RsCargoRustPolicyState::Unreadable {
+                rel_path: rel_path.to_owned(),
+                reason: err.to_string(),
+            };
+        }
+    };
+
+    let parsed = match guardrail3_rs_toml_parser::parse(&content) {
+        Ok(parsed) => parsed,
+        Err(err) => {
+            return G3RsCargoRustPolicyState::ParseError {
+                rel_path: rel_path.to_owned(),
+                reason: err.to_string(),
+            };
+        }
+    };
+
+    G3RsCargoRustPolicyState::Parsed {
+        rel_path: rel_path.to_owned(),
+        profile: parsed.profile,
+        waivers: parsed
+            .waivers
+            .into_iter()
+            .map(|waiver| G3RsCargoWaiver {
+                rule: waiver.rule,
+                file: waiver.file,
+                selector: waiver.selector,
+                reason: waiver.reason,
+            })
+            .collect(),
+    }
 }

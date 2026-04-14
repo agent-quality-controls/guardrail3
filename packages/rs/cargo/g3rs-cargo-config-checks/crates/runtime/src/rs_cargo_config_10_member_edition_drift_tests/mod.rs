@@ -2,7 +2,7 @@ use guardrail3_check_types::G3Severity;
 use cargo_toml_parser::parse as parse_cargo_toml;
 use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind};
 
-use crate::test_support::{member, root};
+use crate::test_support::{member, parsed_rust_policy, root};
 
 #[test]
 fn warns_when_member_edition_is_older_than_workspace() {
@@ -15,9 +15,7 @@ fn warns_when_member_edition_is_older_than_workspace() {
             [workspace.package]
             edition = "2024"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -51,9 +49,7 @@ fn inventories_when_member_inherits_workspace_edition() {
             [workspace.package]
             edition = "2024"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -87,9 +83,7 @@ fn errors_when_member_edition_is_invalid() {
             [workspace.package]
             edition = "2024"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -123,9 +117,7 @@ fn errors_when_member_edition_is_unrecognized() {
             [workspace.package]
             edition = "2024"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -155,9 +147,7 @@ fn stays_quiet_when_workspace_has_no_edition_policy() {
             members = ["crates/api"]
             resolver = "2"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -214,10 +204,7 @@ fn stays_quiet_when_workspace_edition_shape_is_invalid_even_if_package_has_valid
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo,
         raw_cargo,
-        guardrail_rel_path: Some("guardrail3.toml".to_owned()),
-        profile_name: None,
-        escape_hatches: Vec::new(),
-        guardrail_parse_error: false,
+        rust_policy: g3rs_cargo_types::G3RsCargoRustPolicyState::Missing,
         edition: Some("2024".to_owned()),
         edition_invalid: true,
         rust_version: None,

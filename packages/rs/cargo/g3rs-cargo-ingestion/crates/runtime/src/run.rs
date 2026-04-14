@@ -1,6 +1,6 @@
 use g3rs_cargo_types::{
     G3RsCargoConfigChecksInput, G3RsCargoFileTreeChecksInput, G3RsCargoPolicyRootKind,
-    G3RsCargoSourceChecksInput,
+    G3RsCargoRustPolicyState, G3RsCargoSourceChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -20,15 +20,12 @@ pub fn ingest_for_config_checks(
 
     let raw_cargo = crate::parse::parse_raw_toml(&root_entry.path.abs_path)?;
     let cargo = crate::parse::parse_cargo_toml(&root_entry.path.abs_path)?;
-    let guardrail_rel_path = crate::select::select_root_guardrail_toml(crawl)
-        .map(|entry| entry.path.rel_path.clone());
-    let guardrail_state = read_guardrail_state(crawl);
+    let rust_policy = read_rust_policy_state(crawl);
     let root = crate::ingest::build_root(
         root_entry.path.rel_path.clone(),
         cargo,
         raw_cargo.clone(),
-        guardrail_rel_path,
-        &guardrail_state,
+        rust_policy,
     );
 
     let workspace_members = if root.kind == G3RsCargoPolicyRootKind::WorkspaceRoot {
@@ -54,7 +51,7 @@ pub fn ingest_for_file_tree_checks(
 ) -> Result<G3RsCargoFileTreeChecksInput, IngestionError> {
     let root_entry = crate::select::select_root_cargo_toml(crawl)
         .ok_or(IngestionError::CargoTomlNotFound)?;
-    let guardrail_rel_path = crate::select::select_root_guardrail_toml(crawl)
+    let rust_policy_rel_path = crate::select::select_root_rust_policy_toml(crawl)
         .map(|entry| entry.path.rel_path.clone());
     let mut input_failures = Vec::new();
     let mut missing_members = Vec::new();
@@ -165,37 +162,28 @@ pub fn ingest_for_file_tree_checks(
         }
     }
 
-    if let Some(guardrail_entry) = crate::select::select_root_guardrail_toml(crawl) {
-        if !guardrail_entry.readable {
+    match read_rust_policy_state(crawl) {
+        G3RsCargoRustPolicyState::Missing | G3RsCargoRustPolicyState::Parsed { .. } => {}
+        G3RsCargoRustPolicyState::Unreadable { rel_path, reason } => {
             input_failures.push(crate::ingest::input_failure(
-                guardrail_entry.path.rel_path.clone(),
-                "Failed to parse root-local guardrail3.toml for cargo profile resolution: file is not readable.",
+                rel_path,
+                format!(
+                    "Failed to parse root-local guardrail3-rs.toml for cargo Rust policy resolution: {reason}"
+                ),
             ));
-        } else if let Err(error) = crate::parse::parse_raw_toml(&guardrail_entry.path.abs_path) {
-            match error {
-                IngestionError::ParseFailed { reason, .. } => {
-                    input_failures.push(crate::ingest::input_failure(
-                        guardrail_entry.path.rel_path.clone(),
-                        format!(
-                            "Failed to parse root-local guardrail3.toml for cargo profile resolution: {reason}"
-                        ),
-                    ));
-                }
-                IngestionError::Unreadable { reason, .. } => {
-                    input_failures.push(crate::ingest::input_failure(
-                        guardrail_entry.path.rel_path.clone(),
-                        format!(
-                            "Failed to parse root-local guardrail3.toml for cargo profile resolution: {reason}"
-                        ),
-                    ));
-                }
-                other => return Err(other),
-            }
+        }
+        G3RsCargoRustPolicyState::ParseError { rel_path, reason } => {
+            input_failures.push(crate::ingest::input_failure(
+                rel_path,
+                format!(
+                    "Failed to parse root-local guardrail3-rs.toml for cargo Rust policy resolution: {reason}"
+                ),
+            ));
         }
     }
 
     Ok(G3RsCargoFileTreeChecksInput {
-        root: crate::ingest::filetree_root(kind, guardrail_rel_path, members_parse_error),
+        root: crate::ingest::filetree_root(kind, rust_policy_rel_path, members_parse_error),
         missing_members,
         input_failures,
     })
@@ -235,39 +223,15 @@ fn collect_config_members(
     Ok(members)
 }
 
-fn read_guardrail_state(crawl: &G3RsWorkspaceCrawl) -> crate::ingest::GuardrailState {
-    let Some(entry) = crate::select::select_root_guardrail_toml(crawl) else {
-        return crate::ingest::GuardrailState::default();
+fn read_rust_policy_state(crawl: &G3RsWorkspaceCrawl) -> G3RsCargoRustPolicyState {
+    let Some(entry) = crate::select::select_root_rust_policy_toml(crawl) else {
+        return G3RsCargoRustPolicyState::Missing;
     };
     if !entry.readable {
-        return crate::ingest::GuardrailState {
-            parse_error: true,
-            ..crate::ingest::GuardrailState::default()
+        return G3RsCargoRustPolicyState::Unreadable {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "file is not readable".to_owned(),
         };
     }
-    let Ok(raw_guardrail) = crate::parse::parse_raw_toml(&entry.path.abs_path) else {
-        return crate::ingest::GuardrailState {
-            parse_error: true,
-            ..crate::ingest::GuardrailState::default()
-        };
-    };
-
-    let Ok(profile_name) = crate::ingest::profile_name_from_guardrail(&raw_guardrail) else {
-        return crate::ingest::GuardrailState {
-            parse_error: true,
-            ..crate::ingest::GuardrailState::default()
-        };
-    };
-    let Ok(escape_hatches) = crate::ingest::escape_hatches_from_guardrail(&raw_guardrail) else {
-        return crate::ingest::GuardrailState {
-            parse_error: true,
-            ..crate::ingest::GuardrailState::default()
-        };
-    };
-
-    crate::ingest::GuardrailState {
-        profile_name,
-        escape_hatches,
-        parse_error: false,
-    }
+    crate::parse::parse_rust_policy_state(&entry.path.rel_path, &entry.path.abs_path)
 }
