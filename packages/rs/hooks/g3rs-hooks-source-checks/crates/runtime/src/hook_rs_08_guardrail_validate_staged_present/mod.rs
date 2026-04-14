@@ -15,28 +15,28 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         found,
         input.rel_path,
         "Rust guardrail validate step present",
-        "Hook runs g3rs Rust validation on staged changes.",
+        "Hook runs g3rs Rust validation with an explicit workspace path.",
         "Rust guardrail validate step missing",
-        "Hook does not execute `g3rs ... validate --staged`.",
+        "Hook does not execute `g3rs validate --path ...`.",
         results,
     );
 }
 
 pub(crate) fn script_contains_guardrail_step(parsed: &ParsedShellScript) -> bool {
-    any_resolved_command(parsed, is_guardrail_validate_staged_command)
+    any_resolved_command(parsed, is_guardrail_validate_path_command)
 }
 
 pub(crate) fn script_contains_path_qualified_guardrail_step(
     parsed: &ParsedShellScript,
 ) -> bool {
-    any_resolved_command(parsed, is_path_qualified_guardrail_validate_staged_command)
+    any_resolved_command(parsed, is_path_qualified_guardrail_validate_path_command)
 }
 
-fn is_path_qualified_guardrail_validate_staged_command(command: &ResolvedCommand) -> bool {
-    command.path_qualified() && is_guardrail_validate_staged_command(command)
+fn is_path_qualified_guardrail_validate_path_command(command: &ResolvedCommand) -> bool {
+    command.path_qualified() && is_guardrail_validate_path_command(command)
 }
 
-fn is_guardrail_validate_staged_command(command: &ResolvedCommand) -> bool {
+fn is_guardrail_validate_path_command(command: &ResolvedCommand) -> bool {
     if command.command_name() != "g3rs" {
         return false;
     }
@@ -49,19 +49,63 @@ fn is_guardrail_validate_staged_command(command: &ResolvedCommand) -> bool {
         return false;
     }
 
-    let saw_validate = match args.first().map(String::as_str) {
-        Some("rs") => args.get(1).map(String::as_str) == Some("validate"),
-        Some("validate") => true,
-        _ => false,
-    };
-
-    if !saw_validate {
+    if args.first().map(String::as_str) != Some("validate") {
         return false;
     }
 
-    args.iter()
-        .all(|arg| !is_help_or_version_flag(arg))
-        && args.iter().any(|arg| arg == "--staged")
+    parse_validate_args(&args[1..])
+}
+
+fn parse_validate_args(args: &[String]) -> bool {
+    let mut saw_path = false;
+    let mut index = 0usize;
+    while let Some(arg) = args.get(index).map(String::as_str) {
+        if is_help_or_version_flag(arg) {
+            return false;
+        }
+        if let Some(path) = arg.strip_prefix("--path=") {
+            if path.is_empty() {
+                return false;
+            }
+            saw_path = true;
+            index += 1;
+            continue;
+        }
+        if arg == "--path" {
+            let Some(value) = args.get(index + 1).map(String::as_str) else {
+                return false;
+            };
+            if value.starts_with('-') {
+                return false;
+            }
+            saw_path = true;
+            index += 2;
+            continue;
+        }
+        if let Some(value) = arg.strip_prefix("--family=") {
+            if value.is_empty() {
+                return false;
+            }
+            index += 1;
+            continue;
+        }
+        if arg == "--family" {
+            let Some(value) = args.get(index + 1).map(String::as_str) else {
+                return false;
+            };
+            if value.starts_with('-') {
+                return false;
+            }
+            index += 2;
+            continue;
+        }
+        if arg == "--inventory" {
+            index += 1;
+            continue;
+        }
+        return false;
+    }
+    saw_path
 }
 
 fn push_presence_result(

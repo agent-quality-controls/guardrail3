@@ -21,7 +21,7 @@ fn warns_when_config_names_only_appear_in_comment() {
 fn passes_when_trigger_logic_checks_guardrail3_rs_toml() {
     let content = r#"
 if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
-    g3rs rs validate --staged .
+    g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -30,7 +30,7 @@ fi
 
 #[test]
 fn passes_when_direct_grep_and_validation_chain_covers_all_configs() {
-    let content = r#"echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$' && g3rs rs validate --staged ."#;
+    let content = r#"echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$' && g3rs validate --path ."#;
     let results = run_case(content);
     assertions::assert_present(&results);
 }
@@ -39,7 +39,7 @@ fn passes_when_direct_grep_and_validation_chain_covers_all_configs() {
 fn passes_when_trigger_logic_checks_all_rust_guardrail_configs() {
     let content = r#"
 if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
-    g3rs rs validate --staged .
+    g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -57,7 +57,7 @@ fn warns_when_config_names_only_appear_in_echo_banner() {
 fn warns_when_printf_prose_mentions_configs_before_validation() {
     let content = r#"
 if printf '%s\n' 'guardrail3-rs.toml clippy.toml .clippy.toml deny.toml .deny.toml rustfmt.toml .rustfmt.toml rust-toolchain.toml'; then
-    g3rs rs validate --staged .
+    g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -77,7 +77,7 @@ rustfmt.toml
 .rustfmt.toml
 rust-toolchain.toml
 EOF
-g3rs rs validate --staged .
+g3rs validate --path .
 "#;
     let results = run_case(content);
     assertions::assert_missing(&results);
@@ -85,7 +85,7 @@ g3rs rs validate --staged .
 
 #[test]
 fn warns_when_doc_grep_mentions_configs_before_validation() {
-    let content = r#"grep -q 'guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml' README.md && g3rs rs validate --staged ."#;
+    let content = r#"grep -q 'guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml' README.md && g3rs validate --path ."#;
     let results = run_case(content);
     assertions::assert_missing(&results);
 }
@@ -98,7 +98,7 @@ if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.
 fi
 
 if echo "$STAGED_FILES" | grep -qE '(\.rs|Cargo\.toml)$'; then
-    g3rs rs validate --staged .
+    g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -109,7 +109,7 @@ fi
 fn warns_when_only_dotted_variants_are_covered() {
     let content = r#"
 if echo "$STAGED_FILES" | grep -qE '(\.clippy\.toml|\.deny\.toml|\.rustfmt\.toml|guardrail3-rs\.toml|rust-toolchain\.toml)$'; then
-    g3rs rs validate --staged .
+    g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -120,7 +120,7 @@ fi
 fn passes_when_config_trigger_block_runs_path_qualified_guardrail_validation() {
     let content = r#"
 if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
-    /usr/local/bin/g3rs rs validate --staged .
+    /usr/local/bin/g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -129,7 +129,7 @@ fi
 
 #[test]
 fn passes_when_all_configs_are_checked_in_a_single_line_if_block() {
-    let content = r#"if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then g3rs rs validate --staged .; fi"#;
+    let content = r#"if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then g3rs validate --path .; fi"#;
     let results = run_case(content);
     assertions::assert_present(&results);
 }
@@ -138,7 +138,7 @@ fn passes_when_all_configs_are_checked_in_a_single_line_if_block() {
 fn warns_when_only_lookalike_config_names_are_covered() {
     let content = r#"
 if echo "$STAGED_FILES" | grep -qE '(myguardrail3-rs\.toml|custom-clippy\.toml|project\.clippy\.toml|company-deny\.toml|project\.deny\.toml|team-rustfmt\.toml|project\.rustfmt\.toml|rust-toolchain\.toml\.bak)$'; then
-    g3rs rs validate --staged .
+    g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -150,7 +150,7 @@ fn passes_when_case_trigger_covers_all_rust_guardrail_configs() {
     let content = r#"
 case "$changed_path" in
     guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml)
-        g3rs rs validate --staged .
+        g3rs validate --path .
         ;;
 esac
 "#;
@@ -164,7 +164,7 @@ fn warns_when_if_branch_mentions_configs_but_else_branch_runs_validation() {
 if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
     echo "config changed"
 else
-    g3rs rs validate --staged .
+    g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -179,7 +179,7 @@ case "$changed_path" in
         echo "config changed"
         ;;
     *.rs)
-        g3rs rs validate --staged .
+        g3rs validate --path .
         ;;
 esac
 "#;
@@ -189,14 +189,14 @@ esac
 
 #[test]
 fn warns_when_single_line_if_mentions_configs_but_else_branch_runs_validation() {
-    let content = r#"if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then echo "config changed"; else g3rs rs validate --staged .; fi"#;
+    let content = r#"if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then echo "config changed"; else g3rs validate --path .; fi"#;
     let results = run_case(content);
     assertions::assert_missing(&results);
 }
 
 #[test]
 fn passes_when_compact_single_line_if_routes_config_changes_to_validation() {
-    let content = r#"if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$';then g3rs rs validate --staged .;fi"#;
+    let content = r#"if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$';then g3rs validate --path .;fi"#;
     let results = run_case(content);
     assertions::assert_present(&results);
 }
@@ -207,7 +207,7 @@ fn passes_when_nested_if_and_case_route_config_changes_to_validation() {
 if test -n "$changed_path"; then
     case "$changed_path" in
         guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml)
-            g3rs rs validate --staged .
+            g3rs validate --path .
             ;;
     esac
 fi
@@ -225,7 +225,7 @@ if test -n "$changed_path"; then
             echo "config changed"
             ;;
         *.rs)
-            g3rs rs validate --staged .
+            g3rs validate --path .
             ;;
     esac
 fi
@@ -240,7 +240,7 @@ fn passes_when_elif_trigger_routes_config_changes_to_validation() {
 if echo "$STAGED_FILES" | grep -qE '(\.rs|Cargo\.toml)$'; then
     echo "rust files changed"
 elif [[ "$STAGED_FILES" == *guardrail3-rs.toml* || "$STAGED_FILES" == *clippy.toml* || "$STAGED_FILES" == *.clippy.toml* || "$STAGED_FILES" == *deny.toml* || "$STAGED_FILES" == *.deny.toml* || "$STAGED_FILES" == *rustfmt.toml* || "$STAGED_FILES" == *.rustfmt.toml* || "$STAGED_FILES" == *rust-toolchain.toml* ]]; then
-    g3rs rs validate --staged .
+    g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -259,7 +259,7 @@ if [ "$changed" = "guardrail3-rs.toml" ] || \
    [ "$changed" = ".rustfmt.toml" ] || \
    [ "$changed" = "rust-toolchain.toml" ]
 then
-    g3rs rs validate --staged .
+    g3rs validate --path .
 fi
 "#;
     let results = run_case(content);
@@ -268,21 +268,21 @@ fi
 
 #[test]
 fn passes_when_single_line_case_routes_config_changes_to_validation() {
-    let content = r#"case "$changed_path" in guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml) g3rs rs validate --staged . ;; esac"#;
+    let content = r#"case "$changed_path" in guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml) g3rs validate --path . ;; esac"#;
     let results = run_case(content);
     assertions::assert_present(&results);
 }
 
 #[test]
 fn warns_when_single_line_case_mentions_configs_but_other_arm_runs_validation() {
-    let content = r#"case "$changed_path" in guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml) echo "config changed" ;; *.rs) g3rs rs validate --staged . ;; esac"#;
+    let content = r#"case "$changed_path" in guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml) echo "config changed" ;; *.rs) g3rs validate --path . ;; esac"#;
     let results = run_case(content);
     assertions::assert_missing(&results);
 }
 
 #[test]
 fn passes_when_compact_single_line_case_routes_config_changes_to_validation() {
-    let content = r#"case "$changed_path" in guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml)g3rs rs validate --staged .;;esac"#;
+    let content = r#"case "$changed_path" in guardrail3-rs.toml|clippy.toml|.clippy.toml|deny.toml|.deny.toml|rustfmt.toml|.rustfmt.toml|rust-toolchain.toml)g3rs validate --path .;;esac"#;
     let results = run_case(content);
     assertions::assert_present(&results);
 }
