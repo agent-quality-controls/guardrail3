@@ -83,7 +83,7 @@ pub(crate) const DENY_BANS_SERIALIZATION: Module = Module {
 };
 
 pub(crate) const DENY_BANS_REGEX: Module = Module {
-    content: r#"    { name = "regex", wrappers = ["tree-sitter", "globset", "ignore"] },
+    content: r#"    { name = "regex", wrappers = [] },
     { name = "fancy-regex", wrappers = [] },
     { name = "onig", wrappers = [] },
     { name = "pcre2", wrappers = [] },
@@ -141,7 +141,7 @@ ignore = true"#,
 pub(crate) const DENY_ADVISORIES: Module = Module {
     content: r#"[advisories]
 unmaintained = "workspace"
-yanked = "warn"
+yanked = "deny"
 ignore = []"#,
 };
 

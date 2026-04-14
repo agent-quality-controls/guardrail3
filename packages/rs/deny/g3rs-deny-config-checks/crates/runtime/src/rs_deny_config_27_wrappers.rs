@@ -53,35 +53,27 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
             continue;
         };
 
-        if !expected_ban.wrappers.is_empty() && actual_wrappers != expected_ban.wrappers {
-            results.push(G3CheckResult::new(
-                ID.to_owned(),
-                G3Severity::Error,
-                "managed ban wrappers changed".to_owned(),
+        if actual_wrappers != expected_ban.wrappers {
+            let message = if expected_ban.wrappers.is_empty() {
+                format!(
+                    "`{}` ban `{name}` must not add wrappers.",
+                    input.deny_rel_path
+                )
+            } else {
                 format!(
                     "`{}` ban `{name}` must keep wrappers `{}`.",
                     input.deny_rel_path,
                     join_set(&expected_ban.wrappers)
-                ),
+                )
+            };
+            results.push(G3CheckResult::new(
+                ID.to_owned(),
+                G3Severity::Error,
+                "managed ban wrappers changed".to_owned(),
+                message,
                 Some(input.deny_rel_path.clone()),
                 None,
             ));
-        } else if expected_ban.wrappers.is_empty() && !actual_wrappers.is_empty() {
-            results.push(
-                G3CheckResult::new(
-                    ID.to_owned(),
-                    G3Severity::Info,
-                    "project-specific ban wrappers".to_owned(),
-                    format!(
-                        "`{}` ban `{name}` adds project-specific wrappers `{}`.",
-                        input.deny_rel_path,
-                        join_set(&actual_wrappers)
-                    ),
-                    Some(input.deny_rel_path.clone()),
-                    None,
-                )
-                .into_inventory(),
-            );
         }
     }
 }

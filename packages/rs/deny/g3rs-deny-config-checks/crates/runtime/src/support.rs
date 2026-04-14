@@ -65,7 +65,7 @@ pub(crate) fn expected_advisory_baseline() -> (String, String) {
     let yanked = advisories
         .and_then(|value| value.get("yanked"))
         .and_then(toml::Value::as_str)
-        .unwrap_or("warn");
+        .unwrap_or("deny");
     (unmaintained.to_owned(), yanked.to_owned())
 }
 
