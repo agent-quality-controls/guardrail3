@@ -134,8 +134,18 @@ pub struct G3RsArchFileTreeCrate {
     pub cargo_parse_error: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
+pub enum G3RsArchRustPolicyState {
+    Missing,
+    Unreadable { rel_path: String, reason: String },
+    ParseError { rel_path: String, reason: String },
+    Parsed { rel_path: String, waivers: Vec<WaiverConfig> },
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct G3RsArchFileTreeChecksInput {
     pub crates: Vec<G3RsArchFileTreeCrate>,
     pub module_dirs: Vec<G3RsArchModuleDir>,
+    pub rust_policy: G3RsArchRustPolicyState,
 }
+use guardrail3_rs_toml_parser::WaiverConfig;

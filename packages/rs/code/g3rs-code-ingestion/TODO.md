@@ -6,5 +6,4 @@
   - pure workspace root with nested member packages
 - add more package-level parity smoke tests as more `code` source rules move over
 - add broader config-lane parity coverage as more code config rules move over
-- add more file-tree coverage around mixed root/member structural caps if new edge cases show up
 - decide whether fixture filtering should become shared utility instead of local duplication

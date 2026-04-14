@@ -21,6 +21,3 @@ workspace = true
 [dependencies]
 g3rs-code-file-tree-checks-types = { path = "../types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0", features = ["types"] }
-
-[dev-dependencies]
-g3rs-code-file-tree-checks-assertions = { path = "../assertions" }

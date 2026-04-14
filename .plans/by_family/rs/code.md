@@ -39,7 +39,7 @@ Agent handoff focus:
   - `apps/guardrail3/crates/app/rs/family_mapper/src/views.rs`
 - migrate the family from routed-root thinking to repo-global owned-file
   routing
-- verify file ownership, structural caps, and exception-comment discovery all
+- verify file ownership and exception-comment discovery both
   respect the shared owned source surface rather than routed roots
 
 Known current risk:

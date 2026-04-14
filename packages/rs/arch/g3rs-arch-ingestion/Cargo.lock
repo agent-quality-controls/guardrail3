@@ -165,6 +165,7 @@ dependencies = [
  "g3rs-workspace-crawl",
  "glob",
  "guardrail3-check-types",
+ "guardrail3-rs-toml-parser",
  "proc-macro2",
  "syn",
  "tempfile",
@@ -209,6 +210,9 @@ dependencies = [
 [[package]]
 name = "g3rs-arch-types"
 version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser",
+]
 
 [[package]]
 name = "g3rs-workspace-crawl"
@@ -266,6 +270,29 @@ dependencies = [
 [[package]]
 name = "guardrail3-check-types"
 version = "0.1.0"
+
+[[package]]
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "hashbrown"
@@ -450,6 +477,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
 dependencies = [
  "serde_core",
+ "serde_derive",
 ]
 
 [[package]]

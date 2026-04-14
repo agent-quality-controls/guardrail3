@@ -8,8 +8,8 @@ use g3rs_arch_ingestion_types::{
 };
 use g3rs_arch_types::{
     G3RsArchBoundaryRef, G3RsArchConfigCrate, G3RsArchCrateNode, G3RsArchDependencyEdge,
-    G3RsArchFacadeItem, G3RsArchFacadeSurface, G3RsArchFeatureExport,
-    G3RsArchFileTreeCrate, G3RsArchModuleDir, G3RsArchSourceCrate, G3RsArchSourceFile,
+    G3RsArchFacadeItem, G3RsArchFacadeSurface, G3RsArchFeatureExport, G3RsArchFileTreeCrate,
+    G3RsArchModuleDir, G3RsArchRustPolicyState, G3RsArchSourceCrate, G3RsArchSourceFile,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use proc_macro2::Span;
@@ -57,7 +57,42 @@ pub fn ingest_for_file_tree_checks(
     Ok(G3RsArchFileTreeChecksInput {
         crates: collect_file_tree_crates(&crate_nodes),
         module_dirs,
+        rust_policy: ingest_rust_policy(&view),
     })
+}
+
+fn ingest_rust_policy(view: &CrawlView<'_>) -> G3RsArchRustPolicyState {
+    let Some(entry) = view.entry("guardrail3-rs.toml") else {
+        return G3RsArchRustPolicyState::Missing;
+    };
+    if !entry.readable {
+        return G3RsArchRustPolicyState::Unreadable {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "file is not readable".to_owned(),
+        };
+    }
+    let content = match view.read_file("guardrail3-rs.toml") {
+        Ok(content) => content,
+        Err(err) => {
+            return G3RsArchRustPolicyState::Unreadable {
+                rel_path: entry.path.rel_path.clone(),
+                reason: err.to_string(),
+            };
+        }
+    };
+    let parsed = match guardrail3_rs_toml_parser::parse(&content) {
+        Ok(parsed) => parsed,
+        Err(err) => {
+            return G3RsArchRustPolicyState::ParseError {
+                rel_path: entry.path.rel_path.clone(),
+                reason: err.to_string(),
+            };
+        }
+    };
+    G3RsArchRustPolicyState::Parsed {
+        rel_path: entry.path.rel_path.clone(),
+        waivers: parsed.waivers,
+    }
 }
 
 fn collect_source_crates(crate_nodes: &[G3RsArchCrateNode]) -> Vec<G3RsArchSourceCrate> {

@@ -368,6 +368,55 @@ version = "0.1.0"
 }
 
 #[test]
+fn file_tree_ingestion_threads_structural_split_waivers_from_rust_policy() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::write(
+        root.path().join("guardrail3-rs.toml"),
+        r#"
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crate_a/Cargo.toml"
+selector = "structural-split"
+reason = "Rule runtime crate intentionally aggregates one rule per file and is the package boundary by design."
+"#,
+    )
+    .expect("rust policy");
+    fs::create_dir_all(root.path().join("crate_a/src/deep/a/b/c")).expect("crate dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(root.path().join("crate_a/src/lib.rs"), "pub mod api;\n").expect("crate lib");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let input = crate::ingest_for_file_tree_checks(&crawl).expect("filetree ingest");
+
+    match input.rust_policy {
+        g3rs_arch_types::G3RsArchRustPolicyState::Parsed { waivers, .. } => {
+            assert_eq!(waivers.len(), 1, "{waivers:#?}");
+            assert_eq!(waivers[0].rule, "RS-ARCH-FILETREE-07");
+            assert_eq!(waivers[0].file, "crate_a/Cargo.toml");
+            assert_eq!(waivers[0].selector, "structural-split");
+        }
+        ref other => panic!("expected parsed rust policy, got {other:#?}"),
+    }
+}
+
+#[test]
 fn file_tree_pipeline_reports_missing_facade_and_complexity() {
     let root = tempdir().expect("tempdir");
 

@@ -1,4 +1,8 @@
-use g3rs_arch_types::{G3RsArchFileTreeChecksInput, G3RsArchFileTreeCrate, G3RsArchModuleDir};
+use g3rs_arch_types::{
+    G3RsArchFileTreeChecksInput, G3RsArchFileTreeCrate, G3RsArchModuleDir,
+    G3RsArchRustPolicyState,
+};
+use guardrail3_rs_toml_parser::WaiverConfig;
 
 pub(crate) fn crate_node(rel_dir: &str) -> G3RsArchFileTreeCrate {
     G3RsArchFileTreeCrate {
@@ -33,7 +37,32 @@ pub(crate) fn input(
     G3RsArchFileTreeChecksInput {
         crates,
         module_dirs,
+        rust_policy: G3RsArchRustPolicyState::Missing,
     }
+}
+
+pub(crate) fn input_with_rust_policy(
+    crates: Vec<G3RsArchFileTreeCrate>,
+    module_dirs: Vec<G3RsArchModuleDir>,
+    rust_policy: G3RsArchRustPolicyState,
+) -> G3RsArchFileTreeChecksInput {
+    G3RsArchFileTreeChecksInput {
+        crates,
+        module_dirs,
+        rust_policy,
+    }
+}
+
+pub(crate) fn waiver(rule: &str, file: &str, selector: &str, reason: &str) -> WaiverConfig {
+    let parsed = guardrail3_rs_toml_parser::parse(&format!(
+        "[[waivers]]\nrule = \"{rule}\"\nfile = \"{file}\"\nselector = \"{selector}\"\nreason = \"{reason}\"\n"
+    ))
+    .expect("waiver fixture should parse");
+    parsed
+        .waivers
+        .into_iter()
+        .next()
+        .expect("waiver fixture should contain one waiver")
 }
 
 fn join_rel(dir: &str, child: &str) -> String {

@@ -23,6 +23,7 @@ g3rs-arch-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-arch-types = { path = "../../../g3rs-arch-types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
 glob = "0.3"
+guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0", default-features = false, features = ["api"] }
 proc-macro2 = { version = "1", features = ["span-locations"] }
 syn = { version = "2", features = ["full", "parsing"] }
 toml = "0.8"

@@ -6,7 +6,7 @@ pub fn check(input: &G3RsArchFileTreeChecksInput) -> Vec<G3CheckResult> {
 
     for node in &input.crates {
         crate::rs_arch_01_crate_has_facade::check(node, &mut results);
-        crate::rs_arch_07a_structural_split::check(node, &mut results);
+        crate::rs_arch_07a_structural_split::check(node, &input.rust_policy, &mut results);
     }
 
     for module_dir in &input.module_dirs {
