@@ -134,3 +134,46 @@ fn stays_quiet_when_rust_policy_parse_error_suppresses_clean_inventory() {
 
     assert!(results.is_empty(), "{results:#?}");
 }
+
+#[test]
+fn stands_down_when_rust_policy_parse_error_blocks_reason_resolution() {
+    let root = root(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            [workspace.lints.rust]
+            warnings = "allow"
+        "#,
+        parse_error_rust_policy("bad rust policy"),
+    );
+    let mut results = Vec::new();
+
+    crate::rs_cargo_config_11_unapproved_allow_entries::check(&root, &mut results);
+
+    assert!(results.is_empty(), "{results:#?}");
+}
+
+#[test]
+fn stands_down_when_rust_policy_is_unreadable() {
+    let root = root(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            [workspace.lints.rust]
+            warnings = "allow"
+        "#,
+        g3rs_cargo_types::G3RsCargoRustPolicyState::Unreadable {
+            rel_path: "guardrail3-rs.toml".to_owned(),
+            reason: "file is not readable".to_owned(),
+        },
+    );
+    let mut results = Vec::new();
+
+    crate::rs_cargo_config_11_unapproved_allow_entries::check(&root, &mut results);
+
+    assert!(results.is_empty(), "{results:#?}");
+}
