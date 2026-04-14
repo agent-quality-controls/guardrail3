@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use glob::Pattern;
 use g3rs_arch_ingestion_types::{
     G3RsArchConfigChecksInput, G3RsArchFileTreeChecksInput, G3RsArchIngestionError,
     G3RsArchSourceChecksInput,
@@ -12,6 +11,7 @@ use g3rs_arch_types::{
     G3RsArchModuleDir, G3RsArchRustPolicyState, G3RsArchSourceCrate, G3RsArchSourceFile,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use glob::Pattern;
 use proc_macro2::Span;
 use syn::spanned::Spanned;
 use toml::Value;
@@ -151,7 +151,9 @@ fn collect_file_tree_crates(crate_nodes: &[G3RsArchCrateNode]) -> Vec<G3RsArchFi
         .collect()
 }
 
-fn collect_crate_nodes(view: &CrawlView<'_>) -> Result<Vec<G3RsArchCrateNode>, G3RsArchIngestionError> {
+fn collect_crate_nodes(
+    view: &CrawlView<'_>,
+) -> Result<Vec<G3RsArchCrateNode>, G3RsArchIngestionError> {
     let mut cargo_dirs = discover_crate_dirs(view)?;
     cargo_dirs.sort();
     cargo_dirs.dedup();
@@ -162,7 +164,10 @@ fn collect_crate_nodes(view: &CrawlView<'_>) -> Result<Vec<G3RsArchCrateNode>, G
         .map(|dir| build_crate_node(view, dir, &crate_dirs))
         .collect::<Result<Vec<_>, _>>()?;
 
-    let rel_dirs = nodes.iter().map(|node| node.rel_dir.clone()).collect::<Vec<_>>();
+    let rel_dirs = nodes
+        .iter()
+        .map(|node| node.rel_dir.clone())
+        .collect::<Vec<_>>();
     for rel_dir in rel_dirs {
         let parent = find_parent_dir(&rel_dir, &nodes);
         if let Some(node) = nodes.iter_mut().find(|node| node.rel_dir == rel_dir) {
@@ -184,14 +189,17 @@ fn discover_crate_dirs(view: &CrawlView<'_>) -> Result<Vec<String>, G3RsArchInge
         });
     }
 
-    let content = view.read_file("Cargo.toml").map_err(|err| G3RsArchIngestionError::Unreadable {
-        path: root_entry.path.abs_path.clone(),
-        reason: err.to_string(),
-    })?;
-    let parsed = toml::from_str::<Value>(&content).map_err(|err| G3RsArchIngestionError::ParseFailed {
-        path: root_entry.path.abs_path.clone(),
-        reason: err.to_string(),
-    })?;
+    let content =
+        view.read_file("Cargo.toml")
+            .map_err(|err| G3RsArchIngestionError::Unreadable {
+                path: root_entry.path.abs_path.clone(),
+                reason: err.to_string(),
+            })?;
+    let parsed =
+        toml::from_str::<Value>(&content).map_err(|err| G3RsArchIngestionError::ParseFailed {
+            path: root_entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        })?;
 
     let mut dirs = Vec::new();
     if parsed.get("package").is_some() {
@@ -242,7 +250,11 @@ fn select_workspace_member_dirs(
         .all_dir_rels()
         .filter(|rel_dir| !rel_dir.is_empty())
         .filter(|rel_dir| view.file_exists(&CrawlView::join_rel(rel_dir, "Cargo.toml")))
-        .filter(|rel_dir| member_patterns.iter().any(|pattern| pattern.matches(rel_dir)))
+        .filter(|rel_dir| {
+            member_patterns
+                .iter()
+                .any(|pattern| pattern.matches(rel_dir))
+        })
         .map(str::to_owned)
         .collect::<Vec<_>>();
 
@@ -253,24 +265,31 @@ fn select_workspace_member_dirs(
         .flatten()
         .filter_map(Value::as_str)
     {
-        let parsed_pattern = Pattern::new(pattern).map_err(|err| G3RsArchIngestionError::ParseFailed {
-            path: view.root_abs_path().join("Cargo.toml"),
-            reason: format!("invalid workspace member pattern `{pattern}`: {err}"),
-        })?;
+        let parsed_pattern =
+            Pattern::new(pattern).map_err(|err| G3RsArchIngestionError::ParseFailed {
+                path: view.root_abs_path().join("Cargo.toml"),
+                reason: format!("invalid workspace member pattern `{pattern}`: {err}"),
+            })?;
         if !all_matching_member_dirs
             .iter()
             .any(|member_dir| parsed_pattern.matches(member_dir))
         {
             return Err(G3RsArchIngestionError::ParseFailed {
                 path: view.root_abs_path().join("Cargo.toml"),
-                reason: format!("workspace member pattern `{pattern}` did not resolve to any Cargo.toml"),
+                reason: format!(
+                    "workspace member pattern `{pattern}` did not resolve to any Cargo.toml"
+                ),
             });
         }
     }
 
     Ok(all_matching_member_dirs
         .into_iter()
-        .filter(|rel_dir| !exclude_patterns.iter().any(|pattern| pattern.matches(rel_dir)))
+        .filter(|rel_dir| {
+            !exclude_patterns
+                .iter()
+                .any(|pattern| pattern.matches(rel_dir))
+        })
         .collect())
 }
 
@@ -280,10 +299,12 @@ fn build_crate_node(
     crate_dirs: &[&str],
 ) -> Result<G3RsArchCrateNode, G3RsArchIngestionError> {
     let cargo_rel_path = CrawlView::join_rel(dir, "Cargo.toml");
-    let entry = view.entry(&cargo_rel_path).ok_or_else(|| G3RsArchIngestionError::Unreadable {
-        path: view.root_abs_path().join(&cargo_rel_path),
-        reason: "selected Cargo.toml missing from crawl".to_owned(),
-    })?;
+    let entry = view
+        .entry(&cargo_rel_path)
+        .ok_or_else(|| G3RsArchIngestionError::Unreadable {
+            path: view.root_abs_path().join(&cargo_rel_path),
+            reason: "selected Cargo.toml missing from crawl".to_owned(),
+        })?;
     if !entry.readable {
         return Err(G3RsArchIngestionError::Unreadable {
             path: entry.path.abs_path.clone(),
@@ -291,18 +312,26 @@ fn build_crate_node(
         });
     }
 
-    let content = view
-        .read_file(&cargo_rel_path)
-        .map_err(|err| G3RsArchIngestionError::Unreadable {
-            path: entry.path.abs_path.clone(),
-            reason: err.to_string(),
-        })?;
+    let content =
+        view.read_file(&cargo_rel_path)
+            .map_err(|err| G3RsArchIngestionError::Unreadable {
+                path: entry.path.abs_path.clone(),
+                reason: err.to_string(),
+            })?;
 
     let parsed = toml::from_str::<Value>(&content).ok();
-    let parse_error = toml::from_str::<Value>(&content).err().map(|err| err.to_string());
+    let parse_error = toml::from_str::<Value>(&content)
+        .err()
+        .map(|err| err.to_string());
 
-    let has_package = parsed.as_ref().and_then(|value| value.get("package")).is_some();
-    let has_workspace = parsed.as_ref().and_then(|value| value.get("workspace")).is_some();
+    let has_package = parsed
+        .as_ref()
+        .and_then(|value| value.get("package"))
+        .is_some();
+    let has_workspace = parsed
+        .as_ref()
+        .and_then(|value| value.get("workspace"))
+        .is_some();
     let package_name = parsed
         .as_ref()
         .and_then(|value| value.get("package"))
@@ -339,7 +368,10 @@ fn build_crate_node(
     let has_lib_rs = lib_rs_rel.is_some();
     let has_main_rs = view.file_exists(&CrawlView::join_rel(dir, "src/main.rs"));
 
-    let features = parsed.as_ref().and_then(|value| value.get("features")).and_then(Value::as_table);
+    let features = parsed
+        .as_ref()
+        .and_then(|value| value.get("features"))
+        .and_then(Value::as_table);
     let has_default_feature = features.is_some_and(|table| table.contains_key("default"));
     let has_all_feature = features.is_some_and(|table| table.contains_key("all"));
     let all_feature_deps = feature_list(features.and_then(|table| table.get("all")));
@@ -381,7 +413,10 @@ fn collect_facade_surfaces(
     crate_nodes: &[G3RsArchCrateNode],
 ) -> Vec<G3RsArchFacadeSurface> {
     let mut surfaces = Vec::new();
-    let crate_dirs = crate_nodes.iter().map(|node| node.rel_dir.as_str()).collect::<Vec<_>>();
+    let crate_dirs = crate_nodes
+        .iter()
+        .map(|node| node.rel_dir.as_str())
+        .collect::<Vec<_>>();
 
     for node in crate_nodes {
         if let Some(lib_rel) = &node.lib_rs_rel {
@@ -392,7 +427,13 @@ fn collect_facade_surfaces(
     }
 
     for node in crate_nodes {
-        collect_mod_rs_recursive(view, &node.rel_dir, &node.rel_dir, &crate_dirs, &mut surfaces);
+        collect_mod_rs_recursive(
+            view,
+            &node.rel_dir,
+            &node.rel_dir,
+            &crate_dirs,
+            &mut surfaces,
+        );
     }
 
     surfaces
@@ -505,15 +546,6 @@ fn analyze_facade(
                     if gated_on_all {
                         gated_on_all_count += 1;
                     }
-                } else {
-                    body_items.push(G3RsArchFacadeItem {
-                        line: span_line(item_use.span()),
-                        kind: "private use",
-                        name: use_tree_name(&item_use.tree),
-                        is_broad_reexport: false,
-                        feature_gate,
-                        gated_on_all,
-                    });
                 }
             }
             syn::Item::Fn(item_fn) => body_items.push(simple_item(
@@ -599,9 +631,18 @@ fn collect_rs_files(
     crate_nodes: &[G3RsArchCrateNode],
 ) -> Result<Vec<G3RsArchSourceFile>, G3RsArchIngestionError> {
     let mut rel_paths = Vec::new();
-    let crate_dirs = crate_nodes.iter().map(|node| node.rel_dir.as_str()).collect::<Vec<_>>();
+    let crate_dirs = crate_nodes
+        .iter()
+        .map(|node| node.rel_dir.as_str())
+        .collect::<Vec<_>>();
     for node in crate_nodes {
-        collect_rs_files_recursive(view, &node.rel_dir, &node.rel_dir, &crate_dirs, &mut rel_paths);
+        collect_rs_files_recursive(
+            view,
+            &node.rel_dir,
+            &node.rel_dir,
+            &crate_dirs,
+            &mut rel_paths,
+        );
     }
     rel_paths.sort();
     rel_paths.dedup();
@@ -609,20 +650,24 @@ fn collect_rs_files(
     rel_paths
         .into_iter()
         .map(|rel_path| {
-            let entry = view.entry(&rel_path).ok_or_else(|| G3RsArchIngestionError::Unreadable {
-                path: view.root_abs_path().join(&rel_path),
-                reason: "selected Rust source missing from crawl".to_owned(),
-            })?;
+            let entry =
+                view.entry(&rel_path)
+                    .ok_or_else(|| G3RsArchIngestionError::Unreadable {
+                        path: view.root_abs_path().join(&rel_path),
+                        reason: "selected Rust source missing from crawl".to_owned(),
+                    })?;
             if !entry.readable {
                 return Err(G3RsArchIngestionError::Unreadable {
                     path: entry.path.abs_path.clone(),
                     reason: "file is not readable".to_owned(),
                 });
             }
-            let content = view.read_file(&rel_path).map_err(|err| G3RsArchIngestionError::Unreadable {
-                path: entry.path.abs_path.clone(),
-                reason: err.to_string(),
-            })?;
+            let content =
+                view.read_file(&rel_path)
+                    .map_err(|err| G3RsArchIngestionError::Unreadable {
+                        path: entry.path.abs_path.clone(),
+                        reason: err.to_string(),
+                    })?;
             Ok(G3RsArchSourceFile { rel_path, content })
         })
         .collect()
@@ -668,22 +713,24 @@ fn collect_module_dirs_from_mod_declarations(
             continue;
         }
 
-        let entry = view.entry(&rel_path).ok_or_else(|| G3RsArchIngestionError::Unreadable {
-            path: view.root_abs_path().join(&rel_path),
-            reason: "selected Rust source missing from crawl".to_owned(),
-        })?;
+        let entry = view
+            .entry(&rel_path)
+            .ok_or_else(|| G3RsArchIngestionError::Unreadable {
+                path: view.root_abs_path().join(&rel_path),
+                reason: "selected Rust source missing from crawl".to_owned(),
+            })?;
         if !entry.readable {
             return Err(G3RsArchIngestionError::Unreadable {
                 path: entry.path.abs_path.clone(),
                 reason: "file is not readable".to_owned(),
             });
         }
-        let content = view
-            .read_file(&rel_path)
-            .map_err(|err| G3RsArchIngestionError::Unreadable {
-                path: entry.path.abs_path.clone(),
-                reason: err.to_string(),
-            })?;
+        let content =
+            view.read_file(&rel_path)
+                .map_err(|err| G3RsArchIngestionError::Unreadable {
+                    path: entry.path.abs_path.clone(),
+                    reason: err.to_string(),
+                })?;
         let ast = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(&content)).map_err(
             |err| G3RsArchIngestionError::ParseFailed {
                 path: entry.path.abs_path.clone(),
@@ -867,11 +914,13 @@ fn collect_dependency_edges(
         if node.cargo_parse_error.is_some() {
             continue;
         }
-        let content = view.read_file(&node.cargo_rel_path).map_err(|err| G3RsArchIngestionError::Unreadable {
-            path: view
-                .abs_path(&node.cargo_rel_path)
-                .unwrap_or_else(|| PathBuf::from(&node.cargo_rel_path)),
-            reason: err.to_string(),
+        let content = view.read_file(&node.cargo_rel_path).map_err(|err| {
+            G3RsArchIngestionError::Unreadable {
+                path: view
+                    .abs_path(&node.cargo_rel_path)
+                    .unwrap_or_else(|| PathBuf::from(&node.cargo_rel_path)),
+                reason: err.to_string(),
+            }
         })?;
         let Ok(parsed) = toml::from_str::<Value>(&content) else {
             continue;
@@ -879,7 +928,15 @@ fn collect_dependency_edges(
 
         for section in ["dependencies", "dev-dependencies", "build-dependencies"] {
             if let Some(deps) = parsed.get(section).and_then(Value::as_table) {
-                collect_section_edges(&node.rel_dir, &node.cargo_rel_path, section, deps, crate_nodes, &node_map, &mut edges);
+                collect_section_edges(
+                    &node.rel_dir,
+                    &node.cargo_rel_path,
+                    section,
+                    deps,
+                    crate_nodes,
+                    &node_map,
+                    &mut edges,
+                );
             }
         }
 
@@ -890,7 +947,15 @@ fn collect_dependency_edges(
                 };
                 for section in ["dependencies", "dev-dependencies", "build-dependencies"] {
                     if let Some(deps) = target_table.get(section).and_then(Value::as_table) {
-                        collect_section_edges(&node.rel_dir, &node.cargo_rel_path, section, deps, crate_nodes, &node_map, &mut edges);
+                        collect_section_edges(
+                            &node.rel_dir,
+                            &node.cargo_rel_path,
+                            section,
+                            deps,
+                            crate_nodes,
+                            &node_map,
+                            &mut edges,
+                        );
                     }
                 }
             }
@@ -1044,7 +1109,12 @@ fn count_dependencies(parsed: &Value) -> usize {
     count
 }
 
-fn count_siblings(view: &CrawlView<'_>, dir: &str, root_dir: &str, crate_dirs: &[&str]) -> (usize, usize) {
+fn count_siblings(
+    view: &CrawlView<'_>,
+    dir: &str,
+    root_dir: &str,
+    crate_dirs: &[&str],
+) -> (usize, usize) {
     let Some(entry) = view.dir_contents(dir) else {
         return (0, 0);
     };
@@ -1103,9 +1173,9 @@ fn measure_depth_recursive(
 }
 
 fn is_test_or_example_path(rel_path: &str) -> bool {
-    rel_path.split('/').any(|segment| {
-        matches!(segment, "tests" | "examples" | "benches" | "target")
-    })
+    rel_path
+        .split('/')
+        .any(|segment| matches!(segment, "tests" | "examples" | "benches" | "target"))
 }
 
 fn is_under_crate_src(dir: &str, crate_nodes: &[G3RsArchCrateNode]) -> bool {
