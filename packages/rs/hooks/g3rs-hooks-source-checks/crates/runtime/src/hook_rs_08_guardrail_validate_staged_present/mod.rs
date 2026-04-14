@@ -42,32 +42,15 @@ fn is_guardrail_validate_staged_command(command: &ResolvedCommand) -> bool {
     }
 
     let args = command.args();
-    let mut index = 0usize;
-
-    while let Some(token) = args.get(index).map(String::as_str) {
-        if !token.starts_with('-') {
-            break;
-        }
-
-        if is_help_or_version_flag(token) {
-            return false;
-        }
-        if let Some((flag_name, _)) = token.split_once('=')
-            && guardrail_global_flag_takes_value(flag_name)
-        {
-            index += 1;
-            continue;
-        }
-        if guardrail_global_flag_takes_value(token) {
-            index += 2;
-            continue;
-        }
-
-        index += 1;
+    if args
+        .first()
+        .is_some_and(|token| token.starts_with('-') || is_help_or_version_flag(token))
+    {
+        return false;
     }
 
-    let saw_validate = match args.get(index).map(String::as_str) {
-        Some("rs") => args.get(index + 1).map(String::as_str) == Some("validate"),
+    let saw_validate = match args.first().map(String::as_str) {
+        Some("rs") => args.get(1).map(String::as_str) == Some("validate"),
         Some("validate") => true,
         _ => false,
     };
@@ -77,9 +60,8 @@ fn is_guardrail_validate_staged_command(command: &ResolvedCommand) -> bool {
     }
 
     args.iter()
-        .skip(index)
         .all(|arg| !is_help_or_version_flag(arg))
-        && args.iter().skip(index).any(|arg| arg == "--staged")
+        && args.iter().any(|arg| arg == "--staged")
 }
 
 fn push_presence_result(
@@ -115,10 +97,6 @@ fn push_presence_result(
             false,
         ));
     }
-}
-
-fn guardrail_global_flag_takes_value(flag: &str) -> bool {
-    matches!(flag, "--config" | "--format" | "--root" | "--cache-dir")
 }
 
 fn is_help_or_version_flag(token: &str) -> bool {
