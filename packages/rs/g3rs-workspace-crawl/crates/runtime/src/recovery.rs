@@ -30,7 +30,7 @@ const RECOVER_EXACT: &[&str] = &[
     ".jscpd.json",
     "cspell.json",
     ".cspell.json",
-    "guardrail3.toml",
+    "guardrail3-rs.toml",
     "release-plz.toml",
     ".release-plz.toml",
     "cliff.toml",

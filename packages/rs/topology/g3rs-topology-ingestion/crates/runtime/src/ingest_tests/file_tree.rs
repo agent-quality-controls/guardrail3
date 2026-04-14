@@ -61,11 +61,6 @@ members = []
         "[profile.default]\n",
     );
     write(root.path().join("guardrail3-rs.toml"), "[rust]\n");
-    write(
-        root.path().join("guardrail3.toml"),
-        "[profile]\nname = \"service\"\n",
-    );
-
     let crawl = crawl(root.path()).expect("crawl");
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
 
@@ -120,8 +115,11 @@ members = []
     }));
     assert!(input.family_files.iter().any(|file| {
         file.family == G3RsTopologyWorkspaceFamily::Garde
-            && file.rel_path == "guardrail3.toml"
-            && file.kind == G3RsTopologyWorkspaceFamilyFileKind::GuardrailToml
+            && file.rel_path == "guardrail3-rs.toml"
+            && file.kind == G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml
+    }));
+    assert!(!input.family_files.iter().any(|file| {
+        file.rel_path == "guardrail3.toml"
     }));
     assert!(input.input_failures.is_empty());
 }
@@ -623,10 +621,6 @@ fn family_file_mapping_covers_supported_workspace_local_files() {
     fs::create_dir_all(root.path().join(".cargo")).expect("cargo dir");
     fs::create_dir_all(root.path().join(".config")).expect("config dir");
 
-    write(
-        root.path().join("guardrail3.toml"),
-        "[profile]\nname = \"service\"\n",
-    );
     write(root.path().join("guardrail3-rs.toml"), "[rust]\n");
     write(root.path().join("rustfmt.toml"), "max_width = 100\n");
     write(root.path().join(".rustfmt.toml"), "max_width = 100\n");
@@ -676,12 +670,6 @@ fn family_file_mapping_covers_supported_workspace_local_files() {
     );
     assert_family_file(
         &input,
-        G3RsTopologyWorkspaceFamily::Garde,
-        "guardrail3.toml",
-        G3RsTopologyWorkspaceFamilyFileKind::GuardrailToml,
-    );
-    assert_family_file(
-        &input,
         G3RsTopologyWorkspaceFamily::Cargo,
         "guardrail3-rs.toml",
         G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
@@ -689,6 +677,12 @@ fn family_file_mapping_covers_supported_workspace_local_files() {
     assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Deps,
+        "guardrail3-rs.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
+    );
+    assert_family_file(
+        &input,
+        G3RsTopologyWorkspaceFamily::Garde,
         "guardrail3-rs.toml",
         G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
     );
@@ -796,8 +790,8 @@ fn family_file_mapping_covers_supported_workspace_local_files() {
     );
 
     assert_exact_family_file_count(&input, "Cargo.toml", 7);
-    assert_exact_family_file_count(&input, "guardrail3.toml", 1);
-    assert_exact_family_file_count(&input, "guardrail3-rs.toml", 2);
+    assert_exact_family_file_count(&input, "guardrail3.toml", 0);
+    assert_exact_family_file_count(&input, "guardrail3-rs.toml", 3);
     assert_exact_family_file_count(&input, "clippy.toml", 2);
     assert_exact_family_file_count(&input, ".cargo/config.toml", 2);
     assert_exact_family_file_count(&input, ".cargo/config", 2);
@@ -1094,10 +1088,7 @@ version = "0.1.0"
         root.path().join("packages/lib/.cargo/config.toml"),
         "[alias]\n",
     );
-    write(
-        root.path().join("tools/helper/guardrail3.toml"),
-        "[profile]\nname = \"service\"\n",
-    );
+    write(root.path().join("tools/helper/guardrail3-rs.toml"), "profile = \"service\"\n");
 
     let crawl = crawl(root.path()).expect("crawl");
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
@@ -1151,14 +1142,14 @@ version = "0.1.0"
     assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Garde,
-        "tools/helper/guardrail3.toml",
-        G3RsTopologyWorkspaceFamilyFileKind::GuardrailToml,
+        "tools/helper/guardrail3-rs.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
     );
     assert_family_file_attachment(
         &input,
         G3RsTopologyWorkspaceFamily::Garde,
-        "tools/helper/guardrail3.toml",
-        G3RsTopologyWorkspaceFamilyFileKind::GuardrailToml,
+        "tools/helper/guardrail3-rs.toml",
+        G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
         G3RsTopologyWorkspaceFamilyFileAttachment::NestedUnderRoot {
             root_rel: "".to_owned(),
             owner_rel: "tools/helper".to_owned(),

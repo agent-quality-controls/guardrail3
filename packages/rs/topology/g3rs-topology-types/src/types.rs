@@ -23,7 +23,6 @@ pub enum G3RsTopologyWorkspaceFamily {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum G3RsTopologyWorkspaceFamilyFileKind {
     CargoToml,
-    GuardrailToml,
     Guardrail3RsToml,
     RustfmtToml,
     DotRustfmtToml,

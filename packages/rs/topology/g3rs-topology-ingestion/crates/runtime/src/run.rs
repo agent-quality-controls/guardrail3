@@ -212,12 +212,6 @@ fn classify_family_file(
             ),
         ];
     }
-    if rel_path == "guardrail3.toml" || rel_path.ends_with("/guardrail3.toml") {
-        return vec![file(
-            G3RsTopologyWorkspaceFamily::Garde,
-            G3RsTopologyWorkspaceFamilyFileKind::GuardrailToml,
-        )];
-    }
     if rel_path == "guardrail3-rs.toml" || rel_path.ends_with("/guardrail3-rs.toml") {
         return vec![
             file(
@@ -226,6 +220,10 @@ fn classify_family_file(
             ),
             file(
                 G3RsTopologyWorkspaceFamily::Deps,
+                G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
+            ),
+            file(
+                G3RsTopologyWorkspaceFamily::Garde,
                 G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
             ),
         ];
