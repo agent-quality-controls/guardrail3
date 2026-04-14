@@ -18,7 +18,7 @@ fn errors_when_query_as_has_no_escape_hatch_reason() {
                 severity: Some(assertions::G3Severity::Error),
                 file: Some("src/db.rs"),
                 title: Some("sqlx query_as missing reason"),
-                message_contains: Some("without a matching escape-hatch reason"),
+                message_contains: Some("without a matching waiver reason"),
                 ..Default::default()
             },
             assertions::ExpectedRuleResult {

@@ -1,10 +1,11 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_garde_source_checks_types::G3RsGardeSourceChecksInput;
+use g3rs_garde_source_checks_types::{
+    G3RsGardeRustPolicyInput, G3RsGardeSourceChecksInput, G3RsGardeWaiver,
+};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_domain_config::types::GuardrailConfig;
 
-use crate::parse::{self, BoundaryKind, GuardrailConfigParseKind, ParsedGardeFile};
+use crate::parse::{self, BoundaryKind, ParsedGardeFile};
 
 #[derive(Debug, Clone)]
 pub(crate) struct DerivedBoundaryTypeSite {
@@ -30,8 +31,8 @@ pub(crate) struct QueryAsMacroSite {
     pub(crate) rel_path: String,
     pub(crate) line: usize,
     pub(crate) macro_name: String,
-    pub(crate) escape_hatch_reason: Option<String>,
-    pub(crate) policy_available: bool,
+    pub(crate) waiver_reason: Option<String>,
+    pub(crate) policy_resolved: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -51,13 +52,6 @@ pub(crate) struct BoundaryFieldSite {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct GuardrailConfigValidationSite {
-    pub(crate) rel_path: String,
-    pub(crate) line: usize,
-    pub(crate) parse_kind: GuardrailConfigParseKind,
-}
-
-#[derive(Debug, Clone)]
 pub(crate) struct InputFailureSite {
     pub(crate) rel_path: String,
     pub(crate) message: String,
@@ -71,7 +65,6 @@ pub(crate) struct GardeAstAnalysis {
     pub(crate) manual_deserialize_impls: Vec<ManualDeserializeImplSite>,
     pub(crate) boundary_fields: Vec<BoundaryFieldSite>,
     pub(crate) query_as_macros: Vec<QueryAsMacroSite>,
-    pub(crate) guardrail_config_validation_sites: Vec<GuardrailConfigValidationSite>,
 }
 
 #[derive(Debug, Clone)]
@@ -81,34 +74,8 @@ struct ParsedSourceFile {
 }
 
 pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnalysis {
-    let guardrail_toml = input
-        .guardrail_toml
-        .as_ref()
-        .expect("active garde source input must include guardrail3.toml");
     let mut input_failures = Vec::new();
-    let guardrail_config = match std::fs::read_to_string(&guardrail_toml.abs_path) {
-        Ok(content) => match toml::from_str::<GuardrailConfig>(&content) {
-            Ok(config) => Some(config),
-            Err(parse_error) => {
-                input_failures.push(InputFailureSite {
-                    rel_path: guardrail_toml.rel_path.clone(),
-                    message: format!(
-                        "Failed to parse guardrail3.toml for garde policy resolution: {parse_error}"
-                    ),
-                });
-                None
-            }
-        },
-        Err(read_error) => {
-            input_failures.push(InputFailureSite {
-                rel_path: guardrail_toml.rel_path.clone(),
-                message: format!(
-                    "Failed to read guardrail3.toml for garde policy resolution: {read_error}"
-                ),
-            });
-            None
-        }
-    };
+    let rust_policy = resolve_rust_policy(&input.rust_policy, &mut input_failures);
 
     let mut parsed_files = Vec::new();
     let mut source_files = input.source_files.clone();
@@ -143,18 +110,6 @@ pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnaly
             rel_path: source_file.rel_path.clone(),
             parsed: parse::analyze(&source),
         });
-    }
-
-    let garde_applicable = input.garde_dependency_present
-        || parsed_files
-            .iter()
-            .any(|parsed_file| parsed_file_shows_garde_adoption(&parsed_file.parsed));
-
-    if !garde_applicable {
-        return GardeAstAnalysis {
-            input_failures,
-            ..GardeAstAnalysis::default()
-        };
     }
 
     let mut global_type_validation_map = BTreeMap::<String, (bool, bool)>::new();
@@ -195,7 +150,6 @@ pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnaly
     let mut manual_deserialize_impls = Vec::new();
     let mut boundary_fields = Vec::new();
     let mut query_as_macros = Vec::new();
-    let mut guardrail_config_validation_sites = Vec::new();
 
     for parsed_file in parsed_files {
         for target in parsed_file.parsed.derived_types {
@@ -283,25 +237,17 @@ pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnaly
                 rel_path: parsed_file.rel_path.clone(),
                 line: macro_use.line,
                 macro_name: macro_use.macro_name,
-                policy_available: guardrail_config.is_some(),
-                escape_hatch_reason: guardrail_config.as_ref().and_then(|config| {
-                    config
-                        .escape_hatch_reason(
-                            "garde",
-                            &parsed_file.rel_path,
-                            "sqlx_query_as",
-                            &selector,
-                        )
-                        .map(str::to_owned)
+                policy_resolved: rust_policy.is_some(),
+                waiver_reason: rust_policy.and_then(|waivers: &[G3RsGardeWaiver]| {
+                    waivers
+                        .iter()
+                        .find(|waiver| {
+                            waiver.rule == "RS-GARDE-SOURCE-04"
+                                && waiver.file == parsed_file.rel_path
+                                && waiver.selector == selector
+                        })
+                        .map(|waiver| waiver.reason.clone())
                 }),
-            });
-        }
-
-        for site in parsed_file.parsed.guardrail_config_validation_sites {
-            guardrail_config_validation_sites.push(GuardrailConfigValidationSite {
-                rel_path: parsed_file.rel_path.clone(),
-                line: site.line,
-                parse_kind: site.parse_kind,
             });
         }
     }
@@ -311,8 +257,6 @@ pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnaly
     manual_deserialize_impls.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
     boundary_fields.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
     query_as_macros.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
-    guardrail_config_validation_sites
-        .sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
 
     GardeAstAnalysis {
         input_failures,
@@ -321,18 +265,7 @@ pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnaly
         manual_deserialize_impls,
         boundary_fields,
         query_as_macros,
-        guardrail_config_validation_sites,
     }
-}
-
-fn parsed_file_shows_garde_adoption(parsed: &ParsedGardeFile) -> bool {
-    !parsed.derived_types.is_empty()
-        || !parsed.manual_deserialize_impls.is_empty()
-        || !parsed.manual_validate_impls.is_empty()
-        || parsed
-            .type_validation_map
-            .values()
-            .any(|(_has_non_primitive_fields, has_validate)| *has_validate)
 }
 
 fn resolve_validation_state(
@@ -424,6 +357,25 @@ fn strip_local_path_prefixes(candidate_name: &str) -> Option<&str> {
         break;
     }
     changed.then_some(stripped)
+}
+
+fn resolve_rust_policy<'a>(
+    input: &'a G3RsGardeRustPolicyInput,
+    input_failures: &mut Vec<InputFailureSite>,
+) -> Option<&'a [G3RsGardeWaiver]> {
+    match input {
+        G3RsGardeRustPolicyInput::Missing => Some(&[]),
+        G3RsGardeRustPolicyInput::Parsed { rel_path: _, garde_enabled: _, waivers } => {
+            Some(waivers.as_slice())
+        }
+        G3RsGardeRustPolicyInput::Invalid { rel_path, message } => {
+            input_failures.push(InputFailureSite {
+                rel_path: rel_path.clone(),
+                message: message.clone(),
+            });
+            None
+        }
+    }
 }
 
 pub(crate) fn error(

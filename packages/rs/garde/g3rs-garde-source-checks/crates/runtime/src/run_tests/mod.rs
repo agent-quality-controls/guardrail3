@@ -1,4 +1,4 @@
-use g3rs_garde_source_checks_types::{G3RsGardeApplicability, G3RsGardeSourceChecksInput};
+use g3rs_garde_source_checks_types::{G3RsGardeApplicability, G3RsGardeRustPolicyInput, G3RsGardeSourceChecksInput};
 
 #[test]
 fn returns_no_results_when_family_is_inactive() {
@@ -6,7 +6,7 @@ fn returns_no_results_when_family_is_inactive() {
         applicability: G3RsGardeApplicability::Inactive,
         garde_dependency_present: false,
         source_files: Vec::new(),
-        guardrail_toml: None,
+        rust_policy: G3RsGardeRustPolicyInput::Missing,
     };
 
     let results = crate::run::check(&input);

@@ -3,6 +3,7 @@ use std::path::Path;
 
 use cargo_toml_parser::CargoToml;
 use clippy_toml_parser::ClippyToml;
+use guardrail3_rs_toml_parser::Guardrail3RsToml;
 
 use crate::run::IngestionError;
 
@@ -25,6 +26,18 @@ pub(crate) fn parse_clippy_toml(abs_path: &Path) -> Result<ClippyToml, Ingestion
         reason: err.to_string(),
     })?;
     clippy_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+        path: abs_path.to_path_buf(),
+        reason: err.to_string(),
+    })
+}
+
+/// Read the file at `abs_path` and parse it as a `Guardrail3RsToml`.
+pub(crate) fn parse_guardrail3_rs_toml(abs_path: &Path) -> Result<Guardrail3RsToml, IngestionError> {
+    let content = crate::fs::read_to_string(abs_path).map_err(|err| IngestionError::Unreadable {
+        path: abs_path.to_path_buf(),
+        reason: err.to_string(),
+    })?;
+    guardrail3_rs_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
         path: abs_path.to_path_buf(),
         reason: err.to_string(),
     })

@@ -8,15 +8,15 @@ use crate::support::{QueryAsMacroSite, error, warn};
 const ID: &str = "RS-GARDE-SOURCE-04";
 
 pub(crate) fn check(macro_use: &QueryAsMacroSite, results: &mut Vec<G3CheckResult>) {
-    if !macro_use.policy_available {
+    if !macro_use.policy_resolved {
         return;
     }
-    match macro_use.escape_hatch_reason.as_deref() {
+    match macro_use.waiver_reason.as_deref() {
         None => results.push(error(
             ID,
             "sqlx query_as missing reason",
             format!(
-                "`{}` bypasses derive-based garde boundary checks without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this usage with a reason.",
+                "`{}` bypasses derive-based garde boundary checks without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml for this usage with a reason.",
                 macro_use.macro_name
             ),
             &macro_use.rel_path,
@@ -51,7 +51,7 @@ pub(crate) fn check(macro_use: &QueryAsMacroSite, results: &mut Vec<G3CheckResul
 pub(crate) fn check_count(macro_uses: &[QueryAsMacroSite], results: &mut Vec<G3CheckResult>) {
     let mut counts = BTreeMap::<String, usize>::new();
     for macro_use in macro_uses {
-        if !macro_use.policy_available {
+        if !macro_use.policy_resolved {
             continue;
         }
         *counts.entry(macro_use.rel_path.clone()).or_default() += 1;

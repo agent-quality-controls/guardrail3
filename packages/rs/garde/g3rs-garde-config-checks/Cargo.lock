@@ -79,7 +79,6 @@ dependencies = [
  "g3rs-garde-config-checks-assertions",
  "g3rs-garde-config-checks-types",
  "guardrail3-check-types",
- "guardrail3-domain-modules",
  "toml",
 ]
 
@@ -101,10 +100,6 @@ dependencies = [
 [[package]]
 name = "guardrail3-check-types"
 version = "0.1.0"
-
-[[package]]
-name = "guardrail3-domain-modules"
-version = "0.0.0"
 
 [[package]]
 name = "hashbrown"

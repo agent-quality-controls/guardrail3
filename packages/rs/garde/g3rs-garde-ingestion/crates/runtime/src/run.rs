@@ -3,8 +3,9 @@ use g3rs_garde_source_checks_types::{G3RsSourceFile, G3RsGardeSourceChecksInput}
 use cargo_toml_parser::CargoToml;
 use g3rs_garde_types::{
     G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
-    G3RsGardeFileTreeChecksInput,
+    G3RsGardeFileTreeChecksInput, G3RsGardeRustPolicyInput, G3RsGardeWaiver,
 };
+use guardrail3_rs_toml_parser::Guardrail3RsToml;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsGardeIngestionError` so the facade can reach it.
@@ -33,8 +34,8 @@ pub fn ingest_for_config_checks(
 
     let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
     let garde_dependency_present = has_garde_dependency(&cargo);
-    let guardrail_present = crate::select::select_guardrail_toml(crawl).is_some();
-    let applicability = if garde_dependency_present || guardrail_present {
+    let rust_policy = parse_rust_policy(crawl);
+    let applicability = if garde_dependency_present || rust_policy_enables_garde(&rust_policy) {
         G3RsGardeApplicability::Active
     } else {
         G3RsGardeApplicability::Inactive
@@ -100,16 +101,11 @@ pub fn ingest_for_source_checks(
     }
     let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
     let garde_dependency_present = has_garde_dependency(&cargo);
-    let Some(guardrail_entry) = crate::select::select_guardrail_toml(crawl) else {
-        if !garde_dependency_present {
-            return Ok(G3RsGardeSourceChecksInput {
-                applicability: G3RsGardeApplicability::Inactive,
-                garde_dependency_present: false,
-                source_files: Vec::new(),
-                guardrail_toml: None,
-            });
-        }
-        return Err(IngestionError::GuardrailTomlNotFound);
+    let rust_policy = parse_rust_policy(crawl);
+    let applicability = if garde_dependency_present || rust_policy_enables_garde(&rust_policy) {
+        G3RsGardeApplicability::Active
+    } else {
+        G3RsGardeApplicability::Inactive
     };
     let source_files = crate::select::select_ast_source_files(crawl)
         .into_iter()
@@ -120,13 +116,10 @@ pub fn ingest_for_source_checks(
         .collect::<Vec<_>>();
 
     Ok(G3RsGardeSourceChecksInput {
-        applicability: G3RsGardeApplicability::Active,
+        applicability,
         garde_dependency_present,
         source_files,
-        guardrail_toml: Some(G3RsSourceFile {
-            rel_path: guardrail_entry.path.rel_path.clone(),
-            abs_path: guardrail_entry.path.abs_path.clone(),
-        }),
+        rust_policy,
     })
 }
 
@@ -136,6 +129,69 @@ fn has_garde_dependency(cargo: &CargoToml) -> bool {
             .workspace
             .as_ref()
             .is_some_and(|workspace| workspace.dependencies.contains_key("garde"))
+}
+
+fn parse_rust_policy(crawl: &G3RsWorkspaceCrawl) -> G3RsGardeRustPolicyInput {
+    let Some(entry) = crate::select::select_guardrail3_rs_toml(crawl) else {
+        return G3RsGardeRustPolicyInput::Missing;
+    };
+
+    if !entry.readable {
+        return G3RsGardeRustPolicyInput::Invalid {
+            rel_path: entry.path.rel_path.clone(),
+            message: format!(
+                "Failed to read `{}` for garde Rust policy resolution: file is not readable",
+                entry.path.rel_path
+            ),
+        };
+    }
+
+    match crate::parse::parse_guardrail3_rs_toml(&entry.path.abs_path) {
+        Ok(parsed) => G3RsGardeRustPolicyInput::Parsed {
+            rel_path: entry.path.rel_path.clone(),
+            garde_enabled: parsed
+                .checks
+                .as_ref()
+                .and_then(|checks| checks.garde)
+                .unwrap_or(false),
+            waivers: collect_waivers(&parsed),
+        },
+        Err(IngestionError::Unreadable { reason, .. }) => G3RsGardeRustPolicyInput::Invalid {
+            rel_path: entry.path.rel_path.clone(),
+            message: format!(
+                "Failed to read `{}` for garde Rust policy resolution: {reason}",
+                entry.path.rel_path
+            ),
+        },
+        Err(IngestionError::ParseFailed { reason, .. }) => G3RsGardeRustPolicyInput::Invalid {
+            rel_path: entry.path.rel_path.clone(),
+            message: format!(
+                "Failed to parse `{}` for garde Rust policy resolution: {reason}",
+                entry.path.rel_path
+            ),
+        },
+        Err(other) => unreachable!("unexpected guardrail3-rs.toml ingestion error: {other}"),
+    }
+}
+
+fn rust_policy_enables_garde(policy: &G3RsGardeRustPolicyInput) -> bool {
+    match policy {
+        G3RsGardeRustPolicyInput::Parsed { garde_enabled, .. } => *garde_enabled,
+        G3RsGardeRustPolicyInput::Missing | G3RsGardeRustPolicyInput::Invalid { .. } => false,
+    }
+}
+
+fn collect_waivers(parsed: &Guardrail3RsToml) -> Vec<G3RsGardeWaiver> {
+    parsed
+        .waivers
+        .iter()
+        .map(|waiver| G3RsGardeWaiver {
+            rule: waiver.rule.clone(),
+            file: waiver.file.clone(),
+            selector: waiver.selector.clone(),
+            reason: waiver.reason.clone(),
+        })
+        .collect()
 }
 
 /// Stub file-tree ingestion entry point for the garde family.

@@ -36,12 +36,34 @@ pub struct G3RsSourceFile {
     pub abs_path: PathBuf,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsGardeWaiver {
+    pub rule: String,
+    pub file: String,
+    pub selector: String,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum G3RsGardeRustPolicyInput {
+    Missing,
+    Parsed {
+        rel_path: String,
+        garde_enabled: bool,
+        waivers: Vec<G3RsGardeWaiver>,
+    },
+    Invalid {
+        rel_path: String,
+        message: String,
+    },
+}
+
 #[derive(Debug, Clone)]
 pub struct G3RsGardeSourceChecksInput {
     pub applicability: G3RsGardeApplicability,
     pub garde_dependency_present: bool,
     pub source_files: Vec<G3RsSourceFile>,
-    pub guardrail_toml: Option<G3RsSourceFile>,
+    pub rust_policy: G3RsGardeRustPolicyInput,
 }
 
 /// Placeholder input contract for future garde file-tree checks.

@@ -5,8 +5,6 @@ use std::path::PathBuf;
 pub enum G3RsGardeIngestionError {
     /// No `Cargo.toml` found at the workspace root.
     CargoTomlNotFound,
-    /// No `guardrail3.toml` found at the workspace root.
-    GuardrailTomlNotFound,
     /// File-tree ingestion is planned but not implemented yet.
     FileTreeIngestionNotImplemented,
     /// A required file exists but cannot be read.
@@ -30,9 +28,6 @@ impl std::fmt::Display for G3RsGardeIngestionError {
         match self {
             Self::CargoTomlNotFound => {
                 f.write_str("no Cargo.toml found at the workspace root")
-            }
-            Self::GuardrailTomlNotFound => {
-                f.write_str("no guardrail3.toml found at the workspace root")
             }
             Self::FileTreeIngestionNotImplemented => {
                 f.write_str("garde file-tree ingestion is not implemented yet")

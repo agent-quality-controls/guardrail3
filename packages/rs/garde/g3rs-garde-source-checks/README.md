@@ -11,8 +11,8 @@ This package owns the garde rules that operate on governed Rust source files:
 - `RS-GARDE-SOURCE-05`
 - `RS-GARDE-SOURCE-06`
 - `RS-GARDE-SOURCE-07`
-- `RS-GARDE-SOURCE-08`
 - `RS-GARDE-SOURCE-10`
 
-The package reads and analyzes the governed source files and `guardrail3.toml`
-from the explicit file list in its input contract.
+The package reads and analyzes governed source files from the explicit file
+list in its input contract and consumes typed Rust-policy waiver state from
+`guardrail3-rs.toml`.
