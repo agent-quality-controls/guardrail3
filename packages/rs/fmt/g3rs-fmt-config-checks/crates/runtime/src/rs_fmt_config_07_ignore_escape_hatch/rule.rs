@@ -1,4 +1,6 @@
-use g3rs_fmt_config_checks_types::{G3RsFmtConfigChecksInput, G3RsFmtRustfmtConfigState};
+use g3rs_fmt_config_checks_types::{
+    G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState,
+};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
@@ -13,14 +15,16 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
     }
 
     let ignore = format!("{:?}", rustfmt.ignore);
-    let reason = input
-        .escape_hatches
-        .iter()
+    let empty = Vec::new();
+    let waivers = match &input.rust_policy {
+        G3RsFmtRustPolicyState::Parsed { waivers, .. } => waivers,
+        G3RsFmtRustPolicyState::Missing
+        | G3RsFmtRustPolicyState::Unreadable { .. }
+        | G3RsFmtRustPolicyState::ParseError { .. } => &empty,
+    };
+    let reason = waivers.iter()
         .find(|entry| {
-            entry.family == "fmt"
-                && entry.file == input.rustfmt_rel_path
-                && entry.kind == "ignore"
-                && entry.selector == "ignore"
+            entry.rule == ID && entry.file == input.rustfmt_rel_path && entry.selector == "ignore"
         })
         .map(|entry| entry.reason.as_str());
 
@@ -30,7 +34,7 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
             G3Severity::Error,
             "rustfmt ignore missing reason".to_owned(),
             format!(
-                "`{}` uses `ignore = {ignore}` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml with family = \"fmt\", file = \"{}\", kind = \"ignore\", and a reason explaining why these paths are excluded.",
+                "`{}` uses `ignore = {ignore}` without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml with rule = \"RS-FMT-CONFIG-07\", file = \"{}\", selector = \"ignore\", and a reason explaining why these paths are excluded.",
                 input.rustfmt_rel_path, input.rustfmt_rel_path
             ),
             Some(input.rustfmt_rel_path.clone()),
@@ -41,7 +45,7 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
                 G3CheckResult::new(
                     ID.to_owned(),
                     G3Severity::Warn,
-                    "rustfmt ignore escape hatch".to_owned(),
+                    "rustfmt ignore waiver".to_owned(),
                     format!(
                         "`{}` excludes paths from formatting with documented reason `{reason}`: {ignore}",
                         input.rustfmt_rel_path
@@ -70,7 +74,7 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
         G3Severity::Warn,
         "rustfmt ignore count".to_owned(),
         format!(
-            "`{}` has 1 rustfmt ignore escape hatch.",
+            "`{}` has 1 rustfmt ignore waiver.",
             input.rustfmt_rel_path
         ),
         Some(input.rustfmt_rel_path.clone()),

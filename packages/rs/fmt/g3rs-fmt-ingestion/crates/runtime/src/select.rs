@@ -30,8 +30,8 @@ pub(crate) fn select_toolchain_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsW
     crawl.root_file("rust-toolchain.toml")
 }
 
-pub(crate) fn select_guardrail3_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("guardrail3.toml")
+pub(crate) fn select_rust_policy_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
+    crawl.root_file("guardrail3-rs.toml")
 }
 
 pub(crate) fn collect_nested_config_files(

@@ -1,6 +1,7 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
 use g3rs_fmt_config_checks_types::{
-    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustfmtConfigState, G3RsFmtToolchainState,
+    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState,
+    G3RsFmtRustfmtConfigState, G3RsFmtToolchainState,
 };
 use guardrail3_check_types::G3CheckResult;
 use rust_toolchain_toml_parser::parse as parse_toolchain_toml;
@@ -36,7 +37,7 @@ components = ["clippy", "rustfmt"]
             )
             .expect("toolchain fixture should parse"),
         ),
-        escape_hatches: Vec::new(),
+        rust_policy: G3RsFmtRustPolicyState::Missing,
     };
     let mut results = Vec::new();
     check(&input, &mut results);
