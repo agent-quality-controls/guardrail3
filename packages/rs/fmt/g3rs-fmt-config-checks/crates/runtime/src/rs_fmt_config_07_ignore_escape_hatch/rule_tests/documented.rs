@@ -1,15 +1,15 @@
 use g3rs_fmt_config_checks_assertions::rs_fmt_config_07_ignore_escape_hatch as assertions;
 
-use super::helpers::{escape_hatch, run_check};
+use super::helpers::{run_check, waiver};
 
 #[test]
-fn warns_for_documented_ignore_escape_hatch() {
+fn warns_for_documented_ignore_waiver() {
     let results = run_check(
         r#"
 edition = "2024"
 ignore = ["generated/**"]
 "#,
-        vec![escape_hatch(
+        vec![waiver(
             "Generated code rewrites break formatter stability.",
         )],
     );
@@ -19,12 +19,12 @@ ignore = ["generated/**"]
         &[
             assertions::warn(
                 "rustfmt ignore count",
-                "`rustfmt.toml` has 1 rustfmt ignore escape hatch.",
+                "`rustfmt.toml` has 1 rustfmt ignore waiver.",
                 "rustfmt.toml",
                 false,
             ),
             assertions::warn(
-                "rustfmt ignore escape hatch",
+                "rustfmt ignore waiver",
                 "`rustfmt.toml` excludes paths from formatting with documented reason `Generated code rewrites break formatter stability.`: [\"generated/**\"]",
                 "rustfmt.toml",
                 false,

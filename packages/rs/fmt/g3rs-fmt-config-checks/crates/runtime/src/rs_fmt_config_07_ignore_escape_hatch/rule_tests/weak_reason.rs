@@ -1,6 +1,6 @@
 use g3rs_fmt_config_checks_assertions::rs_fmt_config_07_ignore_escape_hatch as assertions;
 
-use super::helpers::{escape_hatch, run_check};
+use super::helpers::{run_check, waiver};
 
 #[test]
 fn errors_when_ignore_reason_is_too_weak() {
@@ -9,7 +9,7 @@ fn errors_when_ignore_reason_is_too_weak() {
 edition = "2024"
 ignore = ["generated/**"]
 "#,
-        vec![escape_hatch("temp")],
+        vec![waiver("temp")],
     );
 
     assertions::assert_findings(
@@ -23,7 +23,7 @@ ignore = ["generated/**"]
             ),
             assertions::warn(
                 "rustfmt ignore count",
-                "`rustfmt.toml` has 1 rustfmt ignore escape hatch.",
+                "`rustfmt.toml` has 1 rustfmt ignore waiver.",
                 "rustfmt.toml",
                 false,
             ),

@@ -1,7 +1,8 @@
 /// Public ingestion entry point.
 use g3rs_fmt_types::{
-    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtEscapeHatch, G3RsFmtFileTreeChecksInput,
-    G3RsFmtRustfmtConfigState, G3RsFmtSourceChecksInput, G3RsFmtToolchainState,
+    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtFileTreeChecksInput,
+    G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState, G3RsFmtSourceChecksInput,
+    G3RsFmtToolchainState, G3RsFmtWaiver,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -23,7 +24,7 @@ pub fn ingest_for_config_checks(
         cargo_state: ingest_cargo_state(crawl),
         toolchain_rel_path: "rust-toolchain.toml".to_owned(),
         toolchain_state: ingest_toolchain_state(crawl),
-        escape_hatches: ingest_escape_hatches(crawl),
+        rust_policy: ingest_rust_policy(crawl),
     })
 }
 
@@ -94,33 +95,42 @@ fn ingest_toolchain_state(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtToolchainState {
     }
 }
 
-fn ingest_escape_hatches(crawl: &G3RsWorkspaceCrawl) -> Vec<G3RsFmtEscapeHatch> {
-    let Some(entry) = crate::select::select_guardrail3_toml(crawl) else {
-        return Vec::new();
+fn ingest_rust_policy(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtRustPolicyState {
+    let Some(entry) = crate::select::select_rust_policy_toml(crawl) else {
+        return G3RsFmtRustPolicyState::Missing;
     };
     if !entry.readable {
-        return Vec::new();
+        return G3RsFmtRustPolicyState::Unreadable {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "file is not readable".to_owned(),
+        };
     }
     let Ok(content) = crate::fs::read_to_string(&entry.path.abs_path) else {
-        return Vec::new();
+        return G3RsFmtRustPolicyState::Unreadable {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "file is not readable".to_owned(),
+        };
     };
-    let Ok(value) = toml::from_str::<toml::Value>(&content) else {
-        return Vec::new();
+    let parsed = match guardrail3_rs_toml_parser::parse(&content) {
+        Ok(parsed) => parsed,
+        Err(err) => {
+            return G3RsFmtRustPolicyState::ParseError {
+                rel_path: entry.path.rel_path.clone(),
+                reason: err.to_string(),
+            };
+        }
     };
-    value
-        .get("escape_hatches")
-        .and_then(toml::Value::as_array)
-        .into_iter()
-        .flatten()
-        .filter_map(|entry| {
-            let table = entry.as_table()?;
-            Some(G3RsFmtEscapeHatch {
-                family: table.get("family")?.as_str()?.to_owned(),
-                file: table.get("file")?.as_str()?.to_owned(),
-                kind: table.get("kind")?.as_str()?.to_owned(),
-                selector: table.get("selector")?.as_str()?.to_owned(),
-                reason: table.get("reason")?.as_str()?.to_owned(),
+    G3RsFmtRustPolicyState::Parsed {
+        rel_path: entry.path.rel_path.clone(),
+        waivers: parsed
+            .waivers
+            .into_iter()
+            .map(|waiver| G3RsFmtWaiver {
+                rule: waiver.rule,
+                file: waiver.file,
+                selector: waiver.selector,
+                reason: waiver.reason,
             })
-        })
-        .collect()
+            .collect(),
+    }
 }

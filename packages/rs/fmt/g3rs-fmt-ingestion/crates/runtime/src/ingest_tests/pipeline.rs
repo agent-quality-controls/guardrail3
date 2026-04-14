@@ -141,7 +141,7 @@ fn pipeline_reports_rustfmt_parse_error_via_config_rule() {
 }
 
 #[test]
-fn pipeline_reports_rustfmt_ignore_escape_hatch() {
+fn pipeline_reports_rustfmt_ignore_waiver_from_guardrail3_rs_toml() {
     let temp = tempdir().expect("create temporary workspace");
     let root = temp.path();
     git_init(root);
@@ -156,8 +156,12 @@ fn pipeline_reports_rustfmt_ignore_escape_hatch() {
     );
     write(root.join("rustfmt.toml"), "ignore = [\"generated/**\"]\n");
     write(
+        root.join("guardrail3-rs.toml"),
+        "[[waivers]]\nrule = \"RS-FMT-CONFIG-07\"\nfile = \"rustfmt.toml\"\nselector = \"ignore\"\nreason = \"Generated code rewrites break formatter stability.\"\n",
+    );
+    write(
         root.join("guardrail3.toml"),
-        "[[escape_hatches]]\nfamily = \"fmt\"\nfile = \"rustfmt.toml\"\nkind = \"ignore\"\nselector = \"ignore\"\nreason = \"Generated code rewrites break formatter stability.\"\n",
+        "[[escape_hatches]]\nfamily = \"fmt\"\nfile = \"rustfmt.toml\"\nkind = \"ignore\"\nselector = \"ignore\"\nreason = \"legacy dead config\"\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -167,7 +171,7 @@ fn pipeline_reports_rustfmt_ignore_escape_hatch() {
     assert!(
         results.iter().any(|result| {
             result.id() == "RS-FMT-CONFIG-07"
-                && result.title() == "rustfmt ignore escape hatch"
+                && result.title() == "rustfmt ignore waiver"
                 && result.file() == Some("rustfmt.toml")
         }),
         "{results:#?}"

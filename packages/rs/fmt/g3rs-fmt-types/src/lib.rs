@@ -26,12 +26,19 @@ pub enum G3RsFmtToolchainState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsFmtEscapeHatch {
-    pub family: String,
+pub struct G3RsFmtWaiver {
+    pub rule: String,
     pub file: String,
-    pub kind: String,
     pub selector: String,
     pub reason: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum G3RsFmtRustPolicyState {
+    Missing,
+    Unreadable { rel_path: String, reason: String },
+    ParseError { rel_path: String, reason: String },
+    Parsed { rel_path: String, waivers: Vec<G3RsFmtWaiver> },
 }
 
 #[derive(Debug, Clone)]
@@ -43,7 +50,7 @@ pub struct G3RsFmtConfigChecksInput {
     pub cargo_state: G3RsFmtCargoState,
     pub toolchain_rel_path: String,
     pub toolchain_state: G3RsFmtToolchainState,
-    pub escape_hatches: Vec<G3RsFmtEscapeHatch>,
+    pub rust_policy: G3RsFmtRustPolicyState,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
