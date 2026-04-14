@@ -250,3 +250,80 @@ fn stays_quiet_when_workspace_policy_is_incomplete() {
 
     assert!(results.is_empty(), "{results:#?}");
 }
+
+#[test]
+fn stands_down_when_rust_policy_parse_error_blocks_member_reason_resolution() {
+    let root = root(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.lints.rust]
+            warnings = "deny"
+
+            [workspace.lints.clippy]
+            all = { level = "deny", priority = -1 }
+        "#,
+        crate::test_support::parse_error_rust_policy("bad rust policy"),
+    );
+    let member = member(
+        "crates/api",
+        r#"
+            [package]
+            name = "api"
+            edition = "2024"
+
+            [lints]
+            workspace = true
+
+            [lints.clippy]
+            module_name_repetitions = "allow"
+        "#,
+    );
+    let mut results = Vec::new();
+
+    crate::rs_cargo_config_12_member_local_allows_forbidden::check(&root, &member, &mut results);
+
+    assert!(results.is_empty(), "{results:#?}");
+}
+
+#[test]
+fn stands_down_when_rust_policy_is_unreadable() {
+    let root = root(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.lints.rust]
+            warnings = "deny"
+
+            [workspace.lints.clippy]
+            all = { level = "deny", priority = -1 }
+        "#,
+        g3rs_cargo_types::G3RsCargoRustPolicyState::Unreadable {
+            rel_path: "guardrail3-rs.toml".to_owned(),
+            reason: "file is not readable".to_owned(),
+        },
+    );
+    let member = member(
+        "crates/api",
+        r#"
+            [package]
+            name = "api"
+            edition = "2024"
+
+            [lints]
+            workspace = true
+
+            [lints.clippy]
+            module_name_repetitions = "allow"
+        "#,
+    );
+    let mut results = Vec::new();
+
+    crate::rs_cargo_config_12_member_local_allows_forbidden::check(&root, &member, &mut results);
+
+    assert!(results.is_empty(), "{results:#?}");
+}

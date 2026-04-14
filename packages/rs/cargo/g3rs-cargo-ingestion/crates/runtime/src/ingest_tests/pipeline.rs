@@ -107,6 +107,57 @@ fn config_pipeline_reports_old_app_allow_inventory_and_member_rules() {
 }
 
 #[test]
+fn config_pipeline_stands_down_allow_rules_when_guardrail3_rs_is_invalid() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+
+            [workspace.lints.rust]
+            warnings = "deny"
+
+            [workspace.lints.clippy]
+            all = { level = "deny", priority = -1 }
+            module_name_repetitions = "allow"
+        "#,
+    );
+    write(
+        root.join("crates/api/Cargo.toml"),
+        r#"
+            [package]
+            name = "api"
+            edition = "2021"
+
+            [lints]
+            workspace = true
+
+            [lints.rust]
+            warnings = "allow"
+        "#,
+    );
+    write(root.join("guardrail3-rs.toml"), "profile = [");
+
+    let input = crate::ingest_for_config_checks(&crawl(root)).expect("ingestion should succeed");
+    let results = g3rs_cargo_config_checks::check(&input);
+
+    assert!(
+        !results
+            .iter()
+            .any(|result| matches!(result.id(), "RS-CARGO-CONFIG-07" | "RS-CARGO-CONFIG-11" | "RS-CARGO-CONFIG-12")),
+        "{results:#?}"
+    );
+}
+
+#[test]
 fn filetree_pipeline_reports_guardrail3_rs_parse_failures_and_ignores_legacy_guardrail3_toml() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();

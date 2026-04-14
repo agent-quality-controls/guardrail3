@@ -4,7 +4,7 @@ use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
     allow_selector, explicit_allow_entries, has_valid_lint_level, raw_member_lints,
-    raw_policy_lints, rust_policy_waivers, waiver_reason,
+    raw_policy_lints, rust_policy_valid, rust_policy_waivers, waiver_reason,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-12";
@@ -15,6 +15,9 @@ pub(crate) fn check(
     results: &mut Vec<G3CheckResult>,
 ) {
     if member.lint_workspace_invalid || !member.lint_workspace_true {
+        return;
+    }
+    if !rust_policy_valid(root) {
         return;
     }
 

@@ -4,7 +4,7 @@ use g3rs_cargo_types::{
 };
 use guardrail3_check_types::G3Severity;
 
-use crate::test_support::{parsed_rust_policy, root, waiver};
+use crate::test_support::{parse_error_rust_policy, parsed_rust_policy, root, waiver};
 
 #[test]
 fn inventories_documented_approved_allow_entries() {
@@ -124,6 +124,49 @@ fn stays_quiet_when_clippy_table_shape_is_invalid() {
         rust_version: None,
         rust_version_invalid: false,
     };
+    let mut results = Vec::new();
+
+    crate::rs_cargo_config_07_approved_allow_inventory::check(&root, &mut results);
+
+    assert!(results.is_empty(), "{results:#?}");
+}
+
+#[test]
+fn stands_down_when_rust_policy_parse_error_blocks_waiver_resolution() {
+    let root = root(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            [workspace.lints.clippy]
+            module_name_repetitions = "allow"
+        "#,
+        parse_error_rust_policy("bad rust policy"),
+    );
+    let mut results = Vec::new();
+
+    crate::rs_cargo_config_07_approved_allow_inventory::check(&root, &mut results);
+
+    assert!(results.is_empty(), "{results:#?}");
+}
+
+#[test]
+fn stands_down_when_rust_policy_is_unreadable() {
+    let root = root(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            [workspace.lints.clippy]
+            module_name_repetitions = "allow"
+        "#,
+        G3RsCargoRustPolicyState::Unreadable {
+            rel_path: "guardrail3-rs.toml".to_owned(),
+            reason: "file is not readable".to_owned(),
+        },
+    );
     let mut results = Vec::new();
 
     crate::rs_cargo_config_07_approved_allow_inventory::check(&root, &mut results);

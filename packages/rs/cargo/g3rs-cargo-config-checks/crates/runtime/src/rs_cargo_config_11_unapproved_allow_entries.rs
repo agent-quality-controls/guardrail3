@@ -10,6 +10,9 @@ use crate::support::{
 const ID: &str = "RS-CARGO-CONFIG-11";
 
 pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>) {
+    if !rust_policy_valid(root) {
+        return;
+    }
     let rust_lints = raw_policy_lints(root, "rust");
     let clippy_lints = raw_policy_lints(root, "clippy");
     let lint_tables_well_formed =

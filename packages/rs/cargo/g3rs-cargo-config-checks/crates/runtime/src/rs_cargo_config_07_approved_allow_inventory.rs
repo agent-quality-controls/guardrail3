@@ -4,13 +4,16 @@ use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
     EXPECTED_CLIPPY_REQUIRED_ALLOW, allow_selector, explicit_allow_entries,
-    raw_policy_lints, warn,
+    raw_policy_lints, rust_policy_valid, warn,
     rust_policy_waivers, waiver_reason,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-07";
 
 pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>) {
+    if !rust_policy_valid(root) {
+        return;
+    }
     let Some(clippy_lints) = raw_policy_lints(root, "clippy") else {
         return;
     };
