@@ -152,15 +152,15 @@ fn passes_when_guardrail_validation_runs_inside_exported_command_substitution() 
 }
 
 #[test]
-fn passes_when_guardrail_global_flag_precedes_validate() {
-    let results = run_case("g3rs --config guardrail3.toml validate --staged .\n");
-    assertions::assert_present(&results);
+fn warns_when_dead_global_flag_precedes_validate() {
+    let results = run_case("g3rs --config guardrail3-rs.toml validate --staged .\n");
+    assertions::assert_missing(&results);
 }
 
 #[test]
-fn passes_when_attached_guardrail_global_flag_precedes_validate() {
-    let results = run_case("g3rs --config=guardrail3.toml validate --staged .\n");
-    assertions::assert_present(&results);
+fn warns_when_dead_attached_global_flag_precedes_validate() {
+    let results = run_case("g3rs --config=guardrail3-rs.toml validate --staged .\n");
+    assertions::assert_missing(&results);
 }
 
 #[test]
