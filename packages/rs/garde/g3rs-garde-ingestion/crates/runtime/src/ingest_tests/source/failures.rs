@@ -5,7 +5,7 @@ fn ast_ingestion_fails_when_guardrail_is_missing() {
 
     super::write(
         root.join("Cargo.toml"),
-        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n",
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n\n[dependencies]\ngarde = \"0.22\"\n",
     );
     super::write(root.join("src/lib.rs"), "fn ok() {}\n");
 

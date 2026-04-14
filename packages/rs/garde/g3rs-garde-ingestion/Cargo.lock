@@ -246,6 +246,9 @@ dependencies = [
 [[package]]
 name = "g3rs-garde-source-checks-types"
 version = "0.1.0"
+dependencies = [
+ "g3rs-garde-types",
+]
 
 [[package]]
 name = "g3rs-garde-types"

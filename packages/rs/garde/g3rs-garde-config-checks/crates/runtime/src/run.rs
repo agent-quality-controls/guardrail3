@@ -1,4 +1,6 @@
-use g3rs_garde_config_checks_types::{G3RsGardeClippyInput, G3RsGardeConfigChecksInput};
+use g3rs_garde_config_checks_types::{
+    G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
+};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::has_garde_dependency;
@@ -10,6 +12,10 @@ use crate::support::has_garde_dependency;
 /// input is surfaced here as rule-local warn results.
 #[must_use]
 pub fn check(input: &G3RsGardeConfigChecksInput) -> Vec<G3CheckResult> {
+    if input.applicability == G3RsGardeApplicability::Inactive {
+        return Vec::new();
+    }
+
     let mut results = Vec::new();
 
     crate::rs_garde_config_01_dependency_present::check(

@@ -1,6 +1,8 @@
 use std::path::Path;
 
-use g3rs_garde_source_checks_types::{G3RsSourceFile, G3RsGardeSourceChecksInput};
+use g3rs_garde_source_checks_types::{
+    G3RsGardeApplicability, G3RsGardeSourceChecksInput, G3RsSourceFile,
+};
 use guardrail3_check_types::G3CheckResult;
 use tempfile::TempDir;
 
@@ -38,7 +40,13 @@ impl Fixture {
     pub(crate) fn make_guardrail_unreadable(&self) {
         use std::os::unix::fs::PermissionsExt;
 
-        let path = self.input.guardrail_toml.abs_path.clone();
+        let path = self
+            .input
+            .guardrail_toml
+            .as_ref()
+            .expect("fixture guardrail should exist")
+            .abs_path
+            .clone();
         let mut permissions = std::fs::metadata(&path)
             .expect("fixture guardrail metadata should exist")
             .permissions();
@@ -70,12 +78,13 @@ pub(crate) fn fixture(source_files: &[(&str, &str)], guardrail_toml: &str) -> Fi
     Fixture {
         _tempdir: tempdir,
         input: G3RsGardeSourceChecksInput {
+            applicability: G3RsGardeApplicability::Active,
             garde_dependency_present: true,
             source_files: ast_files,
-            guardrail_toml: G3RsSourceFile {
+            guardrail_toml: Some(G3RsSourceFile {
                 rel_path: guardrail_rel_path.to_owned(),
                 abs_path: guardrail_abs_path,
-            },
+            }),
         },
     }
 }

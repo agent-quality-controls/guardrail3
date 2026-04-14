@@ -81,13 +81,17 @@ struct ParsedSourceFile {
 }
 
 pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnalysis {
+    let guardrail_toml = input
+        .guardrail_toml
+        .as_ref()
+        .expect("active garde source input must include guardrail3.toml");
     let mut input_failures = Vec::new();
-    let guardrail_config = match std::fs::read_to_string(&input.guardrail_toml.abs_path) {
+    let guardrail_config = match std::fs::read_to_string(&guardrail_toml.abs_path) {
         Ok(content) => match toml::from_str::<GuardrailConfig>(&content) {
             Ok(config) => Some(config),
             Err(parse_error) => {
                 input_failures.push(InputFailureSite {
-                    rel_path: input.guardrail_toml.rel_path.clone(),
+                    rel_path: guardrail_toml.rel_path.clone(),
                     message: format!(
                         "Failed to parse guardrail3.toml for garde policy resolution: {parse_error}"
                     ),
@@ -97,7 +101,7 @@ pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnaly
         },
         Err(read_error) => {
             input_failures.push(InputFailureSite {
-                rel_path: input.guardrail_toml.rel_path.clone(),
+                rel_path: guardrail_toml.rel_path.clone(),
                 message: format!(
                     "Failed to read guardrail3.toml for garde policy resolution: {read_error}"
                 ),
