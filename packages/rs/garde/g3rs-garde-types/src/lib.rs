@@ -2,6 +2,12 @@ use cargo_toml_parser::CargoToml;
 use clippy_toml_parser::ClippyToml;
 use std::path::PathBuf;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum G3RsGardeApplicability {
+    Inactive,
+    Active,
+}
+
 #[derive(Debug, Clone)]
 pub enum G3RsGardeClippyInput {
     Missing,
@@ -15,6 +21,7 @@ pub enum G3RsGardeClippyInput {
 /// receives already-selected parsed files and validates their config semantics.
 #[derive(Debug, Clone)]
 pub struct G3RsGardeConfigChecksInput {
+    pub applicability: G3RsGardeApplicability,
     /// Repo-relative path to the routed root Cargo manifest.
     pub cargo_rel_path: String,
     /// Parsed Cargo manifest content.
@@ -31,9 +38,10 @@ pub struct G3RsSourceFile {
 
 #[derive(Debug, Clone)]
 pub struct G3RsGardeSourceChecksInput {
+    pub applicability: G3RsGardeApplicability,
     pub garde_dependency_present: bool,
     pub source_files: Vec<G3RsSourceFile>,
-    pub guardrail_toml: G3RsSourceFile,
+    pub guardrail_toml: Option<G3RsSourceFile>,
 }
 
 /// Placeholder input contract for future garde file-tree checks.

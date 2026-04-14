@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use g3rs_garde_types::G3RsGardeClippyInput;
+use g3rs_garde_types::{G3RsGardeApplicability, G3RsGardeClippyInput};
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -33,7 +33,7 @@ fn ingests_with_both_cargo_and_clippy() {
 
     write(
         root.join("Cargo.toml"),
-        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n[workspace.dependencies]\ngarde = \"0.22\"\n",
     );
     write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
@@ -46,6 +46,7 @@ fn ingests_with_both_cargo_and_clippy() {
         input.cargo_rel_path, "Cargo.toml",
         "cargo_rel_path should reference the root Cargo.toml"
     );
+    assert_eq!(input.applicability, G3RsGardeApplicability::Active);
     assert!(
         input.cargo.workspace.is_some(),
         "parsed Cargo.toml should contain a [workspace] section"
@@ -65,13 +66,17 @@ fn ingests_with_dot_clippy_toml() {
     let root = temp.path();
     git_init(root);
 
-    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\n[dependencies]\ngarde = \"0.22\"\n",
+    );
     write(root.join(".clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
     let result = crate::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed with .clippy.toml variant");
+    assert_eq!(input.applicability, G3RsGardeApplicability::Active);
     assert!(
         matches!(
             input.clippy_input,
@@ -87,13 +92,17 @@ fn clippy_is_missing_without_clippy_config() {
     let root = temp.path();
     git_init(root);
 
-    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\n[dependencies]\ngarde = \"0.22\"\n",
+    );
 
     let crawl = crawl(root);
     let result = crate::ingest_for_config_checks(&crawl);
 
     let input = result
         .expect("ingestion should succeed even without clippy config (it is optional)");
+    assert_eq!(input.applicability, G3RsGardeApplicability::Active);
     assert_eq!(
         input.cargo_rel_path, "Cargo.toml",
         "cargo_rel_path should still be present without clippy config"

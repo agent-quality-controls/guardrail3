@@ -35,7 +35,15 @@ fn ingests_root_scoped_ast_input() {
     let crawl = super::crawl(root);
     let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 
-    assert_eq!(input.guardrail_toml.rel_path, "guardrail3.toml");
+    assert_eq!(input.applicability, g3rs_garde_types::G3RsGardeApplicability::Active);
+    assert_eq!(
+        input
+            .guardrail_toml
+            .as_ref()
+            .expect("active garde input should include guardrail3.toml")
+            .rel_path,
+        "guardrail3.toml"
+    );
     assert_eq!(
         input
             .source_files

@@ -29,6 +29,7 @@ fn pipeline_reports_missing_garde_dependency() {
         root.join("Cargo.toml"),
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n",
     );
+    write(root.join("guardrail3.toml"), "[profile]\nname = \"service\"\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
@@ -97,6 +98,7 @@ fn pipeline_keeps_ban_rules_quiet_when_garde_is_missing() {
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\nversion = \"0.1.0\"\n",
     );
+    write(root.join("guardrail3.toml"), "[profile]\nname = \"service\"\n");
     write(root.join("clippy.toml"), "disallowed-methods = []\ndisallowed-types = []\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -149,4 +151,27 @@ fn pipeline_warns_when_clippy_is_invalid_for_garde_root() {
         }),
         "{results:#?}"
     );
+}
+
+#[test]
+fn pipeline_marks_family_inactive_when_no_garde_dependency_and_no_guardrail_toml() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = []\n[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("src/lib.rs"), "pub fn run() {}\n");
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+
+    let config_input = crate::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
+    let config_results = g3rs_garde_config_checks::check(&config_input);
+    assert!(config_results.is_empty(), "{config_results:#?}");
+
+    let source_input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let source_results = g3rs_garde_source_checks::check(&source_input);
+    assert!(source_results.is_empty(), "{source_results:#?}");
 }

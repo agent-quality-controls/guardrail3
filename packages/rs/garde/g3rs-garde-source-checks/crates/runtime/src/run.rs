@@ -1,7 +1,11 @@
-use g3rs_garde_source_checks_types::G3RsGardeSourceChecksInput;
+use g3rs_garde_source_checks_types::{G3RsGardeApplicability, G3RsGardeSourceChecksInput};
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsGardeSourceChecksInput) -> Vec<G3CheckResult> {
+    if input.applicability == G3RsGardeApplicability::Inactive {
+        return Vec::new();
+    }
+
     let analysis = crate::support::analyze_input(input);
     let mut results = Vec::new();
 
@@ -32,3 +36,7 @@ pub fn check(input: &G3RsGardeSourceChecksInput) -> Vec<G3CheckResult> {
 
     results
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"]
+mod tests;

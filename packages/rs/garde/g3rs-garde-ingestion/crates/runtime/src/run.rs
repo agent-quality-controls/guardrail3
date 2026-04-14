@@ -2,7 +2,8 @@
 use g3rs_garde_source_checks_types::{G3RsSourceFile, G3RsGardeSourceChecksInput};
 use cargo_toml_parser::CargoToml;
 use g3rs_garde_types::{
-    G3RsGardeClippyInput, G3RsGardeConfigChecksInput, G3RsGardeFileTreeChecksInput,
+    G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
+    G3RsGardeFileTreeChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -21,10 +22,8 @@ pub use g3rs_garde_ingestion_types::G3RsGardeIngestionError as IngestionError;
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeConfigChecksInput, IngestionError> {
-    // 1. Select and parse Cargo.toml (required)
     let cargo_entry = crate::select::select_cargo_toml(crawl)
         .ok_or(IngestionError::CargoTomlNotFound)?;
-
     if !cargo_entry.readable {
         return Err(IngestionError::Unreadable {
             path: cargo_entry.path.abs_path.clone(),
@@ -33,9 +32,17 @@ pub fn ingest_for_config_checks(
     }
 
     let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
+    let garde_dependency_present = has_garde_dependency(&cargo);
+    let guardrail_present = crate::select::select_guardrail_toml(crawl).is_some();
+    let applicability = if garde_dependency_present || guardrail_present {
+        G3RsGardeApplicability::Active
+    } else {
+        G3RsGardeApplicability::Inactive
+    };
 
-    // 2. Select and classify clippy config (optional)
-    let clippy_input = if let Some(entry) = crate::select::select_clippy_toml(crawl) {
+    let clippy_input = if applicability == G3RsGardeApplicability::Inactive {
+        G3RsGardeClippyInput::Missing
+    } else if let Some(entry) = crate::select::select_clippy_toml(crawl) {
         if !entry.readable {
             G3RsGardeClippyInput::Invalid {
                 rel_path: entry.path.rel_path.clone(),
@@ -71,7 +78,12 @@ pub fn ingest_for_config_checks(
         G3RsGardeClippyInput::Missing
     };
 
-    Ok(crate::ingest::assemble(cargo_entry.path.rel_path.clone(), cargo, clippy_input))
+    Ok(crate::ingest::assemble(
+        applicability,
+        cargo_entry.path.rel_path.clone(),
+        cargo,
+        clippy_input,
+    ))
 }
 
 /// Ingest garde source input from a workspace crawl.
@@ -87,8 +99,18 @@ pub fn ingest_for_source_checks(
         });
     }
     let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
-    let guardrail_entry =
-        crate::select::select_guardrail_toml(crawl).ok_or(IngestionError::GuardrailTomlNotFound)?;
+    let garde_dependency_present = has_garde_dependency(&cargo);
+    let Some(guardrail_entry) = crate::select::select_guardrail_toml(crawl) else {
+        if !garde_dependency_present {
+            return Ok(G3RsGardeSourceChecksInput {
+                applicability: G3RsGardeApplicability::Inactive,
+                garde_dependency_present: false,
+                source_files: Vec::new(),
+                guardrail_toml: None,
+            });
+        }
+        return Err(IngestionError::GuardrailTomlNotFound);
+    };
     let source_files = crate::select::select_ast_source_files(crawl)
         .into_iter()
         .map(|entry| G3RsSourceFile {
@@ -98,12 +120,13 @@ pub fn ingest_for_source_checks(
         .collect::<Vec<_>>();
 
     Ok(G3RsGardeSourceChecksInput {
-        garde_dependency_present: has_garde_dependency(&cargo),
+        applicability: G3RsGardeApplicability::Active,
+        garde_dependency_present,
         source_files,
-        guardrail_toml: G3RsSourceFile {
+        guardrail_toml: Some(G3RsSourceFile {
             rel_path: guardrail_entry.path.rel_path.clone(),
             abs_path: guardrail_entry.path.abs_path.clone(),
-        },
+        }),
     })
 }
 
