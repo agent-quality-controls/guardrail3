@@ -17,9 +17,9 @@ fn errors_when_canonical_non_empty_wrapper_policy_changes() {
 
     assertions::assert_findings(
         &results,
-        &[assertions::error(
+        &[assertions::warn(
             "managed ban wrappers changed",
-            "`deny.toml` ban `regex` must not add wrappers.",
+            "`deny.toml` ban `regex` adds local wrappers `tree-sitter`.",
             "deny.toml",
             false,
         )],

@@ -55,9 +55,9 @@ fn errors_when_managed_ban_adds_project_specific_wrappers() {
 
     assertions::assert_findings(
         &results,
-        &[assertions::error(
+        &[assertions::warn(
             "managed ban wrappers changed",
-            "`deny.toml` ban `anyhow` must not add wrappers.",
+            "`deny.toml` ban `anyhow` adds local wrappers `texting_robots`.",
             "deny.toml",
             false,
         )],

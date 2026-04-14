@@ -21,6 +21,7 @@ impl ReportRenderer for PlainTextReportRenderer {
                     file,
                     result.title()
                 ));
+                family_lines.push(format!("  {}", result.message()));
             }
             if family_lines.is_empty() {
                 continue;
@@ -100,5 +101,27 @@ mod tests {
         let output = PlainTextReportRenderer.render(&report, false);
 
         assert_eq!(output, "No findings.\n");
+    }
+
+    #[test]
+    fn renderer_includes_rule_message() {
+        let report = ValidateReport {
+            runs: vec![FamilyRun {
+                family: SupportedFamily::Deny,
+                results: vec![G3CheckResult::new(
+                    "RS-DENY-CONFIG-27".to_owned(),
+                    G3Severity::Warn,
+                    "managed ban wrappers changed".to_owned(),
+                    "`deny.toml` ban `regex` adds local wrappers `tree-sitter`.".to_owned(),
+                    Some("deny.toml".to_owned()),
+                    None,
+                )],
+            }],
+        };
+
+        let output = PlainTextReportRenderer.render(&report, false);
+
+        assert!(output.contains("[Warn] RS-DENY-CONFIG-27 deny.toml managed ban wrappers changed"));
+        assert!(output.contains("`deny.toml` ban `regex` adds local wrappers `tree-sitter`."));
     }
 }
