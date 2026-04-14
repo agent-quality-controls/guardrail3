@@ -9,7 +9,6 @@ clippy = true
 deny = true
 cargo = true
 code = true
-hexarch = true
 deps = true
 garde = true
 test = true

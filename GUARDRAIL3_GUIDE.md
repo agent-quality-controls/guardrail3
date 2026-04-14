@@ -26,7 +26,7 @@ clippy
 deny
 cargo
 code
-hexarch
+apparch
 deps
 garde
 test
@@ -41,7 +41,7 @@ Examples:
 
 ```text
 guardrail3 rs validate .
-guardrail3 rs validate . --family hexarch
+guardrail3 rs validate . --family apparch
 guardrail3 rs validate . --family code --family garde --staged
 guardrail3 rs validate . --family release --thorough
 ```
@@ -70,7 +70,7 @@ clippy = true
 deny = true
 cargo = true
 code = true
-hexarch = true
+apparch = true
 deps = true
 garde = true
 test = true
@@ -83,7 +83,7 @@ Per-app and package overrides use the same family names:
 
 ```toml
 [rust.apps.my_api.checks]
-hexarch = true
+apparch = true
 garde = false
 
 [rust.packages.checks]
@@ -103,7 +103,7 @@ hooks
 Use:
 
 ```toml
-hexarch
+apparch
 test
 hooks_shared
 hooks_rs
@@ -113,7 +113,7 @@ hooks_rs
 
 `service`
 - For binaries and services that do I/O.
-- Services typically live under `apps/` and use hexarch.
+- Services typically live under `apps/` and use apparch.
 
 `library`
 - For shared packages with no uncontrolled I/O.
@@ -193,7 +193,7 @@ JSON output shape:
   "stacks": ["Rust"],
   "sections": [
     {
-      "name": "hexarch",
+      "name": "apparch",
       "results": [
         {
           "id": "RS-HEXARCH-01",
