@@ -1,12 +1,12 @@
 use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{BoolSetting, bool_setting, policy_context_valid, raw_clippy, value_kind};
+use crate::support::{BoolSetting, bool_setting, raw_clippy, rust_policy_valid, value_kind};
 
 const ID: &str = "RS-CLIPPY-CONFIG-15";
 
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    if !policy_context_valid(input) {
+    if !rust_policy_valid(input) {
         return;
     }
     let Some(parsed) = raw_clippy(input) else {

@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use g3rs_clippy_types::G3RsClippyConfigState;
+use g3rs_clippy_types::{G3RsClippyConfigState, G3RsClippyRustPolicyState};
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -300,7 +300,7 @@ fn malformed_root_cargo_toml_does_not_abort_clippy_config_ingestion() {
     git_init(root);
 
     write(root.join("Cargo.toml"), "[workspace]\nnot = [valid");
-    write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
     write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
 
     let crawl = crawl(root);
@@ -308,6 +308,149 @@ fn malformed_root_cargo_toml_does_not_abort_clippy_config_ingestion() {
         .expect("malformed root Cargo.toml should disable published-library policy, not abort clippy ingestion");
 
     assert!(!input.published_library_policy, "{input:#?}");
+}
+
+#[test]
+fn uses_guardrail3_rs_toml_for_library_policy() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"[workspace]
+members = []
+
+[package]
+name = "workspace-root"
+version = "0.1.0"
+edition = "2024"
+"#,
+    );
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
+    write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("valid guardrail3-rs.toml should drive clippy library policy");
+
+    assert!(input.published_library_policy, "{input:#?}");
+}
+
+#[test]
+fn ignores_legacy_guardrail3_toml_for_library_policy() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"[workspace]
+members = []
+
+[package]
+name = "workspace-root"
+version = "0.1.0"
+edition = "2024"
+"#,
+    );
+    write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
+    write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("legacy guardrail3.toml should no longer drive clippy policy");
+
+    assert!(!input.published_library_policy, "{input:#?}");
+}
+
+#[test]
+fn surfaces_guardrail3_rs_parse_errors_in_policy_state() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
+    write(root.join("guardrail3-rs.toml"), "profile = 7\n");
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("invalid guardrail3-rs.toml should be preserved in clippy policy state");
+
+    match input.rust_policy {
+        G3RsClippyRustPolicyState::ParseError { rel_path, .. } => {
+            assert_eq!(rel_path, "guardrail3-rs.toml");
+        }
+        other => panic!("expected ParseError policy state, got {other:#?}"),
+    }
+}
+
+#[test]
+fn library_policy_respects_workspace_inherited_member_publish_false() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"[workspace]
+members = ["member"]
+
+[workspace.package]
+publish = false
+"#,
+    );
+    write(
+        root.join("member/Cargo.toml"),
+        r#"[package]
+name = "member"
+version = "0.1.0"
+edition = "2024"
+publish = { workspace = true }
+"#,
+    );
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
+    write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("workspace-inherited publishability should not abort clippy ingestion");
+
+    assert!(!input.published_library_policy, "{input:#?}");
+}
+
+#[test]
+fn library_policy_respects_workspace_inherited_member_publish_true() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"[workspace]
+members = ["member"]
+
+[workspace.package]
+publish = true
+"#,
+    );
+    write(
+        root.join("member/Cargo.toml"),
+        r#"[package]
+name = "member"
+version = "0.1.0"
+edition = "2024"
+publish = { workspace = true }
+"#,
+    );
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
+    write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl)
+        .expect("workspace-inherited publishability should not abort clippy ingestion");
+
+    assert!(input.published_library_policy, "{input:#?}");
 }
 
 #[test]

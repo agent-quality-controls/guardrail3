@@ -1,7 +1,7 @@
 use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
-use guardrail3_domain_modules::clippy::MAX_STRUCT_BOOLS;
 use guardrail3_check_types::G3CheckResult;
 
+use crate::baseline::MAX_STRUCT_BOOLS;
 use crate::support::{check_threshold, typed_clippy};
 
 const ID: &str = "RS-CLIPPY-CONFIG-01";

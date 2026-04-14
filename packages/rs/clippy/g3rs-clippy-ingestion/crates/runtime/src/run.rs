@@ -1,5 +1,5 @@
 use g3rs_clippy_types::{
-    G3RsClippyConfigChecksInput, G3RsClippyFileTreeChecksInput, G3RsClippyPolicyContextState,
+    G3RsClippyConfigChecksInput, G3RsClippyFileTreeChecksInput, G3RsClippyRustPolicyState,
     G3RsClippyShadowedConfig,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
@@ -13,24 +13,24 @@ pub fn ingest_for_config_checks(
         .ok_or(IngestionError::ClippyTomlNotFound)?;
 
     let clippy = crate::parse::parse_clippy_state(&entry.path.abs_path);
-    let policy_context = match crate::select::select_root_guardrail_toml(crawl) {
-        Some(entry) => crate::parse::parse_guardrail_policy_state(
+    let rust_policy = match crate::select::select_root_guardrail3_rs_toml(crawl) {
+        Some(entry) => crate::parse::parse_rust_policy_state(
             &entry.path.rel_path,
             &entry.path.abs_path,
         ),
-        None => G3RsClippyPolicyContextState::Missing,
+        None => G3RsClippyRustPolicyState::Missing,
     };
-    let profile_name = match &policy_context {
-        G3RsClippyPolicyContextState::Parsed { profile_name, .. } => profile_name.as_deref(),
-        G3RsClippyPolicyContextState::Missing
-        | G3RsClippyPolicyContextState::Unreadable { .. }
-        | G3RsClippyPolicyContextState::ParseError { .. } => None,
+    let profile = match &rust_policy {
+        G3RsClippyRustPolicyState::Parsed { profile, .. } => *profile,
+        G3RsClippyRustPolicyState::Missing
+        | G3RsClippyRustPolicyState::Unreadable { .. }
+        | G3RsClippyRustPolicyState::ParseError { .. } => None,
     };
     let published_library_policy = match crate::select::select_root_cargo_toml(crawl) {
         Some(entry) => crate::parse::compute_published_library_policy(
             &crawl.root_abs_path,
             &entry.path.abs_path,
-            profile_name,
+            profile,
         ),
         None => false,
     };
@@ -44,7 +44,7 @@ pub fn ingest_for_config_checks(
     Ok(crate::ingest::assemble_config_input(
         entry.path.rel_path.clone(),
         clippy,
-        policy_context,
+        rust_policy,
         published_library_policy,
         cargo_config_overrides,
     ))

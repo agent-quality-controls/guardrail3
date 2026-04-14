@@ -1,12 +1,13 @@
 use super::check;
-use crate::test_support::{findings, input_with_raw, parsed_policy};
+use crate::test_support::{findings, input_with_raw, parsed_rust_policy};
+use guardrail3_rs_toml_parser::RustProfile;
 
 #[test]
 fn warns_when_enabled_for_non_library_policy() {
     let input = input_with_raw(
         "clippy.toml",
         "avoid-breaking-exported-api = true\n",
-        parsed_policy("guardrail3.toml", Some("service"), true),
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), true),
         false,
         Vec::new(),
     );
@@ -31,7 +32,7 @@ fn inventories_enabled_setting_for_published_library_policy() {
     let input = input_with_raw(
         "clippy.toml",
         "avoid-breaking-exported-api = true\n",
-        parsed_policy("guardrail3.toml", Some("library"), true),
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
         true,
         Vec::new(),
     );
@@ -49,7 +50,7 @@ fn inventories_explicit_false_setting() {
     let input = input_with_raw(
         "clippy.toml",
         "avoid-breaking-exported-api = false\n",
-        parsed_policy("guardrail3.toml", Some("service"), true),
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), true),
         false,
         Vec::new(),
     );
@@ -67,7 +68,7 @@ fn warns_when_setting_is_missing() {
     let input = input_with_raw(
         "clippy.toml",
         "",
-        parsed_policy("guardrail3.toml", Some("service"), true),
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), true),
         false,
         Vec::new(),
     );
@@ -85,7 +86,7 @@ fn warns_when_setting_has_wrong_type() {
     let input = input_with_raw(
         "clippy.toml",
         "avoid-breaking-exported-api = 7\n",
-        parsed_policy("guardrail3.toml", Some("service"), true),
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), true),
         false,
         Vec::new(),
     );

@@ -1,13 +1,13 @@
 use super::check;
 use crate::test_support::{findings, input_with_raw, override_facts};
-use g3rs_clippy_config_checks_types::G3RsClippyPolicyContextState;
+use g3rs_clippy_config_checks_types::G3RsClippyRustPolicyState;
 
 #[test]
 fn inventories_clean_state_when_no_overrides_exist() {
     let input = input_with_raw(
         "clippy.toml",
         "",
-        G3RsClippyPolicyContextState::Missing,
+        G3RsClippyRustPolicyState::Missing,
         false,
         Vec::new(),
     );
@@ -24,7 +24,7 @@ fn errors_on_override_surface() {
     let input = input_with_raw(
         "clippy.toml",
         "",
-        G3RsClippyPolicyContextState::Missing,
+        G3RsClippyRustPolicyState::Missing,
         false,
         vec![override_facts(".cargo/config.toml", None)],
     );
@@ -49,7 +49,7 @@ fn errors_on_malformed_override_surface() {
     let input = input_with_raw(
         "clippy.toml",
         "",
-        G3RsClippyPolicyContextState::Missing,
+        G3RsClippyRustPolicyState::Missing,
         false,
         vec![override_facts(".cargo/config", Some("bad env"))],
     );

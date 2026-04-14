@@ -1,3 +1,4 @@
+mod baseline;
 mod rs_clippy_config_01_max_struct_bools;
 mod rs_clippy_config_02_max_fn_params_bools;
 mod rs_clippy_config_03_too_many_lines_threshold;

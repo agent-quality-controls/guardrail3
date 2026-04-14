@@ -1,8 +1,10 @@
 use std::path::Path;
 
+use cargo_toml_parser::{CargoToml, InheritableValue, PackageSection, VecStringOrBool};
 use g3rs_clippy_types::{
-    G3RsClippyCargoConfigOverride, G3RsClippyConfigState, G3RsClippyPolicyContextState,
+    G3RsClippyCargoConfigOverride, G3RsClippyConfigState, G3RsClippyRustPolicyState,
 };
+use guardrail3_rs_toml_parser::RustProfile;
 use glob::Pattern;
 
 use crate::run::IngestionError;
@@ -30,96 +32,39 @@ pub(crate) fn parse_clippy_state(abs_path: &Path) -> G3RsClippyConfigState {
     G3RsClippyConfigState::Parsed { raw, typed }
 }
 
-pub(crate) fn parse_guardrail_policy_state(
+pub(crate) fn parse_rust_policy_state(
     rel_path: &str,
     abs_path: &Path,
-) -> G3RsClippyPolicyContextState {
+) -> G3RsClippyRustPolicyState {
     let content = match read_to_string(abs_path) {
         Ok(content) => content,
         Err(reason) => {
-            return G3RsClippyPolicyContextState::Unreadable {
+            return G3RsClippyRustPolicyState::Unreadable {
                 rel_path: rel_path.to_owned(),
                 reason,
             };
         }
     };
 
-    let parsed = match toml::from_str::<toml::Value>(&content) {
+    let parsed = match guardrail3_rs_toml_parser::parse(&content) {
         Ok(parsed) => parsed,
         Err(err) => {
-            return G3RsClippyPolicyContextState::ParseError {
+            return G3RsClippyRustPolicyState::ParseError {
                 rel_path: rel_path.to_owned(),
                 reason: err.to_string(),
             };
         }
     };
 
-    let profile_name = match parsed.get("profile") {
-        Some(profile) => {
-            let Some(profile_table) = profile.as_table() else {
-                return G3RsClippyPolicyContextState::ParseError {
-                    rel_path: rel_path.to_owned(),
-                    reason: "`profile` must be a table in active `guardrail3.toml`.".to_owned(),
-                };
-            };
-            match profile_table.get("name") {
-                Some(name) => match name.as_str() {
-                    Some(name) => Some(name.to_owned()),
-                    None => {
-                        return G3RsClippyPolicyContextState::ParseError {
-                            rel_path: rel_path.to_owned(),
-                            reason: "`profile.name` must be a string in active `guardrail3.toml`."
-                                .to_owned(),
-                        };
-                    }
-                },
-                None => None,
-            }
-        }
-        None => None,
-    };
+    let garde_enabled = parsed
+        .checks
+        .as_ref()
+        .and_then(|checks| checks.garde)
+        .unwrap_or(true);
 
-    let garde_enabled = match parsed.get("rust") {
-        Some(rust) => {
-            let Some(rust_table) = rust.as_table() else {
-                return G3RsClippyPolicyContextState::ParseError {
-                    rel_path: rel_path.to_owned(),
-                    reason: "`rust` must be a table in active `guardrail3.toml`.".to_owned(),
-                };
-            };
-            match rust_table.get("checks") {
-                Some(checks) => {
-                    let Some(checks_table) = checks.as_table() else {
-                        return G3RsClippyPolicyContextState::ParseError {
-                            rel_path: rel_path.to_owned(),
-                            reason: "`rust.checks` must be a table in active `guardrail3.toml`."
-                                .to_owned(),
-                        };
-                    };
-                    match checks_table.get("garde") {
-                        Some(garde) => match garde.as_bool() {
-                            Some(garde) => garde,
-                            None => {
-                                return G3RsClippyPolicyContextState::ParseError {
-                                    rel_path: rel_path.to_owned(),
-                                    reason:
-                                        "`rust.checks.garde` must be a bool in active `guardrail3.toml`."
-                                            .to_owned(),
-                                };
-                            }
-                        },
-                        None => true,
-                    }
-                }
-                None => true,
-            }
-        }
-        None => true,
-    };
-
-    G3RsClippyPolicyContextState::Parsed {
+    G3RsClippyRustPolicyState::Parsed {
         rel_path: rel_path.to_owned(),
-        profile_name,
+        profile: parsed.profile,
         garde_enabled,
     }
 }
@@ -172,26 +117,30 @@ pub(crate) fn parse_cargo_override(
 pub(crate) fn compute_published_library_policy(
     root_abs_path: &Path,
     root_cargo_abs_path: &Path,
-    profile_name: Option<&str>,
+    profile: Option<RustProfile>,
 ) -> bool {
-    if profile_name != Some("library") {
+    if profile != Some(RustProfile::Library) {
         return false;
     }
 
     let Ok(root_content) = read_to_string(root_cargo_abs_path) else {
         return false;
     };
-    let Ok(root_raw) = toml::from_str::<toml::Value>(&root_content) else {
-        return false;
-    };
-
-    if manifest_publishable(&root_raw) {
-        return true;
-    }
-
     let Ok(root_cargo) = cargo_toml_parser::parse(&root_content) else {
         return false;
     };
+    let Ok(root_raw) = toml::from_str::<toml::Value>(&root_content) else {
+        return false;
+    };
+    let workspace_publish = root_cargo
+        .workspace
+        .as_ref()
+        .and_then(|workspace| workspace.package.as_ref())
+        .and_then(|package| package.publish.as_ref());
+
+    if manifest_publishable(&root_cargo, workspace_publish) {
+        return true;
+    }
 
     let Ok(declared_members) = collect_declared_member_rels(root_abs_path, &root_raw) else {
         return false;
@@ -205,11 +154,11 @@ pub(crate) fn compute_published_library_policy(
             Ok(content) => content,
             Err(_) => continue,
         };
-        let member_raw = match toml::from_str::<toml::Value>(&member_content) {
-            Ok(raw) => raw,
+        let member_cargo = match cargo_toml_parser::parse(&member_content) {
+            Ok(cargo) => cargo,
             Err(_) => continue,
         };
-        if manifest_publishable(&member_raw) {
+        if manifest_publishable(&member_cargo, workspace_publish) {
             return true;
         }
     }
@@ -343,15 +292,34 @@ fn normalize_member_rel(pattern: &str) -> String {
     }
 }
 
-fn manifest_publishable(raw: &toml::Value) -> bool {
-    let Some(package) = raw.get("package") else {
+fn manifest_publishable(
+    cargo: &CargoToml,
+    workspace_publish: Option<&VecStringOrBool>,
+) -> bool {
+    let Some(package) = cargo.package.as_ref().or(cargo.project.as_ref()) else {
         return false;
     };
-    match package.get("publish") {
+    package_publishable(package, workspace_publish)
+}
+
+fn package_publishable(
+    package: &PackageSection,
+    workspace_publish: Option<&VecStringOrBool>,
+) -> bool {
+    match package.publish.as_ref() {
         None => true,
-        Some(toml::Value::Boolean(value)) => *value,
-        Some(toml::Value::Array(array)) => !array.is_empty() && array.iter().all(toml::Value::is_str),
-        _ => false,
+        Some(InheritableValue::Value(value)) => publish_value_allows_publish(value),
+        Some(InheritableValue::Inherit(inheritance)) if inheritance.workspace => {
+            workspace_publish.is_some_and(publish_value_allows_publish)
+        }
+        Some(InheritableValue::Inherit(_)) => false,
+    }
+}
+
+fn publish_value_allows_publish(value: &VecStringOrBool) -> bool {
+    match value {
+        VecStringOrBool::Bool(flag) => *flag,
+        VecStringOrBool::VecString(registries) => !registries.is_empty(),
     }
 }
 

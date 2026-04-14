@@ -18,10 +18,10 @@ pub(crate) fn collect_root_clippy_tomls(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3Rs
     entries
 }
 
-pub(crate) fn select_root_guardrail_toml(
+pub(crate) fn select_root_guardrail3_rs_toml(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("guardrail3.toml")
+    crawl.root_file("guardrail3-rs.toml")
 }
 
 pub(crate) fn collect_root_cargo_config_overrides(

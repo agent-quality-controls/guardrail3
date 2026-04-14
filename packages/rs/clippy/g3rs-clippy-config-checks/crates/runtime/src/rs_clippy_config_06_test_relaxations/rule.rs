@@ -1,10 +1,10 @@
 use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
-use guardrail3_domain_modules::clippy::{
+use guardrail3_check_types::{G3CheckResult, G3Severity};
+
+use crate::baseline::{
     ALLOW_DBG_IN_TESTS, ALLOW_EXPECT_IN_TESTS, ALLOW_PANIC_IN_TESTS, ALLOW_PRINT_IN_TESTS,
     ALLOW_UNWRAP_IN_TESTS,
 };
-use guardrail3_check_types::{G3CheckResult, G3Severity};
-
 use crate::support::{
     allow_dbg_in_tests, allow_expect_in_tests, allow_panic_in_tests, allow_print_in_tests,
     allow_unwrap_in_tests, relaxation_message, typed_clippy,

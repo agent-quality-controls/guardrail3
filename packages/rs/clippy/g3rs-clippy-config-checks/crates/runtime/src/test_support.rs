@@ -1,10 +1,10 @@
 use clippy_toml_parser::parse as parse_clippy_toml;
 use g3rs_clippy_config_checks_types::{
     G3RsClippyCargoConfigOverride, G3RsClippyConfigChecksInput, G3RsClippyConfigState,
-    G3RsClippyPolicyContextState,
+    G3RsClippyRustPolicyState,
 };
+use guardrail3_rs_toml_parser::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_domain_modules::clippy::build_clippy_toml;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct Finding {
@@ -30,24 +30,79 @@ pub(crate) fn findings(results: &[G3CheckResult]) -> Vec<Finding> {
         .collect()
 }
 
-pub(crate) fn baseline_toml(profile_name: &str, garde_enabled: bool) -> String {
-    build_clippy_toml(profile_name, false, garde_enabled, "", "")
+pub(crate) fn baseline_toml(profile: RustProfile, garde_enabled: bool) -> String {
+    let mut out = String::new();
+    out.push_str(&format!(
+        "max-struct-bools = {}\n",
+        crate::baseline::MAX_STRUCT_BOOLS
+    ));
+    out.push_str(&format!(
+        "max-fn-params-bools = {}\n",
+        crate::baseline::MAX_FN_PARAMS_BOOLS
+    ));
+    out.push_str(&format!(
+        "too-many-lines-threshold = {}\n",
+        crate::baseline::TOO_MANY_LINES_THRESHOLD
+    ));
+    out.push_str(&format!(
+        "too-many-arguments-threshold = {}\n",
+        crate::baseline::TOO_MANY_ARGUMENTS_THRESHOLD
+    ));
+    out.push_str(&format!(
+        "excessive-nesting-threshold = {}\n",
+        crate::baseline::EXCESSIVE_NESTING_THRESHOLD
+    ));
+    out.push_str(&format!(
+        "cognitive-complexity-threshold = {}\n",
+        crate::baseline::COGNITIVE_COMPLEXITY_THRESHOLD
+    ));
+    out.push_str(&format!(
+        "type-complexity-threshold = {}\n",
+        crate::baseline::TYPE_COMPLEXITY_THRESHOLD
+    ));
+    out.push_str(&format!(
+        "avoid-breaking-exported-api = false\nallow-dbg-in-tests = {}\nallow-expect-in-tests = {}\nallow-panic-in-tests = {}\nallow-print-in-tests = {}\nallow-unwrap-in-tests = {}\n",
+        crate::baseline::ALLOW_DBG_IN_TESTS,
+        crate::baseline::ALLOW_EXPECT_IN_TESTS,
+        crate::baseline::ALLOW_PANIC_IN_TESTS,
+        crate::baseline::ALLOW_PRINT_IN_TESTS,
+        crate::baseline::ALLOW_UNWRAP_IN_TESTS,
+    ));
+
+    out.push_str("disallowed-methods = [\n");
+    for path in crate::support::expected_method_bans(garde_enabled) {
+        out.push_str(&format!("  {{ path = \"{path}\", reason = \"baseline\" }},\n"));
+    }
+    out.push_str("]\n");
+
+    out.push_str("disallowed-types = [\n");
+    for path in crate::support::expected_type_bans(Some(profile), garde_enabled) {
+        out.push_str(&format!("  {{ path = \"{path}\", reason = \"baseline\" }},\n"));
+    }
+    out.push_str("]\n");
+
+    out.push_str("disallowed-macros = [\n");
+    for path in crate::baseline::EXPECTED_MACRO_BANS {
+        out.push_str(&format!("  {{ path = \"{path}\", reason = \"baseline\" }},\n"));
+    }
+    out.push_str("]\n");
+    out
 }
 
-pub(crate) fn parsed_policy(
+pub(crate) fn parsed_rust_policy(
     rel_path: &str,
-    profile_name: Option<&str>,
+    profile: Option<RustProfile>,
     garde_enabled: bool,
-) -> G3RsClippyPolicyContextState {
-    G3RsClippyPolicyContextState::Parsed {
+) -> G3RsClippyRustPolicyState {
+    G3RsClippyRustPolicyState::Parsed {
         rel_path: rel_path.to_owned(),
-        profile_name: profile_name.map(str::to_owned),
+        profile,
         garde_enabled,
     }
 }
 
-pub(crate) fn parse_error_policy(rel_path: &str, reason: &str) -> G3RsClippyPolicyContextState {
-    G3RsClippyPolicyContextState::ParseError {
+pub(crate) fn parse_error_rust_policy(rel_path: &str, reason: &str) -> G3RsClippyRustPolicyState {
+    G3RsClippyRustPolicyState::ParseError {
         rel_path: rel_path.to_owned(),
         reason: reason.to_owned(),
     }
@@ -67,7 +122,7 @@ pub(crate) fn input_from_raw(rel_path: &str, raw: &str) -> G3RsClippyConfigCheck
     input_with_raw(
         rel_path,
         raw,
-        G3RsClippyPolicyContextState::Missing,
+        G3RsClippyRustPolicyState::Missing,
         false,
         Vec::new(),
     )
@@ -76,7 +131,7 @@ pub(crate) fn input_from_raw(rel_path: &str, raw: &str) -> G3RsClippyConfigCheck
 pub(crate) fn input_with_raw(
     rel_path: &str,
     raw: &str,
-    policy_context: G3RsClippyPolicyContextState,
+    rust_policy: G3RsClippyRustPolicyState,
     published_library_policy: bool,
     cargo_config_overrides: Vec<G3RsClippyCargoConfigOverride>,
 ) -> G3RsClippyConfigChecksInput {
@@ -93,7 +148,7 @@ pub(crate) fn input_with_raw(
     G3RsClippyConfigChecksInput {
         clippy_rel_path: rel_path.to_owned(),
         clippy,
-        policy_context,
+        rust_policy,
         published_library_policy,
         cargo_config_overrides,
     }
