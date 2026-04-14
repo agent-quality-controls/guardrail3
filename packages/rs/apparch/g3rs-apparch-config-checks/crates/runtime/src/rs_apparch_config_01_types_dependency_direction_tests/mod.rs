@@ -1,5 +1,6 @@
 use g3rs_apparch_types::{
-    G3RsApparchConfigChecksInput, G3RsApparchCrate, G3RsApparchDependencyEdge, G3RsApparchLayer,
+    G3RsApparchConfigChecksInput, G3RsApparchCrate, G3RsApparchDependencyEdge,
+    G3RsApparchDependencyKind, G3RsApparchLayer, G3RsApparchRustPolicyState,
 };
 use guardrail3_check_types::G3Severity;
 
@@ -25,8 +26,13 @@ fn input(edges: &[(&str, &str)]) -> G3RsApparchConfigChecksInput {
             .map(|(from, to)| G3RsApparchDependencyEdge {
                 from_cargo_rel_path: (*from).to_owned(),
                 to_cargo_rel_path: (*to).to_owned(),
+                dep_name: (*to).to_owned(),
+                kind: G3RsApparchDependencyKind::Dependency,
             })
             .collect(),
+        external_dependencies: Vec::new(),
+        patch_bypasses: Vec::new(),
+        rust_policy: G3RsApparchRustPolicyState::Missing,
     }
 }
 

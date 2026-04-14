@@ -13,6 +13,7 @@ pub fn check(input: &G3RsApparchSourceChecksInput) -> Vec<G3CheckResult> {
         .collect::<BTreeMap<_, _>>();
 
     crate::rs_apparch_source_04_io_traits_in_types::check(input, &crates_by_path, &mut results);
+    crate::rs_apparch_source_05_types_public_surface::check(input, &crates_by_path, &mut results);
 
     results
 }

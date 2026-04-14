@@ -1,5 +1,6 @@
 use g3rs_apparch_types::{
-    G3RsApparchConfigChecksInput, G3RsApparchCrate, G3RsApparchDependencyEdge, G3RsApparchLayer,
+    G3RsApparchConfigChecksInput, G3RsApparchCrate, G3RsApparchDependencyEdge,
+    G3RsApparchDependencyKind, G3RsApparchLayer, G3RsApparchRustPolicyState,
 };
 
 #[test]
@@ -16,6 +17,9 @@ fn io_inbound_has_no_dependency_direction_rule() {
             edge("io/inbound/http", "logic/service"),
             edge("io/inbound/http", "io/outbound/db"),
         ],
+        external_dependencies: Vec::new(),
+        patch_bypasses: Vec::new(),
+        rust_policy: G3RsApparchRustPolicyState::Missing,
     };
 
     let results = crate::run::check(&input);
@@ -38,5 +42,7 @@ fn edge(from_rel_dir: &str, to_rel_dir: &str) -> G3RsApparchDependencyEdge {
     G3RsApparchDependencyEdge {
         from_cargo_rel_path: format!("{from_rel_dir}/Cargo.toml"),
         to_cargo_rel_path: format!("{to_rel_dir}/Cargo.toml"),
+        dep_name: to_rel_dir.rsplit('/').next().expect("dep name").to_owned(),
+        kind: G3RsApparchDependencyKind::Dependency,
     }
 }
