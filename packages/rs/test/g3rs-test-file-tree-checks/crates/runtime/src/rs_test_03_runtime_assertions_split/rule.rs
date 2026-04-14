@@ -118,7 +118,12 @@ fn collect_violations(
                     rel_path: component.runtime_cargo_rel_path.clone(),
                     line: None,
                     title: "runtime missing assertions dev-dependency".to_owned(),
-                    message: "Runtime crates with test harnesses must wire sibling assertions crates through `dev-dependencies`.".to_owned(),
+                    message: format!(
+                        "Manifest `{}` is missing dev-dependency `{}`. Add `{}` under `[dev-dependencies]`, so sidecars and external harnesses can call the shared assertions crate.",
+                        component.runtime_cargo_rel_path,
+                        assertions_package_name,
+                        assertions_package_name,
+                    ),
                 });
             }
         }
@@ -137,9 +142,12 @@ fn collect_violations(
                 rel_path: component.assertions_cargo_rel_path.clone(),
                 line: None,
                 title: "assertions missing runtime dependency".to_owned(),
-                message:
-                    "Assertions crates must depend on the sibling runtime crate they validate."
-                        .to_owned(),
+                message: format!(
+                    "Manifest `{}` is missing dependency `{}`. Add `{}` under `[dependencies]`, so the shared assertions crate can prove the runtime behavior it checks.",
+                    component.assertions_cargo_rel_path,
+                    component.runtime_package_name.as_deref().unwrap_or("<runtime-package>"),
+                    component.runtime_package_name.as_deref().unwrap_or("<runtime-package>"),
+                ),
             });
         }
 
@@ -150,7 +158,7 @@ fn collect_violations(
                     line: None,
                     title: "sidecar missing owned assertions module".to_owned(),
                     message: format!(
-                        "Owned sidecar `{}` requires reusable assertions module `{}`.",
+                        "Sidecar file `{}` has tests but no shared assertions file `{}`. Create that assertions file and move the final result assertions there, so internal and external tests use the same proof.",
                         sidecar.mod_rel_path, sidecar.assertions_module_rel_path
                     ),
                 });
@@ -250,7 +258,10 @@ fn collect_violations(
                         line: Some(binding.line),
                         title: "sidecar escapes owned module boundary".to_owned(),
                         message: format!(
-                            "Internal sidecar harnesses must not escape their owned module boundary through local path `{target}`."
+                            "Sidecar file `{}` reaches local path `{}`. Call only the owned production module `{}` or the shared assertions crate from this sidecar, so the sidecar tests one module without reaching into siblings.",
+                            file.file.rel_path,
+                            target,
+                            owner_module_name,
                         ),
                     });
                 }
@@ -262,8 +273,18 @@ fn collect_violations(
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: file.file.rel_path.clone(),
                         line: Some(binding.line),
-                        title: "sidecar imports sibling production module".to_owned(),
-                        message: "Internal sidecar harnesses may reach only their owned production module subtree, not sibling production modules.".to_owned(),
+                        title: "sidecar imports sibling local module".to_owned(),
+                        message: format!(
+                            "Sidecar file `{}` imports sibling local module `{}`. Import only the owned production module `{}` or the shared assertions crate from this sidecar, so the sidecar tests one module without reaching into siblings.",
+                            file.file.rel_path,
+                            helpers::sibling_module_target(
+                                &binding.path_segments,
+                                owner_module_name,
+                                &local_module_names,
+                            )
+                            .unwrap_or("<sibling-module>"),
+                            owner_module_name,
+                        ),
                     });
                 }
                 if let Some(local_root) = helpers::first_disallowed_local_package(
@@ -318,9 +339,12 @@ fn collect_violations(
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.file.rel_path.clone(),
                     line: None,
-                    title: "sidecar calls sibling production module".to_owned(),
+                    title: "sidecar calls sibling local module".to_owned(),
                     message: format!(
-                        "Internal sidecar harnesses must not call sibling production module `{target_module}` directly."
+                        "Sidecar file `{}` calls sibling local module `{}`. Call only the owned production module `{}` or the shared assertions crate from this sidecar, so the sidecar tests one module without reaching into siblings.",
+                        file.file.rel_path,
+                        target_module,
+                        owner_module_name,
                     ),
                 });
             }
@@ -370,7 +394,11 @@ fn collect_violations(
                         rel_path: file.file.rel_path.clone(),
                         line: Some(binding.line),
                         title: "assertions module reaches local private code".to_owned(),
-                        message: "Assertions modules must import runtime public API or helper crates, not local `crate::`, `self::`, or `super::` paths.".to_owned(),
+                        message: format!(
+                            "Assertions file `{}` imports local path `{}`. Import the runtime crate public API instead, so sidecars and external harnesses can reuse the same assertions without depending on private module layout.",
+                            file.file.rel_path,
+                            binding.path_segments.join("::"),
+                        ),
                     });
                 }
                 if let Some(local_root) = helpers::first_disallowed_local_package(
