@@ -4,10 +4,6 @@ use g3rs_garde_config_checks_types::{
     G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
 };
 
-fn canonical_clippy_toml() -> String {
-    guardrail3_domain_modules::clippy::build_clippy_toml("service", false, true, "", "")
-}
-
 #[test]
 fn warns_when_clippy_config_is_missing_for_garde_root() {
     let input = G3RsGardeConfigChecksInput {
@@ -64,7 +60,8 @@ fn keeps_ban_rules_quiet_when_garde_is_absent() {
         cargo: parse_cargo("[workspace]\nmembers = []\n").expect("cargo should parse"),
         clippy_input: G3RsGardeClippyInput::Parsed {
             rel_path: "clippy.toml".to_owned(),
-            clippy: parse_clippy(&canonical_clippy_toml()).expect("clippy should parse"),
+            clippy: parse_clippy(&crate::test_support::canonical_clippy_toml())
+                .expect("clippy should parse"),
         },
     };
 

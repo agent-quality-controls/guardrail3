@@ -8,3 +8,6 @@ mod support;
 
 #[cfg(feature = "checks")]
 pub use run::check;
+
+#[cfg(test)]
+mod test_support;

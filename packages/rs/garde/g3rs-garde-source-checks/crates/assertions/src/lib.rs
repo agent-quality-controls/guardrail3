@@ -16,5 +16,3 @@ pub mod rs_garde_ast_05_field_level_constraints;
 pub mod rs_garde_ast_06_nested_validation_dive;
 #[cfg(feature = "checks")]
 pub mod rs_garde_ast_07_context_validation_surface;
-#[cfg(feature = "checks")]
-pub mod rs_garde_ast_08_guardrail_config_validate_call;

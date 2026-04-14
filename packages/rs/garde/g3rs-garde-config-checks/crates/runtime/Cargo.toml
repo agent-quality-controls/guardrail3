@@ -26,5 +26,4 @@ guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/
 
 [dev-dependencies]
 g3rs-garde-config-checks-assertions = { path = "../assertions" }
-guardrail3-domain-modules = { path = "../../../../../../apps/guardrail3/crates/domain/modules" }
 toml = "0.8"

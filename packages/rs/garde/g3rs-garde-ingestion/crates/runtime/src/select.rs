@@ -13,9 +13,11 @@ pub(crate) fn select_clippy_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWork
         .or_else(|| crawl.root_file(".clippy.toml"))
 }
 
-/// Find the root `guardrail3.toml`.
-pub(crate) fn select_guardrail_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("guardrail3.toml")
+/// Find the root `guardrail3-rs.toml`.
+pub(crate) fn select_guardrail3_rs_toml(
+    crawl: &G3RsWorkspaceCrawl,
+) -> Option<&G3RsWorkspaceEntry> {
+    crawl.root_file("guardrail3-rs.toml")
 }
 
 /// Select all non-test, non-fixture Rust source files under the crawled root.

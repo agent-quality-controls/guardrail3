@@ -15,6 +15,6 @@ Config ingestion:
 
 Source ingestion:
 - requires root `Cargo.toml`
-- requires root `guardrail3.toml`
+- optionally parses root `guardrail3-rs.toml`
 - selects governed non-test Rust source files
-- leaves source and guardrail read/parse failures to `RS-GARDE-SOURCE-10`
+- leaves source and Rust-policy read/parse failures to `RS-GARDE-SOURCE-10`

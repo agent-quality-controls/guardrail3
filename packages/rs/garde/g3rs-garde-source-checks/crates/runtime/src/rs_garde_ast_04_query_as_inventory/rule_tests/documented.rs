@@ -2,7 +2,7 @@ use g3rs_garde_source_checks_assertions::rs_garde_ast_04_query_as_inventory as a
 
 #[test]
 fn inventories_documented_query_as_usages() {
-    let guardrail = "[profile]\nname = \"service\"\n\n[[escape_hatches]]\nfamily = \"garde\"\nfile = \"src/db.rs\"\nkind = \"sqlx_query_as\"\nselector = \"sqlx::query_as@L4\"\nreason = \"Temporary SQLx row mapping until validated DTO extraction lands.\"\n\n[[escape_hatches]]\nfamily = \"garde\"\nfile = \"src/db.rs\"\nkind = \"sqlx_query_as\"\nselector = \"qa@L5\"\nreason = \"Temporary SQLx row mapping until validated DTO extraction lands.\"\n";
+    let guardrail = "profile = \"service\"\n\n[[waivers]]\nrule = \"RS-GARDE-SOURCE-04\"\nfile = \"src/db.rs\"\nselector = \"sqlx::query_as@L4\"\nreason = \"Temporary SQLx row mapping until validated DTO extraction lands.\"\n\n[[waivers]]\nrule = \"RS-GARDE-SOURCE-04\"\nfile = \"src/db.rs\"\nselector = \"qa@L5\"\nreason = \"Temporary SQLx row mapping until validated DTO extraction lands.\"\n";
     let fixture = crate::test_support::fixture(
         &[(
             "src/db.rs",

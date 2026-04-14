@@ -1,5 +1,5 @@
 pub(crate) fn canonical_clippy_toml() -> String {
-    guardrail3_domain_modules::clippy::build_clippy_toml("service", false, true, "", "")
+    crate::test_support::canonical_clippy_toml()
 }
 
 pub(crate) fn remove_clippy_ban_path(clippy_toml: &str, key: &str, path: &str) -> String {

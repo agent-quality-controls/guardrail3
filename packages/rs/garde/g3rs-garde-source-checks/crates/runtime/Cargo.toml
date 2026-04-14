@@ -21,13 +21,12 @@ workspace = true
 [dependencies]
 g3rs-garde-source-checks-types = { path = "../types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
-guardrail3-domain-config = { path = "../../../../../../apps/guardrail3/crates/domain/config" }
 guardrail3-reason-policy = { path = "../../../../../shared/reason-policy/crates/reason-policy", version = "0.0.0" }
 proc-macro2 = { version = "1", features = ["span-locations"] }
 quote = "1.0.45"
 syn = { version = "2", features = ["full", "parsing", "visit"] }
-toml = "0.8"
 
 [dev-dependencies]
 g3rs-garde-source-checks-assertions = { path = "../assertions" }
+guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
 tempfile = "3"

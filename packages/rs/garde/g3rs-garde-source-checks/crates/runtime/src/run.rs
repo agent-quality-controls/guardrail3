@@ -30,9 +30,6 @@ pub fn check(input: &G3RsGardeSourceChecksInput) -> Vec<G3CheckResult> {
         crate::rs_garde_ast_06_nested_validation_dive::check(field, &mut results);
         crate::rs_garde_ast_07_context_validation_surface::check(field, &mut results);
     }
-    for site in &analysis.guardrail_config_validation_sites {
-        crate::rs_garde_ast_08_guardrail_config_validate_call::check(site, &mut results);
-    }
 
     results
 }

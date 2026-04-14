@@ -29,7 +29,10 @@ fn pipeline_reports_missing_garde_dependency() {
         root.join("Cargo.toml"),
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n",
     );
-    write(root.join("guardrail3.toml"), "[profile]\nname = \"service\"\n");
+    write(
+        root.join("guardrail3-rs.toml"),
+        "profile = \"service\"\n\n[checks]\ngarde = true\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
@@ -94,29 +97,14 @@ fn pipeline_keeps_ban_rules_quiet_when_garde_is_missing() {
     let root = temp.path();
     git_init(root);
 
-    write(
-        root.join("Cargo.toml"),
-        "[workspace]\nmembers = []\nversion = \"0.1.0\"\n",
-    );
-    write(root.join("guardrail3.toml"), "[profile]\nname = \"service\"\n");
+    write(root.join("Cargo.toml"), "[workspace]\nmembers = []\nversion = \"0.1.0\"\n");
     write(root.join("clippy.toml"), "disallowed-methods = []\ndisallowed-types = []\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_garde_config_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-GARDE-CONFIG-01" && result.title() == "garde dependency missing"
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        results
-            .iter()
-            .all(|result| !matches!(result.id(), "RS-GARDE-CONFIG-02" | "RS-GARDE-CONFIG-03" | "RS-GARDE-CONFIG-04" | "RS-GARDE-CONFIG-05")),
-        "{results:#?}"
-    );
+    assert!(results.is_empty(), "{results:#?}");
 }
 
 #[test]

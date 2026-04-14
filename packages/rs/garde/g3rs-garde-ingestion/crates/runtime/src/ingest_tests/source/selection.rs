@@ -7,7 +7,10 @@ fn ingests_root_scoped_ast_input() {
         root.join("Cargo.toml"),
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n",
     );
-    super::write(root.join("guardrail3.toml"), "[profile]\nname = \"service\"\n");
+    super::write(
+        root.join("guardrail3-rs.toml"),
+        "profile = \"service\"\n\n[checks]\ngarde = true\n",
+    );
     super::write(
         root.join("src/lib.rs"),
         "use garde::Validate;\n#[derive(Validate)] struct Input;\n",
@@ -36,14 +39,6 @@ fn ingests_root_scoped_ast_input() {
     let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 
     assert_eq!(input.applicability, g3rs_garde_types::G3RsGardeApplicability::Active);
-    assert_eq!(
-        input
-            .guardrail_toml
-            .as_ref()
-            .expect("active garde input should include guardrail3.toml")
-            .rel_path,
-        "guardrail3.toml"
-    );
     assert_eq!(
         input
             .source_files

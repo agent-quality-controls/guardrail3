@@ -1,8 +1,5 @@
 mod aliases;
 mod fields;
-mod guardrail_config;
-
-use guardrail_config::collect_unvalidated_guardrail_sites;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum BoundaryKind {
@@ -48,27 +45,6 @@ pub(crate) struct BoundaryField {
     pub(crate) uses_context: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum GuardrailConfigParseKind {
-    TomlFromStr,
-    TryInto,
-}
-
-impl GuardrailConfigParseKind {
-    pub(crate) const fn label(self) -> &'static str {
-        match self {
-            Self::TomlFromStr => "`toml::from_str`",
-            Self::TryInto => "`try_into::<GuardrailConfig>()`",
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub(crate) struct GuardrailConfigValidationSite {
-    pub(crate) line: usize,
-    pub(crate) parse_kind: GuardrailConfigParseKind,
-}
-
 #[derive(Debug, Clone, Default)]
 pub(crate) struct ParsedGardeFile {
     pub(crate) derived_types: Vec<DerivedBoundaryType>,
@@ -77,7 +53,6 @@ pub(crate) struct ParsedGardeFile {
     pub(crate) type_validation_map: std::collections::BTreeMap<String, (bool, bool)>,
     pub(crate) boundary_fields: Vec<BoundaryField>,
     pub(crate) query_as_macros: Vec<QueryAsMacro>,
-    pub(crate) guardrail_config_validation_sites: Vec<GuardrailConfigValidationSite>,
 }
 
 pub(crate) fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
@@ -99,7 +74,6 @@ struct GardeVisitor {
     boundary_fields: Vec<BoundaryField>,
     query_as_macros: Vec<QueryAsMacro>,
     module_stack: Vec<String>,
-    guardrail_config_validation_sites: Vec<GuardrailConfigValidationSite>,
     boundary_derive_aliases: std::collections::BTreeSet<String>,
     deserialize_aliases: std::collections::BTreeSet<String>,
     validate_aliases: std::collections::BTreeSet<String>,
@@ -117,7 +91,6 @@ impl GardeVisitor {
             type_validation_map: self.type_validation_map,
             boundary_fields: self.boundary_fields,
             query_as_macros: self.query_as_macros,
-            guardrail_config_validation_sites: self.guardrail_config_validation_sites,
         }
     }
 
@@ -145,10 +118,6 @@ impl GardeVisitor {
     fn is_validate_derive(&self, macro_name: &str) -> bool {
         let resolved = aliases::resolve_path_string_aliases(macro_name, &self.module_path_aliases);
         is_validate_derive(&resolved) || self.validate_aliases.contains(macro_name)
-    }
-
-    fn should_analyze_guardrail_validation(&self, attrs: &[syn::Attribute]) -> bool {
-        self.cfg_test_depth == 0 && !attrs_contain_cfg_test(attrs)
     }
 }
 
@@ -182,30 +151,6 @@ impl<'source> syn::visit::Visit<'source> for GardeVisitor {
             return;
         }
         syn::visit::visit_item_mod(self, item);
-    }
-
-    fn visit_item_fn(&mut self, item: &'source syn::ItemFn) {
-        if self.should_analyze_guardrail_validation(&item.attrs) {
-            self.guardrail_config_validation_sites
-                .extend(collect_unvalidated_guardrail_sites(
-                    &item.block,
-                    &item.sig.output,
-                    &self.module_path_aliases,
-                ));
-        }
-        syn::visit::visit_item_fn(self, item);
-    }
-
-    fn visit_impl_item_fn(&mut self, item: &'source syn::ImplItemFn) {
-        if self.should_analyze_guardrail_validation(&item.attrs) {
-            self.guardrail_config_validation_sites
-                .extend(collect_unvalidated_guardrail_sites(
-                    &item.block,
-                    &item.sig.output,
-                    &self.module_path_aliases,
-                ));
-        }
-        syn::visit::visit_impl_item_fn(self, item);
     }
 
     fn visit_item_struct(&mut self, item: &'source syn::ItemStruct) {
