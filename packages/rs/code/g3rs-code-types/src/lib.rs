@@ -7,7 +7,7 @@ use rustfmt_toml_parser::RustfmtToml;
 
 #[derive(Debug, Clone)]
 pub enum G3RsCodeConfigFileKind {
-    Guardrail3Toml { guardrail3: Guardrail3RsToml },
+    Guardrail3RsToml { guardrail3: Guardrail3RsToml },
     ClippyToml { clippy: ClippyToml },
     DenyToml { deny: DenyToml },
     CargoToml { cargo: CargoToml },

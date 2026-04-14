@@ -13,7 +13,7 @@ use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use crate::run::IngestionError;
 
 const CONFIG_FILE_NAMES: &[&str] = &[
-    "guardrail3.toml",
+    "guardrail3-rs.toml",
     "clippy.toml",
     ".clippy.toml",
     "deny.toml",
@@ -70,7 +70,7 @@ fn parse_config_file_kind(
     let file_name = file_name(rel_path);
 
     let kind = match file_name {
-        "guardrail3.toml" => Some(G3RsCodeConfigFileKind::Guardrail3Toml {
+        "guardrail3-rs.toml" => Some(G3RsCodeConfigFileKind::Guardrail3RsToml {
             guardrail3: parse_guardrail3_toml(content).map_err(|err| IngestionError::ParseFailed {
                 path: abs_path.to_path_buf(),
                 reason: err.to_string(),

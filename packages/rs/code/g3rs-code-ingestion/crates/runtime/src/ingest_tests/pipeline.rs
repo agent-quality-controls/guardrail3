@@ -7,20 +7,11 @@ use g3rs_code_ingestion_types::G3RsCodeSourceChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use tempfile::tempdir;
 
-const HAS_TODO: &str =
-    include_str!("../../../../../../../../apps/guardrail3/tests/fixtures/adversarial/has_todo.rs");
-const DIRECT_STD_FS: &str = include_str!(
-    "../../../../../../../../apps/guardrail3/tests/fixtures/adversarial/direct_std_fs.rs"
-);
-const CLEAN_FILE: &str = include_str!(
-    "../../../../../../../../apps/guardrail3/tests/fixtures/adversarial/clean_file.rs"
-);
-const COMMENT_USE_STD_FS: &str = include_str!(
-    "../../../../../../../../apps/guardrail3/tests/fixtures/grep-attacks/rust-structural/comment_use_std_fs.rs"
-);
-const STRING_TODO: &str = include_str!(
-    "../../../../../../../../apps/guardrail3/tests/fixtures/grep-attacks/rust-code-quality/string_todo.rs"
-);
+const HAS_TODO: &str = "pub fn run() {\n    todo!(\"finish this\");\n}\n";
+const DIRECT_STD_FS: &str = "pub fn load() {\n    let _ = std::fs::read_to_string(\"/tmp/demo\");\n}\n";
+const CLEAN_FILE: &str = "pub fn clean() {\n    let value = 1 + 1;\n    let _ = value;\n}\n";
+const COMMENT_USE_STD_FS: &str = "// use std::fs::read_to_string in docs only\npub fn clean() {}\n";
+const STRING_TODO: &str = "pub fn clean() {\n    let _ = \"TODO: literal only\";\n}\n";
 
 fn git_init(path: &Path) {
     let status = Command::new("git")
