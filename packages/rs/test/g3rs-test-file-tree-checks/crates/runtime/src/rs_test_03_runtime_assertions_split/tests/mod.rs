@@ -199,6 +199,19 @@ fn reports_assertions_missing_runtime_dependency() {
         "crates/assertions/Cargo.toml",
         None,
     );
+
+    let result = results
+        .iter()
+        .find(|result| {
+            result.id() == "RS-TEST-FILETREE-03"
+                && result.title() == "assertions missing runtime dependency"
+                && result.file() == Some("crates/assertions/Cargo.toml")
+        })
+        .expect("missing RS-TEST-FILETREE-03 result");
+    assert_eq!(
+        result.message(),
+        "Manifest `crates/assertions/Cargo.toml` is missing dependency `demo_runtime`. Add `demo_runtime` under `[dependencies]`, so the shared assertions crate can prove the runtime behavior it checks."
+    );
 }
 
 #[test]
@@ -331,9 +344,22 @@ fn reports_sidecar_importing_sibling_production_module() {
         &results,
         "RS-TEST-FILETREE-03",
         G3Severity::Error,
-        "sidecar imports sibling production module",
+        "sidecar imports sibling local module",
         "crates/runtime/src/foo_tests/mod.rs",
         Some(1),
+    );
+
+    let result = results
+        .iter()
+        .find(|result| {
+            result.id() == "RS-TEST-FILETREE-03"
+                && result.title() == "sidecar imports sibling local module"
+                && result.file() == Some("crates/runtime/src/foo_tests/mod.rs")
+        })
+        .expect("missing RS-TEST-FILETREE-03 result");
+    assert_eq!(
+        result.message(),
+        "Sidecar file `crates/runtime/src/foo_tests/mod.rs` imports sibling local module `bar`. Import only the owned production module `foo` or the shared assertions crate from this sidecar, so the sidecar tests one module without reaching into siblings."
     );
 }
 

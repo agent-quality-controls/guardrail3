@@ -131,6 +131,19 @@ fn reports_bad_cfg_test_declaration() {
         "src/lib.rs",
         Some(1),
     );
+
+    let result = results
+        .iter()
+        .find(|result| {
+            result.id() == "RS-TEST-FILETREE-02"
+                && result.title() == "ad hoc cfg(test) module declaration"
+                && result.file() == Some("src/lib.rs")
+        })
+        .expect("missing RS-TEST-FILETREE-02 result");
+    assert_eq!(
+        result.message(),
+        "File `src/lib.rs` declares `#[cfg(test)] mod helper_tests;` without the owned sidecar path `helper_tests/mod.rs`. Point that declaration at `helper_tests/mod.rs`, so this module's internal tests live in one sidecar directory."
+    );
 }
 
 #[test]

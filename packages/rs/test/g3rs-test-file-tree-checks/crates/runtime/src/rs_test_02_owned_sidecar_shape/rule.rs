@@ -138,7 +138,13 @@ fn collect_violations(
                 rel_path: file.file.rel_path.clone(),
                 line: Some(module.line),
                 title: "ad hoc cfg(test) module declaration".to_owned(),
-                message: "Declaration-only `#[cfg(test)] mod ...;` must resolve to the owned `*_tests/mod.rs` sidecar shape.".to_owned(),
+                message: format!(
+                    "File `{}` declares `#[cfg(test)] mod {};` without the owned sidecar path `{}/mod.rs`. Point that declaration at `{}/mod.rs`, so this module's internal tests live in one sidecar directory.",
+                    file.file.rel_path,
+                    module.name,
+                    module.name,
+                    module.name,
+                ),
             });
         }
     }
