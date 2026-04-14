@@ -1,6 +1,6 @@
-use super::check;
+use crate::rs_clippy_config_20_forbid_clippy_conf_dir_override::check;
 use crate::test_support::{findings, input_with_raw, override_facts};
-use g3rs_clippy_config_checks_types::G3RsClippyRustPolicyState;
+use g3rs_clippy_types::G3RsClippyRustPolicyState;
 
 #[test]
 fn inventories_clean_state_when_no_overrides_exist() {

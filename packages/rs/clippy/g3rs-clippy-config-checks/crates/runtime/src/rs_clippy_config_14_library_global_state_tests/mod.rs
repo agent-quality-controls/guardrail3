@@ -1,4 +1,4 @@
-use super::check;
+use crate::rs_clippy_config_14_library_global_state::check;
 use crate::test_support::{baseline_toml, findings, input_with_raw, parsed_rust_policy};
 use guardrail3_rs_toml_parser::RustProfile;
 

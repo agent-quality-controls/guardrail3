@@ -1,4 +1,4 @@
-use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
+use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::baseline::TOO_MANY_LINES_THRESHOLD;
@@ -19,7 +19,3 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         results,
     );
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;

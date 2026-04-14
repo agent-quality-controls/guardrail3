@@ -1,5 +1,5 @@
 use clippy_toml_parser::parse as parse_clippy_toml;
-use g3rs_clippy_config_checks_types::{
+use g3rs_clippy_types::{
     G3RsClippyCargoConfigOverride, G3RsClippyConfigChecksInput, G3RsClippyConfigState,
     G3RsClippyRustPolicyState,
 };
@@ -28,6 +28,47 @@ pub(crate) fn findings(results: &[G3CheckResult]) -> Vec<Finding> {
             inventory: result.inventory(),
         })
         .collect()
+}
+
+pub(crate) fn findings_for(results: &[G3CheckResult], id: &str) -> Vec<Finding> {
+    findings(results)
+        .into_iter()
+        .filter(|finding| finding.id == id)
+        .collect()
+}
+
+pub(crate) fn assert_findings_for(results: &[G3CheckResult], id: &str, expected: &[Finding]) {
+    assert_eq!(findings_for(results, id), expected);
+}
+
+pub(crate) fn finding_for(
+    id: &str,
+    severity: G3Severity,
+    title: &str,
+    message: &str,
+    file: &str,
+    inventory: bool,
+) -> Finding {
+    Finding {
+        id: id.to_owned(),
+        severity,
+        title: title.to_owned(),
+        message: message.to_owned(),
+        file: Some(file.to_owned()),
+        inventory,
+    }
+}
+
+pub(crate) fn error_for(id: &str, title: &str, message: &str, file: &str, inventory: bool) -> Finding {
+    finding_for(id, G3Severity::Error, title, message, file, inventory)
+}
+
+pub(crate) fn warn_for(id: &str, title: &str, message: &str, file: &str, inventory: bool) -> Finding {
+    finding_for(id, G3Severity::Warn, title, message, file, inventory)
+}
+
+pub(crate) fn info_for(id: &str, title: &str, message: &str, file: &str, inventory: bool) -> Finding {
+    finding_for(id, G3Severity::Info, title, message, file, inventory)
 }
 
 pub(crate) fn baseline_toml(profile: RustProfile, garde_enabled: bool) -> String {

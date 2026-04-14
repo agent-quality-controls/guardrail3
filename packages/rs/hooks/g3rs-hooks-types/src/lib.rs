@@ -8,6 +8,7 @@ pub struct G3RsHooksSelectedHookConfigFact {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsHooksConfigChecksInput {
+    pub active: bool,
     pub selected_hook: Option<G3RsHooksSelectedHookConfigFact>,
     pub installed_tools: Vec<String>,
 }
@@ -37,6 +38,7 @@ pub struct G3RsHooksScriptFileFact {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsHooksFileTreeChecksInput {
+    pub active: bool,
     pub pre_commit: Option<G3RsHooksScriptFileFact>,
     pub has_modular_dir: bool,
     pub modular_scripts: Vec<G3RsHooksScriptFileFact>,

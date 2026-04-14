@@ -2,6 +2,10 @@ use g3rs_hooks_file_tree_checks_types::G3RsHooksFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsHooksFileTreeChecksInput) -> Vec<G3CheckResult> {
+    if !input.active {
+        return Vec::new();
+    }
+
     let mut results = Vec::new();
 
     crate::hook_shared_01_pre_commit_exists::check(input.pre_commit.as_ref(), &mut results);

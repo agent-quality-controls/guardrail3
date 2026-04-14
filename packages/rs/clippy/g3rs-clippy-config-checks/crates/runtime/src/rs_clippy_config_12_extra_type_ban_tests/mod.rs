@@ -1,4 +1,4 @@
-use super::check;
+use crate::rs_clippy_config_12_extra_type_ban::check;
 use crate::test_support::{findings, input_from_raw};
 
 #[test]

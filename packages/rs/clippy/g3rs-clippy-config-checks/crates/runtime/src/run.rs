@@ -1,4 +1,4 @@
-use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
+use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsClippyConfigChecksInput) -> Vec<G3CheckResult> {

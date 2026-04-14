@@ -19,6 +19,12 @@ fn git_init(path: &std::path::Path) {
     assert!(status.success(), "git init should exit successfully");
 }
 
+fn repo_root(temp_dir: &tempfile::TempDir) -> &std::path::Path {
+    let root = temp_dir.path();
+    git_init(root);
+    root
+}
+
 fn git_config_hooks_path(path: &std::path::Path, hooks_path: &str) {
     let status = Command::new("git")
         .args(["config", "core.hooksPath", hooks_path])
@@ -40,7 +46,7 @@ fn make_executable(path: &std::path::Path) {
 #[test]
 fn pipeline_reports_fmt_step_when_real_command_exists() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "cargo fmt --check\n");
 
@@ -71,7 +77,7 @@ fn pipeline_reports_fmt_step_when_real_command_exists() {
 #[test]
 fn pipeline_keeps_hook_rs_10_quiet_for_single_crate_repo() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join("Cargo.toml"),
@@ -103,7 +109,7 @@ fn pipeline_keeps_hook_rs_10_quiet_for_single_crate_repo() {
 #[test]
 fn pipeline_keeps_echoed_fmt_text_as_missing_step() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "echo \"cargo fmt --check\"\n");
 
@@ -134,7 +140,7 @@ fn pipeline_keeps_echoed_fmt_text_as_missing_step() {
 #[test]
 fn pipeline_works_through_hooks_pre_commit_fallback() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("hooks/pre-commit"), "cargo fmt --check\n");
 
@@ -165,7 +171,7 @@ fn pipeline_works_through_hooks_pre_commit_fallback() {
 #[test]
 fn pipeline_fallback_hook_stays_quiet_about_inactive_modular_layout() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("hooks/pre-commit"), "cargo fmt --check\n");
     write(root.join(".githooks/pre-commit.d/10-rust.sh"), "echo cargo test --workspace\n");
@@ -186,12 +192,12 @@ fn pipeline_fallback_hook_stays_quiet_about_inactive_modular_layout() {
 #[test]
 fn pipeline_reports_rs_config_trigger_for_guardrail3_rs_toml() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write(
         root.join(".githooks/pre-commit"),
-        "if echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs rs validate --staged .\nfi\n",
+        "if echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs validate --path .\nfi\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -218,9 +224,9 @@ fn pipeline_reports_rs_config_trigger_for_guardrail3_rs_toml() {
 #[test]
 fn pipeline_reports_top_level_g3rs_validate_step_inventory() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
-    write(root.join(".githooks/pre-commit"), "g3rs validate --staged .\n");
+    write(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = crate::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
@@ -248,13 +254,13 @@ fn pipeline_reports_top_level_g3rs_validate_step_inventory() {
 #[test]
 fn pipeline_stays_clean_for_valid_githooks_setup() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
     write(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\nset -e\nrun-parts .githooks/pre-commit.d\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ngitleaks protect --staged --no-banner\ncargo dupes check --exclude-tests\ng3rs rs validate --staged .\npnpm install --frozen-lockfile\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs rs validate --staged .\nfi\n",
+        "#!/usr/bin/env bash\nset -e\nrun-parts .githooks/pre-commit.d\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ngitleaks protect --staged --no-banner\ncargo dupes check --exclude-tests\ng3rs validate --path .\npnpm install --frozen-lockfile\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs validate --path .\nfi\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -271,12 +277,12 @@ fn pipeline_stays_clean_for_valid_githooks_setup() {
 #[test]
 fn pipeline_reports_inventory_for_valid_rust_hook_steps() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\nset -e\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ncargo dupes check --exclude-tests\ngitleaks protect --staged --no-banner\ng3rs rs validate --staged .\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\npnpm install --frozen-lockfile\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs rs validate --staged .\nfi\n",
+        "#!/usr/bin/env bash\nset -e\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ncargo dupes check --exclude-tests\ngitleaks protect --staged --no-banner\ng3rs validate --path .\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\npnpm install --frozen-lockfile\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs validate --path .\nfi\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -319,11 +325,11 @@ fn pipeline_reports_inventory_for_valid_rust_hook_steps() {
 #[test]
 fn pipeline_reports_inventory_for_command_substitution_and_binary_aliases() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\nset -e\nOUT=\"$(g3rs validate --staged .)\"\ncargo-deny check\n",
+        "#!/usr/bin/env bash\nset -e\nOUT=\"$(g3rs validate --path .)\"\ncargo-deny check\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -356,11 +362,11 @@ fn pipeline_reports_inventory_for_command_substitution_and_binary_aliases() {
 #[test]
 fn pipeline_reports_inventory_for_called_function_commands() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\nrun_guardrails() {\n    g3rs validate --staged .\n}\nrun_guardrails\n",
+        "#!/usr/bin/env bash\nrun_guardrails() {\n    g3rs validate --path .\n}\nrun_guardrails\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -389,11 +395,11 @@ fn pipeline_reports_inventory_for_called_function_commands() {
 #[test]
 fn pipeline_reports_inventory_for_executed_subshell_commands() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\n(g3rs validate --staged .)\n(cargo-deny check)\n",
+        "#!/usr/bin/env bash\n(g3rs validate --path .)\n(cargo-deny check)\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -426,7 +432,7 @@ fn pipeline_reports_inventory_for_executed_subshell_commands() {
 #[test]
 fn pipeline_reports_inventory_for_valid_shell_hook_steps() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
@@ -467,7 +473,7 @@ fn pipeline_reports_inventory_for_valid_shell_hook_steps() {
 #[test]
 fn pipeline_reports_dispatcher_findings_for_real_pre_commit_script() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
     write(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
@@ -511,7 +517,7 @@ fn pipeline_reports_dispatcher_findings_for_real_pre_commit_script() {
 #[test]
 fn pipeline_source_reports_missing_dispatcher_pattern_when_modular_dir_is_only_echoed() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "echo run-parts .githooks/pre-commit.d\n");
     fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
@@ -546,13 +552,25 @@ fn pipeline_source_reports_missing_dispatcher_pattern_when_modular_dir_is_only_e
 #[test]
 fn pipeline_config_reports_missing_g3rs_binary_when_required() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
+    let bin_dir = root.join("bin");
 
-    write(root.join(".githooks/pre-commit"), "g3rs rs validate --staged .\n");
+    write(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
+    write(bin_dir.join("gitleaks"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-deny"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-machete"), "#!/usr/bin/env bash\n");
+    #[cfg(unix)]
+    {
+        make_executable(&bin_dir.join("gitleaks"));
+        make_executable(&bin_dir.join("cargo-deny"));
+        make_executable(&bin_dir.join("cargo-machete"));
+    }
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let path_env = std::env::join_paths([bin_dir.as_path()]).expect("join path");
     let input =
-        crate::run::ingest_for_config_checks_with_path(&crawl, None).expect("ingestion should succeed");
+        crate::run::ingest_for_config_checks_with_path(&crawl, Some(path_env.as_os_str()))
+            .expect("ingestion should succeed");
     let results = g3rs_hooks_config_checks::check(&input);
 
     let rule_results = results
@@ -574,12 +592,12 @@ fn pipeline_config_reports_missing_g3rs_binary_when_required() {
 #[test]
 fn pipeline_config_reports_tool_inventory_and_missing_cargo_dupes() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
     let bin_dir = root.join("bin");
 
     write(
         root.join(".githooks/pre-commit"),
-        "g3rs rs validate --staged .\ncargo dupes check --exclude-tests\n",
+        "g3rs validate --path .\ncargo dupes check --exclude-tests\n",
     );
     write(bin_dir.join("gitleaks"), "#!/usr/bin/env bash\n");
     write(bin_dir.join("cargo-deny"), "#!/usr/bin/env bash\n");
@@ -640,19 +658,25 @@ fn pipeline_config_reports_tool_inventory_and_missing_cargo_dupes() {
 #[test]
 fn pipeline_config_reports_present_g3rs_and_cargo_dupes_binaries() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
     let bin_dir = root.join("bin");
 
     write(
         root.join(".githooks/pre-commit"),
-        "g3rs rs validate --staged .\ncargo dupes check --exclude-tests\n",
+        "g3rs validate --path .\ncargo dupes check --exclude-tests\n",
     );
     write(bin_dir.join("g3rs"), "#!/usr/bin/env bash\n");
     write(bin_dir.join("cargo-dupes"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("gitleaks"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-deny"), "#!/usr/bin/env bash\n");
+    write(bin_dir.join("cargo-machete"), "#!/usr/bin/env bash\n");
     #[cfg(unix)]
     {
         make_executable(&bin_dir.join("g3rs"));
         make_executable(&bin_dir.join("cargo-dupes"));
+        make_executable(&bin_dir.join("gitleaks"));
+        make_executable(&bin_dir.join("cargo-deny"));
+        make_executable(&bin_dir.join("cargo-machete"));
     }
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -685,15 +709,14 @@ fn pipeline_config_reports_present_g3rs_and_cargo_dupes_binaries() {
 #[test]
 fn pipeline_config_honors_hooks_path_selected_hook_for_binary_requirements() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
     let bin_dir = root.join("bin");
-    git_init(root);
     git_config_hooks_path(root, "hooks");
 
     write(root.join(".githooks/pre-commit"), "gitleaks protect --staged --no-banner\n");
     write(
         root.join("hooks/pre-commit"),
-        "g3rs rs validate --staged .\ncargo dupes check --exclude-tests\ngitleaks protect --staged --no-banner\ncargo-deny check\ncargo-machete\n",
+        "g3rs validate --path .\ncargo dupes check --exclude-tests\ngitleaks protect --staged --no-banner\ncargo-deny check\ncargo-machete\n",
     );
     write(bin_dir.join("g3rs"), "#!/usr/bin/env bash\n");
     write(bin_dir.join("cargo-dupes"), "#!/usr/bin/env bash\n");
@@ -741,7 +764,7 @@ fn pipeline_config_honors_hooks_path_selected_hook_for_binary_requirements() {
 #[test]
 fn pipeline_config_treats_path_qualified_tools_as_installed() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
@@ -765,7 +788,7 @@ fn pipeline_config_treats_path_qualified_tools_as_installed() {
 #[test]
 fn pipeline_file_tree_reports_existing_pre_commit_hook() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\n");
 
@@ -792,8 +815,7 @@ fn pipeline_file_tree_reports_existing_pre_commit_hook() {
 #[test]
 fn pipeline_file_tree_treats_non_compat_hooks_path_as_out_of_contract() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "custom-hooks");
 
     write(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
@@ -824,8 +846,7 @@ fn pipeline_file_tree_treats_non_compat_hooks_path_as_out_of_contract() {
 #[test]
 fn pipeline_file_tree_reports_modular_inventory_for_hooks_compat_path() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "hooks");
 
     write(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
@@ -874,7 +895,7 @@ fn pipeline_file_tree_reports_modular_inventory_for_hooks_compat_path() {
 #[test]
 fn pipeline_file_tree_reports_missing_pre_commit_hook() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
@@ -897,10 +918,48 @@ fn pipeline_file_tree_reports_missing_pre_commit_hook() {
 }
 
 #[test]
+fn nested_package_workspace_is_out_of_scope_for_repo_global_hooks() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let repo_root = temp_dir.path();
+    let nested = repo_root.join("packages/example");
+
+    git_init(repo_root);
+    write(
+        nested.join("Cargo.toml"),
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+    write(
+        repo_root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\ng3rs validate --path .\n",
+    );
+    git_config_hooks_path(repo_root, ".githooks");
+
+    let crawl = g3rs_workspace_crawl::crawl(&nested).expect("crawl should succeed");
+
+    let file_tree_input =
+        crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
+    let file_tree_results = g3rs_hooks_file_tree_checks::check(&file_tree_input);
+    assert!(
+        !file_tree_results
+            .iter()
+            .any(|result| matches!(result.id(), "RS-HOOKS-FILETREE-01" | "RS-HOOKS-FILETREE-02")),
+        "{file_tree_results:#?}"
+    );
+
+    let config_input = crate::run::ingest_for_config_checks_with_path(&crawl, None)
+        .expect("config ingestion should succeed");
+    let config_results = g3rs_hooks_config_checks::check(&config_input);
+    assert!(config_results.is_empty(), "{config_results:#?}");
+
+    let source_inputs =
+        crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    assert!(source_inputs.is_empty(), "{source_inputs:#?}");
+}
+
+#[test]
 fn pipeline_file_tree_reports_trust_risk() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\nexit 0\n");
     write(root.join(".git/hooks/pre-commit"), "#!/usr/bin/env bash\nexit 0\n");
@@ -928,8 +987,7 @@ fn pipeline_file_tree_reports_trust_risk() {
 #[test]
 fn pipeline_file_tree_keeps_hooks_path_compat_mode_free_of_git_hook_shadow_risk() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "hooks");
 
     write(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
@@ -952,8 +1010,7 @@ fn pipeline_file_tree_keeps_hooks_path_compat_mode_free_of_git_hook_shadow_risk(
 #[test]
 fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
-    git_init(root);
+    let root = repo_root(&temp_dir);
     git_config_hooks_path(root, ".githooks");
 
     write(
@@ -1083,7 +1140,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
 #[test]
 fn pipeline_runs_shared_source_checks_on_modular_scripts() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
     write(root.join(".githooks/pre-commit.d/10-rust.sh"), "echo cargo fmt --check\n");
@@ -1113,7 +1170,7 @@ fn pipeline_runs_shared_source_checks_on_modular_scripts() {
 #[test]
 fn pipeline_source_reports_shell_safety_inventory_for_valid_hook() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
@@ -1150,11 +1207,11 @@ fn pipeline_source_reports_shell_safety_inventory_for_valid_hook() {
 #[test]
 fn pipeline_source_reports_inventory_for_normalized_wrapped_commands() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\nset -e\nif true; then /opt/bin/g3rs rs validate --staged .; fi\ncargo +nightly clippy -- -D warnings\n",
+        "#!/usr/bin/env bash\nset -e\nif true; then /opt/bin/g3rs validate --path .; fi\ncargo +nightly clippy -- -D warnings\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -1187,7 +1244,7 @@ fn pipeline_source_reports_inventory_for_normalized_wrapped_commands() {
 #[test]
 fn pipeline_source_reports_missing_rust_and_shell_steps() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write(root.join(".githooks/pre-commit"), "echo nothing useful\n");
@@ -1346,11 +1403,11 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
 #[test]
 fn pipeline_source_reports_inert_text_false_pass_risk() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
-        "STEP='g3rs rs validate --staged .'\nprintf '%s\n' 'cargo fmt --check'\n",
+        "STEP='g3rs validate --path .'\nprintf '%s\n' 'cargo fmt --check'\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -1373,7 +1430,7 @@ fn pipeline_source_reports_inert_text_false_pass_risk() {
 #[test]
 fn pipeline_source_reports_missing_workspace_scope_for_workspace_project() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write(root.join(".githooks/pre-commit"), "cargo test\n");
@@ -1398,7 +1455,7 @@ fn pipeline_source_reports_missing_workspace_scope_for_workspace_project() {
 #[test]
 fn pipeline_source_reports_invalid_dispatcher_syntax() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(root.join(".githooks/pre-commit"), "echo run-parts .githooks/pre-commit.d\n");
     fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
@@ -1423,11 +1480,11 @@ fn pipeline_source_reports_invalid_dispatcher_syntax() {
 #[test]
 fn pipeline_keeps_inert_g3rs_text_quiet_when_wrapped_command_executes() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),
-        "# g3rs rs validate --staged .\nenv -i g3rs rs validate --staged .\n",
+        "# g3rs validate --path .\nenv -i g3rs validate --path .\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -1448,7 +1505,7 @@ fn pipeline_keeps_inert_g3rs_text_quiet_when_wrapped_command_executes() {
 #[test]
 fn pipeline_reports_fail_open_wrapper_on_called_function() {
     let temp_dir = tempdir().expect("create temp dir");
-    let root = temp_dir.path();
+    let root = repo_root(&temp_dir);
 
     write(
         root.join(".githooks/pre-commit"),

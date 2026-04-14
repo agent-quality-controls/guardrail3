@@ -1,5 +1,5 @@
 use clippy_toml_parser::parse as parse_clippy_toml;
-use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
+use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::rs_clippy_config_08_type_complexity_threshold::check;

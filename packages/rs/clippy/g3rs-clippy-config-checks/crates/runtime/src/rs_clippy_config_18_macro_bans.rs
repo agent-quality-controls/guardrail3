@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
+use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{EXPECTED_MACRO_BANS, display_macro_name, parse_ban_section, raw_clippy};
@@ -53,7 +53,3 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         }
     }
 }
-
-#[cfg(test)]
-#[path = "rs_clippy_config_18_macro_bans_tests/mod.rs"]
-mod tests;

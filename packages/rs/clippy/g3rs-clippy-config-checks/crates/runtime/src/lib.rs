@@ -23,6 +23,32 @@ mod rs_clippy_config_21_config_parseable;
 mod run;
 mod support;
 #[cfg(test)]
+mod rs_clippy_config_09_missing_method_ban_tests;
+#[cfg(test)]
+mod rs_clippy_config_10_missing_type_ban_tests;
+#[cfg(test)]
+mod rs_clippy_config_11_extra_method_ban_tests;
+#[cfg(test)]
+mod rs_clippy_config_12_extra_type_ban_tests;
+#[cfg(test)]
+mod rs_clippy_config_13_ban_reason_quality_tests;
+#[cfg(test)]
+mod rs_clippy_config_14_library_global_state_tests;
+#[cfg(test)]
+mod rs_clippy_config_15_avoid_breaking_exported_api_tests;
+#[cfg(test)]
+mod rs_clippy_config_16_duplicate_bans_tests;
+#[cfg(test)]
+mod rs_clippy_config_17_unknown_keys_tests;
+#[cfg(test)]
+mod rs_clippy_config_18_macro_bans_tests;
+#[cfg(test)]
+mod rs_clippy_config_19_policy_context_parseable_tests;
+#[cfg(test)]
+mod rs_clippy_config_20_forbid_clippy_conf_dir_override_tests;
+#[cfg(test)]
+mod rs_clippy_config_21_config_parseable_tests;
+#[cfg(test)]
 mod test_support;
 
 #[cfg(feature = "checks")]

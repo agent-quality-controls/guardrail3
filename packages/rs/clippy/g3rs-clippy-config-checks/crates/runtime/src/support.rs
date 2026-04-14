@@ -1,5 +1,5 @@
 use clippy_toml_parser::ClippyToml;
-use g3rs_clippy_config_checks_types::{
+use g3rs_clippy_types::{
     G3RsClippyConfigChecksInput, G3RsClippyConfigState, G3RsClippyRustPolicyState,
 };
 use guardrail3_rs_toml_parser::RustProfile;

@@ -24,7 +24,7 @@ fn stays_quiet_when_hook_does_not_require_g3rs() {
 fn reports_inventory_when_g3rs_is_installed() {
     let mut results = Vec::new();
     crate::hook_rs_14_guardrail_binary_available::check(
-        &hook("g3rs rs validate --staged .\n"),
+        &hook("g3rs validate --path .\n"),
         &["g3rs".to_owned()],
         &mut results,
     );
@@ -43,7 +43,7 @@ fn reports_inventory_when_g3rs_is_installed() {
 fn reports_inventory_when_g3rs_is_path_qualified() {
     let mut results = Vec::new();
     crate::hook_rs_14_guardrail_binary_available::check(
-        &hook("/usr/local/bin/g3rs rs validate --staged .\n"),
+        &hook("/usr/local/bin/g3rs validate --path .\n"),
         &[],
         &mut results,
     );
@@ -62,7 +62,7 @@ fn reports_inventory_when_g3rs_is_path_qualified() {
 fn reports_missing_g3rs_when_validation_is_required() {
     let mut results = Vec::new();
     crate::hook_rs_14_guardrail_binary_available::check(
-        &hook("g3rs rs validate --staged .\n"),
+        &hook("g3rs validate --path .\n"),
         &[],
         &mut results,
     );

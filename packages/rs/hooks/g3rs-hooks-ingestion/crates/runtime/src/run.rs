@@ -27,6 +27,10 @@ pub fn ingest_for_source_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<Vec<G3RsHooksSourceChecksInput>, IngestionError> {
     let mut inputs = Vec::new();
+    if !hooks_scope_is_active(crawl.root_abs_path.as_path())? {
+        return Ok(inputs);
+    }
+
     let hooks_path = read_hooks_path(crawl.root_abs_path.as_path())?;
     let Some(selected) = select_pre_commit_surface(crawl, hooks_path.as_deref()) else {
         return Ok(inputs);
@@ -81,6 +85,19 @@ pub fn ingest_for_source_checks(
 pub fn ingest_for_file_tree_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsHooksFileTreeChecksInput, IngestionError> {
+    let active = hooks_scope_is_active(crawl.root_abs_path.as_path())?;
+    if !active {
+        return Ok(G3RsHooksFileTreeChecksInput {
+            active,
+            pre_commit: None,
+            has_modular_dir: false,
+            modular_scripts: Vec::new(),
+            local_override_scripts: Vec::new(),
+            hooks_path: None,
+            trust_risks: Vec::new(),
+        });
+    }
+
     let hooks_path = read_hooks_path(crawl.root_abs_path.as_path())?;
     let selected = select_pre_commit_surface(crawl, hooks_path.as_deref());
     let pre_commit = selected.as_ref().map(|selected| selected.entry).map(read_script_file_fact).transpose()?;
@@ -89,6 +106,7 @@ pub fn ingest_for_file_tree_checks(
         .is_some_and(|entry| entry.kind == G3RsWorkspaceEntryKind::Directory);
 
     Ok(G3RsHooksFileTreeChecksInput {
+        active,
         pre_commit,
         has_modular_dir,
         modular_scripts: if has_modular_dir {
@@ -106,8 +124,18 @@ pub(crate) fn ingest_for_config_checks_with_path(
     crawl: &G3RsWorkspaceCrawl,
     path_env: Option<&OsStr>,
 ) -> Result<G3RsHooksConfigChecksInput, IngestionError> {
+    let active = hooks_scope_is_active(crawl.root_abs_path.as_path())?;
+    if !active {
+        return Ok(G3RsHooksConfigChecksInput {
+            active,
+            selected_hook: None,
+            installed_tools: Vec::new(),
+        });
+    }
+
     let hooks_path = read_hooks_path(crawl.root_abs_path.as_path())?;
     Ok(G3RsHooksConfigChecksInput {
+        active,
         selected_hook: select_pre_commit_surface(crawl, hooks_path.as_deref())
             .map(|selected| selected.entry)
             .map(read_selected_hook_config_fact)
@@ -335,6 +363,14 @@ fn read_hooks_path(root: &Path) -> Result<Option<String>, IngestionError> {
             .trim_end_matches(['\n', '\r'])
             .to_owned(),
     ))
+}
+
+fn hooks_scope_is_active(root: &Path) -> Result<bool, IngestionError> {
+    if std::fs::metadata(root.join(".git")).is_err() {
+        return Ok(false);
+    }
+
+    Ok(true)
 }
 
 fn collect_trust_risks(crawl: &G3RsWorkspaceCrawl, hooks_path: Option<&str>) -> Vec<String> {

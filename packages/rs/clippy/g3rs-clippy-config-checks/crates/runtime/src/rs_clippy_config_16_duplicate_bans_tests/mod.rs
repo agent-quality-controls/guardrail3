@@ -1,4 +1,4 @@
-use super::check;
+use crate::rs_clippy_config_16_duplicate_bans::check;
 use crate::test_support::{findings, input_from_raw};
 
 #[test]

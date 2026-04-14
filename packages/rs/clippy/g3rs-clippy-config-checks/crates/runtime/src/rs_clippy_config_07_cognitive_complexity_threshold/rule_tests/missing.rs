@@ -1,4 +1,4 @@
-use g3rs_clippy_config_checks_assertions::rs_clippy_config_07_cognitive_complexity_threshold as assertions;
+use super::assertions;
 
 use super::helpers::run_check;
 

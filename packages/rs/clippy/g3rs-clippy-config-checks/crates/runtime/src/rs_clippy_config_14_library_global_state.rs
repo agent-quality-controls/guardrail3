@@ -1,7 +1,7 @@
 use guardrail3_rs_toml_parser::RustProfile;
 use std::collections::BTreeSet;
 
-use g3rs_clippy_config_checks_types::G3RsClippyConfigChecksInput;
+use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{EXPECTED_LIBRARY_GLOBAL_STATE_TYPES, parse_ban_section, raw_clippy, rust_policy_valid, rust_profile};
@@ -62,7 +62,3 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         );
     }
 }
-
-#[cfg(test)]
-#[path = "rs_clippy_config_14_library_global_state_tests/mod.rs"]
-mod tests;
