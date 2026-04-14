@@ -1,4 +1,5 @@
 use deny_toml_parser::DenyToml;
+use guardrail3_rs_toml_parser::RustProfile;
 
 /// Input contract for extracted deny config checks.
 ///
@@ -11,10 +12,19 @@ pub struct G3RsDenyConfigChecksInput {
     pub deny_rel_path: String,
     /// Parsed deny config.
     pub deny: DenyToml,
-    /// Active deny profile for this pointed workspace, when one is known.
-    pub profile_name: Option<String>,
-    /// Whether profile-sensitive deny rules can trust the active policy context.
-    pub policy_context_valid: bool,
+    /// Active Rust-only guardrail policy state for this pointed workspace.
+    pub rust_policy: G3RsDenyRustPolicyState,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum G3RsDenyRustPolicyState {
+    Missing,
+    Unreadable { rel_path: String, reason: String },
+    ParseError { rel_path: String, reason: String },
+    Parsed {
+        rel_path: String,
+        profile: Option<RustProfile>,
+    },
 }
 
 /// Placeholder input contract for future deny source checks.

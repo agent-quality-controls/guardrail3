@@ -15,8 +15,8 @@ pub(crate) fn root_deny_entries(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWorkspac
     entries
 }
 
-pub(crate) fn select_guardrail3_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("guardrail3.toml")
+pub(crate) fn select_guardrail3_rs_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
+    crawl.root_file("guardrail3-rs.toml")
 }
 
 fn deny_precedence(rel_path: &str) -> usize {

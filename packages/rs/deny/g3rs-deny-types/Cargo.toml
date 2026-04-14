@@ -31,3 +31,4 @@ module_name_repetitions = "allow"
 
 [dependencies]
 deny-toml-parser = { path = "../../../parsers/deny-toml-parser" }
+guardrail3-rs-toml-parser = { path = "../../../parsers/guardrail3-rs-toml-parser" }

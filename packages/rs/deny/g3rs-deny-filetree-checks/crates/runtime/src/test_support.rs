@@ -15,8 +15,8 @@ pub(crate) fn input(
         input_failures: input_failures
             .into_iter()
             .map(|(rel_path, message)| G3RsDenyInputFailure {
-                title: if rel_path == "guardrail3.toml" {
-                    "deny policy context is not parseable".to_owned()
+                title: if rel_path == "guardrail3-rs.toml" {
+                    "deny rust policy is not parseable".to_owned()
                 } else {
                     "deny input failure".to_owned()
                 },

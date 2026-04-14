@@ -6,8 +6,12 @@ use deny_toml_parser::{
     GraphTargetEntry, LicenseClarification, LicenseClarificationFile, LicenseException,
     LicensesConfig, LicensesPrivateConfig, SourcesConfig,
 };
+use g3rs_deny_config_checks_types::G3RsDenyConfigChecksInput;
+use g3rs_deny_types::G3RsDenyRustPolicyState;
+use guardrail3_rs_toml_parser::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_domain_modules::deny;
+
+use crate::baseline as deny;
 
 pub(crate) fn error(id: &str, title: impl Into<String>, message: impl Into<String>, file: &str) -> G3CheckResult {
     G3CheckResult::new(
@@ -184,6 +188,23 @@ pub(crate) fn expected_tokio_allowed_features() -> BTreeSet<String> {
         .and_then(|entries| entries.first())
         .map(|entry| string_set_from_value(entry.get("allow")))
         .unwrap_or_default()
+}
+
+pub(crate) fn rust_policy_valid(input: &G3RsDenyConfigChecksInput) -> bool {
+    !matches!(
+        input.rust_policy,
+        G3RsDenyRustPolicyState::Unreadable { .. } | G3RsDenyRustPolicyState::ParseError { .. }
+    )
+}
+
+pub(crate) fn managed_profile_name(input: &G3RsDenyConfigChecksInput) -> Option<&'static str> {
+    match input.rust_policy {
+        G3RsDenyRustPolicyState::Parsed {
+            profile: Some(RustProfile::Library),
+            ..
+        } => Some("library"),
+        _ => None,
+    }
 }
 
 pub(crate) fn join_set(values: &BTreeSet<String>) -> String {

@@ -2,6 +2,8 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+use g3rs_deny_types::G3RsDenyRustPolicyState;
+use guardrail3_rs_toml_parser::RustProfile;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -276,5 +278,67 @@ fn empty_deny_toml_parses_to_hollow_input() {
     assert!(
         input.deny.bans.is_none(),
         "empty deny.toml should have no [bans] section"
+    );
+}
+
+#[test]
+fn guardrail3_rs_toml_drives_library_profile() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+
+    assert_eq!(
+        input.rust_policy,
+        G3RsDenyRustPolicyState::Parsed {
+            rel_path: "guardrail3-rs.toml".to_owned(),
+            profile: Some(RustProfile::Library),
+        }
+    );
+}
+
+#[test]
+fn legacy_guardrail3_toml_is_ignored() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
+    write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+
+    assert_eq!(
+        input.rust_policy,
+        G3RsDenyRustPolicyState::Missing,
+        "legacy guardrail3.toml must not affect deny profile resolution"
+    );
+}
+
+#[test]
+fn guardrail3_rs_parse_errors_surface_in_rust_policy_state() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
+    write(root.join("guardrail3-rs.toml"), "profile = \"invalid\"\n");
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+
+    assert!(
+        matches!(
+            input.rust_policy,
+            G3RsDenyRustPolicyState::ParseError { ref rel_path, .. }
+            if rel_path == "guardrail3-rs.toml"
+        ),
+        "invalid guardrail3-rs.toml must surface as deny rust policy parse error"
     );
 }

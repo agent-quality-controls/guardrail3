@@ -1,18 +1,18 @@
 use g3rs_deny_config_checks_types::G3RsDenyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{ban_name, expected_bans, join_set, wrappers};
+use crate::support::{ban_name, expected_bans, join_set, managed_profile_name, rust_policy_valid, wrappers};
 
 const ID: &str = "RS-DENY-CONFIG-27";
 
 pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    if !input.policy_context_valid {
+    if !rust_policy_valid(input) {
         return;
     }
     let Some(bans) = input.deny.bans.as_ref() else {
         return;
     };
-    let expected = expected_bans(input.profile_name.as_deref());
+    let expected = expected_bans(managed_profile_name(input));
 
     for entry in &bans.deny {
         let actual_wrappers = wrappers(entry);
