@@ -1,7 +1,9 @@
 use cargo_toml_parser::{CargoToml, InheritableValue, LintValue, ToolLints};
 use g3rs_cargo_types::{
-    G3RsCargoEscapeHatch, G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoWorkspaceMember,
+    G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoWaiver,
+    G3RsCargoWorkspaceMember,
 };
+use guardrail3_rs_toml_parser::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 pub(crate) struct LintExpectation {
@@ -320,22 +322,45 @@ pub(crate) fn allow_selector(family: &str, lint_name: &str) -> String {
     format!("{family}:{lint_name}")
 }
 
-pub(crate) fn escape_hatch_reason<'a>(
-    entries: &'a [G3RsCargoEscapeHatch],
-    family: &str,
+pub(crate) fn waiver_reason<'a>(
+    entries: &'a [G3RsCargoWaiver],
+    rule: &str,
     file: &str,
-    kind: &str,
     selector: &str,
 ) -> Option<&'a str> {
     entries
         .iter()
         .find(|entry| {
-            entry.family == family
+            entry.rule == rule
                 && entry.file == file
-                && entry.kind == kind
                 && entry.selector == selector
         })
         .map(|entry| entry.reason.as_str())
+}
+
+pub(crate) fn rust_policy_valid(root: &G3RsCargoPolicyRoot) -> bool {
+    matches!(
+        root.rust_policy,
+        G3RsCargoRustPolicyState::Missing | G3RsCargoRustPolicyState::Parsed { .. }
+    )
+}
+
+pub(crate) fn rust_profile(root: &G3RsCargoPolicyRoot) -> Option<RustProfile> {
+    match &root.rust_policy {
+        G3RsCargoRustPolicyState::Parsed { profile, .. } => *profile,
+        G3RsCargoRustPolicyState::Missing
+        | G3RsCargoRustPolicyState::Unreadable { .. }
+        | G3RsCargoRustPolicyState::ParseError { .. } => None,
+    }
+}
+
+pub(crate) fn rust_policy_waivers(root: &G3RsCargoPolicyRoot) -> &[G3RsCargoWaiver] {
+    match &root.rust_policy {
+        G3RsCargoRustPolicyState::Parsed { waivers, .. } => waivers.as_slice(),
+        G3RsCargoRustPolicyState::Missing
+        | G3RsCargoRustPolicyState::Unreadable { .. }
+        | G3RsCargoRustPolicyState::ParseError { .. } => &[],
+    }
 }
 
 pub(crate) fn lints_table_is_well_formed(lints: Option<&toml::Value>) -> bool {

@@ -1,8 +1,10 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
-use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind};
+use g3rs_cargo_types::{
+    G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState,
+};
 use guardrail3_check_types::G3Severity;
 
-use crate::test_support::{escape_hatch, root};
+use crate::test_support::{parsed_rust_policy, root, waiver};
 
 #[test]
 fn inventories_documented_approved_allow_entries() {
@@ -16,13 +18,15 @@ fn inventories_documented_approved_allow_entries() {
             module_name_repetitions = "allow"
             must_use_candidate = "allow"
         "#,
-        None,
-        false,
-        vec![escape_hatch(
-            "Cargo.toml",
-            "clippy:module_name_repetitions",
-            "Temporary lint suppression while API cleanup lands.",
-        )],
+        parsed_rust_policy(
+            None,
+            vec![waiver(
+                "RS-CARGO-CONFIG-07",
+                "Cargo.toml",
+                "clippy:module_name_repetitions",
+                "Temporary lint suppression while API cleanup lands.",
+            )],
+        ),
     );
     let mut results = Vec::new();
 
@@ -65,9 +69,15 @@ fn errors_when_approved_allow_reason_is_too_weak() {
             [workspace.lints.clippy]
             module_name_repetitions = "allow"
         "#,
-        None,
-        false,
-        vec![escape_hatch("Cargo.toml", "clippy:module_name_repetitions", "temp")],
+        parsed_rust_policy(
+            None,
+            vec![waiver(
+                "RS-CARGO-CONFIG-07",
+                "Cargo.toml",
+                "clippy:module_name_repetitions",
+                "temp",
+            )],
+        ),
     );
     let mut results = Vec::new();
 
@@ -108,10 +118,7 @@ fn stays_quiet_when_clippy_table_shape_is_invalid() {
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo,
         raw_cargo,
-        guardrail_rel_path: Some("guardrail3.toml".to_owned()),
-        profile_name: None,
-        escape_hatches: Vec::new(),
-        guardrail_parse_error: false,
+        rust_policy: G3RsCargoRustPolicyState::Missing,
         edition: None,
         edition_invalid: false,
         rust_version: None,

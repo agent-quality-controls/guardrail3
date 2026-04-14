@@ -1,6 +1,6 @@
 use guardrail3_check_types::G3Severity;
 
-use crate::test_support::{member, root};
+use crate::test_support::{member, parsed_rust_policy, root};
 
 #[test]
 fn errors_when_member_weakens_workspace_lints() {
@@ -13,9 +13,7 @@ fn errors_when_member_weakens_workspace_lints() {
             [workspace.lints.rust]
             warnings = "deny"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -55,9 +53,7 @@ fn inventories_when_member_does_not_weaken_workspace_lints() {
             [workspace.lints.clippy]
             unwrap_used = "deny"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -98,9 +94,7 @@ fn errors_when_member_lint_table_shape_is_invalid() {
             [workspace.lints.clippy]
             unwrap_used = "deny"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -140,9 +134,7 @@ fn errors_when_member_weakens_forbid_to_deny() {
             [workspace.lints.clippy]
             unwrap_used = "deny"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",
@@ -178,9 +170,7 @@ fn stays_quiet_when_workspace_policy_is_incomplete() {
             [workspace.lints.rust]
             warnings = "deny"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let member = member(
         "crates/api",

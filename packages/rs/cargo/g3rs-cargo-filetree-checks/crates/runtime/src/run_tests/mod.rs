@@ -10,7 +10,7 @@ fn inventories_clean_workspace_filetree() {
             kind: Some(G3RsCargoPolicyRootKind::WorkspaceRoot),
             rel_dir: String::new(),
             cargo_rel_path: "Cargo.toml".to_owned(),
-            guardrail_rel_path: Some("guardrail3.toml".to_owned()),
+            rust_policy_rel_path: Some("guardrail3-rs.toml".to_owned()),
             members_parse_error: false,
         },
         missing_members: Vec::new(),
@@ -40,7 +40,7 @@ fn reports_missing_members_and_input_failures() {
             kind: Some(G3RsCargoPolicyRootKind::WorkspaceRoot),
             rel_dir: String::new(),
             cargo_rel_path: "Cargo.toml".to_owned(),
-            guardrail_rel_path: Some("guardrail3.toml".to_owned()),
+            rust_policy_rel_path: Some("guardrail3-rs.toml".to_owned()),
             members_parse_error: false,
         },
         missing_members: vec![G3RsCargoMissingMember {
@@ -49,7 +49,7 @@ fn reports_missing_members_and_input_failures() {
             member_rel: "crates/missing".to_owned(),
         }],
         input_failures: vec![G3RsCargoInputFailure {
-            rel_path: "guardrail3.toml".to_owned(),
+            rel_path: "guardrail3-rs.toml".to_owned(),
             message: "broken".to_owned(),
         }],
     };
@@ -79,7 +79,7 @@ fn inventories_exactly_when_workspace_filetree_is_clean() {
             kind: Some(G3RsCargoPolicyRootKind::WorkspaceRoot),
             rel_dir: String::new(),
             cargo_rel_path: "Cargo.toml".to_owned(),
-            guardrail_rel_path: Some("guardrail3.toml".to_owned()),
+            rust_policy_rel_path: Some("guardrail3-rs.toml".to_owned()),
             members_parse_error: false,
         },
         missing_members: Vec::new(),

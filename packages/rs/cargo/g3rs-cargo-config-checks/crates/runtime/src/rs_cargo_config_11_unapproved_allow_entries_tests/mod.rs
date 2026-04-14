@@ -1,6 +1,6 @@
 use guardrail3_check_types::G3Severity;
 
-use crate::test_support::{escape_hatch, root};
+use crate::test_support::{parse_error_rust_policy, parsed_rust_policy, root, waiver};
 
 #[test]
 fn errors_on_unapproved_allow_entries() {
@@ -13,9 +13,7 @@ fn errors_on_unapproved_allow_entries() {
             [workspace.lints.rust]
             warnings = "allow"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let mut results = Vec::new();
 
@@ -40,13 +38,15 @@ fn errors_on_documented_unapproved_allow_entries() {
             [workspace.lints.rust]
             warnings = "allow"
         "#,
-        None,
-        false,
-        vec![escape_hatch(
+        parsed_rust_policy(
+            None,
+            vec![waiver(
+                "RS-CARGO-CONFIG-11",
             "Cargo.toml",
             "rust:warnings",
             "Temporary lint suppression while API cleanup lands.",
-        )],
+            )],
+        ),
     );
     let mut results = Vec::new();
 
@@ -74,9 +74,7 @@ fn inventories_when_no_unapproved_allow_entries_exist() {
             [workspace.lints.clippy]
             module_name_repetitions = "allow"
         "#,
-        None,
-        false,
-        Vec::new(),
+        parsed_rust_policy(None, Vec::new()),
     );
     let mut results = Vec::new();
 
@@ -100,9 +98,10 @@ fn errors_when_unapproved_allow_reason_is_too_weak() {
             [workspace.lints.rust]
             warnings = "allow"
         "#,
-        None,
-        false,
-        vec![escape_hatch("Cargo.toml", "rust:warnings", "temp")],
+        parsed_rust_policy(
+            None,
+            vec![waiver("RS-CARGO-CONFIG-11", "Cargo.toml", "rust:warnings", "temp")],
+        ),
     );
     let mut results = Vec::new();
 
@@ -117,7 +116,7 @@ fn errors_when_unapproved_allow_reason_is_too_weak() {
 }
 
 #[test]
-fn stays_quiet_when_guardrail_parse_error_suppresses_clean_inventory() {
+fn stays_quiet_when_rust_policy_parse_error_suppresses_clean_inventory() {
     let root = root(
         r#"
             [workspace]
@@ -127,9 +126,7 @@ fn stays_quiet_when_guardrail_parse_error_suppresses_clean_inventory() {
             [workspace.lints.rust]
             warnings = "deny"
         "#,
-        None,
-        true,
-        Vec::new(),
+        parse_error_rust_policy("bad rust policy"),
     );
     let mut results = Vec::new();
 

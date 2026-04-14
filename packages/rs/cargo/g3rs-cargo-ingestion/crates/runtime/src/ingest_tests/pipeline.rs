@@ -65,15 +65,13 @@ fn config_pipeline_reports_old_app_allow_inventory_and_member_rules() {
         "#,
     );
     write(
-        root.join("guardrail3.toml"),
+        root.join("guardrail3-rs.toml"),
         r#"
-            [profile]
-            name = "library"
+            profile = "library"
 
-            [[escape_hatches]]
-            family = "cargo"
+            [[waivers]]
+            rule = "RS-CARGO-CONFIG-07"
             file = "Cargo.toml"
-            kind = "lint_allow"
             selector = "clippy:module_name_repetitions"
             reason = "Temporary lint suppression while API cleanup lands."
         "#,
@@ -109,6 +107,44 @@ fn config_pipeline_reports_old_app_allow_inventory_and_member_rules() {
 }
 
 #[test]
+fn filetree_pipeline_reports_guardrail3_rs_parse_failures_and_ignores_legacy_guardrail3_toml() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+        "#,
+    );
+    write(root.join("crates/api/Cargo.toml"), "[package");
+    write(root.join("guardrail3-rs.toml"), "profile = [");
+    write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
+
+    let input = crate::ingest_for_file_tree_checks(&crawl(root))
+        .expect("filetree ingestion should succeed with fail-closed inputs");
+    let results = g3rs_cargo_filetree_checks::check(&input);
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-CARGO-FILETREE-14"
+                && result.file() == Some("guardrail3-rs.toml")
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        !results.iter().any(|result| {
+            result.id() == "RS-CARGO-FILETREE-14"
+                && result.file() == Some("guardrail3.toml")
+        }),
+        "{results:#?}"
+    );
+}
+
+#[test]
 fn filetree_pipeline_reports_missing_member_and_input_failures() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
@@ -123,7 +159,7 @@ fn filetree_pipeline_reports_missing_member_and_input_failures() {
         "#,
     );
     write(root.join("crates/api/Cargo.toml"), "[package");
-    write(root.join("guardrail3.toml"), "[profile");
+    write(root.join("guardrail3-rs.toml"), "profile = [");
 
     let input = crate::ingest_for_file_tree_checks(&crawl(root))
         .expect("filetree ingestion should succeed with fail-closed inputs");
@@ -146,7 +182,7 @@ fn filetree_pipeline_reports_missing_member_and_input_failures() {
     assert!(
         results.iter().any(|result| {
             result.id() == "RS-CARGO-FILETREE-14"
-                && result.file() == Some("guardrail3.toml")
+                && result.file() == Some("guardrail3-rs.toml")
         }),
         "{results:#?}"
     );
@@ -174,7 +210,7 @@ fn filetree_pipeline_returns_exact_clean_inventory_results() {
             edition = "2024"
         "#,
     );
-    write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
 
     let input = crate::ingest_for_file_tree_checks(&crawl(root))
         .expect("filetree ingestion should succeed for clean workspace");

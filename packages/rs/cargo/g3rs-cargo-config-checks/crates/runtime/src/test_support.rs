@@ -1,13 +1,13 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
 use g3rs_cargo_types::{
-    G3RsCargoEscapeHatch, G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoWorkspaceMember,
+    G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoWaiver,
+    G3RsCargoWorkspaceMember,
 };
+use guardrail3_rs_toml_parser::RustProfile;
 
 pub(crate) fn root(
     cargo_toml: &str,
-    profile_name: Option<&str>,
-    guardrail_parse_error: bool,
-    escape_hatches: Vec<G3RsCargoEscapeHatch>,
+    rust_policy: G3RsCargoRustPolicyState,
 ) -> G3RsCargoPolicyRoot {
     let cargo = parse_cargo_toml(cargo_toml).expect("cargo fixture should parse");
     let raw_cargo = toml::from_str::<toml::Value>(cargo_toml).expect("raw cargo fixture should parse");
@@ -25,10 +25,7 @@ pub(crate) fn root(
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo,
         raw_cargo: raw_cargo.clone(),
-        guardrail_rel_path: Some("guardrail3.toml".to_owned()),
-        profile_name: profile_name.map(str::to_owned),
-        escape_hatches,
-        guardrail_parse_error,
+        rust_policy,
         edition: root_field(&raw_cargo, kind, "edition"),
         edition_invalid: root_field_invalid(&raw_cargo, kind, "edition"),
         rust_version: root_field(&raw_cargo, kind, "rust-version"),
@@ -69,16 +66,34 @@ pub(crate) fn member(member_rel: &str, cargo_toml: &str) -> G3RsCargoWorkspaceMe
     }
 }
 
-pub(crate) fn escape_hatch(
+pub(crate) fn waiver(
+    rule: &str,
     file: &str,
     selector: &str,
     reason: &str,
-) -> G3RsCargoEscapeHatch {
-    G3RsCargoEscapeHatch {
-        family: "cargo".to_owned(),
+) -> G3RsCargoWaiver {
+    G3RsCargoWaiver {
+        rule: rule.to_owned(),
         file: file.to_owned(),
-        kind: "lint_allow".to_owned(),
         selector: selector.to_owned(),
+        reason: reason.to_owned(),
+    }
+}
+
+pub(crate) fn parsed_rust_policy(
+    profile: Option<RustProfile>,
+    waivers: Vec<G3RsCargoWaiver>,
+) -> G3RsCargoRustPolicyState {
+    G3RsCargoRustPolicyState::Parsed {
+        rel_path: "guardrail3-rs.toml".to_owned(),
+        profile,
+        waivers,
+    }
+}
+
+pub(crate) fn parse_error_rust_policy(reason: &str) -> G3RsCargoRustPolicyState {
+    G3RsCargoRustPolicyState::ParseError {
+        rel_path: "guardrail3-rs.toml".to_owned(),
         reason: reason.to_owned(),
     }
 }

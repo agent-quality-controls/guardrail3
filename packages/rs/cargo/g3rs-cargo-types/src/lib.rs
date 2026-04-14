@@ -1,4 +1,5 @@
 use cargo_toml_parser::CargoToml;
+use guardrail3_rs_toml_parser::RustProfile;
 use toml::Value;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -20,12 +21,23 @@ impl G3RsCargoPolicyRootKind {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsCargoEscapeHatch {
-    pub family: String,
+pub struct G3RsCargoWaiver {
+    pub rule: String,
     pub file: String,
-    pub kind: String,
     pub selector: String,
     pub reason: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum G3RsCargoRustPolicyState {
+    Missing,
+    Unreadable { rel_path: String, reason: String },
+    ParseError { rel_path: String, reason: String },
+    Parsed {
+        rel_path: String,
+        profile: Option<RustProfile>,
+        waivers: Vec<G3RsCargoWaiver>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -35,10 +47,7 @@ pub struct G3RsCargoPolicyRoot {
     pub cargo_rel_path: String,
     pub cargo: CargoToml,
     pub raw_cargo: Value,
-    pub guardrail_rel_path: Option<String>,
-    pub profile_name: Option<String>,
-    pub escape_hatches: Vec<G3RsCargoEscapeHatch>,
-    pub guardrail_parse_error: bool,
+    pub rust_policy: G3RsCargoRustPolicyState,
     pub edition: Option<String>,
     pub edition_invalid: bool,
     pub rust_version: Option<String>,
@@ -90,7 +99,7 @@ pub struct G3RsCargoFileTreeRoot {
     pub kind: Option<G3RsCargoPolicyRootKind>,
     pub rel_dir: String,
     pub cargo_rel_path: String,
-    pub guardrail_rel_path: Option<String>,
+    pub rust_policy_rel_path: Option<String>,
     pub members_parse_error: bool,
 }
 

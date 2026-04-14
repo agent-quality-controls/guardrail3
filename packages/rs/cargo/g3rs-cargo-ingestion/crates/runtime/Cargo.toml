@@ -27,6 +27,7 @@ g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
 g3rs-cargo-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
 glob = "0.3"
+guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
 toml = "0.8"
 
 [dev-dependencies]

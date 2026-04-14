@@ -122,7 +122,61 @@ fn ingests_hybrid_root_with_package_fallback_fields() {
 }
 
 #[test]
-fn malformed_guardrail_toml_degrades_to_guardrail_parse_error() {
+fn guardrail3_rs_toml_drives_profile_and_ignores_legacy_guardrail3_toml() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(
+        root.join("guardrail3-rs.toml"),
+        "profile = \"library\"\n\n[[waivers]]\nrule = \"RS-CARGO-CONFIG-07\"\nfile = \"Cargo.toml\"\nselector = \"clippy:module_name_repetitions\"\nreason = \"Temporary lint suppression while API cleanup lands.\"\n",
+    );
+    write(
+        root.join("guardrail3.toml"),
+        "[profile]\nname = \"service\"\n\n[[escape_hatches]]\nfamily = \"cargo\"\nfile = \"Cargo.toml\"\nkind = \"lint_allow\"\nselector = \"clippy:wrong\"\nreason = \"wrong\"\n",
+    );
+
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("config ingestion should succeed with rust-only policy");
+
+    match &input.root.rust_policy {
+        g3rs_cargo_types::G3RsCargoRustPolicyState::Parsed { profile, waivers, .. } => {
+            assert_eq!(*profile, Some(guardrail3_rs_toml_parser::RustProfile::Library));
+            assert_eq!(waivers.len(), 1, "{waivers:#?}");
+            assert_eq!(waivers[0].rule, "RS-CARGO-CONFIG-07");
+            assert_eq!(waivers[0].selector, "clippy:module_name_repetitions");
+        }
+        other => panic!("expected parsed rust policy, got {other:#?}"),
+    }
+}
+
+#[test]
+fn malformed_guardrail3_rs_toml_degrades_to_rust_policy_parse_error() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("guardrail3-rs.toml"), "profile = [");
+
+    let input = crate::ingest_for_config_checks(&crawl(root))
+        .expect("config ingestion should keep rust-policy parse failures in state");
+
+    assert!(matches!(
+        input.root.rust_policy,
+        g3rs_cargo_types::G3RsCargoRustPolicyState::ParseError { .. }
+    ));
+}
+
+#[test]
+fn legacy_guardrail3_toml_is_ignored() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -134,15 +188,16 @@ fn malformed_guardrail_toml_degrades_to_guardrail_parse_error() {
     write(root.join("guardrail3.toml"), "[profile");
 
     let input = crate::ingest_for_config_checks(&crawl(root))
-        .expect("config ingestion should keep guardrail parse failures in state");
+        .expect("legacy guardrail3.toml must be ignored");
 
-    assert!(input.root.guardrail_parse_error);
-    assert!(input.root.profile_name.is_none());
-    assert!(input.root.escape_hatches.is_empty());
+    assert!(matches!(
+        input.root.rust_policy,
+        g3rs_cargo_types::G3RsCargoRustPolicyState::Missing
+    ));
 }
 
 #[test]
-fn invalid_guardrail_profile_name_degrades_to_guardrail_parse_error() {
+fn invalid_guardrail3_rs_profile_degrades_to_rust_policy_parse_error() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -151,18 +206,19 @@ fn invalid_guardrail_profile_name_degrades_to_guardrail_parse_error() {
         root.join("Cargo.toml"),
         "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write(root.join("guardrail3.toml"), "[profile]\nname = []\n");
+    write(root.join("guardrail3-rs.toml"), "profile = []\n");
 
     let input = crate::ingest_for_config_checks(&crawl(root))
-        .expect("config ingestion should keep guardrail shape failures in state");
+        .expect("config ingestion should keep rust-policy shape failures in state");
 
-    assert!(input.root.guardrail_parse_error);
-    assert!(input.root.profile_name.is_none());
-    assert!(input.root.escape_hatches.is_empty());
+    assert!(matches!(
+        input.root.rust_policy,
+        g3rs_cargo_types::G3RsCargoRustPolicyState::ParseError { .. }
+    ));
 }
 
 #[test]
-fn invalid_guardrail_escape_hatch_degrades_to_guardrail_parse_error() {
+fn invalid_guardrail3_rs_waiver_degrades_to_rust_policy_parse_error() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -172,26 +228,25 @@ fn invalid_guardrail_escape_hatch_degrades_to_guardrail_parse_error() {
         "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
     write(
-        root.join("guardrail3.toml"),
+        root.join("guardrail3-rs.toml"),
         r#"
-            [profile]
-            name = "library"
+            profile = "library"
 
-            [[escape_hatches]]
-            family = "cargo"
+            [[waivers]]
+            rule = "RS-CARGO-CONFIG-11"
             file = "Cargo.toml"
-            kind = "lint_allow"
             selector = "rust:warnings"
             reason = []
         "#,
     );
 
     let input = crate::ingest_for_config_checks(&crawl(root))
-        .expect("config ingestion should keep invalid escape-hatch shape in state");
+        .expect("config ingestion should keep invalid waiver shape in state");
 
-    assert!(input.root.guardrail_parse_error);
-    assert!(input.root.profile_name.is_none());
-    assert!(input.root.escape_hatches.is_empty());
+    assert!(matches!(
+        input.root.rust_policy,
+        g3rs_cargo_types::G3RsCargoRustPolicyState::ParseError { .. }
+    ));
 }
 
 #[test]
@@ -588,7 +643,7 @@ fn config_ingestion_skips_unreadable_member_manifest() {
 
 #[cfg(unix)]
 #[test]
-fn unreadable_guardrail_toml_degrades_to_guardrail_parse_error() {
+fn unreadable_guardrail3_rs_toml_degrades_to_rust_policy_unreadable() {
     use std::os::unix::fs::PermissionsExt;
 
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -599,17 +654,18 @@ fn unreadable_guardrail_toml_degrades_to_guardrail_parse_error() {
         root.join("Cargo.toml"),
         "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    let guardrail = root.join("guardrail3.toml");
-    write(&guardrail, "[profile]\nname = \"library\"\n");
+    let guardrail = root.join("guardrail3-rs.toml");
+    write(&guardrail, "profile = \"library\"\n");
 
     make_unreadable(&guardrail);
     let crawl = crawl(root);
     let _restore = fs::set_permissions(&guardrail, fs::Permissions::from_mode(0o644));
 
     let input = crate::ingest_for_config_checks(&crawl)
-        .expect("unreadable guardrail3.toml should stay in state");
+        .expect("unreadable guardrail3-rs.toml should stay in state");
 
-    assert!(input.root.guardrail_parse_error);
-    assert!(input.root.profile_name.is_none());
-    assert!(input.root.escape_hatches.is_empty());
+    assert!(matches!(
+        input.root.rust_policy,
+        g3rs_cargo_types::G3RsCargoRustPolicyState::Unreadable { .. }
+    ));
 }

@@ -1,8 +1,9 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
 use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind};
+use guardrail3_rs_toml_parser::RustProfile;
 use guardrail3_check_types::G3Severity;
 
-use crate::test_support::root;
+use crate::test_support::{parsed_rust_policy, root};
 
 #[test]
 fn errors_when_library_profile_has_no_rust_version() {
@@ -12,9 +13,7 @@ fn errors_when_library_profile_has_no_rust_version() {
             name = "pkg"
             edition = "2024"
         "#,
-        Some("library"),
-        false,
-        Vec::new(),
+        parsed_rust_policy(Some(RustProfile::Library), Vec::new()),
     );
     let mut results = Vec::new();
 
@@ -35,9 +34,7 @@ fn inventories_when_library_profile_declares_rust_version() {
             edition = "2024"
             rust-version = "1.84"
         "#,
-        Some("library"),
-        false,
-        Vec::new(),
+        parsed_rust_policy(Some(RustProfile::Library), Vec::new()),
     );
     let mut results = Vec::new();
 
@@ -75,10 +72,7 @@ fn errors_when_rust_version_shape_is_invalid() {
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo,
         raw_cargo,
-        guardrail_rel_path: Some("guardrail3.toml".to_owned()),
-        profile_name: Some("library".to_owned()),
-        escape_hatches: Vec::new(),
-        guardrail_parse_error: false,
+        rust_policy: parsed_rust_policy(Some(RustProfile::Library), Vec::new()),
         edition: Some("2024".to_owned()),
         edition_invalid: false,
         rust_version: None,
@@ -102,9 +96,7 @@ fn inventories_when_non_library_omits_rust_version() {
             name = "pkg"
             edition = "2024"
         "#,
-        Some("service"),
-        false,
-        Vec::new(),
+        parsed_rust_policy(Some(RustProfile::Service), Vec::new()),
     );
     let mut results = Vec::new();
 
@@ -128,9 +120,7 @@ fn inventories_when_workspace_root_library_declares_rust_version() {
             [workspace.package]
             rust-version = "1.84"
         "#,
-        Some("library"),
-        false,
-        Vec::new(),
+        parsed_rust_policy(Some(RustProfile::Library), Vec::new()),
     );
     let mut results = Vec::new();
 
@@ -180,10 +170,7 @@ fn errors_when_workspace_root_rust_version_shape_is_invalid() {
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo,
         raw_cargo,
-        guardrail_rel_path: Some("guardrail3.toml".to_owned()),
-        profile_name: Some("library".to_owned()),
-        escape_hatches: Vec::new(),
-        guardrail_parse_error: false,
+        rust_policy: parsed_rust_policy(Some(RustProfile::Library), Vec::new()),
         edition: Some("2024".to_owned()),
         edition_invalid: false,
         rust_version: Some("1.84".to_owned()),

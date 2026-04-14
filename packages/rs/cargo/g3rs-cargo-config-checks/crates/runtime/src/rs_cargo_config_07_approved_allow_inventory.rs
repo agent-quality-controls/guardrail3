@@ -3,8 +3,9 @@ use guardrail3_check_types::G3CheckResult;
 use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
-    EXPECTED_CLIPPY_REQUIRED_ALLOW, allow_selector, escape_hatch_reason, explicit_allow_entries,
+    EXPECTED_CLIPPY_REQUIRED_ALLOW, allow_selector, explicit_allow_entries,
     raw_policy_lints, warn,
+    rust_policy_waivers, waiver_reason,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-07";
@@ -29,11 +30,10 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
             continue;
         }
         let selector = allow_selector("clippy", &lint_name);
-        let Some(reason) = escape_hatch_reason(
-            &root.escape_hatches,
-            "cargo",
+        let Some(reason) = waiver_reason(
+            rust_policy_waivers(root),
+            ID,
             &root.cargo_rel_path,
-            "lint_allow",
             &selector,
         ) else {
             missing_reason_count += 1;
@@ -41,7 +41,7 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
                 ID,
                 "approved allow entry missing reason",
                 format!(
-                    "`{}` explicitly allows `{lint_name}` in `clippy` without a matching escape-hatch reason. Add an escape-hatch entry in guardrail3.toml for this lint with a reason.",
+                    "`{}` explicitly allows `{lint_name}` in `clippy` without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml for this lint with a reason.",
                     root.cargo_rel_path
                 ),
                 &root.cargo_rel_path,
