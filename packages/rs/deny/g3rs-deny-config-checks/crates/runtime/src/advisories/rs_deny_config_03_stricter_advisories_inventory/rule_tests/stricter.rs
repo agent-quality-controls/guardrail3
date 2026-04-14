@@ -11,15 +11,7 @@ unmaintained = "workspace"
 yanked = "deny"
 "#,
     );
-    assertions::assert_findings(
-        &results,
-        &[assertions::info(
-            "advisories `yanked` stricter than baseline",
-            "`deny.toml` sets `[advisories].yanked = \"deny\"`.",
-            "deny.toml",
-            true,
-        )],
-    );
+    assertions::assert_no_findings(&results);
 }
 
 #[test]

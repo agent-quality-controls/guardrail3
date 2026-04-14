@@ -7,7 +7,7 @@ fn unmaintained_missing() {
     let results = run_check(
         r#"
 [advisories]
-yanked = "warn"
+yanked = "deny"
 "#,
     );
     assertions::assert_findings(
@@ -33,7 +33,7 @@ unmaintained = "workspace"
         &results,
         &[assertions::error(
             "advisories `yanked` missing",
-            "`deny.toml` must set `[advisories].yanked = \"warn\"`.",
+            "`deny.toml` must set `[advisories].yanked = \"deny\"`.",
             "deny.toml",
             false,
         )],
@@ -58,7 +58,7 @@ fn both_missing() {
             ),
             assertions::error(
                 "advisories `yanked` missing",
-                "`deny.toml` must set `[advisories].yanked = \"warn\"`.",
+                "`deny.toml` must set `[advisories].yanked = \"deny\"`.",
                 "deny.toml",
                 false,
             ),

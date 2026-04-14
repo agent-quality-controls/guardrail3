@@ -40,7 +40,7 @@ fn inventories_added_wrappers_for_non_canonical_bans() {
 }
 
 #[test]
-fn inventories_project_specific_wrappers_for_canonical_bans_without_managed_wrappers() {
+fn errors_when_managed_ban_adds_project_specific_wrappers() {
     let deny_toml = canonical_bans_toml("service").replace(
         "\"anyhow\"",
         "{ name = \"anyhow\", wrappers = [\"texting_robots\"] }",
@@ -55,11 +55,11 @@ fn inventories_project_specific_wrappers_for_canonical_bans_without_managed_wrap
 
     assertions::assert_findings(
         &results,
-        &[assertions::info(
-            "project-specific ban wrappers",
-            "`deny.toml` ban `anyhow` adds project-specific wrappers `texting_robots`.",
+        &[assertions::error(
+            "managed ban wrappers changed",
+            "`deny.toml` ban `anyhow` must not add wrappers.",
             "deny.toml",
-            true,
+            false,
         )],
     );
 }

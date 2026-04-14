@@ -8,7 +8,7 @@ fn correct_baseline_values() {
         r#"
 [advisories]
 unmaintained = "workspace"
-yanked = "warn"
+yanked = "deny"
 "#,
     );
     assertions::assert_no_findings(&results);

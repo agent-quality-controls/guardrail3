@@ -8,7 +8,7 @@ fn unmaintained_wrong() {
         r#"
 [advisories]
 unmaintained = "all"
-yanked = "warn"
+yanked = "deny"
 "#,
     );
     assertions::assert_findings(
@@ -28,14 +28,14 @@ fn yanked_wrong() {
         r#"
 [advisories]
 unmaintained = "workspace"
-yanked = "deny"
+yanked = "warn"
 "#,
     );
     assertions::assert_findings(
         &results,
         &[assertions::error(
             "advisories `yanked` has wrong value",
-            "`deny.toml` must set `[advisories].yanked = \"warn\"`, found `deny`.",
+            "`deny.toml` must set `[advisories].yanked = \"deny\"`, found `warn`.",
             "deny.toml",
             false,
         )],
@@ -62,7 +62,7 @@ yanked = "allow"
             ),
             assertions::error(
                 "advisories `yanked` has wrong value",
-                "`deny.toml` must set `[advisories].yanked = \"warn\"`, found `allow`.",
+                "`deny.toml` must set `[advisories].yanked = \"deny\"`, found `allow`.",
                 "deny.toml",
                 false,
             ),

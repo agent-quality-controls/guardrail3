@@ -5,7 +5,7 @@ use crate::test_support::{canonical_bans_toml, run};
 #[test]
 fn errors_when_canonical_non_empty_wrapper_policy_changes() {
     let deny_toml = canonical_bans_toml("service").replace(
-        r#"{ name = "regex", wrappers = ["globset", "ignore", "tree-sitter"] }"#,
+        r#""regex""#,
         r#"{ name = "regex", wrappers = ["tree-sitter"] }"#,
     );
     let results = run(
@@ -19,7 +19,7 @@ fn errors_when_canonical_non_empty_wrapper_policy_changes() {
         &results,
         &[assertions::error(
             "managed ban wrappers changed",
-            "`deny.toml` ban `regex` must keep wrappers `globset, ignore, tree-sitter`.",
+            "`deny.toml` ban `regex` must not add wrappers.",
             "deny.toml",
             false,
         )],
