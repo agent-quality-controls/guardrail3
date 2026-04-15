@@ -218,7 +218,7 @@ pub(crate) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
                     publishable_binary_names.len(),
                 )
             }),
-            dry_run: krate.publishable.then(|| run_publish_dry_run(crawl, &krate.cargo_abs_path)),
+            dry_run: krate.publishable.then(|| run_publish_dry_run(&krate.cargo_abs_path)),
         })
         .collect::<Vec<_>>();
 
@@ -1286,11 +1286,16 @@ fn tool_is_available(tool: &str, path_env: Option<&OsStr>) -> bool {
     })
 }
 
-fn run_publish_dry_run(crawl: &G3RsWorkspaceCrawl, manifest_path: &Path) -> G3RsReleaseDryRunOutcome {
+fn run_publish_dry_run(manifest_path: &Path) -> G3RsReleaseDryRunOutcome {
+    let manifest_dir = manifest_path.parent().unwrap_or_else(|| Path::new("."));
+    let manifest_name = manifest_path
+        .file_name()
+        .unwrap_or_else(|| OsStr::new("Cargo.toml"));
+
     match Command::new("cargo")
         .args(["publish", "--dry-run", "--manifest-path"])
-        .arg(manifest_path)
-        .current_dir(&crawl.root_abs_path)
+        .arg(manifest_name)
+        .current_dir(manifest_dir)
         .output()
     {
         Ok(output) if output.status.success() => G3RsReleaseDryRunOutcome::Passed,
