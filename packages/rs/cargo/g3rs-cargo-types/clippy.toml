@@ -1,0 +1,65 @@
+max-struct-bools = 3
+max-fn-params-bools = 3
+too-many-lines-threshold = 75
+too-many-arguments-threshold = 7
+excessive-nesting-threshold = 4
+cognitive-complexity-threshold = 15
+type-complexity-threshold = 75
+
+avoid-breaking-exported-api = false
+
+allow-dbg-in-tests = false
+allow-expect-in-tests = true
+allow-panic-in-tests = false
+allow-print-in-tests = false
+allow-unwrap-in-tests = false
+
+disallowed-methods = [
+  { path = "std::env::var", reason = "Use the centralized config module - direct env access scatters configuration and is untestable" },
+  { path = "std::env::var_os", reason = "Use the centralized config module - direct env access scatters configuration and is untestable" },
+  { path = "std::env::vars", reason = "Use the centralized config module - direct env access scatters configuration and is untestable" },
+  { path = "std::env::set_var", reason = "Unsafe in multi-threaded contexts - environment mutation is not thread-safe" },
+  { path = "std::env::remove_var", reason = "Unsafe in multi-threaded contexts - environment mutation is not thread-safe" },
+  { path = "std::process::exit", reason = "Use proper error propagation (return Result from main) - process::exit skips destructors" },
+  { path = "std::process::abort", reason = "Panic or return an error instead - abort skips destructors and bypasses shutdown handling" },
+  { path = "std::process::Command::new", reason = "Shell execution not permitted in this service" },
+  { path = "std::thread::sleep", reason = "Use tokio::time::sleep for async context - std::thread::sleep blocks the tokio runtime" },
+  { path = "std::fs::read_to_string", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::read", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::read_dir", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::read_link", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::write", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::remove_file", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::remove_dir_all", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::create_dir_all", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::rename", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::copy", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::metadata", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::symlink_metadata", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::canonicalize", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::set_permissions", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "std::fs::hard_link", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it - no scattered std::fs calls" },
+  { path = "reqwest::Client::new", reason = "Use shared client from AppState - per-request construction skips connection pooling" },
+  { path = "reqwest::Client::builder", reason = "Use shared client from AppState - construct once at startup and inject via DI" },
+]
+
+disallowed-types = [
+  { path = "std::collections::HashMap", reason = "Use BTreeMap for deterministic iteration order" },
+  { path = "std::collections::HashSet", reason = "Use BTreeSet for deterministic iteration order" },
+  { path = "std::sync::Mutex", reason = "Use parking_lot::Mutex - no poisoning, better performance" },
+  { path = "std::sync::RwLock", reason = "Use parking_lot::RwLock - no poisoning, better performance" },
+  { path = "std::fs::File", reason = "BANNED: Create a centralized fs module - no direct file handle construction" },
+  { path = "std::any::Any", reason = "Avoid type erasure - std::any::Any weakens typed boundaries and reviewability" },
+  { path = "std::sync::LazyLock", reason = "Library profile must not rely on process-global state; keep shared state out of publishable library APIs." },
+  { path = "std::sync::OnceLock", reason = "Library profile must not rely on process-global state; keep shared state out of publishable library APIs." },
+  { path = "once_cell::sync::Lazy", reason = "Library profile must not rely on process-global state; keep shared state out of publishable library APIs." },
+  { path = "once_cell::sync::OnceCell", reason = "Library profile must not rely on process-global state; keep shared state out of publishable library APIs." },
+]
+
+disallowed-macros = [
+  { path = "std::println", reason = "Use structured logging or explicit output helpers instead of ad hoc println!" },
+  { path = "std::eprintln", reason = "Use structured logging or explicit error reporting instead of ad hoc eprintln!" },
+  { path = "std::dbg", reason = "Remove debugging probes before commit - dbg! is a temporary local diagnostic only" },
+  { path = "std::todo", reason = "Ship concrete code or explicit errors - todo! leaves unfinished control flow in production code" },
+  { path = "std::unimplemented", reason = "Ship concrete code or explicit errors - unimplemented! leaves unfinished control flow in production code" },
+]

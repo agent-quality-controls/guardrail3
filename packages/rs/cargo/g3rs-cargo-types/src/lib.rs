@@ -1,111 +1,25 @@
-use cargo_toml_parser::CargoToml;
-use guardrail3_rs_toml_parser::RustProfile;
-use toml::Value;
+#[cfg(feature = "api")]
+mod types;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum G3RsCargoPolicyRootKind {
-    WorkspaceRoot,
-    StandalonePackageRoot,
-    Other,
-}
-
-impl G3RsCargoPolicyRootKind {
-    #[must_use]
-    pub const fn label(self) -> &'static str {
-        match self {
-            Self::WorkspaceRoot => "workspace root",
-            Self::StandalonePackageRoot => "standalone package root",
-            Self::Other => "Cargo manifest",
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsCargoWaiver {
-    pub rule: String,
-    pub file: String,
-    pub selector: String,
-    pub reason: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum G3RsCargoRustPolicyState {
-    Missing,
-    Unreadable { rel_path: String, reason: String },
-    ParseError { rel_path: String, reason: String },
-    Parsed {
-        rel_path: String,
-        profile: Option<RustProfile>,
-        waivers: Vec<G3RsCargoWaiver>,
-    },
-}
-
-#[derive(Debug, Clone)]
-pub struct G3RsCargoPolicyRoot {
-    pub kind: G3RsCargoPolicyRootKind,
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub cargo: CargoToml,
-    pub raw_cargo: Value,
-    pub rust_policy: G3RsCargoRustPolicyState,
-    pub edition: Option<String>,
-    pub edition_invalid: bool,
-    pub rust_version: Option<String>,
-    pub rust_version_invalid: bool,
-}
-
-#[derive(Debug, Clone)]
-pub struct G3RsCargoWorkspaceMember {
-    pub workspace_root_rel: String,
-    pub member_rel: String,
-    pub cargo_rel_path: String,
-    pub raw_cargo: Value,
-    pub package_name: Option<String>,
-    pub edition: Option<String>,
-    pub edition_invalid: bool,
-    pub lint_workspace_invalid: bool,
-    pub lint_workspace_true: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsCargoMissingMember {
-    pub workspace_root_rel: String,
-    pub workspace_cargo_rel_path: String,
-    pub member_rel: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsCargoInputFailure {
-    pub rel_path: String,
-    pub message: String,
-}
-
-/// Input contract for extracted Cargo config checks.
-///
-/// Ingestion owns crawl selection, root/member discovery, policy-file parsing,
-/// and normalization into one root plus zero or more workspace members.
-#[derive(Debug, Clone)]
-pub struct G3RsCargoConfigChecksInput {
-    pub root: G3RsCargoPolicyRoot,
-    pub workspace_members: Vec<G3RsCargoWorkspaceMember>,
-}
-
-/// Placeholder input contract for future Cargo source checks.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct G3RsCargoSourceChecksInput;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsCargoFileTreeRoot {
-    pub kind: Option<G3RsCargoPolicyRootKind>,
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub rust_policy_rel_path: Option<String>,
-    pub members_parse_error: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsCargoFileTreeChecksInput {
-    pub root: G3RsCargoFileTreeRoot,
-    pub missing_members: Vec<G3RsCargoMissingMember>,
-    pub input_failures: Vec<G3RsCargoInputFailure>,
-}
+#[cfg(feature = "api")]
+pub use types::G3RsCargoConfigChecksInput;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoFileTreeChecksInput;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoFileTreeRoot;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoInputFailure;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoMissingMember;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoPolicyRoot;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoPolicyRootKind;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoRustPolicyState;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoSourceChecksInput;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoWaiver;
+#[cfg(feature = "api")]
+pub use types::G3RsCargoWorkspaceMember;
