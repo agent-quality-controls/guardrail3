@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+use g3rs_cargo_ingestion_assertions::run as assertions;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -77,33 +78,10 @@ fn config_pipeline_reports_old_app_allow_inventory_and_member_rules() {
         "#,
     );
 
-    let input = crate::ingest_for_config_checks(&crawl(root)).expect("ingestion should succeed");
+    let input = crate::run::ingest_for_config_checks(&crawl(root)).expect("ingestion should succeed");
     let results = g3rs_cargo_config_checks::check(&input);
 
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id() == "RS-CARGO-CONFIG-07"),
-        "{results:#?}"
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id() == "RS-CARGO-CONFIG-09"),
-        "{results:#?}"
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id() == "RS-CARGO-CONFIG-10"),
-        "{results:#?}"
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id() == "RS-CARGO-CONFIG-13"),
-        "{results:#?}"
-    );
+    assertions::assert_config_pipeline_old_app_allow_inventory_and_member_rules(&results);
 }
 
 #[test]
@@ -146,14 +124,11 @@ fn config_pipeline_stands_down_allow_rules_when_guardrail3_rs_is_invalid() {
     );
     write(root.join("guardrail3-rs.toml"), "profile = [");
 
-    let input = crate::ingest_for_config_checks(&crawl(root)).expect("ingestion should succeed");
+    let input = crate::run::ingest_for_config_checks(&crawl(root)).expect("ingestion should succeed");
     let results = g3rs_cargo_config_checks::check(&input);
 
-    assert!(
-        !results
-            .iter()
-            .any(|result| matches!(result.id(), "RS-CARGO-CONFIG-07" | "RS-CARGO-CONFIG-11" | "RS-CARGO-CONFIG-12")),
-        "{results:#?}"
+    assertions::assert_config_pipeline_stands_down_allow_rules_when_guardrail3_rs_is_invalid(
+        &results,
     );
 }
 
@@ -175,24 +150,11 @@ fn filetree_pipeline_reports_guardrail3_rs_parse_failures_and_ignores_legacy_gua
     write(root.join("guardrail3-rs.toml"), "profile = [");
     write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
 
-    let input = crate::ingest_for_file_tree_checks(&crawl(root))
+    let input = crate::run::ingest_for_file_tree_checks(&crawl(root))
         .expect("filetree ingestion should succeed with fail-closed inputs");
     let results = g3rs_cargo_filetree_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-CARGO-FILETREE-14"
-                && result.file() == Some("guardrail3-rs.toml")
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        !results.iter().any(|result| {
-            result.id() == "RS-CARGO-FILETREE-14"
-                && result.file() == Some("guardrail3.toml")
-        }),
-        "{results:#?}"
-    );
+    assertions::assert_filetree_pipeline_reports_guardrail3_rs_parse_failures_and_ignores_legacy_guardrail3_toml(&results);
 }
 
 #[test]
@@ -212,31 +174,11 @@ fn filetree_pipeline_reports_missing_member_and_input_failures() {
     write(root.join("crates/api/Cargo.toml"), "[package");
     write(root.join("guardrail3-rs.toml"), "profile = [");
 
-    let input = crate::ingest_for_file_tree_checks(&crawl(root))
+    let input = crate::run::ingest_for_file_tree_checks(&crawl(root))
         .expect("filetree ingestion should succeed with fail-closed inputs");
     let results = g3rs_cargo_filetree_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-CARGO-FILETREE-10"
-                && result.title() == "declared workspace member missing Cargo.toml"
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-CARGO-FILETREE-14"
-                && result.file() == Some("crates/api/Cargo.toml")
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-CARGO-FILETREE-14"
-                && result.file() == Some("guardrail3-rs.toml")
-        }),
-        "{results:#?}"
-    );
+    assertions::assert_filetree_pipeline_reports_missing_member_and_input_failures(&results);
 }
 
 #[test]
@@ -263,17 +205,11 @@ fn filetree_pipeline_returns_exact_clean_inventory_results() {
     );
     write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
 
-    let input = crate::ingest_for_file_tree_checks(&crawl(root))
+    let input = crate::run::ingest_for_file_tree_checks(&crawl(root))
         .expect("filetree ingestion should succeed for clean workspace");
     let results = g3rs_cargo_filetree_checks::check(&input);
 
-    assert_eq!(results.len(), 2, "{results:#?}");
-    assert_eq!(results[0].id(), "RS-CARGO-FILETREE-10");
-    assert_eq!(results[0].title(), "all declared workspace members have Cargo.toml");
-    assert!(results[0].inventory());
-    assert_eq!(results[1].id(), "RS-CARGO-FILETREE-14");
-    assert_eq!(results[1].title(), "cargo-family inputs parsed cleanly");
-    assert!(results[1].inventory());
+    assertions::assert_filetree_pipeline_returns_exact_clean_inventory_results(&results);
 }
 
 #[test]
@@ -299,14 +235,9 @@ fn filetree_pipeline_reports_malformed_workspace_members_without_missing_member_
         "#,
     );
 
-    let input = crate::ingest_for_file_tree_checks(&crawl(root))
+    let input = crate::run::ingest_for_file_tree_checks(&crawl(root))
         .expect("filetree ingestion should degrade malformed workspace members to input failures");
     let results = g3rs_cargo_filetree_checks::check(&input);
 
-    assert_eq!(results.len(), 2, "{results:#?}");
-    assert!(results.iter().all(|result| result.id() == "RS-CARGO-FILETREE-14"));
-    assert!(results.iter().all(|result| result.file() == Some("Cargo.toml")));
-    assert!(results
-        .iter()
-        .all(|result| result.title() == "failed to read Cargo configuration"));
+    assertions::assert_filetree_pipeline_reports_malformed_workspace_members_without_missing_member_reclassification(&results);
 }

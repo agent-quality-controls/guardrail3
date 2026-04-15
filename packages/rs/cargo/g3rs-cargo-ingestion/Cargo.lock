@@ -120,7 +120,7 @@ name = "g3rs-cargo-config-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-cargo-config-checks-runtime",
- "g3rs-cargo-config-checks-types",
+ "g3rs-cargo-types",
 ]
 
 [[package]]
@@ -128,18 +128,11 @@ name = "g3rs-cargo-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3rs-cargo-config-checks-types",
  "g3rs-cargo-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
+ "guardrail3-rs-toml-parser",
  "toml",
-]
-
-[[package]]
-name = "g3rs-cargo-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-cargo-types",
 ]
 
 [[package]]
@@ -147,23 +140,15 @@ name = "g3rs-cargo-filetree-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-cargo-filetree-checks-runtime",
- "g3rs-cargo-filetree-checks-types",
+ "g3rs-cargo-types",
 ]
 
 [[package]]
 name = "g3rs-cargo-filetree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-cargo-filetree-checks-types",
  "g3rs-cargo-types",
  "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-cargo-filetree-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-cargo-types",
 ]
 
 [[package]]
@@ -178,7 +163,9 @@ dependencies = [
 name = "g3rs-cargo-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-cargo-ingestion-types",
+ "g3rs-cargo-ingestion-runtime",
+ "g3rs-cargo-types",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -193,6 +180,7 @@ dependencies = [
  "g3rs-cargo-types",
  "g3rs-workspace-crawl",
  "glob",
+ "guardrail3-rs-toml-parser",
  "tempfile",
  "toml",
 ]
@@ -206,6 +194,7 @@ name = "g3rs-cargo-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -269,6 +258,29 @@ version = "0.1.0"
 [[package]]
 name = "guardrail3-reason-policy"
 version = "0.0.0"
+
+[[package]]
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "hashbrown"
