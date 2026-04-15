@@ -106,6 +106,29 @@ edition = "2024"
 }
 
 #[test]
+fn repo_root_checks_stub_returns_not_implemented() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+    write(
+        root.join("Cargo.toml"),
+        r#"
+[workspace]
+members = []
+resolver = "2"
+"#,
+    );
+
+    let crawl = crawl(root);
+    let error = crate::ingest_for_repo_root_checks(&crawl).expect_err("stub should fail");
+
+    assert!(matches!(
+        error,
+        crate::IngestionError::RepoRootChecksNotImplemented
+    ));
+}
+
+#[test]
 fn ingests_workspace_inherited_readme_path() {
     let temp = tempdir().expect("create temporary workspace");
     let root = temp.path();

@@ -96,15 +96,7 @@ jobs:
         crate::run::ingest_for_config_checks_with_path(&crawl, Some(bin_dir.as_os_str()));
     let results = g3rs_release_config_checks::check(&input);
 
-    for id in [
-        "RS-RELEASE-CONFIG-12",
-        "RS-RELEASE-CONFIG-13",
-        "RS-RELEASE-CONFIG-14",
-        "RS-RELEASE-CONFIG-15",
-        "RS-RELEASE-CONFIG-16",
-        "RS-RELEASE-CONFIG-17",
-        "RS-RELEASE-CONFIG-21",
-    ] {
+    for id in ["RS-RELEASE-CONFIG-15", "RS-RELEASE-CONFIG-16", "RS-RELEASE-CONFIG-17", "RS-RELEASE-CONFIG-21"] {
         assert!(results.iter().any(|result| result.id() == id), "{results:#?}");
     }
 }

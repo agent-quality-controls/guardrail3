@@ -11,7 +11,7 @@ use g3rs_release_types::{
     G3RsReleaseConfigChecksInput, G3RsReleaseConfigCrate, G3RsReleaseConfigEdge,
     G3RsReleaseConfigRepo, G3RsReleaseDryRunOutcome, G3RsReleaseFileTreeChecksInput,
     G3RsReleaseFileTreeReadme, G3RsReleaseFileTreeRepo, G3RsReleaseInputFailure,
-    G3RsReleaseSourceChecksInput, G3RsReleaseSourceReadme,
+    G3RsReleasePathTargetKind, G3RsReleaseSourceChecksInput, G3RsReleaseSourceReadme,
 };
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 use semver::{Version, VersionReq};
@@ -229,7 +229,12 @@ pub(crate) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
     let edges = crate_bases
         .iter()
         .flat_map(|krate| {
-            dependency_edges(&krate.cargo, &workspace_dependencies)
+            dependency_edges(
+                crawl,
+                &krate.cargo_abs_path,
+                &krate.cargo,
+                &workspace_dependencies,
+            )
                 .into_iter()
                 .map(|edge| G3RsReleaseConfigEdge {
                     crate_name: krate.name.clone(),
@@ -239,6 +244,7 @@ pub(crate) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
                     section_label: edge.section_label,
                     target_label: edge.target_label,
                     has_path: edge.has_path,
+                    path_target_kind: edge.path_target_kind,
                     dep_publishable: publishable_names.contains(&edge.dep_package_name),
                     version_req: edge.version_req.clone(),
                     actual_version: version_map.get(&edge.dep_package_name).cloned(),
@@ -719,15 +725,20 @@ struct DependencyEdge {
     section_label: String,
     target_label: Option<String>,
     has_path: bool,
+    path_target_kind: Option<G3RsReleasePathTargetKind>,
     version_req: Option<String>,
 }
 
 fn dependency_edges(
+    crawl: &G3RsWorkspaceCrawl,
+    source_manifest_abs_path: &Path,
     cargo: &CargoToml,
     workspace_dependencies: &BTreeMap<String, Dependency>,
 ) -> Vec<DependencyEdge> {
     let mut edges = Vec::new();
     collect_dependency_edges(
+        crawl,
+        source_manifest_abs_path.parent().unwrap_or(source_manifest_abs_path),
         &cargo.dependencies,
         "dependencies",
         None,
@@ -735,6 +746,8 @@ fn dependency_edges(
         &mut edges,
     );
     collect_dependency_edges(
+        crawl,
+        source_manifest_abs_path.parent().unwrap_or(source_manifest_abs_path),
         &cargo.build_dependencies,
         "build-dependencies",
         None,
@@ -743,6 +756,8 @@ fn dependency_edges(
     );
     for (target_name, target) in &cargo.target {
         collect_target_dependency_edges(
+            crawl,
+            source_manifest_abs_path.parent().unwrap_or(source_manifest_abs_path),
             target,
             target_name,
             workspace_dependencies,
@@ -753,12 +768,16 @@ fn dependency_edges(
 }
 
 fn collect_target_dependency_edges(
+    crawl: &G3RsWorkspaceCrawl,
+    source_manifest_dir: &Path,
     target: &TargetDependencyTables,
     target_name: &str,
     workspace_dependencies: &BTreeMap<String, Dependency>,
     edges: &mut Vec<DependencyEdge>,
 ) {
     collect_dependency_edges(
+        crawl,
+        source_manifest_dir,
         &target.dependencies,
         "dependencies",
         Some(target_name),
@@ -766,6 +785,8 @@ fn collect_target_dependency_edges(
         edges,
     );
     collect_dependency_edges(
+        crawl,
+        source_manifest_dir,
         &target.build_dependencies,
         "build-dependencies",
         Some(target_name),
@@ -775,6 +796,8 @@ fn collect_target_dependency_edges(
 }
 
 fn collect_dependency_edges(
+    crawl: &G3RsWorkspaceCrawl,
+    source_manifest_dir: &Path,
     dependencies: &BTreeMap<String, Dependency>,
     section_label: &str,
     target_label: Option<&str>,
@@ -787,6 +810,18 @@ fn collect_dependency_edges(
             dep,
             Dependency::Detailed(detail) if detail.workspace == Some(true)
         );
+        let path_target_kind = dependency_path(dep)
+            .as_deref()
+            .map(|path| classify_dependency_path(crawl, source_manifest_dir, path))
+            .or_else(|| {
+                if workspace_inherited {
+                    workspace_detail.and_then(dependency_path).as_deref().map(|path| {
+                        classify_dependency_path(crawl, &crawl.root_abs_path, path)
+                    })
+                } else {
+                    None
+                }
+            });
         let has_path = dependency_path(dep).is_some()
             || (workspace_inherited && workspace_detail.and_then(dependency_path).is_some());
         let dep_package_name = dependency_package(dep)
@@ -812,6 +847,7 @@ fn collect_dependency_edges(
             section_label: section_label.to_owned(),
             target_label: target_label.map(str::to_owned),
             has_path,
+            path_target_kind,
             version_req,
         });
     }
@@ -1079,6 +1115,36 @@ fn normalize_relative_path(path: &Path) -> String {
         }
     }
     parts.join("/")
+}
+
+fn classify_dependency_path(
+    crawl: &G3RsWorkspaceCrawl,
+    base_dir: &Path,
+    relative: &str,
+) -> G3RsReleasePathTargetKind {
+    let normalized_target = normalize_absolute_path(&base_dir.join(relative));
+    let normalized_root = normalize_absolute_path(&crawl.root_abs_path);
+    if normalized_target.starts_with(&normalized_root) {
+        G3RsReleasePathTargetKind::InWorkspace
+    } else {
+        G3RsReleasePathTargetKind::OutsideWorkspace
+    }
+}
+
+fn normalize_absolute_path(path: &Path) -> PathBuf {
+    let mut normalized = PathBuf::new();
+    for component in path.components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                let _ = normalized.pop();
+            }
+            Component::Normal(part) => normalized.push(part),
+            Component::RootDir => normalized.push(Path::new("/")),
+            Component::Prefix(prefix) => normalized.push(prefix.as_os_str()),
+        }
+    }
+    normalized
 }
 
 fn join_under_root(root_rel_dir: &str, child: &str) -> String {

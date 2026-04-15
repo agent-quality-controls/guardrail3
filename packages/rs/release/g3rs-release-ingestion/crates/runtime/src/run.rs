@@ -1,5 +1,6 @@
 use std::ffi::OsStr;
 
+use g3rs_release_types::G3RsReleaseConfigRepo;
 use g3rs_release_types::{
     G3RsReleaseConfigChecksInput, G3RsReleaseFileTreeChecksInput, G3RsReleaseSourceChecksInput,
 };
@@ -36,6 +37,12 @@ pub fn ingest_for_file_tree_checks(
 ) -> Result<G3RsReleaseFileTreeChecksInput, IngestionError> {
     require_pointed_workspace_root(crawl)?;
     Ok(crate::ingest::collect(crawl, std::env::var_os("PATH").as_deref()).filetree)
+}
+
+pub fn ingest_for_repo_root_checks(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsReleaseConfigRepo, IngestionError> {
+    Err(IngestionError::RepoRootChecksNotImplemented)
 }
 
 fn require_pointed_workspace_root(crawl: &G3RsWorkspaceCrawl) -> Result<(), IngestionError> {
