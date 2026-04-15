@@ -6,23 +6,32 @@ description = "Runtime implementation for g3 fmt config checks"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "fmt", "checks", "runtime"]
+categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
 
 [features]
 default = ["all"]
 all = ["checks"]
 checks = []
 
+[package.metadata.docs.rs]
+all-features = true
+
 [lints]
 workspace = true
 
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser" }
-g3rs-fmt-config-checks-types = { path = "../types", version = "0.1.0" }
+g3rs-fmt-types = { path = "../../../g3rs-fmt-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 guardrail3-reason-policy = { path = "../../../../../shared/reason-policy/crates/reason-policy" }
 rustfmt-toml-parser = { path = "../../../../../parsers/rustfmt-toml-parser" }
 toml = "0.8"
 
 [dev-dependencies]
-g3rs-fmt-config-checks-assertions = { path = "../assertions" }
+g3rs-fmt-config-checks-assertions = { path = "../assertions", version = "0.1.0" }
 rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser" }
+test_support = { path = "../test_support", version = "0.1.0" }

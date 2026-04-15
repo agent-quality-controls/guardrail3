@@ -1,4 +1,4 @@
-use g3rs_fmt_config_checks_assertions::rs_fmt_config_01_settings as assertions;
+use g3rs_fmt_config_checks_assertions::rs_fmt_config_01_settings::rule as assertions;
 
 use super::helpers::{parsed_rustfmt, run_check};
 

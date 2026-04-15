@@ -1,4 +1,4 @@
-use g3rs_fmt_config_checks_types::{
+use g3rs_fmt_types::{
     G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
@@ -81,7 +81,3 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
         None,
     ));
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;

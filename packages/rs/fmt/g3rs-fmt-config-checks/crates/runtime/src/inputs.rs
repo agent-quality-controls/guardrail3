@@ -1,5 +1,5 @@
 use cargo_toml_parser::{CargoToml, InheritableValue};
-use g3rs_fmt_config_checks_types::{
+use g3rs_fmt_types::{
     G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustfmtConfigState,
 };
 use rustfmt_toml_parser::{Edition, RustfmtToml, StyleEdition};

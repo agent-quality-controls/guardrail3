@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use g3rs_fmt_config_checks_types::G3RsFmtConfigChecksInput;
+use g3rs_fmt_types::G3RsFmtConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::inputs::rustfmt;
@@ -47,7 +47,3 @@ fn expected_keys() -> BTreeSet<&'static str> {
     .into_iter()
     .collect()
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;

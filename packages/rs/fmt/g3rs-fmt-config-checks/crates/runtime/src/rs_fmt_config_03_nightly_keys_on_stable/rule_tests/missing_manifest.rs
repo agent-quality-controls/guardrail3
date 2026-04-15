@@ -1,5 +1,5 @@
-use g3rs_fmt_config_checks_assertions::rs_fmt_config_03_nightly_keys_on_stable as assertions;
-use g3rs_fmt_config_checks_types::G3RsFmtToolchainState;
+use g3rs_fmt_config_checks_assertions::rs_fmt_config_03_nightly_keys_on_stable::rule as assertions;
+use test_support::G3RsFmtToolchainState;
 
 use super::helpers::run_check;
 

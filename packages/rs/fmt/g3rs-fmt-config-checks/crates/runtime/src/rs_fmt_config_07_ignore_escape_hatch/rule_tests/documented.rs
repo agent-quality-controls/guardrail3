@@ -1,4 +1,4 @@
-use g3rs_fmt_config_checks_assertions::rs_fmt_config_07_ignore_escape_hatch as assertions;
+use g3rs_fmt_config_checks_assertions::rs_fmt_config_07_ignore_escape_hatch::rule as assertions;
 
 use super::helpers::{run_check, waiver};
 

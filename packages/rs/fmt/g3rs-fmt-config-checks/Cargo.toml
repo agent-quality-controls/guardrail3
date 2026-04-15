@@ -8,7 +8,7 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["guardrail3", "fmt", "checks", "rust", "policy"]
 categories = ["development-tools"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
@@ -33,6 +33,7 @@ all-features = true
 members = [
     "crates/assertions",
     "crates/runtime",
+    "crates/test_support",
     "crates/types",
 ]
 resolver = "2"

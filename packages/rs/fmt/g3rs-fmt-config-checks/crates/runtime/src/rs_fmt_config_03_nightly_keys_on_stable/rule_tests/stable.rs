@@ -1,4 +1,4 @@
-use g3rs_fmt_config_checks_assertions::rs_fmt_config_03_nightly_keys_on_stable as assertions;
+use g3rs_fmt_config_checks_assertions::rs_fmt_config_03_nightly_keys_on_stable::rule as assertions;
 
 use super::helpers::{parsed_toolchain, run_check};
 

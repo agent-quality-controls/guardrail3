@@ -1,4 +1,4 @@
-use g3rs_fmt_config_checks_assertions::rs_fmt_config_02_extra_settings as assertions;
+use g3rs_fmt_config_checks_assertions::rs_fmt_config_02_extra_settings::rule as assertions;
 
 use super::helpers::run_check;
 

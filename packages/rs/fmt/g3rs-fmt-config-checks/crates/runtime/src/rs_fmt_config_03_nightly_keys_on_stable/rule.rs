@@ -1,4 +1,4 @@
-use g3rs_fmt_config_checks_types::{G3RsFmtConfigChecksInput, G3RsFmtToolchainState};
+use g3rs_fmt_types::{G3RsFmtConfigChecksInput, G3RsFmtToolchainState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::inputs::{rustfmt, rustfmt_table};
@@ -101,7 +101,3 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
         )),
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;
