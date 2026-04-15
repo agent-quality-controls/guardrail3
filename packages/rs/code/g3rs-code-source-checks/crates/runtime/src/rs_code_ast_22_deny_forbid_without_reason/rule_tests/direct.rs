@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_22_deny_forbid_without_reason::{
+use g3rs_code_source_checks_assertions::rs_code_ast_22_deny_forbid_without_reason::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_deny_without_reason() {
-    let results = check_source("src/lib.rs", "#[deny(dead_code)]\nfn probe() {}\n", false);
+    let results = super::super::check_source("src/lib.rs", "#[deny(dead_code)]\nfn probe() {}\n", false);
 
     assert_rule_results(
         &results,
@@ -24,7 +23,7 @@ fn errors_on_deny_without_reason() {
 
 #[test]
 fn errors_on_weak_reason() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#[forbid(unsafe_code)] // reason: temp\nfn probe() {}\n",
         false,
@@ -47,7 +46,7 @@ fn errors_on_weak_reason() {
 
 #[test]
 fn inventories_crate_level_forbid_unsafe_code() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#![forbid(unsafe_code)]\nfn probe() {}\n",
         false,

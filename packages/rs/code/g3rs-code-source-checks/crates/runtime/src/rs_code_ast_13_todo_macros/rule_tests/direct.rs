@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_13_todo_macros::{
+use g3rs_code_source_checks_assertions::rs_code_ast_13_todo_macros::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn warns_on_todo_macro() {
-    let results = check_source("src/foo.rs", "fn foo() { todo!(); }", false);
+    let results = super::super::check_source("src/foo.rs", "fn foo() { todo!(); }", false);
 
     assert_rule_results(
         &results,
@@ -22,7 +21,7 @@ fn warns_on_todo_macro() {
 
 #[test]
 fn warns_on_unimplemented_macro() {
-    let results = check_source("src/foo.rs", "fn foo() { unimplemented!(); }", false);
+    let results = super::super::check_source("src/foo.rs", "fn foo() { unimplemented!(); }", false);
 
     assert_rule_results(
         &results,
@@ -39,7 +38,7 @@ fn warns_on_unimplemented_macro() {
 
 #[test]
 fn warns_on_unreachable_macro_in_non_test_code() {
-    let results = check_source("src/foo.rs", "fn foo() { unreachable!(); }", false);
+    let results = super::super::check_source("src/foo.rs", "fn foo() { unreachable!(); }", false);
 
     assert_rule_results(
         &results,

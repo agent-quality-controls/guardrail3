@@ -1,4 +1,4 @@
-use g3rs_code_source_checks_types::{G3RsCodeSourceChecksInput, G3RsSourceFile};
+use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsSourceFile};
 
 pub(crate) struct G3RsCodeSourceFileAst {
     pub(crate) source_file: G3RsSourceFile,

@@ -1,4 +1,4 @@
-use g3rs_code_source_checks_types::G3RsCodeSourceChecksInput;
+use g3rs_code_types::G3RsCodeSourceChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsCodeSourceChecksInput) -> Vec<G3CheckResult> {

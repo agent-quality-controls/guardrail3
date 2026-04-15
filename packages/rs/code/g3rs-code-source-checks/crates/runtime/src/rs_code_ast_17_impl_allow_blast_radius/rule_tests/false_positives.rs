@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_17_impl_allow_blast_radius::assert_rule_results;
+use g3rs_code_source_checks_assertions::rs_code_ast_17_impl_allow_blast_radius::rule::assert_rule_results;
 
 #[test]
 fn skips_threshold_and_method_level_cases() {
@@ -23,6 +22,6 @@ impl Foo {
 }
 "#;
 
-    assert_rule_results(&check_source("src/foo.rs", threshold, false), &[]);
-    assert_rule_results(&check_source("src/foo.rs", method_level, false), &[]);
+    assert_rule_results(&super::super::check_source("src/foo.rs", threshold, false), &[]);
+    assert_rule_results(&super::super::check_source("src/foo.rs", method_level, false), &[]);
 }

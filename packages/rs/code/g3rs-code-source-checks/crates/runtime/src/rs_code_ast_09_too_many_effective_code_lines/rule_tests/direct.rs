@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_09_too_many_effective_code_lines::{
+use g3rs_code_source_checks_assertions::rs_code_ast_09_too_many_effective_code_lines::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
@@ -9,7 +8,7 @@ fn errors_when_effective_code_lines_exceed_cap() {
         .map(|i| format!("fn f{i}() {{}}\n"))
         .collect::<String>();
 
-    let results = check_source("src/lib.rs", &content, false);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert_rule_results(
         &results,

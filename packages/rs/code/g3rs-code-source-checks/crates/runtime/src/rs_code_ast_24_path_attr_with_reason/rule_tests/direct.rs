@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_24_path_attr_with_reason::{
+use g3rs_code_source_checks_assertions::rs_code_ast_24_path_attr_with_reason::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_path_without_reason() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#[path = \"generated.rs\"]\nmod generated;\n",
         false,
@@ -28,7 +27,7 @@ fn errors_on_path_without_reason() {
 
 #[test]
 fn errors_on_path_escape() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#[path = \"../generated.rs\"]\nmod generated;\n",
         false,
@@ -51,7 +50,7 @@ fn errors_on_path_escape() {
 
 #[test]
 fn warns_on_path_with_useful_reason() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#[path = \"generated.rs\"] // reason: generated bridge shim\nmod generated;\n",
         false,
@@ -74,7 +73,7 @@ fn warns_on_path_with_useful_reason() {
 
 #[test]
 fn warns_on_conditional_path_with_useful_reason() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#[cfg_attr(feature = \"cli\", path = \"generated.rs\")] // reason: generated bridge shim\nmod generated;\n",
         false,

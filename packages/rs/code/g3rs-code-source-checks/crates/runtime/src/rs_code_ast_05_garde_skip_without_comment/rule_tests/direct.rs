@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_05_garde_skip_without_comment::{
+use g3rs_code_source_checks_assertions::rs_code_ast_05_garde_skip_without_comment::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_non_exempt_garde_skip_without_comment() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "struct Form {\n    #[garde(skip)]\n    token: String,\n}\n",
         false,

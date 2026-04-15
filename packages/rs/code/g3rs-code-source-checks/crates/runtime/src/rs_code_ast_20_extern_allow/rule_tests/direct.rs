@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_20_extern_allow::{
+use g3rs_code_source_checks_assertions::rs_code_ast_20_extern_allow::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
@@ -11,7 +10,7 @@ unsafe extern "C" {
     fn puts(s: *const i8);
 }
 "#;
-    let results = check_source("src/ffi.rs", content, false);
+    let results = super::super::check_source("src/ffi.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -36,7 +35,7 @@ unsafe extern "C" {
     fn puts(s: *const i8);
 }
 "#;
-    let results = check_source("src/ffi.rs", content, false);
+    let results = super::super::check_source("src/ffi.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -61,7 +60,7 @@ unsafe extern "C" {
     fn puts(s: *const i8);
 }
 "#;
-    let results = check_source("src/ffi.rs", content, false);
+    let results = super::super::check_source("src/ffi.rs", content, false);
 
     assert_rule_results(
         &results,

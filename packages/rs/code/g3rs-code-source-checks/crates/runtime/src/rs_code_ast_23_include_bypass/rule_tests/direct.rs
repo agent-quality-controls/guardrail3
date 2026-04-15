@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_23_include_bypass::{
+use g3rs_code_source_checks_assertions::rs_code_ast_23_include_bypass::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn reports_plain_include_bypass() {
-    let results = check_source("src/lib.rs", "include!(\"../generated.rs\");", false);
+    let results = super::super::check_source("src/lib.rs", "include!(\"../generated.rs\");", false);
 
     assert_rule_results(
         &results,
@@ -23,7 +22,7 @@ fn reports_plain_include_bypass() {
 #[test]
 fn inventories_build_script_include_pattern() {
     let content = "include!(concat!(env!(\"OUT_DIR\"), \"/generated.rs\"));";
-    let results = check_source("src/lib.rs", content, false);
+    let results = super::super::check_source("src/lib.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -46,7 +45,7 @@ fn warns_on_include_path_traversal_cases() {
     let bytes = "const BYTES: &[u8] = include_bytes!(\"../fixtures/payload.bin\");";
 
     assert_rule_results(
-        &check_source("src/lib.rs", build_script, false),
+        &super::super::check_source("src/lib.rs", build_script, false),
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Warn),
             title: Some("include path traversal"),
@@ -58,7 +57,7 @@ fn warns_on_include_path_traversal_cases() {
     );
 
     assert_rule_results(
-        &check_source("src/lib.rs", bytes, false),
+        &super::super::check_source("src/lib.rs", bytes, false),
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Warn),
             title: Some("include path traversal"),

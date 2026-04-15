@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_18_always_true_cfg_attr_bypass::assert_rule_results;
+use g3rs_code_source_checks_assertions::rs_code_ast_18_always_true_cfg_attr_bypass::rule::assert_rule_results;
 
 #[test]
 fn skips_genuinely_conditional_cfg_attr_forms() {
@@ -11,5 +10,5 @@ fn test_only_probe() {}
 fn feature_probe() {}
 "#;
 
-    assert_rule_results(&check_source("src/foo.rs", content, false), &[]);
+    assert_rule_results(&super::super::check_source("src/foo.rs", content, false), &[]);
 }

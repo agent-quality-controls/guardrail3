@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_20_extern_allow::assert_rule_results;
+use g3rs_code_source_checks_assertions::rs_code_ast_20_extern_allow::rule::assert_rule_results;
 
 #[test]
 fn ignores_non_covering_allow_attributes() {
@@ -16,5 +15,5 @@ extern "C" {
 }
 "#;
 
-    assert_rule_results(&check_source("src/ffi.rs", content, false), &[]);
+    assert_rule_results(&super::super::check_source("src/ffi.rs", content, false), &[]);
 }

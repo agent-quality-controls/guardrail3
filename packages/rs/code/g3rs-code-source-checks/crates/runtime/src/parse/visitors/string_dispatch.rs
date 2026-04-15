@@ -4,7 +4,7 @@ use syn::visit::Visit;
 
 use super::super::helpers::span_line;
 use super::super::types::StringDispatchInfo;
-use super::TestContextAware;
+use super::core::TestContextAware;
 
 pub(super) fn find_string_dispatch_sites(
     source: &syn::File,
