@@ -74,6 +74,28 @@ fn reports_test_without_shared_proof_step() {
 }
 
 #[test]
+fn ignores_local_setup_helper_when_test_has_no_proof() {
+    let results = run_input(input(
+        vec![file(
+            "src/feature_tests/missing.rs",
+            G3RsTestFileKind::InternalSidecarSupport,
+            Some("demo_assertions"),
+            "use super::helpers::git_init;\n#[test]\nfn missing() { git_init(); }\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-07",
+        G3Severity::Error,
+        "test has no shared proof step",
+        "src/feature_tests/missing.rs",
+        Some(3),
+    );
+}
+
+#[test]
 fn inventories_assertion_macro_proof() {
     let results = run_input(input(
         vec![file(
@@ -146,5 +168,33 @@ fn inventories_owned_assertions_proof_via_glob_import() {
         "RS-TEST-SOURCE-07",
         "test uses shared proof",
         "tests/glob.rs",
+    );
+}
+
+#[test]
+fn inventories_owned_assertions_wrapper_over_other_assertions_crate() {
+    let results = run_input(input(
+        vec![
+            file(
+                "assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo_assertions"),
+                "use other_assertions::assert_demo;\npub fn prove() { assert_demo(); }\n",
+            ),
+            file(
+                "tests/wrapper.rs",
+                G3RsTestFileKind::ExternalHarness,
+                Some("demo_assertions"),
+                "use demo_assertions::prove;\n#[test]\nfn wrapper() { prove(); }\n",
+            ),
+        ],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_inventory(
+        &results,
+        "RS-TEST-SOURCE-07",
+        "test uses shared proof",
+        "tests/wrapper.rs",
     );
 }

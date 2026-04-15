@@ -37,8 +37,11 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
 
     if let Some(local_path) = local_proof_path(
         input.function,
+        &input.parsed.functions,
         &input.parsed.imports,
         &input.parsed.file_function_names,
+        input.file.assertions_package_name.as_deref(),
+        input.proof_bearing_assertion_functions,
     ) {
         results.push(G3CheckResult::new(
             ID.to_owned(),
@@ -72,9 +75,19 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
 
 fn local_proof_path(
     function: &TestFunctionInfo,
+    functions: &[crate::parse::FunctionInfo],
     imports: &[UseBinding],
     file_function_names: &BTreeSet<String>,
+    assertions_package_name: Option<&str>,
+    proof_bearing_assertion_functions: Option<&BTreeSet<String>>,
 ) -> Option<String> {
+    let local_assertion_helpers = local_assertion_helper_names(
+        functions,
+        imports,
+        file_function_names,
+        assertions_package_name,
+        proof_bearing_assertion_functions,
+    );
     let mut local_imports = BTreeMap::new();
     for binding in imports {
         let Some(first) = binding.path_segments.first() else {
@@ -92,57 +105,157 @@ fn local_proof_path(
         }
     }
 
-    first_local_path(
+    first_local_assertion_path(
         &function.call_paths,
         &function.local_call_aliases,
         &function.shadowed_idents,
         file_function_names,
         &local_imports,
+        &local_assertion_helpers,
     )
     .or_else(|| {
-        first_local_path(
-            &function.method_receiver_paths,
-            &function.local_call_aliases,
-            &function.shadowed_idents,
-            file_function_names,
-            &local_imports,
-        )
+        function
+            .method_names
+            .iter()
+            .zip(function.method_receiver_paths.iter())
+            .find(|(method, receiver)| {
+                local_assertion_helpers.contains(method.as_str())
+                    && receiver
+                        .first()
+                        .is_some_and(|name| function.shadowed_idents.contains(name))
+            })
+            .map(|(method, receiver)| format!("{}::{method}", receiver.join("::")))
     })
 }
 
-fn first_local_path(
+fn first_local_assertion_path(
     call_paths: &[Vec<String>],
     local_call_aliases: &BTreeMap<String, Vec<String>>,
     shadowed_idents: &BTreeSet<String>,
     file_function_names: &BTreeSet<String>,
     local_imports: &BTreeMap<String, String>,
+    local_assertion_helpers: &BTreeSet<&str>,
 ) -> Option<String> {
     for path in call_paths {
         let Some(first) = path.first() else {
             continue;
         };
         if matches!(first.as_str(), "crate" | "self" | "super") {
-            return Some(path.join("::"));
+            if path_uses_local_assertions_module(path)
+                || path
+                    .last()
+                    .is_some_and(|name| local_assertion_helpers.contains(name.as_str()))
+            {
+                return Some(path.join("::"));
+            }
+            continue;
         }
         if let Some(import_path) = local_imports.get(first) {
             if path.len() == 1 {
-                return Some(import_path.clone());
+                if local_assertion_helpers.contains(first.as_str())
+                    || import_path
+                        .split("::")
+                        .any(|segment| segment == "assertions")
+                {
+                    return Some(import_path.clone());
+                }
+                continue;
             }
-            return Some(format!("{import_path}::{}", path[1..].join("::")));
+            if import_path
+                .split("::")
+                .any(|segment| segment == "assertions")
+                || path[1..]
+                    .last()
+                    .is_some_and(|name| local_assertion_helpers.contains(name.as_str()))
+            {
+                return Some(format!("{import_path}::{}", path[1..].join("::")));
+            }
+            continue;
         }
-        if path.len() == 1 && !shadowed_idents.contains(first) && file_function_names.contains(first) {
+        if path.len() == 1
+            && !shadowed_idents.contains(first)
+            && file_function_names.contains(first)
+            && local_assertion_helpers.contains(first.as_str())
+        {
             return Some(format!("local function `{first}`"));
         }
         if let Some(alias_path) = local_call_aliases.get(first) {
-            if alias_path
-                .first()
-                .is_some_and(|segment| matches!(segment.as_str(), "crate" | "self" | "super"))
+            if path_uses_local_assertions_module(alias_path)
+                || alias_path
+                    .last()
+                    .is_some_and(|name| local_assertion_helpers.contains(name.as_str()))
             {
                 return Some(alias_path.join("::"));
             }
         }
     }
     None
+}
+
+fn path_uses_local_assertions_module(path: &[String]) -> bool {
+    path.iter().any(|segment| segment == "assertions")
+}
+
+fn local_assertion_helper_names<'a>(
+    functions: &'a [crate::parse::FunctionInfo],
+    imports: &[UseBinding],
+    file_function_names: &BTreeSet<String>,
+    assertions_package_name: Option<&str>,
+    proof_bearing_assertion_functions: Option<&BTreeSet<String>>,
+) -> BTreeSet<&'a str> {
+    let mut assertion_helpers = functions
+        .iter()
+        .filter(|function| !function.is_test)
+        .filter(|function| {
+            function.has_assertion_macro
+                || has_owned_assertion_proof(
+                    &crate::parse::TestFunctionInfo {
+                        line: function.line,
+                        name: function.name.clone(),
+                        uses_tokio_test_attr: false,
+                        has_assertion_macro: function.has_assertion_macro,
+                        has_failure_enforcement: function.has_failure_enforcement,
+                        call_paths: function.call_paths.clone(),
+                        path_uses: function.path_uses.clone(),
+                        method_receiver_paths: Vec::new(),
+                        method_names: function.method_names.clone(),
+                        local_call_aliases: function.local_call_aliases.clone(),
+                        field_accesses: function.field_accesses.clone(),
+                        shadowed_idents: function.shadowed_idents.clone(),
+                        should_panic_line: None,
+                        should_panic_has_expected: false,
+                        tautological_assert_lines: Vec::new(),
+                        weak_matches_lines: Vec::new(),
+                    },
+                    imports,
+                    file_function_names,
+                    assertions_package_name,
+                    proof_bearing_assertion_functions,
+                )
+        })
+        .map(|function| function.name.as_str())
+        .collect::<BTreeSet<_>>();
+
+    loop {
+        let mut changed = false;
+        for function in functions.iter().filter(|function| !function.is_test) {
+            if assertion_helpers.contains(function.name.as_str()) {
+                continue;
+            }
+            if function.call_paths.iter().any(|path| {
+                path.len() == 1
+                    && assertion_helpers.contains(path[0].as_str())
+                    && !function.shadowed_idents.contains(&path[0])
+            }) {
+                changed |= assertion_helpers.insert(function.name.as_str());
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    assertion_helpers
 }
 
 pub(crate) fn has_owned_assertion_proof(

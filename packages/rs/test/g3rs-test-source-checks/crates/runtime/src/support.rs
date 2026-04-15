@@ -245,8 +245,24 @@ fn exported_assertion_function_calls_proof(
     ]);
     let mut bare_imported_proofs = BTreeMap::new();
     let mut glob_prefixes = Vec::new();
+    let mut external_assertions_aliases = BTreeSet::new();
+    let mut external_assertions_glob = false;
 
     for binding in imports {
+        if binding
+            .path_segments
+            .first()
+            .is_some_and(|segment| segment.ends_with("_assertions"))
+        {
+            if let Some(local_name) = binding.local_name.as_ref() {
+                let _ = external_assertions_aliases.insert(local_name.clone());
+            } else if let Some(last) = binding.path_segments.last() {
+                let _ = external_assertions_aliases.insert(last.clone());
+            } else {
+                external_assertions_glob = true;
+            }
+            continue;
+        }
         if !binding
             .path_segments
             .first()
@@ -282,18 +298,25 @@ fn exported_assertion_function_calls_proof(
                         || (file_function_names.contains(name)
                             && proof_bearing_names
                                 .contains(&qualified_assertion_name(module_prefix, name)))
+                        || external_assertions_aliases.contains(name)
                         || (!file_function_names.contains(name)
                             && (bare_imported_proofs
                                 .get(name)
                                 .is_some_and(|qualified| proof_bearing_names.contains(qualified))
+                                || (external_assertions_glob
+                                    && !function.shadowed_idents.contains(name))
                                 || glob_prefixes.iter().any(|prefix| {
                                     proof_bearing_names
                                         .contains(&qualified_assertion_name(prefix, name))
                                 }))))
             }
-            [first, rest @ ..] => root_prefixes.get(first).is_some_and(|prefix| {
-                proof_bearing_names.contains(&qualified_assertion_name(prefix, &rest.join("::")))
-            }),
+            [first, rest @ ..] => {
+                (first.ends_with("_assertions") || external_assertions_aliases.contains(first))
+                    || root_prefixes.get(first).is_some_and(|prefix| {
+                        proof_bearing_names
+                            .contains(&qualified_assertion_name(prefix, &rest.join("::")))
+                    })
+            }
             _ => false,
         })
 }

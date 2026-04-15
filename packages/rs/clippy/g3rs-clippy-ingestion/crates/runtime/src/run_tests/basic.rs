@@ -1,29 +1,7 @@
-use std::fs;
-use std::path::Path;
-use std::process::Command;
-
 use g3rs_clippy_types::{G3RsClippyConfigState, G3RsClippyRustPolicyState};
 use tempfile::tempdir;
 
-fn git_init(path: &Path) {
-    let _status = Command::new("git")
-        .args(["init", "--quiet"])
-        .current_dir(path)
-        .status()
-        .expect("git init should succeed in test fixture setup");
-}
-
-fn write(path: impl AsRef<Path>, content: &str) {
-    if let Some(parent) = path.as_ref().parent() {
-        fs::create_dir_all(parent)
-            .expect("should create parent directories for test fixture files");
-    }
-    fs::write(path, content).expect("should write test fixture file to disk");
-}
-
-fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
-}
+use super::helpers::{crawl, git_init, write};
 
 fn typed_msrv(input: &g3rs_clippy_types::G3RsClippyConfigChecksInput) -> Option<&str> {
     match &input.clippy {
@@ -45,7 +23,7 @@ fn ingests_clippy_toml() {
     write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid clippy.toml");
     assert_eq!(
@@ -68,7 +46,7 @@ fn ingests_dot_clippy_toml() {
     write(root.join(".clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid .clippy.toml");
     assert_eq!(
@@ -92,7 +70,7 @@ fn prefers_dot_clippy_toml_over_plain_variant() {
     write(root.join(".clippy.toml"), "msrv = \"1.80\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed when both clippy config variants exist");
     assert_eq!(
@@ -118,7 +96,7 @@ fn keeps_raw_parseable_but_typed_invalid_clippy_for_config_checks() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect(
         "config ingestion should preserve raw-parseable clippy.toml for parseability and section-shape checks instead of aborting on typed parse failure",
@@ -146,7 +124,7 @@ fn filetree_ingestion_is_not_a_stub_when_root_configs_exist() {
     write(root.join(".clippy.toml"), "msrv = \"1.80\"\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect(
+    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect(
         "filetree ingestion should build real root coverage and same-root conflict facts instead of returning a stub error",
     );
     assert_eq!(
@@ -168,12 +146,12 @@ fn fails_when_clippy_toml_is_missing() {
     git_init(root);
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     assert!(
         matches!(
             result,
-            Err(crate::IngestionError::ClippyTomlNotFound)
+            Err(crate::run::IngestionError::ClippyTomlNotFound)
         ),
         "ingestion should return ClippyTomlNotFound when no clippy config exists in the workspace"
     );
@@ -188,7 +166,7 @@ fn keeps_raw_parse_error_state_for_malformed_clippy_toml() {
     write(root.join("clippy.toml"), "{{{{not valid toml at all}}}}");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should preserve malformed clippy.toml state");
     assert!(
@@ -209,7 +187,7 @@ fn keeps_typed_parse_error_state_for_unknown_fields() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should preserve typed parse errors for unknown fields");
     assert!(
@@ -233,7 +211,7 @@ fn keeps_typed_parse_error_state_for_wrong_value_type() {
     write(root.join("clippy.toml"), "msrv = 42\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should preserve typed parse errors for wrong value types");
     assert!(
@@ -257,7 +235,7 @@ fn empty_clippy_toml_parses_to_defaults() {
     write(root.join("clippy.toml"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for an empty clippy.toml");
     assert_eq!(
@@ -282,12 +260,12 @@ fn nested_clippy_toml_is_not_selected() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     assert!(
         matches!(
             result,
-            Err(crate::IngestionError::ClippyTomlNotFound)
+            Err(crate::run::IngestionError::ClippyTomlNotFound)
         ),
         "ingestion should not select a clippy.toml in a subdirectory, only at the workspace root"
     );
@@ -304,7 +282,7 @@ fn malformed_root_cargo_toml_does_not_abort_clippy_config_ingestion() {
     write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl)
+    let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("malformed root Cargo.toml should disable published-library policy, not abort clippy ingestion");
 
     assert!(!input.published_library_policy, "{input:#?}");
@@ -331,7 +309,7 @@ edition = "2024"
     write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl)
+    let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("valid guardrail3-rs.toml should drive clippy library policy");
 
     assert!(input.published_library_policy, "{input:#?}");
@@ -358,7 +336,7 @@ edition = "2024"
     write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl)
+    let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("legacy guardrail3.toml should no longer drive clippy policy");
 
     assert!(!input.published_library_policy, "{input:#?}");
@@ -374,7 +352,7 @@ fn surfaces_guardrail3_rs_parse_errors_in_policy_state() {
     write(root.join("guardrail3-rs.toml"), "profile = 7\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl)
+    let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("invalid guardrail3-rs.toml should be preserved in clippy policy state");
 
     match input.rust_policy {
@@ -413,7 +391,7 @@ publish = { workspace = true }
     write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl)
+    let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("workspace-inherited publishability should not abort clippy ingestion");
 
     assert!(!input.published_library_policy, "{input:#?}");
@@ -447,7 +425,7 @@ publish = { workspace = true }
     write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl)
+    let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("workspace-inherited publishability should not abort clippy ingestion");
 
     assert!(input.published_library_policy, "{input:#?}");
@@ -463,7 +441,7 @@ fn ignored_but_recovered_clippy_toml_is_ingested() {
     write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect(
         "ingestion should succeed for a gitignored clippy.toml recovered by the crawl recovery phase",

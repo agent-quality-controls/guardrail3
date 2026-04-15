@@ -1,22 +1,14 @@
 use std::path::PathBuf;
 
-/// Ingestion failure for clippy.
 #[derive(Debug)]
 pub enum G3RsClippyIngestionError {
-    /// No `clippy.toml` or `.clippy.toml` found at the workspace root.
     ClippyTomlNotFound,
-    /// The clippy config exists but cannot be read.
     Unreadable {
-        /// Absolute path to the unreadable file.
         path: PathBuf,
-        /// The underlying IO error message.
         reason: String,
     },
-    /// The clippy config content could not be parsed.
     ParseFailed {
-        /// Absolute path to the file that failed to parse.
         path: PathBuf,
-        /// The underlying parse error message.
         reason: String,
     },
 }

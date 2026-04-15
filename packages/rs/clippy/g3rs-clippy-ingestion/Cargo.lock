@@ -147,11 +147,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-clippy-config-checks-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-config-checks-runtime",
+ "guardrail3-check-types",
+]
+
+[[package]]
 name = "g3rs-clippy-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "clippy-toml-parser",
- "g3rs-clippy-config-checks-types",
+ "g3rs-clippy-types",
  "guardrail3-check-types",
  "guardrail3-rs-toml-parser",
  "toml",
@@ -170,6 +178,14 @@ version = "0.1.0"
 dependencies = [
  "g3rs-clippy-filetree-checks-runtime",
  "g3rs-clippy-filetree-checks-types",
+]
+
+[[package]]
+name = "g3rs-clippy-filetree-checks-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-filetree-checks-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -192,14 +208,16 @@ name = "g3rs-clippy-ingestion"
 version = "0.1.0"
 dependencies = [
  "g3rs-clippy-ingestion-runtime",
- "g3rs-clippy-ingestion-types",
 ]
 
 [[package]]
 name = "g3rs-clippy-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-clippy-ingestion-types",
+ "g3rs-clippy-config-checks-assertions",
+ "g3rs-clippy-filetree-checks-assertions",
+ "g3rs-clippy-ingestion-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -211,7 +229,6 @@ dependencies = [
  "g3rs-clippy-config-checks",
  "g3rs-clippy-filetree-checks",
  "g3rs-clippy-ingestion-assertions",
- "g3rs-clippy-ingestion-types",
  "g3rs-clippy-types",
  "g3rs-workspace-crawl",
  "glob",
@@ -219,10 +236,6 @@ dependencies = [
  "tempfile",
  "toml",
 ]
-
-[[package]]
-name = "g3rs-clippy-ingestion-types"
-version = "0.1.0"
 
 [[package]]
 name = "g3rs-clippy-types"
