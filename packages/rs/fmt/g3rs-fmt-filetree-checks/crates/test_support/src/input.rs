@@ -1,8 +1,8 @@
-use g3rs_fmt_filetree_checks_types::{
+use g3rs_fmt_types::{
     G3RsFmtConfigFileKind, G3RsFmtFileTreeChecksInput, G3RsFmtNestedConfigFile,
 };
 
-pub(crate) fn input(
+pub fn input(
     root_rustfmt_toml_rel_path: Option<&str>,
     root_dot_rustfmt_toml_rel_path: Option<&str>,
     nested_config_files: Vec<(&str, G3RsFmtConfigFileKind)>,

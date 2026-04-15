@@ -1,15 +1,15 @@
-use g3rs_fmt_filetree_checks_assertions::rs_fmt_filetree_08_dual_file_conflict as assertions;
-
-use crate::test_support::input;
+use g3rs_fmt_filetree_checks_assertions::rs_fmt_filetree_08_dual_file_conflict::rule as assertions;
+use test_support::input;
 
 #[test]
 fn warns_for_root_dual_file_conflict() {
-    let results = crate::check(&input(
+    let mut results = Vec::new();
+    super::super::rule::check(&input(
         Some("rustfmt.toml"),
         Some(".rustfmt.toml"),
         Vec::new(),
         vec![""],
-    ));
+    ), &mut results);
 
     assertions::assert_findings(
         &results,
@@ -24,12 +24,13 @@ fn warns_for_root_dual_file_conflict() {
 
 #[test]
 fn warns_for_nested_dual_file_conflict() {
-    let results = crate::check(&input(
+    let mut results = Vec::new();
+    super::super::rule::check(&input(
         Some("rustfmt.toml"),
         None,
         Vec::new(),
         vec!["crates/api"],
-    ));
+    ), &mut results);
 
     assertions::assert_findings(
         &results,

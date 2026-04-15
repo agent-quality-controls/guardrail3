@@ -8,3 +8,5 @@ pub mod rs_fmt_filetree_01_exists;
 pub mod rs_fmt_filetree_05_per_crate_override;
 #[cfg(feature = "checks")]
 pub mod rs_fmt_filetree_08_dual_file_conflict;
+#[cfg(feature = "checks")]
+pub mod run;

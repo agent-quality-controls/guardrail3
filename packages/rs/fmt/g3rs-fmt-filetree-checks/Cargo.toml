@@ -8,20 +8,21 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["guardrail3", "fmt", "checks", "rust", "filetree"]
 categories = ["development-tools"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
 g3rs-fmt-filetree-checks-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
-g3rs-fmt-filetree-checks-types = { path = "crates/types", version = "0.1.0", optional = true }
+g3rs-fmt-types = { path = "../g3rs-fmt-types", version = "0.1.0", optional = true }
 
 [features]
 default = ["all"]
 all = ["api"]
-types = ["dep:g3rs-fmt-filetree-checks-types"]
-runtime = ["dep:g3rs-fmt-filetree-checks-runtime"]
-api = ["types", "runtime"]
+api = [
+    "dep:g3rs-fmt-filetree-checks-runtime",
+    "dep:g3rs-fmt-types",
+]
 
 [package.metadata.guardrail3]
 shared = true
@@ -33,7 +34,7 @@ all-features = true
 members = [
     "crates/assertions",
     "crates/runtime",
-    "crates/types",
+    "crates/test_support",
 ]
 resolver = "2"
 
