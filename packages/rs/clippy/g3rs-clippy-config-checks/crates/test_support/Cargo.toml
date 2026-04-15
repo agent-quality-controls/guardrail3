@@ -1,0 +1,33 @@
+[package]
+name = "test_support"
+version = "0.1.0"
+edition = "2024"
+description = "Generic test input builders for g3 clippy config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "clippy", "checks", "test-support"]
+categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["support"]
+support = []
+
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
+guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
+g3rs-clippy-types = { path = "../../../g3rs-clippy-types", version = "0.1.0" }
+toml = "0.8"

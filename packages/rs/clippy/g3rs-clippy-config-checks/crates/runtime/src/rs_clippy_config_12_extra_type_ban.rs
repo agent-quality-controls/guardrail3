@@ -3,7 +3,10 @@ use std::collections::BTreeSet;
 use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{expected_type_bans, garde_enabled, parse_ban_section, raw_clippy, rust_policy_valid, rust_profile};
+use crate::support::{
+    expected_type_bans, garde_enabled, parse_ban_section, raw_clippy, rust_policy_valid,
+    rust_profile,
+};
 
 const ID: &str = "RS-CLIPPY-CONFIG-12";
 
@@ -29,8 +32,9 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         ));
     }
 
-    let expected: BTreeSet<_> =
-        expected_type_bans(rust_profile(input), garde_enabled(input)).into_iter().collect();
+    let expected: BTreeSet<_> = expected_type_bans(rust_profile(input), garde_enabled(input))
+        .into_iter()
+        .collect();
     let mut extra_count = 0usize;
     for found in section.entries.into_iter().map(|entry| entry.path) {
         if !expected.contains(found.as_str()) {

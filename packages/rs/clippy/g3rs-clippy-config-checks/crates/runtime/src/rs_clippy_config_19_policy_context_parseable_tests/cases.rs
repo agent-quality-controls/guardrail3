@@ -1,6 +1,7 @@
 use crate::rs_clippy_config_19_policy_context_parseable::check;
-use crate::test_support::{findings, input_with_raw, parse_error_rust_policy, parsed_rust_policy};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_19_policy_context_parseable as assertions;
 use guardrail3_rs_toml_parser::RustProfile;
+use test_support::{input_with_raw, parse_error_rust_policy, parsed_rust_policy};
 
 #[test]
 fn reports_policy_context_parse_errors() {
@@ -15,15 +16,13 @@ fn reports_policy_context_parse_errors() {
     check(&input, &mut results);
 
     assert_eq!(
-        findings(&results),
-        vec![crate::test_support::Finding {
-            id: "RS-CLIPPY-CONFIG-19".to_owned(),
-            severity: guardrail3_check_types::G3Severity::Error,
-            title: "clippy rust policy is not parseable".to_owned(),
-            message: "Failed to parse active `guardrail3-rs.toml` used for clippy profile and garde policy: bad profile".to_owned(),
-            file: Some("guardrail3-rs.toml".to_owned()),
-            inventory: false,
-        }]
+        assertions::findings(&results),
+        vec![assertions::error(
+            "clippy rust policy is not parseable",
+            "Failed to parse active `guardrail3-rs.toml` used for clippy profile and garde policy: bad profile",
+            "guardrail3-rs.toml",
+            false,
+        )]
     );
 }
 
@@ -39,9 +38,13 @@ fn inventories_parseable_policy_context() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(
-        findings(&results).iter().any(|finding| {
-            finding.title == "clippy rust policy parseable" && finding.inventory
-        })
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "clippy rust policy parseable",
+            "Active `guardrail3-rs.toml` parsed successfully for clippy policy context.",
+            "guardrail3-rs.toml",
+            true,
+        )],
     );
 }

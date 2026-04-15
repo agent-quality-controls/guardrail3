@@ -33,6 +33,7 @@ all-features = true
 members = [
     "crates/assertions",
     "crates/runtime",
+    "crates/test_support",
     "crates/types",
 ]
 resolver = "2"

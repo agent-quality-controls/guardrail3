@@ -2,8 +2,8 @@ use clippy_toml_parser::ClippyToml;
 use g3rs_clippy_types::{
     G3RsClippyConfigChecksInput, G3RsClippyConfigState, G3RsClippyRustPolicyState,
 };
-use guardrail3_rs_toml_parser::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
+use guardrail3_rs_toml_parser::RustProfile;
 
 #[derive(Debug)]
 pub(crate) struct ThresholdExpectation {
@@ -183,15 +183,15 @@ pub(crate) fn typed_clippy(input: &G3RsClippyConfigChecksInput) -> Option<&Clipp
 pub(crate) fn raw_clippy(input: &G3RsClippyConfigChecksInput) -> Option<&toml::Value> {
     match &input.clippy {
         G3RsClippyConfigState::Parsed { raw, .. } => Some(raw),
-        G3RsClippyConfigState::Unreadable { .. } | G3RsClippyConfigState::ParseError { .. } => {
-            None
-        }
+        G3RsClippyConfigState::Unreadable { .. } | G3RsClippyConfigState::ParseError { .. } => None,
     }
 }
 
 pub(crate) fn typed_parse_error(input: &G3RsClippyConfigChecksInput) -> Option<&str> {
     match &input.clippy {
-        G3RsClippyConfigState::Parsed { typed: Err(reason), .. } => Some(reason),
+        G3RsClippyConfigState::Parsed {
+            typed: Err(reason), ..
+        } => Some(reason),
         G3RsClippyConfigState::Unreadable { .. }
         | G3RsClippyConfigState::ParseError { .. }
         | G3RsClippyConfigState::Parsed { typed: Ok(_), .. } => None,
@@ -231,17 +231,11 @@ pub(crate) fn garde_enabled(input: &G3RsClippyConfigChecksInput) -> bool {
     }
 }
 
-pub(crate) fn rust_policy_failure(
-    input: &G3RsClippyConfigChecksInput,
-) -> Option<(&str, &str)> {
+pub(crate) fn rust_policy_failure(input: &G3RsClippyConfigChecksInput) -> Option<(&str, &str)> {
     match &input.rust_policy {
         G3RsClippyRustPolicyState::Unreadable { rel_path, reason }
-        | G3RsClippyRustPolicyState::ParseError { rel_path, reason } => {
-            Some((rel_path, reason))
-        }
-        G3RsClippyRustPolicyState::Missing | G3RsClippyRustPolicyState::Parsed { .. } => {
-            None
-        }
+        | G3RsClippyRustPolicyState::ParseError { rel_path, reason } => Some((rel_path, reason)),
+        G3RsClippyRustPolicyState::Missing | G3RsClippyRustPolicyState::Parsed { .. } => None,
     }
 }
 
@@ -418,7 +412,10 @@ pub(crate) fn managed_non_threshold_keys() -> Vec<&'static str> {
 }
 
 pub(crate) fn known_top_level_keys() -> Vec<&'static str> {
-    THRESHOLD_EXPECTATIONS.iter().map(|expectation| expectation.key).collect()
+    THRESHOLD_EXPECTATIONS
+        .iter()
+        .map(|expectation| expectation.key)
+        .collect()
 }
 
 pub(crate) fn normalized_key_distance(a: &str, b: &str) -> usize {

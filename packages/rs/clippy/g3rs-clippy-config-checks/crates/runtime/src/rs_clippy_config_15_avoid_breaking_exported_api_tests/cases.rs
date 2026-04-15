@@ -1,6 +1,7 @@
 use crate::rs_clippy_config_15_avoid_breaking_exported_api::check;
-use crate::test_support::{findings, input_with_raw, parsed_rust_policy};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_15_avoid_breaking_exported_api as assertions;
 use guardrail3_rs_toml_parser::RustProfile;
+use test_support::{input_with_raw, parsed_rust_policy};
 
 #[test]
 fn warns_when_enabled_for_non_library_policy() {
@@ -15,17 +16,13 @@ fn warns_when_enabled_for_non_library_policy() {
     check(&input, &mut results);
 
     assert_eq!(
-        findings(&results),
-        vec![crate::test_support::Finding {
-            id: "RS-CLIPPY-CONFIG-15".to_owned(),
-            severity: guardrail3_check_types::G3Severity::Warn,
-            title: "avoid-breaking-exported-api enabled".to_owned(),
-            message:
-                "`avoid-breaking-exported-api = true` suppresses useful lints. Prefer `false`."
-                    .to_owned(),
-            file: Some("clippy.toml".to_owned()),
-            inventory: false,
-        }]
+        assertions::findings(&results),
+        vec![assertions::warn(
+            "avoid-breaking-exported-api enabled",
+            "`avoid-breaking-exported-api = true` suppresses useful lints. Prefer `false`.",
+            "clippy.toml",
+            false,
+        )]
     );
 }
 
@@ -41,9 +38,15 @@ fn inventories_enabled_setting_for_published_library_policy() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "library keeps avoid-breaking-exported-api enabled" && finding.inventory
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "library keeps avoid-breaking-exported-api enabled",
+            "Published library profile may legitimately keep `avoid-breaking-exported-api = true`.",
+            "clippy.toml",
+            true,
+        )],
+    );
 }
 
 #[test]
@@ -58,9 +61,15 @@ fn inventories_explicit_false_setting() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "avoid-breaking-exported-api explicitly false" && finding.inventory
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "avoid-breaking-exported-api explicitly false",
+            "`avoid-breaking-exported-api = false` is set.",
+            "clippy.toml",
+            true,
+        )],
+    );
 }
 
 #[test]
@@ -75,10 +84,15 @@ fn warns_when_setting_is_missing() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "avoid-breaking-exported-api not set"
-            && finding.severity == guardrail3_check_types::G3Severity::Warn
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "avoid-breaking-exported-api not set",
+            "Set `avoid-breaking-exported-api = false` explicitly unless this is a published library.",
+            "clippy.toml",
+            false,
+        )],
+    );
 }
 
 #[test]
@@ -93,8 +107,13 @@ fn warns_when_setting_has_wrong_type() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "avoid-breaking-exported-api wrong type"
-            && finding.message.contains("integer")
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "avoid-breaking-exported-api wrong type",
+            "`avoid-breaking-exported-api` must be a bool, found integer.",
+            "clippy.toml",
+            false,
+        )],
+    );
 }

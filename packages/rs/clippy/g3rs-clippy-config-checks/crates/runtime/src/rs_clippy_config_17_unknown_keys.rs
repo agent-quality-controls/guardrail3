@@ -3,7 +3,9 @@ use std::collections::BTreeSet;
 use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{known_top_level_keys, managed_non_threshold_keys, normalized_key_distance, raw_clippy};
+use crate::support::{
+    known_top_level_keys, managed_non_threshold_keys, normalized_key_distance, raw_clippy,
+};
 
 const ID: &str = "RS-CLIPPY-CONFIG-17";
 

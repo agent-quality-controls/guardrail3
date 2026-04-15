@@ -1,6 +1,6 @@
 use crate::rs_clippy_config_18_macro_bans::check;
-use crate::support::EXPECTED_MACRO_BANS;
-use crate::test_support::{findings, input_from_raw};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_18_macro_bans as assertions;
+use test_support::input_from_raw;
 
 #[test]
 fn reports_missing_macro_bans() {
@@ -8,9 +8,7 @@ fn reports_missing_macro_bans() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "missing macro ban" && finding.message.contains("println!")
-    }));
+    assertions::assert_contains_missing_macro_ban(&results, "println!");
 }
 
 #[test]
@@ -19,10 +17,7 @@ fn reports_malformed_macro_sections() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "disallowed-macros section malformed"
-            && finding.message.contains("disallowed-macros[0]")
-    }));
+    assertions::assert_contains_malformed_macro_section(&results, "disallowed-macros[0]");
 }
 
 #[test]
@@ -42,10 +37,5 @@ disallowed-macros = [
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    let findings = findings(&results);
-    let present = findings
-        .iter()
-        .filter(|finding| finding.title == "macro ban present")
-        .count();
-    assert_eq!(present, EXPECTED_MACRO_BANS.len(), "{findings:#?}");
+    assertions::assert_macro_ban_present_count(&results, 5);
 }

@@ -1,5 +1,4 @@
-use super::assertions;
-
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_05_excessive_nesting_threshold::rule as assertions;
 use super::helpers::run_check;
 
 #[test]

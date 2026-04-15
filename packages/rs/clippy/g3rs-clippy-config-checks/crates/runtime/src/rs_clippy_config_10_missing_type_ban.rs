@@ -29,7 +29,11 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         ));
     }
 
-    let found: BTreeSet<_> = section.entries.into_iter().map(|entry| entry.path).collect();
+    let found: BTreeSet<_> = section
+        .entries
+        .into_iter()
+        .map(|entry| entry.path)
+        .collect();
     for expected in expected_required_type_bans(garde_enabled(input)) {
         if found.contains(expected) {
             results.push(

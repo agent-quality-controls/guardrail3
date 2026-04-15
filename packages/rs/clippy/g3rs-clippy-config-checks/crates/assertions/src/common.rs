@@ -153,35 +153,3 @@ macro_rules! define_result_assertions {
         }
     };
 }
-
-#[cfg(test)]
-mod tests {
-    use guardrail3_check_types::G3CheckResult;
-
-    use super::*;
-
-    #[test]
-    fn opaque_finding_still_supports_helper_api() {
-        let results = vec![
-            G3CheckResult::new(
-                "RS-CLIPPY-CONFIG-01".to_owned(),
-                G3Severity::Info,
-                "golden".to_owned(),
-                "matches baseline".to_owned(),
-                Some("clippy.toml".to_owned()),
-                None,
-            )
-            .into_inventory(),
-        ];
-
-        crate::rs_clippy_config_01_max_struct_bools::assert_findings(
-            &results,
-            &[crate::rs_clippy_config_01_max_struct_bools::info(
-                "golden",
-                "matches baseline",
-                "clippy.toml",
-                true,
-            )],
-        );
-    }
-}

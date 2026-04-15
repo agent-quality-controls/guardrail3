@@ -1,4 +1,6 @@
 mod common;
+#[cfg(feature = "checks")]
+use g3rs_clippy_config_checks_runtime as _;
 
 #[cfg(feature = "checks")]
 pub mod rs_clippy_config_01_max_struct_bools;
@@ -16,3 +18,29 @@ pub mod rs_clippy_config_06_test_relaxations;
 pub mod rs_clippy_config_07_cognitive_complexity_threshold;
 #[cfg(feature = "checks")]
 pub mod rs_clippy_config_08_type_complexity_threshold;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_09_missing_method_ban;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_10_missing_type_ban;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_11_extra_method_ban;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_12_extra_type_ban;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_13_ban_reason_quality;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_14_library_global_state;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_15_avoid_breaking_exported_api;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_16_duplicate_bans;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_17_unknown_keys;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_18_macro_bans;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_19_policy_context_parseable;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_20_forbid_clippy_conf_dir_override;
+#[cfg(feature = "checks")]
+pub mod rs_clippy_config_21_config_parseable;

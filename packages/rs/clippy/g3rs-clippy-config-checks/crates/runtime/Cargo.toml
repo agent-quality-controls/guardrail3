@@ -31,3 +31,5 @@ guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/
 toml = "0.8"
 
 [dev-dependencies]
+g3rs-clippy-config-checks-assertions = { path = "../assertions", version = "0.1.0" }
+test_support = { path = "../test_support", version = "0.1.0" }

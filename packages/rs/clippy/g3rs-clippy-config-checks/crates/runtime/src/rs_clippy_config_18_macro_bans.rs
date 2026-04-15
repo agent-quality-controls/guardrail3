@@ -24,7 +24,11 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         ));
     }
 
-    let found: BTreeSet<_> = section.entries.into_iter().map(|entry| entry.path).collect();
+    let found: BTreeSet<_> = section
+        .entries
+        .into_iter()
+        .map(|entry| entry.path)
+        .collect();
     for expected in EXPECTED_MACRO_BANS {
         if found.contains(*expected) {
             results.push(
