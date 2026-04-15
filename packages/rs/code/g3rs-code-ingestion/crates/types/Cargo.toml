@@ -9,6 +9,7 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "code", "ingestion", "rust"]
 categories = ["development-tools"]
+publish = false
 
 [features]
 default = ["all"]
@@ -17,9 +18,6 @@ api = []
 
 [lints]
 workspace = true
-
-[dependencies]
-g3rs-code-types = { path = "../../../g3rs-code-types", version = "0.1.0" }
 
 [package.metadata.guardrail3]
 shared = true

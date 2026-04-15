@@ -1,0 +1,24 @@
+profile = "library"
+
+allowed_deps = [
+  "cargo-toml-parser",
+  "clippy-toml-parser",
+  "deny-toml-parser",
+  "g3rs-code-config-checks",
+  "g3rs-code-file-tree-checks",
+  "g3rs-code-ingestion-assertions",
+  "g3rs-code-ingestion-runtime",
+  "g3rs-code-ingestion-types",
+  "g3rs-code-source-checks",
+  "g3rs-code-types",
+  "g3rs-workspace-crawl",
+  "glob",
+  "guardrail3-check-types",
+  "guardrail3-rs-toml-parser",
+  "rust-toolchain-toml-parser",
+  "rustfmt-toml-parser",
+  "tempfile",
+]
+
+[checks]
+garde = false
