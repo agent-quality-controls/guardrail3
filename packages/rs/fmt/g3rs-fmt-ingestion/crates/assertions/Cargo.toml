@@ -9,6 +9,7 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "fmt", "ingestion", "assertions"]
 categories = ["development-tools"]
+publish = false
 
 [lints]
 workspace = true
@@ -22,4 +23,5 @@ ingest = []
 shared = true
 
 [dependencies]
-g3rs-fmt-ingestion-types = { path = "../types" }
+g3rs-fmt-ingestion-runtime = { path = "../runtime", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }

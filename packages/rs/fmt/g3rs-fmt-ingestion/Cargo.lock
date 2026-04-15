@@ -128,7 +128,7 @@ name = "g3rs-fmt-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3rs-fmt-config-checks-types",
+ "g3rs-fmt-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
  "rustfmt-toml-parser",
@@ -147,22 +147,15 @@ name = "g3rs-fmt-filetree-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-fmt-filetree-checks-runtime",
- "g3rs-fmt-filetree-checks-types",
+ "g3rs-fmt-types",
 ]
 
 [[package]]
 name = "g3rs-fmt-filetree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-fmt-filetree-checks-types",
- "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-fmt-filetree-checks-types"
-version = "0.1.0"
-dependencies = [
  "g3rs-fmt-types",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -177,7 +170,8 @@ dependencies = [
 name = "g3rs-fmt-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-fmt-ingestion-types",
+ "g3rs-fmt-ingestion-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -192,6 +186,7 @@ dependencies = [
  "g3rs-fmt-types",
  "g3rs-workspace-crawl",
  "guardrail3-check-types",
+ "guardrail3-rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
  "tempfile",
@@ -265,6 +260,29 @@ version = "0.1.0"
 [[package]]
 name = "guardrail3-reason-policy"
 version = "0.0.0"
+
+[[package]]
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "hashbrown"

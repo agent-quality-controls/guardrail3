@@ -1,23 +1,7 @@
-use std::fs;
-use std::path::Path;
-use std::process::Command;
-
+use g3rs_fmt_ingestion_assertions::run as assertions;
 use tempfile::tempdir;
 
-fn git_init(path: &Path) {
-    let _ = Command::new("git")
-        .args(["init", "--quiet"])
-        .current_dir(path)
-        .status()
-        .expect("git init should succeed");
-}
-
-fn write(path: impl AsRef<Path>, content: &str) {
-    if let Some(parent) = path.as_ref().parent() {
-        fs::create_dir_all(parent).expect("create parent directory");
-    }
-    fs::write(path, content).expect("write fixture file");
-}
+use super::helpers::{git_init, write};
 
 #[test]
 fn pipeline_reports_nightly_rustfmt_keys_on_stable() {
@@ -39,15 +23,10 @@ fn pipeline_reports_nightly_rustfmt_keys_on_stable() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_fmt_config_checks::check(&input);
 
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id() == "RS-FMT-CONFIG-03"),
-        "{results:#?}"
-    );
+    assertions::assert_nightly_rustfmt_keys_on_stable(&results);
 }
 
 #[test]
@@ -66,19 +45,12 @@ fn pipeline_reports_nightly_key_blocker_when_toolchain_is_missing() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::ingest_for_config_checks(&crawl).expect(
+    let input = crate::run::ingest_for_config_checks(&crawl).expect(
         "ingestion should preserve missing toolchain for RS-FMT-CONFIG-03 blocker reporting",
     );
     let results = g3rs_fmt_config_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-FMT-CONFIG-03"
-                && result.title() == "rust-toolchain.toml missing"
-                && result.file() == Some("rust-toolchain.toml")
-        }),
-        "{results:#?}"
-    );
+    assertions::assert_nightly_key_blocker_when_toolchain_is_missing(&results);
 }
 
 #[test]
@@ -94,19 +66,12 @@ fn pipeline_reports_edition_blocker_when_cargo_is_missing() {
     write(root.join("rustfmt.toml"), "edition = \"2024\"\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::ingest_for_config_checks(&crawl).expect(
+    let input = crate::run::ingest_for_config_checks(&crawl).expect(
         "ingestion should preserve missing Cargo.toml for RS-FMT-CONFIG-04 blocker reporting",
     );
     let results = g3rs_fmt_config_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-FMT-CONFIG-04"
-                && result.title() == "Cargo.toml missing"
-                && result.file() == Some("Cargo.toml")
-        }),
-        "{results:#?}"
-    );
+    assertions::assert_edition_blocker_when_cargo_is_missing(&results);
 }
 
 #[test]
@@ -126,18 +91,11 @@ fn pipeline_reports_rustfmt_parse_error_via_config_rule() {
     write(root.join("rustfmt.toml"), "edition = [\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::ingest_for_config_checks(&crawl)
+    let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("ingestion should preserve rustfmt parse failures for RS-FMT-CONFIG-01");
     let results = g3rs_fmt_config_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-FMT-CONFIG-01"
-                && result.title() == "rustfmt config parse error"
-                && result.file() == Some("rustfmt.toml")
-        }),
-        "{results:#?}"
-    );
+    assertions::assert_rustfmt_parse_error(&results);
 }
 
 #[test]
@@ -165,17 +123,10 @@ fn pipeline_reports_rustfmt_ignore_waiver_from_guardrail3_rs_toml() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_fmt_config_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-FMT-CONFIG-07"
-                && result.title() == "rustfmt ignore waiver"
-                && result.file() == Some("rustfmt.toml")
-        }),
-        "{results:#?}"
-    );
+    assertions::assert_rustfmt_ignore_waiver(&results);
 }
 
 #[test]
@@ -198,24 +149,13 @@ fn pipeline_uses_root_dot_rustfmt_toml_for_config_checks() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
 
     assert_eq!(input.rustfmt_rel_path, ".rustfmt.toml");
 
     let results = g3rs_fmt_config_checks::check(&input);
 
-    assert_eq!(
-        results
-            .iter()
-            .filter(|result| result.id() == "RS-FMT-CONFIG-03")
-            .map(|result| (result.title().to_owned(), result.file().map(str::to_owned)))
-            .collect::<Vec<_>>(),
-        vec![(
-            "nightly-only rustfmt setting `group_imports` on stable".to_owned(),
-            Some(".rustfmt.toml".to_owned())
-        )],
-        "{results:#?}"
-    );
+    assertions::assert_root_dot_rustfmt_toml_for_config_checks(&results);
 }
 
 #[test]
@@ -235,32 +175,8 @@ fn pipeline_keeps_config_01_active_when_cargo_is_parse_error() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_fmt_config_checks::check(&input);
 
-    assert_eq!(
-        results
-            .iter()
-            .map(|result| {
-                (
-                    result.id().to_owned(),
-                    result.title().to_owned(),
-                    result.file().map(str::to_owned),
-                )
-            })
-            .collect::<Vec<_>>(),
-        vec![
-            (
-                "RS-FMT-CONFIG-01".to_owned(),
-                "rustfmt max_width wrong".to_owned(),
-                Some("rustfmt.toml".to_owned()),
-            ),
-            (
-                "RS-FMT-CONFIG-04".to_owned(),
-                "Cargo.toml parse error".to_owned(),
-                Some("Cargo.toml".to_owned()),
-            ),
-        ],
-        "{results:#?}"
-    );
+    assertions::assert_keeps_config_01_active_when_cargo_is_parse_error(&results);
 }
