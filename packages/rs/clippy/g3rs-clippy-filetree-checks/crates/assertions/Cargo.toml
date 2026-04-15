@@ -6,6 +6,7 @@ description = "Assertions for g3 clippy filetree checks tests"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
+publish = false
 
 [lints]
 workspace = true

@@ -1,15 +1,15 @@
-use g3rs_clippy_filetree_checks_assertions::rs_clippy_filetree_02_same_root_conflict::{
+use g3rs_clippy_filetree_checks_assertions::rs_clippy_filetree_02_same_root_conflict::rule::{
     assert_findings, error,
 };
-
-use crate::test_support::input;
+use test_support::input;
 
 #[test]
 fn errors_for_shadowed_plain_clippy_toml_when_dotfile_wins() {
-    let results = crate::check(&input(
-        Some(".clippy.toml"),
-        &[("clippy.toml", ".clippy.toml")],
-    ));
+    let mut results = Vec::new();
+    super::super::rule::check(
+        &input(Some(".clippy.toml"), &[("clippy.toml", ".clippy.toml")]),
+        &mut results,
+    );
 
     assert_findings(
         &results,
@@ -24,6 +24,10 @@ fn errors_for_shadowed_plain_clippy_toml_when_dotfile_wins() {
 
 #[test]
 fn stays_quiet_without_shadowed_same_root_configs() {
-    let results = crate::check(&input(Some(".clippy.toml"), &[]));
+    let mut results = Vec::new();
+    super::super::rule::check(
+        &input(Some(".clippy.toml"), &[]),
+        &mut results,
+    );
     assert_findings(&results, &[]);
 }
