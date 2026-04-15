@@ -45,7 +45,3 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
         ));
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;

@@ -5,10 +5,7 @@ use g3rs_cargo_types::{
 };
 use guardrail3_rs_toml_parser::RustProfile;
 
-pub(crate) fn root(
-    cargo_toml: &str,
-    rust_policy: G3RsCargoRustPolicyState,
-) -> G3RsCargoPolicyRoot {
+pub fn root(cargo_toml: &str, rust_policy: G3RsCargoRustPolicyState) -> G3RsCargoPolicyRoot {
     let cargo = parse_cargo_toml(cargo_toml).expect("cargo fixture should parse");
     let raw_cargo = toml::from_str::<toml::Value>(cargo_toml).expect("raw cargo fixture should parse");
     let kind = if raw_cargo.get("workspace").is_some() {
@@ -33,7 +30,7 @@ pub(crate) fn root(
     }
 }
 
-pub(crate) fn member(member_rel: &str, cargo_toml: &str) -> G3RsCargoWorkspaceMember {
+pub fn member(member_rel: &str, cargo_toml: &str) -> G3RsCargoWorkspaceMember {
     let raw_cargo = toml::from_str::<toml::Value>(cargo_toml).expect("member cargo fixture should parse");
     G3RsCargoWorkspaceMember {
         workspace_root_rel: String::new(),
@@ -66,12 +63,7 @@ pub(crate) fn member(member_rel: &str, cargo_toml: &str) -> G3RsCargoWorkspaceMe
     }
 }
 
-pub(crate) fn waiver(
-    rule: &str,
-    file: &str,
-    selector: &str,
-    reason: &str,
-) -> G3RsCargoWaiver {
+pub fn waiver(rule: &str, file: &str, selector: &str, reason: &str) -> G3RsCargoWaiver {
     G3RsCargoWaiver {
         rule: rule.to_owned(),
         file: file.to_owned(),
@@ -80,7 +72,7 @@ pub(crate) fn waiver(
     }
 }
 
-pub(crate) fn parsed_rust_policy(
+pub fn parsed_rust_policy(
     profile: Option<RustProfile>,
     waivers: Vec<G3RsCargoWaiver>,
 ) -> G3RsCargoRustPolicyState {
@@ -91,7 +83,7 @@ pub(crate) fn parsed_rust_policy(
     }
 }
 
-pub(crate) fn parse_error_rust_policy(reason: &str) -> G3RsCargoRustPolicyState {
+pub fn parse_error_rust_policy(reason: &str) -> G3RsCargoRustPolicyState {
     G3RsCargoRustPolicyState::ParseError {
         rel_path: "guardrail3-rs.toml".to_owned(),
         reason: reason.to_owned(),

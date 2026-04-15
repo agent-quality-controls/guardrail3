@@ -1,37 +1,33 @@
 use cargo_toml_parser::{CargoToml, ToolLints};
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{
-    cargo_role, error, info, is_weaker, lint_level, lint_priority, policy_lints, CargoRole,
-    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_CLIPPY_REQUIRED_ALLOW,
-    EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS, LintExpectation,
-};
+use crate::support::{self, CargoRole, LintExpectation};
 
 const ID: &str = "RS-CARGO-CONFIG-02";
 
 pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G3CheckResult>) {
-    if matches!(cargo_role(cargo), CargoRole::Other) {
+    if matches!(support::cargo_role(cargo), CargoRole::Other) {
         return;
     }
 
-    let rust_lints = policy_lints(cargo, "rust");
-    let clippy_lints = policy_lints(cargo, "clippy");
+    let rust_lints = support::policy_lints(cargo, "rust");
+    let clippy_lints = support::policy_lints(cargo, "clippy");
     let mut violations = 0usize;
 
     if let Some(rust_lints) = rust_lints {
-        for expected in EXPECTED_RUST_LINTS {
+        for expected in support::EXPECTED_RUST_LINTS {
             violations += check_expected(cargo_rel_path, rust_lints, expected, results);
         }
-        for expected in EXPECTED_LIBRARY_RUST_LINTS {
+        for expected in support::EXPECTED_LIBRARY_RUST_LINTS {
             violations += check_expected(cargo_rel_path, rust_lints, expected, results);
         }
     }
 
     if let Some(clippy_lints) = clippy_lints {
-        for expected in EXPECTED_CLIPPY_GROUPS {
+        for expected in support::EXPECTED_CLIPPY_GROUPS {
             violations += check_expected(cargo_rel_path, clippy_lints, expected, results);
         }
-        for lint_name in EXPECTED_CLIPPY_DENY {
+        for lint_name in support::EXPECTED_CLIPPY_DENY {
             violations += check_expected(
                 cargo_rel_path,
                 clippy_lints,
@@ -43,11 +39,11 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
                 results,
             );
         }
-        for required in EXPECTED_CLIPPY_REQUIRED_ALLOW {
-            if let Some(actual_level) = lint_level(clippy_lints, required.name) {
+        for required in support::EXPECTED_CLIPPY_REQUIRED_ALLOW {
+            if let Some(actual_level) = support::lint_level(clippy_lints, required.name) {
                 if actual_level != "allow" {
                     violations += 1;
-                    results.push(error(
+                    results.push(support::error(
                         ID,
                         format!("lint `{}` must be allow", required.name),
                         format!(
@@ -62,7 +58,7 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
     }
 
     if violations == 0 && rust_lints.is_some() && clippy_lints.is_some() {
-        results.push(info(
+        results.push(support::info(
             ID,
             "lint levels match policy",
             format!("`{cargo_rel_path}` uses the expected lint levels for this Cargo policy file."),
@@ -79,10 +75,12 @@ fn check_expected(
 ) -> usize {
     let mut violations = 0usize;
 
-    if let Some(actual_level) = lint_level(lints, expected.name) {
-        if actual_level != expected.expected_level && is_weaker(expected.expected_level, actual_level) {
+    if let Some(actual_level) = support::lint_level(lints, expected.name) {
+        if actual_level != expected.expected_level
+            && support::is_weaker(expected.expected_level, actual_level)
+        {
             violations += 1;
-            results.push(error(
+            results.push(support::error(
                 ID,
                 format!("lint `{}` weakens policy", expected.name),
                 format!(
@@ -99,11 +97,11 @@ fn check_expected(
     }
 
     if let Some(expected_priority) = expected.priority {
-        if lint_level(lints, expected.name).is_some() {
-            let actual_priority = lint_priority(lints, expected.name);
+        if support::lint_level(lints, expected.name).is_some() {
+            let actual_priority = support::lint_priority(lints, expected.name);
             if actual_priority != Some(expected_priority) {
                 violations += 1;
-                results.push(error(
+                results.push(support::error(
                     ID,
                     format!("lint `{}` has wrong priority", expected.name),
                     format!(
@@ -120,7 +118,3 @@ fn check_expected(
 
     violations
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;

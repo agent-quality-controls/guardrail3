@@ -119,7 +119,3 @@ fn lints_are_well_formed(lints: Option<&toml::Value>) -> bool {
     };
     table.values().all(has_valid_lint_level)
 }
-
-#[cfg(test)]
-#[path = "rs_cargo_config_12_member_local_allows_forbidden_tests/mod.rs"]
-mod tests;

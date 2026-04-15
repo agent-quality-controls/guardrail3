@@ -1,0 +1,26 @@
+[package]
+name = "test_support"
+version = "0.1.0"
+edition = "2024"
+description = "Generic test input builders for g3 cargo config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+publish = false
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["support"]
+support = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
+g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
+guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
+toml = "0.8"

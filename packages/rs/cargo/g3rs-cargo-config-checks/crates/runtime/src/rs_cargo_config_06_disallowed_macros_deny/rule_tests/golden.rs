@@ -1,11 +1,9 @@
-use guardrail3_check_types::G3Severity;
-
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_06_disallowed_macros_deny::rule as assertions;
 use super::helpers::run_check;
 
 #[test]
 fn inventories_when_disallowed_macros_is_denied() {
-    let results = run_check(include_str!("../../rs_cargo_config_01_workspace_lints/rule_tests/fixtures/golden_workspace.toml"));
-    let result = results.iter().find(|result| result.id() == "RS-CARGO-CONFIG-06").unwrap();
-    assert_eq!(result.severity(), G3Severity::Info);
-    assert!(result.inventory());
+    let results = run_check(include_str!("fixtures/golden_workspace.toml"));
+
+    assertions::assert_has_info(&results, "disallowed macros lint enforced", true);
 }

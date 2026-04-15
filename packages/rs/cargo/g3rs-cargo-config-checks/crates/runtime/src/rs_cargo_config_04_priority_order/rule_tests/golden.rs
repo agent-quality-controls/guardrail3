@@ -1,11 +1,9 @@
-use guardrail3_check_types::G3Severity;
-
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_04_priority_order::rule as assertions;
 use super::helpers::run_check;
 
 #[test]
 fn inventories_when_specific_deny_lints_do_not_use_negative_priority() {
-    let results = run_check(include_str!("../../rs_cargo_config_01_workspace_lints/rule_tests/fixtures/golden_workspace.toml"));
-    let result = results.iter().find(|result| result.id() == "RS-CARGO-CONFIG-04").unwrap();
-    assert_eq!(result.severity(), G3Severity::Info);
-    assert!(result.inventory());
+    let results = run_check(include_str!("fixtures/golden_workspace.toml"));
+
+    assertions::assert_has_info(&results, "specific lint priorities are safe", true);
 }

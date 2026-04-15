@@ -74,7 +74,3 @@ fn edition_rank(edition: &str) -> Option<usize> {
         _ => None,
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;

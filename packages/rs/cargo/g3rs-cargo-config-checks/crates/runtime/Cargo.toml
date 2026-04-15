@@ -9,6 +9,7 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "cargo", "checks", "rust", "policy"]
 categories = ["development-tools"]
+publish = false
 
 [features]
 default = ["all"]
@@ -18,10 +19,12 @@ checks = []
 [lints]
 workspace = true
 
+[package.metadata.guardrail3]
+shared = true
+
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
-g3rs-cargo-config-checks-types = { path = "../types", version = "0.1.0" }
 guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
 guardrail3-reason-policy = { path = "../../../../../shared/reason-policy/crates/reason-policy", version = "0.0.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
@@ -29,3 +32,4 @@ toml = "0.8"
 
 [dev-dependencies]
 g3rs-cargo-config-checks-assertions = { path = "../assertions" }
+test_support = { path = "../test_support", version = "0.1.0" }
