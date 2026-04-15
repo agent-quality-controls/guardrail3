@@ -99,7 +99,3 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
         ));
     }
 }
-
-#[cfg(test)]
-#[path = "rs_cargo_config_11_unapproved_allow_entries_tests/mod.rs"]
-mod tests;

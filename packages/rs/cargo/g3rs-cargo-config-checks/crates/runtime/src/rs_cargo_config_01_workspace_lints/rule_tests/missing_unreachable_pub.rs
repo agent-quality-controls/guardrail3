@@ -1,5 +1,4 @@
-use guardrail3_check_types::G3Severity;
-
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_01_workspace_lints::rule as assertions;
 use super::helpers::run_check;
 
 #[test]
@@ -9,9 +8,6 @@ fn errors_when_library_only_rust_lint_is_missing() {
             .replace("unreachable_pub = \"deny\"\n", "")
             .as_str(),
     );
-    let result = results
-        .iter()
-        .find(|result| result.title() == "missing rust lint `unreachable_pub`")
-        .unwrap();
-    assert_eq!(result.severity(), G3Severity::Error);
+
+    assertions::assert_has_error(&results, "missing rust lint `unreachable_pub`", false);
 }

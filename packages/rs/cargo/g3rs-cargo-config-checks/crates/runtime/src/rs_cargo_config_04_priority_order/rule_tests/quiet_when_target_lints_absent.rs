@@ -1,3 +1,4 @@
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_04_priority_order::rule as assertions;
 use super::helpers::run_check;
 
 #[test]
@@ -15,10 +16,5 @@ cargo = { level = "deny", priority = -1 }
 "#,
     );
 
-    assert!(
-        results
-            .iter()
-            .all(|result| result.id() != "RS-CARGO-CONFIG-04"),
-        "{results:#?}"
-    );
+    assertions::assert_no_findings(&results);
 }

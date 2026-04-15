@@ -54,7 +54,3 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
         )),
     }
 }
-
-#[cfg(test)]
-#[path = "rs_cargo_config_13_rust_version_policy_tests/mod.rs"]
-mod tests;

@@ -1,5 +1,4 @@
-use guardrail3_check_types::G3Severity;
-
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_01_workspace_lints::rule as assertions;
 use super::helpers::run_check;
 
 #[test]
@@ -20,7 +19,5 @@ unreachable_pub = "deny"
 "#,
     );
 
-    let result = results.iter().find(|result| result.id() == "RS-CARGO-CONFIG-01").unwrap();
-    assert_eq!(result.severity(), G3Severity::Error);
-    assert_eq!(result.title(), "clippy lint table missing");
+    assertions::assert_has_error(&results, "clippy lint table missing", false);
 }

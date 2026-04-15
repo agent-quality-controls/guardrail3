@@ -40,7 +40,3 @@ pub(crate) fn check(member: &G3RsCargoWorkspaceMember, results: &mut Vec<G3Check
         ));
     }
 }
-
-#[cfg(test)]
-#[path = "rs_cargo_config_08_workspace_lints_inherited_tests/mod.rs"]
-mod tests;

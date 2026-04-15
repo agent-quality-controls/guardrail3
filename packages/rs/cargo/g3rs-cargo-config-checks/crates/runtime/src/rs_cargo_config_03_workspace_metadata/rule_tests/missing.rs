@@ -1,11 +1,8 @@
-use guardrail3_check_types::G3Severity;
-
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_03_workspace_metadata::rule as assertions;
 use super::helpers::run_check;
 
 #[test]
 fn errors_when_edition_is_missing() {
     let results = run_check("[package]\nname = \"pkg\"\n");
-    let result = results.iter().find(|result| result.id() == "RS-CARGO-CONFIG-03").unwrap();
-    assert_eq!(result.severity(), G3Severity::Error);
-    assert_eq!(result.title(), "edition missing");
+    assertions::assert_has_error(&results, "edition missing", false);
 }

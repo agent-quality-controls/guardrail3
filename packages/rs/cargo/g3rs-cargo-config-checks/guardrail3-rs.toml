@@ -1,0 +1,26 @@
+profile = "library"
+
+allowed_deps = [
+  "cargo-toml-parser",
+  "g3rs-cargo-config-checks-assertions",
+  "g3rs-cargo-types",
+  "guardrail3-check-types",
+  "guardrail3-rs-toml-parser",
+  "guardrail3-reason-policy",
+  "toml",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime crate intentionally keeps one cargo policy rule per module."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions crate intentionally keeps one cargo policy assertion module per rule."

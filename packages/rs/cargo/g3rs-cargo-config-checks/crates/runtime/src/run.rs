@@ -1,4 +1,4 @@
-use g3rs_cargo_config_checks_types::G3RsCargoConfigChecksInput;
+use g3rs_cargo_types::G3RsCargoConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsCargoConfigChecksInput) -> Vec<G3CheckResult> {
