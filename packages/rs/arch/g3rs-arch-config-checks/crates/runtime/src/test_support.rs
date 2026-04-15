@@ -14,6 +14,12 @@ pub(crate) fn config_crate(rel_dir: &str) -> G3RsArchConfigCrate {
     }
 }
 
+pub(crate) fn shared_config_crate(rel_dir: &str) -> G3RsArchConfigCrate {
+    let mut krate = config_crate(rel_dir);
+    krate.shared = true;
+    krate
+}
+
 pub(crate) fn input(
     crates: Vec<G3RsArchConfigCrate>,
     dependency_edges: Vec<G3RsArchDependencyEdge>,
@@ -43,6 +49,16 @@ pub(crate) fn dependency_edge(
         is_direct_child: false,
         target_shared: false,
     }
+}
+
+pub(crate) fn shared_dependency_edge(
+    source_rel_dir: &str,
+    target_rel_dir: &str,
+    section: &str,
+) -> G3RsArchDependencyEdge {
+    let mut edge = dependency_edge(source_rel_dir, target_rel_dir, section);
+    edge.target_shared = true;
+    edge
 }
 
 fn join_rel(dir: &str, child: &str) -> String {

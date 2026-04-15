@@ -24,6 +24,9 @@ pub(crate) fn check(edge: &G3RsArchDependencyEdge, results: &mut Vec<G3CheckResu
     if is_allowed_test_edge(edge) {
         return;
     }
+    if edge.target_shared {
+        return;
+    }
 
     let Some(boundary) = &edge.crossed_boundary else {
         results.push(
