@@ -28,6 +28,7 @@ pub struct G3RsReleaseConfigCrate {
     pub cargo_rel_path: String,
     pub cargo: CargoToml,
     pub workspace_package: Option<WorkspacePackageSection>,
+    pub publish_declared: bool,
     pub publishable: bool,
     pub is_binary: bool,
     pub is_library: bool,
@@ -52,6 +53,7 @@ pub struct G3RsReleaseConfigCrate {
 pub struct G3RsReleaseConfigEdge {
     pub crate_name: String,
     pub cargo_rel_path: String,
+    pub source_publishable: bool,
     pub dep_name: String,
     pub dep_package_name: String,
     pub section_label: String,
@@ -100,6 +102,7 @@ pub struct G3RsReleaseConfigChecksInput {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsReleaseFileTreeRepo {
     pub cargo_rel_path: String,
+    pub publishable_count: usize,
     pub license_rel_path: Option<String>,
     pub release_plz_rel_path: String,
     pub release_plz_exists: bool,

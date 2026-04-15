@@ -27,6 +27,31 @@ pub(crate) fn config_input_for_crate(
     }
 }
 
+pub(crate) fn config_input_for_publishable_crate(
+    cargo_toml: &str,
+    workspace_cargo_toml: Option<&str>,
+) -> G3RsReleaseConfigChecksInput {
+    let mut cargo = cargo_toml_parser::parse(cargo_toml).expect("cargo fixture should parse");
+    if let Some(package) = cargo.package.as_mut() {
+        if package.publish.is_none() {
+            package.publish = Some(InheritableValue::Value(VecStringOrBool::Bool(true)));
+        }
+    }
+    let workspace_package = workspace_cargo_toml
+        .map(|workspace| {
+            cargo_toml_parser::parse(workspace).expect("workspace cargo fixture should parse")
+        })
+        .and_then(|workspace| workspace.workspace.and_then(|section| section.package));
+    let krate = build_crate("Cargo.toml", cargo, workspace_package);
+
+    G3RsReleaseConfigChecksInput {
+        repo: None,
+        crates: vec![krate],
+        edges: Vec::new(),
+        input_failures: Vec::new(),
+    }
+}
+
 pub(crate) fn config_input_for_repo(
     release_plz_toml: Option<&str>,
     cliff_toml: Option<&str>,
@@ -54,7 +79,7 @@ pub(crate) fn config_input_for_repo(
             registry_token_workflow_rel_path: None,
             publishable_crate_names: BTreeSet::new(),
             publishable_binary_crate_names: BTreeSet::new(),
-            publishable_count: 0,
+            publishable_count: 1,
             non_publishable_count: 0,
             semver_checks_installed: false,
             publish_setting: None,
@@ -76,12 +101,14 @@ fn build_crate(
     let name = package_ref
         .and_then(|pkg| pkg.name.clone())
         .unwrap_or_else(|| cargo_rel_path.to_owned());
+    let publish_declared = publish_declared(package_ref);
     let publishable = publishable(package_ref, workspace_package.as_ref());
     let version_string = version_string(package_ref, workspace_package.as_ref());
 
     G3RsReleaseConfigCrate {
         name,
         cargo_rel_path: cargo_rel_path.to_owned(),
+        publish_declared,
         is_binary: !cargo.bin.is_empty(),
         is_library: cargo.lib.is_some(),
         binary_target_names: BTreeSet::new(),
@@ -158,6 +185,12 @@ fn build_crate(
     }
 }
 
+fn publish_declared(package: Option<&PackageSection>) -> bool {
+    package
+        .and_then(|package| package.publish.as_ref())
+        .is_some()
+}
+
 fn publishable(
     package: Option<&PackageSection>,
     workspace_package: Option<&cargo_toml_parser::WorkspacePackageSection>,
@@ -166,7 +199,7 @@ fn publishable(
         return false;
     };
     match package.publish.as_ref() {
-        None => true,
+        None => false,
         Some(InheritableValue::Value(VecStringOrBool::Bool(false))) => false,
         Some(InheritableValue::Value(VecStringOrBool::VecString(values))) => !values.is_empty(),
         Some(InheritableValue::Value(VecStringOrBool::Bool(true))) => true,

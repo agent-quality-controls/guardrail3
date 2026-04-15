@@ -6,7 +6,7 @@ use crate::support::error;
 const ID: &str = "RS-RELEASE-CONFIG-20";
 
 pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResult>) {
-    if !edge.has_path || !edge.dep_publishable {
+    if !edge.source_publishable || !edge.has_path || !edge.dep_publishable {
         return;
     }
     let Some(version_req) = &edge.version_req else {
@@ -39,4 +39,39 @@ pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResul
         ),
         &edge.cargo_rel_path,
     ));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::check;
+    use g3rs_release_config_checks_types::G3RsReleaseConfigEdge;
+
+    fn edge() -> G3RsReleaseConfigEdge {
+        G3RsReleaseConfigEdge {
+            crate_name: "crate-a".to_owned(),
+            cargo_rel_path: "Cargo.toml".to_owned(),
+            source_publishable: true,
+            dep_name: "dep-a".to_owned(),
+            dep_package_name: "dep-a".to_owned(),
+            section_label: "dependencies".to_owned(),
+            target_label: None,
+            has_path: true,
+            path_target_kind: None,
+            dep_publishable: true,
+            version_req: Some("^0.2.0".to_owned()),
+            actual_version: Some("0.1.0".to_owned()),
+            version_satisfied: Some(false),
+        }
+    }
+
+    #[test]
+    fn skips_non_publishable_source_crate() {
+        let mut edge = edge();
+        edge.source_publishable = false;
+        let mut results = Vec::new();
+
+        check(&edge, &mut results);
+
+        assert!(results.is_empty());
+    }
 }

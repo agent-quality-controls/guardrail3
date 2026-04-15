@@ -8,6 +8,7 @@ pub fn check(input: &G3RsReleaseConfigChecksInput) -> Vec<G3CheckResult> {
         crate::rs_release_config_25_input_failures::check(failure, &mut results);
     }
     for krate in &input.crates {
+        crate::rs_release_config_00_publish_must_be_explicit::check(krate, &mut results);
         crate::rs_release_config_01_description_present::check(krate, &mut results);
         crate::rs_release_config_02_license_present::check(krate, &mut results);
         crate::rs_release_config_03_repository_present::check(krate, &mut results);
@@ -35,4 +36,32 @@ pub fn check(input: &G3RsReleaseConfigChecksInput) -> Vec<G3CheckResult> {
         crate::rs_release_config_20_interdependent_version_consistency::check(edge, &mut results);
     }
     results
+}
+
+#[cfg(test)]
+mod tests {
+    use super::check;
+
+    #[test]
+    fn skips_repo_level_release_setup_when_nothing_publishes() {
+        let mut input = crate::test_support::config_input_for_repo(
+            Some(
+                r#"
+[[package]]
+name = "some-crate"
+"#,
+            ),
+            Some("# empty cliff.toml\n"),
+        );
+        let repo = input.repo.as_mut().expect("repo should exist");
+        repo.publishable_count = 0;
+        repo.non_publishable_count = 2;
+        repo.semver_checks_installed = false;
+        repo.publish_setting = Some("false".to_owned());
+        repo.release_profile_settings = vec!["lto = true".to_owned()];
+
+        let results = check(&input);
+
+        assert!(results.is_empty(), "{results:#?}");
+    }
 }

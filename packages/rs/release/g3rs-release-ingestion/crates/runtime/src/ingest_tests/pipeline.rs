@@ -32,7 +32,7 @@ members = ["crates/demo"]
 resolver = "2"
 
 [workspace.package]
-publish = false
+publish = true
 
 [profile.release]
 opt-level = 3
@@ -45,7 +45,7 @@ opt-level = 3
 name = "demo"
 version = "0.1.0"
 edition = "2024"
-publish = false
+publish.workspace = true
 "#,
     );
     write(root.join("crates/demo/src/lib.rs"), "pub fn demo() {}\n");
@@ -122,6 +122,7 @@ resolver = "2"
 name = "demo"
 version = "0.1.0"
 edition = "2024"
+publish = true
 description = "demo crate"
 license = "MIT"
 repository = "https://example.com/demo"
@@ -166,6 +167,7 @@ resolver = "2"
 name = "demo"
 version = "0.1.0"
 edition = "2024"
+publish = true
 description = "demo crate"
 license = "MIT"
 repository = "https://example.com/demo"

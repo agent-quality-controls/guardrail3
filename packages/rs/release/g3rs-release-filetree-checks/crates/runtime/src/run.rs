@@ -44,4 +44,18 @@ mod tests {
         assert!(results.iter().any(|result| result.id() == "RS-RELEASE-FILETREE-04"));
         assert!(results.iter().any(|result| result.id() == "RS-RELEASE-FILETREE-05"));
     }
+
+    #[test]
+    fn skips_workspace_release_files_when_nothing_publishes() {
+        let mut input = repo_input();
+        let repo = input.repo.as_mut().unwrap();
+        repo.publishable_count = 0;
+        repo.license_rel_path = None;
+        repo.release_plz_exists = false;
+        repo.cliff_exists = false;
+
+        let results = check(&input);
+
+        assert!(results.is_empty(), "{results:#?}");
+    }
 }
