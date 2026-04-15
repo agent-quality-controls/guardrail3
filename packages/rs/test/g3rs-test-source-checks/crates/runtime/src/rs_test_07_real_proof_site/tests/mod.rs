@@ -96,6 +96,78 @@ fn ignores_local_setup_helper_when_test_has_no_proof() {
 }
 
 #[test]
+fn ignores_same_file_setup_helper_when_test_has_no_proof() {
+    let results = run_input(input(
+        vec![file(
+            "src/feature_tests/missing.rs",
+            G3RsTestFileKind::InternalSidecarSupport,
+            Some("demo_assertions"),
+            "fn git_init() { assert!(true); }\n#[test]\nfn missing() { git_init(); }\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-07",
+        G3Severity::Error,
+        "test has no shared proof step",
+        "src/feature_tests/missing.rs",
+        Some(3),
+    );
+}
+
+#[test]
+fn ignores_same_file_setup_helper_before_shared_assertions_call() {
+    let results = run_input(input(
+        vec![
+            file(
+                "assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo_assertions"),
+                "pub fn assert_demo() { assert_eq!(1, 1); }\n",
+            ),
+            file(
+                "src/feature_tests/ok.rs",
+                G3RsTestFileKind::InternalSidecarSupport,
+                Some("demo_assertions"),
+                "use demo_assertions::assert_demo;\nfn git_init() { assert!(true); }\n#[test]\nfn ok() { git_init(); assert_demo(); }\n",
+            ),
+        ],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_inventory(
+        &results,
+        "RS-TEST-SOURCE-07",
+        "test uses shared proof",
+        "src/feature_tests/ok.rs",
+    );
+}
+
+#[test]
+fn reports_same_file_local_result_check_helper() {
+    let results = run_input(input(
+        vec![file(
+            "src/feature_tests/local.rs",
+            G3RsTestFileKind::InternalSidecarSupport,
+            Some("demo_assertions"),
+            "fn assert_results() { assert_eq!(1, 1); }\n#[test]\nfn local() { assert_results(); }\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-07",
+        G3Severity::Error,
+        "test checks results through local path",
+        "src/feature_tests/local.rs",
+        Some(3),
+    );
+}
+
+#[test]
 fn inventories_assertion_macro_proof() {
     let results = run_input(input(
         vec![file(
