@@ -6,6 +6,18 @@ use syn::visit::Visit;
 mod helpers;
 mod types;
 
+const DEFINE_RESULT_ASSERTIONS_PROOF_FUNCTIONS: &[&str] = &[
+    "assert_findings",
+    "assert_no_findings",
+    "assert_contains",
+    "assert_has_info",
+    "assert_has_warn",
+    "assert_has_error",
+    "assert_title_count",
+    "assert_message_contains",
+    "assert_title_absent",
+];
+
 pub(crate) type CfgTestModuleInfo = self::types::CfgTestModuleInfo;
 pub(crate) type FieldAccessInfo = self::types::FieldAccessInfo;
 pub(crate) type FunctionInfo = self::types::FunctionInfo;
@@ -287,11 +299,11 @@ impl<'source> Visit<'source> for TestVisitor {
             .last()
             .is_some_and(|segment| segment.ident == "define_result_assertions")
         {
-            self.out.macro_defined_proof_functions.extend([
-                "assert_findings".to_owned(),
-                "assert_no_findings".to_owned(),
-                "assert_contains".to_owned(),
-            ]);
+            self.out.macro_defined_proof_functions.extend(
+                DEFINE_RESULT_ASSERTIONS_PROOF_FUNCTIONS
+                    .iter()
+                    .map(|name| (*name).to_owned()),
+            );
         }
         syn::visit::visit_item_macro(self, item);
     }
