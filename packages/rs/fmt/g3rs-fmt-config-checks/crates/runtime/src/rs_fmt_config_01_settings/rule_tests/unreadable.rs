@@ -1,5 +1,5 @@
-use g3rs_fmt_config_checks_assertions::rs_fmt_config_01_settings as assertions;
-use g3rs_fmt_config_checks_types::G3RsFmtRustfmtConfigState;
+use g3rs_fmt_config_checks_assertions::rs_fmt_config_01_settings::rule as assertions;
+use test_support::G3RsFmtRustfmtConfigState;
 
 use super::helpers::run_check;
 

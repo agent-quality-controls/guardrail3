@@ -1,11 +1,11 @@
-use g3rs_fmt_config_checks_types::{
+use test_support::{
     G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState,
     G3RsFmtRustfmtConfigState, G3RsFmtToolchainState, G3RsFmtWaiver,
 };
 use guardrail3_check_types::G3CheckResult;
 use rustfmt_toml_parser::parse as parse_rustfmt_toml;
 
-use crate::rs_fmt_config_07_ignore_escape_hatch::check;
+use super::super::rule::check;
 
 pub(super) fn run_check(
     rustfmt_toml: &str,

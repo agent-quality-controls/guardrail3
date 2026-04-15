@@ -1,0 +1,34 @@
+[package]
+name = "test_support"
+version = "0.1.0"
+edition = "2024"
+description = "Generic test input builders for g3 fmt config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "fmt", "checks", "test-support"]
+categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["support"]
+support = []
+
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
+g3rs-fmt-types = { path = "../../../g3rs-fmt-types", version = "0.1.0" }
+rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser", version = "0.1.0" }
+rustfmt-toml-parser = { path = "../../../../../parsers/rustfmt-toml-parser", version = "0.1.0" }
+toml = "0.8"

@@ -1,4 +1,4 @@
-use g3rs_fmt_config_checks_types::G3RsFmtConfigChecksInput;
+use g3rs_fmt_types::G3RsFmtConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsFmtConfigChecksInput) -> Vec<G3CheckResult> {

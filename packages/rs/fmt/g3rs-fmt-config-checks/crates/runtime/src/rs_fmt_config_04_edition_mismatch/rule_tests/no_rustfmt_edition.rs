@@ -1,5 +1,5 @@
-use g3rs_fmt_config_checks_assertions::rs_fmt_config_04_edition_mismatch as assertions;
-use g3rs_fmt_config_checks_types::G3RsFmtCargoState;
+use g3rs_fmt_config_checks_assertions::rs_fmt_config_04_edition_mismatch::rule as assertions;
+use test_support::G3RsFmtCargoState;
 
 use super::helpers::run_check;
 
