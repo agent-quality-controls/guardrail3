@@ -1,13 +1,13 @@
-use super::helpers::check_source_with_shared;
-use g3rs_code_source_checks_assertions::rs_code_31_public_struct_named_fields::{
+use g3rs_code_source_checks_assertions::rs_code_ast_31_public_struct_named_fields::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn shared_plain_record_struct_is_allowed() {
-    let results = check_source_with_shared(
+    let results = super::super::check_source_with_shared(
         "src/types.rs",
         "pub struct Input { pub rel_path: String, pub profile: Option<String> }",
+        false,
         true,
     );
 
@@ -16,9 +16,10 @@ fn shared_plain_record_struct_is_allowed() {
 
 #[test]
 fn shared_struct_with_inherent_impl_still_errors() {
-    let results = check_source_with_shared(
+    let results = super::super::check_source_with_shared(
         "src/types.rs",
         "pub struct Input { pub rel_path: String, pub profile: Option<String>, pub raw: String, pub flags: usize, pub mode: bool }\nimpl Input { pub fn validate(&self) -> bool { self.mode } }",
+        false,
         true,
     );
 
@@ -39,9 +40,10 @@ fn shared_struct_with_inherent_impl_still_errors() {
 
 #[test]
 fn shared_struct_with_mixed_visibility_still_warns() {
-    let results = check_source_with_shared(
+    let results = super::super::check_source_with_shared(
         "src/types.rs",
         "pub struct Input { pub rel_path: String, profile: Option<String> }",
+        false,
         true,
     );
 

@@ -1,6 +1,6 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::parse::find_public_struct_field_bags;
+use crate::parse::attrs::find_public_struct_field_bags;
 use crate::support::CodeSourceRuleInput;
 
 const ID: &str = "RS-CODE-SOURCE-31";
@@ -33,6 +33,7 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
                 info.struct_name, info.public_field_count
             )
         };
+
         results.push(G3CheckResult::new(
             ID.to_owned(),
             severity,
@@ -62,6 +63,43 @@ fn struct_has_inherent_impl(source: &syn::File, struct_name: &str) -> bool {
                 .last()
                 .is_some_and(|segment| segment.ident == struct_name)
     })
+}
+
+#[cfg(test)]
+pub(super) fn check_source(
+    rel_path: &str,
+    content: &str,
+    is_test: bool,
+) -> Vec<guardrail3_check_types::G3CheckResult> {
+    check_source_with_shared(rel_path, content, is_test, false)
+}
+
+#[cfg(test)]
+pub(super) fn check_source_with_shared(
+    rel_path: &str,
+    content: &str,
+    is_test: bool,
+    is_shared_crate: bool,
+) -> Vec<guardrail3_check_types::G3CheckResult> {
+    let source = crate::parse::parse_rust_file(content)
+        .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
+    let parsed = crate::support::G3RsCodeSourceFileAst {
+        source_file: g3rs_code_types::G3RsSourceFile {
+            rel_path: rel_path.to_owned(),
+            content: content.to_owned(),
+            is_test,
+            profile_name: None,
+            is_library_root: false,
+        },
+        source,
+    };
+    let input = crate::support::CodeSourceRuleInput {
+        is_shared_crate,
+        ..crate::support::CodeSourceRuleInput::from(&parsed)
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
 }
 
 #[cfg(test)]

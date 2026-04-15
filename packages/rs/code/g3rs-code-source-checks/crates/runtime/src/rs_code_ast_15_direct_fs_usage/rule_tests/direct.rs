@@ -1,12 +1,11 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_15_direct_fs_usage::{
+use g3rs_code_source_checks_assertions::rs_code_ast_15_direct_fs_usage::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_std_fs_import() {
     let content = "use std::fs;\nfn main() {}";
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -26,7 +25,7 @@ fn errors_on_std_fs_import() {
 #[test]
 fn errors_on_inline_std_fs_call() {
     let content = "fn main() { let _ = std::fs::read_to_string(\"foo\"); }";
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -46,7 +45,7 @@ fn errors_on_inline_std_fs_call() {
 #[test]
 fn still_errors_inside_allow_scoped_std_fs_usage() {
     let content = "#[allow(clippy::disallowed_methods)]\nfn main() { let _ = std::fs::read_to_string(\"foo\"); }";
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -66,7 +65,7 @@ fn still_errors_inside_allow_scoped_std_fs_usage() {
 #[test]
 fn errors_on_std_alias_fs_call() {
     let content = "use std as s;\nfn main() { let _ = s::fs::read_to_string(\"foo\"); }";
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -86,7 +85,7 @@ fn errors_on_std_alias_fs_call() {
 #[test]
 fn errors_on_extern_crate_std_alias_fs_call() {
     let content = "extern crate std as s;\nfn main() { let _ = s::fs::read_to_string(\"foo\"); }";
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -107,7 +106,7 @@ fn errors_on_extern_crate_std_alias_fs_call() {
 fn prefers_import_hit_when_import_and_call_share_one_line() {
     let content =
         "use std::fs; fn same_line_probe() { let _ = std::fs::read_to_string(\"same-line.txt\"); }";
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,

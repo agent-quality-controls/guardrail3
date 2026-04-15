@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_17_impl_allow_blast_radius::{
+use g3rs_code_source_checks_assertions::rs_code_ast_17_impl_allow_blast_radius::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
@@ -16,7 +15,7 @@ impl Foo {
     fn d(&self) {}
 }
 "#;
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -46,7 +45,7 @@ impl Foo {
     fn d(&self) {}
 }
 "#;
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,

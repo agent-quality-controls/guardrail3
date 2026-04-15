@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_01_crate_level_allow::{
+use g3rs_code_source_checks_assertions::rs_code_ast_01_crate_level_allow::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_crate_level_allow_in_prod_code() {
-    let results = check_source("src/lib.rs", "#![allow(dead_code)]\nfn probe() {}\n", false);
+    let results = super::super::check_source("src/lib.rs", "#![allow(dead_code)]\nfn probe() {}\n", false);
 
     assert_rule_results(
         &results,
@@ -24,7 +23,7 @@ fn errors_on_crate_level_allow_in_prod_code() {
 
 #[test]
 fn reports_inline_module_allow() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "mod nested {\n    #![allow(dead_code)]\n    fn probe() {}\n}\n",
         false,
@@ -47,7 +46,7 @@ fn reports_inline_module_allow() {
 
 #[test]
 fn downgrades_test_files_to_inventory_info() {
-    let results = check_source(
+    let results = super::super::check_source(
         "tests/smoke.rs",
         "#![allow(dead_code)]\nfn probe() {}\n",
         true,

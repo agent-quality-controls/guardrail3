@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_29_large_trait_surface::{
+use g3rs_code_source_checks_assertions::rs_code_ast_29_large_trait_surface::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
@@ -9,7 +8,7 @@ fn errors_on_trait_with_thirteen_methods() {
         .map(|index| format!("    fn m{index}(&self);\n"))
         .collect::<String>();
     let content = format!("pub trait Service {{\n{methods}}}");
-    let results = check_source("src/lib.rs", &content);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert_rule_results(
         &results,
@@ -30,7 +29,7 @@ fn warns_on_trait_with_nine_methods() {
         .map(|index| format!("    fn m{index}(&self);\n"))
         .collect::<String>();
     let content = format!("pub trait Service {{\n{methods}}}");
-    let results = check_source("src/lib.rs", &content);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert_rule_results(
         &results,

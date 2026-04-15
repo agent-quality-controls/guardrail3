@@ -1,12 +1,11 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_16_panic_macro::{
+use g3rs_code_source_checks_assertions::rs_code_ast_16_panic_macro::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn warns_on_panic_macro_in_non_test_code() {
     let content = "fn foo() { panic!(\"boom\"); }";
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -24,7 +23,7 @@ fn warns_on_panic_macro_in_non_test_code() {
 #[test]
 fn warns_on_qualified_panic_macro_in_non_test_code() {
     let content = "fn foo() { core::panic!(\"boom\"); }";
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,

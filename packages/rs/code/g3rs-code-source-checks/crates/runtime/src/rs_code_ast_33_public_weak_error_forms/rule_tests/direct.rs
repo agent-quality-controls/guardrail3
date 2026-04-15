@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_33_public_weak_error_forms::{
+use g3rs_code_source_checks_assertions::rs_code_ast_33_public_weak_error_forms::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_string_and_str_public_result_errors() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "pub fn parse() -> Result<(), String> { Ok(()) }\npub fn label() -> Result<(), &str> { Ok(()) }",
         false,
@@ -40,7 +39,7 @@ fn errors_on_string_and_str_public_result_errors() {
 
 #[test]
 fn errors_on_anyhow_and_box_dyn_error_public_results() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "pub fn parse() -> Result<(), anyhow::Error> { Ok(()) }\npub fn boxed() -> Result<(), Box<dyn std::error::Error>> { Ok(()) }",
         false,

@@ -1,23 +1,24 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_31_public_struct_named_fields::assert_rule_results;
+use g3rs_code_source_checks_assertions::rs_code_ast_31_public_struct_named_fields::rule::assert_rule_results;
 
 #[test]
 fn skips_private_fields_tuple_structs_and_private_modules() {
     assert_rule_results(
-        &check_source(
+        &super::super::check_source(
             "src/lib.rs",
             "pub struct User { id: String, email: String }",
+            false,
         ),
         &[],
     );
     assert_rule_results(
-        &check_source("src/lib.rs", "pub struct UserId(pub String);"),
+        &super::super::check_source("src/lib.rs", "pub struct UserId(pub String);", false),
         &[],
     );
     assert_rule_results(
-        &check_source(
+        &super::super::check_source(
             "src/lib.rs",
             "mod internal { pub struct User { pub id: String } }",
+            false,
         ),
         &[],
     );

@@ -1,4 +1,3 @@
-use super::helpers::check_source;
 
 #[test]
 fn skips_test_files() {
@@ -6,7 +5,7 @@ fn skips_test_files() {
         .map(|i| format!("fn f{i}() {{}}\n"))
         .collect::<String>();
 
-    let results = check_source("tests/smoke.rs", &content, true);
+    let results = super::super::check_source("tests/smoke.rs", &content, true);
 
     assert!(results.is_empty(), "{results:#?}");
 }
@@ -15,7 +14,7 @@ fn skips_test_files() {
 fn ignores_comment_only_lines() {
     let content = (0..500).map(|_| "// comment\n").collect::<String>();
 
-    let results = check_source("src/lib.rs", &content, false);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert!(results.is_empty(), "{results:#?}");
 }
@@ -27,7 +26,7 @@ fn ignores_raw_string_payload_only_lines() {
         .collect::<String>();
     let content = format!("const BIG: &str = r#\"\n{payload}\"#;\n");
 
-    let results = check_source("src/lib.rs", &content, false);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert!(results.is_empty(), "{results:#?}");
 }

@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_19_large_type_inventory::{
+use g3rs_code_source_checks_assertions::rs_code_ast_19_large_type_inventory::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
@@ -11,7 +10,7 @@ fn inventories_large_struct() {
         .join(", ");
     let content = format!("struct Big {{ {fields} }}\n");
 
-    let results = check_source("src/lib.rs", &content, false);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert_rule_results(
         &results,
@@ -34,7 +33,7 @@ fn inventories_large_enum() {
         .join(", ");
     let content = format!("enum Big {{ {variants} }}\n");
 
-    let results = check_source("src/lib.rs", &content, false);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert_rule_results(
         &results,

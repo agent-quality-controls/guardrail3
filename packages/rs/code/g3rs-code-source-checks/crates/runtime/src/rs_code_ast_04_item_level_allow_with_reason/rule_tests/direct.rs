@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_04_item_level_allow_with_reason::{
+use g3rs_code_source_checks_assertions::rs_code_ast_04_item_level_allow_with_reason::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn inventories_allow_with_useful_reason() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#[allow(dead_code)] // reason: proc macro entrypoint\nfn probe() {}\n",
         false,
@@ -26,7 +25,7 @@ fn inventories_allow_with_useful_reason() {
 
 #[test]
 fn inventories_expect_with_useful_reason() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#[expect(dead_code)] // reason: generated bridge shim\nfn probe() {}\n",
         false,

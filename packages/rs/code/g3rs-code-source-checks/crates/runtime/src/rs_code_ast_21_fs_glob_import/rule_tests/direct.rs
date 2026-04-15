@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_21_fs_glob_import::{
+use g3rs_code_source_checks_assertions::rs_code_ast_21_fs_glob_import::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_direct_std_fs_glob() {
-    let results = check_source("src/foo.rs", "use std::fs::*;\nfn main() {}", false);
+    let results = super::super::check_source("src/foo.rs", "use std::fs::*;\nfn main() {}", false);
 
     assert_rule_results(
         &results,
@@ -23,7 +22,7 @@ fn errors_on_direct_std_fs_glob() {
 #[test]
 fn errors_on_std_alias_glob_import() {
     let content = "use std as s;\nuse s::fs::*;\nfn main() {}";
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -40,7 +39,7 @@ fn errors_on_std_alias_glob_import() {
 
 #[test]
 fn errors_on_grouped_std_fs_glob_import() {
-    let results = check_source("src/foo.rs", "use std::{fs::*, io};\nfn main() {}", false);
+    let results = super::super::check_source("src/foo.rs", "use std::{fs::*, io};\nfn main() {}", false);
 
     assert_rule_results(
         &results,

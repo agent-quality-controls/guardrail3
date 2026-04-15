@@ -1,8 +1,7 @@
-use super::helpers::check_source;
 
 #[test]
 fn skips_small_types() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "struct Small { a: u8 }\nenum E { A, B }\n",
         false,
@@ -19,7 +18,7 @@ fn skips_struct_at_threshold() {
         .join(", ");
     let content = format!("struct Exact {{ {fields} }}\n");
 
-    let results = check_source("src/lib.rs", &content, false);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert!(results.is_empty(), "{results:#?}");
 }
@@ -32,7 +31,7 @@ fn skips_enum_at_threshold() {
         .join(", ");
     let content = format!("enum Exact {{ {variants} }}\n");
 
-    let results = check_source("src/lib.rs", &content, false);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert!(results.is_empty(), "{results:#?}");
 }

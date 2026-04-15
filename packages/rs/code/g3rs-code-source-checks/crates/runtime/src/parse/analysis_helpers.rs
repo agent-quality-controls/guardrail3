@@ -207,7 +207,7 @@ fn path_string_has_parent_segment(path: &str) -> bool {
         || path.split('\\').any(|segment| segment == "..")
 }
 
-pub(crate) fn result_error_kind(ty: &syn::Type) -> Option<crate::parse::PublicResultErrorKind> {
+pub(crate) fn result_error_kind(ty: &syn::Type) -> Option<crate::parse::types::PublicResultErrorKind> {
     let syn::Type::Path(type_path) = ty else {
         return None;
     };
@@ -223,16 +223,16 @@ pub(crate) fn result_error_kind(ty: &syn::Type) -> Option<crate::parse::PublicRe
         return None;
     };
     if is_string_type(err_ty) {
-        return Some(crate::parse::PublicResultErrorKind::String);
+        return Some(crate::parse::types::PublicResultErrorKind::String);
     }
     if is_str_ref_type(err_ty) {
-        return Some(crate::parse::PublicResultErrorKind::StrRef);
+        return Some(crate::parse::types::PublicResultErrorKind::StrRef);
     }
     if is_anyhow_error_type(err_ty) {
-        return Some(crate::parse::PublicResultErrorKind::AnyhowError);
+        return Some(crate::parse::types::PublicResultErrorKind::AnyhowError);
     }
     if is_box_dyn_error(err_ty) {
-        return Some(crate::parse::PublicResultErrorKind::BoxDynError);
+        return Some(crate::parse::types::PublicResultErrorKind::BoxDynError);
     }
     None
 }

@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_06_garde_skip_with_comment::{
+use g3rs_code_source_checks_assertions::rs_code_ast_06_garde_skip_with_comment::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_when_comment_lacks_reason_key() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "struct Form {\n    #[garde(skip)] // upstream validates this field\n    token: String,\n}\n",
         false,
@@ -28,7 +27,7 @@ fn errors_when_comment_lacks_reason_key() {
 
 #[test]
 fn errors_on_weak_reason() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "struct Form {\n    #[garde(skip)] // reason: temp\n    token: String,\n}\n",
         false,
@@ -51,7 +50,7 @@ fn errors_on_weak_reason() {
 
 #[test]
 fn inventories_useful_reason() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "struct Form {\n    #[garde(skip)] // reason: validated upstream boundary\n    token: String,\n}\n",
         false,

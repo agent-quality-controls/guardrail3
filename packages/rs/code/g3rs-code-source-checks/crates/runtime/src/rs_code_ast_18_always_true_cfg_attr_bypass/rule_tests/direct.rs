@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_18_always_true_cfg_attr_bypass::{
+use g3rs_code_source_checks_assertions::rs_code_ast_18_always_true_cfg_attr_bypass::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
@@ -9,7 +8,7 @@ fn errors_on_unconditional_cfg_attr_bypass() {
 #[cfg_attr(not(any()), allow(clippy::unwrap_used))]
 fn foo() {}
 "#;
-    let results = check_source("src/foo.rs", content, false);
+    let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -29,7 +28,7 @@ fn foo() {}
 #[test]
 fn errors_on_trait_item_with_always_true_cfg_attr_allow() {
     let content = "trait Api {\n    #[cfg_attr(all(), allow(dead_code))]\n    fn run();\n}\n";
-    let results = check_source("src/lib.rs", content, false);
+    let results = super::super::check_source("src/lib.rs", content, false);
 
     assert_rule_results(
         &results,

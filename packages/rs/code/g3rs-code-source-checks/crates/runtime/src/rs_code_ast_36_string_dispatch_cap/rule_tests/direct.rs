@@ -1,5 +1,4 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_36_string_dispatch_cap::{
+use g3rs_code_source_checks_assertions::rs_code_ast_36_string_dispatch_cap::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
@@ -11,7 +10,7 @@ fn errors_on_match_with_too_many_string_arms() {
         .join("\n");
     let content =
         format!("pub fn dispatch(value: &str) -> usize {{ match value {{ {arms} _ => 0 }} }}");
-    let results = check_source("src/lib.rs", &content, false);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert_rule_results(
         &results,
@@ -37,7 +36,7 @@ fn errors_on_if_else_chain_with_too_many_string_branches() {
     }
     chain.push_str("else { 0 }");
     let content = format!("pub fn dispatch(value: &str) -> usize {{ {chain} }}");
-    let results = check_source("src/lib.rs", &content, false);
+    let results = super::super::check_source("src/lib.rs", &content, false);
 
     assert_rule_results(
         &results,

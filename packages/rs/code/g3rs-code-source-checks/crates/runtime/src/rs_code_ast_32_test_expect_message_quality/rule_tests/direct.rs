@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_32_test_expect_message_quality::{
+use g3rs_code_source_checks_assertions::rs_code_ast_32_test_expect_message_quality::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_short_expect_message_in_test_file() {
-    let results = check_source(
+    let results = super::super::check_source(
         "tests/probe.rs",
         "fn probe() { let _ = Some(1).expect(\"ok\"); }",
         true,
@@ -30,7 +29,7 @@ fn errors_on_short_expect_message_in_test_file() {
 fn errors_on_non_literal_expect_message_in_test_file() {
     let content =
         "fn probe() { let msg = \"backend fixture should parse\"; let _ = Some(1).expect(msg); }";
-    let results = check_source("tests/probe.rs", content, true);
+    let results = super::super::check_source("tests/probe.rs", content, true);
 
     assert_rule_results(
         &results,
@@ -50,7 +49,7 @@ fn errors_on_non_literal_expect_message_in_test_file() {
 #[test]
 fn errors_on_cfg_test_expect_inside_non_test_file() {
     let content = "#[cfg(test)]\nmod tests {\n    #[test]\n    fn probe() { let _ = Some(1).expect(\"present\"); }\n}";
-    let results = check_source("src/lib.rs", content, false);
+    let results = super::super::check_source("src/lib.rs", content, false);
 
     assert_rule_results(
         &results,

@@ -1,12 +1,11 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_31_public_struct_named_fields::{
+use g3rs_code_source_checks_assertions::rs_code_ast_31_public_struct_named_fields::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn warns_on_public_struct_with_two_public_fields() {
     let content = "pub struct User { pub id: String, pub email: String }";
-    let results = check_source("src/lib.rs", content);
+    let results = super::super::check_source("src/lib.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -26,7 +25,7 @@ fn warns_on_public_struct_with_two_public_fields() {
 #[test]
 fn errors_on_public_struct_with_five_public_fields() {
     let content = "pub struct User { pub a: u8, pub b: u8, pub c: u8, pub d: u8, pub e: u8 }";
-    let results = check_source("src/lib.rs", content);
+    let results = super::super::check_source("src/lib.rs", content, false);
 
     assert_rule_results(
         &results,
@@ -46,7 +45,7 @@ fn errors_on_public_struct_with_five_public_fields() {
 #[test]
 fn warns_on_public_struct_with_four_public_fields() {
     let content = "pub struct User { pub a: u8, pub b: u8, pub c: u8, pub d: u8 }";
-    let results = check_source("src/lib.rs", content);
+    let results = super::super::check_source("src/lib.rs", content, false);
 
     assert_rule_results(
         &results,

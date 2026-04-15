@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_02_unused_crate_dependencies_allow::{
+use g3rs_code_source_checks_assertions::rs_code_ast_02_unused_crate_dependencies_allow::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn inventories_crate_level_unused_crate_dependencies_allow() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#![allow(unused_crate_dependencies)]\nfn probe() {}\n",
         false,
@@ -26,7 +25,7 @@ fn inventories_crate_level_unused_crate_dependencies_allow() {
 
 #[test]
 fn inventories_inline_module_unused_crate_dependencies_allow() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "mod nested {\n    #![allow(unused_crate_dependencies)]\n    fn probe() {}\n}\n",
         false,

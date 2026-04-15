@@ -9,6 +9,7 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "code", "source", "checks", "rust"]
 categories = ["development-tools"]
+publish = false
 
 [features]
 default = ["all"]
@@ -19,7 +20,7 @@ checks = []
 workspace = true
 
 [dependencies]
-g3rs-code-source-checks-types = { path = "../types", version = "0.1.0" }
+g3rs-code-types = { path = "../../../g3rs-code-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 guardrail3-reason-policy = { path = "../../../../../shared/reason-policy/crates/reason-policy", version = "0.0.0" }
 proc-macro2 = { version = "1", features = ["span-locations"] }

@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_34_generic_parameter_cap::{
+use g3rs_code_source_checks_assertions::rs_code_ast_34_generic_parameter_cap::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_functions_and_structs_above_generic_cap() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "pub fn build<A, B, C, D, E, F, G>() {}\npub struct Cache<A, B, C, D, E, F, const N: usize>;",
         false,
@@ -40,7 +39,7 @@ fn errors_on_functions_and_structs_above_generic_cap() {
 
 #[test]
 fn errors_on_traits_above_generic_cap() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "pub trait Service<A, B, C, D, E, F, const N: usize> {}",
         false,
@@ -63,7 +62,7 @@ fn errors_on_traits_above_generic_cap() {
 
 #[test]
 fn errors_on_enums_above_generic_cap() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "pub enum Response<A, B, C, D, E, F, const N: usize> { Ok, Err }",
         false,

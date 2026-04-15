@@ -1,11 +1,10 @@
-use super::helpers::check_source;
-use g3rs_code_source_checks_assertions::rs_code_03_item_level_allow_without_reason::{
+use g3rs_code_source_checks_assertions::rs_code_ast_03_item_level_allow_without_reason::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };
 
 #[test]
 fn errors_on_item_level_allow_without_reason() {
-    let results = check_source("src/lib.rs", "#[allow(dead_code)]\nfn probe() {}\n", false);
+    let results = super::super::check_source("src/lib.rs", "#[allow(dead_code)]\nfn probe() {}\n", false);
 
     assert_rule_results(
         &results,
@@ -22,7 +21,7 @@ fn errors_on_item_level_allow_without_reason() {
 
 #[test]
 fn errors_on_item_level_expect_without_reason() {
-    let results = check_source("src/lib.rs", "#[expect(dead_code)]\nfn probe() {}\n", false);
+    let results = super::super::check_source("src/lib.rs", "#[expect(dead_code)]\nfn probe() {}\n", false);
 
     assert_rule_results(
         &results,
@@ -39,7 +38,7 @@ fn errors_on_item_level_expect_without_reason() {
 
 #[test]
 fn errors_on_weak_reason() {
-    let results = check_source(
+    let results = super::super::check_source(
         "src/lib.rs",
         "#[allow(dead_code)] // reason: temp\nfn probe() {}\n",
         false,
