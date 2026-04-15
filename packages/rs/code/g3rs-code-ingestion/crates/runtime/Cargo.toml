@@ -9,6 +9,7 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "code", "ingestion", "rust"]
 categories = ["development-tools"]
+publish = false
 
 [features]
 default = ["all"]
@@ -22,6 +23,7 @@ workspace = true
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
 deny-toml-parser = { path = "../../../../../parsers/deny-toml-parser", version = "0.1.0" }
+g3rs-code-types = { path = "../../../g3rs-code-types", version = "0.1.0" }
 g3rs-code-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
 glob = "0.3"
@@ -34,6 +36,7 @@ g3rs-code-source-checks = { path = "../../../g3rs-code-source-checks", version =
 g3rs-code-config-checks = { path = "../../../g3rs-code-config-checks", version = "0.1.0" }
 g3rs-code-file-tree-checks = { path = "../../../g3rs-code-file-tree-checks", version = "0.1.0" }
 g3rs-code-ingestion-assertions = { path = "../assertions" }
+g3rs-code-types = { path = "../../../g3rs-code-types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 tempfile = "3"

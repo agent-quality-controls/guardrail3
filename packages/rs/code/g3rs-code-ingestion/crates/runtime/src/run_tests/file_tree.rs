@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+use g3rs_code_ingestion_assertions::run as assertions;
 use guardrail3_check_types::G3CheckResult;
 use tempfile::tempdir;
 
@@ -23,13 +24,9 @@ fn write(path: impl AsRef<Path>, content: &str) {
 
 fn run_file_tree_pipeline(root: &Path) -> Vec<G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
     g3rs_code_file_tree_checks::check(&input)
-}
-
-fn run_file_tree_input(root: &Path) -> g3rs_code_ingestion_types::G3RsCodeFileTreeChecksInput {
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed")
 }
 
 #[test]
@@ -53,7 +50,7 @@ fn pipeline_does_not_report_structural_split_because_arch_owns_that_policy() {
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_results_empty(&results);
 }
 
 #[test]
@@ -77,7 +74,7 @@ fn pipeline_stays_quiet_at_exact_thresholds() {
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_results_empty(&results);
 }
 
 #[test]
@@ -101,7 +98,7 @@ fn pipeline_does_not_report_member_structural_split_because_arch_owns_that_polic
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_results_empty(&results);
 }
 
 #[test]
@@ -134,7 +131,7 @@ resolver = \"2\"\n",
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_results_empty(&results);
 }
 
 #[test]
@@ -158,7 +155,7 @@ fn pipeline_excludes_target_files_from_structural_caps() {
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_results_empty(&results);
 }
 
 #[test]
@@ -182,7 +179,7 @@ fn pipeline_excludes_fixture_files_from_structural_caps() {
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_results_empty(&results);
 }
 
 #[test]
@@ -245,10 +242,8 @@ resolver = \"2\"\n",
         write(root.join(format!("crates/api/src/file{index}.rs")), "");
     }
 
-    let mut results = run_file_tree_pipeline(root);
-    results.sort_by(|left, right| left.file().cmp(&right.file()));
-
-    assert!(results.is_empty(), "{results:#?}");
+    let results = run_file_tree_pipeline(root);
+    assertions::assert_results_empty(&results);
 }
 
 #[test]
@@ -293,7 +288,7 @@ resolver = \"2\"\n",
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_results_empty(&results);
 }
 
 #[test]
@@ -321,14 +316,11 @@ resolver = \"2\"\n",
     );
     write(root.join("crates/skip/src/lib.rs"), "");
 
-    let input = run_file_tree_input(root);
-    let roots = input
-        .roots
-        .into_iter()
-        .map(|root| root.cargo_rel_path)
-        .collect::<Vec<_>>();
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::run::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
 
-    assert_eq!(roots, vec!["crates/api/Cargo.toml".to_owned()]);
+    assertions::assert_root_cargo_paths(&input, &["crates/api/Cargo.toml"]);
 }
 
 #[test]
@@ -346,11 +338,9 @@ fn file_tree_input_supports_owned_roots_with_no_rust_files() {
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
 
-    let input = run_file_tree_input(root);
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let input = crate::run::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
 
-    assert_eq!(input.roots.len(), 1, "{input:#?}");
-    assert_eq!(input.roots[0].cargo_rel_path, "crates/api/Cargo.toml");
-    assert_eq!(input.roots[0].max_module_depth, 0);
-    assert_eq!(input.roots[0].max_sibling_dirs, 0);
-    assert_eq!(input.roots[0].max_sibling_rs_files, 0);
+    assertions::assert_single_zero_structural_root(&input, "crates/api/Cargo.toml");
 }

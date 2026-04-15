@@ -13,4 +13,4 @@ pub use run::{
 };
 
 #[cfg(test)]
-mod ingest_tests;
+mod run_tests;

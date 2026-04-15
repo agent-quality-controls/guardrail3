@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use cargo_toml_parser::parse;
-use g3rs_code_ingestion_types::{
+use g3rs_code_types::{
     G3RsCodeConfigChecksInput, G3RsCodeFileTreeChecksInput, G3RsCodeSourceChecksInput,
     G3RsCodeStructuralCapRoot,
 };
