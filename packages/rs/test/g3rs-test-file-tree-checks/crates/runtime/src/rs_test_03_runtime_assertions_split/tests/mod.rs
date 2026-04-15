@@ -364,6 +364,74 @@ fn reports_sidecar_importing_sibling_production_module() {
 }
 
 #[test]
+fn allows_nested_sidecar_to_import_its_required_nested_assertions_module() {
+    let component = with_sidecar(
+        {
+            let mut component = component(
+                "",
+                "crates/runtime",
+                Some("demo_runtime"),
+                true,
+                Some("demo_assertions"),
+            );
+            component.runtime_dev_dependencies =
+                BTreeSet::from(["demo_assertions".to_owned()]);
+            component.assertions_dependencies =
+                BTreeSet::from(["demo_runtime".to_owned()]);
+            component
+        },
+        "crates/runtime/src/foo/rule_tests/mod.rs",
+        "crates/assertions/src/foo/rule.rs",
+    );
+
+    let results = run_input(input(
+        vec![
+            file(
+                "crates/runtime/src/foo/rule.rs",
+                G3RsTestFileKind::Source,
+                Some(""),
+                Some("rule"),
+                Some("demo_assertions"),
+                "pub fn value() -> u8 { 1 }\n",
+            ),
+            file(
+                "crates/runtime/src/foo/rule_tests/mod.rs",
+                G3RsTestFileKind::InternalSidecarMod,
+                Some(""),
+                Some("rule"),
+                Some("demo_assertions"),
+                "mod golden;\n",
+            ),
+            file(
+                "crates/runtime/src/foo/rule_tests/golden.rs",
+                G3RsTestFileKind::InternalSidecarSupport,
+                Some(""),
+                Some("rule"),
+                Some("demo_assertions"),
+                "use demo_assertions::foo::rule::assert_runtime;\n#[test]\nfn owned_sidecar() { assert_runtime(); }\n",
+            ),
+            file(
+                "crates/assertions/src/foo/rule.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some(""),
+                Some("rule"),
+                Some("demo_assertions"),
+                "pub fn assert_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
+            ),
+        ],
+        vec![component],
+    ));
+
+    assert!(
+        results.iter().all(|result| {
+            !(result.id() == "RS-TEST-FILETREE-03"
+                && result.title() == "sidecar imports sibling assertions module")
+        }),
+        "unexpected sibling assertions error\nactual={results:#?}"
+    );
+}
+
+#[test]
 fn reports_test_harness_outside_runtime_assertions_split() {
     let results = run_input(input(
         vec![file(

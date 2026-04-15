@@ -199,17 +199,59 @@ pub(super) fn first_disallowed_local_package<'a>(
 pub(super) fn foreign_assertions_module_target<'a>(
     path_segments: &'a [String],
     assertions_package_name: Option<&str>,
+    sidecar_rel_path: &str,
     owner_module_name: &str,
 ) -> Option<&'a str> {
     let assertions_package_name = assertions_package_name?;
     let [first, second, ..] = path_segments else {
         return None;
     };
-    if first != assertions_package_name
-        || second == owner_module_name
-        || (owner_module_name == "lib" && path_segments.len() == 2)
-    {
+    if first != assertions_package_name {
         return None;
     }
+
+    let expected_prefix = expected_assertions_module_prefix(sidecar_rel_path, owner_module_name);
+    if expected_prefix.is_empty() {
+        return (path_segments.len() > 2).then_some(second.as_str());
+    }
+
+    let actual_prefix = &path_segments[1..];
+    if actual_prefix.starts_with(&expected_prefix) {
+        return None;
+    }
+
     Some(second.as_str())
+}
+
+fn expected_assertions_module_prefix(sidecar_rel_path: &str, owner_module_name: &str) -> Vec<String> {
+    let rel_after_src = sidecar_rel_path
+        .split_once("/src/")
+        .map_or(sidecar_rel_path, |(_, suffix)| suffix);
+
+    let fabricated_assertions_rel = if let Some((before_rule_tests, _)) =
+        rel_after_src.split_once("/rule_tests/")
+    {
+        format!("{before_rule_tests}/{owner_module_name}.rs")
+    } else if let Some((before_flat_tests, _)) = rel_after_src.split_once("_tests/") {
+        format!("{before_flat_tests}.rs")
+    } else {
+        return Vec::new();
+    };
+
+    assertions_module_prefix_from_rel_path(&fabricated_assertions_rel)
+}
+
+fn assertions_module_prefix_from_rel_path(rel_path: &str) -> Vec<String> {
+    let rel_without_ext = rel_path.strip_suffix(".rs").unwrap_or(rel_path);
+    let mut segments = rel_without_ext
+        .split('/')
+        .filter(|segment| !segment.is_empty())
+        .map(str::to_owned)
+        .collect::<Vec<_>>();
+    if segments.last().is_some_and(|segment| segment == "lib") {
+        let _ = segments.pop();
+    } else if segments.last().is_some_and(|segment| segment == "mod") {
+        let _ = segments.pop();
+    }
+    segments
 }
