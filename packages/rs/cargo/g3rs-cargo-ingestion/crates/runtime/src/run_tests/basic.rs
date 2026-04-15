@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+use g3rs_cargo_ingestion_assertions::run as assertions;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -68,7 +69,7 @@ fn ingests_workspace_root_with_members_for_config_checks() {
         "#,
     );
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("ingestion should succeed for a valid workspace root");
 
     assert_eq!(input.root.cargo_rel_path, "Cargo.toml");
@@ -104,7 +105,7 @@ fn ingests_hybrid_root_with_package_fallback_fields() {
         "#,
     );
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("ingestion should succeed for a valid hybrid root");
 
     assert_eq!(
@@ -140,7 +141,7 @@ fn guardrail3_rs_toml_drives_profile_and_ignores_legacy_guardrail3_toml() {
         "[profile]\nname = \"service\"\n\n[[escape_hatches]]\nfamily = \"cargo\"\nfile = \"Cargo.toml\"\nkind = \"lint_allow\"\nselector = \"clippy:wrong\"\nreason = \"wrong\"\n",
     );
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("config ingestion should succeed with rust-only policy");
 
     match &input.root.rust_policy {
@@ -166,13 +167,10 @@ fn malformed_guardrail3_rs_toml_degrades_to_rust_policy_parse_error() {
     );
     write(root.join("guardrail3-rs.toml"), "profile = [");
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("config ingestion should keep rust-policy parse failures in state");
 
-    assert!(matches!(
-        input.root.rust_policy,
-        g3rs_cargo_types::G3RsCargoRustPolicyState::ParseError { .. }
-    ));
+    assertions::assert_rust_policy_parse_error(&input.root.rust_policy);
 }
 
 #[test]
@@ -187,7 +185,7 @@ fn legacy_guardrail3_toml_is_ignored() {
     );
     write(root.join("guardrail3.toml"), "[profile");
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("legacy guardrail3.toml must be ignored");
 
     assert!(matches!(
@@ -208,13 +206,10 @@ fn invalid_guardrail3_rs_profile_degrades_to_rust_policy_parse_error() {
     );
     write(root.join("guardrail3-rs.toml"), "profile = []\n");
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("config ingestion should keep rust-policy shape failures in state");
 
-    assert!(matches!(
-        input.root.rust_policy,
-        g3rs_cargo_types::G3RsCargoRustPolicyState::ParseError { .. }
-    ));
+    assertions::assert_rust_policy_parse_error(&input.root.rust_policy);
 }
 
 #[test]
@@ -240,13 +235,10 @@ fn invalid_guardrail3_rs_waiver_degrades_to_rust_policy_parse_error() {
         "#,
     );
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("config ingestion should keep invalid waiver shape in state");
 
-    assert!(matches!(
-        input.root.rust_policy,
-        g3rs_cargo_types::G3RsCargoRustPolicyState::ParseError { .. }
-    ));
+    assertions::assert_rust_policy_parse_error(&input.root.rust_policy);
 }
 
 #[test]
@@ -264,7 +256,7 @@ fn config_ingestion_fails_closed_on_invalid_workspace_members_shape() {
         "#,
     );
 
-    let result = crate::ingest_for_config_checks(&crawl(root));
+    let result = crate::run::ingest_for_config_checks(&crawl(root));
 
     assert!(result.is_err(), "invalid workspace members must fail closed");
 }
@@ -284,7 +276,7 @@ fn config_ingestion_fails_closed_on_invalid_workspace_member_glob() {
         "#,
     );
 
-    let result = crate::ingest_for_config_checks(&crawl(root));
+    let result = crate::run::ingest_for_config_checks(&crawl(root));
 
     assert!(
         result.is_err(),
@@ -316,7 +308,7 @@ fn config_ingestion_fails_closed_on_invalid_workspace_exclude_glob() {
         "#,
     );
 
-    let result = crate::ingest_for_config_checks(&crawl(root));
+    let result = crate::run::ingest_for_config_checks(&crawl(root));
 
     assert!(
         result.is_err(),
@@ -348,7 +340,7 @@ fn config_ingestion_fails_closed_on_invalid_workspace_exclude_shape() {
         "#,
     );
 
-    let result = crate::ingest_for_config_checks(&crawl(root));
+    let result = crate::run::ingest_for_config_checks(&crawl(root));
 
     assert!(
         result.is_err(),
@@ -376,7 +368,7 @@ fn config_ingestion_normalizes_root_member_dot_patterns() {
         "#,
     );
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("root member dot patterns should normalize to the root manifest");
 
     assert_eq!(input.workspace_members.len(), 1, "{:#?}", input.workspace_members);
@@ -411,7 +403,7 @@ fn config_ingestion_keeps_healthy_members_when_another_member_manifest_is_malfor
     );
     write(root.join("crates/broken/Cargo.toml"), "[package");
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("malformed sibling member should not abort config ingestion");
 
     assert_eq!(input.workspace_members.len(), 1, "{:#?}", input.workspace_members);
@@ -433,7 +425,7 @@ fn config_ingestion_skips_missing_declared_member_manifest() {
         "#,
     );
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("missing declared member should be left to filetree checks");
 
     assert!(input.workspace_members.is_empty(), "{:#?}", input.workspace_members);
@@ -465,7 +457,7 @@ fn config_ingestion_preserves_invalid_lints_workspace_shape_per_member() {
         "#,
     );
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("invalid [lints].workspace should remain member-scoped config state");
 
     assert_eq!(input.workspace_members.len(), 1);
@@ -476,7 +468,6 @@ fn config_ingestion_preserves_invalid_lints_workspace_shape_per_member() {
 #[cfg(unix)]
 #[test]
 fn unreadable_root_cargo_toml_fails_ingestion() {
-    use g3rs_cargo_ingestion_types::G3RsCargoIngestionError;
     use std::os::unix::fs::PermissionsExt;
 
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -497,10 +488,10 @@ fn unreadable_root_cargo_toml_fails_ingestion() {
     let crawl = crawl(root);
     let _restore = fs::set_permissions(&cargo_path, fs::Permissions::from_mode(0o644));
 
-    let err =
-        crate::ingest_for_config_checks(&crawl).expect_err("unreadable root Cargo.toml should fail");
+    let err = crate::run::ingest_for_config_checks(&crawl)
+        .expect_err("unreadable root Cargo.toml should fail");
 
-    assert!(matches!(err, G3RsCargoIngestionError::Unreadable { .. }), "{err:?}");
+    assertions::assert_unreadable_error(&err, "Cargo.toml");
 }
 
 #[test]
@@ -540,7 +531,7 @@ fn config_ingestion_keeps_healthy_members_when_another_member_has_invalid_lints_
         "#,
     );
 
-    let input = crate::ingest_for_config_checks(&crawl(root))
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("invalid sibling member must not abort healthy config fan-out");
 
     assert_eq!(input.workspace_members.len(), 2, "{:#?}", input.workspace_members);
@@ -562,8 +553,6 @@ fn config_ingestion_keeps_healthy_members_when_another_member_has_invalid_lints_
 
 #[test]
 fn config_ingestion_fails_closed_on_invalid_workspace_rust_version_before_package_fallback() {
-    use g3rs_cargo_ingestion_types::G3RsCargoIngestionError;
-
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
     git_init(root);
@@ -586,10 +575,10 @@ fn config_ingestion_fails_closed_on_invalid_workspace_rust_version_before_packag
         "#,
     );
 
-    let err = crate::ingest_for_config_checks(&crawl(root))
+    let err = crate::run::ingest_for_config_checks(&crawl(root))
         .expect_err("invalid workspace rust-version must fail before any package fallback");
 
-    assert!(matches!(err, G3RsCargoIngestionError::ParseFailed { .. }), "{err:?}");
+    assertions::assert_parse_failed_error(&err, "Cargo.toml");
 }
 
 #[cfg(unix)]
@@ -634,7 +623,7 @@ fn config_ingestion_skips_unreadable_member_manifest() {
     let crawl = crawl(root);
     let _restore = fs::set_permissions(&secret, fs::Permissions::from_mode(0o644));
 
-    let input = crate::ingest_for_config_checks(&crawl)
+    let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("unreadable sibling member must not abort healthy config fan-out");
 
     assert_eq!(input.workspace_members.len(), 1, "{:#?}", input.workspace_members);
@@ -661,11 +650,8 @@ fn unreadable_guardrail3_rs_toml_degrades_to_rust_policy_unreadable() {
     let crawl = crawl(root);
     let _restore = fs::set_permissions(&guardrail, fs::Permissions::from_mode(0o644));
 
-    let input = crate::ingest_for_config_checks(&crawl)
+    let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("unreadable guardrail3-rs.toml should stay in state");
 
-    assert!(matches!(
-        input.root.rust_policy,
-        g3rs_cargo_types::G3RsCargoRustPolicyState::Unreadable { .. }
-    ));
+    assertions::assert_rust_policy_unreadable(&input.root.rust_policy);
 }

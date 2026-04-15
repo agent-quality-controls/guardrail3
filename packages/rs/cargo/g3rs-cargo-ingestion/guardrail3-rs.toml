@@ -1,0 +1,20 @@
+profile = "library"
+
+allowed_deps = [
+  "cargo-toml-parser",
+  "g3rs-cargo-config-checks",
+  "g3rs-cargo-filetree-checks",
+  "g3rs-cargo-ingestion-assertions",
+  "g3rs-cargo-ingestion-runtime",
+  "g3rs-cargo-ingestion-types",
+  "g3rs-cargo-types",
+  "g3rs-workspace-crawl",
+  "glob",
+  "guardrail3-check-types",
+  "guardrail3-rs-toml-parser",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false
