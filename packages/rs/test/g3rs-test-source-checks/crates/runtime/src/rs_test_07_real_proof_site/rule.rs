@@ -196,6 +196,12 @@ fn path_uses_local_assertions_module(path: &[String]) -> bool {
     path.iter().any(|segment| segment == "assertions")
 }
 
+fn looks_like_proof_helper_name(name: &str) -> bool {
+    ["assert", "require", "expect", "verify", "prove"]
+        .iter()
+        .any(|prefix| name.starts_with(prefix))
+}
+
 fn local_assertion_helper_names<'a>(
     functions: &'a [crate::parse::FunctionInfo],
     imports: &[UseBinding],
@@ -207,31 +213,31 @@ fn local_assertion_helper_names<'a>(
         .iter()
         .filter(|function| !function.is_test)
         .filter(|function| {
-            function.has_assertion_macro
-                || has_owned_assertion_proof(
-                    &crate::parse::TestFunctionInfo {
-                        line: function.line,
-                        name: function.name.clone(),
-                        uses_tokio_test_attr: false,
-                        has_assertion_macro: function.has_assertion_macro,
-                        has_failure_enforcement: function.has_failure_enforcement,
-                        call_paths: function.call_paths.clone(),
-                        path_uses: function.path_uses.clone(),
-                        method_receiver_paths: Vec::new(),
-                        method_names: function.method_names.clone(),
-                        local_call_aliases: function.local_call_aliases.clone(),
-                        field_accesses: function.field_accesses.clone(),
-                        shadowed_idents: function.shadowed_idents.clone(),
-                        should_panic_line: None,
-                        should_panic_has_expected: false,
-                        tautological_assert_lines: Vec::new(),
-                        weak_matches_lines: Vec::new(),
-                    },
-                    imports,
-                    file_function_names,
-                    assertions_package_name,
-                    proof_bearing_assertion_functions,
-                )
+            has_owned_assertion_proof(
+                &crate::parse::TestFunctionInfo {
+                    line: function.line,
+                    name: function.name.clone(),
+                    uses_tokio_test_attr: false,
+                    has_assertion_macro: function.has_assertion_macro,
+                    has_failure_enforcement: function.has_failure_enforcement,
+                    call_paths: function.call_paths.clone(),
+                    path_uses: function.path_uses.clone(),
+                    method_receiver_paths: Vec::new(),
+                    method_names: function.method_names.clone(),
+                    local_call_aliases: function.local_call_aliases.clone(),
+                    field_accesses: function.field_accesses.clone(),
+                    shadowed_idents: function.shadowed_idents.clone(),
+                    should_panic_line: None,
+                    should_panic_has_expected: false,
+                    tautological_assert_lines: Vec::new(),
+                    weak_matches_lines: Vec::new(),
+                },
+                imports,
+                file_function_names,
+                assertions_package_name,
+                proof_bearing_assertion_functions,
+            ) || (looks_like_proof_helper_name(&function.name)
+                && function.has_assertion_macro)
         })
         .map(|function| function.name.as_str())
         .collect::<BTreeSet<_>>();
@@ -240,6 +246,9 @@ fn local_assertion_helper_names<'a>(
         let mut changed = false;
         for function in functions.iter().filter(|function| !function.is_test) {
             if assertion_helpers.contains(function.name.as_str()) {
+                continue;
+            }
+            if !looks_like_proof_helper_name(&function.name) {
                 continue;
             }
             if function.call_paths.iter().any(|path| {
