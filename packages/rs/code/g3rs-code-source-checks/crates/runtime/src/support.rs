@@ -16,6 +16,7 @@ pub(crate) struct CodeSourceRuleInput<'a> {
     pub(crate) content: &'a str,
     pub(crate) source: &'a syn::File,
     pub(crate) is_test: bool,
+    pub(crate) is_shared_crate: bool,
     #[allow(dead_code)] // reason: retained for upcoming profile-sensitive code source rules
     pub(crate) profile_name: Option<&'a str>,
     #[allow(dead_code)] // reason: retained for upcoming lib.rs-only code source rules
@@ -29,6 +30,7 @@ impl<'a> From<&'a G3RsCodeSourceFileAst> for CodeSourceRuleInput<'a> {
             content: &value.source_file.content,
             source: &value.source,
             is_test: value.source_file.is_test,
+            is_shared_crate: false,
             profile_name: value.source_file.profile_name.as_deref(),
             is_library_root: value.source_file.is_library_root,
         }

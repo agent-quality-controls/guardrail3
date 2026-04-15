@@ -69,6 +69,7 @@ pub(crate) struct PublicStructFieldBagInfo {
     pub(crate) line: usize,
     pub(crate) struct_name: String,
     pub(crate) public_field_count: usize,
+    pub(crate) all_fields_public: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

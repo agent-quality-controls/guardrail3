@@ -7,6 +7,7 @@ pub(crate) fn assemble(
     is_test: bool,
     profile_name: Option<String>,
     is_library_root: bool,
+    is_shared_crate: bool,
 ) -> G3RsCodeSourceChecksInput {
     G3RsCodeSourceChecksInput {
         source_file: G3RsSourceFile {
@@ -16,5 +17,6 @@ pub(crate) fn assemble(
             profile_name,
             is_library_root,
         },
+        is_shared_crate,
     }
 }
