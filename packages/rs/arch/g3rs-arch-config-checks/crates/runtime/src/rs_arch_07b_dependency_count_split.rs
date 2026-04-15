@@ -5,17 +5,17 @@ const ID: &str = "RS-ARCH-CONFIG-07";
 const MAX_DEPENDENCIES: usize = 12;
 
 pub(crate) fn check(node: &G3RsArchConfigCrate, results: &mut Vec<G3CheckResult>) {
-    if node.dependency_count <= MAX_DEPENDENCIES {
+    if node.production_dependency_count <= MAX_DEPENDENCIES {
         return;
     }
 
     results.push(G3CheckResult::new(
         ID.to_owned(),
         G3Severity::Error,
-        "crate has too many direct dependencies, must split".to_owned(),
+        "crate has too many production dependencies, must split".to_owned(),
         format!(
-            "Crate `{}` has {} direct dependencies (max {}). Extract groups of related modules into sub-crates under a `crates/` directory.",
-            node.rel_dir, node.dependency_count, MAX_DEPENDENCIES
+            "Crate `{}` has {} production dependencies in `[dependencies]` and `[build-dependencies]` (max {}). Move related code behind smaller crate boundaries so the runtime crate carries fewer direct production links.",
+            node.rel_dir, node.production_dependency_count, MAX_DEPENDENCIES
         ),
         Some(node.cargo_rel_path.clone()),
         None,

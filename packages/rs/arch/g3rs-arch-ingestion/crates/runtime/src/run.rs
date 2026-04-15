@@ -121,7 +121,8 @@ fn collect_config_crates(
             rel_dir: node.rel_dir.clone(),
             cargo_rel_path: node.cargo_rel_path.clone(),
             shared: node.shared,
-            dependency_count: node.dependency_count,
+            production_dependency_count: node.production_dependency_count,
+            dev_dependency_count: node.dev_dependency_count,
             requires_feature_contract: node
                 .lib_rs_rel
                 .as_deref()
@@ -376,7 +377,8 @@ fn build_crate_node(
     let has_all_feature = features.is_some_and(|table| table.contains_key("all"));
     let all_feature_deps = feature_list(features.and_then(|table| table.get("all")));
     let default_feature_deps = feature_list(features.and_then(|table| table.get("default")));
-    let dependency_count = parsed.as_ref().map_or(0, count_dependencies);
+    let (production_dependency_count, dev_dependency_count) =
+        parsed.as_ref().map_or((0, 0), count_dependencies);
     let src_dir = CrawlView::join_rel(dir, "src");
     let (sibling_rs_file_count, sibling_dir_count) = if view.dir_contents(&src_dir).is_some() {
         count_siblings(view, &src_dir, dir, crate_dirs)
@@ -400,7 +402,8 @@ fn build_crate_node(
         has_all_feature,
         all_feature_deps,
         default_feature_deps,
-        dependency_count,
+        production_dependency_count,
+        dev_dependency_count,
         sibling_rs_file_count,
         sibling_dir_count,
         max_module_depth,
@@ -1095,18 +1098,19 @@ fn normalize_path(base: &str, rel: &str) -> String {
     parts.join("/")
 }
 
-fn count_dependencies(parsed: &Value) -> usize {
-    let mut count = 0;
+fn count_dependencies(parsed: &Value) -> (usize, usize) {
+    let mut production_count = 0;
+    let mut dev_count = 0;
     if let Some(deps) = parsed.get("dependencies").and_then(Value::as_table) {
-        count += deps.len();
+        production_count += deps.len();
     }
     if let Some(deps) = parsed.get("build-dependencies").and_then(Value::as_table) {
-        count += deps.len();
+        production_count += deps.len();
     }
     if let Some(deps) = parsed.get("dev-dependencies").and_then(Value::as_table) {
-        count += deps.len();
+        dev_count += deps.len();
     }
-    count
+    (production_count, dev_count)
 }
 
 fn count_siblings(
