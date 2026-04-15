@@ -6,7 +6,8 @@ use crate::test_support::{config_crate, input};
 #[test]
 fn exact_dependency_threshold_stays_quiet() {
     let mut node = config_crate("crate_a");
-    node.dependency_count = 12;
+    node.production_dependency_count = 12;
+    node.dev_dependency_count = 99;
 
     let results = crate::check(&input(vec![node], Vec::new()));
 
@@ -16,7 +17,8 @@ fn exact_dependency_threshold_stays_quiet() {
 #[test]
 fn dependency_threshold_over_limit_fires_config_rule() {
     let mut node = config_crate("crate_a");
-    node.dependency_count = 13;
+    node.production_dependency_count = 13;
+    node.dev_dependency_count = 0;
 
     let results = crate::check(&input(vec![node], Vec::new()));
 
@@ -25,7 +27,7 @@ fn dependency_threshold_over_limit_fires_config_rule() {
         "RS-ARCH-CONFIG-07",
         &[ExpectedRuleResult {
             severity: Some(G3Severity::Error),
-            title: Some("crate has too many direct dependencies, must split"),
+            title: Some("crate has too many production dependencies, must split"),
             file: Some("crate_a/Cargo.toml"),
             inventory: Some(false),
             message: None,

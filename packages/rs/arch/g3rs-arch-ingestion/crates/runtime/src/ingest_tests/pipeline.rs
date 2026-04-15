@@ -851,3 +851,59 @@ thirteen = "1"
             .any(|result| result.id() == "RS-ARCH-FILETREE-07")
     );
 }
+
+#[test]
+fn split_rule_ignores_dev_dependencies_in_hard_config_cap() {
+    let root = tempdir().expect("tempdir");
+
+    fs::write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crate_a"]
+"#,
+    )
+    .expect("root cargo");
+    fs::create_dir_all(root.path().join("crate_a/src")).expect("crate dirs");
+    fs::write(
+        root.path().join("crate_a/Cargo.toml"),
+        r#"
+[package]
+name = "crate_a"
+version = "0.1.0"
+
+[dependencies]
+one = "1"
+two = "1"
+three = "1"
+four = "1"
+five = "1"
+six = "1"
+seven = "1"
+eight = "1"
+nine = "1"
+ten = "1"
+eleven = "1"
+twelve = "1"
+
+[dev-dependencies]
+tempfile = "3"
+serde_json = "1"
+"#,
+    )
+    .expect("crate cargo");
+    fs::write(root.path().join("crate_a/src/lib.rs"), "pub mod api;\n").expect("lib");
+
+    let crawl = crawl(root.path()).expect("crawl");
+    let config_inputs = crate::ingest_for_config_checks(&crawl).expect("config ingest");
+    let config_crate = &config_inputs[0].crates[0];
+    let config_results = check_config(&config_inputs[0]);
+
+    assert_eq!(config_crate.production_dependency_count, 12);
+    assert_eq!(config_crate.dev_dependency_count, 2);
+    assert!(
+        !config_results
+            .iter()
+            .any(|result| result.id() == "RS-ARCH-CONFIG-07")
+    );
+}
