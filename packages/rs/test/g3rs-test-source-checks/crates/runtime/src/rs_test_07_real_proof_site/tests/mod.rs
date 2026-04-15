@@ -198,3 +198,44 @@ fn inventories_owned_assertions_wrapper_over_other_assertions_crate() {
         "tests/wrapper.rs",
     );
 }
+
+#[test]
+fn inventories_define_result_assertions_helper_surface() {
+    let helpers = [
+        "assert_findings",
+        "assert_no_findings",
+        "assert_contains",
+        "assert_has_info",
+        "assert_has_warn",
+        "assert_has_error",
+        "assert_title_count",
+        "assert_message_contains",
+        "assert_title_absent",
+    ];
+
+    for helper in helpers {
+        let rel_path = format!("tests/{helper}.rs");
+        let content = format!(
+            "use demo_assertions::{helper};\n#[test]\nfn prove() {{ {helper}(); }}\n"
+        );
+        let results = run_input(input(
+            vec![
+                file(
+                    "assertions/src/lib.rs",
+                    G3RsTestFileKind::AssertionsModule,
+                    Some("demo_assertions"),
+                    "crate::define_result_assertions!(\"RS-DEMO\");\n",
+                ),
+                file(
+                    &rel_path,
+                    G3RsTestFileKind::ExternalHarness,
+                    Some("demo_assertions"),
+                    &content,
+                ),
+            ],
+            Some("demo_assertions"),
+        ));
+
+        assert_has_inventory(&results, "RS-TEST-SOURCE-07", "test uses shared proof", &rel_path);
+    }
+}
