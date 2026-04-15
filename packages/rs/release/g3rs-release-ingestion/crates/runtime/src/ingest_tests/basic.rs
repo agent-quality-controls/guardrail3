@@ -1,4 +1,5 @@
 use tempfile::tempdir;
+use std::path::Path;
 
 use super::{crawl, git_init, long_readme, write};
 
@@ -233,4 +234,56 @@ publish = false
     assert_eq!(filetree.repo.as_ref().unwrap().publishable_count, 0);
     let filetree_results = g3rs_release_filetree_checks::check(&filetree);
     assert!(filetree_results.is_empty(), "{filetree_results:#?}");
+}
+
+#[test]
+fn relative_nested_validate_path_does_not_fake_missing_manifest_in_dry_run() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("pkg/Cargo.toml"),
+        r#"
+[package]
+name = "demo"
+version = "0.1.0"
+edition = "2024"
+publish = true
+description = "demo crate"
+license = "MIT"
+repository = "https://example.com/demo"
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md"]
+
+[workspace]
+members = []
+resolver = "2"
+"#,
+    );
+    write(root.join("pkg/src/lib.rs"), "pub fn demo() {}\n");
+    write(root.join("pkg/README.md"), &long_readme("Demo"));
+
+    let original_dir = std::env::current_dir().expect("read current directory");
+    std::env::set_current_dir(root).expect("enter fixture root");
+
+    let crawl = crawl(Path::new("pkg"));
+    let config = crate::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
+
+    std::env::set_current_dir(original_dir).expect("restore current directory");
+
+    let dry_run = config.crates[0]
+        .dry_run
+        .as_ref()
+        .expect("published crate should have dry-run result");
+
+    match dry_run {
+        g3rs_release_types::G3RsReleaseDryRunOutcome::Failed(stderr) => {
+            assert!(
+                !stderr.contains("manifest path `pkg/Cargo.toml` does not exist"),
+                "{stderr}"
+            );
+        }
+        g3rs_release_types::G3RsReleaseDryRunOutcome::Passed => {}
+    }
 }
