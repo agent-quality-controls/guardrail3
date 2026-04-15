@@ -4,7 +4,7 @@ use g3rs_clippy_types::{
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
-pub use g3rs_clippy_ingestion_types::G3RsClippyIngestionError as IngestionError;
+pub use crate::error::G3RsClippyIngestionError as IngestionError;
 
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,

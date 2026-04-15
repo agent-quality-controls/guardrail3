@@ -1,0 +1,26 @@
+profile = "library"
+
+allowed_deps = [
+  "cargo-toml-parser",
+  "g3rs-clippy-config-checks-assertions",
+  "clippy-toml-parser",
+  "g3rs-clippy-filetree-checks-assertions",
+  "g3rs-clippy-config-checks",
+  "g3rs-clippy-filetree-checks",
+  "g3rs-clippy-types",
+  "guardrail3-check-types",
+  "g3rs-workspace-crawl",
+  "glob",
+  "guardrail3-rs-toml-parser",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime crate intentionally owns the ingestion pipeline and its close sidecars."

@@ -255,7 +255,7 @@ fn expand_member_pattern(
         let mut matches = Vec::new();
         let mut stack = vec![root_abs_path.to_path_buf()];
         while let Some(dir) = stack.pop() {
-            let Ok(entries) = std::fs::read_dir(&dir) else {
+            let Ok(entries) = crate::fs::read_dir(&dir) else {
                 continue;
             };
             for entry in entries.flatten() {

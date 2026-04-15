@@ -1,6 +1,4 @@
 #[cfg(feature = "api")]
 pub use g3rs_clippy_ingestion_runtime::{
-    ingest_for_config_checks, ingest_for_file_tree_checks,
+    G3RsClippyIngestionError, ingest_for_config_checks, ingest_for_file_tree_checks,
 };
-#[cfg(feature = "api")]
-pub use g3rs_clippy_ingestion_types::G3RsClippyIngestionError;

@@ -1,3 +1,4 @@
+mod error;
 mod fs;
 mod ingest;
 mod parse;
@@ -8,6 +9,8 @@ mod select;
 pub use run::{
     IngestionError, ingest_for_config_checks, ingest_for_file_tree_checks,
 };
+#[cfg(feature = "ingest")]
+pub use error::G3RsClippyIngestionError;
 
 #[cfg(test)]
-mod ingest_tests;
+mod run_tests;
