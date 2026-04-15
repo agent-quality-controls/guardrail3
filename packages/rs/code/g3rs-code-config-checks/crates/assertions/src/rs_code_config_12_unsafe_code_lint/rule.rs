@@ -25,3 +25,13 @@ pub fn assert_deny_error(result: &G3CheckResult, rel_path: &str) {
     assert_eq!(result.line(), None);
     assert!(!result.inventory(), "deny should stay in normal output");
 }
+
+pub fn assert_single_forbid_inventory_info(results: &[G3CheckResult], rel_path: &str) {
+    assert_eq!(results.len(), 1, "unexpected results: {results:#?}");
+    assert_forbid_inventory_info(&results[0], rel_path);
+}
+
+pub fn assert_single_deny_error(results: &[G3CheckResult], rel_path: &str) {
+    assert_eq!(results.len(), 1, "unexpected results: {results:#?}");
+    assert_deny_error(&results[0], rel_path);
+}

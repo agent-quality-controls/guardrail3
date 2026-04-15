@@ -1,4 +1,4 @@
-use g3rs_code_config_checks_types::G3RsCodeExceptionComment;
+use g3rs_code_types::G3RsCodeExceptionComment;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-CODE-CONFIG-07";
