@@ -1,7 +1,7 @@
 use crate::rs_clippy_config_10_missing_type_ban::check;
-use crate::support::expected_required_type_bans;
-use crate::test_support::{findings, input_from_raw, parsed_rust_policy};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_10_missing_type_ban as assertions;
 use guardrail3_rs_toml_parser::RustProfile;
+use test_support::{input_from_raw, input_with_raw, parsed_rust_policy};
 
 #[test]
 fn reports_missing_baseline_type_ban() {
@@ -9,27 +9,13 @@ fn reports_missing_baseline_type_ban() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    let findings = findings(&results);
-    let missing = findings
-        .iter()
-        .filter(|finding| finding.title == "missing type ban")
-        .collect::<Vec<_>>();
-
-    assert_eq!(
-        missing.len(),
-        expected_required_type_bans(true).len(),
-        "{findings:#?}"
-    );
-    assert!(
-        missing
-            .iter()
-            .any(|finding| finding.message.contains("std::collections::HashMap"))
-    );
+    assertions::assert_missing_type_ban_count(&results, 21);
+    assertions::assert_contains_missing_type_ban(&results, "std::collections::HashMap");
 }
 
 #[test]
 fn reports_library_profile_specific_missing_type_ban() {
-    let input = crate::test_support::input_with_raw(
+    let input = input_with_raw(
         "clippy.toml",
         "disallowed-types = []\n",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
@@ -39,14 +25,12 @@ fn reports_library_profile_specific_missing_type_ban() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "missing type ban" && finding.message.contains("std::sync::Mutex")
-    }));
+    assertions::assert_contains_missing_type_ban(&results, "std::sync::Mutex");
 }
 
 #[test]
 fn drops_garde_owned_type_bans_when_garde_is_disabled() {
-    let input = crate::test_support::input_with_raw(
+    let input = input_with_raw(
         "clippy.toml",
         "disallowed-types = []\n",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), false),
@@ -56,14 +40,5 @@ fn drops_garde_owned_type_bans_when_garde_is_disabled() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    let findings = findings(&results);
-    let missing = findings
-        .iter()
-        .filter(|finding| finding.title == "missing type ban")
-        .collect::<Vec<_>>();
-    assert_eq!(
-        missing.len(),
-        expected_required_type_bans(false).len(),
-        "{findings:#?}"
-    );
+    assertions::assert_missing_type_ban_count(&results, 6);
 }

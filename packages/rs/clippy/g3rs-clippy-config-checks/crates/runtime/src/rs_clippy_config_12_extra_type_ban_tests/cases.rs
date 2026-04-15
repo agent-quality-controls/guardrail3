@@ -1,5 +1,6 @@
 use crate::rs_clippy_config_12_extra_type_ban::check;
-use crate::test_support::{findings, input_from_raw};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_12_extra_type_ban as assertions;
+use test_support::input_from_raw;
 
 #[test]
 fn inventories_extra_type_ban() {
@@ -10,9 +11,15 @@ fn inventories_extra_type_ban() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "extra type ban" && finding.message.contains("example::extra")
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "extra type ban",
+            "Additional type ban `example::extra` beyond baseline.",
+            "clippy.toml",
+            true,
+        )],
+    );
 }
 
 #[test]
@@ -21,10 +28,14 @@ fn inventories_clean_state_when_no_extra_type_bans_exist() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(
-        findings(&results)
-            .iter()
-            .any(|finding| { finding.title == "no extra type bans" && finding.inventory })
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "no extra type bans",
+            "No additional type bans beyond the managed baseline.",
+            "clippy.toml",
+            true,
+        )],
     );
 }
 
@@ -34,8 +45,13 @@ fn reports_malformed_type_sections() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "disallowed-types section malformed"
-            && finding.message.contains("disallowed-types[0]")
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "disallowed-types section malformed",
+            "`disallowed-types[0]` must be a string or table, found integer.",
+            "clippy.toml",
+            false,
+        )],
+    );
 }

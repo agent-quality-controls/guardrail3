@@ -1,5 +1,6 @@
 use crate::rs_clippy_config_16_duplicate_bans::check;
-use crate::test_support::{findings, input_from_raw};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_16_duplicate_bans as assertions;
+use test_support::input_from_raw;
 
 #[test]
 fn warns_on_duplicate_ban_entries() {
@@ -10,9 +11,15 @@ fn warns_on_duplicate_ban_entries() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "duplicate ban entry" && finding.message.contains("std::println")
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "duplicate ban entry",
+            "`std::println` appears 2 times in `disallowed-macros`. Remove the duplicate entries.",
+            "clippy.toml",
+            false,
+        )],
+    );
 }
 
 #[test]
@@ -21,10 +28,14 @@ fn inventories_duplicate_free_ban_sections() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(
-        findings(&results).iter().any(|finding| {
-            finding.title == "ban entries are duplicate-free" && finding.inventory
-        })
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "ban entries are duplicate-free",
+            "Managed ban sections contain no duplicate paths.",
+            "clippy.toml",
+            true,
+        )],
     );
 }
 
@@ -37,7 +48,13 @@ fn warns_on_duplicate_method_bans() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "duplicate ban entry" && finding.message.contains("serde_json::from_str")
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "duplicate ban entry",
+            "`serde_json::from_str` appears 2 times in `disallowed-methods`. Remove the duplicate entries.",
+            "clippy.toml",
+            false,
+        )],
+    );
 }

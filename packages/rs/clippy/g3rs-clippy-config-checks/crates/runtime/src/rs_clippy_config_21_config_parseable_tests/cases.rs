@@ -1,17 +1,21 @@
 use crate::rs_clippy_config_21_config_parseable::check;
-use crate::test_support::{baseline_toml, findings, input_from_raw};
-use guardrail3_rs_toml_parser::RustProfile;
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_21_config_parseable as assertions;
+use test_support::input_from_raw;
 
 #[test]
 fn inventories_parseable_clippy_toml() {
-    let input = input_from_raw("clippy.toml", &baseline_toml(RustProfile::Service, true));
+    let input = input_from_raw("clippy.toml", "max-struct-bools = 3\n");
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(
-        findings(&results)
-            .iter()
-            .any(|finding| { finding.title == "clippy.toml parseable" && finding.inventory })
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "clippy.toml parseable",
+            "`clippy.toml` parsed successfully.",
+            "clippy.toml",
+            true,
+        )],
     );
 }
 
@@ -21,10 +25,7 @@ fn errors_on_typed_parse_failures() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "clippy.toml parse error"
-            && finding.message.contains("Failed to parse `clippy.toml`")
-    }));
+    assertions::assert_parse_error_contains(&results, "Failed to parse `clippy.toml`");
 }
 
 #[test]
@@ -33,8 +34,5 @@ fn errors_on_raw_toml_parse_failures() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "clippy.toml parse error"
-            && finding.message.contains("Failed to parse `clippy.toml`")
-    }));
+    assertions::assert_parse_error_contains(&results, "Failed to parse `clippy.toml`");
 }

@@ -1,5 +1,6 @@
 use crate::rs_clippy_config_11_extra_method_ban::check;
-use crate::test_support::{findings, input_from_raw};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_11_extra_method_ban as assertions;
+use test_support::input_from_raw;
 
 #[test]
 fn inventories_extra_method_ban() {
@@ -10,9 +11,15 @@ fn inventories_extra_method_ban() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "extra method ban" && finding.message.contains("example::extra")
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "extra method ban",
+            "Additional method ban `example::extra` beyond baseline.",
+            "clippy.toml",
+            true,
+        )],
+    );
 }
 
 #[test]
@@ -21,9 +28,13 @@ fn inventories_clean_state_when_no_extra_method_bans_exist() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(
-        findings(&results)
-            .iter()
-            .any(|finding| { finding.title == "no extra method bans" && finding.inventory })
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "no extra method bans",
+            "No additional method bans beyond the managed baseline.",
+            "clippy.toml",
+            true,
+        )],
     );
 }

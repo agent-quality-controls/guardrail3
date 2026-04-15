@@ -1,7 +1,7 @@
 use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{raw_parse_error, typed_parse_error, typed_clippy};
+use crate::support::{raw_parse_error, typed_clippy, typed_parse_error};
 
 const ID: &str = "RS-CLIPPY-CONFIG-21";
 

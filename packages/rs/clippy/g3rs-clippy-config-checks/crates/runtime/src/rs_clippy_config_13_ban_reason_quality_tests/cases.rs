@@ -1,5 +1,6 @@
 use crate::rs_clippy_config_13_ban_reason_quality::check;
-use crate::test_support::{findings, input_from_raw};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_13_ban_reason_quality as assertions;
+use test_support::input_from_raw;
 
 #[test]
 fn errors_on_plain_string_ban_entries_without_reason() {
@@ -10,10 +11,15 @@ fn errors_on_plain_string_ban_entries_without_reason() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "ban entry missing reason"
-            && finding.message.contains("serde_json::from_str")
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "ban entry missing reason",
+            "`serde_json::from_str` in `disallowed-methods` must use table format with a `reason` field.",
+            "clippy.toml",
+            false,
+        )],
+    );
 }
 
 #[test]
@@ -26,15 +32,13 @@ fn inventories_reasoned_table_ban_entries() {
     check(&input, &mut results);
 
     assert_eq!(
-        findings(&results),
-        vec![crate::test_support::Finding {
-            id: "RS-CLIPPY-CONFIG-13".to_owned(),
-            severity: guardrail3_check_types::G3Severity::Info,
-            title: "ban entries use reasoned table format".to_owned(),
-            message: "All managed ban entries use table format with a `reason` field.".to_owned(),
-            file: Some("clippy.toml".to_owned()),
-            inventory: true,
-        }]
+        assertions::findings(&results),
+        vec![assertions::info(
+            "ban entries use reasoned table format",
+            "All managed ban entries use table format with a `reason` field.",
+            "clippy.toml",
+            true,
+        )]
     );
 }
 
@@ -44,7 +48,13 @@ fn errors_on_malformed_macro_ban_sections() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "ban section malformed" && finding.message.contains("disallowed-macros[0]")
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "ban section malformed",
+            "`disallowed-macros[0]` must be a string or table, found integer.",
+            "clippy.toml",
+            false,
+        )],
+    );
 }

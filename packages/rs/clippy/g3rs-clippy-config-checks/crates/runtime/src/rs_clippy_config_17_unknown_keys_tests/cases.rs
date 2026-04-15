@@ -1,5 +1,6 @@
 use crate::rs_clippy_config_17_unknown_keys::check;
-use crate::test_support::{findings, input_from_raw};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_17_unknown_keys as assertions;
+use test_support::input_from_raw;
 
 #[test]
 fn warns_on_managed_key_typos() {
@@ -8,15 +9,13 @@ fn warns_on_managed_key_typos() {
     check(&input, &mut results);
 
     assert_eq!(
-        findings(&results),
-        vec![crate::test_support::Finding {
-            id: "RS-CLIPPY-CONFIG-17".to_owned(),
-            severity: guardrail3_check_types::G3Severity::Warn,
-            title: "unrecognized clippy.toml key".to_owned(),
-            message: "Top-level key `too-many-lnes-threshold` looks like a typo of a guardrail-managed clippy key. Check the spelling and correct it.".to_owned(),
-            file: Some("clippy.toml".to_owned()),
-            inventory: false,
-        }]
+        assertions::findings(&results),
+        vec![assertions::warn(
+            "unrecognized clippy.toml key",
+            "Top-level key `too-many-lnes-threshold` looks like a typo of a guardrail-managed clippy key. Check the spelling and correct it.",
+            "clippy.toml",
+            false,
+        )]
     );
 }
 
@@ -26,7 +25,13 @@ fn stays_quiet_for_benign_near_miss_keys() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "no suspicious managed-key typos" && finding.inventory
-    }));
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "no suspicious managed-key typos",
+            "No top-level keys look like typos of guardrail-managed clippy keys.",
+            "clippy.toml",
+            true,
+        )],
+    );
 }

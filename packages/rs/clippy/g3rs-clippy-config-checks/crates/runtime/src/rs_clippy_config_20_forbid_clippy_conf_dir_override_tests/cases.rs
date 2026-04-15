@@ -1,6 +1,7 @@
 use crate::rs_clippy_config_20_forbid_clippy_conf_dir_override::check;
-use crate::test_support::{findings, input_with_raw, override_facts};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_20_forbid_clippy_conf_dir_override as assertions;
 use g3rs_clippy_types::G3RsClippyRustPolicyState;
+use test_support::{input_with_raw, override_facts};
 
 #[test]
 fn inventories_clean_state_when_no_overrides_exist() {
@@ -14,9 +15,7 @@ fn inventories_clean_state_when_no_overrides_exist() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "no clippy config dir overrides found" && finding.inventory
-    }));
+    assertions::assert_no_overrides_inventory(&results);
 }
 
 #[test]
@@ -32,15 +31,13 @@ fn errors_on_override_surface() {
     check(&input, &mut results);
 
     assert_eq!(
-        findings(&results),
-        vec![crate::test_support::Finding {
-            id: "RS-CLIPPY-CONFIG-20".to_owned(),
-            severity: guardrail3_check_types::G3Severity::Error,
-            title: "clippy config dir override is forbidden".to_owned(),
-            message: "`.cargo/config.toml` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model. Remove the `CLIPPY_CONF_DIR` setting from `.cargo/config.toml`.".to_owned(),
-            file: Some(".cargo/config.toml".to_owned()),
-            inventory: false,
-        }]
+        assertions::findings(&results),
+        vec![assertions::error(
+            "clippy config dir override is forbidden",
+            "`.cargo/config.toml` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model. Remove the `CLIPPY_CONF_DIR` setting from `.cargo/config.toml`.",
+            ".cargo/config.toml",
+            false,
+        )]
     );
 }
 
@@ -57,14 +54,12 @@ fn errors_on_malformed_override_surface() {
     check(&input, &mut results);
 
     assert_eq!(
-        findings(&results),
-        vec![crate::test_support::Finding {
-            id: "RS-CLIPPY-CONFIG-20".to_owned(),
-            severity: guardrail3_check_types::G3Severity::Error,
-            title: "cargo config override surface is not parseable".to_owned(),
-            message: "Failed to parse `.cargo/config` while checking for forbidden `CLIPPY_CONF_DIR` overrides: bad env".to_owned(),
-            file: Some(".cargo/config".to_owned()),
-            inventory: false,
-        }]
+        assertions::findings(&results),
+        vec![assertions::error(
+            "cargo config override surface is not parseable",
+            "Failed to parse `.cargo/config` while checking for forbidden `CLIPPY_CONF_DIR` overrides: bad env",
+            ".cargo/config",
+            false,
+        )]
     );
 }

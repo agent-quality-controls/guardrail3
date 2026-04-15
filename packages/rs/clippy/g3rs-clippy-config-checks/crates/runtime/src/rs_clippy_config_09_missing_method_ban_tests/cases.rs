@@ -1,6 +1,6 @@
 use crate::rs_clippy_config_09_missing_method_ban::check;
-use crate::support::expected_method_bans;
-use crate::test_support::{findings, input_from_raw, parse_error_rust_policy, parsed_rust_policy};
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_09_missing_method_ban as assertions;
+use test_support::{input_from_raw, input_with_raw, parse_error_rust_policy, parsed_rust_policy};
 
 #[test]
 fn reports_missing_baseline_method_ban() {
@@ -8,27 +8,13 @@ fn reports_missing_baseline_method_ban() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    let findings = findings(&results);
-    let missing = findings
-        .iter()
-        .filter(|finding| finding.title == "missing method ban")
-        .collect::<Vec<_>>();
-
-    assert_eq!(
-        missing.len(),
-        expected_method_bans(true).len(),
-        "{findings:#?}"
-    );
-    assert!(
-        missing
-            .iter()
-            .any(|finding| finding.message.contains("serde_json::from_str"))
-    );
+    assertions::assert_missing_method_ban_count(&results, 70);
+    assertions::assert_contains_missing_method_ban(&results, "serde_json::from_str");
 }
 
 #[test]
 fn stands_down_when_policy_context_is_invalid() {
-    let input = crate::test_support::input_with_raw(
+    let input = input_with_raw(
         "clippy.toml",
         "disallowed-methods = []\n",
         parse_error_rust_policy("guardrail3-rs.toml", "bad profile"),
@@ -38,12 +24,12 @@ fn stands_down_when_policy_context_is_invalid() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_no_findings(&results);
 }
 
 #[test]
 fn reports_malformed_method_section() {
-    let input = crate::test_support::input_with_raw(
+    let input = input_with_raw(
         "clippy.toml",
         "disallowed-methods = [1]\n",
         parsed_rust_policy(
@@ -57,15 +43,12 @@ fn reports_malformed_method_section() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(findings(&results).iter().any(|finding| {
-        finding.title == "disallowed-methods section malformed"
-            && finding.message.contains("disallowed-methods[0]")
-    }));
+    assertions::assert_contains_malformed_section(&results, "disallowed-methods[0]");
 }
 
 #[test]
 fn drops_garde_owned_method_bans_when_garde_is_disabled() {
-    let input = crate::test_support::input_with_raw(
+    let input = input_with_raw(
         "clippy.toml",
         "disallowed-methods = []\n",
         parsed_rust_policy(
@@ -79,14 +62,5 @@ fn drops_garde_owned_method_bans_when_garde_is_disabled() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    let findings = findings(&results);
-    let missing = findings
-        .iter()
-        .filter(|finding| finding.title == "missing method ban")
-        .collect::<Vec<_>>();
-    assert_eq!(
-        missing.len(),
-        expected_method_bans(false).len(),
-        "{findings:#?}"
-    );
+    assertions::assert_missing_method_ban_count(&results, 26);
 }
