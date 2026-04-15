@@ -3,11 +3,25 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-ARCH-CONFIG-05";
 
+fn is_allowed_test_edge(edge: &G3RsArchDependencyEdge) -> bool {
+    (edge.source_rel_dir == "crates/assertions"
+        && edge.resolved_target_rel.as_deref() == Some("crates/runtime"))
+        || (edge.source_rel_dir == "crates/runtime"
+            && edge.section == "dev-dependencies"
+            && matches!(
+                edge.resolved_target_rel.as_deref(),
+                Some("crates/assertions" | "crates/test_support")
+            ))
+}
+
 pub(crate) fn check(edge: &G3RsArchDependencyEdge, results: &mut Vec<G3CheckResult>) {
     let Some(target_rel) = &edge.resolved_target_rel else {
         return;
     };
     if !edge.target_is_crate {
+        return;
+    }
+    if is_allowed_test_edge(edge) {
         return;
     }
 
@@ -46,3 +60,7 @@ pub(crate) fn check(edge: &G3RsArchDependencyEdge, results: &mut Vec<G3CheckResu
         None,
     ));
 }
+
+#[cfg(test)]
+#[path = "rs_arch_05_no_boundary_crossing_tests/mod.rs"]
+mod tests;

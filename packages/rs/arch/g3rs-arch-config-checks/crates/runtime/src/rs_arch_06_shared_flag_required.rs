@@ -5,6 +5,17 @@ use crate::run::CrateMap;
 
 const ID: &str = "RS-ARCH-CONFIG-06";
 
+fn is_allowed_test_edge(edge: &G3RsArchDependencyEdge) -> bool {
+    (edge.source_rel_dir == "crates/assertions"
+        && edge.resolved_target_rel.as_deref() == Some("crates/runtime"))
+        || (edge.source_rel_dir == "crates/runtime"
+            && edge.section == "dev-dependencies"
+            && matches!(
+                edge.resolved_target_rel.as_deref(),
+                Some("crates/assertions" | "crates/test_support")
+            ))
+}
+
 pub(crate) fn check(
     edge: &G3RsArchDependencyEdge,
     crate_map: &CrateMap<'_>,
@@ -14,6 +25,9 @@ pub(crate) fn check(
         return;
     };
     if !edge.target_is_crate {
+        return;
+    }
+    if is_allowed_test_edge(edge) {
         return;
     }
     let Some(_target_node) = crate_map.get(target_rel.as_str()) else {
@@ -54,3 +68,7 @@ pub(crate) fn check(
         None,
     ));
 }
+
+#[cfg(test)]
+#[path = "rs_arch_06_shared_flag_required_tests/mod.rs"]
+mod tests;

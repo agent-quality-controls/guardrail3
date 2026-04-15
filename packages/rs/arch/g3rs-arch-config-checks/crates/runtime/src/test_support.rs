@@ -24,6 +24,27 @@ pub(crate) fn input(
     }
 }
 
+pub(crate) fn dependency_edge(
+    source_rel_dir: &str,
+    target_rel_dir: &str,
+    section: &str,
+) -> G3RsArchDependencyEdge {
+    G3RsArchDependencyEdge {
+        source_rel_dir: source_rel_dir.to_owned(),
+        source_cargo_rel: join_rel(source_rel_dir, "Cargo.toml"),
+        dep_alias: target_rel_dir
+            .rsplit_once('/')
+            .map_or_else(|| target_rel_dir.to_owned(), |(_, tail)| tail.to_owned()),
+        raw_path: format!("../{}", target_rel_dir.rsplit_once('/').map_or(target_rel_dir, |(_, tail)| tail)),
+        resolved_target_rel: Some(target_rel_dir.to_owned()),
+        target_is_crate: true,
+        section: section.to_owned(),
+        crossed_boundary: Some(g3rs_arch_types::G3RsArchBoundaryRef::RootWorkspace),
+        is_direct_child: false,
+        target_shared: false,
+    }
+}
+
 fn join_rel(dir: &str, child: &str) -> String {
     if dir.is_empty() {
         child.to_owned()
