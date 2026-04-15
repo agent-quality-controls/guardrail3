@@ -36,7 +36,7 @@ name = "g3rs-cargo-filetree-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-cargo-filetree-checks-runtime",
- "g3rs-cargo-filetree-checks-types",
+ "g3rs-cargo-types",
 ]
 
 [[package]]
@@ -52,16 +52,8 @@ name = "g3rs-cargo-filetree-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-cargo-filetree-checks-assertions",
- "g3rs-cargo-filetree-checks-types",
  "g3rs-cargo-types",
  "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-cargo-filetree-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-cargo-types",
 ]
 
 [[package]]
@@ -69,12 +61,36 @@ name = "g3rs-cargo-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "guardrail3-rs-toml-parser",
  "toml",
 ]
 
 [[package]]
 name = "guardrail3-check-types"
 version = "0.1.0"
+
+[[package]]
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "hashbrown"

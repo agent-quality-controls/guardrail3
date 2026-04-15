@@ -6,6 +6,7 @@ description = "Assertions for g3 cargo filetree checks tests"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
+publish = false
 
 [lints]
 workspace = true
@@ -14,6 +15,9 @@ workspace = true
 default = ["all"]
 all = ["checks"]
 checks = []
+
+[package.metadata.guardrail3]
+shared = true
 
 [dependencies]
 g3rs-cargo-filetree-checks-runtime = { path = "../runtime", version = "0.1.0" }

@@ -1,4 +1,4 @@
-use g3rs_cargo_filetree_checks_types::G3RsCargoFileTreeChecksInput;
+use g3rs_cargo_types::G3RsCargoFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsCargoFileTreeChecksInput) -> Vec<G3CheckResult> {
@@ -30,5 +30,8 @@ pub fn check(input: &G3RsCargoFileTreeChecksInput) -> Vec<G3CheckResult> {
 }
 
 #[cfg(test)]
+use g3rs_cargo_filetree_checks_assertions as _;
+
+#[cfg(test)]
 #[path = "run_tests/mod.rs"]
-mod tests;
+mod run_tests;

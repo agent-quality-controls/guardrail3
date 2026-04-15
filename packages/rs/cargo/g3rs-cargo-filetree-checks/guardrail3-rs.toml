@@ -1,0 +1,10 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-cargo-filetree-checks-assertions",
+  "g3rs-cargo-types",
+  "guardrail3-check-types",
+]
+
+[checks]
+garde = false
