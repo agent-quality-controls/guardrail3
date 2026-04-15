@@ -1,0 +1,26 @@
+[package]
+name = "test_support"
+version = "0.1.0"
+edition = "2024"
+description = "Generic test input builders for g3 clippy filetree checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+publish = false
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["support"]
+support = []
+
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+g3rs-clippy-types = { path = "../../../g3rs-clippy-types", version = "0.1.0" }

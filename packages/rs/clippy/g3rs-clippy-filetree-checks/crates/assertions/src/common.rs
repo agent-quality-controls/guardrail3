@@ -2,11 +2,11 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
-    pub severity: G3Severity,
-    pub title: &'a str,
-    pub message: &'a str,
-    pub file: Option<&'a str>,
-    pub inventory: bool,
+    severity: G3Severity,
+    title: &'a str,
+    message: &'a str,
+    file: Option<&'a str>,
+    inventory: bool,
 }
 
 #[must_use]
@@ -62,6 +62,10 @@ pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[F
     assert_eq!(findings(results, id), expected_vec);
 }
 
+pub(crate) fn assert_no_findings(results: &[G3CheckResult], id: &str) {
+    assert!(findings(results, id).is_empty());
+}
+
 #[must_use]
 pub(crate) fn finding<'a>(
     severity: G3Severity,
@@ -89,6 +93,10 @@ macro_rules! define_result_assertions {
             expected: &[Finding<'_>],
         ) {
             crate::common::assert_findings(results, $id, expected);
+        }
+
+        pub fn assert_no_findings(results: &[guardrail3_check_types::G3CheckResult]) {
+            crate::common::assert_no_findings(results, $id);
         }
 
         #[must_use]

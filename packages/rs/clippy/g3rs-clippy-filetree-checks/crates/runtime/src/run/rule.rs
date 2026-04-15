@@ -1,4 +1,4 @@
-use g3rs_clippy_filetree_checks_types::G3RsClippyFileTreeChecksInput;
+use g3rs_clippy_types::G3RsClippyFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsClippyFileTreeChecksInput) -> Vec<G3CheckResult> {
@@ -9,7 +9,3 @@ pub fn check(input: &G3RsClippyFileTreeChecksInput) -> Vec<G3CheckResult> {
 
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod tests;

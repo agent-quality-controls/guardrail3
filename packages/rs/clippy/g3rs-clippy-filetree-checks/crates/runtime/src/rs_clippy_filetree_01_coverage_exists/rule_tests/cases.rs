@@ -1,12 +1,15 @@
-use g3rs_clippy_filetree_checks_assertions::rs_clippy_filetree_01_coverage_exists::{
+use g3rs_clippy_filetree_checks_assertions::rs_clippy_filetree_01_coverage_exists::rule::{
     assert_findings, error, info,
 };
-
-use crate::test_support::input;
+use test_support::input;
 
 #[test]
 fn inventories_when_workspace_root_has_preferred_clippy_config() {
-    let results = crate::check(&input(Some(".clippy.toml"), &[]));
+    let mut results = Vec::new();
+    super::super::rule::check(
+        &input(Some(".clippy.toml"), &[]),
+        &mut results,
+    );
 
     assert_findings(
         &results,
@@ -21,7 +24,8 @@ fn inventories_when_workspace_root_has_preferred_clippy_config() {
 
 #[test]
 fn errors_when_workspace_root_has_no_clippy_config() {
-    let results = crate::check(&input(None, &[]));
+    let mut results = Vec::new();
+    super::super::rule::check(&input(None, &[]), &mut results);
 
     assert_findings(
         &results,

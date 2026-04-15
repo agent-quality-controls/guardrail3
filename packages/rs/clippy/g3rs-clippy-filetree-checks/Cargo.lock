@@ -36,7 +36,7 @@ name = "g3rs-clippy-filetree-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-clippy-filetree-checks-runtime",
- "g3rs-clippy-filetree-checks-types",
+ "g3rs-clippy-types",
 ]
 
 [[package]]
@@ -52,15 +52,9 @@ name = "g3rs-clippy-filetree-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-clippy-filetree-checks-assertions",
- "g3rs-clippy-filetree-checks-types",
- "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-clippy-filetree-checks-types"
-version = "0.1.0"
-dependencies = [
  "g3rs-clippy-types",
+ "guardrail3-check-types",
+ "test_support",
 ]
 
 [[package]]
@@ -187,6 +181,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "test_support"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-types",
 ]
 
 [[package]]

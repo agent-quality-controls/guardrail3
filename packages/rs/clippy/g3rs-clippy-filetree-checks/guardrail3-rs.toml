@@ -1,0 +1,11 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-clippy-filetree-checks-assertions",
+  "g3rs-clippy-types",
+  "guardrail3-check-types",
+  "test_support",
+]
+
+[checks]
+garde = false

@@ -1,4 +1,4 @@
-use g3rs_clippy_filetree_checks_types::G3RsClippyFileTreeChecksInput;
+use g3rs_clippy_types::G3RsClippyFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-CLIPPY-FILETREE-01";
@@ -26,7 +26,3 @@ pub(crate) fn check(input: &G3RsClippyFileTreeChecksInput, results: &mut Vec<G3C
         )),
     }
 }
-
-#[cfg(test)]
-#[path = "rs_clippy_filetree_01_coverage_exists_tests/mod.rs"]
-mod tests;
