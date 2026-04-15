@@ -4,6 +4,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 const ID: &str = "RS-RELEASE-FILETREE-02";
 
 pub(crate) fn check(repo: &G3RsReleaseFileTreeRepo, results: &mut Vec<G3CheckResult>) {
+    if repo.publishable_count == 0 {
+        return;
+    }
+
     if repo.release_plz_exists {
         results.push(
             G3CheckResult::new(
@@ -44,5 +48,18 @@ mod tests {
         assert_eq!(results[0].id(), "RS-RELEASE-FILETREE-02");
         assert_eq!(results[0].title(), "release-plz.toml missing");
         assert!(!results[0].inventory());
+    }
+
+    #[test]
+    fn skips_when_workspace_has_no_publishable_crates() {
+        let mut input = repo_input();
+        let repo = input.repo.as_mut().unwrap();
+        repo.publishable_count = 0;
+        repo.release_plz_exists = false;
+        let mut results = Vec::new();
+
+        check(input.repo.as_ref().unwrap(), &mut results);
+
+        assert!(results.is_empty());
     }
 }

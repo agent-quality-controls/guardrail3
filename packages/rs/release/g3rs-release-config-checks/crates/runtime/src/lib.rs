@@ -6,6 +6,7 @@ use semver as _;
 #[cfg(test)]
 use g3rs_release_config_checks_assertions as _;
 
+mod rs_release_config_00_publish_must_be_explicit;
 mod rs_release_config_01_description_present;
 mod rs_release_config_02_license_present;
 mod rs_release_config_03_repository_present;

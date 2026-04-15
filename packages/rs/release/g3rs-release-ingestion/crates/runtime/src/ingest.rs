@@ -56,6 +56,7 @@ struct CrateBase {
     cargo_rel_path: String,
     cargo_abs_path: PathBuf,
     cargo: CargoToml,
+    publish_declared: bool,
     publishable: bool,
     is_binary: bool,
     is_library: bool,
@@ -183,6 +184,7 @@ pub(crate) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
             cargo_rel_path: krate.cargo_rel_path.clone(),
             cargo: krate.cargo.clone(),
             workspace_package: root_workspace_package.clone(),
+            publish_declared: krate.publish_declared,
             publishable: krate.publishable,
             is_binary: krate.is_binary,
             is_library: krate.is_library,
@@ -239,6 +241,7 @@ pub(crate) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
                 .map(|edge| G3RsReleaseConfigEdge {
                     crate_name: krate.name.clone(),
                     cargo_rel_path: krate.cargo_rel_path.clone(),
+                    source_publishable: krate.publishable,
                     dep_name: edge.dep_name,
                     dep_package_name: edge.dep_package_name.clone(),
                     section_label: edge.section_label,
@@ -259,6 +262,7 @@ pub(crate) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
 
     let repo_filetree = G3RsReleaseFileTreeRepo {
         cargo_rel_path: "Cargo.toml".to_owned(),
+        publishable_count,
         license_rel_path: ["LICENSE", "LICENSE-MIT", "LICENSE-APACHE", "LICENSE.md"]
             .iter()
             .find(|name| file_exists(crawl, name))
@@ -517,6 +521,7 @@ fn build_crate_base(
     let name = package
         .and_then(|package| package.name.clone())
         .unwrap_or_else(|| krate.cargo_rel_path.clone());
+    let publish_declared = publish_declared(package);
     let publishable = publishable(package, workspace_package);
     let is_binary = is_binary_crate(crawl, &krate.rel_dir, &krate.cargo);
     let binary_target_names = binary_target_names(crawl, &krate.rel_dir, &krate.cargo);
@@ -535,6 +540,7 @@ fn build_crate_base(
         cargo_rel_path: krate.cargo_rel_path.clone(),
         cargo_abs_path: krate.cargo_abs_path.clone(),
         cargo: krate.cargo.clone(),
+        publish_declared,
         publishable,
         is_binary,
         is_library: is_library_crate(crawl, &krate.rel_dir, &krate.cargo),
@@ -883,7 +889,7 @@ fn publishable(
     };
 
     match package.publish.as_ref() {
-        None => true,
+        None => false,
         Some(InheritableValue::Value(VecStringOrBool::Bool(false))) => false,
         Some(InheritableValue::Value(VecStringOrBool::VecString(values))) => !values.is_empty(),
         Some(InheritableValue::Value(VecStringOrBool::Bool(true))) => true,
@@ -894,6 +900,12 @@ fn publishable(
             Some(VecStringOrBool::Bool(true)) => true,
         },
     }
+}
+
+fn publish_declared(package: Option<&PackageSection>) -> bool {
+    package
+        .and_then(|package| package.publish.as_ref())
+        .is_some()
 }
 
 fn inherited_string_present(

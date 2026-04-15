@@ -6,6 +6,10 @@ use crate::support::info;
 const ID: &str = "RS-RELEASE-CONFIG-16";
 
 pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
+    if repo.publishable_count == 0 {
+        return;
+    }
+
     let Some(publish) = &repo.publish_setting else {
         return;
     };

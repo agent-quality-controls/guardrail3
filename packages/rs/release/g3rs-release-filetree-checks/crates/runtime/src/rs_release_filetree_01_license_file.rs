@@ -5,6 +5,10 @@ const ID: &str = "RS-RELEASE-FILETREE-01";
 const ALLOWED_LICENSE_PATHS: &[&str] = &["LICENSE", "LICENSE-MIT", "LICENSE-APACHE", "LICENSE.md"];
 
 pub(crate) fn check(repo: &G3RsReleaseFileTreeRepo, results: &mut Vec<G3CheckResult>) {
+    if repo.publishable_count == 0 {
+        return;
+    }
+
     match &repo.license_rel_path {
         Some(rel_path) if ALLOWED_LICENSE_PATHS.contains(&rel_path.as_str()) => {
             results.push(
@@ -58,5 +62,18 @@ mod tests {
         assert_eq!(results[0].id(), "RS-RELEASE-FILETREE-01");
         assert_eq!(results[0].title(), "LICENSE file missing");
         assert!(!results[0].inventory());
+    }
+
+    #[test]
+    fn skips_when_workspace_has_no_publishable_crates() {
+        let mut input = repo_input();
+        let repo = input.repo.as_mut().unwrap();
+        repo.publishable_count = 0;
+        repo.license_rel_path = None;
+        let mut results = Vec::new();
+
+        check(input.repo.as_ref().unwrap(), &mut results);
+
+        assert!(results.is_empty());
     }
 }

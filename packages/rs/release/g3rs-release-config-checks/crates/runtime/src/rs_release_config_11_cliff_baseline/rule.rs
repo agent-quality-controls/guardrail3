@@ -9,6 +9,10 @@ const REQUIRED_PREFIXES: &[&str] = &[
 ];
 
 pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
+    if repo.publishable_count == 0 {
+        return;
+    }
+
     if !repo.cliff_exists {
         return;
     }

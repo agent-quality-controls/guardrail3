@@ -46,6 +46,7 @@ commit_parsers = [
 name = "demo"
 version = "0.1.0"
 edition = "2024"
+publish = true
 description = "demo crate"
 license = "MIT"
 repository = "https://example.com/demo"
@@ -68,6 +69,7 @@ include = ["src/**", "Cargo.toml", "README.md", "LICENSE"]
 
     let filetree =
         crate::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    assert_eq!(filetree.repo.as_ref().unwrap().publishable_count, 1);
     assert_eq!(filetree.repo.as_ref().unwrap().license_rel_path.as_deref(), Some("LICENSE"));
     assert!(filetree.repo.as_ref().unwrap().release_plz_exists);
     assert!(filetree.repo.as_ref().unwrap().cliff_exists);
@@ -142,6 +144,7 @@ members = ["crates/demo"]
 resolver = "2"
 
 [workspace.package]
+publish = true
 readme = "README.md"
 description = "workspace description"
 license = "MIT"
@@ -156,6 +159,7 @@ repository = "https://example.com/workspace"
 name = "demo"
 version = "0.1.0"
 edition = "2024"
+publish.workspace = true
 readme.workspace = true
 description.workspace = true
 license.workspace = true
@@ -176,4 +180,57 @@ repository.workspace = true
         crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     assert_eq!(source.readmes.len(), 1);
     assert_eq!(source.readmes[0].readme_rel_path, "README.md");
+}
+
+#[test]
+fn skips_release_burden_when_workspace_has_only_non_publishable_crates() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/public", "crates/internal"]
+resolver = "2"
+"#,
+    );
+    write(
+        root.join("crates/public/Cargo.toml"),
+        r#"
+[package]
+name = "public"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+internal = { path = "../internal", version = "0.1.0" }
+"#,
+    );
+    write(root.join("crates/public/src/lib.rs"), "pub fn public() {}\n");
+    write(
+        root.join("crates/internal/Cargo.toml"),
+        r#"
+[package]
+name = "internal"
+version = "0.1.0"
+edition = "2024"
+publish = false
+"#,
+    );
+    write(root.join("crates/internal/src/lib.rs"), "pub fn internal() {}\n");
+
+    let crawl = crawl(root);
+
+    let config = crate::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
+    let config_results = g3rs_release_config_checks::check(&config);
+    assert!(config_results.is_empty(), "{config_results:#?}");
+
+    let filetree =
+        crate::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    assert_eq!(filetree.repo.as_ref().unwrap().publishable_count, 0);
+    let filetree_results = g3rs_release_filetree_checks::check(&filetree);
+    assert!(filetree_results.is_empty(), "{filetree_results:#?}");
 }

@@ -9,6 +9,7 @@ pub(crate) fn repo_input() -> G3RsReleaseFileTreeChecksInput {
     G3RsReleaseFileTreeChecksInput {
         repo: Some(G3RsReleaseFileTreeRepo {
             cargo_rel_path: "Cargo.toml".to_owned(),
+            publishable_count: 1,
             license_rel_path: Some("LICENSE".to_owned()),
             release_plz_rel_path: "release-plz.toml".to_owned(),
             release_plz_exists: true,

@@ -6,6 +6,10 @@ use crate::support::{info, warn};
 const ID: &str = "RS-RELEASE-CONFIG-15";
 
 pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
+    if repo.publishable_count == 0 {
+        return;
+    }
+
     if repo.semver_checks_installed {
         results.push(info(
             ID,
