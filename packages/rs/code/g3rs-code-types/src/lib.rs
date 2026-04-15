@@ -46,6 +46,7 @@ pub struct G3RsSourceFile {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsCodeSourceChecksInput {
     pub source_file: G3RsSourceFile,
+    pub is_shared_crate: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -11,7 +11,15 @@ pub fn check(input: &G3RsCodeSourceChecksInput) -> Vec<G3CheckResult> {
             return results;
         }
     };
-    let rule_input = crate::support::CodeSourceRuleInput::from(&parsed);
+    let rule_input = crate::support::CodeSourceRuleInput {
+        rel_path: &parsed.source_file.rel_path,
+        content: &parsed.source_file.content,
+        source: &parsed.source,
+        is_test: parsed.source_file.is_test,
+        is_shared_crate: input.is_shared_crate,
+        profile_name: parsed.source_file.profile_name.as_deref(),
+        is_library_root: parsed.source_file.is_library_root,
+    };
     let mut results = Vec::new();
 
     crate::rs_code_ast_01_crate_level_allow::check(&rule_input, &mut results);

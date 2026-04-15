@@ -4,6 +4,14 @@ use g3rs_code_source_checks_types::G3RsSourceFile;
 use guardrail3_check_types::G3CheckResult;
 
 pub(super) fn check_source(rel_path: &str, content: &str) -> Vec<G3CheckResult> {
+    check_source_with_shared(rel_path, content, false)
+}
+
+pub(super) fn check_source_with_shared(
+    rel_path: &str,
+    content: &str,
+    is_shared_crate: bool,
+) -> Vec<G3CheckResult> {
     let source = crate::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
     let parsed = G3RsCodeSourceFileAst {
@@ -17,6 +25,10 @@ pub(super) fn check_source(rel_path: &str, content: &str) -> Vec<G3CheckResult> 
         source,
     };
     let input = CodeSourceRuleInput::from(&parsed);
+    let input = CodeSourceRuleInput {
+        is_shared_crate,
+        ..input
+    };
     let mut results = Vec::new();
     check(&input, &mut results);
     results

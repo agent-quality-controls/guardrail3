@@ -533,10 +533,18 @@ impl<'source> Visit<'source> for PublicStructFieldBagVisitor {
                 _ => 0,
             };
             if public_field_count > 0 {
+                let all_fields_public = match &item_struct.fields {
+                    syn::Fields::Named(fields) => fields
+                        .named
+                        .iter()
+                        .all(|field| matches!(field.vis, syn::Visibility::Public(_))),
+                    _ => false,
+                };
                 self.out.push(PublicStructFieldBagInfo {
                     line: helpers::span_line(item_struct.ident.span()),
                     struct_name: item_struct.ident.to_string(),
                     public_field_count,
+                    all_fields_public,
                 });
             }
         }

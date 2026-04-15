@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::{CargoToml, Value};
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 
 use crate::run::IngestionError;
@@ -31,6 +31,7 @@ pub(crate) fn is_test_root_path(rel_path: &str) -> bool {
 pub(crate) struct SourceProfile {
     pub(crate) profile_name: Option<String>,
     pub(crate) is_library_root: bool,
+    pub(crate) is_shared_crate: bool,
 }
 
 #[derive(Debug)]
@@ -43,6 +44,7 @@ struct PackageTargets {
     package_dir_rel: String,
     library_root_rel: Option<String>,
     binary_root_rels: Vec<String>,
+    is_shared_crate: bool,
 }
 
 impl CargoTargetClassifier {
@@ -68,6 +70,7 @@ impl CargoTargetClassifier {
             return SourceProfile {
                 profile_name: None,
                 is_library_root: false,
+                is_shared_crate: false,
             };
         }
 
@@ -80,6 +83,7 @@ impl CargoTargetClassifier {
             return SourceProfile {
                 profile_name: None,
                 is_library_root: false,
+                is_shared_crate: false,
             };
         };
 
@@ -87,6 +91,7 @@ impl CargoTargetClassifier {
             return SourceProfile {
                 profile_name: Some("library".to_owned()),
                 is_library_root: true,
+                is_shared_crate: package.is_shared_crate,
             };
         }
 
@@ -96,6 +101,7 @@ impl CargoTargetClassifier {
             return SourceProfile {
                 profile_name: Some("binary".to_owned()),
                 is_library_root: false,
+                is_shared_crate: package.is_shared_crate,
             };
         }
 
@@ -103,12 +109,14 @@ impl CargoTargetClassifier {
             return SourceProfile {
                 profile_name: Some("library".to_owned()),
                 is_library_root: false,
+                is_shared_crate: package.is_shared_crate,
             };
         }
 
         SourceProfile {
             profile_name: None,
             is_library_root: false,
+            is_shared_crate: package.is_shared_crate,
         }
     }
 }
@@ -193,7 +201,22 @@ fn load_package_targets(
         package_dir_rel: manifest_dir_rel(manifest_rel_path),
         library_root_rel: resolve_library_root(crawl, manifest_rel_path, &manifest),
         binary_root_rels: resolve_binary_roots(crawl, manifest_rel_path, &manifest),
+        is_shared_crate: manifest_shared_flag(&manifest),
     })
+}
+
+fn manifest_shared_flag(manifest: &CargoToml) -> bool {
+    manifest
+        .package
+        .as_ref()
+        .and_then(|package| package.metadata.as_ref())
+        .and_then(|metadata| metadata.get("guardrail3"))
+        .and_then(|value| match value {
+            Value::Table(table) => table.get("shared"),
+            _ => None,
+        })
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
 }
 
 fn resolve_library_root(

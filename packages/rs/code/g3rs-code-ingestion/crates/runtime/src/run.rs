@@ -44,6 +44,7 @@ pub fn ingest_for_source_checks(
                 selected.is_test,
                 selected.profile_name,
                 selected.is_library_root,
+                selected.is_shared_crate,
             ))
         })
         .collect()

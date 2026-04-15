@@ -48,25 +48,6 @@ pub struct G3RsClippyConfigChecksInput {
     pub cargo_config_overrides: Vec<G3RsClippyCargoConfigOverride>,
 }
 
-impl G3RsClippyConfigChecksInput {
-    #[must_use]
-    pub fn from_typed(clippy_rel_path: impl Into<String>, clippy: ClippyToml) -> Self {
-        Self {
-            clippy_rel_path: clippy_rel_path.into(),
-            clippy: G3RsClippyConfigState::Parsed {
-                raw: toml::from_str(
-                    &toml::to_string(&clippy).expect("typed clippy config should serialize"),
-                )
-                .expect("serialized clippy config should parse back to toml::Value"),
-                typed: Ok(clippy),
-            },
-            rust_policy: G3RsClippyRustPolicyState::Missing,
-            published_library_policy: false,
-            cargo_config_overrides: Vec::new(),
-        }
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsClippyShadowedConfig {
     pub rel_path: String,

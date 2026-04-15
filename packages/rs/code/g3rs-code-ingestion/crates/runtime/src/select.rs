@@ -11,6 +11,8 @@ pub(crate) struct SelectedCodeSourceFile<'a> {
     pub(crate) profile_name: Option<String>,
     /// Whether this file is the exact library root source.
     pub(crate) is_library_root: bool,
+    /// Whether the owning crate is explicitly marked shared.
+    pub(crate) is_shared_crate: bool,
 }
 
 /// Select all owned Rust source files for the `code` source lane.
@@ -44,6 +46,7 @@ pub(crate) fn select_source_files(
                 is_test,
                 profile_name: profile.profile_name,
                 is_library_root: profile.is_library_root,
+                is_shared_crate: profile.is_shared_crate,
             }
         })
         .collect())

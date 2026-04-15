@@ -11,6 +11,7 @@ fn emits_code_family_input_failure_on_parse_error() {
             profile_name: None,
             is_library_root: false,
         },
+        is_shared_crate: false,
     };
 
     let results = crate::run::check(&input);

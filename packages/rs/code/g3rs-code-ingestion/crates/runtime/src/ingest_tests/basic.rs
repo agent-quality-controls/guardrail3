@@ -242,6 +242,58 @@ path = \"cmd/worker.rs\"\n",
 }
 
 #[test]
+fn marks_shared_crates_from_guardrail3_metadata() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[package]\n\
+name = \"demo\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n\
+\n\
+[package.metadata.guardrail3]\n\
+shared = true\n",
+    );
+    write(root.join("src/lib.rs"), "pub struct Input;\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
+    let input = require_source_file(&inputs, "src/lib.rs");
+
+    assert!(input.is_shared_crate, "shared metadata should mark source input as shared");
+}
+
+#[test]
+fn leaves_shared_flag_off_for_normal_crates() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[package]\n\
+name = \"demo\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n",
+    );
+    write(root.join("src/lib.rs"), "pub struct Input;\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
+    let input = require_source_file(&inputs, "src/lib.rs");
+
+    assert!(
+        !input.is_shared_crate,
+        "normal crates should not be treated as shared transport crates"
+    );
+}
+
+#[test]
 fn classifies_nested_workspace_members_from_their_own_manifest() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

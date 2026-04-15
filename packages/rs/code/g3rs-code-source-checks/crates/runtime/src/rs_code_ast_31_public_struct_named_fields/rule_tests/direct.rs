@@ -16,7 +16,7 @@ fn warns_on_public_struct_with_two_public_fields() {
             file: Some("src/lib.rs"),
             inventory: Some(false),
             message: Some(
-                "Public struct `User` exposes 2 named `pub` fields (warn below 5, error at 5+). Prefer private fields and explicit accessors or constructors.",
+                "Struct `User` exposes 2 named `pub` fields. Make the fields private and expose constructors or getters instead, so callers use one API instead of reaching into raw state.",
             ),
             line: Some(1),
         }],
@@ -36,7 +36,7 @@ fn errors_on_public_struct_with_five_public_fields() {
             file: Some("src/lib.rs"),
             inventory: Some(false),
             message: Some(
-                "Public struct `User` exposes 5 named `pub` fields (warn below 5, error at 5+). Prefer private fields and explicit accessors or constructors.",
+                "Struct `User` exposes 5 named `pub` fields. Make the fields private and expose constructors or getters instead, so callers use one API instead of reaching into raw state.",
             ),
             line: Some(1),
         }],
@@ -56,7 +56,7 @@ fn warns_on_public_struct_with_four_public_fields() {
             file: Some("src/lib.rs"),
             inventory: Some(false),
             message: Some(
-                "Public struct `User` exposes 4 named `pub` fields (warn below 5, error at 5+). Prefer private fields and explicit accessors or constructors.",
+                "Struct `User` exposes 4 named `pub` fields. Make the fields private and expose constructors or getters instead, so callers use one API instead of reaching into raw state.",
             ),
             line: Some(1),
         }],
