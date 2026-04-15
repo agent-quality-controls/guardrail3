@@ -1,4 +1,4 @@
-use g3rs_fmt_filetree_checks_types::{G3RsFmtConfigFileKind, G3RsFmtFileTreeChecksInput};
+use g3rs_fmt_types::{G3RsFmtConfigFileKind, G3RsFmtFileTreeChecksInput};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-FMT-FILETREE-05";
@@ -21,7 +21,3 @@ pub(crate) fn check(input: &G3RsFmtFileTreeChecksInput, results: &mut Vec<G3Chec
         ));
     }
 }
-
-#[cfg(test)]
-#[path = "rs_fmt_filetree_05_per_crate_override_tests/mod.rs"]
-mod tests;

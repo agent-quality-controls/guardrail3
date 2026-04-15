@@ -1,10 +1,10 @@
-use g3rs_fmt_filetree_checks_assertions::rs_fmt_filetree_01_exists as assertions;
-
-use crate::test_support::input;
+use g3rs_fmt_filetree_checks_assertions::rs_fmt_filetree_01_exists::rule as assertions;
+use test_support::input;
 
 #[test]
 fn errors_when_no_root_config_exists() {
-    let results = crate::check(&input(None, None, Vec::new(), Vec::new()));
+    let mut results = Vec::new();
+    super::super::rule::check(&input(None, None, Vec::new(), Vec::new()), &mut results);
 
     assertions::assert_findings(
         &results,
@@ -19,14 +19,22 @@ fn errors_when_no_root_config_exists() {
 
 #[test]
 fn stays_quiet_when_root_rustfmt_toml_exists() {
-    let results = crate::check(&input(Some("rustfmt.toml"), None, Vec::new(), Vec::new()));
+    let mut results = Vec::new();
+    super::super::rule::check(
+        &input(Some("rustfmt.toml"), None, Vec::new(), Vec::new()),
+        &mut results,
+    );
 
     assertions::assert_no_findings(&results);
 }
 
 #[test]
 fn stays_quiet_when_only_root_dot_rustfmt_toml_exists() {
-    let results = crate::check(&input(None, Some(".rustfmt.toml"), Vec::new(), Vec::new()));
+    let mut results = Vec::new();
+    super::super::rule::check(
+        &input(None, Some(".rustfmt.toml"), Vec::new(), Vec::new()),
+        &mut results,
+    );
 
     assertions::assert_no_findings(&results);
 }

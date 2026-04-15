@@ -6,6 +6,7 @@ description = "Test assertions for g3rs fmt filetree checks"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
+publish = false
 
 [features]
 default = ["all"]
@@ -16,5 +17,5 @@ checks = []
 workspace = true
 
 [dependencies]
-g3rs-fmt-filetree-checks-runtime = { path = "../runtime" }
+g3rs-fmt-filetree-checks-runtime = { path = "../runtime", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
