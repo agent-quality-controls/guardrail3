@@ -304,6 +304,7 @@ fn collect_violations(
                 if let Some(target_module) = helpers::foreign_assertions_module_target(
                     &binding.path_segments,
                     assertions_package_name,
+                    &file.file.rel_path,
                     owner_module_name,
                 ) {
                     violations.push(RuntimeAssertionsViolation {
@@ -370,6 +371,7 @@ fn collect_violations(
                 helpers::foreign_assertions_module_target(
                     path,
                     assertions_package_name,
+                    &file.file.rel_path,
                     owner_module_name,
                 )
             }) {
