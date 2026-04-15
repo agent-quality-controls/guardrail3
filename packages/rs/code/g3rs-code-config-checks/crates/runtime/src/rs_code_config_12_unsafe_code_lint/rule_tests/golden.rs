@@ -1,5 +1,4 @@
-use g3rs_code_config_checks_assertions::common::require_single_result;
-use g3rs_code_config_checks_assertions::rs_code_config_12_unsafe_code_lint::assert_forbid_inventory_info;
+use g3rs_code_config_checks_assertions::rs_code_config_12_unsafe_code_lint::rule::assert_single_forbid_inventory_info;
 
 use super::helpers::{cargo_file, run_check};
 
@@ -10,6 +9,5 @@ fn emits_inventory_info_for_forbid() {
         "[workspace]\n[workspace.lints.rust]\nunsafe_code = \"forbid\"\n",
     )]);
 
-    let result = require_single_result(&results);
-    assert_forbid_inventory_info(result, "Cargo.toml");
+    assert_single_forbid_inventory_info(&results, "Cargo.toml");
 }

@@ -82,13 +82,14 @@ name = "g3rs-code-config-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-code-config-checks-runtime",
- "g3rs-code-config-checks-types",
+ "g3rs-code-types",
 ]
 
 [[package]]
 name = "g3rs-code-config-checks-assertions"
 version = "0.1.0"
 dependencies = [
+ "g3rs-code-config-checks-runtime",
  "guardrail3-check-types",
 ]
 
@@ -98,15 +99,8 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-code-config-checks-assertions",
- "g3rs-code-config-checks-types",
- "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-code-config-checks-types"
-version = "0.1.0"
-dependencies = [
  "g3rs-code-types",
+ "guardrail3-check-types",
 ]
 
 [[package]]
