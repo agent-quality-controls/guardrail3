@@ -11,6 +11,12 @@ pub enum G3RsReleaseDryRunOutcome {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum G3RsReleasePathTargetKind {
+    InWorkspace,
+    OutsideWorkspace,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsReleaseInputFailure {
     pub rel_path: String,
     pub message: String,
@@ -51,6 +57,7 @@ pub struct G3RsReleaseConfigEdge {
     pub section_label: String,
     pub target_label: Option<String>,
     pub has_path: bool,
+    pub path_target_kind: Option<G3RsReleasePathTargetKind>,
     pub dep_publishable: bool,
     pub version_req: Option<String>,
     pub actual_version: Option<String>,

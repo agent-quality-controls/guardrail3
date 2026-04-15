@@ -1,0 +1,18 @@
+[package]
+name = "g3rs-release-repo-root-checks-types"
+version = "0.1.0"
+edition = "2024"
+description = "Public contract types for g3rs release repo-root checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "release", "repo-root", "checks", "rust"]
+categories = ["development-tools"]
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-release-types = { path = "../../../g3rs-release-types" }

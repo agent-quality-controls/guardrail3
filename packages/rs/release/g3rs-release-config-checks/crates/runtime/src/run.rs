@@ -25,9 +25,6 @@ pub fn check(input: &G3RsReleaseConfigChecksInput) -> Vec<G3CheckResult> {
     if let Some(repo) = &input.repo {
         crate::rs_release_config_10_release_plz_baseline::check(repo, &mut results);
         crate::rs_release_config_11_cliff_baseline::check(repo, &mut results);
-        crate::rs_release_config_12_release_plz_workflow::check(repo, &mut results);
-        crate::rs_release_config_13_publish_dry_run_workflow::check(repo, &mut results);
-        crate::rs_release_config_14_registry_token::check(repo, &mut results);
         crate::rs_release_config_15_semver_checks_installed::check(repo, &mut results);
         crate::rs_release_config_16_publish_status_inventory::check(repo, &mut results);
         crate::rs_release_config_17_release_profile_inventory::check(repo, &mut results);

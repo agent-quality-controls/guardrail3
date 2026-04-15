@@ -127,3 +127,49 @@ jobs:
         "{results:#?}"
     );
 }
+
+#[test]
+fn config_pipeline_warns_for_path_dependency_that_escapes_workspace() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/public"]
+resolver = "2"
+"#,
+    );
+    write(
+        root.join("crates/public/Cargo.toml"),
+        r#"
+[package]
+name = "public"
+version = "0.1.0"
+edition = "2024"
+description = "public crate"
+license = "MIT"
+repository = "https://example.com/public"
+readme = "README.md"
+
+[dependencies]
+tooling = { path = "../../../vendor/tooling", version = "0.1.0" }
+"#,
+    );
+    write(root.join("crates/public/src/lib.rs"), "pub fn public() {}\n");
+    write(root.join("crates/public/README.md"), "# Public\n\ncrate\n");
+
+    let crawl = crawl(root);
+    let input = crate::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
+    let results = g3rs_release_config_checks::check(&input);
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-RELEASE-CONFIG-19"
+                && result.title().contains("public: path dep escapes workspace")
+        }),
+        "{results:#?}"
+    );
+}
