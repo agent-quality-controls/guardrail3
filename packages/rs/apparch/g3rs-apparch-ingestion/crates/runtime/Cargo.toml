@@ -2,13 +2,24 @@
 name = "g3rs-apparch-ingestion-runtime"
 version.workspace = true
 edition.workspace = true
+description = "Runtime implementation for g3rs apparch ingestion"
 license.workspace = true
 rust-version.workspace = true
 repository.workspace = true
+keywords = ["guardrail3", "apparch", "ingestion", "rust"]
+categories = ["development-tools"]
+publish = false
+
+[features]
+default = ["all"]
+all = ["ingest"]
+ingest = []
+
+[package.metadata.guardrail3]
+shared = true
 
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", features = ["api"] }
-g3rs-apparch-ingestion-types = { path = "../types" }
 g3rs-apparch-types = { path = "../../../g3rs-apparch-types" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", features = ["api"] }
 glob = "0.3.3"
@@ -17,6 +28,7 @@ syn = { version = "2.0.106", features = ["full"] }
 
 [dev-dependencies]
 g3rs-apparch-config-checks = { path = "../../../g3rs-apparch-config-checks" }
+g3rs-apparch-ingestion-assertions = { path = "../assertions" }
 g3rs-apparch-source-checks = { path = "../../../g3rs-apparch-source-checks" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types" }
 tempfile = "3.20.0"

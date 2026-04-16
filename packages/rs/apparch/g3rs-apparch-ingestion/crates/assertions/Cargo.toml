@@ -1,0 +1,26 @@
+[package]
+name = "g3rs-apparch-ingestion-assertions"
+version = "0.1.0"
+edition = "2024"
+description = "Assertion helpers for g3rs apparch ingestion tests"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["guardrail3", "apparch", "ingestion", "assertions"]
+categories = ["development-tools"]
+publish = false
+
+[features]
+default = ["all"]
+all = ["ingest"]
+ingest = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+g3rs-apparch-ingestion-runtime = { path = "../runtime", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+
+[lints]
+workspace = true
