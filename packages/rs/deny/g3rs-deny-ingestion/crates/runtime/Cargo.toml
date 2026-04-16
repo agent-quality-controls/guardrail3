@@ -9,6 +9,7 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "deny", "ingestion", "rust"]
 categories = ["development-tools"]
+publish = false
 
 [features]
 default = ["all"]
@@ -30,8 +31,6 @@ guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-
 
 [dev-dependencies]
 g3rs-deny-config-checks = { path = "../../../g3rs-deny-config-checks" }
-g3rs-deny-config-checks-assertions = { path = "../../../g3rs-deny-config-checks/crates/assertions" }
 g3rs-deny-filetree-checks = { path = "../../../g3rs-deny-filetree-checks" }
-g3rs-deny-filetree-checks-assertions = { path = "../../../g3rs-deny-filetree-checks/crates/assertions" }
 g3rs-deny-ingestion-assertions = { path = "../assertions" }
 tempfile = "3"

@@ -1,0 +1,38 @@
+profile = "library"
+
+allowed_deps = [
+  "deny-toml-parser",
+  "g3rs-deny-config-checks",
+  "g3rs-deny-config-checks-assertions",
+  "g3rs-deny-filetree-checks",
+  "g3rs-deny-filetree-checks-assertions",
+  "g3rs-deny-ingestion-assertions",
+  "g3rs-deny-ingestion-runtime",
+  "g3rs-deny-ingestion-types",
+  "g3rs-deny-types",
+  "g3rs-workspace-crawl",
+  "guardrail3-check-types",
+  "guardrail3-rs-toml-parser",
+  "tempfile",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime crate intentionally keeps deny ingestion flow split across focused modules."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions crate intentionally keeps shared proof helpers in dedicated modules."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/types/Cargo.toml"
+selector = "structural-split"
+reason = "Types crate intentionally keeps the public error contract split from the facade."
