@@ -17,6 +17,14 @@ struct RuntimeAssertionsViolation {
     message: String,
 }
 
+fn component_package_rel_dir(component: &g3rs_test_types::G3RsTestComponentFileTreeFacts) -> &str {
+    if component.rel_dir.is_empty() {
+        component.runtime_rel_dir.as_str()
+    } else {
+        component.rel_dir.as_str()
+    }
+}
+
 fn path_mentions_route_construction(path: &[String]) -> bool {
     path.iter().any(|segment| {
         matches!(
@@ -87,13 +95,13 @@ fn collect_violations(
         let assertions_package_name = component.assertions_package_name.as_deref();
 
         if !component.assertions_exists {
+            let component_rel_dir = component_package_rel_dir(component);
             violations.push(RuntimeAssertionsViolation {
                 rel_path: component.assertions_cargo_rel_path.clone(),
                 line: None,
                 title: "assertions crate missing".to_owned(),
                 message: format!(
-                    "Component `{}` has test harnesses but is missing sibling `assertions/Cargo.toml`.",
-                    component.rel_dir
+                    "Component `{component_rel_dir}` has sidecar tests that require a shared assertions crate, but `{component_rel_dir}` is still a single-crate package. Reshape it into one package with sibling member crates under `crates/`: `crates/runtime` for the production crate and `crates/assertions` for shared test proof. Do not add `{component_rel_dir}/assertions/Cargo.toml` directly under the current crate root, because that creates a nested package instead of sibling member crates."
                 ),
             });
         }
@@ -240,8 +248,7 @@ fn collect_violations(
                 .files
                 .iter()
                 .filter(|candidate| {
-                    candidate.file.component_rel_dir.as_deref()
-                        == Some(component.rel_dir.as_str())
+                    candidate.file.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
                         && matches!(candidate.file.kind, G3RsTestFileKind::Source)
                 })
                 .filter_map(|candidate| candidate.file.owner_module_name.clone())
@@ -490,9 +497,7 @@ fn collect_violations(
     violations
 }
 
-fn non_component_harness_violations(
-    files: &[AnalyzedFile],
-) -> Vec<RuntimeAssertionsViolation> {
+fn non_component_harness_violations(files: &[AnalyzedFile]) -> Vec<RuntimeAssertionsViolation> {
     files.iter()
         .filter(|file| file.file.component_rel_dir.is_none())
         .filter(|file| {

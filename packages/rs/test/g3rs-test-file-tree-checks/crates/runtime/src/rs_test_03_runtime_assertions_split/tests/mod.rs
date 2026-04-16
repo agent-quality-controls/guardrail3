@@ -4,8 +4,8 @@ use g3rs_test_types::G3RsTestFileKind;
 use guardrail3_check_types::G3Severity;
 
 use crate::test_helpers::{
-    assert_has_inventory, assert_has_result, component, file, input, run_input, with_external_harness,
-    with_sidecar,
+    assert_has_inventory, assert_has_result, component, file, input, run_input,
+    with_external_harness, with_sidecar,
 };
 
 #[test]
@@ -20,10 +20,8 @@ fn reports_inventory_for_valid_runtime_assertions_split() {
                     true,
                     Some("demo_assertions"),
                 );
-                component.runtime_dev_dependencies =
-                    BTreeSet::from(["demo_assertions".to_owned()]);
-                component.assertions_dependencies =
-                    BTreeSet::from(["demo_runtime".to_owned()]);
+                component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
+                component.assertions_dependencies = BTreeSet::from(["demo_runtime".to_owned()]);
                 component
             },
             "crates/runtime/src/lib_tests/mod.rs",
@@ -104,6 +102,19 @@ fn reports_missing_assertions_crate() {
         "crates/assertions/Cargo.toml",
         None,
     );
+
+    let result = results
+        .iter()
+        .find(|result| {
+            result.id() == "RS-TEST-FILETREE-03"
+                && result.title() == "assertions crate missing"
+                && result.file() == Some("crates/assertions/Cargo.toml")
+        })
+        .expect("missing RS-TEST-FILETREE-03 result");
+    assert_eq!(
+        result.message(),
+        "Component `crates/runtime` has sidecar tests that require a shared assertions crate, but `crates/runtime` is still a single-crate package. Reshape it into one package with sibling member crates under `crates/`: `crates/runtime` for the production crate and `crates/assertions` for shared test proof. Do not add `crates/runtime/assertions/Cargo.toml` directly under the current crate root, because that creates a nested package instead of sibling member crates."
+    );
 }
 
 #[test]
@@ -118,8 +129,7 @@ fn reports_runtime_depends_on_assertions_at_normal_scope() {
         ),
         "crates/runtime/tests/public_surface.rs",
     );
-    component.runtime_normal_dependencies =
-        BTreeSet::from(["demo_assertions".to_owned()]);
+    component.runtime_normal_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
     component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
     component.assertions_dependencies = BTreeSet::from(["demo_runtime".to_owned()]);
 
@@ -293,10 +303,8 @@ fn reports_sidecar_importing_sibling_production_module() {
                 true,
                 Some("demo_assertions"),
             );
-            component.runtime_dev_dependencies =
-                BTreeSet::from(["demo_assertions".to_owned()]);
-            component.assertions_dependencies =
-                BTreeSet::from(["demo_runtime".to_owned()]);
+            component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
+            component.assertions_dependencies = BTreeSet::from(["demo_runtime".to_owned()]);
             component
         },
         "crates/runtime/src/foo_tests/mod.rs",
@@ -374,10 +382,8 @@ fn allows_nested_sidecar_to_import_its_required_nested_assertions_module() {
                 true,
                 Some("demo_assertions"),
             );
-            component.runtime_dev_dependencies =
-                BTreeSet::from(["demo_assertions".to_owned()]);
-            component.assertions_dependencies =
-                BTreeSet::from(["demo_runtime".to_owned()]);
+            component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
+            component.assertions_dependencies = BTreeSet::from(["demo_runtime".to_owned()]);
             component
         },
         "crates/runtime/src/foo/rule_tests/mod.rs",
@@ -442,7 +448,13 @@ fn reports_test_harness_outside_runtime_assertions_split() {
             None,
             "#[test]\nfn owned_sidecar() { assert!(true); }\n",
         )],
-        vec![component("", "crates/runtime", Some("demo_runtime"), false, None)],
+        vec![component(
+            "",
+            "crates/runtime",
+            Some("demo_runtime"),
+            false,
+            None,
+        )],
     ));
 
     assert_has_result(
