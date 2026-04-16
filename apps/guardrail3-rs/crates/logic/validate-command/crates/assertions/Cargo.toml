@@ -1,0 +1,19 @@
+[package]
+name = "guardrail3-rs-validate-command-assertions"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-rs-app-types = { path = "../../../../types/app-types" }
+guardrail3-rs-validate-command = { path = "../runtime" }
+
+[features]
+default = ["checks"]
+checks = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

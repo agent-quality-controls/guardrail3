@@ -1,0 +1,29 @@
+[package]
+name = "guardrail3-rs-family-runner-quality"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-rs-app-types = { path = "../../types/app-types" }
+g3rs-workspace-crawl.workspace = true
+g3rs-code-config-checks.workspace = true
+g3rs-code-file-tree-checks.workspace = true
+g3rs-code-ingestion.workspace = true
+g3rs-code-source-checks.workspace = true
+g3rs-deps-config-checks.workspace = true
+g3rs-deps-filetree-checks.workspace = true
+g3rs-deps-ingestion.workspace = true
+g3rs-garde-config-checks.workspace = true
+g3rs-garde-ingestion.workspace = true
+g3rs-garde-source-checks.workspace = true
+
+[features]
+default = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true
