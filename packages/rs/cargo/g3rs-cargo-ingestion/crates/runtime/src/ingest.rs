@@ -129,6 +129,15 @@ fn string_field(table: Option<&toml::Value>, field: &str) -> StringFieldSnapshot
             value: Some(field_value.clone()),
             invalid: false,
         },
+        toml::Value::Table(field_table)
+            if field_table.len() == 1
+                && field_table
+                    .get("workspace")
+                    .and_then(toml::Value::as_bool)
+                    == Some(true) =>
+        {
+            StringFieldSnapshot::default()
+        }
         _ => StringFieldSnapshot {
             value: None,
             invalid: true,
