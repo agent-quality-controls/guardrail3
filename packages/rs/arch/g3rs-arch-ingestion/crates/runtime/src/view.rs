@@ -94,13 +94,11 @@ impl<'a> CrawlView<'a> {
     }
 
     pub(crate) fn entry(&self, rel_path: &str) -> Option<&G3RsWorkspaceEntry> {
-        self.crawl.entry(rel_path)
+        g3rs_workspace_crawl::entry(self.crawl, rel_path)
     }
 
     pub(crate) fn abs_path(&self, rel_path: &str) -> Option<PathBuf> {
-        self.crawl
-            .entry(rel_path)
-            .map(|entry| entry.path.abs_path.clone())
+        g3rs_workspace_crawl::entry(self.crawl, rel_path).map(|entry| entry.path.abs_path.clone())
     }
 
     pub(crate) fn all_dir_rels(&self) -> impl Iterator<Item = &str> {
@@ -108,9 +106,7 @@ impl<'a> CrawlView<'a> {
     }
 
     pub(crate) fn read_file(&self, rel_path: &str) -> Result<String, std::io::Error> {
-        let path = self
-            .crawl
-            .entry(rel_path)
+        let path = g3rs_workspace_crawl::entry(self.crawl, rel_path)
             .map(|entry| entry.path.abs_path.clone())
             .ok_or_else(|| {
                 std::io::Error::new(std::io::ErrorKind::NotFound, "entry missing from crawl")

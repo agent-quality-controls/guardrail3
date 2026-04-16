@@ -3,15 +3,15 @@ use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspace
 use glob::Pattern;
 
 pub(crate) fn select_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("Cargo.toml")
+    g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
 pub(crate) fn select_release_plz_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("release-plz.toml")
+    g3rs_workspace_crawl::root_file(crawl, "release-plz.toml")
 }
 
 pub(crate) fn select_cliff_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("cliff.toml")
+    g3rs_workspace_crawl::root_file(crawl, "cliff.toml")
 }
 
 pub(crate) fn select_member_manifest<'a>(
@@ -19,7 +19,7 @@ pub(crate) fn select_member_manifest<'a>(
     member_rel: &str,
 ) -> Option<&'a G3RsWorkspaceEntry> {
     let rel_path = member_manifest_rel_path(member_rel);
-    crawl.entry(&rel_path)
+    g3rs_workspace_crawl::entry(crawl, &rel_path)
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
 }
 
@@ -33,7 +33,9 @@ pub(crate) fn select_workflow_entries(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWo
                 && std::path::Path::new(&entry.path.rel_path)
                     .extension()
                     .and_then(|ext| ext.to_str())
-                    .is_some_and(|ext| ext.eq_ignore_ascii_case("yml") || ext.eq_ignore_ascii_case("yaml"))
+                    .is_some_and(|ext| {
+                        ext.eq_ignore_ascii_case("yml") || ext.eq_ignore_ascii_case("yaml")
+                    })
         })
         .collect::<Vec<_>>();
     entries.sort_by(|left, right| left.path.rel_path.cmp(&right.path.rel_path));
@@ -99,7 +101,10 @@ fn looks_like_glob(pattern: &str) -> bool {
 
 pub(crate) fn normalize_member_rel(pattern: &str) -> String {
     let trimmed = pattern.trim_matches('/');
-    let stripped = trimmed.strip_prefix("./").unwrap_or(trimmed).trim_matches('/');
+    let stripped = trimmed
+        .strip_prefix("./")
+        .unwrap_or(trimmed)
+        .trim_matches('/');
 
     if stripped == "." {
         String::new()

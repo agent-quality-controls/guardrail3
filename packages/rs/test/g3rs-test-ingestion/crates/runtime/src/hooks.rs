@@ -37,7 +37,10 @@ pub(crate) fn collect_mutation_hook_state(
         let hook_dir_rel = join_under_root(hook_root_rel, ".githooks/pre-commit.d");
         for entry in crawl.entries.iter().filter(|entry| {
             entry.kind == G3RsWorkspaceEntryKind::File
-                && entry.path.rel_path.starts_with(&(hook_dir_rel.clone() + "/"))
+                && entry
+                    .path
+                    .rel_path
+                    .starts_with(&(hook_dir_rel.clone() + "/"))
         }) {
             if script_contains_mutation_step(crawl, &entry.path.rel_path)? {
                 active = true;
@@ -63,7 +66,8 @@ fn active_hook_root_dirs(discovery: &TestRootDiscovery, root: &OwnedTestRoot) ->
         .as_ref()
         .and_then(|manifest| manifest.workspace.as_ref())
         .is_some()
-        && (root.root_rel_dir.is_empty() || discovery.workspace_members.contains(&root.root_rel_dir))
+        && (root.root_rel_dir.is_empty()
+            || discovery.workspace_members.contains(&root.root_rel_dir))
     {
         let _ = roots.insert(String::new());
     }
@@ -82,7 +86,7 @@ fn script_contains_mutation_step(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
 ) -> Result<bool, IngestionError> {
-    let Some(entry) = crawl.entry(rel_path) else {
+    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
         return Ok(false);
     };
     if !entry.readable {
@@ -91,9 +95,11 @@ fn script_contains_mutation_step(
             reason: "file is not readable".to_owned(),
         });
     }
-    let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| IngestionError::Unreadable {
-        path: entry.path.abs_path.clone(),
-        reason: err.to_string(),
+    let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| {
+        IngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        }
     })?;
     Ok(parse_script(&content)
         .executable_lines()

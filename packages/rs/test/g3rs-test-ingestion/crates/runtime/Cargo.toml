@@ -22,7 +22,7 @@ workspace = true
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 g3rs-test-types = { path = "../../../g3rs-test-types", version = "0.1.0" }
 g3rs-test-ingestion-types = { path = "../types", version = "0.1.0" }
-g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 glob = "0.3"
 mutants-toml-parser = { path = "../../../../../parsers/mutants-toml-parser", version = "0.1.0" }
 nextest-toml-parser = { path = "../../../../../parsers/nextest-toml-parser", version = "0.1.0" }

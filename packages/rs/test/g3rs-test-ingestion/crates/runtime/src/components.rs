@@ -125,7 +125,8 @@ pub(crate) fn collect_ast_files(
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
         .filter(|entry| entry.path.rel_path.ends_with(".rs"))
         .filter_map(|entry| {
-            classify_file_for_source(&entry.path.rel_path, root, components).map(|file| (entry, file))
+            classify_file_for_source(&entry.path.rel_path, root, components)
+                .map(|file| (entry, file))
         })
         .map(|(entry, mut file)| {
             if !entry.readable {
@@ -163,13 +164,16 @@ pub(crate) fn collect_file_tree_files(
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
         .filter(|entry| entry.path.rel_path.ends_with(".rs"))
     {
-        let Some(mut file) = classify_file_for_file_tree(&entry.path.rel_path, root, components) else {
+        let Some(mut file) = classify_file_for_file_tree(&entry.path.rel_path, root, components)
+        else {
             continue;
         };
         if !entry.readable {
             input_failures.push(G3RsTestFileTreeInputFailure {
                 rel_path: entry.path.rel_path.clone(),
-                message: "Failed to read Rust source file for test-family analysis: file is not readable".to_owned(),
+                message:
+                    "Failed to read Rust source file for test-family analysis: file is not readable"
+                        .to_owned(),
             });
             continue;
         }
@@ -180,9 +184,7 @@ pub(crate) fn collect_file_tree_files(
             }
             Err(err) => input_failures.push(G3RsTestFileTreeInputFailure {
                 rel_path: entry.path.rel_path.clone(),
-                message: format!(
-                    "Failed to read Rust source file for test-family analysis: {err}"
-                ),
+                message: format!("Failed to read Rust source file for test-family analysis: {err}"),
             }),
         }
     }
@@ -293,7 +295,9 @@ fn classify_file_for_source(
                         .and_then(|segment| segment.strip_suffix("_tests"))
                         .map(str::to_owned),
                 )
-            } else if let Some(owner_module_name) = owner_module_name_from_sidecar_path(rel_after_src) {
+            } else if let Some(owner_module_name) =
+                owner_module_name_from_sidecar_path(rel_after_src)
+            {
                 (
                     G3RsTestFileKind::InternalSidecarSupport,
                     Some(owner_module_name),
@@ -495,7 +499,7 @@ fn parse_optional_manifest(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
 ) -> Result<Option<CargoToml>, IngestionError> {
-    let Some(entry) = crawl.entry(rel_path) else {
+    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
         return Ok(None);
     };
     if !entry.readable {
@@ -504,14 +508,18 @@ fn parse_optional_manifest(
             reason: "file is not readable".to_owned(),
         });
     }
-    let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| IngestionError::Unreadable {
-        path: entry.path.abs_path.clone(),
-        reason: err.to_string(),
+    let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| {
+        IngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        }
     })?;
-    parse(&content).map(Some).map_err(|err| IngestionError::ParseFailed {
-        path: entry.path.abs_path.clone(),
-        reason: err.to_string(),
-    })
+    parse(&content)
+        .map(Some)
+        .map_err(|err| IngestionError::ParseFailed {
+            path: entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        })
 }
 
 fn parse_optional_manifest_lenient(
@@ -519,7 +527,7 @@ fn parse_optional_manifest_lenient(
     rel_path: &str,
     input_failures: &mut Vec<G3RsTestFileTreeInputFailure>,
 ) -> Option<CargoToml> {
-    if crawl.entry(rel_path).is_none() {
+    if g3rs_workspace_crawl::entry(crawl, rel_path).is_none() {
         return None;
     }
     parse_manifest_lenient(crawl, rel_path, input_failures)
@@ -530,7 +538,7 @@ fn parse_manifest_lenient(
     rel_path: &str,
     input_failures: &mut Vec<G3RsTestFileTreeInputFailure>,
 ) -> Option<CargoToml> {
-    let Some(entry) = crawl.entry(rel_path) else {
+    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
         input_failures.push(G3RsTestFileTreeInputFailure {
             rel_path: rel_path.to_owned(),
             message: "Failed to parse Cargo.toml for test-family boundaries: required Cargo.toml entry is missing from crawl".to_owned(),
@@ -540,7 +548,8 @@ fn parse_manifest_lenient(
     if !entry.readable {
         input_failures.push(G3RsTestFileTreeInputFailure {
             rel_path: rel_path.to_owned(),
-            message: "Failed to read Cargo.toml for test-family boundaries: file is not readable".to_owned(),
+            message: "Failed to read Cargo.toml for test-family boundaries: file is not readable"
+                .to_owned(),
         });
         return None;
     }
@@ -650,9 +659,8 @@ fn collect_external_harnesses(crawl: &G3RsWorkspaceCrawl, runtime_rel_dir: &str)
 }
 
 fn dedupe_failures(input_failures: &mut Vec<G3RsTestFileTreeInputFailure>) {
-    input_failures.dedup_by(|left, right| {
-        left.rel_path == right.rel_path && left.message == right.message
-    });
+    input_failures
+        .dedup_by(|left, right| left.rel_path == right.rel_path && left.message == right.message);
 }
 
 fn path_is_under(rel_path: &str, prefix: &str) -> bool {

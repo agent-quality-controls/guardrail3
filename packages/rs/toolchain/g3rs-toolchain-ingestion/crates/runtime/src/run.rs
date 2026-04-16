@@ -20,8 +20,7 @@ pub use g3rs_toolchain_ingestion_types::G3RsToolchainIngestionError as Ingestion
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainConfigChecksInput, IngestionError> {
-    let toolchain_entry = crawl
-        .root_file("rust-toolchain.toml")
+    let toolchain_entry = g3rs_workspace_crawl::root_file(crawl, "rust-toolchain.toml")
         .ok_or(IngestionError::ToolchainTomlNotFound)?;
 
     if !toolchain_entry.readable {
@@ -34,18 +33,19 @@ pub fn ingest_for_config_checks(
     let toolchain_toml = crate::parse::parse_toolchain_toml(&toolchain_entry.path.abs_path)?;
     let toolchain_rel_path = toolchain_entry.path.rel_path.clone();
 
-    let (cargo_rel_path, cargo_toml) = if let Some(cargo_entry) = crawl.root_file("Cargo.toml") {
-        if !cargo_entry.readable {
-            return Err(IngestionError::Unreadable {
-                path: cargo_entry.path.abs_path.clone(),
-                reason: "file is not readable".to_owned(),
-            });
-        }
-        let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
-        (Some(cargo_entry.path.rel_path.clone()), Some(cargo))
-    } else {
-        (None, None)
-    };
+    let (cargo_rel_path, cargo_toml) =
+        if let Some(cargo_entry) = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml") {
+            if !cargo_entry.readable {
+                return Err(IngestionError::Unreadable {
+                    path: cargo_entry.path.abs_path.clone(),
+                    reason: "file is not readable".to_owned(),
+                });
+            }
+            let cargo = crate::parse::parse_cargo_toml(&cargo_entry.path.abs_path)?;
+            (Some(cargo_entry.path.rel_path.clone()), Some(cargo))
+        } else {
+            (None, None)
+        };
 
     Ok(crate::ingest::assemble(
         toolchain_rel_path,
@@ -66,11 +66,9 @@ pub fn ingest_for_file_tree_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainFileTreeChecksInput, IngestionError> {
     Ok(G3RsToolchainFileTreeChecksInput {
-        toolchain_toml_rel_path: crawl
-            .root_file("rust-toolchain.toml")
+        toolchain_toml_rel_path: g3rs_workspace_crawl::root_file(crawl, "rust-toolchain.toml")
             .map(|entry| entry.path.rel_path.clone()),
-        legacy_toolchain_rel_path: crawl
-            .root_file("rust-toolchain")
+        legacy_toolchain_rel_path: g3rs_workspace_crawl::root_file(crawl, "rust-toolchain")
             .map(|entry| entry.path.rel_path.clone()),
     })
 }

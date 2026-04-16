@@ -2,11 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use g3rs_workspace_crawl_assertions::{
-    workspace_entries::{assert_entry, assert_has_rel_path},
-    workspace_queries::assert_root_file_exists,
-};
-use g3rs_workspace_crawl_types::{G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState};
+use g3rs_workspace_crawl_assertions::crawl as assertions;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -31,12 +27,13 @@ fn includes_hidden_config_files() {
 
     let crawl = crate::crawl(root).expect("crawl should succeed");
 
-    assert_root_file_exists(&crawl, ".clippy.toml");
-    assert_has_rel_path(&crawl.entries, "Cargo.toml");
-    assert_entry(
-        crawl.entry(".clippy.toml").expect("hidden config entry"),
-        G3RsWorkspaceEntryKind::File,
-        G3RsWorkspaceIgnoreState::Included,
+    assertions::assert_root_file_exists(&crawl, ".clippy.toml");
+    assertions::assert_has_rel_path(&crawl.entries, "Cargo.toml");
+    assertions::assert_crawl_entry(
+        &crawl,
+        ".clippy.toml",
+        crate::G3RsWorkspaceEntryKind::File,
+        crate::G3RsWorkspaceIgnoreState::Included,
         true,
     );
 }

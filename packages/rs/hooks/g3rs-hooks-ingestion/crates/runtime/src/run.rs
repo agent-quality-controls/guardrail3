@@ -2,9 +2,7 @@ use std::collections::BTreeSet;
 use std::ffi::OsStr;
 use std::path::Path;
 
-use g3rs_hooks_config_checks_types::{
-    G3RsHooksConfigChecksInput, G3RsHooksSelectedHookConfigFact,
-};
+use g3rs_hooks_config_checks_types::{G3RsHooksConfigChecksInput, G3RsHooksSelectedHookConfigFact};
 use g3rs_hooks_file_tree_checks_types::{G3RsHooksFileTreeChecksInput, G3RsHooksScriptFileFact};
 use g3rs_hooks_ingestion_types::{
     G3RsHookScriptKind, G3RsHooksIngestionError as IngestionError, G3RsHooksSourceChecksInput,
@@ -60,7 +58,9 @@ pub fn ingest_for_source_checks(
     }
 
     for entry in &crawl.entries {
-        if entry.kind != G3RsWorkspaceEntryKind::File || !is_direct_modular_script(&entry.path.rel_path) {
+        if entry.kind != G3RsWorkspaceEntryKind::File
+            || !is_direct_modular_script(&entry.path.rel_path)
+        {
             continue;
         }
         if !entry.readable {
@@ -100,9 +100,12 @@ pub fn ingest_for_file_tree_checks(
 
     let hooks_path = read_hooks_path(crawl.root_abs_path.as_path())?;
     let selected = select_pre_commit_surface(crawl, hooks_path.as_deref());
-    let pre_commit = selected.as_ref().map(|selected| selected.entry).map(read_script_file_fact).transpose()?;
-    let has_modular_dir = crawl
-        .entry(".githooks/pre-commit.d")
+    let pre_commit = selected
+        .as_ref()
+        .map(|selected| selected.entry)
+        .map(read_script_file_fact)
+        .transpose()?;
+    let has_modular_dir = g3rs_workspace_crawl::entry(crawl, ".githooks/pre-commit.d")
         .is_some_and(|entry| entry.kind == G3RsWorkspaceEntryKind::Directory);
 
     Ok(G3RsHooksFileTreeChecksInput {
@@ -114,7 +117,10 @@ pub fn ingest_for_file_tree_checks(
         } else {
             Vec::new()
         },
-        local_override_scripts: collect_direct_file_names(crawl, ".guardrail3/overrides/pre-commit.d/"),
+        local_override_scripts: collect_direct_file_names(
+            crawl,
+            ".guardrail3/overrides/pre-commit.d/",
+        ),
         hooks_path: hooks_path.clone(),
         trust_risks: collect_trust_risks(crawl, hooks_path.as_deref()),
     })
@@ -156,18 +162,16 @@ fn select_pre_commit_surface<'a>(
     hooks_path: Option<&str>,
 ) -> Option<SelectedHookSurface<'a>> {
     let entry = match normalized_hooks_path(hooks_path) {
-        Some(".githooks") => crawl.entry(".githooks/pre-commit"),
-        Some("hooks") => crawl.entry("hooks/pre-commit"),
+        Some(".githooks") => g3rs_workspace_crawl::entry(crawl, ".githooks/pre-commit"),
+        Some("hooks") => g3rs_workspace_crawl::entry(crawl, "hooks/pre-commit"),
         Some(_) => None,
-        None => crawl
-            .entry(".githooks/pre-commit")
-            .or_else(|| crawl.entry("hooks/pre-commit")),
+        None => g3rs_workspace_crawl::entry(crawl, ".githooks/pre-commit")
+            .or_else(|| g3rs_workspace_crawl::entry(crawl, "hooks/pre-commit")),
     }?;
 
     Some(SelectedHookSurface {
         has_modular_dir: entry.path.rel_path == ".githooks/pre-commit"
-            && crawl
-                .entry(".githooks/pre-commit.d")
+            && g3rs_workspace_crawl::entry(crawl, ".githooks/pre-commit.d")
                 .is_some_and(|entry| entry.kind == G3RsWorkspaceEntryKind::Directory),
         entry,
     })
@@ -214,7 +218,7 @@ fn collect_direct_file_names(crawl: &G3RsWorkspaceCrawl, prefix: &str) -> Vec<St
 }
 
 fn root_is_workspace_project(crawl: &G3RsWorkspaceCrawl) -> Result<bool, IngestionError> {
-    let Some(entry) = crawl.entry("Cargo.toml") else {
+    let Some(entry) = g3rs_workspace_crawl::entry(crawl, "Cargo.toml") else {
         return Ok(false);
     };
     if !entry.readable {
@@ -276,7 +280,13 @@ fn read_script_file_fact(
 
 fn discover_installed_tools(path_env: Option<&OsStr>) -> Vec<String> {
     let mut installed = BTreeSet::new();
-    for tool in ["gitleaks", "cargo-deny", "cargo-machete", "g3rs", "cargo-dupes"] {
+    for tool in [
+        "gitleaks",
+        "cargo-deny",
+        "cargo-machete",
+        "g3rs",
+        "cargo-dupes",
+    ] {
         if tool_is_available(tool, path_env) {
             let _ = installed.insert(tool.to_owned());
         }
@@ -376,7 +386,7 @@ fn hooks_scope_is_active(root: &Path) -> Result<bool, IngestionError> {
 fn collect_trust_risks(crawl: &G3RsWorkspaceCrawl, hooks_path: Option<&str>) -> Vec<String> {
     let mut risks = Vec::new();
 
-    if crawl.entry(".husky/pre-commit").is_some() {
+    if g3rs_workspace_crawl::entry(crawl, ".husky/pre-commit").is_some() {
         risks.push(".husky/pre-commit".to_owned());
     }
     for rel_path in [
@@ -385,13 +395,16 @@ fn collect_trust_risks(crawl: &G3RsWorkspaceCrawl, hooks_path: Option<&str>) -> 
         ".lefthook.yml",
         ".lefthook.yaml",
     ] {
-        if crawl.entry(rel_path).is_some() {
+        if g3rs_workspace_crawl::entry(crawl, rel_path).is_some() {
             risks.push(rel_path.to_owned());
         }
     }
 
     if git_hook_pre_commit_exists(crawl.root_abs_path.as_path())
-        && !matches!(normalized_hooks_path(hooks_path), Some(".githooks" | "hooks"))
+        && !matches!(
+            normalized_hooks_path(hooks_path),
+            Some(".githooks" | "hooks")
+        )
     {
         risks.push(".git/hooks/pre-commit".to_owned());
     }

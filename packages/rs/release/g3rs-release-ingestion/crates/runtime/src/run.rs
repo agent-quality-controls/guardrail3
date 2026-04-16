@@ -46,7 +46,7 @@ pub fn ingest_for_repo_root_checks(
 }
 
 fn require_pointed_workspace_root(crawl: &G3RsWorkspaceCrawl) -> Result<(), IngestionError> {
-    let Some(entry) = crawl.entry("Cargo.toml") else {
+    let Some(entry) = g3rs_workspace_crawl::entry(crawl, "Cargo.toml") else {
         return Err(IngestionError::CargoTomlNotFound);
     };
     if !entry.readable {

@@ -125,7 +125,8 @@ pub fn ingest_for_file_tree_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsDepsFileTreeChecksInput, IngestionError> {
     let cargo_lock_rel_path = "Cargo.lock".to_owned();
-    let cargo_lock_exists = crawl.root_file(cargo_lock_rel_path.as_str()).is_some();
+    let cargo_lock_exists =
+        g3rs_workspace_crawl::root_file(crawl, cargo_lock_rel_path.as_str()).is_some();
     let profile = read_root_profile(crawl)?;
     let (cargo_lock_ignored, gitignore_rel_path) = read_lockfile_ignore_state(crawl)?;
 
@@ -156,7 +157,7 @@ fn read_root_profile(crawl: &G3RsWorkspaceCrawl) -> Result<Option<RustProfile>, 
 fn read_lockfile_ignore_state(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<(bool, Option<String>), IngestionError> {
-    let Some(gitignore_entry) = crawl.root_file(".gitignore") else {
+    let Some(gitignore_entry) = g3rs_workspace_crawl::root_file(crawl, ".gitignore") else {
         return Ok((false, None));
     };
     if !gitignore_entry.readable {

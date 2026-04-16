@@ -13,25 +13,25 @@ pub(crate) fn select_active_rustfmt_config(
 }
 
 pub(crate) fn select_root_rustfmt_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("rustfmt.toml")
+    g3rs_workspace_crawl::root_file(crawl, "rustfmt.toml")
 }
 
 pub(crate) fn select_root_dot_rustfmt_toml(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file(".rustfmt.toml")
+    g3rs_workspace_crawl::root_file(crawl, ".rustfmt.toml")
 }
 
 pub(crate) fn select_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("Cargo.toml")
+    g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
 pub(crate) fn select_toolchain_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("rust-toolchain.toml")
+    g3rs_workspace_crawl::root_file(crawl, "rust-toolchain.toml")
 }
 
 pub(crate) fn select_rust_policy_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("guardrail3-rs.toml")
+    g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
 pub(crate) fn collect_nested_config_files(
