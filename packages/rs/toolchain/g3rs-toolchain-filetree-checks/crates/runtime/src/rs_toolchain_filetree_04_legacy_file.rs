@@ -1,4 +1,4 @@
-use g3rs_toolchain_filetree_checks_types::G3RsToolchainFileTreeChecksInput;
+use g3rs_toolchain_types::G3RsToolchainFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-TOOLCHAIN-FILETREE-04";
@@ -29,5 +29,5 @@ pub(crate) fn check(input: &G3RsToolchainFileTreeChecksInput, results: &mut Vec<
 }
 
 #[cfg(test)]
-#[path = "rs_toolchain_filetree_04_legacy_file_tests/mod.rs"]
-mod tests;
+#[path = "rs_toolchain_filetree_04_legacy_file_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_toolchain_filetree_04_legacy_file_tests;
