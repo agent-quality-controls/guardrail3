@@ -36,7 +36,7 @@ name = "g3rs-deny-filetree-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-deny-filetree-checks-runtime",
- "g3rs-deny-filetree-checks-types",
+ "g3rs-deny-types",
 ]
 
 [[package]]
@@ -52,16 +52,9 @@ name = "g3rs-deny-filetree-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-deny-filetree-checks-assertions",
- "g3rs-deny-filetree-checks-types",
  "g3rs-deny-types",
  "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-deny-filetree-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-deny-types",
+ "test_support",
 ]
 
 [[package]]
@@ -187,6 +180,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "test_support"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deny-types",
 ]
 
 [[package]]

@@ -1,4 +1,4 @@
-use g3rs_deny_filetree_checks_types::G3RsDenyFileTreeChecksInput;
+use g3rs_deny_types::G3RsDenyFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsDenyFileTreeChecksInput) -> Vec<G3CheckResult> {
@@ -11,5 +11,5 @@ pub fn check(input: &G3RsDenyFileTreeChecksInput) -> Vec<G3CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod tests;
+#[path = "run_tests/mod.rs"] // reason: file module tests live in the owned run_tests sidecar directory.
+mod run_tests;

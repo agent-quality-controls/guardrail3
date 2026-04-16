@@ -1,6 +1,5 @@
 use g3rs_deny_filetree_checks_assertions::rs_deny_filetree_01_coverage as assertions;
-
-use crate::test_support::input;
+use test_support::input;
 
 #[test]
 fn reports_selected_deny_parse_failures_without_hiding_coverage_inventory() {

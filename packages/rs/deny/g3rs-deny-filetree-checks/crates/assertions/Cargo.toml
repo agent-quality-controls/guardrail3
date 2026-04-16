@@ -6,6 +6,7 @@ description = "Test assertions for g3rs deny filetree checks"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
+publish = false
 
 [features]
 default = ["all"]

@@ -1,7 +1,6 @@
-use g3rs_deny_filetree_checks_types::G3RsDenyFileTreeChecksInput;
-use g3rs_deny_types::G3RsDenyInputFailure;
+use g3rs_deny_types::{G3RsDenyFileTreeChecksInput, G3RsDenyInputFailure};
 
-pub(crate) fn input(
+pub fn input(
     selected_deny_rel_path: Option<&str>,
     candidate_deny_rel_paths: Vec<&str>,
     input_failures: Vec<(&str, &str)>,
