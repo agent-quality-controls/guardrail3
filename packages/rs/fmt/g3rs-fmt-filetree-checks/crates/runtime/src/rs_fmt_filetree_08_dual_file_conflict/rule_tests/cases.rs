@@ -4,12 +4,15 @@ use test_support::input;
 #[test]
 fn warns_for_root_dual_file_conflict() {
     let mut results = Vec::new();
-    super::super::rule::check(&input(
-        Some("rustfmt.toml"),
-        Some(".rustfmt.toml"),
-        Vec::new(),
-        vec![""],
-    ), &mut results);
+    super::super::check(
+        &input(
+            Some("rustfmt.toml"),
+            Some(".rustfmt.toml"),
+            Vec::new(),
+            vec![""],
+        ),
+        &mut results,
+    );
 
     assertions::assert_findings(
         &results,
@@ -25,12 +28,10 @@ fn warns_for_root_dual_file_conflict() {
 #[test]
 fn warns_for_nested_dual_file_conflict() {
     let mut results = Vec::new();
-    super::super::rule::check(&input(
-        Some("rustfmt.toml"),
-        None,
-        Vec::new(),
-        vec!["crates/api"],
-    ), &mut results);
+    super::super::check(
+        &input(Some("rustfmt.toml"), None, Vec::new(), vec!["crates/api"]),
+        &mut results,
+    );
 
     assertions::assert_findings(
         &results,

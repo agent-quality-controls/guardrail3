@@ -4,7 +4,7 @@ use test_support::input;
 #[test]
 fn errors_when_no_root_config_exists() {
     let mut results = Vec::new();
-    super::super::rule::check(&input(None, None, Vec::new(), Vec::new()), &mut results);
+    super::super::check(&input(None, None, Vec::new(), Vec::new()), &mut results);
 
     assertions::assert_findings(
         &results,
@@ -20,7 +20,7 @@ fn errors_when_no_root_config_exists() {
 #[test]
 fn stays_quiet_when_root_rustfmt_toml_exists() {
     let mut results = Vec::new();
-    super::super::rule::check(
+    super::super::check(
         &input(Some("rustfmt.toml"), None, Vec::new(), Vec::new()),
         &mut results,
     );
@@ -31,7 +31,7 @@ fn stays_quiet_when_root_rustfmt_toml_exists() {
 #[test]
 fn stays_quiet_when_only_root_dot_rustfmt_toml_exists() {
     let mut results = Vec::new();
-    super::super::rule::check(
+    super::super::check(
         &input(None, Some(".rustfmt.toml"), Vec::new(), Vec::new()),
         &mut results,
     );

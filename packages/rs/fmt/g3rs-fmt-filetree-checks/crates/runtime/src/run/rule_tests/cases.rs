@@ -3,7 +3,7 @@ use test_support::{G3RsFmtConfigFileKind, input};
 
 #[test]
 fn run_combines_all_filetree_findings() {
-    let results = super::super::rule::check(&input(
+    let results = super::super::check(&input(
         None,
         None,
         vec![(
