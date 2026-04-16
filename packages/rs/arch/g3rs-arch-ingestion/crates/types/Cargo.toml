@@ -20,4 +20,3 @@ workspace = true
 
 [dependencies]
 g3rs-arch-types = { path = "../../../g3rs-arch-types", version = "0.1.0" }
-g3rs-arch-source-checks-types = { path = "../../../g3rs-arch-source-checks/crates/types", version = "0.1.0" }
