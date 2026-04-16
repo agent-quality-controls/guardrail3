@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use g3rs_apparch_source_checks_types::G3RsApparchSourceChecksInput;
+use g3rs_apparch_types::G3RsApparchSourceChecksInput;
 use g3rs_apparch_types::G3RsApparchCrate;
 use guardrail3_check_types::G3CheckResult;
 

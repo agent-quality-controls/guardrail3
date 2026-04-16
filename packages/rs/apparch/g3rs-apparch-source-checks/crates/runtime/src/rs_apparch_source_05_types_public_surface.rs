@@ -84,4 +84,4 @@ pub(crate) fn check(
 
 #[cfg(test)]
 #[path = "rs_apparch_source_05_types_public_surface_tests/mod.rs"]
-mod tests;
+mod rs_apparch_source_05_types_public_surface_tests;

@@ -1,2 +1,4 @@
+#[cfg(feature = "api")]
 pub use g3rs_apparch_source_checks_runtime::check;
-pub use g3rs_apparch_source_checks_types::G3RsApparchSourceChecksInput;
+#[cfg(feature = "api")]
+pub use g3rs_apparch_types::G3RsApparchSourceChecksInput;

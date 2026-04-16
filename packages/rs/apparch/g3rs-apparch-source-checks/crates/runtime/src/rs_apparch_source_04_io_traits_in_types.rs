@@ -78,4 +78,4 @@ pub(crate) fn check(
 
 #[cfg(test)]
 #[path = "rs_apparch_source_04_io_traits_in_types_tests/mod.rs"]
-mod tests;
+mod rs_apparch_source_04_io_traits_in_types_tests;
