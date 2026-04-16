@@ -107,6 +107,42 @@ fn ingest_for_file_tree_checks_classifies_structural_file_roles() {
 }
 
 #[test]
+fn ingest_for_file_tree_checks_records_nested_assertions_manifest_path() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"packages/demo/crates/runtime\"]\nresolver = \"2\"\n",
+    );
+    write(
+        root.join("packages/demo/Cargo.toml"),
+        "[workspace]\nmembers = [\"crates/runtime\"]\nresolver = \"2\"\n",
+    );
+    write(
+        root.join("packages/demo/crates/runtime/Cargo.toml"),
+        "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("packages/demo/crates/runtime/src/lib.rs"), "pub fn value() -> u8 { 1 }\n");
+    write(
+        root.join("packages/demo/assertions/Cargo.toml"),
+        "[package]\nname = \"wrong-demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
+
+    assert_eq!(inputs.len(), 1, "{inputs:#?}");
+    let component = &inputs[0].components[0];
+    assert_eq!(
+        component.nested_assertions_cargo_rel_path.as_deref(),
+        Some("packages/demo/assertions/Cargo.toml")
+    );
+}
+
+#[test]
 fn file_tree_pipeline_reports_structural_test_findings() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

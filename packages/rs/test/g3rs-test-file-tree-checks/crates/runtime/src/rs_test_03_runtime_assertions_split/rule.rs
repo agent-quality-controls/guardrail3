@@ -96,6 +96,19 @@ fn collect_violations(
 
         if !component.assertions_exists {
             let component_rel_dir = component_package_rel_dir(component);
+            if let Some(nested_assertions_cargo_rel_path) =
+                component.nested_assertions_cargo_rel_path.as_ref()
+            {
+                violations.push(RuntimeAssertionsViolation {
+                    rel_path: nested_assertions_cargo_rel_path.clone(),
+                    line: None,
+                    title: "nested assertions package is the wrong shape".to_owned(),
+                    message: format!(
+                        "Found nested package `{nested_assertions_cargo_rel_path}`. This is the wrong test layout. If assertions is a separate crate, move it to `{component_rel_dir}/crates/assertions/Cargo.toml` and move the production crate to `{component_rel_dir}/crates/runtime/Cargo.toml` so both are sibling member crates in one package."
+                    ),
+                });
+                continue;
+            }
             violations.push(RuntimeAssertionsViolation {
                 rel_path: component.assertions_cargo_rel_path.clone(),
                 line: None,

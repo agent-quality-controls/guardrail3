@@ -5,7 +5,7 @@ use guardrail3_check_types::G3Severity;
 
 use crate::test_helpers::{
     assert_has_inventory, assert_has_result, component, file, input, run_input,
-    with_external_harness, with_sidecar,
+    with_external_harness, with_nested_assertions_manifest, with_sidecar,
 };
 
 #[test]
@@ -114,6 +114,56 @@ fn reports_missing_assertions_crate() {
     assert_eq!(
         result.message(),
         "Component `crates/runtime` has sidecar tests that require a shared assertions crate, but `crates/runtime` is still a single-crate package. Reshape it into one package with sibling member crates under `crates/`: `crates/runtime` for the production crate and `crates/assertions` for shared test proof. Do not add `crates/runtime/assertions/Cargo.toml` directly under the current crate root, because that creates a nested package instead of sibling member crates."
+    );
+}
+
+#[test]
+fn reports_nested_assertions_package_as_wrong_shape() {
+    let component = with_nested_assertions_manifest(
+        with_external_harness(
+            component(
+                "packages/demo",
+                "packages/demo/crates/runtime",
+                Some("demo_runtime"),
+                false,
+                None,
+            ),
+            "packages/demo/crates/runtime/tests/public_surface.rs",
+        ),
+        "packages/demo/assertions/Cargo.toml",
+    );
+    let results = run_input(input(
+        vec![file(
+            "packages/demo/crates/runtime/tests/public_surface.rs",
+            G3RsTestFileKind::ExternalHarness,
+            Some("packages/demo"),
+            None,
+            None,
+            "#[test]\nfn public_surface() { assert!(true); }\n",
+        )],
+        vec![component],
+    ));
+
+    assert_has_result(
+        &results,
+        "RS-TEST-FILETREE-03",
+        G3Severity::Error,
+        "nested assertions package is the wrong shape",
+        "packages/demo/assertions/Cargo.toml",
+        None,
+    );
+
+    let result = results
+        .iter()
+        .find(|result| {
+            result.id() == "RS-TEST-FILETREE-03"
+                && result.title() == "nested assertions package is the wrong shape"
+                && result.file() == Some("packages/demo/assertions/Cargo.toml")
+        })
+        .expect("missing RS-TEST-FILETREE-03 result");
+    assert_eq!(
+        result.message(),
+        "Found nested package `packages/demo/assertions/Cargo.toml`. This is the wrong test layout. If assertions is a separate crate, move it to `packages/demo/crates/assertions/Cargo.toml` and move the production crate to `packages/demo/crates/runtime/Cargo.toml` so both are sibling member crates in one package."
     );
 }
 
