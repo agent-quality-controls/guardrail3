@@ -72,3 +72,7 @@ pub fn ingest_for_file_tree_checks(
         shadowed_same_root_configs,
     ))
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod run_tests;

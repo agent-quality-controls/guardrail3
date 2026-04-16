@@ -381,7 +381,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
     write(
         root.join("src/path_sidecar_exempt.rs"),
-        "#[cfg(test)]\n#[path = \"rs_code_ast_24_path_attr_with_reason_tests/mod.rs\"]\nmod rs_code_ast_24_path_attr_with_reason_tests;\n",
+        "#[cfg(test)]\n#[path = \"path_sidecar_exempt_tests/mod.rs\"]\nmod path_sidecar_exempt_tests;\n",
     );
     write(
         root.join("src/cfg_attr_unknown.rs"),

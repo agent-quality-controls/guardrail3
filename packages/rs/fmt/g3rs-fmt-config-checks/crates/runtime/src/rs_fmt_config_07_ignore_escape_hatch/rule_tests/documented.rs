@@ -9,9 +9,7 @@ fn warns_for_documented_ignore_waiver() {
 edition = "2024"
 ignore = ["generated/**"]
 "#,
-        vec![waiver(
-            "Generated code rewrites break formatter stability.",
-        )],
+        vec![waiver("Generated code rewrites break formatter stability.")],
     );
 
     assertions::assert_findings(

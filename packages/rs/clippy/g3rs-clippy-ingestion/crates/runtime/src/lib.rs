@@ -11,6 +11,3 @@ pub use run::{
 };
 #[cfg(feature = "ingest")]
 pub use error::G3RsClippyIngestionError;
-
-#[cfg(test)]
-mod run_tests;

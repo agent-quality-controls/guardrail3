@@ -1,7 +1,7 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
 use g3rs_fmt_types::{
-    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState,
-    G3RsFmtRustfmtConfigState, G3RsFmtToolchainState, G3RsFmtWaiver,
+    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState,
+    G3RsFmtToolchainState, G3RsFmtWaiver,
 };
 use rust_toolchain_toml_parser::parse as parse_toolchain_toml;
 use rustfmt_toml_parser::parse as parse_rustfmt_toml;

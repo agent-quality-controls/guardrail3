@@ -1,16 +1,13 @@
-use test_support::{
-    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState,
-    G3RsFmtRustfmtConfigState, G3RsFmtToolchainState, G3RsFmtWaiver,
-};
 use guardrail3_check_types::G3CheckResult;
 use rustfmt_toml_parser::parse as parse_rustfmt_toml;
+use test_support::{
+    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState,
+    G3RsFmtToolchainState, G3RsFmtWaiver,
+};
 
-use super::super::rule::check;
+use super::super::check;
 
-pub(super) fn run_check(
-    rustfmt_toml: &str,
-    waivers: Vec<G3RsFmtWaiver>,
-) -> Vec<G3CheckResult> {
+pub(super) fn run_check(rustfmt_toml: &str, waivers: Vec<G3RsFmtWaiver>) -> Vec<G3CheckResult> {
     let input = G3RsFmtConfigChecksInput {
         rustfmt_rel_path: "rustfmt.toml".to_owned(),
         rustfmt_state: G3RsFmtRustfmtConfigState::Parsed(

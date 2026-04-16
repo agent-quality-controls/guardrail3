@@ -3,7 +3,7 @@ use g3rs_deps_types::G3RsDepsConfigInputScope;
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_rs_toml_parser::RustProfile;
 
-use super::super::rule::check;
+use super::super::check;
 
 pub(super) fn run_check(
     profile: Option<RustProfile>,
