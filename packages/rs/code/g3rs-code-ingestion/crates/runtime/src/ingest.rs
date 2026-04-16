@@ -1,4 +1,4 @@
-use g3rs_code_ingestion_types::{G3RsCodeSourceChecksInput, G3RsSourceFile};
+use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsSourceFile};
 
 /// Build one `code` source checks input from selected metadata and source text.
 pub(crate) fn assemble(

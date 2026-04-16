@@ -11,24 +11,7 @@ pub fn assert_bad_line_threshold(results: &[guardrail3_check_types::G3CheckResul
 }
 
 pub fn assert_same_root_conflict(results: &[guardrail3_check_types::G3CheckResult]) {
-    g3rs_clippy_filetree_checks_assertions::rs_clippy_filetree_01_coverage_exists::assert_findings(
-        results,
-        &[g3rs_clippy_filetree_checks_assertions::rs_clippy_filetree_01_coverage_exists::info(
-            "workspace root covered by clippy config",
-            "Workspace root is covered by `.clippy.toml`.",
-            ".clippy.toml",
-            true,
-        )],
-    );
-    g3rs_clippy_filetree_checks_assertions::rs_clippy_filetree_02_same_root_conflict::assert_findings(
-        results,
-        &[g3rs_clippy_filetree_checks_assertions::rs_clippy_filetree_02_same_root_conflict::error(
-            "same-root clippy config conflict",
-            "`clippy.toml` conflicts with `.clippy.toml` at the same policy root. Keep only the highest-precedence clippy config file.",
-            "clippy.toml",
-            false,
-        )],
-    );
+    g3rs_clippy_filetree_checks_assertions::run::rule::assert_same_root_conflict(results);
 }
 
 pub fn assert_library_profile_warning(results: &[guardrail3_check_types::G3CheckResult]) {

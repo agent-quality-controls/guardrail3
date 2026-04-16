@@ -1,14 +1,14 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
 use clippy_toml_parser::parse as parse_clippy_toml;
 use deny_toml_parser::parse as parse_deny_toml;
-use g3rs_code_ingestion_types::{
+use g3rs_code_types::{
     G3RsCodeConfigChecksInput, G3RsCodeConfigFile, G3RsCodeConfigFileKind,
     G3RsCodeExceptionComment,
 };
+use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use guardrail3_rs_toml_parser::parse as parse_guardrail3_toml;
 use rust_toolchain_toml_parser::parse as parse_rust_toolchain_toml;
 use rustfmt_toml_parser::parse as parse_rustfmt_toml;
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::run::IngestionError;
 

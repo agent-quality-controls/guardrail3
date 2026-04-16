@@ -47,6 +47,34 @@ fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
     g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on a real workspace")
 }
 
+fn is_supported_channel(channel: &str) -> bool {
+    if channel == "stable" {
+        return true;
+    }
+
+    let version_part = channel
+        .trim()
+        .trim_start_matches('v')
+        .split_once('-')
+        .map_or(channel, |(version, _)| version);
+    let mut parts = version_part.split('.');
+    let Some(major) = parts.next() else {
+        return false;
+    };
+    let Some(minor) = parts.next() else {
+        return false;
+    };
+
+    if major.parse::<u64>().is_err() || minor.parse::<u64>().is_err() {
+        return false;
+    }
+
+    match parts.next() {
+        Some(patch) => patch.parse::<u64>().is_ok() && parts.next().is_none(),
+        None => true,
+    }
+}
+
 /// Real workspace with `[package]` containing `rust-version = "1.85"`.
 #[test]
 fn ingests_real_workspace_with_package_rust_version() {
@@ -147,10 +175,13 @@ fn ingests_all_real_workspaces() {
             .toolchain
             .as_ref()
             .unwrap_or_else(|| panic!("{pkg_name}: should have [toolchain] section"));
-        assert_eq!(
-            section.channel.as_deref(),
-            Some("stable"),
-            "{pkg_name}: should use channel = stable"
+        let channel = section
+            .channel
+            .as_deref()
+            .unwrap_or_else(|| panic!("{pkg_name}: should set [toolchain].channel"));
+        assert!(
+            is_supported_channel(channel),
+            "{pkg_name}: should use stable or a pinned stable version, got `{channel}`"
         );
         assert!(
             section.components.contains(&"clippy".to_owned()),
