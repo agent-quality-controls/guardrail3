@@ -8,12 +8,12 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["cargo", "manifest", "toml", "parser", "rust"]
 categories = ["config", "development-tools", "parser-implementations"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
-cargo-toml-parser-runtime = { path = "crates/parser/runtime", version = "0.1.0", optional = true }
+cargo-toml-parser-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
 
 [features]
 default = ["all"]
@@ -31,9 +31,9 @@ all-features = true
 
 [workspace]
 members = [
-    "crates/parser/runtime",
-    "crates/parser/assertions",
-    "crates/parser/types",
+    "crates/runtime",
+    "crates/assertions",
+    "crates/types",
 ]
 resolver = "2"
 

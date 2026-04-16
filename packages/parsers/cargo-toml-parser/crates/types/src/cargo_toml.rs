@@ -1,8 +1,3 @@
-#![allow(
-    clippy::missing_docs_in_private_items,
-    reason = "this file mirrors Cargo.toml schema directly; field names intentionally track TOML keys"
-)]
-
 use std::collections::BTreeMap;
 
 use serde::de::{self, Deserializer};
@@ -125,6 +120,7 @@ impl<'de> Deserialize<'de> for TomlTrimPaths {
     where
         D: Deserializer<'de>,
     {
+        /// Visitor for Cargo's `trim-paths` mixed TOML forms.
         struct V;
 
         impl<'de> serde::de::Visitor<'de> for V {
