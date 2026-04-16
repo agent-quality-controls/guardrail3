@@ -2,8 +2,7 @@ use std::collections::BTreeSet;
 
 use g3rs_test_file_tree_checks_types::G3RsTestFileTreeChecksInput;
 use g3rs_test_types::{
-    G3RsTestComponentFileTreeFacts, G3RsTestFileKind, G3RsTestOwnedSidecarFacts,
-    G3RsTestSourceFile,
+    G3RsTestComponentFileTreeFacts, G3RsTestFileKind, G3RsTestOwnedSidecarFacts, G3RsTestSourceFile,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
@@ -58,11 +57,20 @@ pub(crate) fn component(
             format!("{}/assertions/Cargo.toml", parent_dir(runtime_rel_dir))
         },
         assertions_exists,
+        nested_assertions_cargo_rel_path: None,
         assertions_package_name: assertions_package_name.map(str::to_owned),
         assertions_dependencies: BTreeSet::new(),
         sidecars: Vec::new(),
         external_harnesses: Vec::new(),
     }
+}
+
+pub(crate) fn with_nested_assertions_manifest(
+    mut component: G3RsTestComponentFileTreeFacts,
+    nested_assertions_cargo_rel_path: &str,
+) -> G3RsTestComponentFileTreeFacts {
+    component.nested_assertions_cargo_rel_path = Some(nested_assertions_cargo_rel_path.to_owned());
+    component
 }
 
 pub(crate) fn with_sidecar(

@@ -21,6 +21,7 @@ pub(crate) struct OwnedTestComponent {
     pub(crate) assertions_rel_dir: String,
     pub(crate) assertions_cargo_rel_path: String,
     pub(crate) assertions_exists: bool,
+    pub(crate) nested_assertions_cargo_rel_path: Option<String>,
     pub(crate) assertions_package_name: Option<String>,
     pub(crate) assertions_dependencies: BTreeSet<String>,
     pub(crate) sidecars: Vec<G3RsTestOwnedSidecarFacts>,
@@ -38,6 +39,8 @@ pub(crate) fn collect_components(
     };
     let assertions_cargo_rel_path = format!("{assertions_rel_dir}/Cargo.toml");
     let assertions_manifest = parse_optional_manifest(crawl, &assertions_cargo_rel_path)?;
+    let nested_assertions_cargo_rel_path =
+        nested_assertions_cargo_rel_path(crawl, &root.root_rel_dir, &assertions_cargo_rel_path);
 
     Ok(vec![OwnedTestComponent {
         rel_dir: root.root_rel_dir.clone(),
@@ -54,6 +57,7 @@ pub(crate) fn collect_components(
         assertions_rel_dir: assertions_rel_dir.clone(),
         assertions_cargo_rel_path: assertions_cargo_rel_path.clone(),
         assertions_exists: assertions_manifest.is_some(),
+        nested_assertions_cargo_rel_path,
         assertions_package_name: assertions_manifest
             .as_ref()
             .and_then(|manifest| manifest.package.as_ref())
@@ -81,6 +85,8 @@ pub(crate) fn collect_file_tree_components(
     let mut input_failures = Vec::new();
     let assertions_manifest =
         parse_optional_manifest_lenient(crawl, &assertions_cargo_rel_path, &mut input_failures);
+    let nested_assertions_cargo_rel_path =
+        nested_assertions_cargo_rel_path(crawl, &root.root_rel_dir, &assertions_cargo_rel_path);
 
     (
         vec![OwnedTestComponent {
@@ -98,6 +104,7 @@ pub(crate) fn collect_file_tree_components(
             assertions_rel_dir: assertions_rel_dir.clone(),
             assertions_cargo_rel_path: assertions_cargo_rel_path.clone(),
             assertions_exists: assertions_manifest.is_some(),
+            nested_assertions_cargo_rel_path,
             assertions_package_name: assertions_manifest
                 .as_ref()
                 .and_then(|manifest| manifest.package.as_ref())
@@ -262,6 +269,7 @@ pub(crate) fn public_file_tree_component_facts(
             assertions_rel_dir: component.assertions_rel_dir.clone(),
             assertions_cargo_rel_path: component.assertions_cargo_rel_path.clone(),
             assertions_exists: component.assertions_exists,
+            nested_assertions_cargo_rel_path: component.nested_assertions_cargo_rel_path.clone(),
             assertions_package_name: component.assertions_package_name.clone(),
             assertions_dependencies: component.assertions_dependencies.clone(),
             sidecars: component.sidecars.clone(),
@@ -590,6 +598,21 @@ fn manifest_dev_dependencies(manifest: &CargoToml) -> BTreeSet<String> {
         .keys()
         .map(|name| rust_crate_name(name))
         .collect()
+}
+
+fn nested_assertions_cargo_rel_path(
+    crawl: &G3RsWorkspaceCrawl,
+    root_rel_dir: &str,
+    expected_assertions_cargo_rel_path: &str,
+) -> Option<String> {
+    let nested_rel_path = join_under_root(root_rel_dir, "assertions/Cargo.toml");
+    if nested_rel_path == expected_assertions_cargo_rel_path {
+        return None;
+    }
+
+    g3rs_workspace_crawl::entry(crawl, &nested_rel_path)
+        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .map(|_| nested_rel_path)
 }
 
 fn rust_crate_name(package_name: &str) -> String {

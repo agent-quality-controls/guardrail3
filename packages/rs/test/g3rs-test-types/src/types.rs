@@ -82,6 +82,7 @@ pub struct G3RsTestComponentFileTreeFacts {
     pub assertions_rel_dir: String,
     pub assertions_cargo_rel_path: String,
     pub assertions_exists: bool,
+    pub nested_assertions_cargo_rel_path: Option<String>,
     pub assertions_package_name: Option<String>,
     pub assertions_dependencies: BTreeSet<String>,
     pub sidecars: Vec<G3RsTestOwnedSidecarFacts>,
