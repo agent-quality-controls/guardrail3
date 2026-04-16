@@ -26,7 +26,7 @@ pub(crate) fn check_file(file: &G3RsArchSourceFile, results: &mut Vec<G3CheckRes
             let path_value = extract_path_value(attr);
             if path_value
                 .as_deref()
-                .is_some_and(|path| is_test_sidecar_exempt(module, path))
+                .is_some_and(|path| is_test_sidecar_exempt(&file.rel_path, module, path))
             {
                 continue;
             }
@@ -59,14 +59,30 @@ fn extract_path_value(attr: &syn::Attribute) -> Option<String> {
     None
 }
 
-fn is_test_sidecar_exempt(module: &syn::ItemMod, path_value: &str) -> bool {
-    if !module.ident.to_string().ends_with("_tests") {
+fn is_test_sidecar_exempt(
+    file_rel_path: &str,
+    module: &syn::ItemMod,
+    path_value: &str,
+) -> bool {
+    let Some(expected_module_name) = owned_sidecar_module_name(file_rel_path) else {
+        return false;
+    };
+    if module.ident != expected_module_name {
         return false;
     }
-    if path_value != format!("{}/mod.rs", module.ident) {
+    if path_value != format!("{expected_module_name}/mod.rs") {
         return false;
     }
     module.attrs.iter().any(attr_is_cfg_test)
+}
+
+fn owned_sidecar_module_name(file_rel_path: &str) -> Option<String> {
+    let file_name = file_rel_path.rsplit('/').next()?;
+    let stem = file_name.strip_suffix(".rs")?;
+    if stem == "mod" || stem.is_empty() {
+        return None;
+    }
+    Some(format!("{stem}_tests"))
 }
 
 fn attr_is_cfg_test(attr: &syn::Attribute) -> bool {
