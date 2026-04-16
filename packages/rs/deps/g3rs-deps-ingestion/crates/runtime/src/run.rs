@@ -241,7 +241,7 @@ fn tool_is_available(tool: &str, path_env: Option<&OsStr>) -> bool {
 }
 
 fn candidate_is_executable(path: &Path) -> bool {
-    let Ok(metadata) = std::fs::metadata(path) else {
+    let Ok(metadata) = crate::fs::metadata(path) else {
         return false;
     };
     if !metadata.is_file() {

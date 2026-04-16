@@ -1,9 +1,10 @@
-use g3rs_workspace_crawl::crawl;
 use g3rs_deps_types::G3RsDepsConfigInputScope;
+use g3rs_deps_ingestion_assertions::run as assertions;
+use g3rs_workspace_crawl::crawl;
 
-use crate::run::{IngestionError, ingest_for_config_checks, ingest_for_source_checks};
+use crate::run::{ingest_for_config_checks, ingest_for_source_checks};
 
-use super::{temp_workspace, write_file};
+use super::helpers::{temp_workspace, write_file};
 
 #[test]
 fn missing_guardrail_rs_file_fails_ingestion() {
@@ -21,7 +22,7 @@ fn missing_guardrail_rs_file_fails_ingestion() {
 
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err = ingest_for_config_checks(&crawl).expect_err("missing guardrail3-rs.toml should fail");
-    assert!(matches!(err, IngestionError::Guardrail3RsTomlNotFound));
+    assertions::assert_missing_guardrail3_rs(&err);
 }
 
 #[test]
@@ -61,7 +62,7 @@ fn unreadable_root_guardrail_rs_file_fails_ingestion() {
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err =
         ingest_for_config_checks(&crawl).expect_err("unreadable guardrail3-rs.toml should fail");
-    assert!(matches!(err, IngestionError::Unreadable { .. }));
+    assertions::assert_unreadable_error(&err, "guardrail3-rs.toml");
 }
 
 #[test]
@@ -85,7 +86,7 @@ fn malformed_root_guardrail_rs_file_fails_ingestion() {
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err =
         ingest_for_config_checks(&crawl).expect_err("malformed guardrail3-rs.toml should fail");
-    assert!(matches!(err, IngestionError::ParseFailed { .. }));
+    assertions::assert_parse_failed_error(&err, "guardrail3-rs.toml");
 }
 
 #[test]
@@ -93,10 +94,8 @@ fn source_entrypoint_stays_stubbed() {
     let workspace = temp_workspace();
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
 
-    assert!(matches!(
-        ingest_for_source_checks(&crawl),
-        Err(IngestionError::SourceIngestionNotImplemented)
-    ));
+    let err = ingest_for_source_checks(&crawl).expect_err("source ingestion should stay stubbed");
+    assertions::assert_source_ingestion_not_implemented(&err);
 }
 
 #[test]
@@ -135,7 +134,7 @@ fn unreadable_root_cargo_toml_fails_ingestion() {
 
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err = ingest_for_config_checks(&crawl).expect_err("unreadable Cargo.toml should fail");
-    assert!(matches!(err, IngestionError::Unreadable { .. }));
+    assertions::assert_unreadable_error(&err, "Cargo.toml");
 }
 
 #[test]
@@ -152,7 +151,7 @@ fn malformed_root_cargo_toml_fails_ingestion() {
 
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err = ingest_for_config_checks(&crawl).expect_err("malformed Cargo.toml should fail");
-    assert!(matches!(err, IngestionError::ParseFailed { .. }));
+    assertions::assert_parse_failed_error(&err, "Cargo.toml");
 }
 
 #[test]
@@ -192,7 +191,7 @@ fn unreadable_member_manifest_fails_ingestion() {
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err =
         ingest_for_config_checks(&crawl).expect_err("unreadable member Cargo.toml should fail");
-    assert!(matches!(err, IngestionError::Unreadable { .. }));
+    assertions::assert_unreadable_error(&err, "packages/core/Cargo.toml");
 }
 
 #[test]
@@ -266,11 +265,7 @@ fn missing_declared_workspace_member_fails_ingestion() {
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err = ingest_for_config_checks(&crawl)
         .expect_err("missing declared member should fail ingestion");
-    assert!(matches!(
-        err,
-        IngestionError::NormalizationFailed { reason, .. }
-            if reason.contains("packages/missing")
-    ));
+    assertions::assert_normalization_failed_contains(&err, "Cargo.toml", "packages/missing");
 }
 
 #[test]
@@ -372,11 +367,11 @@ fn empty_allowed_dep_entry_fails_ingestion() {
 
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err = ingest_for_config_checks(&crawl).expect_err("empty allowed_deps entry should fail");
-    assert!(matches!(
-        err,
-        IngestionError::NormalizationFailed { reason, .. }
-            if reason.contains("must not contain empty dependency names")
-    ));
+    assertions::assert_normalization_failed_contains(
+        &err,
+        "guardrail3-rs.toml",
+        "must not contain empty dependency names",
+    );
 }
 
 #[test]
@@ -418,9 +413,9 @@ fn in_workspace_non_member_path_dependency_fails_ingestion() {
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err =
         ingest_for_config_checks(&crawl).expect_err("in-workspace non-member path should fail");
-    assert!(matches!(
-        err,
-        IngestionError::NormalizationFailed { reason, .. }
-            if reason.contains("in-workspace non-member")
-    ));
+    assertions::assert_normalization_failed_contains(
+        &err,
+        "packages/core/Cargo.toml",
+        "in-workspace non-member",
+    );
 }
