@@ -3,27 +3,23 @@ use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry};
 
 /// Find the workspace-root `Cargo.toml` in the crawl result.
 pub(crate) fn select_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("Cargo.toml")
+    g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
 /// Find `clippy.toml` or `.clippy.toml` at the workspace root.
 pub(crate) fn select_clippy_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl
-        .root_file("clippy.toml")
-        .or_else(|| crawl.root_file(".clippy.toml"))
+    g3rs_workspace_crawl::root_file(crawl, "clippy.toml")
+        .or_else(|| g3rs_workspace_crawl::root_file(crawl, ".clippy.toml"))
 }
 
 /// Find the root `guardrail3-rs.toml`.
-pub(crate) fn select_guardrail3_rs_toml(
-    crawl: &G3RsWorkspaceCrawl,
-) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("guardrail3-rs.toml")
+pub(crate) fn select_guardrail3_rs_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
+    g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
 /// Select all non-test, non-fixture Rust source files under the crawled root.
 pub(crate) fn select_ast_source_files(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWorkspaceEntry> {
-    let mut files = crawl
-        .files_with_extension("rs")
+    let mut files = g3rs_workspace_crawl::files_with_extension(crawl, "rs")
         .into_iter()
         .filter(|entry| is_runtime_source_path(entry.path.rel_path.as_str()))
         .filter(|entry| !is_nested_cargo_root_member(crawl, entry.path.rel_path.as_str()))
@@ -65,7 +61,9 @@ fn is_nested_cargo_root_member(crawl: &G3RsWorkspaceCrawl, rel_path: &str) -> bo
     let mut prefix = rel_path.rsplit_once('/').map(|(parent, _)| parent);
 
     while let Some(dir) = prefix {
-        if !dir.is_empty() && crawl.entry(&format!("{dir}/Cargo.toml")).is_some() {
+        if !dir.is_empty()
+            && g3rs_workspace_crawl::entry(crawl, &format!("{dir}/Cargo.toml")).is_some()
+        {
             return true;
         }
         prefix = dir.rsplit_once('/').map(|(parent, _)| parent);

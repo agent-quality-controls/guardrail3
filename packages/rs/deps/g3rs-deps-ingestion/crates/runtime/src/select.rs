@@ -7,14 +7,14 @@ use glob::Pattern;
 pub(crate) fn select_workspace_cargo_toml(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("Cargo.toml")
+    g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
 /// Find `guardrail3-rs.toml` at the workspace root.
 pub(crate) fn select_workspace_guardrail3_rs_toml(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("guardrail3-rs.toml")
+    g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
 /// Find member `Cargo.toml` files declared by `[workspace].members`.
@@ -67,8 +67,7 @@ pub(crate) fn select_member_cargo_tomls<'a>(
         .collect::<Vec<_>>();
 
     if workspace_cargo.package.is_some() && !workspace_root_is_excluded(&exclude_patterns) {
-        let root_entry = crawl
-            .root_file("Cargo.toml")
+        let root_entry = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
             .ok_or_else(|| "workspace root Cargo.toml missing from crawl".to_owned())?;
         members.push(root_entry);
     }

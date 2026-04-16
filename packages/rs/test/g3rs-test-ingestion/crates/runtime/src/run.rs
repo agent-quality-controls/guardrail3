@@ -1,5 +1,5 @@
 use g3rs_test_ingestion_types::{
-    G3RsTestSourceChecksInput, G3RsTestConfigChecksInput, G3RsTestFileTreeChecksInput,
+    G3RsTestConfigChecksInput, G3RsTestFileTreeChecksInput, G3RsTestSourceChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -21,11 +21,16 @@ pub(crate) fn ingest_for_config_checks_with_tool_state(
         .roots
         .iter()
         .map(|root| {
-            let activation =
-                crate::activation::summarize_root(crawl, root, discovery.workspace_manifest.as_ref())?;
+            let activation = crate::activation::summarize_root(
+                crawl,
+                root,
+                discovery.workspace_manifest.as_ref(),
+            )?;
             let hook_state = crate::hooks::collect_mutation_hook_state(crawl, &discovery, root)?;
-            let nextest_rel_path = crate::roots::join_under_root(&root.root_rel_dir, ".config/nextest.toml");
-            let mutants_rel_path = crate::roots::join_under_root(&root.root_rel_dir, ".cargo/mutants.toml");
+            let nextest_rel_path =
+                crate::roots::join_under_root(&root.root_rel_dir, ".config/nextest.toml");
+            let mutants_rel_path =
+                crate::roots::join_under_root(&root.root_rel_dir, ".cargo/mutants.toml");
             let nextest = parse_optional_nextest(crawl, &nextest_rel_path)?;
             let (mutants_exists, mutants) = parse_optional_mutants(crawl, &mutants_rel_path)?;
 
@@ -111,7 +116,7 @@ fn parse_optional_nextest(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
 ) -> Result<Option<nextest_toml_parser::NextestToml>, IngestionError> {
-    let Some(entry) = crawl.entry(rel_path) else {
+    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
         return Ok(None);
     };
     if !entry.readable {
@@ -120,21 +125,25 @@ fn parse_optional_nextest(
             reason: "file is not readable".to_owned(),
         });
     }
-    let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| IngestionError::Unreadable {
-        path: entry.path.abs_path.clone(),
-        reason: err.to_string(),
+    let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| {
+        IngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        }
     })?;
-    nextest_toml_parser::parse(&content).map(Some).map_err(|err| IngestionError::ParseFailed {
-        path: entry.path.abs_path.clone(),
-        reason: err.to_string(),
-    })
+    nextest_toml_parser::parse(&content)
+        .map(Some)
+        .map_err(|err| IngestionError::ParseFailed {
+            path: entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        })
 }
 
 fn parse_optional_mutants(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
 ) -> Result<(bool, Option<mutants_toml_parser::MutantsToml>), IngestionError> {
-    let Some(entry) = crawl.entry(rel_path) else {
+    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
         return Ok((false, None));
     };
     if !entry.readable {
@@ -143,14 +152,17 @@ fn parse_optional_mutants(
             reason: "file is not readable".to_owned(),
         });
     }
-    let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| IngestionError::Unreadable {
-        path: entry.path.abs_path.clone(),
-        reason: err.to_string(),
+    let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| {
+        IngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        }
     })?;
-    let parsed = mutants_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
-        path: entry.path.abs_path.clone(),
-        reason: err.to_string(),
-    })?;
+    let parsed =
+        mutants_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+            path: entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        })?;
     Ok((true, Some(parsed)))
 }
 

@@ -22,7 +22,7 @@ workspace = true
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 g3rs-topology-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-topology-types = { path = "../../../g3rs-topology-types", version = "0.1.0" }
-g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 
 [dev-dependencies]
 g3rs-topology-file-tree-checks = { path = "../../../g3rs-topology-file-tree-checks", version = "0.1.0" }

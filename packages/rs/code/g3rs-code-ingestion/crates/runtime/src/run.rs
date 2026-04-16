@@ -71,7 +71,7 @@ pub fn ingest_for_file_tree_checks(
 fn selected_package_roots(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<Vec<G3RsCodeStructuralCapRoot>, IngestionError> {
-    let Some(root_cargo_entry) = crawl.root_file("Cargo.toml") else {
+    let Some(root_cargo_entry) = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml") else {
         return Err(IngestionError::ParseFailed {
             path: crawl.root_abs_path.join("Cargo.toml"),
             reason: "root Cargo.toml missing from crawl".to_owned(),
@@ -135,7 +135,10 @@ fn measure_root_structure(
         .filter(|entry| entry.path.rel_path.ends_with(".rs"))
         .filter(|entry| !crate::classify::is_fixture_path(entry.path.rel_path.as_str()))
         .filter(|entry| !is_generated_path(entry.path.rel_path.as_str()))
-        .filter(|entry| owning_root_dir(entry.path.rel_path.as_str(), root_dirs) == Some(root.root_rel_dir.as_str()))
+        .filter(|entry| {
+            owning_root_dir(entry.path.rel_path.as_str(), root_dirs)
+                == Some(root.root_rel_dir.as_str())
+        })
         .map(|entry| entry.path.rel_path.clone())
         .collect::<Vec<_>>();
 
@@ -208,7 +211,8 @@ fn is_direct_child_dir(candidate: &str, parent: &str) -> bool {
         return false;
     };
 
-    rest.strip_prefix('/').is_some_and(|suffix| !suffix.contains('/'))
+    rest.strip_prefix('/')
+        .is_some_and(|suffix| !suffix.contains('/'))
 }
 
 fn file_parent_rel(rel_path: &str) -> &str {

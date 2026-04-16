@@ -28,10 +28,12 @@ pub(crate) fn select_owned_config_entries<'a>(
     Ok(entries)
 }
 
-pub(crate) fn owned_root_dirs(crawl: &G3RsWorkspaceCrawl) -> Result<BTreeSet<String>, IngestionError> {
+pub(crate) fn owned_root_dirs(
+    crawl: &G3RsWorkspaceCrawl,
+) -> Result<BTreeSet<String>, IngestionError> {
     let mut roots = BTreeSet::from([String::new()]);
 
-    let Some(root_cargo_entry) = crawl.root_file("Cargo.toml") else {
+    let Some(root_cargo_entry) = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml") else {
         return Ok(roots);
     };
 
@@ -64,13 +66,14 @@ fn select_workspace_member_dirs(
     crawl: &G3RsWorkspaceCrawl,
     workspace_cargo: &CargoToml,
 ) -> Result<BTreeSet<String>, IngestionError> {
-    let workspace = workspace_cargo
-        .workspace
-        .as_ref()
-        .ok_or_else(|| IngestionError::ParseFailed {
-            path: crawl.root_abs_path.join("Cargo.toml"),
-            reason: "workspace Cargo.toml has no [workspace] section".to_owned(),
-        })?;
+    let workspace =
+        workspace_cargo
+            .workspace
+            .as_ref()
+            .ok_or_else(|| IngestionError::ParseFailed {
+                path: crawl.root_abs_path.join("Cargo.toml"),
+                reason: "workspace Cargo.toml has no [workspace] section".to_owned(),
+            })?;
 
     let member_patterns = workspace
         .members
@@ -100,14 +103,20 @@ fn select_workspace_member_dirs(
         .filter_map(|entry| manifest_dir_from_manifest_path(entry.path.rel_path.as_str()))
         .filter(|member_dir| {
             !member_dir.is_empty()
-                && member_patterns.iter().any(|pattern| pattern.matches(member_dir))
-                && !exclude_patterns.iter().any(|pattern| pattern.matches(member_dir))
+                && member_patterns
+                    .iter()
+                    .any(|pattern| pattern.matches(member_dir))
+                && !exclude_patterns
+                    .iter()
+                    .any(|pattern| pattern.matches(member_dir))
         })
         .map(str::to_owned)
         .collect::<BTreeSet<_>>();
 
     for (raw_pattern, pattern) in workspace.members.iter().zip(member_patterns.iter()) {
-        let matched = member_dirs.iter().any(|member_dir| pattern.matches(member_dir));
+        let matched = member_dirs
+            .iter()
+            .any(|member_dir| pattern.matches(member_dir));
         if !matched {
             return Err(IngestionError::ParseFailed {
                 path: crawl.root_abs_path.join("Cargo.toml"),
@@ -136,7 +145,10 @@ fn file_is_within_owned_root(rel_path: &str, owned_roots: &BTreeSet<String>) -> 
         if root.is_empty() {
             parent.is_empty()
         } else {
-            parent == root || parent.strip_prefix(root.as_str()).is_some_and(|rest| rest.starts_with('/'))
+            parent == root
+                || parent
+                    .strip_prefix(root.as_str())
+                    .is_some_and(|rest| rest.starts_with('/'))
         }
     })
 }

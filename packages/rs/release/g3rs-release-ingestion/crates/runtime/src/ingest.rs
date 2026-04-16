@@ -4,8 +4,8 @@ use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 
 use cargo_toml_parser::{
-    CargoToml, Dependency, InheritableValue, PackageSection, StringOrBool,
-    TargetDependencyTables, VecStringOrBool, WorkspacePackageSection,
+    CargoToml, Dependency, InheritableValue, PackageSection, StringOrBool, TargetDependencyTables,
+    VecStringOrBool, WorkspacePackageSection,
 };
 use g3rs_release_types::{
     G3RsReleaseConfigChecksInput, G3RsReleaseConfigCrate, G3RsReleaseConfigEdge,
@@ -17,9 +17,8 @@ use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 use semver::{Version, VersionReq};
 
 use crate::workflow::{
-    binary_release_present, extract_workflow_analysis, linux_target_present,
+    WorkflowAnalysis, binary_release_present, extract_workflow_analysis, linux_target_present,
     publish_dry_run_step_present, registry_token_present, release_plz_step_present,
-    WorkflowAnalysis,
 };
 
 #[derive(Debug, Clone)]
@@ -218,7 +217,9 @@ pub(crate) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
                     publishable_binary_names.len(),
                 )
             }),
-            dry_run: krate.publishable.then(|| run_publish_dry_run(&krate.cargo_abs_path)),
+            dry_run: krate
+                .publishable
+                .then(|| run_publish_dry_run(&krate.cargo_abs_path)),
         })
         .collect::<Vec<_>>();
 
@@ -237,26 +238,26 @@ pub(crate) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
                 &krate.cargo,
                 &workspace_dependencies,
             )
-                .into_iter()
-                .map(|edge| G3RsReleaseConfigEdge {
-                    crate_name: krate.name.clone(),
-                    cargo_rel_path: krate.cargo_rel_path.clone(),
-                    source_publishable: krate.publishable,
-                    dep_name: edge.dep_name,
-                    dep_package_name: edge.dep_package_name.clone(),
-                    section_label: edge.section_label,
-                    target_label: edge.target_label,
-                    has_path: edge.has_path,
-                    path_target_kind: edge.path_target_kind,
-                    dep_publishable: publishable_names.contains(&edge.dep_package_name),
-                    version_req: edge.version_req.clone(),
-                    actual_version: version_map.get(&edge.dep_package_name).cloned(),
-                    version_satisfied: edge
-                        .version_req
-                        .as_deref()
-                        .zip(version_map.get(&edge.dep_package_name).map(String::as_str))
-                        .map(|(req, actual)| version_requirement_satisfied(actual, req)),
-                })
+            .into_iter()
+            .map(|edge| G3RsReleaseConfigEdge {
+                crate_name: krate.name.clone(),
+                cargo_rel_path: krate.cargo_rel_path.clone(),
+                source_publishable: krate.publishable,
+                dep_name: edge.dep_name,
+                dep_package_name: edge.dep_package_name.clone(),
+                section_label: edge.section_label,
+                target_label: edge.target_label,
+                has_path: edge.has_path,
+                path_target_kind: edge.path_target_kind,
+                dep_publishable: publishable_names.contains(&edge.dep_package_name),
+                version_req: edge.version_req.clone(),
+                actual_version: version_map.get(&edge.dep_package_name).cloned(),
+                version_satisfied: edge
+                    .version_req
+                    .as_deref()
+                    .zip(version_map.get(&edge.dep_package_name).map(String::as_str))
+                    .map(|(req, actual)| version_requirement_satisfied(actual, req)),
+            })
         })
         .collect::<Vec<_>>();
 
@@ -290,7 +291,7 @@ pub(crate) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
         if !krate.publishable || krate.readme_declared_false || !krate.readme_exists {
             continue;
         }
-        let Some(entry) = crawl.entry(&krate.readme_rel_path) else {
+        let Some(entry) = g3rs_workspace_crawl::entry(crawl, &krate.readme_rel_path) else {
             continue;
         };
         if !entry.readable {
@@ -532,8 +533,11 @@ fn build_crate_base(
     } else {
         krate.rel_dir.as_str()
     };
-    let (readme_rel_path, readme_abs_path) =
-        resolve_manifest_relative_path(crawl, readme_base_rel_dir, readme_field.unwrap_or("README.md"));
+    let (readme_rel_path, readme_abs_path) = resolve_manifest_relative_path(
+        crawl,
+        readme_base_rel_dir,
+        readme_field.unwrap_or("README.md"),
+    );
 
     CrateBase {
         name,
@@ -585,14 +589,11 @@ fn build_crate_base(
             .and_then(docs_rs_table)
             .is_some_and(has_supported_docs_rs_settings),
         include_exclude_present: package.is_some_and(|package| {
-            package
-                .include
-                .as_ref()
-                .is_some_and(|value| matches!(value, InheritableValue::Value(values) if !values.is_empty()))
-                || package
-                    .exclude
-                    .as_ref()
-                    .is_some_and(|value| matches!(value, InheritableValue::Value(values) if !values.is_empty()))
+            package.include.as_ref().is_some_and(
+                |value| matches!(value, InheritableValue::Value(values) if !values.is_empty()),
+            ) || package.exclude.as_ref().is_some_and(
+                |value| matches!(value, InheritableValue::Value(values) if !values.is_empty()),
+            )
         }),
         has_binstall_metadata: package
             .and_then(|package| package.metadata.as_ref())
@@ -605,7 +606,12 @@ fn build_crate_base(
 fn parse_release_plz(
     crawl: &G3RsWorkspaceCrawl,
     failures: &mut Vec<G3RsReleaseInputFailure>,
-) -> (bool, String, Option<release_plz_toml_parser::ReleasePlzToml>, BTreeSet<String>) {
+) -> (
+    bool,
+    String,
+    Option<release_plz_toml_parser::ReleasePlzToml>,
+    BTreeSet<String>,
+) {
     let rel_path = "release-plz.toml".to_owned();
     let Some(entry) = crate::select::select_release_plz_toml(crawl) else {
         return (false, rel_path, None, BTreeSet::new());
@@ -744,7 +750,9 @@ fn dependency_edges(
     let mut edges = Vec::new();
     collect_dependency_edges(
         crawl,
-        source_manifest_abs_path.parent().unwrap_or(source_manifest_abs_path),
+        source_manifest_abs_path
+            .parent()
+            .unwrap_or(source_manifest_abs_path),
         &cargo.dependencies,
         "dependencies",
         None,
@@ -753,7 +761,9 @@ fn dependency_edges(
     );
     collect_dependency_edges(
         crawl,
-        source_manifest_abs_path.parent().unwrap_or(source_manifest_abs_path),
+        source_manifest_abs_path
+            .parent()
+            .unwrap_or(source_manifest_abs_path),
         &cargo.build_dependencies,
         "build-dependencies",
         None,
@@ -763,7 +773,9 @@ fn dependency_edges(
     for (target_name, target) in &cargo.target {
         collect_target_dependency_edges(
             crawl,
-            source_manifest_abs_path.parent().unwrap_or(source_manifest_abs_path),
+            source_manifest_abs_path
+                .parent()
+                .unwrap_or(source_manifest_abs_path),
             target,
             target_name,
             workspace_dependencies,
@@ -821,9 +833,10 @@ fn collect_dependency_edges(
             .map(|path| classify_dependency_path(crawl, source_manifest_dir, path))
             .or_else(|| {
                 if workspace_inherited {
-                    workspace_detail.and_then(dependency_path).as_deref().map(|path| {
-                        classify_dependency_path(crawl, &crawl.root_abs_path, path)
-                    })
+                    workspace_detail
+                        .and_then(dependency_path)
+                        .as_deref()
+                        .map(|path| classify_dependency_path(crawl, &crawl.root_abs_path, path))
                 } else {
                     None
                 }
@@ -893,12 +906,14 @@ fn publishable(
         Some(InheritableValue::Value(VecStringOrBool::Bool(false))) => false,
         Some(InheritableValue::Value(VecStringOrBool::VecString(values))) => !values.is_empty(),
         Some(InheritableValue::Value(VecStringOrBool::Bool(true))) => true,
-        Some(InheritableValue::Inherit(_)) => match workspace_package.and_then(|workspace| workspace.publish.as_ref()) {
-            None => false,
-            Some(VecStringOrBool::Bool(false)) => false,
-            Some(VecStringOrBool::VecString(values)) => !values.is_empty(),
-            Some(VecStringOrBool::Bool(true)) => true,
-        },
+        Some(InheritableValue::Inherit(_)) => {
+            match workspace_package.and_then(|workspace| workspace.publish.as_ref()) {
+                None => false,
+                Some(VecStringOrBool::Bool(false)) => false,
+                Some(VecStringOrBool::VecString(values)) => !values.is_empty(),
+                Some(VecStringOrBool::Bool(true)) => true,
+            }
+        }
     }
 }
 
@@ -914,7 +929,9 @@ fn inherited_string_present(
 ) -> bool {
     match value {
         Some(InheritableValue::Value(value)) => !value.trim().is_empty(),
-        Some(InheritableValue::Inherit(_)) => workspace_value.is_some_and(|value| !value.trim().is_empty()),
+        Some(InheritableValue::Inherit(_)) => {
+            workspace_value.is_some_and(|value| !value.trim().is_empty())
+        }
         None => false,
     }
 }
@@ -936,7 +953,9 @@ fn version_string(
 ) -> Option<String> {
     match package.and_then(|package| package.version.as_ref()) {
         Some(InheritableValue::Value(value)) => Some(value.clone()),
-        Some(InheritableValue::Inherit(_)) => workspace_package.and_then(|workspace| workspace.version.clone()),
+        Some(InheritableValue::Inherit(_)) => {
+            workspace_package.and_then(|workspace| workspace.version.clone())
+        }
         None => None,
     }
 }
@@ -1048,7 +1067,10 @@ fn binary_target_names(
     }
 
     if file_exists(crawl, &join_under_root(rel_dir, "src/main.rs"))
-        && let Some(package_name) = cargo.package.as_ref().and_then(|package| package.name.as_ref())
+        && let Some(package_name) = cargo
+            .package
+            .as_ref()
+            .and_then(|package| package.name.as_ref())
     {
         let _ = names.insert(package_name.clone());
     }
@@ -1060,7 +1082,10 @@ fn binary_target_names(
         }
     }
     for dir in direct_child_dirs(crawl, &src_bin_rel) {
-        if file_exists(crawl, &join_under_root(&src_bin_rel, &format!("{dir}/main.rs"))) {
+        if file_exists(
+            crawl,
+            &join_under_root(&src_bin_rel, &format!("{dir}/main.rs")),
+        ) {
             let _ = names.insert(dir);
         }
     }
@@ -1073,9 +1098,12 @@ fn autodiscovered_bin_exists(crawl: &G3RsWorkspaceCrawl, rel_dir: &str) -> bool 
     direct_child_files(crawl, &src_bin_rel)
         .iter()
         .any(|file| file.ends_with(".rs"))
-        || direct_child_dirs(crawl, &src_bin_rel)
-            .iter()
-            .any(|dir| file_exists(crawl, &join_under_root(&src_bin_rel, &format!("{dir}/main.rs"))))
+        || direct_child_dirs(crawl, &src_bin_rel).iter().any(|dir| {
+            file_exists(
+                crawl,
+                &join_under_root(&src_bin_rel, &format!("{dir}/main.rs")),
+            )
+        })
 }
 
 fn binary_name_from_path(path: &str) -> Option<String> {
@@ -1107,8 +1135,7 @@ fn resolve_manifest_relative_path(
         format!("{manifest_rel_dir}/{relative}")
     };
     let rel = normalize_relative_path(Path::new(&joined));
-    let abs = crawl
-        .entry(&rel)
+    let abs = g3rs_workspace_crawl::entry(crawl, &rel)
         .map(|entry| entry.path.abs_path.clone())
         .unwrap_or_else(|| crawl.root_abs_path.join(&rel));
     (rel, abs)
@@ -1168,7 +1195,7 @@ fn join_under_root(root_rel_dir: &str, child: &str) -> String {
 }
 
 fn file_exists(crawl: &G3RsWorkspaceCrawl, rel_path: &str) -> bool {
-    crawl.entry(rel_path)
+    g3rs_workspace_crawl::entry(crawl, rel_path)
         .is_some_and(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
 }
 
@@ -1179,7 +1206,8 @@ fn direct_child_files(crawl: &G3RsWorkspaceCrawl, dir_rel: &str) -> Vec<String> 
         format!("{dir_rel}/")
     };
 
-    crawl.entries
+    crawl
+        .entries
         .iter()
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
         .filter_map(|entry| entry.path.rel_path.strip_prefix(&prefix))
@@ -1303,17 +1331,9 @@ fn run_publish_dry_run(manifest_path: &Path) -> G3RsReleaseDryRunOutcome {
             let stderr = String::from_utf8_lossy(&output.stderr);
             let stdout = String::from_utf8_lossy(&output.stdout);
             let excerpt = if stderr.trim().is_empty() {
-                stdout
-                    .lines()
-                    .take(3)
-                    .collect::<Vec<_>>()
-                    .join("; ")
+                stdout.lines().take(3).collect::<Vec<_>>().join("; ")
             } else {
-                stderr
-                    .lines()
-                    .take(3)
-                    .collect::<Vec<_>>()
-                    .join("; ")
+                stderr.lines().take(3).collect::<Vec<_>>().join("; ")
             };
             G3RsReleaseDryRunOutcome::Failed(excerpt)
         }
@@ -1321,7 +1341,10 @@ fn run_publish_dry_run(manifest_path: &Path) -> G3RsReleaseDryRunOutcome {
     }
 }
 
-fn input_failure(rel_path: impl Into<String>, message: impl Into<String>) -> G3RsReleaseInputFailure {
+fn input_failure(
+    rel_path: impl Into<String>,
+    message: impl Into<String>,
+) -> G3RsReleaseInputFailure {
     G3RsReleaseInputFailure {
         rel_path: rel_path.into(),
         message: message.into(),

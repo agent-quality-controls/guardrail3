@@ -169,8 +169,7 @@ fn load_package_targets(
     crawl: &G3RsWorkspaceCrawl,
     manifest_rel_path: &str,
 ) -> Result<PackageTargets, IngestionError> {
-    let manifest_entry = crawl
-        .entry(manifest_rel_path)
+    let manifest_entry = g3rs_workspace_crawl::entry(crawl, manifest_rel_path)
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
         .ok_or_else(|| IngestionError::Unreadable {
             path: crawl.root_abs_path.join(manifest_rel_path),
@@ -237,7 +236,7 @@ fn resolve_library_root(
         }
         if autolib_enabled {
             let default_rel = join_rel(&package_dir_rel, "src/lib.rs");
-            if crawl.entry(&default_rel).is_some() {
+            if g3rs_workspace_crawl::entry(crawl, &default_rel).is_some() {
                 return Some(default_rel);
             }
         }
@@ -249,7 +248,7 @@ fn resolve_library_root(
     }
 
     let default_rel = join_rel(&package_dir_rel, "src/lib.rs");
-    crawl.entry(&default_rel).map(|_| default_rel)
+    g3rs_workspace_crawl::entry(crawl, &default_rel).map(|_| default_rel)
 }
 
 fn resolve_binary_roots(
@@ -273,7 +272,7 @@ fn resolve_binary_roots(
 
     if autobins_enabled {
         let default_main_rel = join_rel(&package_dir_rel, "src/main.rs");
-        if crawl.entry(&default_main_rel).is_some() {
+        if g3rs_workspace_crawl::entry(crawl, &default_main_rel).is_some() {
             roots.push(default_main_rel);
         }
 
@@ -315,7 +314,7 @@ fn nearest_manifest_rel_path(crawl: &G3RsWorkspaceCrawl, source_rel_path: &str) 
             current.join("Cargo.toml").to_string_lossy().into_owned()
         };
 
-        if crawl.entry(&manifest_rel).is_some() {
+        if g3rs_workspace_crawl::entry(crawl, &manifest_rel).is_some() {
             return Some(manifest_rel);
         }
 

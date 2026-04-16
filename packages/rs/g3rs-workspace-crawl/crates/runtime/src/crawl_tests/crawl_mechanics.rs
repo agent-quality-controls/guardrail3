@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+use g3rs_workspace_crawl_assertions::crawl as assertions;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -60,14 +61,8 @@ fn symlinks_are_skipped() {
 
     let crawl = crate::crawl(root).expect("crawl should succeed with symlinks present");
 
-    assert!(
-        crawl.entry("real.txt").is_some(),
-        "regular file real.txt should appear in crawl"
-    );
-    assert!(
-        crawl.entry("link.txt").is_none(),
-        "symlink link.txt should be skipped because follow_links is false"
-    );
+    assertions::assert_crawl_entry_exists(&crawl, "real.txt");
+    assertions::assert_crawl_entry_absent(&crawl, "link.txt");
 }
 
 #[cfg(unix)]
@@ -88,19 +83,19 @@ fn unreadable_file_has_readable_false() {
 
     let crawl = crate::crawl(root).expect("crawl should succeed even with unreadable files");
 
-    let secret = crawl
-        .entry("secret.txt")
-        .expect("unreadable file secret.txt should still appear in crawl entries");
-    assert!(
-        !secret.readable,
-        "secret.txt should have readable=false after chmod 000"
+    assertions::assert_crawl_entry(
+        &crawl,
+        "secret.txt",
+        crate::G3RsWorkspaceEntryKind::File,
+        crate::G3RsWorkspaceIgnoreState::Included,
+        false,
     );
 
-    let normal = crawl
-        .entry("normal.txt")
-        .expect("normal.txt should appear in crawl entries");
-    assert!(
-        normal.readable,
-        "normal.txt should have readable=true with default permissions"
+    assertions::assert_crawl_entry(
+        &crawl,
+        "normal.txt",
+        crate::G3RsWorkspaceEntryKind::File,
+        crate::G3RsWorkspaceIgnoreState::Included,
+        true,
     );
 }

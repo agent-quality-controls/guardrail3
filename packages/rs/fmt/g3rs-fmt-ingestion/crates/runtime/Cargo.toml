@@ -26,7 +26,7 @@ shared = true
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 g3rs-fmt-types = { path = "../../../g3rs-fmt-types", version = "0.1.0" }
 g3rs-fmt-ingestion-types = { path = "../types", version = "0.1.0" }
-g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
+g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
 rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser", version = "0.1.0" }
 rustfmt-toml-parser = { path = "../../../../../parsers/rustfmt-toml-parser", version = "0.1.0" }

@@ -2,13 +2,13 @@ use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspace
 use glob::Pattern;
 
 pub(crate) fn select_root_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("Cargo.toml")
+    g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
 pub(crate) fn select_root_rust_policy_toml(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Option<&G3RsWorkspaceEntry> {
-    crawl.root_file("guardrail3-rs.toml")
+    g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
 pub(crate) fn select_member_manifest<'a>(
@@ -16,7 +16,7 @@ pub(crate) fn select_member_manifest<'a>(
     member_rel: &str,
 ) -> Option<&'a G3RsWorkspaceEntry> {
     let rel_path = member_manifest_rel_path(member_rel);
-    crawl.entry(&rel_path)
+    g3rs_workspace_crawl::entry(crawl, &rel_path)
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
 }
 
@@ -61,7 +61,9 @@ pub(crate) fn collect_declared_member_rels(
     Ok(members.into_iter().collect())
 }
 
-pub(crate) fn workspace_root_kind(root_raw: &toml::Value) -> g3rs_cargo_types::G3RsCargoPolicyRootKind {
+pub(crate) fn workspace_root_kind(
+    root_raw: &toml::Value,
+) -> g3rs_cargo_types::G3RsCargoPolicyRootKind {
     if root_raw.get("workspace").is_some() {
         g3rs_cargo_types::G3RsCargoPolicyRootKind::WorkspaceRoot
     } else if root_raw.get("package").is_some() {
@@ -94,7 +96,8 @@ fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> Result<Ve
     if looks_like_glob(&normalized) {
         let compiled = Pattern::new(&normalized)
             .map_err(|err| format!("invalid workspace member pattern `{pattern}`: {err}"))?;
-        Ok(crawl.entries
+        Ok(crawl
+            .entries
             .iter()
             .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::Directory)
             .map(|entry| entry.path.rel_path.as_str())
@@ -112,7 +115,10 @@ fn looks_like_glob(pattern: &str) -> bool {
 
 pub(crate) fn normalize_member_rel(pattern: &str) -> String {
     let trimmed = pattern.trim_matches('/');
-    let stripped = trimmed.strip_prefix("./").unwrap_or(trimmed).trim_matches('/');
+    let stripped = trimmed
+        .strip_prefix("./")
+        .unwrap_or(trimmed)
+        .trim_matches('/');
 
     if stripped == "." {
         String::new()
