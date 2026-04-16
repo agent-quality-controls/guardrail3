@@ -9,6 +9,7 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "toolchain", "ingestion", "assertions"]
 categories = ["development-tools"]
+publish = false
 
 [lints]
 workspace = true
@@ -22,4 +23,7 @@ ingest = []
 shared = true
 
 [dependencies]
-g3rs-toolchain-ingestion-types = { path = "../types" }
+g3rs-toolchain-config-checks-assertions = { path = "../../../g3rs-toolchain-config-checks/crates/assertions" }
+g3rs-toolchain-filetree-checks-assertions = { path = "../../../g3rs-toolchain-filetree-checks/crates/assertions" }
+g3rs-toolchain-ingestion-runtime = { path = "../runtime" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
