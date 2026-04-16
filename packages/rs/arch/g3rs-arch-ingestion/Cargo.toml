@@ -8,20 +8,18 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["guardrail3", "arch", "ingestion", "rust"]
 categories = ["development-tools"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
 g3rs-arch-ingestion-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
-g3rs-arch-ingestion-types = { path = "crates/types", version = "0.1.0", optional = true }
 
 [features]
 default = ["all"]
 all = ["api"]
 api = [
     "dep:g3rs-arch-ingestion-runtime",
-    "dep:g3rs-arch-ingestion-types",
 ]
 
 [package.metadata.guardrail3]
@@ -34,7 +32,6 @@ all-features = true
 members = [
     "crates/assertions",
     "crates/runtime",
-    "crates/types",
 ]
 resolver = "2"
 

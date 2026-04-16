@@ -1,0 +1,33 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-arch-config-checks",
+  "g3rs-arch-file-tree-checks",
+  "g3rs-arch-ingestion-assertions",
+  "g3rs-arch-ingestion-runtime",
+  "g3rs-arch-source-checks",
+  "g3rs-arch-types",
+  "g3rs-workspace-crawl",
+  "glob",
+  "guardrail3-check-types",
+  "guardrail3-rs-toml-parser",
+  "proc-macro2",
+  "syn",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime crate intentionally keeps ingestion flow split across focused modules."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions crate intentionally keeps shared proof helpers in dedicated modules."

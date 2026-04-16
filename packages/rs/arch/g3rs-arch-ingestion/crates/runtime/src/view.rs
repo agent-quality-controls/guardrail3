@@ -5,6 +5,8 @@ use g3rs_workspace_crawl::{
     G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
 };
 
+use crate::fs;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct DirContents {
     files: Vec<String>,
@@ -96,7 +98,9 @@ impl<'a> CrawlView<'a> {
     }
 
     pub(crate) fn abs_path(&self, rel_path: &str) -> Option<PathBuf> {
-        self.crawl.entry(rel_path).map(|entry| entry.path.abs_path.clone())
+        self.crawl
+            .entry(rel_path)
+            .map(|entry| entry.path.abs_path.clone())
     }
 
     pub(crate) fn all_dir_rels(&self) -> impl Iterator<Item = &str> {
@@ -108,8 +112,10 @@ impl<'a> CrawlView<'a> {
             .crawl
             .entry(rel_path)
             .map(|entry| entry.path.abs_path.clone())
-            .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "entry missing from crawl"))?;
-        std::fs::read_to_string(path)
+            .ok_or_else(|| {
+                std::io::Error::new(std::io::ErrorKind::NotFound, "entry missing from crawl")
+            })?;
+        fs::read_to_string(&path)
     }
 
     pub(crate) fn root_abs_path(&self) -> &Path {
