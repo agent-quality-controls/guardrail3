@@ -1,4 +1,4 @@
-use g3rs_toolchain_filetree_checks_types::G3RsToolchainFileTreeChecksInput;
+use g3rs_toolchain_types::G3RsToolchainFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsToolchainFileTreeChecksInput) -> Vec<G3CheckResult> {
@@ -11,5 +11,5 @@ pub fn check(input: &G3RsToolchainFileTreeChecksInput) -> Vec<G3CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod tests;
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod run_tests;
