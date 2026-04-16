@@ -2,13 +2,12 @@
     clippy::expect_used,
     clippy::missing_const_for_fn,
     clippy::missing_panics_doc,
-    clippy::panic,
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
 use std::collections::BTreeMap;
 
-use cargo_config_toml_parser_runtime::{
+use cargo_config_toml_parser_runtime::types::{
     CargoConfigToml, CommandValue, EnvValue, HttpSslVersion, TargetSelector, Value,
 };
 
@@ -26,11 +25,15 @@ pub fn assert_extra_empty(cfg: &CargoConfigToml) {
 }
 
 pub fn assert_simple_env_value(env: Option<&EnvValue>, expected: &str, key: &str) {
-    match env {
-        Some(EnvValue::Simple(actual)) => assert_eq!(actual, expected, "{key} mismatch"),
-        Some(EnvValue::Detailed(_)) => panic!("{key} should be a simple env value"),
-        None => panic!("{key} should exist"),
-    }
+    assert!(env.is_some(), "{key} should exist");
+    assert!(
+        matches!(env, Some(EnvValue::Simple(_))),
+        "{key} should be a simple env value",
+    );
+    let Some(EnvValue::Simple(actual)) = env else {
+        return;
+    };
+    assert_eq!(actual, expected, "{key} mismatch");
 }
 
 pub fn assert_detailed_env_value(
@@ -40,25 +43,43 @@ pub fn assert_detailed_env_value(
     expected_relative: Option<bool>,
     key: &str,
 ) {
-    match env {
-        Some(EnvValue::Detailed(detail)) => {
-            assert_eq!(detail.value, expected_value, "{key}.value mismatch");
-            assert_eq!(detail.force, expected_force, "{key}.force mismatch");
-            assert_eq!(detail.relative, expected_relative, "{key}.relative mismatch");
-            assert!(detail.extra.is_empty(), "{key}.extra should be empty");
-        }
-        Some(EnvValue::Simple(_)) => panic!("{key} should be a detailed env value"),
-        None => panic!("{key} should exist"),
-    }
+    assert!(env.is_some(), "{key} should exist");
+    assert!(
+        matches!(env, Some(EnvValue::Detailed(_))),
+        "{key} should be a detailed env value",
+    );
+    let Some(EnvValue::Detailed(detail)) = env else {
+        return;
+    };
+    assert_eq!(detail.value, expected_value, "{key}.value mismatch");
+    assert_eq!(detail.force, expected_force, "{key}.force mismatch");
+    assert_eq!(detail.relative, expected_relative, "{key}.relative mismatch");
+    assert!(detail.extra.is_empty(), "{key}.extra should be empty");
+}
+
+pub fn assert_detailed_env_extra_table(env: Option<&EnvValue>, key: &str, extra_key: &str) {
+    assert!(env.is_some(), "{key} should exist");
+    assert!(
+        matches!(env, Some(EnvValue::Detailed(_))),
+        "{key} should be a detailed env value",
+    );
+    let Some(EnvValue::Detailed(detail)) = env else {
+        return;
+    };
+    assert_nested_extra_table(&detail.extra, extra_key);
 }
 
 pub fn assert_command_list(actual: Option<&CommandValue>, expected: &[&str], field_name: &str) {
     let expected_values = expected.iter().map(ToString::to_string).collect::<Vec<_>>();
-    match actual {
-        Some(CommandValue::List(value)) => assert_eq!(value, &expected_values, "{field_name} mismatch"),
-        Some(CommandValue::String(_)) => panic!("{field_name} should be a list command"),
-        None => panic!("{field_name} should exist"),
-    }
+    assert!(actual.is_some(), "{field_name} should exist");
+    assert!(
+        matches!(actual, Some(CommandValue::List(_))),
+        "{field_name} should be a list command",
+    );
+    let Some(CommandValue::List(value)) = actual else {
+        return;
+    };
+    assert_eq!(value, &expected_values, "{field_name} mismatch");
 }
 
 pub fn assert_target_selector_list(
@@ -67,11 +88,15 @@ pub fn assert_target_selector_list(
     field_name: &str,
 ) {
     let expected_values = expected.iter().map(ToString::to_string).collect::<Vec<_>>();
-    match actual {
-        Some(TargetSelector::List(value)) => assert_eq!(value, &expected_values, "{field_name} mismatch"),
-        Some(TargetSelector::String(_)) => panic!("{field_name} should be a list selector"),
-        None => panic!("{field_name} should exist"),
-    }
+    assert!(actual.is_some(), "{field_name} should exist");
+    assert!(
+        matches!(actual, Some(TargetSelector::List(_))),
+        "{field_name} should be a list selector",
+    );
+    let Some(TargetSelector::List(value)) = actual else {
+        return;
+    };
+    assert_eq!(value, &expected_values, "{field_name} mismatch");
 }
 
 pub fn assert_tls_range(
@@ -79,15 +104,17 @@ pub fn assert_tls_range(
     expected_min: Option<&str>,
     expected_max: Option<&str>,
 ) {
-    match actual {
-        Some(HttpSslVersion::Range(range)) => {
-            assert_eq!(range.min.as_deref(), expected_min, "http.ssl-version.min mismatch");
-            assert_eq!(range.max.as_deref(), expected_max, "http.ssl-version.max mismatch");
-            assert!(range.extra.is_empty(), "http.ssl-version.extra should be empty");
-        }
-        Some(HttpSslVersion::String(_)) => panic!("http.ssl-version should be a range"),
-        None => panic!("http.ssl-version should exist"),
-    }
+    assert!(actual.is_some(), "http.ssl-version should exist");
+    assert!(
+        matches!(actual, Some(HttpSslVersion::Range(_))),
+        "http.ssl-version should be a range",
+    );
+    let Some(HttpSslVersion::Range(range)) = actual else {
+        return;
+    };
+    assert_eq!(range.min.as_deref(), expected_min, "http.ssl-version.min mismatch");
+    assert_eq!(range.max.as_deref(), expected_max, "http.ssl-version.max mismatch");
+    assert!(range.extra.is_empty(), "http.ssl-version.extra should be empty");
 }
 
 pub fn assert_string_list(actual: &[String], expected: &[&str], field_name: &str) {
@@ -127,5 +154,13 @@ pub fn assert_parse_error(err: impl std::fmt::Display) {
     assert!(
         msg.contains("invalid cargo config"),
         "expected error message prefix, got: {msg}",
+    );
+}
+
+pub fn assert_include_path_error(err: impl std::fmt::Display) {
+    let msg = err.to_string();
+    assert!(
+        msg.contains("expected a config include path ending with `.toml`"),
+        "expected include path error, got: {msg}",
     );
 }

@@ -41,11 +41,7 @@ include = ["shared.txt"]
     )
     .expect_err("non-.toml include path should be rejected");
 
-    let message = err.to_string();
-    assert!(
-        message.contains("expected a config include path ending with `.toml`"),
-        "expected include path error, got: {message}",
-    );
+    assertions::assert_include_path_error(err);
 }
 
 #[test]
@@ -188,14 +184,7 @@ FUTURE_ENV = { value = "x", custom = { nested = true } }
 
     assertions::assert_simple_env_value(cfg.env.get("CLIPPY_CONF_DIR"), ".", "CLIPPY_CONF_DIR");
     assertions::assert_top_level_string_extra(&cfg, "future-key", "value");
-    let env = cfg.env.get("FUTURE_ENV").expect("FUTURE_ENV should exist");
-    assert!(
-        matches!(env, crate::EnvValue::Detailed(_)),
-        "FUTURE_ENV should be detailed",
-    );
-    if let crate::EnvValue::Detailed(detail) = env {
-        assertions::assert_nested_extra_table(&detail.extra, "custom");
-    }
+    assertions::assert_detailed_env_extra_table(cfg.env.get("FUTURE_ENV"), "FUTURE_ENV", "custom");
 }
 
 #[test]
