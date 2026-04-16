@@ -1,5 +1,5 @@
-use g3rs_clippy_config_checks_assertions::rs_clippy_config_02_max_fn_params_bools::rule as assertions;
 use super::helpers::run_check;
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_02_max_fn_params_bools::rule as assertions;
 
 #[test]
 fn errors_when_max_fn_params_bools_has_the_wrong_value() {

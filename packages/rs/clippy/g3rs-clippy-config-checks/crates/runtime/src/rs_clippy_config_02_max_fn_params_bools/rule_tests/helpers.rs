@@ -1,6 +1,6 @@
 use guardrail3_check_types::G3CheckResult;
 
-use super::super::rule::check;
+use super::super::check;
 use test_support::input_from_raw;
 
 pub(super) fn run_check(clippy_toml: &str) -> Vec<G3CheckResult> {

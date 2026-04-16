@@ -67,3 +67,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         );
     }
 }
+
+#[cfg(test)]
+#[path = "rs_clippy_config_12_extra_type_ban_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_clippy_config_12_extra_type_ban_tests;

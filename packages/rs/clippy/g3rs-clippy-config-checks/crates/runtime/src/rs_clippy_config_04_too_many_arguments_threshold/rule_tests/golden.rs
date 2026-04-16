@@ -1,5 +1,5 @@
-use g3rs_clippy_config_checks_assertions::rs_clippy_config_04_too_many_arguments_threshold::rule as assertions;
 use super::helpers::run_check;
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_04_too_many_arguments_threshold::rule as assertions;
 
 #[test]
 fn inventories_when_too_many_arguments_threshold_matches_baseline() {

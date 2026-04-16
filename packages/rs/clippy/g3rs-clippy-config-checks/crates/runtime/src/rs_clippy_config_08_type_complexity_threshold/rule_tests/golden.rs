@@ -1,5 +1,5 @@
-use g3rs_clippy_config_checks_assertions::rs_clippy_config_08_type_complexity_threshold::rule as assertions;
 use super::helpers::run_check;
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_08_type_complexity_threshold::rule as assertions;
 
 #[test]
 fn inventories_when_type_complexity_threshold_matches_baseline() {
