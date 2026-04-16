@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use g3rs_apparch_config_checks_types::G3RsApparchConfigChecksInput;
 use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchLayer};
+use g3rs_apparch_types::G3RsApparchConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsApparchConfigChecksInput) -> Vec<G3CheckResult> {
@@ -113,4 +113,4 @@ pub(crate) fn forbidden_runtime_dependency(
 
 #[cfg(test)]
 #[path = "run_tests/mod.rs"]
-mod tests;
+mod run_tests;

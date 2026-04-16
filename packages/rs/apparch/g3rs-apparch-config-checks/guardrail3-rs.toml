@@ -1,0 +1,25 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-apparch-config-checks-assertions",
+  "g3rs-apparch-config-checks-runtime",
+  "g3rs-apparch-types",
+  "guardrail3-check-types",
+  "guardrail3-reason-policy",
+  "guardrail3-rs-toml-parser",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime crate intentionally keeps one apparch policy rule per module."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions crate intentionally keeps one shared proof module per apparch rule."
