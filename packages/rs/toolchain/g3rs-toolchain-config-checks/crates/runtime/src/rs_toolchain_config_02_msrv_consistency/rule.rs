@@ -1,6 +1,6 @@
 use cargo_toml_parser::{CargoToml, InheritableValue};
-use rust_toolchain_toml_parser::RustToolchainToml;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
+use rust_toolchain_toml_parser::RustToolchainToml;
 
 const ID: &str = "RS-TOOLCHAIN-CONFIG-02";
 
@@ -90,7 +90,8 @@ fn cargo_rust_version(cargo: &CargoToml) -> Option<&str> {
         .and_then(|workspace| workspace.package.as_ref())
         .and_then(|package| package.rust_version.as_deref())
         .or_else(|| {
-            cargo.package
+            cargo
+                .package
                 .as_ref()
                 .and_then(|package| inheritable_string(package.rust_version.as_ref()))
         })
@@ -135,5 +136,5 @@ fn parse_manifest_version(raw: &str) -> Option<(u64, u64, u64)> {
 }
 
 #[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

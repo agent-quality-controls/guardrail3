@@ -1,4 +1,4 @@
-use g3rs_toolchain_config_checks_assertions::rs_toolchain_config_02_msrv_consistency as assertions;
+use g3rs_toolchain_config_checks_assertions::rs_toolchain_config_02_msrv_consistency::rule as assertions;
 
 use super::helpers::run_check;
 

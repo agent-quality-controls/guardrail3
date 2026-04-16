@@ -36,7 +36,7 @@ name = "g3rs-toolchain-config-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-toolchain-config-checks-runtime",
- "g3rs-toolchain-config-checks-types",
+ "g3rs-toolchain-types",
 ]
 
 [[package]]
@@ -53,16 +53,9 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-toolchain-config-checks-assertions",
- "g3rs-toolchain-config-checks-types",
+ "g3rs-toolchain-types",
  "guardrail3-check-types",
  "rust-toolchain-toml-parser",
-]
-
-[[package]]
-name = "g3rs-toolchain-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-toolchain-types",
 ]
 
 [[package]]

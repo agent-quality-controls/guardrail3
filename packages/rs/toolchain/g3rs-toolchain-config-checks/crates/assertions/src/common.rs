@@ -2,11 +2,11 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
-    pub severity: G3Severity,
-    pub title: &'a str,
-    pub message: &'a str,
-    pub file: Option<&'a str>,
-    pub inventory: bool,
+    severity: G3Severity,
+    title: &'a str,
+    message: &'a str,
+    file: Option<&'a str>,
+    inventory: bool,
 }
 
 #[must_use]
@@ -41,11 +41,7 @@ pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Findin
     findings
 }
 
-pub(crate) fn assert_findings(
-    results: &[G3CheckResult],
-    id: &str,
-    expected: &[Finding<'_>],
-) {
+pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[Finding<'_>]) {
     let mut expected_vec = expected.to_vec();
     expected_vec.sort_by(|left, right| {
         (

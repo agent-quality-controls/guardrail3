@@ -12,7 +12,11 @@ enum ChannelKind {
     Unsupported,
 }
 
-pub(crate) fn check(toolchain_rel_path: &str, toolchain_toml: &RustToolchainToml, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(
+    toolchain_rel_path: &str,
+    toolchain_toml: &RustToolchainToml,
+    results: &mut Vec<G3CheckResult>,
+) {
     let Some(toolchain) = toolchain_table(toolchain_toml, toolchain_rel_path, results) else {
         return;
     };
@@ -42,11 +46,7 @@ fn toolchain_table<'a>(
     }
 }
 
-fn check_channel(
-    toolchain: &ToolchainSection,
-    rel: &str,
-    results: &mut Vec<G3CheckResult>,
-) {
+fn check_channel(toolchain: &ToolchainSection, rel: &str, results: &mut Vec<G3CheckResult>) {
     match toolchain.channel.as_deref() {
         Some(channel) => match classify_channel(channel) {
             ChannelKind::Stable => results.push(
@@ -165,11 +165,7 @@ fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
     Some((major, minor, patch))
 }
 
-fn check_components(
-    toolchain: &ToolchainSection,
-    rel: &str,
-    results: &mut Vec<G3CheckResult>,
-) {
+fn check_components(toolchain: &ToolchainSection, rel: &str, results: &mut Vec<G3CheckResult>) {
     let names = toolchain
         .components
         .iter()
@@ -203,5 +199,5 @@ fn check_components(
 }
 
 #[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;
