@@ -1,40 +1,8 @@
-use std::fs;
-use std::path::Path;
-use std::process::Command;
-
 use g3rs_deny_types::G3RsDenyRustPolicyState;
 use guardrail3_rs_toml_parser::RustProfile;
 use tempfile::tempdir;
 
-fn git_init(path: &Path) {
-    let _status = Command::new("git")
-        .args(["init", "--quiet"])
-        .current_dir(path)
-        .status()
-        .expect("git init should succeed in test fixture setup");
-}
-
-fn write(path: impl AsRef<Path>, content: &str) {
-    if let Some(parent) = path.as_ref().parent() {
-        fs::create_dir_all(parent)
-            .expect("should create parent directories for test fixture files");
-    }
-    fs::write(path, content).expect("should write test fixture file to disk");
-}
-
-fn make_unreadable(path: &Path) {
-    use std::os::unix::fs::PermissionsExt;
-
-    let mut permissions = fs::metadata(path)
-        .expect("fixture file should exist before chmod")
-        .permissions();
-    permissions.set_mode(0o000);
-    fs::set_permissions(path, permissions).expect("should chmod fixture file unreadable");
-}
-
-fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
-}
+use super::helpers::{crawl, git_init, make_unreadable, write};
 
 #[test]
 fn ingests_deny_toml() {
@@ -48,7 +16,7 @@ fn ingests_deny_toml() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid deny.toml");
     assert_eq!(
@@ -73,7 +41,7 @@ fn ingests_dot_deny_toml() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for a valid .deny.toml");
     assert_eq!(
@@ -94,7 +62,7 @@ fn ingests_root_cargo_deny_toml_when_no_higher_precedence_root_file_exists() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for root .cargo/deny.toml");
     assert_eq!(
@@ -120,7 +88,7 @@ fn prefers_deny_toml_over_dot_variant() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input =
         result.expect("ingestion should succeed when both deny.toml and .deny.toml exist");
@@ -151,10 +119,10 @@ fn fails_when_deny_toml_is_missing() {
     write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::DenyTomlNotFound)),
+        matches!(result, Err(crate::run::IngestionError::DenyTomlNotFound)),
         "ingestion should return DenyTomlNotFound when no deny config exists in the workspace"
     );
 }
@@ -168,10 +136,10 @@ fn fails_on_malformed_deny_toml() {
     write(root.join("deny.toml"), "{{{{not valid toml}}}}");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
+        matches!(result, Err(crate::run::IngestionError::ParseFailed { .. })),
         "ingestion should return ParseFailed when deny.toml contains invalid TOML"
     );
 }
@@ -191,10 +159,10 @@ fn fails_on_unreadable_selected_deny_file() {
     let crawl = crawl(root);
     make_unreadable(&deny_path);
 
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::Unreadable { .. })),
+        matches!(result, Err(crate::run::IngestionError::Unreadable { .. })),
         "ingestion should return Unreadable when the selected deny file cannot be read"
     );
 }
@@ -223,7 +191,7 @@ fn ignored_but_recovered_deny_toml_is_ingested() {
         "deny.toml should have Ignored state when gitignored, proving the recovery path was exercised"
     );
 
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect(
         "ingestion should succeed for a gitignored deny.toml recovered by the crawl recovery phase",
@@ -250,7 +218,7 @@ fn nested_deny_toml_is_not_selected() {
     );
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed when root deny.toml exists");
     assert_eq!(
@@ -268,7 +236,7 @@ fn empty_deny_toml_parses_to_hollow_input() {
     write(root.join("deny.toml"), "");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed for an empty deny.toml");
     assert!(
@@ -291,7 +259,7 @@ fn guardrail3_rs_toml_drives_library_profile() {
     write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
 
     assert_eq!(
         input.rust_policy,
@@ -312,7 +280,7 @@ fn legacy_guardrail3_toml_is_ignored() {
     write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
 
     assert_eq!(
         input.rust_policy,
@@ -331,7 +299,7 @@ fn guardrail3_rs_parse_errors_surface_in_rust_policy_state() {
     write(root.join("guardrail3-rs.toml"), "profile = \"invalid\"\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
+    let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
 
     assert!(
         matches!(
