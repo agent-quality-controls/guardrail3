@@ -1,4 +1,4 @@
-use g3rs_deps_filetree_checks_types::G3RsDepsFileTreeChecksInput;
+use g3rs_deps_types::G3RsDepsFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsDepsFileTreeChecksInput) -> Vec<G3CheckResult> {
@@ -12,4 +12,4 @@ pub fn check(input: &G3RsDepsFileTreeChecksInput) -> Vec<G3CheckResult> {
 
 #[cfg(test)]
 #[path = "run_tests/mod.rs"]
-mod tests;
+mod run_tests;
