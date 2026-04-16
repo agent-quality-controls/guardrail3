@@ -160,7 +160,6 @@ dependencies = [
 name = "g3rs-arch-ingestion-types"
 version = "0.1.0"
 dependencies = [
- "g3rs-arch-source-checks-types",
  "g3rs-arch-types",
 ]
 
@@ -169,25 +168,17 @@ name = "g3rs-arch-source-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-arch-source-checks-runtime",
- "g3rs-arch-source-checks-types",
+ "g3rs-arch-types",
 ]
 
 [[package]]
 name = "g3rs-arch-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-arch-source-checks-types",
  "g3rs-arch-types",
  "guardrail3-check-types",
  "proc-macro2",
  "syn",
-]
-
-[[package]]
-name = "g3rs-arch-source-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-arch-types",
 ]
 
 [[package]]

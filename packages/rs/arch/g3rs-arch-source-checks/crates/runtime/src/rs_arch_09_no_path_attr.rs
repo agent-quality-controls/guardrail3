@@ -101,4 +101,5 @@ fn cfg_meta_is_test(meta: &syn::Meta, positive: bool) -> bool {
 
 #[cfg(test)]
 #[path = "rs_arch_09_no_path_attr_tests/mod.rs"]
-mod tests;
+// reason: keep rule tests in the owned x_tests sidecar directory.
+mod rs_arch_09_no_path_attr_tests;

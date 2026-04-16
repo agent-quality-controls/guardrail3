@@ -82,4 +82,5 @@ pub(crate) fn check(
 
 #[cfg(test)]
 #[path = "rs_arch_08a_feature_gated_exports_tests/mod.rs"]
-mod tests;
+// reason: keep rule tests in the owned x_tests sidecar directory.
+mod rs_arch_08a_feature_gated_exports_tests;

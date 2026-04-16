@@ -1,0 +1,13 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-arch-source-checks-assertions",
+  "g3rs-arch-source-checks-runtime",
+  "g3rs-arch-types",
+  "guardrail3-check-types",
+  "proc-macro2",
+  "syn",
+]
+
+[checks]
+garde = false

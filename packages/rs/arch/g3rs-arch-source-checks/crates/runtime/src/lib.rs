@@ -8,8 +8,6 @@ mod rs_arch_04_mod_facade_only;
 mod rs_arch_08a_feature_gated_exports;
 mod rs_arch_09_no_path_attr;
 mod run;
-#[cfg(test)]
-mod test_support;
 
 #[cfg(feature = "checks")]
 pub use run::check;
