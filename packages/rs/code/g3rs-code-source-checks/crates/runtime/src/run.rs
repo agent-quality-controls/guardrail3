@@ -17,6 +17,7 @@ pub fn check(input: &G3RsCodeSourceChecksInput) -> Vec<G3CheckResult> {
         source: &parsed.source,
         is_test: parsed.source_file.is_test,
         is_shared_crate: input.is_shared_crate,
+        waivers: &input.waivers,
         profile_name: parsed.source_file.profile_name.as_deref(),
         is_library_root: parsed.source_file.is_library_root,
     };

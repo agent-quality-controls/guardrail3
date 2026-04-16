@@ -13,6 +13,8 @@ pub(crate) struct SelectedCodeSourceFile<'a> {
     pub(crate) is_library_root: bool,
     /// Whether the owning crate is explicitly marked shared.
     pub(crate) is_shared_crate: bool,
+    /// Package-local waivers that apply to source checks.
+    pub(crate) waivers: Vec<g3rs_code_types::G3RsCodeWaiver>,
 }
 
 /// Select all owned Rust source files for the `code` source lane.
@@ -47,6 +49,7 @@ pub(crate) fn select_source_files(
                 profile_name: profile.profile_name,
                 is_library_root: profile.is_library_root,
                 is_shared_crate: profile.is_shared_crate,
+                waivers: profile.waivers,
             }
         })
         .collect())

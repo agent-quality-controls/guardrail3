@@ -31,8 +31,11 @@ pub(super) fn check_broken_source(
             is_library_root: false,
         },
         is_shared_crate,
+        waivers: Vec::new(),
     };
-    let parse_error = crate::support::parse_input(&input).err().expect("source fixture should fail to parse");
+    let parse_error = crate::support::parse_input(&input)
+        .err()
+        .expect("source fixture should fail to parse");
     let parse_failure = crate::support::parse_failure_input(&input, &parse_error);
     let mut results = Vec::new();
     check(&parse_failure, &mut results);

@@ -1,4 +1,4 @@
-use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsSourceFile};
+use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsCodeWaiver, G3RsSourceFile};
 
 /// Build one `code` source checks input from selected metadata and source text.
 pub(crate) fn assemble(
@@ -8,6 +8,7 @@ pub(crate) fn assemble(
     profile_name: Option<String>,
     is_library_root: bool,
     is_shared_crate: bool,
+    waivers: Vec<G3RsCodeWaiver>,
 ) -> G3RsCodeSourceChecksInput {
     G3RsCodeSourceChecksInput {
         source_file: G3RsSourceFile {
@@ -18,5 +19,6 @@ pub(crate) fn assemble(
             is_library_root,
         },
         is_shared_crate,
+        waivers,
     }
 }

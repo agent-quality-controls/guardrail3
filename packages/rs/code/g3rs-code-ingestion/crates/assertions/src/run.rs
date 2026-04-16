@@ -51,6 +51,22 @@ pub fn assert_not_shared_crate(input: &G3RsCodeSourceChecksInput) {
     assert!(!input.is_shared_crate, "{input:#?}");
 }
 
+pub fn assert_source_waiver(
+    input: &G3RsCodeSourceChecksInput,
+    rule: &str,
+    file: &str,
+    selector: &str,
+    reason: &str,
+) {
+    let waiver = input
+        .waivers
+        .iter()
+        .find(|waiver| waiver.rule == rule && waiver.file == file && waiver.selector == selector);
+    assert!(waiver.is_some(), "{input:#?}");
+    let waiver = waiver.unwrap_or_else(|| unreachable!());
+    assert_eq!(waiver.reason, reason, "{input:#?}");
+}
+
 pub fn assert_code_ast_results(
     lib_results: &[G3CheckResult],
     test_results: &[G3CheckResult],
