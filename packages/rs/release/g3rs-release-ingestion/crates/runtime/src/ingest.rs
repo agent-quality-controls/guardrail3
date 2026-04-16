@@ -656,7 +656,7 @@ fn parse_release_plz(
 fn parse_cliff(
     crawl: &G3RsWorkspaceCrawl,
     failures: &mut Vec<G3RsReleaseInputFailure>,
-) -> (bool, String, Option<cliff_toml_parser::CliffToml>) {
+) -> (bool, String, Option<cliff_toml_parser::types::CliffToml>) {
     let rel_path = "cliff.toml".to_owned();
     let Some(entry) = crate::select::select_cliff_toml(crawl) else {
         return (false, rel_path, None);
