@@ -1,11 +1,12 @@
 use g3rs_deps_types::G3RsDepsDependencySection;
 use g3rs_deps_types::G3RsDepsConfigInputScope;
+use g3rs_deps_ingestion_assertions::run as assertions;
 use g3rs_workspace_crawl::crawl;
 use guardrail3_rs_toml_parser::RustProfile;
 
 use crate::run::ingest_for_config_checks;
 
-use super::{temp_workspace, write_file};
+use super::helpers::{temp_workspace, write_file};
 
 #[test]
 fn ingests_member_crates_into_normalized_dependency_inputs() {
@@ -198,11 +199,11 @@ fn undefined_workspace_dependency_fails_ingestion() {
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err =
         ingest_for_config_checks(&crawl).expect_err("undefined workspace dependency should fail");
-    assert!(matches!(
-        err,
-        crate::run::IngestionError::NormalizationFailed { reason, .. }
-            if reason.contains("workspace dependency `serde` was requested but not defined")
-    ));
+    assertions::assert_normalization_failed_contains(
+        &err,
+        "Cargo.toml",
+        "workspace dependency `serde` was requested but not defined",
+    );
 }
 
 #[test]
@@ -375,9 +376,9 @@ fn absolute_path_dependency_inside_workspace_non_member_fails_ingestion() {
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
     let err = ingest_for_config_checks(&crawl)
         .expect_err("absolute in-workspace non-member path should fail");
-    assert!(matches!(
-        err,
-        crate::run::IngestionError::NormalizationFailed { reason, .. }
-            if reason.contains("in-workspace non-member")
-    ));
+    assertions::assert_normalization_failed_contains(
+        &err,
+        "packages/core/Cargo.toml",
+        "in-workspace non-member",
+    );
 }

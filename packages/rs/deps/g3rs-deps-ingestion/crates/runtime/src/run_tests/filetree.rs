@@ -1,52 +1,9 @@
+use g3rs_deps_ingestion_assertions::run as assertions;
 use g3rs_workspace_crawl::crawl;
-use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::run::ingest_for_file_tree_checks;
 
-use super::{temp_workspace, write_file};
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct Finding {
-    id: String,
-    severity: G3Severity,
-    title: String,
-    message: String,
-    file: Option<String>,
-    inventory: bool,
-}
-
-fn findings(results: &[G3CheckResult]) -> Vec<Finding> {
-    let mut findings = results
-        .iter()
-        .map(|result| Finding {
-            id: result.id().to_owned(),
-            severity: result.severity(),
-            title: result.title().to_owned(),
-            message: result.message().to_owned(),
-            file: result.file().map(str::to_owned),
-            inventory: result.inventory(),
-        })
-        .collect::<Vec<_>>();
-    findings.sort_by(|left, right| {
-        (
-            left.id.as_str(),
-            format!("{:?}", left.severity),
-            left.title.as_str(),
-            left.message.as_str(),
-            left.file.as_deref(),
-            left.inventory,
-        )
-            .cmp(&(
-                right.id.as_str(),
-                format!("{:?}", right.severity),
-                right.title.as_str(),
-                right.message.as_str(),
-                right.file.as_deref(),
-                right.inventory,
-            ))
-    });
-    findings
-}
+use super::helpers::{temp_workspace, write_file};
 
 #[test]
 fn filetree_entrypoint_ingests_root_lockfile_surface() {
@@ -119,30 +76,7 @@ fn pipeline_reports_missing_lockfile_as_error_for_service_profile() {
     let input = ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deps_filetree_checks::check(&input);
 
-    assert_eq!(
-        findings(&results),
-        vec![
-            Finding {
-                id: "RS-DEPS-FILETREE-09".to_owned(),
-                severity: G3Severity::Error,
-                title: "Cargo.lock missing".to_owned(),
-                message:
-                    "`Cargo.lock` is missing. Run `cargo generate-lockfile` and commit the result."
-                        .to_owned(),
-                file: Some("Cargo.lock".to_owned()),
-                inventory: false,
-            },
-            Finding {
-                id: "RS-DEPS-FILETREE-10".to_owned(),
-                severity: G3Severity::Info,
-                title: "Cargo.lock tracked by git".to_owned(),
-                message: "No relevant `.gitignore` masks `Cargo.lock` at the workspace root."
-                    .to_owned(),
-                file: Some("Cargo.lock".to_owned()),
-                inventory: true,
-            },
-        ]
-    );
+    assertions::assert_filetree_missing_lockfile_for_service(&results);
 }
 
 #[test]
@@ -177,28 +111,7 @@ fn pipeline_reports_missing_lockfile_as_info_for_library_profile() {
     let input = ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deps_filetree_checks::check(&input);
 
-    assert_eq!(
-        findings(&results),
-        vec![
-            Finding {
-                id: "RS-DEPS-FILETREE-09".to_owned(),
-                severity: G3Severity::Info,
-                title: "Cargo.lock missing".to_owned(),
-                message: "Library-profile workspace is missing `Cargo.lock`.".to_owned(),
-                file: Some("Cargo.lock".to_owned()),
-                inventory: false,
-            },
-            Finding {
-                id: "RS-DEPS-FILETREE-10".to_owned(),
-                severity: G3Severity::Info,
-                title: "Cargo.lock tracked by git".to_owned(),
-                message: "No relevant `.gitignore` masks `Cargo.lock` at the workspace root."
-                    .to_owned(),
-                file: Some("Cargo.lock".to_owned()),
-                inventory: true,
-            },
-        ]
-    );
+    assertions::assert_filetree_missing_lockfile_for_library(&results);
 }
 
 #[test]
@@ -235,27 +148,7 @@ fn pipeline_reports_ignored_lockfile() {
     let input = ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deps_filetree_checks::check(&input);
 
-    assert_eq!(
-        findings(&results),
-        vec![
-            Finding {
-                id: "RS-DEPS-FILETREE-09".to_owned(),
-                severity: G3Severity::Info,
-                title: "Cargo.lock committed".to_owned(),
-                message: "Workspace root has `Cargo.lock` committed.".to_owned(),
-                file: Some("Cargo.lock".to_owned()),
-                inventory: true,
-            },
-            Finding {
-                id: "RS-DEPS-FILETREE-10".to_owned(),
-                severity: G3Severity::Error,
-                title: "Cargo.lock ignored in gitignore".to_owned(),
-                message: "`.gitignore` ignores `Cargo.lock`. Remove the line ignoring `Cargo.lock` from this `.gitignore`.".to_owned(),
-                file: Some(".gitignore".to_owned()),
-                inventory: false,
-            },
-        ]
-    );
+    assertions::assert_filetree_ignored_lockfile(&results);
 }
 
 #[test]
@@ -292,28 +185,7 @@ fn pipeline_respects_unignore_after_ignore() {
     let input = ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deps_filetree_checks::check(&input);
 
-    assert_eq!(
-        findings(&results),
-        vec![
-            Finding {
-                id: "RS-DEPS-FILETREE-09".to_owned(),
-                severity: G3Severity::Info,
-                title: "Cargo.lock committed".to_owned(),
-                message: "Workspace root has `Cargo.lock` committed.".to_owned(),
-                file: Some("Cargo.lock".to_owned()),
-                inventory: true,
-            },
-            Finding {
-                id: "RS-DEPS-FILETREE-10".to_owned(),
-                severity: G3Severity::Info,
-                title: "Cargo.lock tracked by git".to_owned(),
-                message: "No relevant `.gitignore` masks `Cargo.lock` at the workspace root."
-                    .to_owned(),
-                file: Some("Cargo.lock".to_owned()),
-                inventory: true,
-            },
-        ]
-    );
+    assertions::assert_filetree_unignored_lockfile(&results);
 }
 
 #[test]
@@ -350,25 +222,5 @@ fn pipeline_uses_last_gitignore_match() {
     let input = ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deps_filetree_checks::check(&input);
 
-    assert_eq!(
-        findings(&results),
-        vec![
-            Finding {
-                id: "RS-DEPS-FILETREE-09".to_owned(),
-                severity: G3Severity::Info,
-                title: "Cargo.lock committed".to_owned(),
-                message: "Workspace root has `Cargo.lock` committed.".to_owned(),
-                file: Some("Cargo.lock".to_owned()),
-                inventory: true,
-            },
-            Finding {
-                id: "RS-DEPS-FILETREE-10".to_owned(),
-                severity: G3Severity::Error,
-                title: "Cargo.lock ignored in gitignore".to_owned(),
-                message: "`.gitignore` ignores `Cargo.lock`. Remove the line ignoring `Cargo.lock` from this `.gitignore`.".to_owned(),
-                file: Some(".gitignore".to_owned()),
-                inventory: false,
-            },
-        ]
-    );
+    assertions::assert_filetree_ignored_lockfile(&results);
 }
