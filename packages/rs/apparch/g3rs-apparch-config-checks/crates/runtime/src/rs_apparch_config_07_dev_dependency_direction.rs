@@ -27,6 +27,9 @@ pub(crate) fn check(
         .filter(|(_, target)| {
             target.layer.is_some_and(|target_layer| {
                 crate::run::forbidden_runtime_dependency(source_layer, target_layer)
+                    && !crate::run::is_package_internal_runtime_to_assertions_dev_edge(
+                        krate, target,
+                    )
             })
         })
         .collect::<Vec<_>>();

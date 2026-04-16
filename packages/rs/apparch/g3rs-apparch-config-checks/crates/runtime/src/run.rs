@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchLayer};
 use g3rs_apparch_types::G3RsApparchConfigChecksInput;
+use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchLayer};
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsApparchConfigChecksInput) -> Vec<G3CheckResult> {
@@ -97,18 +97,46 @@ pub(crate) fn forbidden_runtime_dependency(
         ),
         G3RsApparchLayer::Logic => matches!(
             target_layer,
-            G3RsApparchLayer::Logic
-                | G3RsApparchLayer::IoInbound
-                | G3RsApparchLayer::IoOutbound
+            G3RsApparchLayer::Logic | G3RsApparchLayer::IoInbound | G3RsApparchLayer::IoOutbound
         ),
         G3RsApparchLayer::IoOutbound => matches!(
             target_layer,
-            G3RsApparchLayer::Logic
-                | G3RsApparchLayer::IoInbound
-                | G3RsApparchLayer::IoOutbound
+            G3RsApparchLayer::Logic | G3RsApparchLayer::IoInbound | G3RsApparchLayer::IoOutbound
         ),
         G3RsApparchLayer::IoInbound => false,
     }
+}
+
+fn package_member(rel_dir: &str) -> Option<(&str, &str)> {
+    rel_dir.split_once("/crates/")
+}
+
+pub(crate) fn is_package_internal_assertions_to_runtime_edge(
+    source: &G3RsApparchCrate,
+    target: &G3RsApparchCrate,
+) -> bool {
+    let Some((source_package, source_member)) = package_member(&source.rel_dir) else {
+        return false;
+    };
+    let Some((target_package, target_member)) = package_member(&target.rel_dir) else {
+        return false;
+    };
+
+    source_package == target_package && source_member == "assertions" && target_member == "runtime"
+}
+
+pub(crate) fn is_package_internal_runtime_to_assertions_dev_edge(
+    source: &G3RsApparchCrate,
+    target: &G3RsApparchCrate,
+) -> bool {
+    let Some((source_package, source_member)) = package_member(&source.rel_dir) else {
+        return false;
+    };
+    let Some((target_package, target_member)) = package_member(&target.rel_dir) else {
+        return false;
+    };
+
+    source_package == target_package && source_member == "runtime" && target_member == "assertions"
 }
 
 #[cfg(test)]

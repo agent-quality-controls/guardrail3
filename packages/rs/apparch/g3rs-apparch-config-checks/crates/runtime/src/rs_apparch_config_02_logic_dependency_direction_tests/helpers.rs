@@ -20,6 +20,14 @@ pub(super) fn input(edges: &[(&str, &str)]) -> G3RsApparchConfigChecksInput {
         crates: vec![
             crate_input(G3RsApparchLayer::Logic, "logic/service/Cargo.toml"),
             crate_input(G3RsApparchLayer::Logic, "logic/shared/Cargo.toml"),
+            crate_input(
+                G3RsApparchLayer::Logic,
+                "logic/validate-command/crates/runtime/Cargo.toml",
+            ),
+            crate_input(
+                G3RsApparchLayer::Logic,
+                "logic/validate-command/crates/assertions/Cargo.toml",
+            ),
             crate_input(G3RsApparchLayer::IoInbound, "io/inbound/http/Cargo.toml"),
             crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml"),
             crate_input(G3RsApparchLayer::Types, "types/core/Cargo.toml"),
@@ -39,7 +47,10 @@ pub(super) fn input(edges: &[(&str, &str)]) -> G3RsApparchConfigChecksInput {
     }
 }
 
-pub(super) fn run_rule(input: &G3RsApparchConfigChecksInput) -> Vec<G3CheckResult> {
+pub(super) fn run_rule(
+    input: &G3RsApparchConfigChecksInput,
+    source_cargo_rel_path: &str,
+) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     let crates_by_path = input
         .crates
@@ -49,7 +60,13 @@ pub(super) fn run_rule(input: &G3RsApparchConfigChecksInput) -> Vec<G3CheckResul
     let krate = input
         .crates
         .first()
-        .expect("logic test input should contain a source crate");
+        .filter(|krate| krate.cargo_rel_path == source_cargo_rel_path)
+        .or_else(|| {
+            input.crates
+                .iter()
+                .find(|krate| krate.cargo_rel_path == source_cargo_rel_path)
+        })
+        .expect("logic test input should contain the requested source crate");
 
     crate::rs_apparch_config_02_logic_dependency_direction::check(
         krate,
