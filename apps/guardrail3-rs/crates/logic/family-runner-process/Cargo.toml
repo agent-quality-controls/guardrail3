@@ -1,0 +1,27 @@
+[package]
+name = "guardrail3-rs-family-runner-process"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-rs-app-types = { path = "../../types/app-types" }
+g3rs-workspace-crawl.workspace = true
+g3rs-hooks-config-checks.workspace = true
+g3rs-hooks-file-tree-checks.workspace = true
+g3rs-hooks-ingestion.workspace = true
+g3rs-hooks-source-checks.workspace = true
+g3rs-release-config-checks.workspace = true
+g3rs-release-filetree-checks.workspace = true
+g3rs-release-ingestion.workspace = true
+g3rs-release-source-checks.workspace = true
+
+[features]
+default = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

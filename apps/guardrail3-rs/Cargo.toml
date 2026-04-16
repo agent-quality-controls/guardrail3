@@ -1,10 +1,19 @@
 [workspace]
 members = [
     "crates/types/app-types",
-    "crates/logic/validate-command",
-    "crates/io/inbound/cli",
+    "crates/logic/family-runner-style",
+    "crates/logic/family-runner-policy",
+    "crates/logic/family-runner-quality",
+    "crates/logic/family-runner-process",
+    "crates/logic/family-runner-test",
+    "crates/logic/family-runner-structure",
+    "crates/logic/validate-command/crates/assertions",
+    "crates/logic/validate-command/crates/runtime",
+    "crates/io/inbound/cli/crates/assertions",
+    "crates/io/inbound/cli/crates/runtime",
     "crates/io/outbound/packages",
-    "crates/io/outbound/report",
+    "crates/io/outbound/report/crates/assertions",
+    "crates/io/outbound/report/crates/runtime",
 ]
 resolver = "2"
 
@@ -84,6 +93,7 @@ dead_code = "deny"
 unused_results = "deny"
 unused_crate_dependencies = "deny"
 missing_debug_implementations = "deny"
+unreachable_pub = "deny"
 
 [workspace.lints.clippy]
 all = { level = "deny", priority = -1 }
@@ -101,5 +111,32 @@ print_stderr = "deny"
 disallowed_methods = "deny"
 disallowed_macros = "deny"
 disallowed_types = "deny"
-module_name_repetitions = "allow"
-multiple_crate_versions = "allow"
+indexing_slicing = "deny"
+string_slice = "deny"
+arithmetic_side_effects = "deny"
+shadow_unrelated = "deny"
+missing_assert_message = "deny"
+partial_pub_fields = "deny"
+str_to_string = "deny"
+implicit_clone = "deny"
+as_conversions = "deny"
+float_cmp = "deny"
+lossy_float_literal = "deny"
+wildcard_enum_match_arm = "deny"
+rest_pat_in_fully_bound_structs = "deny"
+large_stack_arrays = "deny"
+needless_pass_by_value = "deny"
+redundant_else = "deny"
+large_futures = "deny"
+semicolon_if_nothing_returned = "deny"
+redundant_closure_for_method_calls = "deny"
+map_unwrap_or = "deny"
+verbose_file_reads = "deny"
+missing_docs_in_private_items = "deny"
+must_use_candidate = "deny"
+option_if_let_else = "deny"
+empty_line_after_doc_comments = "deny"
+single_match_else = "deny"
+ref_option_ref = "deny"
+trivially_copy_pass_by_ref = "deny"
+redundant_pub_crate = "allow"
