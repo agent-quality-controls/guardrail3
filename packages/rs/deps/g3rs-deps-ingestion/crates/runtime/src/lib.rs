@@ -11,5 +11,3 @@ pub use run::{
 
 #[cfg(test)]
 use g3rs_deps_ingestion_assertions as _;
-#[cfg(test)]
-mod run_tests;

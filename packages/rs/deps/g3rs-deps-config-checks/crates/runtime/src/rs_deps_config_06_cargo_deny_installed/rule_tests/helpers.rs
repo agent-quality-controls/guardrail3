@@ -2,7 +2,7 @@ use g3rs_deps_types::G3RsDepsConfigChecksInput;
 use g3rs_deps_types::G3RsDepsConfigInputScope;
 use guardrail3_check_types::G3CheckResult;
 
-use super::super::rule::check;
+use super::super::check;
 
 pub(super) fn run_check(installed_tools: &[&str]) -> Vec<G3CheckResult> {
     let input = G3RsDepsConfigChecksInput {
@@ -13,7 +13,10 @@ pub(super) fn run_check(installed_tools: &[&str]) -> Vec<G3CheckResult> {
         allowlist_present: false,
         allowed_deps: Vec::new(),
         dependencies: Vec::new(),
-        installed_tools: installed_tools.iter().map(|tool| (*tool).to_owned()).collect(),
+        installed_tools: installed_tools
+            .iter()
+            .map(|tool| (*tool).to_owned())
+            .collect(),
     };
     let mut results = Vec::new();
     check(&input, &mut results);

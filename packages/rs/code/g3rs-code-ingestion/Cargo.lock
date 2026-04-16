@@ -166,7 +166,7 @@ name = "g3rs-code-config-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-code-config-checks-runtime",
- "g3rs-code-config-checks-types",
+ "g3rs-code-types",
 ]
 
 [[package]]
@@ -174,15 +174,8 @@ name = "g3rs-code-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3rs-code-config-checks-types",
- "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-code-config-checks-types"
-version = "0.1.0"
-dependencies = [
  "g3rs-code-types",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -190,22 +183,15 @@ name = "g3rs-code-file-tree-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-code-file-tree-checks-runtime",
- "g3rs-code-file-tree-checks-types",
+ "g3rs-code-types",
 ]
 
 [[package]]
 name = "g3rs-code-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-code-file-tree-checks-types",
- "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-code-file-tree-checks-types"
-version = "0.1.0"
-dependencies = [
  "g3rs-code-types",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -220,7 +206,10 @@ dependencies = [
 name = "g3rs-code-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-code-source-checks-types",
+ "cargo-toml-parser",
+ "g3rs-code-ingestion-runtime",
+ "g3rs-code-types",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -235,6 +224,7 @@ dependencies = [
  "g3rs-code-ingestion-assertions",
  "g3rs-code-ingestion-types",
  "g3rs-code-source-checks",
+ "g3rs-code-types",
  "g3rs-workspace-crawl",
  "glob",
  "guardrail3-check-types",
@@ -247,35 +237,25 @@ dependencies = [
 [[package]]
 name = "g3rs-code-ingestion-types"
 version = "0.1.0"
-dependencies = [
- "g3rs-code-types",
-]
 
 [[package]]
 name = "g3rs-code-source-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-code-source-checks-runtime",
- "g3rs-code-source-checks-types",
+ "g3rs-code-types",
 ]
 
 [[package]]
 name = "g3rs-code-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-code-source-checks-types",
+ "g3rs-code-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "g3rs-code-source-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-code-types",
 ]
 
 [[package]]

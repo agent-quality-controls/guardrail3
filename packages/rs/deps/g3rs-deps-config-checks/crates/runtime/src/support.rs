@@ -50,7 +50,10 @@ pub(crate) fn is_workspace_tooling(input: &G3RsDepsConfigChecksInput) -> bool {
 }
 
 pub(crate) fn tool_installed(input: &G3RsDepsConfigChecksInput, tool: &str) -> bool {
-    input.installed_tools.iter().any(|installed| installed == tool)
+    input
+        .installed_tools
+        .iter()
+        .any(|installed| installed == tool)
 }
 
 pub(crate) fn allowlisted(input: &G3RsDepsConfigChecksInput, dep_package_name: &str) -> bool {

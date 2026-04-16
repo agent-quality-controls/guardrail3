@@ -6,7 +6,7 @@ use test_support::input;
 #[test]
 fn errors_for_shadowed_plain_clippy_toml_when_dotfile_wins() {
     let mut results = Vec::new();
-    super::super::rule::check(
+    super::super::check(
         &input(Some(".clippy.toml"), &[("clippy.toml", ".clippy.toml")]),
         &mut results,
     );
@@ -25,9 +25,6 @@ fn errors_for_shadowed_plain_clippy_toml_when_dotfile_wins() {
 #[test]
 fn stays_quiet_without_shadowed_same_root_configs() {
     let mut results = Vec::new();
-    super::super::rule::check(
-        &input(Some(".clippy.toml"), &[]),
-        &mut results,
-    );
+    super::super::check(&input(Some(".clippy.toml"), &[]), &mut results);
     assert_findings(&results, &[]);
 }

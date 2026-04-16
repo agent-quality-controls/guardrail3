@@ -1,6 +1,4 @@
-use g3rs_fmt_types::{
-    G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState,
-};
+use g3rs_fmt_types::{G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
@@ -22,7 +20,8 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
         | G3RsFmtRustPolicyState::Unreadable { .. }
         | G3RsFmtRustPolicyState::ParseError { .. } => &empty,
     };
-    let reason = waivers.iter()
+    let reason = waivers
+        .iter()
         .find(|entry| {
             entry.rule == ID && entry.file == input.rustfmt_rel_path && entry.selector == "ignore"
         })
@@ -73,11 +72,12 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
         ID.to_owned(),
         G3Severity::Warn,
         "rustfmt ignore count".to_owned(),
-        format!(
-            "`{}` has 1 rustfmt ignore waiver.",
-            input.rustfmt_rel_path
-        ),
+        format!("`{}` has 1 rustfmt ignore waiver.", input.rustfmt_rel_path),
         Some(input.rustfmt_rel_path.clone()),
         None,
     ));
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

@@ -49,11 +49,13 @@ pub fn assert_same_root_conflict(results: &[guardrail3_check_types::G3CheckResul
     );
     crate::rs_clippy_filetree_02_same_root_conflict::rule::assert_findings(
         results,
-        &[crate::rs_clippy_filetree_02_same_root_conflict::rule::error(
-            "same-root clippy config conflict",
-            "`clippy.toml` conflicts with `.clippy.toml` at the same policy root. Keep only the highest-precedence clippy config file.",
-            "clippy.toml",
-            false,
-        )],
+        &[
+            crate::rs_clippy_filetree_02_same_root_conflict::rule::error(
+                "same-root clippy config conflict",
+                "`clippy.toml` conflicts with `.clippy.toml` at the same policy root. Keep only the highest-precedence clippy config file.",
+                "clippy.toml",
+                false,
+            ),
+        ],
     );
 }

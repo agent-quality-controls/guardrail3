@@ -6,10 +6,7 @@ use test_support::input;
 #[test]
 fn inventories_when_workspace_root_has_preferred_clippy_config() {
     let mut results = Vec::new();
-    super::super::rule::check(
-        &input(Some(".clippy.toml"), &[]),
-        &mut results,
-    );
+    super::super::check(&input(Some(".clippy.toml"), &[]), &mut results);
 
     assert_findings(
         &results,
@@ -25,7 +22,7 @@ fn inventories_when_workspace_root_has_preferred_clippy_config() {
 #[test]
 fn errors_when_workspace_root_has_no_clippy_config() {
     let mut results = Vec::new();
-    super::super::rule::check(&input(None, &[]), &mut results);
+    super::super::check(&input(None, &[]), &mut results);
 
     assert_findings(
         &results,

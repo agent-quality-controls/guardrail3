@@ -182,8 +182,7 @@ fn ignored_but_recovered_deny_toml_is_ingested() {
     let crawl = crawl(root);
 
     // Verify the crawl actually marked this as Ignored (proving recovery path)
-    let crawl_entry = crawl
-        .entry("deny.toml")
+    let crawl_entry = g3rs_workspace_crawl::entry(&crawl, "deny.toml")
         .expect("deny.toml should be present in crawl via recovery even when gitignored");
     assert_eq!(
         crawl_entry.ignore_state,
