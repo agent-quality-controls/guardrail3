@@ -62,7 +62,7 @@ impl<'a> CrawlView<'a> {
             .entry(rel_path)
             .map(|entry| entry.path.abs_path.clone())
             .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "entry missing from crawl"))?;
-        std::fs::read_to_string(path)
+        crate::fs::read_to_string(&path)
     }
 
     pub(crate) fn join_rel(dir: &str, child: &str) -> String {

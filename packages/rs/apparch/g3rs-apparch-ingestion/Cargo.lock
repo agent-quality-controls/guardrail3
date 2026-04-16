@@ -120,24 +120,16 @@ name = "g3rs-apparch-config-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-apparch-config-checks-runtime",
- "g3rs-apparch-config-checks-types",
+ "g3rs-apparch-types",
 ]
 
 [[package]]
 name = "g3rs-apparch-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-apparch-config-checks-types",
  "g3rs-apparch-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
-]
-
-[[package]]
-name = "g3rs-apparch-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-apparch-types",
 ]
 
 [[package]]
@@ -145,7 +137,14 @@ name = "g3rs-apparch-ingestion"
 version = "0.1.0"
 dependencies = [
  "g3rs-apparch-ingestion-runtime",
- "g3rs-apparch-ingestion-types",
+]
+
+[[package]]
+name = "g3rs-apparch-ingestion-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-apparch-ingestion-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -154,7 +153,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-apparch-config-checks",
- "g3rs-apparch-ingestion-types",
+ "g3rs-apparch-ingestion-assertions",
  "g3rs-apparch-source-checks",
  "g3rs-apparch-types",
  "g3rs-workspace-crawl",
@@ -166,34 +165,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3rs-apparch-ingestion-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-apparch-types",
-]
-
-[[package]]
 name = "g3rs-apparch-source-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-apparch-source-checks-runtime",
- "g3rs-apparch-source-checks-types",
+ "g3rs-apparch-types",
 ]
 
 [[package]]
 name = "g3rs-apparch-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-apparch-source-checks-types",
  "g3rs-apparch-types",
  "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-apparch-source-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-apparch-types",
 ]
 
 [[package]]

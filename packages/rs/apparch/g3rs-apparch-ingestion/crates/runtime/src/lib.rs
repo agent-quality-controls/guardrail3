@@ -1,6 +1,9 @@
-#[cfg(test)]
-mod ingest_tests;
+mod fs;
 mod run;
 mod view;
 
-pub use run::{ingest_for_config_checks, ingest_for_source_checks};
+#[cfg(feature = "ingest")]
+pub use run::{G3RsApparchIngestionError, ingest_for_config_checks, ingest_for_source_checks};
+
+#[cfg(test)]
+use g3rs_apparch_ingestion_assertions as _;
