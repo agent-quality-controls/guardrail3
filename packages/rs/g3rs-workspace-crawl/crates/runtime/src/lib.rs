@@ -14,6 +14,3 @@ pub use g3rs_workspace_crawl_types::{
 pub use query::{entry, files_with_extension, root_file};
 #[cfg(feature = "crawl")]
 pub use run::{G3RsWorkspaceCrawlError, crawl};
-
-#[cfg(test)]
-mod crawl_tests;

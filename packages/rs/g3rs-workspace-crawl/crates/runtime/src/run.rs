@@ -13,3 +13,7 @@ pub enum G3RsWorkspaceCrawlError {
 pub fn crawl(workspace_root: &Path) -> Result<G3RsWorkspaceCrawl, G3RsWorkspaceCrawlError> {
     crate::crawl::crawl_workspace(workspace_root)
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod run_tests;

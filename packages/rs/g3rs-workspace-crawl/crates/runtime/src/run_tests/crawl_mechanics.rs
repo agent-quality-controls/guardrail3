@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use g3rs_workspace_crawl_assertions::crawl as assertions;
+use g3rs_workspace_crawl_assertions::run as assertions;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -30,7 +30,7 @@ fn entries_are_sorted_by_rel_path() {
     write(root.join("a.rs"), "// a");
     write(root.join("m/b.rs"), "// b");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed for sort-order test");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed for sort-order test");
 
     let rel_paths: Vec<&str> = crawl
         .entries
@@ -59,7 +59,7 @@ fn symlinks_are_skipped() {
     symlink(root.join("real.txt"), root.join("link.txt"))
         .expect("create symlink fixture pointing to real.txt");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed with symlinks present");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed with symlinks present");
 
     assertions::assert_crawl_entry_exists(&crawl, "real.txt");
     assertions::assert_crawl_entry_absent(&crawl, "link.txt");
@@ -81,7 +81,7 @@ fn unreadable_file_has_readable_false() {
     fs::set_permissions(root.join("secret.txt"), permissions)
         .expect("chmod 000 should succeed on fixture file");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed even with unreadable files");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed even with unreadable files");
 
     assertions::assert_crawl_entry(
         &crawl,

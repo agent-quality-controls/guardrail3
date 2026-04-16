@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use g3rs_workspace_crawl_assertions::crawl as assertions;
+use g3rs_workspace_crawl_assertions::run as assertions;
 use tempfile::tempdir;
 
 /// Initialize a git repo at the given path so the ignore crate's WalkBuilder
@@ -33,7 +33,7 @@ fn marks_gitignored_files_as_included_via_recovery() {
     write(root.join("Cargo.lock"), "# lock\n");
     write(root.join("src/lib.rs"), "");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
 
     // Cargo.lock is ignored but recoverable — should appear as Ignored
     assertions::assert_has_rel_path(&crawl.entries, "Cargo.lock");
@@ -65,7 +65,7 @@ fn ignored_non_recoverable_files_do_not_appear() {
     write(root.join("debug.log"), "some log\n");
     write(root.join("src/lib.rs"), "");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
 
     // debug.log is ignored and not on the recovery list — absent
     assertions::assert_crawl_entry_absent(&crawl, "debug.log");
@@ -85,7 +85,7 @@ fn nested_gitignore_is_respected() {
         "also tmp but not ignored by nested rule",
     );
 
-    let crawl = crate::crawl(root).expect("crawl should succeed");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
 
     // src/temp.tmp is ignored by src/.gitignore — not recoverable, absent
     assertions::assert_crawl_entry_absent(&crawl, "src/temp.tmp");
@@ -116,7 +116,7 @@ fn ancestor_gitignore_is_respected() {
     write(workspace.join("src/lib.rs"), "");
     write(workspace.join("output.generated"), "generated file");
 
-    let crawl = crate::crawl(&workspace).expect("crawl should succeed");
+    let crawl = crate::run::crawl(&workspace).expect("crawl should succeed");
 
     // output.generated is ignored by ancestor .gitignore — not recoverable, absent
     assertions::assert_crawl_entry_absent(&crawl, "output.generated");
@@ -141,7 +141,7 @@ fn negation_pattern_unignores_file() {
     write(root.join("debug.log"), "ignored log");
     write(root.join("important.log"), "keep this");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
 
     // important.log is unignored by negation
     assertions::assert_crawl_entry(
@@ -166,7 +166,7 @@ fn hidden_dotfiles_are_included_normally() {
     write(root.join(".rustfmt.toml"), "edition = \"2024\"\n");
     write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
 
     assertions::assert_crawl_entry(
         &crawl,
@@ -199,7 +199,7 @@ fn banned_directories_are_excluded_from_recovery() {
         "[package]\nname = \"build-artifact\"\n",
     );
 
-    let crawl = crate::crawl(root).expect("crawl should succeed");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
 
     assertions::assert_crawl_entry_absent(&crawl, "target/Cargo.toml");
     assertions::assert_crawl_entry_absent(&crawl, "target");
@@ -217,7 +217,7 @@ fn recovery_finds_ignored_config_in_non_banned_directory() {
     write(root.join(".cargo/config.toml"), "[build]\njobs = 4\n");
     write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
 
     // .cargo/config.toml is ignored but recoverable
     assertions::assert_has_rel_path(&crawl.entries, ".cargo/config.toml");
@@ -246,7 +246,7 @@ fn recovery_uses_guardrail3_rs_toml_and_not_dead_guardrail3_toml() {
         "[profile]\nname = \"service\"\n",
     );
 
-    let crawl = crate::crawl(root).expect("crawl should succeed");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
 
     assertions::assert_crawl_entry(
         &crawl,
@@ -268,7 +268,8 @@ fn golden_baseline_no_gitignore() {
     write(root.join("src/lib.rs"), "pub fn demo() {}\n");
     write(root.join("README.md"), "# demo\n");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed for workspace with no .gitignore");
+    let crawl =
+        crate::run::crawl(root).expect("crawl should succeed for workspace with no .gitignore");
 
     for entry in &crawl.entries {
         assert_eq!(
@@ -295,8 +296,8 @@ fn directory_only_gitignore_pattern() {
     write(root.join("build-notes.txt"), "keep this");
     write(root.join("src/lib.rs"), "");
 
-    let crawl =
-        crate::crawl(root).expect("crawl should succeed with directory-only gitignore pattern");
+    let crawl = crate::run::crawl(root)
+        .expect("crawl should succeed with directory-only gitignore pattern");
 
     // build/ directory and its contents should not appear (ignored, not recoverable)
     assertions::assert_crawl_entry_absent(&crawl, "build");
@@ -324,7 +325,7 @@ fn non_git_workspace_includes_everything() {
     write(root.join("src/lib.rs"), "");
     write(root.join("debug.log"), "some log");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed in non-git workspace");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed in non-git workspace");
 
     // Without .git, the ignore crate's require_git default (true) means
     // .gitignore rules may or may not be applied depending on whether a
@@ -349,7 +350,8 @@ fn claude_worktrees_banned_from_recovery() {
     );
     write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed with .claude/worktrees banned");
+    let crawl =
+        crate::run::crawl(root).expect("crawl should succeed with .claude/worktrees banned");
 
     // .claude/worktrees/ is a banned root — Cargo.toml inside it should NOT
     // be recovered even though Cargo.toml is on the recovery list
@@ -372,8 +374,8 @@ fn banned_dirs_excluded_from_phase1_without_gitignore() {
     );
     write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
 
-    let crawl =
-        crate::crawl(root).expect("crawl should succeed with un-gitignored banned directory");
+    let crawl = crate::run::crawl(root)
+        .expect("crawl should succeed with un-gitignored banned directory");
 
     // node_modules/ should not appear as Included despite not being gitignored
     assertions::assert_crawl_entry_absent(&crawl, "node_modules");
