@@ -1,7 +1,7 @@
 /// Read and parse config files from disk.
 use std::path::Path;
 
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use clippy_toml_parser::ClippyToml;
 use guardrail3_rs_toml_parser::Guardrail3RsToml;
 

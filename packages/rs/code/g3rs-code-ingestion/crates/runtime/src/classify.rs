@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use cargo_toml_parser::{CargoToml, Value};
+use cargo_toml_parser::{types::CargoToml, types::Value};
 use g3rs_code_types::G3RsCodeWaiver;
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 use guardrail3_rs_toml_parser::parse as parse_guardrail3_toml;

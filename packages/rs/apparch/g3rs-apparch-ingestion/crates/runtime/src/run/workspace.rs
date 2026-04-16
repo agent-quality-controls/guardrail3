@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchLayer, G3RsApparchRustPolicyState};
 use glob::Pattern;
 use guardrail3_rs_toml_parser::from_path as parse_guardrail3_rs_toml;

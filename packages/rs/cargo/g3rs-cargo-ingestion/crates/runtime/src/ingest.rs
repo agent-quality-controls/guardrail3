@@ -1,4 +1,4 @@
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use g3rs_cargo_types::{
     G3RsCargoFileTreeRoot, G3RsCargoInputFailure,
     G3RsCargoMissingMember, G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind,

@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path};
 
-use cargo_toml_parser::{CargoToml, Dependency};
+use cargo_toml_parser::{types::CargoToml, types::Dependency};
 use g3rs_apparch_types::{G3RsApparchConfigChecksInput, G3RsApparchDependencyKind};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 

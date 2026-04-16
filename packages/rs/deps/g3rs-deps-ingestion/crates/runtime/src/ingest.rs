@@ -2,7 +2,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path};
 
-use cargo_toml_parser::{CargoToml, Dependency, TargetDependencyTables};
+use cargo_toml_parser::{types::CargoToml, types::Dependency, types::TargetDependencyTables};
 use g3rs_deps_types::{
     G3RsDepsConfigChecksInput, G3RsDepsConfigInputScope, G3RsDepsDependencySection,
     G3RsDepsResolvedDependency,

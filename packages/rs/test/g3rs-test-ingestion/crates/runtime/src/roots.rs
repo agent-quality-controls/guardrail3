@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use cargo_toml_parser::{CargoToml, parse};
+use cargo_toml_parser::{types::CargoToml, parse};
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 use glob::Pattern;
 

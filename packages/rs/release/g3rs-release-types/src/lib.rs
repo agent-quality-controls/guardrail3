@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use cargo_toml_parser::{CargoToml, WorkspacePackageSection};
+use cargo_toml_parser::{types::CargoToml, types::WorkspacePackageSection};
 use cliff_toml_parser::CliffToml;
 use release_plz_toml_parser::ReleasePlzToml;
 

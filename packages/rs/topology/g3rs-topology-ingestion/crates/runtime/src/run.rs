@@ -1,4 +1,4 @@
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use g3rs_topology_ingestion_types::{
     G3RsTopologyFileTreeChecksInput, G3RsTopologyIngestionError as IngestionError,
 };

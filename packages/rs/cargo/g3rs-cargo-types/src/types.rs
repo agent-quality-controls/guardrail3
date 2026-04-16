@@ -1,4 +1,4 @@
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use guardrail3_rs_toml_parser::RustProfile;
 use toml::Value;
 
@@ -31,8 +31,14 @@ pub struct G3RsCargoWaiver {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3RsCargoRustPolicyState {
     Missing,
-    Unreadable { rel_path: String, reason: String },
-    ParseError { rel_path: String, reason: String },
+    Unreadable {
+        rel_path: String,
+        reason: String,
+    },
+    ParseError {
+        rel_path: String,
+        reason: String,
+    },
     Parsed {
         rel_path: String,
         profile: Option<RustProfile>,

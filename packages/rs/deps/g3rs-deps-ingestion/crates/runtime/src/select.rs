@@ -1,5 +1,5 @@
 /// Select config entries from a workspace crawl.
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
 use glob::Pattern;
 

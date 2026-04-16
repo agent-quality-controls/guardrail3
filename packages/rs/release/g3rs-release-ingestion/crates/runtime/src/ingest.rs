@@ -4,8 +4,9 @@ use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 
 use cargo_toml_parser::{
-    CargoToml, Dependency, InheritableValue, PackageSection, StringOrBool, TargetDependencyTables,
-    VecStringOrBool, WorkspacePackageSection,
+    types::CargoToml, types::Dependency, types::InheritableValue, types::PackageSection,
+    types::StringOrBool, types::TargetDependencyTables, types::VecStringOrBool,
+    types::WorkspacePackageSection,
 };
 use g3rs_release_types::{
     G3RsReleaseConfigChecksInput, G3RsReleaseConfigCrate, G3RsReleaseConfigEdge,

@@ -1,4 +1,4 @@
-use cargo_toml_parser::{CargoToml, Dependency};
+use cargo_toml_parser::{types::CargoToml, types::Dependency};
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
 use syn::visit::Visit;
 
@@ -27,7 +27,13 @@ pub(crate) fn summarize_root(
         if is_fixture_path(rel_path) {
             continue;
         }
-        if !file_belongs_to_root(rel_path, &runtime_src, &runtime_tests, &assertions_src, &support_srcs) {
+        if !file_belongs_to_root(
+            rel_path,
+            &runtime_src,
+            &runtime_tests,
+            &assertions_src,
+            &support_srcs,
+        ) {
             continue;
         }
 
@@ -38,16 +44,17 @@ pub(crate) fn summarize_root(
             });
         }
 
-        let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| IngestionError::Unreadable {
-            path: entry.path.abs_path.clone(),
-            reason: err.to_string(),
-        })?;
-        let source = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(&content)).map_err(|err| {
-            IngestionError::ParseFailed {
+        let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| {
+            IngestionError::Unreadable {
                 path: entry.path.abs_path.clone(),
                 reason: err.to_string(),
             }
         })?;
+        let source = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(&content))
+            .map_err(|err| IngestionError::ParseFailed {
+                path: entry.path.abs_path.clone(),
+                reason: err.to_string(),
+            })?;
 
         let mut visitor = ActivationVisitor::default();
         visitor.visit_file(&source);
@@ -55,7 +62,9 @@ pub(crate) fn summarize_root(
         if rel_path.starts_with(&runtime_tests)
             || is_sidecar_path(rel_path, &runtime_src)
             || rel_path.starts_with(&assertions_src)
-            || support_srcs.iter().any(|prefix| path_is_under(rel_path, prefix))
+            || support_srcs
+                .iter()
+                .any(|prefix| path_is_under(rel_path, prefix))
             || visitor.has_tests
             || visitor.has_cfg_test_module
         {
@@ -69,7 +78,10 @@ pub(crate) fn summarize_root(
     Ok(summary)
 }
 
-pub(crate) fn has_tokio_dependency(cargo: &CargoToml, workspace_manifest: Option<&CargoToml>) -> bool {
+pub(crate) fn has_tokio_dependency(
+    cargo: &CargoToml,
+    workspace_manifest: Option<&CargoToml>,
+) -> bool {
     let workspace_deps = workspace_manifest
         .and_then(|manifest| manifest.workspace.as_ref())
         .map(|workspace| &workspace.dependencies);
@@ -102,7 +114,8 @@ fn dependency_is_tokio(
                 return true;
             }
             if detail.workspace == Some(true) {
-                let Some(workspace_spec) = workspace_deps.and_then(|deps| deps.get(dep_name)) else {
+                let Some(workspace_spec) = workspace_deps.and_then(|deps| deps.get(dep_name))
+                else {
                     return dep_name == "tokio";
                 };
                 return dependency_is_tokio(dep_name, workspace_spec, None);
@@ -116,7 +129,10 @@ fn assertions_src_rel_path(root: &OwnedTestRoot) -> String {
     if root.runtime_rel_dir == root.root_rel_dir {
         join_under_root(&root.root_rel_dir, "assertions/src")
     } else {
-        format!("{}/assertions/src", crate::roots::parent_dir(&root.runtime_rel_dir))
+        format!(
+            "{}/assertions/src",
+            crate::roots::parent_dir(&root.runtime_rel_dir)
+        )
     }
 }
 
@@ -137,7 +153,9 @@ fn file_belongs_to_root(
     path_is_under(rel_path, runtime_src)
         || path_is_under(rel_path, runtime_tests)
         || path_is_under(rel_path, assertions_src)
-        || support_srcs.iter().any(|prefix| path_is_under(rel_path, prefix))
+        || support_srcs
+            .iter()
+            .any(|prefix| path_is_under(rel_path, prefix))
 }
 
 fn path_is_under(rel_path: &str, prefix: &str) -> bool {
@@ -213,7 +231,12 @@ fn is_test_attr(attr: &syn::Attribute) -> bool {
         || cfg_attr_nested_metas(attr)
             .into_iter()
             .flatten()
-            .any(|meta| predicate.as_ref().is_some_and(cfg_meta_contains_positive_test) && meta_path_is_test(&meta))
+            .any(|meta| {
+                predicate
+                    .as_ref()
+                    .is_some_and(cfg_meta_contains_positive_test)
+                    && meta_path_is_test(&meta)
+            })
 }
 
 fn is_tokio_test_attr(attr: &syn::Attribute) -> bool {
@@ -222,7 +245,12 @@ fn is_tokio_test_attr(attr: &syn::Attribute) -> bool {
         || cfg_attr_nested_metas(attr)
             .into_iter()
             .flatten()
-            .any(|meta| predicate.as_ref().is_some_and(cfg_meta_contains_positive_test) && meta_path_is_tokio_test(&meta))
+            .any(|meta| {
+                predicate
+                    .as_ref()
+                    .is_some_and(cfg_meta_contains_positive_test)
+                    && meta_path_is_tokio_test(&meta)
+            })
 }
 
 fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {

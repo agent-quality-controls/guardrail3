@@ -1,4 +1,4 @@
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use clippy_toml_parser::ClippyToml;
 use std::path::PathBuf;
 
@@ -11,8 +11,14 @@ pub enum G3RsGardeApplicability {
 #[derive(Debug, Clone)]
 pub enum G3RsGardeClippyInput {
     Missing,
-    Parsed { rel_path: String, clippy: ClippyToml },
-    Invalid { rel_path: String, message: String },
+    Parsed {
+        rel_path: String,
+        clippy: ClippyToml,
+    },
+    Invalid {
+        rel_path: String,
+        message: String,
+    },
 }
 
 /// Input contract for extracted garde config checks.

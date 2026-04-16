@@ -1,4 +1,4 @@
-use cargo_toml_parser::{CargoToml, InheritableValue, LintValue, ToolLints};
+use cargo_toml_parser::{types::CargoToml, types::InheritableValue, types::LintValue, types::ToolLints};
 use g3rs_cargo_types::{
     G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoWaiver,
     G3RsCargoWorkspaceMember,
