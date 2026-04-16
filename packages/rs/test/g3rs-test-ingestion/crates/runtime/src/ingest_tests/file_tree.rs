@@ -24,7 +24,8 @@ fn write(path: impl AsRef<Path>, content: &str) {
 
 fn run_file_tree_pipeline(root: &Path) -> Vec<G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
+    let inputs =
+        crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
     inputs
         .iter()
         .flat_map(g3rs_test_file_tree_checks::check)
@@ -61,16 +62,23 @@ fn ingest_for_file_tree_checks_classifies_structural_file_roles() {
         root.join("crates/assertions/Cargo.toml"),
         "[package]\nname = \"demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
     );
-    write(root.join("crates/assertions/src/lib.rs"), "pub fn assert_runtime() {}\n");
+    write(
+        root.join("crates/assertions/src/lib.rs"),
+        "pub fn assert_runtime() {}\n",
+    );
     write(
         root.join("test_support/Cargo.toml"),
         "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
     write(root.join("test_support/src/lib.rs"), "pub fn helper() {}\n");
-    write(root.join("src/lib_tests/mod.rs"), "#[test]\nfn stray() { assert!(true); }\n");
+    write(
+        root.join("src/lib_tests/mod.rs"),
+        "#[test]\nfn stray() { assert!(true); }\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
+    let inputs =
+        crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
 
     assert_eq!(inputs.len(), 1, "{inputs:#?}");
     let input = &inputs[0];
@@ -124,18 +132,30 @@ fn ingest_for_file_tree_checks_records_nested_assertions_manifest_path() {
         root.join("packages/demo/crates/runtime/Cargo.toml"),
         "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write(root.join("packages/demo/crates/runtime/src/lib.rs"), "pub fn value() -> u8 { 1 }\n");
+    write(
+        root.join("packages/demo/crates/runtime/src/lib.rs"),
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write(
         root.join("packages/demo/assertions/Cargo.toml"),
         "[package]\nname = \"wrong-demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_file_tree_checks(&crawl)
-        .expect("file-tree ingestion should succeed");
+    let inputs =
+        crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
 
     assert_eq!(inputs.len(), 1, "{inputs:#?}");
     let component = &inputs[0].components[0];
+    assert_eq!(
+        component.assertions_rel_dir,
+        "packages/demo/crates/assertions"
+    );
+    assert_eq!(
+        component.assertions_cargo_rel_path,
+        "packages/demo/crates/assertions/Cargo.toml"
+    );
+    assert!(!component.assertions_exists);
     assert_eq!(
         component.nested_assertions_cargo_rel_path.as_deref(),
         Some("packages/demo/assertions/Cargo.toml")
@@ -156,7 +176,10 @@ fn file_tree_pipeline_reports_structural_test_findings() {
         root.join("crates/runtime/Cargo.toml"),
         "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write(root.join("crates/runtime/src/lib.rs"), "pub fn value() -> u8 { 1 }\n");
+    write(
+        root.join("crates/runtime/src/lib.rs"),
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write(
         root.join("crates/runtime/tests/public_surface.rs"),
         "use crate::value;\n#[test]\nfn public_surface() { assert_eq!(value(), 1); }\n",
@@ -169,23 +192,35 @@ fn file_tree_pipeline_reports_structural_test_findings() {
         root.join("test_support/src/lib.rs"),
         "use demo_runtime::value;\npub fn fixture_value() -> u8 { value() }\n",
     );
-    write(root.join("src/tests/helper.rs"), "#[test]\nfn stray() { assert!(true); }\n");
+    write(
+        root.join("src/tests/helper.rs"),
+        "#[test]\nfn stray() { assert!(true); }\n",
+    );
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-FILETREE-02" && result.file() == Some("src/tests")
-    }), "{results:#?}");
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-FILETREE-03"
-            && result.title() == "assertions crate missing"
-            && result.file() == Some("crates/assertions/Cargo.toml")
-    }), "{results:#?}");
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-FILETREE-18"
-            && result.title() == "test_support imports local component crate"
-            && result.file() == Some("test_support/src/lib.rs")
-    }), "{results:#?}");
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-TEST-FILETREE-02" && result.file() == Some("src/tests")
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-TEST-FILETREE-03"
+                && result.title() == "assertions crate missing"
+                && result.file() == Some("crates/assertions/Cargo.toml")
+        }),
+        "{results:#?}"
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-TEST-FILETREE-18"
+                && result.title() == "test_support imports local component crate"
+                && result.file() == Some("test_support/src/lib.rs")
+        }),
+        "{results:#?}"
+    );
 }
 
 #[test]
@@ -202,16 +237,17 @@ fn file_tree_pipeline_reports_input_failures_as_rs_test_10() {
         root.join("crates/runtime/Cargo.toml"),
         "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write(root.join("crates/runtime/src/lib.rs"), "pub fn value() -> u8 { 1 }\n");
+    write(
+        root.join("crates/runtime/src/lib.rs"),
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write(
         root.join("crates/runtime/tests/public_surface.rs"),
         "#[test]\nfn public_surface() { assert_eq!(crate::value(), 1); }\n",
     );
     let unreadable = root.join("crates/runtime/tests/broken.rs");
     write(&unreadable, "#[test]\nfn broken() { assert!(true); }\n");
-    let mut permissions = fs::metadata(&unreadable)
-        .expect("metadata")
-        .permissions();
+    let mut permissions = fs::metadata(&unreadable).expect("metadata").permissions();
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -223,19 +259,20 @@ fn file_tree_pipeline_reports_input_failures_as_rs_test_10() {
 
     #[cfg(unix)]
     {
-        let mut restore = fs::metadata(&unreadable)
-            .expect("metadata")
-            .permissions();
+        let mut restore = fs::metadata(&unreadable).expect("metadata").permissions();
         use std::os::unix::fs::PermissionsExt;
         restore.set_mode(0o644);
         fs::set_permissions(&unreadable, restore).expect("restore permissions");
     }
 
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-FILETREE-10"
-            && result.file() == Some("crates/runtime/tests/broken.rs")
-            && result.title() == "failed to read test input"
-    }), "{results:#?}");
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-TEST-FILETREE-10"
+                && result.file() == Some("crates/runtime/tests/broken.rs")
+                && result.title() == "failed to read test input"
+        }),
+        "{results:#?}"
+    );
 }
 
 #[test]
@@ -253,7 +290,10 @@ fn file_tree_pipeline_reports_nested_ad_hoc_src_tests_tree() {
         "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
     write(root.join("crates/runtime/src/lib.rs"), "pub mod foo;\n");
-    write(root.join("crates/runtime/src/foo.rs"), "pub fn value() -> u8 { 1 }\n");
+    write(
+        root.join("crates/runtime/src/foo.rs"),
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write(
         root.join("crates/runtime/src/foo/tests/helper.rs"),
         "#[test]\nfn stray() { assert!(true); }\n",
@@ -262,15 +302,21 @@ fn file_tree_pipeline_reports_nested_ad_hoc_src_tests_tree() {
         root.join("crates/assertions/Cargo.toml"),
         "[package]\nname = \"demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
     );
-    write(root.join("crates/assertions/src/lib.rs"), "pub fn assert_runtime() {}\n");
+    write(
+        root.join("crates/assertions/src/lib.rs"),
+        "pub fn assert_runtime() {}\n",
+    );
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-TEST-FILETREE-02"
-            && result.title() == "ad hoc src/tests tree"
-            && result.file() == Some("crates/runtime/src/foo/tests")
-    }), "{results:#?}");
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-TEST-FILETREE-02"
+                && result.title() == "ad hoc src/tests tree"
+                && result.file() == Some("crates/runtime/src/foo/tests")
+        }),
+        "{results:#?}"
+    );
 }
 
 #[test]

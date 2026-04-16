@@ -25,7 +25,10 @@ fn write(path: impl AsRef<Path>, content: &str) {
 fn run_ast_pipeline(root: &Path) -> Vec<G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
-    inputs.iter().flat_map(g3rs_test_source_checks::check).collect()
+    inputs
+        .iter()
+        .flat_map(g3rs_test_source_checks::check)
+        .collect()
 }
 
 fn findings_by_file(results: &[G3CheckResult]) -> BTreeMap<String, Vec<&G3CheckResult>> {
@@ -99,7 +102,10 @@ fn pipeline_reports_assertions_boundary_rules() {
         root.join("crates/runtime/Cargo.toml"),
         "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write(root.join("crates/runtime/src/lib.rs"), "pub fn smoke() {}\n");
+    write(
+        root.join("crates/runtime/src/lib.rs"),
+        "pub fn smoke() {}\n",
+    );
     write(
         root.join("crates/assertions/Cargo.toml"),
         "[package]\nname = \"demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
@@ -180,7 +186,10 @@ fn ingest_for_source_checks_classifies_root_files_by_role() {
         root.join("crates/runtime/Cargo.toml"),
         "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write(root.join("crates/runtime/src/lib.rs"), "pub fn smoke() {}\n");
+    write(
+        root.join("crates/runtime/src/lib.rs"),
+        "pub fn smoke() {}\n",
+    );
     write(
         root.join("crates/runtime/src/feature_tests/mod.rs"),
         "#[test]\nfn sidecar() {}\n",
@@ -243,4 +252,59 @@ fn ingest_for_source_checks_classifies_root_files_by_role() {
     );
     assert!(!file_kinds.contains_key("crates/runtime/src/feature_tests/fixtures/skip.rs"));
     assert!(!file_kinds.contains_key("crates/assertions/src/fixtures/skip.rs"));
+}
+
+#[test]
+fn ingest_for_source_checks_expects_package_style_assertions_after_nested_fix_attempt() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"packages/demo/crates/runtime\"]\nresolver = \"2\"\n",
+    );
+    write(
+        root.join("packages/demo/Cargo.toml"),
+        "[workspace]\nmembers = [\"crates/runtime\"]\nresolver = \"2\"\n",
+    );
+    write(
+        root.join("packages/demo/crates/runtime/Cargo.toml"),
+        "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(
+        root.join("packages/demo/crates/runtime/src/lib.rs"),
+        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n",
+    );
+    write(
+        root.join("packages/demo/crates/runtime/src/lib_tests/mod.rs"),
+        "#[test]\nfn owned() { assert!(true); }\n",
+    );
+    write(
+        root.join("packages/demo/assertions/Cargo.toml"),
+        "[package]\nname = \"wrong-demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(
+        root.join("packages/demo/assertions/src/lib.rs"),
+        "pub fn assert_runtime() { assert_eq!(1, 1); }\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+
+    assert_eq!(inputs.len(), 1, "{inputs:#?}");
+    let input = &inputs[0];
+    let component = &input.components[0];
+    assert_eq!(
+        component.assertions_rel_dir,
+        "packages/demo/crates/assertions"
+    );
+    assert!(!component.assertions_exists);
+    assert!(
+        input
+            .files
+            .iter()
+            .all(|file| file.rel_path != "packages/demo/assertions/src/lib.rs"),
+        "{input:#?}"
+    );
 }
