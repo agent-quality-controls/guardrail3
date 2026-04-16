@@ -1,4 +1,4 @@
-use g3rs_deps_config_checks_types::G3RsDepsConfigChecksInput;
+use g3rs_deps_types::G3RsDepsConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, unique_direct_dependency_names};
@@ -22,7 +22,3 @@ pub(crate) fn check(input: &G3RsDepsConfigChecksInput, results: &mut Vec<G3Check
         &input.crate_cargo_rel_path,
     ));
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;

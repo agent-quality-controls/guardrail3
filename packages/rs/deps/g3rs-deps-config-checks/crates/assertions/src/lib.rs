@@ -1,6 +1,9 @@
 mod common;
 
 #[cfg(feature = "checks")]
+use g3rs_deps_config_checks_runtime as _;
+
+#[cfg(feature = "checks")]
 pub mod rs_deps_config_01_dependencies_allowlisted;
 #[cfg(feature = "checks")]
 pub mod rs_deps_config_02_build_dependencies_allowlisted;

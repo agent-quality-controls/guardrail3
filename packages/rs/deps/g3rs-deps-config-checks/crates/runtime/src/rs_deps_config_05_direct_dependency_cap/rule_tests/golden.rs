@@ -1,3 +1,5 @@
+use g3rs_deps_config_checks_assertions::rs_deps_config_05_direct_dependency_cap::rule as assertions;
+
 use super::helpers::{
     build_dependency, dev_dependency, run_check, runtime_dependency, target_runtime_dependency,
 };
@@ -13,11 +15,7 @@ fn deduplicates_package_names_across_sections_aliases_and_targets() {
     dependencies.push(target_runtime_dependency("serde", "cfg(unix)"));
 
     let results = run_check(&dependencies);
-    assert!(
-        results
-            .iter()
-            .all(|result| result.id() != "RS-DEPS-CONFIG-05")
-    );
+    assertions::assert_no_findings(&results);
 }
 
 #[test]
@@ -31,11 +29,10 @@ fn counts_external_workspace_and_vendored_path_but_skips_internal_workspace_path
 
     let results = run_check(&dependencies);
 
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-DEPS-CONFIG-05"
-            && matches!(result.severity(), guardrail3_check_types::G3Severity::Error)
-            && result
-                .message()
-                .contains("Crate `api` has 26 unique direct dependencies")
-    }));
+    assertions::assert_has_error(&results, "too many direct dependencies", false);
+    assertions::assert_message_contains(
+        &results,
+        "too many direct dependencies",
+        "Crate `api` has 26 unique direct dependencies",
+    );
 }

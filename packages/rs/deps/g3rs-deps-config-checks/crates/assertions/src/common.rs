@@ -62,8 +62,65 @@ pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[F
     assert_eq!(findings(results, id), expected_vec);
 }
 
-pub(crate) fn assert_contains(results: &[G3CheckResult], id: &str, expected: Finding<'_>) {
-    assert!(findings(results, id).contains(&expected));
+pub(crate) fn assert_no_findings(results: &[G3CheckResult], id: &str) {
+    assert!(findings(results, id).is_empty(), "{:#?}", findings(results, id));
+}
+
+pub(crate) fn assert_has_finding(
+    results: &[G3CheckResult],
+    id: &str,
+    expected_severity: G3Severity,
+    expected_title: &str,
+    expected_inventory: bool,
+) {
+    assert!(
+        results.iter().any(|result| {
+            result.id() == id
+                && result.severity() == expected_severity
+                && result.title() == expected_title
+                && result.inventory() == expected_inventory
+        }),
+        "{:#?}",
+        findings(results, id)
+    );
+}
+
+pub(crate) fn assert_title_count(
+    results: &[G3CheckResult],
+    id: &str,
+    expected_title: &str,
+    expected_count: usize,
+) {
+    let actual = results
+        .iter()
+        .filter(|result| result.id() == id && result.title() == expected_title)
+        .count();
+    assert_eq!(actual, expected_count, "{:#?}", findings(results, id));
+}
+
+pub(crate) fn assert_message_contains(
+    results: &[G3CheckResult],
+    id: &str,
+    expected_title: &str,
+    needle: &str,
+) {
+    assert!(
+        results.iter().any(|result| {
+            result.id() == id && result.title() == expected_title && result.message().contains(needle)
+        }),
+        "{:#?}",
+        findings(results, id)
+    );
+}
+
+pub(crate) fn assert_title_absent(results: &[G3CheckResult], id: &str, expected_title: &str) {
+    assert!(
+        results
+            .iter()
+            .all(|result| !(result.id() == id && result.title() == expected_title)),
+        "{:#?}",
+        findings(results, id)
+    );
 }
 
 #[must_use]
@@ -71,14 +128,14 @@ pub(crate) fn finding<'a>(
     severity: G3Severity,
     title: &'a str,
     message: &'a str,
-    file: Option<&'a str>,
+    file: &'a str,
     inventory: bool,
 ) -> Finding<'a> {
     Finding {
         severity,
         title,
         message,
-        file,
+        file: Some(file),
         inventory,
     }
 }
@@ -100,11 +157,73 @@ macro_rules! define_result_assertions {
             crate::common::assert_findings(results, $id, expected);
         }
 
-        pub fn assert_contains(
+        pub fn assert_no_findings(results: &[guardrail3_check_types::G3CheckResult]) {
+            crate::common::assert_no_findings(results, $id);
+        }
+
+        pub fn assert_has_info(
             results: &[guardrail3_check_types::G3CheckResult],
-            expected: Finding<'_>,
+            title: &str,
+            inventory: bool,
         ) {
-            crate::common::assert_contains(results, $id, expected);
+            crate::common::assert_has_finding(
+                results,
+                $id,
+                guardrail3_check_types::G3Severity::Info,
+                title,
+                inventory,
+            );
+        }
+
+        pub fn assert_has_warn(
+            results: &[guardrail3_check_types::G3CheckResult],
+            title: &str,
+            inventory: bool,
+        ) {
+            crate::common::assert_has_finding(
+                results,
+                $id,
+                guardrail3_check_types::G3Severity::Warn,
+                title,
+                inventory,
+            );
+        }
+
+        pub fn assert_has_error(
+            results: &[guardrail3_check_types::G3CheckResult],
+            title: &str,
+            inventory: bool,
+        ) {
+            crate::common::assert_has_finding(
+                results,
+                $id,
+                guardrail3_check_types::G3Severity::Error,
+                title,
+                inventory,
+            );
+        }
+
+        pub fn assert_title_count(
+            results: &[guardrail3_check_types::G3CheckResult],
+            title: &str,
+            expected_count: usize,
+        ) {
+            crate::common::assert_title_count(results, $id, title, expected_count);
+        }
+
+        pub fn assert_message_contains(
+            results: &[guardrail3_check_types::G3CheckResult],
+            title: &str,
+            needle: &str,
+        ) {
+            crate::common::assert_message_contains(results, $id, title, needle);
+        }
+
+        pub fn assert_title_absent(
+            results: &[guardrail3_check_types::G3CheckResult],
+            title: &str,
+        ) {
+            crate::common::assert_title_absent(results, $id, title);
         }
 
         #[must_use]
@@ -118,7 +237,7 @@ macro_rules! define_result_assertions {
                 guardrail3_check_types::G3Severity::Error,
                 title,
                 message,
-                Some(file),
+                file,
                 inventory,
             )
         }
@@ -134,7 +253,7 @@ macro_rules! define_result_assertions {
                 guardrail3_check_types::G3Severity::Warn,
                 title,
                 message,
-                Some(file),
+                file,
                 inventory,
             )
         }
@@ -150,7 +269,7 @@ macro_rules! define_result_assertions {
                 guardrail3_check_types::G3Severity::Info,
                 title,
                 message,
-                Some(file),
+                file,
                 inventory,
             )
         }
