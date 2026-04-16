@@ -1,25 +1,28 @@
 [package]
 name = "g3rs-arch-ingestion-runtime"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
 description = "Runtime implementation for g3rs arch ingestion"
-license = "MIT OR Apache-2.0"
-rust-version = "1.85"
-repository = "https://github.com/ArcticLens/websmasher"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
 readme = "README.md"
 keywords = ["guardrail3", "arch", "ingestion", "rust"]
 categories = ["development-tools"]
+publish = false
 
 [features]
 default = ["all"]
 all = ["ingest"]
 ingest = []
 
+[package.metadata.guardrail3]
+shared = true
+
 [lints]
 workspace = true
 
 [dependencies]
-g3rs-arch-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-arch-types = { path = "../../../g3rs-arch-types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["types"] }
 glob = "0.3"

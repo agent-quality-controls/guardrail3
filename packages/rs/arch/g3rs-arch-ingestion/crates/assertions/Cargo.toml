@@ -2,13 +2,27 @@
 name = "g3rs-arch-ingestion-assertions"
 version = "0.1.0"
 edition = "2024"
-description = "Test assertions for g3rs arch ingestion"
+description = "Assertion helpers for g3rs arch ingestion tests"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
-keywords = ["guardrail3", "arch", "ingestion", "rust"]
+keywords = ["guardrail3", "arch", "ingestion", "assertions"]
 categories = ["development-tools"]
+publish = false
+
+[features]
+default = ["all"]
+all = ["ingest"]
+ingest = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+g3rs-arch-ingestion-runtime = { path = "../runtime", version = "0.1.0" }
+g3rs-arch-types = { path = "../../../g3rs-arch-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 
 [lints]
 workspace = true
