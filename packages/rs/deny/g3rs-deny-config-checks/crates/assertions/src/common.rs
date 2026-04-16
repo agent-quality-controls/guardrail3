@@ -2,11 +2,11 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
-    pub severity: G3Severity,
-    pub title: &'a str,
-    pub message: &'a str,
-    pub file: Option<&'a str>,
-    pub inventory: bool,
+    severity: G3Severity,
+    title: &'a str,
+    message: &'a str,
+    file: Option<&'a str>,
+    inventory: bool,
 }
 
 #[must_use]
@@ -121,11 +121,7 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn error_no_file<'a>(
-            title: &'a str,
-            message: &'a str,
-            inventory: bool,
-        ) -> Finding<'a> {
+        pub fn error_no_file<'a>(title: &'a str, message: &'a str, inventory: bool) -> Finding<'a> {
             crate::common::finding(
                 guardrail3_check_types::G3Severity::Error,
                 title,
@@ -152,11 +148,7 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn warn_no_file<'a>(
-            title: &'a str,
-            message: &'a str,
-            inventory: bool,
-        ) -> Finding<'a> {
+        pub fn warn_no_file<'a>(title: &'a str, message: &'a str, inventory: bool) -> Finding<'a> {
             crate::common::finding(
                 guardrail3_check_types::G3Severity::Warn,
                 title,
@@ -183,11 +175,7 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn info_no_file<'a>(
-            title: &'a str,
-            message: &'a str,
-            inventory: bool,
-        ) -> Finding<'a> {
+        pub fn info_no_file<'a>(title: &'a str, message: &'a str, inventory: bool) -> Finding<'a> {
             crate::common::finding(
                 guardrail3_check_types::G3Severity::Info,
                 title,

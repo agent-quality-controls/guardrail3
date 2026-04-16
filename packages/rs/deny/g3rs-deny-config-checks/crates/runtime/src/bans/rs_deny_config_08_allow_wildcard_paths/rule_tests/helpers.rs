@@ -1,7 +1,7 @@
 use deny_toml_parser::parse as parse_deny_toml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::bans::rs_deny_config_08_allow_wildcard_paths::check;
+use super::super::check;
 
 pub(super) fn run_check(deny_toml: &str) -> Vec<G3CheckResult> {
     let deny = parse_deny_toml(deny_toml).expect("deny fixture should parse");

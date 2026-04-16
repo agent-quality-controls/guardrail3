@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_11_confidence_threshold as assertions;
+use g3rs_deny_config_checks_assertions::licenses::rs_deny_config_11_confidence_threshold::rule as assertions;
 
 use super::helpers::run_check;
 

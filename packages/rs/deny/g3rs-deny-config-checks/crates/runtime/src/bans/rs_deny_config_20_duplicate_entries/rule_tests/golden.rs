@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_20_duplicate_entries as assertions;
+use g3rs_deny_config_checks_assertions::bans::rs_deny_config_20_duplicate_entries::rule as assertions;
 
 use super::helpers::run_check;
 

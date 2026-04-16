@@ -1,7 +1,8 @@
 use deny_toml_parser::{AdvisoryScope, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{expected_advisory_baseline, inventory};
+use crate::support::expectations::expected_advisory_baseline;
+use crate::support::findings::inventory;
 
 const ID: &str = "RS-DENY-CONFIG-03";
 
@@ -58,7 +59,9 @@ fn check_value(
 
 fn is_stricter(actual: Option<&str>, expected: &str) -> bool {
     match (actual, advisory_rank(expected)) {
-        (Some(actual), Some(expected_rank)) => advisory_rank(actual).is_some_and(|actual_rank| actual_rank > expected_rank),
+        (Some(actual), Some(expected_rank)) => {
+            advisory_rank(actual).is_some_and(|actual_rank| actual_rank > expected_rank)
+        }
         _ => false,
     }
 }
@@ -78,4 +81,4 @@ fn advisory_rank(value: &str) -> Option<u8> {
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

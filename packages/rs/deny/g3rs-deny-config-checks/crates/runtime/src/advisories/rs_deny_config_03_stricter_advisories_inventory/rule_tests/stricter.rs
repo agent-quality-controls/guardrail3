@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_03_stricter_advisories_inventory as assertions;
+use g3rs_deny_config_checks_assertions::advisories::rs_deny_config_03_stricter_advisories_inventory::rule as assertions;
 
 use super::helpers::run_check;
 

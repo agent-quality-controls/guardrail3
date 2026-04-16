@@ -1,7 +1,9 @@
-use g3rs_deny_config_checks_types::G3RsDenyConfigChecksInput;
+use g3rs_deny_types::G3RsDenyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{ban_name, expected_bans, join_set, managed_profile_name, rust_policy_valid, wrappers};
+use crate::support::expectations::expected_bans;
+use crate::support::identities::{ban_name, join_set, wrappers};
+use crate::support::policy::{managed_profile_name, rust_policy_valid};
 
 const ID: &str = "RS-DENY-CONFIG-27";
 
@@ -54,27 +56,28 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         };
 
         if actual_wrappers != expected_ban.wrappers {
-            let (severity, message, inventory) = if actual_wrappers.is_superset(&expected_ban.wrappers) {
-                (
-                    G3Severity::Warn,
-                    format!(
-                        "`{}` ban `{name}` adds local wrappers `{}`.",
-                        input.deny_rel_path,
-                        join_set(&actual_wrappers)
-                    ),
-                    false,
-                )
-            } else {
-                (
-                    G3Severity::Error,
-                    format!(
-                        "`{}` ban `{name}` must keep wrappers `{}`.",
-                        input.deny_rel_path,
-                        join_set(&expected_ban.wrappers)
-                    ),
-                    false,
-                )
-            };
+            let (severity, message, inventory) =
+                if actual_wrappers.is_superset(&expected_ban.wrappers) {
+                    (
+                        G3Severity::Warn,
+                        format!(
+                            "`{}` ban `{name}` adds local wrappers `{}`.",
+                            input.deny_rel_path,
+                            join_set(&actual_wrappers)
+                        ),
+                        false,
+                    )
+                } else {
+                    (
+                        G3Severity::Error,
+                        format!(
+                            "`{}` ban `{name}` must keep wrappers `{}`.",
+                            input.deny_rel_path,
+                            join_set(&expected_ban.wrappers)
+                        ),
+                        false,
+                    )
+                };
             let result = G3CheckResult::new(
                 ID.to_owned(),
                 severity,
@@ -83,11 +86,15 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
                 Some(input.deny_rel_path.clone()),
                 None,
             );
-            results.push(if inventory { result.into_inventory() } else { result });
+            results.push(if inventory {
+                result.into_inventory()
+            } else {
+                result
+            });
         }
     }
 }
 
 #[cfg(test)]
 #[path = "rs_deny_config_27_wrappers_tests/mod.rs"]
-mod tests;
+mod rs_deny_config_27_wrappers_tests;

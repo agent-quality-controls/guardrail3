@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_06_multiple_versions_floor as assertions;
+use g3rs_deny_config_checks_assertions::bans::rs_deny_config_06_multiple_versions_floor::rule as assertions;
 
 use super::helpers::run_check;
 

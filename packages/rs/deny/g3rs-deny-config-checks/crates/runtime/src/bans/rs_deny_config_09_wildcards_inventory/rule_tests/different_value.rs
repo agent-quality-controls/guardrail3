@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_09_wildcards_inventory as assertions;
+use g3rs_deny_config_checks_assertions::bans::rs_deny_config_09_wildcards_inventory::rule as assertions;
 
 use super::helpers::run_check;
 

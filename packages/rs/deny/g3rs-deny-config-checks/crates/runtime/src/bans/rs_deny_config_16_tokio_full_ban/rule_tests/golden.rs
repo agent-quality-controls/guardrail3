@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_16_tokio_full_ban as assertions;
+use g3rs_deny_config_checks_assertions::bans::rs_deny_config_16_tokio_full_ban::rule as assertions;
 
 use super::helpers::run_check;
 

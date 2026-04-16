@@ -1,0 +1,34 @@
+profile = "library"
+
+allowed_deps = [
+  "deny-toml-parser",
+  "g3rs-deny-config-checks-assertions",
+  "g3rs-deny-config-checks-runtime",
+  "g3rs-deny-types",
+  "guardrail3-check-types",
+  "guardrail3-reason-policy",
+  "guardrail3-rs-toml-parser",
+  "test_support",
+  "toml",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime crate intentionally keeps one deny config rule module per file."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions crate intentionally keeps one shared proof module per rule."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/test_support/Cargo.toml"
+selector = "structural-split"
+reason = "Shared test support crate intentionally holds reusable deny fixture builders for package tests."

@@ -1,7 +1,8 @@
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{feature_entry_name, inventory};
+use crate::support::findings::inventory;
+use crate::support::identities::feature_entry_name;
 
 const ID: &str = "RS-DENY-CONFIG-17";
 
@@ -27,4 +28,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

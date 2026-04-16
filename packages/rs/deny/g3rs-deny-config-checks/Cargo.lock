@@ -36,7 +36,7 @@ name = "g3rs-deny-config-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-deny-config-checks-runtime",
- "g3rs-deny-config-checks-types",
+ "g3rs-deny-types",
 ]
 
 [[package]]
@@ -53,19 +53,12 @@ version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
  "g3rs-deny-config-checks-assertions",
- "g3rs-deny-config-checks-types",
  "g3rs-deny-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
  "guardrail3-rs-toml-parser",
+ "test_support",
  "toml",
-]
-
-[[package]]
-name = "g3rs-deny-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-deny-types",
 ]
 
 [[package]]
@@ -195,6 +188,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "test_support"
+version = "0.1.0"
+dependencies = [
+ "deny-toml-parser",
+ "g3rs-deny-types",
+ "guardrail3-check-types",
+ "guardrail3-rs-toml-parser",
 ]
 
 [[package]]

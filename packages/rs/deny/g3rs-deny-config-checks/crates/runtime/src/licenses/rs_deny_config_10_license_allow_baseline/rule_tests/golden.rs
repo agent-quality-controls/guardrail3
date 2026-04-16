@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_10_license_allow_baseline as assertions;
+use g3rs_deny_config_checks_assertions::licenses::rs_deny_config_10_license_allow_baseline::rule as assertions;
 
 use super::helpers::run_check;
 

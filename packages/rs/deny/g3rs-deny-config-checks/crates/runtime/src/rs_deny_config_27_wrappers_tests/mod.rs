@@ -1,3 +1,4 @@
+mod helpers;
 mod golden;
 mod malformed_entries;
 mod managed_wrappers;

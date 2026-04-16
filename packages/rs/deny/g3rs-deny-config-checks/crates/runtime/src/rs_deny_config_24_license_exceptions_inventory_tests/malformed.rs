@@ -1,6 +1,7 @@
 use g3rs_deny_config_checks_assertions::rs_deny_config_24_license_exceptions_inventory as assertions;
 
-use crate::test_support::run;
+use test_support::run;
+use guardrail3_rs_toml_parser::RustProfile;
 
 #[test]
 fn inventories_documented_and_invalid_license_exceptions() {
@@ -31,7 +32,7 @@ crate = "weak-reason"
 allow = ["MIT"]
 reason = "temp"
 "#,
-        Some("service"),
+        Some(RustProfile::Service),
         true,
         crate::rs_deny_config_24_license_exceptions_inventory::check,
     );

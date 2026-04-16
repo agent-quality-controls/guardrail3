@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_12_copyleft_allowlist as assertions;
+use g3rs_deny_config_checks_assertions::licenses::rs_deny_config_12_copyleft_allowlist::rule as assertions;
 
 use super::helpers::run_check;
 

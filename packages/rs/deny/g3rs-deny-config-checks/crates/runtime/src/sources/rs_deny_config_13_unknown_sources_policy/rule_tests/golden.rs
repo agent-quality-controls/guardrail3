@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_13_unknown_sources_policy as assertions;
+use g3rs_deny_config_checks_assertions::sources::rs_deny_config_13_unknown_sources_policy::rule as assertions;
 
 use super::helpers::run_check;
 

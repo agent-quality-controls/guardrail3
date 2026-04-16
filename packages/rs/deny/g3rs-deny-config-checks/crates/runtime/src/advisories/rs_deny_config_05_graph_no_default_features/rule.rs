@@ -1,7 +1,8 @@
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{error, expected_graph};
+use crate::support::expectations::expected_graph;
+use crate::support::findings::error;
 
 const ID: &str = "RS-DENY-CONFIG-05";
 
@@ -29,4 +30,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

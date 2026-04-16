@@ -3,7 +3,8 @@ use std::collections::BTreeSet;
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{error, expected_sources};
+use crate::support::expectations::expected_sources;
+use crate::support::findings::error;
 
 const ID: &str = "RS-DENY-CONFIG-14";
 
@@ -29,7 +30,11 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
     }
 
     let expected = expected_sources().0;
-    let actual = sources.allow_registry.iter().cloned().collect::<BTreeSet<_>>();
+    let actual = sources
+        .allow_registry
+        .iter()
+        .cloned()
+        .collect::<BTreeSet<_>>();
 
     for registry in expected.difference(&actual) {
         results.push(error(
@@ -65,4 +70,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

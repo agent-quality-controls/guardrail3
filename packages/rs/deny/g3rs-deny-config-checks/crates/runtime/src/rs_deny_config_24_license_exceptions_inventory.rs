@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_types::G3RsDenyConfigChecksInput;
+use g3rs_deny_types::G3RsDenyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
@@ -121,4 +121,4 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
 
 #[cfg(test)]
 #[path = "rs_deny_config_24_license_exceptions_inventory_tests/mod.rs"]
-mod tests;
+mod rs_deny_config_24_license_exceptions_inventory_tests;

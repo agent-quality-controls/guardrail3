@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_14_allow_registry_baseline as assertions;
+use g3rs_deny_config_checks_assertions::sources::rs_deny_config_14_allow_registry_baseline::rule as assertions;
 
 use super::helpers::run_check;
 

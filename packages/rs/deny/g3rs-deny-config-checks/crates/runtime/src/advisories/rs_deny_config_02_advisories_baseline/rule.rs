@@ -1,7 +1,8 @@
 use deny_toml_parser::{AdvisoryScope, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{error, expected_advisory_baseline};
+use crate::support::expectations::expected_advisory_baseline;
+use crate::support::findings::error;
 
 const ID: &str = "RS-DENY-CONFIG-02";
 
@@ -70,4 +71,4 @@ fn check_value(
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

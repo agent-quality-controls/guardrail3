@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_17_extra_feature_bans_inventory as assertions;
+use g3rs_deny_config_checks_assertions::bans::rs_deny_config_17_extra_feature_bans_inventory::rule as assertions;
 
 use super::helpers::run_check;
 

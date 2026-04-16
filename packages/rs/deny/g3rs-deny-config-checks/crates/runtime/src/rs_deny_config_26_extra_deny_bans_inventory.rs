@@ -1,7 +1,9 @@
-use g3rs_deny_config_checks_types::G3RsDenyConfigChecksInput;
+use g3rs_deny_types::G3RsDenyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{ban_name, expected_ban_names, managed_profile_name, rust_policy_valid};
+use crate::support::expectations::expected_ban_names;
+use crate::support::identities::ban_name;
+use crate::support::policy::{managed_profile_name, rust_policy_valid};
 
 const ID: &str = "RS-DENY-CONFIG-26";
 
@@ -72,4 +74,4 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
 
 #[cfg(test)]
 #[path = "rs_deny_config_26_extra_deny_bans_inventory_tests/mod.rs"]
-mod tests;
+mod rs_deny_config_26_extra_deny_bans_inventory_tests;

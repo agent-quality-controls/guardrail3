@@ -1,4 +1,4 @@
-mod helpers;
 mod golden;
-mod too_many;
+mod helpers;
 mod no_advisories_section;
+mod too_many;
