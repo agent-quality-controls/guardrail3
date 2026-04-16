@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use g3rs_workspace_crawl_assertions::crawl as assertions;
+use g3rs_workspace_crawl_assertions::run as assertions;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -25,7 +25,7 @@ fn includes_hidden_config_files() {
     )
     .expect("write Cargo.toml fixture");
 
-    let crawl = crate::crawl(root).expect("crawl should succeed");
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
 
     assertions::assert_root_file_exists(&crawl, ".clippy.toml");
     assertions::assert_has_rel_path(&crawl.entries, "Cargo.toml");

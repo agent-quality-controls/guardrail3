@@ -104,7 +104,7 @@ dependencies = [
 name = "g3rs-workspace-crawl-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-types",
+ "g3rs-workspace-crawl-runtime",
 ]
 
 [[package]]
