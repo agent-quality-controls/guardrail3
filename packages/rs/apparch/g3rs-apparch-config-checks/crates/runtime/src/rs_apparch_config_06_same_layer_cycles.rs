@@ -175,4 +175,4 @@ fn strong_connect(
 
 #[cfg(test)]
 #[path = "rs_apparch_config_06_same_layer_cycles_tests/mod.rs"]
-mod tests;
+mod rs_apparch_config_06_same_layer_cycles_tests;

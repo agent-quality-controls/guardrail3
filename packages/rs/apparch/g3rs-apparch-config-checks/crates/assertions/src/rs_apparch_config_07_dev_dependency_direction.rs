@@ -1,0 +1,23 @@
+use guardrail3_check_types::{G3CheckResult, G3Severity};
+
+const ID: &str = "RS-APPARCH-CONFIG-07";
+
+pub fn assert_direction_warning(results: &[G3CheckResult], source_file: &str) {
+    assert!(
+        results.iter().any(|result| {
+            result.id() == ID
+                && result.severity() == G3Severity::Warn
+                && result.title() == "dev-dependency direction violation"
+                && result.file() == Some(source_file)
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
+
+pub fn assert_no_findings(results: &[G3CheckResult]) {
+    assert!(
+        results.iter().all(|result| result.id() != ID),
+        "{results:#?}"
+    );
+}

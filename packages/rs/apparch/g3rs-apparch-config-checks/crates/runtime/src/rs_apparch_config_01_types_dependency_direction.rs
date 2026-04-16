@@ -74,4 +74,4 @@ pub(crate) fn check(
 
 #[cfg(test)]
 #[path = "rs_apparch_config_01_types_dependency_direction_tests/mod.rs"]
-mod tests;
+mod rs_apparch_config_01_types_dependency_direction_tests;

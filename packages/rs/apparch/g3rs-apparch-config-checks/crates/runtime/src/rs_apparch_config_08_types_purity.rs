@@ -122,4 +122,4 @@ fn allowed_dependencies(
 
 #[cfg(test)]
 #[path = "rs_apparch_config_08_types_purity_tests/mod.rs"]
-mod tests;
+mod rs_apparch_config_08_types_purity_tests;

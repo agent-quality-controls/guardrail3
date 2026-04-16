@@ -110,4 +110,4 @@ pub(crate) fn check(
 
 #[cfg(test)]
 #[path = "rs_apparch_config_05_patch_replace_bypass_tests/mod.rs"]
-mod tests;
+mod rs_apparch_config_05_patch_replace_bypass_tests;

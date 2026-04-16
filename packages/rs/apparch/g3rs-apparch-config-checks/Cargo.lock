@@ -13,25 +13,26 @@ name = "g3rs-apparch-config-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-apparch-config-checks-runtime",
- "g3rs-apparch-config-checks-types",
+ "g3rs-apparch-types",
+]
+
+[[package]]
+name = "g3rs-apparch-config-checks-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-apparch-config-checks-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]
 name = "g3rs-apparch-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-apparch-config-checks-types",
+ "g3rs-apparch-config-checks-assertions",
  "g3rs-apparch-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
  "guardrail3-rs-toml-parser",
-]
-
-[[package]]
-name = "g3rs-apparch-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-apparch-types",
 ]
 
 [[package]]
