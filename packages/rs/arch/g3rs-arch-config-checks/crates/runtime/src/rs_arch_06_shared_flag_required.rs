@@ -1,5 +1,4 @@
-use g3rs_arch_types::G3RsArchConfigCrate;
-use g3rs_arch_types::G3RsArchDependencyEdge;
+use g3rs_arch_types::types::{G3RsArchConfigCrate, G3RsArchDependencyEdge};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use std::collections::BTreeMap;
 

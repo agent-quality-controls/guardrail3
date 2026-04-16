@@ -10,16 +10,31 @@ pub struct G3RsArchCrateNode {
     pub lib_rs_rel: Option<String>,
     pub parent_rel_dir: Option<String>,
     pub shared: bool,
+    pub feature_contract: G3RsArchFeatureContract,
+    pub dependency_counts: G3RsArchDependencyCounts,
+    pub structure: G3RsArchCrateStructure,
+    pub cargo_parse_error: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsArchFeatureContract {
     pub has_default_feature: bool,
     pub has_all_feature: bool,
     pub all_feature_deps: Vec<String>,
     pub default_feature_deps: Vec<String>,
-    pub production_dependency_count: usize,
-    pub dev_dependency_count: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsArchDependencyCounts {
+    pub production: usize,
+    pub dev: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsArchCrateStructure {
     pub sibling_rs_file_count: usize,
     pub sibling_dir_count: usize,
     pub max_module_depth: usize,
-    pub cargo_parse_error: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -139,9 +154,18 @@ pub struct G3RsArchFileTreeCrate {
 #[derive(Debug, Clone, PartialEq)]
 pub enum G3RsArchRustPolicyState {
     Missing,
-    Unreadable { rel_path: String, reason: String },
-    ParseError { rel_path: String, reason: String },
-    Parsed { rel_path: String, waivers: Vec<WaiverConfig> },
+    Unreadable {
+        rel_path: String,
+        reason: String,
+    },
+    ParseError {
+        rel_path: String,
+        reason: String,
+    },
+    Parsed {
+        rel_path: String,
+        waivers: Vec<WaiverConfig>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]

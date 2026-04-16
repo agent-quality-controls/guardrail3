@@ -1,4 +1,4 @@
-use g3rs_arch_types::{G3RsArchFileTreeCrate, G3RsArchRustPolicyState};
+use g3rs_arch_types::types::{G3RsArchFileTreeCrate, G3RsArchRustPolicyState};
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_rs_toml_parser::WaiverConfig;
 

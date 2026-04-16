@@ -1,4 +1,4 @@
-use g3rs_arch_types::G3RsArchConfigCrate;
+use g3rs_arch_types::types::G3RsArchConfigCrate;
 use guardrail3_check_types::G3CheckResult;
 
 pub(super) fn config_crate(rel_dir: &str) -> G3RsArchConfigCrate {

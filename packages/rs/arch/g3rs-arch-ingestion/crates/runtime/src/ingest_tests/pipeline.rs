@@ -523,7 +523,7 @@ version = "0.1.0"
     let input = crate::ingest_for_file_tree_checks(&crawl).expect("filetree ingest");
 
     match input.rust_policy {
-        g3rs_arch_types::G3RsArchRustPolicyState::Parsed { waivers, .. } => {
+        g3rs_arch_types::types::G3RsArchRustPolicyState::Parsed { waivers, .. } => {
             assert_eq!(waivers.len(), 1, "{waivers:#?}");
             assert_eq!(waivers[0].rule, "RS-ARCH-FILETREE-07");
             assert_eq!(waivers[0].file, "crate_a/Cargo.toml");

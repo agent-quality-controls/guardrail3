@@ -1,4 +1,4 @@
-use g3rs_arch_types::{G3RsArchFacadeSurface, G3RsArchSourceCrate};
+use g3rs_arch_types::types::{G3RsArchFacadeSurface, G3RsArchSourceCrate};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-ARCH-SOURCE-02";
@@ -49,7 +49,10 @@ pub(crate) fn check(
                 ID.to_owned(),
                 G3Severity::Info,
                 "lib.rs is facade-only".to_owned(),
-                format!("lib.rs in `{}` contains only facade declarations.", node.rel_dir),
+                format!(
+                    "lib.rs in `{}` contains only facade declarations.",
+                    node.rel_dir
+                ),
                 Some(lib_rel.clone()),
                 None,
             )
