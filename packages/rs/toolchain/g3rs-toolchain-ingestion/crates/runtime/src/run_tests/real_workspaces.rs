@@ -36,10 +36,10 @@ fn ingests_real_workspace_with_package_rust_version() {
         .as_ref()
         .and_then(|pkg| pkg.rust_version.as_ref())
         .and_then(
-            |rv: &cargo_toml_parser::InheritableValue<String>| match rv {
-            cargo_toml_parser::InheritableValue::Value(v) => Some(v.as_str()),
-            cargo_toml_parser::InheritableValue::Inherit(_) => None,
-        },
+            |rv: &cargo_toml_parser::types::InheritableValue<String>| match rv {
+                cargo_toml_parser::types::InheritableValue::Value(v) => Some(v.as_str()),
+                cargo_toml_parser::types::InheritableValue::Inherit(_) => None,
+            },
         );
     assert_eq!(rust_version, Some("1.85"));
 }

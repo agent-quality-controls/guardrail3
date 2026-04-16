@@ -1,4 +1,4 @@
-use cargo_toml_parser::LintValue;
+use cargo_toml_parser::types::LintValue;
 use std::collections::BTreeMap;
 
 use g3rs_code_types::{

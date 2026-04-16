@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use cargo_toml_parser::{CargoToml, InheritableValue, PackageSection, VecStringOrBool};
+use cargo_toml_parser::{types::CargoToml, types::InheritableValue, types::PackageSection, types::VecStringOrBool};
 use g3rs_clippy_types::{
     G3RsClippyCargoConfigOverride, G3RsClippyConfigState, G3RsClippyRustPolicyState,
 };

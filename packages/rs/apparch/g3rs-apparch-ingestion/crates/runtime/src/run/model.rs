@@ -1,4 +1,4 @@
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use g3rs_apparch_types::{
     G3RsApparchCrate, G3RsApparchDependencyEdge, G3RsApparchExternalDependency,
     G3RsApparchRustPolicyState,

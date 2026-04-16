@@ -1,6 +1,6 @@
 /// Public ingestion entry point.
 use g3rs_garde_source_checks_types::{G3RsSourceFile, G3RsGardeSourceChecksInput};
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use g3rs_garde_types::{
     G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
     G3RsGardeFileTreeChecksInput, G3RsGardeRustPolicyInput, G3RsGardeWaiver,

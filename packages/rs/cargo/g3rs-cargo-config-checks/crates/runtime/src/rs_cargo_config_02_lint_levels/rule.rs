@@ -1,4 +1,4 @@
-use cargo_toml_parser::{CargoToml, ToolLints};
+use cargo_toml_parser::{types::CargoToml, types::ToolLints};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{self, CargoRole, LintExpectation};

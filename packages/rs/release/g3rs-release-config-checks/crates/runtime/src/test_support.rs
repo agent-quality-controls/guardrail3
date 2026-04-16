@@ -2,7 +2,13 @@
 
 use std::collections::BTreeSet;
 
-use cargo_toml_parser::{CargoToml, InheritableValue, PackageSection, VecStringOrBool};
+use cargo_toml_parser::{
+    types::CargoToml,
+    types::InheritableValue,
+    types::PackageSection,
+    types::VecStringOrBool,
+    types::WorkspacePackageSection,
+};
 use g3rs_release_config_checks_types::{
     G3RsReleaseConfigChecksInput, G3RsReleaseConfigCrate, G3RsReleaseConfigRepo,
 };
@@ -56,8 +62,9 @@ pub(crate) fn config_input_for_repo(
     release_plz_toml: Option<&str>,
     cliff_toml: Option<&str>,
 ) -> G3RsReleaseConfigChecksInput {
-    let release_plz = release_plz_toml
-        .map(|value| release_plz_toml_parser::parse(value).expect("release-plz fixture should parse"));
+    let release_plz = release_plz_toml.map(|value| {
+        release_plz_toml_parser::parse(value).expect("release-plz fixture should parse")
+    });
     let cliff = cliff_toml
         .map(|value| cliff_toml_parser::parse(value).expect("cliff fixture should parse"));
 
@@ -94,7 +101,7 @@ pub(crate) fn config_input_for_repo(
 fn build_crate(
     cargo_rel_path: &str,
     cargo: CargoToml,
-    workspace_package: Option<cargo_toml_parser::WorkspacePackageSection>,
+    workspace_package: Option<WorkspacePackageSection>,
 ) -> G3RsReleaseConfigCrate {
     let package = cargo.package.clone();
     let package_ref = package.as_ref();
@@ -114,18 +121,26 @@ fn build_crate(
         binary_target_names: BTreeSet::new(),
         description_present: inherited_string_present(
             package_ref.and_then(|pkg| pkg.description.as_ref()),
-            workspace_package.as_ref().and_then(|ws| ws.description.as_deref()),
+            workspace_package
+                .as_ref()
+                .and_then(|ws| ws.description.as_deref()),
         ),
         license_present: inherited_string_present(
             package_ref.and_then(|pkg| pkg.license.as_ref()),
-            workspace_package.as_ref().and_then(|ws| ws.license.as_deref()),
+            workspace_package
+                .as_ref()
+                .and_then(|ws| ws.license.as_deref()),
         ) || inherited_string_present(
             package_ref.and_then(|pkg| pkg.license_file.as_ref()),
-            workspace_package.as_ref().and_then(|ws| ws.license_file.as_deref()),
+            workspace_package
+                .as_ref()
+                .and_then(|ws| ws.license_file.as_deref()),
         ),
         repository_present: inherited_string_present(
             package_ref.and_then(|pkg| pkg.repository.as_ref()),
-            workspace_package.as_ref().and_then(|ws| ws.repository.as_deref()),
+            workspace_package
+                .as_ref()
+                .and_then(|ws| ws.repository.as_deref()),
         ),
         keywords_count: inherited_vec_count(
             package_ref.and_then(|pkg| pkg.keywords.as_ref()),
@@ -133,16 +148,20 @@ fn build_crate(
         ),
         categories_count: inherited_vec_count(
             package_ref.and_then(|pkg| pkg.categories.as_ref()),
-            workspace_package.as_ref().map(|ws| ws.categories.as_slice()),
+            workspace_package
+                .as_ref()
+                .map(|ws| ws.categories.as_slice()),
         ),
         version_valid: version_string
             .as_deref()
             .is_some_and(|version| semver::Version::parse(version).is_ok()),
         docs_rs_present: package_ref
             .and_then(|pkg| pkg.metadata.as_ref())
-            .and_then(|metadata| metadata.get("docs.rs").or_else(|| {
-                metadata.get("docs").and_then(|docs| docs.get("rs"))
-            }))
+            .and_then(|metadata| {
+                metadata
+                    .get("docs.rs")
+                    .or_else(|| metadata.get("docs").and_then(|docs| docs.get("rs")))
+            })
             .and_then(|value| value.as_table())
             .is_some_and(|table| {
                 [
@@ -158,13 +177,11 @@ fn build_crate(
                 .any(|key| table.contains_key(*key))
             }),
         include_exclude_present: package_ref.is_some_and(|pkg| {
-            pkg.include
-                .as_ref()
-                .is_some_and(|value| matches!(value, InheritableValue::Value(values) if !values.is_empty()))
-                || pkg
-                    .exclude
-                    .as_ref()
-                    .is_some_and(|value| matches!(value, InheritableValue::Value(values) if !values.is_empty()))
+            pkg.include.as_ref().is_some_and(
+                |value| matches!(value, InheritableValue::Value(values) if !values.is_empty()),
+            ) || pkg.exclude.as_ref().is_some_and(
+                |value| matches!(value, InheritableValue::Value(values) if !values.is_empty()),
+            )
         }),
         has_binstall_metadata: package_ref
             .and_then(|pkg| pkg.metadata.as_ref())
@@ -193,7 +210,7 @@ fn publish_declared(package: Option<&PackageSection>) -> bool {
 
 fn publishable(
     package: Option<&PackageSection>,
-    workspace_package: Option<&cargo_toml_parser::WorkspacePackageSection>,
+    workspace_package: Option<&WorkspacePackageSection>,
 ) -> bool {
     let Some(package) = package else {
         return false;
@@ -203,12 +220,14 @@ fn publishable(
         Some(InheritableValue::Value(VecStringOrBool::Bool(false))) => false,
         Some(InheritableValue::Value(VecStringOrBool::VecString(values))) => !values.is_empty(),
         Some(InheritableValue::Value(VecStringOrBool::Bool(true))) => true,
-        Some(InheritableValue::Inherit(_)) => match workspace_package.and_then(|ws| ws.publish.as_ref()) {
-            None => false,
-            Some(VecStringOrBool::Bool(false)) => false,
-            Some(VecStringOrBool::VecString(values)) => !values.is_empty(),
-            Some(VecStringOrBool::Bool(true)) => true,
-        },
+        Some(InheritableValue::Inherit(_)) => {
+            match workspace_package.and_then(|ws| ws.publish.as_ref()) {
+                None => false,
+                Some(VecStringOrBool::Bool(false)) => false,
+                Some(VecStringOrBool::VecString(values)) => !values.is_empty(),
+                Some(VecStringOrBool::Bool(true)) => true,
+            }
+        }
     }
 }
 
@@ -218,7 +237,9 @@ fn inherited_string_present(
 ) -> bool {
     match value {
         Some(InheritableValue::Value(value)) => !value.trim().is_empty(),
-        Some(InheritableValue::Inherit(_)) => workspace_value.is_some_and(|value| !value.trim().is_empty()),
+        Some(InheritableValue::Inherit(_)) => {
+            workspace_value.is_some_and(|value| !value.trim().is_empty())
+        }
         None => false,
     }
 }
@@ -236,7 +257,7 @@ fn inherited_vec_count(
 
 fn version_string(
     package: Option<&PackageSection>,
-    workspace_package: Option<&cargo_toml_parser::WorkspacePackageSection>,
+    workspace_package: Option<&WorkspacePackageSection>,
 ) -> Option<String> {
     match package.and_then(|pkg| pkg.version.as_ref()) {
         Some(InheritableValue::Value(value)) => Some(value.clone()),

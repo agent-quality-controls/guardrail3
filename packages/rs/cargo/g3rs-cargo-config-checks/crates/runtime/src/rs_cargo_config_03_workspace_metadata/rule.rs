@@ -1,4 +1,4 @@
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{CargoRole, cargo_role, error, info, policy_root_edition, role_label};

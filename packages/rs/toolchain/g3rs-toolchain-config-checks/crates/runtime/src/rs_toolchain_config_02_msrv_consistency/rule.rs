@@ -1,4 +1,4 @@
-use cargo_toml_parser::{CargoToml, InheritableValue};
+use cargo_toml_parser::{types::CargoToml, types::InheritableValue};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use rust_toolchain_toml_parser::RustToolchainToml;
 

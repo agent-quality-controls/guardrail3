@@ -1,4 +1,4 @@
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use rust_toolchain_toml_parser::RustToolchainToml;
 use rustfmt_toml_parser::RustfmtToml;
 
@@ -36,9 +36,18 @@ pub struct G3RsFmtWaiver {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3RsFmtRustPolicyState {
     Missing,
-    Unreadable { rel_path: String, reason: String },
-    ParseError { rel_path: String, reason: String },
-    Parsed { rel_path: String, waivers: Vec<G3RsFmtWaiver> },
+    Unreadable {
+        rel_path: String,
+        reason: String,
+    },
+    ParseError {
+        rel_path: String,
+        reason: String,
+    },
+    Parsed {
+        rel_path: String,
+        waivers: Vec<G3RsFmtWaiver>,
+    },
 }
 
 #[derive(Debug, Clone)]

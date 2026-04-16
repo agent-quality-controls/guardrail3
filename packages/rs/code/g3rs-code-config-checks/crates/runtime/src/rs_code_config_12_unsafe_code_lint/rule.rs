@@ -1,4 +1,4 @@
-use cargo_toml_parser::LintValue;
+use cargo_toml_parser::types::LintValue;
 use g3rs_code_types::{G3RsCodeConfigFile, G3RsCodeConfigFileKind};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 

@@ -1,7 +1,7 @@
 /// Read and parse a `Cargo.toml` file from disk.
 use std::path::Path;
 
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use g3rs_cargo_types::{G3RsCargoRustPolicyState, G3RsCargoWaiver};
 
 use crate::run::IngestionError;

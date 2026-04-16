@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use clippy_toml_parser::{ClippyToml, DisallowedPath};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 

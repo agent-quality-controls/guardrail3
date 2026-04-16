@@ -1,4 +1,4 @@
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use clippy_toml_parser::ClippyToml;
 use deny_toml_parser::DenyToml;
 use guardrail3_rs_toml_parser::Guardrail3RsToml;

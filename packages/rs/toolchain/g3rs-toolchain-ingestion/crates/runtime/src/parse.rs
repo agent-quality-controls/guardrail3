@@ -1,7 +1,7 @@
 /// Read and parse config files from disk.
 use std::path::Path;
 
-use cargo_toml_parser::CargoToml;
+use cargo_toml_parser::types::CargoToml;
 use rust_toolchain_toml_parser::RustToolchainToml;
 
 use crate::run::IngestionError;

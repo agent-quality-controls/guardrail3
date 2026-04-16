@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use cargo_toml_parser::{CargoToml, parse};
+use cargo_toml_parser::{types::CargoToml, parse};
 use g3rs_test_types::{
     G3RsTestComponentFileTreeFacts, G3RsTestComponentSourceFacts, G3RsTestFileKind,
     G3RsTestFileTreeInputFailure, G3RsTestOwnedSidecarFacts, G3RsTestSourceFile,
