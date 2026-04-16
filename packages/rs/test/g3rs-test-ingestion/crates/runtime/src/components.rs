@@ -32,15 +32,7 @@ pub(crate) fn collect_components(
     crawl: &G3RsWorkspaceCrawl,
     root: &OwnedTestRoot,
 ) -> Result<Vec<OwnedTestComponent>, IngestionError> {
-    let assertions_rel_dir = if root.runtime_rel_dir == root.root_rel_dir {
-        join_under_root(&root.root_rel_dir, "assertions")
-    } else {
-        format!("{}/assertions", parent_dir(&root.runtime_rel_dir))
-    };
-    let assertions_cargo_rel_path = format!("{assertions_rel_dir}/Cargo.toml");
-    let assertions_manifest = parse_optional_manifest(crawl, &assertions_cargo_rel_path)?;
-    let nested_assertions_cargo_rel_path =
-        nested_assertions_cargo_rel_path(crawl, &root.root_rel_dir, &assertions_cargo_rel_path);
+    let layout = resolve_assertions_layout(crawl, root, None)?;
 
     Ok(vec![OwnedTestComponent {
         rel_dir: root.root_rel_dir.clone(),
@@ -54,20 +46,22 @@ pub(crate) fn collect_components(
             .map(rust_crate_name),
         runtime_normal_dependencies: manifest_normal_dependencies(&root.cargo),
         runtime_dev_dependencies: manifest_dev_dependencies(&root.cargo),
-        assertions_rel_dir: assertions_rel_dir.clone(),
-        assertions_cargo_rel_path: assertions_cargo_rel_path.clone(),
-        assertions_exists: assertions_manifest.is_some(),
-        nested_assertions_cargo_rel_path,
-        assertions_package_name: assertions_manifest
+        assertions_rel_dir: layout.assertions_rel_dir.clone(),
+        assertions_cargo_rel_path: layout.assertions_cargo_rel_path.clone(),
+        assertions_exists: layout.assertions_manifest.is_some(),
+        nested_assertions_cargo_rel_path: layout.nested_assertions_cargo_rel_path.clone(),
+        assertions_package_name: layout
+            .assertions_manifest
             .as_ref()
             .and_then(|manifest| manifest.package.as_ref())
             .and_then(|package| package.name.as_deref())
             .map(rust_crate_name),
-        assertions_dependencies: assertions_manifest
+        assertions_dependencies: layout
+            .assertions_manifest
             .as_ref()
             .map(manifest_normal_dependencies)
             .unwrap_or_default(),
-        sidecars: collect_sidecars(crawl, &root.runtime_rel_dir, &assertions_rel_dir),
+        sidecars: collect_sidecars(crawl, &root.runtime_rel_dir, &layout.assertions_rel_dir),
         external_harnesses: collect_external_harnesses(crawl, &root.runtime_rel_dir),
     }])
 }
@@ -76,17 +70,9 @@ pub(crate) fn collect_file_tree_components(
     crawl: &G3RsWorkspaceCrawl,
     root: &OwnedTestRoot,
 ) -> (Vec<OwnedTestComponent>, Vec<G3RsTestFileTreeInputFailure>) {
-    let assertions_rel_dir = if root.runtime_rel_dir == root.root_rel_dir {
-        join_under_root(&root.root_rel_dir, "assertions")
-    } else {
-        format!("{}/assertions", parent_dir(&root.runtime_rel_dir))
-    };
-    let assertions_cargo_rel_path = format!("{assertions_rel_dir}/Cargo.toml");
     let mut input_failures = Vec::new();
-    let assertions_manifest =
-        parse_optional_manifest_lenient(crawl, &assertions_cargo_rel_path, &mut input_failures);
-    let nested_assertions_cargo_rel_path =
-        nested_assertions_cargo_rel_path(crawl, &root.root_rel_dir, &assertions_cargo_rel_path);
+    let layout = resolve_assertions_layout(crawl, root, Some(&mut input_failures))
+        .expect("lenient assertions layout resolution should not fail");
 
     (
         vec![OwnedTestComponent {
@@ -101,20 +87,22 @@ pub(crate) fn collect_file_tree_components(
                 .map(rust_crate_name),
             runtime_normal_dependencies: manifest_normal_dependencies(&root.cargo),
             runtime_dev_dependencies: manifest_dev_dependencies(&root.cargo),
-            assertions_rel_dir: assertions_rel_dir.clone(),
-            assertions_cargo_rel_path: assertions_cargo_rel_path.clone(),
-            assertions_exists: assertions_manifest.is_some(),
-            nested_assertions_cargo_rel_path,
-            assertions_package_name: assertions_manifest
+            assertions_rel_dir: layout.assertions_rel_dir.clone(),
+            assertions_cargo_rel_path: layout.assertions_cargo_rel_path.clone(),
+            assertions_exists: layout.assertions_manifest.is_some(),
+            nested_assertions_cargo_rel_path: layout.nested_assertions_cargo_rel_path.clone(),
+            assertions_package_name: layout
+                .assertions_manifest
                 .as_ref()
                 .and_then(|manifest| manifest.package.as_ref())
                 .and_then(|package| package.name.as_deref())
                 .map(rust_crate_name),
-            assertions_dependencies: assertions_manifest
+            assertions_dependencies: layout
+                .assertions_manifest
                 .as_ref()
                 .map(manifest_normal_dependencies)
                 .unwrap_or_default(),
-            sidecars: collect_sidecars(crawl, &root.runtime_rel_dir, &assertions_rel_dir),
+            sidecars: collect_sidecars(crawl, &root.runtime_rel_dir, &layout.assertions_rel_dir),
             external_harnesses: collect_external_harnesses(crawl, &root.runtime_rel_dir),
         }],
         input_failures,
@@ -600,19 +588,47 @@ fn manifest_dev_dependencies(manifest: &CargoToml) -> BTreeSet<String> {
         .collect()
 }
 
-fn nested_assertions_cargo_rel_path(
-    crawl: &G3RsWorkspaceCrawl,
-    root_rel_dir: &str,
-    expected_assertions_cargo_rel_path: &str,
-) -> Option<String> {
-    let nested_rel_path = join_under_root(root_rel_dir, "assertions/Cargo.toml");
-    if nested_rel_path == expected_assertions_cargo_rel_path {
-        return None;
-    }
+struct AssertionsLayout {
+    assertions_rel_dir: String,
+    assertions_cargo_rel_path: String,
+    assertions_manifest: Option<CargoToml>,
+    nested_assertions_cargo_rel_path: Option<String>,
+}
 
-    g3rs_workspace_crawl::entry(crawl, &nested_rel_path)
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
-        .map(|_| nested_rel_path)
+fn resolve_assertions_layout(
+    crawl: &G3RsWorkspaceCrawl,
+    root: &OwnedTestRoot,
+    mut input_failures: Option<&mut Vec<G3RsTestFileTreeInputFailure>>,
+) -> Result<AssertionsLayout, IngestionError> {
+    let nested_assertions_cargo_rel_path = g3rs_workspace_crawl::entry(
+        crawl,
+        &join_under_root(&root.root_rel_dir, "assertions/Cargo.toml"),
+    )
+    .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+    .map(|_| join_under_root(&root.root_rel_dir, "assertions/Cargo.toml"));
+    let assertions_rel_dir = if root.runtime_rel_dir == root.root_rel_dir
+        && nested_assertions_cargo_rel_path.is_some()
+    {
+        join_under_root(&root.root_rel_dir, "crates/assertions")
+    } else if root.runtime_rel_dir == root.root_rel_dir {
+        join_under_root(&root.root_rel_dir, "assertions")
+    } else {
+        format!("{}/assertions", parent_dir(&root.runtime_rel_dir))
+    };
+    let assertions_cargo_rel_path = format!("{assertions_rel_dir}/Cargo.toml");
+    let assertions_manifest = if let Some(failures) = input_failures.as_deref_mut() {
+        parse_optional_manifest_lenient(crawl, &assertions_cargo_rel_path, failures)
+    } else {
+        parse_optional_manifest(crawl, &assertions_cargo_rel_path)?
+    };
+
+    Ok(AssertionsLayout {
+        assertions_rel_dir,
+        assertions_cargo_rel_path: assertions_cargo_rel_path.clone(),
+        assertions_manifest,
+        nested_assertions_cargo_rel_path: nested_assertions_cargo_rel_path
+            .filter(|nested| nested != &assertions_cargo_rel_path),
+    })
 }
 
 fn rust_crate_name(package_name: &str) -> String {
