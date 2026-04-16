@@ -3,8 +3,6 @@ mod rs_deps_filetree_10_gitignore_not_ignoring_cargo_lock;
 mod run;
 #[cfg(test)]
 use g3rs_deps_filetree_checks_assertions as _;
-#[cfg(test)]
-mod test_support;
 
 #[cfg(feature = "checks")]
 pub use run::check;

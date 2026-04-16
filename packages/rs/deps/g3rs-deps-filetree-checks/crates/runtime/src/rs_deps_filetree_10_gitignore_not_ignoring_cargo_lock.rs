@@ -1,4 +1,4 @@
-use g3rs_deps_filetree_checks_types::G3RsDepsFileTreeChecksInput;
+use g3rs_deps_types::G3RsDepsFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-DEPS-FILETREE-10";
@@ -38,4 +38,4 @@ pub(crate) fn check(input: &G3RsDepsFileTreeChecksInput, results: &mut Vec<G3Che
 
 #[cfg(test)]
 #[path = "rs_deps_filetree_10_gitignore_not_ignoring_cargo_lock_tests/mod.rs"]
-mod tests;
+mod rs_deps_filetree_10_gitignore_not_ignoring_cargo_lock_tests;

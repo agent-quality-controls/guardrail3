@@ -6,19 +6,23 @@ description = "Runtime implementation for g3rs deps filetree checks"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
+publish = false
 
 [features]
 default = ["all"]
 all = ["checks"]
 checks = []
 
+[package.metadata.guardrail3]
+shared = true
+
 [lints]
 workspace = true
 
 [dependencies]
-g3rs-deps-filetree-checks-types = { path = "../types", version = "0.1.0" }
+g3rs-deps-types = { path = "../../../g3rs-deps-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
 
 [dev-dependencies]
-g3rs-deps-filetree-checks-assertions = { path = "../assertions" }
+g3rs-deps-filetree-checks-assertions = { path = "../assertions", version = "0.1.0" }
