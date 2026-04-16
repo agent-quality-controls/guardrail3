@@ -1,6 +1,5 @@
 use g3rs_deny_filetree_checks_assertions::rs_deny_filetree_01_coverage as assertions;
-
-use crate::test_support::input;
+use test_support::input;
 
 #[test]
 fn inventories_selected_deny_config_when_it_is_usable() {

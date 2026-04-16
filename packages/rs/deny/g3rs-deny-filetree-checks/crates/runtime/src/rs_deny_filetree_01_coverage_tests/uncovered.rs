@@ -1,6 +1,5 @@
 use g3rs_deny_filetree_checks_assertions::rs_deny_filetree_01_coverage as assertions;
-
-use crate::test_support::input;
+use test_support::input;
 
 #[test]
 fn errors_when_no_root_deny_config_exists() {

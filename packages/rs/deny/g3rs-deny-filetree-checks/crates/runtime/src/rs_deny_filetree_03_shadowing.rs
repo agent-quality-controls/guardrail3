@@ -1,4 +1,4 @@
-use g3rs_deny_filetree_checks_types::G3RsDenyFileTreeChecksInput;
+use g3rs_deny_types::G3RsDenyFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-DENY-FILETREE-03";
@@ -22,5 +22,5 @@ pub(crate) fn check(input: &G3RsDenyFileTreeChecksInput, results: &mut Vec<G3Che
 }
 
 #[cfg(test)]
-#[path = "rs_deny_filetree_03_shadowing_tests/mod.rs"]
-mod tests;
+#[path = "rs_deny_filetree_03_shadowing_tests/mod.rs"] // reason: file module tests live in the owned rs_deny_filetree_03_shadowing_tests sidecar directory.
+mod rs_deny_filetree_03_shadowing_tests;

@@ -1,6 +1,5 @@
 use g3rs_deny_filetree_checks_assertions::rs_deny_filetree_03_shadowing as assertions;
-
-use crate::test_support::input;
+use test_support::input;
 
 #[test]
 fn errors_on_same_root_precedence_conflict() {
