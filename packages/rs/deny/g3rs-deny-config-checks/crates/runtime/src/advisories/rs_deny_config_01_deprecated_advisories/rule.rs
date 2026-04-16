@@ -1,7 +1,7 @@
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::warn;
+use crate::support::findings::warn;
 
 const ID: &str = "RS-DENY-CONFIG-01";
 
@@ -21,9 +21,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
             results.push(warn(
                 ID,
                 format!("deprecated advisory field `{deprecated}`"),
-                format!(
-                    "`{deny_rel_path}` uses deprecated `[advisories].{deprecated}`."
-                ),
+                format!("`{deny_rel_path}` uses deprecated `[advisories].{deprecated}`."),
                 deny_rel_path,
             ));
         }
@@ -32,4 +30,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

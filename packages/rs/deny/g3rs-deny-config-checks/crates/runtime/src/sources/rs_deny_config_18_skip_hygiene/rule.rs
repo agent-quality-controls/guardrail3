@@ -2,7 +2,8 @@ use deny_toml_parser::{BanSkipEntry, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_reason_policy::validate_reason_text;
 
-use crate::support::{skip_entry_name, skip_entry_reason, warn, error};
+use crate::support::findings::{error, warn};
+use crate::support::identities::{skip_entry_name, skip_entry_reason};
 
 const ID: &str = "RS-DENY-CONFIG-18";
 
@@ -40,7 +41,9 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
             results.push(error(
                 ID,
                 "malformed skip entry",
-                format!("`{deny_rel_path}` has `[bans.skip]` entry without a valid crate identifier."),
+                format!(
+                    "`{deny_rel_path}` has `[bans.skip]` entry without a valid crate identifier."
+                ),
                 deny_rel_path,
             ));
             continue;
@@ -97,4 +100,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

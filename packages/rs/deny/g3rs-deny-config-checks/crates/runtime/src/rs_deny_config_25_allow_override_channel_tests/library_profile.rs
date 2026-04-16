@@ -1,6 +1,6 @@
 use g3rs_deny_config_checks_assertions::rs_deny_config_25_allow_override_channel as assertions;
 
-use crate::test_support::run;
+use test_support::run;
 
 #[test]
 fn errors_when_library_only_ban_is_allow_listed() {
@@ -10,7 +10,7 @@ fn errors_when_library_only_ban_is_allow_listed() {
 deny = ["axum"]
 allow = ["axum"]
 "#,
-        Some("library"),
+        Some(guardrail3_rs_toml_parser::RustProfile::Library),
         true,
         crate::rs_deny_config_25_allow_override_channel::check,
     );

@@ -1,6 +1,6 @@
 mod advisories;
-mod baseline;
 mod bans;
+mod baseline;
 mod licenses;
 mod rs_deny_config_23_ban_baseline_complete;
 mod rs_deny_config_24_license_exceptions_inventory;
@@ -12,7 +12,9 @@ mod sources;
 mod support;
 
 #[cfg(test)]
-mod test_support;
+use g3rs_deny_config_checks_assertions as _;
+#[cfg(test)]
+use test_support as _;
 
 #[cfg(feature = "checks")]
 pub use run::check;

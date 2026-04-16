@@ -1,8 +1,8 @@
-mod helpers;
+mod documented;
 mod golden;
-mod string_entry;
+mod helpers;
 mod malformed_entry;
 mod missing_reason;
-mod documented;
-mod weak_reason;
 mod no_bans_section;
+mod string_entry;
+mod weak_reason;

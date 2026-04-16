@@ -1,7 +1,9 @@
-use g3rs_deny_config_checks_types::G3RsDenyConfigChecksInput;
+use g3rs_deny_types::G3RsDenyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{ban_name, expected_bans, managed_profile_name, rust_policy_valid};
+use crate::support::expectations::expected_bans;
+use crate::support::identities::ban_name;
+use crate::support::policy::{managed_profile_name, rust_policy_valid};
 
 const ID: &str = "RS-DENY-CONFIG-23";
 
@@ -22,7 +24,12 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         return;
     };
 
-    if input.deny.bans.as_ref().is_some_and(|bans| bans.deny.is_empty()) {
+    if input
+        .deny
+        .bans
+        .as_ref()
+        .is_some_and(|bans| bans.deny.is_empty())
+    {
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
@@ -35,7 +42,11 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
     }
 
     let expected = expected_bans(managed_profile_name(input));
-    let actual_names = bans.deny.iter().filter_map(ban_name).collect::<std::collections::BTreeSet<_>>();
+    let actual_names = bans
+        .deny
+        .iter()
+        .filter_map(ban_name)
+        .collect::<std::collections::BTreeSet<_>>();
 
     for name in expected.keys() {
         if !actual_names.contains(name) {
@@ -53,4 +64,4 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
 
 #[cfg(test)]
 #[path = "rs_deny_config_23_ban_baseline_complete_tests/mod.rs"]
-mod tests;
+mod rs_deny_config_23_ban_baseline_complete_tests;

@@ -1,9 +1,11 @@
 use std::collections::BTreeSet;
 
-use g3rs_deny_config_checks_types::G3RsDenyConfigChecksInput;
+use g3rs_deny_types::G3RsDenyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{allow_name, expected_bans, join_set, managed_profile_name, rust_policy_valid};
+use crate::support::expectations::expected_bans;
+use crate::support::identities::{allow_name, join_set};
+use crate::support::policy::{managed_profile_name, rust_policy_valid};
 
 const ID: &str = "RS-DENY-CONFIG-25";
 
@@ -19,7 +21,11 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         return;
     }
 
-    let allow_names = bans.allow.iter().filter_map(allow_name).collect::<BTreeSet<_>>();
+    let allow_names = bans
+        .allow
+        .iter()
+        .filter_map(allow_name)
+        .collect::<BTreeSet<_>>();
     if allow_names.len() != bans.allow.len() {
         results.push(G3CheckResult::new(
             ID.to_owned(),
@@ -50,7 +56,11 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
     }
 
     let expected = expected_bans(managed_profile_name(input));
-    let actual_deny = bans.deny.iter().filter_map(crate::support::ban_name).collect::<BTreeSet<_>>();
+    let actual_deny = bans
+        .deny
+        .iter()
+        .filter_map(crate::support::identities::ban_name)
+        .collect::<BTreeSet<_>>();
     for name in allow_names {
         if expected.contains_key(&name) || actual_deny.contains(&name) {
             results.push(G3CheckResult::new(
@@ -70,4 +80,4 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
 
 #[cfg(test)]
 #[path = "rs_deny_config_25_allow_override_channel_tests/mod.rs"]
-mod tests;
+mod rs_deny_config_25_allow_override_channel_tests;

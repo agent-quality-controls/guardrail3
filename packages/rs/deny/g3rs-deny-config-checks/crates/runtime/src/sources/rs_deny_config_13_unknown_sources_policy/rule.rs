@@ -1,7 +1,8 @@
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{error, expected_sources};
+use crate::support::expectations::expected_sources;
+use crate::support::findings::error;
 
 const ID: &str = "RS-DENY-CONFIG-13";
 
@@ -18,8 +19,16 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
     let (_, expected_unknown_registry, expected_unknown_git) = expected_sources();
     for (key, actual, expected) in [
-        ("unknown-registry", sources.unknown_registry.as_deref(), expected_unknown_registry.as_str()),
-        ("unknown-git", sources.unknown_git.as_deref(), expected_unknown_git.as_str()),
+        (
+            "unknown-registry",
+            sources.unknown_registry.as_deref(),
+            expected_unknown_registry.as_str(),
+        ),
+        (
+            "unknown-git",
+            sources.unknown_git.as_deref(),
+            expected_unknown_git.as_str(),
+        ),
     ] {
         match actual {
             Some(value) if value == expected => {}
@@ -35,4 +44,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

@@ -2,7 +2,8 @@ use deny_toml_parser::{AdvisoryIgnoreEntry, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_reason_policy::validate_reason_text;
 
-use crate::support::{advisory_ignore_identity, advisory_ignore_reason, error, warn};
+use crate::support::findings::{error, warn};
+use crate::support::identities::{advisory_ignore_identity, advisory_ignore_reason};
 
 const ID: &str = "RS-DENY-CONFIG-19";
 
@@ -99,4 +100,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

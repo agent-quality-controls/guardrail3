@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_21_unknown_keys as assertions;
+use g3rs_deny_config_checks_assertions::sources::rs_deny_config_21_unknown_keys::rule as assertions;
 
 use super::helpers::run_check;
 

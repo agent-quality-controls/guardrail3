@@ -3,8 +3,9 @@ use std::collections::BTreeMap;
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{
-    advisory_ignore_identity, deny_entry_name, feature_entry_name, normalized_skip_identity, warn,
+use crate::support::findings::warn;
+use crate::support::identities::{
+    advisory_ignore_identity, deny_entry_name, feature_entry_name, normalized_skip_identity,
 };
 
 const ID: &str = "RS-DENY-CONFIG-20";
@@ -85,4 +86,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

@@ -1,7 +1,9 @@
 use deny_toml_parser::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{expected_tokio_allowed_features, feature_entry_name, join_set, warn};
+use crate::support::expectations::expected_tokio_allowed_features;
+use crate::support::findings::warn;
+use crate::support::identities::{feature_entry_name, join_set};
 
 const ID: &str = "RS-DENY-CONFIG-16";
 
@@ -32,7 +34,10 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
         return;
     }
 
-    if tokio_entries.iter().any(|entry| !entry.deny.iter().any(|feature| feature == "full")) {
+    if tokio_entries
+        .iter()
+        .any(|entry| !entry.deny.iter().any(|feature| feature == "full"))
+    {
         results.push(warn(
             ID,
             "tokio full feature not banned",
@@ -42,7 +47,14 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
     }
 
     let expected_allow = expected_tokio_allowed_features();
-    if tokio_entries.iter().any(|entry| entry.allow.iter().cloned().collect::<std::collections::BTreeSet<_>>() != expected_allow) {
+    if tokio_entries.iter().any(|entry| {
+        entry
+            .allow
+            .iter()
+            .cloned()
+            .collect::<std::collections::BTreeSet<_>>()
+            != expected_allow
+    }) {
         results.push(warn(
             ID,
             "tokio allowed features changed",
@@ -57,4 +69,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

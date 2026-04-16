@@ -1,4 +1,4 @@
-use g3rs_deny_config_checks_assertions::rs_deny_config_08_allow_wildcard_paths as assertions;
+use g3rs_deny_config_checks_assertions::bans::rs_deny_config_08_allow_wildcard_paths::rule as assertions;
 
 use super::helpers::run_check;
 

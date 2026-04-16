@@ -1,12 +1,14 @@
 use g3rs_deny_config_checks_assertions::rs_deny_config_26_extra_deny_bans_inventory as assertions;
 
-use crate::test_support::{canonical_bans_toml, run};
+use test_support::run;
+
+use super::helpers;
 
 #[test]
 fn inventories_canonical_baseline_as_having_no_extra_bans() {
     let results = run(
-        &canonical_bans_toml("service"),
-        Some("service"),
+        &helpers::service_canonical_bans_toml(),
+        Some(guardrail3_rs_toml_parser::RustProfile::Service),
         true,
         crate::rs_deny_config_26_extra_deny_bans_inventory::check,
     );

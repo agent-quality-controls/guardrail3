@@ -1,20 +1,18 @@
 use deny_toml_parser::{BanDenyEntry, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{
-    advisories_unknown_keys, advisory_ignore_unknown_keys, allow_entry_unknown_keys,
-    allow_org_unknown_keys, bans_unknown_keys, build_allow_build_script_unknown_keys,
-    build_bypass_allow_unknown_keys, build_bypass_unknown_keys, build_unknown_keys,
-    feature_entry_name, feature_entry_unknown_keys, graph_target_unknown_keys, graph_unknown_keys,
-    known_top_level_keys, license_clarification_file_unknown_keys,
-    license_clarification_unknown_keys, license_exception_name, license_exception_unknown_keys,
-    licenses_unknown_keys, output_unknown_keys, private_unknown_keys, skip_tree_unknown_keys,
-    sources_unknown_keys, warn, workspace_dependencies_unknown_keys,
-};
+use crate::support::findings::warn;
+use crate::support::identities::{feature_entry_name, license_exception_name};
+use crate::support::unknown_keys;
 
 const ID: &str = "RS-DENY-CONFIG-21";
 
-fn warn_unknown_key(results: &mut Vec<G3CheckResult>, rel_path: &str, title: String, message: String) {
+fn warn_unknown_key(
+    results: &mut Vec<G3CheckResult>,
+    rel_path: &str,
+    title: String,
+    message: String,
+) {
     results.push(warn(ID, title, message, rel_path));
 }
 
@@ -51,7 +49,7 @@ fn warn_unsupported_entry_schema(
 
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     for key in deny.extra.keys() {
-        if !known_top_level_keys().contains(key.as_str()) {
+        if !unknown_keys::known_top_level_keys().contains(key.as_str()) {
             warn_unknown_key(
                 results,
                 deny_rel_path,
@@ -62,7 +60,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
     }
 
     if let Some(graph) = deny.graph.as_ref() {
-        for key in graph_unknown_keys(graph) {
+        for key in unknown_keys::graph_unknown_keys(graph) {
             warn_unknown_key(
                 results,
                 deny_rel_path,
@@ -71,19 +69,21 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
             );
         }
         for (index, entry) in graph.targets.iter().enumerate() {
-            for key in graph_target_unknown_keys(entry) {
+            for key in unknown_keys::graph_target_unknown_keys(entry) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
                     "unknown graph.targets key".to_owned(),
-                    format!("`{deny_rel_path}` uses unknown `[[graph.targets]].{key}` at index {index}."),
+                    format!(
+                        "`{deny_rel_path}` uses unknown `[[graph.targets]].{key}` at index {index}."
+                    ),
                 );
             }
         }
     }
 
     if let Some(advisories) = deny.advisories.as_ref() {
-        for key in advisories_unknown_keys(advisories) {
+        for key in unknown_keys::advisories_unknown_keys(advisories) {
             warn_unknown_key(
                 results,
                 deny_rel_path,
@@ -92,19 +92,21 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
             );
         }
         for (index, entry) in advisories.ignore.iter().enumerate() {
-            for key in advisory_ignore_unknown_keys(entry) {
+            for key in unknown_keys::advisory_ignore_unknown_keys(entry) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
                     "unknown advisories.ignore key".to_owned(),
-                    format!("`{deny_rel_path}` uses unknown `[[advisories.ignore]].{key}` at index {index}."),
+                    format!(
+                        "`{deny_rel_path}` uses unknown `[[advisories.ignore]].{key}` at index {index}."
+                    ),
                 );
             }
         }
     }
 
     if let Some(bans) = deny.bans.as_ref() {
-        for key in bans_unknown_keys(bans) {
+        for key in unknown_keys::bans_unknown_keys(bans) {
             warn_unknown_key(
                 results,
                 deny_rel_path,
@@ -120,19 +122,23 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
                         results,
                         deny_rel_path,
                         "unknown bans.skip key".to_owned(),
-                        format!("`{deny_rel_path}` uses unknown `[[bans.skip]].{key}` at index {index}."),
+                        format!(
+                            "`{deny_rel_path}` uses unknown `[[bans.skip]].{key}` at index {index}."
+                        ),
                     );
                 }
             }
         }
 
         for (index, entry) in bans.allow.iter().enumerate() {
-            for key in allow_entry_unknown_keys(entry) {
+            for key in unknown_keys::allow_entry_unknown_keys(entry) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
                     "unknown bans.allow key".to_owned(),
-                    format!("`{deny_rel_path}` uses unknown `[[bans.allow]].{key}` at index {index}."),
+                    format!(
+                        "`{deny_rel_path}` uses unknown `[[bans.allow]].{key}` at index {index}."
+                    ),
                 );
             }
         }
@@ -150,7 +156,11 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
                             "string or table with `name` or `crate`",
                         );
                     }
-                    if detail.wrappers.iter().any(|wrapper| wrapper.trim().is_empty()) {
+                    if detail
+                        .wrappers
+                        .iter()
+                        .any(|wrapper| wrapper.trim().is_empty())
+                    {
                         warn_unsupported_schema(
                             results,
                             deny_rel_path,
@@ -172,40 +182,46 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
                     "table with `name` or `crate`",
                 );
             }
-            for key in feature_entry_unknown_keys(entry) {
+            for key in unknown_keys::feature_entry_unknown_keys(entry) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
                     "unknown bans.features key".to_owned(),
-                    format!("`{deny_rel_path}` uses unknown `[[bans.features]].{key}` at index {index}."),
+                    format!(
+                        "`{deny_rel_path}` uses unknown `[[bans.features]].{key}` at index {index}."
+                    ),
                 );
             }
         }
 
         for (index, entry) in bans.skip_tree.iter().enumerate() {
-            for key in skip_tree_unknown_keys(entry) {
+            for key in unknown_keys::skip_tree_unknown_keys(entry) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
                     "unknown bans.skip-tree key".to_owned(),
-                    format!("`{deny_rel_path}` uses unknown `[[bans.skip-tree]].{key}` at index {index}."),
+                    format!(
+                        "`{deny_rel_path}` uses unknown `[[bans.skip-tree]].{key}` at index {index}."
+                    ),
                 );
             }
         }
 
         if let Some(workspace_dependencies) = bans.workspace_dependencies.as_ref() {
-            for key in workspace_dependencies_unknown_keys(workspace_dependencies) {
+            for key in unknown_keys::workspace_dependencies_unknown_keys(workspace_dependencies) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
                     "unknown bans.workspace-dependencies key".to_owned(),
-                    format!("`{deny_rel_path}` uses unknown `[bans.workspace-dependencies].{key}`."),
+                    format!(
+                        "`{deny_rel_path}` uses unknown `[bans.workspace-dependencies].{key}`."
+                    ),
                 );
             }
         }
 
         if let Some(build) = bans.build.as_ref() {
-            for key in build_unknown_keys(build) {
+            for key in unknown_keys::build_unknown_keys(build) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
@@ -214,7 +230,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
                 );
             }
             for (index, entry) in build.allow_build_scripts.iter().enumerate() {
-                for key in build_allow_build_script_unknown_keys(entry) {
+                for key in unknown_keys::build_allow_build_script_unknown_keys(entry) {
                     warn_unknown_key(
                         results,
                         deny_rel_path,
@@ -226,16 +242,18 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
                 }
             }
             for (index, entry) in build.bypass.iter().enumerate() {
-                for key in build_bypass_unknown_keys(entry) {
+                for key in unknown_keys::build_bypass_unknown_keys(entry) {
                     warn_unknown_key(
                         results,
                         deny_rel_path,
                         "unknown bans.build.bypass key".to_owned(),
-                        format!("`{deny_rel_path}` uses unknown `[[bans.build.bypass]].{key}` at index {index}."),
+                        format!(
+                            "`{deny_rel_path}` uses unknown `[[bans.build.bypass]].{key}` at index {index}."
+                        ),
                     );
                 }
                 for (allow_index, allow_entry) in entry.allow.iter().enumerate() {
-                    for key in build_bypass_allow_unknown_keys(allow_entry) {
+                    for key in unknown_keys::build_bypass_allow_unknown_keys(allow_entry) {
                         warn_unknown_key(
                             results,
                             deny_rel_path,
@@ -251,7 +269,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
     }
 
     if let Some(licenses) = deny.licenses.as_ref() {
-        for key in licenses_unknown_keys(licenses) {
+        for key in unknown_keys::licenses_unknown_keys(licenses) {
             warn_unknown_key(
                 results,
                 deny_rel_path,
@@ -261,7 +279,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
         }
 
         if let Some(private) = licenses.private.as_ref() {
-            for key in private_unknown_keys(private) {
+            for key in unknown_keys::private_unknown_keys(private) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
@@ -281,27 +299,31 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
                     "table with `name` or `crate`",
                 );
             }
-            for key in license_exception_unknown_keys(entry) {
+            for key in unknown_keys::license_exception_unknown_keys(entry) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
                     "unknown licenses.exceptions key".to_owned(),
-                    format!("`{deny_rel_path}` uses unknown `[[licenses.exceptions]].{key}` at index {index}."),
+                    format!(
+                        "`{deny_rel_path}` uses unknown `[[licenses.exceptions]].{key}` at index {index}."
+                    ),
                 );
             }
         }
 
         for (index, entry) in licenses.clarify.iter().enumerate() {
-            for key in license_clarification_unknown_keys(entry) {
+            for key in unknown_keys::license_clarification_unknown_keys(entry) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
                     "unknown licenses.clarify key".to_owned(),
-                    format!("`{deny_rel_path}` uses unknown `[[licenses.clarify]].{key}` at index {index}."),
+                    format!(
+                        "`{deny_rel_path}` uses unknown `[[licenses.clarify]].{key}` at index {index}."
+                    ),
                 );
             }
             for (file_index, file) in entry.license_files.iter().enumerate() {
-                for key in license_clarification_file_unknown_keys(file) {
+                for key in unknown_keys::license_clarification_file_unknown_keys(file) {
                     warn_unknown_key(
                         results,
                         deny_rel_path,
@@ -316,7 +338,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
     }
 
     if let Some(sources) = deny.sources.as_ref() {
-        for key in sources_unknown_keys(sources) {
+        for key in unknown_keys::sources_unknown_keys(sources) {
             warn_unknown_key(
                 results,
                 deny_rel_path,
@@ -326,7 +348,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
         }
 
         if let Some(allow_org) = sources.allow_org.as_ref() {
-            for key in allow_org_unknown_keys(allow_org) {
+            for key in unknown_keys::allow_org_unknown_keys(allow_org) {
                 warn_unknown_key(
                     results,
                     deny_rel_path,
@@ -338,7 +360,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
     }
 
     if let Some(output) = deny.output.as_ref() {
-        for key in output_unknown_keys(output) {
+        for key in unknown_keys::output_unknown_keys(output) {
             warn_unknown_key(
                 results,
                 deny_rel_path,
@@ -351,4 +373,4 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"]
-mod tests;
+mod rule_tests;

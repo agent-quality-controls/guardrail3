@@ -1,6 +1,6 @@
 use g3rs_deny_config_checks_assertions::rs_deny_config_25_allow_override_channel as assertions;
 
-use crate::test_support::run;
+use test_support::run;
 
 #[test]
 fn reports_non_overlapping_allow_entries_without_override_findings() {
@@ -9,7 +9,7 @@ fn reports_non_overlapping_allow_entries_without_override_findings() {
 [bans]
 allow = ["totally-custom-crate"]
 "#,
-        Some("service"),
+        Some(guardrail3_rs_toml_parser::RustProfile::Service),
         true,
         crate::rs_deny_config_25_allow_override_channel::check,
     );

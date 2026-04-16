@@ -1,3 +1,4 @@
+mod helpers;
 mod golden;
 mod library_profile;
 mod malformed_entries;
