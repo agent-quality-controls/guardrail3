@@ -72,4 +72,5 @@ pub(crate) fn check(module_dir: &G3RsArchModuleDir, results: &mut Vec<G3CheckRes
 
 #[cfg(test)]
 #[path = "rs_arch_03_mod_rs_required_tests/mod.rs"]
-mod tests;
+// reason: keep rule tests in the owned x_tests sidecar directory.
+mod rs_arch_03_mod_rs_required_tests;

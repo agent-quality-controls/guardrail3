@@ -13,13 +13,14 @@ name = "g3rs-arch-file-tree-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-arch-file-tree-checks-runtime",
- "g3rs-arch-file-tree-checks-types",
+ "g3rs-arch-types",
 ]
 
 [[package]]
 name = "g3rs-arch-file-tree-checks-assertions"
 version = "0.1.0"
 dependencies = [
+ "g3rs-arch-file-tree-checks-runtime",
  "guardrail3-check-types",
 ]
 
@@ -28,17 +29,9 @@ name = "g3rs-arch-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-arch-file-tree-checks-assertions",
- "g3rs-arch-file-tree-checks-types",
  "g3rs-arch-types",
  "guardrail3-check-types",
  "guardrail3-rs-toml-parser",
-]
-
-[[package]]
-name = "g3rs-arch-file-tree-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-arch-types",
 ]
 
 [[package]]

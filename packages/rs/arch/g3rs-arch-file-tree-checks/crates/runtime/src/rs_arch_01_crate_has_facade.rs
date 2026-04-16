@@ -42,4 +42,5 @@ pub(crate) fn check(node: &G3RsArchFileTreeCrate, results: &mut Vec<G3CheckResul
 
 #[cfg(test)]
 #[path = "rs_arch_01_crate_has_facade_tests/mod.rs"]
-mod tests;
+// reason: keep rule tests in the owned x_tests sidecar directory.
+mod rs_arch_01_crate_has_facade_tests;

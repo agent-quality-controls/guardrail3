@@ -5,8 +5,6 @@ mod rs_arch_01_crate_has_facade;
 mod rs_arch_03_mod_rs_required;
 mod rs_arch_07a_structural_split;
 mod run;
-#[cfg(test)]
-mod test_support;
 
 #[cfg(feature = "checks")]
 pub use run::check;
