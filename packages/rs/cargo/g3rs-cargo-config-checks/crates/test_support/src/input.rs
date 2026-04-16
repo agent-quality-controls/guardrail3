@@ -7,7 +7,8 @@ use guardrail3_rs_toml_parser::RustProfile;
 
 pub fn root(cargo_toml: &str, rust_policy: G3RsCargoRustPolicyState) -> G3RsCargoPolicyRoot {
     let cargo = parse_cargo_toml(cargo_toml).expect("cargo fixture should parse");
-    let raw_cargo = toml::from_str::<toml::Value>(cargo_toml).expect("raw cargo fixture should parse");
+    let raw_cargo =
+        toml::from_str::<toml::Value>(cargo_toml).expect("raw cargo fixture should parse");
     let kind = if raw_cargo.get("workspace").is_some() {
         G3RsCargoPolicyRootKind::WorkspaceRoot
     } else if raw_cargo.get("package").is_some() {
@@ -31,7 +32,8 @@ pub fn root(cargo_toml: &str, rust_policy: G3RsCargoRustPolicyState) -> G3RsCarg
 }
 
 pub fn member(member_rel: &str, cargo_toml: &str) -> G3RsCargoWorkspaceMember {
-    let raw_cargo = toml::from_str::<toml::Value>(cargo_toml).expect("member cargo fixture should parse");
+    let raw_cargo =
+        toml::from_str::<toml::Value>(cargo_toml).expect("member cargo fixture should parse");
     G3RsCargoWorkspaceMember {
         workspace_root_rel: String::new(),
         member_rel: member_rel.to_owned(),
@@ -90,7 +92,11 @@ pub fn parse_error_rust_policy(reason: &str) -> G3RsCargoRustPolicyState {
     }
 }
 
-fn root_field(raw_cargo: &toml::Value, kind: G3RsCargoPolicyRootKind, field: &str) -> Option<String> {
+fn root_field(
+    raw_cargo: &toml::Value,
+    kind: G3RsCargoPolicyRootKind,
+    field: &str,
+) -> Option<String> {
     if kind == G3RsCargoPolicyRootKind::WorkspaceRoot {
         raw_cargo
             .get("workspace")

@@ -1,7 +1,7 @@
 use cargo_toml_parser::CargoToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{cargo_role, error, info, policy_root_edition, role_label, CargoRole};
+use crate::support::{CargoRole, cargo_role, error, info, policy_root_edition, role_label};
 
 const ID: &str = "RS-CARGO-CONFIG-03";
 
@@ -74,3 +74,7 @@ fn edition_rank(edition: &str) -> Option<usize> {
         _ => None,
     }
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

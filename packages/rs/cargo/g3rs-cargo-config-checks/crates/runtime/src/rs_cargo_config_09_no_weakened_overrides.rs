@@ -117,3 +117,7 @@ fn check_family(
     }
     violations
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_config_09_no_weakened_overrides_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_cargo_config_09_no_weakened_overrides_tests;

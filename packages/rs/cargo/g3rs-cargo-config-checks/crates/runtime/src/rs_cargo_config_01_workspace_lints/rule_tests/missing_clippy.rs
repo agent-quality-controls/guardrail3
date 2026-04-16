@@ -1,5 +1,5 @@
-use g3rs_cargo_config_checks_assertions::rs_cargo_config_01_workspace_lints::rule as assertions;
 use super::helpers::run_check;
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_01_workspace_lints::rule as assertions;
 
 #[test]
 fn errors_when_clippy_lints_table_is_missing() {

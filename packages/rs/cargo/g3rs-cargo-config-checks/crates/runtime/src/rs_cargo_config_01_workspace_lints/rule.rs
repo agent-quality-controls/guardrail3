@@ -2,9 +2,9 @@ use cargo_toml_parser::CargoToml;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{
-    cargo_role, error, info, lint_level, policy_lints, policy_lints_table_label, CargoRole,
-    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_CLIPPY_REQUIRED_ALLOW,
-    EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS,
+    CargoRole, EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_CLIPPY_REQUIRED_ALLOW,
+    EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS, cargo_role, error, info, lint_level,
+    policy_lints, policy_lints_table_label,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-01";
@@ -128,8 +128,14 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
         results.push(info(
             ID,
             "workspace lint tables present",
-            format!("`{cargo_rel_path}` defines all required cargo policy lint tables and entries."),
+            format!(
+                "`{cargo_rel_path}` defines all required cargo policy lint tables and entries."
+            ),
             cargo_rel_path,
         ));
     }
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

@@ -1,5 +1,5 @@
-use g3rs_cargo_config_checks_assertions::rs_cargo_config_06_disallowed_macros_deny::rule as assertions;
 use super::helpers::run_check;
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_06_disallowed_macros_deny::rule as assertions;
 
 const STANDALONE_PACKAGE_WITH_DENY: &str = r#"
 [package]

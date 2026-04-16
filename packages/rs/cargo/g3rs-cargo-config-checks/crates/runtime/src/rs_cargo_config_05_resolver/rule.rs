@@ -1,7 +1,7 @@
 use cargo_toml_parser::CargoToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{cargo_role, error, info, workspace_resolver, CargoRole};
+use crate::support::{CargoRole, cargo_role, error, info, workspace_resolver};
 
 const ID: &str = "RS-CARGO-CONFIG-05";
 
@@ -15,7 +15,10 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
             results.push(info(
                 ID,
                 "workspace resolver set",
-                format!("Workspace resolver = `{}`", workspace_resolver(cargo).unwrap_or_default()),
+                format!(
+                    "Workspace resolver = `{}`",
+                    workspace_resolver(cargo).unwrap_or_default()
+                ),
                 cargo_rel_path,
             ));
         }
@@ -39,3 +42,7 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
         }
     }
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

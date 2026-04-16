@@ -1,6 +1,6 @@
 use g3rs_cargo_types::G3RsCargoPolicyRoot;
-use guardrail3_rs_toml_parser::RustProfile;
 use guardrail3_check_types::G3CheckResult;
+use guardrail3_rs_toml_parser::RustProfile;
 
 use crate::support::{rust_policy_valid, rust_profile};
 
@@ -54,3 +54,7 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
         )),
     }
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_config_13_rust_version_policy_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_cargo_config_13_rust_version_policy_tests;

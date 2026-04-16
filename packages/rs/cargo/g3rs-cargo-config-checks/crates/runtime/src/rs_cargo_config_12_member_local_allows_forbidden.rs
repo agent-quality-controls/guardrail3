@@ -23,10 +23,12 @@ pub(crate) fn check(
 
     let workspace_policy_complete =
         raw_policy_lints(root, "rust").is_some() && raw_policy_lints(root, "clippy").is_some();
-    let member_override_shapes_valid =
-        [raw_member_lints(member, "rust"), raw_member_lints(member, "clippy")]
-            .into_iter()
-            .all(lints_are_well_formed);
+    let member_override_shapes_valid = [
+        raw_member_lints(member, "rust"),
+        raw_member_lints(member, "clippy"),
+    ]
+    .into_iter()
+    .all(lints_are_well_formed);
 
     let mut documented_count = 0usize;
     let mut missing_reason_count = 0usize;
@@ -119,3 +121,7 @@ fn lints_are_well_formed(lints: Option<&toml::Value>) -> bool {
     };
     table.values().all(has_valid_lint_level)
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_config_12_member_local_allows_forbidden_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_cargo_config_12_member_local_allows_forbidden_tests;
