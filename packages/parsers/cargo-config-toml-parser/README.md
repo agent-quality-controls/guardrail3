@@ -1,14 +1,21 @@
 # cargo-config-toml-parser
 
-Facade crate for typed `.cargo/config.toml` / `.cargo/config` parsing.
+Typed parser for `.cargo/config.toml` and legacy `.cargo/config`.
 
-The public API is exposed from this root crate. Internal parser and model crates
-live under `crates/`.
+This package publishes the facade crate `cargo-config-toml-parser`. The facade
+re-exports the public parser API from the internal runtime crate and the typed
+schema from the internal types crate.
+
+## What it parses
+
+- top-level Cargo config keys such as `paths`, `include`, and `alias`
+- known nested sections such as `build`, `env`, `http`, `net`, `registry`, and `target`
+- unknown keys through `extra` maps so the model stays forward-compatible
 
 ## Usage
 
 ```rust
-use cargo_config_toml_parser::{EnvValue, parse};
+use cargo_config_toml_parser::{parse, types::EnvValue};
 
 let cfg = parse(
     r#"
@@ -22,6 +29,12 @@ assert!(matches!(
     Some(EnvValue::Simple(value)) if value == "."
 ));
 ```
+
+## Internal layout
+
+- `crates/runtime` owns parsing and file loading
+- `crates/types` owns the typed Cargo config schema
+- `crates/assertions` owns shared proof helpers for runtime sidecar tests
 
 ## License
 
