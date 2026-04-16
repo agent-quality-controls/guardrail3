@@ -1,6 +1,4 @@
-use g3rs_fmt_types::{
-    G3RsFmtConfigFileKind, G3RsFmtFileTreeChecksInput, G3RsFmtNestedConfigFile,
-};
+use g3rs_fmt_types::{G3RsFmtConfigFileKind, G3RsFmtFileTreeChecksInput, G3RsFmtNestedConfigFile};
 
 pub fn input(
     root_rustfmt_toml_rel_path: Option<&str>,

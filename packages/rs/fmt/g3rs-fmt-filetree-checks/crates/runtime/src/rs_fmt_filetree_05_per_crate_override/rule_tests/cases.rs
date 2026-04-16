@@ -4,15 +4,18 @@ use test_support::{G3RsFmtConfigFileKind, input};
 #[test]
 fn errors_for_nested_rustfmt_toml() {
     let mut results = Vec::new();
-    super::super::rule::check(&input(
-        Some("rustfmt.toml"),
-        None,
-        vec![(
-            "crates/api/rustfmt.toml",
-            G3RsFmtConfigFileKind::RustfmtToml,
-        )],
-        Vec::new(),
-    ), &mut results);
+    super::super::check(
+        &input(
+            Some("rustfmt.toml"),
+            None,
+            vec![(
+                "crates/api/rustfmt.toml",
+                G3RsFmtConfigFileKind::RustfmtToml,
+            )],
+            Vec::new(),
+        ),
+        &mut results,
+    );
 
     assertions::assert_findings(
         &results,
@@ -28,15 +31,18 @@ fn errors_for_nested_rustfmt_toml() {
 #[test]
 fn errors_for_nested_dot_rustfmt_toml() {
     let mut results = Vec::new();
-    super::super::rule::check(&input(
-        Some("rustfmt.toml"),
-        None,
-        vec![(
-            "crates/api/.rustfmt.toml",
-            G3RsFmtConfigFileKind::DotRustfmtToml,
-        )],
-        Vec::new(),
-    ), &mut results);
+    super::super::check(
+        &input(
+            Some("rustfmt.toml"),
+            None,
+            vec![(
+                "crates/api/.rustfmt.toml",
+                G3RsFmtConfigFileKind::DotRustfmtToml,
+            )],
+            Vec::new(),
+        ),
+        &mut results,
+    );
 
     assertions::assert_findings(
         &results,
