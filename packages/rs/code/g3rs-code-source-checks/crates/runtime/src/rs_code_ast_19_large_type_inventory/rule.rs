@@ -14,6 +14,13 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
                 name,
                 field_count,
             } => {
+                if crate::support::has_matching_waiver(
+                    input,
+                    ID,
+                    &format!("struct:{name}"),
+                ) {
+                    continue;
+                }
                 results.push(G3CheckResult::new(
                     ID.to_owned(),
                     G3Severity::Warn,
@@ -28,6 +35,13 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
                 name,
                 variant_count,
             } => {
+                if crate::support::has_matching_waiver(
+                    input,
+                    ID,
+                    &format!("enum:{name}"),
+                ) {
+                    continue;
+                }
                 results.push(G3CheckResult::new(
                     ID.to_owned(),
                     G3Severity::Warn,
@@ -41,12 +55,21 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
     }
 }
 
-
 #[cfg(test)]
 pub(super) fn check_source(
     rel_path: &str,
     content: &str,
     is_test: bool,
+) -> Vec<guardrail3_check_types::G3CheckResult> {
+    check_source_with_waivers(rel_path, content, is_test, &[])
+}
+
+#[cfg(test)]
+pub(super) fn check_source_with_waivers(
+    rel_path: &str,
+    content: &str,
+    is_test: bool,
+    waivers: &[(&str, &str, &str, &str)],
 ) -> Vec<guardrail3_check_types::G3CheckResult> {
     let source = crate::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
@@ -61,6 +84,18 @@ pub(super) fn check_source(
         source,
     };
     let input = crate::support::CodeSourceRuleInput::from(&parsed);
+    let input = crate::support::CodeSourceRuleInput {
+        waivers: &waivers
+            .iter()
+            .map(|(rule, file, selector, reason)| g3rs_code_types::G3RsCodeWaiver {
+                rule: (*rule).to_owned(),
+                file: (*file).to_owned(),
+                selector: (*selector).to_owned(),
+                reason: (*reason).to_owned(),
+            })
+            .collect::<Vec<_>>(),
+        ..input
+    };
     let mut results = Vec::new();
     check(&input, &mut results);
     results

@@ -260,6 +260,95 @@ edition = \"2024\"\n",
 }
 
 #[test]
+fn threads_guardrail3_rs_waivers_into_source_inputs() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[package]\n\
+name = \"demo\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n",
+    );
+    write(
+        root.join("guardrail3-rs.toml"),
+        "\
+profile = \"library\"\n\
+\n\
+[[waivers]]\n\
+rule = \"RS-CODE-SOURCE-19\"\n\
+file = \"src/lib.rs\"\n\
+selector = \"struct:CargoConfigToml\"\n\
+reason = \"Schema mirror intentionally matches Cargo's top-level config surface.\"\n",
+    );
+    write(root.join("src/lib.rs"), "pub struct CargoConfigToml;\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs =
+        crate::run::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
+    let input = assertions::require_source_file(&inputs, "src/lib.rs");
+
+    assertions::assert_source_waiver(
+        input,
+        "RS-CODE-SOURCE-19",
+        "src/lib.rs",
+        "struct:CargoConfigToml",
+        "Schema mirror intentionally matches Cargo's top-level config surface.",
+    );
+}
+
+#[test]
+fn threads_package_root_waivers_into_member_crate_sources() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[workspace]\n\
+members = [\"crates/types\"]\n\
+resolver = \"2\"\n",
+    );
+    write(
+        root.join("guardrail3-rs.toml"),
+        "\
+profile = \"library\"\n\
+\n\
+[[waivers]]\n\
+rule = \"RS-CODE-SOURCE-19\"\n\
+file = \"crates/types/src/lib.rs\"\n\
+selector = \"struct:CargoConfigToml\"\n\
+reason = \"Schema mirror intentionally matches Cargo's top-level config surface.\"\n",
+    );
+    write(
+        root.join("crates/types/Cargo.toml"),
+        "\
+[package]\n\
+name = \"demo-types\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n",
+    );
+    write(root.join("crates/types/src/lib.rs"), "pub struct CargoConfigToml;\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs =
+        crate::run::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
+    let input = assertions::require_source_file(&inputs, "crates/types/src/lib.rs");
+
+    assertions::assert_source_waiver(
+        input,
+        "RS-CODE-SOURCE-19",
+        "crates/types/src/lib.rs",
+        "struct:CargoConfigToml",
+        "Schema mirror intentionally matches Cargo's top-level config surface.",
+    );
+}
+
+#[test]
 fn classifies_nested_workspace_members_from_their_own_manifest() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

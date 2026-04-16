@@ -47,3 +47,49 @@ fn inventories_large_enum() {
         }],
     );
 }
+
+#[test]
+fn skips_large_struct_with_exact_waiver() {
+    let fields = (0..16)
+        .map(|i| format!("f{i}: u8"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let content = format!("pub struct CargoConfigToml {{ {fields} }}\n");
+
+    let results = super::super::check_source_with_waivers(
+        "src/lib.rs",
+        &content,
+        false,
+        &[("RS-CODE-SOURCE-19", "src/lib.rs", "struct:CargoConfigToml", "schema mirror")],
+    );
+
+    assert!(results.is_empty(), "{results:#?}");
+}
+
+#[test]
+fn non_matching_waiver_does_not_suppress_large_struct() {
+    let fields = (0..16)
+        .map(|i| format!("f{i}: u8"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let content = format!("pub struct CargoConfigToml {{ {fields} }}\n");
+
+    let results = super::super::check_source_with_waivers(
+        "src/lib.rs",
+        &content,
+        false,
+        &[("RS-CODE-SOURCE-19", "src/lib.rs", "struct:Different", "wrong selector")],
+    );
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Warn),
+            title: Some("large type inventory"),
+            file: Some("src/lib.rs"),
+            inventory: Some(false),
+            message: Some("struct `CargoConfigToml` has 16 fields (inventory threshold 15)."),
+            line: Some(1),
+        }],
+    );
+}

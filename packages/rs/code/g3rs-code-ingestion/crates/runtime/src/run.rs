@@ -45,6 +45,7 @@ pub fn ingest_for_source_checks(
                 selected.profile_name,
                 selected.is_library_root,
                 selected.is_shared_crate,
+                selected.waivers,
             ))
         })
         .collect()

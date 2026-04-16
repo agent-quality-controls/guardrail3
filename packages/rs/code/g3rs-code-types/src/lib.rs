@@ -14,6 +14,8 @@ pub use types::G3RsCodeFileTreeChecksInput;
 #[cfg(feature = "api")]
 pub use types::G3RsCodeSourceChecksInput;
 #[cfg(feature = "api")]
+pub use types::G3RsCodeWaiver;
+#[cfg(feature = "api")]
 pub use types::G3RsCodeStructuralCapRoot;
 #[cfg(feature = "api")]
 pub use types::G3RsSourceFile;
