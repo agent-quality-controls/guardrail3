@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
 use g3rs_apparch_types::{
-    G3RsApparchConfigChecksInput, G3RsApparchCrate, G3RsApparchDependencyEdge,
-    G3RsApparchLayer, G3RsApparchRustPolicyState,
+    G3RsApparchConfigChecksInput, G3RsApparchCrate, G3RsApparchDependencyEdge, G3RsApparchLayer,
+    G3RsApparchRustPolicyState,
 };
 use guardrail3_check_types::G3CheckResult;
 
@@ -19,8 +19,24 @@ pub(super) fn input(edge: Option<G3RsApparchDependencyEdge>) -> G3RsApparchConfi
     G3RsApparchConfigChecksInput {
         crates: vec![
             crate_input(G3RsApparchLayer::Logic, "logic/service/Cargo.toml"),
+            crate_input(
+                G3RsApparchLayer::Logic,
+                "logic/validate-command/crates/runtime/Cargo.toml",
+            ),
+            crate_input(
+                G3RsApparchLayer::Logic,
+                "logic/validate-command/crates/assertions/Cargo.toml",
+            ),
             crate_input(G3RsApparchLayer::Types, "types/core/Cargo.toml"),
             crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml"),
+            crate_input(
+                G3RsApparchLayer::IoOutbound,
+                "io/outbound/report/crates/runtime/Cargo.toml",
+            ),
+            crate_input(
+                G3RsApparchLayer::IoOutbound,
+                "io/outbound/report/crates/assertions/Cargo.toml",
+            ),
         ],
         dependency_edges: edge.into_iter().collect(),
         external_dependencies: Vec::new(),
@@ -29,7 +45,10 @@ pub(super) fn input(edge: Option<G3RsApparchDependencyEdge>) -> G3RsApparchConfi
     }
 }
 
-pub(super) fn run_rule(input: &G3RsApparchConfigChecksInput) -> Vec<G3CheckResult> {
+pub(super) fn run_rule(
+    input: &G3RsApparchConfigChecksInput,
+    source_cargo_rel_path: &str,
+) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     let crates_by_path = input
         .crates
@@ -38,8 +57,9 @@ pub(super) fn run_rule(input: &G3RsApparchConfigChecksInput) -> Vec<G3CheckResul
         .collect::<BTreeMap<_, _>>();
     let krate = input
         .crates
-        .first()
-        .expect("dev-dependency test input should contain a source crate");
+        .iter()
+        .find(|krate| krate.cargo_rel_path == source_cargo_rel_path)
+        .expect("dev-dependency test input should contain the requested source crate");
 
     crate::rs_apparch_config_07_dev_dependency_direction::check(
         krate,

@@ -26,7 +26,7 @@ pub(crate) fn check(
                 Some(G3RsApparchLayer::Logic)
                     | Some(G3RsApparchLayer::IoInbound)
                     | Some(G3RsApparchLayer::IoOutbound)
-            )
+            ) && !crate::run::is_package_internal_assertions_to_runtime_edge(krate, target)
         })
         .collect::<Vec<_>>();
 
