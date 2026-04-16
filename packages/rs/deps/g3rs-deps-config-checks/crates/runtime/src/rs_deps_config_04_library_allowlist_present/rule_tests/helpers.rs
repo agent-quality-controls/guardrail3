@@ -1,9 +1,9 @@
-use g3rs_deps_config_checks_types::G3RsDepsConfigChecksInput;
+use g3rs_deps_types::G3RsDepsConfigChecksInput;
 use g3rs_deps_types::G3RsDepsConfigInputScope;
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_rs_toml_parser::RustProfile;
 
-use crate::rs_deps_config_04_library_allowlist_present::rule::check;
+use super::super::rule::check;
 
 pub(super) fn run_check(
     profile: Option<RustProfile>,

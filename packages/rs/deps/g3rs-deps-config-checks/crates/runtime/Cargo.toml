@@ -1,19 +1,25 @@
 [package]
 name = "g3rs-deps-config-checks-runtime"
-version.workspace = true
-edition.workspace = true
-license.workspace = true
-rust-version.workspace = true
-repository.workspace = true
-publish = true
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+description = "Runtime implementation for g3 deps config checks"
+readme = "README.md"
+keywords = ["guardrail3", "deps", "checks", "rust", "policy"]
+categories = ["development-tools"]
+publish = false
 
 [features]
 default = ["all"]
 all = ["checks"]
 checks = []
 
+[package.metadata.guardrail3]
+shared = true
+
 [dependencies]
-g3rs-deps-config-checks-types = { path = "../types", version = "0.1.0" }
 g3rs-deps-types = { path = "../../../g3rs-deps-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }

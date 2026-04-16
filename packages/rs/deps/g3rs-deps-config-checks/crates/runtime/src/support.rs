@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use g3rs_deps_config_checks_types::G3RsDepsConfigChecksInput;
+use g3rs_deps_types::G3RsDepsConfigChecksInput;
 use g3rs_deps_types::{
     G3RsDepsConfigInputScope, G3RsDepsDependencySection, G3RsDepsResolvedDependency,
 };
