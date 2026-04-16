@@ -63,7 +63,11 @@ pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[F
 }
 
 pub(crate) fn assert_no_findings(results: &[G3CheckResult], id: &str) {
-    assert!(findings(results, id).is_empty(), "{:#?}", findings(results, id));
+    assert!(
+        findings(results, id).is_empty(),
+        "{:#?}",
+        findings(results, id)
+    );
 }
 
 pub(crate) fn assert_has_finding(
@@ -106,7 +110,9 @@ pub(crate) fn assert_message_contains(
 ) {
     assert!(
         results.iter().any(|result| {
-            result.id() == id && result.title() == expected_title && result.message().contains(needle)
+            result.id() == id
+                && result.title() == expected_title
+                && result.message().contains(needle)
         }),
         "{:#?}",
         findings(results, id)
@@ -219,10 +225,7 @@ macro_rules! define_result_assertions {
             crate::common::assert_message_contains(results, $id, title, needle);
         }
 
-        pub fn assert_title_absent(
-            results: &[guardrail3_check_types::G3CheckResult],
-            title: &str,
-        ) {
+        pub fn assert_title_absent(results: &[guardrail3_check_types::G3CheckResult], title: &str) {
             crate::common::assert_title_absent(results, $id, title);
         }
 

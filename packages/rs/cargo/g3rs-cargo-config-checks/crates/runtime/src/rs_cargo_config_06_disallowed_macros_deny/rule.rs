@@ -1,7 +1,9 @@
 use cargo_toml_parser::CargoToml;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{cargo_role, error, info, lint_level, policy_lints, policy_lints_table_label, CargoRole};
+use crate::support::{
+    CargoRole, cargo_role, error, info, lint_level, policy_lints, policy_lints_table_label,
+};
 
 const ID: &str = "RS-CARGO-CONFIG-06";
 
@@ -50,3 +52,7 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
         }
     }
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

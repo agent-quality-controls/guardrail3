@@ -1,8 +1,6 @@
 use cargo_toml_parser::parse as parse_cargo_toml;
 use g3rs_cargo_config_checks_assertions::rs_cargo_config_07_approved_allow_inventory as assertions;
-use g3rs_cargo_types::{
-    G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState,
-};
+use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState};
 use test_support::{parse_error_rust_policy, parsed_rust_policy, root, waiver};
 
 #[test]

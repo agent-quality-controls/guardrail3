@@ -3,9 +3,8 @@ use guardrail3_check_types::G3CheckResult;
 use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
-    EXPECTED_CLIPPY_REQUIRED_ALLOW, allow_selector, explicit_allow_entries,
-    raw_policy_lints, rust_policy_valid, warn,
-    rust_policy_waivers, waiver_reason,
+    EXPECTED_CLIPPY_REQUIRED_ALLOW, allow_selector, explicit_allow_entries, raw_policy_lints,
+    rust_policy_valid, rust_policy_waivers, waiver_reason, warn,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-07";
@@ -94,3 +93,7 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
         ));
     }
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_config_07_approved_allow_inventory_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_cargo_config_07_approved_allow_inventory_tests;

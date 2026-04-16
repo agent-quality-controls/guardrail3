@@ -18,16 +18,12 @@ pub(crate) fn check(member: &G3RsCargoWorkspaceMember, results: &mut Vec<G3Check
     }
     if member.lint_workspace_true {
         let package_name = member.package_name.as_deref().unwrap_or("unknown");
-        results.push(
-            crate::support::info(
-                ID,
-                "workspace lints inherited",
-                format!(
-                    "{package_name}: `[lints] workspace = true` inherits workspace lint policy"
-                ),
-                &member.cargo_rel_path,
-            ),
-        );
+        results.push(crate::support::info(
+            ID,
+            "workspace lints inherited",
+            format!("{package_name}: `[lints] workspace = true` inherits workspace lint policy"),
+            &member.cargo_rel_path,
+        ));
     } else {
         results.push(crate::support::error(
             ID,
@@ -40,3 +36,7 @@ pub(crate) fn check(member: &G3RsCargoWorkspaceMember, results: &mut Vec<G3Check
         ));
     }
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_config_08_workspace_lints_inherited_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_cargo_config_08_workspace_lints_inherited_tests;

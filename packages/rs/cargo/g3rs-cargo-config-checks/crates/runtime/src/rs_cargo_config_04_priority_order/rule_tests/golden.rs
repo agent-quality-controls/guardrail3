@@ -1,5 +1,5 @@
-use g3rs_cargo_config_checks_assertions::rs_cargo_config_04_priority_order::rule as assertions;
 use super::helpers::run_check;
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_04_priority_order::rule as assertions;
 
 #[test]
 fn inventories_when_specific_deny_lints_do_not_use_negative_priority() {

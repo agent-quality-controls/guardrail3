@@ -3,8 +3,8 @@ use g3rs_cargo_types::{
     G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoWaiver,
     G3RsCargoWorkspaceMember,
 };
-use guardrail3_rs_toml_parser::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
+use guardrail3_rs_toml_parser::RustProfile;
 
 pub(crate) struct LintExpectation {
     pub name: &'static str,
@@ -163,7 +163,12 @@ pub(crate) fn policy_lints<'a>(cargo: &'a CargoToml, family: &str) -> Option<&'a
             .as_ref()
             .and_then(|workspace| workspace.lints.as_ref())
             .and_then(|lints| lints.tools.get(family))
-            .or_else(|| cargo.lints.as_ref().and_then(|lints| lints.tools.get(family))),
+            .or_else(|| {
+                cargo
+                    .lints
+                    .as_ref()
+                    .and_then(|lints| lints.tools.get(family))
+            }),
         CargoRole::PackageRoot => cargo.lints.as_ref()?.tools.get(family),
         CargoRole::Other => None,
     }
@@ -285,10 +290,15 @@ pub(crate) fn raw_policy_lints<'a>(
             .get("workspace")
             .and_then(|value| value.get("lints"))
             .and_then(|value| value.get(family))
-            .or_else(|| root.raw_cargo.get("lints").and_then(|value| value.get(family))),
-        G3RsCargoPolicyRootKind::StandalonePackageRoot => {
-            root.raw_cargo.get("lints").and_then(|value| value.get(family))
-        }
+            .or_else(|| {
+                root.raw_cargo
+                    .get("lints")
+                    .and_then(|value| value.get(family))
+            }),
+        G3RsCargoPolicyRootKind::StandalonePackageRoot => root
+            .raw_cargo
+            .get("lints")
+            .and_then(|value| value.get(family)),
         G3RsCargoPolicyRootKind::Other => None,
     }
 }
@@ -297,7 +307,10 @@ pub(crate) fn raw_member_lints<'a>(
     member: &'a G3RsCargoWorkspaceMember,
     family: &str,
 ) -> Option<&'a toml::Value> {
-    member.raw_cargo.get("lints").and_then(|value| value.get(family))
+    member
+        .raw_cargo
+        .get("lints")
+        .and_then(|value| value.get(family))
 }
 
 pub(crate) fn explicit_allow_entries(lints: Option<&toml::Value>) -> Vec<String> {
@@ -330,11 +343,7 @@ pub(crate) fn waiver_reason<'a>(
 ) -> Option<&'a str> {
     entries
         .iter()
-        .find(|entry| {
-            entry.rule == rule
-                && entry.file == file
-                && entry.selector == selector
-        })
+        .find(|entry| entry.rule == rule && entry.file == file && entry.selector == selector)
         .map(|entry| entry.reason.as_str())
 }
 
@@ -385,7 +394,8 @@ pub(crate) fn has_valid_lint_level(value: &toml::Value) -> bool {
 }
 
 pub(crate) fn raw_lint_level(lints: &toml::Value, name: &str) -> Option<String> {
-    lints.get(name)
+    lints
+        .get(name)
         .and_then(lint_level_from_value)
         .map(str::to_owned)
 }

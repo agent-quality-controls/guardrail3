@@ -85,7 +85,12 @@ fn errors_when_unapproved_allow_reason_is_too_weak() {
         "#,
         parsed_rust_policy(
             None,
-            vec![waiver("RS-CARGO-CONFIG-11", "Cargo.toml", "rust:warnings", "temp")],
+            vec![waiver(
+                "RS-CARGO-CONFIG-11",
+                "Cargo.toml",
+                "rust:warnings",
+                "temp",
+            )],
         ),
     );
     let mut results = Vec::new();

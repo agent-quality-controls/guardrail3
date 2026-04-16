@@ -1,5 +1,5 @@
-use g3rs_cargo_config_checks_assertions::rs_cargo_config_05_resolver::rule as assertions;
 use super::helpers::run_check;
+use g3rs_cargo_config_checks_assertions::rs_cargo_config_05_resolver::rule as assertions;
 
 #[test]
 fn inventories_when_workspace_resolver_is_supported() {
