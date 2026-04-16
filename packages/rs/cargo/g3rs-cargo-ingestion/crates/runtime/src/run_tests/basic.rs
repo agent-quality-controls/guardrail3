@@ -83,6 +83,44 @@ fn ingests_workspace_root_with_members_for_config_checks() {
 }
 
 #[test]
+fn member_may_inherit_workspace_edition() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+        "#,
+    );
+    write(
+        root.join("crates/api/Cargo.toml"),
+        r#"
+            [package]
+            name = "api"
+            version = "0.1.0"
+            edition.workspace = true
+
+            [lints]
+            workspace = true
+        "#,
+    );
+
+    let input = crate::run::ingest_for_config_checks(&crawl(root))
+        .expect("ingestion should accept workspace edition inheritance");
+
+    assert_eq!(input.workspace_members.len(), 1);
+    assert_eq!(input.workspace_members[0].edition, None);
+    assert!(!input.workspace_members[0].edition_invalid);
+}
+
+#[test]
 fn ingests_hybrid_root_with_package_fallback_fields() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();
