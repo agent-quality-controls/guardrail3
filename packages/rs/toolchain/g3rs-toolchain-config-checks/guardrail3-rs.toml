@@ -1,0 +1,24 @@
+profile = "library"
+
+allowed_deps = [
+  "cargo-toml-parser",
+  "g3rs-toolchain-config-checks-assertions",
+  "g3rs-toolchain-types",
+  "guardrail3-check-types",
+  "rust-toolchain-toml-parser",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime crate intentionally keeps one toolchain config rule per module."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions crate intentionally keeps one shared proof module per toolchain config rule."

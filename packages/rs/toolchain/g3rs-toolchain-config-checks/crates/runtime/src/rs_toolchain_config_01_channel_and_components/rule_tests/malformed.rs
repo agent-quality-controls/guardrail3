@@ -1,4 +1,4 @@
-use g3rs_toolchain_config_checks_assertions::rs_toolchain_config_01_channel_and_components as assertions;
+use g3rs_toolchain_config_checks_assertions::rs_toolchain_config_01_channel_and_components::rule as assertions;
 
 use super::helpers::run_check;
 

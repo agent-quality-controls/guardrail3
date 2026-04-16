@@ -1,4 +1,4 @@
-use g3rs_toolchain_config_checks_types::G3RsToolchainConfigChecksInput;
+use g3rs_toolchain_types::G3RsToolchainConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 /// Run extracted rust-toolchain config checks.
@@ -15,9 +15,7 @@ pub fn check(input: &G3RsToolchainConfigChecksInput) -> Vec<G3CheckResult> {
         &mut results,
     );
 
-    if let (Some(cargo_rel_path), Some(cargo_toml)) =
-        (&input.cargo_rel_path, &input.cargo_toml)
-    {
+    if let (Some(cargo_rel_path), Some(cargo_toml)) = (&input.cargo_rel_path, &input.cargo_toml) {
         crate::rs_toolchain_config_02_msrv_consistency::check(
             &input.toolchain_rel_path,
             &input.toolchain_toml,

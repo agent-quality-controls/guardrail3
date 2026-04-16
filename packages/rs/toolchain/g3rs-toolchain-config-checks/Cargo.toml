@@ -8,20 +8,20 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["guardrail3", "toolchain", "checks", "rust", "policy"]
 categories = ["development-tools"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
 g3rs-toolchain-config-checks-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
-g3rs-toolchain-config-checks-types = { path = "crates/types", version = "0.1.0", optional = true }
+g3rs-toolchain-types = { path = "../g3rs-toolchain-types", version = "0.1.0", optional = true }
 
 [features]
 default = ["all"]
 all = ["api"]
 api = [
     "dep:g3rs-toolchain-config-checks-runtime",
-    "dep:g3rs-toolchain-config-checks-types",
+    "dep:g3rs-toolchain-types",
 ]
 
 [package.metadata.guardrail3]
@@ -34,7 +34,6 @@ all-features = true
 members = [
     "crates/assertions",
     "crates/runtime",
-    "crates/types",
 ]
 resolver = "2"
 
