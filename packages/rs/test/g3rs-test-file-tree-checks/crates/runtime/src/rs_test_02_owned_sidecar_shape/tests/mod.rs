@@ -110,16 +110,26 @@ fn reports_flat_sidecar_file() {
 }
 
 #[test]
-fn reports_bad_cfg_test_declaration() {
+fn reports_missing_path_bridge_even_when_sidecar_exists() {
     let results = run_input(input(
-        vec![file(
-            "src/lib.rs",
-            G3RsTestFileKind::Source,
-            Some(""),
-            Some("lib"),
-            None,
-            "#[cfg(test)]\nmod helper_tests;\n",
-        )],
+        vec![
+            file(
+                "src/lib.rs",
+                G3RsTestFileKind::Source,
+                Some(""),
+                Some("lib"),
+                None,
+                "#[cfg(test)]\nmod lib_tests;\n",
+            ),
+            file(
+                "src/lib_tests/mod.rs",
+                G3RsTestFileKind::InternalSidecarMod,
+                Some(""),
+                Some("lib"),
+                None,
+                "#[test]\nfn keeps_shape() { assert!(true); }\n",
+            ),
+        ],
         vec![component("", "", Some("demo_runtime"), false, None)],
     ));
 
@@ -142,7 +152,45 @@ fn reports_bad_cfg_test_declaration() {
         .expect("missing RS-TEST-FILETREE-02 result");
     assert_eq!(
         result.message(),
-        "File `src/lib.rs` declares `#[cfg(test)] mod helper_tests;` without the owned sidecar path `helper_tests/mod.rs`. Point that declaration at `helper_tests/mod.rs`, so this module's internal tests live in one sidecar directory."
+        "File `src/lib.rs` declares `#[cfg(test)] mod lib_tests;` without the owned sidecar declaration `#[path = \"lib_tests/mod.rs\"] mod lib_tests;`. Use that exact file-owned sidecar shape, so this module's internal tests live in one sidecar directory."
+    );
+}
+
+#[test]
+fn reports_generic_tests_name_even_with_owned_sidecar_folder() {
+    let results = run_input(input(
+        vec![
+            file(
+                "src/rule.rs",
+                G3RsTestFileKind::Source,
+                Some(""),
+                Some("rule"),
+                None,
+                "#[cfg(test)]\n#[path = \"rule_tests/mod.rs\"]\nmod tests;\n",
+            ),
+            file(
+                "src/rule_tests/mod.rs",
+                G3RsTestFileKind::InternalSidecarMod,
+                Some(""),
+                Some("rule"),
+                None,
+                "#[test]\nfn keeps_shape() { assert!(true); }\n",
+            ),
+        ],
+        vec![component("", "", Some("demo_runtime"), false, None)],
+    ));
+
+    let result = results
+        .iter()
+        .find(|result| {
+            result.id() == "RS-TEST-FILETREE-02"
+                && result.title() == "ad hoc cfg(test) module declaration"
+                && result.file() == Some("src/rule.rs")
+        })
+        .expect("missing RS-TEST-FILETREE-02 result");
+    assert_eq!(
+        result.message(),
+        "File `src/rule.rs` declares `#[cfg(test)] mod tests;` without the owned sidecar declaration `#[path = \"rule_tests/mod.rs\"] mod rule_tests;`. Use that exact file-owned sidecar shape, so this module's internal tests live in one sidecar directory."
     );
 }
 

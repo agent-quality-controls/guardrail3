@@ -10,7 +10,9 @@ const ID: &str = "RS-CODE-SOURCE-24";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_path_attrs(input.source) {
-        if info.cfg_truth == CfgPredicateTruth::KnownFalse || info.is_test_sidecar_exempt {
+        if info.cfg_truth == CfgPredicateTruth::KnownFalse
+            || is_exact_owned_test_sidecar(input.rel_path, &info.module_name, &info.path_value)
+        {
             continue;
         }
 
@@ -73,6 +75,20 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
     }
 }
 
+fn is_exact_owned_test_sidecar(rel_path: &str, module_name: &str, path_value: &str) -> bool {
+    let file_name = rel_path.rsplit('/').next();
+    let Some(file_name) = file_name else {
+        return false;
+    };
+    let Some(stem) = file_name.strip_suffix(".rs") else {
+        return false;
+    };
+    if stem == "mod" || stem.is_empty() {
+        return false;
+    }
+    let expected_module_name = format!("{stem}_tests");
+    module_name == expected_module_name && path_value == format!("{expected_module_name}/mod.rs")
+}
 
 #[cfg(test)]
 pub(super) fn check_source(

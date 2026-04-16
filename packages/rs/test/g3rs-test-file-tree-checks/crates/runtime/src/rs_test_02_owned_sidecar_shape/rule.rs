@@ -83,7 +83,8 @@ fn collect_violations(
             continue;
         }
 
-        let Some(owner_module_rel_path) = owned_sidecar_owner_rel_path(&src_root, rel_after_src) else {
+        let Some(owner_module_rel_path) = owned_sidecar_owner_rel_path(&src_root, rel_after_src)
+        else {
             continue;
         };
         let mod_rel_path = format!("{dir_rel}/mod.rs");
@@ -92,7 +93,9 @@ fn collect_violations(
                 rel_path: dir_rel,
                 line: None,
                 title: "sidecar directory missing mod.rs".to_owned(),
-                message: "Internal sidecar harness directories must expose `mod.rs` as their entrypoint.".to_owned(),
+                message:
+                    "Internal sidecar harness directories must expose `mod.rs` as their entrypoint."
+                        .to_owned(),
             });
             continue;
         }
@@ -134,17 +137,21 @@ fn collect_violations(
             if cfg_test_decl_is_owned_sidecar(&file.file.rel_path, module, &file_set) {
                 continue;
             }
+            let expected = owned_sidecar_contract(&file.file.rel_path);
             violations.push(SidecarViolation {
                 rel_path: file.file.rel_path.clone(),
                 line: Some(module.line),
                 title: "ad hoc cfg(test) module declaration".to_owned(),
-                message: format!(
-                    "File `{}` declares `#[cfg(test)] mod {};` without the owned sidecar path `{}/mod.rs`. Point that declaration at `{}/mod.rs`, so this module's internal tests live in one sidecar directory.",
-                    file.file.rel_path,
-                    module.name,
-                    module.name,
-                    module.name,
-                ),
+                message: match expected {
+                    Some((module_name, path_attr)) => format!(
+                        "File `{}` declares `#[cfg(test)] mod {};` without the owned sidecar declaration `#[path = \"{}\"] mod {};`. Use that exact file-owned sidecar shape, so this module's internal tests live in one sidecar directory.",
+                        file.file.rel_path, module.name, path_attr, module_name,
+                    ),
+                    None => format!(
+                        "Facade file `{}` must not declare internal test sidecars. Move the tests onto a real sibling `x.rs` file and use `#[path = \"x_tests/mod.rs\"] mod x_tests;` there.",
+                        file.file.rel_path,
+                    ),
+                },
             });
         }
     }
@@ -227,21 +234,34 @@ fn cfg_test_decl_is_owned_sidecar(
     module: &crate::parse::CfgTestModuleInfo,
     file_set: &BTreeSet<String>,
 ) -> bool {
-    if module.has_body || !module.name.ends_with("_tests") {
+    if module.has_body {
         return false;
     }
 
+    let Some((expected_module_name, expected_path_attr)) = owned_sidecar_contract(file_rel_path)
+    else {
+        return false;
+    };
+    if module.name != expected_module_name {
+        return false;
+    }
     let parent = parent_dir(file_rel_path);
-    let expected_mod_rel = format!("{parent}/{}/mod.rs", module.name);
+    let expected_mod_rel = format!("{parent}/{expected_module_name}/mod.rs");
     if !file_set.contains(&expected_mod_rel) {
         return false;
     }
 
-    let expected_path_attr = format!("{}/mod.rs", module.name);
-    module
-        .path_attr
-        .as_deref()
-        .is_none_or(|path_attr| path_attr == expected_path_attr)
+    module.path_attr.as_deref() == Some(expected_path_attr.as_str())
+}
+
+fn owned_sidecar_contract(file_rel_path: &str) -> Option<(String, String)> {
+    let file_name = file_rel_path.rsplit('/').next()?;
+    let stem = file_name.strip_suffix(".rs")?;
+    if stem == "mod" || stem.is_empty() {
+        return None;
+    }
+    let module_name = format!("{stem}_tests");
+    Some((module_name.clone(), format!("{module_name}/mod.rs")))
 }
 
 fn join_under_root(root_rel_dir: &str, child_rel: &str) -> String {
