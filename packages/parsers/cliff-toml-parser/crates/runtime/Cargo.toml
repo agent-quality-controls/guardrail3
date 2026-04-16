@@ -1,14 +1,14 @@
 [package]
 name = "cliff-toml-parser-runtime"
 version.workspace = true
-edition = "2024"
+edition.workspace = true
 description = "Parser implementation for cliff.toml facade packages"
 license.workspace = true
 rust-version.workspace = true
 repository.workspace = true
 keywords = ["cliff", "toml", "parser", "changelog", "rust"]
 categories = ["config", "development-tools", "parser-implementations"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
@@ -27,9 +27,6 @@ toml = "0.8"
 [dev-dependencies]
 cliff-toml-parser-runtime-assertions = { path = "../assertions" }
 tempfile = "3"
-
-[package.metadata.guardrail3]
-shared = true
 
 [package.metadata.docs.rs]
 all-features = true

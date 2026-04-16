@@ -5,13 +5,19 @@
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
-use cliff_toml_parser_runtime::{CliffCommitParser, CliffToml};
+use cliff_toml_parser_runtime::types::{CliffCommitParser, CliffToml};
 
 /// Assert that all top-level optional sections are `None`.
 pub fn assert_sections_empty(cfg: &CliffToml) {
     assert!(cfg.git.is_none(), "git section should be None");
     assert!(cfg.changelog.is_none(), "changelog section should be None");
     assert!(cfg.extra.is_empty(), "extra should be empty");
+}
+
+/// Assert that the optional top-level sections are absent.
+pub fn assert_sections_absent(cfg: &CliffToml) {
+    assert!(cfg.git.is_none(), "git section should be None");
+    assert!(cfg.changelog.is_none(), "changelog section should be None");
 }
 
 /// Assert a boolean field matches an expected value.
@@ -50,5 +56,29 @@ pub fn assert_parse_error(err: impl std::fmt::Display) {
     assert!(
         msg.contains("invalid cliff.toml"),
         "expected error message prefix, got: {msg}",
+    );
+}
+
+/// Assert that changelog text fields match expected values.
+pub fn assert_changelog_fields(
+    cfg: &CliffToml,
+    header: Option<&str>,
+    footer: Option<&str>,
+    has_body: bool,
+) {
+    let changelog = cfg
+        .changelog
+        .as_ref()
+        .expect("changelog section should be present");
+    assert_eq!(changelog.header.as_deref(), header, "changelog header mismatch");
+    assert_eq!(changelog.footer.as_deref(), footer, "changelog footer mismatch");
+    assert_eq!(changelog.body.is_some(), has_body, "changelog body presence mismatch");
+}
+
+/// Assert that an unknown top-level key was preserved in `extra`.
+pub fn assert_top_level_extra_key(cfg: &CliffToml, key: &str) {
+    assert!(
+        cfg.extra.contains_key(key),
+        "expected top-level extra key `{key}` to be preserved",
     );
 }

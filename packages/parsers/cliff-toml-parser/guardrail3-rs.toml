@@ -1,0 +1,13 @@
+profile = "library"
+
+allowed_deps = [
+  "cliff-toml-parser-runtime",
+  "cliff-toml-parser-runtime-assertions",
+  "cliff-toml-parser-types",
+  "serde",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false

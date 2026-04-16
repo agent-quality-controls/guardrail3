@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use cargo_toml_parser::{types::CargoToml, types::WorkspacePackageSection};
-use cliff_toml_parser::CliffToml;
+use cliff_toml_parser::types::CliffToml;
 use release_plz_toml_parser::ReleasePlzToml;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

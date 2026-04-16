@@ -90,20 +90,11 @@ fn changelog_section_parses() {
     );
     let cfg = parse_fixture(input);
 
-    let changelog = cfg
-        .changelog
-        .as_ref()
-        .expect("changelog section should be present");
-    assert_eq!(
-        changelog.header.as_deref(),
+    assertions::assert_changelog_fields(
+        &cfg,
         Some("# Changelog"),
-        "header mismatch",
-    );
-    assert!(changelog.body.is_some(), "body should be present");
-    assert_eq!(
-        changelog.footer.as_deref(),
         Some("<!-- generated -->"),
-        "footer mismatch",
+        true,
     );
 }
 
@@ -135,10 +126,6 @@ initial_tag = "0.1.0"
 "#,
     );
 
-    assert!(cfg.git.is_none(), "git section should be None");
-    assert!(cfg.changelog.is_none(), "changelog section should be None");
-    assert!(
-        cfg.extra.contains_key("bump"),
-        "unknown top-level key should be captured in extra",
-    );
+    assertions::assert_sections_absent(&cfg);
+    assertions::assert_top_level_extra_key(&cfg, "bump");
 }
