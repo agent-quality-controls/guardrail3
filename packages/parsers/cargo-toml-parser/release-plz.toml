@@ -1,0 +1,13 @@
+[workspace]
+changelog_config = "cliff.toml"
+git_release_enable = true
+release_always = false
+
+[[package]]
+name = "cargo-toml-parser"
+
+[[package]]
+name = "cargo-toml-parser-runtime"
+
+[[package]]
+name = "cargo-toml-parser-types"

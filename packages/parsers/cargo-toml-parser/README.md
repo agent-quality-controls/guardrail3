@@ -1,14 +1,21 @@
 # cargo-toml-parser
 
-Facade crate for typed `Cargo.toml` parsing.
+Typed parser for `Cargo.toml`.
 
-The public API is exposed from this root crate. Internal parser and model crates
-live under `crates/`.
+This package publishes the facade crate `cargo-toml-parser`. The facade
+re-exports the public parser API from the internal runtime crate and the typed
+schema from the internal types crate.
+
+## What it parses
+
+- top-level Cargo manifest keys such as `package`, `dependencies`, and `profile`
+- known nested sections such as `workspace`, `target`, `lints`, and `patch`
+- unknown keys through `extra` maps so the model stays forward-compatible
 
 ## Usage
 
 ```rust
-use cargo_toml_parser::{Dependency, parse};
+use cargo_toml_parser::{parse, types::Dependency};
 
 let manifest = parse(
     r#"
@@ -26,6 +33,12 @@ assert!(matches!(
     Some(Dependency::Simple(value)) if value == "1"
 ));
 ```
+
+## Internal layout
+
+- `crates/runtime` owns parsing and file loading
+- `crates/types` owns the typed Cargo.toml schema
+- `crates/assertions` owns shared proof helpers for runtime sidecar tests
 
 ## License
 

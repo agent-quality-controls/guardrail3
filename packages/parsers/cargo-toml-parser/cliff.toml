@@ -1,0 +1,30 @@
+[git]
+conventional_commits = true
+filter_unconventional = true
+
+[[git.commit_parsers]]
+message = "^feat"
+
+[[git.commit_parsers]]
+message = "^fix"
+
+[[git.commit_parsers]]
+message = "^doc"
+
+[[git.commit_parsers]]
+message = "^perf"
+
+[[git.commit_parsers]]
+message = "^refactor"
+
+[[git.commit_parsers]]
+message = "^style"
+
+[[git.commit_parsers]]
+message = "^test"
+
+[[git.commit_parsers]]
+message = "^chore"
+
+[changelog]
+header = "# Changelog\n"
