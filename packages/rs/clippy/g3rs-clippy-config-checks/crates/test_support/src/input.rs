@@ -24,10 +24,7 @@ pub fn parse_error_rust_policy(rel_path: &str, reason: &str) -> G3RsClippyRustPo
     }
 }
 
-pub fn override_facts(
-    rel_path: &str,
-    parse_error: Option<&str>,
-) -> G3RsClippyCargoConfigOverride {
+pub fn override_facts(rel_path: &str, parse_error: Option<&str>) -> G3RsClippyCargoConfigOverride {
     G3RsClippyCargoConfigOverride {
         rel_path: rel_path.to_owned(),
         parse_error: parse_error.map(str::to_owned),

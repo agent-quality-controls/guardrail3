@@ -1,5 +1,5 @@
-use g3rs_clippy_config_checks_assertions::rs_clippy_config_05_excessive_nesting_threshold::rule as assertions;
 use super::helpers::run_check;
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_05_excessive_nesting_threshold::rule as assertions;
 
 #[test]
 fn errors_when_excessive_nesting_threshold_has_the_wrong_value() {

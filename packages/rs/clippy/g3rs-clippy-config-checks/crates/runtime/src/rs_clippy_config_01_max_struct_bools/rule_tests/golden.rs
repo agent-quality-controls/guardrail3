@@ -1,5 +1,5 @@
-use g3rs_clippy_config_checks_assertions::rs_clippy_config_01_max_struct_bools::rule as assertions;
 use super::helpers::run_check;
+use g3rs_clippy_config_checks_assertions::rs_clippy_config_01_max_struct_bools::rule as assertions;
 
 #[test]
 fn inventories_when_max_struct_bools_matches_baseline() {
