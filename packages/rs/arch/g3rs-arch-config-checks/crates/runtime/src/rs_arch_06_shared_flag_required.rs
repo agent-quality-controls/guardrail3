@@ -1,7 +1,7 @@
+use g3rs_arch_types::G3RsArchConfigCrate;
 use g3rs_arch_types::G3RsArchDependencyEdge;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-
-use crate::run::CrateMap;
+use std::collections::BTreeMap;
 
 const ID: &str = "RS-ARCH-CONFIG-06";
 
@@ -18,7 +18,7 @@ fn is_allowed_test_edge(edge: &G3RsArchDependencyEdge) -> bool {
 
 pub(crate) fn check(
     edge: &G3RsArchDependencyEdge,
-    crate_map: &CrateMap<'_>,
+    crate_map: &BTreeMap<&str, &G3RsArchConfigCrate>,
     results: &mut Vec<G3CheckResult>,
 ) {
     let Some(target_rel) = &edge.resolved_target_rel else {
@@ -71,4 +71,5 @@ pub(crate) fn check(
 
 #[cfg(test)]
 #[path = "rs_arch_06_shared_flag_required_tests/mod.rs"]
-mod tests;
+// reason: keep rule tests in the owned x_tests sidecar directory.
+mod rs_arch_06_shared_flag_required_tests;

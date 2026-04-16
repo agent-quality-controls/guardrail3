@@ -13,13 +13,14 @@ name = "g3rs-arch-config-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-arch-config-checks-runtime",
- "g3rs-arch-config-checks-types",
+ "g3rs-arch-types",
 ]
 
 [[package]]
 name = "g3rs-arch-config-checks-assertions"
 version = "0.1.0"
 dependencies = [
+ "g3rs-arch-config-checks-runtime",
  "guardrail3-check-types",
 ]
 
@@ -28,16 +29,8 @@ name = "g3rs-arch-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-arch-config-checks-assertions",
- "g3rs-arch-config-checks-types",
  "g3rs-arch-types",
  "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-arch-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-arch-types",
 ]
 
 [[package]]

@@ -9,17 +9,20 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "arch", "config", "checks", "rust"]
 categories = ["development-tools"]
+publish = false
 
 [features]
 default = ["all"]
 all = ["checks"]
 checks = []
 
+[package.metadata.guardrail3]
+shared = true
+
 [lints]
 workspace = true
 
 [dependencies]
-g3rs-arch-config-checks-types = { path = "../types", version = "0.1.0" }
 g3rs-arch-types = { path = "../../../g3rs-arch-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
 
