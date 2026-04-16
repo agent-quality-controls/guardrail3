@@ -1,6 +1,2 @@
-#![allow(
-    clippy::missing_docs_in_private_items,
-    reason = "assertions scaffold will gain ingestion-specific helpers later"
-)]
-
+/// Shared helper primitives used by the ingestion proof modules.
 mod common;
