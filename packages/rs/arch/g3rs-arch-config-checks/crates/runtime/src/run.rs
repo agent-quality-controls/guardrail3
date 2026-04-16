@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
-use g3rs_arch_config_checks_types::G3RsArchConfigChecksInput;
-use g3rs_arch_types::G3RsArchConfigCrate;
+use g3rs_arch_types::G3RsArchConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsArchConfigChecksInput) -> Vec<G3CheckResult> {
@@ -24,5 +23,3 @@ pub fn check(input: &G3RsArchConfigChecksInput) -> Vec<G3CheckResult> {
 
     results
 }
-
-pub(crate) type CrateMap<'a> = BTreeMap<&'a str, &'a G3RsArchConfigCrate>;

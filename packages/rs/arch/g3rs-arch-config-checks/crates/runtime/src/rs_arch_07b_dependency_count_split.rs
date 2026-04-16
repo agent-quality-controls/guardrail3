@@ -24,4 +24,5 @@ pub(crate) fn check(node: &G3RsArchConfigCrate, results: &mut Vec<G3CheckResult>
 
 #[cfg(test)]
 #[path = "rs_arch_07b_dependency_count_split_tests/mod.rs"]
-mod tests;
+// reason: keep rule tests in the owned x_tests sidecar directory.
+mod rs_arch_07b_dependency_count_split_tests;

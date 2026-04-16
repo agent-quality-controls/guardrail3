@@ -6,8 +6,6 @@ mod rs_arch_06_shared_flag_required;
 mod rs_arch_07b_dependency_count_split;
 mod rs_arch_08b_feature_contract;
 mod run;
-#[cfg(test)]
-mod test_support;
 
 #[cfg(feature = "checks")]
 pub use run::check;

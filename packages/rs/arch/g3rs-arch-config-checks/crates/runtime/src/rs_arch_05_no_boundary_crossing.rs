@@ -66,4 +66,5 @@ pub(crate) fn check(edge: &G3RsArchDependencyEdge, results: &mut Vec<G3CheckResu
 
 #[cfg(test)]
 #[path = "rs_arch_05_no_boundary_crossing_tests/mod.rs"]
-mod tests;
+// reason: keep rule tests in the owned x_tests sidecar directory.
+mod rs_arch_05_no_boundary_crossing_tests;
