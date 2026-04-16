@@ -53,7 +53,8 @@ pub(crate) fn check(
             }
         }
         G3RsArchRustPolicyState::Missing => {}
-        G3RsArchRustPolicyState::Unreadable { .. } | G3RsArchRustPolicyState::ParseError { .. } => {}
+        G3RsArchRustPolicyState::Unreadable { .. } | G3RsArchRustPolicyState::ParseError { .. } => {
+        }
     }
 
     results.push(G3CheckResult::new(
@@ -72,4 +73,5 @@ pub(crate) fn check(
 
 #[cfg(test)]
 #[path = "rs_arch_07a_structural_split_tests/mod.rs"]
-mod tests;
+// reason: keep rule tests in the owned x_tests sidecar directory.
+mod rs_arch_07a_structural_split_tests;

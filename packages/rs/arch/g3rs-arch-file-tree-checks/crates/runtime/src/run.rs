@@ -1,4 +1,4 @@
-use g3rs_arch_file_tree_checks_types::G3RsArchFileTreeChecksInput;
+use g3rs_arch_types::G3RsArchFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsArchFileTreeChecksInput) -> Vec<G3CheckResult> {
