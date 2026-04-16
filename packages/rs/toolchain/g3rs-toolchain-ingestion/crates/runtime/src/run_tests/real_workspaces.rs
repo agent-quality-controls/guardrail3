@@ -1,79 +1,5 @@
 /// Integration tests against real workspaces in the guardrail3 repository.
-
-use std::path::{Path, PathBuf};
-
-/// Resolve the guardrail3 packages directory from the runtime crate's manifest.
-fn packages_dir() -> PathBuf {
-    let manifest = Path::new(env!("CARGO_MANIFEST_DIR"));
-    manifest
-        .parent()
-        .and_then(Path::parent)
-        .and_then(Path::parent)
-        .and_then(Path::parent)
-        .and_then(Path::parent)
-        .expect("should resolve packages/ directory from CARGO_MANIFEST_DIR")
-        .to_path_buf()
-}
-
-/// Resolve one concrete package workspace root from the grouped `packages/` tree.
-fn package_dir(rel_path: &str) -> PathBuf {
-    packages_dir().join(rel_path)
-}
-
-/// Collect leaf package directories under the grouped `packages/` tree.
-fn collect_package_dirs(root: &Path) -> Vec<PathBuf> {
-    let mut packages = Vec::new();
-    let entries = std::fs::read_dir(root).expect("should be able to list package directories");
-
-    for entry in entries {
-        let entry = entry.expect("should read package directory entry");
-        let path = entry.path();
-        if !path.is_dir() {
-            continue;
-        }
-
-        if path.join("Cargo.toml").exists() {
-            packages.push(path);
-            continue;
-        }
-
-        packages.extend(collect_package_dirs(&path));
-    }
-
-    packages
-}
-
-fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on a real workspace")
-}
-
-fn is_supported_channel(channel: &str) -> bool {
-    if channel == "stable" {
-        return true;
-    }
-
-    let version_part = channel
-        .trim()
-        .trim_start_matches('v')
-        .split_once('-')
-        .map_or(channel, |(version, _)| version);
-    let mut parts = version_part.split('.');
-    let Some(major) = parts.next() else {
-        return false;
-    };
-    let Some(minor) = parts.next() else {
-        return false;
-    };
-
-    if major.parse::<u64>().is_err() || minor.parse::<u64>().is_err() {
-        return false;
-    }
-
-    match parts.next() {
-        Some(patch) => patch.parse::<u64>().is_ok() && parts.next().is_none(),
-        None => true,
-    }
-}
+use super::helpers::{collect_package_dirs, crawl, is_supported_channel, package_dir, packages_dir};
 
 /// Real workspace with `[package]` containing `rust-version = "1.85"`.
 #[test]
@@ -84,7 +10,7 @@ fn ingests_real_workspace_with_package_rust_version() {
     }
 
     let crawl = crawl(&root);
-    let output = crate::ingest_for_config_checks(&crawl)
+    let output = super::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed on clippy-toml-parser");
 
     assert_eq!(output.toolchain_rel_path, "rust-toolchain.toml");
@@ -109,10 +35,12 @@ fn ingests_real_workspace_with_package_rust_version() {
         .package
         .as_ref()
         .and_then(|pkg| pkg.rust_version.as_ref())
-        .and_then(|rv| match rv {
+        .and_then(
+            |rv: &cargo_toml_parser::InheritableValue<String>| match rv {
             cargo_toml_parser::InheritableValue::Value(v) => Some(v.as_str()),
             cargo_toml_parser::InheritableValue::Inherit(_) => None,
-        });
+        },
+        );
     assert_eq!(rust_version, Some("1.85"));
 }
 
@@ -125,7 +53,7 @@ fn ingests_real_workspace_without_rust_version() {
     }
 
     let crawl = crawl(&root);
-    let output = crate::ingest_for_config_checks(&crawl)
+    let output = super::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed on guardrail3-check-types");
 
     let section = output
@@ -167,7 +95,7 @@ fn ingests_all_real_workspaces() {
         let pkg_name = pkg_dir
             .file_name()
             .map_or("unknown", |n| n.to_str().unwrap_or("unknown"));
-        let output = crate::ingest_for_config_checks(&crawl)
+        let output = super::ingest_for_config_checks(&crawl)
             .unwrap_or_else(|err| panic!("ingestion failed for {pkg_name}: {err}"));
 
         let section = output

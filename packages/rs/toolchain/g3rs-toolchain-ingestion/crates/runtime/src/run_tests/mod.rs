@@ -1,10 +1,4 @@
-#![allow(
-    clippy::expect_used,
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    clippy::disallowed_methods,
-    reason = "test code uses expect/panic for assertions and direct fs access for fixtures"
-)]
+pub(super) use super::{IngestionError, ingest_for_config_checks, ingest_for_file_tree_checks};
 
 /// Covers the smallest happy-path and failure-path ingest cases.
 mod basic;
@@ -12,6 +6,8 @@ mod basic;
 mod deps;
 /// Covers file tree projection and root-file selection cases.
 mod filetree;
+/// Shared fixture setup used across run sidecar tests.
+mod helpers;
 /// Covers end-to-end ingestion wiring across all derived outputs.
 mod pipeline;
 /// Covers ingest behavior against real repo fixture layouts.

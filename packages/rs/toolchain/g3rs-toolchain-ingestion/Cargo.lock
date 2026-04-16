@@ -124,6 +124,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-toolchain-config-checks-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toolchain-config-checks-runtime",
+ "guardrail3-check-types",
+]
+
+[[package]]
 name = "g3rs-toolchain-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
@@ -146,6 +154,14 @@ version = "0.1.0"
 dependencies = [
  "g3rs-toolchain-filetree-checks-runtime",
  "g3rs-toolchain-filetree-checks-types",
+]
+
+[[package]]
+name = "g3rs-toolchain-filetree-checks-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toolchain-filetree-checks-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -175,7 +191,10 @@ dependencies = [
 name = "g3rs-toolchain-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-toolchain-ingestion-types",
+ "g3rs-toolchain-config-checks-assertions",
+ "g3rs-toolchain-filetree-checks-assertions",
+ "g3rs-toolchain-ingestion-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]

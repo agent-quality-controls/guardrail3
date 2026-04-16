@@ -72,3 +72,7 @@ pub fn ingest_for_file_tree_checks(
             .map(|entry| entry.path.rel_path.clone()),
     })
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"]
+mod run_tests;

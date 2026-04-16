@@ -1,28 +1,8 @@
 use std::fs;
-use std::path::Path;
-use std::process::Command;
 
 use tempfile::tempdir;
 
-fn git_init(path: &Path) {
-    let _status = Command::new("git")
-        .args(["init", "--quiet"])
-        .current_dir(path)
-        .status()
-        .expect("git init should succeed in test fixture setup");
-}
-
-fn write(path: impl AsRef<Path>, content: &str) {
-    if let Some(parent) = path.as_ref().parent() {
-        fs::create_dir_all(parent)
-            .expect("should create parent directories for test fixture files");
-    }
-    fs::write(path, content).expect("should write test fixture file to disk");
-}
-
-fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
-}
+use super::helpers::{crawl, git_init, write};
 
 // ---------------------------------------------------------------------------
 // Happy path: basic ingestion
@@ -40,7 +20,7 @@ fn ingests_toolchain_toml() {
     );
 
     let crawl = crawl(root);
-    let output = crate::ingest_for_config_checks(&crawl)
+    let output = super::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed for a valid rust-toolchain.toml");
 
     assert_eq!(
@@ -87,7 +67,7 @@ fn ingests_with_cargo_toml() {
     );
 
     let crawl = crawl(root);
-    let output = crate::ingest_for_config_checks(&crawl)
+    let output = super::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed when both config files are present");
 
     assert_eq!(output.toolchain_rel_path, "rust-toolchain.toml");
@@ -135,7 +115,7 @@ fn cargo_none_without_cargo_toml() {
     );
 
     let crawl = crawl(root);
-    let output = crate::ingest_for_config_checks(&crawl)
+    let output = super::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed even without Cargo.toml");
 
     assert!(output.cargo_toml.is_none());
@@ -160,10 +140,10 @@ fn fails_when_toolchain_toml_is_missing() {
     git_init(root);
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = super::ingest_for_config_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::ToolchainTomlNotFound)),
+        matches!(result, Err(super::IngestionError::ToolchainTomlNotFound)),
         "ingestion should return ToolchainTomlNotFound when no rust-toolchain.toml exists"
     );
 }
@@ -184,11 +164,11 @@ fn fails_on_malformed_toolchain_toml() {
     );
 
     let crawl = crawl(root);
-    let err = crate::ingest_for_config_checks(&crawl)
+    let err = super::ingest_for_config_checks(&crawl)
         .expect_err("ingestion should return Err when rust-toolchain.toml contains invalid TOML");
 
     match &err {
-        crate::IngestionError::ParseFailed { path, reason } => {
+        super::IngestionError::ParseFailed { path, reason } => {
             assert!(
                 path.ends_with("rust-toolchain.toml"),
                 "ParseFailed path should reference rust-toolchain.toml, got: {path:?}"
@@ -216,7 +196,7 @@ fn ignored_but_recovered_toolchain_toml_is_ingested() {
     );
 
     let crawl = crawl(root);
-    let output = crate::ingest_for_config_checks(&crawl).expect(
+    let output = super::ingest_for_config_checks(&crawl).expect(
         "ingestion should succeed for a gitignored rust-toolchain.toml recovered by crawl",
     );
 
@@ -247,10 +227,10 @@ fn malformed_cargo_toml_returns_error() {
     write(root.join("Cargo.toml"), "{{{{not valid toml}}}}");
 
     let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = super::ingest_for_config_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
+        matches!(result, Err(super::IngestionError::ParseFailed { .. })),
         "ingestion should fail closed when Cargo.toml exists but is malformed"
     );
 }
@@ -271,7 +251,7 @@ fn toolchain_with_components_only() {
     );
 
     let crawl = crawl(root);
-    let output = crate::ingest_for_config_checks(&crawl)
+    let output = super::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed for a toolchain with components but no channel");
 
     let section = output
@@ -299,7 +279,7 @@ fn empty_toolchain_file_succeeds() {
     write(root.join("rust-toolchain.toml"), "");
 
     let crawl = crawl(root);
-    let output = crate::ingest_for_config_checks(&crawl)
+    let output = super::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed for an empty rust-toolchain.toml");
 
     assert!(output.toolchain_toml.toolchain.is_none());
@@ -321,7 +301,7 @@ fn toolchain_with_extra_keys_succeeds() {
     );
 
     let crawl = crawl(root);
-    let output = crate::ingest_for_config_checks(&crawl)
+    let output = super::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed for a toolchain file with extra sections");
 
     let section = output
@@ -342,7 +322,7 @@ fn toolchain_with_extra_keys_succeeds() {
 
 #[test]
 fn error_display_toolchain_not_found() {
-    let err = crate::IngestionError::ToolchainTomlNotFound;
+    let err = super::IngestionError::ToolchainTomlNotFound;
     let msg = err.to_string();
     assert!(
         msg.contains("rust-toolchain.toml"),
@@ -352,7 +332,7 @@ fn error_display_toolchain_not_found() {
 
 #[test]
 fn error_display_unreadable() {
-    let err = crate::IngestionError::Unreadable {
+    let err = super::IngestionError::Unreadable {
         path: std::path::PathBuf::from("/fake/rust-toolchain.toml"),
         reason: "permission denied".to_owned(),
     };
@@ -363,7 +343,7 @@ fn error_display_unreadable() {
 
 #[test]
 fn error_display_parse_failed() {
-    let err = crate::IngestionError::ParseFailed {
+    let err = super::IngestionError::ParseFailed {
         path: std::path::PathBuf::from("/fake/rust-toolchain.toml"),
         reason: "expected `=`".to_owned(),
     };
@@ -378,8 +358,11 @@ fn error_display_parse_failed() {
 
 #[test]
 fn error_implements_std_error() {
-    fn assert_error<T: std::error::Error>() {}
-    assert_error::<crate::IngestionError>();
+    let error: &dyn std::error::Error = &super::IngestionError::ToolchainTomlNotFound;
+    assert!(
+        error.to_string().contains("rust-toolchain.toml"),
+        "{error}"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -406,11 +389,11 @@ fn unreadable_toolchain_toml_returns_error() {
         }],
     };
 
-    let err = crate::ingest_for_config_checks(&crawl)
+    let err = super::ingest_for_config_checks(&crawl)
         .expect_err("ingestion should return Err when rust-toolchain.toml has readable=false");
 
     match &err {
-        crate::IngestionError::Unreadable { path, reason } => {
+        super::IngestionError::Unreadable { path, reason } => {
             assert!(path.ends_with("rust-toolchain.toml"), "got: {path:?}");
             assert!(!reason.is_empty());
         }
@@ -461,11 +444,11 @@ fn unreadable_cargo_toml_returns_error() {
         ],
     };
 
-    let err = crate::ingest_for_config_checks(&crawl)
+    let err = super::ingest_for_config_checks(&crawl)
         .expect_err("ingestion should fail closed when Cargo.toml is unreadable");
 
     match &err {
-        crate::IngestionError::Unreadable { path, reason } => {
+        super::IngestionError::Unreadable { path, reason } => {
             assert!(path.ends_with("Cargo.toml"), "got: {path:?}");
             assert!(!reason.is_empty(), "got: {reason}");
         }
@@ -492,12 +475,12 @@ fn toolchain_deleted_after_crawl_returns_unreadable() {
     fs::remove_file(root.join("rust-toolchain.toml"))
         .expect("should delete rust-toolchain.toml for TOCTOU test");
 
-    let err = crate::ingest_for_config_checks(&crawl).expect_err(
+    let err = super::ingest_for_config_checks(&crawl).expect_err(
         "ingestion should return Err when rust-toolchain.toml is deleted between crawl and read",
     );
 
     match &err {
-        crate::IngestionError::Unreadable { path, reason } => {
+        super::IngestionError::Unreadable { path, reason } => {
             assert!(path.ends_with("rust-toolchain.toml"), "got: {path:?}");
             assert!(!reason.is_empty(), "got: {reason}");
         }
@@ -525,11 +508,11 @@ fn cargo_deleted_after_crawl_returns_unreadable() {
     fs::remove_file(root.join("Cargo.toml"))
         .expect("should delete Cargo.toml for TOCTOU test");
 
-    let err = crate::ingest_for_config_checks(&crawl)
+    let err = super::ingest_for_config_checks(&crawl)
         .expect_err("ingestion should fail closed when Cargo.toml vanishes after crawl");
 
     match &err {
-        crate::IngestionError::Unreadable { path, reason } => {
+        super::IngestionError::Unreadable { path, reason } => {
             assert!(path.ends_with("Cargo.toml"), "got: {path:?}");
             assert!(!reason.is_empty(), "got: {reason}");
         }
@@ -554,7 +537,7 @@ fn cargo_toml_without_rust_version() {
     write(root.join("Cargo.toml"), "[workspace]\nresolver = \"2\"\n");
 
     let crawl = crawl(root);
-    let output = crate::ingest_for_config_checks(&crawl)
+    let output = super::ingest_for_config_checks(&crawl)
         .expect("ingestion should succeed when Cargo.toml has no rust-version");
 
     let cargo = output

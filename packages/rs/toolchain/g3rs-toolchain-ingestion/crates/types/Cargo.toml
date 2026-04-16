@@ -9,6 +9,7 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "toolchain", "ingestion", "rust"]
 categories = ["development-tools"]
+publish = false
 
 [features]
 default = ["all"]
