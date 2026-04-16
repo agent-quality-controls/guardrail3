@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
-use g3rs_arch_types::{G3RsArchFacadeSurface, G3RsArchSourceChecksInput};
+use g3rs_arch_types::types::G3RsArchFacadeSurface;
+use g3rs_arch_types::G3RsArchSourceChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsArchSourceChecksInput) -> Vec<G3CheckResult> {
@@ -36,6 +37,6 @@ pub fn check(input: &G3RsArchSourceChecksInput) -> Vec<G3CheckResult> {
 
 pub(crate) fn broad_reexports(
     surface: &G3RsArchFacadeSurface,
-) -> impl Iterator<Item = &g3rs_arch_types::G3RsArchFacadeItem> {
+) -> impl Iterator<Item = &g3rs_arch_types::types::G3RsArchFacadeItem> {
     surface.broad_reexports.iter()
 }

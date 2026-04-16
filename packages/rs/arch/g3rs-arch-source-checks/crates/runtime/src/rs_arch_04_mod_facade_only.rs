@@ -1,4 +1,4 @@
-use g3rs_arch_types::G3RsArchFacadeSurface;
+use g3rs_arch_types::types::G3RsArchFacadeSurface;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-ARCH-SOURCE-04";
@@ -38,7 +38,10 @@ pub(crate) fn check(surface: &G3RsArchFacadeSurface, results: &mut Vec<G3CheckRe
                 ID.to_owned(),
                 G3Severity::Info,
                 "mod.rs is facade-only".to_owned(),
-                format!("mod.rs at `{}` contains only facade declarations.", surface.rel_path),
+                format!(
+                    "mod.rs at `{}` contains only facade declarations.",
+                    surface.rel_path
+                ),
                 Some(surface.rel_path.clone()),
                 None,
             )

@@ -1,5 +1,5 @@
 use g3rs_arch_file_tree_checks_assertions::rs_arch_07a_structural_split as assertions;
-use g3rs_arch_types::G3RsArchRustPolicyState;
+use g3rs_arch_types::types::G3RsArchRustPolicyState;
 
 use super::helpers::{crate_node, run_rule, waiver};
 

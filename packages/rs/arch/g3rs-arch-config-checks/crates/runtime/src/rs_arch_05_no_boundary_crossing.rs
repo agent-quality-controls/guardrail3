@@ -1,4 +1,4 @@
-use g3rs_arch_types::{G3RsArchBoundaryRef, G3RsArchDependencyEdge};
+use g3rs_arch_types::types::{G3RsArchBoundaryRef, G3RsArchDependencyEdge};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-ARCH-CONFIG-05";

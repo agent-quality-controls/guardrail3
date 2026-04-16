@@ -1,5 +1,5 @@
 use g3rs_arch_source_checks_assertions::rs_arch_08a_feature_gated_exports as assertions;
-use g3rs_arch_types::{G3RsArchFacadeSurface, G3RsArchFeatureExport};
+use g3rs_arch_types::types::{G3RsArchFacadeSurface, G3RsArchFeatureExport};
 
 use super::helpers::{run_rule, source_crate};
 

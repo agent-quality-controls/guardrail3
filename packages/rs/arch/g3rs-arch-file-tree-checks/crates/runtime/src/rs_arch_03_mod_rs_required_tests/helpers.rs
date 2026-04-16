@@ -1,4 +1,4 @@
-use g3rs_arch_types::G3RsArchModuleDir;
+use g3rs_arch_types::types::G3RsArchModuleDir;
 use guardrail3_check_types::G3CheckResult;
 
 pub(super) fn module_dir(dir_rel: &str) -> G3RsArchModuleDir {

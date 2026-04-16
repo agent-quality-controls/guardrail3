@@ -1,4 +1,4 @@
-use g3rs_arch_types::G3RsArchDependencyEdge;
+use g3rs_arch_types::types::G3RsArchDependencyEdge;
 use guardrail3_check_types::G3CheckResult;
 
 pub(super) fn dependency_edge(
@@ -21,7 +21,7 @@ pub(super) fn dependency_edge(
         resolved_target_rel: Some(target_rel_dir.to_owned()),
         target_is_crate: true,
         section: section.to_owned(),
-        crossed_boundary: Some(g3rs_arch_types::G3RsArchBoundaryRef::RootWorkspace),
+        crossed_boundary: Some(g3rs_arch_types::types::G3RsArchBoundaryRef::RootWorkspace),
         is_direct_child: false,
         target_shared: false,
     }

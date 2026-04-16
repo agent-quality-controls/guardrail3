@@ -1,4 +1,4 @@
-use g3rs_arch_types::G3RsArchSourceFile;
+use g3rs_arch_types::types::G3RsArchSourceFile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use syn::spanned::Spanned;
 

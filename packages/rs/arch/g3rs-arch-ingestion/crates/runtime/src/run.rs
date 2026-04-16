@@ -5,10 +5,12 @@ use g3rs_arch_ingestion_types::{
     G3RsArchConfigChecksInput, G3RsArchFileTreeChecksInput, G3RsArchIngestionError,
     G3RsArchSourceChecksInput,
 };
-use g3rs_arch_types::{
-    G3RsArchBoundaryRef, G3RsArchConfigCrate, G3RsArchCrateNode, G3RsArchDependencyEdge,
-    G3RsArchFacadeItem, G3RsArchFacadeSurface, G3RsArchFeatureExport, G3RsArchFileTreeCrate,
-    G3RsArchModuleDir, G3RsArchRustPolicyState, G3RsArchSourceCrate, G3RsArchSourceFile,
+use g3rs_arch_types::types::{
+    G3RsArchBoundaryRef, G3RsArchConfigCrate, G3RsArchCrateNode, G3RsArchCrateStructure,
+    G3RsArchDependencyCounts, G3RsArchDependencyEdge, G3RsArchFacadeItem,
+    G3RsArchFacadeSurface, G3RsArchFeatureContract, G3RsArchFeatureExport,
+    G3RsArchFileTreeCrate, G3RsArchModuleDir, G3RsArchRustPolicyState, G3RsArchSourceCrate,
+    G3RsArchSourceFile,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use glob::Pattern;
@@ -121,16 +123,16 @@ fn collect_config_crates(
             rel_dir: node.rel_dir.clone(),
             cargo_rel_path: node.cargo_rel_path.clone(),
             shared: node.shared,
-            production_dependency_count: node.production_dependency_count,
-            dev_dependency_count: node.dev_dependency_count,
+            production_dependency_count: node.dependency_counts.production,
+            dev_dependency_count: node.dependency_counts.dev,
             requires_feature_contract: node
                 .lib_rs_rel
                 .as_deref()
                 .is_some_and(|rel| requires_feature_contract.contains(rel)),
-            has_default_feature: node.has_default_feature,
-            has_all_feature: node.has_all_feature,
-            all_feature_deps: node.all_feature_deps.clone(),
-            default_feature_deps: node.default_feature_deps.clone(),
+            has_default_feature: node.feature_contract.has_default_feature,
+            has_all_feature: node.feature_contract.has_all_feature,
+            all_feature_deps: node.feature_contract.all_feature_deps.clone(),
+            default_feature_deps: node.feature_contract.default_feature_deps.clone(),
         })
         .collect()
 }
@@ -144,9 +146,9 @@ fn collect_file_tree_crates(crate_nodes: &[G3RsArchCrateNode]) -> Vec<G3RsArchFi
             has_package: node.has_package,
             has_lib_rs: node.has_lib_rs,
             has_main_rs: node.has_main_rs,
-            sibling_rs_file_count: node.sibling_rs_file_count,
-            sibling_dir_count: node.sibling_dir_count,
-            max_module_depth: node.max_module_depth,
+            sibling_rs_file_count: node.structure.sibling_rs_file_count,
+            sibling_dir_count: node.structure.sibling_dir_count,
+            max_module_depth: node.structure.max_module_depth,
             cargo_parse_error: node.cargo_parse_error.clone(),
         })
         .collect()
@@ -398,15 +400,21 @@ fn build_crate_node(
         lib_rs_rel,
         parent_rel_dir: None,
         shared,
-        has_default_feature,
-        has_all_feature,
-        all_feature_deps,
-        default_feature_deps,
-        production_dependency_count,
-        dev_dependency_count,
-        sibling_rs_file_count,
-        sibling_dir_count,
-        max_module_depth,
+        feature_contract: G3RsArchFeatureContract {
+            has_default_feature,
+            has_all_feature,
+            all_feature_deps,
+            default_feature_deps,
+        },
+        dependency_counts: G3RsArchDependencyCounts {
+            production: production_dependency_count,
+            dev: dev_dependency_count,
+        },
+        structure: G3RsArchCrateStructure {
+            sibling_rs_file_count,
+            sibling_dir_count,
+            max_module_depth,
+        },
         cargo_parse_error: parse_error,
     })
 }
