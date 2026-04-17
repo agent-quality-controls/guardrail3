@@ -1,9 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_test_file_tree_checks_types::G3RsTestFileTreeChecksInput;
-use g3rs_test_types::{
-    G3RsTestFileKind, G3RsTestFileTreeInputFailure, G3RsTestSourceFile,
-};
+use g3rs_test_types::G3RsTestFileTreeChecksInput;
+use g3rs_test_types::{G3RsTestFileKind, G3RsTestFileTreeInputFailure, G3RsTestSourceFile};
 
 use crate::parse::{FunctionInfo, ParsedTestFile, UseBinding, analyze, parse_rust_file};
 
@@ -137,7 +135,9 @@ fn collect_assertions_proof_catalog(
                     .functions
                     .iter()
                     .filter(|function| {
-                        function.is_public && !function.is_test && function.has_assertion_macro
+                        function.is_public
+                            && !function.is_test
+                            && function.assertions.has_assertion_macro
                     })
                     .map(move |function| {
                         qualified_assertion_name(&direct_module_prefix, &function.name)
@@ -162,7 +162,9 @@ fn collect_assertions_proof_catalog(
                     .parsed
                     .functions
                     .iter()
-                    .filter(|function| !function.is_test && function.has_assertion_macro)
+                    .filter(|function| {
+                        !function.is_test && function.assertions.has_assertion_macro
+                    })
                     .map(|function| function.name.clone())
                     .collect::<BTreeSet<_>>();
                 let candidates = file
@@ -260,12 +262,10 @@ fn exported_assertion_function_calls_proof(
         }
     }
 
-    function
-        .call_paths
-        .iter()
+    function.body.call_paths.iter()
         .any(|path| match path.as_slice() {
             [name] => {
-                !function.shadowed_idents.contains(name)
+                !function.body.shadowed_idents.contains(name)
                     && ((file_function_names.contains(name)
                         && local_proof_functions.contains(name))
                         || (file_function_names.contains(name)

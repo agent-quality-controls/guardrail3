@@ -2,6 +2,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-TEST-FILETREE-10";
 
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;
+
 pub(crate) fn check(
     _root_rel_dir: &str,
     rel_path: &str,

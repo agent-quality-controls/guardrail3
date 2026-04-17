@@ -3,10 +3,7 @@ use std::collections::BTreeSet;
 use g3rs_test_types::G3RsTestFileKind;
 use guardrail3_check_types::G3Severity;
 
-use crate::test_helpers::{
-    assert_has_inventory, assert_has_result, component, file, input, run_input,
-    with_external_harness, with_nested_assertions_manifest, with_sidecar,
-};
+use g3rs_test_file_tree_checks_assertions::rs_test_03_runtime_assertions_split::rule as assertions;
 
 #[test]
 fn reports_inventory_for_valid_runtime_assertions_split() {
@@ -30,7 +27,7 @@ fn reports_inventory_for_valid_runtime_assertions_split() {
         "crates/runtime/tests/public_surface.rs",
     );
 
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![
             file(
                 "crates/runtime/src/lib.rs",
@@ -68,7 +65,7 @@ fn reports_inventory_for_valid_runtime_assertions_split() {
         vec![component],
     ));
 
-    assert_has_inventory(
+    assertions::assert_has_inventory(
         &results,
         "RS-TEST-FILETREE-03",
         "runtime/assertions split confirmed",
@@ -82,7 +79,7 @@ fn reports_missing_assertions_crate() {
         component("", "crates/runtime", Some("demo_runtime"), false, None),
         "crates/runtime/tests/public_surface.rs",
     );
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![file(
             "crates/runtime/tests/public_surface.rs",
             G3RsTestFileKind::ExternalHarness,
@@ -94,7 +91,7 @@ fn reports_missing_assertions_crate() {
         vec![component],
     ));
 
-    assert_has_result(
+    assertions::assert_has_result(
         &results,
         "RS-TEST-FILETREE-03",
         G3Severity::Error,
@@ -103,16 +100,11 @@ fn reports_missing_assertions_crate() {
         None,
     );
 
-    let result = results
-        .iter()
-        .find(|result| {
-            result.id() == "RS-TEST-FILETREE-03"
-                && result.title() == "assertions crate missing"
-                && result.file() == Some("crates/assertions/Cargo.toml")
-        })
-        .expect("missing RS-TEST-FILETREE-03 result");
-    assert_eq!(
-        result.message(),
+    assertions::assert_message(
+        &results,
+        "RS-TEST-FILETREE-03",
+        "assertions crate missing",
+        "crates/assertions/Cargo.toml",
         "Component `crates/runtime` has sidecar tests that require a shared assertions crate, but `crates/runtime` is still a single-crate package. Reshape it into one package with sibling member crates under `crates/`: `crates/runtime` for the production crate and `crates/assertions` for shared test proof. Do not add `crates/runtime/assertions/Cargo.toml` directly under the current crate root, because that creates a nested package instead of sibling member crates."
     );
 }
@@ -132,7 +124,7 @@ fn reports_nested_assertions_package_as_wrong_shape() {
         ),
         "packages/demo/assertions/Cargo.toml",
     );
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![file(
             "packages/demo/crates/runtime/tests/public_surface.rs",
             G3RsTestFileKind::ExternalHarness,
@@ -144,7 +136,7 @@ fn reports_nested_assertions_package_as_wrong_shape() {
         vec![component],
     ));
 
-    assert_has_result(
+    assertions::assert_has_result(
         &results,
         "RS-TEST-FILETREE-03",
         G3Severity::Error,
@@ -153,16 +145,11 @@ fn reports_nested_assertions_package_as_wrong_shape() {
         None,
     );
 
-    let result = results
-        .iter()
-        .find(|result| {
-            result.id() == "RS-TEST-FILETREE-03"
-                && result.title() == "nested assertions package is the wrong shape"
-                && result.file() == Some("packages/demo/assertions/Cargo.toml")
-        })
-        .expect("missing RS-TEST-FILETREE-03 result");
-    assert_eq!(
-        result.message(),
+    assertions::assert_message(
+        &results,
+        "RS-TEST-FILETREE-03",
+        "nested assertions package is the wrong shape",
+        "packages/demo/assertions/Cargo.toml",
         "Found nested package `packages/demo/assertions/Cargo.toml`. This is the wrong test layout. If assertions is a separate crate, move it to `packages/demo/crates/assertions/Cargo.toml` and move the production crate to `packages/demo/crates/runtime/Cargo.toml` so both are sibling member crates in one package."
     );
 }
@@ -183,7 +170,7 @@ fn reports_runtime_depends_on_assertions_at_normal_scope() {
     component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
     component.assertions_dependencies = BTreeSet::from(["demo_runtime".to_owned()]);
 
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![
             file(
                 "crates/runtime/tests/public_surface.rs",
@@ -205,7 +192,7 @@ fn reports_runtime_depends_on_assertions_at_normal_scope() {
         vec![component],
     ));
 
-    assert_has_result(
+    assertions::assert_has_result(
         &results,
         "RS-TEST-FILETREE-03",
         G3Severity::Error,
@@ -229,7 +216,7 @@ fn reports_assertions_missing_runtime_dependency() {
     );
     component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
 
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![
             file(
                 "crates/runtime/tests/public_surface.rs",
@@ -251,7 +238,7 @@ fn reports_assertions_missing_runtime_dependency() {
         vec![component],
     ));
 
-    assert_has_result(
+    assertions::assert_has_result(
         &results,
         "RS-TEST-FILETREE-03",
         G3Severity::Error,
@@ -260,16 +247,11 @@ fn reports_assertions_missing_runtime_dependency() {
         None,
     );
 
-    let result = results
-        .iter()
-        .find(|result| {
-            result.id() == "RS-TEST-FILETREE-03"
-                && result.title() == "assertions missing runtime dependency"
-                && result.file() == Some("crates/assertions/Cargo.toml")
-        })
-        .expect("missing RS-TEST-FILETREE-03 result");
-    assert_eq!(
-        result.message(),
+    assertions::assert_message(
+        &results,
+        "RS-TEST-FILETREE-03",
+        "assertions missing runtime dependency",
+        "crates/assertions/Cargo.toml",
         "Manifest `crates/assertions/Cargo.toml` is missing dependency `demo_runtime`. Add `demo_runtime` under `[dependencies]`, so the shared assertions crate can prove the runtime behavior it checks."
     );
 }
@@ -286,7 +268,7 @@ fn reports_external_harness_reaching_private_runtime_glue() {
         ),
         "crates/runtime/tests/public_surface.rs",
     );
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![file(
             "crates/runtime/tests/public_surface.rs",
             G3RsTestFileKind::ExternalHarness,
@@ -298,7 +280,7 @@ fn reports_external_harness_reaching_private_runtime_glue() {
         vec![component],
     ));
 
-    assert_has_result(
+    assertions::assert_has_result(
         &results,
         "RS-TEST-FILETREE-03",
         G3Severity::Error,
@@ -320,7 +302,7 @@ fn reports_external_harness_path_including_local_source() {
         ),
         "crates/runtime/tests/public_surface.rs",
     );
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![file(
             "crates/runtime/tests/public_surface.rs",
             G3RsTestFileKind::ExternalHarness,
@@ -332,7 +314,7 @@ fn reports_external_harness_path_including_local_source() {
         vec![component],
     ));
 
-    assert_has_result(
+    assertions::assert_has_result(
         &results,
         "RS-TEST-FILETREE-03",
         G3Severity::Error,
@@ -360,7 +342,7 @@ fn reports_sidecar_importing_sibling_production_module() {
         "crates/runtime/src/foo_tests/mod.rs",
         "crates/assertions/src/foo.rs",
     );
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![
             file(
                 "crates/runtime/src/foo.rs",
@@ -398,7 +380,7 @@ fn reports_sidecar_importing_sibling_production_module() {
         vec![component],
     ));
 
-    assert_has_result(
+    assertions::assert_has_result(
         &results,
         "RS-TEST-FILETREE-03",
         G3Severity::Error,
@@ -407,16 +389,11 @@ fn reports_sidecar_importing_sibling_production_module() {
         Some(1),
     );
 
-    let result = results
-        .iter()
-        .find(|result| {
-            result.id() == "RS-TEST-FILETREE-03"
-                && result.title() == "sidecar imports sibling local module"
-                && result.file() == Some("crates/runtime/src/foo_tests/mod.rs")
-        })
-        .expect("missing RS-TEST-FILETREE-03 result");
-    assert_eq!(
-        result.message(),
+    assertions::assert_message(
+        &results,
+        "RS-TEST-FILETREE-03",
+        "sidecar imports sibling local module",
+        "crates/runtime/src/foo_tests/mod.rs",
         "Sidecar file `crates/runtime/src/foo_tests/mod.rs` imports sibling local module `bar`. Import only the owned production module `foo` or the shared assertions crate from this sidecar, so the sidecar tests one module without reaching into siblings."
     );
 }
@@ -440,7 +417,7 @@ fn allows_nested_sidecar_to_import_its_required_nested_assertions_module() {
         "crates/assertions/src/foo/rule.rs",
     );
 
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![
             file(
                 "crates/runtime/src/foo/rule.rs",
@@ -478,18 +455,16 @@ fn allows_nested_sidecar_to_import_its_required_nested_assertions_module() {
         vec![component],
     ));
 
-    assert!(
-        results.iter().all(|result| {
-            !(result.id() == "RS-TEST-FILETREE-03"
-                && result.title() == "sidecar imports sibling assertions module")
-        }),
-        "unexpected sibling assertions error\nactual={results:#?}"
+    assertions::assert_no_title(
+        &results,
+        "RS-TEST-FILETREE-03",
+        "sidecar imports sibling assertions module",
     );
 }
 
 #[test]
 fn reports_test_harness_outside_runtime_assertions_split() {
-    let results = run_input(input(
+    let results = assertions::check(&input(
         vec![file(
             "src/lib_tests/mod.rs",
             G3RsTestFileKind::InternalSidecarMod,
@@ -507,7 +482,7 @@ fn reports_test_harness_outside_runtime_assertions_split() {
         )],
     ));
 
-    assert_has_result(
+    assertions::assert_has_result(
         &results,
         "RS-TEST-FILETREE-03",
         G3Severity::Error,
@@ -515,4 +490,116 @@ fn reports_test_harness_outside_runtime_assertions_split() {
         "src/lib_tests/mod.rs",
         None,
     );
+}
+
+fn file(
+    rel_path: &str,
+    kind: G3RsTestFileKind,
+    component_rel_dir: Option<&str>,
+    owner_module_name: Option<&str>,
+    assertions_package_name: Option<&str>,
+    content: &str,
+) -> g3rs_test_types::G3RsTestSourceFile {
+    g3rs_test_types::G3RsTestSourceFile {
+        rel_path: rel_path.to_owned(),
+        kind,
+        owner_module_name: owner_module_name.map(str::to_owned),
+        component_rel_dir: component_rel_dir.map(str::to_owned),
+        assertions_package_name: assertions_package_name.map(str::to_owned),
+        content: content.to_owned(),
+    }
+}
+
+fn component(
+    rel_dir: &str,
+    runtime_rel_dir: &str,
+    runtime_package_name: Option<&str>,
+    assertions_exists: bool,
+    assertions_package_name: Option<&str>,
+) -> g3rs_test_types::G3RsTestComponentFileTreeFacts {
+    g3rs_test_types::G3RsTestComponentFileTreeFacts {
+        rel_dir: rel_dir.to_owned(),
+        runtime_rel_dir: runtime_rel_dir.to_owned(),
+        runtime_cargo_rel_path: if runtime_rel_dir.is_empty() {
+            "Cargo.toml".to_owned()
+        } else {
+            format!("{runtime_rel_dir}/Cargo.toml")
+        },
+        runtime_package_name: runtime_package_name.map(str::to_owned),
+        runtime_normal_dependencies: BTreeSet::new(),
+        runtime_dev_dependencies: BTreeSet::new(),
+        assertions_rel_dir: if runtime_rel_dir.is_empty() {
+            "assertions".to_owned()
+        } else {
+            format!("{}/assertions", parent_dir(runtime_rel_dir))
+        },
+        assertions_cargo_rel_path: if runtime_rel_dir.is_empty() {
+            "assertions/Cargo.toml".to_owned()
+        } else {
+            format!("{}/assertions/Cargo.toml", parent_dir(runtime_rel_dir))
+        },
+        assertions_exists,
+        nested_assertions_cargo_rel_path: None,
+        assertions_package_name: assertions_package_name.map(str::to_owned),
+        assertions_dependencies: BTreeSet::new(),
+        sidecars: Vec::new(),
+        external_harnesses: Vec::new(),
+    }
+}
+
+fn with_nested_assertions_manifest(
+    mut component: g3rs_test_types::G3RsTestComponentFileTreeFacts,
+    nested_assertions_cargo_rel_path: &str,
+) -> g3rs_test_types::G3RsTestComponentFileTreeFacts {
+    component.nested_assertions_cargo_rel_path = Some(nested_assertions_cargo_rel_path.to_owned());
+    component
+}
+
+fn with_sidecar(
+    mut component: g3rs_test_types::G3RsTestComponentFileTreeFacts,
+    mod_rel_path: &str,
+    assertions_module_rel_path: &str,
+) -> g3rs_test_types::G3RsTestComponentFileTreeFacts {
+    component
+        .sidecars
+        .push(g3rs_test_types::G3RsTestOwnedSidecarFacts {
+            mod_rel_path: mod_rel_path.to_owned(),
+            assertions_module_rel_path: assertions_module_rel_path.to_owned(),
+        });
+    component
+}
+
+fn with_external_harness(
+    mut component: g3rs_test_types::G3RsTestComponentFileTreeFacts,
+    rel_path: &str,
+) -> g3rs_test_types::G3RsTestComponentFileTreeFacts {
+    component.external_harnesses.push(rel_path.to_owned());
+    component
+}
+
+fn input(
+    files: Vec<g3rs_test_types::G3RsTestSourceFile>,
+    components: Vec<g3rs_test_types::G3RsTestComponentFileTreeFacts>,
+) -> g3rs_test_types::G3RsTestFileTreeChecksInput {
+    let local_package_names = components
+        .iter()
+        .filter_map(|component| component.runtime_package_name.clone())
+        .chain(
+            components
+                .iter()
+                .filter_map(|component| component.assertions_package_name.clone()),
+        )
+        .collect();
+    g3rs_test_types::G3RsTestFileTreeChecksInput {
+        root_rel_dir: String::new(),
+        cargo_rel_path: "Cargo.toml".to_owned(),
+        files,
+        components,
+        local_package_names,
+        input_failures: Vec::new(),
+    }
+}
+
+fn parent_dir(rel_path: &str) -> &str {
+    rel_path.rsplit_once('/').map_or("", |(parent, _)| parent)
 }

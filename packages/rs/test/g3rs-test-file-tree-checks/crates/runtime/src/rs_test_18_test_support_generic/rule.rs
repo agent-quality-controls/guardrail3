@@ -25,6 +25,10 @@ const REPORT_METHODS: &[&str] = &[
     "title",
 ];
 
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;
+
 fn path_mentions_route_construction(path: &[String]) -> bool {
     path.iter().any(|segment| {
         matches!(
@@ -114,10 +118,10 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
         .any(|call_path| path_mentions_route_construction(call_path))
         || input
             .parsed
-            .functions
-            .iter()
-            .flat_map(|function| function.path_uses.iter())
-            .any(|path| path_mentions_route_construction(path))
+        .functions
+        .iter()
+        .flat_map(|function| function.body.path_uses.iter())
+        .any(|path| path_mentions_route_construction(path))
     {
         results.push(G3CheckResult::new(
             ID.to_owned(),
@@ -156,9 +160,9 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
         .filter(|function| {
             !function.is_public
                 && !function.is_test
-                && function.arg_count == 0
+                && function.signature.arg_count == 0
                 && matches!(
-                    function.return_kind,
+                    function.signature.return_kind,
                     ReturnKind::StringLike | ReturnKind::PathLike
                 )
         })
@@ -172,20 +176,22 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
         .iter()
         .filter(|function| function.is_public && !function.is_test)
     {
-        let references_file_value = function.path_uses.iter().any(|path| {
+        let references_file_value = function.body.path_uses.iter().any(|path| {
             path.first()
                 .is_some_and(|first| input.parsed.file_value_names.contains(first))
         });
-        let calls_local_canned_helper = function.call_paths.iter().any(|path| {
+        let calls_local_canned_helper = function.body.call_paths.iter().any(|path| {
             path.len() == 1
                 && local_canned_helpers.contains(path[0].as_str())
-                && !function.shadowed_idents.contains(&path[0])
+                && !function.body.shadowed_idents.contains(&path[0])
         });
 
         if matches!(
-            function.return_kind,
+            function.signature.return_kind,
             ReturnKind::StringLike | ReturnKind::PathLike
-        ) && (function.arg_count == 0 || references_file_value || calls_local_canned_helper)
+        ) && (function.signature.arg_count == 0
+            || references_file_value
+            || calls_local_canned_helper)
         {
             results.push(G3CheckResult::new(
                 ID.to_owned(),
@@ -202,8 +208,8 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
             continue;
         }
 
-        if function.arg_count == 0
-            && matches!(function.return_kind, ReturnKind::Other)
+        if function.signature.arg_count == 0
+            && matches!(function.signature.return_kind, ReturnKind::Other)
             && calls_local_canned_helper
         {
             results.push(G3CheckResult::new(
@@ -220,18 +226,21 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
             reported = true;
         }
 
-        let selects_report_semantics = function.has_check_result_arg
-            && (function.arg_names.contains("rule_id")
-                || function.arg_names.contains("id")
+        let selects_report_semantics = function.signature.has_check_result_arg
+            && (function.signature.arg_names.contains("rule_id")
+                || function.signature.arg_names.contains("id")
                 || function
+                    .body
                     .field_accesses
                     .iter()
                     .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
                 || function
+                    .body
                     .method_names
                     .iter()
                     .any(|method| REPORT_METHODS.contains(&method.as_str()))
                 || function
+                    .body
                     .path_uses
                     .iter()
                     .any(|path| path.last().is_some_and(|segment| segment == "CheckResult"))
@@ -239,10 +248,10 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
                     .string_literals
                     .iter()
                     .any(|value| value.starts_with("RS-")));
-        let calls_local_semantic_helper = function.call_paths.iter().any(|path| {
+        let calls_local_semantic_helper = function.body.call_paths.iter().any(|path| {
             path.len() == 1
                 && local_semantic_helpers.contains(path[0].as_str())
-                && !function.shadowed_idents.contains(&path[0])
+                && !function.body.shadowed_idents.contains(&path[0])
         });
         if selects_report_semantics || calls_local_semantic_helper {
             results.push(G3CheckResult::new(
@@ -280,18 +289,21 @@ fn semantic_helper_names<'a>(functions: &'a [crate::parse::FunctionInfo]) -> BTr
         .iter()
         .filter(|function| !function.is_public && !function.is_test)
         .filter(|function| {
-            function.has_check_result_arg
-                && (function.arg_names.contains("rule_id")
-                    || function.arg_names.contains("id")
+            function.signature.has_check_result_arg
+                && (function.signature.arg_names.contains("rule_id")
+                    || function.signature.arg_names.contains("id")
                     || function
+                        .body
                         .field_accesses
                         .iter()
                         .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
                     || function
+                        .body
                         .method_names
                         .iter()
                         .any(|method| REPORT_METHODS.contains(&method.as_str()))
                     || function
+                        .body
                         .path_uses
                         .iter()
                         .any(|path| path.last().is_some_and(|segment| segment == "CheckResult"))
@@ -312,10 +324,10 @@ fn semantic_helper_names<'a>(functions: &'a [crate::parse::FunctionInfo]) -> BTr
             if semantic_helpers.contains(function.name.as_str()) {
                 continue;
             }
-            if function.call_paths.iter().any(|path| {
+            if function.body.call_paths.iter().any(|path| {
                 path.len() == 1
                     && semantic_helpers.contains(path[0].as_str())
-                    && !function.shadowed_idents.contains(&path[0])
+                    && !function.body.shadowed_idents.contains(&path[0])
             }) {
                 changed |= semantic_helpers.insert(function.name.as_str());
             }

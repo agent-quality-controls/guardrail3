@@ -1,12 +1,16 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_test_file_tree_checks_types::G3RsTestFileTreeChecksInput;
+use g3rs_test_types::G3RsTestFileTreeChecksInput;
 use g3rs_test_types::G3RsTestFileKind;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::AnalyzedFile;
 
 const ID: &str = "RS-TEST-FILETREE-02";
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct SidecarViolation {

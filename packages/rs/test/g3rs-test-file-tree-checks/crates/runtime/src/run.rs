@@ -1,4 +1,4 @@
-use g3rs_test_file_tree_checks_types::G3RsTestFileTreeChecksInput;
+use g3rs_test_types::G3RsTestFileTreeChecksInput;
 use g3rs_test_types::G3RsTestFileKind;
 use guardrail3_check_types::G3CheckResult;
 

@@ -8,7 +8,7 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["guardrail3", "test", "file-tree", "checks", "rust"]
 categories = ["development-tools"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
@@ -19,10 +19,9 @@ g3rs-test-file-tree-checks-types = { path = "crates/types", version = "0.1.0", o
 [features]
 default = ["all"]
 all = ["api"]
-api = [
-    "dep:g3rs-test-file-tree-checks-runtime",
-    "dep:g3rs-test-file-tree-checks-types",
-]
+types = ["dep:g3rs-test-file-tree-checks-types"]
+runtime = ["dep:g3rs-test-file-tree-checks-runtime"]
+api = ["types", "runtime"]
 
 [package.metadata.guardrail3]
 shared = true
