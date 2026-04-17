@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use cargo_toml_parser::types::CargoToml;
 use mutants_toml_parser::types::MutantsToml;
-use nextest_toml_parser::NextestToml;
+use nextest_toml_parser::types::NextestToml;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct G3RsTestConfigChecksInput {
