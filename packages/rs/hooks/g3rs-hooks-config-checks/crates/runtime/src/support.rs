@@ -1,4 +1,4 @@
-use g3rs_hooks_config_checks_types::G3RsHooksSelectedHookConfigFact;
+use g3rs_hooks_types::G3RsHooksSelectedHookConfigFact;
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 pub(crate) fn tool_installed(installed_tools: &[String], tool: &str) -> bool {
@@ -10,18 +10,23 @@ pub(crate) fn hook_uses_path_qualified_required_tool(
     tool: &str,
 ) -> bool {
     match tool {
-        "gitleaks" => any_resolved_command(&selected_hook.parsed, is_path_qualified_gitleaks_command),
+        "gitleaks" => {
+            any_resolved_command(&selected_hook.parsed, is_path_qualified_gitleaks_command)
+        }
         "cargo-deny" => {
             any_resolved_command(&selected_hook.parsed, is_path_qualified_cargo_deny_command)
         }
-        "cargo-machete" => {
-            any_resolved_command(&selected_hook.parsed, is_path_qualified_cargo_machete_command)
-        }
+        "cargo-machete" => any_resolved_command(
+            &selected_hook.parsed,
+            is_path_qualified_cargo_machete_command,
+        ),
         _ => false,
     }
 }
 
-pub(crate) fn hook_requires_g3rs_validation(selected_hook: &G3RsHooksSelectedHookConfigFact) -> bool {
+pub(crate) fn hook_requires_g3rs_validation(
+    selected_hook: &G3RsHooksSelectedHookConfigFact,
+) -> bool {
     any_resolved_command(&selected_hook.parsed, is_g3rs_validate_staged_command)
 }
 
@@ -68,7 +73,10 @@ fn is_g3rs_validate_staged_command(command: &ResolvedCommand) -> bool {
 fn is_cargo_dupes_command(command: &ResolvedCommand) -> bool {
     match command.command_name() {
         "cargo" => command.args().first().is_some_and(|arg| arg == "dupes"),
-        "cargo-dupes" => !command.args().iter().any(|arg| is_help_or_version_flag(arg)),
+        "cargo-dupes" => !command
+            .args()
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg)),
         _ => false,
     }
 }
@@ -76,19 +84,28 @@ fn is_cargo_dupes_command(command: &ResolvedCommand) -> bool {
 fn is_path_qualified_gitleaks_command(command: &ResolvedCommand) -> bool {
     command.path_qualified()
         && command.command_name() == "gitleaks"
-        && !command.args().iter().any(|arg| is_help_or_version_flag(arg))
+        && !command
+            .args()
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg))
 }
 
 fn is_path_qualified_cargo_deny_command(command: &ResolvedCommand) -> bool {
     command.path_qualified()
         && command.command_name() == "cargo-deny"
-        && !command.args().iter().any(|arg| is_help_or_version_flag(arg))
+        && !command
+            .args()
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg))
 }
 
 fn is_path_qualified_cargo_machete_command(command: &ResolvedCommand) -> bool {
     command.path_qualified()
         && command.command_name() == "cargo-machete"
-        && !command.args().iter().any(|arg| is_help_or_version_flag(arg))
+        && !command
+            .args()
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg))
 }
 
 fn parse_validate_args(args: &[String]) -> bool {

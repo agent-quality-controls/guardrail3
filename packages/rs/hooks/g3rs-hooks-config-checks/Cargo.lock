@@ -14,6 +14,7 @@ dependencies = [
 name = "g3rs-hooks-config-checks-assertions"
 version = "0.1.0"
 dependencies = [
+ "g3rs-hooks-config-checks-runtime",
  "guardrail3-check-types",
 ]
 
@@ -22,7 +23,7 @@ name = "g3rs-hooks-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-hooks-config-checks-assertions",
- "g3rs-hooks-config-checks-types",
+ "g3rs-hooks-types",
  "guardrail3-check-types",
  "hook-shell-parser",
 ]
@@ -54,4 +55,11 @@ dependencies = [
 
 [[package]]
 name = "hook-shell-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-types",
+]
+
+[[package]]
+name = "hook-shell-parser-types"
 version = "0.1.0"
