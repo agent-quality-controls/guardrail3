@@ -142,7 +142,7 @@ fn parse_optional_nextest(
 fn parse_optional_mutants(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
-) -> Result<(bool, Option<mutants_toml_parser::MutantsToml>), IngestionError> {
+) -> Result<(bool, Option<mutants_toml_parser::types::MutantsToml>), IngestionError> {
     let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
         return Ok((false, None));
     };

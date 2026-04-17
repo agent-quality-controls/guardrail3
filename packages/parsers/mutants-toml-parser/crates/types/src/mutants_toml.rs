@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 #[non_exhaustive]
-#[allow(clippy::struct_excessive_bools)] // reason: config struct mirrors the mutants.toml schema — each bool maps to a cargo-mutants option
 pub struct MutantsToml {
     #[serde(default)]
     pub exclude_re: Vec<String>,

@@ -5,7 +5,7 @@ edition = "2024"
 description = "Assertion helpers for mutants-toml parser tests"
 license.workspace = true
 repository.workspace = true
-publish = true
+publish = false
 readme = "README.md"
 keywords = ["mutants", "toml", "assertions", "parser", "rust"]
 categories = ["config", "development-tools", "parser-implementations"]
@@ -20,3 +20,6 @@ checks = []
 
 [dependencies]
 mutants-toml-parser-runtime = { path = "../runtime" }
+
+[package.metadata.docs.rs]
+all-features = true

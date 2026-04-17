@@ -18,13 +18,11 @@ pub fn assert_basic_fields(
     minimum_test_timeout: Option<f64>,
 ) {
     assert_eq!(
-        cfg.timeout_multiplier,
-        timeout_multiplier,
+        cfg.timeout_multiplier, timeout_multiplier,
         "timeout_multiplier mismatch",
     );
     assert_eq!(
-        cfg.minimum_test_timeout,
-        minimum_test_timeout,
+        cfg.minimum_test_timeout, minimum_test_timeout,
         "minimum_test_timeout mismatch",
     );
 }
@@ -38,11 +36,19 @@ pub fn assert_bool_field(actual: Option<bool>, expected: Option<bool>, field_nam
     assert_eq!(actual, expected, "{field_name} mismatch");
 }
 
-pub fn assert_test_tool(actual: Option<TestTool>, expected: Option<TestTool>) {
+pub fn assert_test_tool_name(actual: Option<TestTool>, expected: Option<&str>) {
+    let actual = actual.map(|value| match value {
+        TestTool::Cargo => "cargo",
+        TestTool::Nextest => "nextest",
+    });
     assert_eq!(actual, expected, "test_tool mismatch");
 }
 
-pub fn assert_sharding(actual: Option<Sharding>, expected: Option<Sharding>) {
+pub fn assert_sharding_name(actual: Option<Sharding>, expected: Option<&str>) {
+    let actual = actual.map(|value| match value {
+        Sharding::RoundRobin => "round-robin",
+        Sharding::Slice => "slice",
+    });
     assert_eq!(actual, expected, "sharding mismatch");
 }
 

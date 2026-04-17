@@ -8,17 +8,18 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["mutants", "toml", "parser", "mutation-testing", "rust"]
 categories = ["config", "development-tools", "parser-implementations"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
-mutants-toml-parser-runtime = { path = "crates/parser/runtime", version = "0.1.0", optional = true }
+mutants-toml-parser-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
+mutants-toml-parser-types = { path = "crates/types", version = "0.1.0", optional = true }
 
 [features]
 default = ["all"]
 all = ["api"]
-api = ["dep:mutants-toml-parser-runtime"]
+api = ["dep:mutants-toml-parser-runtime", "dep:mutants-toml-parser-types"]
 
 [lints]
 workspace = true
@@ -30,9 +31,9 @@ all-features = true
 
 [workspace]
 members = [
-    "crates/parser/runtime",
-    "crates/parser/assertions",
-    "crates/parser/types",
+    "crates/runtime",
+    "crates/assertions",
+    "crates/types",
 ]
 resolver = "2"
 

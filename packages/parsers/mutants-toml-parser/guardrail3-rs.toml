@@ -1,0 +1,25 @@
+profile = "library"
+
+allowed_deps = [
+  "mutants-toml-parser-runtime",
+  "mutants-toml-parser-runtime-assertions",
+  "mutants-toml-parser-types",
+  "serde",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-19"
+file = "crates/types/src/mutants_toml.rs"
+selector = "struct:MutantsToml"
+reason = "Schema mirror intentionally matches cargo-mutants' config surface."
+
+[[waivers]]
+rule = "RS-CLIPPY-CONFIG-01"
+file = "clippy.toml"
+selector = "key:max-struct-bools"
+reason = "Schema mirror package keeps the generated baseline while exempting the schema-mirror type from the bool-count cap."
