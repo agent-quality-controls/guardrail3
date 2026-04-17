@@ -1,7 +1,7 @@
 use crate::rs_clippy_config_20_forbid_clippy_conf_dir_override::check;
 use g3rs_clippy_config_checks_assertions::rs_clippy_config_20_forbid_clippy_conf_dir_override as assertions;
 use g3rs_clippy_types::G3RsClippyRustPolicyState;
-use test_support::{input_with_raw, override_facts};
+use test_support::{cargo_config, input_with_raw, missing_cargo_root, parse_error_cargo_config};
 
 #[test]
 fn inventories_clean_state_when_no_overrides_exist() {
@@ -9,7 +9,8 @@ fn inventories_clean_state_when_no_overrides_exist() {
         "clippy.toml",
         "",
         G3RsClippyRustPolicyState::Missing,
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -24,8 +25,12 @@ fn errors_on_override_surface() {
         "clippy.toml",
         "",
         G3RsClippyRustPolicyState::Missing,
-        false,
-        vec![override_facts(".cargo/config.toml", None)],
+        missing_cargo_root(),
+        Vec::new(),
+        vec![cargo_config(
+            ".cargo/config.toml",
+            "[env]\nCLIPPY_CONF_DIR = \"config/clippy\"\n",
+        )],
     );
     let mut results = Vec::new();
     check(&input, &mut results);
@@ -47,8 +52,9 @@ fn errors_on_malformed_override_surface() {
         "clippy.toml",
         "",
         G3RsClippyRustPolicyState::Missing,
-        false,
-        vec![override_facts(".cargo/config", Some("bad env"))],
+        missing_cargo_root(),
+        Vec::new(),
+        vec![parse_error_cargo_config(".cargo/config", "bad env")],
     );
     let mut results = Vec::new();
     check(&input, &mut results);

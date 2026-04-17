@@ -4,7 +4,7 @@ use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
     allow_selector, explicit_allow_entries, is_approved_allow, lints_table_is_well_formed,
-    raw_policy_lints, rust_policy_valid, rust_policy_waivers, waiver_reason,
+    policy_override_lints, rust_policy_valid, rust_policy_waivers, waiver_reason,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-11";
@@ -13,8 +13,8 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
     if !rust_policy_valid(root) {
         return;
     }
-    let rust_lints = raw_policy_lints(root, "rust");
-    let clippy_lints = raw_policy_lints(root, "clippy");
+    let rust_lints = policy_override_lints(root, "rust");
+    let clippy_lints = policy_override_lints(root, "clippy");
     let lint_tables_well_formed =
         lints_table_is_well_formed(rust_lints) && lints_table_is_well_formed(clippy_lints);
 

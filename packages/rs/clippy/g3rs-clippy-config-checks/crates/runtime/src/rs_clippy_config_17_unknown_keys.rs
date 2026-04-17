@@ -4,16 +4,13 @@ use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{
-    known_top_level_keys, managed_non_threshold_keys, normalized_key_distance, raw_clippy,
+    clippy_document, known_top_level_keys, managed_non_threshold_keys, normalized_key_distance,
 };
 
 const ID: &str = "RS-CLIPPY-CONFIG-17";
 
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let Some(parsed) = raw_clippy(input) else {
-        return;
-    };
-    let Some(table) = parsed.as_table() else {
+    let Some(document) = clippy_document(input) else {
         return;
     };
 
@@ -22,8 +19,8 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         .into_iter()
         .chain(managed_non_threshold_keys())
         .collect();
-    for key in table.keys() {
-        let looks_like_managed_typo = !known.contains(key.as_str())
+    for key in clippy_toml_parser::top_level_keys(document) {
+        let looks_like_managed_typo = !known.contains(key)
             && known
                 .iter()
                 .copied()

@@ -1,6 +1,5 @@
-use cargo_toml_parser::types::CargoToml;
+use cargo_toml_parser::types::CargoTomlDocument;
 use guardrail3_rs_toml_parser::types::RustProfile;
-use toml::Value;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum G3RsCargoPolicyRootKind {
@@ -51,13 +50,8 @@ pub struct G3RsCargoPolicyRoot {
     pub kind: G3RsCargoPolicyRootKind,
     pub rel_dir: String,
     pub cargo_rel_path: String,
-    pub cargo: CargoToml,
-    pub raw_cargo: Value,
+    pub cargo: CargoTomlDocument,
     pub rust_policy: G3RsCargoRustPolicyState,
-    pub edition: Option<String>,
-    pub edition_invalid: bool,
-    pub rust_version: Option<String>,
-    pub rust_version_invalid: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -65,12 +59,7 @@ pub struct G3RsCargoWorkspaceMember {
     pub workspace_root_rel: String,
     pub member_rel: String,
     pub cargo_rel_path: String,
-    pub raw_cargo: Value,
-    pub package_name: Option<String>,
-    pub edition: Option<String>,
-    pub edition_invalid: bool,
-    pub lint_workspace_invalid: bool,
-    pub lint_workspace_true: bool,
+    pub cargo: CargoTomlDocument,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

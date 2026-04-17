@@ -1,6 +1,5 @@
-use cargo_toml_parser::parse as parse_cargo_toml;
 use g3rs_cargo_config_checks_assertions::rs_cargo_config_07_approved_allow_inventory as assertions;
-use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState};
+use g3rs_cargo_types::G3RsCargoRustPolicyState;
 use test_support::{parse_error_rust_policy, parsed_rust_policy, root, waiver};
 
 #[test]
@@ -69,15 +68,7 @@ fn errors_when_approved_allow_reason_is_too_weak() {
 
 #[test]
 fn stays_quiet_when_clippy_table_shape_is_invalid() {
-    let cargo = parse_cargo_toml(
-        r#"
-            [workspace]
-            members = []
-            resolver = "2"
-        "#,
-    )
-    .expect("typed cargo fixture should parse");
-    let raw_cargo = toml::from_str::<toml::Value>(
+    let root = root(
         r#"
             [workspace]
             members = []
@@ -86,20 +77,8 @@ fn stays_quiet_when_clippy_table_shape_is_invalid() {
             [workspace.lints]
             clippy = "bad"
         "#,
-    )
-    .expect("raw cargo fixture should parse");
-    let root = G3RsCargoPolicyRoot {
-        kind: G3RsCargoPolicyRootKind::WorkspaceRoot,
-        rel_dir: String::new(),
-        cargo_rel_path: "Cargo.toml".to_owned(),
-        cargo,
-        raw_cargo,
-        rust_policy: G3RsCargoRustPolicyState::Missing,
-        edition: None,
-        edition_invalid: false,
-        rust_version: None,
-        rust_version_invalid: false,
-    };
+        G3RsCargoRustPolicyState::Missing,
+    );
     let mut results = Vec::new();
 
     crate::rs_cargo_config_07_approved_allow_inventory::check(&root, &mut results);

@@ -1,5 +1,6 @@
 use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoWorkspaceMember};
 use guardrail3_check_types::G3CheckResult;
+use cargo_toml_parser::types::CargoStringFieldState;
 
 const ID: &str = "RS-CARGO-CONFIG-10";
 
@@ -8,30 +9,32 @@ pub(crate) fn check(
     member: &G3RsCargoWorkspaceMember,
     results: &mut Vec<G3CheckResult>,
 ) {
-    if root.edition_invalid {
+    if matches!(
+        crate::support::root_edition_state(root),
+        CargoStringFieldState::WrongType(_)
+    ) {
         return;
     }
-    if member.edition_invalid {
-        results.push(crate::support::error(
-            ID,
-            "member edition invalid",
-            format!(
-                "{} must declare edition as a string value or inherit it from the workspace.",
-                member.member_rel
-            ),
-            &member.cargo_rel_path,
-        ));
-        return;
-    }
-    let Some(workspace_edition) = root.edition.as_deref() else {
+    let CargoStringFieldState::Value(workspace_edition) = crate::support::root_edition_state(root) else {
         return;
     };
     let Some(workspace_rank) = edition_rank(workspace_edition) else {
         return;
     };
 
-    match member.edition.as_deref() {
-        Some(member_edition) => {
+    match crate::support::member_edition_state(member) {
+        CargoStringFieldState::WrongType(_) => {
+            results.push(crate::support::error(
+                ID,
+                "member edition invalid",
+                format!(
+                    "{} must declare edition as a string value or inherit it from the workspace.",
+                    member.member_rel
+                ),
+                &member.cargo_rel_path,
+            ));
+        }
+        CargoStringFieldState::Value(member_edition) => {
             let Some(member_rank) = edition_rank(member_edition) else {
                 results.push(crate::support::error(
                     ID,
@@ -66,7 +69,7 @@ pub(crate) fn check(
                 ));
             }
         }
-        None => {
+        CargoStringFieldState::Missing | CargoStringFieldState::Inherit => {
             results.push(crate::support::info(
                 ID,
                 "member inherits workspace edition",

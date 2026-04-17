@@ -279,6 +279,7 @@ pub enum SourceItemOrderingCategory {
     Trait,
 }
 
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SourceItemOrdering(pub Vec<SourceItemOrderingCategory>);
 

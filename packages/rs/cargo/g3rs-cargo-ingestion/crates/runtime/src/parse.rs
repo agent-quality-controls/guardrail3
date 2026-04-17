@@ -1,20 +1,40 @@
 /// Read and parse a `Cargo.toml` file from disk.
 use std::path::Path;
 
-use cargo_toml_parser::types::CargoToml;
+use cargo_toml_parser::types::CargoTomlDocument;
 use g3rs_cargo_types::{G3RsCargoRustPolicyState, G3RsCargoWaiver};
 
 use crate::run::IngestionError;
 
-/// Read the file at `abs_path` and parse it as a `CargoToml`.
-pub(crate) fn parse_cargo_toml(abs_path: &Path) -> Result<CargoToml, IngestionError> {
+/// Read the file at `abs_path` and parse it as a `Cargo.toml` document.
+pub(crate) fn parse_root_cargo_toml(abs_path: &Path) -> Result<CargoTomlDocument, IngestionError> {
     let content = crate::fs::read_to_string(abs_path).map_err(|err| {
         IngestionError::Unreadable {
             path: abs_path.to_path_buf(),
             reason: err.to_string(),
         }
     })?;
-    cargo_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+    let document = cargo_toml_parser::parse_document(&content).map_err(|err| IngestionError::ParseFailed {
+        path: abs_path.to_path_buf(),
+        reason: err.to_string(),
+    })?;
+    if let Some(reason) = cargo_toml_parser::document::parse_error_reason(&document) {
+        return Err(IngestionError::ParseFailed {
+            path: abs_path.to_path_buf(),
+            reason: reason.to_owned(),
+        });
+    }
+    Ok(document)
+}
+
+pub(crate) fn parse_member_cargo_toml(abs_path: &Path) -> Result<CargoTomlDocument, IngestionError> {
+    let content = crate::fs::read_to_string(abs_path).map_err(|err| {
+        IngestionError::Unreadable {
+            path: abs_path.to_path_buf(),
+            reason: err.to_string(),
+        }
+    })?;
+    cargo_toml_parser::parse_document(&content).map_err(|err| IngestionError::ParseFailed {
         path: abs_path.to_path_buf(),
         reason: err.to_string(),
     })

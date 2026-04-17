@@ -23,4 +23,3 @@ shared = true
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
 guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
-toml = "0.8"

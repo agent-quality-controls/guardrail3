@@ -27,6 +27,7 @@ shared = true
 all-features = true
 
 [dependencies]
+cargo-config-toml-parser = { path = "../../../../../parsers/cargo-config-toml-parser", version = "0.1.0" }
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
 guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }

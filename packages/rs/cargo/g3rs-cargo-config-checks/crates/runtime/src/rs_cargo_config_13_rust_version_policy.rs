@@ -1,6 +1,7 @@
 use g3rs_cargo_types::G3RsCargoPolicyRoot;
 use guardrail3_check_types::G3CheckResult;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
+use cargo_toml_parser::types::CargoStringFieldState;
 
 use crate::support::{rust_policy_valid, rust_profile};
 
@@ -10,8 +11,9 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
     if !rust_policy_valid(root) {
         return;
     }
-    if root.rust_version_invalid {
-        results.push(crate::support::error(
+    let is_library = rust_profile(root) == Some(RustProfile::Library);
+    match (is_library, crate::support::root_rust_version_state(root)) {
+        (_, CargoStringFieldState::WrongType(_)) => results.push(crate::support::error(
             ID,
             "rust-version invalid",
             format!(
@@ -19,31 +21,26 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
                 root.cargo_rel_path
             ),
             &root.cargo_rel_path,
-        ));
-        return;
-    }
-
-    let is_library = rust_profile(root) == Some(RustProfile::Library);
-    match (is_library, root.rust_version.as_deref()) {
-        (true, Some(version)) => results.push(crate::support::info(
+        )),
+        (true, CargoStringFieldState::Value(version)) => results.push(crate::support::info(
             ID,
             "library rust-version declared",
             format!("`{}` declares `rust-version = \"{version}\"`.", root.cargo_rel_path),
             &root.cargo_rel_path,
         )),
-        (true, None) => results.push(crate::support::error(
+        (true, CargoStringFieldState::Missing | CargoStringFieldState::Inherit) => results.push(crate::support::error(
             ID,
             "library rust-version missing",
             "Library crates must declare `rust-version` (minimum supported Rust version). Add `rust-version = \"1.75\"` (or appropriate version) to `[package]`.",
             &root.cargo_rel_path,
         )),
-        (false, Some(version)) => results.push(crate::support::info(
+        (false, CargoStringFieldState::Value(version)) => results.push(crate::support::info(
             ID,
             "rust-version inventory",
             format!("`{}` declares `rust-version = \"{version}\"`.", root.cargo_rel_path),
             &root.cargo_rel_path,
         )),
-        (false, None) => results.push(crate::support::info(
+        (false, CargoStringFieldState::Missing | CargoStringFieldState::Inherit) => results.push(crate::support::info(
             ID,
             "rust-version inventory",
             format!(

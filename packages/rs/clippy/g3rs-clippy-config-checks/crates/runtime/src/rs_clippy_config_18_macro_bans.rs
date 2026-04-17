@@ -3,16 +3,16 @@ use std::collections::BTreeSet;
 use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{EXPECTED_MACRO_BANS, display_macro_name, parse_ban_section, raw_clippy};
+use crate::support::{EXPECTED_MACRO_BANS, clippy_document, display_macro_name, parse_ban_section};
 
 const ID: &str = "RS-CLIPPY-CONFIG-18";
 
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let Some(parsed) = raw_clippy(input) else {
+    let Some(document) = clippy_document(input) else {
         return;
     };
 
-    let section = parse_ban_section(parsed, "disallowed-macros");
+    let section = parse_ban_section(document, "disallowed-macros");
     for malformed in &section.malformed_messages {
         results.push(G3CheckResult::new(
             ID.to_owned(),

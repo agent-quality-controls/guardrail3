@@ -3,7 +3,7 @@ use guardrail3_check_types::G3CheckResult;
 use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
-    EXPECTED_CLIPPY_REQUIRED_ALLOW, allow_selector, explicit_allow_entries, raw_policy_lints,
+    EXPECTED_CLIPPY_REQUIRED_ALLOW, allow_selector, explicit_allow_entries, policy_override_lints,
     rust_policy_valid, rust_policy_waivers, waiver_reason, warn,
 };
 
@@ -13,12 +13,9 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
     if !rust_policy_valid(root) {
         return;
     }
-    let Some(clippy_lints) = raw_policy_lints(root, "clippy") else {
+    let Some(clippy_lints) = policy_override_lints(root, "clippy") else {
         return;
     };
-    if clippy_lints.as_table().is_none() {
-        return;
-    }
 
     let mut documented_count = 0usize;
     let mut missing_reason_count = 0usize;

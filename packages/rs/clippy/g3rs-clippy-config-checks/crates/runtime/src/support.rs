@@ -1,9 +1,13 @@
-use clippy_toml_parser::types::ClippyToml;
+use clippy_toml_parser::types::{
+    ClippyBanEntry as ParserBanEntry, ClippyBanSection as ParserBanSection,
+    ClippyBoolSetting as ParserBoolSetting, ClippyToml, ClippyTomlDocument,
+};
 use g3rs_clippy_types::{
-    G3RsClippyConfigChecksInput, G3RsClippyConfigState, G3RsClippyRustPolicyState,
+    G3RsClippyCargoMemberState, G3RsClippyCargoRootState, G3RsClippyConfigChecksInput,
+    G3RsClippyConfigState, G3RsClippyRustPolicyState,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 #[derive(Debug)]
 pub(crate) struct ThresholdExpectation {
@@ -183,30 +187,25 @@ pub(crate) fn has_matching_waiver(
 
 pub(crate) fn typed_clippy(input: &G3RsClippyConfigChecksInput) -> Option<&ClippyToml> {
     match &input.clippy {
-        G3RsClippyConfigState::Parsed {
-            typed: Ok(clippy), ..
-        } => Some(clippy),
+        G3RsClippyConfigState::Parsed(document) => clippy_toml_parser::typed(document),
         G3RsClippyConfigState::Unreadable { .. }
-        | G3RsClippyConfigState::ParseError { .. }
-        | G3RsClippyConfigState::Parsed { typed: Err(_), .. } => None,
+        | G3RsClippyConfigState::ParseError { .. } => None,
     }
 }
 
-pub(crate) fn raw_clippy(input: &G3RsClippyConfigChecksInput) -> Option<&toml::Value> {
+pub(crate) fn clippy_document(
+    input: &G3RsClippyConfigChecksInput,
+) -> Option<&ClippyTomlDocument> {
     match &input.clippy {
-        G3RsClippyConfigState::Parsed { raw, .. } => Some(raw),
+        G3RsClippyConfigState::Parsed(document) => Some(document),
         G3RsClippyConfigState::Unreadable { .. } | G3RsClippyConfigState::ParseError { .. } => None,
     }
 }
 
 pub(crate) fn typed_parse_error(input: &G3RsClippyConfigChecksInput) -> Option<&str> {
     match &input.clippy {
-        G3RsClippyConfigState::Parsed {
-            typed: Err(reason), ..
-        } => Some(reason),
-        G3RsClippyConfigState::Unreadable { .. }
-        | G3RsClippyConfigState::ParseError { .. }
-        | G3RsClippyConfigState::Parsed { typed: Ok(_), .. } => None,
+        G3RsClippyConfigState::Parsed(document) => clippy_toml_parser::parse_error_reason(document),
+        G3RsClippyConfigState::Unreadable { .. } | G3RsClippyConfigState::ParseError { .. } => None,
     }
 }
 
@@ -214,7 +213,7 @@ pub(crate) fn raw_parse_error(input: &G3RsClippyConfigChecksInput) -> Option<&st
     match &input.clippy {
         G3RsClippyConfigState::Unreadable { reason }
         | G3RsClippyConfigState::ParseError { reason } => Some(reason),
-        G3RsClippyConfigState::Parsed { .. } => None,
+        G3RsClippyConfigState::Parsed(_) => None,
     }
 }
 
@@ -258,6 +257,34 @@ pub(crate) fn rust_policy_rel_path(input: &G3RsClippyConfigChecksInput) -> Optio
         | G3RsClippyRustPolicyState::Parsed { rel_path, .. } => Some(rel_path),
         G3RsClippyRustPolicyState::Missing => None,
     }
+}
+
+pub(crate) fn published_library_policy(input: &G3RsClippyConfigChecksInput) -> bool {
+    let G3RsClippyCargoRootState::Parsed { cargo: root_cargo, .. } = &input.cargo_root else {
+        return false;
+    };
+    let Some(root_typed) = cargo_toml_parser::document::typed(root_cargo) else {
+        return false;
+    };
+    let workspace_publish = root_typed
+        .workspace
+        .as_ref()
+        .and_then(|workspace| workspace.package.as_ref())
+        .and_then(|package| package.publish.as_ref());
+
+    if manifest_publishable(root_typed, workspace_publish) {
+        return true;
+    }
+
+    input
+        .cargo_workspace_members
+        .iter()
+        .filter_map(|member| match member {
+            G3RsClippyCargoMemberState::Parsed { cargo, .. } => cargo_toml_parser::document::typed(cargo),
+            G3RsClippyCargoMemberState::Unreadable { .. }
+            | G3RsClippyCargoMemberState::ParseError { .. } => None,
+        })
+        .any(|member| manifest_publishable(member, workspace_publish))
 }
 
 pub(crate) fn relaxation_message(key: &str, expected: bool, actual: Option<bool>) -> String {
@@ -326,82 +353,41 @@ pub(crate) fn expected_method_bans(garde_enabled: bool) -> Vec<&'static str> {
     bans
 }
 
-pub(crate) fn parse_ban_section(parsed: &toml::Value, key: &str) -> BanSectionFacts {
-    let Some(value) = parsed.get(key) else {
-        return BanSectionFacts {
-            entries: Vec::new(),
-            malformed_messages: Vec::new(),
-        };
-    };
-
-    let Some(entries) = value.as_array() else {
-        return BanSectionFacts {
-            entries: Vec::new(),
-            malformed_messages: vec![format!(
-                "`{key}` must be an array, found {}.",
-                value_kind(value)
-            )],
-        };
-    };
-
-    let mut parsed_entries = Vec::new();
-    let mut malformed_messages = Vec::new();
-
-    for (index, entry) in entries.iter().enumerate() {
-        match entry {
-            toml::Value::String(path) => parsed_entries.push(BanEntry {
-                path: path.clone(),
-                reason: None,
-                is_plain_string: true,
-            }),
-            toml::Value::Table(table) => match table.get("path") {
-                Some(toml::Value::String(path)) => {
-                    if let Some(reason) = table.get("reason") {
-                        if !reason.is_str() {
-                            malformed_messages.push(format!(
-                                "`{key}[{index}].reason` must be a string when present, found {}.",
-                                value_kind(reason)
-                            ));
-                            continue;
-                        }
-                    }
-                    parsed_entries.push(BanEntry {
-                        path: path.to_owned(),
-                        reason: table
-                            .get("reason")
-                            .and_then(toml::Value::as_str)
-                            .map(str::to_owned),
-                        is_plain_string: false,
-                    });
-                }
-                Some(path) => malformed_messages.push(format!(
-                    "`{key}[{index}].path` must be a string, found {}.",
-                    value_kind(path)
-                )),
-                None => malformed_messages.push(format!(
-                    "`{key}[{index}]` must contain a string `path` field."
-                )),
-            },
-            other => malformed_messages.push(format!(
-                "`{key}[{index}]` must be a string or table, found {}.",
-                value_kind(other)
-            )),
-        }
-    }
-
+pub(crate) fn parse_ban_section(
+    document: &ClippyTomlDocument,
+    key: &str,
+) -> BanSectionFacts {
+    let ParserBanSection {
+        entries,
+        malformed_messages,
+    } = clippy_toml_parser::ban_section(document, key);
     BanSectionFacts {
-        entries: parsed_entries,
+        entries: entries
+            .into_iter()
+            .map(
+                |ParserBanEntry {
+                     path,
+                     reason,
+                     is_plain_string,
+                 }| BanEntry {
+                    path,
+                    reason,
+                    is_plain_string,
+                },
+            )
+            .collect(),
         malformed_messages,
     }
 }
 
-pub(crate) fn bool_setting<'a>(parsed: &'a toml::Value, key: &str) -> BoolSetting<'a> {
-    match parsed.get(key) {
-        None => BoolSetting::Missing,
-        Some(value) => match value.as_bool() {
-            Some(actual) => BoolSetting::Value(actual),
-            None => BoolSetting::WrongType(value),
-        },
+pub(crate) fn bool_setting<'a>(
+    document: &'a ClippyTomlDocument,
+    key: &str,
+) -> BoolSetting<'a> {
+    match clippy_toml_parser::bool_setting(document, key) {
+        ParserBoolSetting::Missing => BoolSetting::Missing,
+        ParserBoolSetting::WrongType(value) => BoolSetting::WrongType(value),
+        ParserBoolSetting::Value(actual) => BoolSetting::Value(actual),
     }
 }
 
@@ -445,6 +431,41 @@ pub(crate) fn value_kind(value: &toml::Value) -> &'static str {
         toml::Value::Datetime(_) => "datetime",
         toml::Value::Array(_) => "array",
         toml::Value::Table(_) => "table",
+    }
+}
+
+fn manifest_publishable(
+    cargo: &cargo_toml_parser::types::CargoToml,
+    workspace_publish: Option<&cargo_toml_parser::types::VecStringOrBool>,
+) -> bool {
+    let Some(package) = cargo.package.as_ref().or(cargo.project.as_ref()) else {
+        return false;
+    };
+    package_publishable(package, workspace_publish)
+}
+
+fn package_publishable(
+    package: &cargo_toml_parser::types::PackageSection,
+    workspace_publish: Option<&cargo_toml_parser::types::VecStringOrBool>,
+) -> bool {
+    match package.publish.as_ref() {
+        None => true,
+        Some(cargo_toml_parser::types::InheritableValue::Value(value)) => {
+            publish_value_allows_publish(value)
+        }
+        Some(cargo_toml_parser::types::InheritableValue::Inherit(inheritance))
+            if inheritance.workspace =>
+        {
+            workspace_publish.is_some_and(publish_value_allows_publish)
+        }
+        Some(cargo_toml_parser::types::InheritableValue::Inherit(_)) => false,
+    }
+}
+
+fn publish_value_allows_publish(value: &cargo_toml_parser::types::VecStringOrBool) -> bool {
+    match value {
+        cargo_toml_parser::types::VecStringOrBool::Bool(flag) => *flag,
+        cargo_toml_parser::types::VecStringOrBool::VecString(registries) => !registries.is_empty(),
     }
 }
 

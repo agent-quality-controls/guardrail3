@@ -1,7 +1,10 @@
 use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{BoolSetting, bool_setting, raw_clippy, rust_policy_valid, value_kind};
+use crate::support::{
+    BoolSetting, bool_setting, clippy_document, published_library_policy, rust_policy_valid,
+    value_kind,
+};
 
 const ID: &str = "RS-CLIPPY-CONFIG-15";
 
@@ -9,11 +12,11 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
     if !rust_policy_valid(input) {
         return;
     }
-    let Some(parsed) = raw_clippy(input) else {
+    let Some(document) = clippy_document(input) else {
         return;
     };
 
-    match bool_setting(parsed, "avoid-breaking-exported-api") {
+    match bool_setting(document, "avoid-breaking-exported-api") {
         BoolSetting::Value(false) => results.push(
             G3CheckResult::new(
                 ID.to_owned(),
@@ -25,7 +28,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
             )
             .into_inventory(),
         ),
-        BoolSetting::Value(true) if input.published_library_policy => results.push(
+        BoolSetting::Value(true) if published_library_policy(input) => results.push(
             G3CheckResult::new(
                 ID.to_owned(),
                 G3Severity::Info,

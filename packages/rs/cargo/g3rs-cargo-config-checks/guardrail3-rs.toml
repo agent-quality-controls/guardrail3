@@ -1,13 +1,13 @@
 profile = "library"
 
 allowed_deps = [
+  "cargo-config-toml-parser",
   "cargo-toml-parser",
   "g3rs-cargo-config-checks-assertions",
   "g3rs-cargo-types",
   "guardrail3-check-types",
   "guardrail3-rs-toml-parser",
   "guardrail3-reason-policy",
-  "toml",
 ]
 
 [checks]
