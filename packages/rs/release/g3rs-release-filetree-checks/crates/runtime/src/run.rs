@@ -1,4 +1,4 @@
-use g3rs_release_filetree_checks_types::G3RsReleaseFileTreeChecksInput;
+use g3rs_release_types::G3RsReleaseFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsReleaseFileTreeChecksInput) -> Vec<G3CheckResult> {
@@ -22,40 +22,5 @@ pub fn check(input: &G3RsReleaseFileTreeChecksInput) -> Vec<G3CheckResult> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::check;
-    use crate::test_support::{failure, readme, repo_input};
-
-    #[test]
-    fn aggregates_repo_readme_and_input_failures() {
-        let mut input = repo_input();
-        input.readmes.push(readme("demo"));
-        input.input_failures.push(failure(
-            "crates/demo/README.md",
-            "Failed to read README for release checks.",
-        ));
-
-        let results = check(&input);
-
-        assert_eq!(results.len(), 5);
-        assert!(results.iter().any(|result| result.id() == "RS-RELEASE-FILETREE-01"));
-        assert!(results.iter().any(|result| result.id() == "RS-RELEASE-FILETREE-02"));
-        assert!(results.iter().any(|result| result.id() == "RS-RELEASE-FILETREE-03"));
-        assert!(results.iter().any(|result| result.id() == "RS-RELEASE-FILETREE-04"));
-        assert!(results.iter().any(|result| result.id() == "RS-RELEASE-FILETREE-05"));
-    }
-
-    #[test]
-    fn skips_workspace_release_files_when_nothing_publishes() {
-        let mut input = repo_input();
-        let repo = input.repo.as_mut().unwrap();
-        repo.publishable_count = 0;
-        repo.license_rel_path = None;
-        repo.release_plz_exists = false;
-        repo.cliff_exists = false;
-
-        let results = check(&input);
-
-        assert!(results.is_empty(), "{results:#?}");
-    }
-}
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod run_tests;

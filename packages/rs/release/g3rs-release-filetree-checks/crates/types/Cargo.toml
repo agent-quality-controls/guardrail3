@@ -9,10 +9,11 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "release", "filetree", "checks", "rust"]
 categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
 
 [features]
-default = ["all"]
-all = ["api"]
+default = ["api"]
 api = []
 
 [lints]
@@ -20,3 +21,9 @@ workspace = true
 
 [dependencies]
 g3rs-release-types = { path = "../../../g3rs-release-types", version = "0.1.0" }
+
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true

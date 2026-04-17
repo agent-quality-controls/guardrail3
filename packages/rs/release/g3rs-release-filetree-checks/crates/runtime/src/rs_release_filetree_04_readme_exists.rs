@@ -1,4 +1,4 @@
-use g3rs_release_filetree_checks_types::G3RsReleaseFileTreeReadme;
+use g3rs_release_types::G3RsReleaseFileTreeReadme;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-RELEASE-FILETREE-04";
@@ -36,45 +36,5 @@ pub(crate) fn check(readme: &G3RsReleaseFileTreeReadme, results: &mut Vec<G3Chec
 }
 
 #[cfg(test)]
-mod tests {
-    use super::check;
-    use crate::test_support::readme;
-
-    #[test]
-    fn inventories_when_readme_exists() {
-        let readme = readme("demo");
-        let mut results = Vec::new();
-        check(&readme, &mut results);
-        assert_eq!(results[0].id(), "RS-RELEASE-FILETREE-04");
-        assert_eq!(results[0].title(), "demo: README present");
-        assert!(results[0].inventory());
-    }
-
-    #[test]
-    fn errors_when_publishable_readme_is_missing() {
-        let mut readme = readme("demo");
-        readme.readme_exists = false;
-        let mut results = Vec::new();
-
-        check(&readme, &mut results);
-
-        assert_eq!(results[0].id(), "RS-RELEASE-FILETREE-04");
-        assert_eq!(results[0].title(), "demo: README missing");
-        assert!(!results[0].inventory());
-    }
-
-    #[test]
-    fn skips_non_publishable_and_readme_false_crates() {
-        let mut non_publishable = readme("demo");
-        non_publishable.publishable = false;
-        let mut non_publishable_results = Vec::new();
-        check(&non_publishable, &mut non_publishable_results);
-        assert!(non_publishable_results.is_empty());
-
-        let mut opted_out = readme("demo");
-        opted_out.readme_declared_false = true;
-        let mut opted_out_results = Vec::new();
-        check(&opted_out, &mut opted_out_results);
-        assert!(opted_out_results.is_empty());
-    }
-}
+#[path = "rs_release_filetree_04_readme_exists_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_release_filetree_04_readme_exists_tests;

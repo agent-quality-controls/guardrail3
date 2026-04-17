@@ -1,3 +1,3 @@
-# g3rs-code-file-tree-checks-types
+# g3rs-release-filetree-checks-types
 
-Public types for the `code` file-tree lane.
+Public types for the `release` filetree lane.

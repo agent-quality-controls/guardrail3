@@ -1,3 +1,3 @@
-# g3rs-code-file-tree-checks-runtime
+# g3rs-release-filetree-checks-runtime
 
-Runtime implementation for the `code` file-tree lane.
+Runtime implementation for the `release` filetree lane.
