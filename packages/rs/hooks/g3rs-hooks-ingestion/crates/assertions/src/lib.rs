@@ -1,6 +1,4 @@
-#![allow(
-    clippy::missing_assert_message,
-    reason = "assertions scaffold will gain ingestion-specific helpers later"
-)]
+use g3rs_hooks_ingestion_runtime as _;
 
-use g3rs_hooks_source_checks_types as _;
+#[cfg(feature = "checks")]
+pub mod run;
