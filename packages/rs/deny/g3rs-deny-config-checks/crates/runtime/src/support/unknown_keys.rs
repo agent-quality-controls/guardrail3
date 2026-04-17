@@ -1,12 +1,6 @@
 use std::collections::BTreeSet;
 
-use deny_toml_parser::types::{
-    AdvisoriesConfig, AdvisoryIgnoreEntry, BanAllowEntry, BanBuildAllowBuildScriptEntry,
-    BanBuildBypassAllowEntry, BanBuildBypassEntry, BanBuildConfig, BanFeatureEntry,
-    BanSkipTreeEntry, BanWorkspaceDependenciesConfig, BansConfig, GraphConfig, GraphTargetEntry,
-    LicenseClarification, LicenseClarificationFile, LicenseException, LicensesConfig,
-    LicensesPrivateConfig, OutputConfig, SourcesAllowOrg, SourcesConfig,
-};
+use deny_toml_parser::types as deny;
 
 pub(crate) fn known_top_level_keys() -> BTreeSet<&'static str> {
     BTreeSet::from([
@@ -20,7 +14,7 @@ pub(crate) fn known_top_level_keys() -> BTreeSet<&'static str> {
     ])
 }
 
-pub(crate) fn feature_entry_unknown_keys(entry: &BanFeatureEntry) -> Vec<String> {
+pub(crate) fn feature_entry_unknown_keys(entry: &deny::BanFeatureEntry) -> Vec<String> {
     entry
         .extra
         .keys()
@@ -29,10 +23,10 @@ pub(crate) fn feature_entry_unknown_keys(entry: &BanFeatureEntry) -> Vec<String>
         .collect()
 }
 
-pub(crate) fn graph_target_unknown_keys(entry: &GraphTargetEntry) -> Vec<String> {
+pub(crate) fn graph_target_unknown_keys(entry: &deny::GraphTargetEntry) -> Vec<String> {
     match entry {
-        GraphTargetEntry::Simple(_) => Vec::new(),
-        GraphTargetEntry::Detailed(detail) => detail
+        deny::GraphTargetEntry::Simple(_) => Vec::new(),
+        deny::GraphTargetEntry::Detailed(detail) => detail
             .extra
             .keys()
             .filter(|key| !known_section_keys("graph-target").contains(key.as_str()))
@@ -41,7 +35,9 @@ pub(crate) fn graph_target_unknown_keys(entry: &GraphTargetEntry) -> Vec<String>
     }
 }
 
-pub(crate) fn license_clarification_unknown_keys(entry: &LicenseClarification) -> Vec<String> {
+pub(crate) fn license_clarification_unknown_keys(
+    entry: &deny::LicenseClarification,
+) -> Vec<String> {
     entry
         .extra
         .keys()
@@ -51,7 +47,7 @@ pub(crate) fn license_clarification_unknown_keys(entry: &LicenseClarification) -
 }
 
 pub(crate) fn license_clarification_file_unknown_keys(
-    entry: &LicenseClarificationFile,
+    entry: &deny::LicenseClarificationFile,
 ) -> Vec<String> {
     entry
         .extra
@@ -61,7 +57,7 @@ pub(crate) fn license_clarification_file_unknown_keys(
         .collect()
 }
 
-pub(crate) fn license_exception_unknown_keys(entry: &LicenseException) -> Vec<String> {
+pub(crate) fn license_exception_unknown_keys(entry: &deny::LicenseException) -> Vec<String> {
     entry
         .extra
         .keys()
@@ -70,10 +66,10 @@ pub(crate) fn license_exception_unknown_keys(entry: &LicenseException) -> Vec<St
         .collect()
 }
 
-pub(crate) fn allow_entry_unknown_keys(entry: &BanAllowEntry) -> Vec<String> {
+pub(crate) fn allow_entry_unknown_keys(entry: &deny::BanAllowEntry) -> Vec<String> {
     match entry {
-        BanAllowEntry::Simple(_) => Vec::new(),
-        BanAllowEntry::Detailed(detail) => detail
+        deny::BanAllowEntry::Simple(_) => Vec::new(),
+        deny::BanAllowEntry::Detailed(detail) => detail
             .extra
             .keys()
             .filter(|key| !known_section_keys("allow").contains(key.as_str()))
@@ -82,10 +78,10 @@ pub(crate) fn allow_entry_unknown_keys(entry: &BanAllowEntry) -> Vec<String> {
     }
 }
 
-pub(crate) fn advisory_ignore_unknown_keys(entry: &AdvisoryIgnoreEntry) -> Vec<String> {
+pub(crate) fn advisory_ignore_unknown_keys(entry: &deny::AdvisoryIgnoreEntry) -> Vec<String> {
     match entry {
-        AdvisoryIgnoreEntry::Simple(_) => Vec::new(),
-        AdvisoryIgnoreEntry::Detailed(detail) => detail
+        deny::AdvisoryIgnoreEntry::Simple(_) => Vec::new(),
+        deny::AdvisoryIgnoreEntry::Detailed(detail) => detail
             .extra
             .keys()
             .filter(|key| !known_section_keys("ignore").contains(key.as_str()))
@@ -94,7 +90,7 @@ pub(crate) fn advisory_ignore_unknown_keys(entry: &AdvisoryIgnoreEntry) -> Vec<S
     }
 }
 
-pub(crate) fn private_unknown_keys(config: &LicensesPrivateConfig) -> Vec<String> {
+pub(crate) fn private_unknown_keys(config: &deny::LicensesPrivateConfig) -> Vec<String> {
     config
         .extra
         .keys()
@@ -103,7 +99,7 @@ pub(crate) fn private_unknown_keys(config: &LicensesPrivateConfig) -> Vec<String
         .collect()
 }
 
-pub(crate) fn graph_unknown_keys(graph: &GraphConfig) -> Vec<String> {
+pub(crate) fn graph_unknown_keys(graph: &deny::GraphConfig) -> Vec<String> {
     graph
         .extra
         .keys()
@@ -112,7 +108,7 @@ pub(crate) fn graph_unknown_keys(graph: &GraphConfig) -> Vec<String> {
         .collect()
 }
 
-pub(crate) fn advisories_unknown_keys(config: &AdvisoriesConfig) -> Vec<String> {
+pub(crate) fn advisories_unknown_keys(config: &deny::AdvisoriesConfig) -> Vec<String> {
     config
         .extra
         .keys()
@@ -121,7 +117,7 @@ pub(crate) fn advisories_unknown_keys(config: &AdvisoriesConfig) -> Vec<String> 
         .collect()
 }
 
-pub(crate) fn bans_unknown_keys(config: &BansConfig) -> Vec<String> {
+pub(crate) fn bans_unknown_keys(config: &deny::BansConfig) -> Vec<String> {
     config
         .extra
         .keys()
@@ -130,7 +126,7 @@ pub(crate) fn bans_unknown_keys(config: &BansConfig) -> Vec<String> {
         .collect()
 }
 
-pub(crate) fn licenses_unknown_keys(config: &LicensesConfig) -> Vec<String> {
+pub(crate) fn licenses_unknown_keys(config: &deny::LicensesConfig) -> Vec<String> {
     config
         .extra
         .keys()
@@ -139,7 +135,7 @@ pub(crate) fn licenses_unknown_keys(config: &LicensesConfig) -> Vec<String> {
         .collect()
 }
 
-pub(crate) fn sources_unknown_keys(config: &SourcesConfig) -> Vec<String> {
+pub(crate) fn sources_unknown_keys(config: &deny::SourcesConfig) -> Vec<String> {
     config
         .extra
         .keys()
@@ -148,10 +144,10 @@ pub(crate) fn sources_unknown_keys(config: &SourcesConfig) -> Vec<String> {
         .collect()
 }
 
-pub(crate) fn skip_tree_unknown_keys(entry: &BanSkipTreeEntry) -> Vec<String> {
+pub(crate) fn skip_tree_unknown_keys(entry: &deny::BanSkipTreeEntry) -> Vec<String> {
     match entry {
-        BanSkipTreeEntry::Simple(_) => Vec::new(),
-        BanSkipTreeEntry::Detailed(detail) => detail
+        deny::BanSkipTreeEntry::Simple(_) => Vec::new(),
+        deny::BanSkipTreeEntry::Detailed(detail) => detail
             .extra
             .keys()
             .filter(|key| !known_section_keys("skip-tree").contains(key.as_str()))
@@ -161,7 +157,7 @@ pub(crate) fn skip_tree_unknown_keys(entry: &BanSkipTreeEntry) -> Vec<String> {
 }
 
 pub(crate) fn workspace_dependencies_unknown_keys(
-    config: &BanWorkspaceDependenciesConfig,
+    config: &deny::BanWorkspaceDependenciesConfig,
 ) -> Vec<String> {
     config
         .extra
@@ -171,7 +167,7 @@ pub(crate) fn workspace_dependencies_unknown_keys(
         .collect()
 }
 
-pub(crate) fn build_unknown_keys(config: &BanBuildConfig) -> Vec<String> {
+pub(crate) fn build_unknown_keys(config: &deny::BanBuildConfig) -> Vec<String> {
     config
         .extra
         .keys()
@@ -181,11 +177,11 @@ pub(crate) fn build_unknown_keys(config: &BanBuildConfig) -> Vec<String> {
 }
 
 pub(crate) fn build_allow_build_script_unknown_keys(
-    entry: &BanBuildAllowBuildScriptEntry,
+    entry: &deny::BanBuildAllowBuildScriptEntry,
 ) -> Vec<String> {
     match entry {
-        BanBuildAllowBuildScriptEntry::Simple(_) => Vec::new(),
-        BanBuildAllowBuildScriptEntry::Detailed(detail) => detail
+        deny::BanBuildAllowBuildScriptEntry::Simple(_) => Vec::new(),
+        deny::BanBuildAllowBuildScriptEntry::Detailed(detail) => detail
             .extra
             .keys()
             .filter(|key| !known_section_keys("build-allow-build-scripts").contains(key.as_str()))
@@ -194,9 +190,7 @@ pub(crate) fn build_allow_build_script_unknown_keys(
     }
 }
 
-pub(crate) fn build_bypass_unknown_keys(
-    entry: &BanBuildBypassEntry,
-) -> Vec<String> {
+pub(crate) fn build_bypass_unknown_keys(entry: &deny::BanBuildBypassEntry) -> Vec<String> {
     entry
         .extra
         .keys()
@@ -206,7 +200,7 @@ pub(crate) fn build_bypass_unknown_keys(
 }
 
 pub(crate) fn build_bypass_allow_unknown_keys(
-    entry: &BanBuildBypassAllowEntry,
+    entry: &deny::BanBuildBypassAllowEntry,
 ) -> Vec<String> {
     entry
         .extra
@@ -216,7 +210,7 @@ pub(crate) fn build_bypass_allow_unknown_keys(
         .collect()
 }
 
-pub(crate) fn output_unknown_keys(config: &OutputConfig) -> Vec<String> {
+pub(crate) fn output_unknown_keys(config: &deny::OutputConfig) -> Vec<String> {
     config
         .extra
         .keys()
@@ -225,7 +219,7 @@ pub(crate) fn output_unknown_keys(config: &OutputConfig) -> Vec<String> {
         .collect()
 }
 
-pub(crate) fn allow_org_unknown_keys(config: &SourcesAllowOrg) -> Vec<String> {
+pub(crate) fn allow_org_unknown_keys(config: &deny::SourcesAllowOrg) -> Vec<String> {
     config
         .extra
         .keys()
