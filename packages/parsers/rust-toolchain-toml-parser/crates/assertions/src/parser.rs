@@ -5,10 +5,26 @@
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
-use rust_toolchain_toml_parser_runtime::{RustToolchainToml, Value};
+use std::io::Write;
+
+use rust_toolchain_toml_parser_runtime::Value;
+use rust_toolchain_toml_parser_runtime::types::RustToolchainToml;
+use rust_toolchain_toml_parser_runtime::types::rust_toolchain_toml::ToolchainSection;
+
+pub fn parse_fixture(input: &str) -> RustToolchainToml {
+    rust_toolchain_toml_parser_runtime::parse(input)
+        .expect("should parse valid rust-toolchain.toml")
+}
+
+pub fn parse_from_tempfile(input: &str) -> RustToolchainToml {
+    let mut file = tempfile::NamedTempFile::new().expect("tempfile should be created");
+    file.write_all(input.as_bytes())
+        .expect("toolchain file should be written");
+    rust_toolchain_toml_parser_runtime::from_path(file.path()).expect("file should parse")
+}
 
 #[must_use]
-pub fn toolchain(cfg: &RustToolchainToml) -> &rust_toolchain_toml_parser_runtime::ToolchainSection {
+pub fn toolchain(cfg: &RustToolchainToml) -> &ToolchainSection {
     cfg.toolchain.as_ref().expect("toolchain should be present")
 }
 
@@ -65,4 +81,23 @@ pub fn assert_toolchain_string_extra(cfg: &RustToolchainToml, key: &str, expecte
         Some(expected),
         "toolchain extra key should be preserved"
     );
+}
+
+pub fn assert_parse_error(err: impl std::fmt::Display) {
+    let msg = err.to_string();
+    assert!(
+        msg.contains("invalid rust-toolchain.toml"),
+        "expected error message prefix, got: {msg}",
+    );
+}
+
+/// Parse rust-toolchain TOML content through the runtime parser.
+///
+/// # Errors
+///
+/// Returns the parser error when the input is not valid rust-toolchain TOML.
+pub fn parse_error(
+    input: &str,
+) -> Result<RustToolchainToml, rust_toolchain_toml_parser_runtime::Error> {
+    rust_toolchain_toml_parser_runtime::parse(input)
 }

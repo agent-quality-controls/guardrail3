@@ -1,11 +1,8 @@
-use helpers::{parse_fixture, parse_from_tempfile};
 use rust_toolchain_toml_parser_runtime_assertions::parser as assertions;
-
-use super::helpers;
 
 #[test]
 fn empty_string_yields_empty_config() {
-    let cfg = parse_fixture("");
+    let cfg = assertions::parse_fixture("");
 
     assertions::assert_toolchain_absent(&cfg);
     assertions::assert_top_level_extra_empty(&cfg);
@@ -13,7 +10,7 @@ fn empty_string_yields_empty_config() {
 
 #[test]
 fn toolchain_section_parses_common_fields() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 [toolchain]
 channel = "stable"
@@ -36,7 +33,7 @@ profile = "minimal"
 
 #[test]
 fn missing_arrays_default_to_empty() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 [toolchain]
 channel = "1.85.0"
@@ -48,7 +45,7 @@ channel = "1.85.0"
 
 #[test]
 fn toolchain_section_parses_path_form() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 [toolchain]
 path = "/opt/rust/toolchains/local"
@@ -67,7 +64,7 @@ path = "/opt/rust/toolchains/local"
 
 #[test]
 fn unknown_top_level_keys_are_captured() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 schema-version = 1
 
@@ -81,7 +78,7 @@ channel = "stable"
 
 #[test]
 fn unknown_toolchain_keys_are_captured() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 [toolchain]
 channel = "stable"
@@ -94,7 +91,7 @@ custom-key = "kept"
 
 #[test]
 fn from_path_reads_and_parses_file() {
-    let cfg = parse_from_tempfile(
+    let cfg = assertions::parse_from_tempfile(
         r#"
 [toolchain]
 channel = "stable"
@@ -108,7 +105,7 @@ components = ["clippy"]
 
 #[test]
 fn path_and_channel_cannot_be_combined() {
-    let err = super::super::parse(
+    let err = assertions::parse_error(
         r#"
 [toolchain]
 channel = "stable"
@@ -126,7 +123,7 @@ path = "/opt/rust/toolchains/local"
 
 #[test]
 fn path_cannot_be_combined_with_other_toolchain_options() {
-    let err = super::super::parse(
+    let err = assertions::parse_error(
         r#"
 [toolchain]
 path = "/opt/rust/toolchains/local"

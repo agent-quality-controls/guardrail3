@@ -1,6 +1,6 @@
 use cargo_toml_parser::{types::CargoToml, types::InheritableValue};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use rust_toolchain_toml_parser::RustToolchainToml;
+use rust_toolchain_toml_parser::types::RustToolchainToml;
 
 const ID: &str = "RS-TOOLCHAIN-CONFIG-02";
 

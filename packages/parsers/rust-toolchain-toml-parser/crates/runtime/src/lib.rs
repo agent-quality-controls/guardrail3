@@ -8,8 +8,8 @@ mod parser;
 #[cfg(feature = "api")]
 pub use error::Error;
 #[cfg(feature = "api")]
-pub use parser::{from_path, parse};
+pub mod types;
 #[cfg(feature = "api")]
-pub use rust_toolchain_toml_parser_types::{RustToolchainToml, ToolchainSection};
+pub use parser::{from_path, parse};
 #[cfg(feature = "api")]
 pub use toml::Value;

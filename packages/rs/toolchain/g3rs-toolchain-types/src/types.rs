@@ -1,5 +1,5 @@
 use cargo_toml_parser::types::CargoToml;
-use rust_toolchain_toml_parser::RustToolchainToml;
+use rust_toolchain_toml_parser::types::RustToolchainToml;
 
 /// Input contract for extracted rust-toolchain config checks.
 ///

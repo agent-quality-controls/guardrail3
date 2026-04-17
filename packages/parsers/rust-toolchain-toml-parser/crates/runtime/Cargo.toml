@@ -8,7 +8,7 @@ rust-version.workspace = true
 repository.workspace = true
 keywords = ["rust-toolchain", "toml", "parser", "toolchain", "rust"]
 categories = ["config", "development-tools", "parser-implementations"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
@@ -26,7 +26,6 @@ toml = "0.8"
 
 [dev-dependencies]
 rust-toolchain-toml-parser-runtime-assertions = { path = "../assertions" }
-tempfile = "3"
 
 [package.metadata.docs.rs]
 all-features = true

@@ -1,0 +1,13 @@
+profile = "library"
+
+allowed_deps = [
+  "rust-toolchain-toml-parser-runtime",
+  "rust-toolchain-toml-parser-runtime-assertions",
+  "rust-toolchain-toml-parser-types",
+  "serde",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false

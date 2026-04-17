@@ -1,11 +1,11 @@
 [package]
 name = "rust-toolchain-toml-parser-runtime-assertions"
-version = "0.0.0"
+version.workspace = true
 edition = "2024"
 description = "Assertion helpers for rust-toolchain-toml parser tests"
 license.workspace = true
 repository.workspace = true
-publish = true
+publish = false
 readme = "README.md"
 keywords = ["rust-toolchain", "toml", "assertions", "parser", "rust"]
 categories = ["config", "development-tools", "parser-implementations"]
@@ -20,3 +20,7 @@ checks = []
 
 [dependencies]
 rust-toolchain-toml-parser-runtime = { path = "../runtime" }
+tempfile = "3"
+
+[package.metadata.docs.rs]
+all-features = true

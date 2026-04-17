@@ -2,7 +2,7 @@ use cargo_toml_parser::types::CargoToml;
 use clippy_toml_parser::types::ClippyToml;
 use deny_toml_parser::types::DenyToml;
 use guardrail3_rs_toml_parser::types::Guardrail3RsToml;
-use rust_toolchain_toml_parser::RustToolchainToml;
+use rust_toolchain_toml_parser::types::RustToolchainToml;
 use rustfmt_toml_parser::RustfmtToml;
 
 #[derive(Debug, Clone)]
