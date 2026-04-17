@@ -57,7 +57,7 @@ def extract_package_target(rel_path):
 
     E.g. "../../../cargo-toml-parser" → ("cargo-toml-parser", "")
     E.g. "../../../guardrail3-check-types" → ("guardrail3-check-types", "/crates/guardrail3-check-types")
-    E.g. "../../../reason-policy/crates/reason-policy" → ("reason-policy", "/crates/reason-policy")
+    E.g. "../../../reason-policy" → ("reason-policy", "/crates/reason-policy")
     """
     # Normalize
     parts = [p for p in rel_path.split("/") if p != "." and p != ""]
