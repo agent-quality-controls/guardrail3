@@ -8,10 +8,6 @@ mod parser;
 #[cfg(feature = "api")]
 pub use error::Error;
 #[cfg(feature = "api")]
-pub use guardrail3_rs_toml_parser_types::{
-    Guardrail3RsToml, RustChecksConfig, RustProfile, WaiverConfig,
-};
+pub mod types;
 #[cfg(feature = "api")]
 pub use parser::{from_path, parse};
-#[cfg(feature = "api")]
-pub use toml::Value;

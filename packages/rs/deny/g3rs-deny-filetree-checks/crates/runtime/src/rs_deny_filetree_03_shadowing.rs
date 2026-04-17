@@ -15,12 +15,16 @@ pub(crate) fn check(input: &G3RsDenyFileTreeChecksInput, results: &mut Vec<G3Che
         ID.to_owned(),
         G3Severity::Error,
         "multiple deny configs at one policy root".to_owned(),
-        format!("`.` has multiple accepted deny configs: {}.", rel_paths.join(", ")),
+        format!(
+            "`.` has multiple accepted deny configs: {}.",
+            rel_paths.join(", ")
+        ),
         rel_paths.first().cloned(),
         None,
     ));
 }
 
 #[cfg(test)]
-#[path = "rs_deny_filetree_03_shadowing_tests/mod.rs"] // reason: file module tests live in the owned rs_deny_filetree_03_shadowing_tests sidecar directory.
+#[path = "rs_deny_filetree_03_shadowing_tests/mod.rs"]
+// reason: file module tests live in the owned rs_deny_filetree_03_shadowing_tests sidecar directory.
 mod rs_deny_filetree_03_shadowing_tests;

@@ -5,7 +5,7 @@ use g3rs_garde_types::{
     G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
     G3RsGardeFileTreeChecksInput, G3RsGardeRustPolicyInput, G3RsGardeWaiver,
 };
-use guardrail3_rs_toml_parser::Guardrail3RsToml;
+use guardrail3_rs_toml_parser::types::Guardrail3RsToml;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsGardeIngestionError` so the facade can reach it.

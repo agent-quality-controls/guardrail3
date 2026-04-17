@@ -121,11 +121,7 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn error_no_file<'a>(
-            title: &'a str,
-            message: &'a str,
-            inventory: bool,
-        ) -> Finding<'a> {
+        pub fn error_no_file<'a>(title: &'a str, message: &'a str, inventory: bool) -> Finding<'a> {
             crate::common::finding(
                 guardrail3_check_types::G3Severity::Error,
                 title,

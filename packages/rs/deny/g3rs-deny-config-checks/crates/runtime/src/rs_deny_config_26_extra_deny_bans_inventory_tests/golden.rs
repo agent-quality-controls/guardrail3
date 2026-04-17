@@ -8,7 +8,7 @@ use super::helpers;
 fn inventories_canonical_baseline_as_having_no_extra_bans() {
     let results = run(
         &helpers::service_canonical_bans_toml(),
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_26_extra_deny_bans_inventory::check,
     );

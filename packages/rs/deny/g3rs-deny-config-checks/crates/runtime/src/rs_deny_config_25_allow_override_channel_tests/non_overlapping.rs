@@ -9,7 +9,7 @@ fn reports_non_overlapping_allow_entries_without_override_findings() {
 [bans]
 allow = ["totally-custom-crate"]
 "#,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_25_allow_override_channel::check,
     );

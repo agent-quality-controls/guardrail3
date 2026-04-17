@@ -2,7 +2,7 @@ use g3rs_deps_types::G3RsDepsDependencySection;
 use g3rs_deps_types::G3RsDepsConfigInputScope;
 use g3rs_deps_ingestion_assertions::run as assertions;
 use g3rs_workspace_crawl::crawl;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 use crate::run::ingest_for_config_checks;
 

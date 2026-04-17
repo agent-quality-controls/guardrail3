@@ -1,5 +1,5 @@
 use guardrail3_rs_toml_parser_runtime_assertions::parser as assertions;
-use helpers::{parse_fixture, parse_fixture_file, parse_from_tempfile};
+use helpers::{parse_error, parse_fixture, parse_fixture_file, parse_from_tempfile};
 
 use super::helpers;
 
@@ -20,7 +20,7 @@ allowed_deps = ["serde", "toml"]
 "#,
     );
 
-    assertions::assert_profile(&cfg, Some(crate::RustProfile::Service));
+    assertions::assert_profile(&cfg, Some(crate::types::RustProfile::Service));
     assertions::assert_string_list(&cfg.allowed_deps, &["serde", "toml"], "allowed_deps");
     assertions::assert_extra_empty(&cfg);
 }
@@ -51,15 +51,15 @@ reviewer = "guardrail-team"
     );
 
     assertions::assert_version(&cfg, Some("1"));
-    assertions::assert_profile(&cfg, Some(crate::RustProfile::Library));
+    assertions::assert_profile(&cfg, Some(crate::types::RustProfile::Library));
     assertions::assert_string_list(
         &cfg.excluded_paths,
         &["legacy", "tests/fixtures"],
         "excluded_paths",
     );
     assertions::assert_string_list(&cfg.allowed_deps, &["serde", "toml"], "allowed_deps");
-    assertions::assert_check_value(cfg.checks.as_ref(), "fmt", Some(true));
-    assertions::assert_check_value(cfg.checks.as_ref(), "clippy", Some(true));
+    assertions::assert_fmt_check(cfg.checks.as_ref(), Some(true));
+    assertions::assert_clippy_check(cfg.checks.as_ref(), Some(true));
     assertions::assert_check_extra_bool(cfg.checks.as_ref(), "hexarch", false);
     assertions::assert_check_extra_string(cfg.checks.as_ref(), "future_check", "preserve-me");
     assertions::assert_waiver(
@@ -98,7 +98,7 @@ nested = { still = "here" }
 "#,
     );
 
-    assertions::assert_profile(&cfg, Some(crate::RustProfile::Service));
+    assertions::assert_profile(&cfg, Some(crate::types::RustProfile::Service));
     assertions::assert_top_level_string_extra(&cfg, "future-key", "value");
     assertions::assert_check_extra_table(cfg.checks.as_ref(), "nested");
 }
@@ -134,7 +134,7 @@ profile = "service"
 "#,
     );
 
-    assertions::assert_profile(&cfg, Some(crate::RustProfile::Service));
+    assertions::assert_profile(&cfg, Some(crate::types::RustProfile::Service));
 }
 
 #[test]
@@ -142,20 +142,20 @@ fn realistic_workspace_fixture_file_parses() {
     let cfg = parse_fixture_file("workspace_service.toml");
 
     assertions::assert_version(&cfg, Some("1"));
-    assertions::assert_profile(&cfg, Some(crate::RustProfile::Service));
+    assertions::assert_profile(&cfg, Some(crate::types::RustProfile::Service));
     assertions::assert_string_list(
         &cfg.excluded_paths,
         &["legacy", "tests/fixtures"],
         "excluded_paths",
     );
     assertions::assert_string_list(&cfg.allowed_deps, &["serde", "toml"], "allowed_deps");
-    assertions::assert_check_value(cfg.checks.as_ref(), "fmt", Some(true));
-    assertions::assert_check_value(cfg.checks.as_ref(), "hooks_rs", Some(true));
+    assertions::assert_fmt_check(cfg.checks.as_ref(), Some(true));
+    assertions::assert_hooks_rs_check(cfg.checks.as_ref(), Some(true));
     assert_eq!(cfg.waivers.len(), 3, "fixture should contain three waivers");
 }
 
 #[test]
 fn parse_error_on_invalid_toml() {
-    let err = super::super::parse("this is not [[[valid toml");
-    assertions::assert_parse_error(err.expect_err("invalid TOML should error"));
+    let err = parse_error("this is not [[[valid toml");
+    assertions::assert_parse_error(err);
 }

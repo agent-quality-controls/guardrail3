@@ -6,7 +6,7 @@
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
-use guardrail3_rs_toml_parser_runtime::{
+use guardrail3_rs_toml_parser_runtime::types::{
     Guardrail3RsToml, RustChecksConfig, RustProfile, Value, WaiverConfig,
 };
 
@@ -39,25 +39,24 @@ pub fn assert_string_list(actual: &[String], expected: &[&str], field_name: &str
     assert_eq!(actual, expected_values, "{field_name} mismatch");
 }
 
-pub fn assert_check_value(checks: Option<&RustChecksConfig>, key: &str, expected: Option<bool>) {
-    let actual = checks.and_then(|checks| match key {
-        "topology" => checks.topology,
-        "arch" => checks.arch,
-        "fmt" => checks.fmt,
-        "toolchain" => checks.toolchain,
-        "clippy" => checks.clippy,
-        "deny" => checks.deny,
-        "cargo" => checks.cargo,
-        "code" => checks.code,
-        "deps" => checks.deps,
-        "garde" => checks.garde,
-        "test" => checks.test,
-        "release" => checks.release,
-        "hooks_shared" => checks.hooks_shared,
-        "hooks_rs" => checks.hooks_rs,
-        _ => panic!("unexpected check key: {key}"),
-    });
-    assert_eq!(actual, expected, "{key} mismatch");
+pub fn assert_fmt_check(checks: Option<&RustChecksConfig>, expected: Option<bool>) {
+    let actual = checks.and_then(|checks| checks.fmt);
+    assert_eq!(actual, expected, "fmt mismatch");
+}
+
+pub fn assert_clippy_check(checks: Option<&RustChecksConfig>, expected: Option<bool>) {
+    let actual = checks.and_then(|checks| checks.clippy);
+    assert_eq!(actual, expected, "clippy mismatch");
+}
+
+pub fn assert_garde_check(checks: Option<&RustChecksConfig>, expected: Option<bool>) {
+    let actual = checks.and_then(|checks| checks.garde);
+    assert_eq!(actual, expected, "garde mismatch");
+}
+
+pub fn assert_hooks_rs_check(checks: Option<&RustChecksConfig>, expected: Option<bool>) {
+    let actual = checks.and_then(|checks| checks.hooks_rs);
+    assert_eq!(actual, expected, "hooks_rs mismatch");
 }
 
 pub fn assert_check_extra_string(checks: Option<&RustChecksConfig>, key: &str, expected: &str) {

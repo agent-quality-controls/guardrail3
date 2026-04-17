@@ -10,7 +10,7 @@ fn errors_when_library_only_ban_is_allow_listed() {
 deny = ["axum"]
 allow = ["axum"]
 "#,
-        Some(guardrail3_rs_toml_parser::RustProfile::Library),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Library),
         true,
         crate::rs_deny_config_25_allow_override_channel::check,
     );

@@ -1,14 +1,15 @@
 [package]
 name = "guardrail3-rs-toml-parser-runtime-assertions"
-version = "0.0.0"
+version.workspace = true
 edition = "2024"
 description = "Assertion helpers for guardrail3-rs.toml parser tests"
 license.workspace = true
 repository.workspace = true
-publish = true
+publish = false
 readme = "README.md"
 keywords = ["guardrail3", "rust", "toml", "assertions", "parser"]
 categories = ["config", "development-tools", "parser-implementations"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [lints]
 workspace = true
@@ -20,3 +21,6 @@ checks = []
 
 [dependencies]
 guardrail3-rs-toml-parser-runtime = { path = "../runtime" }
+
+[package.metadata.docs.rs]
+all-features = true

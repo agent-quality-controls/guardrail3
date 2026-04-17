@@ -8,7 +8,7 @@ use super::helpers;
 fn errors_when_bans_section_is_missing() {
     let results = run(
         "",
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_23_ban_baseline_complete::check,
     );
@@ -28,7 +28,7 @@ fn errors_when_bans_section_is_missing() {
 fn errors_when_bans_deny_is_missing() {
     let results = run(
         "[bans]\n",
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_23_ban_baseline_complete::check,
     );
@@ -51,7 +51,7 @@ fn errors_when_canonical_bans_are_missing() {
         .replace("\"lazy_static\",\n", "");
     let results = run(
         &deny_toml,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_23_ban_baseline_complete::check,
     );

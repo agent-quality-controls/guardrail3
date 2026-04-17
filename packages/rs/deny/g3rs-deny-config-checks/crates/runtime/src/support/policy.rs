@@ -1,5 +1,5 @@
 use g3rs_deny_types::{G3RsDenyConfigChecksInput, G3RsDenyRustPolicyState};
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 pub(crate) fn rust_policy_valid(input: &G3RsDenyConfigChecksInput) -> bool {
     !matches!(

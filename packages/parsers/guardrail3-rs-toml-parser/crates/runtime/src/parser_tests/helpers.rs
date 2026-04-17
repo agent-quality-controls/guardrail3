@@ -1,7 +1,6 @@
 use std::io::Write;
 
-use super::super::{from_path, parse};
-use crate::Guardrail3RsToml;
+use super::super::{from_path, parse, Error, Guardrail3RsToml};
 
 pub(super) fn parse_fixture(input: &str) -> Guardrail3RsToml {
     parse(input).expect("should parse valid guardrail3-rs.toml")
@@ -21,4 +20,8 @@ pub(super) fn parse_from_tempfile(input: &str) -> Guardrail3RsToml {
     file.write_all(input.as_bytes())
         .expect("guardrail3-rs.toml should be written");
     from_path(file.path()).expect("file should parse")
+}
+
+pub(super) fn parse_error(input: &str) -> Error {
+    parse(input).expect_err("input should fail to parse")
 }

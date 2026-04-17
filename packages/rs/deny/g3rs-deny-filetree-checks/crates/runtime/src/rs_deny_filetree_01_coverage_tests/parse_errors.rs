@@ -17,18 +17,20 @@ fn reports_selected_deny_parse_failures_without_hiding_coverage_inventory() {
 
     assertions::assert_findings(
         &results,
-        &[assertions::error(
-            "deny input failure",
-            "Failed to parse root deny config `deny.toml` for deny checks: invalid TOML.",
-            "deny.toml",
-            false,
-        ),
-        assertions::info(
-            "workspace root covered by deny config",
-            "workspace root `.` is covered by `deny.toml`.",
-            "deny.toml",
-            true,
-        )],
+        &[
+            assertions::error(
+                "deny input failure",
+                "Failed to parse root deny config `deny.toml` for deny checks: invalid TOML.",
+                "deny.toml",
+                false,
+            ),
+            assertions::info(
+                "workspace root covered by deny config",
+                "workspace root `.` is covered by `deny.toml`.",
+                "deny.toml",
+                true,
+            ),
+        ],
     );
 }
 
