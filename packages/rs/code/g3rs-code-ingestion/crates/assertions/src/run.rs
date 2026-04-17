@@ -63,7 +63,7 @@ pub fn assert_source_waiver(
         .iter()
         .find(|waiver| waiver.rule == rule && waiver.file == file && waiver.selector == selector);
     assert!(waiver.is_some(), "{input:#?}");
-    let waiver = waiver.unwrap_or_else(|| unreachable!());
+    let waiver = waiver.expect("assert_source_waiver should only unwrap an asserted-present waiver");
     assert_eq!(waiver.reason, reason, "{input:#?}");
 }
 
