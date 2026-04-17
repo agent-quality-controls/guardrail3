@@ -127,7 +127,6 @@ dependencies = [
 name = "g3rs-topology-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-topology-file-tree-checks-types",
  "g3rs-topology-types",
  "glob",
  "guardrail3-check-types",
@@ -151,6 +150,10 @@ dependencies = [
 [[package]]
 name = "g3rs-topology-ingestion-assertions"
 version = "0.1.0"
+dependencies = [
+ "g3rs-topology-ingestion-runtime",
+ "guardrail3-check-types",
+]
 
 [[package]]
 name = "g3rs-topology-ingestion-runtime"
@@ -158,6 +161,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-topology-file-tree-checks",
+ "g3rs-topology-ingestion-assertions",
  "g3rs-topology-ingestion-types",
  "g3rs-topology-types",
  "g3rs-workspace-crawl",
@@ -168,9 +172,6 @@ dependencies = [
 [[package]]
 name = "g3rs-topology-ingestion-types"
 version = "0.1.0"
-dependencies = [
- "g3rs-topology-types",
-]
 
 [[package]]
 name = "g3rs-topology-types"
