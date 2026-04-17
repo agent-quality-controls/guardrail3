@@ -1,6 +1,6 @@
 use g3rs_clippy_types::{
-    G3RsClippyConfigChecksInput, G3RsClippyFileTreeChecksInput, G3RsClippyRustPolicyState,
-    G3RsClippyShadowedConfig,
+    G3RsClippyCargoRootState, G3RsClippyConfigChecksInput, G3RsClippyFileTreeChecksInput,
+    G3RsClippyRustPolicyState, G3RsClippyShadowedConfig,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -31,33 +31,50 @@ pub fn ingest_for_config_checks(
         }
         None => (G3RsClippyRustPolicyState::Missing, Vec::new()),
     };
-    let profile = match &rust_policy {
-        G3RsClippyRustPolicyState::Parsed { profile, .. } => *profile,
-        G3RsClippyRustPolicyState::Missing
-        | G3RsClippyRustPolicyState::Unreadable { .. }
-        | G3RsClippyRustPolicyState::ParseError { .. } => None,
+    let cargo_root = match crate::select::select_root_cargo_toml(crawl) {
+        Some(entry) => crate::parse::parse_cargo_root_state(&entry.path.rel_path, &entry.path.abs_path),
+        None => G3RsClippyCargoRootState::Missing,
     };
-    let published_library_policy = match crate::select::select_root_cargo_toml(crawl) {
-        Some(entry) => crate::parse::compute_published_library_policy(
-            &crawl.root_abs_path,
-            &entry.path.abs_path,
-            profile,
-        ),
-        None => false,
+    let cargo_workspace_members = match &cargo_root {
+        G3RsClippyCargoRootState::Parsed { cargo, .. }
+            if cargo_toml_parser::document::kind(cargo)
+                == cargo_toml_parser::types::CargoTomlDocumentKind::WorkspaceRoot =>
+        {
+            crate::parse::collect_declared_member_rels(&crawl.root_abs_path, &cargo.raw)
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(|member_rel| {
+                    let rel_path = if member_rel.is_empty() {
+                        "Cargo.toml".to_owned()
+                    } else {
+                        format!("{member_rel}/Cargo.toml")
+                    };
+                    let entry = g3rs_workspace_crawl::entry(crawl, &rel_path)?;
+                    Some(crate::parse::parse_cargo_member_state(
+                        &member_rel,
+                        &entry.path.rel_path,
+                        &entry.path.abs_path,
+                    ))
+                })
+                .collect()
+        }
+        G3RsClippyCargoRootState::Missing
+        | G3RsClippyCargoRootState::Unreadable { .. }
+        | G3RsClippyCargoRootState::ParseError { .. }
+        | G3RsClippyCargoRootState::Parsed { .. } => Vec::new(),
     };
-    let cargo_config_overrides = crate::select::collect_root_cargo_config_overrides(crawl)
+    let cargo_configs = crate::select::collect_root_cargo_config_overrides(crawl)
         .into_iter()
-        .filter_map(|entry| {
-            crate::parse::parse_cargo_override(&entry.path.rel_path, &entry.path.abs_path)
-        })
+        .map(|entry| crate::parse::parse_cargo_config_state(&entry.path.rel_path, &entry.path.abs_path))
         .collect();
 
     Ok(crate::ingest::assemble_config_input(
         entry.path.rel_path.clone(),
         clippy,
         rust_policy,
-        published_library_policy,
-        cargo_config_overrides,
+        cargo_root,
+        cargo_workspace_members,
+        cargo_configs,
         waivers,
     ))
 }

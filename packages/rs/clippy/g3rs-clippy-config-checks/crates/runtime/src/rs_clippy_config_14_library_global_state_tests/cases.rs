@@ -1,7 +1,7 @@
 use crate::rs_clippy_config_14_library_global_state::check;
 use g3rs_clippy_config_checks_assertions::rs_clippy_config_14_library_global_state as assertions;
-use guardrail3_rs_toml_parser::RustProfile;
-use test_support::{input_with_raw, parsed_rust_policy};
+use guardrail3_rs_toml_parser::types::RustProfile;
+use test_support::{input_with_raw, missing_cargo_root, parsed_rust_policy};
 
 fn library_global_state_baseline() -> &'static str {
     r#"
@@ -20,7 +20,8 @@ fn reports_missing_library_global_state_bans() {
         "clippy.toml",
         "disallowed-types = []\n",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -36,7 +37,8 @@ fn inventories_complete_library_global_state_bans() {
         "clippy.toml",
         library_global_state_baseline(),
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();

@@ -19,14 +19,9 @@ pub fn ingest_for_config_checks(
     }
 
     let raw_cargo = crate::parse::parse_raw_toml(&root_entry.path.abs_path)?;
-    let cargo = crate::parse::parse_cargo_toml(&root_entry.path.abs_path)?;
+    let cargo = crate::parse::parse_root_cargo_toml(&root_entry.path.abs_path)?;
     let rust_policy = read_rust_policy_state(crawl);
-    let root = crate::ingest::build_root(
-        root_entry.path.rel_path.clone(),
-        cargo,
-        raw_cargo.clone(),
-        rust_policy,
-    );
+    let root = crate::ingest::build_root(root_entry.path.rel_path.clone(), cargo, rust_policy);
 
     let workspace_members = if root.kind == G3RsCargoPolicyRootKind::WorkspaceRoot {
         collect_config_members(crawl, &raw_cargo)?
@@ -67,7 +62,7 @@ pub fn ingest_for_file_tree_checks(
         match crate::parse::parse_raw_toml(&root_entry.path.abs_path) {
             Ok(raw_cargo) => {
                 kind = Some(crate::select::workspace_root_kind(&raw_cargo));
-                match crate::parse::parse_cargo_toml(&root_entry.path.abs_path) {
+                match crate::parse::parse_root_cargo_toml(&root_entry.path.abs_path) {
                     Ok(_) => {}
                     Err(IngestionError::ParseFailed { reason, .. }) => {
                         input_failures.push(crate::ingest::input_failure(
@@ -208,15 +203,15 @@ fn collect_config_members(
         if !member_entry.readable {
             continue;
         }
-        let raw_member = match crate::parse::parse_raw_toml(&member_entry.path.abs_path) {
-            Ok(raw_member) => raw_member,
+        let cargo_member = match crate::parse::parse_member_cargo_toml(&member_entry.path.abs_path) {
+            Ok(cargo_member) => cargo_member,
             Err(IngestionError::ParseFailed { .. } | IngestionError::Unreadable { .. }) => continue,
             Err(other) => return Err(other),
         };
         members.push(crate::ingest::build_member(
             member_rel,
             member_entry.path.rel_path.clone(),
-            raw_member,
+            cargo_member,
         ));
     }
     members.sort_by(|left, right| left.member_rel.cmp(&right.member_rel));

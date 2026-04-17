@@ -46,3 +46,17 @@ pub fn assert_config_parse_error_contains(
         results, needle,
     );
 }
+
+pub fn assert_single_waiver(
+    input: &g3rs_clippy_types::G3RsClippyConfigChecksInput,
+    rule: &str,
+    file: &str,
+    selector: &str,
+    reason: &str,
+) {
+    assert_eq!(input.waivers.len(), 1, "{input:#?}");
+    assert_eq!(input.waivers[0].rule, rule, "{input:#?}");
+    assert_eq!(input.waivers[0].file, file, "{input:#?}");
+    assert_eq!(input.waivers[0].selector, selector, "{input:#?}");
+    assert_eq!(input.waivers[0].reason, reason, "{input:#?}");
+}

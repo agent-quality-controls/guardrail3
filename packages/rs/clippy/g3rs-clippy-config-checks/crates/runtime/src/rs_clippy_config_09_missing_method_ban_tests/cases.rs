@@ -1,6 +1,9 @@
 use crate::rs_clippy_config_09_missing_method_ban::check;
 use g3rs_clippy_config_checks_assertions::rs_clippy_config_09_missing_method_ban as assertions;
-use test_support::{input_from_raw, input_with_raw, parse_error_rust_policy, parsed_rust_policy};
+use test_support::{
+    input_from_raw, input_with_raw, missing_cargo_root, parse_error_rust_policy,
+    parsed_rust_policy,
+};
 
 #[test]
 fn reports_missing_baseline_method_ban() {
@@ -18,7 +21,8 @@ fn stands_down_when_policy_context_is_invalid() {
         "clippy.toml",
         "disallowed-methods = []\n",
         parse_error_rust_policy("guardrail3-rs.toml", "bad profile"),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -34,10 +38,11 @@ fn reports_malformed_method_section() {
         "disallowed-methods = [1]\n",
         parsed_rust_policy(
             "guardrail3-rs.toml",
-            Some(guardrail3_rs_toml_parser::RustProfile::Service),
+            Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
             true,
         ),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -53,10 +58,11 @@ fn drops_garde_owned_method_bans_when_garde_is_disabled() {
         "disallowed-methods = []\n",
         parsed_rust_policy(
             "guardrail3-rs.toml",
-            Some(guardrail3_rs_toml_parser::RustProfile::Service),
+            Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
             false,
         ),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();

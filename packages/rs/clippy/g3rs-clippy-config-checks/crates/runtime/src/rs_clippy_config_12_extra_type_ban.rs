@@ -4,7 +4,7 @@ use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{
-    expected_type_bans, garde_enabled, parse_ban_section, raw_clippy, rust_policy_valid,
+    clippy_document, expected_type_bans, garde_enabled, parse_ban_section, rust_policy_valid,
     rust_profile,
 };
 
@@ -14,11 +14,11 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
     if !rust_policy_valid(input) {
         return;
     }
-    let Some(parsed) = raw_clippy(input) else {
+    let Some(document) = clippy_document(input) else {
         return;
     };
 
-    let section = parse_ban_section(parsed, "disallowed-types");
+    let section = parse_ban_section(document, "disallowed-types");
     let mut malformed_count = 0usize;
     for malformed in &section.malformed_messages {
         malformed_count += 1;

@@ -1,6 +1,4 @@
-use cargo_toml_parser::parse as parse_cargo_toml;
 use g3rs_cargo_config_checks_assertions::rs_cargo_config_10_member_edition_drift as assertions;
-use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind};
 use test_support::{member, parsed_rust_policy, root};
 
 #[test]
@@ -156,20 +154,7 @@ fn stays_quiet_when_workspace_has_no_edition_policy() {
 
 #[test]
 fn stays_quiet_when_workspace_edition_shape_is_invalid_even_if_package_has_valid_fallback() {
-    let cargo = parse_cargo_toml(
-        r#"
-            [workspace]
-            members = ["crates/api"]
-            resolver = "2"
-
-            [package]
-            name = "hybrid"
-            version = "0.1.0"
-            edition = "2024"
-        "#,
-    )
-    .expect("typed cargo fixture should parse");
-    let raw_cargo = toml::from_str::<toml::Value>(
+    let root = root(
         r#"
             [workspace]
             members = ["crates/api"]
@@ -183,20 +168,8 @@ fn stays_quiet_when_workspace_edition_shape_is_invalid_even_if_package_has_valid
             version = "0.1.0"
             edition = "2024"
         "#,
-    )
-    .expect("raw cargo fixture should parse");
-    let root = G3RsCargoPolicyRoot {
-        kind: G3RsCargoPolicyRootKind::WorkspaceRoot,
-        rel_dir: String::new(),
-        cargo_rel_path: "Cargo.toml".to_owned(),
-        cargo,
-        raw_cargo,
-        rust_policy: g3rs_cargo_types::G3RsCargoRustPolicyState::Missing,
-        edition: Some("2024".to_owned()),
-        edition_invalid: true,
-        rust_version: None,
-        rust_version_invalid: false,
-    };
+        g3rs_cargo_types::G3RsCargoRustPolicyState::Missing,
+    );
     let member = member(
         "crates/api",
         r#"

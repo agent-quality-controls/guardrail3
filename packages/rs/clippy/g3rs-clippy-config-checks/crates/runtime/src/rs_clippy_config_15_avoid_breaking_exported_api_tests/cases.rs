@@ -1,7 +1,7 @@
 use crate::rs_clippy_config_15_avoid_breaking_exported_api::check;
 use g3rs_clippy_config_checks_assertions::rs_clippy_config_15_avoid_breaking_exported_api as assertions;
-use guardrail3_rs_toml_parser::RustProfile;
-use test_support::{input_with_raw, parsed_rust_policy};
+use guardrail3_rs_toml_parser::types::RustProfile;
+use test_support::{cargo_member, cargo_root, input_with_raw, missing_cargo_root, parsed_rust_policy};
 
 #[test]
 fn warns_when_enabled_for_non_library_policy() {
@@ -9,7 +9,8 @@ fn warns_when_enabled_for_non_library_policy() {
         "clippy.toml",
         "avoid-breaking-exported-api = true\n",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), true),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -32,7 +33,56 @@ fn inventories_enabled_setting_for_published_library_policy() {
         "clippy.toml",
         "avoid-breaking-exported-api = true\n",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
-        true,
+        cargo_root(
+            "Cargo.toml",
+            r#"[package]
+name = "lib"
+version = "0.1.0"
+edition = "2024"
+"#,
+        ),
+        Vec::new(),
+        Vec::new(),
+    );
+    let mut results = Vec::new();
+    check(&input, &mut results);
+
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "library keeps avoid-breaking-exported-api enabled",
+            "Published library profile may legitimately keep `avoid-breaking-exported-api = true`.",
+            "clippy.toml",
+            true,
+        )],
+    );
+}
+
+#[test]
+fn inventories_enabled_setting_for_published_workspace_member_library() {
+    let input = input_with_raw(
+        "clippy.toml",
+        "avoid-breaking-exported-api = true\n",
+        parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
+        cargo_root(
+            "Cargo.toml",
+            r#"[workspace]
+members = ["member"]
+
+[workspace.package]
+publish = true
+"#,
+        ),
+        vec![cargo_member(
+            "member",
+            "member/Cargo.toml",
+            r#"[package]
+name = "member"
+version = "0.1.0"
+edition = "2024"
+publish = { workspace = true }
+"#,
+        )],
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -55,7 +105,8 @@ fn inventories_explicit_false_setting() {
         "clippy.toml",
         "avoid-breaking-exported-api = false\n",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), true),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -78,7 +129,8 @@ fn warns_when_setting_is_missing() {
         "clippy.toml",
         "",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), true),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -101,7 +153,8 @@ fn warns_when_setting_has_wrong_type() {
         "clippy.toml",
         "avoid-breaking-exported-api = 7\n",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), true),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();

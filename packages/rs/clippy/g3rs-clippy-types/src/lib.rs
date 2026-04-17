@@ -2,7 +2,11 @@
 mod types;
 
 #[cfg(feature = "api")]
-pub use types::G3RsClippyCargoConfigOverride;
+pub use types::G3RsClippyCargoConfigState;
+#[cfg(feature = "api")]
+pub use types::G3RsClippyCargoMemberState;
+#[cfg(feature = "api")]
+pub use types::G3RsClippyCargoRootState;
 #[cfg(feature = "api")]
 pub use types::G3RsClippyConfigChecksInput;
 #[cfg(feature = "api")]

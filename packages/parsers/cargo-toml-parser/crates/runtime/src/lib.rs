@@ -1,3 +1,6 @@
+/// Document query helpers over passive parser types.
+#[cfg(feature = "api")]
+pub mod document;
 /// Error surface for parser failures.
 mod error;
 /// Centralized filesystem boundary for parser file reads.
@@ -10,4 +13,4 @@ pub mod types;
 #[cfg(feature = "api")]
 pub use error::Error;
 #[cfg(feature = "api")]
-pub use parser::{from_path, parse};
+pub use parser::{from_path, parse, parse_document};

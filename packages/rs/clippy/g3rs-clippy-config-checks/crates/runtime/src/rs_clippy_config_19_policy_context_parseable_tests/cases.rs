@@ -1,7 +1,9 @@
 use crate::rs_clippy_config_19_policy_context_parseable::check;
 use g3rs_clippy_config_checks_assertions::rs_clippy_config_19_policy_context_parseable as assertions;
-use guardrail3_rs_toml_parser::RustProfile;
-use test_support::{input_with_raw, parse_error_rust_policy, parsed_rust_policy};
+use guardrail3_rs_toml_parser::types::RustProfile;
+use test_support::{
+    input_with_raw, missing_cargo_root, parse_error_rust_policy, parsed_rust_policy,
+};
 
 #[test]
 fn reports_policy_context_parse_errors() {
@@ -9,7 +11,8 @@ fn reports_policy_context_parse_errors() {
         "clippy.toml",
         "",
         parse_error_rust_policy("guardrail3-rs.toml", "bad profile"),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -32,7 +35,8 @@ fn inventories_parseable_policy_context() {
         "clippy.toml",
         "",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), true),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();

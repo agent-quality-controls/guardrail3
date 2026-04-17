@@ -1,10 +1,10 @@
-use g3rs_clippy_types::G3RsClippyConfigChecksInput;
+use g3rs_clippy_types::{G3RsClippyCargoConfigState, G3RsClippyConfigChecksInput};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-CLIPPY-CONFIG-20";
 
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    if input.cargo_config_overrides.is_empty() {
+    if input.cargo_configs.is_empty() {
         results.push(
             G3CheckResult::new(
                 ID.to_owned(),
@@ -19,22 +19,9 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         return;
     }
 
-    for override_facts in &input.cargo_config_overrides {
-        let (title, message) = match override_facts.parse_error.as_deref() {
-            Some(parse_error) => (
-                "cargo config override surface is not parseable".to_owned(),
-                format!(
-                    "Failed to parse `{}` while checking for forbidden `CLIPPY_CONF_DIR` overrides: {parse_error}",
-                    override_facts.rel_path
-                ),
-            ),
-            None => (
-                "clippy config dir override is forbidden".to_owned(),
-                format!(
-                    "`{}` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model. Remove the `CLIPPY_CONF_DIR` setting from `{}`.",
-                    override_facts.rel_path, override_facts.rel_path
-                ),
-            ),
+    for cargo_config in &input.cargo_configs {
+        let Some((title, message, rel_path)) = finding(cargo_config) else {
+            continue;
         };
 
         results.push(G3CheckResult::new(
@@ -42,9 +29,35 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
             G3Severity::Error,
             title,
             message,
-            Some(override_facts.rel_path.clone()),
+            Some(rel_path),
             None,
         ));
+    }
+}
+
+fn finding(cargo_config: &G3RsClippyCargoConfigState) -> Option<(String, String, String)> {
+    match cargo_config {
+        G3RsClippyCargoConfigState::Unreadable { rel_path, reason }
+        | G3RsClippyCargoConfigState::ParseError { rel_path, reason } => Some((
+            "cargo config override surface is not parseable".to_owned(),
+            format!(
+                "Failed to parse `{rel_path}` while checking for forbidden `CLIPPY_CONF_DIR` overrides: {reason}"
+            ),
+            rel_path.clone(),
+        )),
+        G3RsClippyCargoConfigState::Parsed {
+            rel_path,
+            cargo_config,
+        } => cargo_config
+            .env
+            .get("CLIPPY_CONF_DIR")
+            .map(|_| (
+                "clippy config dir override is forbidden".to_owned(),
+                format!(
+                    "`{rel_path}` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model. Remove the `CLIPPY_CONF_DIR` setting from `{rel_path}`."
+                ),
+                rel_path.clone(),
+            )),
     }
 }
 

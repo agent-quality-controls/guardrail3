@@ -1,12 +1,12 @@
 use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::{parse_ban_section, raw_clippy};
+use crate::support::{clippy_document, parse_ban_section};
 
 const ID: &str = "RS-CLIPPY-CONFIG-13";
 
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let Some(parsed) = raw_clippy(input) else {
+    let Some(document) = clippy_document(input) else {
         return;
     };
 
@@ -16,7 +16,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         "disallowed-types",
         "disallowed-macros",
     ] {
-        let section = parse_ban_section(parsed, key);
+        let section = parse_ban_section(document, key);
         for malformed in &section.malformed_messages {
             issue_count += 1;
             results.push(G3CheckResult::new(

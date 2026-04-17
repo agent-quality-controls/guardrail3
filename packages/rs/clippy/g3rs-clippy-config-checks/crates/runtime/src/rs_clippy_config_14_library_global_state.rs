@@ -1,11 +1,11 @@
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 use std::collections::BTreeSet;
 
 use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{
-    EXPECTED_LIBRARY_GLOBAL_STATE_TYPES, parse_ban_section, raw_clippy, rust_policy_valid,
+    EXPECTED_LIBRARY_GLOBAL_STATE_TYPES, clippy_document, parse_ban_section, rust_policy_valid,
     rust_profile,
 };
 
@@ -15,11 +15,11 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
     if !rust_policy_valid(input) || rust_profile(input) != Some(RustProfile::Library) {
         return;
     }
-    let Some(parsed) = raw_clippy(input) else {
+    let Some(document) = clippy_document(input) else {
         return;
     };
 
-    let section = parse_ban_section(parsed, "disallowed-types");
+    let section = parse_ban_section(document, "disallowed-types");
     let mut malformed_count = 0usize;
     for malformed in &section.malformed_messages {
         malformed_count += 1;

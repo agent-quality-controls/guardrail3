@@ -5,13 +5,55 @@ use super::helpers::{crawl, git_init, write};
 
 fn typed_msrv(input: &g3rs_clippy_types::G3RsClippyConfigChecksInput) -> Option<&str> {
     match &input.clippy {
-        G3RsClippyConfigState::Parsed {
-            typed: Ok(clippy), ..
-        } => clippy.msrv.as_deref(),
+        G3RsClippyConfigState::Parsed(document) => {
+            clippy_toml_parser::typed(document).and_then(|clippy| clippy.msrv.as_deref())
+        }
         G3RsClippyConfigState::Unreadable { .. }
-        | G3RsClippyConfigState::ParseError { .. }
-        | G3RsClippyConfigState::Parsed { typed: Err(_), .. } => None,
+        | G3RsClippyConfigState::ParseError { .. } => None,
     }
+}
+
+fn clippy_conf_dir_override_rel_paths(
+    input: &g3rs_clippy_types::G3RsClippyConfigChecksInput,
+) -> Vec<&str> {
+    input
+        .cargo_configs
+        .iter()
+        .filter_map(|cargo_config| match cargo_config {
+            g3rs_clippy_types::G3RsClippyCargoConfigState::Parsed {
+                rel_path,
+                cargo_config,
+            } if cargo_config.env.contains_key("CLIPPY_CONF_DIR") => Some(rel_path.as_str()),
+            _ => None,
+        })
+        .collect()
+}
+
+fn typed_cargo_root_rel_path(
+    input: &g3rs_clippy_types::G3RsClippyConfigChecksInput,
+) -> Option<&str> {
+    match &input.cargo_root {
+        g3rs_clippy_types::G3RsClippyCargoRootState::Parsed { rel_path, .. } => Some(rel_path),
+        g3rs_clippy_types::G3RsClippyCargoRootState::Missing
+        | g3rs_clippy_types::G3RsClippyCargoRootState::Unreadable { .. }
+        | g3rs_clippy_types::G3RsClippyCargoRootState::ParseError { .. } => None,
+    }
+}
+
+fn typed_cargo_member_rels(
+    input: &g3rs_clippy_types::G3RsClippyConfigChecksInput,
+) -> Vec<&str> {
+    input
+        .cargo_workspace_members
+        .iter()
+        .filter_map(|member| match member {
+            g3rs_clippy_types::G3RsClippyCargoMemberState::Parsed { member_rel, .. } => {
+                Some(member_rel.as_str())
+            }
+            g3rs_clippy_types::G3RsClippyCargoMemberState::Unreadable { .. }
+            | g3rs_clippy_types::G3RsClippyCargoMemberState::ParseError { .. } => None,
+        })
+        .collect()
 }
 
 #[test]
@@ -102,13 +144,13 @@ fn keeps_raw_parseable_but_typed_invalid_clippy_for_config_checks() {
         "config ingestion should preserve raw-parseable clippy.toml for parseability and section-shape checks instead of aborting on typed parse failure",
     );
     match input.clippy {
-        G3RsClippyConfigState::Parsed {
-            typed: Err(reason),
-            ..
-        } => assert!(
-            reason.contains("path"),
-            "typed parse error should preserve the parser reason: {reason}"
-        ),
+        G3RsClippyConfigState::Parsed(document) => match clippy_toml_parser::parse_error_reason(&document) {
+            Some(reason) => assert!(
+                reason.contains("path"),
+                "typed parse error should preserve the parser reason: {reason}"
+            ),
+            None => panic!("expected typed parse error document"),
+        },
         other => panic!("expected raw-parseable typed-invalid clippy state, got {other:#?}"),
     }
 }
@@ -193,10 +235,7 @@ fn keeps_typed_parse_error_state_for_unknown_fields() {
     assert!(
         matches!(
             input.clippy,
-            G3RsClippyConfigState::Parsed {
-                typed: Err(_),
-                ..
-            }
+            G3RsClippyConfigState::Parsed(_)
         ),
         "{input:#?}"
     );
@@ -217,10 +256,7 @@ fn keeps_typed_parse_error_state_for_wrong_value_type() {
     assert!(
         matches!(
             input.clippy,
-            G3RsClippyConfigState::Parsed {
-                typed: Err(_),
-                ..
-            }
+            G3RsClippyConfigState::Parsed(_)
         ),
         "{input:#?}"
     );
@@ -292,11 +328,13 @@ reason = \"schema mirror\"\n",
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("ingestion should thread guardrail waivers into config input");
 
-    assert_eq!(input.waivers.len(), 1, "{input:#?}");
-    assert_eq!(input.waivers[0].rule, "RS-CLIPPY-CONFIG-01", "{input:#?}");
-    assert_eq!(input.waivers[0].file, "clippy.toml", "{input:#?}");
-    assert_eq!(input.waivers[0].selector, "key:max-struct-bools", "{input:#?}");
-    assert_eq!(input.waivers[0].reason, "schema mirror", "{input:#?}");
+    g3rs_clippy_ingestion_assertions::run::assert_single_waiver(
+        &input,
+        "RS-CLIPPY-CONFIG-01",
+        "clippy.toml",
+        "key:max-struct-bools",
+        "schema mirror",
+    );
 }
 
 #[test]
@@ -313,7 +351,13 @@ fn malformed_root_cargo_toml_does_not_abort_clippy_config_ingestion() {
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("malformed root Cargo.toml should disable published-library policy, not abort clippy ingestion");
 
-    assert!(!input.published_library_policy, "{input:#?}");
+    assert!(
+        matches!(
+            &input.cargo_root,
+            g3rs_clippy_types::G3RsClippyCargoRootState::ParseError { .. }
+        ),
+        "{input:#?}"
+    );
 }
 
 #[test]
@@ -340,7 +384,7 @@ edition = "2024"
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("valid guardrail3-rs.toml should drive clippy library policy");
 
-    assert!(input.published_library_policy, "{input:#?}");
+    assert_eq!(typed_cargo_root_rel_path(&input), Some("Cargo.toml"), "{input:#?}");
 }
 
 #[test]
@@ -367,7 +411,7 @@ edition = "2024"
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("legacy guardrail3.toml should no longer drive clippy policy");
 
-    assert!(!input.published_library_policy, "{input:#?}");
+    assert_eq!(typed_cargo_root_rel_path(&input), Some("Cargo.toml"), "{input:#?}");
 }
 
 #[test]
@@ -422,7 +466,7 @@ publish = { workspace = true }
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("workspace-inherited publishability should not abort clippy ingestion");
 
-    assert!(!input.published_library_policy, "{input:#?}");
+    assert_eq!(typed_cargo_member_rels(&input), vec!["member"], "{input:#?}");
 }
 
 #[test]
@@ -456,7 +500,7 @@ publish = { workspace = true }
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("workspace-inherited publishability should not abort clippy ingestion");
 
-    assert!(input.published_library_policy, "{input:#?}");
+    assert_eq!(typed_cargo_member_rels(&input), vec!["member"], "{input:#?}");
 }
 
 #[test]
@@ -482,5 +526,51 @@ fn ignored_but_recovered_clippy_toml_is_ingested() {
         typed_msrv(&input),
         Some("1.85"),
         "recovered clippy.toml should be parsed correctly"
+    );
+}
+
+#[test]
+fn ingests_root_cargo_config_as_typed_file_state() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
+    write(
+        root.join(".cargo/config.toml"),
+        "[env]\nCLIPPY_CONF_DIR = \"config/clippy\"\n",
+    );
+
+    let crawl = crawl(root);
+    let input = crate::run::ingest_for_config_checks(&crawl)
+        .expect("clippy ingestion should preserve typed .cargo/config state");
+
+    assert_eq!(
+        clippy_conf_dir_override_rel_paths(&input),
+        vec![".cargo/config.toml"],
+        "clippy ingestion should pass the parsed cargo config file through instead of a pre-sliced override summary"
+    );
+}
+
+#[test]
+fn preserves_cargo_config_parse_error_state() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
+    write(root.join(".cargo/config"), "[env\nbroken = true\n");
+
+    let crawl = crawl(root);
+    let input = crate::run::ingest_for_config_checks(&crawl)
+        .expect("clippy ingestion should preserve malformed cargo config state");
+
+    assert!(
+        input.cargo_configs.iter().any(|cargo_config| matches!(
+            cargo_config,
+            g3rs_clippy_types::G3RsClippyCargoConfigState::ParseError { rel_path, .. }
+                if rel_path == ".cargo/config"
+        )),
+        "{input:#?}"
     );
 }

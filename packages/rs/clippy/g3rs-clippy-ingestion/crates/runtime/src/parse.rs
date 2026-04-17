@@ -1,11 +1,10 @@
 use std::path::Path;
 
-use cargo_toml_parser::{types::CargoToml, types::InheritableValue, types::PackageSection, types::VecStringOrBool};
 use g3rs_clippy_types::{
-    G3RsClippyCargoConfigOverride, G3RsClippyConfigState, G3RsClippyRustPolicyState,
+    G3RsClippyCargoConfigState, G3RsClippyCargoMemberState, G3RsClippyCargoRootState,
+    G3RsClippyConfigState, G3RsClippyRustPolicyState,
     G3RsClippyWaiver,
 };
-use guardrail3_rs_toml_parser::types::RustProfile;
 use glob::Pattern;
 
 use crate::run::IngestionError;
@@ -20,17 +19,12 @@ pub(crate) fn parse_clippy_state(abs_path: &Path) -> G3RsClippyConfigState {
         Err(reason) => return G3RsClippyConfigState::Unreadable { reason },
     };
 
-    let raw = match toml::from_str::<toml::Value>(&content) {
-        Ok(raw) => raw,
-        Err(err) => {
-            return G3RsClippyConfigState::ParseError {
-                reason: err.to_string(),
-            };
-        }
-    };
-
-    let typed = clippy_toml_parser::parse(&content).map_err(|err| err.to_string());
-    G3RsClippyConfigState::Parsed { raw, typed }
+    match clippy_toml_parser::parse_document(&content) {
+        Ok(document) => G3RsClippyConfigState::Parsed(document),
+        Err(err) => G3RsClippyConfigState::ParseError {
+            reason: err.to_string(),
+        },
+    }
 }
 
 pub(crate) fn parse_rust_policy_state(
@@ -92,108 +86,93 @@ pub(crate) fn parse_waivers(abs_path: &Path) -> Result<Vec<G3RsClippyWaiver>, In
         .collect())
 }
 
-pub(crate) fn parse_cargo_override(
+pub(crate) fn parse_cargo_config_state(
     rel_path: &str,
     abs_path: &Path,
-) -> Option<G3RsClippyCargoConfigOverride> {
+) -> G3RsClippyCargoConfigState {
     let content = match read_to_string(abs_path) {
         Ok(content) => content,
         Err(reason) => {
-            return Some(G3RsClippyCargoConfigOverride {
+            return G3RsClippyCargoConfigState::Unreadable {
                 rel_path: rel_path.to_owned(),
-                parse_error: Some(reason),
-            });
+                reason,
+            };
         }
     };
 
-    let parsed = match toml::from_str::<toml::Value>(&content) {
+    let cargo_config = match cargo_config_toml_parser::parse(&content) {
         Ok(parsed) => parsed,
         Err(err) => {
-            return Some(G3RsClippyCargoConfigOverride {
+            return G3RsClippyCargoConfigState::ParseError {
                 rel_path: rel_path.to_owned(),
-                parse_error: Some(err.to_string()),
-            });
+                reason: err.to_string(),
+            };
         }
     };
 
-    let Some(env) = parsed.get("env") else {
-        return None;
-    };
-    let Some(env_table) = env.as_table() else {
-        return Some(G3RsClippyCargoConfigOverride {
-            rel_path: rel_path.to_owned(),
-            parse_error: Some(format!(
-                "invalid cargo config shape: `env` must be a table, found {}",
-                value_kind(env)
-            )),
-        });
-    };
-
-    env_table
-        .get("CLIPPY_CONF_DIR")
-        .map(|_| G3RsClippyCargoConfigOverride {
-            rel_path: rel_path.to_owned(),
-            parse_error: None,
-        })
+    G3RsClippyCargoConfigState::Parsed {
+        rel_path: rel_path.to_owned(),
+        cargo_config,
+    }
 }
 
-pub(crate) fn compute_published_library_policy(
-    root_abs_path: &Path,
-    root_cargo_abs_path: &Path,
-    profile: Option<RustProfile>,
-) -> bool {
-    if profile != Some(RustProfile::Library) {
-        return false;
-    }
-
-    let Ok(root_content) = read_to_string(root_cargo_abs_path) else {
-        return false;
-    };
-    let Ok(root_cargo) = cargo_toml_parser::parse(&root_content) else {
-        return false;
-    };
-    let Ok(root_raw) = toml::from_str::<toml::Value>(&root_content) else {
-        return false;
-    };
-    let workspace_publish = root_cargo
-        .workspace
-        .as_ref()
-        .and_then(|workspace| workspace.package.as_ref())
-        .and_then(|package| package.publish.as_ref());
-
-    if manifest_publishable(&root_cargo, workspace_publish) {
-        return true;
-    }
-
-    let Ok(declared_members) = collect_declared_member_rels(root_abs_path, &root_raw) else {
-        return false;
-    };
-    for member_rel in declared_members {
-        if member_rel.is_empty() {
-            continue;
+pub(crate) fn parse_cargo_root_state(
+    rel_path: &str,
+    abs_path: &Path,
+) -> G3RsClippyCargoRootState {
+    let content = match read_to_string(abs_path) {
+        Ok(content) => content,
+        Err(reason) => {
+            return G3RsClippyCargoRootState::Unreadable {
+                rel_path: rel_path.to_owned(),
+                reason,
+            };
         }
-        let member_abs_path = root_abs_path.join(format!("{member_rel}/Cargo.toml"));
-        let member_content = match read_to_string(&member_abs_path) {
-            Ok(content) => content,
-            Err(_) => continue,
-        };
-        let member_cargo = match cargo_toml_parser::parse(&member_content) {
-            Ok(cargo) => cargo,
-            Err(_) => continue,
-        };
-        if manifest_publishable(&member_cargo, workspace_publish) {
-            return true;
-        }
-    }
+    };
 
-    if root_cargo.workspace.is_none() && root_cargo.package.is_none() {
-        return false;
+    match cargo_toml_parser::parse_document(&content) {
+        Ok(cargo) => G3RsClippyCargoRootState::Parsed {
+            rel_path: rel_path.to_owned(),
+            cargo,
+        },
+        Err(err) => G3RsClippyCargoRootState::ParseError {
+            rel_path: rel_path.to_owned(),
+            reason: err.to_string(),
+        },
     }
-
-    false
 }
 
-fn collect_declared_member_rels(
+pub(crate) fn parse_cargo_member_state(
+    member_rel: &str,
+    rel_path: &str,
+    abs_path: &Path,
+) -> G3RsClippyCargoMemberState {
+    let content = match read_to_string(abs_path) {
+        Ok(content) => content,
+        Err(reason) => {
+            return G3RsClippyCargoMemberState::Unreadable {
+                member_rel: member_rel.to_owned(),
+                rel_path: rel_path.to_owned(),
+                reason,
+            };
+        }
+    };
+
+    match cargo_toml_parser::parse_document(&content) {
+        Ok(cargo) => G3RsClippyCargoMemberState::Parsed {
+            member_rel: member_rel.to_owned(),
+            rel_path: rel_path.to_owned(),
+            cargo,
+        },
+        Err(err) => G3RsClippyCargoMemberState::ParseError {
+            member_rel: member_rel.to_owned(),
+            rel_path: rel_path.to_owned(),
+            reason: err.to_string(),
+        },
+    }
+}
+
+pub(crate) fn collect_declared_member_rels(
     root_abs_path: &Path,
     root_raw: &toml::Value,
 ) -> Result<Vec<String>, IngestionError> {
@@ -312,48 +291,5 @@ fn normalize_member_rel(pattern: &str) -> String {
         String::new()
     } else {
         stripped.to_owned()
-    }
-}
-
-fn manifest_publishable(
-    cargo: &CargoToml,
-    workspace_publish: Option<&VecStringOrBool>,
-) -> bool {
-    let Some(package) = cargo.package.as_ref().or(cargo.project.as_ref()) else {
-        return false;
-    };
-    package_publishable(package, workspace_publish)
-}
-
-fn package_publishable(
-    package: &PackageSection,
-    workspace_publish: Option<&VecStringOrBool>,
-) -> bool {
-    match package.publish.as_ref() {
-        None => true,
-        Some(InheritableValue::Value(value)) => publish_value_allows_publish(value),
-        Some(InheritableValue::Inherit(inheritance)) if inheritance.workspace => {
-            workspace_publish.is_some_and(publish_value_allows_publish)
-        }
-        Some(InheritableValue::Inherit(_)) => false,
-    }
-}
-
-fn publish_value_allows_publish(value: &VecStringOrBool) -> bool {
-    match value {
-        VecStringOrBool::Bool(flag) => *flag,
-        VecStringOrBool::VecString(registries) => !registries.is_empty(),
-    }
-}
-
-fn value_kind(value: &toml::Value) -> &'static str {
-    match value {
-        toml::Value::String(_) => "string",
-        toml::Value::Integer(_) => "integer",
-        toml::Value::Float(_) => "float",
-        toml::Value::Boolean(_) => "bool",
-        toml::Value::Datetime(_) => "datetime",
-        toml::Value::Array(_) => "array",
-        toml::Value::Table(_) => "table",
     }
 }

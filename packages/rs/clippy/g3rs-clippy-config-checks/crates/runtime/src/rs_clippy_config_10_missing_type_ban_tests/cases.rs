@@ -1,7 +1,7 @@
 use crate::rs_clippy_config_10_missing_type_ban::check;
 use g3rs_clippy_config_checks_assertions::rs_clippy_config_10_missing_type_ban as assertions;
-use guardrail3_rs_toml_parser::RustProfile;
-use test_support::{input_from_raw, input_with_raw, parsed_rust_policy};
+use guardrail3_rs_toml_parser::types::RustProfile;
+use test_support::{input_from_raw, input_with_raw, missing_cargo_root, parsed_rust_policy};
 
 #[test]
 fn reports_missing_baseline_type_ban() {
@@ -19,7 +19,8 @@ fn reports_library_profile_specific_missing_type_ban() {
         "clippy.toml",
         "disallowed-types = []\n",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Library), true),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();
@@ -34,7 +35,8 @@ fn drops_garde_owned_type_bans_when_garde_is_disabled() {
         "clippy.toml",
         "disallowed-types = []\n",
         parsed_rust_policy("guardrail3-rs.toml", Some(RustProfile::Service), false),
-        false,
+        missing_cargo_root(),
+        Vec::new(),
         Vec::new(),
     );
     let mut results = Vec::new();

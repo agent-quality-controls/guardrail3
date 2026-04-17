@@ -1,10 +1,12 @@
-use cargo_toml_parser::{types::CargoToml, types::InheritableValue, types::LintValue, types::ToolLints};
+use cargo_toml_parser::types::{
+    CargoBoolFieldState, CargoLintTableState, CargoStringFieldState, CargoToml, InheritableValue,
+    LintValue, ToolLints,
+};
 use g3rs_cargo_types::{
-    G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoWaiver,
-    G3RsCargoWorkspaceMember,
+    G3RsCargoPolicyRoot, G3RsCargoRustPolicyState, G3RsCargoWaiver, G3RsCargoWorkspaceMember,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 pub(crate) struct LintExpectation {
     pub name: &'static str,
@@ -280,48 +282,34 @@ pub(crate) fn policy_root_edition(cargo: &CargoToml) -> Option<Result<&str, ()>>
     }
 }
 
-pub(crate) fn raw_policy_lints<'a>(
+pub(crate) fn policy_override_lints<'a>(
     root: &'a G3RsCargoPolicyRoot,
     family: &str,
-) -> Option<&'a toml::Value> {
-    match root.kind {
-        G3RsCargoPolicyRootKind::WorkspaceRoot => root
-            .raw_cargo
-            .get("workspace")
-            .and_then(|value| value.get("lints"))
-            .and_then(|value| value.get(family))
-            .or_else(|| {
-                root.raw_cargo
-                    .get("lints")
-                    .and_then(|value| value.get(family))
-            }),
-        G3RsCargoPolicyRootKind::StandalonePackageRoot => root
-            .raw_cargo
-            .get("lints")
-            .and_then(|value| value.get(family)),
-        G3RsCargoPolicyRootKind::Other => None,
-    }
+)-> Option<&'a ToolLints> {
+    cargo_toml_parser::document::policy_lints(&root.cargo, family)
 }
 
-pub(crate) fn raw_member_lints<'a>(
+pub(crate) fn member_override_lints<'a>(
     member: &'a G3RsCargoWorkspaceMember,
     family: &str,
-) -> Option<&'a toml::Value> {
-    member
-        .raw_cargo
-        .get("lints")
-        .and_then(|value| value.get(family))
+) -> Option<&'a ToolLints> {
+    cargo_toml_parser::document::member_lints(&member.cargo, family)
 }
 
-pub(crate) fn explicit_allow_entries(lints: Option<&toml::Value>) -> Vec<String> {
-    let Some(table) = lints.and_then(toml::Value::as_table) else {
+pub(crate) fn member_override_lints_state<'a>(
+    member: &'a G3RsCargoWorkspaceMember,
+    family: &str,
+) -> CargoLintTableState<'a> {
+    cargo_toml_parser::document::member_lints_state(&member.cargo, family)
+}
+
+pub(crate) fn explicit_allow_entries(lints: Option<&ToolLints>) -> Vec<String> {
+    let Some(lints) = lints else {
         return Vec::new();
     };
-    let mut entries = table
+    let mut entries = lints
         .iter()
-        .filter_map(|(name, value)| {
-            (lint_level_from_value(value) == Some("allow")).then(|| name.clone())
-        })
+        .filter_map(|(name, value)| (lint_level_from_value(value) == Some("allow")).then(|| name.clone()))
         .collect::<Vec<_>>();
     entries.sort();
     entries
@@ -372,32 +360,16 @@ pub(crate) fn rust_policy_waivers(root: &G3RsCargoPolicyRoot) -> &[G3RsCargoWaiv
     }
 }
 
-pub(crate) fn lints_table_is_well_formed(lints: Option<&toml::Value>) -> bool {
-    let Some(lints) = lints else {
-        return false;
-    };
-    let Some(table) = lints.as_table() else {
-        return false;
-    };
-    table.values().all(has_valid_lint_level)
+pub(crate) fn lints_table_is_well_formed(lints: Option<&ToolLints>) -> bool {
+    lints.is_some()
 }
 
-pub(crate) fn has_valid_lint_level(value: &toml::Value) -> bool {
-    matches!(
-        lint_level_from_value(value),
-        Some(level) if is_valid_lint_level(level)
-    ) && value.as_table().is_none_or(|table| {
-        table
-            .get("priority")
-            .is_none_or(|priority| priority.as_integer().is_some())
-    })
+pub(crate) fn has_valid_lint_level(value: &LintValue) -> bool {
+    matches!(lint_level_from_value(value), Some(level) if is_valid_lint_level(level))
 }
 
-pub(crate) fn raw_lint_level(lints: &toml::Value, name: &str) -> Option<String> {
-    lints
-        .get(name)
-        .and_then(lint_level_from_value)
-        .map(str::to_owned)
+pub(crate) fn lint_level_for_name(lints: &ToolLints, name: &str) -> Option<String> {
+    lints.get(name).and_then(lint_level_from_value).map(str::to_owned)
 }
 
 pub(crate) fn is_valid_lint_level(level: &str) -> bool {
@@ -408,12 +380,33 @@ pub(crate) fn workspace_resolver(cargo: &CargoToml) -> Option<&str> {
     cargo.workspace.as_ref()?.resolver.as_deref()
 }
 
-fn lint_level_from_value(value: &toml::Value) -> Option<&str> {
+fn lint_level_from_value(value: &LintValue) -> Option<&str> {
     match value {
-        toml::Value::String(level) => Some(level.as_str()),
-        toml::Value::Table(table) => table.get("level").and_then(toml::Value::as_str),
-        _ => None,
+        LintValue::Level(level) => Some(level.as_str()),
+        LintValue::Detailed(detail) => Some(detail.level.as_str()),
     }
+}
+
+pub(crate) fn root_edition_state(root: &G3RsCargoPolicyRoot) -> CargoStringFieldState<'_> {
+    cargo_toml_parser::document::root_package_string_field(&root.cargo, "edition")
+}
+
+pub(crate) fn root_rust_version_state(root: &G3RsCargoPolicyRoot) -> CargoStringFieldState<'_> {
+    cargo_toml_parser::document::root_package_string_field(&root.cargo, "rust-version")
+}
+
+pub(crate) fn member_edition_state(member: &G3RsCargoWorkspaceMember) -> CargoStringFieldState<'_> {
+    cargo_toml_parser::document::package_string_field(&member.cargo, "edition")
+}
+
+pub(crate) fn member_lints_workspace_state(
+    member: &G3RsCargoWorkspaceMember,
+) -> CargoBoolFieldState<'_> {
+    cargo_toml_parser::document::lints_workspace_state(&member.cargo)
+}
+
+pub(crate) fn member_package_name(member: &G3RsCargoWorkspaceMember) -> Option<&str> {
+    cargo_toml_parser::document::package_name(&member.cargo)
 }
 
 pub(crate) fn info(

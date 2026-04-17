@@ -1,10 +1,12 @@
 use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoWorkspaceMember};
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_reason_policy::validate_reason_text;
+use cargo_toml_parser::types::{CargoBoolFieldState, CargoLintTableState};
 
 use crate::support::{
-    allow_selector, explicit_allow_entries, has_valid_lint_level, raw_member_lints,
-    raw_policy_lints, rust_policy_valid, rust_policy_waivers, waiver_reason,
+    allow_selector, explicit_allow_entries, has_valid_lint_level, member_override_lints,
+    member_override_lints_state, policy_override_lints, rust_policy_valid, rust_policy_waivers,
+    waiver_reason,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-12";
@@ -14,7 +16,10 @@ pub(crate) fn check(
     member: &G3RsCargoWorkspaceMember,
     results: &mut Vec<G3CheckResult>,
 ) {
-    if member.lint_workspace_invalid || !member.lint_workspace_true {
+    if !matches!(
+        crate::support::member_lints_workspace_state(member),
+        CargoBoolFieldState::Value(true)
+    ) {
         return;
     }
     if !rust_policy_valid(root) {
@@ -22,10 +27,10 @@ pub(crate) fn check(
     }
 
     let workspace_policy_complete =
-        raw_policy_lints(root, "rust").is_some() && raw_policy_lints(root, "clippy").is_some();
+        policy_override_lints(root, "rust").is_some() && policy_override_lints(root, "clippy").is_some();
     let member_override_shapes_valid = [
-        raw_member_lints(member, "rust"),
-        raw_member_lints(member, "clippy"),
+        member_override_lints_state(member, "rust"),
+        member_override_lints_state(member, "clippy"),
     ]
     .into_iter()
     .all(lints_are_well_formed);
@@ -34,8 +39,8 @@ pub(crate) fn check(
     let mut missing_reason_count = 0usize;
     let mut weak_reason_count = 0usize;
     for (family, lints) in [
-        ("rust", raw_member_lints(member, "rust")),
-        ("clippy", raw_member_lints(member, "clippy")),
+        ("rust", member_override_lints(member, "rust")),
+        ("clippy", member_override_lints(member, "clippy")),
     ] {
         for lint_name in explicit_allow_entries(lints) {
             let selector = allow_selector(family, &lint_name);
@@ -112,14 +117,12 @@ pub(crate) fn check(
     }
 }
 
-fn lints_are_well_formed(lints: Option<&toml::Value>) -> bool {
-    let Some(lints) = lints else {
-        return true;
-    };
-    let Some(table) = lints.as_table() else {
-        return false;
-    };
-    table.values().all(has_valid_lint_level)
+fn lints_are_well_formed(lints: CargoLintTableState<'_>) -> bool {
+    match lints {
+        CargoLintTableState::Missing => true,
+        CargoLintTableState::Parsed(table) => table.values().all(has_valid_lint_level),
+        CargoLintTableState::WrongType(_) => false,
+    }
 }
 
 #[cfg(test)]

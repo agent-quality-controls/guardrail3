@@ -79,7 +79,10 @@ fn ingests_workspace_root_with_members_for_config_checks() {
     );
     assert_eq!(input.workspace_members.len(), 1);
     assert_eq!(input.workspace_members[0].member_rel, "crates/api");
-    assert!(input.workspace_members[0].lint_workspace_true);
+    assert!(matches!(
+        cargo_toml_parser::document::lints_workspace_state(&input.workspace_members[0].cargo),
+        cargo_toml_parser::types::CargoBoolFieldState::Value(true)
+    ));
 }
 
 #[test]
@@ -116,8 +119,10 @@ fn member_may_inherit_workspace_edition() {
         .expect("ingestion should accept workspace edition inheritance");
 
     assert_eq!(input.workspace_members.len(), 1);
-    assert_eq!(input.workspace_members[0].edition, None);
-    assert!(!input.workspace_members[0].edition_invalid);
+    assert!(matches!(
+        cargo_toml_parser::document::package_string_field(&input.workspace_members[0].cargo, "edition"),
+        cargo_toml_parser::types::CargoStringFieldState::Inherit
+    ));
 }
 
 #[test]
@@ -150,14 +155,11 @@ fn ingests_hybrid_root_with_package_fallback_fields() {
         input.root.kind,
         g3rs_cargo_types::G3RsCargoPolicyRootKind::WorkspaceRoot
     );
-    assert_eq!(input.root.edition.as_deref(), Some("2024"));
-    assert!(
-        input.root
-            .raw_cargo
-            .get("lints")
-            .and_then(|value| value.get("rust"))
-            .is_some()
-    );
+    assert!(matches!(
+        cargo_toml_parser::document::root_package_string_field(&input.root.cargo, "edition"),
+        cargo_toml_parser::types::CargoStringFieldState::Value("2024")
+    ));
+    assert!(cargo_toml_parser::document::policy_lints(&input.root.cargo, "rust").is_some());
 }
 
 #[test]
@@ -184,7 +186,7 @@ fn guardrail3_rs_toml_drives_profile_and_ignores_legacy_guardrail3_toml() {
 
     match &input.root.rust_policy {
         g3rs_cargo_types::G3RsCargoRustPolicyState::Parsed { profile, waivers, .. } => {
-            assert_eq!(*profile, Some(guardrail3_rs_toml_parser::RustProfile::Library));
+            assert_eq!(*profile, Some(guardrail3_rs_toml_parser::types::RustProfile::Library));
             assert_eq!(waivers.len(), 1, "{waivers:#?}");
             assert_eq!(waivers[0].rule, "RS-CARGO-CONFIG-07");
             assert_eq!(waivers[0].selector, "clippy:module_name_repetitions");
@@ -499,8 +501,14 @@ fn config_ingestion_preserves_invalid_lints_workspace_shape_per_member() {
         .expect("invalid [lints].workspace should remain member-scoped config state");
 
     assert_eq!(input.workspace_members.len(), 1);
-    assert!(input.workspace_members[0].lint_workspace_invalid);
-    assert!(!input.workspace_members[0].lint_workspace_true);
+    assert!(match cargo_toml_parser::document::lints_workspace_state(&input.workspace_members[0].cargo) {
+        cargo_toml_parser::types::CargoBoolFieldState::WrongType(toml::Value::String(value)) => {
+            value == "yes"
+        }
+        cargo_toml_parser::types::CargoBoolFieldState::Missing
+        | cargo_toml_parser::types::CargoBoolFieldState::Value(_)
+        | cargo_toml_parser::types::CargoBoolFieldState::WrongType(_) => false,
+    });
 }
 
 #[cfg(unix)]
@@ -575,14 +583,26 @@ fn config_ingestion_keeps_healthy_members_when_another_member_has_invalid_lints_
     assert_eq!(input.workspace_members.len(), 2, "{:#?}", input.workspace_members);
     assert!(
         input.workspace_members.iter().any(|member| {
-            member.member_rel == "crates/api" && member.lint_workspace_true && !member.lint_workspace_invalid
+            member.member_rel == "crates/api"
+                && matches!(
+                    cargo_toml_parser::document::lints_workspace_state(&member.cargo),
+                    cargo_toml_parser::types::CargoBoolFieldState::Value(true)
+                )
         }),
         "{:#?}",
         input.workspace_members
     );
     assert!(
         input.workspace_members.iter().any(|member| {
-            member.member_rel == "crates/bad" && !member.lint_workspace_true && member.lint_workspace_invalid
+            member.member_rel == "crates/bad"
+                && match cargo_toml_parser::document::lints_workspace_state(&member.cargo) {
+                    cargo_toml_parser::types::CargoBoolFieldState::WrongType(
+                        toml::Value::String(value),
+                    ) => value == "yes",
+                    cargo_toml_parser::types::CargoBoolFieldState::Missing
+                    | cargo_toml_parser::types::CargoBoolFieldState::Value(_)
+                    | cargo_toml_parser::types::CargoBoolFieldState::WrongType(_) => false,
+                }
         }),
         "{:#?}",
         input.workspace_members

@@ -1,6 +1,7 @@
 profile = "library"
 
 allowed_deps = [
+  "cargo-config-toml-parser",
   "cargo-toml-parser",
   "g3rs-clippy-config-checks-assertions",
   "clippy-toml-parser",
