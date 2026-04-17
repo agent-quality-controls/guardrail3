@@ -12,3 +12,18 @@ dependencies = [
 [[package]]
 name = "hook-shell-parser-runtime"
 version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-runtime-assertions",
+ "hook-shell-parser-types",
+]
+
+[[package]]
+name = "hook-shell-parser-runtime-assertions"
+version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-runtime",
+]
+
+[[package]]
+name = "hook-shell-parser-types"
+version = "0.1.0"

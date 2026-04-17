@@ -7,9 +7,9 @@ const ID: &str = "RS-HOOKS-SOURCE-03";
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     let found = input
         .parsed
-        .executable_lines()
+        .executable_lines
         .iter()
-        .any(|line| is_cargo_fmt_check_command(line.command_text()));
+        .any(|line| is_cargo_fmt_check_command(&line.command_text));
 
     push_presence_result(
         found,
@@ -211,5 +211,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

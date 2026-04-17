@@ -32,15 +32,15 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
 }
 
 fn first_exit_zero_line(
-    parsed: &hook_shell_parser::ParsedShellScript,
+    parsed: &hook_shell_parser::types::ParsedShellScript,
     visiting: &mut Vec<String>,
-)-> Option<String> {
-    for line in parsed.executable_lines() {
-        if line.is_exit_zero() {
-            return Some(line.raw().to_owned());
+) -> Option<String> {
+    for line in &parsed.executable_lines {
+        if line.is_exit_zero {
+            return Some(line.raw.to_owned());
         }
         if let Some(line_no) =
-            called_function_exit_zero_line(parsed, line.command_name(), line.line_no(), visiting)
+            called_function_exit_zero_line(parsed, &line.command_name, line.line_no, visiting)
         {
             return Some(line_no);
         }
@@ -50,32 +50,32 @@ fn first_exit_zero_line(
 }
 
 fn called_function_exit_zero_line(
-    parsed: &hook_shell_parser::ParsedShellScript,
+    parsed: &hook_shell_parser::types::ParsedShellScript,
     command_name: &str,
     call_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<String> {
     let function = parsed
-        .functions()
+        .functions
         .iter()
-        .find(|function| function.name() == command_name && function.line_no() <= call_line_no)?;
-    if visiting.iter().any(|name| name == function.name()) {
+        .find(|function| function.name == command_name && function.line_no <= call_line_no)?;
+    if visiting.iter().any(|name| name == &function.name) {
         return None;
     }
 
-    visiting.push(function.name().to_owned());
-    let nested = hook_shell_parser::parse_script(function.body());
+    visiting.push(function.name.to_owned());
+    let nested = hook_shell_parser::parse_script(&function.body);
     let line_no = first_exit_zero_line(&nested, visiting);
     let _ = visiting.pop();
     line_no
 }
 
-fn locate_line_no(parsed: &hook_shell_parser::ParsedShellScript, raw_line: &str) -> Option<usize> {
+fn locate_line_no(parsed: &hook_shell_parser::types::ParsedShellScript, raw_line: &str) -> Option<usize> {
     parsed
-        .source_lines()
+        .source_lines
         .iter()
-        .find(|line| line.raw().trim() == raw_line.trim())
-        .map(|line| line.line_no())
+        .find(|line| line.raw.trim() == raw_line.trim())
+        .map(|line| line.line_no)
 }
 
 #[cfg(test)]
@@ -92,5 +92,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

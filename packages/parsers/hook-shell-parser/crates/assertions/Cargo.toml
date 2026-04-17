@@ -1,14 +1,13 @@
 [package]
-name = "hook-shell-parser-runtime"
+name = "hook-shell-parser-runtime-assertions"
 version.workspace = true
 edition = "2024"
-description = "Runtime parser for executable shell hook content"
+description = "Assertion helpers for hook shell parser tests"
 license.workspace = true
-rust-version.workspace = true
 repository.workspace = true
-keywords = ["hook", "shell", "parser", "guardrail3", "rust"]
+keywords = ["hook", "shell", "parser", "assertions", "rust"]
 categories = ["development-tools", "parser-implementations"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
@@ -17,10 +16,11 @@ workspace = true
 
 [features]
 default = ["all"]
-all = ["api"]
-api = []
+all = ["checks"]
+checks = []
 
 [dependencies]
+hook-shell-parser-runtime = { path = "../runtime" }
 
 [package.metadata.docs.rs]
 all-features = true

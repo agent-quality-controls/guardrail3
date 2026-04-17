@@ -64,9 +64,7 @@ fn reports_fail_open_wrapper_with_echo_softener() {
 
 #[test]
 fn reports_fail_open_wrapper_on_called_function_that_runs_critical_command() {
-    let results = run_case(
-        "run_tests() {\n    cargo test --workspace\n}\nrun_tests || true\n",
-    );
+    let results = run_case("run_tests() {\n    cargo test --workspace\n}\nrun_tests || true\n");
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
@@ -93,9 +91,8 @@ fn ignores_echoed_critical_command_with_literal_fail_open_text() {
 
 #[test]
 fn reports_fail_open_wrapper_inside_called_function_body() {
-    let results = run_case(
-        "run_checks() {\n    cargo test --workspace || echo skipped\n}\nrun_checks\n",
-    );
+    let results =
+        run_case("run_checks() {\n    cargo test --workspace || echo skipped\n}\nrun_checks\n");
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {

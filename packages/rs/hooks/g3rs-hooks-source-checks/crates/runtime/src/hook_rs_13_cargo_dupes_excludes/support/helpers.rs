@@ -1,4 +1,4 @@
-use hook_shell_parser::ParsedShellScript;
+use hook_shell_parser::types::ParsedShellScript;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct CommandSegment {
@@ -336,13 +336,13 @@ pub(crate) fn token_is_shadowed_function(
     }
 
     current
-        .functions()
+        .functions
         .iter()
-        .any(|function| function.name() == command_name && function.line_no() <= current_cutoff)
+        .any(|function| function.name == command_name && function.line_no <= current_cutoff)
         || root
-            .functions()
+            .functions
             .iter()
-            .any(|function| function.name() == command_name && function.line_no() <= root_cutoff)
+            .any(|function| function.name == command_name && function.line_no <= root_cutoff)
 }
 
 pub(crate) fn shell_words(command_text: &str) -> Vec<String> {

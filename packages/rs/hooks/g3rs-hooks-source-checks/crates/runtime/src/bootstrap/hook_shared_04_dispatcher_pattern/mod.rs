@@ -24,9 +24,9 @@ pub(crate) fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<G3Check
 
     let has_dispatcher = input
         .parsed
-        .executable_lines()
+        .executable_lines
         .iter()
-        .any(|line| line.is_dispatcher_syntax() && targets_pre_commit_dir(line.raw()));
+        .any(|line| line.is_dispatcher_syntax && targets_pre_commit_dir(&line.raw));
 
     if has_dispatcher {
         results.push(
@@ -77,5 +77,4 @@ pub(crate) fn run_case(
 }
 
 #[cfg(test)]
-
 mod tests;

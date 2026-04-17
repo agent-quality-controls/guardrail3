@@ -1,8 +1,6 @@
-use hook_shell_parser::ParsedShellScript;
-use hook_shell_parser::command_query::{
-    ResolvedCommand, any_resolved_command,
-};
 use crate::compat::{G3CheckResult, G3Severity};
+use hook_shell_parser::types::ParsedShellScript;
+use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use super::inputs::RustHookCommandInput;
 
@@ -26,9 +24,7 @@ pub(crate) fn script_contains_guardrail_step(parsed: &ParsedShellScript) -> bool
     any_resolved_command(parsed, is_guardrail_validate_path_command)
 }
 
-pub(crate) fn script_contains_path_qualified_guardrail_step(
-    parsed: &ParsedShellScript,
-) -> bool {
+pub(crate) fn script_contains_path_qualified_guardrail_step(parsed: &ParsedShellScript) -> bool {
     any_resolved_command(parsed, is_path_qualified_guardrail_validate_path_command)
 }
 
@@ -161,5 +157,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

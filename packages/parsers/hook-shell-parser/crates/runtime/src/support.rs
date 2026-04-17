@@ -1,4 +1,4 @@
-use super::{ExecutableLine, FailOpenWrapper, ShellFunction};
+use crate::types::{ExecutableLine, FailOpenWrapper, ShellFunction};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct HeredocTerminator {
@@ -54,7 +54,10 @@ pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, String)> {
     if let Some(start) = continuation_start
         && start < content.len()
     {
-        logical_lines.push((continuation_line_no.unwrap_or(1), content[start..].to_owned()));
+        logical_lines.push((
+            continuation_line_no.unwrap_or(1),
+            content[start..].to_owned(),
+        ));
     }
 
     logical_lines

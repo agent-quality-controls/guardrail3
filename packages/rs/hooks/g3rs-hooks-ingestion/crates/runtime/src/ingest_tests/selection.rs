@@ -86,9 +86,9 @@ fn prefers_githooks_pre_commit_over_hooks_pre_commit() {
     assert_eq!(inputs[0].kind, G3RsHookScriptKind::PreCommit);
     assert!(inputs[0]
         .parsed
-        .source_lines()
+        .source_lines
         .iter()
-        .any(|line| line.raw().contains("cargo fmt --check")));
+        .any(|line| line.raw.contains("cargo fmt --check")));
     assert!(!inputs[0].has_modular_dir);
     assert!(!inputs[0].is_workspace_project);
 }
@@ -108,9 +108,9 @@ fn falls_back_to_hooks_pre_commit_when_githooks_script_is_absent() {
     assert_eq!(inputs[0].kind, G3RsHookScriptKind::PreCommit);
     assert!(inputs[0]
         .parsed
-        .source_lines()
+        .source_lines
         .iter()
-        .any(|line| line.raw().contains("cargo test --workspace")));
+        .any(|line| line.raw.contains("cargo test --workspace")));
     assert!(!inputs[0].has_modular_dir);
     assert!(!inputs[0].is_workspace_project);
 }
@@ -468,9 +468,9 @@ fn config_ingestion_selects_effective_hook_and_detects_installed_tools() {
     assert_eq!(selected_hook.rel_path, ".githooks/pre-commit");
     assert!(selected_hook
         .parsed
-        .source_lines()
+        .source_lines
         .iter()
-        .any(|line| line.raw().contains("g3rs validate --path")));
+        .any(|line| line.raw.contains("g3rs validate --path")));
     assert_eq!(input.installed_tools, vec!["g3rs".to_owned(), "gitleaks".to_owned()]);
 }
 

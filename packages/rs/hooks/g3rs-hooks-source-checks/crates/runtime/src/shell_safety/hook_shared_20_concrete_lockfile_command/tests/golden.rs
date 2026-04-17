@@ -74,7 +74,8 @@ fn passes_when_path_qualified_pnpm_executes_real_frozen_lockfile_command() {
 
 #[test]
 fn passes_when_called_function_executes_real_frozen_lockfile_command() {
-    let results = run_case("verify_lockfile() {\n    pnpm i --frozen-lockfile\n}\nverify_lockfile\n");
+    let results =
+        run_case("verify_lockfile() {\n    pnpm i --frozen-lockfile\n}\nverify_lockfile\n");
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {

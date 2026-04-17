@@ -1,7 +1,7 @@
 mod support;
 
-use hook_shell_parser::{ParsedShellScript, parse_script};
 use crate::compat::{G3CheckResult, G3Severity};
+use hook_shell_parser::{parse_script, types::ParsedShellScript};
 
 use self::support::*;
 use super::inputs::RustHookCommandInput;
@@ -64,8 +64,8 @@ fn execute_script_for_clippy(
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {
-    for line in parsed.executable_lines() {
-        if line_contains_clippy_deny(line.raw(), root, env_state, visiting) {
+    for line in &parsed.executable_lines {
+        if line_contains_clippy_deny(&line.raw, root, env_state, visiting) {
             return true;
         }
     }
@@ -212,18 +212,18 @@ fn called_function_contains_clippy_deny(
     visiting: &mut Vec<String>,
 ) -> bool {
     let Some(function) = root
-        .functions()
+        .functions
         .iter()
-        .find(|function| function.name() == command_name)
+        .find(|function| function.name == command_name)
     else {
         return false;
     };
-    if visiting.iter().any(|name| name == &function.name()) {
+    if visiting.iter().any(|name| name == &function.name) {
         return false;
     }
 
-    visiting.push(function.name().to_owned());
-    let body_parsed = parse_script(&function.body());
+    visiting.push(function.name.to_owned());
+    let body_parsed = parse_script(&function.body);
     let found = execute_script_for_clippy(&body_parsed, root, env_state, visiting);
     let _ = visiting.pop();
     found
