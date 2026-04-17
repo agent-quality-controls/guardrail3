@@ -1,0 +1,13 @@
+profile = "library"
+
+allowed_deps = [
+  "release-plz-toml-parser-runtime",
+  "release-plz-toml-parser-runtime-assertions",
+  "release-plz-toml-parser-types",
+  "serde",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false

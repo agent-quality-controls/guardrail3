@@ -610,7 +610,7 @@ fn parse_release_plz(
 ) -> (
     bool,
     String,
-    Option<release_plz_toml_parser::ReleasePlzToml>,
+    Option<release_plz_toml_parser::types::ReleasePlzToml>,
     BTreeSet<String>,
 ) {
     let rel_path = "release-plz.toml".to_owned();

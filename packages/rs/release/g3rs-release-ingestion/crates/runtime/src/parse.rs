@@ -2,7 +2,7 @@ use std::path::Path;
 
 use cargo_toml_parser::types::CargoToml;
 use cliff_toml_parser::types::CliffToml;
-use release_plz_toml_parser::ReleasePlzToml;
+use release_plz_toml_parser::types::ReleasePlzToml;
 
 use crate::run::IngestionError;
 
