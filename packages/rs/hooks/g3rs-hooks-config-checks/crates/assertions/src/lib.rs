@@ -1,4 +1,4 @@
-#![allow(dead_code, unreachable_pub, unused_imports)]
+use g3rs_hooks_config_checks_runtime as _;
 
 mod common;
 
