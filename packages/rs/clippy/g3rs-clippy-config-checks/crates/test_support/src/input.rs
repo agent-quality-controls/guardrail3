@@ -1,7 +1,7 @@
 use clippy_toml_parser::parse as parse_clippy_toml;
 use g3rs_clippy_types::{
     G3RsClippyCargoConfigOverride, G3RsClippyConfigChecksInput, G3RsClippyConfigState,
-    G3RsClippyRustPolicyState,
+    G3RsClippyRustPolicyState, G3RsClippyWaiver,
 };
 use guardrail3_rs_toml_parser::RustProfile;
 
@@ -32,11 +32,12 @@ pub fn override_facts(rel_path: &str, parse_error: Option<&str>) -> G3RsClippyCa
 }
 
 pub fn input_from_raw(rel_path: &str, raw: &str) -> G3RsClippyConfigChecksInput {
-    input_with_raw(
+    input_with_raw_and_waivers(
         rel_path,
         raw,
         G3RsClippyRustPolicyState::Missing,
         false,
+        Vec::new(),
         Vec::new(),
     )
 }
@@ -47,6 +48,33 @@ pub fn input_with_raw(
     rust_policy: G3RsClippyRustPolicyState,
     published_library_policy: bool,
     cargo_config_overrides: Vec<G3RsClippyCargoConfigOverride>,
+) -> G3RsClippyConfigChecksInput {
+    input_with_raw_and_waivers(
+        rel_path,
+        raw,
+        rust_policy,
+        published_library_policy,
+        cargo_config_overrides,
+        Vec::new(),
+    )
+}
+
+pub fn waiver(rule: &str, file: &str, selector: &str, reason: &str) -> G3RsClippyWaiver {
+    G3RsClippyWaiver {
+        rule: rule.to_owned(),
+        file: file.to_owned(),
+        selector: selector.to_owned(),
+        reason: reason.to_owned(),
+    }
+}
+
+pub fn input_with_raw_and_waivers(
+    rel_path: &str,
+    raw: &str,
+    rust_policy: G3RsClippyRustPolicyState,
+    published_library_policy: bool,
+    cargo_config_overrides: Vec<G3RsClippyCargoConfigOverride>,
+    waivers: Vec<G3RsClippyWaiver>,
 ) -> G3RsClippyConfigChecksInput {
     let clippy = match toml::from_str::<toml::Value>(raw) {
         Ok(raw_value) => G3RsClippyConfigState::Parsed {
@@ -64,5 +92,6 @@ pub fn input_with_raw(
         rust_policy,
         published_library_policy,
         cargo_config_overrides,
+        waivers,
     }
 }

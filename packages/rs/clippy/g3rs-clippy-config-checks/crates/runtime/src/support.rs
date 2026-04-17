@@ -1,4 +1,4 @@
-use clippy_toml_parser::ClippyToml;
+use clippy_toml_parser::types::ClippyToml;
 use g3rs_clippy_types::{
     G3RsClippyConfigChecksInput, G3RsClippyConfigState, G3RsClippyRustPolicyState,
 };
@@ -167,6 +167,18 @@ pub(crate) fn check_threshold(
             ));
         }
     }
+}
+
+pub(crate) fn has_matching_waiver(
+    input: &G3RsClippyConfigChecksInput,
+    rule: &str,
+    selector: &str,
+) -> bool {
+    input.waivers.iter().any(|waiver| {
+        waiver.rule == rule
+            && waiver.file == input.clippy_rel_path
+            && waiver.selector == selector
+    })
 }
 
 pub(crate) fn typed_clippy(input: &G3RsClippyConfigChecksInput) -> Option<&ClippyToml> {

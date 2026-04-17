@@ -13,7 +13,7 @@ fn inventories_when_all_core_bans_present() {
         cargo: cargo_toml_parser::parse(
             "[workspace]\nmembers = []\n[workspace.dependencies]\ngarde = \"0.22\"\n",
         )
-            .expect("minimal cargo fixture should parse"),
+        .expect("minimal cargo fixture should parse"),
         clippy_input: G3RsGardeClippyInput::Parsed {
             rel_path: "clippy.toml".to_owned(),
             clippy,

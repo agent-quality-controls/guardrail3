@@ -1,4 +1,4 @@
-use clippy_toml_parser::ClippyToml;
+use clippy_toml_parser::types::ClippyToml;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{ADDITIONAL_METHOD_BANS, disallowed_method_paths, info, missing_bans, warn};

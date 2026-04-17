@@ -1,4 +1,4 @@
-use clippy_toml_parser::ClippyToml;
+use clippy_toml_parser::types::ClippyToml;
 use guardrail3_rs_toml_parser::RustProfile;
 
 #[derive(Debug, Clone)]
@@ -39,6 +39,14 @@ pub struct G3RsClippyCargoConfigOverride {
     pub parse_error: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsClippyWaiver {
+    pub rule: String,
+    pub file: String,
+    pub selector: String,
+    pub reason: String,
+}
+
 #[derive(Debug, Clone)]
 pub struct G3RsClippyConfigChecksInput {
     pub clippy_rel_path: String,
@@ -46,6 +54,7 @@ pub struct G3RsClippyConfigChecksInput {
     pub rust_policy: G3RsClippyRustPolicyState,
     pub published_library_policy: bool,
     pub cargo_config_overrides: Vec<G3RsClippyCargoConfigOverride>,
+    pub waivers: Vec<G3RsClippyWaiver>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

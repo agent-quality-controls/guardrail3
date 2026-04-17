@@ -3,6 +3,7 @@ use std::path::Path;
 use cargo_toml_parser::{types::CargoToml, types::InheritableValue, types::PackageSection, types::VecStringOrBool};
 use g3rs_clippy_types::{
     G3RsClippyCargoConfigOverride, G3RsClippyConfigState, G3RsClippyRustPolicyState,
+    G3RsClippyWaiver,
 };
 use guardrail3_rs_toml_parser::RustProfile;
 use glob::Pattern;
@@ -67,6 +68,28 @@ pub(crate) fn parse_rust_policy_state(
         profile: parsed.profile,
         garde_enabled,
     }
+}
+
+pub(crate) fn parse_waivers(abs_path: &Path) -> Result<Vec<G3RsClippyWaiver>, IngestionError> {
+    let content = read_to_string(abs_path).map_err(|reason| IngestionError::Unreadable {
+        path: abs_path.to_path_buf(),
+        reason,
+    })?;
+    let parsed = guardrail3_rs_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+        path: abs_path.to_path_buf(),
+        reason: err.to_string(),
+    })?;
+
+    Ok(parsed
+        .waivers
+        .into_iter()
+        .map(|waiver| G3RsClippyWaiver {
+            rule: waiver.rule,
+            file: waiver.file,
+            selector: waiver.selector,
+            reason: waiver.reason,
+        })
+        .collect())
 }
 
 pub(crate) fn parse_cargo_override(

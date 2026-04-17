@@ -1,11 +1,11 @@
-use g3rs_release_repo_root_checks_types::G3RsReleaseRepoRootChecksInput;
+use g3rs_release_repo_root_checks_types::G3RsReleaseConfigRepo;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, warn};
 
 const ID: &str = "RS-RELEASE-REPO-ROOT-03";
 
-pub(crate) fn check(input: &G3RsReleaseRepoRootChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
     if input.has_registry_token_workflow {
         results.push(info(
             ID,
