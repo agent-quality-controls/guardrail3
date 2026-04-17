@@ -26,4 +26,20 @@ fn skips_typed_errors_and_private_reachability() {
         ),
         &[],
     );
+    assert_rule_results(
+        &super::super::check_source(
+            "src/lib.rs",
+            "pub enum Error { Parse }\npub fn parse() -> Result<(), Error> { Ok(()) }",
+            false,
+        ),
+        &[],
+    );
+    assert_rule_results(
+        &super::super::check_source(
+            "src/lib.rs",
+            "use crate::error::Error;\npub fn parse() -> Result<(), Error> { Ok(()) }",
+            false,
+        ),
+        &[],
+    );
 }

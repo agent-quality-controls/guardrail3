@@ -87,6 +87,12 @@ pub(crate) struct PublicResultErrorInfo {
     pub(crate) kind: PublicResultErrorKind,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub(crate) struct AnyhowTypeBindings {
+    pub(crate) error_type_names: BTreeSet<String>,
+    pub(crate) module_aliases: BTreeSet<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct TraitMethodCountInfo {
     pub(crate) line: usize,
@@ -167,3 +173,4 @@ pub(crate) struct GardeSkipInfo {
     pub(crate) is_exempt: bool,
     pub(crate) has_subcommand_attr: bool,
 }
+use std::collections::BTreeSet;
