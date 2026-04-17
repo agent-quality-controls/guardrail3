@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use g3rs_test_source_checks_types::G3RsTestSourceChecksInput;
+use g3rs_test_types::G3RsTestSourceChecksInput;
 use g3rs_test_types::G3RsTestFileKind;
 use guardrail3_check_types::G3CheckResult;
 

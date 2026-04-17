@@ -71,7 +71,7 @@ pub(crate) fn check_sidecar_semantic_proof(
         return;
     }
     if !owns_sidecar_semantic_proof(input) {
-        if !input.function.has_failure_enforcement {
+        if !input.function.assertions.has_failure_enforcement {
             return;
         }
         results.push(
@@ -100,16 +100,16 @@ pub(crate) fn check_sidecar_semantic_proof(
 
 fn owns_sidecar_semantic_proof(input: &TestFunctionInput<'_>) -> bool {
     owns_result_shape_assertion(
-        &input.function.field_accesses,
-        &input.function.method_names,
-        &input.function.path_uses,
+        &input.function.body.field_accesses,
+        &input.function.body.method_names,
+        &input.function.body.path_uses,
     ) || local_semantic_helper_names(&input.parsed.functions)
         .iter()
         .any(|helper| {
-            input.function.call_paths.iter().any(|path| {
+            input.function.body.call_paths.iter().any(|path| {
                 path.len() == 1
                     && path[0] == *helper
-                    && !input.function.shadowed_idents.contains(&path[0])
+                    && !input.function.body.shadowed_idents.contains(&path[0])
             })
         })
 }
@@ -122,9 +122,9 @@ fn local_semantic_helper_names<'a>(
         .filter(|function| !function.is_test)
         .filter(|function| {
             owns_result_shape_assertion(
-                &function.field_accesses,
-                &function.method_names,
-                &function.path_uses,
+                &function.body.field_accesses,
+                &function.body.method_names,
+                &function.body.path_uses,
             )
         })
         .map(|function| function.name.as_str())
@@ -136,10 +136,10 @@ fn local_semantic_helper_names<'a>(
             if semantic_helpers.contains(function.name.as_str()) {
                 continue;
             }
-            if function.call_paths.iter().any(|path| {
+            if function.body.call_paths.iter().any(|path| {
                 path.len() == 1
                     && semantic_helpers.contains(path[0].as_str())
-                    && !function.shadowed_idents.contains(&path[0])
+                    && !function.body.shadowed_idents.contains(&path[0])
             }) {
                 changed |= semantic_helpers.insert(function.name.as_str());
             }
@@ -168,3 +168,7 @@ fn owns_result_shape_assertion(
                 .is_some_and(|segment| matches!(segment.as_str(), "CheckResult" | "Severity"))
         })
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

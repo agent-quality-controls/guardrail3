@@ -30,3 +30,7 @@ pub(crate) fn check(input: &CfgTestModuleInput<'_>, results: &mut Vec<G3CheckRes
         Some(input.module.line),
     ));
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

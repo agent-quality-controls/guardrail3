@@ -5,7 +5,7 @@ use crate::support::TestFunctionInput;
 const ID: &str = "RS-TEST-SOURCE-08";
 
 pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResult>) {
-    for line in &input.function.weak_matches_lines {
+    for line in &input.function.harness.weak_matches_lines {
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
@@ -18,7 +18,7 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
             Some(*line),
         ));
     }
-    if input.function.weak_matches_lines.is_empty() {
+    if input.function.harness.weak_matches_lines.is_empty() {
         results.push(
             G3CheckResult::new(
                 ID.to_owned(),
@@ -35,3 +35,7 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
         );
     }
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

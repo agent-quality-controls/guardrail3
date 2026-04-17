@@ -12,7 +12,7 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
         return;
     }
 
-    if input.function.has_assertion_macro || calls_local_assertion_helper(input) {
+    if input.function.assertions.has_assertion_macro || calls_local_assertion_helper(input) {
         results.push(G3CheckResult::new(
     ID.to_owned(),
     G3Severity::Error,
@@ -54,12 +54,13 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
         input.proof_bearing_assertion_functions,
     );
 
-    input.function.call_paths.iter().any(|path| {
+    input.function.body.call_paths.iter().any(|path| {
         if path.len() == 1 {
             let direct_local_helper = local_assertion_helpers.contains(path[0].as_str())
-                && !input.function.shadowed_idents.contains(&path[0]);
+                && !input.function.body.shadowed_idents.contains(&path[0]);
             let aliased_local_helper = input
                 .function
+                .body
                 .local_call_aliases
                 .get(&path[0])
                 .and_then(|alias| alias.last())
@@ -73,14 +74,15 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
                 .is_none_or(|first| !import_binds_name(&input.parsed.imports, first))
     }) || input
         .function
+        .body
         .method_names
         .iter()
-        .zip(input.function.method_receiver_paths.iter())
+        .zip(input.function.harness.method_receiver_paths.iter())
         .any(|(method, receiver)| {
             local_assertion_helpers.contains(method.as_str())
                 && receiver
                     .first()
-                    .is_some_and(|name| input.function.shadowed_idents.contains(name))
+                    .is_some_and(|name| input.function.body.shadowed_idents.contains(name))
         })
 }
 
@@ -95,25 +97,14 @@ fn local_assertion_helper_names<'a>(
         .iter()
         .filter(|function| !function.is_test)
         .filter(|function| {
-            function.has_assertion_macro
+            function.assertions.has_assertion_macro
                 || has_owned_assertion_proof(
                     &crate::parse::TestFunctionInfo {
                         line: function.line,
                         name: function.name.clone(),
-                        uses_tokio_test_attr: false,
-                        has_assertion_macro: function.has_assertion_macro,
-                        has_failure_enforcement: function.has_failure_enforcement,
-                        call_paths: function.call_paths.clone(),
-                        path_uses: function.path_uses.clone(),
-                        method_receiver_paths: Vec::new(),
-                        method_names: function.method_names.clone(),
-                        local_call_aliases: function.local_call_aliases.clone(),
-                        field_accesses: function.field_accesses.clone(),
-                        shadowed_idents: function.shadowed_idents.clone(),
-                        should_panic_line: None,
-                        should_panic_has_expected: false,
-                        tautological_assert_lines: Vec::new(),
-                        weak_matches_lines: Vec::new(),
+                        assertions: function.assertions.clone(),
+                        body: function.body.clone(),
+                        harness: crate::parse::TestHarnessFacts::default(),
                     },
                     imports,
                     file_function_names,
@@ -130,10 +121,10 @@ fn local_assertion_helper_names<'a>(
             if assertion_helpers.contains(function.name.as_str()) {
                 continue;
             }
-            if function.call_paths.iter().any(|path| {
+            if function.body.call_paths.iter().any(|path| {
                 path.len() == 1
                     && assertion_helpers.contains(path[0].as_str())
-                    && !function.shadowed_idents.contains(&path[0])
+                    && !function.body.shadowed_idents.contains(&path[0])
             }) {
                 changed |= assertion_helpers.insert(function.name.as_str());
             }
@@ -156,3 +147,7 @@ fn import_binds_name(imports: &[crate::parse::UseBinding], name: &str) -> bool {
                     .is_some_and(|segment| segment == name))
     })
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

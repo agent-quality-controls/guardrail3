@@ -5,10 +5,10 @@ use crate::support::TestFunctionInput;
 const ID: &str = "RS-TEST-SOURCE-05";
 
 pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResult>) {
-    let Some(line) = input.function.should_panic_line else {
+    let Some(line) = input.function.harness.should_panic_line else {
         return;
     };
-    if input.function.should_panic_has_expected {
+    if input.function.harness.should_panic_has_expected {
         results.push(
             G3CheckResult::new(
                 ID.to_owned(),
@@ -38,3 +38,7 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
         Some(line),
     ));
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;
