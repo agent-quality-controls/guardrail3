@@ -1,16 +1,19 @@
 [package]
-name = "rustfmt-toml-parser-runtime"
+name = "rustfmt-toml-parser-types"
 version.workspace = true
 edition = "2024"
-description = "Parser implementation for rustfmt.toml facade packages"
+description = "Typed model for rustfmt.toml files"
 license.workspace = true
 rust-version.workspace = true
 repository.workspace = true
-keywords = ["rustfmt", "toml", "parser", "configuration", "rust"]
+keywords = ["rustfmt", "toml", "types", "configuration", "rust"]
 categories = ["config", "development-tools", "parser-implementations"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[package.metadata.guardrail3]
+shared = true
 
 [lints]
 workspace = true
@@ -21,12 +24,8 @@ all = ["api"]
 api = []
 
 [dependencies]
-rustfmt-toml-parser-types = { path = "../types", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }
 toml = "0.8"
-
-[dev-dependencies]
-rustfmt-toml-parser-runtime-assertions = { path = "../assertions" }
-tempfile = "3"
 
 [package.metadata.docs.rs]
 all-features = true

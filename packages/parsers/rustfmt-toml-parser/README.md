@@ -9,6 +9,7 @@ live under `crates/`.
 
 ```rust
 use rustfmt_toml_parser::parse;
+use rustfmt_toml_parser::types::Edition;
 
 let cfg = parse(
     r#"
@@ -18,7 +19,7 @@ edition = "2021"
 )?;
 
 assert_eq!(cfg.max_width, Some(100));
-assert_eq!(cfg.edition.as_deref(), Some("2021"));
+assert_eq!(cfg.edition, Some(Edition::Edition2021));
 ```
 
 ## License

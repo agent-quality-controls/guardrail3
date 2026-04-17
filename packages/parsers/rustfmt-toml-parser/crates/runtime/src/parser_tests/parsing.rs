@@ -1,12 +1,8 @@
-use crate::{Color, Edition, EmitMode, Heuristics, NewlineStyle};
-use helpers::{parse_fixture, parse_from_tempfile};
 use rustfmt_toml_parser_runtime_assertions::parser as assertions;
-
-use super::helpers;
 
 #[test]
 fn empty_string_yields_empty_config() {
-    let cfg = parse_fixture("");
+    let cfg = assertions::parse_fixture("");
 
     assertions::assert_core_fields_empty(&cfg);
     assertions::assert_collections_empty(&cfg);
@@ -15,7 +11,7 @@ fn empty_string_yields_empty_config() {
 
 #[test]
 fn realistic_config_parses_typed_fields() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 max_width = 100
 hard_tabs = false
@@ -36,26 +32,17 @@ merge_derives = true
     );
 
     assertions::assert_basic_width_fields(&cfg, Some(100), Some(false), Some(4));
-    assert_eq!(cfg.edition, Some(Edition::Edition2021));
-    assert_eq!(cfg.newline_style, Some(NewlineStyle::Unix));
-    assert_eq!(cfg.use_small_heuristics, Some(Heuristics::Default));
-    assert_eq!(
-        cfg.blank_lines_lower_bound,
-        Some(1),
-        "blank_lines_lower_bound"
-    );
-    assert_eq!(
-        cfg.blank_lines_upper_bound,
-        Some(2),
-        "blank_lines_upper_bound"
-    );
-    assert_eq!(cfg.color, Some(Color::Always));
+    assertions::assert_edition(&cfg, Some(assertions::Edition::Edition2021));
+    assertions::assert_newline_style(&cfg, Some(assertions::NewlineStyle::Unix));
+    assertions::assert_use_small_heuristics(&cfg, Some(assertions::Heuristics::Default));
+    assertions::assert_blank_line_bounds(&cfg, Some(1), Some(2));
+    assertions::assert_color(&cfg, Some(assertions::Color::Always));
     assertions::assert_bool_field(
         cfg.overflow_delimited_expr,
         Some(true),
         "overflow_delimited_expr",
     );
-    assert_eq!(cfg.emit_mode, Some(EmitMode::Stdout));
+    assertions::assert_emit_mode(&cfg, Some(assertions::EmitMode::Stdout));
     assertions::assert_bool_field(cfg.make_backup, Some(false), "make_backup");
     assertions::assert_bool_field(
         cfg.print_misformatted_file_names,
@@ -69,7 +56,7 @@ merge_derives = true
 
 #[test]
 fn unknown_keys_land_in_extra() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 max_width = 100
 some_future_nightly_option = "yes"
@@ -84,7 +71,7 @@ another_unknown = 42
 
 #[test]
 fn flat_entries_roundtrip() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 max_width = 120
 ignore = ["generated.rs", "vendor/"]
@@ -107,13 +94,13 @@ disable_all_formatting = false
     );
 
     let serialized = toml::to_string(&cfg).expect("serialization should succeed");
-    let cfg2 = parse_fixture(&serialized);
+    let cfg2 = assertions::parse_fixture(&serialized);
     assertions::assert_tomls_equal(&cfg, &cfg2);
 }
 
 #[test]
 fn from_path_reads_and_parses_file() {
-    let cfg = parse_from_tempfile(
+    let cfg = assertions::parse_from_tempfile(
         r#"
 max_width = 99
 edition = "2021"
@@ -121,12 +108,12 @@ edition = "2021"
     );
 
     assertions::assert_basic_width_fields(&cfg, Some(99), None, None);
-    assert_eq!(cfg.edition, Some(Edition::Edition2021));
+    assertions::assert_edition(&cfg, Some(assertions::Edition::Edition2021));
 }
 
 #[test]
 fn invalid_enum_value_is_rejected() {
-    let err = super::super::parse(
+    let err = assertions::parse_error(
         r#"
 newline_style = "Posix"
 "#,
@@ -137,6 +124,6 @@ newline_style = "Posix"
 
 #[test]
 fn parse_error_on_invalid_toml() {
-    let err = super::super::parse("this is not [[[valid toml");
+    let err = assertions::parse_error("this is not [[[valid toml");
     assertions::assert_parse_error(err.expect_err("invalid TOML should produce an error"));
 }

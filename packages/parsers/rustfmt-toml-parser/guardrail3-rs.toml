@@ -1,0 +1,25 @@
+profile = "library"
+
+allowed_deps = [
+  "rustfmt-toml-parser-runtime",
+  "rustfmt-toml-parser-runtime-assertions",
+  "rustfmt-toml-parser-types",
+  "serde",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-19"
+file = "crates/types/src/rustfmt_toml.rs"
+selector = "struct:RustfmtToml"
+reason = "Schema mirror intentionally matches rustfmt's config surface."
+
+[[waivers]]
+rule = "RS-CLIPPY-CONFIG-01"
+file = "clippy.toml"
+selector = "key:max-struct-bools"
+reason = "Schema mirror parser package needs a higher bool-field threshold than the repo baseline."

@@ -181,6 +181,7 @@ name = "rustfmt-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rustfmt-toml-parser-runtime",
+ "rustfmt-toml-parser-types",
 ]
 
 [[package]]
@@ -189,15 +190,15 @@ version = "0.1.0"
 dependencies = [
  "rustfmt-toml-parser-runtime-assertions",
  "rustfmt-toml-parser-types",
- "tempfile",
  "toml",
 ]
 
 [[package]]
 name = "rustfmt-toml-parser-runtime-assertions"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "rustfmt-toml-parser-runtime",
+ "tempfile",
 ]
 
 [[package]]

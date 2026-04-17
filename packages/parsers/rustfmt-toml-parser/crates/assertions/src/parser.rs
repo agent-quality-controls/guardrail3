@@ -5,7 +5,36 @@
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
-use rustfmt_toml_parser_runtime::{RustfmtToml, Value};
+use std::io::Write;
+
+pub use rustfmt_toml_parser_runtime::types::Color;
+pub use rustfmt_toml_parser_runtime::types::Edition;
+pub use rustfmt_toml_parser_runtime::types::EmitMode;
+pub use rustfmt_toml_parser_runtime::types::Heuristics;
+pub use rustfmt_toml_parser_runtime::types::NewlineStyle;
+
+use rustfmt_toml_parser_runtime::Value;
+use rustfmt_toml_parser_runtime::types::RustfmtToml;
+
+pub fn parse_fixture(input: &str) -> RustfmtToml {
+    rustfmt_toml_parser_runtime::parse(input).expect("should parse valid rustfmt.toml")
+}
+
+pub fn parse_from_tempfile(input: &str) -> RustfmtToml {
+    let mut file = tempfile::NamedTempFile::new().expect("tempfile should be created");
+    file.write_all(input.as_bytes())
+        .expect("rustfmt config should be written");
+    rustfmt_toml_parser_runtime::from_path(file.path()).expect("file should parse")
+}
+
+/// Parse rustfmt TOML content through the runtime parser.
+///
+/// # Errors
+///
+/// Returns the parser error when the input is not valid rustfmt TOML.
+pub fn parse_error(input: &str) -> Result<RustfmtToml, rustfmt_toml_parser_runtime::Error> {
+    rustfmt_toml_parser_runtime::parse(input)
+}
 
 pub fn assert_core_fields_empty(cfg: &RustfmtToml) {
     assert_eq!(
@@ -49,8 +78,38 @@ pub fn assert_basic_width_fields(
     assert_eq!(cfg.tab_spaces, tab_spaces, "tab_spaces mismatch");
 }
 
-pub fn assert_string_field(actual: Option<&str>, expected: Option<&str>, field_name: &str) {
-    assert_eq!(actual, expected, "{field_name} mismatch");
+pub fn assert_edition(cfg: &RustfmtToml, expected: Option<Edition>) {
+    assert_eq!(cfg.edition, expected, "edition mismatch");
+}
+
+pub fn assert_newline_style(cfg: &RustfmtToml, expected: Option<NewlineStyle>) {
+    assert_eq!(cfg.newline_style, expected, "newline_style mismatch");
+}
+
+pub fn assert_use_small_heuristics(cfg: &RustfmtToml, expected: Option<Heuristics>) {
+    assert_eq!(
+        cfg.use_small_heuristics, expected,
+        "use_small_heuristics mismatch",
+    );
+}
+
+pub fn assert_blank_line_bounds(cfg: &RustfmtToml, lower: Option<u32>, upper: Option<u32>) {
+    assert_eq!(
+        cfg.blank_lines_lower_bound, lower,
+        "blank_lines_lower_bound mismatch"
+    );
+    assert_eq!(
+        cfg.blank_lines_upper_bound, upper,
+        "blank_lines_upper_bound mismatch"
+    );
+}
+
+pub fn assert_color(cfg: &RustfmtToml, expected: Option<Color>) {
+    assert_eq!(cfg.color, expected, "color mismatch");
+}
+
+pub fn assert_emit_mode(cfg: &RustfmtToml, expected: Option<EmitMode>) {
+    assert_eq!(cfg.emit_mode, expected, "emit_mode mismatch");
 }
 
 pub fn assert_bool_field(actual: Option<bool>, expected: Option<bool>, field_name: &str) {

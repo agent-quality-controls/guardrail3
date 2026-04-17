@@ -139,7 +139,6 @@ pub enum StyleEdition {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
-#[allow(clippy::struct_excessive_bools)] // reason: config struct mirrors rustfmt.toml schema — each bool maps to a rustfmt option
 pub struct RustfmtToml {
     pub max_width: Option<u32>,
     pub hard_tabs: Option<bool>,

@@ -85,7 +85,10 @@ fn ingests_all_three_files() {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
         other => panic!("expected parsed rust-toolchain.toml, got {other:?}"),
     };
-    assert_eq!(rustfmt.edition, Some(rustfmt_toml_parser::Edition::Edition2024));
+    assert_eq!(
+        rustfmt.edition,
+        Some(rustfmt_toml_parser::types::Edition::Edition2024)
+    );
     assert!(cargo.workspace.is_some());
     let toolchain_section = toolchain
         .toolchain
@@ -115,7 +118,7 @@ fn dot_rustfmt_toml_is_accepted_when_root_rustfmt_toml_is_absent() {
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => None,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
         },
-        Some(rustfmt_toml_parser::Edition::Edition2024),
+        Some(rustfmt_toml_parser::types::Edition::Edition2024),
         "parsed edition should come from .rustfmt.toml"
     );
 }
@@ -163,7 +166,7 @@ fn ignores_dot_rustfmt_toml_when_rustfmt_toml_exists() {
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => None,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
         },
-        Some(rustfmt_toml_parser::Edition::Edition2024),
+        Some(rustfmt_toml_parser::types::Edition::Edition2024),
         "parsed edition should come from rustfmt.toml (2024), not .rustfmt.toml (2021)"
     );
 }
@@ -335,7 +338,10 @@ fn ignored_but_recovered_rustfmt_toml_is_ingested() {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
         other => panic!("expected parsed rust-toolchain.toml, got {other:?}"),
     };
-    assert_eq!(rustfmt.edition, Some(rustfmt_toml_parser::Edition::Edition2024));
+    assert_eq!(
+        rustfmt.edition,
+        Some(rustfmt_toml_parser::types::Edition::Edition2024)
+    );
     assert!(cargo.workspace.is_some());
     assert_eq!(
         toolchain
@@ -375,7 +381,10 @@ fn ignored_but_recovered_cargo_toml_is_ingested() {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
         other => panic!("expected parsed rust-toolchain.toml, got {other:?}"),
     };
-    assert_eq!(rustfmt.edition, Some(rustfmt_toml_parser::Edition::Edition2024));
+    assert_eq!(
+        rustfmt.edition,
+        Some(rustfmt_toml_parser::types::Edition::Edition2024)
+    );
     assert!(cargo.workspace.is_some());
     assert_eq!(
         toolchain
@@ -415,7 +424,10 @@ fn ignored_but_recovered_toolchain_toml_is_ingested() {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
         other => panic!("expected parsed rust-toolchain.toml, got {other:?}"),
     };
-    assert_eq!(rustfmt.edition, Some(rustfmt_toml_parser::Edition::Edition2024));
+    assert_eq!(
+        rustfmt.edition,
+        Some(rustfmt_toml_parser::types::Edition::Edition2024)
+    );
     assert!(cargo.workspace.is_some());
     assert_eq!(
         toolchain
@@ -547,12 +559,12 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
     };
     assert_eq!(
         rustfmt.edition,
-        Some(rustfmt_toml_parser::Edition::Edition2024),
+        Some(rustfmt_toml_parser::types::Edition::Edition2024),
         "realistic rustfmt should have edition 2024"
     );
     assert_eq!(
         rustfmt.style_edition,
-        Some(rustfmt_toml_parser::StyleEdition::Edition2024),
+        Some(rustfmt_toml_parser::types::StyleEdition::Edition2024),
         "realistic rustfmt should have style_edition 2024"
     );
     assert_eq!(
