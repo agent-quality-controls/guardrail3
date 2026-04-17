@@ -1,4 +1,4 @@
-use g3rs_topology_file_tree_checks_types::G3RsTopologyFileTreeChecksInput;
+use g3rs_topology_types::G3RsTopologyFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsTopologyFileTreeChecksInput) -> Vec<G3CheckResult> {
@@ -9,19 +9,16 @@ pub fn check(input: &G3RsTopologyFileTreeChecksInput) -> Vec<G3CheckResult> {
         crate::rs_topology_07_required_inputs_fail_closed::check(failure, &mut results);
     }
 
-    for issue in &facts.issues {
-        match &issue.kind {
-            crate::support::TopologyIssueKind::NestedWorkspace { .. } => {
-                crate::rs_topology_11_no_nested_workspaces::check(issue, &mut results);
-            }
-            crate::support::TopologyIssueKind::UndeclaredWorkspaceMember { .. }
-            | crate::support::TopologyIssueKind::ExtraWorkspaceMember { .. } => {
-                crate::rs_topology_12_declared_workspace_members_only::check(issue, &mut results);
-            }
-            crate::support::TopologyIssueKind::WorkspaceMemberPathEscapesRoot { .. } => {
-                crate::rs_topology_13_member_paths_must_not_escape_root::check(issue, &mut results);
-            }
-        }
+    for input in &facts.nested_workspaces {
+        crate::rs_topology_11_no_nested_workspaces::check(input, &mut results);
+    }
+
+    for input in &facts.membership_issues {
+        crate::rs_topology_12_declared_workspace_members_only::check(input, &mut results);
+    }
+
+    for input in &facts.escaping_member_paths {
+        crate::rs_topology_13_member_paths_must_not_escape_root::check(input, &mut results);
     }
 
     for file in &facts.illegal_family_files {

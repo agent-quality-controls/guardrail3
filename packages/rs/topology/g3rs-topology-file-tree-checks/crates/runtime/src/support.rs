@@ -1,50 +1,27 @@
 use std::collections::BTreeSet;
 
-use g3rs_topology_file_tree_checks_types::G3RsTopologyFileTreeChecksInput;
 use g3rs_topology_types::{
-    G3RsTopologyCargoManifestKind, G3RsTopologyFileTreeInputFailure, G3RsTopologyWorkspaceFamily,
+    G3RsTopologyCargoManifestKind, G3RsTopologyFileTreeChecksInput,
+    G3RsTopologyFileTreeInputFailure, G3RsTopologyWorkspaceFamily,
     G3RsTopologyWorkspaceFamilyFile, G3RsTopologyWorkspaceFamilyFileAttachment,
     G3RsTopologyWorkspaceFamilyFileKind,
 };
 use glob::Pattern;
 
-#[derive(Debug, Clone)]
-pub(crate) struct TopologyIssue {
-    pub(crate) rel_dir: String,
-    pub(crate) cargo_rel_path: String,
-    pub(crate) kind: TopologyIssueKind,
-}
-
-#[derive(Debug, Clone)]
-pub(crate) enum TopologyIssueKind {
-    NestedWorkspace {
-        parent_workspace_rel: String,
-    },
-    UndeclaredWorkspaceMember {
-        workspace_root_rel: String,
-    },
-    ExtraWorkspaceMember {
-        workspace_root_rel: String,
-        member_pattern: String,
-    },
-    WorkspaceMemberPathEscapesRoot {
-        workspace_root_rel: String,
-        member_pattern: String,
-    },
-}
-
-#[derive(Debug, Clone)]
-pub(crate) struct IllegalFamilyFilePlacement {
-    pub(crate) family: G3RsTopologyWorkspaceFamily,
-    pub(crate) rel_path: String,
-    pub(crate) reason: String,
-}
+use crate::rs_topology_11_no_nested_workspaces::NestedWorkspaceInput;
+use crate::rs_topology_12_declared_workspace_members_only::{
+    WorkspaceMemberIssueInput, WorkspaceMemberIssueKind,
+};
+use crate::rs_topology_13_member_paths_must_not_escape_root::EscapingWorkspaceMemberPathInput;
+use crate::rs_topology_16_workspace_local_file_placement::IllegalFamilyFilePlacementInput;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct TopologyFacts {
     pub(crate) input_failures: Vec<G3RsTopologyFileTreeInputFailure>,
-    pub(crate) issues: Vec<TopologyIssue>,
-    pub(crate) illegal_family_files: Vec<IllegalFamilyFilePlacement>,
+    pub(crate) nested_workspaces: Vec<NestedWorkspaceInput>,
+    pub(crate) membership_issues: Vec<WorkspaceMemberIssueInput>,
+    pub(crate) escaping_member_paths: Vec<EscapingWorkspaceMemberPathInput>,
+    pub(crate) illegal_family_files: Vec<IllegalFamilyFilePlacementInput>,
 }
 
 #[derive(Debug, Clone)]
@@ -58,40 +35,58 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
     let workspace_root_rel = input.workspace_root_rel_dir.as_str();
     let workspace_roots = std::iter::once(workspace_root_rel.to_owned())
         .chain(
-            input
-                .descendant_cargo_roots
-                .iter()
-                .filter(|root| {
-                    matches!(
-                        root.manifest_kind,
-                        Some(
-                            G3RsTopologyCargoManifestKind::Workspace
-                                | G3RsTopologyCargoManifestKind::Hybrid
-                        )
+            input.descendant_cargo_roots.iter().filter_map(|root| {
+                if matches!(
+                    root.manifest_kind,
+                    Some(
+                        G3RsTopologyCargoManifestKind::Workspace
+                            | G3RsTopologyCargoManifestKind::Hybrid
                     )
-                })
-                .map(|root| root.rel_dir.clone()),
+                ) {
+                    Some(root.rel_dir.clone())
+                } else {
+                    None
+                }
+            }),
         )
         .collect::<BTreeSet<_>>();
 
-    let mut issues = collect_nested_workspace_issues(input, &workspace_roots);
-    let escaping_patterns = collect_escaping_member_patterns(input);
+    let mut nested_workspaces = collect_nested_workspace_issues(input, &workspace_roots);
+    nested_workspaces.sort_by(|left, right| {
+        left.cargo_rel_path
+            .cmp(&right.cargo_rel_path)
+            .then(left.parent_workspace_rel.cmp(&right.parent_workspace_rel))
+    });
+    nested_workspaces.dedup_by(|left, right| {
+        left.rel_dir == right.rel_dir
+            && left.cargo_rel_path == right.cargo_rel_path
+            && left.parent_workspace_rel == right.parent_workspace_rel
+    });
+
+    let mut escaping_member_paths = collect_escaping_member_patterns(input)
+        .into_iter()
+        .map(|member_pattern| EscapingWorkspaceMemberPathInput {
+            cargo_rel_path: input.workspace_root_cargo_rel_path.clone(),
+            workspace_root_rel: workspace_root_rel.to_owned(),
+            member_pattern,
+        })
+        .collect::<Vec<_>>();
+    escaping_member_paths.sort_by(|left, right| {
+        left.cargo_rel_path
+            .cmp(&right.cargo_rel_path)
+            .then(left.workspace_root_rel.cmp(&right.workspace_root_rel))
+            .then(left.member_pattern.cmp(&right.member_pattern))
+    });
+    escaping_member_paths.dedup_by(|left, right| {
+        left.cargo_rel_path == right.cargo_rel_path
+            && left.workspace_root_rel == right.workspace_root_rel
+            && left.member_pattern == right.member_pattern
+    });
+
     let actual_children = collect_actual_children(input, &workspace_roots);
     let member_patterns = collect_member_patterns(input, &actual_children);
 
-    issues.extend(
-        escaping_patterns
-            .iter()
-            .map(|member_pattern| TopologyIssue {
-                rel_dir: workspace_root_rel.to_owned(),
-                cargo_rel_path: input.workspace_root_cargo_rel_path.clone(),
-                kind: TopologyIssueKind::WorkspaceMemberPathEscapesRoot {
-                    workspace_root_rel: workspace_root_rel.to_owned(),
-                    member_pattern: member_pattern.clone(),
-                },
-            }),
-    );
-
+    let mut membership_issues = Vec::new();
     for child in &actual_children {
         let declared = member_patterns.iter().any(|member| {
             member
@@ -102,11 +97,10 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
         if declared {
             continue;
         }
-        let cargo_rel_path = join_rel(child, "Cargo.toml");
-        issues.push(TopologyIssue {
+        membership_issues.push(WorkspaceMemberIssueInput {
             rel_dir: child.clone(),
-            cargo_rel_path,
-            kind: TopologyIssueKind::UndeclaredWorkspaceMember {
+            cargo_rel_path: join_rel(child, "Cargo.toml"),
+            kind: WorkspaceMemberIssueKind::Undeclared {
                 workspace_root_rel: workspace_root_rel.to_owned(),
             },
         });
@@ -118,25 +112,25 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
         if covers_real_child || !member.matched_unresolved_dirs.is_empty() {
             continue;
         }
-        issues.push(TopologyIssue {
+        membership_issues.push(WorkspaceMemberIssueInput {
             rel_dir: workspace_root_rel.to_owned(),
             cargo_rel_path: input.workspace_root_cargo_rel_path.clone(),
-            kind: TopologyIssueKind::ExtraWorkspaceMember {
+            kind: WorkspaceMemberIssueKind::Extra {
                 workspace_root_rel: workspace_root_rel.to_owned(),
                 member_pattern: member.raw.clone(),
             },
         });
     }
 
-    issues.sort_by(|left, right| {
-        left.cargo_rel_path
-            .cmp(&right.cargo_rel_path)
-            .then(issue_sort_key(&left.kind).cmp(&issue_sort_key(&right.kind)))
+    membership_issues.sort_by(|left, right| {
+        left.cargo_rel_path.cmp(&right.cargo_rel_path).then(
+            membership_issue_sort_key(&left.kind).cmp(&membership_issue_sort_key(&right.kind)),
+        )
     });
-    issues.dedup_by(|left, right| {
+    membership_issues.dedup_by(|left, right| {
         left.rel_dir == right.rel_dir
             && left.cargo_rel_path == right.cargo_rel_path
-            && issue_sort_key(&left.kind) == issue_sort_key(&right.kind)
+            && membership_issue_sort_key(&left.kind) == membership_issue_sort_key(&right.kind)
     });
 
     let legal_member_roots = actual_children
@@ -177,7 +171,9 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
 
     TopologyFacts {
         input_failures: input.input_failures.clone(),
-        issues,
+        nested_workspaces,
+        membership_issues,
+        escaping_member_paths,
         illegal_family_files,
     }
 }
@@ -185,7 +181,7 @@ pub(crate) fn collect_facts(input: &G3RsTopologyFileTreeChecksInput) -> Topology
 fn collect_nested_workspace_issues(
     input: &G3RsTopologyFileTreeChecksInput,
     workspace_roots: &BTreeSet<String>,
-) -> Vec<TopologyIssue> {
+) -> Vec<NestedWorkspaceInput> {
     input
         .descendant_cargo_roots
         .iter()
@@ -200,12 +196,10 @@ fn collect_nested_workspace_issues(
         })
         .filter_map(|root| {
             nearest_ancestor_workspace(&root.rel_dir, workspace_roots).map(|parent_workspace_rel| {
-                TopologyIssue {
+                NestedWorkspaceInput {
                     rel_dir: root.rel_dir.clone(),
                     cargo_rel_path: root.cargo_rel_path.clone(),
-                    kind: TopologyIssueKind::NestedWorkspace {
-                        parent_workspace_rel: parent_workspace_rel.to_owned(),
-                    },
+                    parent_workspace_rel: parent_workspace_rel.to_owned(),
                 }
             })
         })
@@ -314,7 +308,7 @@ fn classify_illegal_family_file(
     workspace_root_rel: &str,
     actual_children: &BTreeSet<String>,
     legal_member_roots: &BTreeSet<String>,
-) -> Option<IllegalFamilyFilePlacement> {
+) -> Option<IllegalFamilyFilePlacementInput> {
     if file.kind == G3RsTopologyWorkspaceFamilyFileKind::CargoToml {
         return None;
     }
@@ -376,7 +370,7 @@ fn classify_illegal_family_file(
         }
     };
 
-    Some(IllegalFamilyFilePlacement {
+    Some(IllegalFamilyFilePlacementInput {
         family: file.family,
         rel_path: file.rel_path.clone(),
         reason,
@@ -421,7 +415,7 @@ fn nearest_ancestor_workspace<'a>(
             workspace_rel.as_str() != rel_dir && path_is_under(rel_dir, workspace_rel)
         })
         .max_by_key(|workspace_rel| workspace_rel.len())
-        .map(std::string::String::as_str)
+        .map(String::as_str)
 }
 
 fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
@@ -471,26 +465,16 @@ fn contains_glob_meta(member: &str) -> bool {
     member.contains('*') || member.contains('?') || member.contains('[')
 }
 
-fn issue_sort_key(kind: &TopologyIssueKind) -> (&'static str, String) {
+fn membership_issue_sort_key(kind: &WorkspaceMemberIssueKind) -> (&'static str, String) {
     match kind {
-        TopologyIssueKind::NestedWorkspace {
-            parent_workspace_rel,
-        } => ("nested-workspace", parent_workspace_rel.clone()),
-        TopologyIssueKind::UndeclaredWorkspaceMember { workspace_root_rel } => {
+        WorkspaceMemberIssueKind::Undeclared { workspace_root_rel } => {
             ("undeclared-member", workspace_root_rel.clone())
         }
-        TopologyIssueKind::ExtraWorkspaceMember {
+        WorkspaceMemberIssueKind::Extra {
             workspace_root_rel,
             member_pattern,
         } => (
             "extra-member",
-            format!("{workspace_root_rel}:{member_pattern}"),
-        ),
-        TopologyIssueKind::WorkspaceMemberPathEscapesRoot {
-            workspace_root_rel,
-            member_pattern,
-        } => (
-            "member-path-escape",
             format!("{workspace_root_rel}:{member_pattern}"),
         ),
     }
