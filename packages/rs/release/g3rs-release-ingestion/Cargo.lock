@@ -470,6 +470,7 @@ name = "release-plz-toml-parser"
 version = "0.1.0"
 dependencies = [
  "release-plz-toml-parser-runtime",
+ "release-plz-toml-parser-types",
 ]
 
 [[package]]

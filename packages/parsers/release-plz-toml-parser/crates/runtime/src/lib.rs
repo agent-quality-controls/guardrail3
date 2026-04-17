@@ -6,9 +6,9 @@ mod fs;
 mod parser;
 
 #[cfg(feature = "api")]
-pub use release_plz_toml_parser_types::{ReleasePlzPackage, ReleasePlzToml, ReleasePlzWorkspace};
-#[cfg(feature = "api")]
 pub use error::Error;
+#[cfg(feature = "api")]
+pub mod types;
 #[cfg(feature = "api")]
 pub use parser::{from_path, parse};
 #[cfg(feature = "api")]

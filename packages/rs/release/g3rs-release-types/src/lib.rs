@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use cargo_toml_parser::{types::CargoToml, types::WorkspacePackageSection};
 use cliff_toml_parser::types::CliffToml;
-use release_plz_toml_parser::ReleasePlzToml;
+use release_plz_toml_parser::types::ReleasePlzToml;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3RsReleaseDryRunOutcome {

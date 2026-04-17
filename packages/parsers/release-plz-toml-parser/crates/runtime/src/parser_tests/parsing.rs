@@ -6,12 +6,9 @@
 
 use release_plz_toml_parser_runtime_assertions::parser as assertions;
 
-use super::helpers;
-use helpers::{parse_fixture, parse_from_tempfile};
-
 #[test]
 fn full_config_parses_all_fields() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 [workspace]
 changelog_config = "cliff.toml"
@@ -37,7 +34,11 @@ name = "my-crate"
 
     assertions::assert_list_len(&cfg.package, 1, "package");
     assert_eq!(
-        cfg.package.first().expect("first package should exist").name.as_deref(),
+        cfg.package
+            .first()
+            .expect("first package should exist")
+            .name
+            .as_deref(),
         Some("my-crate"),
         "package name should match",
     );
@@ -45,16 +46,14 @@ name = "my-crate"
 
 #[test]
 fn empty_string_yields_empty_config() {
-    let cfg = parse_fixture("");
+    let cfg = assertions::parse_fixture("");
 
-    assert!(cfg.workspace.is_none(), "workspace should be None for empty input");
-    assert!(cfg.package.is_empty(), "package list should be empty for empty input");
-    assert!(cfg.extra.is_empty(), "extra should be empty for empty input");
+    assertions::assert_empty_toml(&cfg);
 }
 
 #[test]
 fn unknown_keys_land_in_extra() {
-    let cfg = parse_fixture(
+    let cfg = assertions::parse_fixture(
         r#"
 some_future_option = "yes"
 
@@ -68,30 +67,12 @@ some_package_future_key = true
 "#,
     );
 
-    assert!(
-        cfg.extra.contains_key("some_future_option"),
-        "top-level unknown key should land in extra",
-    );
-
-    let ws = cfg
-        .workspace
-        .as_ref()
-        .expect("workspace section should be present");
-    assert!(
-        ws.extra.contains_key("some_workspace_future_key"),
-        "workspace unknown key should land in workspace extra",
-    );
-
-    let pkg = cfg.package.first().expect("first package should exist");
-    assert!(
-        pkg.extra.contains_key("some_package_future_key"),
-        "package unknown key should land in package extra",
-    );
+    assertions::assert_unknown_keys_preserved(&cfg);
 }
 
 #[test]
 fn from_path_reads_and_parses_file() {
-    let cfg = parse_from_tempfile(
+    let cfg = assertions::parse_from_tempfile(
         r#"
 [workspace]
 git_release_enable = true
@@ -107,6 +88,6 @@ git_release_enable = true
 
 #[test]
 fn parse_error_on_invalid_toml() {
-    let err = super::super::parse("this is not [[[valid toml");
+    let err = assertions::parse_error("this is not [[[valid toml");
     assertions::assert_parse_error(err.expect_err("invalid TOML should produce an error"));
 }
