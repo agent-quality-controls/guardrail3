@@ -1,0 +1,15 @@
+profile = "library"
+
+allowed_deps = [
+  "cargo-toml-parser",
+  "clippy-toml-parser",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CARGO-CONFIG-07"
+file = "Cargo.toml"
+selector = "clippy:module_name_repetitions"
+reason = "Shared garde type names intentionally repeat the family and rule context."
