@@ -81,6 +81,10 @@ disallowed-methods = [
     # --- Ban per-request HTTP client construction (use shared client via DI) ---
     { path = "reqwest::Client::new", reason = "Use shared client from AppState -- per-request construction skips connection pooling" },
     { path = "reqwest::Client::builder", reason = "Use shared client from AppState -- construct once at startup and inject via DI" },
+    { path = "std::sync::LazyLock", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
+    { path = "std::sync::OnceLock", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
+    { path = "once_cell::sync::Lazy", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
+    { path = "once_cell::sync::OnceCell", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
     # --- Ban raw serde deserialization (use Validated<T>::new() for external data) ---
     { path = "serde_json::from_str", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
     { path = "serde_json::from_slice", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
@@ -136,6 +140,10 @@ disallowed-types = [
     # --- Ban std::sync::Mutex/RwLock (use parking_lot) ---
     { path = "std::sync::Mutex", reason = "Use parking_lot::Mutex -- no poisoning, better performance" },
     { path = "std::sync::RwLock", reason = "Use parking_lot::RwLock -- no poisoning, better performance" },
+    { path = "std::sync::LazyLock", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
+    { path = "std::sync::OnceLock", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
+    { path = "once_cell::sync::Lazy", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
+    { path = "once_cell::sync::OnceCell", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
     # --- Ban std::fs::File (use centralized fs module) ---
     { path = "std::fs::File", reason = "BANNED: Create a centralized fs module -- no direct file handle construction" },
     # --- Ban std::any::Any (type erasure bypasses typed boundaries) ---

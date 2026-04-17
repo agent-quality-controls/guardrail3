@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use cargo_toml_parser::types::CargoToml;
-use mutants_toml_parser::MutantsToml;
+use mutants_toml_parser::types::MutantsToml;
 use nextest_toml_parser::NextestToml;
 
 #[derive(Debug, Clone, PartialEq)]

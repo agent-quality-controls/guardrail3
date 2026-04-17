@@ -20,7 +20,7 @@ test_tool = "nextest"
 
 assert_eq!(cfg.timeout_multiplier, Some(3.0));
 assert_eq!(cfg.copy_target, Some(true));
-assert_eq!(cfg.test_tool, Some(mutants_toml_parser::TestTool::Nextest));
+assert_eq!(cfg.test_tool, Some(mutants_toml_parser::types::TestTool::Nextest));
 ```
 
 ## License

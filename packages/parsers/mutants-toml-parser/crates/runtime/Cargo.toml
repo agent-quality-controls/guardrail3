@@ -1,19 +1,16 @@
 [package]
-name = "mutants-toml-parser-types"
+name = "mutants-toml-parser-runtime"
 version.workspace = true
 edition = "2024"
-description = "Typed model for .cargo/mutants.toml files"
+description = "Parser implementation for .cargo/mutants.toml facade packages"
 license.workspace = true
 rust-version.workspace = true
 repository.workspace = true
-keywords = ["mutants", "toml", "types", "mutation-testing", "rust"]
+keywords = ["mutants", "toml", "parser", "mutation-testing", "rust"]
 categories = ["config", "development-tools", "parser-implementations"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
-
-[package.metadata.guardrail3]
-shared = true
 
 [lints]
 workspace = true
@@ -24,8 +21,12 @@ all = ["api"]
 api = []
 
 [dependencies]
-serde = { version = "1", features = ["derive"] }
+mutants-toml-parser-types = { path = "../types", version = "0.1.0" }
 toml = "0.8"
+
+[dev-dependencies]
+mutants-toml-parser-runtime-assertions = { path = "../assertions" }
+tempfile = "3"
 
 [package.metadata.docs.rs]
 all-features = true

@@ -8,6 +8,6 @@ mod parser;
 #[cfg(feature = "api")]
 pub use error::Error;
 #[cfg(feature = "api")]
-pub use mutants_toml_parser_types::{MutantsToml, Sharding, TestTool};
+pub use mutants_toml_parser_types::mutants_toml::{MutantsToml, Sharding, TestTool};
 #[cfg(feature = "api")]
 pub use parser::{from_path, parse};
