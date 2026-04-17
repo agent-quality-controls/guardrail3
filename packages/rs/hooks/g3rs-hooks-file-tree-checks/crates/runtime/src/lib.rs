@@ -12,8 +12,6 @@ mod hook_shared_09_local_override_inventory;
 mod hook_shared_12_modular_scripts_executable;
 mod hook_shared_17_execution_trust;
 mod run;
-#[cfg(test)]
-mod test_support;
 
 #[cfg(feature = "checks")]
 pub use run::check;

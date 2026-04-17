@@ -9,6 +9,8 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "hooks", "file-tree", "checks", "rust"]
 categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
 
 [features]
 default = ["all"]
@@ -18,9 +20,15 @@ checks = []
 [lints]
 workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true
+
 [dependencies]
-g3rs-hooks-file-tree-checks-types = { path = "../types", version = "0.1.0" }
+g3rs-hooks-types = { path = "../../../g3rs-hooks-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
 [dev-dependencies]
-g3rs-hooks-file-tree-checks-assertions = { path = "../assertions", version = "0.1.0" }
+g3rs-hooks-file-tree-checks-assertions = { path = "../assertions" }

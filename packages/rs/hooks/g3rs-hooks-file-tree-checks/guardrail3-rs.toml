@@ -1,0 +1,21 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-hooks-types",
+  "guardrail3-check-types",
+]
+
+[checks]
+hooks = false
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Rule runtime crate intentionally aggregates one rule per file and is the package boundary by design."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions crate intentionally keeps one shared proof module per rule so internal and external tests use the same proof surface."

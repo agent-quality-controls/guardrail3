@@ -1,4 +1,4 @@
-use g3rs_hooks_file_tree_checks_types::G3RsHooksFileTreeChecksInput;
+use g3rs_hooks_types::G3RsHooksFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsHooksFileTreeChecksInput) -> Vec<G3CheckResult> {
