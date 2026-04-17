@@ -4,9 +4,8 @@ use std::path::Path;
 
 use g3rs_hooks_config_checks_types::{G3RsHooksConfigChecksInput, G3RsHooksSelectedHookConfigFact};
 use g3rs_hooks_file_tree_checks_types::{G3RsHooksFileTreeChecksInput, G3RsHooksScriptFileFact};
-use g3rs_hooks_ingestion_types::{
-    G3RsHookScriptKind, G3RsHooksIngestionError as IngestionError, G3RsHooksSourceChecksInput,
-};
+use g3rs_hooks_ingestion_types::G3RsHooksIngestionError as IngestionError;
+use g3rs_hooks_types::{G3RsHookScriptKind, G3RsHooksSourceChecksInput};
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 use hook_shell_parser::parse_script;
 
@@ -237,7 +236,7 @@ fn root_is_workspace_project(crawl: &G3RsWorkspaceCrawl) -> Result<bool, Ingesti
 }
 
 fn read_entry(path: &std::path::Path) -> Result<String, IngestionError> {
-    std::fs::read_to_string(path).map_err(|err| IngestionError::Unreadable {
+    crate::fs::read_to_string(path).map_err(|err| IngestionError::Unreadable {
         path: path.to_path_buf(),
         reason: err.to_string(),
     })
@@ -303,7 +302,7 @@ fn tool_is_available(tool: &str, path_env: Option<&OsStr>) -> bool {
 }
 
 fn candidate_is_executable(path: &Path) -> bool {
-    let Ok(metadata) = std::fs::metadata(path) else {
+    let Ok(metadata) = crate::fs::metadata(path) else {
         return false;
     };
     if !metadata.is_file() {
@@ -322,7 +321,7 @@ fn candidate_is_executable(path: &Path) -> bool {
 }
 
 fn executable_bit(path: &Path) -> Option<bool> {
-    let metadata = std::fs::metadata(path).ok()?;
+    let metadata = crate::fs::metadata(path).ok()?;
 
     #[cfg(unix)]
     {
@@ -337,7 +336,7 @@ fn executable_bit(path: &Path) -> Option<bool> {
 }
 
 fn read_hooks_path(root: &Path) -> Result<Option<String>, IngestionError> {
-    if std::fs::metadata(root.join(".git")).is_err() {
+    if !crate::fs::path_exists(root.join(".git").as_path()) {
         return Ok(None);
     }
 
@@ -376,7 +375,7 @@ fn read_hooks_path(root: &Path) -> Result<Option<String>, IngestionError> {
 }
 
 fn hooks_scope_is_active(root: &Path) -> Result<bool, IngestionError> {
-    if std::fs::metadata(root.join(".git")).is_err() {
+    if !crate::fs::path_exists(root.join(".git").as_path()) {
         return Ok(false);
     }
 
@@ -443,5 +442,9 @@ fn git_hook_pre_commit_exists(root: &Path) -> bool {
     let Some(abs) = git_path(root, "hooks/pre-commit") else {
         return false;
     };
-    std::fs::metadata(abs).is_ok()
+    crate::fs::path_exists(abs.as_path())
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod run_tests;

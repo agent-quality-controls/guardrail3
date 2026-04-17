@@ -34,6 +34,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo-config-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "cargo-config-toml-parser-runtime",
+]
+
+[[package]]
+name = "cargo-config-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-config-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "cargo-config-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "cargo-toml-parser"
 version = "0.1.0"
 dependencies = [
@@ -111,6 +134,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 
 [[package]]
+name = "deny-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "deny-toml-parser-runtime",
+]
+
+[[package]]
+name = "deny-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "deny-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "deny-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -150,10 +196,11 @@ dependencies = [
 name = "g3rs-clippy-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "clippy-toml-parser",
- "g3rs-clippy-config-checks-types",
+ "g3rs-clippy-types",
  "guardrail3-check-types",
- "guardrail3-domain-modules",
+ "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -169,32 +216,30 @@ name = "g3rs-clippy-ingestion"
 version = "0.1.0"
 dependencies = [
  "g3rs-clippy-ingestion-runtime",
- "g3rs-clippy-ingestion-types",
 ]
 
 [[package]]
 name = "g3rs-clippy-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-config-toml-parser",
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3rs-clippy-ingestion-types",
  "g3rs-clippy-types",
  "g3rs-workspace-crawl",
  "glob",
+ "guardrail3-rs-toml-parser",
  "toml",
 ]
-
-[[package]]
-name = "g3rs-clippy-ingestion-types"
-version = "0.1.0"
 
 [[package]]
 name = "g3rs-clippy-types"
 version = "0.1.0"
 dependencies = [
+ "cargo-config-toml-parser",
+ "cargo-toml-parser",
  "clippy-toml-parser",
- "toml",
+ "guardrail3-rs-toml-parser",
 ]
 
 [[package]]
@@ -210,31 +255,34 @@ name = "g3rs-code-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "clippy-toml-parser",
+ "deny-toml-parser",
  "g3rs-code-ingestion-types",
+ "g3rs-code-types",
  "g3rs-workspace-crawl",
  "glob",
+ "guardrail3-rs-toml-parser",
+ "rust-toolchain-toml-parser",
+ "rustfmt-toml-parser",
 ]
 
 [[package]]
 name = "g3rs-code-ingestion-types"
 version = "0.1.0"
-dependencies = [
- "g3rs-code-types",
-]
 
 [[package]]
 name = "g3rs-code-source-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-code-source-checks-runtime",
- "g3rs-code-source-checks-types",
+ "g3rs-code-types",
 ]
 
 [[package]]
 name = "g3rs-code-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-code-source-checks-types",
+ "g3rs-code-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
  "proc-macro2",
@@ -243,17 +291,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3rs-code-source-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-code-types",
-]
-
-[[package]]
 name = "g3rs-code-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "clippy-toml-parser",
+ "deny-toml-parser",
+ "guardrail3-rs-toml-parser",
+ "rust-toolchain-toml-parser",
+ "rustfmt-toml-parser",
 ]
 
 [[package]]
@@ -268,7 +314,7 @@ dependencies = [
 name = "g3rs-hooks-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-hooks-config-checks-types",
+ "g3rs-hooks-types",
  "guardrail3-check-types",
  "hook-shell-parser",
 ]
@@ -292,7 +338,7 @@ dependencies = [
 name = "g3rs-hooks-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-hooks-file-tree-checks-types",
+ "g3rs-hooks-types",
  "guardrail3-check-types",
 ]
 
@@ -315,7 +361,8 @@ dependencies = [
 name = "g3rs-hooks-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-hooks-source-checks-types",
+ "g3rs-hooks-ingestion-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -331,8 +378,10 @@ dependencies = [
  "g3rs-hooks-config-checks-types",
  "g3rs-hooks-file-tree-checks",
  "g3rs-hooks-file-tree-checks-types",
+ "g3rs-hooks-ingestion-assertions",
  "g3rs-hooks-ingestion-types",
  "g3rs-hooks-source-checks",
+ "g3rs-hooks-types",
  "g3rs-workspace-crawl",
  "guardrail3-check-types",
  "hook-shell-parser",
@@ -342,9 +391,6 @@ dependencies = [
 [[package]]
 name = "g3rs-hooks-ingestion-types"
 version = "0.1.0"
-dependencies = [
- "g3rs-hooks-types",
-]
 
 [[package]]
 name = "g3rs-hooks-source-checks"
@@ -435,12 +481,38 @@ name = "guardrail3-check-types"
 version = "0.1.0"
 
 [[package]]
-name = "guardrail3-domain-modules"
+name = "guardrail3-reason-policy"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-reason-policy-runtime",
+]
+
+[[package]]
+name = "guardrail3-reason-policy-runtime"
 version = "0.0.0"
 
 [[package]]
-name = "guardrail3-reason-policy"
-version = "0.0.0"
+name = "guardrail3-rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "hashbrown"
@@ -472,6 +544,13 @@ dependencies = [
 
 [[package]]
 name = "hook-shell-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-types",
+]
+
+[[package]]
+name = "hook-shell-parser-types"
 version = "0.1.0"
 
 [[package]]
@@ -600,6 +679,54 @@ name = "regex-syntax"
 version = "0.8.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
+
+[[package]]
+name = "rust-toolchain-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-runtime",
+ "rust-toolchain-toml-parser-types",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "rust-toolchain-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "rust-toolchain-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
+name = "rustfmt-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "rustfmt-toml-parser-runtime",
+ "rustfmt-toml-parser-types",
+]
+
+[[package]]
+name = "rustfmt-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "rustfmt-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "rustfmt-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "rustix"

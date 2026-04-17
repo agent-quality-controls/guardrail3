@@ -1,4 +1,4 @@
-use hook_shell_parser::ParsedShellScript;
+use hook_shell_parser::types::ParsedShellScript;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsHooksSelectedHookConfigFact {
