@@ -1,4 +1,4 @@
-use g3rs_release_source_checks_types::G3RsReleaseSourceReadme;
+use g3rs_release_types::G3RsReleaseSourceReadme;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-RELEASE-SOURCE-01";
@@ -42,7 +42,10 @@ pub(crate) fn check(readme: &G3RsReleaseSourceReadme, results: &mut Vec<G3CheckR
             ID.to_owned(),
             G3Severity::Info,
             format!("{}: README quality looks good", readme.crate_name),
-            format!("README at `{}` has content and headings.", readme.readme_rel_path),
+            format!(
+                "README at `{}` has content and headings.",
+                readme.readme_rel_path
+            ),
             Some(readme.readme_rel_path.clone()),
             None,
         )
@@ -96,33 +99,5 @@ fn has_markdown_heading(content: &str) -> bool {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::test_support::source_input;
-
-    #[test]
-    fn errors_when_readme_is_too_short() {
-        let input = source_input("# Demo\nshort\n");
-        let results = crate::check(&input);
-        assert_eq!(results[0].id(), "RS-RELEASE-SOURCE-01");
-        assert_eq!(results[0].title(), "demo: README is a stub");
-    }
-
-    #[test]
-    fn errors_when_readme_has_no_heading() {
-        let input = source_input(&"x".repeat(260));
-        let results = crate::check(&input);
-
-        assert_eq!(results[0].id(), "RS-RELEASE-SOURCE-01");
-        assert_eq!(results[0].title(), "demo: README has no heading");
-    }
-
-    #[test]
-    fn inventories_when_readme_quality_is_good() {
-        let input = source_input(&format!("# Demo\n\n{}", "x".repeat(260)));
-        let results = crate::check(&input);
-
-        assert_eq!(results[0].id(), "RS-RELEASE-SOURCE-01");
-        assert_eq!(results[0].title(), "demo: README quality looks good");
-        assert!(results[0].inventory());
-    }
-}
+#[path = "rs_release_source_01_readme_quality_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_release_source_01_readme_quality_tests;
