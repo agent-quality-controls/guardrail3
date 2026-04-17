@@ -9,6 +9,8 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "test", "config", "checks", "rust"]
 categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
 
 [features]
 default = ["all"]
@@ -19,12 +21,17 @@ checks = []
 workspace = true
 
 [dependencies]
-g3rs-test-config-checks-types = { path = "../types", version = "0.1.0" }
 g3rs-test-types = { path = "../../../g3rs-test-types", version = "0.1.0" }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0", features = ["types"] }
 
 [dev-dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 g3rs-test-config-checks-assertions = { path = "../assertions" }
 mutants-toml-parser = { path = "../../../../../parsers/mutants-toml-parser", version = "0.1.0" }
 nextest-toml-parser = { path = "../../../../../parsers/nextest-toml-parser", version = "0.1.0" }
+
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true

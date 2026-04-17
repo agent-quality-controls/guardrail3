@@ -1,0 +1,27 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-test-types",
+  "guardrail3-check-types",
+  "cargo-toml-parser",
+  "mutants-toml-parser",
+  "nextest-toml-parser",
+]
+
+[[waivers]]
+rule = "multiple_crate_versions"
+file = "Cargo.toml"
+selector = "lint:clippy::multiple_crate_versions"
+reason = "This internal workspace package intentionally depends on parser crates and shared internal crates with overlapping transitive versions."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime intentionally groups test config rules under nextest and mutants submodules."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions intentionally keep one shared proof module per test config rule."
