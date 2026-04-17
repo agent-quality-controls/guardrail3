@@ -1,6 +1,7 @@
+use g3rs_release_ingestion_assertions::ingest::collect as assertions;
 use tempfile::tempdir;
 
-use super::{crawl, git_init, write};
+use super::support::{crawl, git_init, write};
 
 #[test]
 fn config_pipeline_reports_publish_integrity_edges_and_binary_workflow() {
@@ -90,43 +91,43 @@ jobs:
     );
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
+    let input = super::super::config_result(&crawl).expect("config ingestion should succeed");
     let results = g3rs_release_config_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-RELEASE-CONFIG-19"
-                && result.title().contains("public: path dep to non-publishable crate")
-        }),
-        "{results:#?}"
+    assertions::assert_present(
+        &results,
+        "RS-RELEASE-CONFIG-19",
+        "public: path dep to non-publishable crate",
+        Some("crates/public/Cargo.toml"),
+        false,
     );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-RELEASE-CONFIG-20"
-                && result.title().contains("cli: version mismatch with public")
-        }),
-        "{results:#?}"
+    assertions::assert_present(
+        &results,
+        "RS-RELEASE-CONFIG-20",
+        "cli: version mismatch with public",
+        Some("crates/cli/Cargo.toml"),
+        false,
     );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-RELEASE-CONFIG-22"
-                && result.title().contains("public: include/exclude missing")
-        }),
-        "{results:#?}"
+    assertions::assert_present(
+        &results,
+        "RS-RELEASE-CONFIG-22",
+        "public: include/exclude missing",
+        Some("crates/public/Cargo.toml"),
+        false,
     );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-RELEASE-CONFIG-23"
-                && result.title().contains("cli: binary release workflow present")
-        }),
-        "{results:#?}"
+    assertions::assert_present(
+        &results,
+        "RS-RELEASE-CONFIG-23",
+        "cli: binary release workflow present",
+        Some("crates/cli/Cargo.toml"),
+        true,
     );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-RELEASE-CONFIG-24"
-                && result.title().contains("cli: linux release target present")
-        }),
-        "{results:#?}"
+    assertions::assert_present(
+        &results,
+        "RS-RELEASE-CONFIG-24",
+        "cli: linux release target present",
+        Some("crates/cli/Cargo.toml"),
+        true,
     );
 }
 
@@ -165,14 +166,14 @@ tooling = { path = "../../../vendor/tooling", version = "0.1.0" }
     write(root.join("crates/public/README.md"), "# Public\n\ncrate\n");
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
+    let input = super::super::config_result(&crawl).expect("config ingestion should succeed");
     let results = g3rs_release_config_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-RELEASE-CONFIG-19"
-                && result.title().contains("public: path dep escapes workspace")
-        }),
-        "{results:#?}"
+    assertions::assert_present(
+        &results,
+        "RS-RELEASE-CONFIG-19",
+        "public: path dep escapes workspace",
+        Some("crates/public/Cargo.toml"),
+        false,
     );
 }

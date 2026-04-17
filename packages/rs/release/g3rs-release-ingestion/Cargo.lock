@@ -152,7 +152,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "cliff-toml-parser",
- "g3rs-release-config-checks-types",
+ "g3rs-release-types",
  "guardrail3-check-types",
  "release-plz-toml-parser",
  "semver",
@@ -177,7 +177,7 @@ dependencies = [
 name = "g3rs-release-filetree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-release-filetree-checks-types",
+ "g3rs-release-types",
  "guardrail3-check-types",
 ]
 
@@ -200,7 +200,8 @@ dependencies = [
 name = "g3rs-release-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-release-ingestion-types",
+ "g3rs-release-ingestion-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]

@@ -1,8 +1,11 @@
 use std::fs;
 
+use g3rs_release_ingestion_assertions::ingest::collect as assertions;
 use tempfile::tempdir;
 
-use super::{crawl, git_init, long_readme, write};
+use super::support::{crawl, git_init, long_readme, restore_permissions, write};
+#[cfg(unix)]
+use super::support::make_unreadable;
 
 #[test]
 fn config_pipeline_reports_workflow_tooling_and_repo_inventory() {
@@ -92,12 +95,11 @@ jobs:
     );
 
     let crawl = crawl(root);
-    let input =
-        crate::run::ingest_for_config_checks_with_path(&crawl, Some(bin_dir.as_os_str()));
+    let input = super::super::config_input_with_path(&crawl, Some(bin_dir.as_os_str()));
     let results = g3rs_release_config_checks::check(&input);
 
     for id in ["RS-RELEASE-CONFIG-15", "RS-RELEASE-CONFIG-16", "RS-RELEASE-CONFIG-17", "RS-RELEASE-CONFIG-21"] {
-        assert!(results.iter().any(|result| result.id() == id), "{results:#?}");
+        assert_eq!(assertions::count(&results, id), 1, "{results:#?}");
     }
 }
 
@@ -132,16 +134,15 @@ readme = "README.md"
     write(root.join("crates/demo/src/lib.rs"), "pub fn demo() {}\n");
 
     let crawl = crawl(root);
-    let input =
-        crate::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input = super::super::filetree_result(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_release_filetree_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-RELEASE-FILETREE-04"
-                && result.title() == "demo: README missing"
-        }),
-        "{results:#?}"
+    assertions::assert_present(
+        &results,
+        "RS-RELEASE-FILETREE-04",
+        "demo: README missing",
+        Some("crates/demo/Cargo.toml"),
+        false,
     );
 }
 
@@ -178,20 +179,20 @@ readme = "README.md"
     write(root.join("crates/demo/README.md"), &long_readme("Demo"));
 
     let readme_path = root.join("crates/demo/README.md");
-    let original = super::make_unreadable(&readme_path);
+    let original = make_unreadable(&readme_path);
 
     let crawl = crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::super::source_result(&crawl).expect("source ingestion should succeed");
     let results = g3rs_release_source_checks::check(&input);
 
-    super::restore_permissions(&readme_path, original);
+    restore_permissions(&readme_path, original);
 
-    assert!(
-        results.iter().any(|result| result.id() == "RS-RELEASE-SOURCE-02"),
-        "{results:#?}"
+    assertions::assert_present(
+        &results,
+        "RS-RELEASE-SOURCE-02",
+        "failed to read release source input",
+        Some("crates/demo/README.md"),
+        false,
     );
-    assert!(
-        !results.iter().any(|result| result.id() == "RS-RELEASE-SOURCE-01"),
-        "{results:#?}"
-    );
+    assertions::assert_no_results(&results, "RS-RELEASE-SOURCE-01");
 }
