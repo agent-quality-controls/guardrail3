@@ -12,3 +12,5 @@ pub mod rs_garde_config_03_extractor_type_bans;
 pub mod rs_garde_config_04_reqwest_json_ban;
 #[cfg(feature = "checks")]
 pub mod rs_garde_config_05_additional_method_bans;
+#[cfg(feature = "checks")]
+pub mod run;
