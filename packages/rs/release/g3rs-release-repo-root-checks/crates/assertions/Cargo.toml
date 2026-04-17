@@ -7,6 +7,10 @@ license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 publish = false
+readme = "README.md"
+keywords = ["guardrail3", "release", "repo-root", "checks", "assertions"]
+categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [lints]
 workspace = true
@@ -17,5 +21,11 @@ all = ["checks"]
 checks = []
 
 [dependencies]
-g3rs-release-repo-root-checks-runtime = { path = "../runtime" }
+g3rs-release-repo-root-checks-runtime = { path = "../runtime", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true

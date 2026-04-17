@@ -75,7 +75,6 @@ name = "g3rs-release-repo-root-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-release-repo-root-checks-assertions",
- "g3rs-release-repo-root-checks-types",
  "g3rs-release-types",
  "guardrail3-check-types",
 ]
@@ -145,6 +144,7 @@ name = "release-plz-toml-parser"
 version = "0.1.0"
 dependencies = [
  "release-plz-toml-parser-runtime",
+ "release-plz-toml-parser-types",
 ]
 
 [[package]]

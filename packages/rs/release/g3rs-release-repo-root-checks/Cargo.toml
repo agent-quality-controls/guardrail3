@@ -19,10 +19,9 @@ g3rs-release-repo-root-checks-types = { path = "crates/types", version = "0.1.0"
 [features]
 default = ["all"]
 all = ["api"]
-api = [
-    "dep:g3rs-release-repo-root-checks-runtime",
-    "dep:g3rs-release-repo-root-checks-types",
-]
+types = ["dep:g3rs-release-repo-root-checks-types"]
+runtime = ["dep:g3rs-release-repo-root-checks-runtime"]
+api = ["types", "runtime"]
 
 [package.metadata.guardrail3]
 shared = true

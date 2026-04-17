@@ -1,4 +1,4 @@
-use g3rs_release_repo_root_checks_assertions::rs_release_repo_root_02_publish_dry_run_workflow as assertions;
+use g3rs_release_repo_root_checks_assertions::rs_release_repo_root_02_publish_dry_run_workflow::rule as assertions;
 
 use super::helpers::run;
 
