@@ -1,5 +1,5 @@
 use g3rs_deny_types::G3RsDenyRustPolicyState;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 use tempfile::tempdir;
 
 use super::helpers::{crawl, git_init, make_unreadable, write};

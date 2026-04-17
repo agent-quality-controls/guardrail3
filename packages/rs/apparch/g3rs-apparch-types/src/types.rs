@@ -1,4 +1,4 @@
-use guardrail3_rs_toml_parser::{RustProfile, WaiverConfig};
+use guardrail3_rs_toml_parser::types::{RustProfile, WaiverConfig};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum G3RsApparchLayer {

@@ -29,7 +29,7 @@ fn inventories_added_wrappers_for_non_canonical_bans() {
 
     let results = run(
         &deny_toml,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_27_wrappers::check,
     );
@@ -54,7 +54,7 @@ fn errors_when_managed_ban_adds_project_specific_wrappers() {
 
     let results = run(
         &deny_toml,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_27_wrappers::check,
     );

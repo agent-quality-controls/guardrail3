@@ -1,5 +1,5 @@
 use clippy_toml_parser::types::ClippyToml;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 #[derive(Debug, Clone)]
 pub enum G3RsClippyConfigState {

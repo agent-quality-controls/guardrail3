@@ -3,7 +3,7 @@ use std::path::Path;
 
 use cargo_toml_parser::types::CargoToml;
 use clippy_toml_parser::types::ClippyToml;
-use guardrail3_rs_toml_parser::Guardrail3RsToml;
+use guardrail3_rs_toml_parser::types::Guardrail3RsToml;
 
 use crate::run::IngestionError;
 

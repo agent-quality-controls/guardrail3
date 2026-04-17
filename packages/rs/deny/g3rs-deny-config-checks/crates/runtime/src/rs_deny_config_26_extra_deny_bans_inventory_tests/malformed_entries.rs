@@ -9,7 +9,7 @@ fn errors_when_deny_entry_has_no_usable_name() {
 [bans]
 deny = [{ version = "1.0.0", reason = "temporary" }]
 "#,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_26_extra_deny_bans_inventory::check,
     );
@@ -41,7 +41,7 @@ deny = [{ name = "   ", reason = "temporary" }]
 "#;
     let results = run(
         deny_toml,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_26_extra_deny_bans_inventory::check,
     );

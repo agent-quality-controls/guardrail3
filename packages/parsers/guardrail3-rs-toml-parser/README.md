@@ -8,7 +8,8 @@ live under `crates/`.
 ## Usage
 
 ```rust
-use guardrail3_rs_toml_parser::{RustProfile, parse};
+use guardrail3_rs_toml_parser::parse;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 let cfg = parse(
     r#"

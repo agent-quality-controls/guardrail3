@@ -2,7 +2,7 @@ use deny_toml_parser::parse as parse_deny_toml;
 use g3rs_deny_types::G3RsDenyConfigChecksInput;
 use g3rs_deny_types::G3RsDenyRustPolicyState;
 use guardrail3_check_types::G3CheckResult;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 pub fn input(
     deny_toml: &str,

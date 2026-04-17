@@ -10,7 +10,7 @@ fn stays_quiet_when_policy_context_is_invalid() {
 [bans]
 deny = [{ name = "custom-crate", wrappers = ["adapter"] }]
 "#,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         false,
         crate::rs_deny_config_27_wrappers::check,
     );

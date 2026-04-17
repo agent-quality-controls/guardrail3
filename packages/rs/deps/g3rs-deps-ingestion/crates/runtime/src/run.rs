@@ -8,7 +8,7 @@ use g3rs_deps_types::{
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use glob::Pattern;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 /// Re-export of `G3RsDepsIngestionError` so the facade can reach it.
 pub use g3rs_deps_ingestion_types::G3RsDepsIngestionError as IngestionError;

@@ -8,7 +8,7 @@ use super::helpers;
 fn stays_quiet_for_canonical_wrapper_policy() {
     let results = run(
         &helpers::service_canonical_bans_toml(),
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_27_wrappers::check,
     );

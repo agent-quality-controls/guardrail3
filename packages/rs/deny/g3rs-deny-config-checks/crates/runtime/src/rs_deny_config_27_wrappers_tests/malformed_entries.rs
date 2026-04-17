@@ -9,7 +9,7 @@ fn errors_when_wrappers_entry_has_no_usable_name() {
 [bans]
 deny = [{ wrappers = ["adapter"] }]
 "#,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_27_wrappers::check,
     );
@@ -32,7 +32,7 @@ fn errors_when_wrappers_entry_name_is_blank() {
 [bans]
 deny = [{ name = "   ", wrappers = ["adapter"] }]
 "#,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         true,
         crate::rs_deny_config_27_wrappers::check,
     );

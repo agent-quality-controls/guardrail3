@@ -1,5 +1,5 @@
 use cargo_toml_parser::types::CargoToml;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 use toml::Value;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

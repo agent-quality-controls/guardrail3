@@ -11,5 +11,6 @@ pub fn check(input: &G3RsDenyFileTreeChecksInput) -> Vec<G3CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: file module tests live in the owned run_tests sidecar directory.
+#[path = "run_tests/mod.rs"]
+// reason: file module tests live in the owned run_tests sidecar directory.
 mod run_tests;

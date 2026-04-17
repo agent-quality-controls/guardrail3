@@ -10,7 +10,7 @@ fn skips_allow_list_findings_when_policy_context_is_invalid() {
 [bans]
 allow = ["demo"]
 "#,
-        Some(guardrail3_rs_toml_parser::RustProfile::Service),
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
         false,
         crate::rs_deny_config_25_allow_override_channel::check,
     );

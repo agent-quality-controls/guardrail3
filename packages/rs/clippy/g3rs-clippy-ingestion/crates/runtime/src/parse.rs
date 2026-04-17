@@ -5,7 +5,7 @@ use g3rs_clippy_types::{
     G3RsClippyCargoConfigOverride, G3RsClippyConfigState, G3RsClippyRustPolicyState,
     G3RsClippyWaiver,
 };
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 use glob::Pattern;
 
 use crate::run::IngestionError;

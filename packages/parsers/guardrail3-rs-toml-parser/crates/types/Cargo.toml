@@ -1,16 +1,19 @@
 [package]
-name = "guardrail3-rs-toml-parser-runtime"
+name = "guardrail3-rs-toml-parser-types"
 version.workspace = true
 edition = "2024"
-description = "Parser implementation for guardrail3-rs.toml facade packages"
+description = "Typed model for guardrail3-rs.toml files"
 license.workspace = true
 rust-version.workspace = true
 repository.workspace = true
-keywords = ["guardrail3", "rust", "toml", "parser", "runtime"]
+keywords = ["guardrail3", "rust", "toml", "types", "parser"]
 categories = ["config", "development-tools", "parser-implementations"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[package.metadata.guardrail3]
+shared = true
 
 [lints]
 workspace = true
@@ -21,12 +24,8 @@ all = ["api"]
 api = []
 
 [dependencies]
-guardrail3-rs-toml-parser-types = { path = "../types", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }
 toml = "0.8"
-
-[dev-dependencies]
-guardrail3-rs-toml-parser-runtime-assertions = { path = "../assertions" }
-tempfile = "3"
 
 [package.metadata.docs.rs]
 all-features = true
