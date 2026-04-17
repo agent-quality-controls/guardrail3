@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_assertions::rs_release_config_05_categories_present as assertions;
+use g3rs_release_config_checks_assertions::rs_release_config_05_categories_present::rule as assertions;
 
 use super::helpers::run_check;
 

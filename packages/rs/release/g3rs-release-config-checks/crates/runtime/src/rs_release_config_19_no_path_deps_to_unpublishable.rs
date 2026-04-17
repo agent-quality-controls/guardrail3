@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_types::{G3RsReleaseConfigEdge, G3RsReleasePathTargetKind};
+use g3rs_release_types::{G3RsReleaseConfigEdge, G3RsReleasePathTargetKind};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, warn};
@@ -72,90 +72,5 @@ pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResul
 }
 
 #[cfg(test)]
-mod tests {
-    use g3rs_release_config_checks_types::{G3RsReleaseConfigEdge, G3RsReleasePathTargetKind};
-
-    use super::check;
-
-    fn edge() -> G3RsReleaseConfigEdge {
-        G3RsReleaseConfigEdge {
-            crate_name: "crate-a".to_owned(),
-            cargo_rel_path: "Cargo.toml".to_owned(),
-            source_publishable: true,
-            dep_name: "dep-a".to_owned(),
-            dep_package_name: "dep-a".to_owned(),
-            section_label: "dependencies".to_owned(),
-            target_label: None,
-            has_path: true,
-            path_target_kind: Some(G3RsReleasePathTargetKind::InWorkspace),
-            dep_publishable: false,
-            version_req: None,
-            actual_version: Some("0.1.0".to_owned()),
-            version_satisfied: None,
-        }
-    }
-
-    #[test]
-    fn errors_for_local_path_dep_to_non_publishable_crate() {
-        let mut results = Vec::new();
-
-        check(&edge(), &mut results);
-
-        assert_eq!(results.len(), 1);
-        assert_eq!(results[0].id(), "RS-RELEASE-CONFIG-19");
-        assert_eq!(results[0].title(), "crate-a: path dep to non-publishable crate");
-    }
-
-    #[test]
-    fn stands_down_for_external_path_dep_with_version_requirement() {
-        let mut edge = edge();
-        edge.path_target_kind = None;
-        edge.version_req = Some("^0.1.0".to_owned());
-        edge.actual_version = None;
-        let mut results = Vec::new();
-
-        check(&edge, &mut results);
-
-        assert!(results.is_empty());
-    }
-
-    #[test]
-    fn errors_for_local_unpublishable_path_dep_even_with_version_requirement() {
-        let mut edge = edge();
-        edge.version_req = Some("^0.1.0".to_owned());
-        edge.actual_version = None;
-        let mut results = Vec::new();
-
-        check(&edge, &mut results);
-
-        assert_eq!(results.len(), 1);
-        assert_eq!(results[0].severity(), guardrail3_check_types::G3Severity::Error);
-        assert_eq!(results[0].title(), "crate-a: path dep to non-publishable crate");
-    }
-
-    #[test]
-    fn warns_for_outside_workspace_path_dep_with_version_requirement() {
-        let mut edge = edge();
-        edge.path_target_kind = Some(G3RsReleasePathTargetKind::OutsideWorkspace);
-        edge.version_req = Some("^0.1.0".to_owned());
-        edge.actual_version = None;
-        let mut results = Vec::new();
-
-        check(&edge, &mut results);
-
-        assert_eq!(results.len(), 1);
-        assert_eq!(results[0].severity(), guardrail3_check_types::G3Severity::Warn);
-        assert_eq!(results[0].title(), "crate-a: path dep escapes workspace");
-    }
-
-    #[test]
-    fn skips_non_publishable_source_crate() {
-        let mut edge = edge();
-        edge.source_publishable = false;
-        let mut results = Vec::new();
-
-        check(&edge, &mut results);
-
-        assert!(results.is_empty());
-    }
-}
+#[path = "rs_release_config_19_no_path_deps_to_unpublishable_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_release_config_19_no_path_deps_to_unpublishable_tests;

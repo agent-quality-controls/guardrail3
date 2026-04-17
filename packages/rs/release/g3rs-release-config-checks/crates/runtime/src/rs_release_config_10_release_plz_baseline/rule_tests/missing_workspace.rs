@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_assertions::rs_release_config_10_release_plz_baseline as assertions;
+use g3rs_release_config_checks_assertions::rs_release_config_10_release_plz_baseline::rule as assertions;
 
 use super::helpers::run_check;
 
@@ -10,11 +10,13 @@ name = \"some-crate\"
 ";
     let results = run_check(toml);
 
-    // Missing workspace triggers: missing [workspace], wrong changelog_config,
-    // wrong git_release_enable, wrong release_always.
-    let findings = assertions::findings(&results);
-    assert!(
-        findings.iter().any(|f| f.title == "release-plz: missing [workspace] section"),
-        "expected missing [workspace] warning, got: {findings:?}",
+    assertions::assert_contains(
+        &results,
+        &[assertions::warn(
+            "release-plz: missing [workspace] section",
+            "release-plz.toml should have a [workspace] section.",
+            "release-plz.toml",
+            false,
+        )],
     );
 }

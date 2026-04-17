@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_types::G3RsReleaseConfigCrate;
+use g3rs_release_types::G3RsReleaseConfigCrate;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::error;
@@ -22,70 +22,16 @@ pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckRes
 }
 
 #[cfg(test)]
-mod tests {
-    use super::check;
+#[path = "rs_release_config_00_publish_must_be_explicit_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rs_release_config_00_publish_must_be_explicit_tests;
 
-    #[test]
-    fn errors_when_publish_is_missing() {
-        let input = crate::test_support::config_input_for_crate(
-            r#"
-[package]
-name = "demo"
-version = "0.1.0"
-edition = "2024"
-"#,
-            None,
-        );
-        let mut results = Vec::new();
-
-        check(&input.crates[0], &mut results);
-
-        assert_eq!(results.len(), 1);
-        assert_eq!(results[0].id(), "RS-RELEASE-CONFIG-00");
-        assert_eq!(results[0].title(), "demo: publish must be explicit");
-    }
-
-    #[test]
-    fn stands_down_when_publish_is_false() {
-        let input = crate::test_support::config_input_for_crate(
-            r#"
-[package]
-name = "demo"
-version = "0.1.0"
-edition = "2024"
-publish = false
-"#,
-            None,
-        );
-        let mut results = Vec::new();
-
-        check(&input.crates[0], &mut results);
-
-        assert!(results.is_empty());
-    }
-
-    #[test]
-    fn stands_down_when_publish_is_inherited() {
-        let input = crate::test_support::config_input_for_crate(
-            r#"
-[package]
-name = "demo"
-version.workspace = true
-edition = "2024"
-publish.workspace = true
-"#,
-            Some(
-                r#"
-[workspace.package]
-version = "0.1.0"
-publish = false
-"#,
-            ),
-        );
-        let mut results = Vec::new();
-
-        check(&input.crates[0], &mut results);
-
-        assert!(results.is_empty());
-    }
+#[cfg(test)]
+pub(crate) fn run_check(
+    cargo_toml: &str,
+    workspace_cargo_toml: Option<&str>,
+) -> Vec<guardrail3_check_types::G3CheckResult> {
+    let input = crate::lib_tests::test_support::config_input_for_crate(cargo_toml, workspace_cargo_toml);
+    let mut results = Vec::new();
+    check(&input.crates[0], &mut results);
+    results
 }

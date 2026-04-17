@@ -9,6 +9,8 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "release", "checks", "rust", "policy"]
 categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
 
 [features]
 default = ["all"]
@@ -18,10 +20,16 @@ checks = []
 [lints]
 workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true
+
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 cliff-toml-parser = { path = "../../../../../parsers/cliff-toml-parser", version = "0.1.0" }
-g3rs-release-config-checks-types = { path = "../types", version = "0.1.0" }
+g3rs-release-types = { path = "../../../g3rs-release-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 release-plz-toml-parser = { path = "../../../../../parsers/release-plz-toml-parser", version = "0.1.0" }
 semver = "1"

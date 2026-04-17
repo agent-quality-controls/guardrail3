@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_assertions::rs_release_config_04_keywords_present as assertions;
+use g3rs_release_config_checks_assertions::rs_release_config_04_keywords_present::rule as assertions;
 
 use super::helpers::run_check;
 

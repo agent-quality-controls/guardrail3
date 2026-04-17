@@ -1,11 +1,18 @@
-use g3rs_release_config_checks_types::G3RsReleaseConfigRepo;
+use g3rs_release_types::G3RsReleaseConfigRepo;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, message_covers_prefix, warn};
 
 const ID: &str = "RS-RELEASE-CONFIG-11";
 const REQUIRED_PREFIXES: &[&str] = &[
-    "^feat", "^fix", "^doc", "^perf", "^refactor", "^style", "^test", "^chore",
+    "^feat",
+    "^fix",
+    "^doc",
+    "^perf",
+    "^refactor",
+    "^style",
+    "^test",
+    "^chore",
 ];
 
 pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
@@ -89,5 +96,23 @@ pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResul
 }
 
 #[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod tests;
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;
+
+
+#[cfg(test)]
+pub(crate) fn run_check(cliff_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
+    let input = crate::lib_tests::test_support::config_input_for_repo(None, Some(cliff_toml));
+    let mut results = Vec::new();
+    crate::rs_release_config_11_cliff_baseline::check(
+        input.repo.as_ref().expect("repo should exist"),
+        &mut results,
+    );
+    results
+}
+
+#[cfg(test)]
+pub(crate) const GOLDEN: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/fixtures/golden_cliff.toml"
+));

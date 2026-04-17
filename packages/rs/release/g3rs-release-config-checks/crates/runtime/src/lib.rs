@@ -32,7 +32,8 @@ mod rs_release_config_25_input_failures;
 mod run;
 mod support;
 #[cfg(test)]
-mod test_support;
+#[path = "lib_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod lib_tests;
 
 #[cfg(feature = "checks")]
 pub use run::check;

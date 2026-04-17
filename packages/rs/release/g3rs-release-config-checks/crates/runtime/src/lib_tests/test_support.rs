@@ -9,7 +9,7 @@ use cargo_toml_parser::{
     types::VecStringOrBool,
     types::WorkspacePackageSection,
 };
-use g3rs_release_config_checks_types::{
+use g3rs_release_types::{
     G3RsReleaseConfigChecksInput, G3RsReleaseConfigCrate, G3RsReleaseConfigRepo,
 };
 

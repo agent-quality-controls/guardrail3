@@ -1,4 +1,6 @@
-use g3rs_release_config_checks_assertions::rs_release_config_09_accidentally_publishable as assertions;
+use g3rs_release_config_checks_assertions::rs_release_config_09_accidentally_publishable::rule as assertions;
+
+use super::helpers::run_check_with_workspace;
 
 #[test]
 fn skips_when_publish_inherited_false_from_workspace() {
@@ -16,9 +18,7 @@ members = [\"member\"]
 [workspace.package]
 publish = false
 ";
-    let input = crate::test_support::config_input_for_crate(cargo, Some(workspace));
-
-    let results = crate::check(&input);
+    let results = run_check_with_workspace(cargo, workspace);
 
     assertions::assert_no_findings(&results);
 }

@@ -2,11 +2,11 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
-    pub severity: G3Severity,
-    pub title: &'a str,
-    pub message: &'a str,
-    pub file: Option<&'a str>,
-    pub inventory: bool,
+    severity: G3Severity,
+    title: &'a str,
+    message: &'a str,
+    file: Option<&'a str>,
+    inventory: bool,
 }
 
 #[must_use]
@@ -66,6 +66,24 @@ pub(crate) fn assert_no_findings(results: &[G3CheckResult], id: &str) {
     assert!(findings(results, id).is_empty());
 }
 
+pub(crate) fn assert_contains(results: &[G3CheckResult], id: &str, expected: &[Finding<'_>]) {
+    let findings = findings(results, id);
+    for expected_finding in expected {
+        assert!(
+            findings.contains(expected_finding),
+            "expected finding {expected_finding:?}, got: {findings:?}",
+        );
+    }
+}
+
+#[must_use]
+pub(crate) fn count_titles_with_prefix(results: &[G3CheckResult], id: &str, prefix: &str) -> usize {
+    findings(results, id)
+        .iter()
+        .filter(|finding| finding.title.starts_with(prefix))
+        .count()
+}
+
 #[must_use]
 pub(crate) fn finding<'a>(
     severity: G3Severity,
@@ -102,6 +120,25 @@ macro_rules! define_result_assertions {
 
         pub fn assert_no_findings(results: &[guardrail3_check_types::G3CheckResult]) {
             crate::common::assert_no_findings(results, $id);
+        }
+
+        pub fn assert_contains(
+            results: &[guardrail3_check_types::G3CheckResult],
+            expected: &[Finding<'_>],
+        ) {
+            crate::common::assert_contains(results, $id, expected);
+        }
+
+        pub fn assert_title_count(
+            results: &[guardrail3_check_types::G3CheckResult],
+            prefix: &str,
+            expected_count: usize,
+        ) {
+            assert_eq!(
+                crate::common::count_titles_with_prefix(results, $id, prefix),
+                expected_count,
+                "unexpected title count for prefix `{prefix}`",
+            );
         }
 
         #[must_use]

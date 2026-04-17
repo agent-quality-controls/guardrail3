@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_types::G3RsReleaseConfigRepo;
+use g3rs_release_types::G3RsReleaseConfigRepo;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, warn};

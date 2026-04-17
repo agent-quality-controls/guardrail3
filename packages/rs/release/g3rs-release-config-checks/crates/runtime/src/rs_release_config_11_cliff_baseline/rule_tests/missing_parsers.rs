@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_assertions::rs_release_config_11_cliff_baseline as assertions;
+use g3rs_release_config_checks_assertions::rs_release_config_11_cliff_baseline::rule as assertions;
 
 use super::helpers::run_check;
 
@@ -12,15 +12,5 @@ filter_unconventional = true
 ";
     let results = run_check(toml);
 
-    let findings = assertions::findings(&results);
-    // Should warn for each of the 8 required prefixes.
-    let missing_parser_warnings: Vec<_> = findings
-        .iter()
-        .filter(|f| f.title.starts_with("cliff: missing commit parser for prefix"))
-        .collect();
-    assert_eq!(
-        missing_parser_warnings.len(),
-        8,
-        "expected 8 missing commit parser warnings, got: {missing_parser_warnings:?}",
-    );
+    assertions::assert_title_count(&results, "cliff: missing commit parser for prefix", 8);
 }

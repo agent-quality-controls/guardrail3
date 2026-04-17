@@ -1,8 +1,8 @@
-use g3rs_release_config_checks_assertions::rs_release_config_08_binstall_metadata as assertions;
+use g3rs_release_config_checks_assertions::rs_release_config_08_binstall_metadata::rule as assertions;
 
 use super::helpers::run_check;
 
-const GOLDEN: &str = include_str!("../../fixtures/golden_cargo.toml");
+use super::super::GOLDEN;
 
 #[test]
 fn info_when_binstall_metadata_present() {
