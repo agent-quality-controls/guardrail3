@@ -4,7 +4,8 @@ use syn::parse::{Parse, Parser};
 use syn::punctuated::Punctuated;
 use syn::visit::Visit;
 
-use super::{TestBodyVisitor, UseBinding};
+use super::body::TestBodyVisitor;
+use super::UseBinding;
 
 pub(super) fn is_test_attr(attr: &syn::Attribute) -> bool {
     let predicate = cfg_predicate(attr);

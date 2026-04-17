@@ -1,7 +1,5 @@
 use g3rs_test_source_checks_types::G3RsTestSourceChecksInput;
-use g3rs_test_types::{
-    G3RsTestComponentSourceFacts, G3RsTestFileKind, G3RsTestSourceFile,
-};
+use g3rs_test_types::{G3RsTestComponentSourceFacts, G3RsTestFileKind, G3RsTestSourceFile};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 pub(crate) fn run_input(input: G3RsTestSourceChecksInput) -> Vec<G3CheckResult> {

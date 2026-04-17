@@ -1,1 +1,18 @@
-// Intentionally empty for now.
+#[cfg(feature = "checks")]
+pub mod rs_test_01_inline_test_bodies;
+#[cfg(feature = "checks")]
+pub mod rs_test_04_ignore_reason;
+#[cfg(feature = "checks")]
+pub mod rs_test_05_should_panic_expected;
+#[cfg(feature = "checks")]
+pub mod rs_test_06_tautological_assertions;
+#[cfg(feature = "checks")]
+pub mod rs_test_07_real_proof_site;
+#[cfg(feature = "checks")]
+pub mod rs_test_08_weak_matches_assert;
+#[cfg(feature = "checks")]
+pub mod rs_test_10_input_failures;
+#[cfg(feature = "checks")]
+pub mod rs_test_16_assertions_modules_prove;
+#[cfg(feature = "checks")]
+pub mod rs_test_17_external_harnesses_use_assertions;

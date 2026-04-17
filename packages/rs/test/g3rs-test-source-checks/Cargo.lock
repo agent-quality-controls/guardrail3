@@ -42,12 +42,17 @@ dependencies = [
 [[package]]
 name = "g3rs-test-source-checks-assertions"
 version = "0.1.0"
+dependencies = [
+ "g3rs-test-source-checks-runtime",
+ "g3rs-test-types",
+ "guardrail3-check-types",
+]
 
 [[package]]
 name = "g3rs-test-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-test-source-checks-types",
+ "g3rs-test-source-checks-assertions",
  "g3rs-test-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
@@ -78,6 +83,13 @@ version = "0.1.0"
 [[package]]
 name = "guardrail3-reason-policy"
 version = "0.0.0"
+dependencies = [
+ "guardrail3-reason-policy-runtime",
+]
+
+[[package]]
+name = "guardrail3-reason-policy-runtime"
+version = "0.0.0"
 
 [[package]]
 name = "hashbrown"
@@ -106,6 +118,7 @@ name = "mutants-toml-parser"
 version = "0.1.0"
 dependencies = [
  "mutants-toml-parser-runtime",
+ "mutants-toml-parser-types",
 ]
 
 [[package]]
@@ -121,7 +134,6 @@ name = "mutants-toml-parser-types"
 version = "0.1.0"
 dependencies = [
  "serde",
- "toml",
 ]
 
 [[package]]
@@ -129,6 +141,7 @@ name = "nextest-toml-parser"
 version = "0.1.0"
 dependencies = [
  "nextest-toml-parser-runtime",
+ "nextest-toml-parser-types",
 ]
 
 [[package]]

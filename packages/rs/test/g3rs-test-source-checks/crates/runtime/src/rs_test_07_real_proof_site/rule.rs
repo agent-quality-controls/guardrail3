@@ -2,13 +2,13 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::TestFunctionInput;
 use crate::parse::{TestFunctionInfo, UseBinding};
+use crate::support::TestFunctionInput;
 
 const ID: &str = "RS-TEST-SOURCE-07";
 
 pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResult>) {
-    if input.function.has_assertion_macro
+    if input.function.assertions.has_assertion_macro
         || has_owned_assertion_proof(
             input.function,
             &input.parsed.imports,
@@ -106,23 +106,24 @@ fn local_proof_path(
     }
 
     first_local_assertion_path(
-        &function.call_paths,
-        &function.local_call_aliases,
-        &function.shadowed_idents,
+        &function.body.call_paths,
+        &function.body.local_call_aliases,
+        &function.body.shadowed_idents,
         file_function_names,
         &local_imports,
         &local_assertion_helpers,
     )
     .or_else(|| {
         function
+            .body
             .method_names
             .iter()
-            .zip(function.method_receiver_paths.iter())
+            .zip(function.harness.method_receiver_paths.iter())
             .find(|(method, receiver)| {
                 local_assertion_helpers.contains(method.as_str())
                     && receiver
                         .first()
-                        .is_some_and(|name| function.shadowed_idents.contains(name))
+                        .is_some_and(|name| function.body.shadowed_idents.contains(name))
             })
             .map(|(method, receiver)| format!("{}::{method}", receiver.join("::")))
     })
@@ -217,27 +218,16 @@ fn local_assertion_helper_names<'a>(
                 &crate::parse::TestFunctionInfo {
                     line: function.line,
                     name: function.name.clone(),
-                    uses_tokio_test_attr: false,
-                    has_assertion_macro: function.has_assertion_macro,
-                    has_failure_enforcement: function.has_failure_enforcement,
-                    call_paths: function.call_paths.clone(),
-                    path_uses: function.path_uses.clone(),
-                    method_receiver_paths: Vec::new(),
-                    method_names: function.method_names.clone(),
-                    local_call_aliases: function.local_call_aliases.clone(),
-                    field_accesses: function.field_accesses.clone(),
-                    shadowed_idents: function.shadowed_idents.clone(),
-                    should_panic_line: None,
-                    should_panic_has_expected: false,
-                    tautological_assert_lines: Vec::new(),
-                    weak_matches_lines: Vec::new(),
+                    assertions: function.assertions.clone(),
+                    body: function.body.clone(),
+                    harness: crate::parse::TestHarnessFacts::default(),
                 },
                 imports,
                 file_function_names,
                 assertions_package_name,
                 proof_bearing_assertion_functions,
             ) || (looks_like_proof_helper_name(&function.name)
-                && function.has_assertion_macro)
+                && function.assertions.has_assertion_macro)
         })
         .map(|function| function.name.as_str())
         .collect::<BTreeSet<_>>();
@@ -251,10 +241,10 @@ fn local_assertion_helper_names<'a>(
             if !looks_like_proof_helper_name(&function.name) {
                 continue;
             }
-            if function.call_paths.iter().any(|path| {
+            if function.body.call_paths.iter().any(|path| {
                 path.len() == 1
                     && assertion_helpers.contains(path[0].as_str())
-                    && !function.shadowed_idents.contains(&path[0])
+                    && !function.body.shadowed_idents.contains(&path[0])
             }) {
                 changed |= assertion_helpers.insert(function.name.as_str());
             }
@@ -304,8 +294,8 @@ pub(crate) fn has_owned_assertion_proof(
     }
 
     let bare_call_is_owned = |name: &str| {
-        if function.shadowed_idents.contains(name) {
-            return function.local_call_aliases.get(name).is_some_and(|path| {
+        if function.body.shadowed_idents.contains(name) {
+            return function.body.local_call_aliases.get(name).is_some_and(|path| {
                 path_is_owned(
                     path,
                     &root_prefixes,
@@ -325,7 +315,7 @@ pub(crate) fn has_owned_assertion_proof(
                 }))
     };
 
-    function.call_paths.iter().any(|path| match path.first() {
+    function.body.call_paths.iter().any(|path| match path.first() {
         Some(first) if path.len() == 1 => bare_call_is_owned(first),
         Some(_) => path_is_owned(
             path,
@@ -336,6 +326,7 @@ pub(crate) fn has_owned_assertion_proof(
         ),
         None => false,
     }) || function
+        .harness
         .method_receiver_paths
         .iter()
         .any(|path| match path.first() {
@@ -385,3 +376,7 @@ fn path_is_owned(
         None => false,
     }
 }
+
+#[cfg(test)]
+#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod rule_tests;

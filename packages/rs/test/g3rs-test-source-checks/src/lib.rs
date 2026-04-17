@@ -1,4 +1,4 @@
-#[cfg(feature = "api")]
+#[cfg(feature = "runtime")]
 pub use g3rs_test_source_checks_runtime::check;
-#[cfg(feature = "api")]
+#[cfg(feature = "types")]
 pub use g3rs_test_source_checks_types::G3RsTestSourceChecksInput;

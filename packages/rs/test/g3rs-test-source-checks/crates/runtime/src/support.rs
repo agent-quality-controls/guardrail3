@@ -1,9 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_test_source_checks_types::G3RsTestSourceChecksInput;
-use g3rs_test_types::{G3RsTestFileKind, G3RsTestSourceFile};
+use g3rs_test_types::{G3RsTestFileKind, G3RsTestSourceChecksInput, G3RsTestSourceFile};
 
-use crate::parse::{FunctionInfo, ParsedTestFile, TestFunctionInfo, UseBinding, analyze, parse_rust_file};
+use crate::parse::{
+    FunctionInfo, ParsedTestFile, TestFunctionInfo, UseBinding, analyze, parse_rust_file,
+};
 
 #[derive(Debug)]
 pub(crate) struct ParseFailure {
@@ -23,13 +24,17 @@ pub(crate) struct RootAnalysis {
     pub(crate) proof_bearing_assertions_by_package: BTreeMap<String, BTreeSet<String>>,
 }
 
-pub(crate) fn analyze_root(input: &G3RsTestSourceChecksInput) -> Result<RootAnalysis, ParseFailure> {
+pub(crate) fn analyze_root(
+    input: &G3RsTestSourceChecksInput,
+) -> Result<RootAnalysis, ParseFailure> {
     let mut analysis = RootAnalysis::default();
 
     for file in &input.files {
         let source = parse_rust_file(&file.content).map_err(|err| ParseFailure {
             rel_path: file.rel_path.clone(),
-            reason: format!("Failed to parse Rust source file for test-family source analysis: {err}"),
+            reason: format!(
+                "Failed to parse Rust source file for test-family source analysis: {err}"
+            ),
         })?;
         let parsed = analyze(&source, &file.content);
         analysis.files.push(AnalyzedFile {
@@ -148,7 +153,9 @@ fn collect_assertions_proof_catalog(
                     .functions
                     .iter()
                     .filter(|function| {
-                        function.is_public && !function.is_test && function.has_assertion_macro
+                        function.is_public
+                            && !function.is_test
+                            && function.assertions.has_assertion_macro
                     })
                     .map(move |function| {
                         qualified_assertion_name(&direct_module_prefix, &function.name)
@@ -173,7 +180,9 @@ fn collect_assertions_proof_catalog(
                     .parsed
                     .functions
                     .iter()
-                    .filter(|function| !function.is_test && function.has_assertion_macro)
+                    .filter(|function| {
+                        !function.is_test && function.assertions.has_assertion_macro
+                    })
                     .map(|function| function.name.clone())
                     .collect::<BTreeSet<_>>();
                 let candidates = file
@@ -287,12 +296,10 @@ fn exported_assertion_function_calls_proof(
         }
     }
 
-    function
-        .call_paths
-        .iter()
+    function.body.call_paths.iter()
         .any(|path| match path.as_slice() {
             [name] => {
-                !function.shadowed_idents.contains(name)
+                !function.body.shadowed_idents.contains(name)
                     && ((file_function_names.contains(name)
                         && local_proof_functions.contains(name))
                         || (file_function_names.contains(name)
@@ -304,7 +311,7 @@ fn exported_assertion_function_calls_proof(
                                 .get(name)
                                 .is_some_and(|qualified| proof_bearing_names.contains(qualified))
                                 || (external_assertions_glob
-                                    && !function.shadowed_idents.contains(name))
+                                    && !function.body.shadowed_idents.contains(name))
                                 || glob_prefixes.iter().any(|prefix| {
                                     proof_bearing_names
                                         .contains(&qualified_assertion_name(prefix, name))
