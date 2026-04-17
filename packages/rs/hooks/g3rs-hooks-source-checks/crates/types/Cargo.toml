@@ -9,14 +9,21 @@ repository = "https://github.com/ArcticLens/websmasher"
 readme = "README.md"
 keywords = ["guardrail3", "hooks", "source", "checks", "rust"]
 categories = ["development-tools"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
 
 [features]
-default = ["all"]
-all = ["api"]
+default = ["api"]
 api = []
 
 [lints]
 workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+
+[package.metadata.guardrail3]
+shared = true
+
 [dependencies]
-g3rs-hooks-types = { path = "../../../g3rs-hooks-types" }
+g3rs-hooks-types = { path = "../../../g3rs-hooks-types", version = "0.1.0" }
