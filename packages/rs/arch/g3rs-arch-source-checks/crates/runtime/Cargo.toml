@@ -24,7 +24,7 @@ workspace = true
 
 [dependencies]
 g3rs-arch-types = { path = "../../../g3rs-arch-types", version = "0.1.0" }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 proc-macro2 = { version = "1", features = ["span-locations"] }
 syn = { version = "2", features = ["full", "parsing"] }
 

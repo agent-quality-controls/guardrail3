@@ -18,7 +18,7 @@ workspace = true
 
 [dependencies]
 g3rs-clippy-types = { path = "../../../g3rs-clippy-types", version = "0.1.0" }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
 [dev-dependencies]
 g3rs-clippy-filetree-checks-assertions = { path = "../assertions" }

@@ -21,7 +21,7 @@ shared = true
 
 [dependencies]
 g3rs-apparch-types = { path = "../../../g3rs-apparch-types" }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types" }
 
 [dev-dependencies]
 g3rs-apparch-source-checks-assertions = { path = "../assertions" }

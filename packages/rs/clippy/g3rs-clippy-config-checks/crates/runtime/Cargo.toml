@@ -27,7 +27,7 @@ workspace = true
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
 guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
 g3rs-clippy-types = { path = "../../../g3rs-clippy-types", version = "0.1.0" }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 toml = "0.8"
 
 [dev-dependencies]

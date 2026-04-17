@@ -26,4 +26,4 @@ shared = true
 g3rs-deny-config-checks-assertions = { path = "../../../g3rs-deny-config-checks/crates/assertions" }
 g3rs-deny-filetree-checks-assertions = { path = "../../../g3rs-deny-filetree-checks/crates/assertions" }
 g3rs-deny-ingestion-runtime = { path = "../runtime" }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
