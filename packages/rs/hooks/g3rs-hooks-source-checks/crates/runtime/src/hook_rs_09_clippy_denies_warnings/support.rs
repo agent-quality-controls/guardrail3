@@ -1,4 +1,4 @@
-use super::{EnvState, LintEffect};
+use super::rule::{EnvState, LintEffect};
 
 #[derive(Debug, Clone)]
 pub(super) struct TokenCursor<'a> {

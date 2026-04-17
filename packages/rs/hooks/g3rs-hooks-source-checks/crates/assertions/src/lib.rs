@@ -1,10 +1,11 @@
-#![allow(dead_code, unreachable_pub, unused_imports)]
-
 use g3rs_hooks_source_checks_runtime as _;
 
+#[cfg(feature = "checks")]
 pub mod bootstrap;
 mod common;
+#[cfg(feature = "checks")]
 pub mod shell_safety;
+#[cfg(feature = "checks")]
 pub mod workflow;
 
 #[cfg(feature = "checks")]

@@ -23,7 +23,7 @@ name = "g3rs-hooks-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-hooks-source-checks-assertions",
- "g3rs-hooks-source-checks-types",
+ "g3rs-hooks-types",
  "guardrail3-check-types",
  "hook-shell-parser",
 ]

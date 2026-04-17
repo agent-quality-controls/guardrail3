@@ -11,14 +11,17 @@ pub struct ExpectedRuleResult<'a> {
     pub message_contains: Option<&'a str>,
 }
 
-pub fn rule_results<'a>(results: &'a [G3CheckResult], rule_id: &str) -> Vec<&'a G3CheckResult> {
+pub(crate) fn rule_results<'a>(
+    results: &'a [G3CheckResult],
+    rule_id: &str,
+) -> Vec<&'a G3CheckResult> {
     results
         .iter()
         .filter(|result| result.id() == rule_id)
         .collect()
 }
 
-pub fn assert_rule_results(
+pub(crate) fn assert_rule_results(
     results: &[G3CheckResult],
     rule_id: &str,
     expected: &[ExpectedRuleResult<'_>],
@@ -61,7 +64,7 @@ pub fn assert_rule_results(
     }
 }
 
-pub fn assert_rule_quiet(results: &[G3CheckResult], rule_id: &str) {
+pub(crate) fn assert_rule_quiet(results: &[G3CheckResult], rule_id: &str) {
     let actual = rule_results(results, rule_id);
     assert!(
         actual.is_empty(),
