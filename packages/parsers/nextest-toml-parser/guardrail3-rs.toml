@@ -1,0 +1,25 @@
+profile = "library"
+
+allowed_deps = [
+  "nextest-toml-parser-runtime",
+  "nextest-toml-parser-runtime-assertions",
+  "nextest-toml-parser-types",
+  "serde",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-19"
+file = "crates/types/src/nextest_toml/profile.rs"
+selector = "struct:NextestProfile"
+reason = "Schema mirror intentionally matches nextest's profile surface."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-19"
+file = "crates/types/src/nextest_toml/profile.rs"
+selector = "struct:ProfileOverride"
+reason = "Schema mirror intentionally matches nextest's profile override surface."
