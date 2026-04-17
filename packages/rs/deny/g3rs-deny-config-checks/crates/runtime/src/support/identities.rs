@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
-use deny_toml_parser::{
-    AdvisoryIgnoreEntry, BanDenyDetail, BanDenyEntry, BanFeatureEntry, BanSkipDetail,
-    BanSkipEntry, LicenseException,
+use deny_toml_parser::types::{
+    AdvisoryIgnoreEntry, BanAllowEntry, BanDenyDetail, BanDenyEntry, BanFeatureEntry,
+    BanSkipDetail, BanSkipEntry, LicenseException,
 };
 
 pub(crate) fn join_set(values: &BTreeSet<String>) -> String {
@@ -16,10 +16,10 @@ pub(crate) fn ban_name(entry: &BanDenyEntry) -> Option<String> {
     }
 }
 
-pub(crate) fn allow_name(entry: &deny_toml_parser::BanAllowEntry) -> Option<String> {
+pub(crate) fn allow_name(entry: &BanAllowEntry) -> Option<String> {
     match entry {
-        deny_toml_parser::BanAllowEntry::Simple(name) => normalized_name(name),
-        deny_toml_parser::BanAllowEntry::Detailed(detail) => detail
+        BanAllowEntry::Simple(name) => normalized_name(name),
+        BanAllowEntry::Detailed(detail) => detail
             .name
             .as_deref()
             .and_then(normalized_name)

@@ -43,7 +43,10 @@ pub fn run_with_rust_policy(
     results
 }
 
-fn rust_policy(profile: Option<RustProfile>, policy_context_valid: bool) -> G3RsDenyRustPolicyState {
+fn rust_policy(
+    profile: Option<RustProfile>,
+    policy_context_valid: bool,
+) -> G3RsDenyRustPolicyState {
     if !policy_context_valid {
         return G3RsDenyRustPolicyState::ParseError {
             rel_path: "guardrail3-rs.toml".to_owned(),

@@ -6,8 +6,8 @@ use super::helpers;
 
 #[test]
 fn inventories_added_wrappers_for_non_canonical_bans() {
-    let mut parsed =
-        toml::from_str::<toml::Value>(&helpers::service_canonical_bans_toml()).expect("valid deny fixture");
+    let mut parsed = toml::from_str::<toml::Value>(&helpers::service_canonical_bans_toml())
+        .expect("valid deny fixture");
     let deny_entries = parsed
         .get_mut("bans")
         .and_then(toml::Value::as_table_mut)
@@ -24,7 +24,8 @@ fn inventories_added_wrappers_for_non_canonical_bans() {
             toml::Value::Array(vec![toml::Value::String("adapter".to_owned())]),
         ),
     ])));
-    let deny_toml = toml::to_string(&parsed).expect("serialize deny fixture after mutating parsed TOML");
+    let deny_toml =
+        toml::to_string(&parsed).expect("serialize deny fixture after mutating parsed TOML");
 
     let results = run(
         &deny_toml,

@@ -1,5 +1,5 @@
-mod helpers;
 mod golden;
+mod helpers;
 mod library_profile;
 mod malformed;
 mod non_overlapping;

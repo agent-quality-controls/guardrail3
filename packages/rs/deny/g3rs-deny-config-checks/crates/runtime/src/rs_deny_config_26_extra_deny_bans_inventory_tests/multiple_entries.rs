@@ -6,8 +6,8 @@ use super::helpers;
 
 #[test]
 fn inventories_extra_deny_bans_beyond_the_managed_baseline() {
-    let mut parsed =
-        toml::from_str::<toml::Value>(&helpers::service_canonical_bans_toml()).expect("valid deny fixture");
+    let mut parsed = toml::from_str::<toml::Value>(&helpers::service_canonical_bans_toml())
+        .expect("valid deny fixture");
     let deny_entries = parsed
         .get_mut("bans")
         .and_then(toml::Value::as_table_mut)
@@ -15,7 +15,8 @@ fn inventories_extra_deny_bans_beyond_the_managed_baseline() {
         .and_then(toml::Value::as_array_mut)
         .expect("expected bans.deny array");
     deny_entries.push(toml::Value::String("custom-crate".to_owned()));
-    let deny_toml = toml::to_string(&parsed).expect("serialize deny fixture after mutating parsed TOML");
+    let deny_toml =
+        toml::to_string(&parsed).expect("serialize deny fixture after mutating parsed TOML");
 
     let results = run(
         &deny_toml,

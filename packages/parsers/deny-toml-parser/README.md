@@ -1,6 +1,13 @@
 # deny-toml-parser
 
-Facade crate for typed `deny.toml` parsing.
+Typed parser facade for `deny.toml`.
+
+The root crate exposes only the parsing entrypoints:
+- `parse`
+- `from_path`
+- `Error`
+
+Schema types live under `deny_toml_parser::types`.
 
 The public API is exposed from this root crate. Internal parser and model crates
 live under `crates/`.

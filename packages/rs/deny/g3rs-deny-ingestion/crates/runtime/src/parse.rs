@@ -1,7 +1,7 @@
 /// Read and parse config files from disk.
 use std::path::Path;
 
-use deny_toml_parser::DenyToml;
+use deny_toml_parser::types::DenyToml;
 use g3rs_deny_types::G3RsDenyRustPolicyState;
 
 use crate::run::IngestionError;

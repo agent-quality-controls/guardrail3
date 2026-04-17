@@ -1,10 +1,11 @@
 use std::collections::BTreeSet;
 
-use deny_toml_parser::{
-    AdvisoriesConfig, AdvisoryIgnoreEntry, BanFeatureEntry, BanSkipTreeEntry,
-    BanWorkspaceDependenciesConfig, BansConfig, GraphTargetEntry, LicenseClarification,
-    LicenseClarificationFile, LicenseException, LicensesConfig, LicensesPrivateConfig,
-    SourcesConfig,
+use deny_toml_parser::types::{
+    AdvisoriesConfig, AdvisoryIgnoreEntry, BanAllowEntry, BanBuildAllowBuildScriptEntry,
+    BanBuildBypassAllowEntry, BanBuildBypassEntry, BanBuildConfig, BanFeatureEntry,
+    BanSkipTreeEntry, BanWorkspaceDependenciesConfig, BansConfig, GraphConfig, GraphTargetEntry,
+    LicenseClarification, LicenseClarificationFile, LicenseException, LicensesConfig,
+    LicensesPrivateConfig, OutputConfig, SourcesAllowOrg, SourcesConfig,
 };
 
 pub(crate) fn known_top_level_keys() -> BTreeSet<&'static str> {
@@ -69,10 +70,10 @@ pub(crate) fn license_exception_unknown_keys(entry: &LicenseException) -> Vec<St
         .collect()
 }
 
-pub(crate) fn allow_entry_unknown_keys(entry: &deny_toml_parser::BanAllowEntry) -> Vec<String> {
+pub(crate) fn allow_entry_unknown_keys(entry: &BanAllowEntry) -> Vec<String> {
     match entry {
-        deny_toml_parser::BanAllowEntry::Simple(_) => Vec::new(),
-        deny_toml_parser::BanAllowEntry::Detailed(detail) => detail
+        BanAllowEntry::Simple(_) => Vec::new(),
+        BanAllowEntry::Detailed(detail) => detail
             .extra
             .keys()
             .filter(|key| !known_section_keys("allow").contains(key.as_str()))
@@ -102,7 +103,7 @@ pub(crate) fn private_unknown_keys(config: &LicensesPrivateConfig) -> Vec<String
         .collect()
 }
 
-pub(crate) fn graph_unknown_keys(graph: &deny_toml_parser::GraphConfig) -> Vec<String> {
+pub(crate) fn graph_unknown_keys(graph: &GraphConfig) -> Vec<String> {
     graph
         .extra
         .keys()
@@ -170,7 +171,7 @@ pub(crate) fn workspace_dependencies_unknown_keys(
         .collect()
 }
 
-pub(crate) fn build_unknown_keys(config: &deny_toml_parser::BanBuildConfig) -> Vec<String> {
+pub(crate) fn build_unknown_keys(config: &BanBuildConfig) -> Vec<String> {
     config
         .extra
         .keys()
@@ -180,11 +181,11 @@ pub(crate) fn build_unknown_keys(config: &deny_toml_parser::BanBuildConfig) -> V
 }
 
 pub(crate) fn build_allow_build_script_unknown_keys(
-    entry: &deny_toml_parser::BanBuildAllowBuildScriptEntry,
+    entry: &BanBuildAllowBuildScriptEntry,
 ) -> Vec<String> {
     match entry {
-        deny_toml_parser::BanBuildAllowBuildScriptEntry::Simple(_) => Vec::new(),
-        deny_toml_parser::BanBuildAllowBuildScriptEntry::Detailed(detail) => detail
+        BanBuildAllowBuildScriptEntry::Simple(_) => Vec::new(),
+        BanBuildAllowBuildScriptEntry::Detailed(detail) => detail
             .extra
             .keys()
             .filter(|key| !known_section_keys("build-allow-build-scripts").contains(key.as_str()))
@@ -194,7 +195,7 @@ pub(crate) fn build_allow_build_script_unknown_keys(
 }
 
 pub(crate) fn build_bypass_unknown_keys(
-    entry: &deny_toml_parser::BanBuildBypassEntry,
+    entry: &BanBuildBypassEntry,
 ) -> Vec<String> {
     entry
         .extra
@@ -205,7 +206,7 @@ pub(crate) fn build_bypass_unknown_keys(
 }
 
 pub(crate) fn build_bypass_allow_unknown_keys(
-    entry: &deny_toml_parser::BanBuildBypassAllowEntry,
+    entry: &BanBuildBypassAllowEntry,
 ) -> Vec<String> {
     entry
         .extra
@@ -215,7 +216,7 @@ pub(crate) fn build_bypass_allow_unknown_keys(
         .collect()
 }
 
-pub(crate) fn output_unknown_keys(config: &deny_toml_parser::OutputConfig) -> Vec<String> {
+pub(crate) fn output_unknown_keys(config: &OutputConfig) -> Vec<String> {
     config
         .extra
         .keys()
@@ -224,7 +225,7 @@ pub(crate) fn output_unknown_keys(config: &deny_toml_parser::OutputConfig) -> Ve
         .collect()
 }
 
-pub(crate) fn allow_org_unknown_keys(config: &deny_toml_parser::SourcesAllowOrg) -> Vec<String> {
+pub(crate) fn allow_org_unknown_keys(config: &SourcesAllowOrg) -> Vec<String> {
     config
         .extra
         .keys()
@@ -270,8 +271,7 @@ const BANS_KEYS: &[&str] = &[
 ];
 const ALLOW_KEYS: &[&str] = &["name", "crate", "version", "reason"];
 const SKIP_TREE_KEYS: &[&str] = &["name", "crate", "version", "depth", "reason"];
-const WORKSPACE_DEPENDENCIES_KEYS: &[&str] =
-    &["duplicates", "include-path-dependencies", "unused"];
+const WORKSPACE_DEPENDENCIES_KEYS: &[&str] = &["duplicates", "include-path-dependencies", "unused"];
 const BUILD_KEYS: &[&str] = &[
     "allow-build-scripts",
     "executables",
@@ -334,7 +334,9 @@ const SOURCES_KEYS: &[&str] = &[
     "allow-org",
 ];
 const SKIP_KEYS: &[&str] = &["name", "crate", "version", "reason"];
-const FEATURE_KEYS: &[&str] = &["name", "crate", "version", "deny", "allow", "reason", "exact"];
+const FEATURE_KEYS: &[&str] = &[
+    "name", "crate", "version", "deny", "allow", "reason", "exact",
+];
 const ALLOW_ORG_KEYS: &[&str] = &["github", "gitlab", "bitbucket"];
 const OUTPUT_KEYS: &[&str] = &["feature-depth"];
 const SECTION_KEYS: &[(&str, &[&str])] = &[

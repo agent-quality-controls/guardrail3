@@ -1,4 +1,4 @@
-use deny_toml_parser::DenyToml;
+use deny_toml_parser::types::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::expectations::expected_confidence_threshold;

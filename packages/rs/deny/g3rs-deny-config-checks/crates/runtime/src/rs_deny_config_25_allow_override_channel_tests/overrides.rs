@@ -6,8 +6,8 @@ use super::helpers;
 
 #[test]
 fn errors_on_non_empty_allow_list_and_deny_overrides() {
-    let mut parsed =
-        toml::from_str::<toml::Value>(&helpers::service_canonical_bans_toml()).expect("valid deny fixture");
+    let mut parsed = toml::from_str::<toml::Value>(&helpers::service_canonical_bans_toml())
+        .expect("valid deny fixture");
     let bans = parsed
         .get_mut("bans")
         .and_then(toml::Value::as_table_mut)
@@ -19,7 +19,8 @@ fn errors_on_non_empty_allow_list_and_deny_overrides() {
             toml::Value::String("lazy_static".to_owned()),
         ]),
     );
-    let deny_toml = toml::to_string(&parsed).expect("serialize deny fixture after mutating parsed TOML");
+    let deny_toml =
+        toml::to_string(&parsed).expect("serialize deny fixture after mutating parsed TOML");
 
     let results = run(
         &deny_toml,
