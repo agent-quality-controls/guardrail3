@@ -5,6 +5,10 @@ use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 pub use g3rs_test_ingestion_types::G3RsTestIngestionError as IngestionError;
 
+#[cfg(test)]
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod run_tests;
+
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<Vec<G3RsTestConfigChecksInput>, IngestionError> {
@@ -115,7 +119,7 @@ pub fn ingest_for_file_tree_checks(
 fn parse_optional_nextest(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
-) -> Result<Option<nextest_toml_parser::NextestToml>, IngestionError> {
+) -> Result<Option<nextest_toml_parser::types::NextestToml>, IngestionError> {
     let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
         return Ok(None);
     };
@@ -174,4 +178,27 @@ fn cargo_mutants_installed() -> bool {
         .status()
         .map(|status| status.success())
         .unwrap_or(false)
+}
+
+#[cfg(test)]
+pub(super) fn create_fixture_dir(path: &std::path::Path) -> std::io::Result<()> {
+    crate::fs::create_dir_all(path)
+}
+
+#[cfg(test)]
+pub(super) fn write_fixture(path: &std::path::Path, content: &str) -> std::io::Result<()> {
+    crate::fs::write(path, content)
+}
+
+#[cfg(test)]
+pub(super) fn read_fixture_metadata(path: &std::path::Path) -> std::io::Result<std::fs::Metadata> {
+    crate::fs::metadata(path)
+}
+
+#[cfg(test)]
+pub(super) fn set_fixture_permissions(
+    path: &std::path::Path,
+    permissions: std::fs::Permissions,
+) -> std::io::Result<()> {
+    crate::fs::set_permissions(path, permissions)
 }

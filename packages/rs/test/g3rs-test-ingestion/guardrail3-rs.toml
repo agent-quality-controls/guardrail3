@@ -1,0 +1,34 @@
+profile = "library"
+
+allowed_deps = [
+  "cargo-toml-parser",
+  "g3rs-test-config-checks",
+  "g3rs-test-file-tree-checks",
+  "g3rs-test-source-checks",
+  "g3rs-test-types",
+  "g3rs-workspace-crawl",
+  "glob",
+  "guardrail3-check-types",
+  "mutants-toml-parser",
+  "nextest-toml-parser",
+  "syn",
+  "tempfile",
+]
+
+[[waivers]]
+rule = "multiple_crate_versions"
+file = "Cargo.toml"
+selector = "lint:clippy::multiple_crate_versions"
+reason = "This internal workspace package intentionally depends on parser crates and shared internal crates with overlapping transitive versions."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime intentionally groups test ingestion logic into ingest and components submodules."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions intentionally keep shared ingestion proof helpers in one module."

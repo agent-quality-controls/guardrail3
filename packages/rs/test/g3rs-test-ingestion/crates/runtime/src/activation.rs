@@ -3,7 +3,7 @@ use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspace
 use syn::visit::Visit;
 
 use crate::roots::{OwnedTestRoot, join_under_root};
-use crate::run::IngestionError;
+use crate::ingest::IngestionError;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub(crate) struct ActivationSummary {
