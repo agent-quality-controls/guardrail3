@@ -1,3 +1,3 @@
 # g3rs-release-ingestion-runtime
 
-Runtime implementation for release-family ingestion.
+Runtime implementation for the `release` ingestion lane.

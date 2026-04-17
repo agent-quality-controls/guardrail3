@@ -1,0 +1,37 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-release-types",
+  "g3rs-release-ingestion-types",
+  "g3rs-release-config-checks",
+  "g3rs-release-filetree-checks",
+  "g3rs-release-source-checks",
+  "g3rs-workspace-crawl",
+  "guardrail3-check-types",
+  "cargo-toml-parser",
+  "cliff-toml-parser",
+  "release-plz-toml-parser",
+  "glob",
+  "semver",
+  "serde_yaml",
+  "tempfile",
+  "toml",
+]
+
+[[waivers]]
+rule = "multiple_crate_versions"
+file = "Cargo.toml"
+selector = "lint:clippy::multiple_crate_versions"
+reason = "This internal workspace package intentionally depends on parser crates and shared internal crates with overlapping transitive versions."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime intentionally owns the release ingestion lane boundary and will be split internally by module."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions crate intentionally keeps shared proof modules for the ingestion lane."
