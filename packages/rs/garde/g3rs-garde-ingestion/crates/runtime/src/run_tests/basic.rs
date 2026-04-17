@@ -1,44 +1,18 @@
-use std::fs;
-use std::path::Path;
-use std::process::Command;
-
 use g3rs_garde_types::{G3RsGardeApplicability, G3RsGardeClippyInput};
-use tempfile::tempdir;
-
-fn git_init(path: &Path) {
-    let _status = Command::new("git")
-        .args(["init", "--quiet"])
-        .current_dir(path)
-        .status()
-        .expect("git init should succeed in test fixture setup");
-}
-
-fn write(path: impl AsRef<Path>, content: &str) {
-    if let Some(parent) = path.as_ref().parent() {
-        fs::create_dir_all(parent)
-            .expect("should create parent directories for test fixture files");
-    }
-    fs::write(path, content).expect("should write test fixture file to disk");
-}
-
-fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
-}
 
 #[test]
 fn ingests_with_both_cargo_and_clippy() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let temp = super::helpers::new_root();
     let root = temp.path();
-    git_init(root);
 
-    write(
+    super::helpers::write(
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\nresolver = \"2\"\n[workspace.dependencies]\ngarde = \"0.22\"\n",
     );
-    write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
+    super::helpers::write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let crawl = super::helpers::crawl(root);
+    let result = super::ingest_for_config_checks(&crawl);
 
     let input = result
         .expect("ingestion should succeed when both Cargo.toml and clippy.toml are present");
@@ -62,18 +36,17 @@ fn ingests_with_both_cargo_and_clippy() {
 
 #[test]
 fn ingests_with_dot_clippy_toml() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let temp = super::helpers::new_root();
     let root = temp.path();
-    git_init(root);
 
-    write(
+    super::helpers::write(
         root.join("Cargo.toml"),
         "[package]\nname = \"demo\"\n[dependencies]\ngarde = \"0.22\"\n",
     );
-    write(root.join(".clippy.toml"), "msrv = \"1.85\"\n");
+    super::helpers::write(root.join(".clippy.toml"), "msrv = \"1.85\"\n");
 
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let crawl = super::helpers::crawl(root);
+    let result = super::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should succeed with .clippy.toml variant");
     assert_eq!(input.applicability, G3RsGardeApplicability::Active);
@@ -88,17 +61,16 @@ fn ingests_with_dot_clippy_toml() {
 
 #[test]
 fn clippy_is_missing_without_clippy_config() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let temp = super::helpers::new_root();
     let root = temp.path();
-    git_init(root);
 
-    write(
+    super::helpers::write(
         root.join("Cargo.toml"),
         "[package]\nname = \"demo\"\n[dependencies]\ngarde = \"0.22\"\n",
     );
 
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let crawl = super::helpers::crawl(root);
+    let result = super::ingest_for_config_checks(&crawl);
 
     let input = result
         .expect("ingestion should succeed even without clippy config (it is optional)");
@@ -115,18 +87,17 @@ fn clippy_is_missing_without_clippy_config() {
 
 #[test]
 fn malformed_clippy_toml_is_preserved_for_package_warnings() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let temp = super::helpers::new_root();
     let root = temp.path();
-    git_init(root);
 
-    write(
+    super::helpers::write(
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\n[workspace.dependencies]\ngarde = \"0.22\"\n",
     );
-    write(root.join("clippy.toml"), "{{{{not valid toml}}}}");
+    super::helpers::write(root.join("clippy.toml"), "{{{{not valid toml}}}}");
 
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let crawl = super::helpers::crawl(root);
+    let result = super::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should preserve invalid clippy for package warnings");
     assert!(
@@ -140,49 +111,46 @@ fn malformed_clippy_toml_is_preserved_for_package_warnings() {
 
 #[test]
 fn fails_when_cargo_toml_is_missing() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let temp = super::helpers::new_root();
     let root = temp.path();
-    git_init(root);
 
-    write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
+    super::helpers::write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let crawl = super::helpers::crawl(root);
+    let result = super::ingest_for_config_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::CargoTomlNotFound)),
+        matches!(result, Err(super::IngestionError::CargoTomlNotFound)),
         "ingestion should return CargoTomlNotFound when Cargo.toml is missing even if clippy.toml exists"
     );
 }
 
 #[test]
 fn fails_on_malformed_cargo_toml() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let temp = super::helpers::new_root();
     let root = temp.path();
-    git_init(root);
 
-    write(root.join("Cargo.toml"), "{{{{not valid toml}}}}");
-    write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
+    super::helpers::write(root.join("Cargo.toml"), "{{{{not valid toml}}}}");
+    super::helpers::write(root.join("clippy.toml"), "msrv = \"1.85\"\n");
 
-    let crawl = crawl(root);
-    let result = crate::ingest_for_config_checks(&crawl);
+    let crawl = super::helpers::crawl(root);
+    let result = super::ingest_for_config_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
+        matches!(result, Err(super::IngestionError::ParseFailed { .. })),
         "ingestion should return ParseFailed when Cargo.toml contains invalid TOML"
     );
 }
 
 #[test]
 fn ignored_but_recovered_cargo_toml_is_ingested() {
-    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let temp = super::helpers::new_root();
     let root = temp.path();
-    git_init(root);
 
-    write(root.join(".gitignore"), "Cargo.toml\n");
-    write(root.join("Cargo.toml"), "[package]\nname = \"recovered\"\n");
+    super::helpers::write(root.join(".gitignore"), "Cargo.toml\n");
+    super::helpers::write(root.join("Cargo.toml"), "[package]\nname = \"recovered\"\n");
 
-    let crawl = crawl(root);
+    let crawl = super::helpers::crawl(root);
 
     let crawl_entry = g3rs_workspace_crawl::entry(&crawl, "Cargo.toml")
         .expect("Cargo.toml should be present in crawl via recovery even when gitignored");
@@ -192,7 +160,7 @@ fn ignored_but_recovered_cargo_toml_is_ingested() {
         "Cargo.toml should have Ignored state when gitignored, proving recovery path was exercised"
     );
 
-    let result = crate::ingest_for_config_checks(&crawl);
+    let result = super::ingest_for_config_checks(&crawl);
     let input = result.expect(
         "ingestion should succeed for a gitignored Cargo.toml recovered by the crawl recovery phase",
     );

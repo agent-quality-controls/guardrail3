@@ -147,12 +147,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-garde-config-checks-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-garde-config-checks-runtime",
+ "guardrail3-check-types",
+]
+
+[[package]]
 name = "g3rs-garde-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3rs-garde-config-checks-types",
+ "g3rs-garde-types",
  "guardrail3-check-types",
 ]
 
@@ -175,7 +183,9 @@ dependencies = [
 name = "g3rs-garde-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
- "g3rs-garde-ingestion-types",
+ "g3rs-garde-config-checks-assertions",
+ "g3rs-garde-ingestion-runtime",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -287,6 +297,13 @@ version = "0.1.0"
 
 [[package]]
 name = "guardrail3-reason-policy"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-reason-policy-runtime",
+]
+
+[[package]]
+name = "guardrail3-reason-policy-runtime"
 version = "0.0.0"
 
 [[package]]

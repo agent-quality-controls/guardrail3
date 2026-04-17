@@ -1,3 +1,5 @@
+use g3rs_garde_ingestion_assertions::run as assertions;
+
 #[test]
 fn pipeline_stays_quiet_for_clean_garde_root() {
     let temp = super::new_root();
@@ -13,10 +15,10 @@ fn pipeline_stays_quiet_for_clean_garde_root() {
     );
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_no_results(&results);
 }
 
 #[test]
@@ -35,21 +37,11 @@ fn pipeline_can_report_input_failures_and_ast_findings_together() {
     );
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("src/broken.rs")),
-        "{results:#?}"
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id() == "RS-GARDE-SOURCE-01" && result.file() == Some("src/input.rs")),
-        "{results:#?}"
-    );
+    assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "src/broken.rs");
+    assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-01", "src/input.rs");
 }
 
 #[test]
@@ -67,10 +59,10 @@ fn pipeline_ignores_legacy_guardrail_config_parse_sites() {
     );
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_no_results(&results);
 }
 
 #[test]
@@ -92,22 +84,9 @@ fn pipeline_uses_rust_policy_waivers_for_query_as() {
     );
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-GARDE-SOURCE-04"
-                && result.title() == "sqlx query_as requires validation review"
-                && result.file() == Some("src/db.rs")
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        results.iter().all(|result| {
-            !(result.id() == "RS-GARDE-SOURCE-04"
-                && result.title() == "sqlx query_as missing reason")
-        }),
-        "{results:#?}"
-    );
+    assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-04", "src/db.rs");
+    assertions::assert_rule_absent(&results, "RS-GARDE-SOURCE-04", "sqlx query_as missing reason");
 }
