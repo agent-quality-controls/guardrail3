@@ -1,4 +1,7 @@
-#![allow(dead_code, reason = "parser preserves source facts for planned test rules")]
+#![allow(
+    dead_code,
+    reason = "parser preserves source facts for planned test rules"
+)]
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -36,20 +39,9 @@ pub(crate) struct CfgTestModuleInfo {
 pub(crate) struct TestFunctionInfo {
     pub(crate) line: usize,
     pub(crate) name: String,
-    pub(crate) uses_tokio_test_attr: bool,
-    pub(crate) has_assertion_macro: bool,
-    pub(crate) has_failure_enforcement: bool,
-    pub(crate) call_paths: Vec<Vec<String>>,
-    pub(crate) path_uses: Vec<Vec<String>>,
-    pub(crate) method_receiver_paths: Vec<Vec<String>>,
-    pub(crate) method_names: Vec<String>,
-    pub(crate) local_call_aliases: BTreeMap<String, Vec<String>>,
-    pub(crate) field_accesses: Vec<FieldAccessInfo>,
-    pub(crate) shadowed_idents: BTreeSet<String>,
-    pub(crate) should_panic_line: Option<usize>,
-    pub(crate) should_panic_has_expected: bool,
-    pub(crate) tautological_assert_lines: Vec<usize>,
-    pub(crate) weak_matches_lines: Vec<usize>,
+    pub(crate) assertions: AssertionBodyInfo,
+    pub(crate) body: FunctionBodyFacts,
+    pub(crate) harness: TestHarnessFacts,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -58,19 +50,44 @@ pub(crate) struct FunctionInfo {
     pub(crate) name: String,
     pub(crate) is_public: bool,
     pub(crate) is_test: bool,
+    pub(crate) signature: FunctionSignatureInfo,
+    pub(crate) assertions: AssertionBodyInfo,
+    pub(crate) body: FunctionBodyFacts,
+    pub(crate) string_literals: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub(crate) struct FunctionSignatureInfo {
     pub(crate) arg_count: usize,
     pub(crate) arg_names: BTreeSet<String>,
     pub(crate) has_check_result_arg: bool,
     pub(crate) return_kind: ReturnKind,
+}
+
+#[derive(Debug, Clone, Default)]
+pub(crate) struct AssertionBodyInfo {
     pub(crate) has_assertion_macro: bool,
     pub(crate) has_failure_enforcement: bool,
+}
+
+#[derive(Debug, Clone, Default)]
+pub(crate) struct FunctionBodyFacts {
     pub(crate) call_paths: Vec<Vec<String>>,
     pub(crate) path_uses: Vec<Vec<String>>,
     pub(crate) method_names: Vec<String>,
     pub(crate) local_call_aliases: BTreeMap<String, Vec<String>>,
     pub(crate) field_accesses: Vec<FieldAccessInfo>,
-    pub(crate) string_literals: Vec<String>,
     pub(crate) shadowed_idents: BTreeSet<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub(crate) struct TestHarnessFacts {
+    pub(crate) uses_tokio_test_attr: bool,
+    pub(crate) method_receiver_paths: Vec<Vec<String>>,
+    pub(crate) should_panic_line: Option<usize>,
+    pub(crate) should_panic_has_expected: bool,
+    pub(crate) tautological_assert_lines: Vec<usize>,
+    pub(crate) weak_matches_lines: Vec<usize>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

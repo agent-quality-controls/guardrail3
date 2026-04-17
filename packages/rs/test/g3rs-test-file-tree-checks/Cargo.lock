@@ -42,12 +42,17 @@ dependencies = [
 [[package]]
 name = "g3rs-test-file-tree-checks-assertions"
 version = "0.1.0"
+dependencies = [
+ "g3rs-test-file-tree-checks-runtime",
+ "g3rs-test-types",
+ "guardrail3-check-types",
+]
 
 [[package]]
 name = "g3rs-test-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-test-file-tree-checks-types",
+ "g3rs-test-file-tree-checks-assertions",
  "g3rs-test-types",
  "guardrail3-check-types",
  "proc-macro2",
@@ -101,6 +106,7 @@ name = "mutants-toml-parser"
 version = "0.1.0"
 dependencies = [
  "mutants-toml-parser-runtime",
+ "mutants-toml-parser-types",
 ]
 
 [[package]]
@@ -116,7 +122,6 @@ name = "mutants-toml-parser-types"
 version = "0.1.0"
 dependencies = [
  "serde",
- "toml",
 ]
 
 [[package]]
@@ -124,6 +129,7 @@ name = "nextest-toml-parser"
 version = "0.1.0"
 dependencies = [
  "nextest-toml-parser-runtime",
+ "nextest-toml-parser-types",
 ]
 
 [[package]]

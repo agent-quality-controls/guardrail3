@@ -223,20 +223,22 @@ pub(super) fn foreign_assertions_module_target<'a>(
     Some(second.as_str())
 }
 
-fn expected_assertions_module_prefix(sidecar_rel_path: &str, owner_module_name: &str) -> Vec<String> {
+fn expected_assertions_module_prefix(
+    sidecar_rel_path: &str,
+    owner_module_name: &str,
+) -> Vec<String> {
     let rel_after_src = sidecar_rel_path
         .split_once("/src/")
         .map_or(sidecar_rel_path, |(_, suffix)| suffix);
 
-    let fabricated_assertions_rel = if let Some((before_rule_tests, _)) =
-        rel_after_src.split_once("/rule_tests/")
-    {
-        format!("{before_rule_tests}/{owner_module_name}.rs")
-    } else if let Some((before_flat_tests, _)) = rel_after_src.split_once("_tests/") {
-        format!("{before_flat_tests}.rs")
-    } else {
-        return Vec::new();
-    };
+    let fabricated_assertions_rel =
+        if let Some((before_rule_tests, _)) = rel_after_src.split_once("/rule_tests/") {
+            format!("{before_rule_tests}/{owner_module_name}.rs")
+        } else if let Some((before_flat_tests, _)) = rel_after_src.split_once("_tests/") {
+            format!("{before_flat_tests}.rs")
+        } else {
+            return Vec::new();
+        };
 
     assertions_module_prefix_from_rel_path(&fabricated_assertions_rel)
 }
