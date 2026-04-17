@@ -2,16 +2,18 @@ use std::collections::BTreeSet;
 
 use crate::parse::analysis_helpers;
 use crate::parse::helpers;
-use crate::parse::types::{PublicResultErrorInfo, PublicStructFieldBagInfo};
+use crate::parse::types::{AnyhowTypeBindings, PublicResultErrorInfo, PublicStructFieldBagInfo};
 use syn::visit::Visit;
 
 pub(crate) fn find_public_result_error_types(source: &syn::File) -> Vec<PublicResultErrorInfo> {
     let reachable_types = collect_reachable_public_types(source);
+    let anyhow_bindings = collect_anyhow_type_bindings(source);
     let mut visitor = PublicResultErrorVisitor {
         out: Vec::new(),
         public_module_stack: vec![true],
         module_path: Vec::new(),
         reachable_types,
+        anyhow_bindings,
     };
     visitor.visit_file(source);
     visitor.out
@@ -31,6 +33,7 @@ struct PublicResultErrorVisitor {
     public_module_stack: Vec<bool>,
     module_path: Vec<String>,
     reachable_types: BTreeSet<String>,
+    anyhow_bindings: AnyhowTypeBindings,
 }
 
 struct PublicStructFieldBagVisitor {
@@ -101,7 +104,7 @@ impl<'source> Visit<'source> for PublicResultErrorVisitor {
             let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                 return;
             };
-            if let Some(kind) = analysis_helpers::result_error_kind(ty) {
+            if let Some(kind) = analysis_helpers::result_error_kind(ty, &self.anyhow_bindings) {
                 self.out.push(PublicResultErrorInfo {
                     line: helpers::span_line(item_fn.sig.ident.span()),
                     fn_name: item_fn.sig.ident.to_string(),
@@ -129,7 +132,9 @@ impl<'source> Visit<'source> for PublicResultErrorVisitor {
                 let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                     continue;
                 };
-                if let Some(kind) = analysis_helpers::result_error_kind(ty) {
+                if let Some(kind) =
+                    analysis_helpers::result_error_kind(ty, &self.anyhow_bindings)
+                {
                     self.out.push(PublicResultErrorInfo {
                         line: helpers::span_line(item_fn.sig.ident.span()),
                         fn_name: item_fn.sig.ident.to_string(),
@@ -150,7 +155,9 @@ impl<'source> Visit<'source> for PublicResultErrorVisitor {
                 let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                     continue;
                 };
-                if let Some(kind) = analysis_helpers::result_error_kind(ty) {
+                if let Some(kind) =
+                    analysis_helpers::result_error_kind(ty, &self.anyhow_bindings)
+                {
                     self.out.push(PublicResultErrorInfo {
                         line: helpers::span_line(item_fn.sig.ident.span()),
                         fn_name: format!("{}::{}", item_trait.ident, item_fn.sig.ident),
@@ -310,4 +317,67 @@ fn normalize_type_path(
     };
 
     Some(normalized.join("::"))
+}
+
+fn collect_anyhow_type_bindings(source: &syn::File) -> AnyhowTypeBindings {
+    let mut bindings = AnyhowTypeBindings::default();
+    for item in &source.items {
+        let syn::Item::Use(item_use) = item else {
+            continue;
+        };
+        collect_anyhow_bindings_from_use_tree(&item_use.tree, &mut Vec::new(), &mut bindings);
+    }
+    bindings
+}
+
+fn collect_anyhow_bindings_from_use_tree(
+    tree: &syn::UseTree,
+    prefix: &mut Vec<String>,
+    bindings: &mut AnyhowTypeBindings,
+) {
+    match tree {
+        syn::UseTree::Path(path) => {
+            prefix.push(path.ident.to_string());
+            collect_anyhow_bindings_from_use_tree(&path.tree, prefix, bindings);
+            let _ = prefix.pop();
+        }
+        syn::UseTree::Name(name) => {
+            let mut full = prefix.clone();
+            full.push(name.ident.to_string());
+            match full.as_slice() {
+                [module] if module == "anyhow" => {
+                    let _ = bindings.module_aliases.insert("anyhow".to_owned());
+                }
+                [module, ident] if module == "anyhow" && ident == "self" => {
+                    let _ = bindings.module_aliases.insert("anyhow".to_owned());
+                }
+                [module, err] if module == "anyhow" && err == "Error" => {
+                    let _ = bindings.error_type_names.insert("Error".to_owned());
+                }
+                _ => {}
+            }
+        }
+        syn::UseTree::Rename(rename) => {
+            let mut full = prefix.clone();
+            full.push(rename.ident.to_string());
+            match full.as_slice() {
+                [module] if module == "anyhow" => {
+                    let _ = bindings.module_aliases.insert(rename.rename.to_string());
+                }
+                [module, ident] if module == "anyhow" && ident == "self" => {
+                    let _ = bindings.module_aliases.insert(rename.rename.to_string());
+                }
+                [module, err] if module == "anyhow" && err == "Error" => {
+                    let _ = bindings.error_type_names.insert(rename.rename.to_string());
+                }
+                _ => {}
+            }
+        }
+        syn::UseTree::Group(group) => {
+            for item in &group.items {
+                collect_anyhow_bindings_from_use_tree(item, prefix, bindings);
+            }
+        }
+        syn::UseTree::Glob(_) => {}
+    }
 }
