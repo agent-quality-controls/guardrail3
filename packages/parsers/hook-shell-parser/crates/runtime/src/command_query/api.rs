@@ -1,0 +1,102 @@
+use super::engine;
+
+use crate::types::ParsedShellScript;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) struct CommandSegment {
+    pub(super) text: String,
+    pub(super) operator_before: Option<&'static str>,
+    pub(super) operator_after: Option<&'static str>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ResolvedCommand {
+    line_no: usize,
+    command_text: String,
+    command_path: String,
+    command_name: String,
+    tokens: Vec<String>,
+}
+
+impl ResolvedCommand {
+    pub(super) fn new(
+        line_no: usize,
+        command_text: String,
+        command_path: String,
+        command_name: String,
+        tokens: Vec<String>,
+    ) -> Self {
+        Self {
+            line_no,
+            command_text,
+            command_path,
+            command_name,
+            tokens,
+        }
+    }
+
+    #[must_use]
+    pub fn line_no(&self) -> usize {
+        self.line_no
+    }
+
+    #[must_use]
+    pub fn command_text(&self) -> &str {
+        &self.command_text
+    }
+
+    #[must_use]
+    pub fn command_path(&self) -> &str {
+        &self.command_path
+    }
+
+    #[must_use]
+    pub fn command_name(&self) -> &str {
+        &self.command_name
+    }
+
+    #[must_use]
+    pub fn tokens(&self) -> &[String] {
+        &self.tokens
+    }
+
+    #[must_use]
+    pub fn args(&self) -> &[String] {
+        self.tokens.get(1..).unwrap_or(&[])
+    }
+
+    #[must_use]
+    pub fn path_qualified(&self) -> bool {
+        self.command_path.contains('/')
+    }
+}
+
+#[must_use]
+pub fn any_resolved_command(
+    parsed: &ParsedShellScript,
+    predicate: impl Fn(&ResolvedCommand) -> bool,
+) -> bool {
+    engine::any_resolved_command(parsed, &predicate)
+}
+
+#[must_use]
+pub fn any_resolved_command_on_line(
+    parsed: &ParsedShellScript,
+    raw: &str,
+    line_no: usize,
+    predicate: impl Fn(&ResolvedCommand) -> bool,
+) -> bool {
+    engine::any_resolved_command_on_line(parsed, raw, line_no, &predicate)
+}
+
+#[must_use]
+pub fn any_resolved_command_relaxed(
+    parsed: &ParsedShellScript,
+    predicate: impl Fn(&ResolvedCommand) -> bool,
+) -> bool {
+    engine::any_resolved_command_relaxed(parsed, &predicate)
+}
+
+#[cfg(test)]
+#[path = "api_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod api_tests;

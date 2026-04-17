@@ -33,13 +33,16 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
     ));
 }
 
-fn has_concrete_lockfile_command(parsed: &hook_shell_parser::ParsedShellScript) -> bool {
+fn has_concrete_lockfile_command(parsed: &hook_shell_parser::types::ParsedShellScript) -> bool {
     any_resolved_command(parsed, is_concrete_lockfile_command)
 }
 
 fn is_concrete_lockfile_command(command: &ResolvedCommand) -> bool {
     command.command_name() == "pnpm"
-        && matches!(command.args().first().map(String::as_str), Some("install" | "i"))
+        && matches!(
+            command.args().first().map(String::as_str),
+            Some("install" | "i")
+        )
         && command.args().iter().any(|arg| arg == "--frozen-lockfile")
 }
 
@@ -57,5 +60,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

@@ -33,6 +33,8 @@ deny = [
     { name = "ureq", wrappers = [], reason = "Ban competing HTTP clients (standardize on reqwest)" },
     { name = "surf", wrappers = [], reason = "Ban competing HTTP clients (standardize on reqwest)" },
     { name = "isahc", wrappers = [], reason = "Ban competing HTTP clients (standardize on reqwest)" },
+    { name = "reqwest", wrappers = [], reason = "Ban direct HTTP client dependencies in parser packages" },
+    { name = "hyper", wrappers = [], reason = "Ban direct HTTP client dependencies in parser packages" },
     # --- Logging: standardize on tracing ---
     { name = "log4rs", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
     { name = "env_logger", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
@@ -41,12 +43,14 @@ deny = [
     # --- Async runtime: standardize on tokio ---
     { name = "async-std", wrappers = [], reason = "Ban competing async runtimes (standardize on tokio)" },
     { name = "smol", wrappers = [], reason = "Ban competing async runtimes (standardize on tokio)" },
+    { name = "tokio", wrappers = [], reason = "Ban async runtimes in parser packages" },
     # --- Global state: use std lazy primitives instead of lazy_static ---
     { name = "lazy_static", wrappers = [], reason = "Ban lazy_static (standardize on std lazy primitives)" },
     # --- Error handling: standardize on thiserror ---
     { name = "anyhow", wrappers = [], reason = "Ban anyhow (standardize on thiserror)" },
     # --- Web framework: standardize on axum ---
     { name = "actix-web", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
+    { name = "axum", wrappers = [], reason = "Ban web frameworks in parser packages" },
     { name = "rocket", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
     { name = "warp", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
     { name = "poem", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
@@ -55,13 +59,14 @@ deny = [
     # --- ORM: standardize on sqlx ---
     { name = "diesel", wrappers = [], reason = "Ban competing ORMs (standardize on sqlx)" },
     { name = "sea-orm", wrappers = [], reason = "Ban competing ORMs (standardize on sqlx)" },
+    { name = "sqlx", wrappers = [], reason = "Ban database layers in parser packages" },
     # --- Serialization: no competing binary formats ---
     { name = "bincode", wrappers = [], reason = "Ban competing binary serialization formats" },
     { name = "rmp-serde", wrappers = [], reason = "Ban competing binary serialization formats" },
     { name = "prost", wrappers = [], reason = "Ban competing binary serialization formats" },
     { name = "flatbuffers", wrappers = [], reason = "Ban competing binary serialization formats" },
     # --- Parsing: use structured parsers, never regex ---
-    { name = "regex", wrappers = ["tree-sitter", "globset", "ignore"], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
+    { name = "regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "fancy-regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "onig", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "pcre2", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
@@ -109,7 +114,7 @@ ignore = true
 [advisories]
 # unmaintained: check workspace deps only (transitive unmaintained crates are not actionable)
 unmaintained = "workspace"
-yanked = "warn" # baseline: yanked in transitive deps are not actionable
+yanked = "deny"
 ignore = []
 
 # ============================================================

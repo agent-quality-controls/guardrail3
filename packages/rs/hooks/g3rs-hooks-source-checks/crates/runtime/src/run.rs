@@ -46,13 +46,13 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
         crate::hook_rs_11_gitleaks_step_present::check(&rust_input, &mut results);
         crate::hook_rs_12_cargo_dupes_step_present::check(&rust_input, &mut results);
         crate::hook_rs_13_cargo_dupes_excludes::check(&rust_input, &mut results);
-        crate::hook_rs_16_config_changes_trigger_validation::check(
-            &rust_input,
-            &mut results,
-        );
+        crate::hook_rs_16_config_changes_trigger_validation::check(&rust_input, &mut results);
     }
 
-    crate::shell_safety::hook_shared_10_shell_error_handling::check(&executable_input, &mut results);
+    crate::shell_safety::hook_shared_10_shell_error_handling::check(
+        &executable_input,
+        &mut results,
+    );
     crate::shell_safety::hook_shared_11_valid_shebang::check(&executable_input, &mut results);
     crate::shell_safety::hook_shared_13_no_unconditional_exit_zero::check(
         &executable_input,

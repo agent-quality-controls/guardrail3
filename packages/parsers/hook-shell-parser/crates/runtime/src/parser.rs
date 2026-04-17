@@ -1,140 +1,5 @@
-pub mod command_query;
-mod support;
-
-use self::support::*;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum FailOpenWrapper {
-    True,
-    NoOp,
-    Echo(String),
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ExecutableLine {
-    pub line_no: usize,
-    pub raw: String,
-    pub command_text: String,
-    pub command_name: String,
-    pub softened_by: Option<FailOpenWrapper>,
-    pub is_dispatcher_syntax: bool,
-    pub is_exit_zero: bool,
-}
-
-impl ExecutableLine {
-    #[must_use]
-    pub fn line_no(&self) -> usize {
-        self.line_no
-    }
-
-    #[must_use]
-    pub fn raw(&self) -> &str {
-        &self.raw
-    }
-
-    #[must_use]
-    pub fn command_text(&self) -> &str {
-        &self.command_text
-    }
-
-    #[must_use]
-    pub fn command_name(&self) -> &str {
-        &self.command_name
-    }
-
-    #[must_use]
-    pub fn softened_by(&self) -> Option<&FailOpenWrapper> {
-        self.softened_by.as_ref()
-    }
-
-    #[must_use]
-    pub fn is_dispatcher_syntax(&self) -> bool {
-        self.is_dispatcher_syntax
-    }
-
-    #[must_use]
-    pub fn is_exit_zero(&self) -> bool {
-        self.is_exit_zero
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SourceLine {
-    pub line_no: usize,
-    pub raw: String,
-}
-
-impl SourceLine {
-    #[must_use]
-    pub fn line_no(&self) -> usize {
-        self.line_no
-    }
-
-    #[must_use]
-    pub fn raw(&self) -> &str {
-        &self.raw
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ParsedShellScript {
-    pub shebang: Option<String>,
-    pub source_lines: Vec<SourceLine>,
-    pub executable_lines: Vec<ExecutableLine>,
-    pub functions: Vec<ShellFunction>,
-}
-
-impl ParsedShellScript {
-    #[must_use]
-    pub fn shebang(&self) -> Option<&str> {
-        self.shebang.as_deref()
-    }
-
-    #[must_use]
-    pub fn source_lines(&self) -> &[SourceLine] {
-        self.source_lines.as_slice()
-    }
-
-    #[must_use]
-    pub fn executable_lines(&self) -> &[ExecutableLine] {
-        self.executable_lines.as_slice()
-    }
-
-    #[must_use]
-    pub fn functions(&self) -> &[ShellFunction] {
-        self.functions.as_slice()
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ShellFunction {
-    pub name: String,
-    pub line_no: usize,
-    pub body: String,
-    pub body_starts_on_definition_line: bool,
-}
-
-impl ShellFunction {
-    #[must_use]
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    #[must_use]
-    pub fn line_no(&self) -> usize {
-        self.line_no
-    }
-
-    #[must_use]
-    pub fn body(&self) -> &str {
-        &self.body
-    }
-
-    #[must_use]
-    pub fn body_starts_on_definition_line(&self) -> bool {
-        self.body_starts_on_definition_line
-    }
-}
+use crate::support::*;
+use crate::types::{ParsedShellScript, ShellFunction, SourceLine};
 
 #[must_use]
 pub fn parse_script(content: &str) -> ParsedShellScript {
@@ -202,10 +67,11 @@ pub fn parse_script(content: &str) -> ParsedShellScript {
         if is_function_definition_line(trimmed) {
             function_brace_depth = function_scope_depth_after_definition(trimmed);
             let body = initial_function_body_fragment(raw);
+            let body_starts_on_definition_line = !body.is_empty();
             let function = ShellFunction {
                 name: function_definition_name(trimmed).unwrap_or_default(),
                 line_no,
-                body_starts_on_definition_line: !body.is_empty(),
+                body_starts_on_definition_line,
                 body,
             };
             if function_brace_depth == 0 {
@@ -253,4 +119,5 @@ pub fn parse_script(content: &str) -> ParsedShellScript {
 }
 
 #[cfg(test)]
-mod tests;
+#[path = "parser_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod parser_tests;

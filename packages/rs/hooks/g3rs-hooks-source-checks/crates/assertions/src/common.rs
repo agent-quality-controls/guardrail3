@@ -73,11 +73,11 @@ pub fn assert_rule_quiet(results: &[G3CheckResult], rule_id: &str) {
 macro_rules! define_rule_assertions {
     ($rule_id:literal) => {
         pub use crate::common::ExpectedRuleResult;
+        use guardrail3_check_types::G3CheckResult;
         #[allow(unused_imports)]
         pub use guardrail3_check_types::G3Severity as Severity;
         #[allow(unused_imports)]
         pub use guardrail3_check_types::G3Severity;
-        use guardrail3_check_types::G3CheckResult;
 
         const RULE_ID: &str = $rule_id;
 

@@ -1,5 +1,5 @@
 use super::facts::HookScriptKind;
-use hook_shell_parser::ParsedShellScript;
+use hook_shell_parser::types::ParsedShellScript;
 
 pub(crate) struct RustHookCommandInput<'a> {
     pub(crate) rel_path: &'a str,

@@ -372,11 +372,11 @@ fn content_has_direct_trigger_line_for_needle(content: &str, needle: &str) -> bo
     })
 }
 
-fn script_text(parsed: &hook_shell_parser::ParsedShellScript) -> String {
+fn script_text(parsed: &hook_shell_parser::types::ParsedShellScript) -> String {
     parsed
-        .source_lines()
+        .source_lines
         .iter()
-        .map(|line| line.raw())
+        .map(|line| line.raw.as_str())
         .collect::<Vec<_>>()
         .join("\n")
 }
@@ -648,5 +648,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

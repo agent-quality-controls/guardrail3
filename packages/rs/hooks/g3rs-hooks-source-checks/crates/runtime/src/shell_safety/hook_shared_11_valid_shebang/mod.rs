@@ -5,7 +5,7 @@ use crate::inputs::ExecutableCommandContextInput;
 const ID: &str = "RS-HOOKS-SOURCE-17";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
-    match input.parsed.shebang() {
+    match input.parsed.shebang.as_deref() {
         Some("#!/bin/bash" | "#!/usr/bin/env bash" | "#!/bin/sh") => results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
@@ -53,5 +53,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

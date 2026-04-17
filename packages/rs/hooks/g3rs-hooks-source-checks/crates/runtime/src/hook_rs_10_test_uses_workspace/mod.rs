@@ -1,8 +1,6 @@
-use hook_shell_parser::ParsedShellScript;
-use hook_shell_parser::command_query::{
-    ResolvedCommand, any_resolved_command,
-};
 use crate::compat::{G3CheckResult, G3Severity};
+use hook_shell_parser::types::ParsedShellScript;
+use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use super::inputs::RustHookCommandInput;
 
@@ -151,5 +149,4 @@ pub(crate) fn run_case_with_workspace(
 }
 
 #[cfg(test)]
-
 mod tests;

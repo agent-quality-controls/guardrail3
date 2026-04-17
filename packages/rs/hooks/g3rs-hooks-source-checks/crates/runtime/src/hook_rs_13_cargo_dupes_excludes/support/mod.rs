@@ -1,6 +1,6 @@
 pub(super) mod helpers;
 
-use hook_shell_parser::{ParsedShellScript, parse_script};
+use hook_shell_parser::{parse_script, types::ParsedShellScript};
 
 use self::helpers::*;
 

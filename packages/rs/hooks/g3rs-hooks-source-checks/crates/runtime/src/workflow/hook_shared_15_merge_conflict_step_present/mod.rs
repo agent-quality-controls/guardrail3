@@ -33,7 +33,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
     ));
 }
 
-fn has_merge_conflict_check(parsed: &hook_shell_parser::ParsedShellScript) -> bool {
+fn has_merge_conflict_check(parsed: &hook_shell_parser::types::ParsedShellScript) -> bool {
     any_resolved_command(parsed, is_merge_conflict_command)
 }
 
@@ -59,5 +59,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

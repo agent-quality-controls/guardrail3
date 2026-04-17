@@ -19,7 +19,8 @@ fn flags_comment_teaching_no_verify() {
 
 #[test]
 fn flags_inline_comment_teaching_no_verify() {
-    let results = run_case("cargo fmt --check # use git commit --no-verify if this gets in the way\n");
+    let results =
+        run_case("cargo fmt --check # use git commit --no-verify if this gets in the way\n");
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {

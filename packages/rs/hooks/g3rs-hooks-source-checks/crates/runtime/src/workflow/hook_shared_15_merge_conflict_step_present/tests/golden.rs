@@ -32,9 +32,8 @@ fn passes_when_real_grep_conflict_command_exists() {
 
 #[test]
 fn passes_when_called_function_runs_path_qualified_conflict_check() {
-    let results = run_case(
-        "check_conflicts() {\n    /usr/bin/rg '<<<<<<<' .\n}\ncheck_conflicts\n",
-    );
+    let results =
+        run_case("check_conflicts() {\n    /usr/bin/rg '<<<<<<<' .\n}\ncheck_conflicts\n");
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {

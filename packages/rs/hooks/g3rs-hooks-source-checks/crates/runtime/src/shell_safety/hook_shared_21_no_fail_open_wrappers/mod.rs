@@ -25,25 +25,21 @@ pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckR
 }
 
 fn first_fail_open_critical_command(
-    parsed: &hook_shell_parser::ParsedShellScript,
+    parsed: &hook_shell_parser::types::ParsedShellScript,
     line_offset: usize,
     visiting: &mut Vec<String>,
 ) -> Option<(usize, String)> {
-    for line in parsed.executable_lines() {
-        if line.softened_by().is_some()
-            && any_resolved_command_on_line(
-                parsed,
-                line.raw(),
-                line.line_no(),
+    for line in &parsed.executable_lines {
+        if line.softened_by.is_some()
+            && any_resolved_command_on_line(parsed, &line.raw,
+                line.line_no,
                 is_guardrail_critical_command,
             )
         {
-            return Some((line.line_no() + line_offset, line.command_text().to_owned()));
+            return Some((line.line_no + line_offset, line.command_text.to_owned()));
         }
-        if let Some(found) = called_function_fail_open(
-            parsed,
-            line.command_name(),
-            line.line_no(),
+        if let Some(found) = called_function_fail_open(parsed, &line.command_name,
+            line.line_no,
             line_offset,
             visiting,
         ) {
@@ -55,32 +51,28 @@ fn first_fail_open_critical_command(
 }
 
 fn called_function_fail_open(
-    parsed: &hook_shell_parser::ParsedShellScript,
+    parsed: &hook_shell_parser::types::ParsedShellScript,
     command_name: &str,
     call_line_no: usize,
     line_offset: usize,
     visiting: &mut Vec<String>,
 ) -> Option<(usize, String)> {
     let function = parsed
-        .functions()
+        .functions
         .iter()
-        .find(|function| function.name() == command_name && function.line_no() <= call_line_no)?;
-    if visiting.iter().any(|name| name == function.name()) {
+        .find(|function| function.name == command_name && function.line_no <= call_line_no)?;
+    if visiting.iter().any(|name| name == &function.name) {
         return None;
     }
 
-    visiting.push(function.name().to_owned());
-    let nested = hook_shell_parser::parse_script(function.body());
-    let nested_line_offset = if function.body_starts_on_definition_line() {
-        line_offset + function.line_no().saturating_sub(1)
+    visiting.push(function.name.to_owned());
+    let nested = hook_shell_parser::parse_script(&function.body);
+    let nested_line_offset = if function.body_starts_on_definition_line {
+        line_offset + function.line_no.saturating_sub(1)
     } else {
-        line_offset + function.line_no()
+        line_offset + function.line_no
     };
-    let found = first_fail_open_critical_command(
-        &nested,
-        nested_line_offset,
-        visiting,
-    );
+    let found = first_fail_open_critical_command(&nested, nested_line_offset, visiting);
     let _ = visiting.pop();
     found
 }
@@ -158,5 +150,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

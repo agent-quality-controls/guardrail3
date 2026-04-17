@@ -30,9 +30,8 @@ fn passes_when_guardrail_validation_uses_attached_path_flag() {
 
 #[test]
 fn passes_when_wrapped_guardrail_validation_exists() {
-    let results = run_case(
-        "if ! (cd \"$RUST_WORKSPACE\" && g3rs validate --path .); then\n    exit 1\nfi\n",
-    );
+    let results =
+        run_case("if ! (cd \"$RUST_WORKSPACE\" && g3rs validate --path .); then\n    exit 1\nfi\n");
     assertions::assert_present(&results);
 }
 
@@ -374,9 +373,8 @@ fn warns_when_guardrail_validation_only_exists_inside_uncalled_function() {
 
 #[test]
 fn passes_when_called_function_runs_guardrail_validation() {
-    let results = run_case(
-        "guardrail_validate() {\n    g3rs validate --path .\n}\nguardrail_validate\n",
-    );
+    let results =
+        run_case("guardrail_validate() {\n    g3rs validate --path .\n}\nguardrail_validate\n");
     assertions::assert_present(&results);
 }
 
@@ -396,9 +394,7 @@ fn warns_when_guardrail_validation_only_exists_inside_dead_if_body() {
 
 #[test]
 fn passes_when_guardrail_validation_exists_inside_taken_else_body() {
-    let results = run_case(
-        "if false; then\n    echo skip\nelse\n    g3rs validate --path .\nfi\n",
-    );
+    let results = run_case("if false; then\n    echo skip\nelse\n    g3rs validate --path .\nfi\n");
     assertions::assert_present(&results);
 }
 
@@ -418,7 +414,8 @@ fn passes_when_guardrail_validation_exists_inside_taken_single_line_else_body() 
 
 #[test]
 fn passes_when_guardrail_validation_exists_inside_taken_single_line_elif_body() {
-    let results = run_case("if false; then echo skip; elif true; then g3rs validate --path .; fi\n");
+    let results =
+        run_case("if false; then echo skip; elif true; then g3rs validate --path .; fi\n");
     assertions::assert_present(&results);
 }
 
@@ -438,9 +435,8 @@ fn warns_when_guardrail_validation_only_exists_inside_dead_else_body() {
 
 #[test]
 fn warns_when_guardrail_validation_only_exists_inside_dead_elif_body() {
-    let results = run_case(
-        "if true; then\n    echo ok\nelif true; then\n    g3rs validate --path .\nfi\n",
-    );
+    let results =
+        run_case("if true; then\n    echo ok\nelif true; then\n    g3rs validate --path .\nfi\n");
     assertions::assert_missing(&results);
 }
 

@@ -9,9 +9,9 @@ const ID: &str = "RS-HOOKS-SOURCE-22";
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
     let mut suspicious_lines = Vec::new();
 
-    for logical_line in input.parsed.source_lines() {
-        let line_no = logical_line.line_no();
-        let trimmed = logical_line.raw().trim();
+    for logical_line in &input.parsed.source_lines {
+        let line_no = logical_line.line_no;
+        let trimmed = logical_line.raw.trim();
         if trimmed.is_empty() {
             continue;
         }
@@ -77,7 +77,7 @@ fn step_family_from_text(line: &str) -> Option<&'static str> {
         .find_map(|(needle, family)| line.contains(needle).then_some(family))
 }
 
-fn matches_step_family(parsed: &hook_shell_parser::ParsedShellScript, family: &str) -> bool {
+fn matches_step_family(parsed: &hook_shell_parser::types::ParsedShellScript, family: &str) -> bool {
     any_resolved_command(parsed, predicate_for_step_family(family))
 }
 
@@ -135,7 +135,10 @@ fn is_gitleaks_command(command: &ResolvedCommand) -> bool {
 
 fn is_frozen_lockfile_command(command: &ResolvedCommand) -> bool {
     command.command_name() == "pnpm"
-        && matches!(command.args().first().map(String::as_str), Some("install" | "i"))
+        && matches!(
+            command.args().first().map(String::as_str),
+            Some("install" | "i")
+        )
         && command.args().iter().any(|arg| arg == "--frozen-lockfile")
 }
 
@@ -153,5 +156,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

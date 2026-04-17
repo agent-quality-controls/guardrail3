@@ -5,8 +5,8 @@ use crate::inputs::ExecutableCommandContextInput;
 const ID: &str = "RS-HOOKS-SOURCE-19";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
-    for line in input.parsed.source_lines() {
-        let Some(comment) = crate::support::inline_comment_text(line.raw()) else {
+    for line in &input.parsed.source_lines {
+        let Some(comment) = crate::support::inline_comment_text(&line.raw) else {
             continue;
         };
         if !comment.contains("--no-verify") {
@@ -19,7 +19,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
             "hook bypass instructions present".to_owned(),
             "Hook comments teach `--no-verify`, which weakens the guardrail.".to_owned(),
             Some(input.rel_path.to_owned()),
-            Some(line.line_no()),
+            Some(line.line_no),
             false,
         ));
         return;
@@ -53,5 +53,4 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
 }
 
 #[cfg(test)]
-
 mod tests;

@@ -8,12 +8,12 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["hook", "shell", "parser", "guardrail3", "rust"]
 categories = ["development-tools", "parser-implementations"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
-hook-shell-parser-runtime = { path = "crates/parser/runtime", version = "0.1.0", optional = true }
+hook-shell-parser-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
 
 [features]
 default = ["all"]
@@ -30,7 +30,11 @@ shared = true
 all-features = true
 
 [workspace]
-members = ["crates/parser/runtime"]
+members = [
+    "crates/runtime",
+    "crates/assertions",
+    "crates/types",
+]
 resolver = "2"
 
 [workspace.package]
