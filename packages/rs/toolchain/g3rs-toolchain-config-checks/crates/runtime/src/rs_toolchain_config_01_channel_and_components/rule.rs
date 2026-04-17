@@ -1,5 +1,6 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use rust_toolchain_toml_parser::{RustToolchainToml, ToolchainSection};
+use rust_toolchain_toml_parser::types::RustToolchainToml;
+use rust_toolchain_toml_parser::types::rust_toolchain_toml::ToolchainSection;
 
 const ID: &str = "RS-TOOLCHAIN-CONFIG-01";
 

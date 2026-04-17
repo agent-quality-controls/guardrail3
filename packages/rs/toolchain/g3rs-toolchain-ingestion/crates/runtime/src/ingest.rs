@@ -1,7 +1,7 @@
 /// Assemble the checks input from parsed data.
 use cargo_toml_parser::types::CargoToml;
 use g3rs_toolchain_types::G3RsToolchainConfigChecksInput;
-use rust_toolchain_toml_parser::RustToolchainToml;
+use rust_toolchain_toml_parser::types::RustToolchainToml;
 
 /// Build the checks input from parsed config files.
 pub(crate) fn assemble(

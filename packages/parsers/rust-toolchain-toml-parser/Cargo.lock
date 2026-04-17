@@ -181,6 +181,7 @@ name = "rust-toolchain-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rust-toolchain-toml-parser-runtime",
+ "rust-toolchain-toml-parser-types",
 ]
 
 [[package]]
@@ -189,15 +190,15 @@ version = "0.1.0"
 dependencies = [
  "rust-toolchain-toml-parser-runtime-assertions",
  "rust-toolchain-toml-parser-types",
- "tempfile",
  "toml",
 ]
 
 [[package]]
 name = "rust-toolchain-toml-parser-runtime-assertions"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "rust-toolchain-toml-parser-runtime",
+ "tempfile",
 ]
 
 [[package]]

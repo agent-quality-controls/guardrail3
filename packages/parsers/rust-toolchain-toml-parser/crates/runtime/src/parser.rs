@@ -1,4 +1,4 @@
-use rust_toolchain_toml_parser_types::RustToolchainToml;
+use rust_toolchain_toml_parser_types::rust_toolchain_toml::RustToolchainToml;
 
 use crate::Error;
 
@@ -7,7 +7,7 @@ use crate::Error;
 /// # Errors
 ///
 /// Returns [`Error::Toml`] when the input is not valid `rust-toolchain.toml`.
-#[allow(clippy::disallowed_methods)] // reason: this crate IS the centralized rust-toolchain.toml parser — toml::from_str is its core purpose
+#[allow(clippy::disallowed_methods)] // reason: this crate IS the centralized rust-toolchain.toml parser - toml::from_str is its core purpose
 pub fn parse(input: &str) -> Result<RustToolchainToml, Error> {
     Ok(toml::from_str(input)?)
 }
@@ -23,5 +23,5 @@ pub fn from_path(path: impl AsRef<std::path::Path>) -> Result<RustToolchainToml,
 }
 
 #[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod tests;
+#[path = "parser_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod parser_tests;

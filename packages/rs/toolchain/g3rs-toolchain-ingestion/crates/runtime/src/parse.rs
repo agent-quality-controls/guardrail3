@@ -2,7 +2,7 @@
 use std::path::Path;
 
 use cargo_toml_parser::types::CargoToml;
-use rust_toolchain_toml_parser::RustToolchainToml;
+use rust_toolchain_toml_parser::types::RustToolchainToml;
 
 use crate::run::IngestionError;
 
