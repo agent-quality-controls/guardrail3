@@ -1,6 +1,6 @@
 use cargo_toml_parser::types::CargoToml;
 use rust_toolchain_toml_parser::types::RustToolchainToml;
-use rustfmt_toml_parser::RustfmtToml;
+use rustfmt_toml_parser::types::RustfmtToml;
 
 #[derive(Debug, Clone)]
 pub enum G3RsFmtRustfmtConfigState {

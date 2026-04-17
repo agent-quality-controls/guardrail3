@@ -1,6 +1,6 @@
 use cargo_toml_parser::{types::CargoToml, types::InheritableValue};
 use g3rs_fmt_types::{G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustfmtConfigState};
-use rustfmt_toml_parser::{Edition, RustfmtToml, StyleEdition};
+use rustfmt_toml_parser::types::{Edition, RustfmtToml, StyleEdition};
 
 pub(crate) fn rustfmt(input: &G3RsFmtConfigChecksInput) -> Option<&RustfmtToml> {
     match &input.rustfmt_state {

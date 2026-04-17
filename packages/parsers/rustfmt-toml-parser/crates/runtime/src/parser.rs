@@ -1,4 +1,4 @@
-use rustfmt_toml_parser_types::RustfmtToml;
+use rustfmt_toml_parser_types::rustfmt_toml::RustfmtToml;
 
 use crate::Error;
 
@@ -23,5 +23,5 @@ pub fn from_path(path: impl AsRef<std::path::Path>) -> Result<RustfmtToml, Error
 }
 
 #[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod tests;
+#[path = "parser_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod parser_tests;
