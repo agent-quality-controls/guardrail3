@@ -1,3 +1,3 @@
-# g3rs-code-file-tree-checks-assertions
+# g3rs-release-filetree-checks-assertions
 
-Assertions for the `code` file-tree lane tests.
+Shared proof surface for `g3rs-release-filetree-checks` tests.
