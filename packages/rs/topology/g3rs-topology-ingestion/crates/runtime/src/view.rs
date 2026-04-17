@@ -33,6 +33,6 @@ impl<'a> CrawlView<'a> {
             .ok_or_else(|| {
                 std::io::Error::new(std::io::ErrorKind::NotFound, "entry missing from crawl")
             })?;
-        std::fs::read_to_string(path)
+        crate::fs::read_to_string(path.as_path())
     }
 }

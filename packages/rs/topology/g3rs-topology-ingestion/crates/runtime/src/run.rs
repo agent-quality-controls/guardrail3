@@ -1,10 +1,11 @@
 use cargo_toml_parser::types::CargoToml;
 use g3rs_topology_ingestion_types::{
-    G3RsTopologyFileTreeChecksInput, G3RsTopologyIngestionError as IngestionError,
+    G3RsTopologyIngestionError as IngestionError,
 };
 use g3rs_topology_types::{
     G3RsTopologyCargoManifestKind, G3RsTopologyDescendantCargoRoot,
-    G3RsTopologyFileTreeInputFailure, G3RsTopologyWorkspaceFamily, G3RsTopologyWorkspaceFamilyFile,
+    G3RsTopologyFileTreeChecksInput, G3RsTopologyFileTreeInputFailure,
+    G3RsTopologyWorkspaceFamily, G3RsTopologyWorkspaceFamilyFile,
     G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
@@ -364,6 +365,10 @@ fn parent_dir(rel_path: &str) -> &str {
     rel_path.rsplit_once('/').map_or("", |(dir, _)| dir)
 }
 
+#[cfg(test)]
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for run module.
+mod run_tests;
+
 fn logical_owner_rel(rel_path: &str, kind: G3RsTopologyWorkspaceFamilyFileKind) -> String {
     match kind {
         G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml
@@ -400,7 +405,14 @@ fn attach_owner_rel(
         };
     }
 
-    panic!("topology family file owner `{owner_rel}` is outside the pointed workspace roots");
+    debug_assert!(
+        false,
+        "topology family file owner `{owner_rel}` is outside the pointed workspace roots"
+    );
+    G3RsTopologyWorkspaceFamilyFileAttachment::NestedUnderRoot {
+        root_rel: String::new(),
+        owner_rel: owner_rel.to_owned(),
+    }
 }
 
 fn nearest_ancestor_root<'a>(owner_rel: &str, root_rels: &'a [String]) -> Option<&'a str> {

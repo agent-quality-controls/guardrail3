@@ -1,0 +1,22 @@
+profile = "library"
+
+allowed_deps = [
+  "cargo-toml-parser",
+  "g3rs-topology-file-tree-checks",
+  "g3rs-topology-types",
+  "g3rs-workspace-crawl",
+  "guardrail3-check-types",
+  "tempfile",
+]
+
+[[waivers]]
+rule = "multiple_crate_versions"
+file = "Cargo.toml"
+selector = "lint:clippy::multiple_crate_versions"
+reason = "This internal workspace package intentionally depends on parser crates and shared internal crates with overlapping transitive versions."
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Runtime intentionally groups topology ingestion logic and owned run sidecars in one crate."

@@ -1,5 +1,6 @@
 use std::fs;
 
+use g3rs_topology_ingestion_assertions::run as assertions;
 use g3rs_topology_types::{
     G3RsTopologyCargoManifestKind, G3RsTopologyWorkspaceFamily,
     G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
@@ -9,7 +10,7 @@ use tempfile::tempdir;
 
 #[test]
 fn file_tree_ingestion_collects_descendant_roots_and_family_files() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -20,10 +21,10 @@ exclude = ["crates/ignored"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("crates/app/src")).expect("app dirs");
-    fs::create_dir_all(root.path().join("nested/src")).expect("nested dirs");
-    fs::create_dir_all(root.path().join(".cargo")).expect("cargo dir");
-    fs::create_dir_all(root.path().join(".config")).expect("config dir");
+    fs::create_dir_all(root.path().join("crates/app/src")).expect("create app source dir");
+    fs::create_dir_all(root.path().join("nested/src")).expect("create nested source dir");
+    fs::create_dir_all(root.path().join(".cargo")).expect("create cargo config dir");
+    fs::create_dir_all(root.path().join(".config")).expect("create config dir");
 
     write(
         root.path().join("crates/app/Cargo.toml"),
@@ -61,8 +62,9 @@ members = []
         "[profile.default]\n",
     );
     write(root.path().join("guardrail3-rs.toml"), "[rust]\n");
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
     assert_eq!(input.workspace_root_rel_dir, "");
     assert_eq!(input.workspace_root_cargo_rel_path, "Cargo.toml");
@@ -71,7 +73,7 @@ members = []
             .workspace_manifest
             .workspace
             .as_ref()
-            .expect("workspace")
+            .expect("workspace manifest should parse as workspace")
             .members,
         vec!["crates/app".to_owned(), "nested".to_owned()]
     );
@@ -121,12 +123,12 @@ members = []
     assert!(!input.family_files.iter().any(|file| {
         file.rel_path == "guardrail3.toml"
     }));
-    assert!(input.input_failures.is_empty());
+    assertions::assert_no_input_failures(&input);
 }
 
 #[test]
 fn unreadable_root_cargo_fails_ingestion() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -135,36 +137,48 @@ fn unreadable_root_cargo_fails_ingestion() {
     let cargo_path = root.path().join("Cargo.toml");
     make_unreadable(&cargo_path);
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let err = crate::ingest_for_file_tree_checks(&crawl).expect_err("root cargo should fail");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let err = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect_err("root manifest should fail ingestion");
     restore_readable(&cargo_path);
 
-    assert!(matches!(
-        err,
-        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::Unreadable { path, .. }
-        if path.ends_with("Cargo.toml")
-    ));
+    match err {
+        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::Unreadable {
+            path,
+            reason,
+        } => {
+            assert!(path.ends_with("Cargo.toml"));
+            assert_eq!(reason, "file is not readable");
+        }
+        other => panic!("unexpected ingestion error: {other:?}"),
+    }
 }
 
 #[test]
 fn malformed_root_cargo_fails_ingestion() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(root.path().join("Cargo.toml"), "[workspace");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let err = crate::ingest_for_file_tree_checks(&crawl).expect_err("root cargo should fail");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let err = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect_err("malformed root manifest should fail ingestion");
 
-    assert!(matches!(
-        err,
-        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::ParseFailed { path, .. }
-        if path.ends_with("Cargo.toml")
-    ));
+    match err {
+        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::ParseFailed {
+            path,
+            reason,
+        } => {
+            assert!(path.ends_with("Cargo.toml"));
+            assert!(reason.contains("invalid table header"), "{reason}");
+        }
+        other => panic!("unexpected ingestion error: {other:?}"),
+    }
 }
 
 #[test]
 fn non_workspace_root_cargo_fails_ingestion() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -175,8 +189,9 @@ version = "0.1.0"
 "#,
     );
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let err = crate::ingest_for_file_tree_checks(&crawl).expect_err("root must be workspace");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let err = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect_err("non-workspace root manifest should fail ingestion");
 
     assert!(matches!(
         err,
@@ -187,22 +202,27 @@ version = "0.1.0"
 
 #[test]
 fn missing_root_cargo_in_crawl_fails_ingestion() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let err =
-        crate::ingest_for_file_tree_checks(&crawl).expect_err("missing root cargo should fail");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let err = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect_err("missing root manifest should fail ingestion");
 
-    assert!(matches!(
-        err,
-        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::Unreadable { path, .. }
-        if path.ends_with("Cargo.toml")
-    ));
+    match err {
+        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::Unreadable {
+            path,
+            reason,
+        } => {
+            assert!(path.ends_with("Cargo.toml"));
+            assert_eq!(reason, "file is missing from crawl");
+        }
+        other => panic!("unexpected ingestion error: {other:?}"),
+    }
 }
 
 #[test]
 fn malformed_descendant_cargo_becomes_input_failure() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -212,8 +232,8 @@ members = ["good", "bad"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("good/src")).expect("good dirs");
-    fs::create_dir_all(root.path().join("bad/src")).expect("bad dirs");
+    fs::create_dir_all(root.path().join("good/src")).expect("create good source dir");
+    fs::create_dir_all(root.path().join("bad/src")).expect("create bad source dir");
 
     write(
         root.path().join("good/Cargo.toml"),
@@ -228,25 +248,17 @@ version = "0.1.0"
     write(root.path().join("bad/Cargo.toml"), "[package");
     write(root.path().join("bad/src/lib.rs"), "pub struct Bad;\n");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
-    assert!(input.descendant_cargo_roots.iter().any(|root| {
-        root.rel_dir == "bad"
-            && root.cargo_rel_path == "bad/Cargo.toml"
-            && root.manifest_kind.is_none()
-    }));
-    assert!(
-        input
-            .input_failures
-            .iter()
-            .any(|failure| { failure.rel_path == "bad/Cargo.toml" && !failure.message.is_empty() })
-    );
+    assertions::assert_descendant_root(&input, "bad", "bad/Cargo.toml", None);
+    assertions::assert_input_failure_contains(&input, "bad/Cargo.toml", "invalid table header");
 }
 
 #[test]
 fn unreadable_descendant_cargo_becomes_input_failure() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -256,8 +268,8 @@ members = ["good", "bad"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("good/src")).expect("good dirs");
-    fs::create_dir_all(root.path().join("bad/src")).expect("bad dirs");
+    fs::create_dir_all(root.path().join("good/src")).expect("create good source dir");
+    fs::create_dir_all(root.path().join("bad/src")).expect("create bad source dir");
 
     write(
         root.path().join("good/Cargo.toml"),
@@ -281,26 +293,18 @@ version = "0.1.0"
     write(root.path().join("bad/src/lib.rs"), "pub struct Bad;\n");
     make_unreadable(&bad_cargo);
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
     restore_readable(&bad_cargo);
 
-    assert!(input.descendant_cargo_roots.iter().any(|root| {
-        root.rel_dir == "bad"
-            && root.cargo_rel_path == "bad/Cargo.toml"
-            && root.manifest_kind.is_none()
-    }));
-    assert!(
-        input
-            .input_failures
-            .iter()
-            .any(|failure| failure.rel_path == "bad/Cargo.toml")
-    );
+    assertions::assert_descendant_root(&input, "bad", "bad/Cargo.toml", None);
+    assertions::assert_input_failure_contains(&input, "bad/Cargo.toml", "file is not readable");
 }
 
 #[test]
 fn hybrid_descendant_manifest_is_classified_as_hybrid() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -310,7 +314,7 @@ members = ["hybrid"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("hybrid/src")).expect("hybrid dirs");
+    fs::create_dir_all(root.path().join("hybrid/src")).expect("create hybrid source dir");
     write(
         root.path().join("hybrid/Cargo.toml"),
         r#"
@@ -327,8 +331,9 @@ members = []
         "pub struct Hybrid;\n",
     );
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
     assert!(input.descendant_cargo_roots.iter().any(|root| {
         root.rel_dir == "hybrid"
@@ -338,7 +343,7 @@ members = []
 
 #[test]
 fn descendant_manifest_with_no_workspace_or_package_classifies_as_none() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -348,24 +353,20 @@ members = ["empty"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("empty")).expect("empty dirs");
+    fs::create_dir_all(root.path().join("empty")).expect("create empty dir");
     write(root.path().join("empty/Cargo.toml"), "[bad]\nvalue = 1\n");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
-    assert!(
-        input
-            .descendant_cargo_roots
-            .iter()
-            .any(|root| root.rel_dir == "empty" && root.manifest_kind.is_none())
-    );
-    assert!(input.input_failures.is_empty());
+    assertions::assert_descendant_root(&input, "empty", "empty/Cargo.toml", None);
+    assertions::assert_no_input_failures(&input);
 }
 
 #[test]
 fn unreferenced_and_excluded_real_child_roots_still_appear() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -376,9 +377,9 @@ exclude = ["excluded"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("declared/src")).expect("declared dirs");
-    fs::create_dir_all(root.path().join("excluded/src")).expect("excluded dirs");
-    fs::create_dir_all(root.path().join("stray/src")).expect("stray dirs");
+    fs::create_dir_all(root.path().join("declared/src")).expect("create declared source dir");
+    fs::create_dir_all(root.path().join("excluded/src")).expect("create excluded source dir");
+    fs::create_dir_all(root.path().join("stray/src")).expect("create stray source dir");
 
     write(
         root.path().join("declared/Cargo.toml"),
@@ -416,8 +417,9 @@ version = "0.1.0"
     );
     write(root.path().join("stray/src/lib.rs"), "pub struct Stray;\n");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
     let rel_dirs = input
         .descendant_cargo_roots
@@ -429,7 +431,7 @@ version = "0.1.0"
 
 #[test]
 fn ignored_descendant_roots_and_family_files_stay_out() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
     git_init(root.path());
 
     write(
@@ -441,9 +443,10 @@ members = ["live"]
     );
     write(root.path().join(".gitignore"), "ignored/\n");
 
-    fs::create_dir_all(root.path().join("live/src")).expect("live dirs");
-    fs::create_dir_all(root.path().join("ignored/src")).expect("ignored dirs");
-    fs::create_dir_all(root.path().join("ignored/.cargo")).expect("ignored cargo dir");
+    fs::create_dir_all(root.path().join("live/src")).expect("create live source dir");
+    fs::create_dir_all(root.path().join("ignored/src")).expect("create ignored source dir");
+    fs::create_dir_all(root.path().join("ignored/.cargo"))
+        .expect("create ignored cargo config dir");
 
     write(
         root.path().join("live/Cargo.toml"),
@@ -469,8 +472,9 @@ version = "0.1.0"
     );
     write(root.path().join("ignored/.cargo/config.toml"), "[alias]\n");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
     assert!(
         input
@@ -488,7 +492,7 @@ version = "0.1.0"
 
 #[test]
 fn excluded_live_topology_paths_stay_out() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -498,11 +502,15 @@ members = ["live"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("live/src")).expect("live dirs");
-    fs::create_dir_all(root.path().join("tests/fixtures/demo/src")).expect("fixture dirs");
-    fs::create_dir_all(root.path().join("tests/snapshots/demo/src")).expect("snapshot dirs");
-    fs::create_dir_all(root.path().join("target/generated/src")).expect("target dirs");
-    fs::create_dir_all(root.path().join(".claude/worktrees/tmp/src")).expect("worktree dirs");
+    fs::create_dir_all(root.path().join("live/src")).expect("create live source dir");
+    fs::create_dir_all(root.path().join("tests/fixtures/demo/src"))
+        .expect("create fixture source dir");
+    fs::create_dir_all(root.path().join("tests/snapshots/demo/src"))
+        .expect("create snapshot source dir");
+    fs::create_dir_all(root.path().join("target/generated/src"))
+        .expect("create generated target dir");
+    fs::create_dir_all(root.path().join(".claude/worktrees/tmp/src"))
+        .expect("create ignored worktree dir");
 
     write(
         root.path().join("live/Cargo.toml"),
@@ -557,8 +565,9 @@ version = "0.1.0"
 "#,
     );
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
     assert!(
         input
@@ -612,14 +621,14 @@ version = "0.1.0"
 
 #[test]
 fn family_file_mapping_covers_supported_workspace_local_files() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
     );
-    fs::create_dir_all(root.path().join(".cargo")).expect("cargo dir");
-    fs::create_dir_all(root.path().join(".config")).expect("config dir");
+    fs::create_dir_all(root.path().join(".cargo")).expect("create cargo config dir");
+    fs::create_dir_all(root.path().join(".config")).expect("create config dir");
 
     write(root.path().join("guardrail3-rs.toml"), "[rust]\n");
     write(root.path().join("rustfmt.toml"), "max_width = 100\n");
@@ -647,161 +656,162 @@ fn family_file_mapping_covers_supported_workspace_local_files() {
         "[profile.default]\n",
     );
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Toolchain,
         "Cargo.toml",
         G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Cargo,
         "Cargo.toml",
         G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Release,
         "Cargo.toml",
         G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Cargo,
         "guardrail3-rs.toml",
         G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Deps,
         "guardrail3-rs.toml",
         G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Garde,
         "guardrail3-rs.toml",
         G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Fmt,
         "rustfmt.toml",
         G3RsTopologyWorkspaceFamilyFileKind::RustfmtToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Fmt,
         ".rustfmt.toml",
         G3RsTopologyWorkspaceFamilyFileKind::DotRustfmtToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Toolchain,
         "rust-toolchain.toml",
         G3RsTopologyWorkspaceFamilyFileKind::RustToolchainToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Toolchain,
         "rust-toolchain",
         G3RsTopologyWorkspaceFamilyFileKind::RustToolchainLegacy,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Clippy,
         "clippy.toml",
         G3RsTopologyWorkspaceFamilyFileKind::ClippyToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Garde,
         "clippy.toml",
         G3RsTopologyWorkspaceFamilyFileKind::ClippyToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Clippy,
         ".clippy.toml",
         G3RsTopologyWorkspaceFamilyFileKind::ClippyDotToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Clippy,
         ".cargo/config.toml",
         G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Garde,
         ".cargo/config.toml",
         G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Clippy,
         ".cargo/config",
         G3RsTopologyWorkspaceFamilyFileKind::CargoConfigLegacy,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Deny,
         "deny.toml",
         G3RsTopologyWorkspaceFamilyFileKind::DenyToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Deny,
         ".deny.toml",
         G3RsTopologyWorkspaceFamilyFileKind::DenyDotToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Deny,
         ".cargo/deny.toml",
         G3RsTopologyWorkspaceFamilyFileKind::CargoDenyToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Release,
         "release-plz.toml",
         G3RsTopologyWorkspaceFamilyFileKind::ReleasePlzToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Release,
         "cliff.toml",
         G3RsTopologyWorkspaceFamilyFileKind::CliffToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Test,
         ".cargo/mutants.toml",
         G3RsTopologyWorkspaceFamilyFileKind::MutantsToml,
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Test,
         ".config/nextest.toml",
         G3RsTopologyWorkspaceFamilyFileKind::NextestToml,
     );
 
-    assert_exact_family_file_count(&input, "Cargo.toml", 7);
-    assert_exact_family_file_count(&input, "guardrail3.toml", 0);
-    assert_exact_family_file_count(&input, "guardrail3-rs.toml", 3);
-    assert_exact_family_file_count(&input, "clippy.toml", 2);
-    assert_exact_family_file_count(&input, ".cargo/config.toml", 2);
-    assert_exact_family_file_count(&input, ".cargo/config", 2);
-    assert_exact_family_file_count(&input, ".cargo/mutants.toml", 1);
-    assert_exact_family_file_count(&input, ".config/nextest.toml", 1);
+    assertions::assert_exact_family_file_count(&input, "Cargo.toml", 7);
+    assertions::assert_exact_family_file_count(&input, "guardrail3.toml", 0);
+    assertions::assert_exact_family_file_count(&input, "guardrail3-rs.toml", 3);
+    assertions::assert_exact_family_file_count(&input, "clippy.toml", 2);
+    assertions::assert_exact_family_file_count(&input, ".cargo/config.toml", 2);
+    assertions::assert_exact_family_file_count(&input, ".cargo/config", 2);
+    assertions::assert_exact_family_file_count(&input, ".cargo/mutants.toml", 1);
+    assertions::assert_exact_family_file_count(&input, ".config/nextest.toml", 1);
 }
 
 #[test]
 fn descendant_cargo_toml_files_map_to_all_supported_families() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -810,7 +820,7 @@ fn descendant_cargo_toml_files_map_to_all_supported_families() {
 members = ["crate_a"]
 "#,
     );
-    fs::create_dir_all(root.path().join("crate_a/src")).expect("crate dirs");
+    fs::create_dir_all(root.path().join("crate_a/src")).expect("create crate source dir");
     write(
         root.path().join("crate_a/Cargo.toml"),
         r#"
@@ -821,8 +831,9 @@ version = "0.1.0"
     );
     write(root.path().join("crate_a/src/lib.rs"), "pub struct A;\n");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
     for family in [
         G3RsTopologyWorkspaceFamily::Toolchain,
@@ -833,40 +844,46 @@ version = "0.1.0"
         G3RsTopologyWorkspaceFamily::Garde,
         G3RsTopologyWorkspaceFamily::Release,
     ] {
-        assert_family_file(
+        assertions::assert_family_file(
             &input,
             family,
             "crate_a/Cargo.toml",
             G3RsTopologyWorkspaceFamilyFileKind::CargoToml,
         );
     }
-    assert_exact_family_file_count(&input, "crate_a/Cargo.toml", 7);
+    assertions::assert_exact_family_file_count(&input, "crate_a/Cargo.toml", 7);
 }
 
 #[test]
 fn root_read_failure_after_crawl_fails_ingestion() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
     );
-    let crawl = crawl(root.path()).expect("crawl");
-    fs::remove_file(root.path().join("Cargo.toml")).expect("remove root cargo");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    fs::remove_file(root.path().join("Cargo.toml")).expect("remove root manifest");
 
     let err =
-        crate::ingest_for_file_tree_checks(&crawl).expect_err("deleted root cargo should fail");
+        super::super::ingest_for_file_tree_checks(&crawl)
+            .expect_err("deleted root manifest should fail ingestion");
 
-    assert!(matches!(
-        err,
-        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::Unreadable { path, .. }
-        if path.ends_with("Cargo.toml")
-    ));
+    match err {
+        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::Unreadable {
+            path,
+            reason,
+        } => {
+            assert!(path.ends_with("Cargo.toml"));
+            assert!(reason.contains("No such file or directory"), "{reason}");
+        }
+        other => panic!("unexpected ingestion error: {other:?}"),
+    }
 }
 
 #[test]
 fn descendant_read_failure_after_crawl_becomes_input_failure() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -875,7 +892,7 @@ fn descendant_read_failure_after_crawl_becomes_input_failure() {
 members = ["bad"]
 "#,
     );
-    fs::create_dir_all(root.path().join("bad/src")).expect("bad dirs");
+    fs::create_dir_all(root.path().join("bad/src")).expect("create bad source dir");
     write(
         root.path().join("bad/Cargo.toml"),
         r#"
@@ -886,21 +903,23 @@ version = "0.1.0"
     );
     write(root.path().join("bad/src/lib.rs"), "pub struct Bad;\n");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    fs::remove_file(root.path().join("bad/Cargo.toml")).expect("remove bad cargo");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    fs::remove_file(root.path().join("bad/Cargo.toml")).expect("remove bad manifest");
 
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
-    assert_eq!(input.input_failures.len(), 1);
-    assert_eq!(input.input_failures[0].rel_path, "bad/Cargo.toml");
-    assert_eq!(input.descendant_cargo_roots.len(), 1);
-    assert_eq!(input.descendant_cargo_roots[0].rel_dir, "bad");
-    assert!(input.descendant_cargo_roots[0].manifest_kind.is_none());
+    assertions::assert_input_failure_contains(
+        &input,
+        "bad/Cargo.toml",
+        "No such file or directory",
+    );
+    assertions::assert_descendant_root(&input, "bad", "bad/Cargo.toml", None);
 }
 
 #[test]
 fn file_tree_input_preserves_workspace_member_exactness_shapes() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -910,9 +929,9 @@ members = ["crates/*", "missing", "shared"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("crates/app/src")).expect("app dirs");
-    fs::create_dir_all(root.path().join("crates/extra/src")).expect("extra dirs");
-    fs::create_dir_all(root.path().join("shared/src")).expect("shared dirs");
+    fs::create_dir_all(root.path().join("crates/app/src")).expect("create app source dir");
+    fs::create_dir_all(root.path().join("crates/extra/src")).expect("create extra source dir");
+    fs::create_dir_all(root.path().join("shared/src")).expect("create shared source dir");
 
     write(
         root.path().join("crates/app/Cargo.toml"),
@@ -953,13 +972,14 @@ version = "0.1.0"
         "pub struct Shared;\n",
     );
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
     let workspace = input
         .workspace_manifest
         .workspace
         .as_ref()
-        .expect("workspace");
+        .expect("workspace manifest should parse as workspace");
 
     assert_eq!(
         workspace.members,
@@ -991,7 +1011,7 @@ version = "0.1.0"
 
 #[test]
 fn file_tree_input_preserves_escaping_member_patterns() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -1001,7 +1021,7 @@ members = ["crates/*", "../shared"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("crates/app/src")).expect("app dirs");
+    fs::create_dir_all(root.path().join("crates/app/src")).expect("create app source dir");
     write(
         root.path().join("crates/app/Cargo.toml"),
         r#"
@@ -1015,13 +1035,14 @@ version = "0.1.0"
         "pub struct App;\n",
     );
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
     let workspace = input
         .workspace_manifest
         .workspace
         .as_ref()
-        .expect("workspace");
+        .expect("workspace manifest should parse as workspace");
 
     assert_eq!(
         workspace.members,
@@ -1037,7 +1058,7 @@ version = "0.1.0"
 
 #[test]
 fn file_tree_input_preserves_illegal_family_file_placement_shapes() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -1047,11 +1068,12 @@ members = ["apps/api", "packages/lib"]
 "#,
     );
 
-    fs::create_dir_all(root.path().join("apps/api/src")).expect("api dirs");
-    fs::create_dir_all(root.path().join("packages/lib/src")).expect("lib dirs");
-    fs::create_dir_all(root.path().join("packages/lib/.cargo")).expect("cargo dirs");
-    fs::create_dir_all(root.path().join("tools/helper")).expect("helper dirs");
-    fs::create_dir_all(root.path().join("apps/api/nested")).expect("nested dirs");
+    fs::create_dir_all(root.path().join("apps/api/src")).expect("create api source dir");
+    fs::create_dir_all(root.path().join("packages/lib/src")).expect("create lib source dir");
+    fs::create_dir_all(root.path().join("packages/lib/.cargo"))
+        .expect("create lib cargo config dir");
+    fs::create_dir_all(root.path().join("tools/helper")).expect("create helper dir");
+    fs::create_dir_all(root.path().join("apps/api/nested")).expect("create nested dir");
 
     write(
         root.path().join("apps/api/Cargo.toml"),
@@ -1090,16 +1112,17 @@ version = "0.1.0"
     );
     write(root.path().join("tools/helper/guardrail3-rs.toml"), "profile = \"service\"\n");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Toolchain,
         "rust-toolchain.toml",
         G3RsTopologyWorkspaceFamilyFileKind::RustToolchainToml,
     );
-    assert_family_file_attachment(
+    assertions::assert_family_file_attachment(
         &input,
         G3RsTopologyWorkspaceFamily::Toolchain,
         "rust-toolchain.toml",
@@ -1108,13 +1131,13 @@ version = "0.1.0"
             root_rel: "".to_owned(),
         },
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Clippy,
         "apps/api/nested/clippy.toml",
         G3RsTopologyWorkspaceFamilyFileKind::ClippyToml,
     );
-    assert_family_file_attachment(
+    assertions::assert_family_file_attachment(
         &input,
         G3RsTopologyWorkspaceFamily::Clippy,
         "apps/api/nested/clippy.toml",
@@ -1124,13 +1147,13 @@ version = "0.1.0"
             owner_rel: "apps/api/nested".to_owned(),
         },
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Clippy,
         "packages/lib/.cargo/config.toml",
         G3RsTopologyWorkspaceFamilyFileKind::CargoConfigToml,
     );
-    assert_family_file_attachment(
+    assertions::assert_family_file_attachment(
         &input,
         G3RsTopologyWorkspaceFamily::Clippy,
         "packages/lib/.cargo/config.toml",
@@ -1139,13 +1162,13 @@ version = "0.1.0"
             root_rel: "packages/lib".to_owned(),
         },
     );
-    assert_family_file(
+    assertions::assert_family_file(
         &input,
         G3RsTopologyWorkspaceFamily::Garde,
         "tools/helper/guardrail3-rs.toml",
         G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
     );
-    assert_family_file_attachment(
+    assertions::assert_family_file_attachment(
         &input,
         G3RsTopologyWorkspaceFamily::Garde,
         "tools/helper/guardrail3-rs.toml",
@@ -1159,7 +1182,7 @@ version = "0.1.0"
 
 #[test]
 fn attachment_normalizes_cargo_and_config_owner_dirs() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -1168,9 +1191,11 @@ fn attachment_normalizes_cargo_and_config_owner_dirs() {
 members = ["member"]
 "#,
     );
-    fs::create_dir_all(root.path().join("member/src")).expect("member dirs");
-    fs::create_dir_all(root.path().join("member/.cargo")).expect("member cargo");
-    fs::create_dir_all(root.path().join("member/.config")).expect("member config");
+    fs::create_dir_all(root.path().join("member/src")).expect("create member source dir");
+    fs::create_dir_all(root.path().join("member/.cargo"))
+        .expect("create member cargo config dir");
+    fs::create_dir_all(root.path().join("member/.config"))
+        .expect("create member config dir");
 
     write(
         root.path().join("member/Cargo.toml"),
@@ -1198,8 +1223,9 @@ version = "0.1.0"
         "[profile.default]\n",
     );
 
-    let crawl = crawl(root.path()).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
 
     for (family, rel_path, kind) in [
         (
@@ -1223,7 +1249,7 @@ version = "0.1.0"
             G3RsTopologyWorkspaceFamilyFileKind::NextestToml,
         ),
     ] {
-        assert_family_file_attachment(
+        assertions::assert_family_file_attachment(
             &input,
             family,
             rel_path,
@@ -1236,64 +1262,18 @@ version = "0.1.0"
 }
 
 fn write(path: std::path::PathBuf, content: &str) {
-    fs::write(path, content).expect("write");
-}
-
-fn assert_family_file(
-    input: &g3rs_topology_types::G3RsTopologyFileTreeChecksInput,
-    family: G3RsTopologyWorkspaceFamily,
-    rel_path: &str,
-    kind: G3RsTopologyWorkspaceFamilyFileKind,
-) {
-    assert!(
-        input.family_files.iter().any(|file| {
-            file.family == family && file.rel_path == rel_path && file.kind == kind
-        }),
-        "expected family file mapping for {rel_path}"
-    );
-}
-
-fn assert_family_file_attachment(
-    input: &g3rs_topology_types::G3RsTopologyFileTreeChecksInput,
-    family: G3RsTopologyWorkspaceFamily,
-    rel_path: &str,
-    kind: G3RsTopologyWorkspaceFamilyFileKind,
-    attachment: G3RsTopologyWorkspaceFamilyFileAttachment,
-) {
-    assert!(
-        input.family_files.iter().any(|file| {
-            file.family == family
-                && file.rel_path == rel_path
-                && file.kind == kind
-                && file.attachment == attachment
-        }),
-        "expected family file attachment for {rel_path}"
-    );
-}
-
-fn assert_exact_family_file_count(
-    input: &g3rs_topology_types::G3RsTopologyFileTreeChecksInput,
-    rel_path: &str,
-    expected: usize,
-) {
-    let actual = input
-        .family_files
-        .iter()
-        .filter(|file| file.rel_path == rel_path)
-        .count();
-    assert_eq!(
-        actual, expected,
-        "unexpected family file count for {rel_path}"
-    );
+    fs::write(path, content).expect("write fixture file");
 }
 
 #[cfg(unix)]
 fn make_unreadable(path: &std::path::Path) {
     use std::os::unix::fs::PermissionsExt;
 
-    let mut perms = fs::metadata(path).expect("metadata").permissions();
+    let mut perms = fs::metadata(path)
+        .expect("read file metadata before making file unreadable")
+        .permissions();
     perms.set_mode(0o000);
-    fs::set_permissions(path, perms).expect("chmod 000");
+    fs::set_permissions(path, perms).expect("set file unreadable");
 }
 
 #[cfg(not(unix))]
@@ -1305,9 +1285,11 @@ fn make_unreadable(_path: &std::path::Path) {
 fn restore_readable(path: &std::path::Path) {
     use std::os::unix::fs::PermissionsExt;
 
-    let mut perms = fs::metadata(path).expect("metadata").permissions();
+    let mut perms = fs::metadata(path)
+        .expect("read file metadata before restoring readability")
+        .permissions();
     perms.set_mode(0o644);
-    fs::set_permissions(path, perms).expect("chmod 644");
+    fs::set_permissions(path, perms).expect("restore file readability");
 }
 
 #[cfg(not(unix))]
@@ -1319,6 +1301,6 @@ fn git_init(root: &std::path::Path) {
         .arg("-q")
         .current_dir(root)
         .status()
-        .expect("git init");
+        .expect("run `git init` for topology ingestion fixture");
     assert!(status.success(), "git init should succeed");
 }

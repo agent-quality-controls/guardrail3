@@ -1,25 +1,28 @@
 use std::fs;
 
 use g3rs_topology_file_tree_checks::check;
+use g3rs_topology_ingestion_assertions::run as assertions;
 use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
 
 fn run_results(root: &std::path::Path) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let crawl = crawl(root).expect("crawl");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root).expect("crawl workspace fixture before ingestion");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
     check(&input)
 }
 
 #[test]
 fn nested_workspace_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
-    fs::create_dir_all(root.path().join("crates/api/nested/src")).expect("nested dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
+    fs::create_dir_all(root.path().join("crates/api/nested/src"))
+        .expect("create nested source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -38,25 +41,31 @@ fn nested_workspace_fires_end_to_end() {
     );
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 1);
-    assert_eq!(rule_results[0].file(), Some("crates/api/nested/Cargo.toml"));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-11"),
+        1,
+        "{results:#?}"
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-11",
+        "Nested workspace `crates/api/nested` is forbidden",
+        Some("crates/api/nested/Cargo.toml"),
+        false,
+    );
 }
 
 #[test]
 fn excluded_nested_workspace_still_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\nexclude = [\"crates/api/nested\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
-    fs::create_dir_all(root.path().join("crates/api/nested/src")).expect("nested dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
+    fs::create_dir_all(root.path().join("crates/api/nested/src"))
+        .expect("create nested source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -75,25 +84,30 @@ fn excluded_nested_workspace_still_fires_end_to_end() {
     );
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 1);
-    assert_eq!(rule_results[0].file(), Some("crates/api/nested/Cargo.toml"));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-11"),
+        1,
+        "{results:#?}"
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-11",
+        "Nested workspace `crates/api/nested` is forbidden",
+        Some("crates/api/nested/Cargo.toml"),
+        false,
+    );
 }
 
 #[test]
 fn unreferenced_nested_workspace_still_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
-    fs::create_dir_all(root.path().join("crates/stray/src")).expect("stray dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
+    fs::create_dir_all(root.path().join("crates/stray/src")).expect("create stray source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -112,25 +126,30 @@ fn unreferenced_nested_workspace_still_fires_end_to_end() {
     );
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 1);
-    assert_eq!(rule_results[0].file(), Some("crates/stray/Cargo.toml"));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-11"),
+        1,
+        "{results:#?}"
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-11",
+        "Nested workspace `crates/stray` is forbidden",
+        Some("crates/stray/Cargo.toml"),
+        false,
+    );
 }
 
 #[test]
 fn exact_membership_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\", \"crates/ghost\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
-    fs::create_dir_all(root.path().join("crates/extra/src")).expect("extra dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
+    fs::create_dir_all(root.path().join("crates/extra/src")).expect("create extra source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -150,31 +169,38 @@ fn exact_membership_fires_end_to_end() {
 
     let results = run_results(root.path());
 
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12")
-        .collect::<Vec<_>>();
-    assert_eq!(rule_results.len(), 2);
-    assert!(rule_results.iter().any(|result| {
-        result.file() == Some("Cargo.toml")
-            && result.title() == "Workspace `.` has extra member `crates/ghost`"
-    }));
-    assert!(rule_results.iter().any(|result| {
-        result.file() == Some("crates/extra/Cargo.toml")
-            && result.title() == "Workspace child `crates/extra` must be declared explicitly"
-    }));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        2,
+        "{results:#?}"
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-12",
+        "Workspace `.` has extra member `crates/ghost`",
+        Some("Cargo.toml"),
+        false,
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-12",
+        "Workspace child `crates/extra` must be declared explicitly",
+        Some("crates/extra/Cargo.toml"),
+        false,
+    );
 }
 
 #[test]
 fn nested_workspace_still_fires_membership_rule_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\", \"crates/nested\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
-    fs::create_dir_all(root.path().join("crates/nested/src")).expect("nested dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
+    fs::create_dir_all(root.path().join("crates/nested/src"))
+        .expect("create nested source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -192,29 +218,33 @@ fn nested_workspace_still_fires_membership_rule_end_to_end() {
     let results = run_results(root.path());
 
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-11").count(),
-        1
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-11"),
+        1,
+        "{results:#?}"
     );
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12").count(),
-        1
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        1,
+        "{results:#?}"
     );
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-TOPOLOGY-FILETREE-12"
-            && result.file() == Some("Cargo.toml")
-            && result.title() == "Workspace `.` has extra member `crates/nested`"
-    }));
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-12",
+        "Workspace `.` has extra member `crates/nested`",
+        Some("Cargo.toml"),
+        false,
+    );
 }
 
 #[test]
 fn dot_slash_member_path_stays_quiet_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"./crates/api\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -226,18 +256,22 @@ fn dot_slash_member_path_stays_quiet_end_to_end() {
 
     let results = run_results(root.path());
 
-    assert!(results.iter().all(|result| result.id() != "RS-TOPOLOGY-FILETREE-12"));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        0,
+        "{results:#?}"
+    );
 }
 
 #[test]
 fn escaping_member_path_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\", \"../shared\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -248,18 +282,23 @@ fn escaping_member_path_fires_end_to_end() {
     );
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-13")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 1);
-    assert_eq!(rule_results[0].file(), Some("Cargo.toml"));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-13"),
+        1,
+        "{results:#?}"
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-13",
+        "Workspace `.` uses escaping member path `../shared`",
+        Some("Cargo.toml"),
+        false,
+    );
 }
 
 #[test]
 fn absolute_member_path_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
@@ -267,24 +306,29 @@ fn absolute_member_path_fires_end_to_end() {
     );
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-13")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 1);
-    assert_eq!(rule_results[0].file(), Some("Cargo.toml"));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-13"),
+        1,
+        "{results:#?}"
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-13",
+        "Workspace `.` uses escaping member path `/tmp/shared`",
+        Some("Cargo.toml"),
+        false,
+    );
 }
 
 #[test]
 fn illegal_family_file_placement_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -299,31 +343,38 @@ fn illegal_family_file_placement_fires_end_to_end() {
     );
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 2);
-    assert!(rule_results.iter().all(|result| result.file() == Some("crates/api/clippy.toml")));
-    assert!(rule_results.iter().any(|result| {
-        result.title() == "`clippy` file `crates/api/clippy.toml` is illegally placed"
-    }));
-    assert!(rule_results.iter().any(|result| {
-        result.title() == "`garde` file `crates/api/clippy.toml` is illegally placed"
-    }));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        2,
+        "{results:#?}"
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-16",
+        "`clippy` file `crates/api/clippy.toml` is illegally placed",
+        Some("crates/api/clippy.toml"),
+        false,
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-16",
+        "`garde` file `crates/api/clippy.toml` is illegally placed",
+        Some("crates/api/clippy.toml"),
+        false,
+    );
 }
 
 #[test]
 fn member_cargo_sidecar_illegal_placement_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
-    fs::create_dir_all(root.path().join("crates/api/.cargo")).expect("cargo dir");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
+    fs::create_dir_all(root.path().join("crates/api/.cargo"))
+        .expect("create member cargo config dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -338,35 +389,37 @@ fn member_cargo_sidecar_illegal_placement_fires_end_to_end() {
     );
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 2);
-    assert!(rule_results
-        .iter()
-        .all(|result| result.file() == Some("crates/api/.cargo/config.toml")));
-    assert!(rule_results.iter().any(|result| {
-        result.title()
-            == "`clippy` file `crates/api/.cargo/config.toml` is illegally placed"
-    }));
-    assert!(rule_results.iter().any(|result| {
-        result.title()
-            == "`garde` file `crates/api/.cargo/config.toml` is illegally placed"
-    }));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        2,
+        "{results:#?}"
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-16",
+        "`clippy` file `crates/api/.cargo/config.toml` is illegally placed",
+        Some("crates/api/.cargo/config.toml"),
+        false,
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-16",
+        "`garde` file `crates/api/.cargo/config.toml` is illegally placed",
+        Some("crates/api/.cargo/config.toml"),
+        false,
+    );
 }
 
 #[test]
 fn illegal_root_nested_family_file_placement_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
-    fs::create_dir_all(root.path().join("nested")).expect("nested dir");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
+    fs::create_dir_all(root.path().join("nested")).expect("create nested dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -378,27 +431,33 @@ fn illegal_root_nested_family_file_placement_fires_end_to_end() {
     write(root.path().join("nested/clippy.toml"), "msrv = \"1.85\"\n");
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 2);
-    assert!(rule_results.iter().all(|result| result.file() == Some("nested/clippy.toml")));
-    assert!(rule_results.iter().any(|result| {
-        result.title() == "`clippy` file `nested/clippy.toml` is illegally placed"
-    }));
-    assert!(rule_results.iter().any(|result| {
-        result.title() == "`garde` file `nested/clippy.toml` is illegally placed"
-    }));
+    assert_eq!(
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        2,
+        "{results:#?}"
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-16",
+        "`clippy` file `nested/clippy.toml` is illegally placed",
+        Some("nested/clippy.toml"),
+        false,
+    );
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-16",
+        "`garde` file `nested/clippy.toml` is illegally placed",
+        Some("nested/clippy.toml"),
+        false,
+    );
 }
 
 #[test]
 fn illegal_child_root_fmt_file_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(root.path().join("Cargo.toml"), "[workspace]\nmembers = []\n");
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -407,31 +466,30 @@ fn illegal_child_root_fmt_file_fires_end_to_end() {
     write(root.path().join("crates/api/rustfmt.toml"), "max_width = 100\n");
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 1);
-    assert_eq!(rule_results[0].file(), Some("crates/api/rustfmt.toml"));
     assert_eq!(
-        rule_results[0].title(),
-        "`fmt` file `crates/api/rustfmt.toml` is illegally placed"
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        1,
+        "{results:#?}"
     );
-    assert!(rule_results[0]
-        .message()
-        .contains("fmt files must live at the validation root"));
+    assertions::assert_message_contains(
+        &results,
+        "RS-TOPOLOGY-FILETREE-16",
+        "`fmt` file `crates/api/rustfmt.toml` is illegally placed",
+        Some("crates/api/rustfmt.toml"),
+        false,
+        "fmt files must live at the validation root",
+    );
 }
 
 #[test]
 fn member_fmt_file_fires_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -440,31 +498,30 @@ fn member_fmt_file_fires_end_to_end() {
     write(root.path().join("crates/api/rustfmt.toml"), "max_width = 100\n");
 
     let results = run_results(root.path());
-    let rule_results = results
-        .iter()
-        .filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-16")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rule_results.len(), 1);
-    assert_eq!(rule_results[0].file(), Some("crates/api/rustfmt.toml"));
     assert_eq!(
-        rule_results[0].title(),
-        "`fmt` file `crates/api/rustfmt.toml` is illegally placed"
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        1,
+        "{results:#?}"
     );
-    assert!(rule_results[0]
-        .message()
-        .contains("fmt files must live at the validation root"));
+    assertions::assert_message_contains(
+        &results,
+        "RS-TOPOLOGY-FILETREE-16",
+        "`fmt` file `crates/api/rustfmt.toml` is illegally placed",
+        Some("crates/api/rustfmt.toml"),
+        false,
+        "fmt files must live at the validation root",
+    );
 }
 
 #[test]
 fn legal_workspace_stays_quiet() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -481,20 +538,20 @@ fn legal_workspace_stays_quiet() {
 
     let results = run_results(root.path());
 
-    assert!(results.is_empty());
+    assertions::assert_empty(&results);
 }
 
 #[test]
 fn legal_root_sidecar_configs_stay_quiet() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\n",
     );
-    fs::create_dir_all(root.path().join("crates/api/src")).expect("api dirs");
-    fs::create_dir_all(root.path().join(".cargo")).expect("cargo dir");
-    fs::create_dir_all(root.path().join(".config")).expect("config dir");
+    fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
+    fs::create_dir_all(root.path().join(".cargo")).expect("create cargo config dir");
+    fs::create_dir_all(root.path().join(".config")).expect("create config dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
@@ -515,19 +572,19 @@ fn legal_root_sidecar_configs_stay_quiet() {
 
     let results = run_results(root.path());
 
-    assert!(results.is_empty());
+    assertions::assert_empty(&results);
 }
 
 #[test]
 fn descendant_manifest_failure_fails_closed_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"good\", \"bad\"]\n",
     );
-    fs::create_dir_all(root.path().join("good/src")).expect("good dirs");
-    fs::create_dir_all(root.path().join("bad/src")).expect("bad dirs");
+    fs::create_dir_all(root.path().join("good/src")).expect("create good source dir");
+    fs::create_dir_all(root.path().join("bad/src")).expect("create bad source dir");
     write(
         root.path().join("good/Cargo.toml"),
         "[package]\nname = \"good\"\nversion = \"0.1.0\"\n",
@@ -538,28 +595,34 @@ fn descendant_manifest_failure_fails_closed_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-07").count(),
-        1
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-07"),
+        1,
+        "{results:#?}"
     );
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12").count(),
-        0
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        0,
+        "{results:#?}"
     );
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-TOPOLOGY-FILETREE-07" && result.file() == Some("bad/Cargo.toml")
-    }));
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-07",
+        "Rust topology required input failed closed",
+        Some("bad/Cargo.toml"),
+        false,
+    );
 }
 
 #[test]
 fn unreadable_descendant_manifest_fails_closed_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"good\", \"bad\"]\n",
     );
-    fs::create_dir_all(root.path().join("good/src")).expect("good dirs");
-    fs::create_dir_all(root.path().join("bad/src")).expect("bad dirs");
+    fs::create_dir_all(root.path().join("good/src")).expect("create good source dir");
+    fs::create_dir_all(root.path().join("bad/src")).expect("create bad source dir");
     write(
         root.path().join("good/Cargo.toml"),
         "[package]\nname = \"good\"\nversion = \"0.1.0\"\n",
@@ -577,28 +640,34 @@ fn unreadable_descendant_manifest_fails_closed_end_to_end() {
     restore_readable(&bad_manifest);
 
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-07").count(),
-        1
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-07"),
+        1,
+        "{results:#?}"
     );
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12").count(),
-        0
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        0,
+        "{results:#?}"
     );
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-TOPOLOGY-FILETREE-07" && result.file() == Some("bad/Cargo.toml")
-    }));
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-07",
+        "Rust topology required input failed closed",
+        Some("bad/Cargo.toml"),
+        false,
+    );
 }
 
 #[test]
 fn stale_read_descendant_manifest_fails_closed_end_to_end() {
-    let root = tempdir().expect("tempdir");
+    let root = tempdir().expect("create temp dir");
 
     write(
         root.path().join("Cargo.toml"),
         "[workspace]\nmembers = [\"good\", \"bad\"]\n",
     );
-    fs::create_dir_all(root.path().join("good/src")).expect("good dirs");
-    fs::create_dir_all(root.path().join("bad/src")).expect("bad dirs");
+    fs::create_dir_all(root.path().join("good/src")).expect("create good source dir");
+    fs::create_dir_all(root.path().join("bad/src")).expect("create bad source dir");
     write(
         root.path().join("good/Cargo.toml"),
         "[package]\nname = \"good\"\nversion = \"0.1.0\"\n",
@@ -611,42 +680,53 @@ fn stale_read_descendant_manifest_fails_closed_end_to_end() {
     );
     write(root.path().join("bad/src/lib.rs"), "pub struct Bad;\n");
 
-    let crawl = crawl(root.path()).expect("crawl");
-    fs::remove_file(&bad_manifest).expect("remove bad manifest");
-    let input = crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingest");
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    fs::remove_file(&bad_manifest).expect("remove stale descendant manifest");
+    let input = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("ingest topology file-tree facts");
     let results = check(&input);
 
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-07").count(),
-        1
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-07"),
+        1,
+        "{results:#?}"
     );
     assert_eq!(
-        results.iter().filter(|result| result.id() == "RS-TOPOLOGY-FILETREE-12").count(),
-        0
+        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        0,
+        "{results:#?}"
     );
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-TOPOLOGY-FILETREE-07" && result.file() == Some("bad/Cargo.toml")
-    }));
+    assertions::assert_present(
+        &results,
+        "RS-TOPOLOGY-FILETREE-07",
+        "Rust topology required input failed closed",
+        Some("bad/Cargo.toml"),
+        false,
+    );
 }
 
 fn write(path: std::path::PathBuf, content: &str) {
-    fs::write(path, content).expect("write");
+    fs::write(path, content).expect("write fixture file");
 }
 
 #[cfg(unix)]
 fn make_unreadable(path: &std::path::Path) {
     use std::os::unix::fs::PermissionsExt;
 
-    let mut permissions = fs::metadata(path).expect("metadata").permissions();
+    let mut permissions = fs::metadata(path)
+        .expect("read file metadata before making file unreadable")
+        .permissions();
     permissions.set_mode(0o000);
-    fs::set_permissions(path, permissions).expect("set unreadable");
+    fs::set_permissions(path, permissions).expect("set file unreadable");
 }
 
 #[cfg(unix)]
 fn restore_readable(path: &std::path::Path) {
     use std::os::unix::fs::PermissionsExt;
 
-    let mut permissions = fs::metadata(path).expect("metadata").permissions();
+    let mut permissions = fs::metadata(path)
+        .expect("read file metadata before restoring readability")
+        .permissions();
     permissions.set_mode(0o644);
-    fs::set_permissions(path, permissions).expect("restore readable");
+    fs::set_permissions(path, permissions).expect("restore file readability");
 }
