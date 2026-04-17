@@ -77,7 +77,7 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-garde-config-checks-assertions",
- "g3rs-garde-config-checks-types",
+ "g3rs-garde-types",
  "guardrail3-check-types",
  "toml",
 ]

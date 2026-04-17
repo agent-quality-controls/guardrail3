@@ -1,4 +1,4 @@
-use g3rs_garde_config_checks_types::{
+use g3rs_garde_types::{
     G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
 };
 use guardrail3_check_types::G3CheckResult;
@@ -85,5 +85,5 @@ pub fn check(input: &G3RsGardeConfigChecksInput) -> Vec<G3CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod tests;
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod run_tests;

@@ -8,7 +8,7 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["guardrail3", "garde", "checks", "rust", "policy"]
 categories = ["development-tools"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
@@ -19,10 +19,9 @@ g3rs-garde-config-checks-types = { path = "crates/types", version = "0.1.0", opt
 [features]
 default = ["all"]
 all = ["api"]
-api = [
-    "dep:g3rs-garde-config-checks-runtime",
-    "dep:g3rs-garde-config-checks-types",
-]
+types = ["dep:g3rs-garde-config-checks-types"]
+runtime = ["dep:g3rs-garde-config-checks-runtime"]
+api = ["types", "runtime"]
 
 [package.metadata.guardrail3]
 shared = true
@@ -101,3 +100,6 @@ ref_option_ref = "deny"
 trivially_copy_pass_by_ref = "deny"
 multiple_crate_versions = "deny"
 redundant_pub_crate = "allow"
+
+[lints]
+workspace = true
