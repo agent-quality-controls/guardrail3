@@ -1,4 +1,4 @@
-use g3rs_release_repo_root_checks_assertions::rs_release_repo_root_01_release_plz_workflow as assertions;
+use g3rs_release_repo_root_checks_assertions::rs_release_repo_root_01_release_plz_workflow::rule as assertions;
 
 use super::helpers::run;
 

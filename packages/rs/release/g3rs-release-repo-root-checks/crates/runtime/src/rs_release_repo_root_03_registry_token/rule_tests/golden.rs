@@ -1,4 +1,4 @@
-use g3rs_release_repo_root_checks_assertions::rs_release_repo_root_03_registry_token as assertions;
+use g3rs_release_repo_root_checks_assertions::rs_release_repo_root_03_registry_token::rule as assertions;
 
 use super::helpers::run;
 
