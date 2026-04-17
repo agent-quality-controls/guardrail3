@@ -24,4 +24,4 @@ shared = true
 
 [dependencies]
 g3rs-deny-config-checks-runtime = { path = "../runtime" }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }

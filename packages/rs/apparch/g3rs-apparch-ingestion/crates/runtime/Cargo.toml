@@ -30,7 +30,7 @@ syn = { version = "2.0.106", features = ["full"] }
 g3rs-apparch-config-checks = { path = "../../../g3rs-apparch-config-checks" }
 g3rs-apparch-ingestion-assertions = { path = "../assertions" }
 g3rs-apparch-source-checks = { path = "../../../g3rs-apparch-source-checks" }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types" }
 tempfile = "3.20.0"
 
 [lints]

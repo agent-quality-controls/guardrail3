@@ -27,5 +27,5 @@ g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0
 [dev-dependencies]
 g3rs-topology-file-tree-checks = { path = "../../../g3rs-topology-file-tree-checks", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", features = ["runtime"] }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 tempfile = "3"

@@ -21,7 +21,7 @@ shared = true
 
 [dependencies]
 g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types/crates/guardrail3-check-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
 [dev-dependencies]
 g3rs-cargo-filetree-checks-assertions = { path = "../assertions", version = "0.1.0" }
