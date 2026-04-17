@@ -1,0 +1,28 @@
+profile = "library"
+
+allowed_deps = [
+  "cargo-toml-parser",
+  "cliff-toml-parser",
+  "release-plz-toml-parser",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CARGO-CONFIG-07"
+file = "Cargo.toml"
+selector = "clippy:module_name_repetitions"
+reason = "Shared release type names intentionally repeat the family context."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-19"
+file = "src/types.rs"
+selector = "struct:G3RsReleaseConfigCrate"
+reason = "Release config facts intentionally mirror the full normalized crate inventory."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-19"
+file = "src/types.rs"
+selector = "struct:G3RsReleaseConfigRepo"
+reason = "Release repo facts intentionally mirror the full normalized repo release inventory."
