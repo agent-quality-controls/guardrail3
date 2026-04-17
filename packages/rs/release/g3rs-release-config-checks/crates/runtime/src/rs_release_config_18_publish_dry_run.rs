@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_types::{G3RsReleaseConfigCrate, G3RsReleaseDryRunOutcome};
+use g3rs_release_types::{G3RsReleaseConfigCrate, G3RsReleaseDryRunOutcome};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, info};
@@ -31,7 +31,8 @@ pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckRes
             results.push(error(
                 ID,
                 format!("{}: publish dry-run missing", krate.name),
-                "Expected `cargo publish --dry-run` result, but no result was collected.".to_owned(),
+                "Expected `cargo publish --dry-run` result, but no result was collected."
+                    .to_owned(),
                 &krate.cargo_rel_path,
             ));
         }

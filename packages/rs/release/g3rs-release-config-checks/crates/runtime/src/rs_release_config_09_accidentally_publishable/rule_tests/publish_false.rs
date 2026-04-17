@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_assertions::rs_release_config_09_accidentally_publishable as assertions;
+use g3rs_release_config_checks_assertions::rs_release_config_09_accidentally_publishable::rule as assertions;
 
 use super::helpers::run_check;
 

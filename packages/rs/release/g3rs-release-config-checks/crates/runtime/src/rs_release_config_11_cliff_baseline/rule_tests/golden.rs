@@ -1,8 +1,8 @@
-use g3rs_release_config_checks_assertions::rs_release_config_11_cliff_baseline as assertions;
+use g3rs_release_config_checks_assertions::rs_release_config_11_cliff_baseline::rule as assertions;
 
 use super::helpers::run_check;
 
-const GOLDEN: &str = include_str!("../../fixtures/golden_cliff.toml");
+use super::super::GOLDEN;
 
 #[test]
 fn info_when_baseline_correct() {

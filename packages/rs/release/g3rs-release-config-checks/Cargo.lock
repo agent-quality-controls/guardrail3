@@ -77,7 +77,7 @@ dependencies = [
  "cargo-toml-parser",
  "cliff-toml-parser",
  "g3rs-release-config-checks-assertions",
- "g3rs-release-config-checks-types",
+ "g3rs-release-types",
  "guardrail3-check-types",
  "release-plz-toml-parser",
  "semver",
@@ -148,6 +148,7 @@ name = "release-plz-toml-parser"
 version = "0.1.0"
 dependencies = [
  "release-plz-toml-parser-runtime",
+ "release-plz-toml-parser-types",
 ]
 
 [[package]]

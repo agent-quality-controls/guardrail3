@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_assertions::rs_release_config_08_binstall_metadata as assertions;
+use g3rs_release_config_checks_assertions::rs_release_config_08_binstall_metadata::rule as assertions;
 
 use super::helpers::run_check;
 

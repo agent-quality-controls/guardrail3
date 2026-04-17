@@ -1,4 +1,4 @@
-use g3rs_release_config_checks_types::G3RsReleaseConfigChecksInput;
+use g3rs_release_types::G3RsReleaseConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 /// Run all release config checks and return the collected results.
@@ -39,29 +39,13 @@ pub fn check(input: &G3RsReleaseConfigChecksInput) -> Vec<G3CheckResult> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::check;
-
-    #[test]
-    fn skips_repo_level_release_setup_when_nothing_publishes() {
-        let mut input = crate::test_support::config_input_for_repo(
-            Some(
-                r#"
-[[package]]
-name = "some-crate"
-"#,
-            ),
-            Some("# empty cliff.toml\n"),
-        );
-        let repo = input.repo.as_mut().expect("repo should exist");
-        repo.publishable_count = 0;
-        repo.non_publishable_count = 2;
-        repo.semver_checks_installed = false;
-        repo.publish_setting = Some("false".to_owned());
-        repo.release_profile_settings = vec!["lto = true".to_owned()];
-
-        let results = check(&input);
-
-        assert!(results.is_empty(), "{results:#?}");
-    }
+pub(crate) fn repo_input(
+    release_plz_toml: Option<&str>,
+    cliff_toml: Option<&str>,
+) -> G3RsReleaseConfigChecksInput {
+    crate::lib_tests::test_support::config_input_for_repo(release_plz_toml, cliff_toml)
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod run_tests;
