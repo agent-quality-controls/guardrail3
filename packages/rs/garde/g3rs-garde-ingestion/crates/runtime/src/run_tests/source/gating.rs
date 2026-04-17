@@ -1,3 +1,5 @@
+use g3rs_garde_ingestion_assertions::run as assertions;
+
 #[test]
 fn pipeline_stays_quiet_for_non_garde_root_without_adoption_markers() {
     let temp = super::new_root();
@@ -10,10 +12,10 @@ fn pipeline_stays_quiet_for_non_garde_root_without_adoption_markers() {
     super::write(root.join("src/lib.rs"), "fn load() {}\n");
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_no_results(&results);
 }
 
 #[test]
@@ -35,13 +37,10 @@ fn pipeline_activates_for_source_adoption_markers_without_garde_dependency() {
     );
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| result.id() == "RS-GARDE-SOURCE-01"),
-        "{results:#?}"
-    );
+    assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-01", "src/input.rs");
 }
 
 #[test]
@@ -63,15 +62,10 @@ fn pipeline_activates_for_manual_deserialize_adoption_without_garde_dependency()
     );
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id() == "RS-GARDE-SOURCE-02" && result.file() == Some("src/input.rs")),
-        "{results:#?}"
-    );
+    assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-02", "src/input.rs");
 }
 
 #[test]
@@ -89,10 +83,10 @@ fn pipeline_stays_quiet_for_manual_validate_without_explicit_enablement() {
     );
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_no_results(&results);
 }
 
 #[test]
@@ -110,8 +104,8 @@ fn pipeline_stays_quiet_for_derived_validate_without_explicit_enablement() {
     );
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(results.is_empty(), "{results:#?}");
+    assertions::assert_no_results(&results);
 }

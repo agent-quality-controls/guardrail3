@@ -8,7 +8,7 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["guardrail3", "garde", "ingestion", "rust"]
 categories = ["development-tools"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
@@ -23,6 +23,9 @@ api = [
     "dep:g3rs-garde-ingestion-runtime",
     "dep:g3rs-garde-ingestion-types",
 ]
+
+[lints]
+workspace = true
 
 [package.metadata.guardrail3]
 shared = true

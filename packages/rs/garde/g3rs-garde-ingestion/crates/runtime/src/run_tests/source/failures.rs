@@ -1,3 +1,5 @@
+use g3rs_garde_ingestion_assertions::run as assertions;
+
 #[test]
 fn ast_ingestion_allows_missing_rust_policy_when_garde_is_present() {
     let temp = super::new_root();
@@ -10,7 +12,7 @@ fn ast_ingestion_allows_missing_rust_policy_when_garde_is_present() {
     super::write(root.join("src/lib.rs"), "fn ok() {}\n");
 
     let crawl = super::crawl(root);
-    let result = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let result = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 
     assert_eq!(result.source_files.len(), 1, "{result:#?}");
 }
@@ -23,10 +25,10 @@ fn ast_ingestion_fails_when_cargo_is_missing() {
     super::write(root.join("src/lib.rs"), "fn ok() {}\n");
 
     let crawl = super::crawl(root);
-    let result = crate::ingest_for_source_checks(&crawl);
+    let result = super::ingest_for_source_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::CargoTomlNotFound)),
+        matches!(result, Err(super::IngestionError::CargoTomlNotFound)),
         "{result:#?}"
     );
 }
@@ -40,10 +42,10 @@ fn ast_ingestion_fails_when_cargo_is_malformed() {
     super::write(root.join("src/lib.rs"), "fn ok() {}\n");
 
     let crawl = super::crawl(root);
-    let result = crate::ingest_for_source_checks(&crawl);
+    let result = super::ingest_for_source_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::ParseFailed { .. })),
+        matches!(result, Err(super::IngestionError::ParseFailed { .. })),
         "{result:#?}"
     );
 }
@@ -62,10 +64,10 @@ fn ast_ingestion_fails_when_cargo_is_unreadable() {
     super::make_unreadable(&root.join("Cargo.toml"));
 
     let crawl = super::crawl(root);
-    let result = crate::ingest_for_source_checks(&crawl);
+    let result = super::ingest_for_source_checks(&crawl);
 
     assert!(
-        matches!(result, Err(crate::IngestionError::Unreadable { .. })),
+        matches!(result, Err(super::IngestionError::Unreadable { .. })),
         "{result:#?}"
     );
 }
@@ -82,15 +84,10 @@ fn pipeline_reports_malformed_source_via_garde_10() {
     super::write(root.join("src/lib.rs"), "fn broken( {\n");
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("src/lib.rs")
-        }),
-        "{results:#?}"
-    );
+    assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "src/lib.rs");
 }
 
 #[test]
@@ -109,19 +106,11 @@ fn pipeline_reports_malformed_guardrail_via_garde_10() {
     );
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("guardrail3-rs.toml")
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        results.iter().all(|result| result.id() != "RS-GARDE-SOURCE-04"),
-        "{results:#?}"
-    );
+    assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "guardrail3-rs.toml");
+    assertions::assert_rule_id_absent(&results, "RS-GARDE-SOURCE-04");
 }
 
 #[cfg(unix)]
@@ -138,15 +127,10 @@ fn pipeline_reports_unreadable_source_via_garde_10() {
     super::make_unreadable(&root.join("src/lib.rs"));
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("src/lib.rs")
-        }),
-        "{results:#?}"
-    );
+    assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "src/lib.rs");
 }
 
 #[cfg(unix)]
@@ -167,17 +151,9 @@ fn pipeline_reports_unreadable_guardrail_via_garde_10() {
     super::make_unreadable(&root.join("guardrail3-rs.toml"));
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-GARDE-SOURCE-10" && result.file() == Some("guardrail3-rs.toml")
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        results.iter().all(|result| result.id() != "RS-GARDE-SOURCE-04"),
-        "{results:#?}"
-    );
+    assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "guardrail3-rs.toml");
+    assertions::assert_rule_id_absent(&results, "RS-GARDE-SOURCE-04");
 }

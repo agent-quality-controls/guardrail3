@@ -146,31 +146,32 @@ fn parse_rust_policy(crawl: &G3RsWorkspaceCrawl) -> G3RsGardeRustPolicyInput {
         };
     }
 
-    match crate::parse::parse_guardrail3_rs_toml(&entry.path.abs_path) {
-        Ok(parsed) => G3RsGardeRustPolicyInput::Parsed {
-            rel_path: entry.path.rel_path.clone(),
-            garde_enabled: parsed
-                .checks
-                .as_ref()
-                .and_then(|checks| checks.garde)
-                .unwrap_or(false),
-            waivers: collect_waivers(&parsed),
+    match crate::fs::read_to_string(&entry.path.abs_path) {
+        Ok(content) => match guardrail3_rs_toml_parser::parse(&content) {
+            Ok(parsed) => G3RsGardeRustPolicyInput::Parsed {
+                rel_path: entry.path.rel_path.clone(),
+                garde_enabled: parsed
+                    .checks
+                    .as_ref()
+                    .and_then(|checks| checks.garde)
+                    .unwrap_or(false),
+                waivers: collect_waivers(&parsed),
+            },
+            Err(err) => G3RsGardeRustPolicyInput::Invalid {
+                rel_path: entry.path.rel_path.clone(),
+                message: format!(
+                    "Failed to parse `{}` for garde Rust policy resolution: {err}",
+                    entry.path.rel_path
+                ),
+            },
         },
-        Err(IngestionError::Unreadable { reason, .. }) => G3RsGardeRustPolicyInput::Invalid {
+        Err(err) => G3RsGardeRustPolicyInput::Invalid {
             rel_path: entry.path.rel_path.clone(),
             message: format!(
-                "Failed to read `{}` for garde Rust policy resolution: {reason}",
+                "Failed to read `{}` for garde Rust policy resolution: {err}",
                 entry.path.rel_path
             ),
         },
-        Err(IngestionError::ParseFailed { reason, .. }) => G3RsGardeRustPolicyInput::Invalid {
-            rel_path: entry.path.rel_path.clone(),
-            message: format!(
-                "Failed to parse `{}` for garde Rust policy resolution: {reason}",
-                entry.path.rel_path
-            ),
-        },
-        Err(other) => unreachable!("unexpected guardrail3-rs.toml ingestion error: {other}"),
     }
 }
 
@@ -200,3 +201,7 @@ pub fn ingest_for_file_tree_checks(
 ) -> Result<G3RsGardeFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod run_tests;

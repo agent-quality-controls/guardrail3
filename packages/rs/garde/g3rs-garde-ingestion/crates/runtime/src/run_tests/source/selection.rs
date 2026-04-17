@@ -36,7 +36,7 @@ fn ingests_root_scoped_ast_input() {
     super::write(root.join("src/member/src/lib.rs"), "fn nested_root() {}\n");
 
     let crawl = super::crawl(root);
-    let input = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 
     assert_eq!(input.applicability, g3rs_garde_types::G3RsGardeApplicability::Active);
     assert_eq!(
