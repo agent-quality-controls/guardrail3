@@ -141,6 +141,7 @@ name = "nextest-toml-parser"
 version = "0.1.0"
 dependencies = [
  "nextest-toml-parser-runtime",
+ "nextest-toml-parser-types",
 ]
 
 [[package]]
@@ -149,15 +150,15 @@ version = "0.1.0"
 dependencies = [
  "nextest-toml-parser-runtime-assertions",
  "nextest-toml-parser-types",
- "tempfile",
  "toml",
 ]
 
 [[package]]
 name = "nextest-toml-parser-runtime-assertions"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "nextest-toml-parser-runtime",
+ "tempfile",
 ]
 
 [[package]]

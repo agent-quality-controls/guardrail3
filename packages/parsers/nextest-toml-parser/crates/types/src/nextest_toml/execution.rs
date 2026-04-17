@@ -1,326 +1,8 @@
-#![allow(
-    clippy::excessive_nesting,
-    clippy::missing_docs_in_private_items,
-    reason = "this file mirrors nextest.toml schema directly; field names intentionally track the file shape"
-)]
-
 use std::collections::BTreeMap;
 
 use serde::de::{self, Deserializer};
 use serde::{Deserialize, Serialize};
 use toml::Value;
-
-/// Parsed representation of a `.config/nextest.toml` configuration file.
-///
-/// Known nextest keys are typed where the contract is explicit in nextest's
-/// configuration reference. Unknown keys are preserved in `extra` because
-/// nextest itself warns on unknown configuration and otherwise ignores it.
-#[derive(Debug, Clone, PartialEq, Serialize)]
-#[serde(rename_all = "kebab-case")]
-#[non_exhaustive]
-pub struct NextestToml {
-    pub store: Option<StoreConfig>,
-    pub nextest_version: Option<NextestVersionConfig>,
-    #[serde(default)]
-    pub experimental: Vec<ExperimentalFeature>,
-    #[serde(default)]
-    pub test_groups: BTreeMap<String, TestGroupConfig>,
-    #[serde(default, rename = "script")]
-    pub script: BTreeMap<String, SetupScriptConfig>,
-    pub scripts: Option<ScriptsConfig>,
-    #[serde(default)]
-    pub profile: BTreeMap<String, NextestProfile>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-impl<'de> Deserialize<'de> for NextestToml {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        #[derive(Deserialize)]
-        #[serde(rename_all = "kebab-case")]
-        struct RawNextestToml {
-            store: Option<StoreConfig>,
-            nextest_version: Option<NextestVersionConfig>,
-            #[serde(default)]
-            experimental: Vec<ExperimentalFeature>,
-            #[serde(default)]
-            test_groups: BTreeMap<String, TestGroupConfig>,
-            #[serde(default, rename = "script")]
-            script: BTreeMap<String, SetupScriptConfig>,
-            scripts: Option<ScriptsConfig>,
-            #[serde(default)]
-            profile: BTreeMap<String, NextestProfile>,
-            #[serde(flatten)]
-            extra: BTreeMap<String, Value>,
-        }
-
-        let raw = RawNextestToml::deserialize(deserializer)?;
-        let scripts = raw.scripts.as_ref();
-        let has_legacy_setup = !raw.script.is_empty();
-        let has_setup_scripts = scripts.is_some_and(|scripts| !scripts.setup.is_empty());
-        let has_wrapper_scripts = scripts.is_some_and(|scripts| !scripts.wrapper.is_empty());
-        let has_experimental_setup = raw.experimental.contains(&ExperimentalFeature::SetupScripts);
-        let has_experimental_wrapper =
-            raw.experimental.contains(&ExperimentalFeature::WrapperScripts);
-
-        if has_legacy_setup && has_setup_scripts {
-            return Err(de::Error::custom(
-                "invalid nextest.toml: [script.*] cannot be used together with [scripts.setup.*]",
-            ));
-        }
-
-        if (has_legacy_setup || has_setup_scripts) && !has_experimental_setup {
-            return Err(de::Error::custom(
-                "invalid nextest.toml: setup scripts require experimental = [\"setup-scripts\"]",
-            ));
-        }
-
-        if has_wrapper_scripts && !has_experimental_wrapper {
-            return Err(de::Error::custom(
-                "invalid nextest.toml: wrapper scripts require experimental = [\"wrapper-scripts\"]",
-            ));
-        }
-
-        Ok(Self {
-            store: raw.store,
-            nextest_version: raw.nextest_version,
-            experimental: raw.experimental,
-            test_groups: raw.test_groups,
-            script: raw.script,
-            scripts: raw.scripts,
-            profile: raw.profile,
-            extra: raw.extra,
-        })
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct StoreConfig {
-    pub dir: Option<String>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum NextestVersionConfig {
-    Simple(String),
-    Detailed(NextestVersionDetail),
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct NextestVersionDetail {
-    pub required: Option<String>,
-    pub recommended: Option<String>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum ExperimentalFeature {
-    SetupScripts,
-    WrapperScripts,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-#[non_exhaustive]
-pub struct NextestProfile {
-    pub inherits: Option<String>,
-    pub default_filter: Option<String>,
-    pub slow_timeout: Option<TimeoutConfig>,
-    pub leak_timeout: Option<TimeoutConfig>,
-    pub global_timeout: Option<String>,
-    pub test_threads: Option<TestThreads>,
-    pub threads_required: Option<ThreadsRequired>,
-    #[serde(default)]
-    pub run_extra_args: Vec<String>,
-    pub retries: Option<RetryPolicy>,
-    pub flaky_result: Option<FlakyResult>,
-    pub status_level: Option<StatusLevel>,
-    pub final_status_level: Option<FinalStatusLevel>,
-    pub failure_output: Option<TestOutputDisplay>,
-    pub success_output: Option<TestOutputDisplay>,
-    pub fail_fast: Option<FailFastConfig>,
-    pub test_group: Option<String>,
-    #[serde(default)]
-    pub overrides: Vec<ProfileOverride>,
-    #[serde(default)]
-    pub scripts: Vec<ProfileScriptConfig>,
-    pub junit: Option<JunitConfig>,
-    pub archive: Option<ArchiveConfig>,
-    pub bench: Option<NextestBenchConfig>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct ScriptsConfig {
-    #[serde(default)]
-    pub setup: BTreeMap<String, SetupScriptConfig>,
-    #[serde(default)]
-    pub wrapper: BTreeMap<String, WrapperScriptConfig>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct SetupScriptConfig {
-    pub command: ScriptCommand,
-    pub slow_timeout: Option<TimeoutConfig>,
-    pub leak_timeout: Option<TimeoutConfig>,
-    pub capture_stdout: Option<bool>,
-    pub capture_stderr: Option<bool>,
-    pub junit: Option<ScriptJunitConfig>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct WrapperScriptConfig {
-    pub command: ScriptCommand,
-    pub target_runner: Option<TargetRunnerMode>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum ScriptCommand {
-    Simple(String),
-    Argv(Vec<String>),
-    Detailed(ScriptCommandDetail),
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct ScriptCommandDetail {
-    pub command_line: String,
-    pub relative_to: Option<RelativeTo>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum TargetRunnerMode {
-    Ignore,
-    OverridesWrapper,
-    WithinWrapper,
-    AroundWrapper,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct ProfileScriptConfig {
-    pub platform: Option<PlatformConfig>,
-    pub filter: Option<String>,
-    pub setup: Option<ScriptReference>,
-    pub list_wrapper: Option<String>,
-    pub run_wrapper: Option<String>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum ScriptReference {
-    Single(String),
-    Multiple(Vec<String>),
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct ProfileOverride {
-    pub filter: Option<String>,
-    pub platform: Option<PlatformConfig>,
-    pub default_filter: Option<String>,
-    pub priority: Option<i32>,
-    pub threads_required: Option<ThreadsRequired>,
-    #[serde(default)]
-    pub run_extra_args: Vec<String>,
-    pub retries: Option<RetryPolicy>,
-    pub flaky_result: Option<FlakyResult>,
-    pub slow_timeout: Option<TimeoutConfig>,
-    pub bench: Option<OverrideBenchConfig>,
-    pub leak_timeout: Option<TimeoutConfig>,
-    pub test_group: Option<String>,
-    pub success_output: Option<TestOutputDisplay>,
-    pub failure_output: Option<TestOutputDisplay>,
-    pub junit: Option<OverrideJunitConfig>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct OverrideBenchConfig {
-    pub slow_timeout: Option<TimeoutConfig>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct OverrideJunitConfig {
-    pub store_success_output: Option<bool>,
-    pub store_failure_output: Option<bool>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum PlatformConfig {
-    Name(String),
-    Detailed(PlatformDetail),
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct PlatformDetail {
-    pub host: Option<String>,
-    pub target: Option<String>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct JunitConfig {
-    pub path: Option<String>,
-    pub report_name: Option<String>,
-    pub store_success_output: Option<bool>,
-    pub store_failure_output: Option<bool>,
-    pub flaky_fail_status: Option<JunitFlakyFailStatus>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum JunitFlakyFailStatus {
-    Failure,
-    Success,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct ScriptJunitConfig {
-    pub store_success_output: Option<bool>,
-    pub store_failure_output: Option<bool>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -365,7 +47,10 @@ impl<'de> Deserialize<'de> for ArchiveDepth {
             type Value = ArchiveDepth;
 
             fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                write!(formatter, "a non-negative integer or the string \"infinite\"")
+                write!(
+                    formatter,
+                    "a non-negative integer or the string \"infinite\""
+                )
             }
 
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
@@ -395,8 +80,8 @@ impl<'de> Deserialize<'de> for ArchiveDepth {
                 if v < 0 {
                     return Err(E::invalid_value(de::Unexpected::Signed(v), &self));
                 }
-                let value =
-                    u32::try_from(v).map_err(|_| E::invalid_value(de::Unexpected::Signed(v), &self))?;
+                let value = u32::try_from(v)
+                    .map_err(|_| E::invalid_value(de::Unexpected::Signed(v), &self))?;
                 Ok(ArchiveDepth::Count(value))
             }
         }
@@ -471,8 +156,8 @@ impl<'de> Deserialize<'de> for TestGroupMaxThreads {
                 if v <= 0 {
                     return Err(E::invalid_value(de::Unexpected::Signed(v), &self));
                 }
-                let value =
-                    u32::try_from(v).map_err(|_| E::invalid_value(de::Unexpected::Signed(v), &self))?;
+                let value = u32::try_from(v)
+                    .map_err(|_| E::invalid_value(de::Unexpected::Signed(v), &self))?;
                 Ok(TestGroupMaxThreads::Count(value))
             }
         }
@@ -740,8 +425,8 @@ impl<'de> Deserialize<'de> for RetryPolicy {
                 if v < 0 {
                     return Err(E::invalid_value(de::Unexpected::Signed(v), &self));
                 }
-                let value =
-                    u32::try_from(v).map_err(|_| E::invalid_value(de::Unexpected::Signed(v), &self))?;
+                let value = u32::try_from(v)
+                    .map_err(|_| E::invalid_value(de::Unexpected::Signed(v), &self))?;
                 Ok(RetryPolicy::Count(value))
             }
 

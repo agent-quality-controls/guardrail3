@@ -1,4 +1,4 @@
-use nextest_toml_parser_types::NextestToml;
+use nextest_toml_parser_types::nextest_toml::NextestToml;
 
 use crate::Error;
 
@@ -7,7 +7,7 @@ use crate::Error;
 /// # Errors
 ///
 /// Returns [`Error::Toml`] when the input is not valid `nextest.toml`.
-#[allow(clippy::disallowed_methods)] // reason: this crate IS the centralized nextest.toml parser — toml::from_str is its core purpose
+#[allow(clippy::disallowed_methods)] // reason: this crate IS the centralized nextest.toml parser
 pub fn parse(input: &str) -> Result<NextestToml, Error> {
     Ok(toml::from_str(input)?)
 }
@@ -23,5 +23,5 @@ pub fn from_path(path: impl AsRef<std::path::Path>) -> Result<NextestToml, Error
 }
 
 #[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod tests;
+#[path = "parser_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod parser_tests;
