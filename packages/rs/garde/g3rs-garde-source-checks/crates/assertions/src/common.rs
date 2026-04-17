@@ -16,7 +16,10 @@ pub(crate) fn rule_results<'a>(
     results: &'a [G3CheckResult],
     rule_id: &str,
 ) -> Vec<&'a G3CheckResult> {
-    results.iter().filter(|result| result.id() == rule_id).collect()
+    results
+        .iter()
+        .filter(|result| result.id() == rule_id)
+        .collect()
 }
 
 pub(crate) fn assert_rule_results(

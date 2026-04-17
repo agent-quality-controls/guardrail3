@@ -1,13 +1,13 @@
-use g3rs_garde_source_checks_assertions::rs_garde_ast_04_query_as_inventory as assertions;
+use g3rs_garde_source_checks_assertions::rs_garde_ast_04_query_as_inventory::rule as assertions;
 
 #[test]
 fn errors_when_query_as_has_no_escape_hatch_reason() {
-    let fixture = crate::test_support::fixture(
+    let fixture = super::helpers::fixture(
         &[(
             "src/db.rs",
             "fn load() {\n    let _row = sqlx::query_as!(User, \"select 1\");\n}\n",
         )],
-        crate::test_support::default_guardrail_toml(),
+        super::helpers::default_guardrail_toml(),
     );
 
     let results = fixture.run();
