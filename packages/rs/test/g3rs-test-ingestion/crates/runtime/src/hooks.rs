@@ -4,7 +4,7 @@ use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 
 use crate::hook_shell::{ExecutableLine, parse_script};
 use crate::roots::{OwnedTestRoot, TestRootDiscovery, join_under_root};
-use crate::run::IngestionError;
+use crate::ingest::IngestionError;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub(crate) struct MutationHookState {

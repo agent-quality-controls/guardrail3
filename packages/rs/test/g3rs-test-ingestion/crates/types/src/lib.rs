@@ -1,7 +1,8 @@
 mod error;
 
+#[cfg(feature = "api")]
 pub use g3rs_test_types::{
-    G3RsTestSourceChecksInput, G3RsTestConfigChecksInput, G3RsTestFileTreeChecksInput,
+    G3RsTestConfigChecksInput, G3RsTestFileTreeChecksInput, G3RsTestSourceChecksInput,
 };
 
 #[cfg(feature = "api")]

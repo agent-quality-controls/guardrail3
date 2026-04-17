@@ -111,9 +111,7 @@ pub(crate) fn parse_script(content: &str) -> ParsedShellScript<'_> {
         executable_lines.push(executable);
     }
 
-    ParsedShellScript {
-        executable_lines,
-    }
+    ParsedShellScript { executable_lines }
 }
 
 fn collect_logical_lines(content: &str) -> Vec<(usize, &str)> {

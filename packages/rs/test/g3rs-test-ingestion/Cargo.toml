@@ -8,7 +8,7 @@ rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
 keywords = ["guardrail3", "test", "ingestion", "rust"]
 categories = ["development-tools"]
-publish = true
+publish = false
 readme = "README.md"
 include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
@@ -19,10 +19,9 @@ g3rs-test-ingestion-types = { path = "crates/types", version = "0.1.0", optional
 [features]
 default = ["all"]
 all = ["api"]
-api = [
-    "dep:g3rs-test-ingestion-runtime",
-    "dep:g3rs-test-ingestion-types",
-]
+types = ["dep:g3rs-test-ingestion-types"]
+runtime = ["dep:g3rs-test-ingestion-runtime"]
+api = ["types", "runtime"]
 
 [package.metadata.guardrail3]
 shared = true

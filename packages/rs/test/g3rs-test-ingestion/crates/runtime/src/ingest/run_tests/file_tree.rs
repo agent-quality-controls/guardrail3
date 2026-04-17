@@ -1,9 +1,8 @@
 use std::collections::BTreeMap;
-use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use guardrail3_check_types::G3CheckResult;
+use g3rs_test_ingestion_assertions::ingest::run::{assert_file_has_result, assert_result};
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -17,15 +16,15 @@ fn git_init(path: &Path) {
 
 fn write(path: impl AsRef<Path>, content: &str) {
     if let Some(parent) = path.as_ref().parent() {
-        fs::create_dir_all(parent).expect("create parent directory");
+        super::super::create_fixture_dir(parent).expect("create parent directory");
     }
-    fs::write(path, content).expect("write fixture file");
+    super::super::write_fixture(path.as_ref(), content).expect("write fixture file");
 }
 
-fn run_file_tree_pipeline(root: &Path) -> Vec<G3CheckResult> {
+fn run_file_tree_pipeline(root: &Path) -> Vec<guardrail3_check_types::G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs =
-        crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
+    let inputs = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
     inputs
         .iter()
         .flat_map(g3rs_test_file_tree_checks::check)
@@ -77,8 +76,8 @@ fn ingest_for_file_tree_checks_classifies_structural_file_roles() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs =
-        crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
+    let inputs = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
 
     assert_eq!(inputs.len(), 1, "{inputs:#?}");
     let input = &inputs[0];
@@ -142,8 +141,8 @@ fn ingest_for_file_tree_checks_records_nested_assertions_manifest_path() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs =
-        crate::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
+    let inputs = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
 
     assert_eq!(inputs.len(), 1, "{inputs:#?}");
     let component = &inputs[0].components[0];
@@ -199,27 +198,18 @@ fn file_tree_pipeline_reports_structural_test_findings() {
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TEST-FILETREE-02" && result.file() == Some("src/tests")
-        }),
-        "{results:#?}"
+    assert_file_has_result(&results, "src/tests", "RS-TEST-FILETREE-02");
+    assert_result(
+        &results,
+        "RS-TEST-FILETREE-03",
+        "assertions crate missing",
+        Some("crates/assertions/Cargo.toml"),
     );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TEST-FILETREE-03"
-                && result.title() == "assertions crate missing"
-                && result.file() == Some("crates/assertions/Cargo.toml")
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TEST-FILETREE-18"
-                && result.title() == "test_support imports local component crate"
-                && result.file() == Some("test_support/src/lib.rs")
-        }),
-        "{results:#?}"
+    assert_result(
+        &results,
+        "RS-TEST-FILETREE-18",
+        "test_support imports local component crate",
+        Some("test_support/src/lib.rs"),
     );
 }
 
@@ -247,31 +237,35 @@ fn file_tree_pipeline_reports_input_failures_as_rs_test_10() {
     );
     let unreadable = root.join("crates/runtime/tests/broken.rs");
     write(&unreadable, "#[test]\nfn broken() { assert!(true); }\n");
-    let mut permissions = fs::metadata(&unreadable).expect("metadata").permissions();
+    let mut permissions = super::super::read_fixture_metadata(&unreadable)
+        .expect("should read unreadable fixture metadata before chmod")
+        .permissions();
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         permissions.set_mode(0o000);
-        fs::set_permissions(&unreadable, permissions).expect("set unreadable permissions");
+        super::super::set_fixture_permissions(&unreadable, permissions)
+            .expect("should mark fixture unreadable for file-tree ingestion");
     }
 
     let results = run_file_tree_pipeline(root);
 
     #[cfg(unix)]
     {
-        let mut restore = fs::metadata(&unreadable).expect("metadata").permissions();
+        let mut restore = super::super::read_fixture_metadata(&unreadable)
+            .expect("should read unreadable fixture metadata before restore")
+            .permissions();
         use std::os::unix::fs::PermissionsExt;
         restore.set_mode(0o644);
-        fs::set_permissions(&unreadable, restore).expect("restore permissions");
+        super::super::set_fixture_permissions(&unreadable, restore)
+            .expect("should restore unreadable fixture permissions after assertion");
     }
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TEST-FILETREE-10"
-                && result.file() == Some("crates/runtime/tests/broken.rs")
-                && result.title() == "failed to read test input"
-        }),
-        "{results:#?}"
+    assert_result(
+        &results,
+        "RS-TEST-FILETREE-10",
+        "failed to read test input",
+        Some("crates/runtime/tests/broken.rs"),
     );
 }
 
@@ -309,13 +303,11 @@ fn file_tree_pipeline_reports_nested_ad_hoc_src_tests_tree() {
 
     let results = run_file_tree_pipeline(root);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TEST-FILETREE-02"
-                && result.title() == "ad hoc src/tests tree"
-                && result.file() == Some("crates/runtime/src/foo/tests")
-        }),
-        "{results:#?}"
+    assert_result(
+        &results,
+        "RS-TEST-FILETREE-02",
+        "ad hoc src/tests tree",
+        Some("crates/runtime/src/foo/tests"),
     );
 }
 

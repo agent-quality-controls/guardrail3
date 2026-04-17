@@ -1,9 +1,8 @@
 use std::collections::BTreeMap;
-use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use guardrail3_check_types::G3CheckResult;
+use g3rs_test_ingestion_assertions::ingest::run::{assert_file_has_result, assert_result};
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -17,27 +16,19 @@ fn git_init(path: &Path) {
 
 fn write(path: impl AsRef<Path>, content: &str) {
     if let Some(parent) = path.as_ref().parent() {
-        fs::create_dir_all(parent).expect("create parent directory");
+        super::super::create_fixture_dir(parent).expect("create parent directory");
     }
-    fs::write(path, content).expect("write fixture file");
+    super::super::write_fixture(path.as_ref(), content).expect("write fixture file");
 }
 
-fn run_ast_pipeline(root: &Path) -> Vec<G3CheckResult> {
+fn run_ast_pipeline(root: &Path) -> Vec<guardrail3_check_types::G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let inputs = super::super::ingest_for_source_checks(&crawl)
+        .expect("source ingestion should succeed");
     inputs
         .iter()
         .flat_map(g3rs_test_source_checks::check)
         .collect()
-}
-
-fn findings_by_file(results: &[G3CheckResult]) -> BTreeMap<String, Vec<&G3CheckResult>> {
-    let mut by_file = BTreeMap::<String, Vec<&G3CheckResult>>::new();
-    for result in results {
-        let key = result.file().unwrap_or("<none>").to_owned();
-        by_file.entry(key).or_default().push(result);
-    }
-    by_file
 }
 
 #[test]
@@ -60,32 +51,11 @@ fn pipeline_reports_simple_test_ast_findings() {
     );
 
     let results = run_ast_pipeline(root);
-    let by_file = findings_by_file(&results);
 
-    assert!(
-        by_file["src/lib.rs"]
-            .iter()
-            .any(|result| result.id() == "RS-TEST-SOURCE-01"),
-        "{results:#?}"
-    );
-    assert!(
-        by_file["tests/quality.rs"]
-            .iter()
-            .any(|result| result.id() == "RS-TEST-SOURCE-04"),
-        "{results:#?}"
-    );
-    assert!(
-        by_file["tests/quality.rs"]
-            .iter()
-            .any(|result| result.id() == "RS-TEST-SOURCE-05"),
-        "{results:#?}"
-    );
-    assert!(
-        by_file["tests/quality.rs"]
-            .iter()
-            .any(|result| result.id() == "RS-TEST-SOURCE-08"),
-        "{results:#?}"
-    );
+    assert_file_has_result(&results, "src/lib.rs", "RS-TEST-SOURCE-01");
+    assert_file_has_result(&results, "tests/quality.rs", "RS-TEST-SOURCE-04");
+    assert_file_has_result(&results, "tests/quality.rs", "RS-TEST-SOURCE-05");
+    assert_file_has_result(&results, "tests/quality.rs", "RS-TEST-SOURCE-08");
 }
 
 #[test]
@@ -124,26 +94,12 @@ fn pipeline_reports_assertions_boundary_rules() {
     );
 
     let results = run_ast_pipeline(root);
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TEST-SOURCE-16"
-                && result.file() == Some("crates/assertions/src/lib.rs")
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TEST-SOURCE-17"
-                && result.file() == Some("crates/runtime/tests/api.rs")
-        }),
-        "{results:#?}"
-    );
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TEST-SOURCE-16"
-                && result.file() == Some("crates/runtime/src/feature_tests/mod.rs")
-        }),
-        "{results:#?}"
+    assert_file_has_result(&results, "crates/assertions/src/lib.rs", "RS-TEST-SOURCE-16");
+    assert_file_has_result(&results, "crates/runtime/tests/api.rs", "RS-TEST-SOURCE-17");
+    assert_file_has_result(
+        &results,
+        "crates/runtime/src/feature_tests/mod.rs",
+        "RS-TEST-SOURCE-16",
     );
 }
 
@@ -162,13 +118,11 @@ fn pipeline_reports_malformed_owned_source_as_rs_test_10() {
 
     let results = run_ast_pipeline(root);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id() == "RS-TEST-SOURCE-10"
-                && result.file() == Some("tests/broken.rs")
-                && result.title() == "failed to read test input"
-        }),
-        "{results:#?}"
+    assert_result(
+        &results,
+        "RS-TEST-SOURCE-10",
+        "failed to read test input",
+        Some("tests/broken.rs"),
     );
 }
 
@@ -220,7 +174,8 @@ fn ingest_for_source_checks_classifies_root_files_by_role() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let inputs = super::super::ingest_for_source_checks(&crawl)
+        .expect("source ingestion should succeed");
 
     assert_eq!(inputs.len(), 1, "{inputs:#?}");
     let input = &inputs[0];
@@ -290,7 +245,8 @@ fn ingest_for_source_checks_expects_package_style_assertions_after_nested_fix_at
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = crate::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let inputs = super::super::ingest_for_source_checks(&crawl)
+        .expect("source ingestion should succeed");
 
     assert_eq!(inputs.len(), 1, "{inputs:#?}");
     let input = &inputs[0];

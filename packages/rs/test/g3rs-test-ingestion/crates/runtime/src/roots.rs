@@ -4,7 +4,7 @@ use cargo_toml_parser::{types::CargoToml, parse};
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 use glob::Pattern;
 
-use crate::run::IngestionError;
+use crate::ingest::IngestionError;
 
 #[derive(Debug, Clone)]
 pub(crate) struct OwnedTestRoot {
