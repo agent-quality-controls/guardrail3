@@ -67,6 +67,7 @@ name = "mutants-toml-parser"
 version = "0.1.0"
 dependencies = [
  "mutants-toml-parser-runtime",
+ "mutants-toml-parser-types",
 ]
 
 [[package]]
@@ -82,7 +83,6 @@ name = "mutants-toml-parser-types"
 version = "0.1.0"
 dependencies = [
  "serde",
- "toml",
 ]
 
 [[package]]
@@ -90,6 +90,7 @@ name = "nextest-toml-parser"
 version = "0.1.0"
 dependencies = [
  "nextest-toml-parser-runtime",
+ "nextest-toml-parser-types",
 ]
 
 [[package]]

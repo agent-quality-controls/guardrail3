@@ -1,5 +1,7 @@
+#[cfg(feature = "api")]
 mod types;
 
+#[cfg(feature = "api")]
 pub use types::{
     G3RsTestComponentFileTreeFacts, G3RsTestComponentSourceFacts, G3RsTestConfigChecksInput,
     G3RsTestFileKind, G3RsTestFileTreeChecksInput, G3RsTestFileTreeInputFailure,
