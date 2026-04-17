@@ -272,6 +272,34 @@ fn nested_clippy_toml_is_not_selected() {
 }
 
 #[test]
+fn threads_guardrail3_waivers_into_config_input() {
+    let temp = tempdir().expect("should create temporary directory for test workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(root.join("clippy.toml"), "max-struct-bools = 9\n");
+    write(
+        root.join("guardrail3-rs.toml"),
+        "profile = \"library\"\n\
+[[waivers]]\n\
+rule = \"RS-CLIPPY-CONFIG-01\"\n\
+file = \"clippy.toml\"\n\
+selector = \"key:max-struct-bools\"\n\
+reason = \"schema mirror\"\n",
+    );
+
+    let crawl = crawl(root);
+    let input = crate::run::ingest_for_config_checks(&crawl)
+        .expect("ingestion should thread guardrail waivers into config input");
+
+    assert_eq!(input.waivers.len(), 1, "{input:#?}");
+    assert_eq!(input.waivers[0].rule, "RS-CLIPPY-CONFIG-01", "{input:#?}");
+    assert_eq!(input.waivers[0].file, "clippy.toml", "{input:#?}");
+    assert_eq!(input.waivers[0].selector, "key:max-struct-bools", "{input:#?}");
+    assert_eq!(input.waivers[0].reason, "schema mirror", "{input:#?}");
+}
+
+#[test]
 fn malformed_root_cargo_toml_does_not_abort_clippy_config_ingestion() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
     let root = temp.path();

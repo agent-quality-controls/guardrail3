@@ -6,10 +6,8 @@ use g3rs_garde_config_checks_types::{
 
 #[test]
 fn inventories_when_garde_dependency_present() {
-    let cargo = parse(
-        "[workspace]\nmembers = []\n[dependencies]\ngarde = \"0.1\"\n",
-    )
-    .expect("valid cargo");
+    let cargo =
+        parse("[workspace]\nmembers = []\n[dependencies]\ngarde = \"0.1\"\n").expect("valid cargo");
     let input = G3RsGardeConfigChecksInput {
         applicability: G3RsGardeApplicability::Active,
         cargo_rel_path: "Cargo.toml".to_owned(),

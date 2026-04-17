@@ -2,9 +2,9 @@
 
 use std::collections::BTreeSet;
 
-use g3rs_release_repo_root_checks_types::G3RsReleaseRepoRootChecksInput;
+use g3rs_release_repo_root_checks_types::G3RsReleaseConfigRepo;
 
-pub(crate) fn input() -> G3RsReleaseRepoRootChecksInput {
+pub(crate) fn input() -> G3RsReleaseConfigRepo {
     g3rs_release_types::G3RsReleaseConfigRepo {
         cargo_rel_path: "Cargo.toml".to_owned(),
         release_plz_rel_path: "release-plz.toml".to_owned(),

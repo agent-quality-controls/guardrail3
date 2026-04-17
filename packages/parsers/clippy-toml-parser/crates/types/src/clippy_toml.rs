@@ -18,7 +18,6 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[non_exhaustive]
-#[allow(clippy::struct_excessive_bools)] // reason: clippy.toml has many boolean options and this struct intentionally mirrors the file surface
 pub struct ClippyToml {
     #[serde(default)]
     pub absolute_paths_allowed_crates: Vec<String>,
@@ -355,9 +354,7 @@ impl SourceItemOrderingModuleItemKind {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct SourceItemOrderingModuleItemGroupings(
-    pub ModuleItemGroupingEntries,
-);
+pub struct SourceItemOrderingModuleItemGroupings(pub ModuleItemGroupingEntries);
 
 impl<'de> Deserialize<'de> for SourceItemOrderingModuleItemGroupings {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -468,9 +465,7 @@ impl SourceItemOrderingTraitAssocItemKind {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct SourceItemOrderingTraitAssocItemKinds(
-    pub Vec<SourceItemOrderingTraitAssocItemKind>,
-);
+pub struct SourceItemOrderingTraitAssocItemKinds(pub Vec<SourceItemOrderingTraitAssocItemKind>);
 
 impl<'de> Deserialize<'de> for SourceItemOrderingTraitAssocItemKinds {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

@@ -1,5 +1,5 @@
 use cargo_toml_parser::types::CargoToml;
-use clippy_toml_parser::ClippyToml;
+use clippy_toml_parser::types::ClippyToml;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -1,6 +1,7 @@
 use g3rs_clippy_types::{
     G3RsClippyCargoConfigOverride, G3RsClippyConfigChecksInput, G3RsClippyConfigState,
     G3RsClippyFileTreeChecksInput, G3RsClippyRustPolicyState, G3RsClippyShadowedConfig,
+    G3RsClippyWaiver,
 };
 
 pub(crate) fn assemble_config_input(
@@ -9,6 +10,7 @@ pub(crate) fn assemble_config_input(
     rust_policy: G3RsClippyRustPolicyState,
     published_library_policy: bool,
     cargo_config_overrides: Vec<G3RsClippyCargoConfigOverride>,
+    waivers: Vec<G3RsClippyWaiver>,
 ) -> G3RsClippyConfigChecksInput {
     G3RsClippyConfigChecksInput {
         clippy_rel_path,
@@ -16,6 +18,7 @@ pub(crate) fn assemble_config_input(
         rust_policy,
         published_library_policy,
         cargo_config_overrides,
+        waivers,
     }
 }
 

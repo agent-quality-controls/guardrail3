@@ -4,14 +4,14 @@
     reason = "parser tests use direct exact-shape assertions for concise contract proofs"
 )]
 
-use crate::{
-    DisallowedField, DisallowedPath, InherentImplLintScope, MatchLintBehaviour,
-    PubUnderscoreFieldsBehaviour, SourceItemOrderingWithinModuleItemGroupings,
-};
 use clippy_toml_parser_runtime_assertions::parser as assertions;
 use helpers::{parse_fixture, parse_from_tempfile};
 
 use super::helpers;
+use super::super::{
+    InherentImplLintScope, MatchLintBehaviour, PubUnderscoreFieldsBehaviour,
+    SourceItemOrderingWithinModuleItemGroupings,
+};
 
 #[test]
 fn empty_string_yields_empty_config() {
@@ -75,19 +75,14 @@ disallowed-methods = [
     );
 
     assertions::assert_list_len(&cfg.disallowed_methods, 2, "disallowed_methods");
-    assertions::assert_ban_entry(
-        cfg.disallowed_methods.first(),
+    assertions::assert_first_detailed_method(
+        &cfg,
         "std::env::var",
         Some("Use config module"),
+        Some("crate::config::var"),
+        Some(true),
     );
     assertions::assert_ban_entry(cfg.disallowed_methods.get(1), "std::process::exit", None);
-    match cfg.disallowed_methods.first() {
-        Some(DisallowedPath::Detailed(detail)) => {
-            assert_eq!(detail.replacement.as_deref(), Some("crate::config::var"));
-            assert_eq!(detail.allow_invalid, Some(true));
-        }
-        _ => panic!("first disallowed method should be detailed"),
-    }
 }
 
 #[test]
@@ -117,13 +112,21 @@ allow-unwrap-in-tests = false
     );
 
     assertions::assert_bool_field(cfg.allow_dbg_in_tests, Some(false), "allow_dbg_in_tests");
-    assertions::assert_bool_field(cfg.allow_print_in_tests, Some(false), "allow_print_in_tests");
+    assertions::assert_bool_field(
+        cfg.allow_print_in_tests,
+        Some(false),
+        "allow_print_in_tests",
+    );
     assertions::assert_bool_field(
         cfg.allow_expect_in_tests,
         Some(true),
         "allow_expect_in_tests",
     );
-    assertions::assert_bool_field(cfg.allow_panic_in_tests, Some(false), "allow_panic_in_tests");
+    assertions::assert_bool_field(
+        cfg.allow_panic_in_tests,
+        Some(false),
+        "allow_panic_in_tests",
+    );
     assertions::assert_bool_field(
         cfg.allow_unwrap_in_tests,
         Some(false),
@@ -179,36 +182,51 @@ enforced-import-renames = [
     );
     assert_eq!(cfg.array_size_threshold, Some(4096));
     assertions::assert_bool_field(cfg.check_private_items, Some(true), "check_private_items");
-    assertions::assert_string_list(&cfg.doc_valid_idents, &["OpenAI", "GitHub"], "doc_valid_idents");
+    assertions::assert_string_list(
+        &cfg.doc_valid_idents,
+        &["OpenAI", "GitHub"],
+        "doc_valid_idents",
+    );
     assertions::assert_bool_field(
         cfg.warn_on_all_wildcard_imports,
         Some(true),
         "warn_on_all_wildcard_imports",
     );
-    assert_eq!(cfg.matches_for_let_else, Some(MatchLintBehaviour::Never));
-    assert_eq!(cfg.inherent_impl_lint_scope, Some(InherentImplLintScope::File));
-    assert_eq!(
-        cfg.pub_underscore_fields_behavior,
-        Some(PubUnderscoreFieldsBehaviour::PubliclyExported),
+    assertions::assert_matches_for_let_else(
+        &cfg,
+        MatchLintBehaviour::Never,
     );
-    assert_eq!(
-        cfg.module_items_ordered_within_groupings,
-        Some(SourceItemOrderingWithinModuleItemGroupings::None),
+    assertions::assert_inherent_impl_lint_scope(
+        &cfg,
+        InherentImplLintScope::File,
+    );
+    assertions::assert_pub_underscore_fields_behavior(
+        &cfg,
+        PubUnderscoreFieldsBehaviour::PubliclyExported,
+    );
+    assertions::assert_module_items_ordered_within_groupings(
+        &cfg,
+        SourceItemOrderingWithinModuleItemGroupings::None,
     );
     assert_eq!(cfg.standard_macro_braces.len(), 1, "standard_macro_braces");
     assert_eq!(cfg.standard_macro_braces[0].name, "println");
     assert_eq!(cfg.standard_macro_braces[0].brace, '(');
-    assert_eq!(cfg.enforced_import_renames.len(), 1, "enforced_import_renames");
-    assert_eq!(cfg.enforced_import_renames[0].path, "std::collections::HashMap");
+    assert_eq!(
+        cfg.enforced_import_renames.len(),
+        1,
+        "enforced_import_renames"
+    );
+    assert_eq!(
+        cfg.enforced_import_renames[0].path,
+        "std::collections::HashMap"
+    );
     assert_eq!(cfg.enforced_import_renames[0].rename, "Map");
-    match cfg.disallowed_fields.first() {
-        Some(DisallowedField::Detailed(detail)) => {
-            assert_eq!(detail.path, "crate::Thing::field");
-            assert_eq!(detail.reason.as_deref(), Some("use accessor"));
-            assert_eq!(detail.allow_invalid, Some(true));
-        }
-        _ => panic!("disallowed field should be detailed"),
-    }
+    assertions::assert_first_detailed_field(
+        &cfg,
+        "crate::Thing::field",
+        Some("use accessor"),
+        Some(true),
+    );
 }
 
 #[test]

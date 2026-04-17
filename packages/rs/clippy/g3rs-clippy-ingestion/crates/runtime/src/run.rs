@@ -13,12 +13,23 @@ pub fn ingest_for_config_checks(
         .ok_or(IngestionError::ClippyTomlNotFound)?;
 
     let clippy = crate::parse::parse_clippy_state(&entry.path.abs_path);
-    let rust_policy = match crate::select::select_root_guardrail3_rs_toml(crawl) {
-        Some(entry) => crate::parse::parse_rust_policy_state(
-            &entry.path.rel_path,
-            &entry.path.abs_path,
-        ),
-        None => G3RsClippyRustPolicyState::Missing,
+    let (rust_policy, waivers) = match crate::select::select_root_guardrail3_rs_toml(crawl) {
+        Some(entry) => {
+            let rust_policy = crate::parse::parse_rust_policy_state(
+                &entry.path.rel_path,
+                &entry.path.abs_path,
+            );
+            let waivers = match &rust_policy {
+                G3RsClippyRustPolicyState::Parsed { .. } => {
+                    crate::parse::parse_waivers(&entry.path.abs_path)?
+                }
+                G3RsClippyRustPolicyState::Missing
+                | G3RsClippyRustPolicyState::Unreadable { .. }
+                | G3RsClippyRustPolicyState::ParseError { .. } => Vec::new(),
+            };
+            (rust_policy, waivers)
+        }
+        None => (G3RsClippyRustPolicyState::Missing, Vec::new()),
     };
     let profile = match &rust_policy {
         G3RsClippyRustPolicyState::Parsed { profile, .. } => *profile,
@@ -47,6 +58,7 @@ pub fn ingest_for_config_checks(
         rust_policy,
         published_library_policy,
         cargo_config_overrides,
+        waivers,
     ))
 }
 

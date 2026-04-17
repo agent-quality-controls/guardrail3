@@ -13,3 +13,5 @@ pub use types::G3RsClippyFileTreeChecksInput;
 pub use types::G3RsClippyRustPolicyState;
 #[cfg(feature = "api")]
 pub use types::G3RsClippyShadowedConfig;
+#[cfg(feature = "api")]
+pub use types::G3RsClippyWaiver;
