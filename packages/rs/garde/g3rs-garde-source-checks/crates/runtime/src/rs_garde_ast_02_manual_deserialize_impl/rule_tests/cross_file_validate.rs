@@ -1,8 +1,8 @@
-use g3rs_garde_source_checks_assertions::rs_garde_ast_02_manual_deserialize_impl as assertions;
+use g3rs_garde_source_checks_assertions::rs_garde_ast_02_manual_deserialize_impl::rule as assertions;
 
 #[test]
 fn stays_quiet_when_validate_impl_exists_in_another_file() {
-    let fixture = crate::test_support::fixture(
+    let fixture = super::helpers::fixture(
         &[
             (
                 "src/input.rs",
@@ -13,7 +13,7 @@ fn stays_quiet_when_validate_impl_exists_in_another_file() {
                 "use crate::Input;\n\nimpl garde::Validate for Input {\n    type Context = ();\n\n    fn validate_into(&self, _ctx: &Self::Context, _parent: &mut dyn FnMut(garde::Error)) {}\n}\n",
             ),
         ],
-        crate::test_support::default_guardrail_toml(),
+        super::helpers::default_guardrail_toml(),
     );
 
     let results = fixture.run();

@@ -1,8 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_garde_source_checks_types::{
-    G3RsGardeRustPolicyInput, G3RsGardeSourceChecksInput, G3RsGardeWaiver,
-};
+use g3rs_garde_types::{G3RsGardeRustPolicyInput, G3RsGardeSourceChecksInput, G3RsGardeWaiver};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::parse::{self, BoundaryKind, ParsedGardeFile};
@@ -82,7 +80,7 @@ pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnaly
     source_files.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
 
     for source_file in &source_files {
-        let content = match std::fs::read_to_string(&source_file.abs_path) {
+        let content = match crate::fs::read_to_string(&source_file.abs_path) {
             Ok(content) => content,
             Err(read_error) => {
                 input_failures.push(InputFailureSite {
@@ -162,7 +160,9 @@ pub(crate) fn analyze_input(input: &G3RsGardeSourceChecksInput) -> GardeAstAnaly
                 has_validate: target.has_validate_derive,
             };
             match target.boundary_kind {
-                BoundaryKind::Struct if target.has_non_primitive_fields => struct_targets.push(site),
+                BoundaryKind::Struct if target.has_non_primitive_fields => {
+                    struct_targets.push(site)
+                }
                 BoundaryKind::Enum if target.has_non_primitive_fields => enum_targets.push(site),
                 _ => {}
             }
@@ -365,9 +365,11 @@ fn resolve_rust_policy<'a>(
 ) -> Option<&'a [G3RsGardeWaiver]> {
     match input {
         G3RsGardeRustPolicyInput::Missing => Some(&[]),
-        G3RsGardeRustPolicyInput::Parsed { rel_path: _, garde_enabled: _, waivers } => {
-            Some(waivers.as_slice())
-        }
+        G3RsGardeRustPolicyInput::Parsed {
+            rel_path: _,
+            garde_enabled: _,
+            waivers,
+        } => Some(waivers.as_slice()),
         G3RsGardeRustPolicyInput::Invalid { rel_path, message } => {
             input_failures.push(InputFailureSite {
                 rel_path: rel_path.clone(),
@@ -410,4 +412,124 @@ pub(crate) fn warn(
         file.map(str::to_owned),
         line,
     )
+}
+
+#[cfg(test)]
+pub(crate) struct TestFixture {
+    _tempdir: tempfile::TempDir,
+    pub(crate) input: G3RsGardeSourceChecksInput,
+}
+
+#[cfg(test)]
+impl TestFixture {
+    #[cfg(unix)]
+    pub(crate) fn make_source_unreadable(&self, rel_path: &str) {
+        use std::os::unix::fs::PermissionsExt;
+
+        let path = self
+            .input
+            .source_files
+            .iter()
+            .find(|file| file.rel_path == rel_path)
+            .expect("fixture source file should exist")
+            .abs_path
+            .clone();
+        let mut permissions = crate::fs::metadata(&path)
+            .expect("fixture source metadata should exist")
+            .permissions();
+        permissions.set_mode(0o000);
+        crate::fs::set_permissions(&path, permissions)
+            .expect("should make fixture source unreadable");
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn fixture(source_files: &[(&str, &str)], rust_policy_toml: &str) -> TestFixture {
+    let tempdir = tempfile::tempdir().expect("failed to create garde source fixture tempdir");
+    let parsed = guardrail3_rs_toml_parser::parse(rust_policy_toml)
+        .expect("fixture Rust policy TOML should parse");
+
+    let mut ast_files = Vec::new();
+    for (rel_path, content) in source_files {
+        let abs_path = tempdir.path().join(rel_path);
+        write_fixture_file(&abs_path, content);
+        ast_files.push(g3rs_garde_types::G3RsSourceFile {
+            rel_path: (*rel_path).to_owned(),
+            abs_path,
+        });
+    }
+
+    ast_files.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
+
+    TestFixture {
+        _tempdir: tempdir,
+        input: G3RsGardeSourceChecksInput {
+            applicability: g3rs_garde_types::G3RsGardeApplicability::Active,
+            garde_dependency_present: true,
+            source_files: ast_files,
+            rust_policy: G3RsGardeRustPolicyInput::Parsed {
+                rel_path: "guardrail3-rs.toml".to_owned(),
+                garde_enabled: parsed
+                    .checks
+                    .as_ref()
+                    .and_then(|checks| checks.garde)
+                    .unwrap_or(false),
+                waivers: parsed
+                    .waivers
+                    .into_iter()
+                    .map(|waiver| G3RsGardeWaiver {
+                        rule: waiver.rule,
+                        file: waiver.file,
+                        selector: waiver.selector,
+                        reason: waiver.reason,
+                    })
+                    .collect(),
+            },
+        },
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn invalid_policy_fixture(source_files: &[(&str, &str)], message: &str) -> TestFixture {
+    let tempdir = tempfile::tempdir().expect("failed to create garde source fixture tempdir");
+
+    let mut ast_files = Vec::new();
+    for (rel_path, content) in source_files {
+        let abs_path = tempdir.path().join(rel_path);
+        write_fixture_file(&abs_path, content);
+        ast_files.push(g3rs_garde_types::G3RsSourceFile {
+            rel_path: (*rel_path).to_owned(),
+            abs_path,
+        });
+    }
+
+    ast_files.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
+
+    TestFixture {
+        _tempdir: tempdir,
+        input: G3RsGardeSourceChecksInput {
+            applicability: g3rs_garde_types::G3RsGardeApplicability::Active,
+            garde_dependency_present: true,
+            source_files: ast_files,
+            rust_policy: G3RsGardeRustPolicyInput::Invalid {
+                rel_path: "guardrail3-rs.toml".to_owned(),
+                message: message.to_owned(),
+            },
+        },
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn default_guardrail_toml() -> &'static str {
+    "profile = \"service\"\n"
+}
+
+#[cfg(test)]
+fn write_fixture_file(path: &std::path::Path, content: &str) {
+    crate::fs::create_dir_all(
+        path.parent()
+            .expect("fixture file must have parent directory"),
+    )
+    .expect("failed to create fixture directory");
+    crate::fs::write(path, content).expect("failed to write fixture file");
 }

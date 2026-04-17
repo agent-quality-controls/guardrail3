@@ -1,13 +1,13 @@
-use g3rs_garde_source_checks_assertions::rs_garde_ast_07_context_validation_surface as assertions;
+use g3rs_garde_source_checks_assertions::rs_garde_ast_07_context_validation_surface::rule as assertions;
 
 #[test]
 fn errors_when_ctx_usage_has_no_type_level_context() {
-    let fixture = crate::test_support::fixture(
+    let fixture = super::helpers::fixture(
         &[(
             "src/input.rs",
             "use garde::Validate;\nuse serde::Deserialize;\n\n#[derive(Deserialize, Validate)]\nstruct Input {\n    #[garde(length(chars, min = ctx.title_min, max = ctx.title_max))]\n    title: String,\n}\n",
         )],
-        crate::test_support::default_guardrail_toml(),
+        super::helpers::default_guardrail_toml(),
     );
 
     let results = fixture.run();

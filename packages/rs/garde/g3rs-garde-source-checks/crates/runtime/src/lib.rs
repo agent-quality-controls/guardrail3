@@ -1,3 +1,4 @@
+mod fs;
 mod parse;
 mod rs_garde_10_input_failures;
 mod rs_garde_ast_01_struct_derive_validate;
@@ -12,6 +13,3 @@ mod support;
 
 #[cfg(feature = "checks")]
 pub use run::check;
-
-#[cfg(test)]
-mod test_support;
