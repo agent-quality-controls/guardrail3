@@ -1,0 +1,18 @@
+[package]
+name = "guardrail3-reason-policy-runtime"
+version.workspace = true
+edition = "2024"
+publish = false
+readme = "README.md"
+license.workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+guardrail3-reason-policy-assertions = { path = "../assertions" }

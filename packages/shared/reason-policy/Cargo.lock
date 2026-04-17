@@ -5,3 +5,20 @@ version = 4
 [[package]]
 name = "guardrail3-reason-policy"
 version = "0.0.0"
+dependencies = [
+ "guardrail3-reason-policy-runtime",
+]
+
+[[package]]
+name = "guardrail3-reason-policy-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-reason-policy-runtime",
+]
+
+[[package]]
+name = "guardrail3-reason-policy-runtime"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-reason-policy-assertions",
+]

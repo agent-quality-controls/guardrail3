@@ -27,7 +27,7 @@ workspace = true
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser" }
 g3rs-fmt-types = { path = "../../../g3rs-fmt-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
-guardrail3-reason-policy = { path = "../../../../../shared/reason-policy/crates/reason-policy" }
+guardrail3-reason-policy = { path = "../../../../../shared/reason-policy" }
 rustfmt-toml-parser = { path = "../../../../../parsers/rustfmt-toml-parser" }
 toml = "0.8"
 
