@@ -1,7 +1,7 @@
 use g3rs_deny_config_checks_assertions::rs_deny_config_24_license_exceptions_inventory as assertions;
 
-use test_support::run;
 use guardrail3_rs_toml_parser::RustProfile;
+use test_support::run;
 
 #[test]
 fn stays_quiet_when_no_license_exceptions_exist() {

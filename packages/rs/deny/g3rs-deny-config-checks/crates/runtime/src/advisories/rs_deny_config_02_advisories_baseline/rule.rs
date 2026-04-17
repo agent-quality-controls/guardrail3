@@ -1,4 +1,4 @@
-use deny_toml_parser::{AdvisoryScope, DenyToml};
+use deny_toml_parser::types::{AdvisoryScope, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::expectations::expected_advisory_baseline;

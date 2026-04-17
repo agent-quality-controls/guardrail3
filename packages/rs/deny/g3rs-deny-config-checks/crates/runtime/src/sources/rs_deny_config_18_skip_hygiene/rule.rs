@@ -1,4 +1,4 @@
-use deny_toml_parser::{BanSkipEntry, DenyToml};
+use deny_toml_parser::types::{BanSkipEntry, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_reason_policy::validate_reason_text;
 

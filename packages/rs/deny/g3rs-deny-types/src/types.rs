@@ -1,4 +1,4 @@
-use deny_toml_parser::DenyToml;
+use deny_toml_parser::types::DenyToml;
 use guardrail3_rs_toml_parser::RustProfile;
 
 #[derive(Debug, Clone)]

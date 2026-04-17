@@ -1,5 +1,5 @@
 /// Assemble the checks input from selected and parsed data.
-use deny_toml_parser::DenyToml;
+use deny_toml_parser::types::DenyToml;
 use g3rs_deny_types::{
     G3RsDenyConfigChecksInput, G3RsDenyFileTreeChecksInput, G3RsDenyInputFailure,
     G3RsDenyRustPolicyState,

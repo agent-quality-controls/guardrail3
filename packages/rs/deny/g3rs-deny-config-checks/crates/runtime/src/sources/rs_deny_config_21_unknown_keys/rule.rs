@@ -1,4 +1,4 @@
-use deny_toml_parser::{BanDenyEntry, DenyToml};
+use deny_toml_parser::types::{BanDenyEntry, BanSkipEntry, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::findings::warn;
@@ -116,7 +116,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
         }
 
         for (index, entry) in bans.skip.iter().enumerate() {
-            if let deny_toml_parser::BanSkipEntry::Detailed(detail) = entry {
+            if let BanSkipEntry::Detailed(detail) = entry {
                 for key in detail.extra.keys() {
                     warn_unknown_key(
                         results,

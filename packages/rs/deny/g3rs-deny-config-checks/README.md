@@ -2,7 +2,7 @@
 
 Extracted config checks for `deny.toml`.
 
-This package receives an already parsed `deny_toml_parser::DenyToml` and
+This package receives an already parsed `deny_toml_parser::types::DenyToml` and
 validates only `deny.toml` config semantics. Ingestion owns file discovery,
 authoritative config selection, parse-failure routing, and profile resolution.
 
