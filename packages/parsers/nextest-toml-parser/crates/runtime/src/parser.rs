@@ -7,10 +7,7 @@ use crate::Error;
 /// # Errors
 ///
 /// Returns [`Error::Toml`] when the input is not valid `nextest.toml`.
-#[allow(
-    clippy::disallowed_methods,
-    reason = "this crate IS the centralized nextest.toml parser"
-)]
+#[allow(clippy::disallowed_methods)] // reason: this crate IS the centralized nextest.toml parser
 pub fn parse(input: &str) -> Result<NextestToml, Error> {
     Ok(toml::from_str(input)?)
 }

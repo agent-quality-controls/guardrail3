@@ -1,5 +1,5 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use g3rs_topology_ingestion_runtime::{
+use g3rs_topology_types::{
     G3RsTopologyCargoManifestKind, G3RsTopologyWorkspaceFamily,
     G3RsTopologyFileTreeChecksInput,
     G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
