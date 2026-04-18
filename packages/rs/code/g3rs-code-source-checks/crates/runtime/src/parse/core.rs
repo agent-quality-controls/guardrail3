@@ -3,7 +3,8 @@ pub(crate) fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
 }
 
 pub(crate) fn count_top_level_use_imports(source: &syn::File) -> usize {
-    source.items
+    source
+        .items
         .iter()
         .filter_map(|item| match item {
             syn::Item::Use(item_use) => Some(count_use_tree_imports(&item_use.tree)),

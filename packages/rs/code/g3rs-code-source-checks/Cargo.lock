@@ -125,6 +125,13 @@ version = "0.1.0"
 [[package]]
 name = "guardrail3-reason-policy"
 version = "0.0.0"
+dependencies = [
+ "guardrail3-reason-policy-runtime",
+]
+
+[[package]]
+name = "guardrail3-reason-policy-runtime"
+version = "0.0.0"
 
 [[package]]
 name = "guardrail3-rs-toml-parser"
@@ -194,6 +201,7 @@ name = "rust-toolchain-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rust-toolchain-toml-parser-runtime",
+ "rust-toolchain-toml-parser-types",
 ]
 
 [[package]]
@@ -217,6 +225,7 @@ name = "rustfmt-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rustfmt-toml-parser-runtime",
+ "rustfmt-toml-parser-types",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 use g3rs_deps_filetree_checks_assertions::rs_deps_filetree_09_cargo_lock_present as assertions;
 use g3rs_deps_types::G3RsDepsFileTreeChecksInput;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 #[test]
 fn reports_committed_lockfile_as_inventory() {

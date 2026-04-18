@@ -66,7 +66,6 @@ fn target_label(info: &GardeSkipInfo) -> String {
     }
 }
 
-
 #[cfg(test)]
 pub(super) fn check_source(
     rel_path: &str,

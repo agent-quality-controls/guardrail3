@@ -11,13 +11,29 @@ fn same_layer_cycle_fires() {
         krate(G3RsApparchLayer::Types, "types/c/Cargo.toml"),
     ];
     let edges = vec![
-        edge("types/a/Cargo.toml", "types/b/Cargo.toml", G3RsApparchDependencyKind::Dependency),
-        edge("types/b/Cargo.toml", "types/c/Cargo.toml", G3RsApparchDependencyKind::Dependency),
-        edge("types/c/Cargo.toml", "types/a/Cargo.toml", G3RsApparchDependencyKind::Dependency),
+        edge(
+            "types/a/Cargo.toml",
+            "types/b/Cargo.toml",
+            G3RsApparchDependencyKind::Dependency,
+        ),
+        edge(
+            "types/b/Cargo.toml",
+            "types/c/Cargo.toml",
+            G3RsApparchDependencyKind::Dependency,
+        ),
+        edge(
+            "types/c/Cargo.toml",
+            "types/a/Cargo.toml",
+            G3RsApparchDependencyKind::Dependency,
+        ),
     ];
     let results = run_rule(&crates, &edges);
 
-    assertions::assert_cycle(&results, "same-layer types dependency cycle", "types crate(s)");
+    assertions::assert_cycle(
+        &results,
+        "same-layer types dependency cycle",
+        "types crate(s)",
+    );
 }
 
 #[test]
@@ -27,7 +43,11 @@ fn dev_only_cycle_is_ignored() {
         krate(G3RsApparchLayer::Types, "types/b/Cargo.toml"),
     ];
     let edges = vec![
-        edge("types/a/Cargo.toml", "types/b/Cargo.toml", G3RsApparchDependencyKind::DevDependency),
+        edge(
+            "types/a/Cargo.toml",
+            "types/b/Cargo.toml",
+            G3RsApparchDependencyKind::DevDependency,
+        ),
         edge(
             "types/b/Cargo.toml",
             "types/a/Cargo.toml",
@@ -49,5 +69,9 @@ fn same_layer_self_loop_fires() {
     )];
     let results = run_rule(&crates, &edges);
 
-    assertions::assert_cycle(&results, "same-layer logic dependency cycle", "logic crate(s)");
+    assertions::assert_cycle(
+        &results,
+        "same-layer logic dependency cycle",
+        "logic crate(s)",
+    );
 }

@@ -22,6 +22,12 @@ impl Foo {
 }
 "#;
 
-    assert_rule_results(&super::super::check_source("src/foo.rs", threshold, false), &[]);
-    assert_rule_results(&super::super::check_source("src/foo.rs", method_level, false), &[]);
+    assert_rule_results(
+        &super::super::check_source("src/foo.rs", threshold, false),
+        &[],
+    );
+    assert_rule_results(
+        &super::super::check_source("src/foo.rs", method_level, false),
+        &[],
+    );
 }

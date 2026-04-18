@@ -1,4 +1,3 @@
-
 #[test]
 fn skips_unused_crate_dependencies_exception() {
     let results = super::super::check_source(

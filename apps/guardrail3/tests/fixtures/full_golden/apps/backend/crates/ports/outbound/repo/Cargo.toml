@@ -1,7 +1,0 @@
-[package]
-name = "backend-ports-outbound-repo"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-backend-domain-types = { path = "../../../domain/types" }

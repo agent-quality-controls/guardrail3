@@ -39,7 +39,8 @@ fn errors_on_std_alias_glob_import() {
 
 #[test]
 fn errors_on_grouped_std_fs_glob_import() {
-    let results = super::super::check_source("src/foo.rs", "use std::{fs::*, io};\nfn main() {}", false);
+    let results =
+        super::super::check_source("src/foo.rs", "use std::{fs::*, io};\nfn main() {}", false);
 
     assert_rule_results(
         &results,

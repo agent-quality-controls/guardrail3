@@ -85,6 +85,7 @@ name = "rust-toolchain-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rust-toolchain-toml-parser-runtime",
+ "rust-toolchain-toml-parser-types",
 ]
 
 [[package]]

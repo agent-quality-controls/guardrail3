@@ -4,7 +4,8 @@ use g3rs_code_source_checks_assertions::rs_code_ast_01_crate_level_allow::rule::
 
 #[test]
 fn errors_on_crate_level_allow_in_prod_code() {
-    let results = super::super::check_source("src/lib.rs", "#![allow(dead_code)]\nfn probe() {}\n", false);
+    let results =
+        super::super::check_source("src/lib.rs", "#![allow(dead_code)]\nfn probe() {}\n", false);
 
     assert_rule_results(
         &results,

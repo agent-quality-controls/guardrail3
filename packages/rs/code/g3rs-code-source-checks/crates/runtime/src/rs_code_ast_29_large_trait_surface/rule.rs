@@ -26,7 +26,6 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
     }
 }
 
-
 #[cfg(test)]
 pub(super) fn check_source(
     rel_path: &str,

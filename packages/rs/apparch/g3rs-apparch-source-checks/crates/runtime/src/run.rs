@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use g3rs_apparch_types::G3RsApparchSourceChecksInput;
 use g3rs_apparch_types::G3RsApparchCrate;
+use g3rs_apparch_types::G3RsApparchSourceChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsApparchSourceChecksInput) -> Vec<G3CheckResult> {

@@ -17,7 +17,10 @@ fn crate_input(layer: G3RsApparchLayer, cargo_rel_path: &str) -> G3RsApparchCrat
 
 pub(super) fn free_function_input() -> G3RsApparchSourceChecksInput {
     G3RsApparchSourceChecksInput {
-        crates: vec![crate_input(G3RsApparchLayer::Types, "types/contracts/Cargo.toml")],
+        crates: vec![crate_input(
+            G3RsApparchLayer::Types,
+            "types/contracts/Cargo.toml",
+        )],
         public_items: vec![G3RsApparchPublicItem {
             cargo_rel_path: "types/contracts/Cargo.toml".to_owned(),
             rel_path: "types/contracts/src/lib.rs".to_owned(),
@@ -30,7 +33,10 @@ pub(super) fn free_function_input() -> G3RsApparchSourceChecksInput {
 
 pub(super) fn inherent_method_input() -> G3RsApparchSourceChecksInput {
     G3RsApparchSourceChecksInput {
-        crates: vec![crate_input(G3RsApparchLayer::Types, "types/contracts/Cargo.toml")],
+        crates: vec![crate_input(
+            G3RsApparchLayer::Types,
+            "types/contracts/Cargo.toml",
+        )],
         public_items: vec![G3RsApparchPublicItem {
             cargo_rel_path: "types/contracts/Cargo.toml".to_owned(),
             rel_path: "types/contracts/src/order.rs".to_owned(),
@@ -43,7 +49,10 @@ pub(super) fn inherent_method_input() -> G3RsApparchSourceChecksInput {
 
 pub(super) fn trait_only_input() -> G3RsApparchSourceChecksInput {
     G3RsApparchSourceChecksInput {
-        crates: vec![crate_input(G3RsApparchLayer::Types, "types/contracts/Cargo.toml")],
+        crates: vec![crate_input(
+            G3RsApparchLayer::Types,
+            "types/contracts/Cargo.toml",
+        )],
         public_items: vec![G3RsApparchPublicItem {
             cargo_rel_path: "types/contracts/Cargo.toml".to_owned(),
             rel_path: "types/contracts/src/lib.rs".to_owned(),

@@ -1,3 +1,0 @@
-# Additional disallowed-types entries (TOML array-of-tables format)
-# Example:
-#     { path = "some::Type", reason = "Use alternative instead" },

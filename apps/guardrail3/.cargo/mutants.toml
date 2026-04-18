@@ -1,2 +1,0 @@
-# Mutation testing configuration for cargo-mutants
-timeout_multiplier = 2.0

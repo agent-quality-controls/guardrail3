@@ -51,7 +51,10 @@ pub(crate) fn check(
             continue;
         }
         found_cycle = true;
-        let Some(first) = component.first().and_then(|path| crates_by_path.get(path).copied()) else {
+        let Some(first) = component
+            .first()
+            .and_then(|path| crates_by_path.get(path).copied())
+        else {
             continue;
         };
         let layer = first.layer.expect("component should have a layer");
@@ -139,14 +142,7 @@ fn strong_connect(
         for neighbor in neighbors {
             if !indices.contains_key(neighbor) {
                 strong_connect(
-                    neighbor,
-                    adjacency,
-                    index,
-                    indices,
-                    lowlinks,
-                    stack,
-                    on_stack,
-                    components,
+                    neighbor, adjacency, index, indices, lowlinks, stack, on_stack, components,
                 );
                 let lowlink = lowlinks[node];
                 let neighbor_lowlink = lowlinks[neighbor];

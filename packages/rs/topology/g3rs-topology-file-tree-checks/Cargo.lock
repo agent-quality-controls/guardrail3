@@ -43,6 +43,7 @@ dependencies = [
 name = "g3rs-topology-file-tree-checks-assertions"
 version = "0.1.0"
 dependencies = [
+ "g3rs-topology-file-tree-checks-runtime",
  "guardrail3-check-types",
 ]
 
@@ -52,7 +53,6 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-topology-file-tree-checks-assertions",
- "g3rs-topology-file-tree-checks-types",
  "g3rs-topology-types",
  "glob",
  "guardrail3-check-types",

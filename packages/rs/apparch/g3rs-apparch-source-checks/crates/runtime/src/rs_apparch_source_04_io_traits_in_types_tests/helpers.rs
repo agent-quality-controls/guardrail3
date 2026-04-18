@@ -33,7 +33,10 @@ pub(super) fn io_trait_input(
     }
 }
 
-pub(super) fn clean_io_input(layer: G3RsApparchLayer, cargo_rel_path: &str) -> G3RsApparchSourceChecksInput {
+pub(super) fn clean_io_input(
+    layer: G3RsApparchLayer,
+    cargo_rel_path: &str,
+) -> G3RsApparchSourceChecksInput {
     G3RsApparchSourceChecksInput {
         crates: vec![crate_input(layer, cargo_rel_path)],
         public_items: Vec::new(),

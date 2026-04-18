@@ -6,7 +6,15 @@ use g3rs_apparch_types::{
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-APPARCH-CONFIG-09";
-const BUILTIN_ALLOWED: &[&str] = &["serde", "serde_json", "thiserror", "chrono", "uuid", "time", "bytes"];
+const BUILTIN_ALLOWED: &[&str] = &[
+    "serde",
+    "serde_json",
+    "thiserror",
+    "chrono",
+    "uuid",
+    "time",
+    "bytes",
+];
 
 pub(crate) fn check(
     krate: &G3RsApparchCrate,

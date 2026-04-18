@@ -10,7 +10,10 @@ pub fn assert_forbid_inventory_info(result: &G3CheckResult, rel_path: &str) {
     );
     assert_eq!(result.file(), Some(rel_path));
     assert_eq!(result.line(), None);
-    assert!(result.inventory(), "forbid inventory should stay hidden by default");
+    assert!(
+        result.inventory(),
+        "forbid inventory should stay hidden by default"
+    );
 }
 
 pub fn assert_deny_error(result: &G3CheckResult, rel_path: &str) {

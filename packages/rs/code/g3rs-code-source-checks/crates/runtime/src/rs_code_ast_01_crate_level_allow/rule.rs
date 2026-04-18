@@ -60,7 +60,6 @@ fn push_result(
     ));
 }
 
-
 #[cfg(test)]
 pub(super) fn check_source(
     rel_path: &str,

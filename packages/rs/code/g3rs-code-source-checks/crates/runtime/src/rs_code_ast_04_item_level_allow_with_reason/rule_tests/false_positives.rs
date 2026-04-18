@@ -1,7 +1,7 @@
-
 #[test]
 fn skips_missing_reason() {
-    let results = super::super::check_source("src/lib.rs", "#[allow(dead_code)]\nfn probe() {}\n", false);
+    let results =
+        super::super::check_source("src/lib.rs", "#[allow(dead_code)]\nfn probe() {}\n", false);
 
     assert!(results.is_empty(), "{results:#?}");
 }

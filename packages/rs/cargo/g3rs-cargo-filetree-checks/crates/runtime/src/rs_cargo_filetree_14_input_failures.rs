@@ -26,7 +26,8 @@ pub(crate) fn check_inventory(
     };
 
     let has_input_failures = input_failures.iter().any(|failure| {
-        failure.rel_path == cargo_rel_path || Some(failure.rel_path.as_str()) == rust_policy_rel_path
+        failure.rel_path == cargo_rel_path
+            || Some(failure.rel_path.as_str()) == rust_policy_rel_path
     }) || input_failures
         .iter()
         .any(|failure| failure.rel_path.ends_with("/Cargo.toml"));

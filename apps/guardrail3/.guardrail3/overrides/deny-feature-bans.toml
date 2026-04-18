@@ -1,5 +1,0 @@
-# Additional [[bans.features]] entries for deny.toml
-# Example:
-#     [[bans.features]]
-#     name = "some-crate"
-#     deny = ["full"]

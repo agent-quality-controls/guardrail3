@@ -5,7 +5,7 @@ use g3rs_deps_types::{
     G3RsDepsConfigInputScope, G3RsDepsDependencySection, G3RsDepsResolvedDependency,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(

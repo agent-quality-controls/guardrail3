@@ -10,5 +10,8 @@ fn test_only_probe() {}
 fn feature_probe() {}
 "#;
 
-    assert_rule_results(&super::super::check_source("src/foo.rs", content, false), &[]);
+    assert_rule_results(
+        &super::super::check_source("src/foo.rs", content, false),
+        &[],
+    );
 }

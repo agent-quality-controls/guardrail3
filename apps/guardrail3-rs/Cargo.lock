@@ -84,6 +84,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo-config-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "cargo-config-toml-parser-runtime",
+]
+
+[[package]]
+name = "cargo-config-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-config-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "cargo-config-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "cargo-toml-parser"
 version = "0.1.0"
 dependencies = [
@@ -433,7 +456,6 @@ dependencies = [
  "guardrail3-check-types",
  "guardrail3-reason-policy",
  "guardrail3-rs-toml-parser",
- "toml",
 ]
 
 [[package]]
@@ -483,7 +505,6 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "guardrail3-rs-toml-parser",
- "toml",
 ]
 
 [[package]]
@@ -498,6 +519,7 @@ dependencies = [
 name = "g3rs-clippy-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-clippy-types",
  "guardrail3-check-types",
@@ -539,6 +561,7 @@ dependencies = [
 name = "g3rs-clippy-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-config-toml-parser",
  "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-clippy-types",
@@ -552,9 +575,10 @@ dependencies = [
 name = "g3rs-clippy-types"
 version = "0.1.0"
 dependencies = [
+ "cargo-config-toml-parser",
+ "cargo-toml-parser",
  "clippy-toml-parser",
  "guardrail3-rs-toml-parser",
- "toml",
 ]
 
 [[package]]
@@ -875,7 +899,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3rs-garde-config-checks-types",
+ "g3rs-garde-types",
  "guardrail3-check-types",
 ]
 
@@ -923,7 +947,7 @@ dependencies = [
 name = "g3rs-garde-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-garde-source-checks-types",
+ "g3rs-garde-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
  "proc-macro2",
@@ -958,7 +982,7 @@ dependencies = [
 name = "g3rs-hooks-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-hooks-config-checks-types",
+ "g3rs-hooks-types",
  "guardrail3-check-types",
  "hook-shell-parser",
 ]
@@ -982,7 +1006,7 @@ dependencies = [
 name = "g3rs-hooks-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-hooks-file-tree-checks-types",
+ "g3rs-hooks-types",
  "guardrail3-check-types",
 ]
 
@@ -1009,6 +1033,7 @@ dependencies = [
  "g3rs-hooks-config-checks-types",
  "g3rs-hooks-file-tree-checks-types",
  "g3rs-hooks-ingestion-types",
+ "g3rs-hooks-types",
  "g3rs-workspace-crawl",
  "hook-shell-parser",
 ]
@@ -1016,9 +1041,6 @@ dependencies = [
 [[package]]
 name = "g3rs-hooks-ingestion-types"
 version = "0.1.0"
-dependencies = [
- "g3rs-hooks-types",
-]
 
 [[package]]
 name = "g3rs-hooks-source-checks"
@@ -1032,7 +1054,7 @@ dependencies = [
 name = "g3rs-hooks-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-hooks-source-checks-types",
+ "g3rs-hooks-types",
  "guardrail3-check-types",
  "hook-shell-parser",
 ]
@@ -1065,7 +1087,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "cliff-toml-parser",
- "g3rs-release-config-checks-types",
+ "g3rs-release-types",
  "guardrail3-check-types",
  "release-plz-toml-parser",
  "semver",
@@ -1090,7 +1112,7 @@ dependencies = [
 name = "g3rs-release-filetree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-release-filetree-checks-types",
+ "g3rs-release-types",
  "guardrail3-check-types",
 ]
 
@@ -1141,7 +1163,7 @@ dependencies = [
 name = "g3rs-release-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-release-source-checks-types",
+ "g3rs-release-types",
  "guardrail3-check-types",
 ]
 
@@ -1173,7 +1195,6 @@ dependencies = [
 name = "g3rs-test-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-test-config-checks-types",
  "g3rs-test-types",
  "guardrail3-check-types",
 ]
@@ -1197,7 +1218,6 @@ dependencies = [
 name = "g3rs-test-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-test-file-tree-checks-types",
  "g3rs-test-types",
  "guardrail3-check-types",
  "proc-macro2",
@@ -1252,7 +1272,6 @@ dependencies = [
 name = "g3rs-test-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-test-source-checks-types",
  "g3rs-test-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
@@ -1353,7 +1372,6 @@ dependencies = [
 name = "g3rs-topology-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-topology-file-tree-checks-types",
  "g3rs-topology-types",
  "glob",
  "guardrail3-check-types",
@@ -1387,9 +1405,6 @@ dependencies = [
 [[package]]
 name = "g3rs-topology-ingestion-types"
 version = "0.1.0"
-dependencies = [
- "g3rs-topology-types",
-]
 
 [[package]]
 name = "g3rs-topology-types"
@@ -1457,6 +1472,13 @@ version = "0.1.0"
 
 [[package]]
 name = "guardrail3-reason-policy"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-reason-policy-runtime",
+]
+
+[[package]]
+name = "guardrail3-reason-policy-runtime"
 version = "0.0.0"
 
 [[package]]
@@ -1685,6 +1707,13 @@ dependencies = [
 [[package]]
 name = "hook-shell-parser-runtime"
 version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-types",
+]
+
+[[package]]
+name = "hook-shell-parser-types"
+version = "0.1.0"
 
 [[package]]
 name = "id-arena"
@@ -1767,6 +1796,7 @@ name = "mutants-toml-parser"
 version = "0.1.0"
 dependencies = [
  "mutants-toml-parser-runtime",
+ "mutants-toml-parser-types",
 ]
 
 [[package]]
@@ -1782,7 +1812,6 @@ name = "mutants-toml-parser-types"
 version = "0.1.0"
 dependencies = [
  "serde",
- "toml",
 ]
 
 [[package]]
@@ -1790,6 +1819,7 @@ name = "nextest-toml-parser"
 version = "0.1.0"
 dependencies = [
  "nextest-toml-parser-runtime",
+ "nextest-toml-parser-types",
 ]
 
 [[package]]
@@ -1876,6 +1906,7 @@ name = "release-plz-toml-parser"
 version = "0.1.0"
 dependencies = [
  "release-plz-toml-parser-runtime",
+ "release-plz-toml-parser-types",
 ]
 
 [[package]]
@@ -1899,6 +1930,7 @@ name = "rust-toolchain-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rust-toolchain-toml-parser-runtime",
+ "rust-toolchain-toml-parser-types",
 ]
 
 [[package]]
@@ -1922,6 +1954,7 @@ name = "rustfmt-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rustfmt-toml-parser-runtime",
+ "rustfmt-toml-parser-types",
 ]
 
 [[package]]
