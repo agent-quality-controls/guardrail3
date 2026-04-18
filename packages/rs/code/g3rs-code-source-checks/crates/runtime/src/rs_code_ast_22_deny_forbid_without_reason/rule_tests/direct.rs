@@ -4,7 +4,8 @@ use g3rs_code_source_checks_assertions::rs_code_ast_22_deny_forbid_without_reaso
 
 #[test]
 fn errors_on_deny_without_reason() {
-    let results = super::super::check_source("src/lib.rs", "#[deny(dead_code)]\nfn probe() {}\n", false);
+    let results =
+        super::super::check_source("src/lib.rs", "#[deny(dead_code)]\nfn probe() {}\n", false);
 
     assert_rule_results(
         &results,

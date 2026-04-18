@@ -69,9 +69,9 @@ pub fn assert_modern_toolchain_exists(results: &[guardrail3_check_types::G3Check
 }
 
 pub fn assert_nightly_toolchain_channel(results: &[guardrail3_check_types::G3CheckResult]) {
-    g3rs_toolchain_config_checks_assertions::rs_toolchain_config_01_channel_and_components::assert_contains(
+    g3rs_toolchain_config_checks_assertions::rs_toolchain_config_01_channel_and_components::rule::assert_contains(
         results,
-        g3rs_toolchain_config_checks_assertions::rs_toolchain_config_01_channel_and_components::error(
+        g3rs_toolchain_config_checks_assertions::rs_toolchain_config_01_channel_and_components::rule::error(
             "toolchain channel is nightly",
             "Channel is set to nightly. Use `channel = \"stable\"` or a pinned stable version.",
             "rust-toolchain.toml",

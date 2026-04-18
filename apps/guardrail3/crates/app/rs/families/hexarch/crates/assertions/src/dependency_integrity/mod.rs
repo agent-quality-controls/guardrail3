@@ -1,9 +1,0 @@
-pub mod rs_hexarch_19_same_layer_cycles;
-pub mod rs_hexarch_20_dev_dependency_direction;
-pub mod rs_hexarch_21_domain_purity;
-pub mod rs_hexarch_22_ports_trait_dominance;
-pub mod rs_hexarch_23_adapter_pub_trait;
-pub mod rs_hexarch_24_cross_app_boundary;
-pub mod rs_hexarch_25_target_dependency_direction;
-pub mod rs_hexarch_26_member_manifest_parse_error;
-pub mod rs_hexarch_27_nested_workspace_forbidden;

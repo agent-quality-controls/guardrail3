@@ -15,5 +15,8 @@ extern "C" {
 }
 "#;
 
-    assert_rule_results(&super::super::check_source("src/ffi.rs", content, false), &[]);
+    assert_rule_results(
+        &super::super::check_source("src/ffi.rs", content, false),
+        &[],
+    );
 }

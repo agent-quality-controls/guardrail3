@@ -3,7 +3,7 @@ use g3rs_deps_types::{
     G3RsDepsConfigInputScope, G3RsDepsDependencySection, G3RsDepsResolvedDependency,
 };
 use guardrail3_check_types::G3CheckResult;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 use super::super::check;
 

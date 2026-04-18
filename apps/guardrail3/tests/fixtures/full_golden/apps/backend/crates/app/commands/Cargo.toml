@@ -1,9 +1,0 @@
-[package]
-name = "backend-app-commands"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-backend-domain-engine = { path = "../../domain/engine" }
-backend-domain-types = { path = "../../domain/types" }
-backend-ports-outbound-repo = { path = "../../ports/outbound/repo" }

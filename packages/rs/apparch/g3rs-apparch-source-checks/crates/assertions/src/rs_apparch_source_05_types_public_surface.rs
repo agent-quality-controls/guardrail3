@@ -20,7 +20,9 @@ pub fn assert_clean_inventory(results: &[G3CheckResult], source_file: &str) {
         results.iter().any(|result| {
             result.id() == ID
                 && result.severity() == G3Severity::Info
-                && result.title().contains("keeps public behavior out of its surface")
+                && result
+                    .title()
+                    .contains("keeps public behavior out of its surface")
                 && result.file() == Some(source_file)
                 && result.inventory()
         }),

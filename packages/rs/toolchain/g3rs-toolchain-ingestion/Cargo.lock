@@ -120,7 +120,7 @@ name = "g3rs-toolchain-config-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-toolchain-config-checks-runtime",
- "g3rs-toolchain-config-checks-types",
+ "g3rs-toolchain-types",
 ]
 
 [[package]]
@@ -136,16 +136,9 @@ name = "g3rs-toolchain-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3rs-toolchain-config-checks-types",
+ "g3rs-toolchain-types",
  "guardrail3-check-types",
  "rust-toolchain-toml-parser",
-]
-
-[[package]]
-name = "g3rs-toolchain-config-checks-types"
-version = "0.1.0"
-dependencies = [
- "g3rs-toolchain-types",
 ]
 
 [[package]]
@@ -153,7 +146,7 @@ name = "g3rs-toolchain-filetree-checks"
 version = "0.1.0"
 dependencies = [
  "g3rs-toolchain-filetree-checks-runtime",
- "g3rs-toolchain-filetree-checks-types",
+ "g3rs-toolchain-types",
 ]
 
 [[package]]
@@ -168,15 +161,8 @@ dependencies = [
 name = "g3rs-toolchain-filetree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-toolchain-filetree-checks-types",
- "guardrail3-check-types",
-]
-
-[[package]]
-name = "g3rs-toolchain-filetree-checks-types"
-version = "0.1.0"
-dependencies = [
  "g3rs-toolchain-types",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -429,6 +415,7 @@ name = "rust-toolchain-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rust-toolchain-toml-parser-runtime",
+ "rust-toolchain-toml-parser-types",
 ]
 
 [[package]]

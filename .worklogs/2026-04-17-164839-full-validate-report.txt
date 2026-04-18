@@ -1,0 +1,154 @@
+APP apps/guardrail3-rs
+
+PKG packages/parsers/cargo-config-toml-parser
+
+PKG packages/parsers/cargo-toml-parser
+
+PKG packages/parsers/cliff-toml-parser
+
+PKG packages/parsers/clippy-toml-parser
+
+PKG packages/parsers/deny-toml-parser
+
+PKG packages/parsers/guardrail3-rs-toml-parser
+
+PKG packages/parsers/hook-shell-parser
+
+PKG packages/parsers/mutants-toml-parser
+
+PKG packages/parsers/nextest-toml-parser
+
+PKG packages/parsers/release-plz-toml-parser
+
+PKG packages/parsers/rust-toolchain-toml-parser
+
+PKG packages/parsers/rustfmt-toml-parser
+
+PKG packages/rs/apparch/g3rs-apparch-config-checks
+
+PKG packages/rs/apparch/g3rs-apparch-ingestion
+
+PKG packages/rs/apparch/g3rs-apparch-source-checks
+
+PKG packages/rs/apparch/g3rs-apparch-types
+
+PKG packages/rs/arch/g3rs-arch-config-checks
+
+PKG packages/rs/arch/g3rs-arch-file-tree-checks
+
+PKG packages/rs/arch/g3rs-arch-ingestion
+
+PKG packages/rs/arch/g3rs-arch-source-checks
+
+PKG packages/rs/arch/g3rs-arch-types
+
+PKG packages/rs/cargo/g3rs-cargo-config-checks
+
+PKG packages/rs/cargo/g3rs-cargo-filetree-checks
+
+PKG packages/rs/cargo/g3rs-cargo-ingestion
+
+PKG packages/rs/cargo/g3rs-cargo-types
+
+PKG packages/rs/clippy/g3rs-clippy-config-checks
+
+PKG packages/rs/clippy/g3rs-clippy-filetree-checks
+
+PKG packages/rs/clippy/g3rs-clippy-ingestion
+
+PKG packages/rs/clippy/g3rs-clippy-types
+
+PKG packages/rs/code/g3rs-code-config-checks
+
+PKG packages/rs/code/g3rs-code-file-tree-checks
+
+PKG packages/rs/code/g3rs-code-ingestion
+
+PKG packages/rs/code/g3rs-code-source-checks
+
+PKG packages/rs/code/g3rs-code-types
+
+PKG packages/rs/deny/g3rs-deny-config-checks
+
+PKG packages/rs/deny/g3rs-deny-filetree-checks
+
+PKG packages/rs/deny/g3rs-deny-ingestion
+
+PKG packages/rs/deny/g3rs-deny-types
+
+PKG packages/rs/deps/g3rs-deps-config-checks
+
+PKG packages/rs/deps/g3rs-deps-filetree-checks
+
+PKG packages/rs/deps/g3rs-deps-ingestion
+
+PKG packages/rs/deps/g3rs-deps-types
+
+PKG packages/rs/fmt/g3rs-fmt-config-checks
+
+PKG packages/rs/fmt/g3rs-fmt-filetree-checks
+
+PKG packages/rs/fmt/g3rs-fmt-ingestion
+
+PKG packages/rs/fmt/g3rs-fmt-types
+
+PKG packages/rs/g3rs-workspace-crawl
+
+PKG packages/rs/garde/g3rs-garde-config-checks
+
+PKG packages/rs/garde/g3rs-garde-ingestion
+
+PKG packages/rs/garde/g3rs-garde-source-checks
+
+PKG packages/rs/garde/g3rs-garde-types
+
+PKG packages/rs/hooks/g3rs-hooks-config-checks
+
+PKG packages/rs/hooks/g3rs-hooks-file-tree-checks
+
+PKG packages/rs/hooks/g3rs-hooks-ingestion
+
+PKG packages/rs/hooks/g3rs-hooks-source-checks
+
+PKG packages/rs/hooks/g3rs-hooks-types
+
+PKG packages/rs/release/g3rs-release-config-checks
+
+PKG packages/rs/release/g3rs-release-filetree-checks
+
+PKG packages/rs/release/g3rs-release-ingestion
+
+PKG packages/rs/release/g3rs-release-repo-root-checks
+
+PKG packages/rs/release/g3rs-release-source-checks
+
+PKG packages/rs/release/g3rs-release-types
+
+PKG packages/rs/test/g3rs-test-config-checks
+
+PKG packages/rs/test/g3rs-test-file-tree-checks
+
+PKG packages/rs/test/g3rs-test-ingestion
+
+PKG packages/rs/test/g3rs-test-source-checks
+
+PKG packages/rs/test/g3rs-test-types
+
+PKG packages/rs/toolchain/g3rs-toolchain-config-checks
+
+PKG packages/rs/toolchain/g3rs-toolchain-filetree-checks
+
+PKG packages/rs/toolchain/g3rs-toolchain-ingestion
+
+PKG packages/rs/toolchain/g3rs-toolchain-types
+
+PKG packages/rs/topology/g3rs-topology-file-tree-checks
+
+PKG packages/rs/topology/g3rs-topology-ingestion
+
+PKG packages/rs/topology/g3rs-topology-types
+
+PKG packages/shared/guardrail3-check-types
+
+PKG packages/shared/reason-policy
+

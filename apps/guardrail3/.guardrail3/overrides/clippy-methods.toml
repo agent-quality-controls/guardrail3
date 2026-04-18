@@ -1,3 +1,0 @@
-# Additional disallowed-methods entries (TOML array-of-tables format)
-# Example:
-#     { path = "some::method", reason = "Use alternative instead" },

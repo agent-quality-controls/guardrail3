@@ -10,11 +10,7 @@ pub fn assert_has_rel_path(entries: &[G3RsWorkspaceEntry], rel_path: &str) {
     );
 }
 
-pub fn assert_entry_kind(
-    crawl: &G3RsWorkspaceCrawl,
-    rel_path: &str,
-    kind: G3RsWorkspaceEntryKind,
-) {
+pub fn assert_entry_kind(crawl: &G3RsWorkspaceCrawl, rel_path: &str, kind: G3RsWorkspaceEntryKind) {
     let Some(found) = entry(crawl, rel_path) else {
         assert!(
             false,

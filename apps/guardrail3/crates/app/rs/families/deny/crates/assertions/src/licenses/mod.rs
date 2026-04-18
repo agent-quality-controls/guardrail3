@@ -1,4 +1,0 @@
-pub mod rs_deny_config_10_license_allow_baseline;
-pub mod rs_deny_config_11_confidence_threshold;
-pub mod rs_deny_config_12_copyleft_allowlist;
-pub mod rs_deny_17_license_exceptions_inventory;

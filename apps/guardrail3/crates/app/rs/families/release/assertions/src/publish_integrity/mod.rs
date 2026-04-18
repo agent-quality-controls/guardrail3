@@ -1,7 +1,0 @@
-pub mod rs_pub_08_valid_semver;
-pub mod rs_pub_09_publish_dry_run;
-pub mod rs_pub_10_no_path_deps_to_unpublishable;
-pub mod rs_pub_11_interdependent_version_consistency;
-pub mod rs_pub_12_crate_inventory;
-pub mod rs_pub_13_docs_rs_metadata;
-pub mod rs_pub_14_include_exclude_inventory;

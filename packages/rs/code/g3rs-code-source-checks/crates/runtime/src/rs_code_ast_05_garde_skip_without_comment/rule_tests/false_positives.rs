@@ -1,4 +1,3 @@
-
 #[test]
 fn skips_exempt_garde_skip_types() {
     let results = super::super::check_source(

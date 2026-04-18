@@ -43,7 +43,10 @@ pub fn assert_crawl_entry(
         found.ignore_state, ignore_state,
         "unexpected ignore state: {found:#?}"
     );
-    assert_eq!(found.readable, readable, "unexpected readability: {found:#?}");
+    assert_eq!(
+        found.readable, readable,
+        "unexpected readability: {found:#?}"
+    );
 }
 
 pub fn assert_root_file_exists(crawl: &G3RsWorkspaceCrawl, file_name: &str) {

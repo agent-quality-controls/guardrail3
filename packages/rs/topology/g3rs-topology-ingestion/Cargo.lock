@@ -152,6 +152,7 @@ name = "g3rs-topology-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
  "g3rs-topology-ingestion-runtime",
+ "g3rs-topology-types",
  "guardrail3-check-types",
 ]
 

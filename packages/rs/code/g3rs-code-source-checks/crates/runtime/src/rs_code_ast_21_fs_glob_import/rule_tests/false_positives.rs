@@ -7,9 +7,24 @@ fn skips_tests_and_non_glob_cases() {
     let test_module =
         "#[cfg(test)]\nmod tests {\n    use std::fs::*;\n    fn probe() {}\n}\nfn main() {}";
 
-    assert_rule_results(&super::super::check_source("src/foo.rs", test_content, false), &[]);
-    assert_rule_results(&super::super::check_source("src/foo.rs", non_glob, false), &[]);
-    assert_rule_results(&super::super::check_source("src/foo.rs", test_module, false), &[]);
-    assert_rule_results(&super::super::check_source("tests/foo.rs", "use std::fs::*;", true), &[]);
-    assert_rule_results(&super::super::check_source("src/fs.rs", "use std::fs::*;", false), &[]);
+    assert_rule_results(
+        &super::super::check_source("src/foo.rs", test_content, false),
+        &[],
+    );
+    assert_rule_results(
+        &super::super::check_source("src/foo.rs", non_glob, false),
+        &[],
+    );
+    assert_rule_results(
+        &super::super::check_source("src/foo.rs", test_module, false),
+        &[],
+    );
+    assert_rule_results(
+        &super::super::check_source("tests/foo.rs", "use std::fs::*;", true),
+        &[],
+    );
+    assert_rule_results(
+        &super::super::check_source("src/fs.rs", "use std::fs::*;", false),
+        &[],
+    );
 }

@@ -9,8 +9,20 @@ fn skips_useful_and_non_test_expect_calls() {
     let helper_expect =
         "mod helpers { pub fn expect(_message: &str) {} }\nfn probe() { helpers::expect(\"ok\"); }";
 
-    assert_rule_results(&super::super::check_source("tests/probe.rs", useful, true), &[]);
-    assert_rule_results(&super::super::check_source("src/lib.rs", non_test, false), &[]);
-    assert_rule_results(&super::super::check_source("tests/probe.rs", concat_useful, true), &[]);
-    assert_rule_results(&super::super::check_source("tests/probe.rs", helper_expect, true), &[]);
+    assert_rule_results(
+        &super::super::check_source("tests/probe.rs", useful, true),
+        &[],
+    );
+    assert_rule_results(
+        &super::super::check_source("src/lib.rs", non_test, false),
+        &[],
+    );
+    assert_rule_results(
+        &super::super::check_source("tests/probe.rs", concat_useful, true),
+        &[],
+    );
+    assert_rule_results(
+        &super::super::check_source("tests/probe.rs", helper_expect, true),
+        &[],
+    );
 }

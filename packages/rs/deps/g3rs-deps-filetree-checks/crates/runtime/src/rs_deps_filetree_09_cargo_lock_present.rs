@@ -1,6 +1,6 @@
 use g3rs_deps_types::G3RsDepsFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 const ID: &str = "RS-DEPS-FILETREE-09";
 

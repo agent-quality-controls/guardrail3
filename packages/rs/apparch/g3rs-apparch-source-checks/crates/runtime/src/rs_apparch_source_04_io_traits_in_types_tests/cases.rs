@@ -1,9 +1,7 @@
 use g3rs_apparch_source_checks_assertions::rs_apparch_source_04_io_traits_in_types as assertions;
 use g3rs_apparch_types::G3RsApparchLayer;
 
-use super::helpers::{
-    clean_io_input, io_trait_input, logic_trait_input, run_rule,
-};
+use super::helpers::{clean_io_input, io_trait_input, logic_trait_input, run_rule};
 
 #[test]
 fn io_public_trait_fires() {

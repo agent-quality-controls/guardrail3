@@ -76,6 +76,13 @@ version = "0.1.0"
 [[package]]
 name = "guardrail3-reason-policy"
 version = "0.0.0"
+dependencies = [
+ "guardrail3-reason-policy-runtime",
+]
+
+[[package]]
+name = "guardrail3-reason-policy-runtime"
+version = "0.0.0"
 
 [[package]]
 name = "guardrail3-rs-toml-parser"

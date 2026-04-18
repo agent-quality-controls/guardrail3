@@ -1,4 +1,3 @@
-
 #[test]
 fn skips_known_true_cfg_attr() {
     let results = super::super::check_source(

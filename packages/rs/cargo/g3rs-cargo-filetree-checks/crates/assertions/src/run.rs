@@ -35,5 +35,8 @@ pub fn assert_missing_members_and_input_failures(
 pub fn assert_inventory_only(results: &[guardrail3_check_types::G3CheckResult]) {
     let ids: Vec<_> = results.iter().map(|result| result.id()).collect();
     assert_eq!(ids, vec!["RS-CARGO-FILETREE-10", "RS-CARGO-FILETREE-14"]);
-    assert!(results.iter().all(|result| result.inventory()), "{results:#?}");
+    assert!(
+        results.iter().all(|result| result.inventory()),
+        "{results:#?}"
+    );
 }

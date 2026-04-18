@@ -1,6 +1,6 @@
 use g3rs_deps_filetree_checks_assertions::run as assertions;
 use g3rs_deps_types::G3RsDepsFileTreeChecksInput;
-use guardrail3_rs_toml_parser::RustProfile;
+use guardrail3_rs_toml_parser::types::RustProfile;
 
 #[test]
 fn run_emits_lockfile_and_gitignore_findings_together() {

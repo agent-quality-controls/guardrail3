@@ -7,5 +7,8 @@ fn skips_trait_at_warn_boundary() {
         .collect::<String>();
     let content = format!("pub trait Service {{\n{methods}}}");
 
-    assert_rule_results(&super::super::check_source("src/lib.rs", &content, false), &[]);
+    assert_rule_results(
+        &super::super::check_source("src/lib.rs", &content, false),
+        &[],
+    );
 }

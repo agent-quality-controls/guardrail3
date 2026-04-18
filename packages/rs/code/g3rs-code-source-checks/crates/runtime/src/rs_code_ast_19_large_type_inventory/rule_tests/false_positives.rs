@@ -1,4 +1,3 @@
-
 #[test]
 fn skips_small_types() {
     let results = super::super::check_source(

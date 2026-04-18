@@ -32,7 +32,6 @@ fn push_result(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>
     ));
 }
 
-
 #[cfg(test)]
 pub(super) fn check_source(
     rel_path: &str,

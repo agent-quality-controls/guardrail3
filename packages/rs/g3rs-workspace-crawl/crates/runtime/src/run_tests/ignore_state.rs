@@ -374,8 +374,8 @@ fn banned_dirs_excluded_from_phase1_without_gitignore() {
     );
     write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
 
-    let crawl = crate::run::crawl(root)
-        .expect("crawl should succeed with un-gitignored banned directory");
+    let crawl =
+        crate::run::crawl(root).expect("crawl should succeed with un-gitignored banned directory");
 
     // node_modules/ should not appear as Included despite not being gitignored
     assertions::assert_crawl_entry_absent(&crawl, "node_modules");

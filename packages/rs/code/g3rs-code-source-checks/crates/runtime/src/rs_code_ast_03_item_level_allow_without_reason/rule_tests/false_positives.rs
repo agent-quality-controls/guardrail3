@@ -1,4 +1,3 @@
-
 #[test]
 fn skips_useful_reason() {
     let results = super::super::check_source(

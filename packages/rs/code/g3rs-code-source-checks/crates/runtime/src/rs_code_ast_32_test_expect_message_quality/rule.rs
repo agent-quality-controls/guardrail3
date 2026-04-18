@@ -66,7 +66,6 @@ fn test_expect_message_is_useful(message: &str) -> bool {
     true
 }
 
-
 #[cfg(test)]
 pub(super) fn check_source(
     rel_path: &str,
