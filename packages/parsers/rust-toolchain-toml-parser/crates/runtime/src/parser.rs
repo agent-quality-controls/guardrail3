@@ -7,7 +7,10 @@ use crate::Error;
 /// # Errors
 ///
 /// Returns [`Error::Toml`] when the input is not valid `rust-toolchain.toml`.
-#[allow(clippy::disallowed_methods)] // reason: this crate IS the centralized rust-toolchain.toml parser - toml::from_str is its core purpose
+#[allow(
+    clippy::disallowed_methods,
+    reason = "this crate IS the centralized rust-toolchain.toml parser - toml::from_str is its core purpose"
+)]
 pub fn parse(input: &str) -> Result<RustToolchainToml, Error> {
     Ok(toml::from_str(input)?)
 }
