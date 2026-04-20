@@ -62,6 +62,19 @@ pub(crate) fn has_plugin_for(
 }
 
 #[must_use]
+pub(crate) fn missing_plugins_for(
+    input: &G3TsEslintConfigChecksInput,
+    probe_kind: EslintProbeKind,
+    plugin_names: &[&str],
+) -> Vec<String> {
+    plugin_names
+        .iter()
+        .filter(|plugin_name| !has_plugin_for(input, probe_kind, plugin_name))
+        .map(|plugin_name| (*plugin_name).to_owned())
+        .collect()
+}
+
+#[must_use]
 pub(crate) fn project_service_enabled_for(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -145,6 +158,15 @@ pub(crate) fn format_rule_list(rule_names: &[String]) -> String {
     rule_names
         .iter()
         .map(|rule_name| format!("`{rule_name}`"))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+#[must_use]
+pub(crate) fn format_plugin_list(plugin_names: &[String]) -> String {
+    plugin_names
+        .iter()
+        .map(|plugin_name| format!("`{plugin_name}`"))
         .collect::<Vec<_>>()
         .join(", ")
 }

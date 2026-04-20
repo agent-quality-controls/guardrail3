@@ -1,7 +1,8 @@
 use g3ts_eslint_config_checks_assertions::run as assertions;
 
 use super::helpers::{
-    broken_carveouts, golden, missing, missing_rule_groups, parse_error, wrong_thresholds,
+    broken_carveouts, golden, missing, missing_plugin_stack, missing_rule_groups, parse_error,
+    wrong_thresholds,
 };
 
 #[test]
@@ -35,6 +36,7 @@ fn missing_config_reports_only_exists_error() {
         "TS-ESLINT-CONFIG-13",
         "TS-ESLINT-CONFIG-14",
         "TS-ESLINT-CONFIG-15",
+        "TS-ESLINT-CONFIG-16",
     ] {
         assertions::assert_no_findings_for_id(&results, id);
     }
@@ -180,6 +182,13 @@ fn golden_config_reports_inventory_across_full_baseline() {
                 Some("eslint.config.mjs"),
                 true,
             ),
+            assertions::info(
+                "TS-ESLINT-CONFIG-16",
+                "TS plugin stack active on TS source",
+                "The TS source probe has the required unicorn, regexp, and sonarjs plugin stack.",
+                Some("eslint.config.mjs"),
+                true,
+            ),
         ],
     );
 }
@@ -285,5 +294,22 @@ fn broken_carveouts_report_test_and_js_errors() {
                 false,
             ),
         ],
+    );
+}
+
+#[test]
+fn missing_plugin_stack_reports_error() {
+    let input = missing_plugin_stack();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ESLINT-CONFIG-16",
+            "TS plugin stack missing on TS source",
+            "The TS source probe must activate these plugins: `unicorn`, `regexp`, `sonarjs`.",
+            Some("eslint.config.mjs"),
+            false,
+        )],
     );
 }
