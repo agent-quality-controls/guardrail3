@@ -1,0 +1,11 @@
+profile = "library"
+
+allowed_deps = [
+  "eslint-config-parser",
+  "g3ts-eslint-types",
+  "guardrail3-check-types",
+  "serde_json",
+]
+
+[checks]
+garde = false

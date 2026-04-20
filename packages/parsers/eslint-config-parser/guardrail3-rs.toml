@@ -1,0 +1,13 @@
+profile = "library"
+
+allowed_deps = [
+  "eslint-config-parser-runtime",
+  "eslint-config-parser-runtime-assertions",
+  "eslint-config-parser-types",
+  "serde",
+  "serde_json",
+  "tempfile",
+]
+
+[checks]
+garde = false

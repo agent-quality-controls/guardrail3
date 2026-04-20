@@ -1,0 +1,8 @@
+profile = "library"
+
+allowed_deps = [
+  "eslint-config-parser",
+]
+
+[checks]
+garde = false

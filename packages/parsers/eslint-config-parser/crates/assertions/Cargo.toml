@@ -1,0 +1,22 @@
+[package]
+name = "eslint-config-parser-runtime-assertions"
+version = "0.0.0"
+edition = "2024"
+description = "Assertion helpers for eslint-config parser tests"
+license.workspace = true
+repository.workspace = true
+publish = false
+readme = "README.md"
+keywords = ["eslint", "typescript", "assertions", "parser", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[dependencies]
+eslint-config-parser-runtime = { path = "../runtime" }
