@@ -455,3 +455,74 @@ fn file_tree_pipeline_ignores_incidental_src_for_custom_root_lib() {
     let results = file_tree_results(&root);
     assertions::assert_missing_result(&results, "RS-ARCH-FILETREE-07");
 }
+
+#[test]
+fn file_tree_pipeline_reports_dense_nested_member_module_in_mixed_root_workspace() {
+    let root = temp_workspace_root();
+
+    write_file(
+        &root,
+        "Cargo.toml",
+        "[package]\nname = \"pkg\"\nversion = \"0.1.0\"\n\n[workspace]\nmembers = [\"crates/assertions\", \"crates/runtime\", \"crates/types\"]\n",
+    );
+    make_dir(&root, "src");
+    write_file(&root, "src/lib.rs", "pub use pkg_runtime as runtime;\n");
+
+    make_dir(&root, "crates/assertions/src");
+    write_file(
+        &root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"pkg-assertions\"\nversion = \"0.1.0\"\n",
+    );
+    write_file(&root, "crates/assertions/src/lib.rs", "pub struct Assertions;\n");
+
+    make_dir(&root, "crates/types/src");
+    write_file(
+        &root,
+        "crates/types/Cargo.toml",
+        "[package]\nname = \"pkg-types\"\nversion = \"0.1.0\"\n",
+    );
+    write_file(&root, "crates/types/src/lib.rs", "pub struct Types;\n");
+
+    make_dir(&root, "crates/runtime/src/full_config");
+    write_file(
+        &root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"pkg-runtime\"\nversion = \"0.1.0\"\n",
+    );
+    write_file(&root, "crates/runtime/src/lib.rs", "pub mod full_config;\n");
+    write_file(
+        &root,
+        "crates/runtime/src/full_config/mod.rs",
+        "pub mod baseline;\n",
+    );
+    for name in [
+        "baseline",
+        "support",
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "ten",
+        "eleven",
+    ] {
+        write_file(
+            &root,
+            &format!("crates/runtime/src/full_config/{name}.rs"),
+            "pub struct Item;\n",
+        );
+    }
+
+    let results = file_tree_results(&root);
+    assertions::assert_has_result(
+        &results,
+        "RS-ARCH-FILETREE-07",
+        G3Severity::Error,
+        Some("crates/runtime/Cargo.toml"),
+    );
+}
