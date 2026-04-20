@@ -1,0 +1,36 @@
+[package]
+name = "g3ts-eslint-config-checks-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3ts eslint config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["guardrail3", "typescript", "eslint", "checks"]
+categories = ["development-tools"]
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[lints]
+workspace = true
+
+[package.metadata.guardrail3]
+shared = true
+
+[package.metadata.docs.rs]
+all-features = true
+
+[dependencies]
+eslint-config-parser = { path = "../../../../../parsers/eslint-config-parser", version = "0.1.0", features = ["api"] }
+g3ts-eslint-types = { path = "../../../g3ts-eslint-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+
+[dev-dependencies]
+g3ts-eslint-config-checks-assertions = { path = "../assertions" }
+serde_json = "1"
