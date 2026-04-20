@@ -1,7 +1,7 @@
 use std::io::Write;
 
 use clap::Parser;
-use g3ts::{Cli, CliFamilyRunner, PackageRuntime, PlainTextReportRenderer, run_command};
+use g3ts::{Cli, run_command_with_defaults};
 
 /// Keeps direct crate references visible to `unused_crate_dependencies`.
 mod deps {
@@ -15,6 +15,8 @@ mod deps {
 
     #[cfg(test)]
     use guardrail3_ts_assertions as _;
+    #[cfg(test)]
+    use tempfile as _;
 }
 
 fn main() -> std::process::ExitCode {
@@ -24,10 +26,7 @@ fn main() -> std::process::ExitCode {
 /// Runs the CLI and writes its output streams.
 fn run() -> std::io::Result<std::process::ExitCode> {
     let cli = Cli::parse();
-    let crawler = PackageRuntime;
-    let family_runner = CliFamilyRunner;
-    let renderer = PlainTextReportRenderer;
-    let output = run_command(cli.command, &crawler, &family_runner, &renderer);
+    let output = run_command_with_defaults(cli.command);
 
     if !output.stdout.is_empty() {
         let mut stdout = std::io::stdout().lock();
