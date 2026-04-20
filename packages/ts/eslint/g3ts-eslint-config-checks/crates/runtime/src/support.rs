@@ -34,6 +34,11 @@ pub(crate) fn has_ts_plugin(input: &G3TsEslintConfigChecksInput) -> bool {
 }
 
 #[must_use]
+pub(crate) fn has_tsx_source_probe(input: &G3TsEslintConfigChecksInput) -> bool {
+    probe_for(input, EslintProbeKind::TsxSource).is_some_and(|probe| !probe.ignored)
+}
+
+#[must_use]
 pub(crate) fn project_service_enabled(input: &G3TsEslintConfigChecksInput) -> bool {
     project_service_enabled_for(input, EslintProbeKind::TsSource)
 }
@@ -133,6 +138,19 @@ pub(crate) fn missing_error_rules(
 }
 
 #[must_use]
+pub(crate) fn present_error_rules(
+    input: &G3TsEslintConfigChecksInput,
+    probe_kind: EslintProbeKind,
+    rule_names: &[&str],
+) -> Vec<String> {
+    rule_names
+        .iter()
+        .filter(|rule_name| rule_is_error_for(input, probe_kind, rule_name))
+        .map(|rule_name| (*rule_name).to_owned())
+        .collect()
+}
+
+#[must_use]
 pub(crate) fn threshold_matches(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -169,6 +187,22 @@ pub(crate) fn format_plugin_list(plugin_names: &[String]) -> String {
         .map(|plugin_name| format!("`{plugin_name}`"))
         .collect::<Vec<_>>()
         .join(", ")
+}
+
+#[must_use]
+pub(crate) fn missing_error_rules_for_tsx(
+    input: &G3TsEslintConfigChecksInput,
+    rule_names: &[&str],
+) -> Vec<String> {
+    missing_error_rules(input, EslintProbeKind::TsxSource, rule_names)
+}
+
+#[must_use]
+pub(crate) fn missing_plugins_for_tsx(
+    input: &G3TsEslintConfigChecksInput,
+    plugin_names: &[&str],
+) -> Vec<String> {
+    missing_plugins_for(input, EslintProbeKind::TsxSource, plugin_names)
 }
 
 #[must_use]

@@ -52,3 +52,12 @@ pub fn assert_parse_error(err: &impl std::fmt::Display) {
         "error message should mention eslint evaluation, got: {msg}"
     );
 }
+
+pub fn assert_probe_kinds(snapshot: &EslintConfigSnapshot, expected: &[EslintProbeKind]) {
+    let actual = snapshot
+        .probes
+        .iter()
+        .map(|probe| probe.probe)
+        .collect::<Vec<_>>();
+    assert_eq!(actual, expected, "probe kinds mismatch");
+}

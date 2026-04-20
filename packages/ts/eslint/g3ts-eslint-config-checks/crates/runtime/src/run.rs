@@ -19,6 +19,7 @@ pub fn check(input: &G3TsEslintConfigChecksInput) -> Vec<G3CheckResult> {
     crate::ts_eslint_config_14_test_relaxations::check(input, &mut results);
     crate::ts_eslint_config_15_js_carveout::check(input, &mut results);
     crate::ts_eslint_config_16_plugin_stack::check(input, &mut results);
+    crate::ts_eslint_config_17_tsx_source_parity::check(input, &mut results);
     results
 }
 

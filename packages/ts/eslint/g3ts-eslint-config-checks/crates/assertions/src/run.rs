@@ -31,6 +31,27 @@ pub fn assert_contains(results: &[G3CheckResult], expected: &[Finding<'_>]) {
     }
 }
 
+pub fn assert_exact(results: &[G3CheckResult], expected: &[Finding<'_>]) {
+    let actual = results
+        .iter()
+        .map(|result| Finding {
+            id: result.id(),
+            severity: result.severity(),
+            title: result.title(),
+            message: result.message(),
+            file: result.file(),
+            inventory: result.inventory(),
+        })
+        .collect::<Vec<_>>();
+
+    assert_eq!(actual, expected, "exact findings mismatch");
+}
+
+pub fn assert_exact_ids(results: &[G3CheckResult], expected: &[&str]) {
+    let actual = results.iter().map(G3CheckResult::id).collect::<Vec<_>>();
+    assert_eq!(actual, expected, "exact finding id order mismatch");
+}
+
 pub fn assert_no_findings_for_id(results: &[G3CheckResult], id: &str) {
     let matching = results
         .iter()

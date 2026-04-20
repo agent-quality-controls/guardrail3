@@ -18,3 +18,18 @@ pub fn assert_missing(input: &g3ts_eslint_types::G3TsEslintConfigChecksInput) {
         other => assert!(false, "expected missing config state, got: {other:?}"),
     }
 }
+
+pub fn assert_unreadable(
+    input: &g3ts_eslint_types::G3TsEslintConfigChecksInput,
+    expected_rel_path: &str,
+) {
+    match &input.config {
+        G3TsEslintConfigState::Unreadable { rel_path, .. } => {
+            assert_eq!(
+                rel_path, expected_rel_path,
+                "unreadable config path mismatch"
+            );
+        }
+        other => assert!(false, "expected unreadable config state, got: {other:?}"),
+    }
+}

@@ -10,6 +10,7 @@ fn parses_effective_config_probes_via_node_helper() {
     let root = fake_workspace();
     let probes = vec![
         probe(EslintProbeKind::TsSource, "src/index.ts"),
+        probe(EslintProbeKind::TsxSource, "src/app/page.tsx"),
         probe(EslintProbeKind::TsTest, "src/index.test.ts"),
         probe(EslintProbeKind::JsSource, "scripts/build.js"),
         probe(EslintProbeKind::ConfigFile, "eslint.config.mjs"),
@@ -19,7 +20,18 @@ fn parses_effective_config_probes_via_node_helper() {
         .expect("parse should succeed for fake eslint workspace");
 
     assertions::assert_selected_config(&snapshot, "eslint.config.mjs", EslintConfigFileKind::Mjs);
+    assertions::assert_probe_kinds(
+        &snapshot,
+        &[
+            EslintProbeKind::TsSource,
+            EslintProbeKind::TsxSource,
+            EslintProbeKind::TsTest,
+            EslintProbeKind::JsSource,
+            EslintProbeKind::ConfigFile,
+        ],
+    );
     assertions::assert_project_service(&snapshot, EslintProbeKind::TsSource, Some(true));
+    assertions::assert_project_service(&snapshot, EslintProbeKind::TsxSource, Some(true));
     assertions::assert_project_service(&snapshot, EslintProbeKind::JsSource, Some(false));
     assertions::assert_rule_severity(
         &snapshot,
@@ -32,6 +44,12 @@ fn parses_effective_config_probes_via_node_helper() {
         EslintProbeKind::TsTest,
         "@typescript-eslint/no-explicit-any",
         EslintRuleSeverity::Off,
+    );
+    assertions::assert_rule_severity(
+        &snapshot,
+        EslintProbeKind::TsxSource,
+        "@typescript-eslint/no-explicit-any",
+        EslintRuleSeverity::Error,
     );
     assertions::assert_rule_severity(
         &snapshot,
@@ -50,6 +68,28 @@ fn helper_failures_surface_as_parse_errors() {
         .expect_err("parse should fail when fake eslint throws");
 
     assertions::assert_parse_error(&err);
+}
+
+#[test]
+fn selected_config_kind_matches_all_supported_config_extensions() {
+    let root = fake_workspace();
+
+    for (rel_path, expected_kind) in [
+        ("eslint.config.js", EslintConfigFileKind::Js),
+        ("eslint.config.mjs", EslintConfigFileKind::Mjs),
+        ("eslint.config.cjs", EslintConfigFileKind::Cjs),
+        ("eslint.config.ts", EslintConfigFileKind::Ts),
+        ("eslint.config.mts", EslintConfigFileKind::Mts),
+        ("eslint.config.cts", EslintConfigFileKind::Cts),
+    ] {
+        std::fs::write(root.path().join(rel_path), "export default [];\n")
+            .expect("config file should be written");
+
+        let snapshot = crate::parser::parse(root.path(), rel_path, &[])
+            .expect("parse should succeed for supported config kinds");
+
+        assertions::assert_selected_config(&snapshot, rel_path, expected_kind);
+    }
 }
 
 fn probe(probe: EslintProbeKind, rel_path: &str) -> EslintProbeTarget {
@@ -81,6 +121,13 @@ fn fake_workspace() -> TempDir {
         "export const testValue = 1;\n",
     )
     .expect("test source should be written");
+    fs::create_dir_all(root.path().join("src/app"))
+        .expect("tsx source directory should be created");
+    fs::write(
+        root.path().join("src/app/page.tsx"),
+        "export function Page() { return <main />; }\n",
+    )
+    .expect("tsx source should be written");
     fs::write(
         root.path().join("scripts/build.js"),
         "console.log('build');\n",
