@@ -1,0 +1,28 @@
+[package]
+name = "g3ts"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+clap.workspace = true
+g3-workspace-crawl.workspace = true
+guardrail3-ts-app-types = { path = "../../../../../types/app-types" }
+guardrail3-ts-family-runner-config = { path = "../../../../../logic/family-runner-config" }
+guardrail3-ts-validate-command = { path = "../../../../../logic/validate-command/crates/runtime" }
+guardrail3-ts-packages = { path = "../../../../outbound/packages" }
+guardrail3-ts-report = { path = "../../../../outbound/report/crates/runtime" }
+
+[dev-dependencies]
+g3-workspace-crawl.workspace = true
+guardrail3-ts-assertions = { path = "../assertions" }
+
+[features]
+default = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

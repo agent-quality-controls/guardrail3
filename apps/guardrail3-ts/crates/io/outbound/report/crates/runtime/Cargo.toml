@@ -1,0 +1,23 @@
+[package]
+name = "guardrail3-ts-report"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-ts-app-types = { path = "../../../../../types/app-types" }
+
+[dev-dependencies]
+guardrail3-check-types.workspace = true
+guardrail3-ts-app-types = { path = "../../../../../types/app-types" }
+guardrail3-ts-report-assertions = { path = "../assertions" }
+
+[features]
+default = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

@@ -1,0 +1,19 @@
+[package]
+name = "guardrail3-ts-app-types"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-check-types.workspace = true
+g3-workspace-crawl.workspace = true
+
+[features]
+default = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

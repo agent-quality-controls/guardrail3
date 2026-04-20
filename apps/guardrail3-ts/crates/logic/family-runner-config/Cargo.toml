@@ -1,0 +1,21 @@
+[package]
+name = "guardrail3-ts-family-runner-config"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-ts-app-types = { path = "../../types/app-types" }
+g3-workspace-crawl.workspace = true
+g3ts-eslint-config-checks.workspace = true
+g3ts-eslint-ingestion.workspace = true
+
+[features]
+default = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true
