@@ -1,5 +1,5 @@
+mod full_config;
 mod run;
-mod support;
 mod ts_eslint_config_01_exists;
 mod ts_eslint_config_02_parseable;
 mod ts_eslint_config_03_ts_plugin_present;

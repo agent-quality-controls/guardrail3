@@ -1,7 +1,7 @@
 use g3ts_eslint_types::{G3TsEslintConfigChecksInput, G3TsEslintConfigState};
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::info;
+use crate::full_config::support::info;
 
 const ID: &str = "TS-ESLINT-CONFIG-02";
 
