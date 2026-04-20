@@ -236,11 +236,12 @@ fn build_crate_node(
     let (production_dependency_count, dev_dependency_count) =
         parsed.as_ref().map_or((0, 0), count_dependencies);
     let src_dir = CrawlView::join_rel(dir, "src");
-    let (sibling_rs_file_count, sibling_dir_count) = if view.dir_contents(&src_dir).is_some() {
-        count_siblings(view, &src_dir, dir, crate_dirs)
-    } else {
-        count_siblings(view, dir, dir, crate_dirs)
-    };
+    let (max_sibling_rs_file_count, max_sibling_dir_count) =
+        if view.dir_contents(&src_dir).is_some() {
+            measure_max_sibling_counts(view, &src_dir, dir, crate_dirs)
+        } else {
+            measure_max_sibling_counts(view, dir, dir, crate_dirs)
+        };
     let max_module_depth = measure_module_depth(view, dir, crate_dirs);
 
     Ok(G3RsArchCrateNode {
@@ -265,8 +266,8 @@ fn build_crate_node(
             dev: dev_dependency_count,
         },
         structure: G3RsArchCrateStructure {
-            sibling_rs_file_count,
-            sibling_dir_count,
+            max_sibling_rs_file_count,
+            max_sibling_dir_count,
             max_module_depth,
         },
         cargo_parse_error: parse_error,
@@ -393,7 +394,7 @@ fn count_dependencies(parsed: &Value) -> (usize, usize) {
     (production_count, dev_count)
 }
 
-fn count_siblings(
+fn measure_max_sibling_counts(
     view: &CrawlView<'_>,
     dir: &str,
     root_dir: &str,
@@ -415,7 +416,20 @@ fn count_siblings(
             !should_stop_at_nested_crate(view, root_dir, &child_dir, crate_dirs)
         })
         .count();
-    (sibling_rs_file_count, sibling_dir_count)
+
+    entry.dirs().iter().fold(
+        (sibling_rs_file_count, sibling_dir_count),
+        |(max_rs, max_dirs), subdir| {
+            let child_dir = CrawlView::join_rel(dir, subdir);
+            if should_stop_at_nested_crate(view, root_dir, &child_dir, crate_dirs) {
+                return (max_rs, max_dirs);
+            }
+
+            let (child_max_rs, child_max_dirs) =
+                measure_max_sibling_counts(view, &child_dir, root_dir, crate_dirs);
+            (max_rs.max(child_max_rs), max_dirs.max(child_max_dirs))
+        },
+    )
 }
 
 fn measure_module_depth(view: &CrawlView<'_>, crate_dir: &str, crate_dirs: &[&str]) -> usize {

@@ -176,3 +176,74 @@ fn file_tree_complexity_ignores_excluded_nested_crates_for_root_level_layouts() 
     let results = file_tree_results(&root);
     assertions::assert_missing_result(&results, "RS-ARCH-FILETREE-07");
 }
+
+#[test]
+fn file_tree_pipeline_reports_nested_rs_file_piles() {
+    let root = temp_workspace_root();
+
+    write_file(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crate_a\"]\n",
+    );
+    make_dir(&root, "crate_a/src/nested");
+    write_file(
+        &root,
+        "crate_a/Cargo.toml",
+        "[package]\nname = \"crate_a\"\nversion = \"0.1.0\"\n",
+    );
+    write_file(&root, "crate_a/src/lib.rs", "pub mod nested;\n");
+    write_file(&root, "crate_a/src/nested/mod.rs", "pub struct Root;\n");
+    for name in [
+        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven",
+    ] {
+        write_file(
+            &root,
+            &format!("crate_a/src/nested/{name}.rs"),
+            "pub struct Item;\n",
+        );
+    }
+
+    let results = file_tree_results(&root);
+    assertions::assert_has_result(
+        &results,
+        "RS-ARCH-FILETREE-07",
+        G3Severity::Error,
+        Some("crate_a/Cargo.toml"),
+    );
+}
+
+#[test]
+fn file_tree_pipeline_reports_nested_directory_piles() {
+    let root = temp_workspace_root();
+
+    write_file(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crate_a\"]\n",
+    );
+    make_dir(&root, "crate_a/src/nested");
+    write_file(
+        &root,
+        "crate_a/Cargo.toml",
+        "[package]\nname = \"crate_a\"\nversion = \"0.1.0\"\n",
+    );
+    write_file(&root, "crate_a/src/lib.rs", "pub mod nested;\n");
+    write_file(&root, "crate_a/src/nested/mod.rs", "pub struct Root;\n");
+    for name in ["a", "b", "c", "d", "e"] {
+        make_dir(&root, &format!("crate_a/src/nested/{name}"));
+        write_file(
+            &root,
+            &format!("crate_a/src/nested/{name}/mod.rs"),
+            "pub struct Item;\n",
+        );
+    }
+
+    let results = file_tree_results(&root);
+    assertions::assert_has_result(
+        &results,
+        "RS-ARCH-FILETREE-07",
+        G3Severity::Error,
+        Some("crate_a/Cargo.toml"),
+    );
+}

@@ -32,8 +32,8 @@ pub struct G3RsArchDependencyCounts {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsArchCrateStructure {
-    pub sibling_rs_file_count: usize,
-    pub sibling_dir_count: usize,
+    pub max_sibling_rs_file_count: usize,
+    pub max_sibling_dir_count: usize,
     pub max_module_depth: usize,
 }
 
@@ -145,8 +145,8 @@ pub struct G3RsArchFileTreeCrate {
     pub has_package: bool,
     pub has_lib_rs: bool,
     pub has_main_rs: bool,
-    pub sibling_rs_file_count: usize,
-    pub sibling_dir_count: usize,
+    pub max_sibling_rs_file_count: usize,
+    pub max_sibling_dir_count: usize,
     pub max_module_depth: usize,
     pub cargo_parse_error: Option<String>,
 }

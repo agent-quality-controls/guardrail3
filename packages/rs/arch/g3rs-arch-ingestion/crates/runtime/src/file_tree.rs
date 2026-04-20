@@ -1,10 +1,10 @@
 use std::collections::BTreeMap;
 
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_arch_types::types::{
     G3RsArchCrateNode, G3RsArchFileTreeChecksInput, G3RsArchFileTreeCrate, G3RsArchModuleDir,
     G3RsArchRustPolicyState,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::error::G3RsArchIngestionError;
 use crate::view::CrawlView;
@@ -14,7 +14,7 @@ use crate::workspace::{
 };
 
 pub(crate) fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsArchFileTreeChecksInput, G3RsArchIngestionError> {
     let view = CrawlView::new(crawl);
     let crate_nodes = collect_crate_nodes(&view)?;
@@ -70,8 +70,8 @@ fn collect_file_tree_crates(crate_nodes: &[G3RsArchCrateNode]) -> Vec<G3RsArchFi
             has_package: node.has_package,
             has_lib_rs: node.has_lib_rs,
             has_main_rs: node.has_main_rs,
-            sibling_rs_file_count: node.structure.sibling_rs_file_count,
-            sibling_dir_count: node.structure.sibling_dir_count,
+            max_sibling_rs_file_count: node.structure.max_sibling_rs_file_count,
+            max_sibling_dir_count: node.structure.max_sibling_dir_count,
             max_module_depth: node.structure.max_module_depth,
             cargo_parse_error: node.cargo_parse_error.clone(),
         })
