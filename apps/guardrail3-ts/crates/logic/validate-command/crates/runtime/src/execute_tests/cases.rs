@@ -3,8 +3,8 @@ use std::path::Path;
 use g3_workspace_crawl::G3WorkspaceCrawl;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_ts_app_types::{
-    FamilyRunError, FamilyRunner, ReportRenderer, SUPPORTED_FAMILIES, SupportedFamily,
-    ValidateReport, ValidateRequest, WorkspaceCrawlError, WorkspaceCrawler,
+    FamilyRun, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily, ValidateReport,
+    ValidateRequest, WorkspaceCrawlError, WorkspaceCrawler,
 };
 use guardrail3_ts_validate_command_assertions::execute as assertions;
 
@@ -91,7 +91,7 @@ fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
 }
 
 #[test]
-fn execute_defaults_to_all_families_and_errors_on_non_inventory_error() {
+fn execute_defaults_to_the_only_supported_family() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
     std::fs::write(tempdir.path().join("package.json"), "{}\n")
         .expect("write temporary workspace package.json");
@@ -109,7 +109,7 @@ fn execute_defaults_to_all_families_and_errors_on_non_inventory_error() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        &format!("runs={} inventory=false", SUPPORTED_FAMILIES.len()),
+        "runs=1 inventory=false",
         "",
         0,
     );
@@ -133,7 +133,7 @@ impl FamilyRunner for ErroringFamilyRunner {
 }
 
 #[test]
-fn execute_keeps_successful_family_results_when_one_family_errors() {
+fn execute_does_not_print_clean_output_when_all_family_runs_fail() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
     std::fs::write(tempdir.path().join("package.json"), "{}\n")
         .expect("write temporary workspace package.json");
@@ -151,8 +151,53 @@ fn execute_keeps_successful_family_results_when_one_family_errors() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=0 inventory=false",
+        "",
         "eslint: eslint runner exploded\n",
         1,
     );
+}
+
+#[test]
+fn execute_does_not_print_clean_output_when_only_hidden_inventory_survives_an_error() {
+    let report = ValidateReport {
+        runs: vec![FamilyRun {
+            family: SupportedFamily::Eslint,
+            results: vec![
+                G3CheckResult::new(
+                    "TS-ESLINT-CONFIG-01".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some("eslint.config.mjs".to_owned()),
+                    None,
+                )
+                .into_inventory(),
+            ],
+        }],
+    };
+
+    let stdout = super::super::render_stdout(&report, false, true, &StubRenderer);
+
+    assert!(stdout.is_empty(), "stdout should stay empty: {stdout}");
+}
+
+#[test]
+fn execute_keeps_visible_findings_on_stdout_when_an_error_also_happens() {
+    let report = ValidateReport {
+        runs: vec![FamilyRun {
+            family: SupportedFamily::Eslint,
+            results: vec![G3CheckResult::new(
+                "TS-ESLINT-CONFIG-02".to_owned(),
+                G3Severity::Warn,
+                "warn".to_owned(),
+                "warn".to_owned(),
+                Some("eslint.config.mjs".to_owned()),
+                None,
+            )],
+        }],
+    };
+
+    let stdout = super::super::render_stdout(&report, false, true, &StubRenderer);
+
+    assert_eq!(stdout, "runs=1 inventory=false");
 }

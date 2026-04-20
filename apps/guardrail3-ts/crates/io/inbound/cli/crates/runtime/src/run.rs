@@ -68,6 +68,16 @@ pub fn run_command(
     }
 }
 
+/// Executes one parsed command through the app's default runtime wiring.
+pub fn run_command_with_defaults(command: Command) -> CliOutput {
+    run_command(
+        command,
+        &crate::PackageRuntime,
+        &CliFamilyRunner,
+        &crate::PlainTextReportRenderer,
+    )
+}
+
 #[cfg(test)]
 #[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
 mod run_tests;

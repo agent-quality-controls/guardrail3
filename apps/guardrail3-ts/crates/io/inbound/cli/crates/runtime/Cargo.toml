@@ -15,6 +15,7 @@ guardrail3-ts-report = { path = "../../../../outbound/report/crates/runtime" }
 
 [dev-dependencies]
 g3-workspace-crawl.workspace = true
+tempfile.workspace = true
 guardrail3-ts-assertions = { path = "../assertions" }
 
 [features]

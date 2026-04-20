@@ -60,3 +60,43 @@ fn run_command_sends_failures_to_stderr() {
         1,
     );
 }
+
+#[test]
+fn run_command_uses_real_eslint_wiring_for_missing_config() {
+    let tempdir = tempfile::tempdir().expect("create temporary ts workspace root");
+    std::fs::write(tempdir.path().join("package.json"), "{}\n")
+        .expect("write temporary workspace package.json");
+
+    let output = super::super::run_command_with_defaults(super::super::Command::Validate {
+        path: tempdir.path().to_path_buf(),
+        family: Vec::new(),
+        inventory: false,
+    });
+
+    assert!(
+        output.stdout.contains("TS-ESLINT-CONFIG-01"),
+        "expected missing eslint config finding in stdout: {}",
+        output.stdout
+    );
+    assert!(
+        output.stdout.contains("eslint config missing"),
+        "expected missing eslint config title in stdout: {}",
+        output.stdout
+    );
+    assert!(
+        output.stdout.contains("== eslint =="),
+        "expected eslint family header in stdout: {}",
+        output.stdout
+    );
+    assert!(
+        !output.stdout.contains("No findings."),
+        "stdout should not claim the run was clean: {}",
+        output.stdout
+    );
+    assert!(
+        output.stderr.is_empty(),
+        "expected no stderr for clean app wiring failure path: {}",
+        output.stderr
+    );
+    assert_eq!(output.exit_code, 1, "expected error exit code");
+}

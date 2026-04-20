@@ -28,7 +28,12 @@ pub fn execute(
         }
     }
 
-    let stdout = renderer.render(&report, request.include_inventory);
+    let stdout = render_stdout(
+        &report,
+        request.include_inventory,
+        !family_errors.is_empty(),
+        renderer,
+    );
     let stderr = if family_errors.is_empty() {
         String::new()
     } else {
@@ -58,6 +63,19 @@ fn highest_severity(report: &ValidateReport, include_inventory: bool) -> Option<
             G3Severity::Warn => 1_u8,
             G3Severity::Error => 2_u8,
         })
+}
+
+fn render_stdout(
+    report: &ValidateReport,
+    include_inventory: bool,
+    has_family_errors: bool,
+    renderer: &dyn ReportRenderer,
+) -> String {
+    if has_family_errors && highest_severity(report, include_inventory).is_none() {
+        return String::new();
+    }
+
+    renderer.render(report, include_inventory)
 }
 
 #[cfg(test)]

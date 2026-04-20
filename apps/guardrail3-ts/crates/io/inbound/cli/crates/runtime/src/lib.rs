@@ -10,4 +10,4 @@ pub use guardrail3_ts_packages::PackageRuntime;
 #[cfg(feature = "api")]
 pub use guardrail3_ts_report::PlainTextReportRenderer;
 #[cfg(feature = "api")]
-pub use run::{CliFamilyRunner, CliOutput, run_command};
+pub use run::{CliFamilyRunner, CliOutput, run_command, run_command_with_defaults};

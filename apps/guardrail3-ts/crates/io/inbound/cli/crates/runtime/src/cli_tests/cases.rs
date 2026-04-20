@@ -25,3 +25,22 @@ fn parse_command_rejects_unknown_family() {
 
     guardrail3_ts_assertions::cli::assert_parse_error_mentions(&error, "hexarch");
 }
+
+#[test]
+fn parse_command_rejects_rust_family_name() {
+    let error =
+        super::super::parse_command_from(["g3ts", "validate", "--path", ".", "--family", "fmt"])
+            .expect_err("rust family should fail CLI parsing");
+
+    guardrail3_ts_assertions::cli::assert_parse_error_mentions(&error, "fmt");
+}
+
+#[test]
+fn parse_command_accepts_validate_without_family_flag() {
+    guardrail3_ts_assertions::cli::assert_validate_command_from(
+        ["g3ts", "validate", "--path", "."],
+        ".",
+        &[],
+        false,
+    );
+}
