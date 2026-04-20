@@ -9,3 +9,9 @@ allowed_deps = [
 
 [checks]
 garde = false
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Rule runtime crate intentionally aggregates one rule per file and is the package boundary by design."
