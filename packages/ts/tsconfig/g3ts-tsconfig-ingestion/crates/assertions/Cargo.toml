@@ -1,0 +1,23 @@
+[package]
+name = "g3ts-tsconfig-ingestion-assertions"
+version = "0.0.0"
+edition = "2024"
+description = "Assertion helpers for g3ts tsconfig ingestion tests"
+license.workspace = true
+repository.workspace = true
+publish = false
+readme = "README.md"
+keywords = ["guardrail3", "typescript", "tsconfig", "assertions"]
+categories = ["development-tools"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[dependencies]
+g3ts-tsconfig-ingestion-runtime = { path = "../runtime" }
+g3ts-tsconfig-types = { path = "../../../g3ts-tsconfig-types" }

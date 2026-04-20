@@ -244,6 +244,7 @@ dependencies = [
  "guardrail3-ts-packages",
  "guardrail3-ts-report",
  "guardrail3-ts-validate-command",
+ "tempfile",
 ]
 
 [[package]]
@@ -292,6 +293,53 @@ name = "g3ts-eslint-types"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
+]
+
+[[package]]
+name = "g3ts-tsconfig-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-tsconfig-config-checks-runtime",
+ "g3ts-tsconfig-config-checks-types",
+]
+
+[[package]]
+name = "g3ts-tsconfig-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-tsconfig-types",
+ "guardrail3-check-types",
+ "tsconfig-json-parser",
+]
+
+[[package]]
+name = "g3ts-tsconfig-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3ts-tsconfig-types",
+]
+
+[[package]]
+name = "g3ts-tsconfig-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3ts-tsconfig-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-tsconfig-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3-workspace-crawl",
+ "g3ts-tsconfig-types",
+ "tsconfig-json-parser",
+]
+
+[[package]]
+name = "g3ts-tsconfig-types"
+version = "0.1.0"
+dependencies = [
+ "tsconfig-json-parser",
 ]
 
 [[package]]
@@ -347,6 +395,8 @@ dependencies = [
  "g3-workspace-crawl",
  "g3ts-eslint-config-checks",
  "g3ts-eslint-ingestion",
+ "g3ts-tsconfig-config-checks",
+ "g3ts-tsconfig-ingestion",
  "guardrail3-ts-app-types",
 ]
 
@@ -459,6 +509,15 @@ name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
+
+[[package]]
+name = "jsonc-parser"
+version = "0.32.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c2e5dea04f54739ca5694ee06e4448ffda065a55b3427d2b131bd5ea697ea2c"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "leb128fmt"
@@ -652,6 +711,29 @@ dependencies = [
  "once_cell",
  "rustix",
  "windows-sys",
+]
+
+[[package]]
+name = "tsconfig-json-parser"
+version = "0.1.0"
+dependencies = [
+ "tsconfig-json-parser-runtime",
+]
+
+[[package]]
+name = "tsconfig-json-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "jsonc-parser",
+ "serde_json",
+ "tsconfig-json-parser-types",
+]
+
+[[package]]
+name = "tsconfig-json-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
 ]
 
 [[package]]

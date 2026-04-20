@@ -34,12 +34,14 @@ pub enum Command {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum FamilyArg {
     Eslint,
+    Tsconfig,
 }
 
 impl From<FamilyArg> for SupportedFamily {
     fn from(value: FamilyArg) -> Self {
         match value {
             FamilyArg::Eslint => Self::Eslint,
+            FamilyArg::Tsconfig => Self::Tsconfig,
         }
     }
 }

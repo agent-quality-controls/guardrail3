@@ -4,6 +4,7 @@ use guardrail3_ts_app_types::{SUPPORTED_FAMILIES, SupportedFamily, ValidateReque
 pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
     match family {
         SupportedFamily::Eslint => "eslint",
+        SupportedFamily::Tsconfig => "tsconfig",
     }
 }
 
