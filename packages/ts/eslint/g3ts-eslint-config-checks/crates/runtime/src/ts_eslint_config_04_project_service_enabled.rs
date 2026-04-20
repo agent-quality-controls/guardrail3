@@ -1,9 +1,7 @@
 use g3ts_eslint_types::G3TsEslintConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::full_config::support::{
-    error, info, parsed_document, project_service_enabled, selected_rel_path,
-};
+use crate::support::{error, info, parsed_document, project_service_enabled, selected_rel_path};
 
 const ID: &str = "TS-ESLINT-CONFIG-04";
 
