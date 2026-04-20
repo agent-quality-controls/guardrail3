@@ -1,0 +1,35 @@
+[package]
+name = "g3ts-tsconfig-config-checks-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3ts tsconfig config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["guardrail3", "typescript", "tsconfig", "checks"]
+categories = ["development-tools"]
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[lints]
+workspace = true
+
+[package.metadata.guardrail3]
+shared = true
+
+[package.metadata.docs.rs]
+all-features = true
+
+[dependencies]
+g3ts-tsconfig-types = { path = "../../../g3ts-tsconfig-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+tsconfig-json-parser = { path = "../../../../../parsers/tsconfig-json-parser", version = "0.1.0", features = ["api"] }
+
+[dev-dependencies]
+g3ts-tsconfig-config-checks-assertions = { path = "../assertions" }

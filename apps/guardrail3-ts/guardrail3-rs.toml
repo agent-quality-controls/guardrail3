@@ -5,6 +5,8 @@ allowed_deps = [
   "g3-workspace-crawl",
   "g3ts-eslint-config-checks",
   "g3ts-eslint-ingestion",
+  "g3ts-tsconfig-config-checks",
+  "g3ts-tsconfig-ingestion",
   "g3ts",
   "guardrail3-check-types",
   "guardrail3-ts-app-types",

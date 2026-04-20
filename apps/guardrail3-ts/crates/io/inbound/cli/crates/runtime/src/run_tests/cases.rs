@@ -89,6 +89,16 @@ fn run_command_uses_real_eslint_wiring_for_missing_config() {
         output.stdout
     );
     assert!(
+        output.stdout.contains("== tsconfig =="),
+        "expected tsconfig family header in stdout: {}",
+        output.stdout
+    );
+    assert!(
+        output.stdout.contains("TS-TSCONFIG-CONFIG-01"),
+        "expected missing tsconfig finding in stdout: {}",
+        output.stdout
+    );
+    assert!(
         !output.stdout.contains("No findings."),
         "stdout should not claim the run was clean: {}",
         output.stdout

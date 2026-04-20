@@ -18,7 +18,9 @@ impl FamilyRunner for CliFamilyRunner {
         crawl: &G3WorkspaceCrawl,
     ) -> Result<FamilyResults, FamilyRunError> {
         match family {
-            SupportedFamily::Eslint => guardrail3_ts_family_runner_config::run(family, crawl),
+            SupportedFamily::Eslint | SupportedFamily::Tsconfig => {
+                guardrail3_ts_family_runner_config::run(family, crawl)
+            }
         }
     }
 }

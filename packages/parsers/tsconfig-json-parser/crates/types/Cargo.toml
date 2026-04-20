@@ -1,0 +1,30 @@
+[package]
+name = "tsconfig-json-parser-types"
+version.workspace = true
+edition = "2024"
+description = "Typed model for parsed tsconfig JSONC documents"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["typescript", "tsconfig", "types", "jsonc", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+publish = false
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+serde_json = "1"
+
+[package.metadata.docs.rs]
+all-features = true

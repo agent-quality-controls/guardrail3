@@ -14,5 +14,8 @@ pub fn run(
         SupportedFamily::Eslint => Ok(g3ts_eslint_config_checks::check(
             &g3ts_eslint_ingestion::ingest_for_config_checks(crawl),
         )),
+        SupportedFamily::Tsconfig => Ok(g3ts_tsconfig_config_checks::check(
+            &g3ts_tsconfig_ingestion::ingest_for_config_checks(crawl),
+        )),
     }
 }

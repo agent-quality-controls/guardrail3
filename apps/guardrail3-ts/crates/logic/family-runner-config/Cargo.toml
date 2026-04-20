@@ -9,6 +9,8 @@ guardrail3-ts-app-types = { path = "../../types/app-types" }
 g3-workspace-crawl.workspace = true
 g3ts-eslint-config-checks.workspace = true
 g3ts-eslint-ingestion.workspace = true
+g3ts-tsconfig-config-checks.workspace = true
+g3ts-tsconfig-ingestion.workspace = true
 
 [features]
 default = ["api"]

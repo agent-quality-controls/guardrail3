@@ -50,6 +50,17 @@ impl FamilyRunner for StubFamilyRunner {
                     None,
                 ),
             ],
+            SupportedFamily::Tsconfig => vec![
+                G3CheckResult::new(
+                    "TS-TSCONFIG-CONFIG-01".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some("tsconfig.json".to_owned()),
+                    None,
+                )
+                .into_inventory(),
+            ],
         };
 
         Ok(results)
@@ -91,7 +102,7 @@ fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
 }
 
 #[test]
-fn execute_defaults_to_the_only_supported_family() {
+fn execute_defaults_to_all_supported_families() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
     std::fs::write(tempdir.path().join("package.json"), "{}\n")
         .expect("write temporary workspace package.json");
@@ -109,7 +120,7 @@ fn execute_defaults_to_the_only_supported_family() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=1 inventory=false",
+        "runs=2 inventory=false",
         "",
         0,
     );
@@ -127,6 +138,9 @@ impl FamilyRunner for ErroringFamilyRunner {
         match family {
             SupportedFamily::Eslint => Err(FamilyRunError {
                 message: "eslint runner exploded".to_owned(),
+            }),
+            SupportedFamily::Tsconfig => Err(FamilyRunError {
+                message: "tsconfig runner exploded".to_owned(),
             }),
         }
     }
