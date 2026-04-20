@@ -18,8 +18,8 @@ fn exact_thresholds_stay_quiet() {
     let mut node = crate_node("crate_a");
     node.has_lib_rs = true;
     node.max_module_depth = 3;
-    node.sibling_dir_count = 4;
-    node.sibling_rs_file_count = 10;
+    node.max_sibling_dir_count = 4;
+    node.max_sibling_rs_file_count = 10;
 
     let results = run_rule(&node, &G3RsArchRustPolicyState::Missing);
 
@@ -31,8 +31,8 @@ fn structural_threshold_over_limit_fires() {
     let mut node = crate_node("crate_a");
     node.has_lib_rs = true;
     node.max_module_depth = 4;
-    node.sibling_dir_count = 5;
-    node.sibling_rs_file_count = 11;
+    node.max_sibling_dir_count = 5;
+    node.max_sibling_rs_file_count = 11;
 
     let results = run_rule(&node, &G3RsArchRustPolicyState::Missing);
 
@@ -44,8 +44,8 @@ fn exact_waiver_for_crate_suppresses_structural_split() {
     let mut node = crate_node("crate_a");
     node.has_lib_rs = true;
     node.max_module_depth = 4;
-    node.sibling_dir_count = 5;
-    node.sibling_rs_file_count = 11;
+    node.max_sibling_dir_count = 5;
+    node.max_sibling_rs_file_count = 11;
 
     let results = run_rule(
         &node,
@@ -68,8 +68,8 @@ fn non_matching_waiver_does_not_suppress_structural_split() {
     let mut node = crate_node("crate_a");
     node.has_lib_rs = true;
     node.max_module_depth = 4;
-    node.sibling_dir_count = 5;
-    node.sibling_rs_file_count = 11;
+    node.max_sibling_dir_count = 5;
+    node.max_sibling_rs_file_count = 11;
 
     let results = run_rule(
         &node,

@@ -25,16 +25,16 @@ pub(crate) fn check(
             node.max_module_depth, MAX_MODULE_DEPTH
         ));
     }
-    if node.sibling_dir_count > MAX_SIBLING_DIRS {
+    if node.max_sibling_dir_count > MAX_SIBLING_DIRS {
         reasons.push(format!(
             "{} sibling directories (max {})",
-            node.sibling_dir_count, MAX_SIBLING_DIRS
+            node.max_sibling_dir_count, MAX_SIBLING_DIRS
         ));
     }
-    if node.sibling_rs_file_count > MAX_SIBLING_RS_FILES {
+    if node.max_sibling_rs_file_count > MAX_SIBLING_RS_FILES {
         reasons.push(format!(
             "{} sibling .rs files (max {})",
-            node.sibling_rs_file_count, MAX_SIBLING_RS_FILES
+            node.max_sibling_rs_file_count, MAX_SIBLING_RS_FILES
         ));
     }
 

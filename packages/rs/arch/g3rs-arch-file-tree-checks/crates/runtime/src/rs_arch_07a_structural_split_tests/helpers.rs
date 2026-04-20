@@ -9,8 +9,8 @@ pub(super) fn crate_node(rel_dir: &str) -> G3RsArchFileTreeCrate {
         has_package: true,
         has_lib_rs: false,
         has_main_rs: false,
-        sibling_rs_file_count: 0,
-        sibling_dir_count: 0,
+        max_sibling_rs_file_count: 0,
+        max_sibling_dir_count: 0,
         max_module_depth: 0,
         cargo_parse_error: None,
     }
