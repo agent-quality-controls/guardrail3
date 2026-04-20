@@ -1,0 +1,19 @@
+[package]
+name = "guardrail3-ts-assertions"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+clap.workspace = true
+g3ts = { path = "../runtime" }
+
+[features]
+default = ["checks"]
+checks = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

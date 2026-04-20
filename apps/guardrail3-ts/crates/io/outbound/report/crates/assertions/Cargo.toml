@@ -1,0 +1,18 @@
+[package]
+name = "guardrail3-ts-report-assertions"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-ts-report = { path = "../runtime" }
+
+[features]
+default = ["checks"]
+checks = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

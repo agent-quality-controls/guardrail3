@@ -1,0 +1,19 @@
+profile = "service"
+
+allowed_deps = [
+  "clap",
+  "g3-workspace-crawl",
+  "g3ts-eslint-config-checks",
+  "g3ts-eslint-ingestion",
+  "g3ts",
+  "guardrail3-check-types",
+  "guardrail3-ts-app-types",
+  "guardrail3-ts-assertions",
+  "guardrail3-ts-family-runner-config",
+  "guardrail3-ts-packages",
+  "guardrail3-ts-report",
+  "guardrail3-ts-report-assertions",
+  "guardrail3-ts-validate-command",
+  "guardrail3-ts-validate-command-assertions",
+  "tempfile",
+]
