@@ -11,39 +11,39 @@ use serde_json::{Value, json};
 const TS_PLUGINS: &[&str] = &["@typescript-eslint", "unicorn", "regexp", "sonarjs"];
 const TEST_RULE_RELAXATIONS: &[&str] = &["@typescript-eslint/no-explicit-any"];
 const CORE_BASELINE_RULES: &[&str] = &[
-    "no-floating-promises",
+    "@typescript-eslint/no-floating-promises",
     "eqeqeq",
     "no-restricted-globals",
-    "no-cycle",
-    "max-dependencies",
-    "explicit-function-return-type",
-    "strict-boolean-expressions",
+    "import-x/no-cycle",
+    "import-x/max-dependencies",
+    "@typescript-eslint/explicit-function-return-type",
+    "@typescript-eslint/strict-boolean-expressions",
 ];
 const TYPE_SAFETY_RULES: &[&str] = &[
-    "no-misused-promises",
-    "await-thenable",
-    "consistent-type-imports",
-    "no-non-null-assertion",
-    "switch-exhaustiveness-check",
-    "no-unused-vars",
-    "require-await",
+    "@typescript-eslint/no-misused-promises",
+    "@typescript-eslint/await-thenable",
+    "@typescript-eslint/consistent-type-imports",
+    "@typescript-eslint/no-non-null-assertion",
+    "@typescript-eslint/switch-exhaustiveness-check",
+    "@typescript-eslint/no-unused-vars",
+    "@typescript-eslint/require-await",
     "no-param-reassign",
-    "no-unsafe-assignment",
-    "no-unsafe-member-access",
-    "no-unsafe-call",
-    "no-unsafe-return",
-    "no-unsafe-argument",
+    "@typescript-eslint/no-unsafe-assignment",
+    "@typescript-eslint/no-unsafe-member-access",
+    "@typescript-eslint/no-unsafe-call",
+    "@typescript-eslint/no-unsafe-return",
+    "@typescript-eslint/no-unsafe-argument",
 ];
 const HYGIENE_RULES: &[&str] = &[
-    "explicit-module-boundary-types",
-    "promise-function-async",
-    "consistent-type-exports",
-    "consistent-type-definitions",
-    "no-unnecessary-condition",
-    "prefer-nullish-coalescing",
-    "prefer-optional-chain",
-    "no-deprecated",
-    "restrict-template-expressions",
+    "@typescript-eslint/explicit-module-boundary-types",
+    "@typescript-eslint/promise-function-async",
+    "@typescript-eslint/consistent-type-exports",
+    "@typescript-eslint/consistent-type-definitions",
+    "@typescript-eslint/no-unnecessary-condition",
+    "@typescript-eslint/prefer-nullish-coalescing",
+    "@typescript-eslint/prefer-optional-chain",
+    "@typescript-eslint/no-deprecated",
+    "@typescript-eslint/restrict-template-expressions",
     "no-throw-literal",
     "no-empty",
 ];
@@ -179,9 +179,15 @@ impl Fixture {
         let _ = fixture.ts_rules.remove("unicorn/no-keyword-prefix");
         let _ = fixture.ts_rules.remove("regexp/require-unicode-regexp");
         let _ = fixture.ts_rules.remove("sonarjs/cognitive-complexity");
-        let _ = fixture.ts_rules.remove("no-floating-promises");
-        let _ = fixture.ts_rules.remove("no-unsafe-assignment");
-        let _ = fixture.ts_rules.remove("no-unnecessary-condition");
+        let _ = fixture
+            .ts_rules
+            .remove("@typescript-eslint/no-floating-promises");
+        let _ = fixture
+            .ts_rules
+            .remove("@typescript-eslint/no-unsafe-assignment");
+        let _ = fixture
+            .ts_rules
+            .remove("@typescript-eslint/no-unnecessary-condition");
         fixture
             .ts_plugins
             .retain(|plugin| plugin != "@typescript-eslint");
