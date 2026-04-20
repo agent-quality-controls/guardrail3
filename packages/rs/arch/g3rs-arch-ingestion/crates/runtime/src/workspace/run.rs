@@ -1,3 +1,7 @@
+use super::structure::{
+    collect_structure_root_dirs, measure_max_sibling_counts, measure_module_depth,
+};
+
 use glob::Pattern;
 use toml::Value;
 
@@ -235,14 +239,21 @@ fn build_crate_node(
     let default_feature_deps = feature_list(features.and_then(|table| table.get("default")));
     let (production_dependency_count, dev_dependency_count) =
         parsed.as_ref().map_or((0, 0), count_dependencies);
-    let src_dir = CrawlView::join_rel(dir, "src");
+    let structure_roots =
+        collect_structure_root_dirs(view, dir, lib_rs_rel.as_deref(), has_main_rs);
     let (max_sibling_rs_file_count, max_sibling_dir_count) =
-        if view.dir_contents(&src_dir).is_some() {
-            measure_max_sibling_counts(view, &src_dir, dir, crate_dirs)
-        } else {
-            measure_max_sibling_counts(view, dir, dir, crate_dirs)
-        };
-    let max_module_depth = measure_module_depth(view, dir, crate_dirs);
+        structure_roots
+            .iter()
+            .fold((0, 0), |(max_rs, max_dirs), root_dir| {
+                let (root_max_rs, root_max_dirs) =
+                    measure_max_sibling_counts(view, root_dir, dir, crate_dirs, &structure_roots);
+                (max_rs.max(root_max_rs), max_dirs.max(root_max_dirs))
+            });
+    let max_module_depth = structure_roots
+        .iter()
+        .map(|root_dir| measure_module_depth(view, dir, root_dir, crate_dirs, &structure_roots))
+        .max()
+        .unwrap_or(0);
 
     Ok(G3RsArchCrateNode {
         rel_dir: dir.to_owned(),
@@ -392,82 +403,6 @@ fn count_dependencies(parsed: &Value) -> (usize, usize) {
         dev_count += deps.len();
     }
     (production_count, dev_count)
-}
-
-fn measure_max_sibling_counts(
-    view: &CrawlView<'_>,
-    dir: &str,
-    root_dir: &str,
-    crate_dirs: &[&str],
-) -> (usize, usize) {
-    let Some(entry) = view.dir_contents(dir) else {
-        return (0, 0);
-    };
-    let sibling_rs_file_count = entry
-        .files()
-        .iter()
-        .filter(|file| file.ends_with(".rs"))
-        .count();
-    let sibling_dir_count = entry
-        .dirs()
-        .iter()
-        .filter(|subdir| {
-            let child_dir = CrawlView::join_rel(dir, subdir);
-            !should_stop_at_nested_crate(view, root_dir, &child_dir, crate_dirs)
-        })
-        .count();
-
-    entry.dirs().iter().fold(
-        (sibling_rs_file_count, sibling_dir_count),
-        |(max_rs, max_dirs), subdir| {
-            let child_dir = CrawlView::join_rel(dir, subdir);
-            if should_stop_at_nested_crate(view, root_dir, &child_dir, crate_dirs) {
-                return (max_rs, max_dirs);
-            }
-
-            let (child_max_rs, child_max_dirs) =
-                measure_max_sibling_counts(view, &child_dir, root_dir, crate_dirs);
-            (max_rs.max(child_max_rs), max_dirs.max(child_max_dirs))
-        },
-    )
-}
-
-fn measure_module_depth(view: &CrawlView<'_>, crate_dir: &str, crate_dirs: &[&str]) -> usize {
-    let src_dir = CrawlView::join_rel(crate_dir, "src");
-    let base_dir = if view.dir_contents(&src_dir).is_some() {
-        src_dir
-    } else {
-        crate_dir.to_owned()
-    };
-    measure_depth_recursive(view, crate_dir, &base_dir, crate_dirs, 0)
-}
-
-fn measure_depth_recursive(
-    view: &CrawlView<'_>,
-    root_dir: &str,
-    dir: &str,
-    crate_dirs: &[&str],
-    depth: usize,
-) -> usize {
-    let Some(entry) = view.dir_contents(dir) else {
-        return depth;
-    };
-    let has_rs = entry.files().iter().any(|file| file.ends_with(".rs"));
-    let current = if has_rs { depth } else { 0 };
-    let max_child = entry
-        .dirs()
-        .iter()
-        .map(|subdir| {
-            let child_dir = CrawlView::join_rel(dir, subdir);
-            if should_stop_at_nested_crate(view, root_dir, &child_dir, crate_dirs) {
-                0
-            } else {
-                measure_depth_recursive(view, root_dir, &child_dir, crate_dirs, depth + 1)
-            }
-        })
-        .max()
-        .unwrap_or(0);
-    current.max(max_child)
 }
 
 pub(crate) fn is_test_or_example_path(rel_path: &str) -> bool {
