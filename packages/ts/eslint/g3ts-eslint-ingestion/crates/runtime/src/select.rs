@@ -25,13 +25,7 @@ pub(crate) fn probe_targets(
     vec![
         probe(
             EslintProbeKind::TsSource,
-            first_matching_rel_path(crawl, |rel_path| {
-                rel_path.ends_with(".ts")
-                    && !rel_path.ends_with(".d.ts")
-                    && !is_test_rel_path(rel_path)
-                    && !is_eslint_config(rel_path)
-            })
-            .unwrap_or_else(|| "src/index.ts".to_owned()),
+            first_ts_source_rel_path(crawl).unwrap_or_else(|| "src/index.ts".to_owned()),
         ),
         probe(
             EslintProbeKind::TsxSource,
@@ -59,6 +53,13 @@ pub(crate) fn probe_targets(
     ]
 }
 
+fn first_ts_source_rel_path(crawl: &G3WorkspaceCrawl) -> Option<String> {
+    first_matching_rel_path(crawl, is_primary_ts_source_rel_path)
+        .or_else(|| first_matching_rel_path(crawl, is_primary_tsx_source_rel_path))
+        .or_else(|| first_matching_rel_path(crawl, is_fallback_ts_source_rel_path))
+        .or_else(|| first_matching_rel_path(crawl, is_fallback_tsx_source_rel_path))
+}
+
 fn probe(probe: EslintProbeKind, rel_path: String) -> EslintProbeTarget {
     EslintProbeTarget { probe, rel_path }
 }
@@ -83,6 +84,36 @@ fn is_test_rel_path(rel_path: &str) -> bool {
 
 fn is_eslint_config(rel_path: &str) -> bool {
     ROOT_ESLINT_CONFIGS.contains(&rel_path)
+}
+
+fn is_primary_ts_source_rel_path(rel_path: &str) -> bool {
+    rel_path.starts_with("src/")
+        && rel_path.ends_with(".ts")
+        && !rel_path.ends_with(".d.ts")
+        && !is_test_rel_path(rel_path)
+        && !is_eslint_config(rel_path)
+}
+
+fn is_primary_tsx_source_rel_path(rel_path: &str) -> bool {
+    rel_path.starts_with("src/")
+        && rel_path.ends_with(".tsx")
+        && !is_test_rel_path(rel_path)
+        && !is_eslint_config(rel_path)
+}
+
+fn is_fallback_ts_source_rel_path(rel_path: &str) -> bool {
+    rel_path.ends_with(".ts")
+        && !rel_path.ends_with(".d.ts")
+        && !rel_path.starts_with("scripts/")
+        && !is_test_rel_path(rel_path)
+        && !is_eslint_config(rel_path)
+}
+
+fn is_fallback_tsx_source_rel_path(rel_path: &str) -> bool {
+    rel_path.ends_with(".tsx")
+        && !rel_path.starts_with("scripts/")
+        && !is_test_rel_path(rel_path)
+        && !is_eslint_config(rel_path)
 }
 
 #[cfg(test)]
