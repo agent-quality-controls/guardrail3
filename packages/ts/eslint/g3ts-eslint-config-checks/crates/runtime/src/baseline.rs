@@ -5,6 +5,7 @@ pub(crate) const THRESHOLD_RULES: &[(&str, i64, &[&str])] = &[
 ];
 
 pub(crate) const REQUIRED_THRESHOLD_PRESENCE_RULES: &[&str] = &["no-restricted-imports"];
+pub(crate) const REQUIRED_TS_SOURCE_PLUGINS: &[&str] = &["unicorn", "regexp", "sonarjs"];
 
 pub(crate) const CORE_BASELINE_RULES: &[&str] = &[
     "no-floating-promises",

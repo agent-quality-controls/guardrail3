@@ -119,6 +119,10 @@ pub(super) fn broken_carveouts() -> G3TsEslintConfigChecksInput {
     parsed_fixture(Fixture::broken_carveouts())
 }
 
+pub(super) fn missing_plugin_stack() -> G3TsEslintConfigChecksInput {
+    parsed_fixture(Fixture::missing_plugin_stack())
+}
+
 struct Fixture {
     ts_plugins: Vec<String>,
     ts_rules: BTreeMap<String, EslintRuleSetting>,
@@ -192,6 +196,14 @@ impl Fixture {
             EslintRuleSeverity::Error,
         );
         fixture.js_project_service = Some(true);
+        fixture
+    }
+
+    fn missing_plugin_stack() -> Self {
+        let mut fixture = Self::golden();
+        fixture
+            .ts_plugins
+            .retain(|plugin| plugin == "@typescript-eslint");
         fixture
     }
 }
