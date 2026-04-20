@@ -10,7 +10,7 @@ fn missing_config_reports_only_exists_error() {
     let input = missing();
     let results = super::super::check(&input);
 
-    assertions::assert_contains(
+    assertions::assert_exact(
         &results,
         &[assertions::error(
             "TS-ESLINT-CONFIG-01",
@@ -20,26 +20,6 @@ fn missing_config_reports_only_exists_error() {
             false,
         )],
     );
-
-    for id in [
-        "TS-ESLINT-CONFIG-02",
-        "TS-ESLINT-CONFIG-03",
-        "TS-ESLINT-CONFIG-04",
-        "TS-ESLINT-CONFIG-05",
-        "TS-ESLINT-CONFIG-06",
-        "TS-ESLINT-CONFIG-07",
-        "TS-ESLINT-CONFIG-08",
-        "TS-ESLINT-CONFIG-09",
-        "TS-ESLINT-CONFIG-10",
-        "TS-ESLINT-CONFIG-11",
-        "TS-ESLINT-CONFIG-12",
-        "TS-ESLINT-CONFIG-13",
-        "TS-ESLINT-CONFIG-14",
-        "TS-ESLINT-CONFIG-15",
-        "TS-ESLINT-CONFIG-16",
-    ] {
-        assertions::assert_no_findings_for_id(&results, id);
-    }
 }
 
 #[test]
@@ -47,6 +27,7 @@ fn parse_error_reports_exists_inventory_and_parse_error() {
     let input = parse_error();
     let results = super::super::check(&input);
 
+    assertions::assert_exact_ids(&results, &["TS-ESLINT-CONFIG-01", "TS-ESLINT-CONFIG-02"]);
     assertions::assert_contains(
         &results,
         &[assertions::info(
@@ -74,7 +55,7 @@ fn golden_config_reports_inventory_across_full_baseline() {
     let input = golden();
     let results = super::super::check(&input);
 
-    assertions::assert_contains(
+    assertions::assert_exact(
         &results,
         &[
             assertions::info(
@@ -177,8 +158,8 @@ fn golden_config_reports_inventory_across_full_baseline() {
             ),
             assertions::info(
                 "TS-ESLINT-CONFIG-15",
-                "JS carve-out disables projectService",
-                "The JS source probe does not enable `projectService: true`.",
+                "JS carve-out disables typed linting",
+                "The JS source probe does not enable `projectService: true` and does not enforce the representative typed-lint rules.",
                 Some("eslint.config.mjs"),
                 true,
             ),
@@ -186,6 +167,13 @@ fn golden_config_reports_inventory_across_full_baseline() {
                 "TS-ESLINT-CONFIG-16",
                 "TS plugin stack active on TS source",
                 "The TS source probe has the required unicorn, regexp, and sonarjs plugin stack.",
+                Some("eslint.config.mjs"),
+                true,
+            ),
+            assertions::info(
+                "TS-ESLINT-CONFIG-17",
+                "TSX source baseline matches TS source baseline",
+                "The TSX source probe keeps the same typed-lint, threshold, plugin, and grouped-rule baseline as the TS source probe.",
                 Some("eslint.config.mjs"),
                 true,
             ),
@@ -198,6 +186,28 @@ fn wrong_thresholds_report_threshold_error() {
     let input = wrong_thresholds();
     let results = super::super::check(&input);
 
+    assertions::assert_exact_ids(
+        &results,
+        &[
+            "TS-ESLINT-CONFIG-01",
+            "TS-ESLINT-CONFIG-02",
+            "TS-ESLINT-CONFIG-03",
+            "TS-ESLINT-CONFIG-04",
+            "TS-ESLINT-CONFIG-05",
+            "TS-ESLINT-CONFIG-06",
+            "TS-ESLINT-CONFIG-07",
+            "TS-ESLINT-CONFIG-08",
+            "TS-ESLINT-CONFIG-09",
+            "TS-ESLINT-CONFIG-10",
+            "TS-ESLINT-CONFIG-11",
+            "TS-ESLINT-CONFIG-12",
+            "TS-ESLINT-CONFIG-13",
+            "TS-ESLINT-CONFIG-14",
+            "TS-ESLINT-CONFIG-15",
+            "TS-ESLINT-CONFIG-16",
+            "TS-ESLINT-CONFIG-17",
+        ],
+    );
     assertions::assert_contains(
         &results,
         &[assertions::error(
@@ -215,6 +225,28 @@ fn missing_rule_groups_report_group_errors() {
     let input = missing_rule_groups();
     let results = super::super::check(&input);
 
+    assertions::assert_exact_ids(
+        &results,
+        &[
+            "TS-ESLINT-CONFIG-01",
+            "TS-ESLINT-CONFIG-02",
+            "TS-ESLINT-CONFIG-03",
+            "TS-ESLINT-CONFIG-04",
+            "TS-ESLINT-CONFIG-05",
+            "TS-ESLINT-CONFIG-06",
+            "TS-ESLINT-CONFIG-07",
+            "TS-ESLINT-CONFIG-08",
+            "TS-ESLINT-CONFIG-09",
+            "TS-ESLINT-CONFIG-10",
+            "TS-ESLINT-CONFIG-11",
+            "TS-ESLINT-CONFIG-12",
+            "TS-ESLINT-CONFIG-13",
+            "TS-ESLINT-CONFIG-14",
+            "TS-ESLINT-CONFIG-15",
+            "TS-ESLINT-CONFIG-16",
+            "TS-ESLINT-CONFIG-17",
+        ],
+    );
     assertions::assert_contains(
         &results,
         &[
@@ -267,6 +299,13 @@ fn missing_rule_groups_report_group_errors() {
                 Some("eslint.config.mjs"),
                 false,
             ),
+            assertions::error(
+                "TS-ESLINT-CONFIG-17",
+                "TSX source baseline drift detected",
+                "The TSX source probe must enforce these grouped baseline rules at error severity: `@typescript-eslint/no-floating-promises`, `@typescript-eslint/no-unsafe-assignment`, `@typescript-eslint/no-unnecessary-condition`, `unicorn/no-keyword-prefix`, `regexp/require-unicode-regexp`, `sonarjs/cognitive-complexity`.",
+                Some("eslint.config.mjs"),
+                false,
+            ),
         ],
     );
 }
@@ -276,6 +315,28 @@ fn broken_carveouts_report_test_and_js_errors() {
     let input = broken_carveouts();
     let results = super::super::check(&input);
 
+    assertions::assert_exact_ids(
+        &results,
+        &[
+            "TS-ESLINT-CONFIG-01",
+            "TS-ESLINT-CONFIG-02",
+            "TS-ESLINT-CONFIG-03",
+            "TS-ESLINT-CONFIG-04",
+            "TS-ESLINT-CONFIG-05",
+            "TS-ESLINT-CONFIG-06",
+            "TS-ESLINT-CONFIG-07",
+            "TS-ESLINT-CONFIG-08",
+            "TS-ESLINT-CONFIG-09",
+            "TS-ESLINT-CONFIG-10",
+            "TS-ESLINT-CONFIG-11",
+            "TS-ESLINT-CONFIG-12",
+            "TS-ESLINT-CONFIG-13",
+            "TS-ESLINT-CONFIG-14",
+            "TS-ESLINT-CONFIG-15",
+            "TS-ESLINT-CONFIG-16",
+            "TS-ESLINT-CONFIG-17",
+        ],
+    );
     assertions::assert_contains(
         &results,
         &[
@@ -288,8 +349,8 @@ fn broken_carveouts_report_test_and_js_errors() {
             ),
             assertions::error(
                 "TS-ESLINT-CONFIG-15",
-                "JS carve-out for projectService missing",
-                "The JS source probe must not enable `projectService: true`.",
+                "JS carve-out for typed linting missing",
+                "The JS source probe must not enable `projectService: true`. The JS source probe must not enforce these representative typed-lint rules at error severity: `@typescript-eslint/no-unsafe-assignment`.",
                 Some("eslint.config.mjs"),
                 false,
             ),
@@ -302,6 +363,28 @@ fn missing_plugin_stack_reports_error() {
     let input = missing_plugin_stack();
     let results = super::super::check(&input);
 
+    assertions::assert_exact_ids(
+        &results,
+        &[
+            "TS-ESLINT-CONFIG-01",
+            "TS-ESLINT-CONFIG-02",
+            "TS-ESLINT-CONFIG-03",
+            "TS-ESLINT-CONFIG-04",
+            "TS-ESLINT-CONFIG-05",
+            "TS-ESLINT-CONFIG-06",
+            "TS-ESLINT-CONFIG-07",
+            "TS-ESLINT-CONFIG-08",
+            "TS-ESLINT-CONFIG-09",
+            "TS-ESLINT-CONFIG-10",
+            "TS-ESLINT-CONFIG-11",
+            "TS-ESLINT-CONFIG-12",
+            "TS-ESLINT-CONFIG-13",
+            "TS-ESLINT-CONFIG-14",
+            "TS-ESLINT-CONFIG-15",
+            "TS-ESLINT-CONFIG-16",
+            "TS-ESLINT-CONFIG-17",
+        ],
+    );
     assertions::assert_contains(
         &results,
         &[assertions::error(

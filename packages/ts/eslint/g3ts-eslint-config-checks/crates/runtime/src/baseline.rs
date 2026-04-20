@@ -6,6 +6,13 @@ pub(crate) const THRESHOLD_RULES: &[(&str, i64, &[&str])] = &[
 
 pub(crate) const REQUIRED_THRESHOLD_PRESENCE_RULES: &[&str] = &["no-restricted-imports"];
 pub(crate) const REQUIRED_TS_SOURCE_PLUGINS: &[&str] = &["unicorn", "regexp", "sonarjs"];
+pub(crate) const JS_CARVEOUT_TYPED_RULES: &[&str] = &[
+    "@typescript-eslint/no-unsafe-assignment",
+    "@typescript-eslint/no-unsafe-member-access",
+    "@typescript-eslint/no-unsafe-call",
+    "@typescript-eslint/no-unsafe-return",
+    "@typescript-eslint/no-unsafe-argument",
+];
 
 pub(crate) const CORE_BASELINE_RULES: &[&str] = &[
     "@typescript-eslint/no-floating-promises",

@@ -127,6 +127,9 @@ struct Fixture {
     ts_plugins: Vec<String>,
     ts_rules: BTreeMap<String, EslintRuleSetting>,
     ts_project_service: Option<bool>,
+    tsx_plugins: Vec<String>,
+    tsx_rules: BTreeMap<String, EslintRuleSetting>,
+    tsx_project_service: Option<bool>,
     ts_test_rules: BTreeMap<String, EslintRuleSetting>,
     ts_test_project_service: Option<bool>,
     js_rules: BTreeMap<String, EslintRuleSetting>,
@@ -153,6 +156,7 @@ impl Fixture {
         seed_off_rules(&mut ts_test_rules, TEST_RULE_RELAXATIONS);
 
         let js_rules = BTreeMap::new();
+        let tsx_rules = ts_rules.clone();
 
         Self {
             ts_plugins: TS_PLUGINS
@@ -161,6 +165,12 @@ impl Fixture {
                 .collect(),
             ts_rules,
             ts_project_service: Some(true),
+            tsx_plugins: TS_PLUGINS
+                .iter()
+                .map(|plugin| (*plugin).to_owned())
+                .collect(),
+            tsx_rules,
+            tsx_project_service: Some(true),
             ts_test_rules,
             ts_test_project_service: Some(true),
             js_rules,
@@ -177,19 +187,34 @@ impl Fixture {
     fn missing_rule_groups() -> Self {
         let mut fixture = Self::golden();
         let _ = fixture.ts_rules.remove("unicorn/no-keyword-prefix");
+        let _ = fixture.tsx_rules.remove("unicorn/no-keyword-prefix");
         let _ = fixture.ts_rules.remove("regexp/require-unicode-regexp");
+        let _ = fixture.tsx_rules.remove("regexp/require-unicode-regexp");
         let _ = fixture.ts_rules.remove("sonarjs/cognitive-complexity");
+        let _ = fixture.tsx_rules.remove("sonarjs/cognitive-complexity");
         let _ = fixture
             .ts_rules
+            .remove("@typescript-eslint/no-floating-promises");
+        let _ = fixture
+            .tsx_rules
             .remove("@typescript-eslint/no-floating-promises");
         let _ = fixture
             .ts_rules
             .remove("@typescript-eslint/no-unsafe-assignment");
         let _ = fixture
+            .tsx_rules
+            .remove("@typescript-eslint/no-unsafe-assignment");
+        let _ = fixture
             .ts_rules
+            .remove("@typescript-eslint/no-unnecessary-condition");
+        let _ = fixture
+            .tsx_rules
             .remove("@typescript-eslint/no-unnecessary-condition");
         fixture
             .ts_plugins
+            .retain(|plugin| plugin != "@typescript-eslint");
+        fixture
+            .tsx_plugins
             .retain(|plugin| plugin != "@typescript-eslint");
         fixture
     }
@@ -202,6 +227,10 @@ impl Fixture {
             EslintRuleSeverity::Error,
         );
         fixture.js_project_service = Some(true);
+        seed_error_rule(
+            &mut fixture.js_rules,
+            "@typescript-eslint/no-unsafe-assignment",
+        );
         fixture
     }
 
@@ -209,6 +238,9 @@ impl Fixture {
         let mut fixture = Self::golden();
         fixture
             .ts_plugins
+            .retain(|plugin| plugin == "@typescript-eslint");
+        fixture
+            .tsx_plugins
             .retain(|plugin| plugin == "@typescript-eslint");
         fixture
     }
@@ -228,6 +260,14 @@ fn parsed_fixture(fixture: Fixture) -> G3TsEslintConfigChecksInput {
                 plugins: fixture.ts_plugins,
                 rules: fixture.ts_rules,
                 project_service: fixture.ts_project_service,
+            },
+            EslintEffectiveConfigProbe {
+                probe: EslintProbeKind::TsxSource,
+                rel_path: "src/app/page.tsx".to_owned(),
+                ignored: false,
+                plugins: fixture.tsx_plugins,
+                rules: fixture.tsx_rules,
+                project_service: fixture.tsx_project_service,
             },
             EslintEffectiveConfigProbe {
                 probe: EslintProbeKind::TsTest,

@@ -17,6 +17,7 @@ mod ts_eslint_config_13_sonarjs_rules;
 mod ts_eslint_config_14_test_relaxations;
 mod ts_eslint_config_15_js_carveout;
 mod ts_eslint_config_16_plugin_stack;
+mod ts_eslint_config_17_tsx_source_parity;
 
 #[cfg(feature = "checks")]
 pub use run::check;
