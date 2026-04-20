@@ -1,9 +1,10 @@
+use eslint_config_parser::types::EslintProbeKind;
 use g3ts_eslint_types::G3TsEslintConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::full_config::support::{error, info, parsed_document, rule_is_error, selected_rel_path};
+use super::support::{error, info, parsed_document, rule_is_off_for, selected_rel_path};
 
-const ID: &str = "TS-ESLINT-CONFIG-05";
+const ID: &str = "TS-ESLINT-CONFIG-14";
 const RULE_NAME: &str = "@typescript-eslint/no-explicit-any";
 
 pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3CheckResult>) {
@@ -15,11 +16,11 @@ pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3Che
         return;
     };
 
-    if rule_is_error(input, RULE_NAME) {
+    if rule_is_off_for(input, EslintProbeKind::TsTest, RULE_NAME) {
         results.push(info(
             ID,
-            "no-explicit-any enforced on TS source",
-            format!("`{RULE_NAME}` is set to error on the TS source probe."),
+            "test carve-out for no-explicit-any present",
+            format!("`{RULE_NAME}` is off for the TS test probe."),
             rel_path,
         ));
         return;
@@ -27,8 +28,8 @@ pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3Che
 
     results.push(error(
         ID,
-        "no-explicit-any not enforced on TS source",
-        format!("`{RULE_NAME}` must be set to error on the TS source probe."),
+        "test carve-out for no-explicit-any missing",
+        format!("`{RULE_NAME}` must be off for the TS test probe."),
         rel_path,
     ));
 }
