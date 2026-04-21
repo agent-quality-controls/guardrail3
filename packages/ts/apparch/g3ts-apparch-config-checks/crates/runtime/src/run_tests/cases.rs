@@ -1,6 +1,6 @@
 use g3ts_apparch_types::{
-    G3TsApparchConfigChecksInput, G3TsApparchImportKind, G3TsApparchInternalEdge, G3TsApparchLayer,
-    G3TsApparchSourceFile,
+    G3TsApparchConfigChecksInput, G3TsApparchExternalImport, G3TsApparchImportKind,
+    G3TsApparchInternalEdge, G3TsApparchLayer, G3TsApparchSourceFile,
 };
 
 #[test]
@@ -85,4 +85,87 @@ fn config_checks_flag_app_dynamic_importing_outbound() {
 
     let results = crate::run::check(&input);
     g3ts_apparch_config_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-CONFIG-05");
+}
+
+#[test]
+fn config_checks_flag_types_importing_next_runtime() {
+    let input = G3TsApparchConfigChecksInput {
+        files: vec![G3TsApparchSourceFile {
+            rel_path: "src/types/user.ts".to_owned(),
+            layer: G3TsApparchLayer::Types,
+        }],
+        internal_edges: Vec::new(),
+        external_imports: vec![G3TsApparchExternalImport {
+            from_rel_path: "src/types/user.ts".to_owned(),
+            from_layer: G3TsApparchLayer::Types,
+            module_name: "next/navigation".to_owned(),
+            kind: G3TsApparchImportKind::Import,
+        }],
+    };
+
+    let results = crate::run::check(&input);
+    g3ts_apparch_config_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-CONFIG-06");
+}
+
+#[test]
+fn config_checks_flag_logic_importing_react_runtime() {
+    let input = G3TsApparchConfigChecksInput {
+        files: vec![G3TsApparchSourceFile {
+            rel_path: "src/logic/get_user.ts".to_owned(),
+            layer: G3TsApparchLayer::Logic,
+        }],
+        internal_edges: Vec::new(),
+        external_imports: vec![G3TsApparchExternalImport {
+            from_rel_path: "src/logic/get_user.ts".to_owned(),
+            from_layer: G3TsApparchLayer::Logic,
+            module_name: "react".to_owned(),
+            kind: G3TsApparchImportKind::Import,
+        }],
+    };
+
+    let results = crate::run::check(&input);
+    g3ts_apparch_config_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-CONFIG-07");
+}
+
+#[test]
+fn config_checks_flag_logic_importing_react_runtime_subpath() {
+    let input = G3TsApparchConfigChecksInput {
+        files: vec![G3TsApparchSourceFile {
+            rel_path: "src/logic/get_user.ts".to_owned(),
+            layer: G3TsApparchLayer::Logic,
+        }],
+        internal_edges: Vec::new(),
+        external_imports: vec![G3TsApparchExternalImport {
+            from_rel_path: "src/logic/get_user.ts".to_owned(),
+            from_layer: G3TsApparchLayer::Logic,
+            module_name: "react/jsx-runtime".to_owned(),
+            kind: G3TsApparchImportKind::Import,
+        }],
+    };
+
+    let results = crate::run::check(&input);
+    g3ts_apparch_config_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-CONFIG-07");
+}
+
+#[test]
+fn config_checks_allow_logic_importing_non_framework_external() {
+    let input = G3TsApparchConfigChecksInput {
+        files: vec![G3TsApparchSourceFile {
+            rel_path: "src/logic/get_user.ts".to_owned(),
+            layer: G3TsApparchLayer::Logic,
+        }],
+        internal_edges: Vec::new(),
+        external_imports: vec![G3TsApparchExternalImport {
+            from_rel_path: "src/logic/get_user.ts".to_owned(),
+            from_layer: G3TsApparchLayer::Logic,
+            module_name: "zod".to_owned(),
+            kind: G3TsApparchImportKind::Import,
+        }],
+    };
+
+    let results = crate::run::check(&input);
+    g3ts_apparch_config_checks_assertions::run::assert_has_inventory(
+        &results,
+        "TS-APPARCH-CONFIG-07",
+    );
 }
