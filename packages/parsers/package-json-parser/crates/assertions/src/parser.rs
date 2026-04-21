@@ -34,11 +34,10 @@ pub fn assert_bool_field_state(
         (PackageJsonBoolFieldState::Value(actual), Some(expected)) => {
             assert_eq!(actual, expected, "bool field mismatch for {field}");
         }
-        (actual, expected) => {
-            panic!(
-                "unexpected bool field state for {field}; actual: {actual:?}, expected: {expected:?}"
-            );
-        }
+        (actual, expected) => assert!(
+            false,
+            "unexpected bool field state for {field}; actual: {actual:?}, expected: {expected:?}"
+        ),
     }
 }
 
@@ -53,13 +52,13 @@ pub fn assert_snapshot_fields(
     expected_dependencies: &[&str],
     expected_dev_dependencies: &[&str],
 ) {
-    let snapshot = package_json_parser_runtime::typed(document).unwrap_or_else(|| {
+    let Some(snapshot) = package_json_parser_runtime::typed(document) else {
         assert!(
             false,
             "expected parsed package.json document, got: {document:#?}"
         );
-        unreachable!()
-    });
+        return;
+    };
 
     assert_eq!(
         snapshot.package_manager.as_deref(),
