@@ -48,3 +48,19 @@ fn filetree_checks_require_each_declared_entrypoint_to_exist() {
     );
     g3ts_arch_file_tree_checks_assertions::run::assert_has_error(&results, "TS-ARCH-FILETREE-01");
 }
+
+#[test]
+fn filetree_checks_stay_quiet_at_exact_structural_thresholds() {
+    let input = G3TsArchFileTreeChecksInput {
+        existing_entrypoints: Vec::new(),
+        manifest: G3TsArchManifestState::Missing,
+        source_tree: Some(G3TsArchSourceTree {
+            max_depth: 3,
+            max_sibling_dir_count: 4,
+            max_sibling_code_file_count: 10,
+        }),
+    };
+
+    let results = crate::run::check(&input);
+    g3ts_arch_file_tree_checks_assertions::run::assert_missing(&results, "TS-ARCH-FILETREE-02");
+}
