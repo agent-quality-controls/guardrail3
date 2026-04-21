@@ -1,0 +1,16 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-npmrc-types",
+  "guardrail3-check-types",
+  "npmrc-parser",
+]
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "config-check packages keep one rule per file at runtime root"
+
+[checks]
+garde = false

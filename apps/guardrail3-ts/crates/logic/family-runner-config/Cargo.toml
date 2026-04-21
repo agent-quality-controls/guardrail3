@@ -13,6 +13,8 @@ g3ts-tsconfig-config-checks.workspace = true
 g3ts-tsconfig-ingestion.workspace = true
 g3ts-package-config-checks.workspace = true
 g3ts-package-ingestion.workspace = true
+g3ts-npmrc-config-checks.workspace = true
+g3ts-npmrc-ingestion.workspace = true
 
 [features]
 default = ["api"]

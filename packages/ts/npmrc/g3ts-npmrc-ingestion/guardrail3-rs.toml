@@ -1,0 +1,11 @@
+profile = "library"
+
+allowed_deps = [
+  "g3-workspace-crawl",
+  "g3ts-npmrc-types",
+  "tempfile",
+  "npmrc-parser",
+]
+
+[checks]
+garde = false

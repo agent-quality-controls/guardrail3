@@ -36,6 +36,7 @@ pub enum FamilyArg {
     Eslint,
     Tsconfig,
     Package,
+    Npmrc,
 }
 
 impl From<FamilyArg> for SupportedFamily {
@@ -44,6 +45,7 @@ impl From<FamilyArg> for SupportedFamily {
             FamilyArg::Eslint => Self::Eslint,
             FamilyArg::Tsconfig => Self::Tsconfig,
             FamilyArg::Package => Self::Package,
+            FamilyArg::Npmrc => Self::Npmrc,
         }
     }
 }
