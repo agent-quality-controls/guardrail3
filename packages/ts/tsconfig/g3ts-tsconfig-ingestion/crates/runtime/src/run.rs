@@ -1,9 +1,9 @@
-use g3_workspace_crawl::{G3WorkspaceCrawl, root_file};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, root_file};
 use g3ts_tsconfig_types::{G3TsTsconfigChecksInput, G3TsTsconfigState, inline_strict_flags};
 use tsconfig_json_parser::{from_path_document, parse_error_reason};
 
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsTsconfigChecksInput {
-    let Some(entry) = root_file(crawl, "tsconfig.json") else {
+    let Some(entry) = select_root_tsconfig(crawl) else {
         return G3TsTsconfigChecksInput {
             config: G3TsTsconfigState::Missing,
         };
@@ -51,6 +51,10 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsTsconfigChecksI
             effective_compiler_options,
         },
     }
+}
+
+fn select_root_tsconfig<'a>(crawl: &'a G3WorkspaceCrawl) -> Option<&'a G3WorkspaceEntry> {
+    root_file(crawl, "tsconfig.json").or_else(|| root_file(crawl, "tsconfig.base.json"))
 }
 
 #[cfg(test)]

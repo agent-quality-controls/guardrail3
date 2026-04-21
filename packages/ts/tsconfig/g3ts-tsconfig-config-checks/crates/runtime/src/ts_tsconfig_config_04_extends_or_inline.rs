@@ -19,8 +19,7 @@ pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckRe
         results.push(info(
             ID,
             "tsconfig inherits strict baseline",
-            "Root `tsconfig.json` declares `extends`, so strict baseline can be inherited."
-                .to_owned(),
+            format!("Root `{rel_path}` declares `extends`, so strict baseline can be inherited."),
             rel_path,
         ));
         return;
@@ -31,8 +30,9 @@ pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckRe
         results.push(info(
             ID,
             "standalone tsconfig carries strict baseline inline",
-            "Root `tsconfig.json` does not use `extends`, but all strict baseline flags are present inline."
-                .to_owned(),
+            format!(
+                "Root `{rel_path}` does not use `extends`, but all strict baseline flags are present inline."
+            ),
             rel_path,
         ));
         return;
@@ -43,7 +43,7 @@ pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckRe
         G3Severity::Error,
         "standalone tsconfig misses inline strict baseline".to_owned(),
         format!(
-            "Root `tsconfig.json` does not use `extends`, so it must carry the strict baseline inline. Missing or invalid flags: {}.",
+            "Root `{rel_path}` does not use `extends`, so it must carry the strict baseline inline. Missing or invalid flags: {}.",
             missing.join(", ")
         ),
         Some(rel_path.clone()),

@@ -7,13 +7,101 @@ use g3ts_tsconfig_ingestion_assertions::run::{
 use g3ts_tsconfig_types::{G3TsTsconfigExtendsState, G3TsTsconfigState};
 
 #[test]
-fn returns_missing_when_root_tsconfig_is_absent() {
+fn returns_missing_when_no_root_tsconfig_surface_exists() {
     let tempdir = tempfile::tempdir().expect("tempdir should be created");
     let crawl = crawl(tempdir.path()).expect("crawl should succeed");
 
     let input = super::super::ingest_for_config_checks(&crawl);
 
     assert_missing(&input);
+}
+
+#[test]
+fn falls_back_to_root_tsconfig_base_when_root_tsconfig_is_absent() {
+    let tempdir = tempfile::tempdir().expect("tempdir should be created");
+    let root = tempdir.path();
+    super::helpers::write(
+        root,
+        "tsconfig.base.json",
+        r#"
+        {
+          "compilerOptions": {
+            "strict": true,
+            "noImplicitReturns": true,
+            "noUnusedLocals": true,
+            "noUnusedParameters": true,
+            "noUncheckedIndexedAccess": true,
+            "exactOptionalPropertyTypes": true,
+            "noPropertyAccessFromIndexSignature": true,
+            "noImplicitOverride": true,
+            "noFallthroughCasesInSwitch": true,
+            "forceConsistentCasingInFileNames": true,
+            "allowUnreachableCode": false,
+            "allowUnusedLabels": false
+          }
+        }
+        "#,
+    );
+
+    let crawl = crawl(root).expect("crawl should succeed");
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    assert_parsed_root_rel_path(&input, "tsconfig.base.json");
+    assert_effective_flags(
+        &input,
+        &[
+            ("strict", Some(true)),
+            ("noImplicitReturns", Some(true)),
+            ("noUnusedLocals", Some(true)),
+            ("noUnusedParameters", Some(true)),
+            ("allowUnreachableCode", Some(false)),
+        ],
+    );
+}
+
+#[test]
+fn prefers_root_tsconfig_when_both_root_surfaces_exist() {
+    let tempdir = tempfile::tempdir().expect("tempdir should be created");
+    let root = tempdir.path();
+    super::helpers::write(
+        root,
+        "tsconfig.json",
+        r#"
+        {
+          "compilerOptions": {
+            "strict": true,
+            "noImplicitReturns": true,
+            "noUnusedLocals": true,
+            "noUnusedParameters": true,
+            "noUncheckedIndexedAccess": true,
+            "exactOptionalPropertyTypes": true,
+            "noPropertyAccessFromIndexSignature": true,
+            "noImplicitOverride": true,
+            "noFallthroughCasesInSwitch": true,
+            "forceConsistentCasingInFileNames": true,
+            "allowUnreachableCode": false,
+            "allowUnusedLabels": false
+          }
+        }
+        "#,
+    );
+    super::helpers::write(
+        root,
+        "tsconfig.base.json",
+        r#"
+        {
+          "compilerOptions": {
+            "strict": false
+          }
+        }
+        "#,
+    );
+
+    let crawl = crawl(root).expect("crawl should succeed");
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    assert_parsed_root_rel_path(&input, "tsconfig.json");
+    assert_effective_flags(&input, &[("strict", Some(true))]);
 }
 
 #[test]

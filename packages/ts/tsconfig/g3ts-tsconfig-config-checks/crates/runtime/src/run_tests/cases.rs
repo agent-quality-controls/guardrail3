@@ -1,8 +1,8 @@
 use g3ts_tsconfig_config_checks_assertions::run as assertions;
 
 use super::helpers::{
-    broken_chain, external_extends, golden_extends, missing, parse_error,
-    standalone_missing_inline, weak_effective_flags,
+    base_root_inline_baseline, broken_chain, external_extends, golden_extends, missing,
+    parse_error, standalone_missing_inline, weak_effective_flags,
 };
 
 #[test]
@@ -14,7 +14,7 @@ fn missing_config_reports_only_exists_error() {
         &[assertions::error(
             "TS-TSCONFIG-CONFIG-01",
             "tsconfig missing",
-            "No root `tsconfig.json` file was found. Add a root TypeScript config.",
+            "No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.",
             None,
             false,
         )],
@@ -129,5 +129,47 @@ fn external_extends_report_explicit_baseline_blocker() {
             Some("tsconfig.json"),
             false,
         )],
+    );
+}
+
+#[test]
+fn root_tsconfig_base_counts_as_root_surface() {
+    let results = super::super::check(&base_root_inline_baseline());
+
+    assertions::assert_exact_ids(
+        &results,
+        &[
+            "TS-TSCONFIG-CONFIG-01",
+            "TS-TSCONFIG-CONFIG-02",
+            "TS-TSCONFIG-CONFIG-03",
+            "TS-TSCONFIG-CONFIG-04",
+            "TS-TSCONFIG-CONFIG-05",
+        ],
+    );
+    assertions::assert_contains(
+        &results,
+        &[
+            assertions::info(
+                "TS-TSCONFIG-CONFIG-01",
+                "tsconfig exists",
+                "Found root TypeScript config `tsconfig.base.json`.",
+                Some("tsconfig.base.json"),
+                true,
+            ),
+            assertions::info(
+                "TS-TSCONFIG-CONFIG-04",
+                "standalone tsconfig carries strict baseline inline",
+                "Root `tsconfig.base.json` does not use `extends`, but all strict baseline flags are present inline.",
+                Some("tsconfig.base.json"),
+                true,
+            ),
+            assertions::info(
+                "TS-TSCONFIG-CONFIG-05",
+                "strict tsconfig baseline enforced",
+                "The effective tsconfig keeps the required 12 strict boolean flags.",
+                Some("tsconfig.base.json"),
+                true,
+            ),
+        ],
     );
 }

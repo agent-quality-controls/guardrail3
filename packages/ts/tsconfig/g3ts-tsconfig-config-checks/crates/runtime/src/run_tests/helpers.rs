@@ -99,6 +99,31 @@ pub(super) fn external_extends() -> G3TsTsconfigChecksInput {
     }
 }
 
+pub(super) fn base_root_inline_baseline() -> G3TsTsconfigChecksInput {
+    G3TsTsconfigChecksInput {
+        config: G3TsTsconfigState::Parsed {
+            rel_path: "tsconfig.base.json".to_owned(),
+            uses_extends: false,
+            extends_chain: Vec::new(),
+            inline_strict_flags: G3TsTsconfigInlineStrictFlags {
+                strict: G3TsTsconfigBoolState::Value(true),
+                no_implicit_returns: G3TsTsconfigBoolState::Value(true),
+                no_unused_locals: G3TsTsconfigBoolState::Value(true),
+                no_unused_parameters: G3TsTsconfigBoolState::Value(true),
+                no_unchecked_indexed_access: G3TsTsconfigBoolState::Value(true),
+                exact_optional_property_types: G3TsTsconfigBoolState::Value(true),
+                no_property_access_from_index_signature: G3TsTsconfigBoolState::Value(true),
+                no_implicit_override: G3TsTsconfigBoolState::Value(true),
+                no_fallthrough_cases_in_switch: G3TsTsconfigBoolState::Value(true),
+                force_consistent_casing_in_file_names: G3TsTsconfigBoolState::Value(true),
+                allow_unreachable_code: G3TsTsconfigBoolState::Value(false),
+                allow_unused_labels: G3TsTsconfigBoolState::Value(false),
+            },
+            effective_compiler_options: strict_baseline(),
+        },
+    }
+}
+
 fn missing_inline_flags() -> G3TsTsconfigInlineStrictFlags {
     G3TsTsconfigInlineStrictFlags {
         strict: G3TsTsconfigBoolState::Missing,
