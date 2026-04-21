@@ -266,6 +266,14 @@ fn heredoc_marker_index(line: &str) -> Option<(usize, bool)> {
             }
             '<' if !single_quoted && !double_quoted => {
                 if chars.get(i + 1).is_some_and(|(_, next)| *next == '<') {
+                    if chars
+                        .get(i.wrapping_sub(1))
+                        .is_some_and(|(_, prev)| *prev == '<')
+                        || chars.get(i + 2).is_some_and(|(_, next)| *next == '<')
+                    {
+                        i += 1;
+                        continue;
+                    }
                     let strip_tabs = chars.get(i + 2).is_some_and(|(_, next)| *next == '-');
                     return Some((idx, strip_tabs));
                 }
