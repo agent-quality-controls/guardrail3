@@ -34,3 +34,5 @@ pub mod hook_rs_12_cargo_dupes_step_present;
 pub mod hook_rs_13_cargo_dupes_excludes;
 #[cfg(feature = "checks")]
 pub mod hook_rs_16_config_changes_trigger_validation;
+#[cfg(feature = "checks")]
+pub mod hook_rs_17_shared_target_dir_present;

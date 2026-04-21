@@ -47,6 +47,7 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
         crate::hook_rs_12_cargo_dupes_step_present::check(&rust_input, &mut results);
         crate::hook_rs_13_cargo_dupes_excludes::check(&rust_input, &mut results);
         crate::hook_rs_16_config_changes_trigger_validation::check(&rust_input, &mut results);
+        crate::hook_rs_17_shared_target_dir_present::check(&rust_input, &mut results);
     }
 
     crate::shell_safety::hook_shared_10_shell_error_handling::check(
