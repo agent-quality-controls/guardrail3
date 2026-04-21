@@ -50,6 +50,7 @@ const fn family_cli_name(family: SupportedFamily) -> &'static str {
         SupportedFamily::Tsconfig => "tsconfig",
         SupportedFamily::Package => "package",
         SupportedFamily::Npmrc => "npmrc",
+        SupportedFamily::Jscpd => "jscpd",
     }
 }
 

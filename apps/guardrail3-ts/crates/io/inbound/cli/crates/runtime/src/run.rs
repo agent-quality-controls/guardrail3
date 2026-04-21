@@ -21,7 +21,8 @@ impl FamilyRunner for CliFamilyRunner {
             SupportedFamily::Eslint
             | SupportedFamily::Tsconfig
             | SupportedFamily::Package
-            | SupportedFamily::Npmrc => guardrail3_ts_family_runner_config::run(family, crawl),
+            | SupportedFamily::Npmrc
+            | SupportedFamily::Jscpd => guardrail3_ts_family_runner_config::run(family, crawl),
         }
     }
 }

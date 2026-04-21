@@ -14,10 +14,12 @@ fn parse_command_accepts_family_and_inventory_flags() {
             "package",
             "--family",
             "npmrc",
+            "--family",
+            "jscpd",
             "--inventory",
         ],
         ".",
-        &["eslint", "tsconfig", "package", "npmrc"],
+        &["eslint", "tsconfig", "package", "npmrc", "jscpd"],
         true,
     );
 }

@@ -104,6 +104,16 @@ fn run_command_uses_real_eslint_wiring_for_missing_config() {
         output.stdout
     );
     assert!(
+        output.stdout.contains("== jscpd =="),
+        "expected jscpd family header in stdout: {}",
+        output.stdout
+    );
+    assert!(
+        output.stdout.contains("TS-JSCPD-CONFIG-01"),
+        "expected missing jscpd config finding in stdout: {}",
+        output.stdout
+    );
+    assert!(
         !output.stdout.contains("No findings."),
         "stdout should not claim the run was clean: {}",
         output.stdout

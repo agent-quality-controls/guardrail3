@@ -11,6 +11,8 @@ allowed_deps = [
   "g3ts-package-ingestion",
   "g3ts-npmrc-config-checks",
   "g3ts-npmrc-ingestion",
+  "g3ts-jscpd-config-checks",
+  "g3ts-jscpd-ingestion",
   "g3ts",
   "guardrail3-check-types",
   "guardrail3-ts-app-types",

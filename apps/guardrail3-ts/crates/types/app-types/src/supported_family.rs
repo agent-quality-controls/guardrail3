@@ -9,12 +9,15 @@ pub enum SupportedFamily {
     Package,
     /// .npmrc checks.
     Npmrc,
+    /// .jscpd.json checks.
+    Jscpd,
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 4] = [
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 5] = [
     SupportedFamily::Eslint,
     SupportedFamily::Tsconfig,
     SupportedFamily::Package,
     SupportedFamily::Npmrc,
+    SupportedFamily::Jscpd,
 ];

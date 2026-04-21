@@ -1,0 +1,8 @@
+profile = "library"
+
+allowed_deps = [
+  "jscpd-json-parser",
+]
+
+[checks]
+garde = false
