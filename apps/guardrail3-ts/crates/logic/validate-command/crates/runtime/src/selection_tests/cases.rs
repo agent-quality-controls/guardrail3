@@ -48,3 +48,21 @@ fn selected_families_deduplicate_repeated_entries() {
         &[SupportedFamily::Eslint],
     );
 }
+
+#[test]
+fn selected_families_keep_canonical_order_with_jscpd_in_mixed_filter() {
+    let request = ValidateRequest {
+        workspace_root: "ignored".into(),
+        families: vec![
+            SupportedFamily::Jscpd,
+            SupportedFamily::Eslint,
+            SupportedFamily::Jscpd,
+        ],
+        include_inventory: false,
+    };
+
+    assertions::assert_selected_families(
+        &super::super::selected_families(&request),
+        &[SupportedFamily::Eslint, SupportedFamily::Jscpd],
+    );
+}

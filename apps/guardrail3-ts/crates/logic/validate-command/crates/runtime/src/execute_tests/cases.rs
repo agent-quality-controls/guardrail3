@@ -135,6 +135,31 @@ fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
 }
 
 #[test]
+fn execute_runs_selected_jscpd_family_only() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace root");
+    std::fs::write(tempdir.path().join("package.json"), "{}\n")
+        .expect("write temporary workspace package.json");
+
+    let request = ValidateRequest {
+        workspace_root: tempdir.path().to_path_buf(),
+        families: vec![SupportedFamily::Jscpd],
+        include_inventory: false,
+    };
+
+    let outcome = execute(&request, &StubCrawler, &StubFamilyRunner, &StubRenderer)
+        .expect("execute should succeed for selected jscpd-only run");
+
+    assertions::assert_execution_outcome(
+        outcome.stdout(),
+        outcome.stderr(),
+        outcome.exit_code(),
+        "runs=1 inventory=false",
+        "",
+        0,
+    );
+}
+
+#[test]
 fn execute_defaults_to_all_supported_families() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
     std::fs::write(tempdir.path().join("package.json"), "{}\n")

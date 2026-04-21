@@ -25,22 +25,76 @@ fn missing_root_reports_only_exists_error() {
 fn parse_error_reports_exists_inventory_and_parse_error() {
     let results = super::super::check(&root_parse_error());
 
-    assertions::assert_exact_ids(&results, &["TS-JSCPD-CONFIG-01", "TS-JSCPD-CONFIG-02"]);
+    assertions::assert_exact(
+        &results,
+        &[
+            assertions::info(
+                "TS-JSCPD-CONFIG-01",
+                "root .jscpd.json exists",
+                "Found root JSCpd config `.jscpd.json`.",
+                Some(".jscpd.json"),
+                true,
+            ),
+            assertions::error(
+                "TS-JSCPD-CONFIG-02",
+                "root .jscpd.json parse error",
+                "Failed to parse root `.jscpd.json`: synthetic parse failure",
+                Some(".jscpd.json"),
+                false,
+            ),
+        ],
+    );
 }
 
 #[test]
 fn golden_root_reports_expected_inventory() {
     let results = super::super::check(&golden_root());
 
-    assertions::assert_exact_ids(
+    assertions::assert_exact(
         &results,
         &[
-            "TS-JSCPD-CONFIG-01",
-            "TS-JSCPD-CONFIG-02",
-            "TS-JSCPD-CONFIG-03",
-            "TS-JSCPD-CONFIG-04",
-            "TS-JSCPD-CONFIG-05",
-            "TS-JSCPD-CONFIG-06",
+            assertions::info(
+                "TS-JSCPD-CONFIG-01",
+                "root .jscpd.json exists",
+                "Found root JSCpd config `.jscpd.json`.",
+                Some(".jscpd.json"),
+                true,
+            ),
+            assertions::info(
+                "TS-JSCPD-CONFIG-02",
+                "root .jscpd.json parseable",
+                "`.jscpd.json` parsed successfully as jscpd JSON.",
+                Some(".jscpd.json"),
+                true,
+            ),
+            assertions::info(
+                "TS-JSCPD-CONFIG-03",
+                "jscpd threshold set to zero",
+                "The root `.jscpd.json` enforces zero duplication tolerance with `threshold: 0`.",
+                Some(".jscpd.json"),
+                true,
+            ),
+            assertions::info(
+                "TS-JSCPD-CONFIG-04",
+                "jscpd absolute paths enabled",
+                "The root `.jscpd.json` sets `absolute: true`.",
+                Some(".jscpd.json"),
+                true,
+            ),
+            assertions::info(
+                "TS-JSCPD-CONFIG-05",
+                "jscpd required ignore patterns present",
+                "The root `.jscpd.json` includes the required ignore-pattern baseline.",
+                Some(".jscpd.json"),
+                true,
+            ),
+            assertions::info(
+                "TS-JSCPD-CONFIG-06",
+                "jscpd format includes typescript",
+                "The root `.jscpd.json` format list includes `typescript`.",
+                Some(".jscpd.json"),
+                true,
+            ),
         ],
     );
 }
