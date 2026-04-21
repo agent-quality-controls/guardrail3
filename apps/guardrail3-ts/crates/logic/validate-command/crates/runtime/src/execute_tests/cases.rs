@@ -50,6 +50,17 @@ impl FamilyRunner for StubFamilyRunner {
                     None,
                 ),
             ],
+            SupportedFamily::Arch => vec![
+                G3CheckResult::new(
+                    "TS-ARCH-CONFIG-01".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some("package.json".to_owned()),
+                    None,
+                )
+                .into_inventory(),
+            ],
             SupportedFamily::Tsconfig => vec![
                 G3CheckResult::new(
                     "TS-TSCONFIG-CONFIG-01".to_owned(),
@@ -160,6 +171,31 @@ fn execute_runs_selected_jscpd_family_only() {
 }
 
 #[test]
+fn execute_runs_selected_arch_family_only() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace root");
+    std::fs::write(tempdir.path().join("package.json"), "{}\n")
+        .expect("write temporary workspace package.json");
+
+    let request = ValidateRequest {
+        workspace_root: tempdir.path().to_path_buf(),
+        families: vec![SupportedFamily::Arch],
+        include_inventory: false,
+    };
+
+    let outcome = execute(&request, &StubCrawler, &StubFamilyRunner, &StubRenderer)
+        .expect("execute should succeed for selected arch-only run");
+
+    assertions::assert_execution_outcome(
+        outcome.stdout(),
+        outcome.stderr(),
+        outcome.exit_code(),
+        "runs=1 inventory=false",
+        "",
+        0,
+    );
+}
+
+#[test]
 fn execute_defaults_to_all_supported_families() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
     std::fs::write(tempdir.path().join("package.json"), "{}\n")
@@ -178,7 +214,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=5 inventory=false",
+        "runs=6 inventory=false",
         "",
         0,
     );
@@ -196,6 +232,9 @@ impl FamilyRunner for ErroringFamilyRunner {
         match family {
             SupportedFamily::Eslint => Err(FamilyRunError {
                 message: "eslint runner exploded".to_owned(),
+            }),
+            SupportedFamily::Arch => Err(FamilyRunError {
+                message: "arch runner exploded".to_owned(),
             }),
             SupportedFamily::Tsconfig => Err(FamilyRunError {
                 message: "tsconfig runner exploded".to_owned(),

@@ -19,10 +19,18 @@ impl FamilyRunner for CliFamilyRunner {
     ) -> Result<FamilyResults, FamilyRunError> {
         match family {
             SupportedFamily::Eslint
+            | SupportedFamily::Arch
             | SupportedFamily::Tsconfig
             | SupportedFamily::Package
             | SupportedFamily::Npmrc
-            | SupportedFamily::Jscpd => guardrail3_ts_family_runner_config::run(family, crawl),
+            | SupportedFamily::Jscpd => match family {
+                SupportedFamily::Arch => guardrail3_ts_family_runner_structure::run(family, crawl),
+                SupportedFamily::Eslint
+                | SupportedFamily::Tsconfig
+                | SupportedFamily::Package
+                | SupportedFamily::Npmrc
+                | SupportedFamily::Jscpd => guardrail3_ts_family_runner_config::run(family, crawl),
+            },
         }
     }
 }
