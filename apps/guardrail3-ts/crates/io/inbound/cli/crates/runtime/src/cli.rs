@@ -34,6 +34,7 @@ pub enum Command {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum FamilyArg {
     Eslint,
+    Arch,
     Tsconfig,
     Package,
     Npmrc,
@@ -44,6 +45,7 @@ impl From<FamilyArg> for SupportedFamily {
     fn from(value: FamilyArg) -> Self {
         match value {
             FamilyArg::Eslint => Self::Eslint,
+            FamilyArg::Arch => Self::Arch,
             FamilyArg::Tsconfig => Self::Tsconfig,
             FamilyArg::Package => Self::Package,
             FamilyArg::Npmrc => Self::Npmrc,

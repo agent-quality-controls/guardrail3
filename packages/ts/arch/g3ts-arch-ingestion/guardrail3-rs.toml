@@ -1,0 +1,14 @@
+profile = "library"
+
+allowed_deps = [
+  "g3-workspace-crawl",
+  "g3ts-arch-types",
+  "tempfile",
+  "package-json-parser",
+  "serde_json",
+  "tree-sitter",
+  "tree-sitter-typescript",
+]
+
+[checks]
+garde = false

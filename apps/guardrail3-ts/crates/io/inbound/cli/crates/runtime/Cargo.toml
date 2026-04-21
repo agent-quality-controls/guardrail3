@@ -9,6 +9,7 @@ clap.workspace = true
 g3-workspace-crawl.workspace = true
 guardrail3-ts-app-types = { path = "../../../../../types/app-types" }
 guardrail3-ts-family-runner-config = { path = "../../../../../logic/family-runner-config" }
+guardrail3-ts-family-runner-structure = { path = "../../../../../logic/family-runner-structure" }
 guardrail3-ts-validate-command = { path = "../../../../../logic/validate-command/crates/runtime" }
 guardrail3-ts-packages = { path = "../../../../outbound/packages" }
 guardrail3-ts-report = { path = "../../../../outbound/report/crates/runtime" }

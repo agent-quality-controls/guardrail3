@@ -1,0 +1,23 @@
+[package]
+name = "g3ts-arch-ingestion-assertions"
+version = "0.0.0"
+edition = "2024"
+description = "Assertion helpers for g3ts arch ingestion tests"
+license.workspace = true
+repository.workspace = true
+publish = false
+readme = "README.md"
+keywords = ["guardrail3", "typescript", "arch", "assertions"]
+categories = ["development-tools"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[dependencies]
+g3ts-arch-ingestion-runtime = { path = "../runtime" }
+g3ts-arch-types = { path = "../../../g3ts-arch-types" }

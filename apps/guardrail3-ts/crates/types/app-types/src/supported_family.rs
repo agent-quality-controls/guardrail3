@@ -3,6 +3,8 @@
 pub enum SupportedFamily {
     /// ESLint checks.
     Eslint,
+    /// TS architecture checks.
+    Arch,
     /// tsconfig checks.
     Tsconfig,
     /// package.json checks.
@@ -14,8 +16,9 @@ pub enum SupportedFamily {
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 5] = [
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 6] = [
     SupportedFamily::Eslint,
+    SupportedFamily::Arch,
     SupportedFamily::Tsconfig,
     SupportedFamily::Package,
     SupportedFamily::Npmrc,
