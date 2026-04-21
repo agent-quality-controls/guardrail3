@@ -5,8 +5,11 @@ pub fn assert_parsed_rel_path(
     expected: &str,
 ) {
     match &input.config {
-        G3TsEslintConfigState::Parsed { rel_path, .. } => {
-            assert_eq!(rel_path, expected, "parsed config path mismatch");
+        G3TsEslintConfigState::Parsed { snapshot } => {
+            assert_eq!(
+                snapshot.selected_config.rel_path, expected,
+                "parsed config path mismatch"
+            );
         }
         other => assert!(false, "expected parsed config state, got: {other:?}"),
     }

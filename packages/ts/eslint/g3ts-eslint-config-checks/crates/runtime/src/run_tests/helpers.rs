@@ -1,11 +1,10 @@
 use std::collections::BTreeMap;
 
-use eslint_config_parser::types::{
-    EslintConfigDocument, EslintConfigFileKind, EslintConfigParseState, EslintConfigSnapshot,
-    EslintEffectiveConfigProbe, EslintProbeKind, EslintRuleSetting, EslintRuleSeverity,
-    EslintSelectedConfigFile,
+use eslint_config_parser::types::{EslintConfigFileKind, EslintProbeKind, EslintRuleSeverity};
+use g3ts_eslint_types::{
+    G3TsEslintConfigChecksInput, G3TsEslintConfigSnapshot, G3TsEslintConfigState,
+    G3TsEslintEffectiveConfigProbe, G3TsEslintRuleSetting, G3TsEslintSelectedConfig,
 };
-use g3ts_eslint_types::{G3TsEslintConfigChecksInput, G3TsEslintConfigState};
 use serde_json::{Value, json};
 
 const TS_PLUGINS: &[&str] = &["@typescript-eslint", "unicorn", "regexp", "sonarjs"];
@@ -125,14 +124,14 @@ pub(super) fn missing_plugin_stack() -> G3TsEslintConfigChecksInput {
 
 struct Fixture {
     ts_plugins: Vec<String>,
-    ts_rules: BTreeMap<String, EslintRuleSetting>,
+    ts_rules: BTreeMap<String, G3TsEslintRuleSetting>,
     ts_project_service: Option<bool>,
     tsx_plugins: Vec<String>,
-    tsx_rules: BTreeMap<String, EslintRuleSetting>,
+    tsx_rules: BTreeMap<String, G3TsEslintRuleSetting>,
     tsx_project_service: Option<bool>,
-    ts_test_rules: BTreeMap<String, EslintRuleSetting>,
+    ts_test_rules: BTreeMap<String, G3TsEslintRuleSetting>,
     ts_test_project_service: Option<bool>,
-    js_rules: BTreeMap<String, EslintRuleSetting>,
+    js_rules: BTreeMap<String, G3TsEslintRuleSetting>,
     js_project_service: Option<bool>,
 }
 
@@ -247,13 +246,13 @@ impl Fixture {
 }
 
 fn parsed_fixture(fixture: Fixture) -> G3TsEslintConfigChecksInput {
-    let snapshot = EslintConfigSnapshot {
-        selected_config: EslintSelectedConfigFile {
+    let snapshot = G3TsEslintConfigSnapshot {
+        selected_config: G3TsEslintSelectedConfig {
             rel_path: "eslint.config.mjs".to_owned(),
             kind: EslintConfigFileKind::Mjs,
         },
         probes: vec![
-            EslintEffectiveConfigProbe {
+            G3TsEslintEffectiveConfigProbe {
                 probe: EslintProbeKind::TsSource,
                 rel_path: "src/index.ts".to_owned(),
                 ignored: false,
@@ -261,7 +260,7 @@ fn parsed_fixture(fixture: Fixture) -> G3TsEslintConfigChecksInput {
                 rules: fixture.ts_rules,
                 project_service: fixture.ts_project_service,
             },
-            EslintEffectiveConfigProbe {
+            G3TsEslintEffectiveConfigProbe {
                 probe: EslintProbeKind::TsxSource,
                 rel_path: "src/app/page.tsx".to_owned(),
                 ignored: false,
@@ -269,7 +268,7 @@ fn parsed_fixture(fixture: Fixture) -> G3TsEslintConfigChecksInput {
                 rules: fixture.tsx_rules,
                 project_service: fixture.tsx_project_service,
             },
-            EslintEffectiveConfigProbe {
+            G3TsEslintEffectiveConfigProbe {
                 probe: EslintProbeKind::TsTest,
                 rel_path: "src/index.test.ts".to_owned(),
                 ignored: false,
@@ -277,7 +276,7 @@ fn parsed_fixture(fixture: Fixture) -> G3TsEslintConfigChecksInput {
                 rules: fixture.ts_test_rules,
                 project_service: fixture.ts_test_project_service,
             },
-            EslintEffectiveConfigProbe {
+            G3TsEslintEffectiveConfigProbe {
                 probe: EslintProbeKind::JsSource,
                 rel_path: "scripts/build.js".to_owned(),
                 ignored: false,
@@ -289,23 +288,17 @@ fn parsed_fixture(fixture: Fixture) -> G3TsEslintConfigChecksInput {
     };
 
     G3TsEslintConfigChecksInput {
-        config: G3TsEslintConfigState::Parsed {
-            rel_path: "eslint.config.mjs".to_owned(),
-            document: EslintConfigDocument {
-                raw: json!({ "selected_config": { "rel_path": "eslint.config.mjs" } }),
-                typed: EslintConfigParseState::Parsed(snapshot),
-            },
-        },
+        config: G3TsEslintConfigState::Parsed { snapshot },
     }
 }
 
-fn seed_error_rules(rules: &mut BTreeMap<String, EslintRuleSetting>, rule_names: &[&str]) {
+fn seed_error_rules(rules: &mut BTreeMap<String, G3TsEslintRuleSetting>, rule_names: &[&str]) {
     for rule_name in rule_names {
         seed_error_rule(rules, rule_name);
     }
 }
 
-fn seed_error_rule(rules: &mut BTreeMap<String, EslintRuleSetting>, rule_name: &str) {
+fn seed_error_rule(rules: &mut BTreeMap<String, G3TsEslintRuleSetting>, rule_name: &str) {
     assert!(
         rules
             .insert(rule_name.to_owned(), error_rule_setting(vec![]))
@@ -314,14 +307,14 @@ fn seed_error_rule(rules: &mut BTreeMap<String, EslintRuleSetting>, rule_name: &
     );
 }
 
-fn seed_off_rules(rules: &mut BTreeMap<String, EslintRuleSetting>, rule_names: &[&str]) {
+fn seed_off_rules(rules: &mut BTreeMap<String, G3TsEslintRuleSetting>, rule_names: &[&str]) {
     for rule_name in rule_names {
         set_rule_severity(rules, rule_name, EslintRuleSeverity::Off);
     }
 }
 
 fn set_rule_severity(
-    rules: &mut BTreeMap<String, EslintRuleSetting>,
+    rules: &mut BTreeMap<String, G3TsEslintRuleSetting>,
     rule_name: &str,
     severity: EslintRuleSeverity,
 ) {
@@ -329,7 +322,7 @@ fn set_rule_severity(
         rules
             .insert(
                 rule_name.to_owned(),
-                EslintRuleSetting {
+                G3TsEslintRuleSetting {
                     severity,
                     options: vec![],
                 },
@@ -340,7 +333,7 @@ fn set_rule_severity(
 }
 
 fn seed_threshold_rule(
-    rules: &mut BTreeMap<String, EslintRuleSetting>,
+    rules: &mut BTreeMap<String, G3TsEslintRuleSetting>,
     rule_name: &str,
     max: i64,
     key: &str,
@@ -357,7 +350,7 @@ fn seed_threshold_rule(
 }
 
 fn set_threshold_rule(
-    rules: &mut BTreeMap<String, EslintRuleSetting>,
+    rules: &mut BTreeMap<String, G3TsEslintRuleSetting>,
     rule_name: &str,
     max: i64,
     key: &str,
@@ -373,8 +366,8 @@ fn set_threshold_rule(
     );
 }
 
-fn error_rule_setting(options: Vec<Value>) -> EslintRuleSetting {
-    EslintRuleSetting {
+fn error_rule_setting(options: Vec<Value>) -> G3TsEslintRuleSetting {
+    G3TsEslintRuleSetting {
         severity: EslintRuleSeverity::Error,
         options,
     }

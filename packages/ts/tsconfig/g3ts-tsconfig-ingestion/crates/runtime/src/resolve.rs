@@ -1,4 +1,3 @@
-use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use g3ts_tsconfig_types::G3TsTsconfigExtendsState;
@@ -10,7 +9,7 @@ pub(crate) fn build_extends_chain(
     root_abs_path: &Path,
     document: &TsconfigDocument,
 ) -> (Vec<G3TsTsconfigExtendsState>, TsconfigCompilerOptions) {
-    let mut seen = BTreeSet::new();
+    let mut active_stack = Vec::new();
     let mut chain = Vec::new();
     let mut effective = TsconfigCompilerOptions::default();
 
@@ -19,7 +18,7 @@ pub(crate) fn build_extends_chain(
             workspace_root,
             root_abs_path,
             specifier,
-            &mut seen,
+            &mut active_stack,
             &mut chain,
             &mut effective,
         );
@@ -36,7 +35,7 @@ fn resolve_entry(
     workspace_root: &Path,
     current_config_abs_path: &Path,
     specifier: &str,
-    seen: &mut BTreeSet<PathBuf>,
+    active_stack: &mut Vec<PathBuf>,
     chain: &mut Vec<G3TsTsconfigExtendsState>,
     effective: &mut TsconfigCompilerOptions,
 ) {
@@ -58,7 +57,7 @@ fn resolve_entry(
 
     let display_path = display_path(workspace_root, &resolved_abs_path);
 
-    if !seen.insert(resolved_abs_path.clone()) {
+    if active_stack.contains(&resolved_abs_path) {
         chain.push(G3TsTsconfigExtendsState::ParseError {
             specifier: specifier.to_owned(),
             display_path,
@@ -66,10 +65,12 @@ fn resolve_entry(
         });
         return;
     }
+    active_stack.push(resolved_abs_path.clone());
 
     let document = match from_path_document(&resolved_abs_path) {
         Ok(document) => document,
         Err(err) => {
+            let _ = active_stack.pop();
             chain.push(G3TsTsconfigExtendsState::ParseError {
                 specifier: specifier.to_owned(),
                 display_path,
@@ -80,6 +81,7 @@ fn resolve_entry(
     };
 
     if let Some(reason) = parse_error_reason(&document) {
+        let _ = active_stack.pop();
         chain.push(G3TsTsconfigExtendsState::ParseError {
             specifier: specifier.to_owned(),
             display_path,
@@ -93,7 +95,7 @@ fn resolve_entry(
             workspace_root,
             &resolved_abs_path,
             parent_specifier,
-            seen,
+            active_stack,
             chain,
             effective,
         );
@@ -103,11 +105,11 @@ fn resolve_entry(
         merge_compiler_options(effective, &parent_typed.compiler_options);
     }
 
-    chain.push(G3TsTsconfigExtendsState::Parsed {
+    chain.push(G3TsTsconfigExtendsState::Resolved {
         specifier: specifier.to_owned(),
         display_path,
-        document,
     });
+    let _ = active_stack.pop();
 }
 
 fn is_local_extends(specifier: &str) -> bool {

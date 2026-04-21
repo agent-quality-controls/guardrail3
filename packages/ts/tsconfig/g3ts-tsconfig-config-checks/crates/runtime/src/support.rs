@@ -1,7 +1,8 @@
-use g3ts_tsconfig_types::{G3TsTsconfigChecksInput, G3TsTsconfigExtendsState, G3TsTsconfigState};
+use g3ts_tsconfig_types::{
+    G3TsTsconfigBoolState, G3TsTsconfigChecksInput, G3TsTsconfigExtendsState,
+    G3TsTsconfigInlineStrictFlags, G3TsTsconfigState,
+};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use tsconfig_json_parser::bool_field_state;
-use tsconfig_json_parser::types::TsconfigBoolFieldState;
 
 #[derive(Clone, Copy)]
 pub(crate) enum StrictFlag {
@@ -124,9 +125,8 @@ pub(crate) fn extends_chain_issues(input: &G3TsTsconfigChecksInput) -> Vec<Strin
             } => Some(format!(
                 "`{specifier}` resolved to invalid config `{display_path}`: {reason}"
             )),
-            G3TsTsconfigExtendsState::External { .. } | G3TsTsconfigExtendsState::Parsed { .. } => {
-                None
-            }
+            G3TsTsconfigExtendsState::External { .. }
+            | G3TsTsconfigExtendsState::Resolved { .. } => None,
         })
         .collect()
 }
@@ -145,20 +145,22 @@ pub(crate) fn all_local_extends_resolved(input: &G3TsTsconfigChecksInput) -> boo
 }
 
 pub(crate) fn missing_inline_flags(input: &G3TsTsconfigChecksInput) -> Vec<String> {
-    let G3TsTsconfigState::Parsed { document, .. } = &input.config else {
+    let G3TsTsconfigState::Parsed {
+        inline_strict_flags,
+        ..
+    } = &input.config
+    else {
         return Vec::new();
     };
     STRICT_FLAGS
         .iter()
-        .filter_map(
-            |spec| match bool_field_state(document, spec.flag.field_name()) {
-                TsconfigBoolFieldState::Value(_) => None,
-                TsconfigBoolFieldState::Missing => Some(spec.flag.field_name().to_owned()),
-                TsconfigBoolFieldState::WrongType(_) => {
-                    Some(format!("{} (non-boolean)", spec.flag.field_name()))
-                }
-            },
-        )
+        .filter_map(|spec| match spec.flag.inline_value(inline_strict_flags) {
+            G3TsTsconfigBoolState::Value(_) => None,
+            G3TsTsconfigBoolState::Missing => Some(spec.flag.field_name().to_owned()),
+            G3TsTsconfigBoolState::WrongType => {
+                Some(format!("{} (non-boolean)", spec.flag.field_name()))
+            }
+        })
         .collect()
 }
 
@@ -233,6 +235,25 @@ impl StrictFlag {
             Self::ForceConsistentCasingInFileNames => options.force_consistent_casing_in_file_names,
             Self::AllowUnreachableCode => options.allow_unreachable_code,
             Self::AllowUnusedLabels => options.allow_unused_labels,
+        }
+    }
+
+    fn inline_value(self, flags: &G3TsTsconfigInlineStrictFlags) -> G3TsTsconfigBoolState {
+        match self {
+            Self::Strict => flags.strict,
+            Self::NoImplicitReturns => flags.no_implicit_returns,
+            Self::NoUnusedLocals => flags.no_unused_locals,
+            Self::NoUnusedParameters => flags.no_unused_parameters,
+            Self::NoUncheckedIndexedAccess => flags.no_unchecked_indexed_access,
+            Self::ExactOptionalPropertyTypes => flags.exact_optional_property_types,
+            Self::NoPropertyAccessFromIndexSignature => {
+                flags.no_property_access_from_index_signature
+            }
+            Self::NoImplicitOverride => flags.no_implicit_override,
+            Self::NoFallthroughCasesInSwitch => flags.no_fallthrough_cases_in_switch,
+            Self::ForceConsistentCasingInFileNames => flags.force_consistent_casing_in_file_names,
+            Self::AllowUnreachableCode => flags.allow_unreachable_code,
+            Self::AllowUnusedLabels => flags.allow_unused_labels,
         }
     }
 }

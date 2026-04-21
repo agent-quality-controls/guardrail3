@@ -14,12 +14,14 @@ pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckRe
 
     if !effective_check_actionable(input) {
         if has_external_extends(input) {
-            results.push(info(
-                ID,
-                "strict tsconfig baseline deferred through external extends",
-                "The current wave accepts external `extends` parents without proving their effective strict baseline."
+            results.push(G3CheckResult::new(
+                ID.to_owned(),
+                G3Severity::Error,
+                "strict tsconfig baseline blocked by external extends".to_owned(),
+                "The current wave cannot prove the strict baseline through external `extends` parents. Replace external inheritance with a local checked base or extend the local root directly."
                     .to_owned(),
-                rel_path,
+                Some(rel_path.clone()),
+                None,
             ));
         }
         return;

@@ -168,6 +168,7 @@ name = "g3ts-eslint-types"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
+ "serde_json",
 ]
 
 [[package]]
