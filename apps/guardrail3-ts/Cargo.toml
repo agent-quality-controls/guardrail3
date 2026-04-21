@@ -24,6 +24,8 @@ g3ts-eslint-config-checks = { path = "../../packages/ts/eslint/g3ts-eslint-confi
 g3ts-eslint-ingestion = { path = "../../packages/ts/eslint/g3ts-eslint-ingestion" }
 g3ts-tsconfig-config-checks = { path = "../../packages/ts/tsconfig/g3ts-tsconfig-config-checks" }
 g3ts-tsconfig-ingestion = { path = "../../packages/ts/tsconfig/g3ts-tsconfig-ingestion" }
+g3ts-package-config-checks = { path = "../../packages/ts/package/g3ts-package-config-checks" }
+g3ts-package-ingestion = { path = "../../packages/ts/package/g3ts-package-ingestion" }
 tempfile = "3.18.0"
 
 [workspace.lints.rust]

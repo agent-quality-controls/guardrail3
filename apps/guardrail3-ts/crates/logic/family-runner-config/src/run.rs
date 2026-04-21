@@ -17,5 +17,8 @@ pub fn run(
         SupportedFamily::Tsconfig => Ok(g3ts_tsconfig_config_checks::check(
             &g3ts_tsconfig_ingestion::ingest_for_config_checks(crawl),
         )),
+        SupportedFamily::Package => Ok(g3ts_package_config_checks::check(
+            &g3ts_package_ingestion::ingest_for_config_checks(crawl),
+        )),
     }
 }

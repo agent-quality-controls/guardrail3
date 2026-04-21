@@ -35,6 +35,7 @@ pub enum Command {
 pub enum FamilyArg {
     Eslint,
     Tsconfig,
+    Package,
 }
 
 impl From<FamilyArg> for SupportedFamily {
@@ -42,6 +43,7 @@ impl From<FamilyArg> for SupportedFamily {
         match value {
             FamilyArg::Eslint => Self::Eslint,
             FamilyArg::Tsconfig => Self::Tsconfig,
+            FamilyArg::Package => Self::Package,
         }
     }
 }

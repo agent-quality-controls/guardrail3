@@ -99,6 +99,11 @@ fn run_command_uses_real_eslint_wiring_for_missing_config() {
         output.stdout
     );
     assert!(
+        !output.stdout.contains("== package =="),
+        "did not expect package family output for a clean local manifest: {}",
+        output.stdout
+    );
+    assert!(
         !output.stdout.contains("No findings."),
         "stdout should not claim the run was clean: {}",
         output.stdout

@@ -5,8 +5,13 @@ pub enum SupportedFamily {
     Eslint,
     /// tsconfig checks.
     Tsconfig,
+    /// package.json checks.
+    Package,
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 2] =
-    [SupportedFamily::Eslint, SupportedFamily::Tsconfig];
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 3] = [
+    SupportedFamily::Eslint,
+    SupportedFamily::Tsconfig,
+    SupportedFamily::Package,
+];
