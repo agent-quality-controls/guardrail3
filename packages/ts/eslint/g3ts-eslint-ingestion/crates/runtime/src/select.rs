@@ -165,7 +165,7 @@ fn is_primary_tsx_source_rel_path(rel_path: &str) -> bool {
 fn is_fallback_ts_source_rel_path(rel_path: &str) -> bool {
     rel_path.ends_with(".ts")
         && !rel_path.ends_with(".d.ts")
-        && !rel_path.starts_with("scripts/")
+        && !is_script_rel_path(rel_path)
         && !is_test_rel_path(rel_path)
         && !is_eslint_config(rel_path)
         && !is_config_like_rel_path(rel_path)
@@ -173,7 +173,7 @@ fn is_fallback_ts_source_rel_path(rel_path: &str) -> bool {
 
 fn is_fallback_tsx_source_rel_path(rel_path: &str) -> bool {
     rel_path.ends_with(".tsx")
-        && !rel_path.starts_with("scripts/")
+        && !is_script_rel_path(rel_path)
         && !is_test_rel_path(rel_path)
         && !is_eslint_config(rel_path)
         && !is_config_like_rel_path(rel_path)
@@ -189,10 +189,14 @@ fn is_primary_js_source_rel_path(rel_path: &str) -> bool {
 
 fn is_fallback_js_source_rel_path(rel_path: &str) -> bool {
     rel_path.ends_with(".js")
-        && !rel_path.starts_with("scripts/")
+        && !is_script_rel_path(rel_path)
         && !is_eslint_config(rel_path)
         && !is_test_rel_path(rel_path)
         && !is_config_like_rel_path(rel_path)
+}
+
+fn is_script_rel_path(rel_path: &str) -> bool {
+    rel_path.starts_with("scripts/") || rel_path.contains("/scripts/")
 }
 
 fn is_config_like_rel_path(rel_path: &str) -> bool {

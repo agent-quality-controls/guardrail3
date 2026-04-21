@@ -39,6 +39,30 @@ fn ts_source_probe_prefers_real_source_over_scripts_ts() {
 }
 
 #[test]
+fn ts_source_probe_skips_nested_scripts_directories() {
+    let root = super::helpers::fake_root();
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "eslint.config.mjs",
+            "apps/landing/scripts/extract-content-schema.ts",
+            "apps/landing/src/lib/env.ts",
+        ],
+    );
+
+    let probes = super::super::probe_targets(&crawl, "eslint.config.mjs");
+    let ts_source = probes
+        .iter()
+        .find(|probe| probe.probe == EslintProbeKind::TsSource)
+        .expect("TS source probe should exist");
+
+    assert_eq!(
+        ts_source.rel_path, "apps/landing/src/lib/env.ts",
+        "TS source probe should skip nested scripts directories as fallback candidates"
+    );
+}
+
+#[test]
 fn tsx_probe_is_added_only_for_real_tsx_source_files() {
     let root = super::helpers::fake_root();
     let crawl = super::helpers::crawl_with_entries(
