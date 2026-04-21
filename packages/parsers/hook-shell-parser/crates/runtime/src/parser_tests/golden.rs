@@ -18,10 +18,14 @@ guardrail3 rs validate --staged .
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(Some("#!/usr/bin/env bash"), &[
+        ScriptExpectation::new(
+            Some("#!/usr/bin/env bash"),
+            &[
                 CommandExpectation::new("echo", None, None, None, None),
                 CommandExpectation::new("guardrail3", None, None, None, None),
-            ], &[]),
+            ],
+            &[],
+        ),
     );
 }
 
@@ -36,10 +40,20 @@ fi
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[
-                CommandExpectation::new("guardrail3", Some("guardrail3 rs validate --staged ."), None, None, None),
+        ScriptExpectation::new(
+            None,
+            &[
+                CommandExpectation::new(
+                    "guardrail3",
+                    Some("guardrail3 rs validate --staged ."),
+                    None,
+                    None,
+                    None,
+                ),
                 CommandExpectation::new("exit", None, None, None, Some(false)),
-            ], &[]),
+            ],
+            &[],
+        ),
     );
 }
 
@@ -54,7 +68,9 @@ fi
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[
+        ScriptExpectation::new(
+            None,
+            &[
                 CommandExpectation::new(
                     "cargo",
                     Some("cargo clippy --workspace --all-targets --all-features -- -D warnings"),
@@ -63,7 +79,9 @@ fi
                     None,
                 ),
                 CommandExpectation::new("exit", None, None, None, None),
-            ], &[]),
+            ],
+            &[],
+        ),
     );
 }
 
@@ -78,11 +96,21 @@ gitleaks protect --staged --no-banner || echo "warning"
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[
-                CommandExpectation::new("guardrail3", None, None, Some(ExpectedFailOpen::True), None),
+        ScriptExpectation::new(
+            None,
+            &[
+                CommandExpectation::new(
+                    "guardrail3",
+                    None,
+                    None,
+                    Some(ExpectedFailOpen::True),
+                    None,
+                ),
                 CommandExpectation::new("cargo", None, None, Some(ExpectedFailOpen::NoOp), None),
                 CommandExpectation::new("gitleaks", None, None, Some(ExpectedFailOpen::Echo), None),
-            ], &[]),
+            ],
+            &[],
+        ),
     );
 }
 
@@ -92,7 +120,17 @@ fn detects_exit_zero_as_executable_bypass() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("exit", None, None, None, Some(true))], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "exit",
+                None,
+                None,
+                None,
+                Some(true),
+            )],
+            &[],
+        ),
     );
 }
 
@@ -107,11 +145,15 @@ run-parts .githooks/pre-commit.d
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[
+        ScriptExpectation::new(
+            None,
+            &[
                 CommandExpectation::new(".", None, Some(true), None, None),
                 CommandExpectation::new("source", None, Some(true), None, None),
                 CommandExpectation::new("run-parts", None, Some(true), None, None),
-            ], &[]),
+            ],
+            &[],
+        ),
     );
 }
 
@@ -121,7 +163,17 @@ fn does_not_mark_echoed_dispatcher_text_as_dispatcher_syntax() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("echo", None, Some(false), None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "echo",
+                None,
+                Some(false),
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -136,7 +188,17 @@ guardrail3 rs validate --staged .
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("guardrail3", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "guardrail3",
+                None,
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -148,7 +210,17 @@ fn extracts_command_substitution_inside_assignment() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("echo", Some("echo \"$STAGED_FILES\" | grep -cE '(Cargo\\.toml|Cargo\\.lock)$'"), None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "echo",
+                Some("echo \"$STAGED_FILES\" | grep -cE '(Cargo\\.toml|Cargo\\.lock)$'"),
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -158,7 +230,17 @@ fn extracts_command_substitution_inside_export_assignment() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("cargo", Some("cargo dupes --exclude-tests"), None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "cargo",
+                Some("cargo dupes --exclude-tests"),
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -168,7 +250,17 @@ fn extracts_command_substitution_inside_local_assignment() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("jscpd", Some("jscpd ."), None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "jscpd",
+                Some("jscpd ."),
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -178,7 +270,17 @@ fn extracts_quoted_command_substitution_inside_assignment() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("cargo", Some("cargo dupes --exclude-tests"), None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "cargo",
+                Some("cargo dupes --exclude-tests"),
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -186,10 +288,7 @@ fn extracts_quoted_command_substitution_inside_assignment() {
 fn ignores_single_quoted_command_substitution_literal() {
     let parsed = parse_script("OUT='$(cargo dupes --exclude-tests)'\n");
 
-    assert_script_matches(
-        &parsed,
-        ScriptExpectation::new(None, &[], &[]),
-    );
+    assert_script_matches(&parsed, ScriptExpectation::new(None, &[], &[]));
 }
 
 #[test]
@@ -198,7 +297,17 @@ fn strips_inline_comments_from_executable_commands() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("guardrail3", Some("guardrail3 rs validate --staged ."), None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "guardrail3",
+                Some("guardrail3 rs validate --staged ."),
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -208,7 +317,11 @@ fn ignores_heredoc_body_command_text() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("cat", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new("cat", None, None, None, None)],
+            &[],
+        ),
     );
 }
 
@@ -220,7 +333,11 @@ fn ignores_tab_stripped_heredoc_body_command_text() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("cat", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new("cat", None, None, None, None)],
+            &[],
+        ),
     );
 }
 
@@ -230,7 +347,17 @@ fn extracts_command_substitution_inside_declare_assignment() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("cargo", Some("cargo dupes --exclude-tests"), None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "cargo",
+                Some("cargo dupes --exclude-tests"),
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -240,7 +367,17 @@ fn extracts_command_substitution_inside_readonly_assignment() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("jscpd", Some("jscpd ."), None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "jscpd",
+                Some("jscpd ."),
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -252,7 +389,11 @@ fn ignores_uncalled_function_body_commands() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("echo", None, None, None, None)], &[FunctionExpectation::new("guardrail_validate", None, None)]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new("echo", None, None, None, None)],
+            &[FunctionExpectation::new("guardrail_validate", None, None)],
+        ),
     );
 }
 
@@ -264,7 +405,21 @@ fn records_called_function_body_for_later_resolution() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("guardrail_validate", None, None, None, None)], &[FunctionExpectation::new("guardrail_validate", Some("guardrail3 rs validate --staged ."), None)]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "guardrail_validate",
+                None,
+                None,
+                None,
+                None,
+            )],
+            &[FunctionExpectation::new(
+                "guardrail_validate",
+                Some("guardrail3 rs validate --staged ."),
+                None,
+            )],
+        ),
     );
 }
 
@@ -275,7 +430,11 @@ fn keeps_inline_command_after_single_line_function_definition() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("echo", None, None, None, None)], &[FunctionExpectation::new("guardrail_validate", None, None)]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new("echo", None, None, None, None)],
+            &[FunctionExpectation::new("guardrail_validate", None, None)],
+        ),
     );
 }
 
@@ -286,7 +445,11 @@ fn ignores_dead_if_body_commands() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("echo", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new("echo", None, None, None, None)],
+            &[],
+        ),
     );
 }
 
@@ -298,7 +461,17 @@ fn keeps_else_body_after_dead_if_condition() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("guardrail3", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "guardrail3",
+                None,
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -310,7 +483,17 @@ fn keeps_elif_body_after_dead_if_condition() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("guardrail3", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "guardrail3",
+                None,
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -320,10 +503,20 @@ fn keeps_all_semicolon_separated_commands_in_single_line_true_if_branch() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[
+        ScriptExpectation::new(
+            None,
+            &[
                 CommandExpectation::new("echo", None, None, None, None),
-                CommandExpectation::new("g3rs", Some("g3rs rs validate --staged ."), None, None, None),
-            ], &[]),
+                CommandExpectation::new(
+                    "g3rs",
+                    Some("g3rs rs validate --staged ."),
+                    None,
+                    None,
+                    None,
+                ),
+            ],
+            &[],
+        ),
     );
 }
 
@@ -335,7 +528,11 @@ fn ignores_dead_elif_body_after_live_if_condition() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("echo", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new("echo", None, None, None, None)],
+            &[],
+        ),
     );
 }
 
@@ -346,7 +543,17 @@ fn keeps_taken_else_body_from_single_line_dead_if() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("guardrail3", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "guardrail3",
+                None,
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -358,7 +565,17 @@ fn keeps_taken_elif_body_from_single_line_dead_if() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("guardrail3", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "guardrail3",
+                None,
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -370,7 +587,17 @@ fn keeps_taken_elif_body_from_single_line_dead_if_with_else_fallback() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("guardrail3", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "guardrail3",
+                None,
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
     );
 }
 
@@ -381,6 +608,45 @@ fn ignores_dead_while_body_commands() {
 
     assert_script_matches(
         &parsed,
-        ScriptExpectation::new(None, &[CommandExpectation::new("echo", None, None, None, None)], &[]),
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new("echo", None, None, None, None)],
+            &[],
+        ),
+    );
+}
+
+#[test]
+fn keeps_commands_after_here_string_loop() {
+    let parsed = parse_script(
+        "while IFS= read -r file; do\n    [ -n \"$file\" ] || continue\n    if ! (cd \"$file\" && cargo fmt --all -- --check); then\n        exit 1\n    fi\ndone <<< \"$STAGED_FILES\"\necho after\ncargo test --workspace\n",
+    );
+
+    assert_script_matches(
+        &parsed,
+        ScriptExpectation::new(
+            None,
+            &[
+                CommandExpectation::new("[", None, None, None, None),
+                CommandExpectation::new(
+                    "cargo",
+                    Some("cargo fmt --all -- --check"),
+                    None,
+                    None,
+                    None,
+                ),
+                CommandExpectation::new("exit", None, None, None, None),
+                CommandExpectation::new(
+                    "done",
+                    Some("done <<< \"$STAGED_FILES\""),
+                    None,
+                    None,
+                    None,
+                ),
+                CommandExpectation::new("echo", None, None, None, None),
+                CommandExpectation::new("cargo", Some("cargo test --workspace"), None, None, None),
+            ],
+            &[],
+        ),
     );
 }
