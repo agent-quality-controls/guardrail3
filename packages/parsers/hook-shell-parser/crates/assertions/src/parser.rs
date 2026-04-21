@@ -82,7 +82,11 @@ impl<'a> ScriptExpectation<'a> {
 }
 
 pub fn assert_script_matches(parsed: &ParsedShellScript, expected: ScriptExpectation<'_>) {
-    assert_eq!(parsed.shebang.as_deref(), expected.shebang, "shebang mismatch");
+    assert_eq!(
+        parsed.shebang.as_deref(),
+        expected.shebang,
+        "shebang mismatch"
+    );
     assert_eq!(
         parsed.executable_lines.len(),
         expected.commands.len(),
@@ -110,15 +114,13 @@ pub fn assert_script_matches(parsed: &ParsedShellScript, expected: ScriptExpecta
         }
         if let Some(dispatcher) = command.dispatcher {
             assert_eq!(
-                actual.is_dispatcher_syntax,
-                dispatcher,
+                actual.is_dispatcher_syntax, dispatcher,
                 "dispatcher flag mismatch at index {index}",
             );
         }
         if let Some(exit_zero) = command.exit_zero {
             assert_eq!(
-                actual.is_exit_zero,
-                exit_zero,
+                actual.is_exit_zero, exit_zero,
                 "exit-zero flag mismatch at index {index}",
             );
         }
@@ -176,8 +178,7 @@ pub fn assert_script_matches(parsed: &ParsedShellScript, expected: ScriptExpecta
                 .map(|line| line.command_name.as_str())
                 .collect::<Vec<_>>();
             assert_eq!(
-                nested_names,
-                body_command_names,
+                nested_names, body_command_names,
                 "function body command names mismatch at index {index}",
             );
         }

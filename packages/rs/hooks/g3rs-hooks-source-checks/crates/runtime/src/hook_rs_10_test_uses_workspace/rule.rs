@@ -1,6 +1,6 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::types::ParsedShellScript;
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
+use hook_shell_parser::types::ParsedShellScript;
 
 use crate::inputs::RustHookCommandInput;
 

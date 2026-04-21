@@ -119,6 +119,7 @@ pub(super) fn extract_command_substitutions(line: &str) -> Vec<String> {
     let mut double_quoted = false;
     let mut depth = 0usize;
     let mut start = None;
+    let mut backtick_start = None;
     let chars: Vec<(usize, char)> = line.char_indices().collect();
     let mut i = 0usize;
 
@@ -127,6 +128,13 @@ pub(super) fn extract_command_substitutions(line: &str) -> Vec<String> {
         match ch {
             '\'' if !double_quoted => single_quoted = !single_quoted,
             '"' if !single_quoted => double_quoted = !double_quoted,
+            '`' if !single_quoted && !double_quoted && !is_escaped(chars.as_slice(), i) => {
+                if let Some(start_idx) = backtick_start.take() {
+                    substitutions.push(line[start_idx..idx].trim().to_owned());
+                } else {
+                    backtick_start = chars.get(i + 1).map(|(next_idx, _)| *next_idx);
+                }
+            }
             '$' if !single_quoted && !is_escaped(chars.as_slice(), i) => {
                 if chars.get(i + 1).is_some_and(|(_, next)| *next == '(') {
                     if depth == 0 {
