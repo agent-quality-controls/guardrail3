@@ -30,6 +30,7 @@ pub(crate) fn source_tree(crawl: &G3WorkspaceCrawl) -> Option<G3TsArchSourceTree
         .filter(|entry| entry.ignore_state == G3WorkspaceIgnoreState::Included)
         .filter(|entry| entry.readable)
         .filter(|entry| is_source_code_file(&entry.path.rel_path))
+        .filter(|entry| !is_ignored_structure_path(&entry.path.rel_path))
         .collect::<Vec<_>>();
 
     if source_entries.is_empty() {
@@ -44,7 +45,7 @@ pub(crate) fn source_tree(crawl: &G3WorkspaceCrawl) -> Option<G3TsArchSourceTree
             let Some(dir) = dir.to_str() else {
                 break;
             };
-            if dir == "src" || dir.starts_with("src/") {
+            if (dir == "src" || dir.starts_with("src/")) && !is_ignored_structure_path(dir) {
                 let _ = dirs.insert(dir.to_owned());
             }
             current = dir
@@ -59,12 +60,7 @@ pub(crate) fn source_tree(crawl: &G3WorkspaceCrawl) -> Option<G3TsArchSourceTree
 
     for dir in dirs {
         let dir_prefix = format!("{dir}/");
-        let depth = dir
-            .trim_start_matches("src")
-            .trim_matches('/')
-            .split('/')
-            .count()
-            - 1;
+        let depth = source_depth(&dir);
         max_depth = max_depth.max(depth);
 
         let sibling_dir_count = crawl
@@ -74,6 +70,7 @@ pub(crate) fn source_tree(crawl: &G3WorkspaceCrawl) -> Option<G3TsArchSourceTree
             .filter(|entry| entry.ignore_state == G3WorkspaceIgnoreState::Included)
             .filter(|entry| entry.path.rel_path.starts_with(&dir_prefix))
             .filter(|entry| immediate_child(&entry.path.rel_path, &dir_prefix))
+            .filter(|entry| !is_ignored_structure_path(&entry.path.rel_path))
             .count();
         max_sibling_dir_count = max_sibling_dir_count.max(sibling_dir_count);
 
@@ -85,6 +82,7 @@ pub(crate) fn source_tree(crawl: &G3WorkspaceCrawl) -> Option<G3TsArchSourceTree
             .filter(|entry| is_source_code_file(&entry.path.rel_path))
             .filter(|entry| entry.path.rel_path.starts_with(&dir_prefix))
             .filter(|entry| immediate_child(&entry.path.rel_path, &dir_prefix))
+            .filter(|entry| !is_ignored_structure_path(&entry.path.rel_path))
             .count();
         max_sibling_code_file_count = max_sibling_code_file_count.max(sibling_code_file_count);
     }
@@ -104,4 +102,27 @@ fn is_source_code_file(rel_path: &str) -> bool {
     rel_path.starts_with("src/")
         && (rel_path.ends_with(".ts") || rel_path.ends_with(".tsx"))
         && !rel_path.ends_with(".d.ts")
+}
+
+fn source_depth(dir: &str) -> usize {
+    if dir == "src" {
+        return 0;
+    }
+
+    dir.strip_prefix("src/")
+        .map(|suffix| suffix.split('/').count())
+        .unwrap_or(0)
+}
+
+fn is_ignored_structure_path(rel_path: &str) -> bool {
+    rel_path == "src/test"
+        || rel_path.starts_with("src/test/")
+        || rel_path == "src/tests"
+        || rel_path.starts_with("src/tests/")
+        || rel_path == "src/__tests__"
+        || rel_path.starts_with("src/__tests__/")
+        || rel_path == "src/example"
+        || rel_path.starts_with("src/example/")
+        || rel_path == "src/examples"
+        || rel_path.starts_with("src/examples/")
 }

@@ -15,3 +15,10 @@ pub fn assert_has_inventory(results: &[guardrail3_check_types::G3CheckResult], i
         "expected inventory `{id}`, got {results:?}"
     );
 }
+
+pub fn assert_missing(results: &[guardrail3_check_types::G3CheckResult], id: &str) {
+    assert!(
+        results.iter().all(|result| result.id() != id),
+        "expected no finding `{id}`, got {results:?}"
+    );
+}

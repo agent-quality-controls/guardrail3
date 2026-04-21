@@ -9,6 +9,8 @@ fn parse_command_accepts_family_and_inventory_flags() {
             "--family",
             "eslint",
             "--family",
+            "arch",
+            "--family",
             "tsconfig",
             "--family",
             "package",
@@ -19,7 +21,7 @@ fn parse_command_accepts_family_and_inventory_flags() {
             "--inventory",
         ],
         ".",
-        &["eslint", "tsconfig", "package", "npmrc", "jscpd"],
+        &["eslint", "arch", "tsconfig", "package", "npmrc", "jscpd"],
         true,
     );
 }
