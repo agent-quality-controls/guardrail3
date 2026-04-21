@@ -59,21 +59,17 @@ pub fn assert_local_paths(input: &G3TsPackageChecksInput, expected: &[&str]) {
 }
 
 pub fn assert_local_parse_error(input: &G3TsPackageChecksInput, expected_rel_path: &str) {
-    let matching = input
-        .locals
-        .iter()
-        .find(|state| match state {
-            G3TsPackageLocalState::Unreadable { rel_path, .. }
-            | G3TsPackageLocalState::ParseError { rel_path, .. } => rel_path == expected_rel_path,
-            G3TsPackageLocalState::Parsed { snapshot } => snapshot.rel_path == expected_rel_path,
-        })
-        .unwrap_or_else(|| {
-            assert!(
-                false,
-                "missing local manifest state for `{expected_rel_path}`"
-            );
-            unreachable!()
-        });
+    let Some(matching) = input.locals.iter().find(|state| match state {
+        G3TsPackageLocalState::Unreadable { rel_path, .. }
+        | G3TsPackageLocalState::ParseError { rel_path, .. } => rel_path == expected_rel_path,
+        G3TsPackageLocalState::Parsed { snapshot } => snapshot.rel_path == expected_rel_path,
+    }) else {
+        assert!(
+            false,
+            "missing local manifest state for `{expected_rel_path}`"
+        );
+        return;
+    };
 
     match matching {
         G3TsPackageLocalState::ParseError { .. } => {}
@@ -86,28 +82,24 @@ pub fn assert_local_dependency_names(
     expected_rel_path: &str,
     expected_dependencies: &[&str],
 ) {
-    let matching = input
-        .locals
-        .iter()
-        .find(|state| match state {
-            G3TsPackageLocalState::Unreadable { rel_path, .. }
-            | G3TsPackageLocalState::ParseError { rel_path, .. } => rel_path == expected_rel_path,
-            G3TsPackageLocalState::Parsed { snapshot } => snapshot.rel_path == expected_rel_path,
-        })
-        .unwrap_or_else(|| {
-            assert!(
-                false,
-                "missing local manifest state for `{expected_rel_path}`"
-            );
-            unreachable!()
-        });
+    let Some(matching) = input.locals.iter().find(|state| match state {
+        G3TsPackageLocalState::Unreadable { rel_path, .. }
+        | G3TsPackageLocalState::ParseError { rel_path, .. } => rel_path == expected_rel_path,
+        G3TsPackageLocalState::Parsed { snapshot } => snapshot.rel_path == expected_rel_path,
+    }) else {
+        assert!(
+            false,
+            "missing local manifest state for `{expected_rel_path}`"
+        );
+        return;
+    };
 
     let G3TsPackageLocalState::Parsed { snapshot } = matching else {
         assert!(
             false,
             "expected parsed local package state, got: {matching:?}"
         );
-        unreachable!();
+        return;
     };
 
     let expected = expected_dependencies
