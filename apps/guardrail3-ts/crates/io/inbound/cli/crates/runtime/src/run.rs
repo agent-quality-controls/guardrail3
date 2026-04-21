@@ -20,11 +20,14 @@ impl FamilyRunner for CliFamilyRunner {
         match family {
             SupportedFamily::Eslint
             | SupportedFamily::Arch
+            | SupportedFamily::Apparch
             | SupportedFamily::Tsconfig
             | SupportedFamily::Package
             | SupportedFamily::Npmrc
             | SupportedFamily::Jscpd => match family {
-                SupportedFamily::Arch => guardrail3_ts_family_runner_structure::run(family, crawl),
+                SupportedFamily::Arch | SupportedFamily::Apparch => {
+                    guardrail3_ts_family_runner_structure::run(family, crawl)
+                }
                 SupportedFamily::Eslint
                 | SupportedFamily::Tsconfig
                 | SupportedFamily::Package

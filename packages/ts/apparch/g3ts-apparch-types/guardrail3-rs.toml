@@ -1,0 +1,6 @@
+profile = "library"
+
+allowed_deps = []
+
+[checks]
+garde = false

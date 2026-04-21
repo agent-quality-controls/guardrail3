@@ -39,6 +39,25 @@ pub fn run(
             }
             Ok(results)
         }
+        SupportedFamily::Apparch => {
+            let config_input =
+                g3ts_apparch_ingestion::ingest_for_config_checks(crawl).map_err(|error| {
+                    FamilyRunError {
+                        message: format!("{error:?}"),
+                    }
+                })?;
+            let source_input =
+                g3ts_apparch_ingestion::ingest_for_source_checks(crawl).map_err(|error| {
+                    FamilyRunError {
+                        message: format!("{error:?}"),
+                    }
+                })?;
+
+            let mut results = Vec::new();
+            results.extend(g3ts_apparch_config_checks::check(&config_input));
+            results.extend(g3ts_apparch_source_checks::check(&source_input));
+            Ok(results)
+        }
         SupportedFamily::Eslint
         | SupportedFamily::Tsconfig
         | SupportedFamily::Package

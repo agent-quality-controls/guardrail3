@@ -1,0 +1,9 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-apparch-types",
+  "guardrail3-check-types",
+]
+
+[checks]
+garde = false

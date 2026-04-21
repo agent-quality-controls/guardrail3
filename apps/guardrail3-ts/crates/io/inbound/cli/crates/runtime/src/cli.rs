@@ -35,6 +35,7 @@ pub enum Command {
 pub enum FamilyArg {
     Eslint,
     Arch,
+    Apparch,
     Tsconfig,
     Package,
     Npmrc,
@@ -46,6 +47,7 @@ impl From<FamilyArg> for SupportedFamily {
         match value {
             FamilyArg::Eslint => Self::Eslint,
             FamilyArg::Arch => Self::Arch,
+            FamilyArg::Apparch => Self::Apparch,
             FamilyArg::Tsconfig => Self::Tsconfig,
             FamilyArg::Package => Self::Package,
             FamilyArg::Npmrc => Self::Npmrc,

@@ -28,6 +28,7 @@ fn selected_families_default_to_all_supported_families_when_filter_is_empty() {
         &[
             SupportedFamily::Eslint,
             SupportedFamily::Arch,
+            SupportedFamily::Apparch,
             SupportedFamily::Tsconfig,
             SupportedFamily::Package,
             SupportedFamily::Npmrc,
@@ -67,6 +68,28 @@ fn selected_families_keep_canonical_order_with_arch_in_mixed_filter() {
         &[
             SupportedFamily::Eslint,
             SupportedFamily::Arch,
+            SupportedFamily::Jscpd,
+        ],
+    );
+}
+
+#[test]
+fn selected_families_keep_canonical_order_with_apparch_in_mixed_filter() {
+    let request = ValidateRequest {
+        workspace_root: "ignored".into(),
+        families: vec![
+            SupportedFamily::Jscpd,
+            SupportedFamily::Apparch,
+            SupportedFamily::Arch,
+        ],
+        include_inventory: false,
+    };
+
+    assertions::assert_selected_families(
+        &super::super::selected_families(&request),
+        &[
+            SupportedFamily::Arch,
+            SupportedFamily::Apparch,
             SupportedFamily::Jscpd,
         ],
     );

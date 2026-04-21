@@ -1,0 +1,23 @@
+[package]
+name = "g3ts-apparch-source-checks-assertions"
+version = "0.0.0"
+edition = "2024"
+description = "Assertion helpers for g3ts arch source-check tests"
+license.workspace = true
+repository.workspace = true
+publish = false
+readme = "README.md"
+keywords = ["guardrail3", "typescript", "arch", "assertions"]
+categories = ["development-tools"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[dependencies]
+g3ts-apparch-source-checks-runtime = { path = "../runtime" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
