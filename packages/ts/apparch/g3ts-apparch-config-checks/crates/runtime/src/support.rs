@@ -1,4 +1,7 @@
-use g3ts_apparch_types::{G3TsApparchConfigChecksInput, G3TsApparchInternalEdge, G3TsApparchLayer};
+use g3ts_apparch_types::{
+    G3TsApparchConfigChecksInput, G3TsApparchExternalImport, G3TsApparchInternalEdge,
+    G3TsApparchLayer,
+};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 pub(crate) fn layer_label(layer: G3TsApparchLayer) -> &'static str {
@@ -35,6 +38,27 @@ pub(crate) fn inventory(id: &str, title: String, message: String) -> G3CheckResu
     G3CheckResult::new(id.to_owned(), G3Severity::Info, title, message, None, None).into_inventory()
 }
 
+pub(crate) fn violating_framework_imports<'a>(
+    input: &'a G3TsApparchConfigChecksInput,
+    from_layer: G3TsApparchLayer,
+) -> Vec<&'a G3TsApparchExternalImport> {
+    input
+        .external_imports
+        .iter()
+        .filter(|import| import.from_layer == from_layer)
+        .filter(|import| is_framework_runtime_module(&import.module_name))
+        .collect()
+}
+
+fn is_framework_runtime_module(module_name: &str) -> bool {
+    module_name == "next"
+        || module_name.starts_with("next/")
+        || module_name == "react"
+        || module_name.starts_with("react/")
+        || module_name == "react-dom"
+        || module_name.starts_with("react-dom/")
+}
+
 pub(crate) fn edge_error(
     id: &str,
     title: String,
@@ -47,6 +71,22 @@ pub(crate) fn edge_error(
         title,
         message,
         Some(edge.from_rel_path.clone()),
+        None,
+    )
+}
+
+pub(crate) fn external_import_error(
+    id: &str,
+    title: String,
+    message: String,
+    import: &G3TsApparchExternalImport,
+) -> G3CheckResult {
+    G3CheckResult::new(
+        id.to_owned(),
+        G3Severity::Error,
+        title,
+        message,
+        Some(import.from_rel_path.clone()),
         None,
     )
 }
