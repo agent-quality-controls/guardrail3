@@ -2,6 +2,7 @@ profile = "library"
 
 allowed_deps = [
   "eslint-config-parser",
+  "serde_json",
 ]
 
 [checks]

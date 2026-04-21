@@ -1,5 +1,5 @@
 use g3_workspace_crawl::{G3WorkspaceCrawl, root_file};
-use g3ts_tsconfig_types::{G3TsTsconfigChecksInput, G3TsTsconfigState};
+use g3ts_tsconfig_types::{G3TsTsconfigChecksInput, G3TsTsconfigState, inline_strict_flags};
 use tsconfig_json_parser::{from_path_document, parse_error_reason};
 
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsTsconfigChecksInput {
@@ -45,8 +45,9 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsTsconfigChecksI
     G3TsTsconfigChecksInput {
         config: G3TsTsconfigState::Parsed {
             rel_path: entry.path.rel_path.clone(),
-            document,
+            uses_extends: !tsconfig_json_parser::extends_entries(&document).is_empty(),
             extends_chain,
+            inline_strict_flags: inline_strict_flags(&document),
             effective_compiler_options,
         },
     }

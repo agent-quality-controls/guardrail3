@@ -136,3 +136,31 @@ fn fallback_probes_skip_config_modules() {
     assert_eq!(ts_source.rel_path, "src/index.ts");
     assert_eq!(js_source.rel_path, "src/index.js");
 }
+
+#[test]
+fn probe_selection_is_scoped_to_selected_config_root() {
+    let root = super::helpers::fake_root();
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "packages/alpha/eslint.config.mjs",
+            "packages/alpha/src/index.ts",
+            "packages/alpha/src/index.js",
+            "packages/beta/src/index.ts",
+            "packages/beta/src/index.js",
+        ],
+    );
+
+    let probes = super::super::probe_targets(&crawl, "packages/alpha/eslint.config.mjs");
+    let ts_source = probes
+        .iter()
+        .find(|probe| probe.probe == EslintProbeKind::TsSource)
+        .expect("TS source probe should exist");
+    let js_source = probes
+        .iter()
+        .find(|probe| probe.probe == EslintProbeKind::JsSource)
+        .expect("JS source probe should exist");
+
+    assert_eq!(ts_source.rel_path, "packages/alpha/src/index.ts");
+    assert_eq!(js_source.rel_path, "packages/alpha/src/index.js");
+}

@@ -117,17 +117,17 @@ fn weak_effective_flags_report_baseline_error() {
 }
 
 #[test]
-fn external_extends_skip_effective_baseline_error_in_current_wave() {
+fn external_extends_report_explicit_baseline_blocker() {
     let results = super::super::check(&external_extends());
 
     assertions::assert_contains(
         &results,
-        &[assertions::info(
+        &[assertions::error(
             "TS-TSCONFIG-CONFIG-05",
-            "strict tsconfig baseline deferred through external extends",
-            "The current wave accepts external `extends` parents without proving their effective strict baseline.",
+            "strict tsconfig baseline blocked by external extends",
+            "The current wave cannot prove the strict baseline through external `extends` parents. Replace external inheritance with a local checked base or extend the local root directly.",
             Some("tsconfig.json"),
-            true,
+            false,
         )],
     );
 }

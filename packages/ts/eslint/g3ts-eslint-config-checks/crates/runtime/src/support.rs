@@ -1,8 +1,8 @@
-use eslint_config_parser::{
-    probe, rule_setting,
-    types::{EslintEffectiveConfigProbe, EslintProbeKind, EslintRuleSetting, EslintRuleSeverity},
+use eslint_config_parser::types::{EslintProbeKind, EslintRuleSeverity};
+use g3ts_eslint_types::{
+    G3TsEslintConfigChecksInput, G3TsEslintConfigSnapshot, G3TsEslintConfigState,
+    G3TsEslintEffectiveConfigProbe, G3TsEslintRuleSetting,
 };
-use g3ts_eslint_types::{G3TsEslintConfigChecksInput, G3TsEslintConfigState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use serde_json::Value;
 
@@ -11,21 +11,28 @@ pub(crate) fn selected_rel_path(input: &G3TsEslintConfigChecksInput) -> Option<&
     match &input.config {
         G3TsEslintConfigState::Missing => None,
         G3TsEslintConfigState::Unreadable { rel_path, .. }
-        | G3TsEslintConfigState::ParseError { rel_path, .. }
-        | G3TsEslintConfigState::Parsed { rel_path, .. } => Some(rel_path),
+        | G3TsEslintConfigState::ParseError { rel_path, .. } => Some(rel_path),
+        G3TsEslintConfigState::Parsed { snapshot } => Some(&snapshot.selected_config.rel_path),
+    }
+}
+
+#[must_use]
+pub(crate) fn parsed_snapshot(
+    input: &G3TsEslintConfigChecksInput,
+) -> Option<&G3TsEslintConfigSnapshot> {
+    match &input.config {
+        G3TsEslintConfigState::Parsed { snapshot } => Some(snapshot),
+        G3TsEslintConfigState::Missing
+        | G3TsEslintConfigState::Unreadable { .. }
+        | G3TsEslintConfigState::ParseError { .. } => None,
     }
 }
 
 #[must_use]
 pub(crate) fn parsed_document(
     input: &G3TsEslintConfigChecksInput,
-) -> Option<&eslint_config_parser::types::EslintConfigDocument> {
-    match &input.config {
-        G3TsEslintConfigState::Parsed { document, .. } => Some(document),
-        G3TsEslintConfigState::Missing
-        | G3TsEslintConfigState::Unreadable { .. }
-        | G3TsEslintConfigState::ParseError { .. } => None,
-    }
+) -> Option<&G3TsEslintConfigSnapshot> {
+    parsed_snapshot(input)
 }
 
 #[must_use]
@@ -52,8 +59,11 @@ pub(crate) fn rule_is_error(input: &G3TsEslintConfigChecksInput, rule_name: &str
 pub(crate) fn probe_for(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
-) -> Option<&EslintEffectiveConfigProbe> {
-    probe(parsed_document(input)?, probe_kind)
+) -> Option<&G3TsEslintEffectiveConfigProbe> {
+    parsed_snapshot(input)?
+        .probes
+        .iter()
+        .find(|probe| probe.probe == probe_kind)
 }
 
 #[must_use]
@@ -100,8 +110,8 @@ pub(crate) fn rule_setting_for<'a>(
     input: &'a G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
     rule_name: &str,
-) -> Option<&'a EslintRuleSetting> {
-    parsed_document(input).and_then(|document| rule_setting(document, probe_kind, rule_name))
+) -> Option<&'a G3TsEslintRuleSetting> {
+    probe_for(input, probe_kind).and_then(|probe| probe.rules.get(rule_name))
 }
 
 #[must_use]

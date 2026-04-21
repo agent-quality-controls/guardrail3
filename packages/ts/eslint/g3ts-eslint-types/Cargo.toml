@@ -19,6 +19,7 @@ api = []
 
 [dependencies]
 eslint-config-parser = { path = "../../../parsers/eslint-config-parser", version = "0.1.0", features = ["api"] }
+serde_json = "1"
 
 [package.metadata.guardrail3]
 shared = true

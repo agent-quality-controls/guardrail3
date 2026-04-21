@@ -1,6 +1,5 @@
 use g3ts_tsconfig_types::{G3TsTsconfigChecksInput, G3TsTsconfigState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use tsconfig_json_parser::extends_entries;
 
 use crate::support::{info, missing_inline_flags};
 
@@ -8,13 +7,15 @@ const ID: &str = "TS-TSCONFIG-CONFIG-04";
 
 pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let G3TsTsconfigState::Parsed {
-        rel_path, document, ..
+        rel_path,
+        uses_extends,
+        ..
     } = &input.config
     else {
         return;
     };
 
-    if !extends_entries(document).is_empty() {
+    if *uses_extends {
         results.push(info(
             ID,
             "tsconfig inherits strict baseline",

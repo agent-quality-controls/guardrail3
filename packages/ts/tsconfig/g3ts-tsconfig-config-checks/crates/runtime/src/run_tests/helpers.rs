@@ -1,5 +1,7 @@
-use g3ts_tsconfig_types::{G3TsTsconfigChecksInput, G3TsTsconfigExtendsState, G3TsTsconfigState};
-use tsconfig_json_parser::parse_document;
+use g3ts_tsconfig_types::{
+    G3TsTsconfigBoolState, G3TsTsconfigChecksInput, G3TsTsconfigExtendsState,
+    G3TsTsconfigInlineStrictFlags, G3TsTsconfigState,
+};
 use tsconfig_json_parser::types::TsconfigCompilerOptions;
 
 pub(super) fn missing() -> G3TsTsconfigChecksInput {
@@ -18,78 +20,45 @@ pub(super) fn parse_error() -> G3TsTsconfigChecksInput {
 }
 
 pub(super) fn golden_extends() -> G3TsTsconfigChecksInput {
-    let root = parse_document(r#"{ "extends": "../../tsconfig.base.json" }"#)
-        .expect("root tsconfig should parse");
-    let parent = parse_document(
-        r#"
-        {
-          "compilerOptions": {
-            "strict": true,
-            "noImplicitReturns": true,
-            "noUnusedLocals": true,
-            "noUnusedParameters": true,
-            "noUncheckedIndexedAccess": true,
-            "exactOptionalPropertyTypes": true,
-            "noPropertyAccessFromIndexSignature": true,
-            "noImplicitOverride": true,
-            "noFallthroughCasesInSwitch": true,
-            "forceConsistentCasingInFileNames": true,
-            "allowUnreachableCode": false,
-            "allowUnusedLabels": false
-          }
-        }
-        "#,
-    )
-    .expect("parent tsconfig should parse");
-
     G3TsTsconfigChecksInput {
         config: G3TsTsconfigState::Parsed {
             rel_path: "tsconfig.json".to_owned(),
-            document: root,
-            extends_chain: vec![G3TsTsconfigExtendsState::Parsed {
+            uses_extends: true,
+            extends_chain: vec![G3TsTsconfigExtendsState::Resolved {
                 specifier: "../../tsconfig.base.json".to_owned(),
                 display_path: "/tmp/tsconfig.base.json".to_owned(),
-                document: parent,
             }],
+            inline_strict_flags: missing_inline_flags(),
             effective_compiler_options: strict_baseline(),
         },
     }
 }
 
 pub(super) fn broken_chain() -> G3TsTsconfigChecksInput {
-    let root = parse_document(r#"{ "extends": "../../tsconfig.base.json" }"#)
-        .expect("root tsconfig should parse");
-
     G3TsTsconfigChecksInput {
         config: G3TsTsconfigState::Parsed {
             rel_path: "tsconfig.json".to_owned(),
-            document: root,
+            uses_extends: true,
             extends_chain: vec![G3TsTsconfigExtendsState::Missing {
                 specifier: "../../tsconfig.base.json".to_owned(),
                 display_path: "/tmp/tsconfig.base.json".to_owned(),
             }],
+            inline_strict_flags: missing_inline_flags(),
             effective_compiler_options: TsconfigCompilerOptions::default(),
         },
     }
 }
 
 pub(super) fn standalone_missing_inline() -> G3TsTsconfigChecksInput {
-    let root = parse_document(
-        r#"
-        {
-          "compilerOptions": {
-            "strict": true
-          }
-        }
-        "#,
-    )
-    .expect("root tsconfig should parse");
-
     G3TsTsconfigChecksInput {
         config: G3TsTsconfigState::Parsed {
             rel_path: "tsconfig.json".to_owned(),
-            document: root,
+            uses_extends: false,
             extends_chain: Vec::new(),
+            inline_strict_flags: G3TsTsconfigInlineStrictFlags {
+                strict: G3TsTsconfigBoolState::Value(true),
+                ..missing_inline_flags()
+            },
             effective_compiler_options: TsconfigCompilerOptions {
                 strict: Some(true),
                 ..TsconfigCompilerOptions::default()
@@ -99,39 +68,51 @@ pub(super) fn standalone_missing_inline() -> G3TsTsconfigChecksInput {
 }
 
 pub(super) fn weak_effective_flags() -> G3TsTsconfigChecksInput {
-    let root = parse_document(r#"{ "extends": "../../tsconfig.base.json" }"#)
-        .expect("root tsconfig should parse");
-
     let mut effective = strict_baseline();
     effective.no_unused_locals = Some(false);
 
     G3TsTsconfigChecksInput {
         config: G3TsTsconfigState::Parsed {
             rel_path: "tsconfig.json".to_owned(),
-            document: root,
-            extends_chain: vec![G3TsTsconfigExtendsState::Parsed {
+            uses_extends: true,
+            extends_chain: vec![G3TsTsconfigExtendsState::Resolved {
                 specifier: "../../tsconfig.base.json".to_owned(),
                 display_path: "/tmp/tsconfig.base.json".to_owned(),
-                document: parse_document("{}").expect("parent doc should parse"),
             }],
+            inline_strict_flags: missing_inline_flags(),
             effective_compiler_options: effective,
         },
     }
 }
 
 pub(super) fn external_extends() -> G3TsTsconfigChecksInput {
-    let root = parse_document(r#"{ "extends": "@tsconfig/strictest/tsconfig.json" }"#)
-        .expect("root tsconfig should parse");
-
     G3TsTsconfigChecksInput {
         config: G3TsTsconfigState::Parsed {
             rel_path: "tsconfig.json".to_owned(),
-            document: root,
+            uses_extends: true,
             extends_chain: vec![G3TsTsconfigExtendsState::External {
                 specifier: "@tsconfig/strictest/tsconfig.json".to_owned(),
             }],
+            inline_strict_flags: missing_inline_flags(),
             effective_compiler_options: TsconfigCompilerOptions::default(),
         },
+    }
+}
+
+fn missing_inline_flags() -> G3TsTsconfigInlineStrictFlags {
+    G3TsTsconfigInlineStrictFlags {
+        strict: G3TsTsconfigBoolState::Missing,
+        no_implicit_returns: G3TsTsconfigBoolState::Missing,
+        no_unused_locals: G3TsTsconfigBoolState::Missing,
+        no_unused_parameters: G3TsTsconfigBoolState::Missing,
+        no_unchecked_indexed_access: G3TsTsconfigBoolState::Missing,
+        exact_optional_property_types: G3TsTsconfigBoolState::Missing,
+        no_property_access_from_index_signature: G3TsTsconfigBoolState::Missing,
+        no_implicit_override: G3TsTsconfigBoolState::Missing,
+        no_fallthrough_cases_in_switch: G3TsTsconfigBoolState::Missing,
+        force_consistent_casing_in_file_names: G3TsTsconfigBoolState::Missing,
+        allow_unreachable_code: G3TsTsconfigBoolState::Missing,
+        allow_unused_labels: G3TsTsconfigBoolState::Missing,
     }
 }
 

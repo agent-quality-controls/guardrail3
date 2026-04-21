@@ -28,12 +28,15 @@ pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3Che
                 None,
             ));
         }
-        G3TsEslintConfigState::Parsed { rel_path, .. } => {
+        G3TsEslintConfigState::Parsed { snapshot } => {
             results.push(info(
                 ID,
                 "eslint config parseable",
-                format!("`{rel_path}` parsed successfully through ESLint."),
-                rel_path,
+                format!(
+                    "`{}` parsed successfully through ESLint.",
+                    snapshot.selected_config.rel_path
+                ),
+                &snapshot.selected_config.rel_path,
             ));
         }
     }
