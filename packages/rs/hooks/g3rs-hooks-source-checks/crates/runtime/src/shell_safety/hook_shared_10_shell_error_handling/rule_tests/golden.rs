@@ -9,7 +9,8 @@ fn warns_when_set_e_only_appears_in_comment() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
-            title: Some("shell error handling missing"),
+            title: Some("missing fail-closed shell options in `.githooks/pre-commit`"),
+            message_contains: Some("set -euo pipefail"),
             inventory: Some(false),
             ..Default::default()
         }],
@@ -23,7 +24,7 @@ fn warns_when_set_e_only_appears_in_echo() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
-            title: Some("shell error handling missing"),
+            title: Some("missing fail-closed shell options in `.githooks/pre-commit`"),
             inventory: Some(false),
             ..Default::default()
         }],
@@ -37,7 +38,7 @@ fn passes_when_real_shell_error_handling_line_exists() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
-            title: Some("shell error handling present"),
+            title: Some("`.githooks/pre-commit` enables fail-closed shell options"),
             inventory: Some(true),
             ..Default::default()
         }],

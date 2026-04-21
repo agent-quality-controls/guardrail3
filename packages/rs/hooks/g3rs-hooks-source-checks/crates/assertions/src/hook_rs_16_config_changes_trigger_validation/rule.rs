@@ -5,7 +5,9 @@ pub fn assert_present(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("Rust config changes trigger hook validation"),
+            title: Some(
+                "`.githooks/pre-commit` triggers Rust validation on guardrail config changes",
+            ),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -17,7 +19,10 @@ pub fn assert_missing(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("Rust config-change trigger coverage incomplete"),
+            title: Some(
+                "incomplete Rust guardrail config trigger coverage in `.githooks/pre-commit`",
+            ),
+            message_contains: Some("config-only policy change"),
             inventory: Some(false),
             ..Default::default()
         }],

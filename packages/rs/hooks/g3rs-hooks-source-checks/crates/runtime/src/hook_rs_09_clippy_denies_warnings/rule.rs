@@ -31,8 +31,8 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
             G3CheckResult::from_parts(
                 ID.to_owned(),
                 G3Severity::Warn,
-                "cargo clippy denies warnings".to_owned(),
-                "Hook runs clippy in a deny-warnings mode.".to_owned(),
+                "`.githooks/pre-commit` runs clippy in deny-warnings mode".to_owned(),
+                "`.githooks/pre-commit` already executes `cargo clippy` with `-D warnings` or an equivalent `RUSTFLAGS` deny setting, so any clippy warning fails the hook.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -43,8 +43,9 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
             G3Severity::Warn,
-            "cargo clippy deny-warnings step missing".to_owned(),
-            "Hook does not execute `cargo clippy` with `-D warnings` or equivalent.".to_owned(),
+            "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
+                .to_owned(),
+            "Add a real clippy command such as `cargo clippy --workspace --all-targets --all-features -- -D warnings` to `.githooks/pre-commit`. Put it with the other Rust cargo checks so the hook fails on any clippy warning, not only on hard errors.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,
@@ -63,7 +64,7 @@ fn execute_script_for_clippy(
     visiting: &mut Vec<String>,
 ) -> bool {
     for line in &parsed.executable_lines {
-        if line_contains_clippy_deny(&line.raw, root, env_state, visiting) {
+        if line_contains_clippy_deny(&line.command_text, root, env_state, visiting) {
             return true;
         }
     }

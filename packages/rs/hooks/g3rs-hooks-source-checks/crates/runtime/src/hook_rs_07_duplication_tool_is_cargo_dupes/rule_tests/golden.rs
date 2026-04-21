@@ -10,7 +10,10 @@ fn warns_when_only_jscpd_exists() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
             inventory: Some(false),
-            title: Some("wrong Rust duplication tool"),
+            title: Some(
+                "replace `jscpd` with `cargo dupes --exclude-tests` for Rust dependency duplication",
+            ),
+            message_contains: Some("duplicate Rust dependency versions"),
             ..Default::default()
         }],
     );

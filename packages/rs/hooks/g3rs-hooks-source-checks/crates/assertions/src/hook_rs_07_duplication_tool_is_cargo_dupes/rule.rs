@@ -5,7 +5,9 @@ pub fn assert_present(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("cargo-dupes selected for Rust duplication checks"),
+            title: Some(
+                "`.githooks/pre-commit` uses `cargo dupes` for Rust dependency duplication",
+            ),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -17,7 +19,9 @@ pub fn assert_wrong_tool(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("wrong Rust duplication tool"),
+            title: Some(
+                "replace `jscpd` with `cargo dupes --exclude-tests` for Rust dependency duplication",
+            ),
             inventory: Some(false),
             ..Default::default()
         }],
@@ -29,7 +33,8 @@ pub fn assert_missing(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("Rust duplication tool missing"),
+            title: Some("missing `cargo dupes --exclude-tests` command in `.githooks/pre-commit`"),
+            message_contains: Some("duplicate Rust dependency versions"),
             inventory: Some(false),
             ..Default::default()
         }],

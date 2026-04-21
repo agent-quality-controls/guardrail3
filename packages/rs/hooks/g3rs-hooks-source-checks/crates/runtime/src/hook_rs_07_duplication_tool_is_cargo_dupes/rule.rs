@@ -13,8 +13,9 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
             G3Severity::Warn,
-            "wrong Rust duplication tool".to_owned(),
-            "Hook uses jscpd for Rust duplication checks instead of cargo-dupes.".to_owned(),
+            "replace `jscpd` with `cargo dupes --exclude-tests` for Rust dependency duplication"
+                .to_owned(),
+            "`.githooks/pre-commit` runs `jscpd`, but `jscpd` checks copied text, not duplicate Rust dependency versions. Add a real `cargo dupes --exclude-tests` command to the Rust cargo-check section of `.githooks/pre-commit`.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,
@@ -24,8 +25,9 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
             G3CheckResult::from_parts(
                 ID.to_owned(),
                 G3Severity::Warn,
-                "cargo-dupes selected for Rust duplication checks".to_owned(),
-                "Hook uses cargo-dupes for Rust duplication checks.".to_owned(),
+                "`.githooks/pre-commit` uses `cargo dupes` for Rust dependency duplication"
+                    .to_owned(),
+                "`.githooks/pre-commit` includes an executable `cargo dupes` command for Rust dependency-duplication checks.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -36,8 +38,9 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
             G3Severity::Warn,
-            "Rust duplication tool missing".to_owned(),
-            "Hook does not show a Rust duplication-check command.".to_owned(),
+            "missing `cargo dupes --exclude-tests` command in `.githooks/pre-commit`"
+                .to_owned(),
+            "Add an executable `cargo dupes --exclude-tests` command to `.githooks/pre-commit`, next to the other Rust cargo checks. This checks duplicate Rust dependency versions inside each Cargo workspace; repo-wide text duplication tools do not cover that.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,

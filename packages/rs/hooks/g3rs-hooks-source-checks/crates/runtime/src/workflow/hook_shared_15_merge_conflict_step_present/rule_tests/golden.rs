@@ -9,7 +9,8 @@ fn warns_when_conflict_check_only_appears_in_comment() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
-            title: Some("merge-conflict check step missing"),
+            title: Some("missing merge-conflict marker scan in `.githooks/pre-commit`"),
+            message_contains: Some("<<<<<<<"),
             inventory: Some(false),
             ..Default::default()
         }],
@@ -23,7 +24,7 @@ fn passes_when_real_grep_conflict_command_exists() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Info),
-            title: Some("merge-conflict check step present"),
+            title: Some("`.githooks/pre-commit` scans for merge-conflict markers"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -38,7 +39,7 @@ fn passes_when_called_function_runs_path_qualified_conflict_check() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Info),
-            title: Some("merge-conflict check step present"),
+            title: Some("`.githooks/pre-commit` scans for merge-conflict markers"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -52,7 +53,7 @@ fn warns_when_only_echo_mentions_conflict_markers() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
-            title: Some("merge-conflict check step missing"),
+            title: Some("missing merge-conflict marker scan in `.githooks/pre-commit`"),
             inventory: Some(false),
             ..Default::default()
         }],
@@ -66,7 +67,7 @@ fn warns_when_grep_only_mentions_merge_conflict_prose() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
-            title: Some("merge-conflict check step missing"),
+            title: Some("missing merge-conflict marker scan in `.githooks/pre-commit`"),
             inventory: Some(false),
             ..Default::default()
         }],

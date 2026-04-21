@@ -10,7 +10,8 @@ fn warns_when_only_comment_mentions_guardrail_validation() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
             inventory: Some(false),
-            title: Some("Rust guardrail validate step missing"),
+            title: Some("missing `g3rs validate --path ...` command in `.githooks/pre-commit`"),
+            message_contains: Some("Cargo tools do not cover"),
             ..Default::default()
         }],
     );

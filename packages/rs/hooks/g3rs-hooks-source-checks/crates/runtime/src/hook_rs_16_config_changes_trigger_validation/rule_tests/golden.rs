@@ -11,7 +11,10 @@ fn warns_when_config_names_only_appear_in_comment() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
             inventory: Some(false),
-            title: Some("Rust config-change trigger coverage incomplete"),
+            title: Some(
+                "incomplete Rust guardrail config trigger coverage in `.githooks/pre-commit`",
+            ),
+            message_contains: Some("guardrail3-rs.toml"),
             ..Default::default()
         }],
     );

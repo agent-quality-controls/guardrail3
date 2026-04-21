@@ -9,7 +9,8 @@ fn warns_when_lockfile_check_is_only_prose() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
-            title: Some("concrete lockfile integrity command missing"),
+            title: Some("missing concrete lockfile integrity command in `.githooks/pre-commit`"),
+            message_contains: Some("pnpm install --frozen-lockfile"),
             inventory: Some(false),
             ..Default::default()
         }],
@@ -23,7 +24,7 @@ fn passes_when_real_frozen_lockfile_command_exists() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Info),
-            title: Some("concrete lockfile integrity command present"),
+            title: Some("`.githooks/pre-commit` runs a concrete lockfile integrity command"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -37,7 +38,7 @@ fn warns_when_non_install_pnpm_command_uses_frozen_lockfile_flag() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
-            title: Some("concrete lockfile integrity command missing"),
+            title: Some("missing concrete lockfile integrity command in `.githooks/pre-commit`"),
             inventory: Some(false),
             ..Default::default()
         }],
@@ -51,7 +52,7 @@ fn passes_when_env_wrapper_executes_real_frozen_lockfile_command() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Info),
-            title: Some("concrete lockfile integrity command present"),
+            title: Some("`.githooks/pre-commit` runs a concrete lockfile integrity command"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -65,7 +66,7 @@ fn passes_when_path_qualified_pnpm_executes_real_frozen_lockfile_command() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Info),
-            title: Some("concrete lockfile integrity command present"),
+            title: Some("`.githooks/pre-commit` runs a concrete lockfile integrity command"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -80,7 +81,7 @@ fn passes_when_called_function_executes_real_frozen_lockfile_command() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Info),
-            title: Some("concrete lockfile integrity command present"),
+            title: Some("`.githooks/pre-commit` runs a concrete lockfile integrity command"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -94,7 +95,7 @@ fn warns_when_frozen_lockfile_command_is_echoed() {
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
-            title: Some("concrete lockfile integrity command missing"),
+            title: Some("missing concrete lockfile integrity command in `.githooks/pre-commit`"),
             inventory: Some(false),
             ..Default::default()
         }],

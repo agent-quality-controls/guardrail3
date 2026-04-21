@@ -5,7 +5,7 @@ pub fn assert_present(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("cargo dupes step present"),
+            title: Some("`.githooks/pre-commit` runs `cargo dupes`"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -17,7 +17,8 @@ pub fn assert_missing(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("cargo dupes step missing"),
+            title: Some("missing executable `cargo dupes` command in `.githooks/pre-commit`"),
+            message_contains: Some("duplicate Rust dependency versions"),
             inventory: Some(false),
             ..Default::default()
         }],

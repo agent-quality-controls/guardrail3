@@ -16,8 +16,8 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
             G3CheckResult::from_parts(
                 ID.to_owned(),
                 G3Severity::Warn,
-                "shell error handling present".to_owned(),
-                "Hook enables shell error handling with `set -e` or equivalent.".to_owned(),
+                "`.githooks/pre-commit` enables fail-closed shell options".to_owned(),
+                "`.githooks/pre-commit` enables `set -e`-style shell error handling before running checks.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -28,8 +28,8 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
             G3Severity::Warn,
-            "shell error handling missing".to_owned(),
-            "Hook does not enable `set -e`-style shell error handling.".to_owned(),
+            "missing fail-closed shell options in `.githooks/pre-commit`".to_owned(),
+            "Add `set -euo pipefail` near the top of `.githooks/pre-commit`, before any real checks run. Without `-e`, a failing command can be ignored and the hook can continue past a broken check.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,

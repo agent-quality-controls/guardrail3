@@ -5,7 +5,7 @@ pub fn assert_present(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("shared CARGO_TARGET_DIR configured"),
+            title: Some("`.githooks/pre-commit` sets a shared `CARGO_TARGET_DIR`"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -17,7 +17,8 @@ pub fn assert_missing(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("shared CARGO_TARGET_DIR missing"),
+            title: Some("missing shared `CARGO_TARGET_DIR` setup in `.githooks/pre-commit`"),
+            message_contains: Some("export CARGO_TARGET_DIR"),
             inventory: Some(false),
             ..Default::default()
         }],

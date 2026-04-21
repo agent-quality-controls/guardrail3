@@ -119,6 +119,14 @@ fn passes_when_path_qualified_cargo_runs_clippy_denies_warnings() {
 }
 
 #[test]
+fn passes_when_clippy_runs_inside_cd_wrapper_in_if_guard() {
+    let results = run_case(
+        "if ! (cd \"$rust_root\" && cargo clippy --workspace --all-targets --all-features -- -D warnings); then\n    exit 1\nfi\n",
+    );
+    assertions::assert_present(&results);
+}
+
+#[test]
 fn passes_when_later_deny_overrides_earlier_allow_in_clippy_args() {
     let results = run_case("cargo clippy --workspace -- -A warnings -D warnings\n");
     assertions::assert_present(&results);
