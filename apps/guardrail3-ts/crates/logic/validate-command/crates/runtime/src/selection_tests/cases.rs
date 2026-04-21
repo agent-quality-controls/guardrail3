@@ -16,7 +16,7 @@ fn selected_families_follow_canonical_order() {
 }
 
 #[test]
-fn selected_families_default_to_eslint_when_filter_is_empty() {
+fn selected_families_default_to_all_supported_families_when_filter_is_empty() {
     let request = ValidateRequest {
         workspace_root: "ignored".into(),
         families: Vec::new(),
@@ -25,7 +25,11 @@ fn selected_families_default_to_eslint_when_filter_is_empty() {
 
     assertions::assert_selected_families(
         &super::super::selected_families(&request),
-        &[SupportedFamily::Eslint, SupportedFamily::Tsconfig],
+        &[
+            SupportedFamily::Eslint,
+            SupportedFamily::Tsconfig,
+            SupportedFamily::Package,
+        ],
     );
 }
 

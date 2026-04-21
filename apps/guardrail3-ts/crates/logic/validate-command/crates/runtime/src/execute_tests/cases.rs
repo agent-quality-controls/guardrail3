@@ -61,6 +61,17 @@ impl FamilyRunner for StubFamilyRunner {
                 )
                 .into_inventory(),
             ],
+            SupportedFamily::Package => vec![
+                G3CheckResult::new(
+                    "TS-PACKAGE-CONFIG-01".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some("package.json".to_owned()),
+                    None,
+                )
+                .into_inventory(),
+            ],
         };
 
         Ok(results)
@@ -120,7 +131,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=2 inventory=false",
+        "runs=3 inventory=false",
         "",
         0,
     );
@@ -141,6 +152,9 @@ impl FamilyRunner for ErroringFamilyRunner {
             }),
             SupportedFamily::Tsconfig => Err(FamilyRunError {
                 message: "tsconfig runner exploded".to_owned(),
+            }),
+            SupportedFamily::Package => Err(FamilyRunError {
+                message: "package runner exploded".to_owned(),
             }),
         }
     }

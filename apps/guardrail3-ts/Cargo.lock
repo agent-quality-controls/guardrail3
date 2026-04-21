@@ -297,6 +297,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3ts-package-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-package-config-checks-runtime",
+ "g3ts-package-config-checks-types",
+]
+
+[[package]]
+name = "g3ts-package-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-package-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-package-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3ts-package-types",
+]
+
+[[package]]
+name = "g3ts-package-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3ts-package-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-package-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3-workspace-crawl",
+ "g3ts-package-types",
+ "package-json-parser",
+]
+
+[[package]]
+name = "g3ts-package-types"
+version = "0.1.0"
+dependencies = [
+ "package-json-parser",
+]
+
+[[package]]
 name = "g3ts-tsconfig-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -396,6 +442,8 @@ dependencies = [
  "g3-workspace-crawl",
  "g3ts-eslint-config-checks",
  "g3ts-eslint-ingestion",
+ "g3ts-package-config-checks",
+ "g3ts-package-ingestion",
  "g3ts-tsconfig-config-checks",
  "g3ts-tsconfig-ingestion",
  "guardrail3-ts-app-types",
@@ -561,6 +609,28 @@ name = "once_cell_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
+
+[[package]]
+name = "package-json-parser"
+version = "0.1.0"
+dependencies = [
+ "package-json-parser-runtime",
+]
+
+[[package]]
+name = "package-json-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "package-json-parser-types",
+ "serde_json",
+]
+
+[[package]]
+name = "package-json-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+]
 
 [[package]]
 name = "prettyplease"

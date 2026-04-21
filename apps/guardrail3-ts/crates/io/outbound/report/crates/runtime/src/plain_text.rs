@@ -48,6 +48,7 @@ const fn family_cli_name(family: SupportedFamily) -> &'static str {
     match family {
         SupportedFamily::Eslint => "eslint",
         SupportedFamily::Tsconfig => "tsconfig",
+        SupportedFamily::Package => "package",
     }
 }
 
