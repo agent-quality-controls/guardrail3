@@ -26,6 +26,17 @@ pub fn assert_root_parse_error(input: &G3TsJscpdChecksInput, expected_rel_path: 
     }
 }
 
+pub fn assert_root_unreadable(input: &G3TsJscpdChecksInput, expected_rel_path: &str) {
+    match &input.root {
+        G3TsJscpdRootState::Unreadable { rel_path, .. } => {
+            assert_eq!(rel_path, expected_rel_path, "root unreadable path mismatch");
+        }
+        other => {
+            assert!(false, "expected root unreadable state, got: {other:?}");
+        }
+    }
+}
+
 pub fn assert_root_parsed(input: &G3TsJscpdChecksInput, expected_rel_path: &str) {
     match &input.root {
         G3TsJscpdRootState::Parsed { snapshot } => {

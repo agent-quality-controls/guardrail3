@@ -63,7 +63,7 @@ fn rejects_non_object_roots() {
 fn reports_invalid_json() {
     let error = super::super::parse_document("{ invalid ").expect_err("invalid JSON should error");
     assert!(
-        error.to_string().contains("key must be a string"),
+        error.to_string().starts_with("failed to parse .jscpd:"),
         "unexpected parse error: {error}"
     );
 }
