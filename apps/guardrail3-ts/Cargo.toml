@@ -28,6 +28,8 @@ g3ts-package-config-checks = { path = "../../packages/ts/package/g3ts-package-co
 g3ts-package-ingestion = { path = "../../packages/ts/package/g3ts-package-ingestion" }
 g3ts-npmrc-config-checks = { path = "../../packages/ts/npmrc/g3ts-npmrc-config-checks" }
 g3ts-npmrc-ingestion = { path = "../../packages/ts/npmrc/g3ts-npmrc-ingestion" }
+g3ts-jscpd-config-checks = { path = "../../packages/ts/jscpd/g3ts-jscpd-config-checks" }
+g3ts-jscpd-ingestion = { path = "../../packages/ts/jscpd/g3ts-jscpd-ingestion" }
 tempfile = "3.18.0"
 
 [workspace.lints.rust]

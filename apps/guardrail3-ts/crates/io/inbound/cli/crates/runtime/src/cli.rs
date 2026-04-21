@@ -37,6 +37,7 @@ pub enum FamilyArg {
     Tsconfig,
     Package,
     Npmrc,
+    Jscpd,
 }
 
 impl From<FamilyArg> for SupportedFamily {
@@ -46,6 +47,7 @@ impl From<FamilyArg> for SupportedFamily {
             FamilyArg::Tsconfig => Self::Tsconfig,
             FamilyArg::Package => Self::Package,
             FamilyArg::Npmrc => Self::Npmrc,
+            FamilyArg::Jscpd => Self::Jscpd,
         }
     }
 }

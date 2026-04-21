@@ -1,0 +1,13 @@
+profile = "library"
+
+allowed_deps = [
+  "serde",
+  "serde_json",
+  "tempfile",
+  "jscpd-json-parser-runtime",
+  "jscpd-json-parser-runtime-assertions",
+  "jscpd-json-parser-types",
+]
+
+[checks]
+garde = false

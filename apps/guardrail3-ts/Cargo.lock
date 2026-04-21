@@ -297,6 +297,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3ts-jscpd-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-jscpd-config-checks-runtime",
+ "g3ts-jscpd-config-checks-types",
+]
+
+[[package]]
+name = "g3ts-jscpd-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-jscpd-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-jscpd-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3ts-jscpd-types",
+]
+
+[[package]]
+name = "g3ts-jscpd-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3ts-jscpd-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-jscpd-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3-workspace-crawl",
+ "g3ts-jscpd-types",
+ "jscpd-json-parser",
+]
+
+[[package]]
+name = "g3ts-jscpd-types"
+version = "0.1.0"
+dependencies = [
+ "jscpd-json-parser",
+]
+
+[[package]]
 name = "g3ts-npmrc-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -488,6 +534,8 @@ dependencies = [
  "g3-workspace-crawl",
  "g3ts-eslint-config-checks",
  "g3ts-eslint-ingestion",
+ "g3ts-jscpd-config-checks",
+ "g3ts-jscpd-ingestion",
  "g3ts-npmrc-config-checks",
  "g3ts-npmrc-ingestion",
  "g3ts-package-config-checks",
@@ -606,6 +654,29 @@ name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
+
+[[package]]
+name = "jscpd-json-parser"
+version = "0.1.0"
+dependencies = [
+ "jscpd-json-parser-runtime",
+]
+
+[[package]]
+name = "jscpd-json-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "jscpd-json-parser-types",
+ "serde_json",
+]
+
+[[package]]
+name = "jscpd-json-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "jsonc-parser"

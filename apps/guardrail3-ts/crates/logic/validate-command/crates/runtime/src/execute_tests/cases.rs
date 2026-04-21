@@ -83,6 +83,17 @@ impl FamilyRunner for StubFamilyRunner {
                 )
                 .into_inventory(),
             ],
+            SupportedFamily::Jscpd => vec![
+                G3CheckResult::new(
+                    "TS-JSCPD-CONFIG-01".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some(".jscpd.json".to_owned()),
+                    None,
+                )
+                .into_inventory(),
+            ],
         };
 
         Ok(results)
@@ -142,7 +153,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=4 inventory=false",
+        "runs=5 inventory=false",
         "",
         0,
     );
@@ -169,6 +180,9 @@ impl FamilyRunner for ErroringFamilyRunner {
             }),
             SupportedFamily::Npmrc => Err(FamilyRunError {
                 message: "npmrc runner exploded".to_owned(),
+            }),
+            SupportedFamily::Jscpd => Err(FamilyRunError {
+                message: "jscpd runner exploded".to_owned(),
             }),
         }
     }

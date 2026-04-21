@@ -1,0 +1,11 @@
+profile = "library"
+
+allowed_deps = [
+  "g3-workspace-crawl",
+  "g3ts-jscpd-types",
+  "tempfile",
+  "jscpd-json-parser",
+]
+
+[checks]
+garde = false
