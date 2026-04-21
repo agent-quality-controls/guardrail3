@@ -20,5 +20,8 @@ pub fn run(
         SupportedFamily::Package => Ok(g3ts_package_config_checks::check(
             &g3ts_package_ingestion::ingest_for_config_checks(crawl),
         )),
+        SupportedFamily::Npmrc => Ok(g3ts_npmrc_config_checks::check(
+            &g3ts_npmrc_ingestion::ingest_for_config_checks(crawl),
+        )),
     }
 }

@@ -7,11 +7,14 @@ pub enum SupportedFamily {
     Tsconfig,
     /// package.json checks.
     Package,
+    /// .npmrc checks.
+    Npmrc,
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 3] = [
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 4] = [
     SupportedFamily::Eslint,
     SupportedFamily::Tsconfig,
     SupportedFamily::Package,
+    SupportedFamily::Npmrc,
 ];

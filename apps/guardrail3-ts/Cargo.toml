@@ -26,6 +26,8 @@ g3ts-tsconfig-config-checks = { path = "../../packages/ts/tsconfig/g3ts-tsconfig
 g3ts-tsconfig-ingestion = { path = "../../packages/ts/tsconfig/g3ts-tsconfig-ingestion" }
 g3ts-package-config-checks = { path = "../../packages/ts/package/g3ts-package-config-checks" }
 g3ts-package-ingestion = { path = "../../packages/ts/package/g3ts-package-ingestion" }
+g3ts-npmrc-config-checks = { path = "../../packages/ts/npmrc/g3ts-npmrc-config-checks" }
+g3ts-npmrc-ingestion = { path = "../../packages/ts/npmrc/g3ts-npmrc-ingestion" }
 tempfile = "3.18.0"
 
 [workspace.lints.rust]

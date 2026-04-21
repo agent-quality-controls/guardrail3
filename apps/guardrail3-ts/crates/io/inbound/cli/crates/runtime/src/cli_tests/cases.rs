@@ -12,10 +12,12 @@ fn parse_command_accepts_family_and_inventory_flags() {
             "tsconfig",
             "--family",
             "package",
+            "--family",
+            "npmrc",
             "--inventory",
         ],
         ".",
-        &["eslint", "tsconfig", "package"],
+        &["eslint", "tsconfig", "package", "npmrc"],
         true,
     );
 }

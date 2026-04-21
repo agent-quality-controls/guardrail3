@@ -1,0 +1,29 @@
+[package]
+name = "npmrc-parser-types"
+version.workspace = true
+edition = "2024"
+description = "Typed model for parsed .npmrc documents"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["typescript", "npmrc", "types", "config", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+publish = false
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+
+[package.metadata.docs.rs]
+all-features = true

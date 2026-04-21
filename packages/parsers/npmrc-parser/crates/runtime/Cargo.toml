@@ -1,0 +1,31 @@
+[package]
+name = "npmrc-parser-runtime"
+version.workspace = true
+edition = "2024"
+description = "Parser implementation for .npmrc facade packages"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["typescript", "npmrc", "parser", "config", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+publish = false
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+npmrc-parser-types = { path = "../types", version = "0.1.0" }
+
+[dev-dependencies]
+tempfile = "3"
+npmrc-parser-runtime-assertions = { path = "../assertions" }
+
+[package.metadata.docs.rs]
+all-features = true

@@ -6,6 +6,7 @@ pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
         SupportedFamily::Eslint => "eslint",
         SupportedFamily::Tsconfig => "tsconfig",
         SupportedFamily::Package => "package",
+        SupportedFamily::Npmrc => "npmrc",
     }
 }
 
