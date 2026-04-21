@@ -1,13 +1,13 @@
 use crate::parse_script;
 use crate::types::ParsedShellScript;
 
-use super::ResolvedCommand;
 use super::lex::{
-    constant_exit_status, env_flag_takes_value, env_flag_without_value,
-    exec_flag_takes_value, extract_command_substitutions, is_help_or_version_flag,
-    is_terminal_exit, looks_like_env_assignment, normalize_command_token, shell_flag_takes_value,
-    shell_words, split_command_segments,
+    constant_exit_status, env_flag_takes_value, env_flag_without_value, exec_flag_takes_value,
+    extract_command_substitutions, is_help_or_version_flag, is_terminal_exit,
+    looks_like_env_assignment, normalize_command_token, shell_flag_takes_value, shell_words,
+    split_command_segments,
 };
+use super::{CommandQueryOptions, CommandVisit, ResolvedCommand, ShellEnvState};
 
 #[derive(Debug, Clone)]
 struct TokenCursor<'a> {
@@ -35,11 +35,42 @@ impl<'a> TokenCursor<'a> {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+struct NoEnvState;
+
+impl ShellEnvState for NoEnvState {
+    fn apply_assignment(&mut self, _name: &str, _value: &str) {}
+
+    fn unset(&mut self, _name: &str) {}
+
+    fn clear(&mut self) {}
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct SegmentOutcome {
+    stopped: bool,
+    persist_state: bool,
+}
+
 pub(super) fn any_resolved_command<F>(parsed: &ParsedShellScript, predicate: &F) -> bool
 where
     F: Fn(&ResolvedCommand) -> bool,
 {
-    any_resolved_command_with_mode(parsed, predicate, false)
+    let mut found = false;
+    visit_resolved_commands_with_env(
+        parsed,
+        NoEnvState,
+        CommandQueryOptions::default(),
+        |command, _state| {
+            if predicate(command) {
+                found = true;
+                CommandVisit::Stop
+            } else {
+                CommandVisit::Continue
+            }
+        },
+    );
+    found
 }
 
 pub(super) fn any_resolved_command_on_line<F>(
@@ -52,64 +83,106 @@ where
     F: Fn(&ResolvedCommand) -> bool,
 {
     let mut visiting = Vec::new();
-    line_matches(raw, parsed, &mut visiting, predicate, line_no)
+    let mut state = NoEnvState;
+    let mut found = false;
+    let _ = line_visits_with_mode(
+        raw,
+        parsed,
+        parsed,
+        &mut visiting,
+        &mut state,
+        &mut |command: &ResolvedCommand, _state: &NoEnvState| {
+            if predicate(command) {
+                found = true;
+                CommandVisit::Stop
+            } else {
+                CommandVisit::Continue
+            }
+        },
+        line_no,
+        CommandQueryOptions::default(),
+    );
+    found
 }
 
 pub(super) fn any_resolved_command_relaxed<F>(parsed: &ParsedShellScript, predicate: &F) -> bool
 where
     F: Fn(&ResolvedCommand) -> bool,
 {
-    any_resolved_command_with_mode(parsed, predicate, true)
+    let mut found = false;
+    visit_resolved_commands_with_env(
+        parsed,
+        NoEnvState,
+        CommandQueryOptions {
+            allow_detached: true,
+            allow_forward_functions: false,
+        },
+        |command, _state| {
+            if predicate(command) {
+                found = true;
+                CommandVisit::Stop
+            } else {
+                CommandVisit::Continue
+            }
+        },
+    );
+    found
 }
 
-fn any_resolved_command_with_mode<F>(
+pub(super) fn visit_resolved_commands_with_env<S, F>(
     parsed: &ParsedShellScript,
-    predicate: &F,
-    allow_detached: bool,
-) -> bool
-where
-    F: Fn(&ResolvedCommand) -> bool,
+    initial_state: S,
+    options: CommandQueryOptions,
+    mut visitor: F,
+) where
+    S: ShellEnvState,
+    F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
     let mut visiting = Vec::new();
-    parsed.executable_lines.iter().any(|line| {
-        line_matches_with_mode(
+    let mut state = initial_state;
+    for line in &parsed.executable_lines {
+        if line_visits_with_mode(
             &line.raw,
             parsed,
+            parsed,
             &mut visiting,
-            predicate,
+            &mut state,
+            &mut visitor,
             line.line_no,
-            allow_detached,
-        )
-    })
+            options,
+        ) {
+            break;
+        }
+    }
 }
 
-fn line_matches<F>(
+fn line_visits_with_mode<S, F>(
     raw: &str,
+    local: &ParsedShellScript,
     root: &ParsedShellScript,
     visiting: &mut Vec<String>,
-    predicate: &F,
+    state: &mut S,
+    visitor: &mut F,
     line_no: usize,
+    options: CommandQueryOptions,
 ) -> bool
 where
-    F: Fn(&ResolvedCommand) -> bool,
-{
-    line_matches_with_mode(raw, root, visiting, predicate, line_no, false)
-}
-
-fn line_matches_with_mode<F>(
-    raw: &str,
-    root: &ParsedShellScript,
-    visiting: &mut Vec<String>,
-    predicate: &F,
-    line_no: usize,
-    allow_detached: bool,
-) -> bool
-where
-    F: Fn(&ResolvedCommand) -> bool,
+    S: ShellEnvState,
+    F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
     let segments = split_command_segments(raw);
     if segments.is_empty() {
-        return segment_matches(raw, root, visiting, predicate, line_no);
+        return segment_visits(
+            shell_words(raw),
+            local,
+            root,
+            visiting,
+            state,
+            visitor,
+            line_no,
+            options,
+        )
+        .stopped;
     }
 
     let mut prefix_status = None;
@@ -123,18 +196,36 @@ where
         };
 
         let detached = matches!(segment.operator_after, Some("&" | "|"));
-        if reachable && (allow_detached || !detached) {
-            if segment_matches(&segment.text, root, visiting, predicate, line_no) {
+        if reachable && (options.allow_detached || !detached) {
+            let mut segment_state = state.clone();
+            let outcome = segment_visits(
+                shell_words(&segment.text),
+                local,
+                root,
+                visiting,
+                &mut segment_state,
+                visitor,
+                line_no,
+                options,
+            );
+            if outcome.stopped {
                 return true;
             }
+            if outcome.persist_state {
+                *state = segment_state;
+            }
+
             for substitution in extract_command_substitutions(&segment.text) {
-                if line_matches_with_mode(
+                let mut substitution_state = state.clone();
+                if line_visits_with_mode(
                     &substitution,
+                    local,
                     root,
                     visiting,
-                    predicate,
+                    &mut substitution_state,
+                    visitor,
                     line_no,
-                    allow_detached,
+                    options,
                 ) {
                     return true;
                 }
@@ -152,28 +243,19 @@ where
     false
 }
 
-fn segment_matches<F>(
-    segment: &str,
-    root: &ParsedShellScript,
-    visiting: &mut Vec<String>,
-    predicate: &F,
-    line_no: usize,
-) -> bool
-where
-    F: Fn(&ResolvedCommand) -> bool,
-{
-    token_sequence_matches(shell_words(segment), root, visiting, predicate, line_no)
-}
-
-fn token_sequence_matches<F>(
+fn segment_visits<S, F>(
     tokens: Vec<String>,
+    local: &ParsedShellScript,
     root: &ParsedShellScript,
     visiting: &mut Vec<String>,
-    predicate: &F,
+    state: &mut S,
+    visitor: &mut F,
     line_no: usize,
-) -> bool
+    options: CommandQueryOptions,
+) -> SegmentOutcome
 where
-    F: Fn(&ResolvedCommand) -> bool,
+    S: ShellEnvState,
+    F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
     let mut cursor = TokenCursor::new(&tokens);
 
@@ -181,84 +263,185 @@ where
         let _ = cursor.next();
     }
 
+    let mut local_state = state.clone();
+    let mut has_local_overlay = false;
     while cursor.peek().is_some_and(looks_like_env_assignment) {
-        let _ = cursor.next();
+        let token = cursor.next().unwrap_or_default();
+        apply_assignment_token(token, &mut local_state);
+        has_local_overlay = true;
     }
 
     let Some(first) = cursor.next() else {
-        return false;
+        return SegmentOutcome {
+            stopped: false,
+            persist_state: false,
+        };
     };
 
-    dispatch_token(first, &mut cursor, root, visiting, predicate, line_no)
-}
-
-fn dispatch_token<F>(
-    token: &str,
-    cursor: &mut TokenCursor<'_>,
-    root: &ParsedShellScript,
-    visiting: &mut Vec<String>,
-    predicate: &F,
-    line_no: usize,
-) -> bool
-where
-    F: Fn(&ResolvedCommand) -> bool,
-{
-    match normalize_command_token(token) {
-        "env" => env_wrapper_matches(cursor, root, visiting, predicate, line_no),
-        "sh" | "bash" => shell_wrapper_matches(cursor, root, visiting, predicate, line_no),
-        "command" => command_wrapper_matches(cursor, root, visiting, predicate, line_no),
-        "exec" => exec_wrapper_matches(cursor, root, visiting, predicate, line_no),
-        command_name if !token.contains('/') => {
-            if function_defined_before(command_name, root, line_no) {
-                return called_function_matches(command_name, root, visiting, predicate, line_no);
+    match normalize_command_token(first) {
+        "export" => {
+            apply_export_assignments(&mut cursor, state);
+            SegmentOutcome {
+                stopped: false,
+                persist_state: true,
             }
-            predicate(&resolved_command(token, cursor, line_no))
         }
-        _ => predicate(&resolved_command(token, cursor, line_no)),
+        "unset" => {
+            apply_unset_arguments(&mut cursor, state);
+            SegmentOutcome {
+                stopped: false,
+                persist_state: true,
+            }
+        }
+        command_name if function_defined(command_name, local, line_no, options) => {
+            if has_local_overlay {
+                let mut function_state = local_state;
+                SegmentOutcome {
+                    stopped: called_function_visits(
+                        command_name,
+                        local,
+                        root,
+                        visiting,
+                        &mut function_state,
+                        visitor,
+                        line_no,
+                        options,
+                    ),
+                    persist_state: false,
+                }
+            } else {
+                SegmentOutcome {
+                    stopped: called_function_visits(
+                        command_name,
+                        local,
+                        root,
+                        visiting,
+                        state,
+                        visitor,
+                        line_no,
+                        options,
+                    ),
+                    persist_state: true,
+                }
+            }
+        }
+        command_name
+            if !std::ptr::eq(local, root)
+                && function_defined(command_name, root, line_no, options) =>
+        {
+            if has_local_overlay {
+                let mut function_state = local_state;
+                SegmentOutcome {
+                    stopped: called_function_visits(
+                        command_name,
+                        root,
+                        root,
+                        visiting,
+                        &mut function_state,
+                        visitor,
+                        line_no,
+                        options,
+                    ),
+                    persist_state: false,
+                }
+            } else {
+                SegmentOutcome {
+                    stopped: called_function_visits(
+                        command_name,
+                        root,
+                        root,
+                        visiting,
+                        state,
+                        visitor,
+                        line_no,
+                        options,
+                    ),
+                    persist_state: true,
+                }
+            }
+        }
+        _ => SegmentOutcome {
+            stopped: dispatch_external_token(
+                first,
+                &mut cursor,
+                local,
+                root,
+                visiting,
+                &mut local_state,
+                visitor,
+                line_no,
+                options,
+            ),
+            persist_state: false,
+        },
     }
 }
 
-fn dispatch_external_token<F>(
+fn dispatch_external_token<S, F>(
     token: &str,
     cursor: &mut TokenCursor<'_>,
+    local: &ParsedShellScript,
     root: &ParsedShellScript,
     visiting: &mut Vec<String>,
-    predicate: &F,
+    state: &mut S,
+    visitor: &mut F,
     line_no: usize,
+    options: CommandQueryOptions,
 ) -> bool
 where
-    F: Fn(&ResolvedCommand) -> bool,
+    S: ShellEnvState,
+    F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
     match normalize_command_token(token) {
-        "env" => env_wrapper_matches(cursor, root, visiting, predicate, line_no),
-        "sh" | "bash" => shell_wrapper_matches(cursor, root, visiting, predicate, line_no),
-        "command" => command_wrapper_matches(cursor, root, visiting, predicate, line_no),
-        "exec" => exec_wrapper_matches(cursor, root, visiting, predicate, line_no),
-        _ => predicate(&resolved_command(token, cursor, line_no)),
+        "env" => env_wrapper_visits(
+            cursor, local, root, visiting, state, visitor, line_no, options,
+        ),
+        "sh" | "bash" => shell_wrapper_visits(
+            cursor, local, root, visiting, state, visitor, line_no, options,
+        ),
+        "command" => command_wrapper_visits(
+            cursor, local, root, visiting, state, visitor, line_no, options,
+        ),
+        "exec" => exec_wrapper_visits(
+            cursor, local, root, visiting, state, visitor, line_no, options,
+        ),
+        _ => matches!(
+            visitor(&resolved_command(token, cursor, line_no), state),
+            CommandVisit::Stop
+        ),
     }
 }
 
-fn function_defined_before(command_name: &str, root: &ParsedShellScript, line_no: usize) -> bool {
-    root.functions
-        .iter()
-        .any(|function| function.name == command_name && function.line_no <= line_no)
+fn function_defined(
+    command_name: &str,
+    parsed: &ParsedShellScript,
+    line_no: usize,
+    options: CommandQueryOptions,
+) -> bool {
+    parsed.functions.iter().any(|function| {
+        function.name == command_name
+            && (options.allow_forward_functions || function.line_no <= line_no)
+    })
 }
 
-fn called_function_matches<F>(
+fn called_function_visits<S, F>(
     command_name: &str,
+    lookup: &ParsedShellScript,
     root: &ParsedShellScript,
     visiting: &mut Vec<String>,
-    predicate: &F,
+    state: &mut S,
+    visitor: &mut F,
     line_no: usize,
+    options: CommandQueryOptions,
 ) -> bool
 where
-    F: Fn(&ResolvedCommand) -> bool,
+    S: ShellEnvState,
+    F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
-    let Some(function) = root
-        .functions
-        .iter()
-        .find(|function| function.name == command_name && function.line_no <= line_no)
-    else {
+    let Some(function) = lookup.functions.iter().find(|function| {
+        function.name == command_name
+            && (options.allow_forward_functions || function.line_no <= line_no)
+    }) else {
         return false;
     };
     if visiting.iter().any(|name| name == &function.name) {
@@ -267,12 +450,24 @@ where
 
     visiting.push(function.name.clone());
     let body = parse_script(&function.body);
-    let found = body.executable_lines.iter().any(|line| {
-        line_matches(&line.raw, &body, visiting, predicate, line.line_no)
-            || line_matches(&line.raw, root, visiting, predicate, line.line_no)
-    });
+    let mut stopped = false;
+    for line in &body.executable_lines {
+        if line_visits_with_mode(
+            &line.raw,
+            &body,
+            root,
+            visiting,
+            state,
+            visitor,
+            line.line_no,
+            options,
+        ) {
+            stopped = true;
+            break;
+        }
+    }
     let _ = visiting.pop();
-    found
+    stopped
 }
 
 fn resolved_command(token: &str, cursor: &TokenCursor<'_>, line_no: usize) -> ResolvedCommand {
@@ -289,15 +484,19 @@ fn resolved_command(token: &str, cursor: &TokenCursor<'_>, line_no: usize) -> Re
     )
 }
 
-fn env_wrapper_matches<F>(
+fn env_wrapper_visits<S, F>(
     cursor: &mut TokenCursor<'_>,
+    local: &ParsedShellScript,
     root: &ParsedShellScript,
     visiting: &mut Vec<String>,
-    predicate: &F,
+    state: &mut S,
+    visitor: &mut F,
     line_no: usize,
+    options: CommandQueryOptions,
 ) -> bool
 where
-    F: Fn(&ResolvedCommand) -> bool,
+    S: ShellEnvState,
+    F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
     let mut split_string = None;
 
@@ -312,18 +511,25 @@ where
         if let Some((flag_name, value)) = flag.split_once('=')
             && env_flag_takes_value(flag_name)
         {
-            if matches!(flag_name, "-S" | "--split-string") {
-                split_string = Some(value.to_owned());
+            match flag_name {
+                "-u" | "--unset" => state.unset(value),
+                "-S" | "--split-string" => split_string = Some(value.to_owned()),
+                _ => {}
             }
             continue;
         }
         if env_flag_without_value(flag) {
+            if matches!(flag, "-i" | "--ignore-environment") {
+                state.clear();
+            }
             continue;
         }
         if env_flag_takes_value(flag) {
             let value = cursor.next().unwrap_or_default();
-            if matches!(flag, "-S" | "--split-string") {
-                split_string = Some(value.to_owned());
+            match flag {
+                "-u" | "--unset" => state.unset(value),
+                "-S" | "--split-string" => split_string = Some(value.to_owned()),
+                _ => {}
             }
             continue;
         }
@@ -332,7 +538,8 @@ where
     }
 
     while cursor.peek().is_some_and(looks_like_env_assignment) {
-        let _ = cursor.next();
+        let token = cursor.next().unwrap_or_default();
+        apply_assignment_token(token, state);
     }
 
     if let Some(script) = split_string {
@@ -343,25 +550,41 @@ where
                 shell_words(&script)
             };
         split_tokens.extend(cursor.remaining().iter().cloned());
-        return token_sequence_matches(split_tokens, root, visiting, predicate, line_no);
+        return segment_visits(
+            split_tokens,
+            local,
+            root,
+            visiting,
+            state,
+            visitor,
+            line_no,
+            options,
+        )
+        .stopped;
     }
 
     let Some(next) = cursor.next() else {
         return false;
     };
 
-    dispatch_external_token(next, cursor, root, visiting, predicate, line_no)
+    dispatch_external_token(
+        next, cursor, local, root, visiting, state, visitor, line_no, options,
+    )
 }
 
-fn shell_wrapper_matches<F>(
+fn shell_wrapper_visits<S, F>(
     cursor: &mut TokenCursor<'_>,
+    local: &ParsedShellScript,
     root: &ParsedShellScript,
     visiting: &mut Vec<String>,
-    predicate: &F,
+    state: &mut S,
+    visitor: &mut F,
     line_no: usize,
+    options: CommandQueryOptions,
 ) -> bool
 where
-    F: Fn(&ResolvedCommand) -> bool,
+    S: ShellEnvState,
+    F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
     let mut script = None;
 
@@ -406,14 +629,18 @@ where
     }
 
     if let Some(script) = script {
-        return line_matches(&script, root, visiting, predicate, line_no);
+        return line_visits_with_mode(
+            &script, local, root, visiting, state, visitor, line_no, options,
+        );
     }
 
     let Some(next) = cursor.next() else {
         return false;
     };
 
-    dispatch_external_token(next, cursor, root, visiting, predicate, line_no)
+    dispatch_external_token(
+        next, cursor, local, root, visiting, state, visitor, line_no, options,
+    )
 }
 
 fn shell_inline_script(flag: &str) -> Option<&str> {
@@ -436,15 +663,19 @@ fn shell_cluster_uses_next_script(flag: &str) -> bool {
     short.len() > 1 && short.ends_with('c')
 }
 
-fn command_wrapper_matches<F>(
+fn command_wrapper_visits<S, F>(
     cursor: &mut TokenCursor<'_>,
+    local: &ParsedShellScript,
     root: &ParsedShellScript,
     visiting: &mut Vec<String>,
-    predicate: &F,
+    state: &mut S,
+    visitor: &mut F,
     line_no: usize,
+    options: CommandQueryOptions,
 ) -> bool
 where
-    F: Fn(&ResolvedCommand) -> bool,
+    S: ShellEnvState,
+    F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
     while cursor.peek().is_some_and(|token| token.starts_with('-')) {
         let flag = cursor.next().unwrap_or_default();
@@ -463,18 +694,24 @@ where
         return false;
     };
 
-    dispatch_external_token(next, cursor, root, visiting, predicate, line_no)
+    dispatch_external_token(
+        next, cursor, local, root, visiting, state, visitor, line_no, options,
+    )
 }
 
-fn exec_wrapper_matches<F>(
+fn exec_wrapper_visits<S, F>(
     cursor: &mut TokenCursor<'_>,
+    local: &ParsedShellScript,
     root: &ParsedShellScript,
     visiting: &mut Vec<String>,
-    predicate: &F,
+    state: &mut S,
+    visitor: &mut F,
     line_no: usize,
+    options: CommandQueryOptions,
 ) -> bool
 where
-    F: Fn(&ResolvedCommand) -> bool,
+    S: ShellEnvState,
+    F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
     while cursor.peek().is_some_and(|token| token.starts_with('-')) {
         let flag = cursor.next().unwrap_or_default();
@@ -496,5 +733,29 @@ where
         return false;
     };
 
-    dispatch_token(next, cursor, root, visiting, predicate, line_no)
+    dispatch_external_token(
+        next, cursor, local, root, visiting, state, visitor, line_no, options,
+    )
+}
+
+fn apply_assignment_token<S: ShellEnvState>(token: &str, state: &mut S) {
+    let Some((name, value)) = token.split_once('=') else {
+        return;
+    };
+    state.apply_assignment(name, value);
+}
+
+fn apply_export_assignments<S: ShellEnvState>(cursor: &mut TokenCursor<'_>, state: &mut S) {
+    while let Some(token) = cursor.next() {
+        apply_assignment_token(token, state);
+    }
+}
+
+fn apply_unset_arguments<S: ShellEnvState>(cursor: &mut TokenCursor<'_>, state: &mut S) {
+    while let Some(token) = cursor.next() {
+        if token.starts_with('-') {
+            continue;
+        }
+        state.unset(token);
+    }
 }

@@ -31,14 +31,18 @@ fn first_fail_open_critical_command(
 ) -> Option<(usize, String)> {
     for line in &parsed.executable_lines {
         if line.softened_by.is_some()
-            && any_resolved_command_on_line(parsed, &line.raw,
+            && any_resolved_command_on_line(
+                parsed,
+                &line.raw,
                 line.line_no,
                 is_guardrail_critical_command,
             )
         {
             return Some((line.line_no + line_offset, line.command_text.to_owned()));
         }
-        if let Some(found) = called_function_fail_open(parsed, &line.command_name,
+        if let Some(found) = called_function_fail_open(
+            parsed,
+            &line.command_name,
             line.line_no,
             line_offset,
             visiting,

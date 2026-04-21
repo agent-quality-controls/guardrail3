@@ -71,6 +71,26 @@ impl ResolvedCommand {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct CommandQueryOptions {
+    pub allow_detached: bool,
+    pub allow_forward_functions: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CommandVisit {
+    Continue,
+    Stop,
+}
+
+pub trait ShellEnvState: Clone {
+    fn apply_assignment(&mut self, name: &str, value: &str);
+
+    fn unset(&mut self, name: &str);
+
+    fn clear(&mut self);
+}
+
 #[must_use]
 pub fn any_resolved_command(
     parsed: &ParsedShellScript,
@@ -95,6 +115,17 @@ pub fn any_resolved_command_relaxed(
     predicate: impl Fn(&ResolvedCommand) -> bool,
 ) -> bool {
     engine::any_resolved_command_relaxed(parsed, &predicate)
+}
+
+pub fn visit_resolved_commands_with_env<S>(
+    parsed: &ParsedShellScript,
+    initial_state: S,
+    options: CommandQueryOptions,
+    visitor: impl FnMut(&ResolvedCommand, &S) -> CommandVisit,
+) where
+    S: ShellEnvState,
+{
+    engine::visit_resolved_commands_with_env(parsed, initial_state, options, visitor);
 }
 
 #[cfg(test)]
