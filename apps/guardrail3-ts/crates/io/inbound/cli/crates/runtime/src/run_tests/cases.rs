@@ -108,3 +108,39 @@ fn run_command_uses_real_arch_wiring_for_missing_entrypoint() {
         1,
     );
 }
+
+#[test]
+fn run_command_uses_real_apparch_wiring_for_forbidden_types_dependency() {
+    let tempdir = tempfile::tempdir().expect("create temporary ts workspace for apparch wiring");
+    std::fs::write(tempdir.path().join("package.json"), "{}\n")
+        .expect("write temporary workspace package.json for apparch wiring");
+    std::fs::create_dir_all(tempdir.path().join("src/types"))
+        .expect("create apparch types fixture directory");
+    std::fs::create_dir_all(tempdir.path().join("src/logic"))
+        .expect("create apparch logic fixture directory");
+    std::fs::write(
+        tempdir.path().join("src/logic/format_user.ts"),
+        "export function formatUser(): string { return \"user\"; }\n",
+    )
+    .expect("write apparch logic fixture file");
+    std::fs::write(
+        tempdir.path().join("src/types/user.ts"),
+        "import { formatUser } from \"@/logic/format_user\";\nexport interface User { formatted: ReturnType<typeof formatUser>; }\n",
+    )
+    .expect("write apparch types fixture file");
+
+    let output = super::super::run_command_with_defaults(super::super::Command::Validate {
+        path: tempdir.path().to_path_buf(),
+        family: vec![super::super::super::cli::FamilyArg::Apparch],
+        inventory: false,
+    });
+
+    guardrail3_ts_assertions::run::assert_cli_output(
+        &output.stdout,
+        &output.stderr,
+        output.exit_code,
+        "== apparch ==\n[Error] TS-APPARCH-CONFIG-01 src/types/user.ts types layer imports forbidden app layer\n  `src/types/user.ts` in `types` imports `src/logic/format_user.ts` in `logic`. Keep `types` passive and move behavior or framework coupling outward.\n",
+        "",
+        1,
+    );
+}

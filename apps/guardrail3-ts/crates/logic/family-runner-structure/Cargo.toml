@@ -11,6 +11,9 @@ g3ts-arch-config-checks.workspace = true
 g3ts-arch-file-tree-checks.workspace = true
 g3ts-arch-ingestion.workspace = true
 g3ts-arch-source-checks.workspace = true
+g3ts-apparch-config-checks.workspace = true
+g3ts-apparch-ingestion.workspace = true
+g3ts-apparch-source-checks.workspace = true
 
 [features]
 default = ["api"]

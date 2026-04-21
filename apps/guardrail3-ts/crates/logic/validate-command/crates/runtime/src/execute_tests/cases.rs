@@ -61,6 +61,17 @@ impl FamilyRunner for StubFamilyRunner {
                 )
                 .into_inventory(),
             ],
+            SupportedFamily::Apparch => vec![
+                G3CheckResult::new(
+                    "TS-APPARCH-CONFIG-01".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some("src/types/model.ts".to_owned()),
+                    None,
+                )
+                .into_inventory(),
+            ],
             SupportedFamily::Tsconfig => vec![
                 G3CheckResult::new(
                     "TS-TSCONFIG-CONFIG-01".to_owned(),
@@ -196,6 +207,31 @@ fn execute_runs_selected_arch_family_only() {
 }
 
 #[test]
+fn execute_runs_selected_apparch_family_only() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace root");
+    std::fs::write(tempdir.path().join("package.json"), "{}\n")
+        .expect("write temporary workspace package.json");
+
+    let request = ValidateRequest {
+        workspace_root: tempdir.path().to_path_buf(),
+        families: vec![SupportedFamily::Apparch],
+        include_inventory: false,
+    };
+
+    let outcome = execute(&request, &StubCrawler, &StubFamilyRunner, &StubRenderer)
+        .expect("execute should succeed for selected apparch-only run");
+
+    assertions::assert_execution_outcome(
+        outcome.stdout(),
+        outcome.stderr(),
+        outcome.exit_code(),
+        "runs=1 inventory=false",
+        "",
+        0,
+    );
+}
+
+#[test]
 fn execute_defaults_to_all_supported_families() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
     std::fs::write(tempdir.path().join("package.json"), "{}\n")
@@ -214,7 +250,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=6 inventory=false",
+        "runs=7 inventory=false",
         "",
         0,
     );
@@ -235,6 +271,9 @@ impl FamilyRunner for ErroringFamilyRunner {
             }),
             SupportedFamily::Arch => Err(FamilyRunError {
                 message: "arch runner exploded".to_owned(),
+            }),
+            SupportedFamily::Apparch => Err(FamilyRunError {
+                message: "apparch runner exploded".to_owned(),
             }),
             SupportedFamily::Tsconfig => Err(FamilyRunError {
                 message: "tsconfig runner exploded".to_owned(),

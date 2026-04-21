@@ -35,6 +35,9 @@ g3ts-arch-config-checks = { path = "../../packages/ts/arch/g3ts-arch-config-chec
 g3ts-arch-file-tree-checks = { path = "../../packages/ts/arch/g3ts-arch-file-tree-checks" }
 g3ts-arch-ingestion = { path = "../../packages/ts/arch/g3ts-arch-ingestion" }
 g3ts-arch-source-checks = { path = "../../packages/ts/arch/g3ts-arch-source-checks" }
+g3ts-apparch-config-checks = { path = "../../packages/ts/apparch/g3ts-apparch-config-checks" }
+g3ts-apparch-ingestion = { path = "../../packages/ts/apparch/g3ts-apparch-ingestion" }
+g3ts-apparch-source-checks = { path = "../../packages/ts/apparch/g3ts-apparch-source-checks" }
 tempfile = "3.18.0"
 
 [workspace.lints.rust]
