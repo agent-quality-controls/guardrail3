@@ -11,8 +11,8 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
             G3CheckResult::from_parts(
                 ID.to_owned(),
                 G3Severity::Info,
-                "merge-conflict check step present".to_owned(),
-                "Hook contains a real executable merge-conflict marker check.".to_owned(),
+                "`.githooks/pre-commit` scans for merge-conflict markers".to_owned(),
+                "`.githooks/pre-commit` includes an executable `rg` or `grep` step that scans for unresolved merge-conflict markers before commit.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -25,8 +25,8 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
     results.push(G3CheckResult::from_parts(
         ID.to_owned(),
         G3Severity::Warn,
-        "merge-conflict check step missing".to_owned(),
-        "Hook does not execute a merge-conflict marker scan before commit.".to_owned(),
+        "missing merge-conflict marker scan in `.githooks/pre-commit`".to_owned(),
+        "Add an executable `rg` or `grep` check for `<<<<<<<`, `=======`, and `>>>>>>>` near the start of `.githooks/pre-commit`, before expensive validation. This fails fast on unresolved merge conflicts.".to_owned(),
         Some(input.rel_path.to_owned()),
         None,
         false,

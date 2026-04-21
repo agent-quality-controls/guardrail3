@@ -5,7 +5,7 @@ pub fn assert_present(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Info),
-            title: Some("Rust guardrail validate step present"),
+            title: Some("`.githooks/pre-commit` runs `g3rs validate --path ...`"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -17,7 +17,8 @@ pub fn assert_missing(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Warn),
-            title: Some("Rust guardrail validate step missing"),
+            title: Some("missing `g3rs validate --path ...` command in `.githooks/pre-commit`"),
+            message_contains: Some("Cargo tools do not cover"),
             inventory: Some(false),
             ..Default::default()
         }],

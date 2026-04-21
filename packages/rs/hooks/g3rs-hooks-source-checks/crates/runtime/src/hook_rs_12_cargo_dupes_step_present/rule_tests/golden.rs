@@ -9,7 +9,8 @@ fn warns_when_cargo_dupes_is_only_prose() {
         &results,
         &[assertions::ExpectedRuleResult {
             inventory: Some(false),
-            title: Some("cargo dupes step missing"),
+            title: Some("missing executable `cargo dupes` command in `.githooks/pre-commit`"),
+            message_contains: Some("duplicate Rust dependency versions"),
             ..Default::default()
         }],
     );

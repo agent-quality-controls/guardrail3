@@ -1,6 +1,6 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::types::ParsedShellScript;
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command_relaxed};
+use hook_shell_parser::types::ParsedShellScript;
 
 use crate::inputs::RustHookCommandInput;
 
@@ -14,8 +14,9 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
             G3CheckResult::from_parts(
                 ID.to_owned(),
                 G3Severity::Info,
-                "cargo-dupes excludes tests".to_owned(),
-                "Hook runs cargo-dupes with `--exclude-tests`.".to_owned(),
+                "`.githooks/pre-commit` runs `cargo dupes --exclude-tests`".to_owned(),
+                "`.githooks/pre-commit` excludes test-only crates from the `cargo dupes` check."
+                    .to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -26,8 +27,9 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
             G3Severity::Info,
-            "cargo dupes step does not exclude tests".to_owned(),
-            "Hook does not execute cargo dupes with `--exclude-tests`.".to_owned(),
+            "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
+                .to_owned(),
+            "Change the `cargo dupes` command in `.githooks/pre-commit` to `cargo dupes --exclude-tests`. This keeps the duplication check focused on real workspace dependency versions instead of test-only crates.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,

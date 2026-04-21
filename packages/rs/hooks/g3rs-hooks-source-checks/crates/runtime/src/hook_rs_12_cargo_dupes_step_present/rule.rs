@@ -1,6 +1,6 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::types::ParsedShellScript;
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
+use hook_shell_parser::types::ParsedShellScript;
 
 use crate::inputs::RustHookCommandInput;
 
@@ -14,8 +14,8 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
             G3CheckResult::from_parts(
                 ID.to_owned(),
                 G3Severity::Warn,
-                "cargo dupes step present".to_owned(),
-                "Hook runs cargo dupes as an executable command.".to_owned(),
+                "`.githooks/pre-commit` runs `cargo dupes`".to_owned(),
+                "`.githooks/pre-commit` includes an executable `cargo dupes` command in the Rust check flow.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -26,8 +26,8 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
             G3Severity::Warn,
-            "cargo dupes step missing".to_owned(),
-            "Hook does not execute cargo dupes.".to_owned(),
+            "missing executable `cargo dupes` command in `.githooks/pre-commit`".to_owned(),
+            "Add `cargo dupes --exclude-tests` as a real command in `.githooks/pre-commit`, with the other Rust cargo checks. This hook rule is about duplicate Rust dependency versions inside each Cargo workspace, not copied source text.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,

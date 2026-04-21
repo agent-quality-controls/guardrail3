@@ -5,7 +5,7 @@ pub fn assert_present(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Info),
-            title: Some("cargo-dupes excludes tests"),
+            title: Some("`.githooks/pre-commit` runs `cargo dupes --exclude-tests`"),
             inventory: Some(true),
             ..Default::default()
         }],
@@ -17,7 +17,8 @@ pub fn assert_missing(results: &[G3CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Info),
-            title: Some("cargo dupes step does not exclude tests"),
+            title: Some("missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"),
+            message_contains: Some("test-only crates"),
             inventory: Some(false),
             ..Default::default()
         }],

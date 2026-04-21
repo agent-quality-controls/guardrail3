@@ -33,8 +33,8 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
             G3Severity::Warn,
-            "shared CARGO_TARGET_DIR missing".to_owned(),
-            "Hook runs cargo without a shared `CARGO_TARGET_DIR`. In a monorepo with multiple Cargo workspaces, each workspace falls back to its own `target/` directory and recompiles the same dependencies, proc-macros, and shared path dependencies separately. Set a repo-local shared target dir before cargo commands, for example `export CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\"`.".to_owned(),
+            "missing shared `CARGO_TARGET_DIR` setup in `.githooks/pre-commit`".to_owned(),
+            "Before the first cargo command in `.githooks/pre-commit`, set `REPO_ROOT=$(git rev-parse --show-toplevel)` and `export CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\"`. In a monorepo with multiple Cargo workspaces, this reuses one repo-local build cache instead of recompiling the same dependencies, proc-macros, and shared path dependencies in separate `target/` directories.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,
@@ -44,8 +44,8 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
             G3CheckResult::from_parts(
                 ID.to_owned(),
                 G3Severity::Warn,
-                "shared CARGO_TARGET_DIR configured".to_owned(),
-                "Hook sets `CARGO_TARGET_DIR` for cargo execution. This reuses one repo-local build cache across Cargo workspaces and cuts duplicate dependency and proc-macro rebuilds during hook runs.".to_owned(),
+                "`.githooks/pre-commit` sets a shared `CARGO_TARGET_DIR`".to_owned(),
+                "`.githooks/pre-commit` exports `CARGO_TARGET_DIR` before cargo runs, so Cargo workspaces reuse one repo-local build cache during the hook.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,

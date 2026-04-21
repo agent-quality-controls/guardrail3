@@ -11,8 +11,8 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
             G3CheckResult::from_parts(
                 ID.to_owned(),
                 G3Severity::Info,
-                "concrete lockfile integrity command present".to_owned(),
-                "Hook executes a real lockfile integrity command.".to_owned(),
+                "`.githooks/pre-commit` runs a concrete lockfile integrity command".to_owned(),
+                "`.githooks/pre-commit` executes a real install verification command such as `pnpm install --frozen-lockfile`.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -23,13 +23,13 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
     }
 
     results.push(G3CheckResult::from_parts(
-    ID.to_owned(),
-    G3Severity::Warn,
-    "concrete lockfile integrity command missing".to_owned(),
-    "Hook mentions lockfiles without executing a concrete integrity command like `pnpm install --frozen-lockfile`.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
+        ID.to_owned(),
+        G3Severity::Warn,
+        "missing concrete lockfile integrity command in `.githooks/pre-commit`".to_owned(),
+        "Add an executable install verification step such as `pnpm install --frozen-lockfile` to `.githooks/pre-commit` when manifest or lockfile inputs change. Mentioning lockfiles in text or grepping filenames does not prove the lockfile still resolves.".to_owned(),
+        Some(input.rel_path.to_owned()),
+        None,
+        false,
     ));
 }
 

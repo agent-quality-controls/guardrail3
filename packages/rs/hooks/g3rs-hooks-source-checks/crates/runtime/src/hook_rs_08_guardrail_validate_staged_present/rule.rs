@@ -1,6 +1,6 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::types::ParsedShellScript;
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
+use hook_shell_parser::types::ParsedShellScript;
 
 use crate::inputs::RustHookCommandInput;
 
@@ -12,10 +12,10 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     push_presence_result(
         found,
         input.rel_path,
-        "Rust guardrail validate step present",
-        "Hook runs g3rs Rust validation with an explicit workspace path.",
-        "Rust guardrail validate step missing",
-        "Hook does not execute `g3rs validate --path ...`.",
+        "`.githooks/pre-commit` runs `g3rs validate --path ...`",
+        "`.githooks/pre-commit` includes an executable `g3rs validate --path ...` command, so Rust guardrail rules run during the hook.",
+        "missing `g3rs validate --path ...` command in `.githooks/pre-commit`",
+        "Add an executable `g3rs validate --path \"$rust_root\"` step to `.githooks/pre-commit`, next to the Rust cargo checks. Cargo tools do not cover guardrail configuration and architecture rules.",
         results,
     );
 }
