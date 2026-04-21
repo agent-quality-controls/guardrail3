@@ -1,14 +1,30 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::{
-    command_query::any_resolved_command, parse_script, types::ParsedShellScript,
-};
+use hook_shell_parser::{parse_script, types::ParsedShellScript};
 
+use super::support::*;
 use crate::inputs::RustHookCommandInput;
 
 const ID: &str = "RS-HOOKS-SOURCE-25";
 
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub(super) struct EnvState {
+    pub(super) target_dir: bool,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+struct Coverage {
+    saw_cargo: bool,
+    uncovered_cargo: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct SegmentEvaluation {
+    coverage: Coverage,
+    persist_env: bool,
+}
+
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
-    let coverage = evaluate_script(input.parsed, input.parsed, false, &mut Vec::new());
+    let coverage = script_coverage(input.parsed);
     if !coverage.saw_cargo {
         return;
     }
@@ -23,212 +39,388 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
             None,
             false,
         ));
-        return;
+    } else {
+        results.push(
+            G3CheckResult::from_parts(
+                ID.to_owned(),
+                G3Severity::Warn,
+                "shared CARGO_TARGET_DIR configured".to_owned(),
+                "Hook sets `CARGO_TARGET_DIR` for cargo execution. This reuses one repo-local build cache across Cargo workspaces and cuts duplicate dependency and proc-macro rebuilds during hook runs.".to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
+            .into_inventory(),
+        );
     }
-
-    results.push(
-        G3CheckResult::from_parts(
-            ID.to_owned(),
-            G3Severity::Warn,
-            "shared CARGO_TARGET_DIR configured".to_owned(),
-            "Hook sets `CARGO_TARGET_DIR` for cargo execution. This reuses one repo-local build cache across Cargo workspaces and cuts duplicate dependency and proc-macro rebuilds during hook runs.".to_owned(),
-            Some(input.rel_path.to_owned()),
-            None,
-            false,
-        )
-        .into_inventory(),
-    );
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-struct Coverage {
-    saw_cargo: bool,
-    uncovered_cargo: bool,
-    exported_target_dir: bool,
+fn script_coverage(parsed: &ParsedShellScript) -> Coverage {
+    execute_script_for_target_dir(parsed, parsed, &mut EnvState::default(), &mut Vec::new())
 }
 
-fn evaluate_script(
+fn execute_script_for_target_dir(
     parsed: &ParsedShellScript,
     root: &ParsedShellScript,
-    exported_target_dir: bool,
+    env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> Coverage {
-    let mut coverage = Coverage {
-        exported_target_dir,
-        ..Coverage::default()
-    };
+    let mut coverage = Coverage::default();
 
     for line in &parsed.executable_lines {
-        if is_export_target_dir_line(&line.raw) {
-            coverage.exported_target_dir = true;
-            continue;
+        let line_coverage = line_target_dir_coverage(&line.raw, root, env_state, visiting);
+        coverage.saw_cargo |= line_coverage.saw_cargo;
+        coverage.uncovered_cargo |= line_coverage.uncovered_cargo;
+        if coverage.uncovered_cargo {
+            return coverage;
         }
-
-        if is_unset_target_dir_line(&line.raw) {
-            coverage.exported_target_dir = false;
-            continue;
-        }
-
-        if line_has_direct_cargo(&line.raw) {
-            coverage.saw_cargo = true;
-            if !coverage.exported_target_dir && !line_has_inline_target_dir(&line.raw) {
-                coverage.uncovered_cargo = true;
-            }
-            continue;
-        }
-
-        let Some(function_name) = called_function_name(&line.raw) else {
-            continue;
-        };
-        let Some(function) = root
-            .functions
-            .iter()
-            .find(|function| function.name == function_name)
-        else {
-            continue;
-        };
-        if visiting.iter().any(|name| name == &function.name) {
-            continue;
-        }
-
-        visiting.push(function.name.clone());
-        let body = parse_script(&function.body);
-        let nested = evaluate_script(&body, root, coverage.exported_target_dir, visiting);
-        let _ = visiting.pop();
-
-        coverage.saw_cargo |= nested.saw_cargo;
-        coverage.uncovered_cargo |= nested.uncovered_cargo;
-        coverage.exported_target_dir = nested.exported_target_dir;
     }
 
     coverage
 }
 
-fn line_has_direct_cargo(raw: &str) -> bool {
-    let parsed = parse_script(raw);
-    any_resolved_command(&parsed, |command| command.command_name() == "cargo")
-}
-
-fn is_export_target_dir_line(raw: &str) -> bool {
-    let tokens = shell_words(raw);
-    if tokens.is_empty() {
-        return false;
+fn line_target_dir_coverage(
+    raw: &str,
+    root: &ParsedShellScript,
+    env_state: &mut EnvState,
+    visiting: &mut Vec<String>,
+) -> Coverage {
+    let segments = split_command_segments(raw);
+    if segments.is_empty() {
+        return segment_evaluation(raw, root, env_state, visiting).coverage;
     }
 
-    if tokens[0] == "export" {
-        return tokens
-            .iter()
-            .skip(1)
-            .any(|token| token.starts_with("CARGO_TARGET_DIR="));
-    }
+    let mut coverage = Coverage::default();
+    let mut prefix_status = None;
 
-    false
-}
+    for segment in segments {
+        let reachable = match (segment.operator_before, prefix_status) {
+            (Some("&&"), Some(true)) => true,
+            (Some("&&"), Some(false)) => false,
+            (Some("||"), Some(true)) => false,
+            (Some("||"), Some(false)) => true,
+            _ => true,
+        };
 
-fn is_unset_target_dir_line(raw: &str) -> bool {
-    let tokens = shell_words(raw);
-    tokens.first().is_some_and(|token| token == "unset")
-        && tokens
-            .iter()
-            .skip(1)
-            .any(|token| token == "CARGO_TARGET_DIR")
-}
-
-fn line_has_inline_target_dir(raw: &str) -> bool {
-    let tokens = shell_words(raw);
-    let mut saw_env = false;
-    let mut saw_cargo = false;
-
-    for token in tokens {
-        if token == "env" {
-            saw_env = true;
-            continue;
-        }
-        if token.starts_with('-') && saw_env {
-            continue;
-        }
-        if normalize_command_token(&token) == "cargo" {
-            saw_cargo = true;
-            continue;
-        }
-        if token.starts_with("CARGO_TARGET_DIR=") {
-            return !saw_cargo;
-        }
-    }
-
-    false
-}
-
-fn called_function_name(raw: &str) -> Option<String> {
-    let tokens = shell_words(raw);
-    let mut index = 0usize;
-
-    while matches!(tokens.get(index), Some(token) if looks_like_env_assignment(token)) {
-        index += 1;
-    }
-
-    let token = tokens.get(index)?;
-    let token = normalize_command_token(token);
-    if matches!(
-        token,
-        "cargo" | "env" | "export" | "unset" | "sh" | "bash" | "command" | "exec"
-    ) {
-        return None;
-    }
-
-    Some(token.to_owned())
-}
-
-fn shell_words(command_text: &str) -> Vec<String> {
-    let mut words = Vec::new();
-    let mut current = String::new();
-    let mut chars = command_text.chars().peekable();
-    let mut single_quoted = false;
-    let mut double_quoted = false;
-
-    while let Some(ch) = chars.next() {
-        match ch {
-            '\'' if !double_quoted => {
-                single_quoted = !single_quoted;
+        if reachable {
+            let mut segment_env = env_state.clone();
+            let evaluation = segment_evaluation(&segment.text, root, &mut segment_env, visiting);
+            coverage.saw_cargo |= evaluation.coverage.saw_cargo;
+            coverage.uncovered_cargo |= evaluation.coverage.uncovered_cargo;
+            if evaluation.persist_env {
+                *env_state = segment_env;
             }
-            '"' if !single_quoted => {
-                double_quoted = !double_quoted;
+
+            for substitution in extract_command_substitutions(&segment.text) {
+                let mut substitution_env = env_state.clone();
+                let substitution_coverage =
+                    line_target_dir_coverage(&substitution, root, &mut substitution_env, visiting);
+                coverage.saw_cargo |= substitution_coverage.saw_cargo;
+                coverage.uncovered_cargo |= substitution_coverage.uncovered_cargo;
             }
-            '\\' if double_quoted => {
-                if let Some(next) = chars.next() {
-                    current.push(next);
+
+            if coverage.uncovered_cargo {
+                return coverage;
+            }
+        }
+
+        if reachable {
+            prefix_status = constant_exit_status(&segment.text);
+        }
+    }
+
+    coverage
+}
+
+fn segment_evaluation(
+    segment: &str,
+    root: &ParsedShellScript,
+    env_state: &mut EnvState,
+    visiting: &mut Vec<String>,
+) -> SegmentEvaluation {
+    let tokens = shell_words(segment);
+    let mut parts = TokenCursor::new(&tokens);
+    let mut local_env = env_state.clone();
+    let mut has_local_overlay = false;
+
+    while matches!(parts.peek(), Some(token) if looks_like_env_assignment(token)) {
+        let token = parts.next().unwrap_or_default();
+        apply_inline_assignment(token, &mut local_env);
+        has_local_overlay = true;
+    }
+
+    let Some(first) = parts.next() else {
+        return SegmentEvaluation {
+            coverage: Coverage::default(),
+            persist_env: false,
+        };
+    };
+
+    let command_name = normalize_command_token(first);
+
+    match command_name {
+        "export" => {
+            apply_export_assignments(&mut parts, env_state);
+            SegmentEvaluation {
+                coverage: Coverage::default(),
+                persist_env: true,
+            }
+        }
+        "unset" => {
+            apply_unset_arguments(&mut parts, env_state);
+            SegmentEvaluation {
+                coverage: Coverage::default(),
+                persist_env: true,
+            }
+        }
+        "env" => SegmentEvaluation {
+            coverage: env_wrapper_target_dir_coverage(&mut parts, root, &mut local_env, visiting),
+            persist_env: false,
+        },
+        "sh" | "bash" => SegmentEvaluation {
+            coverage: shell_wrapper_target_dir_coverage(&mut parts, root, &mut local_env, visiting),
+            persist_env: false,
+        },
+        "command" => SegmentEvaluation {
+            coverage: command_wrapper_target_dir_coverage(
+                &mut parts,
+                root,
+                &mut local_env,
+                visiting,
+            ),
+            persist_env: false,
+        },
+        "exec" => SegmentEvaluation {
+            coverage: exec_wrapper_target_dir_coverage(&mut parts, root, &mut local_env, visiting),
+            persist_env: false,
+        },
+        _ if root
+            .functions
+            .iter()
+            .any(|function| function.name == command_name) =>
+        {
+            if has_local_overlay {
+                SegmentEvaluation {
+                    coverage: called_function_target_dir_coverage(
+                        command_name,
+                        root,
+                        &mut local_env,
+                        visiting,
+                    ),
+                    persist_env: false,
+                }
+            } else {
+                SegmentEvaluation {
+                    coverage: called_function_target_dir_coverage(
+                        command_name,
+                        root,
+                        env_state,
+                        visiting,
+                    ),
+                    persist_env: true,
                 }
             }
-            ch if ch.is_whitespace() && !single_quoted && !double_quoted => {
-                if !current.is_empty() {
-                    words.push(std::mem::take(&mut current));
-                }
+        }
+        "cargo" => SegmentEvaluation {
+            coverage: Coverage {
+                saw_cargo: true,
+                uncovered_cargo: !local_env.target_dir,
+            },
+            persist_env: false,
+        },
+        _ => SegmentEvaluation {
+            coverage: Coverage::default(),
+            persist_env: false,
+        },
+    }
+}
+
+fn called_function_target_dir_coverage(
+    command_name: &str,
+    root: &ParsedShellScript,
+    env_state: &mut EnvState,
+    visiting: &mut Vec<String>,
+) -> Coverage {
+    let Some(function) = root
+        .functions
+        .iter()
+        .find(|function| function.name == command_name)
+    else {
+        return Coverage::default();
+    };
+    if visiting.iter().any(|name| name == &function.name) {
+        return Coverage::default();
+    }
+
+    visiting.push(function.name.to_owned());
+    let body_parsed = parse_script(&function.body);
+    let coverage = execute_script_for_target_dir(&body_parsed, root, env_state, visiting);
+    let _ = visiting.pop();
+    coverage
+}
+
+fn env_wrapper_target_dir_coverage(
+    parts: &mut TokenCursor<'_>,
+    root: &ParsedShellScript,
+    env_state: &mut EnvState,
+    visiting: &mut Vec<String>,
+) -> Coverage {
+    let mut split_string = None;
+
+    while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
+        let flag = parts.next().unwrap_or_default();
+        if is_help_or_version_flag(flag) {
+            return Coverage::default();
+        }
+        if flag == "--" {
+            break;
+        }
+        if let Some((flag_name, value)) = flag.split_once('=')
+            && env_flag_takes_value(flag_name)
+        {
+            match flag_name {
+                "-u" | "--unset" if value == "CARGO_TARGET_DIR" => env_state.target_dir = false,
+                "-S" | "--split-string" => split_string = Some(value.to_owned()),
+                _ => {}
             }
-            _ => current.push(ch),
+            continue;
+        }
+        if env_flag_without_value(flag) {
+            continue;
+        }
+        if env_flag_takes_value(flag) {
+            let value = parts.next().unwrap_or_default();
+            match flag {
+                "-u" | "--unset" if value == "CARGO_TARGET_DIR" => env_state.target_dir = false,
+                "-S" | "--split-string" => split_string = Some(value.to_owned()),
+                _ => {}
+            }
+            continue;
         }
     }
 
-    if !current.is_empty() {
-        words.push(current);
+    while matches!(parts.peek(), Some(token) if looks_like_env_assignment(token)) {
+        let token = parts.next().unwrap_or_default();
+        apply_inline_assignment(token, env_state);
     }
 
-    words
+    if let Some(script) = split_string {
+        let mut nested = script;
+        let tail = parts.remaining().join(" ");
+        if !tail.is_empty() {
+            nested.push(' ');
+            nested.push_str(&tail);
+        }
+        return line_target_dir_coverage(&nested, root, env_state, visiting);
+    }
+
+    let Some(next) = parts.next() else {
+        return Coverage::default();
+    };
+
+    wrapper_or_command_target_dir_coverage(next, parts, root, env_state, visiting)
 }
 
-fn normalize_command_token(token: &str) -> &str {
-    token.rsplit('/').next().unwrap_or(token)
+fn shell_wrapper_target_dir_coverage(
+    parts: &mut TokenCursor<'_>,
+    root: &ParsedShellScript,
+    env_state: &mut EnvState,
+    visiting: &mut Vec<String>,
+) -> Coverage {
+    while let Some(token) = parts.peek() {
+        if !token.starts_with('-') {
+            break;
+        }
+        let flag = parts.next().unwrap_or_default();
+        if is_help_or_version_flag(flag) {
+            return Coverage::default();
+        }
+        if let Some((flag_name, _)) = flag.split_once('=')
+            && shell_flag_takes_value(flag_name)
+        {
+            continue;
+        }
+        if shell_flag_takes_value(flag) {
+            let _ = parts.next();
+        }
+    }
+
+    let Some(script) = parts.next() else {
+        return Coverage::default();
+    };
+
+    line_target_dir_coverage(script, root, env_state, visiting)
 }
 
-fn looks_like_env_assignment(token: &str) -> bool {
-    let Some((name, _value)) = token.split_once('=') else {
-        return false;
+fn command_wrapper_target_dir_coverage(
+    parts: &mut TokenCursor<'_>,
+    root: &ParsedShellScript,
+    env_state: &mut EnvState,
+    visiting: &mut Vec<String>,
+) -> Coverage {
+    while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
+        let flag = parts.next().unwrap_or_default();
+        if is_help_or_version_flag(flag) || matches!(flag, "-v" | "-V") {
+            return Coverage::default();
+        }
+        if flag == "--" {
+            break;
+        }
+        if flag != "-p" {
+            return Coverage::default();
+        }
+    }
+
+    let Some(next) = parts.next() else {
+        return Coverage::default();
     };
-    let mut chars = name.chars();
-    let Some(first) = chars.next() else {
-        return false;
+
+    wrapper_or_command_target_dir_coverage(next, parts, root, env_state, visiting)
+}
+
+fn exec_wrapper_target_dir_coverage(
+    parts: &mut TokenCursor<'_>,
+    root: &ParsedShellScript,
+    env_state: &mut EnvState,
+    visiting: &mut Vec<String>,
+) -> Coverage {
+    while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
+        let flag = parts.next().unwrap_or_default();
+        if is_help_or_version_flag(flag) {
+            return Coverage::default();
+        }
+        if flag == "--" {
+            break;
+        }
+    }
+
+    let Some(next) = parts.next() else {
+        return Coverage::default();
     };
-    (first.is_ascii_alphabetic() || first == '_')
-        && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
+
+    wrapper_or_command_target_dir_coverage(next, parts, root, env_state, visiting)
+}
+
+fn wrapper_or_command_target_dir_coverage(
+    token: &str,
+    parts: &mut TokenCursor<'_>,
+    root: &ParsedShellScript,
+    env_state: &mut EnvState,
+    visiting: &mut Vec<String>,
+) -> Coverage {
+    match normalize_command_token(token) {
+        "cargo" => Coverage {
+            saw_cargo: true,
+            uncovered_cargo: !env_state.target_dir,
+        },
+        "sh" | "bash" => shell_wrapper_target_dir_coverage(parts, root, env_state, visiting),
+        "command" => command_wrapper_target_dir_coverage(parts, root, env_state, visiting),
+        "exec" => exec_wrapper_target_dir_coverage(parts, root, env_state, visiting),
+        "env" => env_wrapper_target_dir_coverage(parts, root, env_state, visiting),
+        command_name => {
+            called_function_target_dir_coverage(command_name, root, env_state, visiting)
+        }
+    }
 }
 
 #[cfg(test)]
