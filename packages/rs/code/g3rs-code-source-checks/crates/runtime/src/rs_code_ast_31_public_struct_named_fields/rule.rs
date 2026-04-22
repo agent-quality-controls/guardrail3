@@ -417,8 +417,9 @@ fn bind_reexport_alias(
         return false;
     }
 
-    match visible_bindings.insert(alias.to_owned(), target) {
-        Some(existing) if existing == *visible_bindings.get(alias).unwrap_or(&Vec::new()) => false,
+    let previous = visible_bindings.insert(alias.to_owned(), target.clone());
+    match previous {
+        Some(existing) if existing == target => false,
         _ => true,
     }
 }
