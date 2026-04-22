@@ -94,16 +94,16 @@ fn warns_when_same_line_loop_terminator_has_exit_zero_tail() {
 }
 
 #[test]
-fn warns_when_forward_function_call_resolves_to_later_definition() {
+fn warns_when_later_function_redefinition_contains_exit_zero() {
     let results = run_case(
-        "finish\nfinish() {\n    exit 0\n}\n",
+        "finish() {\n    echo ok\n}\nfinish() {\n    exit 0\n}\nfinish\n",
     );
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::G3Severity::Warn),
             title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
-            line: Some(3),
+            line: Some(5),
             inventory: Some(false),
             ..Default::default()
         }],
