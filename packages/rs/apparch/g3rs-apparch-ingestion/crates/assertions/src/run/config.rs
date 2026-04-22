@@ -15,3 +15,10 @@ pub fn assert_has_result(
         "{results:#?}"
     );
 }
+
+pub fn assert_no_result_id(results: &[G3CheckResult], id: &str) {
+    assert!(
+        results.iter().all(|result| result.id() != id),
+        "{results:#?}"
+    );
+}

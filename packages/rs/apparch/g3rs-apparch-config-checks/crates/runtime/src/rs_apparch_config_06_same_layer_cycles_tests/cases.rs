@@ -1,81 +1,56 @@
 use g3rs_apparch_config_checks_assertions::rs_apparch_config_06_same_layer_cycles as assertions;
 use g3rs_apparch_types::{
-    G3RsApparchDependencyKind, G3RsApparchLayer, G3RsApparchSameLayerCyclesChecksInput,
+    G3RsApparchLayer, G3RsApparchSameLayerCyclesChecksInput,
     G3RsApparchSameLayerDependencyEdge,
 };
 
-use super::helpers::{edge, krate, run_rule};
+use super::helpers::{krate, run_rule, same_layer_edge};
 
 #[test]
 fn same_layer_cycle_fires() {
-    let crates = vec![
-        krate(G3RsApparchLayer::Types, "types/a/Cargo.toml"),
-        krate(G3RsApparchLayer::Types, "types/b/Cargo.toml"),
-        krate(G3RsApparchLayer::Types, "types/c/Cargo.toml"),
-    ];
+    let types_a = krate(G3RsApparchLayer::Types, "types/a/Cargo.toml");
+    let types_b = krate(G3RsApparchLayer::Types, "types/b/Cargo.toml");
+    let types_c = krate(G3RsApparchLayer::Types, "types/c/Cargo.toml");
     let edges = vec![
-        edge(
-            "types/a/Cargo.toml",
-            "types/b/Cargo.toml",
-            G3RsApparchDependencyKind::Dependency,
-        ),
-        edge(
-            "types/b/Cargo.toml",
-            "types/c/Cargo.toml",
-            G3RsApparchDependencyKind::Dependency,
-        ),
-        edge(
-            "types/c/Cargo.toml",
-            "types/a/Cargo.toml",
-            G3RsApparchDependencyKind::Dependency,
-        ),
+        same_layer_edge(&types_a, &types_b),
+        same_layer_edge(&types_b, &types_c),
+        same_layer_edge(&types_c, &types_a),
     ];
-    let results = run_rule(&crates, &edges);
+    let results = run_rule(&edges);
 
-    assertions::assert_cycle(
+    assertions::assert_cycle_members(
         &results,
         "same-layer types dependency cycle",
         "types crate(s)",
+        &[&types_a.crate_name, &types_b.crate_name, &types_c.crate_name],
     );
 }
 
 #[test]
-fn dev_only_cycle_is_ignored() {
-    let crates = vec![
-        krate(G3RsApparchLayer::Types, "types/a/Cargo.toml"),
-        krate(G3RsApparchLayer::Types, "types/b/Cargo.toml"),
-    ];
+fn acyclic_same_layer_graph_reports_inventory() {
+    let types_a = krate(G3RsApparchLayer::Types, "types/a/Cargo.toml");
+    let types_b = krate(G3RsApparchLayer::Types, "types/b/Cargo.toml");
+    let types_c = krate(G3RsApparchLayer::Types, "types/c/Cargo.toml");
     let edges = vec![
-        edge(
-            "types/a/Cargo.toml",
-            "types/b/Cargo.toml",
-            G3RsApparchDependencyKind::DevDependency,
-        ),
-        edge(
-            "types/b/Cargo.toml",
-            "types/a/Cargo.toml",
-            G3RsApparchDependencyKind::TargetDevDependency,
-        ),
+        same_layer_edge(&types_a, &types_b),
+        same_layer_edge(&types_b, &types_c),
     ];
-    let results = run_rule(&crates, &edges);
+    let results = run_rule(&edges);
 
-    assertions::assert_no_findings(&results);
+    assertions::assert_inventory_checked_nodes(&results, 3);
 }
 
 #[test]
 fn same_layer_self_loop_fires() {
-    let crates = vec![krate(G3RsApparchLayer::Logic, "logic/service/Cargo.toml")];
-    let edges = vec![edge(
-        "logic/service/Cargo.toml",
-        "logic/service/Cargo.toml",
-        G3RsApparchDependencyKind::BuildDependency,
-    )];
-    let results = run_rule(&crates, &edges);
+    let logic_service = krate(G3RsApparchLayer::Logic, "logic/service/Cargo.toml");
+    let edges = vec![same_layer_edge(&logic_service, &logic_service)];
+    let results = run_rule(&edges);
 
-    assertions::assert_cycle(
+    assertions::assert_cycle_members(
         &results,
         "same-layer logic dependency cycle",
         "logic crate(s)",
+        &[&logic_service.crate_name],
     );
 }
 
@@ -90,17 +65,18 @@ fn cycle_is_not_dropped_when_first_sorted_node_is_missing_from_crate_bag() {
                 to: types_b.clone(),
             },
             G3RsApparchSameLayerDependencyEdge {
-                from: types_b,
-                to: types_a,
+                from: types_b.clone(),
+                to: types_a.clone(),
             },
         ],
     };
     let mut results = Vec::new();
     crate::rs_apparch_config_06_same_layer_cycles::check(&input, &mut results);
 
-    assertions::assert_cycle(
+    assertions::assert_cycle_members(
         &results,
         "same-layer types dependency cycle",
         "types crate(s)",
+        &[&types_a.crate_name, &types_b.crate_name],
     );
 }
