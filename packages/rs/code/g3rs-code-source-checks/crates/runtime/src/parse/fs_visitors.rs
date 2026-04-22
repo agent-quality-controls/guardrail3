@@ -161,10 +161,15 @@ impl InlineStdFsVisitor {
 
 fn collect_std_aliases(tree: &syn::UseTree, aliases: &mut BTreeSet<String>) {
     match tree {
-        syn::UseTree::Rename(rename) if rename.ident == "std" => {
+        syn::UseTree::Rename(rename)
+            if rename.ident == "std"
+                || aliases.contains(rename.ident.to_string().as_str()) =>
+        {
             let _ = aliases.insert(rename.rename.to_string());
         }
-        syn::UseTree::Path(path) if path.ident == "std" => {
+        syn::UseTree::Path(path)
+            if path.ident == "std" || aliases.contains(path.ident.to_string().as_str()) =>
+        {
             collect_std_aliases_under_std(&path.tree, aliases);
         }
         syn::UseTree::Group(group) => {
@@ -189,8 +194,16 @@ fn collect_std_extern_crate_alias(item: &syn::ItemExternCrate, aliases: &mut BTr
 
 fn collect_std_aliases_under_std(tree: &syn::UseTree, aliases: &mut BTreeSet<String>) {
     match tree {
-        syn::UseTree::Rename(rename) if rename.ident == "self" => {
+        syn::UseTree::Rename(rename)
+            if rename.ident == "self"
+                || aliases.contains(rename.ident.to_string().as_str()) =>
+        {
             let _ = aliases.insert(rename.rename.to_string());
+        }
+        syn::UseTree::Path(path)
+            if path.ident == "self" || aliases.contains(path.ident.to_string().as_str()) =>
+        {
+            collect_std_aliases_under_std(&path.tree, aliases);
         }
         syn::UseTree::Group(group) => {
             for item in &group.items {
