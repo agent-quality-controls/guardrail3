@@ -1,3 +1,7 @@
+use std::collections::BTreeSet;
+
+use hook_shell_parser::types::ParsedShellScript;
+
 pub(super) fn is_trigger_like_line(line: &str) -> bool {
     if line.starts_with("printf ") || line.starts_with("cat ") {
         return false;
@@ -26,6 +30,68 @@ pub(super) fn is_trigger_like_line(line: &str) -> bool {
 pub(super) fn mentions_config_exact(line: &str, needle: &str) -> bool {
     contains_bounded_config_reference(line, needle)
         || contains_bounded_config_reference(line, &regex_escaped_literal(needle))
+}
+
+pub(super) fn line_reaches_config_trigger(
+    parsed: &ParsedShellScript,
+    raw: &str,
+    line_no: usize,
+    needle: &str,
+) -> bool {
+    line_reaches_config_trigger_inner(parsed, raw, line_no, needle, &mut BTreeSet::new())
+}
+
+fn line_reaches_config_trigger_inner(
+    parsed: &ParsedShellScript,
+    raw: &str,
+    line_no: usize,
+    needle: &str,
+    visited_functions: &mut BTreeSet<String>,
+) -> bool {
+    if direct_trigger_line(raw, needle) {
+        return true;
+    }
+
+    if looks_like_case_pattern_line(raw.trim()) && mentions_config_exact(raw, needle) {
+        return true;
+    }
+
+    let Some(function_name) = parsed
+        .executable_lines
+        .iter()
+        .find(|line| line.line_no == line_no && line.raw == raw)
+        .map(|line| line.command_name.as_str())
+    else {
+        return false;
+    };
+
+    if !visited_functions.insert(function_name.to_owned()) {
+        return false;
+    }
+
+    parsed
+        .functions
+        .iter()
+        .find(|function| function.name == function_name)
+        .is_some_and(|function| {
+            function.parsed_body.executable_lines.iter().any(|line| {
+                line_reaches_config_trigger_inner(
+                    &function.parsed_body,
+                    &line.raw,
+                    line.line_no,
+                    needle,
+                    visited_functions,
+                )
+            })
+        })
+}
+
+fn direct_trigger_line(line: &str, needle: &str) -> bool {
+    let trimmed = line.trim();
+    !trimmed.starts_with('#')
+        && !trimmed.is_empty()
+        && mentions_config_exact(line, needle)
+        && is_trigger_like_line(trimmed)
 }
 
 fn regex_escaped_literal(needle: &str) -> String {

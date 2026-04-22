@@ -4,8 +4,8 @@ use crate::hook_rs_08_guardrail_validate_staged_present::{
     line_contains_guardrail_step, line_contains_path_qualified_guardrail_step,
 };
 use super::text::{
-    expand_inline_case_block, expand_inline_if_block, is_trigger_like_line,
-    line_contains_then, looks_like_case_pattern_line, mentions_config_exact,
+    expand_inline_case_block, expand_inline_if_block, line_contains_then,
+    line_reaches_config_trigger, looks_like_case_pattern_line,
 };
 
 const CONFIG_NEEDLES: [&str; 8] = [
@@ -113,7 +113,7 @@ fn block_contains_validation(parsed: &ParsedShellScript, block: &NumberedBlock) 
 fn branch_covers_needle(parsed: &ParsedShellScript, branch: &NumberedBlock, needle: &str) -> bool {
     let (direct_branch, nested_blocks) = partition_branch(branch);
     (block_contains_validation(parsed, &direct_branch)
-        && block_mentions_config_trigger(&direct_branch, needle))
+        && block_mentions_config_trigger(parsed, &direct_branch, needle))
         || nested_blocks.into_iter().any(|nested_block| {
             block_branches(&nested_block)
                 .into_iter()
@@ -335,51 +335,19 @@ fn adjust_depth(depth: usize, trimmed: &str) -> usize {
     next
 }
 
-fn block_mentions_config_trigger(block: &NumberedBlock, needle: &str) -> bool {
-    let first_non_empty = block
-        .lines
-        .iter()
-        .find_map(|line| {
-            let trimmed = line.raw.trim();
-            (!trimmed.is_empty()).then_some(trimmed)
-        })
-        .unwrap_or_default();
-    let case_block = block
-        .lines
-        .iter()
-        .filter_map(|line| {
-            let trimmed = line.raw.trim();
-            (!trimmed.is_empty()).then_some(trimmed)
-        })
-        .any(|line| line.starts_with("case ") || looks_like_case_pattern_line(line));
-    let if_like_branch = first_non_empty.starts_with("if ") || first_non_empty.starts_with("elif ");
-    let mut in_if_condition = if_like_branch;
-
+fn block_mentions_config_trigger(
+    parsed: &ParsedShellScript,
+    block: &NumberedBlock,
+    needle: &str,
+) -> bool {
     block.lines.iter().any(|line| {
-        let trimmed = line.raw.trim();
-        let in_condition_now = in_if_condition;
-        let is_match = !trimmed.starts_with('#')
-            && !trimmed.is_empty()
-            && mentions_config_exact(&line.raw, needle)
-            && (is_trigger_like_line(trimmed)
-                || (in_condition_now && is_trigger_like_line(trimmed))
-                || (case_block && looks_like_case_pattern_line(trimmed)));
-
-        if in_if_condition && line_contains_then(trimmed) {
-            in_if_condition = false;
-        }
-
-        is_match
+        line_reaches_config_trigger(parsed, &line.raw, line.line_no, needle)
     })
 }
 
 fn content_has_direct_trigger_line_for_needle(parsed: &ParsedShellScript, needle: &str) -> bool {
-    parsed.source_lines.iter().any(|line| {
-        let trimmed = line.raw.trim();
-        !trimmed.is_empty()
-            && !trimmed.starts_with('#')
-            && mentions_config_exact(&line.raw, needle)
-            && is_trigger_like_line(trimmed)
+    parsed.executable_lines.iter().any(|line| {
+        line_reaches_config_trigger(parsed, &line.raw, line.line_no, needle)
             && (line_contains_guardrail_step(parsed, &line.raw, line.line_no)
                 || line_contains_path_qualified_guardrail_step(parsed, &line.raw, line.line_no))
     })

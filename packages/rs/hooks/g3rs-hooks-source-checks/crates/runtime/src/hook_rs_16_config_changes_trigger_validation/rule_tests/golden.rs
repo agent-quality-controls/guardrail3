@@ -248,6 +248,22 @@ fi
 }
 
 #[test]
+fn passes_when_helper_branch_trigger_reaches_validation() {
+    let content = r#"
+should_validate_configs() {
+    echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'
+}
+
+if test -n "$changed_path"; then
+    should_validate_configs
+    g3rs validate --path .
+fi
+"#;
+    let results = run_case(content);
+    assertions::assert_present(&results);
+}
+
+#[test]
 fn warns_when_nested_case_mentions_configs_but_other_arm_runs_validation() {
     let content = r#"
 if test -n "$changed_path"; then
