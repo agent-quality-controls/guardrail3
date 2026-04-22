@@ -42,6 +42,62 @@ pub struct G3RsSourceFile {
     pub abs_path: PathBuf,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum G3RsGardeBoundaryKind {
+    Struct,
+    Enum,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsGardeDerivedBoundaryTypeSite {
+    pub rel_path: String,
+    pub line: usize,
+    pub name: String,
+    pub boundary_kind: G3RsGardeBoundaryKind,
+    pub boundary_macros: Vec<String>,
+    pub has_validate: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsGardeManualDeserializeImplSite {
+    pub rel_path: String,
+    pub line: usize,
+    pub type_name: String,
+    pub needs_validate: bool,
+    pub has_validate: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsGardeQueryAsMacroSite {
+    pub rel_path: String,
+    pub line: usize,
+    pub macro_name: String,
+    pub waiver_reason: Option<String>,
+    pub policy_resolved: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsGardeBoundaryFieldSite {
+    pub rel_path: String,
+    pub line: usize,
+    pub boundary_name: String,
+    pub field_name: String,
+    pub field_type: String,
+    pub requires_field_validation: bool,
+    pub nested_validated: bool,
+    pub has_garde_skip: bool,
+    pub has_garde_dive: bool,
+    pub has_meaningful_garde_rule: bool,
+    pub uses_context: bool,
+    pub boundary_has_context: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsGardeInputFailureSite {
+    pub rel_path: String,
+    pub message: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsGardeWaiver {
     pub rule: String,
@@ -68,8 +124,13 @@ pub enum G3RsGardeRustPolicyInput {
 pub struct G3RsGardeSourceChecksInput {
     pub applicability: G3RsGardeApplicability,
     pub garde_dependency_present: bool,
-    pub source_files: Vec<G3RsSourceFile>,
     pub rust_policy: G3RsGardeRustPolicyInput,
+    pub input_failures: Vec<G3RsGardeInputFailureSite>,
+    pub struct_targets: Vec<G3RsGardeDerivedBoundaryTypeSite>,
+    pub enum_targets: Vec<G3RsGardeDerivedBoundaryTypeSite>,
+    pub manual_deserialize_impls: Vec<G3RsGardeManualDeserializeImplSite>,
+    pub boundary_fields: Vec<G3RsGardeBoundaryFieldSite>,
+    pub query_as_macros: Vec<G3RsGardeQueryAsMacroSite>,
 }
 
 /// Placeholder input contract for future garde file-tree checks.

@@ -2,11 +2,10 @@ use g3rs_garde_source_checks_assertions::rs_garde_10_input_failures::rule as ass
 
 #[test]
 fn reports_unreadable_rust_source() {
-    let fixture = super::helpers::fixture(
-        &[("src/lib.rs", "fn ok() {}\n")],
-        super::helpers::default_guardrail_toml(),
-    );
-    fixture.make_source_unreadable("src/lib.rs");
+    let fixture = super::helpers::fixture(vec![super::helpers::failure(
+        "src/lib.rs",
+        "Failed to read Rust source file for garde checks: file is not readable",
+    )]);
 
     let results = fixture.run();
 

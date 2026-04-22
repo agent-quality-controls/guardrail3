@@ -2,10 +2,10 @@ use g3rs_garde_source_checks_assertions::rs_garde_10_input_failures::rule as ass
 
 #[test]
 fn reports_malformed_rust_source() {
-    let fixture = super::helpers::fixture(
-        &[("src/lib.rs", "fn broken( {\n")],
-        super::helpers::default_guardrail_toml(),
-    );
+    let fixture = super::helpers::fixture(vec![super::helpers::failure(
+        "src/lib.rs",
+        "Failed to parse Rust source file for garde checks: unexpected end of input",
+    )]);
 
     let results = fixture.run();
 

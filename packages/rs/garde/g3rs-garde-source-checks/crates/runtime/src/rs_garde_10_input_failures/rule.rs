@@ -16,42 +16,28 @@ pub(crate) fn check(site: &InputFailureSite, results: &mut Vec<G3CheckResult>) {
 
 #[cfg(test)]
 fn check_input(input: &g3rs_garde_types::G3RsGardeSourceChecksInput) -> Vec<G3CheckResult> {
-    let analysis = crate::support::analyze_input(input);
     let mut results = Vec::new();
-    for failure in &analysis.input_failures {
+    for failure in &input.input_failures {
         check(failure, &mut results);
     }
     results
 }
 
 #[cfg(test)]
-struct Fixture(crate::support::TestFixture);
+struct Fixture(g3rs_garde_types::G3RsGardeSourceChecksInput);
 
 #[cfg(test)]
 impl Fixture {
     fn run(&self) -> Vec<G3CheckResult> {
-        check_input(&self.0.input)
-    }
-
-    #[cfg(unix)]
-    fn make_source_unreadable(&self, rel_path: &str) {
-        self.0.make_source_unreadable(rel_path);
+        check_input(&self.0)
     }
 }
 
 #[cfg(test)]
-fn fixture(source_files: &[(&str, &str)], rust_policy_toml: &str) -> Fixture {
-    Fixture(crate::support::fixture(source_files, rust_policy_toml))
-}
-
-#[cfg(test)]
-fn invalid_policy_fixture(source_files: &[(&str, &str)], message: &str) -> Fixture {
-    Fixture(crate::support::invalid_policy_fixture(source_files, message))
-}
-
-#[cfg(test)]
-fn default_guardrail_toml() -> &'static str {
-    crate::support::default_guardrail_toml()
+fn fixture(input_failures: Vec<crate::support::InputFailureSite>) -> Fixture {
+    let mut input = crate::support::active_source_input();
+    input.input_failures = input_failures;
+    Fixture(input)
 }
 
 #[cfg(test)]

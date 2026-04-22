@@ -2,13 +2,12 @@ use g3rs_garde_source_checks_assertions::rs_garde_ast_07_context_validation_surf
 
 #[test]
 fn errors_when_ctx_usage_has_no_type_level_context() {
-    let fixture = super::helpers::fixture(
-        &[(
-            "src/input.rs",
-            "use garde::Validate;\nuse serde::Deserialize;\n\n#[derive(Deserialize, Validate)]\nstruct Input {\n    #[garde(length(chars, min = ctx.title_min, max = ctx.title_max))]\n    title: String,\n}\n",
-        )],
-        super::helpers::default_guardrail_toml(),
-    );
+    let fixture = super::helpers::fixture(vec![super::helpers::field(
+        "src/input.rs",
+        6,
+        "Input",
+        "title",
+    )]);
 
     let results = fixture.run();
     assertions::assert_rule_results(

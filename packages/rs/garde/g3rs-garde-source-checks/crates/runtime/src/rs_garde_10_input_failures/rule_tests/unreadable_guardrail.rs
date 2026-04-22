@@ -2,10 +2,10 @@ use g3rs_garde_source_checks_assertions::rs_garde_10_input_failures::rule as ass
 
 #[test]
 fn reports_unreadable_guardrail_config() {
-    let fixture = super::helpers::invalid_policy_fixture(
-        &[("src/lib.rs", "fn ok() {}\n")],
+    let fixture = super::helpers::fixture(vec![super::helpers::failure(
+        "guardrail3-rs.toml",
         "Failed to read `guardrail3-rs.toml` for garde Rust policy resolution: file is not readable",
-    );
+    )]);
 
     let results = fixture.run();
 

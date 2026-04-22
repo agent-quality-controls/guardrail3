@@ -1,7 +1,25 @@
-pub(super) fn fixture(source_files: &[(&str, &str)], rust_policy_toml: &str) -> super::super::Fixture {
-    super::super::fixture(source_files, rust_policy_toml)
+pub(super) fn fixture(
+    targets: Vec<crate::support::DerivedBoundaryTypeSite>,
+) -> super::super::Fixture {
+    super::super::fixture(targets)
 }
 
-pub(super) fn default_guardrail_toml() -> &'static str {
-    super::super::default_guardrail_toml()
+pub(super) fn target(
+    rel_path: &str,
+    line: usize,
+    name: &str,
+    boundary_macros: &[&str],
+    has_validate: bool,
+) -> crate::support::DerivedBoundaryTypeSite {
+    crate::support::DerivedBoundaryTypeSite {
+        rel_path: rel_path.to_owned(),
+        line,
+        name: name.to_owned(),
+        boundary_kind: g3rs_garde_types::G3RsGardeBoundaryKind::Enum,
+        boundary_macros: boundary_macros
+            .iter()
+            .map(|item| (*item).to_owned())
+            .collect(),
+        has_validate,
+    }
 }

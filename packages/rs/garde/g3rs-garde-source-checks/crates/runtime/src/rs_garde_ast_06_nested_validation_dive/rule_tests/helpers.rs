@@ -1,7 +1,28 @@
-pub(super) fn fixture(source_files: &[(&str, &str)], rust_policy_toml: &str) -> super::super::Fixture {
-    super::super::fixture(source_files, rust_policy_toml)
+pub(super) fn fixture(
+    boundary_fields: Vec<crate::support::BoundaryFieldSite>,
+) -> super::super::Fixture {
+    super::super::fixture(boundary_fields)
 }
 
-pub(super) fn default_guardrail_toml() -> &'static str {
-    super::super::default_guardrail_toml()
+pub(super) fn field(
+    rel_path: &str,
+    line: usize,
+    boundary_name: &str,
+    field_name: &str,
+    field_type: &str,
+) -> crate::support::BoundaryFieldSite {
+    crate::support::BoundaryFieldSite {
+        rel_path: rel_path.to_owned(),
+        line,
+        boundary_name: boundary_name.to_owned(),
+        field_name: field_name.to_owned(),
+        field_type: field_type.to_owned(),
+        requires_field_validation: true,
+        nested_validated: true,
+        has_garde_skip: false,
+        has_garde_dive: false,
+        has_meaningful_garde_rule: false,
+        uses_context: false,
+        boundary_has_context: false,
+    }
 }

@@ -1,12 +1,12 @@
-/// Public ingestion entry point.
-use g3rs_garde_source_checks_types::{G3RsSourceFile, G3RsGardeSourceChecksInput};
 use cargo_toml_parser::types::CargoToml;
+/// Public ingestion entry point.
+use g3rs_garde_source_checks_types::G3RsGardeSourceChecksInput;
 use g3rs_garde_types::{
     G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
-    G3RsGardeFileTreeChecksInput, G3RsGardeRustPolicyInput, G3RsGardeWaiver,
+    G3RsGardeFileTreeChecksInput, G3RsGardeRustPolicyInput, G3RsGardeWaiver, G3RsSourceFile,
 };
-use guardrail3_rs_toml_parser::types::Guardrail3RsToml;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use guardrail3_rs_toml_parser::types::Guardrail3RsToml;
 
 /// Re-export of `G3RsGardeIngestionError` so the facade can reach it.
 pub use g3rs_garde_ingestion_types::G3RsGardeIngestionError as IngestionError;
@@ -23,8 +23,8 @@ pub use g3rs_garde_ingestion_types::G3RsGardeIngestionError as IngestionError;
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeConfigChecksInput, IngestionError> {
-    let cargo_entry = crate::select::select_cargo_toml(crawl)
-        .ok_or(IngestionError::CargoTomlNotFound)?;
+    let cargo_entry =
+        crate::select::select_cargo_toml(crawl).ok_or(IngestionError::CargoTomlNotFound)?;
     if !cargo_entry.readable {
         return Err(IngestionError::Unreadable {
             path: cargo_entry.path.abs_path.clone(),
@@ -91,8 +91,8 @@ pub fn ingest_for_config_checks(
 pub fn ingest_for_source_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeSourceChecksInput, IngestionError> {
-    let cargo_entry = crate::select::select_cargo_toml(crawl)
-        .ok_or(IngestionError::CargoTomlNotFound)?;
+    let cargo_entry =
+        crate::select::select_cargo_toml(crawl).ok_or(IngestionError::CargoTomlNotFound)?;
     if !cargo_entry.readable {
         return Err(IngestionError::Unreadable {
             path: cargo_entry.path.abs_path.clone(),
@@ -114,12 +114,18 @@ pub fn ingest_for_source_checks(
             abs_path: entry.path.abs_path.clone(),
         })
         .collect::<Vec<_>>();
+    let analysis = crate::source_analysis::analyze_source_files(&source_files, &rust_policy);
 
     Ok(G3RsGardeSourceChecksInput {
         applicability,
         garde_dependency_present,
-        source_files,
         rust_policy,
+        input_failures: analysis.input_failures,
+        struct_targets: analysis.struct_targets,
+        enum_targets: analysis.enum_targets,
+        manual_deserialize_impls: analysis.manual_deserialize_impls,
+        boundary_fields: analysis.boundary_fields,
+        query_as_macros: analysis.query_as_macros,
     })
 }
 

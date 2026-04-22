@@ -1,12 +1,12 @@
+use g3rs_garde_types::G3RsGardeBoundaryKind;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::parse::BoundaryKind;
 use crate::support::{DerivedBoundaryTypeSite, error};
 
 const ID: &str = "RS-GARDE-SOURCE-03";
 
 pub(crate) fn check(target: &DerivedBoundaryTypeSite, results: &mut Vec<G3CheckResult>) {
-    if target.boundary_kind != BoundaryKind::Enum || target.has_validate {
+    if target.boundary_kind != G3RsGardeBoundaryKind::Enum || target.has_validate {
         return;
     }
 
@@ -25,32 +25,28 @@ pub(crate) fn check(target: &DerivedBoundaryTypeSite, results: &mut Vec<G3CheckR
 
 #[cfg(test)]
 fn check_input(input: &g3rs_garde_types::G3RsGardeSourceChecksInput) -> Vec<G3CheckResult> {
-    let analysis = crate::support::analyze_input(input);
     let mut results = Vec::new();
-    for target in &analysis.enum_targets {
+    for target in &input.enum_targets {
         check(target, &mut results);
     }
     results
 }
 
 #[cfg(test)]
-struct Fixture(crate::support::TestFixture);
+struct Fixture(g3rs_garde_types::G3RsGardeSourceChecksInput);
 
 #[cfg(test)]
 impl Fixture {
     fn run(&self) -> Vec<G3CheckResult> {
-        check_input(&self.0.input)
+        check_input(&self.0)
     }
 }
 
 #[cfg(test)]
-fn fixture(source_files: &[(&str, &str)], rust_policy_toml: &str) -> Fixture {
-    Fixture(crate::support::fixture(source_files, rust_policy_toml))
-}
-
-#[cfg(test)]
-fn default_guardrail_toml() -> &'static str {
-    crate::support::default_guardrail_toml()
+fn fixture(enum_targets: Vec<crate::support::DerivedBoundaryTypeSite>) -> Fixture {
+    let mut input = crate::support::active_source_input();
+    input.enum_targets = enum_targets;
+    Fixture(input)
 }
 
 #[cfg(test)]
