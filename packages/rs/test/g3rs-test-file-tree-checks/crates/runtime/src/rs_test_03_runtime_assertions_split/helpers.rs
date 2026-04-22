@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use g3rs_test_types::G3RsTestComponentFileTreeFacts;
 use g3rs_test_types::ast::{FunctionInfo, UseBinding};
@@ -58,26 +58,70 @@ pub(super) fn assertions_call_runtime_check_test_tree(
         }
     }
 
-    call_paths.iter().any(|path| match path.as_slice() {
-        [single] => imported_check_test_tree.contains(single),
-        [first, second, ..] => runtime_roots.contains(first) && second == "check_test_tree",
-        _ => false,
+    let empty_local_call_aliases = BTreeMap::new();
+    call_paths.iter().any(|path| {
+        path_matches_runtime_check_test_tree(
+            path,
+            &empty_local_call_aliases,
+            &runtime_roots,
+            &imported_check_test_tree,
+        )
     }) || functions.iter().any(|function| {
-        function.body.call_paths.iter().any(|path| match path.as_slice() {
-            [single] => function
-                .body
-                .local_call_aliases
-                .get(single)
-                .is_some_and(|target| match target.as_slice() {
-                    [name] => imported_check_test_tree.contains(name),
-                    [first, second, ..] => {
-                        runtime_roots.contains(first) && second == "check_test_tree"
-                    }
-                    _ => false,
-                }),
-            _ => false,
+        function.body.call_paths.iter().any(|path| {
+            path_matches_runtime_check_test_tree(
+                path,
+                &function.body.local_call_aliases,
+                &runtime_roots,
+                &imported_check_test_tree,
+            )
         })
     })
+}
+
+fn path_matches_runtime_check_test_tree(
+    path: &[String],
+    local_call_aliases: &BTreeMap<String, Vec<String>>,
+    runtime_roots: &BTreeSet<String>,
+    imported_check_test_tree: &BTreeSet<String>,
+) -> bool {
+    let mut visited = BTreeSet::new();
+    path_matches_runtime_check_test_tree_inner(
+        path,
+        local_call_aliases,
+        runtime_roots,
+        imported_check_test_tree,
+        &mut visited,
+    )
+}
+
+fn path_matches_runtime_check_test_tree_inner(
+    path: &[String],
+    local_call_aliases: &BTreeMap<String, Vec<String>>,
+    runtime_roots: &BTreeSet<String>,
+    imported_check_test_tree: &BTreeSet<String>,
+    visited: &mut BTreeSet<String>,
+) -> bool {
+    match path {
+        [single] => {
+            if imported_check_test_tree.contains(single) {
+                return true;
+            }
+            if !visited.insert(single.clone()) {
+                return false;
+            }
+            local_call_aliases.get(single).is_some_and(|target| {
+                path_matches_runtime_check_test_tree_inner(
+                    target,
+                    local_call_aliases,
+                    runtime_roots,
+                    imported_check_test_tree,
+                    visited,
+                )
+            })
+        }
+        [first, second, ..] => runtime_roots.contains(first) && second == "check_test_tree",
+        _ => false,
+    }
 }
 
 pub(super) fn import_hits_sibling_module(
