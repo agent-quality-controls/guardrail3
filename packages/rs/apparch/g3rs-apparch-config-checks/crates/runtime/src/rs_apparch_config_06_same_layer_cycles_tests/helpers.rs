@@ -32,6 +32,7 @@ pub(super) fn run_rule(
 ) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     let input = G3RsApparchSameLayerCyclesChecksInput {
+        crates: crates.to_vec(),
         edges: edges
             .iter()
             .filter(|edge| !edge.kind.is_dev())
@@ -43,8 +44,8 @@ pub(super) fn run_rule(
                     .iter()
                     .find(|krate| krate.cargo_rel_path == edge.to_cargo_rel_path)?;
                 (from.layer == to.layer).then(|| G3RsApparchSameLayerDependencyEdge {
-                    from: from.clone(),
-                    to: to.clone(),
+                    from_cargo_rel_path: from.cargo_rel_path.clone(),
+                    to_cargo_rel_path: to.cargo_rel_path.clone(),
                 })
             })
             .collect(),

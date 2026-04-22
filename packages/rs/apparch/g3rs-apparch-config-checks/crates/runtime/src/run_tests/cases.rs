@@ -39,13 +39,44 @@ fn run_dispatches_prebound_dependency_and_purity_inputs() {
             rust_policy: G3RsApparchRustPolicyState::Missing,
         }],
         patch_bypass_checks: Vec::<G3RsApparchPatchBypassChecksInput>::new(),
-        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput { edges: Vec::new() },
+        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput {
+            crates: Vec::new(),
+            edges: Vec::new(),
+        },
     };
 
     let results = crate::run::check(&input);
 
     assertions::assert_has_finding_id(&results, "RS-APPARCH-CONFIG-01");
     assertions::assert_has_finding_id(&results, "RS-APPARCH-CONFIG-08");
+}
+
+#[test]
+fn run_dispatches_prebound_same_layer_cycle_nodes() {
+    let types_a = fixture_crate("types/a", G3RsApparchLayer::Types);
+    let types_b = fixture_crate("types/b", G3RsApparchLayer::Types);
+    let input = G3RsApparchConfigChecksInput {
+        crate_dependency_checks: Vec::new(),
+        crate_purity_checks: Vec::new(),
+        patch_bypass_checks: Vec::new(),
+        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput {
+            crates: vec![types_a.clone(), types_b.clone()],
+            edges: vec![
+                g3rs_apparch_types::G3RsApparchSameLayerDependencyEdge {
+                    from_cargo_rel_path: types_a.cargo_rel_path.clone(),
+                    to_cargo_rel_path: types_b.cargo_rel_path.clone(),
+                },
+                g3rs_apparch_types::G3RsApparchSameLayerDependencyEdge {
+                    from_cargo_rel_path: types_b.cargo_rel_path.clone(),
+                    to_cargo_rel_path: types_a.cargo_rel_path.clone(),
+                },
+            ],
+        },
+    };
+
+    let results = crate::run::check(&input);
+
+    assertions::assert_has_finding_id(&results, "RS-APPARCH-CONFIG-06");
 }
 
 fn fixture_crate(rel_dir: &str, layer: G3RsApparchLayer) -> G3RsApparchCrate {

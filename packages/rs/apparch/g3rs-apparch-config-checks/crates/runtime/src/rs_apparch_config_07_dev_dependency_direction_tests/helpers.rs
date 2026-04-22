@@ -62,7 +62,10 @@ pub(super) fn input(edge: Option<G3RsApparchDependencyEdge>) -> G3RsApparchConfi
             .collect(),
         crate_purity_checks: Vec::new(),
         patch_bypass_checks: Vec::<G3RsApparchPatchBypassChecksInput>::new(),
-        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput { edges: Vec::new() },
+        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput {
+            crates: Vec::new(),
+            edges: Vec::new(),
+        },
     }
 }
 
