@@ -1,22 +1,5 @@
-use std::collections::BTreeMap;
-
-use g3rs_arch_types::types::{G3RsArchConfigCrate, G3RsArchDependencyEdge};
+use g3rs_arch_types::types::G3RsArchDependencyEdge;
 use guardrail3_check_types::G3CheckResult;
-
-fn config_crate(rel_dir: &str) -> G3RsArchConfigCrate {
-    G3RsArchConfigCrate {
-        rel_dir: rel_dir.to_owned(),
-        cargo_rel_path: format!("{rel_dir}/Cargo.toml"),
-        shared: false,
-        production_dependency_count: 0,
-        dev_dependency_count: 0,
-        requires_feature_contract: false,
-        has_default_feature: false,
-        has_all_feature: false,
-        all_feature_deps: Vec::new(),
-        default_feature_deps: Vec::new(),
-    }
-}
 
 pub(super) fn dependency_edge(
     source_rel_dir: &str,
@@ -45,17 +28,9 @@ pub(super) fn dependency_edge(
 }
 
 pub(super) fn run_rule(edge: &G3RsArchDependencyEdge) -> Vec<G3CheckResult> {
-    let source = config_crate(&edge.source_rel_dir);
-    let target = config_crate(edge.resolved_target_rel.as_deref().unwrap_or(""));
-    let crate_map = [
-        (source.rel_dir.as_str(), &source),
-        (target.rel_dir.as_str(), &target),
-    ]
-    .into_iter()
-    .collect::<BTreeMap<_, _>>();
     let mut results = Vec::new();
 
-    crate::rs_arch_06_shared_flag_required::check(edge, &crate_map, &mut results);
+    crate::rs_arch_06_shared_flag_required::check(edge, &mut results);
 
     results
 }
