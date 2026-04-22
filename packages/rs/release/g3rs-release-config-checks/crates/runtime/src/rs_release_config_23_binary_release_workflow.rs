@@ -15,9 +15,9 @@ pub(crate) fn check(
         return;
     }
 
-    let publishable_binary_count = crate::support::repo_publishable_binary_crate_count(crates);
+    let binary_crate_count = crate::support::repo_binary_crate_count(crates);
     let binary_release_workflow_present = repo.is_some_and(|repo| {
-        crate::support::crate_binary_release_workflow_present(repo, krate, publishable_binary_count)
+        crate::support::crate_binary_release_workflow_present(repo, krate, binary_crate_count)
     });
 
     let (title, message) = if binary_release_workflow_present {
