@@ -50,6 +50,14 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
 fn struct_has_inherent_impl(source: &syn::File, qualified_name: &str) -> bool {
     let mut module_struct_bindings = BTreeMap::new();
     collect_module_struct_bindings(&source.items, &mut Vec::new(), &mut module_struct_bindings);
+    let direct_module_struct_bindings = module_struct_bindings.clone();
+    collect_module_reexport_bindings(
+        &source.items,
+        &mut Vec::new(),
+        &direct_module_struct_bindings,
+        &mut module_struct_bindings,
+        &BTreeMap::new(),
+    );
     items_have_inherent_impl(
         &source.items,
         &mut Vec::new(),
@@ -150,14 +158,7 @@ fn normalize_type_path_with_bindings(
                 resolved.extend_from_slice(segments.get(1..).unwrap_or(&[]));
                 resolved
             }
-            "super" => {
-                let mut resolved = current_module_path.to_vec();
-                if resolved.pop().is_none() {
-                    return None;
-                }
-                resolved.extend_from_slice(segments.get(1..).unwrap_or(&[]));
-                resolved
-            }
+            "super" => resolve_super_relative_path(current_module_path, segments)?,
             _ => {
                 let mut resolved = current_module_path.to_vec();
                 resolved.extend_from_slice(segments);
@@ -167,6 +168,22 @@ fn normalize_type_path_with_bindings(
     };
 
     Some(normalized)
+}
+
+fn resolve_super_relative_path(
+    current_module_path: &[String],
+    segments: &[String],
+) -> Option<Vec<String>> {
+    let mut resolved = current_module_path.to_vec();
+    let mut rest = segments;
+
+    while matches!(rest.first().map(String::as_str), Some("super")) {
+        let _ = resolved.pop()?;
+        rest = rest.get(1..).unwrap_or(&[]);
+    }
+
+    resolved.extend_from_slice(rest);
+    Some(resolved)
 }
 
 fn collect_local_type_bindings(
@@ -276,6 +293,146 @@ fn collect_module_struct_bindings(
         }
     }
     let _ = out.insert(module_path.to_vec(), bindings);
+}
+
+fn collect_module_reexport_bindings(
+    items: &[syn::Item],
+    module_path: &mut Vec<String>,
+    direct_module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+    out: &mut BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+    parent_visible_bindings: &BTreeMap<String, Vec<String>>,
+) {
+    let mut visible_bindings = parent_visible_bindings.clone();
+    if let Some(direct_bindings) = direct_module_struct_bindings.get(module_path) {
+        visible_bindings.extend(direct_bindings.clone());
+    }
+
+    loop {
+        let mut changed = false;
+        for item in items {
+            let syn::Item::Use(item_use) = item else {
+                continue;
+            };
+            changed |= collect_reexport_aliases_from_use_tree(
+                &item_use.tree,
+                &mut Vec::new(),
+                module_path,
+                direct_module_struct_bindings,
+                &mut visible_bindings,
+            );
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    let _ = out.insert(module_path.to_vec(), visible_bindings.clone());
+
+    for item in items {
+        let syn::Item::Mod(item_mod) = item else {
+            continue;
+        };
+        let Some((_, nested_items)) = &item_mod.content else {
+            continue;
+        };
+        module_path.push(item_mod.ident.to_string());
+        collect_module_reexport_bindings(
+            nested_items,
+            module_path,
+            direct_module_struct_bindings,
+            out,
+            &visible_bindings,
+        );
+        let _ = module_path.pop();
+    }
+}
+
+fn collect_reexport_aliases_from_use_tree(
+    tree: &syn::UseTree,
+    prefix: &mut Vec<String>,
+    module_path: &[String],
+    direct_module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+    visible_bindings: &mut BTreeMap<String, Vec<String>>,
+) -> bool {
+    match tree {
+        syn::UseTree::Path(path) => {
+            prefix.push(path.ident.to_string());
+            let changed = collect_reexport_aliases_from_use_tree(
+                &path.tree,
+                prefix,
+                module_path,
+                direct_module_struct_bindings,
+                visible_bindings,
+            );
+            let _ = prefix.pop();
+            changed
+        }
+        syn::UseTree::Name(name) => {
+            let mut segments = prefix.clone();
+            segments.push(name.ident.to_string());
+            bind_reexport_alias(
+                &name.ident.to_string(),
+                &segments,
+                module_path,
+                direct_module_struct_bindings,
+                visible_bindings,
+            )
+        }
+        syn::UseTree::Rename(rename) => {
+            let mut segments = prefix.clone();
+            segments.push(rename.ident.to_string());
+            bind_reexport_alias(
+                &rename.rename.to_string(),
+                &segments,
+                module_path,
+                direct_module_struct_bindings,
+                visible_bindings,
+            )
+        }
+        syn::UseTree::Group(group) => group.items.iter().any(|item| {
+            collect_reexport_aliases_from_use_tree(
+                item,
+                prefix,
+                module_path,
+                direct_module_struct_bindings,
+                visible_bindings,
+            )
+        }),
+        syn::UseTree::Glob(_) => false,
+    }
+}
+
+fn bind_reexport_alias(
+    alias: &str,
+    segments: &[String],
+    module_path: &[String],
+    direct_module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+    visible_bindings: &mut BTreeMap<String, Vec<String>>,
+) -> bool {
+    let Some(target) = normalize_type_path_with_bindings(module_path, false, segments, visible_bindings)
+    else {
+        return false;
+    };
+    if !is_known_struct_binding(&target, direct_module_struct_bindings) {
+        return false;
+    }
+
+    match visible_bindings.insert(alias.to_owned(), target) {
+        Some(existing) if existing == *visible_bindings.get(alias).unwrap_or(&Vec::new()) => false,
+        _ => true,
+    }
+}
+
+fn is_known_struct_binding(
+    target: &[String],
+    direct_module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+) -> bool {
+    let Some((name, module_path)) = target.split_last() else {
+        return false;
+    };
+    direct_module_struct_bindings
+        .get(module_path)
+        .is_some_and(|bindings| bindings.contains_key(name))
 }
 
 #[cfg(test)]
