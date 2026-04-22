@@ -71,12 +71,20 @@ fn use_tree_matches_std_fs_with_std_prefix(
             path.ident == "fs" || fs_aliases.contains(path.ident.to_string().as_str())
         }
         syn::UseTree::Name(name) => {
-            name.ident == "fs" || fs_aliases.contains(name.ident.to_string().as_str())
+            name.ident == "fs"
+                || name.ident == "self"
+                || fs_aliases.contains(name.ident.to_string().as_str())
         }
         syn::UseTree::Rename(rename) => {
-            rename.ident == "fs" || fs_aliases.contains(rename.ident.to_string().as_str())
+            rename.ident == "fs"
+                || rename.ident == "self"
+                || fs_aliases.contains(rename.ident.to_string().as_str())
         }
-        _ => false,
+        syn::UseTree::Group(group) => group
+            .items
+            .iter()
+            .any(|item| use_tree_matches_std_fs_with_std_prefix(item, fs_aliases)),
+        syn::UseTree::Glob(_) => false,
     }
 }
 
@@ -127,6 +135,11 @@ fn use_tree_is_std_fs_glob_with_std_prefix(
         {
             fs_subtree_contains_glob(&fs_path.tree)
         }
+        syn::UseTree::Glob(_) => true,
+        syn::UseTree::Group(group) => group
+            .items
+            .iter()
+            .any(|item| use_tree_is_std_fs_glob_with_std_prefix(item, fs_aliases)),
         _ => false,
     }
 }

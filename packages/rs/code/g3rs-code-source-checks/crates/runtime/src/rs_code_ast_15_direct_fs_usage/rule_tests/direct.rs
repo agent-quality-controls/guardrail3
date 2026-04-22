@@ -123,6 +123,46 @@ fn errors_on_std_alias_then_fs_import() {
 }
 
 #[test]
+fn errors_on_grouped_std_fs_self_import() {
+    let content = "use std::fs::{self, *};\nfn main() {}";
+    let results = super::super::check_source("src/foo.rs", content, false);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("direct std::fs import"),
+            file: Some("src/foo.rs"),
+            inventory: Some(false),
+            message: Some(
+                "Direct `use std::fs` import found: `use std::fs::{self, *};`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
+            ),
+            line: Some(1),
+        }],
+    );
+}
+
+#[test]
+fn errors_on_alias_backed_grouped_std_fs_self_import() {
+    let content = "use std as s;\nuse s::fs::{self, *};\nfn main() {}";
+    let results = super::super::check_source("src/foo.rs", content, false);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("direct std::fs import"),
+            file: Some("src/foo.rs"),
+            inventory: Some(false),
+            message: Some(
+                "Direct `use std::fs` import found: `use s::fs::{self, *};`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
+            ),
+            line: Some(2),
+        }],
+    );
+}
+
+#[test]
 fn errors_on_extern_crate_std_alias_fs_call() {
     let content = "extern crate std as s;\nfn main() { let _ = s::fs::read_to_string(\"foo\"); }";
     let results = super::super::check_source("src/foo.rs", content, false);
