@@ -6,7 +6,10 @@ fn root_without_workspace_fails() {
         "[package]\nname = \"standalone\"\nversion = \"0.1.0\"\n",
     );
 
-    assert!(super::super::ingest_for_config_checks(&super::helpers::crawl_workspace(root.path())).is_err());
+    assert!(
+        super::super::ingest_for_config_checks(&super::helpers::crawl_workspace(root.path()))
+            .is_err()
+    );
 }
 
 #[test]
@@ -17,7 +20,10 @@ fn missing_workspace_member_fails_closed() {
         "[workspace]\nmembers = [\"logic/missing\"]\n",
     );
 
-    assert!(super::super::ingest_for_config_checks(&super::helpers::crawl_workspace(root.path())).is_err());
+    assert!(
+        super::super::ingest_for_config_checks(&super::helpers::crawl_workspace(root.path()))
+            .is_err()
+    );
 }
 
 #[test]
@@ -28,7 +34,10 @@ fn invalid_workspace_member_glob_fails_closed() {
         "[workspace]\nmembers = [\"logic/[bad\"]\n",
     );
 
-    assert!(super::super::ingest_for_config_checks(&super::helpers::crawl_workspace(root.path())).is_err());
+    assert!(
+        super::super::ingest_for_config_checks(&super::helpers::crawl_workspace(root.path()))
+            .is_err()
+    );
 }
 
 #[test]
@@ -77,19 +86,28 @@ logic-service = { workspace = true }
 
     let input = super::helpers::config_input(root.path());
 
-    assert_eq!(input.crates.len(), 4);
-    assert!(input
-        .crates
-        .iter()
-        .any(|krate| krate.cargo_rel_path == "logic/service/Cargo.toml" && krate.layer.is_some()));
-    assert!(input.dependency_edges.iter().any(|edge| {
-        edge.from_cargo_rel_path == "logic/service/Cargo.toml"
-            && edge.to_cargo_rel_path == "types/core/Cargo.toml"
-    }));
-    assert!(input.dependency_edges.iter().any(|edge| {
-        edge.from_cargo_rel_path == "io/outbound/db/Cargo.toml"
-            && edge.to_cargo_rel_path == "logic/service/Cargo.toml"
-    }));
+    assert_eq!(input.crate_dependency_checks.len(), 4);
+    assert!(
+        input
+            .crate_dependency_checks
+            .iter()
+            .any(
+                |check| check.krate.cargo_rel_path == "logic/service/Cargo.toml"
+                    && check.krate.layer.is_some()
+            )
+    );
+    assert!(contains_bound_edge(
+        &input,
+        "logic/service/Cargo.toml",
+        "types/core/Cargo.toml",
+        "dependencies"
+    ));
+    assert!(contains_bound_edge(
+        &input,
+        "io/outbound/db/Cargo.toml",
+        "logic/service/Cargo.toml",
+        "dependencies"
+    ));
 }
 
 #[test]
@@ -140,37 +158,44 @@ types-core = { path = "../../../types/core", package = "types-core" }
 
     let input = super::helpers::config_input(root.path());
 
-    assert!(input
-        .crates
-        .iter()
-        .any(|krate| krate.cargo_rel_path == "types/core/Cargo.toml"));
-    assert!(input.dependency_edges.iter().any(|edge| {
-        edge.from_cargo_rel_path == "types/core/Cargo.toml"
-            && edge.to_cargo_rel_path == "logic/shared/Cargo.toml"
-    }));
-    assert_eq!(
+    assert!(
         input
-            .dependency_edges
+            .crate_dependency_checks
             .iter()
-            .filter(|edge| edge.from_cargo_rel_path == "io/outbound/db/Cargo.toml"
-                && edge.to_cargo_rel_path == "logic/shared/Cargo.toml")
-            .count(),
+            .any(|check| check.krate.cargo_rel_path == "types/core/Cargo.toml")
+    );
+    assert!(contains_bound_edge(
+        &input,
+        "types/core/Cargo.toml",
+        "logic/shared/Cargo.toml",
+        "dev-dependencies"
+    ));
+    assert_eq!(
+        bound_edge_count(
+            &input,
+            "io/outbound/db/Cargo.toml",
+            "logic/shared/Cargo.toml"
+        ),
         2
     );
-    assert!(input.dependency_edges.iter().any(|edge| {
-        edge.from_cargo_rel_path == "io/outbound/db/Cargo.toml"
-            && edge.to_cargo_rel_path == "logic/shared/Cargo.toml"
-            && edge.kind.label() == "build-dependencies"
-    }));
-    assert!(input.dependency_edges.iter().any(|edge| {
-        edge.from_cargo_rel_path == "io/outbound/db/Cargo.toml"
-            && edge.to_cargo_rel_path == "logic/shared/Cargo.toml"
-            && edge.kind.label() == "target.*.dev-dependencies"
-    }));
-    assert!(input.dependency_edges.iter().any(|edge| {
-        edge.from_cargo_rel_path == "io/outbound/db/Cargo.toml"
-            && edge.to_cargo_rel_path == "types/core/Cargo.toml"
-    }));
+    assert!(contains_bound_edge(
+        &input,
+        "io/outbound/db/Cargo.toml",
+        "logic/shared/Cargo.toml",
+        "build-dependencies"
+    ));
+    assert!(contains_bound_edge(
+        &input,
+        "io/outbound/db/Cargo.toml",
+        "logic/shared/Cargo.toml",
+        "target.*.dev-dependencies"
+    ));
+    assert!(contains_bound_edge(
+        &input,
+        "io/outbound/db/Cargo.toml",
+        "types/core/Cargo.toml",
+        "target.*.build-dependencies"
+    ));
 }
 
 #[test]
@@ -204,8 +229,43 @@ contract = { workspace = true }
 
     let input = super::helpers::config_input(root.path());
 
-    assert!(input.dependency_edges.iter().any(|edge| {
-        edge.from_cargo_rel_path == "logic/service/Cargo.toml"
-            && edge.to_cargo_rel_path == "types/core/Cargo.toml"
-    }));
+    assert!(contains_bound_edge(
+        &input,
+        "logic/service/Cargo.toml",
+        "types/core/Cargo.toml",
+        "dependencies"
+    ));
+}
+
+fn contains_bound_edge(
+    input: &g3rs_apparch_types::G3RsApparchConfigChecksInput,
+    source_cargo_rel_path: &str,
+    target_cargo_rel_path: &str,
+    kind_label: &str,
+) -> bool {
+    input
+        .crate_dependency_checks
+        .iter()
+        .find(|check| check.krate.cargo_rel_path == source_cargo_rel_path)
+        .into_iter()
+        .flat_map(|check| &check.internal_dependencies)
+        .any(|dependency| {
+            dependency.target.cargo_rel_path == target_cargo_rel_path
+                && dependency.kind.label() == kind_label
+        })
+}
+
+fn bound_edge_count(
+    input: &g3rs_apparch_types::G3RsApparchConfigChecksInput,
+    source_cargo_rel_path: &str,
+    target_cargo_rel_path: &str,
+) -> usize {
+    input
+        .crate_dependency_checks
+        .iter()
+        .find(|check| check.krate.cargo_rel_path == source_cargo_rel_path)
+        .into_iter()
+        .flat_map(|check| &check.internal_dependencies)
+        .filter(|dependency| dependency.target.cargo_rel_path == target_cargo_rel_path)
+        .count()
 }

@@ -1,16 +1,13 @@
-use g3rs_apparch_types::{G3RsApparchPatchBypass, G3RsApparchRustPolicyState};
+use g3rs_apparch_types::{G3RsApparchPatchBypassChecksInput, G3RsApparchRustPolicyState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
 const ID: &str = "RS-APPARCH-CONFIG-05";
 
-pub(crate) fn check(
-    patch: &G3RsApparchPatchBypass,
-    rust_policy: &G3RsApparchRustPolicyState,
-    results: &mut Vec<G3CheckResult>,
-) {
+pub(crate) fn check(input: &G3RsApparchPatchBypassChecksInput, results: &mut Vec<G3CheckResult>) {
+    let patch = &input.patch;
     let selector = patch.key.as_str();
-    let reason = match rust_policy {
+    let reason = match &input.rust_policy {
         G3RsApparchRustPolicyState::Parsed { waivers, .. } => waivers
             .iter()
             .find(|waiver| {

@@ -2,26 +2,18 @@
 mod types;
 
 #[cfg(feature = "api")]
-pub use types::G3RsApparchConfigChecksInput;
+pub use types::{
+    G3RsApparchBoundDependency, G3RsApparchConfigChecksInput, G3RsApparchCrate,
+    G3RsApparchDependencyEdge, G3RsApparchDependencyKind, G3RsApparchExternalDependency,
+    G3RsApparchLayer, G3RsApparchPatchBypass, G3RsApparchPatchKind, G3RsApparchPublicItem,
+    G3RsApparchPublicItemKind, G3RsApparchRustPolicyState, G3RsApparchSameLayerDependencyEdge,
+    G3RsApparchSourceChecksInput,
+};
 #[cfg(feature = "api")]
-pub use types::G3RsApparchCrate;
+pub type G3RsApparchCrateDependencyChecksInput = types::G3RsApparchCrateDependencyChecksInput;
 #[cfg(feature = "api")]
-pub use types::G3RsApparchDependencyEdge;
+pub type G3RsApparchCratePurityChecksInput = types::G3RsApparchCratePurityChecksInput;
 #[cfg(feature = "api")]
-pub use types::G3RsApparchDependencyKind;
+pub type G3RsApparchPatchBypassChecksInput = types::G3RsApparchPatchBypassChecksInput;
 #[cfg(feature = "api")]
-pub use types::G3RsApparchExternalDependency;
-#[cfg(feature = "api")]
-pub use types::G3RsApparchLayer;
-#[cfg(feature = "api")]
-pub use types::G3RsApparchPatchBypass;
-#[cfg(feature = "api")]
-pub use types::G3RsApparchPatchKind;
-#[cfg(feature = "api")]
-pub use types::G3RsApparchPublicItem;
-#[cfg(feature = "api")]
-pub use types::G3RsApparchPublicItemKind;
-#[cfg(feature = "api")]
-pub use types::G3RsApparchRustPolicyState;
-#[cfg(feature = "api")]
-pub use types::G3RsApparchSourceChecksInput;
+pub type G3RsApparchSameLayerCyclesChecksInput = types::G3RsApparchSameLayerCyclesChecksInput;

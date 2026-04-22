@@ -1,5 +1,6 @@
 use g3rs_apparch_types::{
-    G3RsApparchPatchBypass, G3RsApparchPatchKind, G3RsApparchRustPolicyState,
+    G3RsApparchPatchBypass, G3RsApparchPatchBypassChecksInput, G3RsApparchPatchKind,
+    G3RsApparchRustPolicyState,
 };
 use guardrail3_check_types::G3CheckResult;
 
@@ -19,6 +20,12 @@ pub(super) fn run_rule(
     rust_policy: &G3RsApparchRustPolicyState,
 ) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
-    crate::rs_apparch_config_05_patch_replace_bypass::check(patch, rust_policy, &mut results);
+    crate::rs_apparch_config_05_patch_replace_bypass::check(
+        &G3RsApparchPatchBypassChecksInput {
+            patch: patch.clone(),
+            rust_policy: rust_policy.clone(),
+        },
+        &mut results,
+    );
     results
 }

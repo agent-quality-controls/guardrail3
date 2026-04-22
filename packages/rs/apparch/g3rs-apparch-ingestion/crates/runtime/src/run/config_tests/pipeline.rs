@@ -24,12 +24,18 @@ version = "0.1.0"
 db-outbound = { path = "../../io/outbound/db", package = "db-outbound" }
 "#,
     );
-    super::helpers::write(root.path().join("logic/service/src/lib.rs"), "pub fn orchestrate() {}\n");
+    super::helpers::write(
+        root.path().join("logic/service/src/lib.rs"),
+        "pub fn orchestrate() {}\n",
+    );
     super::helpers::write(
         root.path().join("io/outbound/db/Cargo.toml"),
         "[package]\nname = \"db-outbound\"\nversion = \"0.1.0\"\n",
     );
-    super::helpers::write(root.path().join("io/outbound/db/src/lib.rs"), "pub trait DbTrait {}\n");
+    super::helpers::write(
+        root.path().join("io/outbound/db/src/lib.rs"),
+        "pub trait DbTrait {}\n",
+    );
 
     let results = check_config(&super::helpers::config_input(root.path()));
 

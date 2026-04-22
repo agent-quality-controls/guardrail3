@@ -1,8 +1,7 @@
-use std::collections::BTreeMap;
-
 use g3rs_apparch_types::{
-    G3RsApparchConfigChecksInput, G3RsApparchCrate, G3RsApparchDependencyEdge,
-    G3RsApparchDependencyKind, G3RsApparchLayer, G3RsApparchRustPolicyState,
+    G3RsApparchBoundDependency, G3RsApparchConfigChecksInput, G3RsApparchCrate,
+    G3RsApparchCrateDependencyChecksInput, G3RsApparchDependencyKind, G3RsApparchLayer,
+    G3RsApparchPatchBypassChecksInput, G3RsApparchSameLayerCyclesChecksInput,
 };
 use guardrail3_check_types::G3CheckResult;
 
@@ -16,34 +15,47 @@ fn crate_input(layer: G3RsApparchLayer, cargo_rel_path: &str) -> G3RsApparchCrat
 }
 
 pub(super) fn input(edges: &[(&str, &str)]) -> G3RsApparchConfigChecksInput {
+    let crates = vec![
+        crate_input(G3RsApparchLayer::Logic, "logic/service/Cargo.toml"),
+        crate_input(G3RsApparchLayer::Logic, "logic/shared/Cargo.toml"),
+        crate_input(
+            G3RsApparchLayer::Logic,
+            "logic/validate-command/crates/runtime/Cargo.toml",
+        ),
+        crate_input(
+            G3RsApparchLayer::Logic,
+            "logic/validate-command/crates/assertions/Cargo.toml",
+        ),
+        crate_input(G3RsApparchLayer::IoInbound, "io/inbound/http/Cargo.toml"),
+        crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml"),
+        crate_input(G3RsApparchLayer::Types, "types/core/Cargo.toml"),
+    ];
+
     G3RsApparchConfigChecksInput {
-        crates: vec![
-            crate_input(G3RsApparchLayer::Logic, "logic/service/Cargo.toml"),
-            crate_input(G3RsApparchLayer::Logic, "logic/shared/Cargo.toml"),
-            crate_input(
-                G3RsApparchLayer::Logic,
-                "logic/validate-command/crates/runtime/Cargo.toml",
-            ),
-            crate_input(
-                G3RsApparchLayer::Logic,
-                "logic/validate-command/crates/assertions/Cargo.toml",
-            ),
-            crate_input(G3RsApparchLayer::IoInbound, "io/inbound/http/Cargo.toml"),
-            crate_input(G3RsApparchLayer::IoOutbound, "io/outbound/db/Cargo.toml"),
-            crate_input(G3RsApparchLayer::Types, "types/core/Cargo.toml"),
-        ],
-        dependency_edges: edges
+        crate_dependency_checks: crates
             .iter()
-            .map(|(from, to)| G3RsApparchDependencyEdge {
-                from_cargo_rel_path: (*from).to_owned(),
-                to_cargo_rel_path: (*to).to_owned(),
-                dep_name: (*to).to_owned(),
-                kind: G3RsApparchDependencyKind::Dependency,
+            .map(|krate| G3RsApparchCrateDependencyChecksInput {
+                krate: krate.clone(),
+                internal_dependencies: edges
+                    .iter()
+                    .filter(|(from, _)| *from == krate.cargo_rel_path)
+                    .filter_map(|(_, to)| {
+                        crates
+                            .iter()
+                            .find(|target| target.cargo_rel_path == *to)
+                            .cloned()
+                            .map(|target| G3RsApparchBoundDependency {
+                                dep_name: target.crate_name.clone(),
+                                kind: G3RsApparchDependencyKind::Dependency,
+                                target,
+                            })
+                    })
+                    .collect(),
             })
             .collect(),
-        external_dependencies: Vec::new(),
-        patch_bypasses: Vec::new(),
-        rust_policy: G3RsApparchRustPolicyState::Missing,
+        crate_purity_checks: Vec::new(),
+        patch_bypass_checks: Vec::<G3RsApparchPatchBypassChecksInput>::new(),
+        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput { edges: Vec::new() },
     }
 }
 
@@ -52,28 +64,13 @@ pub(super) fn run_rule(
     source_cargo_rel_path: &str,
 ) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
-    let crates_by_path = input
-        .crates
+    let crate_check = input
+        .crate_dependency_checks
         .iter()
-        .map(|krate| (krate.cargo_rel_path.clone(), krate))
-        .collect::<BTreeMap<_, _>>();
-    let krate = input
-        .crates
-        .first()
-        .filter(|krate| krate.cargo_rel_path == source_cargo_rel_path)
-        .or_else(|| {
-            input.crates
-                .iter()
-                .find(|krate| krate.cargo_rel_path == source_cargo_rel_path)
-        })
+        .find(|check| check.krate.cargo_rel_path == source_cargo_rel_path)
         .expect("logic test input should contain the requested source crate");
 
-    crate::rs_apparch_config_02_logic_dependency_direction::check(
-        krate,
-        &crates_by_path,
-        &input.dependency_edges,
-        &mut results,
-    );
+    crate::rs_apparch_config_02_logic_dependency_direction::check(crate_check, &mut results);
 
     results
 }
