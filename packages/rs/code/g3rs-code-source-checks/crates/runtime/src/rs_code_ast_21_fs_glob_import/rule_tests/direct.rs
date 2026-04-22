@@ -64,6 +64,14 @@ fn does_not_leak_std_fs_alias_across_sibling_functions_for_glob_import() {
 }
 
 #[test]
+fn does_not_leak_std_fs_alias_from_inner_block_scope_for_glob_import() {
+    let content = "fn probe() {\n    {\n        use std::fs as fs2;\n    }\n    use fs2::*;\n}";
+    let results = super::super::check_source("src/foo.rs", content, false);
+
+    assert_rule_results(&results, &[]);
+}
+
+#[test]
 fn errors_on_grouped_std_fs_star_import() {
     let results = super::super::check_source("src/foo.rs", "use std::fs::{*};\nfn main() {}", false);
 

@@ -3,10 +3,8 @@ use std::collections::BTreeSet;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
-use super::{
-    collect_std_aliases, collect_std_extern_crate_alias, TestContextAware,
-};
 use super::super::helpers::span_line;
+use super::support::{TestContextAware, collect_std_aliases, collect_std_extern_crate_alias};
 
 pub(super) struct InlineStdFsVisitor {
     pub(super) out: Vec<usize>,
@@ -52,6 +50,14 @@ impl Default for InlineStdFsVisitor {
 }
 
 impl<'source> Visit<'source> for InlineStdFsVisitor {
+    fn visit_block(&mut self, block: &'source syn::Block) {
+        let std_aliases = self.std_aliases.clone();
+        let fs_aliases = self.fs_aliases.clone();
+        syn::visit::visit_block(self, block);
+        self.std_aliases = std_aliases;
+        self.fs_aliases = fs_aliases;
+    }
+
     fn visit_item_mod(&mut self, item_mod: &'source syn::ItemMod) {
         let was = self.save_and_apply_test_context(&item_mod.attrs);
         let std_aliases = self.std_aliases.clone();
