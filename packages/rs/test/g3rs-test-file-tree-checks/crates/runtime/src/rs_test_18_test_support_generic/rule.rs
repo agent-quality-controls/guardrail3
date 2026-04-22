@@ -42,17 +42,12 @@ fn calls_local_helper(
     local_helpers: &BTreeSet<&str>,
 ) -> bool {
     function.body.call_paths.iter().any(|path| {
-        if path.len() != 1 {
-            return false;
-        }
-        let name = &path[0];
-        (local_helpers.contains(name.as_str()) && !function.body.shadowed_idents.contains(name))
-            || function
-                .body
-                .local_call_aliases
-                .get(name)
-                .and_then(|target| target.last())
-                .is_some_and(|target| local_helpers.contains(target.as_str()))
+        call_path_uses_local_helper(
+            path,
+            local_helpers,
+            &function.body.local_call_aliases,
+            &function.body.shadowed_idents,
+        )
     })
 }
 
@@ -338,9 +333,12 @@ fn semantic_helper_names<'a>(functions: &'a [FunctionInfo]) -> BTreeSet<&'a str>
                 continue;
             }
             if function.body.call_paths.iter().any(|path| {
-                path.len() == 1
-                    && semantic_helpers.contains(path[0].as_str())
-                    && !function.body.shadowed_idents.contains(&path[0])
+                call_path_uses_local_helper(
+                    path,
+                    &semantic_helpers,
+                    &function.body.local_call_aliases,
+                    &function.body.shadowed_idents,
+                )
             }) {
                 changed |= semantic_helpers.insert(function.name.as_str());
             }
@@ -351,4 +349,26 @@ fn semantic_helper_names<'a>(functions: &'a [FunctionInfo]) -> BTreeSet<&'a str>
     }
 
     semantic_helpers
+}
+
+fn call_path_uses_local_helper(
+    path: &[String],
+    local_helpers: &BTreeSet<&str>,
+    local_call_aliases: &std::collections::BTreeMap<String, Vec<String>>,
+    shadowed_idents: &BTreeSet<String>,
+) -> bool {
+    match path {
+        [name] => {
+            (local_helpers.contains(name.as_str()) && !shadowed_idents.contains(name))
+                || local_call_aliases
+                    .get(name)
+                    .and_then(|target| target.last())
+                    .is_some_and(|target| local_helpers.contains(target.as_str()))
+        }
+        [first, ..] if matches!(first.as_str(), "crate" | "self" | "super") => {
+            path.last()
+                .is_some_and(|name| local_helpers.contains(name.as_str()))
+        }
+        _ => false,
+    }
 }
