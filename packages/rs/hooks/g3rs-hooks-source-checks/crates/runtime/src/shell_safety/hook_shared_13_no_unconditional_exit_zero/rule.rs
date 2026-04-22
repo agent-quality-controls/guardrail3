@@ -255,7 +255,7 @@ fn strip_inline_comment(line: &str) -> &str {
 }
 
 fn opens_if_scope(line: &str) -> bool {
-    line.starts_with("if ") && !closes_if_scope(line)
+    starts_shell_keyword(line, "if") && !closes_if_scope(line)
 }
 
 fn closes_if_scope(line: &str) -> bool {
@@ -267,7 +267,7 @@ fn closes_if_scope(line: &str) -> bool {
 }
 
 fn opens_case_scope(line: &str) -> bool {
-    line.starts_with("case ") && !closes_case_scope(line)
+    starts_shell_keyword(line, "case") && !closes_case_scope(line)
 }
 
 fn closes_case_scope(line: &str) -> bool {
@@ -278,11 +278,11 @@ fn closes_case_scope(line: &str) -> bool {
 }
 
 fn is_same_line_scoped_control_flow(line: &str) -> bool {
-    (line.starts_with("if ")
+    (starts_shell_keyword(line, "if")
         && line.contains("then")
         && closes_if_scope(line)
         && line.ends_with("fi"))
-        || (line.starts_with("case ")
+        || (starts_shell_keyword(line, "case")
             && line.contains(" in ")
             && closes_case_scope(line)
             && line.ends_with("esac"))

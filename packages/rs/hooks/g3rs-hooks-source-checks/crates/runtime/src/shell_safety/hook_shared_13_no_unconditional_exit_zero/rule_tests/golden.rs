@@ -151,6 +151,48 @@ fn passes_when_same_line_case_body_contains_exit_zero() {
 }
 
 #[test]
+fn passes_when_tab_delimited_same_line_if_body_contains_exit_zero() {
+    let results = run_case("if\ttrue; then exit 0; fi\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("no unconditional `exit 0` bypass in `.githooks/pre-commit`"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn passes_when_tab_delimited_same_line_case_body_contains_exit_zero() {
+    let results = run_case("case\t\"$x\" in a) exit 0 ;; esac\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("no unconditional `exit 0` bypass in `.githooks/pre-commit`"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn passes_when_tab_delimited_case_opener_contains_exit_zero() {
+    let results = run_case("case\t\"$x\" in\n    a) exit 0 ;;\nesac\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("no unconditional `exit 0` bypass in `.githooks/pre-commit`"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn warns_when_same_line_loop_terminator_has_and_tail_exit_zero() {
     let results = run_case("while true; do\n    :\ndone && exit 0\n");
     assertions::assert_rule_results(
