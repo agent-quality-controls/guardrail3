@@ -4,9 +4,11 @@ pub(crate) fn inline_comment_text(line: &str) -> Option<&str> {
     let mut single_quoted = false;
     let mut double_quoted = false;
     let mut escaped = false;
+    let mut prev_was_whitespace = true;
 
     for (index, ch) in line.char_indices() {
-        if escaped {
+        let escaped_char = escaped;
+        if escaped_char {
             escaped = false;
             continue;
         }
@@ -21,7 +23,7 @@ pub(crate) fn inline_comment_text(line: &str) -> Option<&str> {
             '"' if !single_quoted => {
                 double_quoted = !double_quoted;
             }
-            '#' if !single_quoted && !double_quoted => {
+            '#' if !single_quoted && !double_quoted && prev_was_whitespace => {
                 if index == 0 && line.starts_with("#!") {
                     return None;
                 }
@@ -29,6 +31,7 @@ pub(crate) fn inline_comment_text(line: &str) -> Option<&str> {
             }
             _ => {}
         }
+        prev_was_whitespace = ch.is_whitespace() && !escaped_char;
     }
 
     None

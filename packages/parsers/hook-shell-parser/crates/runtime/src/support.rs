@@ -309,24 +309,25 @@ pub(super) fn strip_inline_comment(line: &str) -> &str {
     let mut prev_was_whitespace = true;
 
     for (index, (idx, ch)) in chars.iter().copied().enumerate() {
+        let escaped = is_escaped(chars.as_slice(), index);
         match ch {
-            '\'' if !double_quoted && !is_escaped(chars.as_slice(), index) => {
+            '\'' if !double_quoted && !escaped => {
                 single_quoted = !single_quoted;
             }
-            '"' if !single_quoted && !is_escaped(chars.as_slice(), index) => {
+            '"' if !single_quoted && !escaped => {
                 double_quoted = !double_quoted;
             }
             '#'
                 if !single_quoted
                     && !double_quoted
                     && prev_was_whitespace
-                    && !is_escaped(chars.as_slice(), index) =>
+                    && !escaped =>
             {
                 return &line[..idx];
             }
             _ => {}
         }
-        prev_was_whitespace = ch.is_whitespace();
+        prev_was_whitespace = ch.is_whitespace() && !escaped;
     }
 
     line
@@ -510,26 +511,115 @@ pub(super) fn inline_command_after_function_definition(line: &str) -> Option<&st
 }
 
 fn function_definition_closer_index(fragment: &str) -> Option<usize> {
-    let mut single_quoted = false;
-    let mut double_quoted = false;
+    let chars: Vec<(usize, char)> = fragment.char_indices().collect();
     let mut brace_depth = 1usize;
+    let mut contexts = vec![ShellTailContext::Function];
+    let mut index = 0usize;
+    let mut escaped = false;
 
-    for (idx, ch) in fragment.char_indices() {
-        match ch {
-            '\'' if !double_quoted => single_quoted = !single_quoted,
-            '"' if !single_quoted => double_quoted = !double_quoted,
-            '{' if !single_quoted && !double_quoted => brace_depth += 1,
-            '}' if !single_quoted && !double_quoted => {
-                brace_depth = brace_depth.saturating_sub(1);
-                if brace_depth == 0 {
-                    return Some(idx);
+    while let Some((idx, ch)) = chars.get(index).copied() {
+        if escaped {
+            escaped = false;
+            index += 1;
+            continue;
+        }
+
+        if ch == '\\' && !matches!(contexts.last(), Some(ShellTailContext::SingleQuote)) {
+            escaped = true;
+            index += 1;
+            continue;
+        }
+
+        match contexts.last().copied() {
+            Some(ShellTailContext::SingleQuote) => {
+                if ch == '\'' {
+                    let _ = contexts.pop();
                 }
             }
-            _ => {}
+            Some(ShellTailContext::DoubleQuote) => {
+                if ch == '"' {
+                    let _ = contexts.pop();
+                } else if ch == '$'
+                    && let Some(next) = start_shell_tail_context(chars.as_slice(), index)
+                {
+                    contexts.push(next);
+                    index += 2;
+                    continue;
+                }
+            }
+            Some(ShellTailContext::CommandSubstitution) => {
+                if ch == '\'' {
+                    contexts.push(ShellTailContext::SingleQuote);
+                } else if ch == '"' {
+                    contexts.push(ShellTailContext::DoubleQuote);
+                } else if ch == '$'
+                    && let Some(next) = start_shell_tail_context(chars.as_slice(), index)
+                {
+                    contexts.push(next);
+                    index += 2;
+                    continue;
+                } else if ch == ')' {
+                    let _ = contexts.pop();
+                }
+            }
+            Some(ShellTailContext::ParameterExpansion) => {
+                if ch == '\'' {
+                    contexts.push(ShellTailContext::SingleQuote);
+                } else if ch == '"' {
+                    contexts.push(ShellTailContext::DoubleQuote);
+                } else if ch == '$'
+                    && let Some(next) = start_shell_tail_context(chars.as_slice(), index)
+                {
+                    contexts.push(next);
+                    index += 2;
+                    continue;
+                } else if ch == '}' {
+                    let _ = contexts.pop();
+                }
+            }
+            Some(ShellTailContext::Function) | None => match ch {
+                '\'' => contexts.push(ShellTailContext::SingleQuote),
+                '"' => contexts.push(ShellTailContext::DoubleQuote),
+                '$' => {
+                    if let Some(next) = start_shell_tail_context(chars.as_slice(), index) {
+                        contexts.push(next);
+                        index += 2;
+                        continue;
+                    }
+                }
+                '{' => brace_depth += 1,
+                '}' => {
+                    brace_depth = brace_depth.saturating_sub(1);
+                    if brace_depth == 0 {
+                        return Some(idx);
+                    }
+                }
+                _ => {}
+            },
         }
+
+        index += 1;
     }
 
     None
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ShellTailContext {
+    Function,
+    SingleQuote,
+    DoubleQuote,
+    CommandSubstitution,
+    ParameterExpansion,
+}
+
+fn start_shell_tail_context(chars: &[(usize, char)], index: usize) -> Option<ShellTailContext> {
+    let next = chars.get(index + 1)?.1;
+    match next {
+        '(' => Some(ShellTailContext::CommandSubstitution),
+        '{' => Some(ShellTailContext::ParameterExpansion),
+        _ => None,
+    }
 }
 
 pub(super) fn function_scope_depth_after_definition(line: &str) -> usize {
