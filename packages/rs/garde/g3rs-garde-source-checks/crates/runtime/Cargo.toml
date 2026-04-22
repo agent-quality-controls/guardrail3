@@ -30,11 +30,6 @@ shared = true
 g3rs-garde-types = { path = "../../../g3rs-garde-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 guardrail3-reason-policy = { path = "../../../../../shared/reason-policy", version = "0.0.0" }
-proc-macro2 = { version = "1", features = ["span-locations"] }
-quote = "1.0.45"
-syn = { version = "2", features = ["full", "parsing", "visit"] }
 
 [dev-dependencies]
 g3rs-garde-source-checks-assertions = { path = "../assertions" }
-guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
-tempfile = "3"

@@ -1,0 +1,343 @@
+use std::collections::{BTreeMap, BTreeSet};
+
+use g3rs_garde_types::{
+    G3RsGardeBoundaryFieldSite, G3RsGardeBoundaryKind, G3RsGardeDerivedBoundaryTypeSite,
+    G3RsGardeInputFailureSite, G3RsGardeManualDeserializeImplSite, G3RsGardeQueryAsMacroSite,
+    G3RsGardeRustPolicyInput, G3RsGardeWaiver, G3RsSourceFile,
+};
+
+use super::parse;
+
+#[derive(Debug, Clone, Default)]
+pub(crate) struct AnalyzedGardeSource {
+    pub(crate) input_failures: Vec<G3RsGardeInputFailureSite>,
+    pub(crate) struct_targets: Vec<G3RsGardeDerivedBoundaryTypeSite>,
+    pub(crate) enum_targets: Vec<G3RsGardeDerivedBoundaryTypeSite>,
+    pub(crate) manual_deserialize_impls: Vec<G3RsGardeManualDeserializeImplSite>,
+    pub(crate) boundary_fields: Vec<G3RsGardeBoundaryFieldSite>,
+    pub(crate) query_as_macros: Vec<G3RsGardeQueryAsMacroSite>,
+}
+
+#[derive(Debug, Clone)]
+struct ParsedSourceFile {
+    rel_path: String,
+    parsed: parse::ParsedGardeFile,
+}
+
+pub(crate) fn analyze_source_files(
+    source_files: &[G3RsSourceFile],
+    rust_policy: &G3RsGardeRustPolicyInput,
+) -> AnalyzedGardeSource {
+    let mut input_failures = Vec::new();
+    let rust_policy = resolve_rust_policy(rust_policy, &mut input_failures);
+
+    let mut parsed_files = Vec::new();
+    let mut ordered = source_files.to_vec();
+    ordered.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
+
+    for source_file in &ordered {
+        let content = match crate::fs::read_to_string(&source_file.abs_path) {
+            Ok(content) => content,
+            Err(read_error) => {
+                input_failures.push(G3RsGardeInputFailureSite {
+                    rel_path: source_file.rel_path.clone(),
+                    message: format!(
+                        "Failed to read Rust source file for garde checks: {read_error}"
+                    ),
+                });
+                continue;
+            }
+        };
+        let source = match parse::parse_rust_file(&content) {
+            Ok(source) => source,
+            Err(parse_error) => {
+                input_failures.push(G3RsGardeInputFailureSite {
+                    rel_path: source_file.rel_path.clone(),
+                    message: format!(
+                        "Failed to parse Rust source file for garde checks: {parse_error}"
+                    ),
+                });
+                continue;
+            }
+        };
+        parsed_files.push(ParsedSourceFile {
+            rel_path: source_file.rel_path.clone(),
+            parsed: parse::analyze(&source),
+        });
+    }
+
+    let mut global_type_validation_map = BTreeMap::<String, (bool, bool)>::new();
+    let mut simple_type_validation_map = BTreeMap::<String, Vec<(bool, bool)>>::new();
+    for parsed_file in &parsed_files {
+        for (type_name, state) in &parsed_file.parsed.type_validation_map {
+            let _ = global_type_validation_map.insert(type_name.clone(), *state);
+            let simple_name = type_name
+                .rsplit("::")
+                .next()
+                .unwrap_or(type_name.as_str())
+                .to_owned();
+            simple_type_validation_map
+                .entry(simple_name)
+                .or_default()
+                .push(*state);
+        }
+    }
+
+    let global_manual_validate_types: BTreeSet<_> = parsed_files
+        .iter()
+        .flat_map(|parsed_file| parsed_file.parsed.manual_validate_impls.iter().cloned())
+        .collect();
+    let mut simple_manual_validate_counts = BTreeMap::<String, usize>::new();
+    for type_name in &global_manual_validate_types {
+        let simple_name = type_name
+            .rsplit("::")
+            .next()
+            .unwrap_or(type_name.as_str())
+            .to_owned();
+        *simple_manual_validate_counts
+            .entry(simple_name)
+            .or_insert(0) += 1;
+    }
+
+    let mut struct_targets = Vec::new();
+    let mut enum_targets = Vec::new();
+    let mut manual_deserialize_impls = Vec::new();
+    let mut boundary_fields = Vec::new();
+    let mut query_as_macros = Vec::new();
+
+    for parsed_file in parsed_files {
+        for target in parsed_file.parsed.derived_types {
+            let boundary_kind = match target.boundary_kind {
+                parse::BoundaryKind::Struct => G3RsGardeBoundaryKind::Struct,
+                parse::BoundaryKind::Enum => G3RsGardeBoundaryKind::Enum,
+            };
+            let site = G3RsGardeDerivedBoundaryTypeSite {
+                rel_path: parsed_file.rel_path.clone(),
+                line: target.line,
+                name: target.name,
+                boundary_kind,
+                boundary_macros: target.boundary_macros,
+                has_validate: target.has_validate_derive,
+            };
+            match boundary_kind {
+                G3RsGardeBoundaryKind::Struct if target.has_non_primitive_fields => {
+                    struct_targets.push(site)
+                }
+                G3RsGardeBoundaryKind::Enum if target.has_non_primitive_fields => {
+                    enum_targets.push(site)
+                }
+                _ => {}
+            }
+        }
+
+        for manual_impl in parsed_file.parsed.manual_deserialize_impls {
+            let resolved = resolve_validation_state(
+                std::slice::from_ref(&manual_impl.type_name),
+                &global_type_validation_map,
+                &simple_type_validation_map,
+                &global_manual_validate_types,
+                &simple_manual_validate_counts,
+            );
+            let has_manual_validate = parsed_file
+                .parsed
+                .manual_validate_impls
+                .contains(&manual_impl.type_name);
+            let needs_validate = resolved.map_or(true, |(has_non_primitive, _)| has_non_primitive);
+            let has_validate =
+                resolved.is_some_and(|(_, has_validate)| has_validate) || has_manual_validate;
+            manual_deserialize_impls.push(G3RsGardeManualDeserializeImplSite {
+                rel_path: parsed_file.rel_path.clone(),
+                line: manual_impl.line,
+                type_name: manual_impl.type_name,
+                needs_validate,
+                has_validate,
+            });
+        }
+
+        for field in parsed_file.parsed.boundary_fields {
+            let boundary_has_validate = field.boundary_has_validate_derive
+                || resolve_validation_state(
+                    std::slice::from_ref(&field.boundary_name),
+                    &global_type_validation_map,
+                    &simple_type_validation_map,
+                    &global_manual_validate_types,
+                    &simple_manual_validate_counts,
+                )
+                .is_some_and(|(_, has_validate)| has_validate);
+            if !boundary_has_validate {
+                continue;
+            }
+
+            let nested_validated = resolve_validation_state(
+                &field.candidate_type_names,
+                &global_type_validation_map,
+                &simple_type_validation_map,
+                &global_manual_validate_types,
+                &simple_manual_validate_counts,
+            )
+            .is_some_and(|(needs_validate, has_validate)| needs_validate && has_validate);
+
+            boundary_fields.push(G3RsGardeBoundaryFieldSite {
+                rel_path: parsed_file.rel_path.clone(),
+                line: field.line,
+                boundary_name: field.boundary_name,
+                field_name: field.field_name,
+                field_type: field.field_type,
+                requires_field_validation: field.requires_field_validation,
+                nested_validated,
+                has_garde_skip: field.has_garde_skip,
+                has_garde_dive: field.has_garde_dive,
+                has_meaningful_garde_rule: field.has_meaningful_garde_rule,
+                uses_context: field.uses_context,
+                boundary_has_context: field.boundary_has_context,
+            });
+        }
+
+        for macro_use in parsed_file.parsed.query_as_macros {
+            let selector = format!("{}@L{}", macro_use.macro_name, macro_use.line);
+            query_as_macros.push(G3RsGardeQueryAsMacroSite {
+                rel_path: parsed_file.rel_path.clone(),
+                line: macro_use.line,
+                macro_name: macro_use.macro_name,
+                policy_resolved: rust_policy.is_some(),
+                waiver_reason: rust_policy.and_then(|waivers: &[G3RsGardeWaiver]| {
+                    waivers
+                        .iter()
+                        .find(|waiver| {
+                            waiver.rule == "RS-GARDE-SOURCE-04"
+                                && waiver.file == parsed_file.rel_path
+                                && waiver.selector == selector
+                        })
+                        .map(|waiver| waiver.reason.clone())
+                }),
+            });
+        }
+    }
+
+    struct_targets.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
+    enum_targets.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
+    manual_deserialize_impls.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
+    boundary_fields.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
+    query_as_macros.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
+
+    AnalyzedGardeSource {
+        input_failures,
+        struct_targets,
+        enum_targets,
+        manual_deserialize_impls,
+        boundary_fields,
+        query_as_macros,
+    }
+}
+
+fn resolve_validation_state(
+    candidate_names: &[String],
+    global_type_validation_map: &BTreeMap<String, (bool, bool)>,
+    simple_type_validation_map: &BTreeMap<String, Vec<(bool, bool)>>,
+    global_manual_validate_types: &BTreeSet<String>,
+    simple_manual_validate_counts: &BTreeMap<String, usize>,
+) -> Option<(bool, bool)> {
+    for candidate_name in candidate_names {
+        if let Some((has_non_primitive, has_validate_derive)) = resolve_exact_validation_state(
+            candidate_name,
+            global_type_validation_map,
+            global_manual_validate_types,
+        ) {
+            return Some((has_non_primitive, has_validate_derive));
+        }
+
+        let stripped_candidate = strip_local_path_prefixes(candidate_name);
+        if let Some((has_non_primitive, has_validate_derive)) =
+            stripped_candidate.and_then(|local_candidate| {
+                resolve_exact_validation_state(
+                    local_candidate,
+                    global_type_validation_map,
+                    global_manual_validate_types,
+                )
+            })
+        {
+            return Some((has_non_primitive, has_validate_derive));
+        }
+
+        if candidate_name.contains("::") && stripped_candidate.is_none() {
+            continue;
+        }
+
+        let simple_name = stripped_candidate
+            .unwrap_or(candidate_name.as_str())
+            .rsplit("::")
+            .next()
+            .unwrap_or(candidate_name.as_str());
+        if let Some(states) = simple_type_validation_map.get(simple_name) {
+            if states.len() == 1 {
+                return Some((
+                    states[0].0,
+                    states[0].1
+                        || simple_manual_validate_counts.get(simple_name).copied() == Some(1),
+                ));
+            }
+        }
+    }
+    None
+}
+
+fn resolve_exact_validation_state(
+    candidate_name: &str,
+    global_type_validation_map: &BTreeMap<String, (bool, bool)>,
+    global_manual_validate_types: &BTreeSet<String>,
+) -> Option<(bool, bool)> {
+    if let Some((has_non_primitive, has_validate_derive)) =
+        global_type_validation_map.get(candidate_name)
+    {
+        return Some((
+            *has_non_primitive,
+            *has_validate_derive || global_manual_validate_types.contains(candidate_name),
+        ));
+    }
+    None
+}
+
+fn strip_local_path_prefixes(candidate_name: &str) -> Option<&str> {
+    let mut stripped = candidate_name;
+    let mut changed = false;
+    loop {
+        if let Some(rest) = stripped.strip_prefix("crate::") {
+            stripped = rest;
+            changed = true;
+            continue;
+        }
+        if let Some(rest) = stripped.strip_prefix("self::") {
+            stripped = rest;
+            changed = true;
+            continue;
+        }
+        if let Some(rest) = stripped.strip_prefix("super::") {
+            stripped = rest;
+            changed = true;
+            continue;
+        }
+        break;
+    }
+    changed.then_some(stripped)
+}
+
+fn resolve_rust_policy<'a>(
+    input: &'a G3RsGardeRustPolicyInput,
+    input_failures: &mut Vec<G3RsGardeInputFailureSite>,
+) -> Option<&'a [G3RsGardeWaiver]> {
+    match input {
+        G3RsGardeRustPolicyInput::Missing => Some(&[]),
+        G3RsGardeRustPolicyInput::Parsed {
+            rel_path: _,
+            garde_enabled: _,
+            waivers,
+        } => Some(waivers.as_slice()),
+        G3RsGardeRustPolicyInput::Invalid { rel_path, message } => {
+            input_failures.push(G3RsGardeInputFailureSite {
+                rel_path: rel_path.clone(),
+                message: message.clone(),
+            });
+            None
+        }
+    }
+}

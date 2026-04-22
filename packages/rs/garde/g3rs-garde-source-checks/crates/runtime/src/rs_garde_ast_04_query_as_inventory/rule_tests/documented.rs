@@ -2,14 +2,11 @@ use g3rs_garde_source_checks_assertions::rs_garde_ast_04_query_as_inventory::rul
 
 #[test]
 fn inventories_documented_query_as_usages() {
-    let guardrail = "profile = \"service\"\n\n[[waivers]]\nrule = \"RS-GARDE-SOURCE-04\"\nfile = \"src/db.rs\"\nselector = \"sqlx::query_as@L4\"\nreason = \"Temporary SQLx row mapping until validated DTO extraction lands.\"\n\n[[waivers]]\nrule = \"RS-GARDE-SOURCE-04\"\nfile = \"src/db.rs\"\nselector = \"qa@L5\"\nreason = \"Temporary SQLx row mapping until validated DTO extraction lands.\"\n";
-    let fixture = super::helpers::fixture(
-        &[(
-            "src/db.rs",
-            "use sqlx::query_as as qa;\n\nfn load() {\n    let _row = sqlx::query_as!(User, \"select 1\");\n    let _row2 = qa!(User, \"select 2\");\n}\n",
-        )],
-        guardrail,
-    );
+    let reason = "Temporary SQLx row mapping until validated DTO extraction lands.";
+    let fixture = super::helpers::fixture(vec![
+        super::helpers::macro_use("src/db.rs", 4, "sqlx::query_as", true, Some(reason)),
+        super::helpers::macro_use("src/db.rs", 5, "qa", true, Some(reason)),
+    ]);
 
     let results = fixture.run();
     assertions::assert_rule_results(

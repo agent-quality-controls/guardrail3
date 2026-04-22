@@ -1,8 +1,8 @@
 use quote::ToTokens;
 use syn::spanned::Spanned;
 
-use super::BoundaryField;
 use super::aliases::{path_to_string, token_stream_uses_ctx_variable};
+use super::analysis::BoundaryField;
 
 #[derive(Default)]
 struct GardeAttrSummary {
@@ -106,7 +106,7 @@ fn collect_fields(
                     .ident
                     .as_ref()
                     .map(std::string::ToString::to_string)
-                    .expect("named field");
+                    .expect("named field fixture should provide an identifier");
                 boundary_field(
                     field,
                     boundary_name,

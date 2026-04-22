@@ -2,13 +2,10 @@ use g3rs_garde_source_checks_assertions::rs_garde_10_input_failures::rule as ass
 
 #[test]
 fn reports_malformed_guardrail_config() {
-    let fixture = super::helpers::invalid_policy_fixture(
-        &[(
-            "src/lib.rs",
-            "use sqlx::query_as;\nfn load() { let _ = query_as!(User, \"select 1\"); }\n",
-        )],
+    let fixture = super::helpers::fixture(vec![super::helpers::failure(
+        "guardrail3-rs.toml",
         "Failed to parse `guardrail3-rs.toml` for garde Rust policy resolution: invalid guardrail3-rs.toml",
-    );
+    )]);
 
     let results = fixture.run();
 

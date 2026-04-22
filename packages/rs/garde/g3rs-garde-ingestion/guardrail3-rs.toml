@@ -11,6 +11,9 @@ allowed_deps = [
   "guardrail3-check-types",
   "g3rs-workspace-crawl",
   "guardrail3-rs-toml-parser",
+  "proc-macro2",
+  "quote",
+  "syn",
   "tempfile",
 ]
 

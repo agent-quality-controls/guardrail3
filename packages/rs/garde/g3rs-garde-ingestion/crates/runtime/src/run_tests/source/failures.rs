@@ -14,7 +14,8 @@ fn ast_ingestion_allows_missing_rust_policy_when_garde_is_present() {
     let crawl = super::crawl(root);
     let result = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 
-    assert_eq!(result.source_files.len(), 1, "{result:#?}");
+    assert!(result.input_failures.is_empty(), "{result:#?}");
+    assert_eq!(result.struct_targets.len(), 0, "{result:#?}");
 }
 
 #[test]

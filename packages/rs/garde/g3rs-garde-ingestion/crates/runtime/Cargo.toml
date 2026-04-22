@@ -34,6 +34,9 @@ g3rs-garde-source-checks-types = { path = "../../../g3rs-garde-source-checks/cra
 g3rs-garde-types = { path = "../../../g3rs-garde-types", version = "0.1.0" }
 g3rs-garde-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
+proc-macro2 = { version = "1", features = ["span-locations"] }
+quote = "1.0.45"
+syn = { version = "2", features = ["full", "parsing", "visit"] }
 
 [dev-dependencies]
 g3rs-garde-source-checks = { path = "../../../g3rs-garde-source-checks" }

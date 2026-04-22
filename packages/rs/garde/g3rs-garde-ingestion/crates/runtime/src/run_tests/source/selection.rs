@@ -13,15 +13,30 @@ fn ingests_root_scoped_ast_input() {
     );
     super::write(
         root.join("src/lib.rs"),
-        "use garde::Validate;\n#[derive(Validate)] struct Input;\n",
+        "use garde::Validate;\nuse serde::Deserialize;\n#[derive(Deserialize, Validate)] struct Nested { value: String }\n#[derive(Deserialize, Validate)] struct Input { nested: Nested }\n",
     );
     super::write(root.join("tests/ignored.rs"), "#[test]\nfn ignored() {}\n");
-    super::write(root.join("tests/fixtures/root_ignored.rs"), "fn ignored() {}\n");
+    super::write(
+        root.join("tests/fixtures/root_ignored.rs"),
+        "fn ignored() {}\n",
+    );
     super::write(root.join("tests.rs"), "#[test]\nfn ignored() {}\n");
-    super::write(root.join("src/support_test.rs"), "#[test]\nfn ignored() {}\n");
-    super::write(root.join("src/support_tests.rs"), "#[test]\nfn ignored() {}\n");
-    super::write(root.join("src/helpers_tests/mod.rs"), "#[test]\nfn ignored() {}\n");
-    super::write(root.join("src/__tests__/ignored.rs"), "#[test]\nfn ignored() {}\n");
+    super::write(
+        root.join("src/support_test.rs"),
+        "#[test]\nfn ignored() {}\n",
+    );
+    super::write(
+        root.join("src/support_tests.rs"),
+        "#[test]\nfn ignored() {}\n",
+    );
+    super::write(
+        root.join("src/helpers_tests/mod.rs"),
+        "#[test]\nfn ignored() {}\n",
+    );
+    super::write(
+        root.join("src/__tests__/ignored.rs"),
+        "#[test]\nfn ignored() {}\n",
+    );
     super::write(root.join("src/test.rs"), "#[test]\nfn ignored() {}\n");
     super::write(root.join("src/tests.rs"), "#[test]\nfn ignored() {}\n");
     super::write(root.join("src/main.rs"), "fn main() {}\n");
@@ -38,14 +53,19 @@ fn ingests_root_scoped_ast_input() {
     let crawl = super::crawl(root);
     let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 
-    assert_eq!(input.applicability, g3rs_garde_types::G3RsGardeApplicability::Active);
     assert_eq!(
-        input
-            .source_files
-            .iter()
-            .map(|file| file.rel_path.as_str())
-            .collect::<Vec<_>>(),
-        vec!["src/lib.rs", "src/main.rs"],
+        input.applicability,
+        g3rs_garde_types::G3RsGardeApplicability::Active
+    );
+    let rel_paths = input
+        .struct_targets
+        .iter()
+        .map(|target| target.rel_path.as_str())
+        .collect::<Vec<_>>();
+    assert!(!rel_paths.is_empty(), "{input:#?}");
+    assert!(
+        rel_paths.iter().all(|path| *path == "src/lib.rs"),
         "{input:#?}"
     );
+    assert!(input.input_failures.is_empty(), "{input:#?}");
 }

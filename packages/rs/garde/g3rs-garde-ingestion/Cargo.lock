@@ -202,6 +202,9 @@ dependencies = [
  "g3rs-garde-types",
  "g3rs-workspace-crawl",
  "guardrail3-rs-toml-parser",
+ "proc-macro2",
+ "quote",
+ "syn",
  "tempfile",
 ]
 
@@ -221,12 +224,9 @@ dependencies = [
 name = "g3rs-garde-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-garde-source-checks-types",
+ "g3rs-garde-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]

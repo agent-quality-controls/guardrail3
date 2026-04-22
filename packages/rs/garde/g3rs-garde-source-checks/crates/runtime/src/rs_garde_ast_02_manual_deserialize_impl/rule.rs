@@ -26,32 +26,28 @@ pub(crate) fn check(target: &ManualDeserializeImplSite, results: &mut Vec<G3Chec
 
 #[cfg(test)]
 fn check_input(input: &g3rs_garde_types::G3RsGardeSourceChecksInput) -> Vec<G3CheckResult> {
-    let analysis = crate::support::analyze_input(input);
     let mut results = Vec::new();
-    for target in &analysis.manual_deserialize_impls {
+    for target in &input.manual_deserialize_impls {
         check(target, &mut results);
     }
     results
 }
 
 #[cfg(test)]
-struct Fixture(crate::support::TestFixture);
+struct Fixture(g3rs_garde_types::G3RsGardeSourceChecksInput);
 
 #[cfg(test)]
 impl Fixture {
     fn run(&self) -> Vec<G3CheckResult> {
-        check_input(&self.0.input)
+        check_input(&self.0)
     }
 }
 
 #[cfg(test)]
-fn fixture(source_files: &[(&str, &str)], rust_policy_toml: &str) -> Fixture {
-    Fixture(crate::support::fixture(source_files, rust_policy_toml))
-}
-
-#[cfg(test)]
-fn default_guardrail_toml() -> &'static str {
-    crate::support::default_guardrail_toml()
+fn fixture(manual_deserialize_impls: Vec<crate::support::ManualDeserializeImplSite>) -> Fixture {
+    let mut input = crate::support::active_source_input();
+    input.manual_deserialize_impls = manual_deserialize_impls;
+    Fixture(input)
 }
 
 #[cfg(test)]

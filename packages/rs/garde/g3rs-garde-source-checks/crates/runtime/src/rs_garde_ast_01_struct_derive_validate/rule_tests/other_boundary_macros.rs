@@ -2,13 +2,13 @@ use g3rs_garde_source_checks_assertions::rs_garde_ast_01_struct_derive_validate:
 
 #[test]
 fn errors_when_parser_boundary_is_missing_validate() {
-    let fixture = super::helpers::fixture(
-        &[(
-            "src/input.rs",
-            "use clap::Parser;\n\n#[derive(Parser)]\nstruct Cli {\n    config_path: String,\n}\n",
-        )],
-        super::helpers::default_guardrail_toml(),
-    );
+    let fixture = super::helpers::fixture(vec![super::helpers::target(
+        "src/input.rs",
+        4,
+        "Cli",
+        &["Parser"],
+        false,
+    )]);
 
     let results = fixture.run();
     assertions::assert_rule_results(
@@ -25,13 +25,13 @@ fn errors_when_parser_boundary_is_missing_validate() {
 
 #[test]
 fn errors_when_aliased_parser_boundary_is_missing_validate() {
-    let fixture = super::helpers::fixture(
-        &[(
-            "src/input.rs",
-            "use clap::Parser as CliParser;\n\n#[derive(CliParser)]\nstruct Cli {\n    config_path: String,\n}\n",
-        )],
-        super::helpers::default_guardrail_toml(),
-    );
+    let fixture = super::helpers::fixture(vec![super::helpers::target(
+        "src/input.rs",
+        4,
+        "Cli",
+        &["CliParser"],
+        false,
+    )]);
 
     let results = fixture.run();
     assertions::assert_rule_results(
@@ -48,13 +48,13 @@ fn errors_when_aliased_parser_boundary_is_missing_validate() {
 
 #[test]
 fn errors_when_args_boundary_is_missing_validate() {
-    let fixture = super::helpers::fixture(
-        &[(
-            "src/input.rs",
-            "use clap::Args;\n\n#[derive(Args)]\nstruct InputArgs {\n    pattern: String,\n}\n",
-        )],
-        super::helpers::default_guardrail_toml(),
-    );
+    let fixture = super::helpers::fixture(vec![super::helpers::target(
+        "src/input.rs",
+        4,
+        "InputArgs",
+        &["Args"],
+        false,
+    )]);
 
     let results = fixture.run();
     assertions::assert_rule_results(
@@ -71,13 +71,13 @@ fn errors_when_args_boundary_is_missing_validate() {
 
 #[test]
 fn errors_when_aliased_args_boundary_is_missing_validate() {
-    let fixture = super::helpers::fixture(
-        &[(
-            "src/input.rs",
-            "use clap::Args as CommandArgs;\n\n#[derive(CommandArgs)]\nstruct InputArgs {\n    pattern: String,\n}\n",
-        )],
-        super::helpers::default_guardrail_toml(),
-    );
+    let fixture = super::helpers::fixture(vec![super::helpers::target(
+        "src/input.rs",
+        4,
+        "InputArgs",
+        &["CommandArgs"],
+        false,
+    )]);
 
     let results = fixture.run();
     assertions::assert_rule_results(
@@ -94,13 +94,13 @@ fn errors_when_aliased_args_boundary_is_missing_validate() {
 
 #[test]
 fn errors_when_from_row_boundary_is_missing_validate() {
-    let fixture = super::helpers::fixture(
-        &[(
-            "src/input.rs",
-            "use sqlx::FromRow;\n\n#[derive(FromRow)]\nstruct UserRecord {\n    name: String,\n}\n",
-        )],
-        super::helpers::default_guardrail_toml(),
-    );
+    let fixture = super::helpers::fixture(vec![super::helpers::target(
+        "src/input.rs",
+        4,
+        "UserRecord",
+        &["FromRow"],
+        false,
+    )]);
 
     let results = fixture.run();
     assertions::assert_rule_results(
@@ -117,13 +117,13 @@ fn errors_when_from_row_boundary_is_missing_validate() {
 
 #[test]
 fn errors_when_aliased_from_row_boundary_is_missing_validate() {
-    let fixture = super::helpers::fixture(
-        &[(
-            "src/input.rs",
-            "use sqlx::FromRow as DbRow;\n\n#[derive(DbRow)]\nstruct UserRecord {\n    name: String,\n}\n",
-        )],
-        super::helpers::default_guardrail_toml(),
-    );
+    let fixture = super::helpers::fixture(vec![super::helpers::target(
+        "src/input.rs",
+        4,
+        "UserRecord",
+        &["DbRow"],
+        false,
+    )]);
 
     let results = fixture.run();
     assertions::assert_rule_results(
