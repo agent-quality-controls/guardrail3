@@ -1,4 +1,5 @@
 use crate::compat::{G3CheckResult, G3Severity};
+use hook_shell_parser::command_query::{any_resolved_command_on_line, ResolvedCommand};
 use hook_shell_parser::types::{ParsedShellScript, ShellFunction};
 
 use crate::inputs::ExecutableCommandContextInput;
@@ -54,37 +55,56 @@ fn first_top_level_exit_zero_line(
     let mut loop_depth = 0usize;
 
     for source_line in &parsed.source_lines {
-        if line_in_function_body(source_line.line_no, function_ranges.as_slice()) {
-            continue;
-        }
-
         let trimmed = strip_inline_comment(&source_line.raw).trim();
         if trimmed.is_empty() || trimmed.starts_with("#!") {
             continue;
         }
 
-        if closes_case_scope(trimmed) {
-            case_depth = case_depth.saturating_sub(1);
-            continue;
-        }
-        if closes_loop_scope(parsed, source_line.line_no, trimmed) {
-            loop_depth = loop_depth.saturating_sub(1);
-            continue;
-        }
-        if closes_if_scope(trimmed) {
-            if_depth = if_depth.saturating_sub(1);
+        if is_function_definition_line(parsed, source_line.line_no) {
+            if if_depth == 0 && case_depth == 0 && loop_depth == 0
+                && let Some(tail) = function_definition_tail(&source_line.raw)
+            {
+                if let Some(line_no) = called_function_exit_zero_line_from_tail(
+                    parsed,
+                    tail,
+                    source_line.line_no,
+                    visiting,
+                ) {
+                    return Some(line_no);
+                }
+
+                if line_contains_exit_zero_path(parsed, tail, source_line.line_no) {
+                    return Some(source_line.line_no);
+                }
+            }
+
             continue;
         }
 
-        if if_depth == 0 && case_depth == 0 && loop_depth == 0 {
+        if line_in_function_body(source_line.line_no, function_ranges.as_slice()) {
+            continue;
+        }
+
+        if closes_case_scope(trimmed) {
+            case_depth = case_depth.saturating_sub(1);
+        }
+        if closes_loop_scope(parsed, source_line.line_no, trimmed) {
+            loop_depth = loop_depth.saturating_sub(1);
+        }
+        if closes_if_scope(trimmed) {
+            if_depth = if_depth.saturating_sub(1);
+        }
+
+        if if_depth == 0 && case_depth == 0 && loop_depth == 0
+            && !opens_case_scope(trimmed)
+            && !opens_loop_scope(trimmed)
+            && !opens_if_scope(trimmed)
+        {
             for line in parsed
                 .executable_lines
                 .iter()
                 .filter(|line| line.line_no == source_line.line_no)
             {
-                if line.is_exit_zero {
-                    return Some(line.line_no);
-                }
                 if let Some(line_no) = called_function_exit_zero_line(
                     parsed,
                     &line.command_name,
@@ -93,6 +113,10 @@ fn first_top_level_exit_zero_line(
                 ) {
                     return Some(line_no);
                 }
+            }
+
+            if line_contains_exit_zero_path(parsed, &source_line.raw, source_line.line_no) {
+                return Some(source_line.line_no);
             }
         }
 
@@ -115,13 +139,13 @@ fn first_top_level_exit_zero_line(
 fn called_function_exit_zero_line(
     parsed: &ParsedShellScript,
     command_name: &str,
-    call_line_no: usize,
+    _call_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<usize> {
     let function = parsed
         .functions
         .iter()
-        .find(|function| function.name == command_name && function.line_no <= call_line_no)?;
+        .find(|function| function.name == command_name)?;
     if visiting.iter().any(|name| name == &function.name) {
         return None;
     }
@@ -131,6 +155,27 @@ fn called_function_exit_zero_line(
         .map(|nested_line_no| absolute_function_body_line(function, nested_line_no));
     let _ = visiting.pop();
     line_no
+}
+
+fn called_function_exit_zero_line_from_tail(
+    parsed: &ParsedShellScript,
+    tail: &str,
+    call_line_no: usize,
+    visiting: &mut Vec<String>,
+) -> Option<usize> {
+    let tail_script = hook_shell_parser::parse_script(tail);
+    for executable in &tail_script.executable_lines {
+        if let Some(line_no) = called_function_exit_zero_line(
+            parsed,
+            &executable.command_name,
+            call_line_no,
+            visiting,
+        ) {
+            return Some(line_no);
+        }
+    }
+
+    None
 }
 
 fn absolute_function_body_line(function: &ShellFunction, nested_line_no: usize) -> usize {
@@ -163,6 +208,27 @@ fn line_in_function_body(line_no: usize, ranges: &[(usize, usize)]) -> bool {
     ranges
         .iter()
         .any(|(start, end)| (*start..=*end).contains(&line_no))
+}
+
+fn is_function_definition_line(parsed: &ParsedShellScript, line_no: usize) -> bool {
+    parsed.functions.iter().any(|function| function.line_no == line_no)
+}
+
+fn function_definition_tail(line: &str) -> Option<&str> {
+    let (_, tail) = line.rsplit_once('}')?;
+    let tail = tail.trim_start_matches(|c: char| c == ';' || c.is_whitespace());
+    (!tail.is_empty()).then_some(tail)
+}
+
+fn line_contains_exit_zero_path(parsed: &ParsedShellScript, raw: &str, line_no: usize) -> bool {
+    any_resolved_command_on_line(parsed, raw, line_no, &|command: &ResolvedCommand| {
+        command.command_name() == "exit"
+            && command
+                .command_text()
+                .split_whitespace()
+                .nth(1)
+                == Some("0")
+    })
 }
 
 fn strip_inline_comment(line: &str) -> &str {
