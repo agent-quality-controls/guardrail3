@@ -12,6 +12,7 @@ allowed_deps = [
   "hook-shell-parser",
   "mutants-toml-parser",
   "nextest-toml-parser",
+  "proc-macro2",
   "syn",
   "tempfile",
 ]

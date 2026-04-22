@@ -1,7 +1,9 @@
 use g3rs_test_types::{G3RsTestFileKind, G3RsTestSourceFile};
 
-use crate::components::support::{file_stem, is_fixture_path, owner_module_name_from_sidecar_path, path_is_under};
 use crate::components::OwnedTestComponent;
+use crate::components::support::{
+    file_stem, is_fixture_path, owner_module_name_from_sidecar_path, path_is_under,
+};
 use crate::roots::{OwnedTestRoot, join_under_root};
 
 pub(crate) fn classify_file_for_source(

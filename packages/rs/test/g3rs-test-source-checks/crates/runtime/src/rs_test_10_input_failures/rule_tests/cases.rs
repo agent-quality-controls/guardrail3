@@ -1,5 +1,5 @@
-use guardrail3_check_types::G3Severity;
 use g3rs_test_source_checks_assertions::rs_test_10_input_failures::rule as assertions;
+use guardrail3_check_types::G3Severity;
 
 #[test]
 fn reports_parse_failure_as_error_result() {

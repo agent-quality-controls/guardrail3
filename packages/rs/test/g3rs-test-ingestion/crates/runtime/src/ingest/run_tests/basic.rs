@@ -167,8 +167,8 @@ resolver = \"2\"\n",
     );
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
-    let inputs = super::super::ingest_for_config_checks(&workspace_crawl)
-        .expect("ingestion should succeed");
+    let inputs =
+        super::super::ingest_for_config_checks(&workspace_crawl).expect("ingestion should succeed");
 
     assert_eq!(inputs.len(), 1, "{inputs:#?}");
     assert_eq!(inputs[0].root_rel_dir, "crates/app");

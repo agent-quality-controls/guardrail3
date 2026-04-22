@@ -1,11 +1,11 @@
 use g3rs_test_types::{G3RsTestComponentFileTreeFacts, G3RsTestComponentSourceFacts};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
-use crate::components::support::{
-    collect_external_harnesses, collect_sidecars, manifest_dev_dependencies,
-    manifest_normal_dependencies, rust_crate_name, AssertionsLayout,
-};
 use crate::components::OwnedTestComponent;
+use crate::components::support::{
+    AssertionsLayout, collect_external_harnesses, collect_sidecars, manifest_dev_dependencies,
+    manifest_normal_dependencies, rust_crate_name,
+};
 use crate::roots::OwnedTestRoot;
 
 pub(crate) fn build_owned_component(

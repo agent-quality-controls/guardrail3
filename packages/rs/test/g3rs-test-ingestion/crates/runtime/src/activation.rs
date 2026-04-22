@@ -2,8 +2,8 @@ use cargo_toml_parser::{types::CargoToml, types::Dependency};
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
 use syn::visit::Visit;
 
-use crate::roots::{OwnedTestRoot, join_under_root};
 use crate::ingest::IngestionError;
+use crate::roots::{OwnedTestRoot, join_under_root};
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub(crate) struct ActivationSummary {

@@ -1,4 +1,3 @@
-mod parse;
 mod rs_test_01_inline_test_bodies;
 mod rs_test_04_ignore_reason;
 mod rs_test_05_should_panic_expected;
@@ -13,4 +12,3 @@ mod support;
 
 #[cfg(feature = "checks")]
 pub use run::check;
-

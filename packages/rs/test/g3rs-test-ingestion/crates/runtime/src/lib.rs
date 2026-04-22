@@ -1,9 +1,13 @@
 mod activation;
 mod components;
+#[cfg(feature = "ingest")]
+pub mod fixtures;
 mod fs;
 mod hooks;
-mod roots;
 mod ingest;
+mod parse;
+mod roots;
+mod source_analysis;
 
 #[cfg(feature = "ingest")]
 pub use ingest::{

@@ -10,7 +10,7 @@ pub(crate) fn check(input: &TestFileInput<'_>, results: &mut Vec<G3CheckResult>)
     let mut missing = 0usize;
     let mut weak = 0usize;
 
-    for finding in &input.parsed.ignore_reasons {
+    for finding in &input.file.parsed.ignore_reasons {
         match finding.reason.as_deref() {
             None => {
                 missing += 1;

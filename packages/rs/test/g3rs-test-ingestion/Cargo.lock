@@ -197,6 +197,7 @@ dependencies = [
  "hook-shell-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
+ "proc-macro2",
  "syn",
  "tempfile",
 ]
@@ -223,8 +224,6 @@ dependencies = [
  "g3rs-test-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
- "proc-macro2",
- "syn",
 ]
 
 [[package]]

@@ -1,25 +1,21 @@
-use g3rs_test_types::{G3RsTestComponentSourceFacts, G3RsTestFileKind, G3RsTestSourceChecksInput, G3RsTestSourceFile};
+use g3rs_test_types::G3RsTestSourceChecksInput;
+use g3rs_test_types::G3RsTestSourceInputFailure;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-pub fn check(rel_path: &str, content: &str) -> Vec<G3CheckResult> {
+pub fn check(rel_path: &str, message: &str) -> Vec<G3CheckResult> {
+    let parse_message = if let Err(err) = syn::parse_file(message) {
+        format!("Failed to parse Rust source file for test-family source analysis: {err}")
+    } else {
+        message.to_owned()
+    };
     g3rs_test_source_checks_runtime::check(&G3RsTestSourceChecksInput {
         root_rel_dir: String::new(),
         cargo_rel_path: "Cargo.toml".to_owned(),
-        files: vec![G3RsTestSourceFile {
+        files: Vec::new(),
+        components: Vec::new(),
+        input_failures: vec![G3RsTestSourceInputFailure {
             rel_path: rel_path.to_owned(),
-            kind: G3RsTestFileKind::ExternalHarness,
-            owner_module_name: None,
-            component_rel_dir: Some(String::new()),
-            assertions_package_name: None,
-            content: content.to_owned(),
-        }],
-        components: vec![G3RsTestComponentSourceFacts {
-            rel_dir: String::new(),
-            runtime_rel_dir: String::new(),
-            runtime_package_name: Some("demo".to_owned()),
-            assertions_rel_dir: "assertions".to_owned(),
-            assertions_exists: false,
-            assertions_package_name: None,
+            message: parse_message,
         }],
     })
 }

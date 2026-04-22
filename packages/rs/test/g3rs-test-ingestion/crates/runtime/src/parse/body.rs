@@ -4,7 +4,7 @@ use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 use super::helpers;
-use super::types::{
+use g3rs_test_types::ast::{
     AssertionBodyInfo, FieldAccessInfo, FunctionBodyFacts, FunctionInfo, FunctionSignatureInfo,
     ReturnKind, TestFunctionInfo, TestHarnessFacts,
 };

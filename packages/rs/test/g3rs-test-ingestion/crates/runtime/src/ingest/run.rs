@@ -71,12 +71,21 @@ pub fn ingest_for_source_checks(
         .iter()
         .map(|root| {
             let components = crate::components::collect_components(crawl, root)?;
-            let files = crate::components::collect_ast_files(crawl, root, &components)?;
+            let (raw_files, mut input_failures) =
+                crate::components::collect_ast_files(crawl, root, &components);
+            let (files, mut parse_failures) =
+                crate::source_analysis::analyze_source_files(raw_files);
+            input_failures.append(&mut parse_failures);
+            input_failures.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
+            input_failures.dedup_by(|left, right| {
+                left.rel_path == right.rel_path && left.message == right.message
+            });
             Ok(G3RsTestSourceChecksInput {
                 root_rel_dir: root.root_rel_dir.clone(),
                 cargo_rel_path: root.cargo_rel_path.clone(),
                 files,
                 components: crate::components::public_component_facts(&components),
+                input_failures,
             })
         })
         .collect()
