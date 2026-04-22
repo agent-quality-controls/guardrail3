@@ -5,7 +5,8 @@ use crate::hook_rs_08_guardrail_validate_staged_present::{
 };
 use super::text::{
     expand_inline_case_block, expand_inline_if_block, line_contains_then,
-    line_reaches_config_trigger, looks_like_case_pattern_line,
+    line_reaches_config_trigger, looks_like_case_pattern_line, mentions_config_exact,
+    is_trigger_like_line,
 };
 
 const CONFIG_NEEDLES: [&str; 8] = [
@@ -340,8 +341,11 @@ fn block_mentions_config_trigger(
     block: &NumberedBlock,
     needle: &str,
 ) -> bool {
-    block.lines.iter().any(|line| {
+    let header_span_len = trigger_header_span_len(block);
+
+    block.lines.iter().enumerate().any(|(index, line)| {
         line_reaches_config_trigger(parsed, &line.raw, line.line_no, needle)
+            && (index < header_span_len || !is_discarded_direct_trigger_line(&line.raw, needle))
     })
 }
 
@@ -363,4 +367,38 @@ fn expanded_single_line_block(line_no: usize, expanded: &str) -> NumberedBlock {
             })
             .collect(),
     }
+}
+
+fn trigger_header_span_len(block: &NumberedBlock) -> usize {
+    let Some(first_non_empty_index) = block
+        .lines
+        .iter()
+        .position(|line| !line.raw.trim().is_empty())
+    else {
+        return 0;
+    };
+    let first = block.lines[first_non_empty_index].raw.trim();
+
+    if first.starts_with("if ") || first.starts_with("elif ") {
+        return block.lines[first_non_empty_index..]
+            .iter()
+            .position(|line| line_contains_then(line.raw.trim()))
+            .map(|offset| first_non_empty_index + offset + 1)
+            .unwrap_or(block.lines.len());
+    }
+
+    if looks_like_case_pattern_line(first) {
+        return first_non_empty_index + 1;
+    }
+
+    0
+}
+
+fn is_discarded_direct_trigger_line(raw: &str, needle: &str) -> bool {
+    let trimmed = raw.trim();
+    mentions_config_exact(raw, needle)
+        && is_trigger_like_line(trimmed)
+        && !looks_like_case_pattern_line(trimmed)
+        && !trimmed.starts_with("if ")
+        && !trimmed.starts_with("elif ")
 }

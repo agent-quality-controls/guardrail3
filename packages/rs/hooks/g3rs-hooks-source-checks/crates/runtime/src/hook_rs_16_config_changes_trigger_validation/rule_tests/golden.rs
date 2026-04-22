@@ -211,6 +211,13 @@ fn warns_when_single_line_if_mentions_configs_but_else_branch_runs_validation() 
 }
 
 #[test]
+fn warns_when_discarded_trigger_comparison_does_not_guard_validation() {
+    let content = r#"if true; then [[ "$changed_path" == *guardrail3-rs.toml* ]]; g3rs validate --path .; fi"#;
+    let results = run_case(content);
+    assertions::assert_missing(&results);
+}
+
+#[test]
 fn passes_when_compact_single_line_if_routes_config_changes_to_validation() {
     let content = r#"if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$';then g3rs validate --path .;fi"#;
     let results = run_case(content);
