@@ -28,3 +28,10 @@ fn skips_tests_and_non_glob_cases() {
         &[],
     );
 }
+
+#[test]
+fn skips_std_alias_from_sibling_module() {
+    let content = "mod first {\n    use std as s;\n}\nmod second {\n    use s::fs::*;\n}\n";
+    let results = super::super::check_source("src/foo.rs", content, false);
+    assert_rule_results(&results, &[]);
+}

@@ -233,7 +233,9 @@ impl Default for StdFsGlobImportVisitor {
 impl<'source> Visit<'source> for InlineStdFsVisitor {
     fn visit_item_mod(&mut self, item_mod: &'source syn::ItemMod) {
         let was = self.save_and_apply_test_context(&item_mod.attrs);
+        let std_aliases = self.std_aliases.clone();
         syn::visit::visit_item_mod(self, item_mod);
+        self.std_aliases = std_aliases;
         self.restore_test_context(was);
     }
 
@@ -288,7 +290,9 @@ impl<'source> Visit<'source> for InlineStdFsVisitor {
 impl<'source> Visit<'source> for StdFsGlobImportVisitor {
     fn visit_item_mod(&mut self, item_mod: &'source syn::ItemMod) {
         let was = self.save_and_apply_test_context(&item_mod.attrs);
+        let std_aliases = self.std_aliases.clone();
         syn::visit::visit_item_mod(self, item_mod);
+        self.std_aliases = std_aliases;
         self.restore_test_context(was);
     }
 
