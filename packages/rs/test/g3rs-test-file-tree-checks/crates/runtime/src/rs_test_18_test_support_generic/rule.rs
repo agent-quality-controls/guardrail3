@@ -360,15 +360,41 @@ fn call_path_uses_local_helper(
     match path {
         [name] => {
             (local_helpers.contains(name.as_str()) && !shadowed_idents.contains(name))
-                || local_call_aliases
-                    .get(name)
-                    .and_then(|target| target.last())
-                    .is_some_and(|target| local_helpers.contains(target.as_str()))
+                || local_call_alias_targets_local_helper(
+                    name,
+                    local_helpers,
+                    local_call_aliases,
+                )
         }
         [first, ..] if matches!(first.as_str(), "crate" | "self" | "super") => {
             path.last()
                 .is_some_and(|name| local_helpers.contains(name.as_str()))
         }
         _ => false,
+    }
+}
+
+fn local_call_alias_targets_local_helper(
+    name: &str,
+    local_helpers: &BTreeSet<&str>,
+    local_call_aliases: &std::collections::BTreeMap<String, Vec<String>>,
+) -> bool {
+    let mut current = name;
+    let mut seen = BTreeSet::new();
+
+    loop {
+        if local_helpers.contains(current) {
+            return true;
+        }
+        if !seen.insert(current.to_owned()) {
+            return false;
+        }
+        let Some(target) = local_call_aliases.get(current) else {
+            return false;
+        };
+        let Some(next) = target.last() else {
+            return false;
+        };
+        current = next;
     }
 }
