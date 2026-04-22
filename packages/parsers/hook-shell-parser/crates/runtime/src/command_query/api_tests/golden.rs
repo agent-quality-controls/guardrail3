@@ -1,7 +1,7 @@
-use crate::command_query::{
-    CommandQueryOptions, CommandVisit, ShellEnvState, visit_resolved_commands_with_env,
+use super::super::{
+    CommandQueryOptions, CommandVisit, ShellEnvState, parse_script_for_tests,
+    visit_resolved_commands_with_env,
 };
-use crate::parse_script;
 use hook_shell_parser_runtime_assertions::command_query::api as query_assertions;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -42,7 +42,7 @@ fn resolves_called_function_with_path_qualified_command() {
 
 #[test]
 fn visits_commands_with_persisted_export_state() {
-    let parsed = parse_script("export RUSTFLAGS='-D warnings'\ncargo clippy\n");
+    let parsed = parse_script_for_tests("export RUSTFLAGS='-D warnings'\ncargo clippy\n");
     let mut snapshots = Vec::new();
 
     visit_resolved_commands_with_env(
@@ -67,7 +67,8 @@ fn visits_commands_with_persisted_export_state() {
 
 #[test]
 fn visits_commands_with_env_wrapper_state_changes() {
-    let parsed = parse_script("export RUSTFLAGS='-D warnings'\nenv -u RUSTFLAGS cargo clippy\n");
+    let parsed =
+        parse_script_for_tests("export RUSTFLAGS='-D warnings'\nenv -u RUSTFLAGS cargo clippy\n");
     let mut snapshots = Vec::new();
 
     visit_resolved_commands_with_env(
@@ -89,7 +90,7 @@ fn visits_commands_with_env_wrapper_state_changes() {
 
 #[test]
 fn visits_function_calls_with_local_inline_env_without_persisting() {
-    let parsed = parse_script(
+    let parsed = parse_script_for_tests(
         "run_checks() {\n    cargo test\n}\nCARGO_TARGET_DIR=.cargo-target run_checks\ncargo test\n",
     );
     let mut snapshots = Vec::new();
@@ -97,10 +98,7 @@ fn visits_function_calls_with_local_inline_env_without_persisting() {
     visit_resolved_commands_with_env(
         &parsed,
         TestEnv::default(),
-        CommandQueryOptions {
-            allow_detached: true,
-            allow_forward_functions: false,
-        },
+        CommandQueryOptions::default().with_detached_commands(),
         |command, state| {
             snapshots.push((
                 command.command_name().to_owned(),
@@ -122,17 +120,15 @@ fn visits_function_calls_with_local_inline_env_without_persisting() {
 
 #[test]
 fn env_ignore_environment_clears_shared_target_dir() {
-    let parsed =
-        parse_script("export CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\"\nenv -i cargo test\n");
+    let parsed = parse_script_for_tests(
+        "export CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\"\nenv -i cargo test\n",
+    );
     let mut snapshots = Vec::new();
 
     visit_resolved_commands_with_env(
         &parsed,
         TestEnv::default(),
-        CommandQueryOptions {
-            allow_detached: true,
-            allow_forward_functions: false,
-        },
+        CommandQueryOptions::default().with_detached_commands(),
         |command, state| {
             snapshots.push((
                 command.command_name().to_owned(),
@@ -148,16 +144,16 @@ fn env_ignore_environment_clears_shared_target_dir() {
 
 #[test]
 fn visits_forward_called_functions_when_enabled() {
-    let parsed = parse_script("outer() {\n    inner\n}\ninner() {\n    cargo test\n}\nouter\n");
+    let parsed =
+        parse_script_for_tests("outer() {\n    inner\n}\ninner() {\n    cargo test\n}\nouter\n");
     let mut snapshots = Vec::new();
 
     visit_resolved_commands_with_env(
         &parsed,
         TestEnv::default(),
-        CommandQueryOptions {
-            allow_detached: true,
-            allow_forward_functions: true,
-        },
+        CommandQueryOptions::default()
+            .with_detached_commands()
+            .with_forward_functions(),
         |command, state| {
             snapshots.push((
                 command.command_name().to_owned(),
@@ -173,17 +169,15 @@ fn visits_forward_called_functions_when_enabled() {
 
 #[test]
 fn visits_backtick_command_substitutions() {
-    let parsed =
-        parse_script("export CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\"\necho `cargo test`\n");
+    let parsed = parse_script_for_tests(
+        "export CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\"\necho `cargo test`\n",
+    );
     let mut snapshots = Vec::new();
 
     visit_resolved_commands_with_env(
         &parsed,
         TestEnv::default(),
-        CommandQueryOptions {
-            allow_detached: true,
-            allow_forward_functions: false,
-        },
+        CommandQueryOptions::default().with_detached_commands(),
         |command, state| {
             snapshots.push((
                 command.command_name().to_owned(),

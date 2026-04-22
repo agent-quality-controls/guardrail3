@@ -52,10 +52,9 @@ fn script_coverage(parsed: &ParsedShellScript) -> Coverage {
     visit_resolved_commands_with_env(
         parsed,
         EnvState::default(),
-        CommandQueryOptions {
-            allow_detached: true,
-            allow_forward_functions: true,
-        },
+        CommandQueryOptions::default()
+            .with_detached_commands()
+            .with_forward_functions(),
         |command, state| {
             if command.command_name() == "cargo" {
                 coverage.saw_cargo = true;

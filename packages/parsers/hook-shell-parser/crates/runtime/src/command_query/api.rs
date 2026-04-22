@@ -73,8 +73,32 @@ impl ResolvedCommand {
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct CommandQueryOptions {
-    pub allow_detached: bool,
-    pub allow_forward_functions: bool,
+    allow_detached: bool,
+    allow_forward_functions: bool,
+}
+
+impl CommandQueryOptions {
+    #[must_use]
+    pub fn with_detached_commands(mut self) -> Self {
+        self.allow_detached = true;
+        self
+    }
+
+    #[must_use]
+    pub fn with_forward_functions(mut self) -> Self {
+        self.allow_forward_functions = true;
+        self
+    }
+
+    #[must_use]
+    pub(super) fn allow_detached(self) -> bool {
+        self.allow_detached
+    }
+
+    #[must_use]
+    pub(super) fn allow_forward_functions(self) -> bool {
+        self.allow_forward_functions
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -127,6 +151,9 @@ pub fn visit_resolved_commands_with_env<S>(
 {
     engine::visit_resolved_commands_with_env(parsed, initial_state, options, visitor);
 }
+
+#[cfg(test)]
+pub(super) use crate::parse_script as parse_script_for_tests;
 
 #[cfg(test)]
 #[path = "api_tests/mod.rs"] // reason: owned sidecar tests for file module.
