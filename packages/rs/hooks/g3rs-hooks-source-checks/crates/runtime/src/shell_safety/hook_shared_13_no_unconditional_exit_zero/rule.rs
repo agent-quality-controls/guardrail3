@@ -100,6 +100,10 @@ fn first_top_level_exit_zero_line(
             && !opens_loop_scope(trimmed)
             && !opens_if_scope(trimmed)
         {
+            if is_same_line_scoped_control_flow(trimmed) {
+                continue;
+            }
+
             for line in parsed
                 .executable_lines
                 .iter()
@@ -271,6 +275,17 @@ fn closes_case_scope(line: &str) -> bool {
         || line.ends_with("; esac")
         || line.ends_with(";esac")
         || contains_shell_keyword(line, "esac")
+}
+
+fn is_same_line_scoped_control_flow(line: &str) -> bool {
+    (line.starts_with("if ")
+        && line.contains("then")
+        && closes_if_scope(line)
+        && line.ends_with("fi"))
+        || (line.starts_with("case ")
+            && line.contains(" in ")
+            && closes_case_scope(line)
+            && line.ends_with("esac"))
 }
 
 fn opens_loop_scope(line: &str) -> bool {
