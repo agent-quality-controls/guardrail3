@@ -3,7 +3,7 @@ use syn::spanned::Spanned;
 
 use g3rs_arch_types::types::{
     G3RsArchCrateNode, G3RsArchFacadeItem, G3RsArchFacadeSurface, G3RsArchFeatureExport,
-    G3RsArchSourceChecksInput, G3RsArchSourceCrate, G3RsArchSourceFile,
+    G3RsArchPathAttrSite, G3RsArchSourceChecksInput, G3RsArchSourceCrate,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -19,12 +19,12 @@ pub(crate) fn ingest_for_source_checks(
     let view = CrawlView::new(crawl);
     let crate_nodes = collect_crate_nodes(&view)?;
     let facade_surfaces = collect_facade_surfaces(&view, &crate_nodes);
-    let source_files = collect_rs_files(&view, &crate_nodes)?;
+    let path_attr_sites = collect_path_attr_sites(&view, &crate_nodes)?;
 
     Ok(vec![G3RsArchSourceChecksInput {
         crates: collect_source_crates(&crate_nodes),
         facade_surfaces,
-        source_files,
+        path_attr_sites,
     }])
 }
 
@@ -256,10 +256,10 @@ fn simple_item(
     }
 }
 
-fn collect_rs_files(
+fn collect_path_attr_sites(
     view: &CrawlView<'_>,
     crate_nodes: &[G3RsArchCrateNode],
-) -> Result<Vec<G3RsArchSourceFile>, G3RsArchIngestionError> {
+) -> Result<Vec<G3RsArchPathAttrSite>, G3RsArchIngestionError> {
     let mut rel_paths = Vec::new();
     let crate_dirs = crate_nodes
         .iter()
@@ -298,7 +298,31 @@ fn collect_rs_files(
                         path: entry.path.abs_path.clone(),
                         reason: err.to_string(),
                     })?;
-            Ok(G3RsArchSourceFile { rel_path, content })
+            Ok(collect_file_path_attr_sites(&rel_path, &content))
+        })
+        .collect::<Result<Vec<_>, _>>()
+        .map(|sites| sites.into_iter().flatten().collect())
+}
+
+fn collect_file_path_attr_sites(rel_path: &str, content: &str) -> Vec<G3RsArchPathAttrSite> {
+    let Ok(ast) = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content)) else {
+        return Vec::new();
+    };
+
+    ast.items
+        .iter()
+        .filter_map(|item| {
+            let syn::Item::Mod(module) = item else {
+                return None;
+            };
+            let path_attr = module.attrs.iter().find(|attr| attr.path().is_ident("path"))?;
+            Some(G3RsArchPathAttrSite {
+                rel_path: rel_path.to_owned(),
+                line: span_line(path_attr.span()),
+                module_name: module.ident.to_string(),
+                path_value: extract_path_attr_value(path_attr),
+                cfg_test_only: module.attrs.iter().any(attr_is_cfg_test),
+            })
         })
         .collect()
 }
@@ -378,6 +402,50 @@ fn extract_feature_expr(expr: &syn::Expr) -> Option<String> {
         }
         syn::Expr::Call(call) => call.args.iter().find_map(extract_feature_expr),
         _ => None,
+    }
+}
+
+fn extract_path_attr_value(attr: &syn::Attribute) -> Option<String> {
+    let syn::Meta::NameValue(name_value) = &attr.meta else {
+        return None;
+    };
+    let syn::Expr::Lit(syn::ExprLit {
+        lit: syn::Lit::Str(value),
+        ..
+    }) = &name_value.value
+    else {
+        return None;
+    };
+    Some(value.value())
+}
+
+fn attr_is_cfg_test(attr: &syn::Attribute) -> bool {
+    if !attr.path().is_ident("cfg") {
+        return false;
+    }
+    let syn::Meta::List(list) = &attr.meta else {
+        return false;
+    };
+    let Ok(meta) = list.parse_args::<syn::Meta>() else {
+        return false;
+    };
+    cfg_meta_is_test(&meta, true)
+}
+
+fn cfg_meta_is_test(meta: &syn::Meta, positive: bool) -> bool {
+    match meta {
+        syn::Meta::Path(path) => positive && path.is_ident("test"),
+        syn::Meta::List(list) if list.path.is_ident("all") || list.path.is_ident("any") => list
+            .parse_args_with(
+                syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+            )
+            .is_ok_and(|items| items.iter().any(|item| cfg_meta_is_test(item, positive))),
+        syn::Meta::List(list) if list.path.is_ident("not") => list
+            .parse_args_with(
+                syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+            )
+            .is_ok_and(|items| items.iter().any(|item| cfg_meta_is_test(item, !positive))),
+        _ => false,
     }
 }
 

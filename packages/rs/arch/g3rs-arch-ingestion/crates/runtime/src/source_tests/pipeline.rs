@@ -139,9 +139,9 @@ fn source_ingestion_stays_inside_the_pointed_workspace() {
     assert_eq!(inputs[0].crates[0].rel_dir, "crate_a");
     assert!(
         inputs[0]
-            .source_files
+            .path_attr_sites
             .iter()
-            .all(|file| file.rel_path.starts_with("crate_a/"))
+            .all(|site| site.rel_path.starts_with("crate_a/"))
     );
 }
 
@@ -180,9 +180,9 @@ fn source_ingestion_does_not_recurse_into_excluded_nested_crates() {
     assert_eq!(inputs[0].crates[0].rel_dir, "pkg");
     assert!(
         inputs[0]
-            .source_files
+            .path_attr_sites
             .iter()
-            .all(|file| !file.rel_path.starts_with("pkg/crates/inner/"))
+            .all(|site| !site.rel_path.starts_with("pkg/crates/inner/"))
     );
     assert!(
         inputs[0]

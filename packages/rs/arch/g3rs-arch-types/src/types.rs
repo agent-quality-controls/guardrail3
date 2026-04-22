@@ -100,22 +100,25 @@ pub struct G3RsArchDependencyEdge {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsArchSourceFile {
-    pub rel_path: String,
-    pub content: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsArchSourceCrate {
     pub rel_dir: String,
     pub lib_rs_rel: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsArchPathAttrSite {
+    pub rel_path: String,
+    pub line: usize,
+    pub module_name: String,
+    pub path_value: Option<String>,
+    pub cfg_test_only: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsArchSourceChecksInput {
     pub crates: Vec<G3RsArchSourceCrate>,
     pub facade_surfaces: Vec<G3RsArchFacadeSurface>,
-    pub source_files: Vec<G3RsArchSourceFile>,
+    pub path_attr_sites: Vec<G3RsArchPathAttrSite>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
