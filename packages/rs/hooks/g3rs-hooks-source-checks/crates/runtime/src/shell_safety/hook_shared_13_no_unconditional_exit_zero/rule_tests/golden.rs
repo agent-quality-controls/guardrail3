@@ -64,6 +64,80 @@ fn warns_when_called_function_contains_exit_zero() {
 }
 
 #[test]
+fn warns_when_same_line_function_definition_has_exit_zero_tail() {
+    let results = run_case("finish() { exit 0; }; exit 0\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(1),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn warns_when_same_line_loop_terminator_has_exit_zero_tail() {
+    let results = run_case("while true; do\n    :\ndone; exit 0\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(3),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn warns_when_forward_function_call_resolves_to_later_definition() {
+    let results = run_case(
+        "finish\nfinish() {\n    exit 0\n}\n",
+    );
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(3),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn warns_when_shell_wrapper_executes_exit_zero() {
+    let sh_results = run_case("sh -c 'exit 0'\n");
+    assertions::assert_rule_results(
+        &sh_results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(1),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+
+    let bash_results = run_case("bash -c 'exit 0'\n");
+    assertions::assert_rule_results(
+        &bash_results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(1),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn warns_when_loop_close_has_trailing_redirection_before_called_function() {
     let results = run_case(
         "while IFS= read -r file; do\n    echo \"$file\"\ndone <<< \"$STAGED_FILES\"\nfinish() {\n    exit 0\n}\nfinish\n",
