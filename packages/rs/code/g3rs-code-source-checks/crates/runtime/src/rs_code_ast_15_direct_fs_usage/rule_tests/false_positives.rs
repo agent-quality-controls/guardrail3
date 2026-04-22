@@ -28,3 +28,10 @@ fn skips_comment_and_string_fs_text() {
     let results = super::super::check_source("src/lib.rs", content, false);
     assert_rule_results(&results, &[]);
 }
+
+#[test]
+fn skips_std_alias_from_sibling_module() {
+    let content = "mod first {\n    use std as s;\n}\nmod second {\n    pub fn probe() { let _ = s::fs::read_to_string(\"fixture\"); }\n}\n";
+    let results = super::super::check_source("src/lib.rs", content, false);
+    assert_rule_results(&results, &[]);
+}
