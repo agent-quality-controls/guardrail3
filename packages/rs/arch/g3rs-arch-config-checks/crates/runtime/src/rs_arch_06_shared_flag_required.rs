@@ -1,6 +1,5 @@
-use g3rs_arch_types::types::{G3RsArchConfigCrate, G3RsArchDependencyEdge};
+use g3rs_arch_types::types::G3RsArchDependencyEdge;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use std::collections::BTreeMap;
 
 const ID: &str = "RS-ARCH-CONFIG-06";
 
@@ -15,11 +14,7 @@ fn is_allowed_test_edge(edge: &G3RsArchDependencyEdge) -> bool {
             ))
 }
 
-pub(crate) fn check(
-    edge: &G3RsArchDependencyEdge,
-    crate_map: &BTreeMap<&str, &G3RsArchConfigCrate>,
-    results: &mut Vec<G3CheckResult>,
-) {
+pub(crate) fn check(edge: &G3RsArchDependencyEdge, results: &mut Vec<G3CheckResult>) {
     let Some(target_rel) = &edge.resolved_target_rel else {
         return;
     };
@@ -29,10 +24,6 @@ pub(crate) fn check(
     if is_allowed_test_edge(edge) {
         return;
     }
-    let Some(_target_node) = crate_map.get(target_rel.as_str()) else {
-        return;
-    };
-
     if edge.is_direct_child {
         return;
     }
