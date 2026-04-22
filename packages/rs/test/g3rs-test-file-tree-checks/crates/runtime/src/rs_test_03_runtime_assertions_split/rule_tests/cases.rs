@@ -77,6 +77,130 @@ fn reports_inventory_for_valid_runtime_assertions_split() {
 }
 
 #[test]
+fn does_not_report_missing_assertions_module_when_path_is_prebound_by_ingestion() {
+    let component = with_sidecar(
+        {
+            let mut component = component(
+                "",
+                "crates/runtime",
+                Some("demo_runtime"),
+                true,
+                Some("demo_assertions"),
+            );
+            component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
+            component.assertions_dependencies = BTreeSet::from(["demo_runtime".to_owned()]);
+            component
+        },
+        "crates/runtime/src/lib_tests/mod.rs",
+        "crates/assertions/src/lib.rs",
+    );
+
+    let mut input = input(
+        vec![
+            file(
+                "crates/runtime/src/lib.rs",
+                G3RsTestFileKind::Source,
+                Some(""),
+                Some("lib"),
+                Some("demo_assertions"),
+                "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n\npub fn value() -> u8 { 1 }\n",
+            ),
+            file(
+                "crates/runtime/src/lib_tests/mod.rs",
+                G3RsTestFileKind::InternalSidecarMod,
+                Some(""),
+                Some("lib"),
+                Some("demo_assertions"),
+                "use demo_assertions::assert_runtime;\n#[test]\nfn owned_sidecar() { assert_runtime(); }\n",
+            ),
+        ],
+        vec![component],
+    );
+    input.files.retain(|file| file.rel_path != "crates/assertions/src/lib.rs");
+    let _ = input
+        .existing_file_paths
+        .insert("crates/assertions/src/lib.rs".to_owned());
+
+    let results = assertions::check(&input);
+
+    assertions::assert_no_title(
+        &results,
+        "RS-TEST-FILETREE-03",
+        "sidecar missing owned assertions module",
+    );
+}
+
+#[test]
+fn reports_sidecar_violation_from_prebound_component_files() {
+    let component = with_sidecar(
+        {
+            let mut component = component(
+                "",
+                "crates/runtime",
+                Some("demo_runtime"),
+                true,
+                Some("demo_assertions"),
+            );
+            component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
+            component.assertions_dependencies = BTreeSet::from(["demo_runtime".to_owned()]);
+            component
+        },
+        "crates/runtime/src/lib_tests/mod.rs",
+        "crates/assertions/src/lib.rs",
+    );
+
+    let mut input = input(
+        vec![
+            file(
+                "crates/runtime/src/lib.rs",
+                G3RsTestFileKind::Source,
+                Some(""),
+                Some("lib"),
+                Some("demo_assertions"),
+                "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n\npub fn value() -> u8 { 1 }\n",
+            ),
+            file(
+                "crates/runtime/src/other.rs",
+                G3RsTestFileKind::Source,
+                Some(""),
+                Some("other"),
+                Some("demo_assertions"),
+                "pub fn other() -> u8 { 2 }\n",
+            ),
+            file(
+                "crates/runtime/src/lib_tests/mod.rs",
+                G3RsTestFileKind::InternalSidecarMod,
+                Some(""),
+                Some("lib"),
+                Some("demo_assertions"),
+                "use crate::other;\n#[test]\nfn owned_sidecar() { let _ = other::other(); }\n",
+            ),
+            file(
+                "crates/assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some(""),
+                Some("lib"),
+                Some("demo_assertions"),
+                "pub fn assert_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
+            ),
+        ],
+        vec![component],
+    );
+    input.files.retain(|file| file.rel_path != "crates/runtime/src/lib_tests/mod.rs");
+
+    let results = assertions::check(&input);
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-FILETREE-03",
+        G3Severity::Error,
+        "sidecar imports sibling local module",
+        "crates/runtime/src/lib_tests/mod.rs",
+        Some(1),
+    );
+}
+
+#[test]
 fn reports_missing_assertions_crate() {
     let component = with_external_harness(
         component("", "crates/runtime", Some("demo_runtime"), false, None),

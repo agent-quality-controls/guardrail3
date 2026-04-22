@@ -219,6 +219,7 @@ pub struct G3RsTestFileTreeChecksInput {
     pub root_rel_dir: String,
     pub cargo_rel_path: String,
     pub files: Vec<G3RsTestAnalyzedSourceFile>,
+    pub existing_file_paths: BTreeSet<String>,
     pub components: Vec<G3RsTestComponentFileTreeFacts>,
     pub has_tests: bool,
     pub local_package_names: BTreeSet<String>,
@@ -241,8 +242,12 @@ pub struct G3RsTestComponentFileTreeFacts {
     pub nested_assertions_cargo_rel_path: Option<String>,
     pub assertions_package_name: Option<String>,
     pub assertions_dependencies: BTreeSet<String>,
+    pub source_module_names: BTreeSet<String>,
     pub sidecars: Vec<G3RsTestOwnedSidecarFacts>,
     pub external_harnesses: Vec<String>,
+    pub sidecar_files: Vec<G3RsTestAnalyzedSourceFile>,
+    pub external_harness_files: Vec<G3RsTestAnalyzedSourceFile>,
+    pub assertions_module_files: Vec<G3RsTestAnalyzedSourceFile>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
