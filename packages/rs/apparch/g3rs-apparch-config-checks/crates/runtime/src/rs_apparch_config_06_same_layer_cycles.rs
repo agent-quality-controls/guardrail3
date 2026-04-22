@@ -10,28 +10,21 @@ pub(crate) fn check(
     results: &mut Vec<G3CheckResult>,
 ) {
     let crates_by_path = input
-        .edges
+        .crates
         .iter()
-        .flat_map(|edge| {
-            [
-                (&edge.from.cargo_rel_path, &edge.from),
-                (&edge.to.cargo_rel_path, &edge.to),
-            ]
-        })
+        .map(|krate| (&krate.cargo_rel_path, krate))
         .collect::<BTreeMap<_, _>>();
     let mut adjacency = BTreeMap::<String, Vec<String>>::new();
     let mut self_loops = BTreeSet::new();
 
     for edge in &input.edges {
-        let source = &edge.from;
-        let target = &edge.to;
         adjacency
-            .entry(source.cargo_rel_path.clone())
+            .entry(edge.from_cargo_rel_path.clone())
             .or_default()
-            .push(target.cargo_rel_path.clone());
-        let _ = adjacency.entry(target.cargo_rel_path.clone()).or_default();
-        if source.cargo_rel_path == target.cargo_rel_path {
-            let _ = self_loops.insert(source.cargo_rel_path.clone());
+            .push(edge.to_cargo_rel_path.clone());
+        let _ = adjacency.entry(edge.to_cargo_rel_path.clone()).or_default();
+        if edge.from_cargo_rel_path == edge.to_cargo_rel_path {
+            let _ = self_loops.insert(edge.from_cargo_rel_path.clone());
         }
     }
 

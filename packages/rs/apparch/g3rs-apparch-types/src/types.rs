@@ -161,12 +161,13 @@ pub struct G3RsApparchPatchBypassChecksInput {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsApparchSameLayerDependencyEdge {
-    pub from: G3RsApparchCrate,
-    pub to: G3RsApparchCrate,
+    pub from_cargo_rel_path: String,
+    pub to_cargo_rel_path: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsApparchSameLayerCyclesChecksInput {
+    pub crates: Vec<G3RsApparchCrate>,
     pub edges: Vec<G3RsApparchSameLayerDependencyEdge>,
 }
 
