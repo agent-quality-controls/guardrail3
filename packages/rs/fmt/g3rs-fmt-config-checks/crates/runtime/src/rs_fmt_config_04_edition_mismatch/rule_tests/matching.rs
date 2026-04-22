@@ -1,5 +1,5 @@
 use g3rs_fmt_config_checks_assertions::rs_fmt_config_04_edition_mismatch::rule as assertions;
-use test_support::G3RsFmtCargoState;
+use test_support::parsed_cargo;
 
 use super::helpers::run_check;
 
@@ -9,14 +9,11 @@ fn stays_quiet_when_editions_match() {
         r#"
 edition = "2024"
 "#,
-        G3RsFmtCargoState::Parsed(
-            cargo_toml_parser::parse(
-                r#"
+        parsed_cargo(
+            r#"
 [workspace.package]
 edition = "2024"
 "#,
-            )
-            .expect("cargo fixture should parse"),
         ),
     );
 

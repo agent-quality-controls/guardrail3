@@ -85,16 +85,9 @@ fn ingests_all_three_files() {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
         other => panic!("expected parsed rust-toolchain.toml, got {other:?}"),
     };
-    assert_eq!(
-        rustfmt.edition,
-        Some(rustfmt_toml_parser::types::Edition::Edition2024)
-    );
-    assert!(cargo.workspace.is_some());
-    let toolchain_section = toolchain
-        .toolchain
-        .as_ref()
-        .expect("parsed rust-toolchain.toml should have a [toolchain] section");
-    assert_eq!(toolchain_section.channel.as_deref(), Some("1.85.0"));
+    assert_eq!(rustfmt.edition, Some("2024".to_owned()));
+    assert_eq!(cargo.edition.as_deref(), None);
+    assert_eq!(toolchain.channel.as_deref(), Some("1.85.0"));
 }
 
 #[test]
@@ -114,11 +107,11 @@ fn dot_rustfmt_toml_is_accepted_when_root_rustfmt_toml_is_absent() {
     assert_eq!(input.rustfmt_rel_path, ".rustfmt.toml");
     assert_eq!(
         match &input.rustfmt_state {
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition.clone(),
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => None,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
         },
-        Some(rustfmt_toml_parser::types::Edition::Edition2024),
+        Some("2024".to_owned()),
         "parsed edition should come from .rustfmt.toml"
     );
 }
@@ -162,11 +155,11 @@ fn ignores_dot_rustfmt_toml_when_rustfmt_toml_exists() {
     // Verify the correct file was parsed (2024 from rustfmt.toml, not 2021 from .rustfmt.toml).
     assert_eq!(
         match &input.rustfmt_state {
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition.clone(),
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => None,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
         },
-        Some(rustfmt_toml_parser::types::Edition::Edition2024),
+        Some("2024".to_owned()),
         "parsed edition should come from rustfmt.toml (2024), not .rustfmt.toml (2021)"
     );
 }
@@ -338,18 +331,9 @@ fn ignored_but_recovered_rustfmt_toml_is_ingested() {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
         other => panic!("expected parsed rust-toolchain.toml, got {other:?}"),
     };
-    assert_eq!(
-        rustfmt.edition,
-        Some(rustfmt_toml_parser::types::Edition::Edition2024)
-    );
-    assert!(cargo.workspace.is_some());
-    assert_eq!(
-        toolchain
-            .toolchain
-            .as_ref()
-            .and_then(|section| section.channel.as_deref()),
-        Some("1.85.0")
-    );
+    assert_eq!(rustfmt.edition, Some("2024".to_owned()));
+    assert_eq!(cargo.edition.as_deref(), None);
+    assert_eq!(toolchain.channel.as_deref(), Some("1.85.0"));
 }
 
 #[test]
@@ -381,18 +365,9 @@ fn ignored_but_recovered_cargo_toml_is_ingested() {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
         other => panic!("expected parsed rust-toolchain.toml, got {other:?}"),
     };
-    assert_eq!(
-        rustfmt.edition,
-        Some(rustfmt_toml_parser::types::Edition::Edition2024)
-    );
-    assert!(cargo.workspace.is_some());
-    assert_eq!(
-        toolchain
-            .toolchain
-            .as_ref()
-            .and_then(|section| section.channel.as_deref()),
-        Some("1.85.0")
-    );
+    assert_eq!(rustfmt.edition, Some("2024".to_owned()));
+    assert_eq!(cargo.edition.as_deref(), None);
+    assert_eq!(toolchain.channel.as_deref(), Some("1.85.0"));
 }
 
 #[test]
@@ -424,18 +399,9 @@ fn ignored_but_recovered_toolchain_toml_is_ingested() {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
         other => panic!("expected parsed rust-toolchain.toml, got {other:?}"),
     };
-    assert_eq!(
-        rustfmt.edition,
-        Some(rustfmt_toml_parser::types::Edition::Edition2024)
-    );
-    assert!(cargo.workspace.is_some());
-    assert_eq!(
-        toolchain
-            .toolchain
-            .as_ref()
-            .and_then(|section| section.channel.as_deref()),
-        Some("1.85.0")
-    );
+    assert_eq!(rustfmt.edition, Some("2024".to_owned()));
+    assert_eq!(cargo.edition.as_deref(), None);
+    assert_eq!(toolchain.channel.as_deref(), Some("1.85.0"));
 }
 
 // ── Empty file behavior ─────────────────────────────────────────────────
@@ -456,7 +422,7 @@ fn empty_rustfmt_toml_is_valid() {
 
     assert_eq!(
         match &input.rustfmt_state {
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition.clone(),
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => {
                 panic!("empty rustfmt.toml should parse")
             }
@@ -559,12 +525,12 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
     };
     assert_eq!(
         rustfmt.edition,
-        Some(rustfmt_toml_parser::types::Edition::Edition2024),
+        Some("2024".to_owned()),
         "realistic rustfmt should have edition 2024"
     );
     assert_eq!(
         rustfmt.style_edition,
-        Some(rustfmt_toml_parser::types::StyleEdition::Edition2024),
+        Some("2024".to_owned()),
         "realistic rustfmt should have style_edition 2024"
     );
     assert_eq!(
@@ -604,16 +570,8 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
         g3rs_fmt_types::G3RsFmtCargoState::Parsed(cargo) => cargo,
         other => panic!("realistic Cargo.toml should parse, got {other:?}"),
     };
-    let workspace = cargo
-        .workspace
-        .as_ref()
-        .expect("realistic Cargo.toml should have a [workspace] section");
-    let ws_package = workspace
-        .package
-        .as_ref()
-        .expect("realistic Cargo.toml should have a [workspace.package] section");
     assert_eq!(
-        ws_package.edition.as_deref(),
+        cargo.edition.as_deref(),
         Some("2024"),
         "realistic Cargo.toml workspace.package.edition should be 2024"
     );
@@ -624,19 +582,10 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,
         other => panic!("realistic toolchain should parse, got {other:?}"),
     };
-    let toolchain_section = toolchain
-        .toolchain
-        .as_ref()
-        .expect("realistic rust-toolchain.toml should have a [toolchain] section");
     assert_eq!(
-        toolchain_section.channel.as_deref(),
+        toolchain.channel.as_deref(),
         Some("stable"),
         "realistic toolchain should have channel 'stable'"
-    );
-    assert_eq!(
-        toolchain_section.components,
-        vec!["clippy".to_owned(), "rustfmt".to_owned()],
-        "realistic toolchain should have clippy and rustfmt components"
     );
 }
 

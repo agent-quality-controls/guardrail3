@@ -1,60 +1,67 @@
 use g3rs_fmt_types::G3RsFmtConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::inputs::{cargo, cargo_edition, rustfmt, rustfmt_edition, rustfmt_style_edition};
-
 const ID: &str = "RS-FMT-CONFIG-01";
 
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let Some(rustfmt) = rustfmt(input) else {
-        let (title, message) = match &input.rustfmt_state {
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => (
+    let rustfmt = match &input.rustfmt_state {
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt,
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => {
+            results.push(G3CheckResult::new(
+                ID.to_owned(),
+                G3Severity::Error,
                 "rustfmt config unreadable".to_owned(),
                 "rustfmt config exists but could not be read from disk".to_owned(),
-            ),
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => (
+                Some(input.rustfmt_rel_path.clone()),
+                None,
+            ));
+            return;
+        }
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => {
+            results.push(G3CheckResult::new(
+                ID.to_owned(),
+                G3Severity::Error,
                 "rustfmt config parse error".to_owned(),
                 "rustfmt config exists but could not be parsed as a TOML table".to_owned(),
-            ),
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(_) => return,
-        };
-        results.push(G3CheckResult::new(
-            ID.to_owned(),
-            G3Severity::Error,
-            title,
-            message,
-            Some(input.rustfmt_rel_path.clone()),
-            None,
-        ));
-        return;
+                Some(input.rustfmt_rel_path.clone()),
+                None,
+            ));
+            return;
+        }
     };
-    let expected_edition = cargo(input).and_then(cargo_edition).unwrap_or("2024");
+    let expected_edition = match &input.cargo_state {
+        g3rs_fmt_types::G3RsFmtCargoState::Parsed(cargo) => cargo.edition.as_deref(),
+        g3rs_fmt_types::G3RsFmtCargoState::Missing
+        | g3rs_fmt_types::G3RsFmtCargoState::Unreadable
+        | g3rs_fmt_types::G3RsFmtCargoState::ParseError => None,
+    }
+    .unwrap_or("2024");
 
     check_string(
         &input.rustfmt_rel_path,
         "edition",
-        rustfmt_edition(rustfmt.edition),
+        rustfmt.edition.as_deref(),
         expected_edition,
         results,
     );
     check_string(
         &input.rustfmt_rel_path,
         "style_edition",
-        rustfmt_style_edition(rustfmt.style_edition),
+        rustfmt.style_edition.as_deref(),
         expected_edition,
         results,
     );
     check_int(
         &input.rustfmt_rel_path,
         "max_width",
-        rustfmt.max_width.map(i64::from),
+        rustfmt.max_width,
         100,
         results,
     );
     check_int(
         &input.rustfmt_rel_path,
         "tab_spaces",
-        rustfmt.tab_spaces.map(i64::from),
+        rustfmt.tab_spaces,
         4,
         results,
     );
