@@ -333,6 +333,27 @@ fn preserves_escaped_hash_outside_quotes_in_executable_commands() {
 }
 
 #[test]
+fn preserves_escaped_space_before_hash_outside_quotes_in_executable_commands() {
+    let parsed = parse_script(r#"echo foo\ # g3rs validate --path .
+"#);
+
+    assert_script_matches(
+        &parsed,
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "echo",
+                Some(r#"echo foo\ # g3rs validate --path ."#),
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
+    );
+}
+
+#[test]
 fn ignores_heredoc_body_command_text() {
     let parsed = parse_script("cat <<'EOF'\nguardrail3 rs validate --staged .\nEOF\n");
 
@@ -495,6 +516,20 @@ fn keeps_inline_command_after_function_definition_when_string_contains_brace() {
                 Some(true),
             )],
             &[FunctionExpectation::new("finish", Some("echo ok"), None)],
+        ),
+    );
+}
+
+#[test]
+fn keeps_inline_command_after_function_definition_when_command_substitution_contains_brace() {
+    let parsed = parse_script("finish() { : $(printf '}'); }; exit 0\n");
+
+    assert_script_matches(
+        &parsed,
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new("exit", None, None, None, Some(true))],
+            &[FunctionExpectation::new("finish", Some(": $(printf '}')"), None)],
         ),
     );
 }
