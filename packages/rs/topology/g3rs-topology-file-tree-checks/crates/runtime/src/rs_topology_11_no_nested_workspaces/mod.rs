@@ -1,2 +1,2 @@
 mod rule;
-pub(crate) use rule::{NestedWorkspaceInput, check};
+pub(crate) use rule::check;

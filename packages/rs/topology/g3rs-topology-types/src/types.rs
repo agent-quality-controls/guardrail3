@@ -68,6 +68,45 @@ pub struct G3RsTopologyFileTreeInputFailure {
     pub message: String,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsTopologyNestedWorkspaceInput {
+    pub rel_dir: String,
+    pub cargo_rel_path: String,
+    pub parent_workspace_rel: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum G3RsTopologyWorkspaceMemberIssueKind {
+    Undeclared {
+        workspace_root_rel: String,
+    },
+    Extra {
+        workspace_root_rel: String,
+        member_pattern: String,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsTopologyWorkspaceMemberIssueInput {
+    pub rel_dir: String,
+    pub cargo_rel_path: String,
+    pub kind: G3RsTopologyWorkspaceMemberIssueKind,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsTopologyEscapingWorkspaceMemberPathInput {
+    pub cargo_rel_path: String,
+    pub workspace_root_rel: String,
+    pub member_pattern: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsTopologyIllegalFamilyFilePlacementInput {
+    pub family: G3RsTopologyWorkspaceFamily,
+    pub rel_path: String,
+    pub reason: String,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct G3RsTopologyFileTreeChecksInput {
     pub workspace_root_rel_dir: String,
@@ -76,4 +115,8 @@ pub struct G3RsTopologyFileTreeChecksInput {
     pub descendant_cargo_roots: Vec<G3RsTopologyDescendantCargoRoot>,
     pub family_files: Vec<G3RsTopologyWorkspaceFamilyFile>,
     pub input_failures: Vec<G3RsTopologyFileTreeInputFailure>,
+    pub nested_workspaces: Vec<G3RsTopologyNestedWorkspaceInput>,
+    pub membership_issues: Vec<G3RsTopologyWorkspaceMemberIssueInput>,
+    pub escaping_member_paths: Vec<G3RsTopologyEscapingWorkspaceMemberPathInput>,
+    pub illegal_family_files: Vec<G3RsTopologyIllegalFamilyFilePlacementInput>,
 }

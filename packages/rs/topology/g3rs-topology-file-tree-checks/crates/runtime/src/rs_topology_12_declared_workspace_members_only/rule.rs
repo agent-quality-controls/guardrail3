@@ -1,30 +1,18 @@
+use g3rs_topology_types::{
+    G3RsTopologyWorkspaceMemberIssueInput, G3RsTopologyWorkspaceMemberIssueKind,
+};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::display_dir;
 
 const ID: &str = "RS-TOPOLOGY-FILETREE-12";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) enum WorkspaceMemberIssueKind {
-    Undeclared {
-        workspace_root_rel: String,
-    },
-    Extra {
-        workspace_root_rel: String,
-        member_pattern: String,
-    },
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct WorkspaceMemberIssueInput {
-    pub(crate) rel_dir: String,
-    pub(crate) cargo_rel_path: String,
-    pub(crate) kind: WorkspaceMemberIssueKind,
-}
-
-pub(crate) fn check(input: &WorkspaceMemberIssueInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(
+    input: &G3RsTopologyWorkspaceMemberIssueInput,
+    results: &mut Vec<G3CheckResult>,
+) {
     match &input.kind {
-        WorkspaceMemberIssueKind::Undeclared { workspace_root_rel } => {
+        G3RsTopologyWorkspaceMemberIssueKind::Undeclared { workspace_root_rel } => {
             results.push(G3CheckResult::new(
                 ID.to_owned(),
                 G3Severity::Error,
@@ -42,7 +30,7 @@ pub(crate) fn check(input: &WorkspaceMemberIssueInput, results: &mut Vec<G3Check
                 None,
             ));
         }
-        WorkspaceMemberIssueKind::Extra {
+        G3RsTopologyWorkspaceMemberIssueKind::Extra {
             workspace_root_rel,
             member_pattern,
         } => {

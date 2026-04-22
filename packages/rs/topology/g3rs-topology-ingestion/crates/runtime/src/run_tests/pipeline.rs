@@ -7,8 +7,8 @@ use tempfile::tempdir;
 
 fn run_results(root: &std::path::Path) -> Vec<guardrail3_check_types::G3CheckResult> {
     let crawl = crawl(root).expect("crawl workspace fixture before ingestion");
-    let input = super::super::ingest_for_file_tree_checks(&crawl)
-        .expect("ingest topology file-tree facts");
+    let input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingest topology file-tree facts");
     check(&input)
 }
 
@@ -199,13 +199,15 @@ fn nested_workspace_still_fires_membership_rule_end_to_end() {
         "[workspace]\nmembers = [\"crates/api\", \"crates/nested\"]\n",
     );
     fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
-    fs::create_dir_all(root.path().join("crates/nested/src"))
-        .expect("create nested source dir");
+    fs::create_dir_all(root.path().join("crates/nested/src")).expect("create nested source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
     );
-    write(root.path().join("crates/api/src/lib.rs"), "pub struct Api;\n");
+    write(
+        root.path().join("crates/api/src/lib.rs"),
+        "pub struct Api;\n",
+    );
     write(
         root.path().join("crates/nested/Cargo.toml"),
         "[workspace]\nmembers = []\n",
@@ -456,14 +458,23 @@ fn illegal_root_nested_family_file_placement_fires_end_to_end() {
 fn illegal_child_root_fmt_file_fires_end_to_end() {
     let root = tempdir().expect("create temp dir");
 
-    write(root.path().join("Cargo.toml"), "[workspace]\nmembers = []\n");
+    write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = []\n",
+    );
     fs::create_dir_all(root.path().join("crates/api/src")).expect("create api source dir");
     write(
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
     );
-    write(root.path().join("crates/api/src/lib.rs"), "pub struct Api;\n");
-    write(root.path().join("crates/api/rustfmt.toml"), "max_width = 100\n");
+    write(
+        root.path().join("crates/api/src/lib.rs"),
+        "pub struct Api;\n",
+    );
+    write(
+        root.path().join("crates/api/rustfmt.toml"),
+        "max_width = 100\n",
+    );
 
     let results = run_results(root.path());
     assert_eq!(
@@ -494,8 +505,14 @@ fn member_fmt_file_fires_end_to_end() {
         root.path().join("crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\n",
     );
-    write(root.path().join("crates/api/src/lib.rs"), "pub struct Api;\n");
-    write(root.path().join("crates/api/rustfmt.toml"), "max_width = 100\n");
+    write(
+        root.path().join("crates/api/src/lib.rs"),
+        "pub struct Api;\n",
+    );
+    write(
+        root.path().join("crates/api/rustfmt.toml"),
+        "max_width = 100\n",
+    );
 
     let results = run_results(root.path());
     assert_eq!(
@@ -682,8 +699,8 @@ fn stale_read_descendant_manifest_fails_closed_end_to_end() {
 
     let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
     fs::remove_file(&bad_manifest).expect("remove stale descendant manifest");
-    let input = super::super::ingest_for_file_tree_checks(&crawl)
-        .expect("ingest topology file-tree facts");
+    let input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingest topology file-tree facts");
     let results = check(&input);
 
     assert_eq!(

@@ -1,2 +1,2 @@
 mod rule;
-pub(crate) use rule::{IllegalFamilyFilePlacementInput, check};
+pub(crate) use rule::check;

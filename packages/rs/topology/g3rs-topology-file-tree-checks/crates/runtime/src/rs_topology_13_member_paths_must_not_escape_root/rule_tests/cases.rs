@@ -1,6 +1,7 @@
 use g3rs_topology_file_tree_checks_assertions::rs_topology_13_member_paths_must_not_escape_root::rule as assertions;
+use g3rs_topology_types::G3RsTopologyEscapingWorkspaceMemberPathInput as EscapingWorkspaceMemberPathInput;
 
-use super::super::{EscapingWorkspaceMemberPathInput, check};
+use super::super::check;
 
 #[test]
 fn escaping_member_path_fires() {

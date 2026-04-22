@@ -5,6 +5,7 @@ allowed_deps = [
   "g3rs-topology-file-tree-checks",
   "g3rs-topology-types",
   "g3rs-workspace-crawl",
+  "glob",
   "guardrail3-check-types",
   "tempfile",
 ]

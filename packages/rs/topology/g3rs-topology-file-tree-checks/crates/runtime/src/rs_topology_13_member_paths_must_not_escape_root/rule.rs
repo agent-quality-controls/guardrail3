@@ -1,17 +1,14 @@
+use g3rs_topology_types::G3RsTopologyEscapingWorkspaceMemberPathInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::display_dir;
 
 const ID: &str = "RS-TOPOLOGY-FILETREE-13";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct EscapingWorkspaceMemberPathInput {
-    pub(crate) cargo_rel_path: String,
-    pub(crate) workspace_root_rel: String,
-    pub(crate) member_pattern: String,
-}
-
-pub(crate) fn check(input: &EscapingWorkspaceMemberPathInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(
+    input: &G3RsTopologyEscapingWorkspaceMemberPathInput,
+    results: &mut Vec<G3CheckResult>,
+) {
     let workspace_root_rel = &input.workspace_root_rel;
     let member_pattern = &input.member_pattern;
 

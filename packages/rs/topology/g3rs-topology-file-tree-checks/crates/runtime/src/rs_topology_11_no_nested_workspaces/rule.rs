@@ -1,17 +1,11 @@
+use g3rs_topology_types::G3RsTopologyNestedWorkspaceInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::display_dir;
 
 const ID: &str = "RS-TOPOLOGY-FILETREE-11";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct NestedWorkspaceInput {
-    pub(crate) rel_dir: String,
-    pub(crate) cargo_rel_path: String,
-    pub(crate) parent_workspace_rel: String,
-}
-
-pub(crate) fn check(input: &NestedWorkspaceInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3RsTopologyNestedWorkspaceInput, results: &mut Vec<G3CheckResult>) {
     let parent_workspace_rel = &input.parent_workspace_rel;
 
     results.push(G3CheckResult::new(
