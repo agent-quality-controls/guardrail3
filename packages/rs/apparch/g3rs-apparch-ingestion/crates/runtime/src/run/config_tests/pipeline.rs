@@ -206,6 +206,41 @@ db-outbound = { path = "../../io/outbound/db", package = "db-outbound" }
 }
 
 #[test]
+fn dev_only_same_layer_cycle_does_not_report_config_06() {
+    let root = super::helpers::temp_workspace();
+    super::helpers::write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = [\"types/a\", \"types/b\"]\n",
+    );
+    super::helpers::write(
+        root.path().join("types/a/Cargo.toml"),
+        r#"
+[package]
+name = "types-a"
+version = "0.1.0"
+
+[dev-dependencies]
+types-b = { path = "../b", package = "types-b" }
+"#,
+    );
+    super::helpers::write(
+        root.path().join("types/b/Cargo.toml"),
+        r#"
+[package]
+name = "types-b"
+version = "0.1.0"
+
+[target.'cfg(unix)'.dev-dependencies]
+types-a = { path = "../a", package = "types-a" }
+"#,
+    );
+
+    let results = check_config(&super::helpers::config_input(root.path()));
+
+    assertions::assert_no_result_id(&results, "RS-APPARCH-CONFIG-06");
+}
+
+#[test]
 fn impure_external_deps_in_types_and_logic_are_reported() {
     let root = super::helpers::temp_workspace();
     super::helpers::write(
