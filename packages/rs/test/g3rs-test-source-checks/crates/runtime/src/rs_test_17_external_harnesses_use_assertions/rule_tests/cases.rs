@@ -82,6 +82,34 @@ fn inventories_external_harness_using_aliased_owned_assertions_crate() {
 }
 
 #[test]
+fn inventories_external_harness_using_aliased_owned_assertions_through_local_alias_chain() {
+    let results = assertions::check(&assertions::input(
+        vec![
+            assertions::file(
+                "assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo_assertions"),
+                "pub fn assert_demo() { assert_eq!(1, 1); }\n",
+            ),
+            assertions::file(
+                "tests/aliased_chain.rs",
+                G3RsTestFileKind::ExternalHarness,
+                Some("demo_assertions"),
+                "fn assert_demo() { assert_eq!(1, 1); }\nuse demo_assertions::assert_demo as run;\nuse self::run as again;\n#[test]\nfn harness() { again(); }\n",
+            ),
+        ],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_inventory(
+        &results,
+        "RS-TEST-SOURCE-17",
+        "external harness uses owned assertions",
+        "tests/aliased_chain.rs",
+    );
+}
+
+#[test]
 fn inventories_qualified_owned_assertions_call_even_with_local_same_name_helper() {
     let results = assertions::check(&assertions::input(
         vec![
