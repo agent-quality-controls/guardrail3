@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_test_types::ast::{FunctionInfo, TestFunctionInfo, TestHarnessFacts, UseBinding};
+use g3rs_test_types::ast::{TestFunctionInfo, UseBinding};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::TestFunctionInput;
@@ -37,11 +37,9 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
 
     if let Some(local_path) = local_proof_path(
         input.function,
-        &input.file.parsed.functions,
-        &input.file.parsed.imports,
         &input.file.parsed.file_function_names,
-        input.file.assertions_package_name.as_deref(),
-        input.proof_bearing_assertion_functions,
+        &input.file.parsed.imports,
+        &input.file.local_proof_helper_functions,
     ) {
         results.push(G3CheckResult::new(
             ID.to_owned(),
@@ -75,19 +73,10 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
 
 fn local_proof_path(
     function: &TestFunctionInfo,
-    functions: &[FunctionInfo],
-    imports: &[UseBinding],
     file_function_names: &BTreeSet<String>,
-    assertions_package_name: Option<&str>,
-    proof_bearing_assertion_functions: Option<&BTreeSet<String>>,
+    imports: &[UseBinding],
+    local_proof_helpers: &BTreeSet<String>,
 ) -> Option<String> {
-    let local_assertion_helpers = local_assertion_helper_names(
-        functions,
-        imports,
-        file_function_names,
-        assertions_package_name,
-        proof_bearing_assertion_functions,
-    );
     let mut local_imports = BTreeMap::new();
     for binding in imports {
         let Some(first) = binding.path_segments.first() else {
@@ -111,7 +100,7 @@ fn local_proof_path(
         &function.body.shadowed_idents,
         file_function_names,
         &local_imports,
-        &local_assertion_helpers,
+        local_proof_helpers,
     )
     .or_else(|| {
         function
@@ -120,7 +109,7 @@ fn local_proof_path(
             .iter()
             .zip(function.harness.method_receiver_paths.iter())
             .find(|(method, receiver)| {
-                local_assertion_helpers.contains(method.as_str())
+                local_proof_helpers.contains(method.as_str())
                     && receiver
                         .first()
                         .is_some_and(|name| function.body.shadowed_idents.contains(name))
@@ -135,40 +124,34 @@ fn first_local_assertion_path(
     shadowed_idents: &BTreeSet<String>,
     file_function_names: &BTreeSet<String>,
     local_imports: &BTreeMap<String, String>,
-    local_assertion_helpers: &BTreeSet<&str>,
+    local_proof_helpers: &BTreeSet<String>,
 ) -> Option<String> {
     for path in call_paths {
         let Some(first) = path.first() else {
             continue;
         };
         if matches!(first.as_str(), "crate" | "self" | "super") {
-            if path_uses_local_assertions_module(path)
-                || path
-                    .last()
-                    .is_some_and(|name| local_assertion_helpers.contains(name.as_str()))
-            {
+            if path.last().is_some_and(|name| {
+                local_proof_helpers.contains(name) || looks_like_proof_helper_name(name)
+            }) {
                 return Some(path.join("::"));
             }
             continue;
         }
         if let Some(import_path) = local_imports.get(first) {
             if path.len() == 1 {
-                if local_assertion_helpers.contains(first.as_str())
-                    || import_path
-                        .split("::")
-                        .any(|segment| segment == "assertions")
+                if local_proof_helpers.contains(first)
+                    || import_path.rsplit("::").next().is_some_and(|name| {
+                        local_proof_helpers.contains(name) || looks_like_proof_helper_name(name)
+                    })
                 {
                     return Some(import_path.clone());
                 }
                 continue;
             }
-            if import_path
-                .split("::")
-                .any(|segment| segment == "assertions")
-                || path[1..]
-                    .last()
-                    .is_some_and(|name| local_assertion_helpers.contains(name.as_str()))
-            {
+            if path[1..].last().is_some_and(|name| {
+                local_proof_helpers.contains(name) || looks_like_proof_helper_name(name)
+            }) {
                 return Some(format!("{import_path}::{}", path[1..].join("::")));
             }
             continue;
@@ -176,16 +159,14 @@ fn first_local_assertion_path(
         if path.len() == 1
             && !shadowed_idents.contains(first)
             && file_function_names.contains(first)
-            && local_assertion_helpers.contains(first.as_str())
+            && local_proof_helpers.contains(first)
         {
             return Some(format!("local function `{first}`"));
         }
         if let Some(alias_path) = local_call_aliases.get(first) {
-            if path_uses_local_assertions_module(alias_path)
-                || alias_path
-                    .last()
-                    .is_some_and(|name| local_assertion_helpers.contains(name.as_str()))
-            {
+            if alias_path.last().is_some_and(|name| {
+                local_proof_helpers.contains(name) || looks_like_proof_helper_name(name)
+            }) {
                 return Some(alias_path.join("::"));
             }
         }
@@ -193,68 +174,26 @@ fn first_local_assertion_path(
     None
 }
 
-fn path_uses_local_assertions_module(path: &[String]) -> bool {
-    path.iter().any(|segment| segment == "assertions")
-}
-
 fn looks_like_proof_helper_name(name: &str) -> bool {
-    ["assert", "require", "expect", "verify", "prove"]
-        .iter()
-        .any(|prefix| name.starts_with(prefix))
-}
-
-fn local_assertion_helper_names<'a>(
-    functions: &'a [FunctionInfo],
-    imports: &[UseBinding],
-    file_function_names: &BTreeSet<String>,
-    assertions_package_name: Option<&str>,
-    proof_bearing_assertion_functions: Option<&BTreeSet<String>>,
-) -> BTreeSet<&'a str> {
-    let mut assertion_helpers = functions
-        .iter()
-        .filter(|function| !function.is_test)
-        .filter(|function| {
-            has_owned_assertion_proof(
-                &TestFunctionInfo {
-                    line: function.line,
-                    name: function.name.clone(),
-                    assertions: function.assertions.clone(),
-                    body: function.body.clone(),
-                    harness: TestHarnessFacts::default(),
-                },
-                imports,
-                file_function_names,
-                assertions_package_name,
-                proof_bearing_assertion_functions,
-            ) || (looks_like_proof_helper_name(&function.name)
-                && function.assertions.has_assertion_macro)
-        })
-        .map(|function| function.name.as_str())
-        .collect::<BTreeSet<_>>();
-
-    loop {
-        let mut changed = false;
-        for function in functions.iter().filter(|function| !function.is_test) {
-            if assertion_helpers.contains(function.name.as_str()) {
-                continue;
-            }
-            if !looks_like_proof_helper_name(&function.name) {
-                continue;
-            }
-            if function.body.call_paths.iter().any(|path| {
-                path.len() == 1
-                    && assertion_helpers.contains(path[0].as_str())
-                    && !function.body.shadowed_idents.contains(&path[0])
-            }) {
-                changed |= assertion_helpers.insert(function.name.as_str());
-            }
-        }
-        if !changed {
-            break;
-        }
-    }
-
-    assertion_helpers
+    name.split('_').any(|segment| {
+        matches!(
+            segment,
+            "assert"
+                | "asserts"
+                | "assertion"
+                | "assertions"
+                | "expect"
+                | "expected"
+                | "prove"
+                | "proof"
+                | "require"
+                | "verify"
+                | "result"
+                | "results"
+                | "outcome"
+                | "outcomes"
+        )
+    })
 }
 
 pub(crate) fn has_owned_assertion_proof(
