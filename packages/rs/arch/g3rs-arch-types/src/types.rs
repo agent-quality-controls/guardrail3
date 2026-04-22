@@ -106,6 +106,12 @@ pub struct G3RsArchSourceCrate {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsArchLibFacadeChecksInput {
+    pub krate: G3RsArchSourceCrate,
+    pub lib_surface: Option<G3RsArchFacadeSurface>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsArchPathAttrSite {
     pub rel_path: String,
     pub line: usize,
@@ -116,8 +122,8 @@ pub struct G3RsArchPathAttrSite {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsArchSourceChecksInput {
-    pub crates: Vec<G3RsArchSourceCrate>,
-    pub facade_surfaces: Vec<G3RsArchFacadeSurface>,
+    pub lib_facade_checks: Vec<G3RsArchLibFacadeChecksInput>,
+    pub mod_facade_surfaces: Vec<G3RsArchFacadeSurface>,
     pub path_attr_sites: Vec<G3RsArchPathAttrSite>,
 }
 

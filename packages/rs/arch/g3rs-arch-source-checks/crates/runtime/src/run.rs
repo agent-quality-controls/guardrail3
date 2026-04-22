@@ -1,31 +1,25 @@
-use std::collections::BTreeMap;
-
 use g3rs_arch_types::G3RsArchSourceChecksInput;
 use g3rs_arch_types::types::G3RsArchFacadeSurface;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsArchSourceChecksInput) -> Vec<G3CheckResult> {
-    let facade_map = input
-        .facade_surfaces
-        .iter()
-        .map(|surface| (surface.rel_path.as_str(), surface))
-        .collect::<BTreeMap<_, _>>();
-
     let mut results = Vec::new();
 
-    for node in &input.crates {
-        let lib_surface = node
-            .lib_rs_rel
-            .as_deref()
-            .and_then(|rel_path| facade_map.get(rel_path).copied());
-        crate::rs_arch_02_lib_facade_only::check(node, lib_surface, &mut results);
-        crate::rs_arch_08a_feature_gated_exports::check(node, lib_surface, &mut results);
+    for check_input in &input.lib_facade_checks {
+        crate::rs_arch_02_lib_facade_only::check(
+            &check_input.krate,
+            check_input.lib_surface.as_ref(),
+            &mut results,
+        );
+        crate::rs_arch_08a_feature_gated_exports::check(
+            &check_input.krate,
+            check_input.lib_surface.as_ref(),
+            &mut results,
+        );
     }
 
-    for surface in &input.facade_surfaces {
-        if surface.is_mod_rs {
-            crate::rs_arch_04_mod_facade_only::check(surface, &mut results);
-        }
+    for surface in &input.mod_facade_surfaces {
+        crate::rs_arch_04_mod_facade_only::check(surface, &mut results);
     }
 
     for site in &input.path_attr_sites {
@@ -40,3 +34,7 @@ pub(crate) fn broad_reexports(
 ) -> impl Iterator<Item = &g3rs_arch_types::types::G3RsArchFacadeItem> {
     surface.broad_reexports.iter()
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"]
+mod run_tests;

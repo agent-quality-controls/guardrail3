@@ -135,8 +135,8 @@ fn source_ingestion_stays_inside_the_pointed_workspace() {
     let inputs = source_inputs(&root);
 
     assert_eq!(inputs.len(), 1);
-    assert_eq!(inputs[0].crates.len(), 1);
-    assert_eq!(inputs[0].crates[0].rel_dir, "crate_a");
+    assert_eq!(inputs[0].lib_facade_checks.len(), 1);
+    assert_eq!(inputs[0].lib_facade_checks[0].krate.rel_dir, "crate_a");
     assert!(
         inputs[0]
             .path_attr_sites
@@ -176,8 +176,8 @@ fn source_ingestion_does_not_recurse_into_excluded_nested_crates() {
     let inputs = source_inputs(&root);
 
     assert_eq!(inputs.len(), 1);
-    assert_eq!(inputs[0].crates.len(), 1);
-    assert_eq!(inputs[0].crates[0].rel_dir, "pkg");
+    assert_eq!(inputs[0].lib_facade_checks.len(), 1);
+    assert_eq!(inputs[0].lib_facade_checks[0].krate.rel_dir, "pkg");
     assert!(
         inputs[0]
             .path_attr_sites
@@ -186,7 +186,7 @@ fn source_ingestion_does_not_recurse_into_excluded_nested_crates() {
     );
     assert!(
         inputs[0]
-            .facade_surfaces
+            .mod_facade_surfaces
             .iter()
             .all(|surface| !surface.rel_path.starts_with("pkg/crates/inner/"))
     );

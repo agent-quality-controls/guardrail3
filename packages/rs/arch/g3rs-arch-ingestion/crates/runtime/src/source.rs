@@ -3,7 +3,8 @@ use syn::spanned::Spanned;
 
 use g3rs_arch_types::types::{
     G3RsArchCrateNode, G3RsArchFacadeItem, G3RsArchFacadeSurface, G3RsArchFeatureExport,
-    G3RsArchPathAttrSite, G3RsArchSourceChecksInput, G3RsArchSourceCrate,
+    G3RsArchLibFacadeChecksInput, G3RsArchPathAttrSite, G3RsArchSourceChecksInput,
+    G3RsArchSourceCrate,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -22,8 +23,11 @@ pub(crate) fn ingest_for_source_checks(
     let path_attr_sites = collect_path_attr_sites(&view, &crate_nodes)?;
 
     Ok(vec![G3RsArchSourceChecksInput {
-        crates: collect_source_crates(&crate_nodes),
-        facade_surfaces,
+        lib_facade_checks: collect_lib_facade_checks(&crate_nodes, &facade_surfaces),
+        mod_facade_surfaces: facade_surfaces
+            .into_iter()
+            .filter(|surface| surface.is_mod_rs)
+            .collect(),
         path_attr_sites,
     }])
 }
@@ -34,6 +38,27 @@ fn collect_source_crates(crate_nodes: &[G3RsArchCrateNode]) -> Vec<G3RsArchSourc
         .map(|node| G3RsArchSourceCrate {
             rel_dir: node.rel_dir.clone(),
             lib_rs_rel: node.lib_rs_rel.clone(),
+        })
+        .collect()
+}
+
+fn collect_lib_facade_checks(
+    crate_nodes: &[G3RsArchCrateNode],
+    facade_surfaces: &[G3RsArchFacadeSurface],
+) -> Vec<G3RsArchLibFacadeChecksInput> {
+    let facade_map = facade_surfaces
+        .iter()
+        .map(|surface| (surface.rel_path.as_str(), surface))
+        .collect::<std::collections::BTreeMap<_, _>>();
+
+    collect_source_crates(crate_nodes)
+        .into_iter()
+        .map(|krate| G3RsArchLibFacadeChecksInput {
+            lib_surface: krate
+                .lib_rs_rel
+                .as_deref()
+                .and_then(|rel_path| facade_map.get(rel_path).cloned().cloned()),
+            krate,
         })
         .collect()
 }
