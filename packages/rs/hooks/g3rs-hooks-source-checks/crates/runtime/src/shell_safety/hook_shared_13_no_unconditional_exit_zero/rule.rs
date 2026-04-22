@@ -127,8 +127,7 @@ fn called_function_exit_zero_line(
     }
 
     visiting.push(function.name.to_owned());
-    let nested = hook_shell_parser::parse_script(&function.body);
-    let line_no = first_unconditional_exit_zero_line(&nested, visiting)
+    let line_no = first_unconditional_exit_zero_line(&function.parsed_body, visiting)
         .map(|nested_line_no| absolute_function_body_line(function, nested_line_no));
     let _ = visiting.pop();
     line_no
@@ -148,7 +147,7 @@ fn function_line_ranges(parsed: &ParsedShellScript) -> Vec<(usize, usize)> {
         .functions
         .iter()
         .map(|function| {
-            let body_line_count = function.body.lines().count();
+            let body_line_count = function.parsed_body.source_lines.len();
             let end_line = if body_line_count == 0 {
                 function.line_no
             } else {

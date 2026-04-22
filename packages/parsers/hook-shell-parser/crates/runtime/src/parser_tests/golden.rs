@@ -417,7 +417,7 @@ fn records_called_function_body_for_later_resolution() {
             &[FunctionExpectation::new(
                 "guardrail_validate",
                 Some("guardrail3 rs validate --staged ."),
-                None,
+                Some(&["guardrail3"]),
             )],
         ),
     );

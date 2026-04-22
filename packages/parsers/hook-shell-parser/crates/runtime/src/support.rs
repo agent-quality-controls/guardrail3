@@ -1,4 +1,4 @@
-use crate::types::{ExecutableLine, FailOpenWrapper, ShellFunction};
+use crate::types::{ExecutableLine, FailOpenWrapper};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct HeredocTerminator {
@@ -472,9 +472,9 @@ pub(super) fn initial_function_body_fragment(line: &str) -> String {
     trim_trailing_function_closer(rest.trim_start())
 }
 
-pub(super) fn append_function_body_line(function: &mut ShellFunction, raw: &str) {
-    function.body.push_str(raw);
-    function.body.push('\n');
+pub(super) fn append_function_body_line(body: &mut String, raw: &str) {
+    body.push_str(raw);
+    body.push('\n');
 }
 
 fn trim_trailing_function_closer(body: &str) -> String {

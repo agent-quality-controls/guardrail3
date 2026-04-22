@@ -1,4 +1,3 @@
-use crate::parse_script;
 use crate::types::ParsedShellScript;
 
 use super::{CommandQueryOptions, CommandVisit, ResolvedCommand, ShellEnvState};
@@ -398,12 +397,11 @@ where
     }
 
     visiting.push(function.name.clone());
-    let body = parse_script(&function.body);
     let mut stopped = false;
-    for line in &body.executable_lines {
+    for line in &function.parsed_body.executable_lines {
         if line_visits_with_mode(
             &line.raw,
-            &body,
+            &function.parsed_body,
             root,
             visiting,
             state,
