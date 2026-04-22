@@ -12,29 +12,43 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
         return;
     }
 
+    let owned_assertion_aliases = owned_assertion_alias_names(
+        &input.file.parsed.imports,
+        input.file.assertions_package_name.as_deref(),
+        input.proof_bearing_assertion_functions,
+    );
+    let uses_owned_assertion_alias = input.function.body.call_paths.iter().any(|path| {
+        path.len() == 1 && owned_assertion_aliases.contains_key(&path[0])
+    });
+    let uses_owned_assertions = uses_owned_assertion_alias
+        || has_owned_assertion_proof(
+            input.function,
+            &input.file.parsed.imports,
+            &input.file.parsed.file_function_names,
+            input.file.assertions_package_name.as_deref(),
+            input.proof_bearing_assertion_functions,
+        )
+        || qualified_owned_assertion_call(
+            &input.function.body.call_paths,
+            input.file.assertions_package_name.as_deref(),
+            input.proof_bearing_assertion_functions,
+        );
+
     if input.function.assertions.has_assertion_macro || calls_local_assertion_helper(input) {
-        results.push(G3CheckResult::new(
-    ID.to_owned(),
-    G3Severity::Error,
-    "external harness asserts directly".to_owned(),
-    format!("Test function `{}` in `{}` uses assertion macros directly. External harnesses in `runtime/tests/` must not assert directly — call functions from the sibling assertions crate instead.", input.function.name, input.file.rel_path),
-    Some(input.file.rel_path.clone()),
-    Some(input.function.line),
-        ));
-        return;
+        if input.function.assertions.has_assertion_macro || !uses_owned_assertions {
+            results.push(G3CheckResult::new(
+        ID.to_owned(),
+        G3Severity::Error,
+        "external harness asserts directly".to_owned(),
+        format!("Test function `{}` in `{}` uses assertion macros directly. External harnesses in `runtime/tests/` must not assert directly — call functions from the sibling assertions crate instead.", input.function.name, input.file.rel_path),
+        Some(input.file.rel_path.clone()),
+        Some(input.function.line),
+            ));
+            return;
+        }
     }
 
-    if has_owned_assertion_proof(
-        input.function,
-        &input.file.parsed.imports,
-        &input.file.parsed.file_function_names,
-        input.file.assertions_package_name.as_deref(),
-        input.proof_bearing_assertion_functions,
-    ) || qualified_owned_assertion_call(
-        &input.function.body.call_paths,
-        input.file.assertions_package_name.as_deref(),
-        input.proof_bearing_assertion_functions,
-    ) {
+    if uses_owned_assertions {
         results.push(
             G3CheckResult::new(
                 ID.to_owned(),
@@ -58,6 +72,11 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
         input.proof_bearing_assertion_functions,
     );
     let imported_local_helpers = imported_local_helper_names(&input.file.parsed.imports);
+    let owned_assertion_aliases = owned_assertion_alias_names(
+        &input.file.parsed.imports,
+        input.file.assertions_package_name.as_deref(),
+        input.proof_bearing_assertion_functions,
+    );
 
     input.function.body.call_paths.iter().any(|path| {
         if path.len() == 1 {
@@ -76,7 +95,9 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
                     &local_assertion_helpers,
                     &imported_local_helpers,
                 );
-            return direct_local_helper || aliased_local_helper || imported_local_helper;
+            let owned_assertion_alias = owned_assertion_aliases.contains_key(&path[0]);
+            return (direct_local_helper || aliased_local_helper || imported_local_helper)
+                && !owned_assertion_alias;
         }
         if path_is_qualified_owned_assertion_call(
             path,
@@ -169,6 +190,81 @@ fn local_assertion_helper_names<'a>(
     }
 
     assertion_helpers
+}
+
+fn owned_assertion_alias_names(
+    imports: &[UseBinding],
+    assertions_package_name: Option<&str>,
+    proof_bearing_assertion_functions: Option<&std::collections::BTreeSet<String>>,
+) -> std::collections::BTreeMap<String, String> {
+    let Some(assertions_package_name) = assertions_package_name else {
+        return std::collections::BTreeMap::new();
+    };
+    let Some(proof_bearing_assertion_functions) = proof_bearing_assertion_functions else {
+        return std::collections::BTreeMap::new();
+    };
+
+    let mut owned_assertion_aliases = std::collections::BTreeMap::new();
+
+    loop {
+        let mut changed = false;
+        for binding in imports {
+            let Some(first) = binding.path_segments.first() else {
+                continue;
+            };
+            let Some(local_name) = binding
+                .local_name
+                .as_ref()
+                .or_else(|| binding.path_segments.last())
+            else {
+                continue;
+            };
+
+            if first == assertions_package_name {
+                let qualified = binding.path_segments[1..].join("::");
+                if !qualified.is_empty()
+                    && proof_bearing_assertion_functions.contains(&qualified)
+                {
+                    changed |= insert_owned_assertion_alias(
+                        local_name.clone(),
+                        qualified,
+                        &mut owned_assertion_aliases,
+                    );
+                }
+                continue;
+            }
+
+            if !matches!(first.as_str(), "crate" | "self" | "super") {
+                continue;
+            }
+
+            let Some(target) = binding.path_segments.last() else {
+                continue;
+            };
+            if let Some(qualified) = owned_assertion_aliases.get(target).cloned() {
+                changed |= insert_owned_assertion_alias(
+                    local_name.clone(),
+                    qualified,
+                    &mut owned_assertion_aliases,
+                );
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    owned_assertion_aliases
+}
+
+fn insert_owned_assertion_alias(
+    local_name: String,
+    qualified: String,
+    owned_assertion_aliases: &mut std::collections::BTreeMap<String, String>,
+) -> bool {
+    owned_assertion_aliases
+        .insert(local_name, qualified.clone())
+        .is_none_or(|existing| existing != qualified)
 }
 
 fn import_binds_name(imports: &[UseBinding], name: &str) -> bool {
