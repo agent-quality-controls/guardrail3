@@ -28,8 +28,8 @@ pub fn check(input: &G3RsArchSourceChecksInput) -> Vec<G3CheckResult> {
         }
     }
 
-    for file in &input.source_files {
-        crate::rs_arch_09_no_path_attr::check_file(file, &mut results);
+    for site in &input.path_attr_sites {
+        crate::rs_arch_09_no_path_attr::check(site, &mut results);
     }
 
     results

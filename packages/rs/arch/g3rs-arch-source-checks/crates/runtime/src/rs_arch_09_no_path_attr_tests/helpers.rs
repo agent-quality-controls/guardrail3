@@ -1,15 +1,24 @@
-use g3rs_arch_types::types::G3RsArchSourceFile;
+use g3rs_arch_types::types::G3RsArchPathAttrSite;
 use guardrail3_check_types::G3CheckResult;
 
-pub(super) fn source_file(rel_path: &str, content: &str) -> G3RsArchSourceFile {
-    G3RsArchSourceFile {
+pub(super) fn site(
+    rel_path: &str,
+    line: usize,
+    module_name: &str,
+    path_value: Option<&str>,
+    cfg_test_only: bool,
+) -> G3RsArchPathAttrSite {
+    G3RsArchPathAttrSite {
         rel_path: rel_path.to_owned(),
-        content: content.to_owned(),
+        line,
+        module_name: module_name.to_owned(),
+        path_value: path_value.map(str::to_owned),
+        cfg_test_only,
     }
 }
 
-pub(super) fn run_rule(file: &G3RsArchSourceFile) -> Vec<G3CheckResult> {
+pub(super) fn run_rule(site: &G3RsArchPathAttrSite) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
-    crate::rs_arch_09_no_path_attr::check_file(file, &mut results);
+    crate::rs_arch_09_no_path_attr::check(site, &mut results);
     results
 }

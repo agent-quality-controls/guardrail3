@@ -174,7 +174,6 @@ dependencies = [
  "g3rs-arch-types",
  "guardrail3-check-types",
  "proc-macro2",
- "syn",
 ]
 
 [[package]]
