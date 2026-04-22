@@ -116,3 +116,38 @@ fn errors_on_anyhow_import_aliases() {
         ],
     );
 }
+
+#[test]
+fn errors_on_nested_module_anyhow_import_aliases() {
+    let results = super::super::check_source(
+        "src/lib.rs",
+        "pub mod api {\n    use anyhow as ah;\n    use anyhow::Error as AppError;\n    pub fn parse() -> Result<(), ah::Error> { Ok(()) }\n    pub fn parse2() -> Result<(), AppError> { Ok(()) }\n}",
+        false,
+    );
+
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                severity: Some(G3Severity::Error),
+                title: Some("weak public error form"),
+                file: Some("src/lib.rs"),
+                inventory: Some(false),
+                message: Some(
+                    "Public function `parse` returns `Result<_, anyhow::Error>`. Use a typed public error instead.",
+                ),
+                line: Some(4),
+            },
+            ExpectedRuleResult {
+                severity: Some(G3Severity::Error),
+                title: Some("weak public error form"),
+                file: Some("src/lib.rs"),
+                inventory: Some(false),
+                message: Some(
+                    "Public function `parse2` returns `Result<_, anyhow::Error>`. Use a typed public error instead.",
+                ),
+                line: Some(5),
+            },
+        ],
+    );
+}

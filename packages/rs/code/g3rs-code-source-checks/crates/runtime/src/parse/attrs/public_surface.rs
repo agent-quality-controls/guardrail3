@@ -7,13 +7,13 @@ use syn::visit::Visit;
 
 pub(crate) fn find_public_result_error_types(source: &syn::File) -> Vec<PublicResultErrorInfo> {
     let reachable_types = collect_reachable_public_types(source);
-    let anyhow_bindings = collect_anyhow_type_bindings(source);
+    let anyhow_bindings = collect_anyhow_type_bindings(&source.items);
     let mut visitor = PublicResultErrorVisitor {
         out: Vec::new(),
         public_module_stack: vec![true],
         module_path: Vec::new(),
         reachable_types,
-        anyhow_bindings,
+        anyhow_bindings_stack: vec![anyhow_bindings],
     };
     visitor.visit_file(source);
     visitor.out
@@ -33,7 +33,7 @@ struct PublicResultErrorVisitor {
     public_module_stack: Vec<bool>,
     module_path: Vec<String>,
     reachable_types: BTreeSet<String>,
-    anyhow_bindings: AnyhowTypeBindings,
+    anyhow_bindings_stack: Vec<AnyhowTypeBindings>,
 }
 
 struct PublicStructFieldBagVisitor {
@@ -51,9 +51,27 @@ impl PublicResultErrorVisitor {
             self.current_module_public() && matches!(item_mod.vis, syn::Visibility::Public(_));
         self.public_module_stack.push(next);
         self.module_path.push(item_mod.ident.to_string());
+        let nested_bindings = item_mod
+            .content
+            .as_ref()
+            .map(|(_, items)| {
+                merge_anyhow_type_bindings(
+                    self.current_anyhow_bindings(),
+                    collect_anyhow_type_bindings(items),
+                )
+            })
+            .unwrap_or_else(|| self.current_anyhow_bindings().clone());
+        self.anyhow_bindings_stack.push(nested_bindings);
         visit(self);
+        let _ = self.anyhow_bindings_stack.pop();
         let _ = self.module_path.pop();
         let _ = self.public_module_stack.pop();
+    }
+
+    fn current_anyhow_bindings(&self) -> &AnyhowTypeBindings {
+        self.anyhow_bindings_stack
+            .last()
+            .expect("anyhow bindings stack is always seeded")
     }
 
     fn reachable_type_name(&self, ty: &syn::Type) -> Option<String> {
@@ -104,7 +122,9 @@ impl<'source> Visit<'source> for PublicResultErrorVisitor {
             let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                 return;
             };
-            if let Some(kind) = analysis_helpers::result_error_kind(ty, &self.anyhow_bindings) {
+            if let Some(kind) =
+                analysis_helpers::result_error_kind(ty, self.current_anyhow_bindings())
+            {
                 self.out.push(PublicResultErrorInfo {
                     line: helpers::span_line(item_fn.sig.ident.span()),
                     fn_name: item_fn.sig.ident.to_string(),
@@ -132,7 +152,9 @@ impl<'source> Visit<'source> for PublicResultErrorVisitor {
                 let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                     continue;
                 };
-                if let Some(kind) = analysis_helpers::result_error_kind(ty, &self.anyhow_bindings) {
+                if let Some(kind) =
+                    analysis_helpers::result_error_kind(ty, self.current_anyhow_bindings())
+                {
                     self.out.push(PublicResultErrorInfo {
                         line: helpers::span_line(item_fn.sig.ident.span()),
                         fn_name: item_fn.sig.ident.to_string(),
@@ -153,7 +175,9 @@ impl<'source> Visit<'source> for PublicResultErrorVisitor {
                 let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                     continue;
                 };
-                if let Some(kind) = analysis_helpers::result_error_kind(ty, &self.anyhow_bindings) {
+                if let Some(kind) =
+                    analysis_helpers::result_error_kind(ty, self.current_anyhow_bindings())
+                {
                     self.out.push(PublicResultErrorInfo {
                         line: helpers::span_line(item_fn.sig.ident.span()),
                         fn_name: format!("{}::{}", item_trait.ident, item_fn.sig.ident),
@@ -315,15 +339,25 @@ fn normalize_type_path(
     Some(normalized.join("::"))
 }
 
-fn collect_anyhow_type_bindings(source: &syn::File) -> AnyhowTypeBindings {
+fn collect_anyhow_type_bindings(items: &[syn::Item]) -> AnyhowTypeBindings {
     let mut bindings = AnyhowTypeBindings::default();
-    for item in &source.items {
+    for item in items {
         let syn::Item::Use(item_use) = item else {
             continue;
         };
         collect_anyhow_bindings_from_use_tree(&item_use.tree, &mut Vec::new(), &mut bindings);
     }
     bindings
+}
+
+fn merge_anyhow_type_bindings(
+    parent: &AnyhowTypeBindings,
+    local: AnyhowTypeBindings,
+) -> AnyhowTypeBindings {
+    let mut merged = parent.clone();
+    merged.error_type_names.extend(local.error_type_names);
+    merged.module_aliases.extend(local.module_aliases);
+    merged
 }
 
 fn collect_anyhow_bindings_from_use_tree(
