@@ -128,6 +128,18 @@ pub struct G3RsApparchPublicItem {
     pub kind: G3RsApparchPublicItemKind,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsApparchIoTraitsSourceChecksInput {
+    pub krate: G3RsApparchCrate,
+    pub public_traits: Vec<G3RsApparchPublicItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsApparchTypesPublicSurfaceChecksInput {
+    pub krate: G3RsApparchCrate,
+    pub public_behavior_items: Vec<G3RsApparchPublicItem>,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct G3RsApparchCrateDependencyChecksInput {
     pub krate: G3RsApparchCrate,
@@ -168,6 +180,6 @@ pub struct G3RsApparchConfigChecksInput {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsApparchSourceChecksInput {
-    pub crates: Vec<G3RsApparchCrate>,
-    pub public_items: Vec<G3RsApparchPublicItem>,
+    pub io_traits_checks: Vec<G3RsApparchIoTraitsSourceChecksInput>,
+    pub types_public_surface_checks: Vec<G3RsApparchTypesPublicSurfaceChecksInput>,
 }

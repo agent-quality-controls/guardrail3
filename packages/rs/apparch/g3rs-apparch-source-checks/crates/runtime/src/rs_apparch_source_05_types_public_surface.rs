@@ -1,32 +1,25 @@
-use std::collections::{BTreeMap, BTreeSet};
-
 use g3rs_apparch_types::{
-    G3RsApparchCrate, G3RsApparchLayer, G3RsApparchPublicItemKind, G3RsApparchSourceChecksInput,
+    G3RsApparchLayer, G3RsApparchPublicItemKind, G3RsApparchTypesPublicSurfaceChecksInput,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-APPARCH-SOURCE-05";
 
 pub(crate) fn check(
-    input: &G3RsApparchSourceChecksInput,
-    crates_by_path: &BTreeMap<String, &G3RsApparchCrate>,
+    input: &G3RsApparchTypesPublicSurfaceChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    let mut crates_with_behavior = BTreeSet::new();
+    let krate = &input.krate;
+    if krate.layer != Some(G3RsApparchLayer::Types) {
+        return;
+    }
 
-    for fact in input.public_items.iter().filter(|fact| {
+    for fact in input.public_behavior_items.iter().filter(|fact| {
         matches!(
             fact.kind,
             G3RsApparchPublicItemKind::FreeFunction | G3RsApparchPublicItemKind::InherentMethod
         )
     }) {
-        let Some(krate) = crates_by_path.get(&fact.cargo_rel_path).copied() else {
-            continue;
-        };
-        if krate.layer != Some(G3RsApparchLayer::Types) {
-            continue;
-        }
-        let _ = crates_with_behavior.insert(krate.cargo_rel_path.clone());
         let detail = match fact.kind {
             G3RsApparchPublicItemKind::FreeFunction => {
                 format!("public free function `{}`", fact.item_name)
@@ -55,13 +48,7 @@ pub(crate) fn check(
         ));
     }
 
-    for krate in &input.crates {
-        if krate.layer != Some(G3RsApparchLayer::Types) {
-            continue;
-        }
-        if crates_with_behavior.contains(&krate.cargo_rel_path) {
-            continue;
-        }
+    if input.public_behavior_items.is_empty() {
         results.push(
             G3CheckResult::new(
                 ID.to_owned(),

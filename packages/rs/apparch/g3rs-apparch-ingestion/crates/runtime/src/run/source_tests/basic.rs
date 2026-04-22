@@ -28,10 +28,13 @@ fn source_ingest_collects_public_traits_from_nested_modules() {
 
     let input = super::helpers::source_input(root.path());
 
-    assert_eq!(input.crates.len(), 1);
-    assert_eq!(input.public_items.len(), 1);
-    assert_eq!(input.public_items[0].rel_path, "io/outbound/db/src/adapter.rs");
-    assert_eq!(input.public_items[0].item_name, "DbTrait");
+    assert_eq!(input.io_traits_checks.len(), 1);
+    assert_eq!(input.io_traits_checks[0].public_traits.len(), 1);
+    assert_eq!(
+        input.io_traits_checks[0].public_traits[0].rel_path,
+        "io/outbound/db/src/adapter.rs"
+    );
+    assert_eq!(input.io_traits_checks[0].public_traits[0].item_name, "DbTrait");
 }
 
 #[test]
@@ -53,10 +56,12 @@ fn source_ingest_collects_public_trait_from_private_module() {
 
     let input = super::helpers::source_input(root.path());
 
-    assert!(input
-        .public_items
-        .iter()
-        .any(|fact| fact.rel_path == "io/outbound/db/src/adapter.rs" && fact.item_name == "HiddenPort"));
+    assert!(contains_io_trait(
+        &input,
+        "io/outbound/db/Cargo.toml",
+        "io/outbound/db/src/adapter.rs",
+        "HiddenPort"
+    ));
 }
 
 #[test]
@@ -81,10 +86,12 @@ fn source_ingest_collects_public_trait_reexported_from_private_module() {
 
     let input = super::helpers::source_input(root.path());
 
-    assert!(input
-        .public_items
-        .iter()
-        .any(|fact| fact.rel_path == "io/outbound/db/src/adapter.rs" && fact.item_name == "DbTrait"));
+    assert!(contains_io_trait(
+        &input,
+        "io/outbound/db/Cargo.toml",
+        "io/outbound/db/src/adapter.rs",
+        "DbTrait"
+    ));
 }
 
 #[test]
@@ -124,10 +131,12 @@ path = "src/a_main.rs"
 
     let input = super::helpers::source_input(root.path());
 
-    assert!(input
-        .public_items
-        .iter()
-        .any(|fact| fact.rel_path == "io/outbound/db/src/shared.rs" && fact.item_name == "SharedTrait"));
+    assert!(contains_io_trait(
+        &input,
+        "io/outbound/db/Cargo.toml",
+        "io/outbound/db/src/shared.rs",
+        "SharedTrait"
+    ));
 }
 
 #[test]
@@ -154,10 +163,12 @@ path = "src/custom_bin.rs"
 
     let input = super::helpers::source_input(root.path());
 
-    assert!(input
-        .public_items
-        .iter()
-        .any(|fact| fact.rel_path == "io/outbound/db/src/lib.rs" && fact.item_name == "LibTrait"));
+    assert!(contains_io_trait(
+        &input,
+        "io/outbound/db/Cargo.toml",
+        "io/outbound/db/src/lib.rs",
+        "LibTrait"
+    ));
 }
 
 #[test]
@@ -195,5 +206,27 @@ fn source_ingest_ignores_file_level_cfg_test_module() {
 
     let input = super::helpers::source_input(root.path());
 
-    assert!(input.public_items.is_empty());
+    assert!(input
+        .io_traits_checks
+        .iter()
+        .all(|check| check.public_traits.is_empty()));
+    assert!(input
+        .types_public_surface_checks
+        .iter()
+        .all(|check| check.public_behavior_items.is_empty()));
+}
+
+fn contains_io_trait(
+    input: &g3rs_apparch_types::G3RsApparchSourceChecksInput,
+    cargo_rel_path: &str,
+    rel_path: &str,
+    item_name: &str,
+) -> bool {
+    input
+        .io_traits_checks
+        .iter()
+        .find(|check| check.krate.cargo_rel_path == cargo_rel_path)
+        .into_iter()
+        .flat_map(|check| &check.public_traits)
+        .any(|fact| fact.rel_path == rel_path && fact.item_name == item_name)
 }
