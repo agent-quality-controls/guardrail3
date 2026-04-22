@@ -71,20 +71,64 @@ fn items_have_inherent_impl(
             let syn::Type::Path(type_path) = item_impl.self_ty.as_ref() else {
                 return false;
             };
-            type_path.qself.is_none() && {
-                let mut path = module_path.clone();
-                path.extend(
-                    type_path
-                        .path
-                        .segments
-                        .iter()
-                        .map(|segment| segment.ident.to_string()),
-                );
-                path.join("::") == qualified_name
-            }
+            normalize_impl_self_type_path(module_path, type_path)
+                .is_some_and(|path| path == qualified_name)
         }
         _ => false,
     })
+}
+
+fn normalize_impl_self_type_path(
+    module_path: &[String],
+    type_path: &syn::TypePath,
+) -> Option<String> {
+    if type_path.qself.is_some() {
+        return None;
+    }
+
+    let segments = type_path
+        .path
+        .segments
+        .iter()
+        .map(|segment| segment.ident.to_string())
+        .collect::<Vec<_>>();
+    if segments.is_empty() {
+        return None;
+    }
+
+    let normalized = if type_path.path.leading_colon.is_some() {
+        segments
+    } else {
+        match segments.first().map(String::as_str) {
+            Some("crate") => segments.get(1..)?.to_vec(),
+            Some("self") | Some("super") => {
+                let mut resolved = module_path.to_vec();
+                let mut iter = segments.iter();
+                while let Some(segment) = iter.next() {
+                    match segment.as_str() {
+                        "self" => {}
+                        "super" => {
+                            let _ = resolved.pop();
+                        }
+                        _ => {
+                            resolved.push(segment.clone());
+                            resolved.extend(iter.cloned());
+                            break;
+                        }
+                    }
+                }
+                resolved
+            }
+            Some(_) => {
+                let mut resolved = module_path.to_vec();
+                resolved.extend(segments);
+                resolved
+            }
+            None => return None,
+        }
+    };
+
+    Some(normalized.join("::"))
 }
 
 #[cfg(test)]
