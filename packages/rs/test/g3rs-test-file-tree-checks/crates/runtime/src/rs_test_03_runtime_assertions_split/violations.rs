@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
 use g3rs_test_types::{
     G3RsTestAnalyzedSourceFile, G3RsTestComponentFileTreeFacts, G3RsTestFileKind,
@@ -20,11 +20,6 @@ pub(super) fn collect_violations(
     input: &G3RsTestFileTreeChecksInput,
 ) -> Vec<RuntimeAssertionsViolation> {
     let mut violations = Vec::new();
-    let parsed_by_path = input
-        .files
-        .iter()
-        .map(|file| (file.rel_path.clone(), file))
-        .collect::<BTreeMap<_, _>>();
 
     violations.extend(non_component_harness_violations(&input.files));
 
@@ -118,7 +113,10 @@ pub(super) fn collect_violations(
         }
 
         for sidecar in &component.sidecars {
-            if !parsed_by_path.contains_key(&sidecar.assertions_module_rel_path) {
+            if !input
+                .existing_file_paths
+                .contains(&sidecar.assertions_module_rel_path)
+            {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: sidecar.mod_rel_path.clone(),
                     line: None,
@@ -134,21 +132,20 @@ pub(super) fn collect_violations(
         collect_external_harness_violations(
             &mut violations,
             component,
-            input,
-            &parsed_by_path,
+            &input.local_package_names,
             &allowed_external_packages,
         );
         collect_sidecar_violations(
             &mut violations,
             component,
-            input,
+            &input.local_package_names,
             assertions_package_name,
             &allowed_sidecar_packages,
         );
         collect_assertions_module_violations(
             &mut violations,
             component,
-            input,
+            &input.local_package_names,
             &allowed_assertions_packages,
         );
     }
@@ -173,15 +170,11 @@ fn component_package_rel_dir(component: &G3RsTestComponentFileTreeFacts) -> &str
 fn collect_external_harness_violations(
     violations: &mut Vec<RuntimeAssertionsViolation>,
     component: &G3RsTestComponentFileTreeFacts,
-    input: &G3RsTestFileTreeChecksInput,
-    parsed_by_path: &BTreeMap<String, &G3RsTestAnalyzedSourceFile>,
+    local_package_names: &BTreeSet<String>,
     allowed_external_packages: &BTreeSet<String>,
 ) {
-    for external_harness in &component.external_harnesses {
-        let Some(file) = parsed_by_path.get(external_harness) else {
-            continue;
-        };
-
+    for file in &component.external_harness_files {
+        let external_harness = &file.rel_path;
         for binding in &file.parsed.imports {
             if helpers::import_uses_external_runtime_boundary(binding) {
                 violations.push(RuntimeAssertionsViolation {
@@ -193,7 +186,7 @@ fn collect_external_harness_violations(
             }
             if let Some(local_root) = helpers::first_disallowed_local_package(
                 &binding.path_segments,
-                &input.local_package_names,
+                local_package_names,
                 allowed_external_packages,
             ) {
                 violations.push(RuntimeAssertionsViolation {
@@ -221,7 +214,7 @@ fn collect_external_harness_violations(
         if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
             helpers::first_disallowed_local_package(
                 path,
-                &input.local_package_names,
+                local_package_names,
                 allowed_external_packages,
             )
             .map(str::to_owned)
@@ -242,29 +235,20 @@ fn collect_external_harness_violations(
 fn collect_sidecar_violations(
     violations: &mut Vec<RuntimeAssertionsViolation>,
     component: &G3RsTestComponentFileTreeFacts,
-    input: &G3RsTestFileTreeChecksInput,
+    local_package_names: &BTreeSet<String>,
     assertions_package_name: Option<&str>,
     allowed_sidecar_packages: &BTreeSet<String>,
 ) {
-    for file in input.files.iter().filter(|file| {
-        file.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
-            && matches!(
-                file.kind,
-                G3RsTestFileKind::InternalSidecarMod | G3RsTestFileKind::InternalSidecarSupport
-            )
+    for file in component.sidecar_files.iter().filter(|file| {
+        matches!(
+            file.kind,
+            G3RsTestFileKind::InternalSidecarMod | G3RsTestFileKind::InternalSidecarSupport
+        )
     }) {
         let Some(owner_module_name) = file.owner_module_name.as_deref() else {
             continue;
         };
-        let local_module_names = input
-            .files
-            .iter()
-            .filter(|candidate| {
-                candidate.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
-                    && matches!(candidate.kind, G3RsTestFileKind::Source)
-            })
-            .filter_map(|candidate| candidate.owner_module_name.clone())
-            .collect::<BTreeSet<_>>();
+        let local_module_names = &component.source_module_names;
         for binding in &file.parsed.imports {
             if let Some(target) = helpers::disallowed_sidecar_local_boundary_target(
                 &binding.path_segments,
@@ -305,7 +289,7 @@ fn collect_sidecar_violations(
             }
             if let Some(local_root) = helpers::first_disallowed_local_package(
                 &binding.path_segments,
-                &input.local_package_names,
+                local_package_names,
                 allowed_sidecar_packages,
             ) {
                 violations.push(RuntimeAssertionsViolation {
@@ -368,7 +352,7 @@ fn collect_sidecar_violations(
         if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
             helpers::first_disallowed_local_package(
                 path,
-                &input.local_package_names,
+                local_package_names,
                 allowed_sidecar_packages,
             )
             .map(str::to_owned)

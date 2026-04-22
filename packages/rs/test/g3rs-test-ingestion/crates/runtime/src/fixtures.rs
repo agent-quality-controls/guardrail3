@@ -97,8 +97,12 @@ pub mod file_tree {
             nested_assertions_cargo_rel_path: None,
             assertions_package_name: assertions_package_name.map(str::to_owned),
             assertions_dependencies: BTreeSet::new(),
+            source_module_names: BTreeSet::new(),
             sidecars: Vec::new(),
             external_harnesses: Vec::new(),
+            sidecar_files: Vec::new(),
+            external_harness_files: Vec::new(),
+            assertions_module_files: Vec::new(),
         }
     }
 

@@ -79,8 +79,12 @@ pub(crate) fn public_file_tree_component_facts(
             nested_assertions_cargo_rel_path: component.nested_assertions_cargo_rel_path.clone(),
             assertions_package_name: component.assertions_package_name.clone(),
             assertions_dependencies: component.assertions_dependencies.clone(),
+            source_module_names: Default::default(),
             sidecars: component.sidecars.clone(),
             external_harnesses: component.external_harnesses.clone(),
+            sidecar_files: Default::default(),
+            external_harness_files: Default::default(),
+            assertions_module_files: Default::default(),
         })
         .collect()
 }

@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use g3rs_test_types::{
-    G3RsTestComponentFileTreeFacts, G3RsTestFileKind, G3RsTestFileTreeChecksInput,
+    G3RsTestComponentFileTreeFacts, G3RsTestFileKind,
 };
 
 use super::helpers;
@@ -10,13 +10,14 @@ use super::violations::RuntimeAssertionsViolation;
 pub(super) fn collect_assertions_module_violations(
     violations: &mut Vec<RuntimeAssertionsViolation>,
     component: &G3RsTestComponentFileTreeFacts,
-    input: &G3RsTestFileTreeChecksInput,
+    local_package_names: &BTreeSet<String>,
     allowed_assertions_packages: &BTreeSet<String>,
 ) {
-    for file in input.files.iter().filter(|file| {
-        file.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
-            && matches!(file.kind, G3RsTestFileKind::AssertionsModule)
-    }) {
+    for file in component
+        .assertions_module_files
+        .iter()
+        .filter(|file| matches!(file.kind, G3RsTestFileKind::AssertionsModule))
+    {
         for binding in &file.parsed.imports {
             if helpers::import_uses_local_boundary(binding) {
                 violations.push(RuntimeAssertionsViolation {
@@ -32,7 +33,7 @@ pub(super) fn collect_assertions_module_violations(
             }
             if let Some(local_root) = helpers::first_disallowed_local_package(
                 &binding.path_segments,
-                &input.local_package_names,
+                local_package_names,
                 allowed_assertions_packages,
             ) {
                 violations.push(RuntimeAssertionsViolation {
@@ -56,7 +57,7 @@ pub(super) fn collect_assertions_module_violations(
         if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
             helpers::first_disallowed_local_package(
                 path,
-                &input.local_package_names,
+                local_package_names,
                 allowed_assertions_packages,
             )
             .map(str::to_owned)
