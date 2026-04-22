@@ -55,6 +55,12 @@ pub(super) fn assertions_call_runtime_check_test_tree(
             {
                 let _ = imported_check_test_tree.insert(local_name.clone());
             }
+        } else if binding
+            .path_segments
+            .last()
+            .is_some_and(|segment| segment == "check_test_tree")
+        {
+            let _ = imported_check_test_tree.insert("check_test_tree".to_owned());
         }
     }
 
