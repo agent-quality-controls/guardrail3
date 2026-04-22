@@ -478,14 +478,11 @@ pub(super) fn append_function_body_line(body: &mut String, raw: &str) {
 }
 
 fn trim_trailing_function_closer(body: &str) -> String {
-    let trimmed = body.trim_end();
-    if trimmed == "}" {
+    let trimmed = strip_inline_comment(body).trim_end();
+    let Some(close_index) = function_definition_closer_index(trimmed) else {
         return String::new();
-    }
-    let stripped = trimmed
-        .rsplit_once('}')
-        .map_or(trimmed, |(before, _)| before)
-        .trim_end();
+    };
+    let stripped = trimmed[..close_index].trim_end();
     if stripped.is_empty() {
         String::new()
     } else {
@@ -494,9 +491,35 @@ fn trim_trailing_function_closer(body: &str) -> String {
 }
 
 pub(super) fn inline_command_after_function_definition(line: &str) -> Option<&str> {
-    let (_, tail) = line.rsplit_once('}')?;
-    let tail = tail.trim_start_matches(|c: char| c == ';' || c.is_whitespace());
+    let line = strip_inline_comment(line);
+    let (_, rest) = line.split_once('{')?;
+    let close_index = function_definition_closer_index(rest.trim_start())?;
+    let tail = rest.trim_start()[close_index + '}'.len_utf8()..]
+        .trim_start_matches(|c: char| c == ';' || c.is_whitespace());
     (!tail.is_empty()).then_some(tail)
+}
+
+fn function_definition_closer_index(fragment: &str) -> Option<usize> {
+    let mut single_quoted = false;
+    let mut double_quoted = false;
+    let mut brace_depth = 1usize;
+
+    for (idx, ch) in fragment.char_indices() {
+        match ch {
+            '\'' if !double_quoted => single_quoted = !single_quoted,
+            '"' if !single_quoted => double_quoted = !double_quoted,
+            '{' if !single_quoted && !double_quoted => brace_depth += 1,
+            '}' if !single_quoted && !double_quoted => {
+                brace_depth = brace_depth.saturating_sub(1);
+                if brace_depth == 0 {
+                    return Some(idx);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    None
 }
 
 pub(super) fn function_scope_depth_after_definition(line: &str) -> usize {

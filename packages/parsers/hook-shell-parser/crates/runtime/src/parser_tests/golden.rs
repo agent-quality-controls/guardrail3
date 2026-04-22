@@ -439,6 +439,46 @@ fn keeps_inline_command_after_single_line_function_definition() {
 }
 
 #[test]
+fn keeps_inline_command_after_function_definition_when_comment_contains_brace() {
+    let parsed = parse_script("finish() { echo ok; }; exit 0 # }\n");
+
+    assert_script_matches(
+        &parsed,
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "exit",
+                None,
+                None,
+                None,
+                Some(true),
+            )],
+            &[FunctionExpectation::new("finish", Some("echo ok"), None)],
+        ),
+    );
+}
+
+#[test]
+fn keeps_inline_command_after_function_definition_when_string_contains_brace() {
+    let parsed = parse_script("finish() { echo ok; }; exit 0; echo \"}\"\n");
+
+    assert_script_matches(
+        &parsed,
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "exit",
+                None,
+                None,
+                None,
+                Some(true),
+            )],
+            &[FunctionExpectation::new("finish", Some("echo ok"), None)],
+        ),
+    );
+}
+
+#[test]
 fn ignores_dead_if_body_commands() {
     let parsed =
         parse_script("if false; then\n    guardrail3 rs validate --staged .\nfi\necho noop\n");
