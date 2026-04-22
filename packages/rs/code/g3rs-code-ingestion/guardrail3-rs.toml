@@ -17,6 +17,7 @@ allowed_deps = [
   "guardrail3-rs-toml-parser",
   "rust-toolchain-toml-parser",
   "rustfmt-toml-parser",
+  "syn",
   "tempfile",
 ]
 

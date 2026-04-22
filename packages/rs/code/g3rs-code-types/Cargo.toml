@@ -95,3 +95,4 @@ deny-toml-parser = { path = "../../../parsers/deny-toml-parser", version = "0.1.
 guardrail3-rs-toml-parser = { path = "../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
 rust-toolchain-toml-parser = { path = "../../../parsers/rust-toolchain-toml-parser", version = "0.1.0" }
 rustfmt-toml-parser = { path = "../../../parsers/rustfmt-toml-parser", version = "0.1.0" }
+syn = { version = "2", features = ["extra-traits", "full"] }

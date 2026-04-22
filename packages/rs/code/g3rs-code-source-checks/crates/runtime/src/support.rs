@@ -1,10 +1,14 @@
-use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsCodeWaiver, G3RsSourceFile};
+#[cfg(test)]
+use g3rs_code_types::G3RsSourceFile;
+use g3rs_code_types::{G3RsCodeParsedSourceState, G3RsCodeSourceChecksInput, G3RsCodeWaiver};
 
+#[cfg(test)]
 pub(crate) struct G3RsCodeSourceFileAst {
     pub(crate) source_file: G3RsSourceFile,
     pub(crate) source: syn::File,
 }
 
+#[derive(Debug)]
 pub(crate) struct CodeInputFailureRuleInput {
     pub(crate) rel_path: String,
     pub(crate) message: String,
@@ -24,6 +28,7 @@ pub(crate) struct CodeSourceRuleInput<'a> {
     pub(crate) is_library_root: bool,
 }
 
+#[cfg(test)]
 impl<'a> From<&'a G3RsCodeSourceFileAst> for CodeSourceRuleInput<'a> {
     fn from(value: &'a G3RsCodeSourceFileAst) -> Self {
         Self {
@@ -49,22 +54,23 @@ pub(crate) fn has_matching_waiver(
     })
 }
 
-pub(crate) fn parse_input(
+pub(crate) fn rule_input(
     input: &G3RsCodeSourceChecksInput,
-) -> Result<G3RsCodeSourceFileAst, syn::Error> {
-    let source = crate::parse::parse_rust_file(&input.source_file.content)?;
-    Ok(G3RsCodeSourceFileAst {
-        source_file: input.source_file.clone(),
-        source,
-    })
-}
-
-pub(crate) fn parse_failure_input(
-    input: &G3RsCodeSourceChecksInput,
-    parse_error: &syn::Error,
-) -> CodeInputFailureRuleInput {
-    CodeInputFailureRuleInput {
-        rel_path: input.source_file.rel_path.clone(),
-        message: format!("Failed to parse Rust source file: {parse_error}"),
+) -> Result<CodeSourceRuleInput<'_>, CodeInputFailureRuleInput> {
+    match &input.parsed_source {
+        G3RsCodeParsedSourceState::Parsed(source) => Ok(CodeSourceRuleInput {
+            rel_path: &input.source_file.rel_path,
+            content: &input.source_file.content,
+            source,
+            is_test: input.source_file.is_test,
+            is_shared_crate: input.is_shared_crate,
+            waivers: &input.waivers,
+            profile_name: input.source_file.profile_name.as_deref(),
+            is_library_root: input.source_file.is_library_root,
+        }),
+        G3RsCodeParsedSourceState::Invalid { message } => Err(CodeInputFailureRuleInput {
+            rel_path: input.source_file.rel_path.clone(),
+            message: message.clone(),
+        }),
     }
 }

@@ -1,16 +1,11 @@
 use cargo_toml_parser::types::LintValue;
-use std::collections::BTreeMap;
-
-use g3rs_code_types::{
-    G3RsCodeConfigChecksInput, G3RsCodeConfigFile, G3RsCodeConfigFileKind,
-    G3RsCodeExceptionComment, G3RsCodeFileTreeChecksInput, G3RsCodeSourceChecksInput,
-};
+use g3rs_code_types as code_types;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 pub fn require_source_file<'a>(
-    inputs: &'a [G3RsCodeSourceChecksInput],
+    inputs: &'a [code_types::G3RsCodeSourceChecksInput],
     rel_path: &str,
-) -> &'a G3RsCodeSourceChecksInput {
+) -> &'a code_types::G3RsCodeSourceChecksInput {
     let index = inputs
         .iter()
         .position(|input| input.source_file.rel_path == rel_path);
@@ -22,7 +17,7 @@ pub fn require_source_file<'a>(
 }
 
 pub fn assert_source_file(
-    input: &G3RsCodeSourceChecksInput,
+    input: &code_types::G3RsCodeSourceChecksInput,
     rel_path: &str,
     is_test: bool,
     profile_name: Option<&str>,
@@ -41,18 +36,36 @@ pub fn assert_source_file(
         "unexpected is_library_root"
     );
     assert_eq!(input.source_file.content, content, "unexpected content");
+    assert!(
+        matches!(
+            input.parsed_source,
+            code_types::G3RsCodeParsedSourceState::Parsed(_)
+        ),
+        "unexpected parsed_source: {input:#?}"
+    );
 }
 
-pub fn assert_shared_crate(input: &G3RsCodeSourceChecksInput) {
+pub fn assert_shared_crate(input: &code_types::G3RsCodeSourceChecksInput) {
     assert!(input.is_shared_crate, "{input:#?}");
 }
 
-pub fn assert_not_shared_crate(input: &G3RsCodeSourceChecksInput) {
+pub fn assert_not_shared_crate(input: &code_types::G3RsCodeSourceChecksInput) {
     assert!(!input.is_shared_crate, "{input:#?}");
 }
 
+pub fn assert_source_parse_failure(input: &code_types::G3RsCodeSourceChecksInput, rel_path: &str) {
+    assert_eq!(input.source_file.rel_path, rel_path, "unexpected rel_path");
+    assert!(
+        matches!(
+            input.parsed_source,
+            code_types::G3RsCodeParsedSourceState::Invalid { .. }
+        ),
+        "unexpected parsed_source: {input:#?}"
+    );
+}
+
 pub fn assert_source_waiver(
-    input: &G3RsCodeSourceChecksInput,
+    input: &code_types::G3RsCodeSourceChecksInput,
     rule: &str,
     file: &str,
     selector: &str,
@@ -63,14 +76,12 @@ pub fn assert_source_waiver(
         .iter()
         .find(|waiver| waiver.rule == rule && waiver.file == file && waiver.selector == selector);
     assert!(waiver.is_some(), "{input:#?}");
-    let waiver = waiver.expect("assert_source_waiver should only unwrap an asserted-present waiver");
+    let waiver =
+        waiver.expect("assert_source_waiver should only unwrap an asserted-present waiver");
     assert_eq!(waiver.reason, reason, "{input:#?}");
 }
 
-pub fn assert_code_ast_results(
-    lib_results: &[G3CheckResult],
-    test_results: &[G3CheckResult],
-) {
+pub fn assert_code_ast_results(lib_results: &[G3CheckResult], test_results: &[G3CheckResult]) {
     assert!(
         lib_results
             .iter()
@@ -84,10 +95,13 @@ pub fn assert_code_ast_results(
 }
 
 pub fn require_config_file<'a>(
-    input: &'a G3RsCodeConfigChecksInput,
+    input: &'a code_types::G3RsCodeConfigChecksInput,
     rel_path: &str,
-) -> &'a G3RsCodeConfigFile {
-    let index = input.files.iter().position(|file| file.rel_path == rel_path);
+) -> &'a code_types::G3RsCodeConfigFile {
+    let index = input
+        .files
+        .iter()
+        .position(|file| file.rel_path == rel_path);
     assert!(
         index.is_some(),
         "missing config file {rel_path}; input: {input:#?}"
@@ -96,7 +110,7 @@ pub fn require_config_file<'a>(
 }
 
 pub fn assert_exception_comments(
-    input: &G3RsCodeConfigChecksInput,
+    input: &code_types::G3RsCodeConfigChecksInput,
     rel_path: &str,
     expected: &[(usize, &str)],
 ) {
@@ -104,7 +118,7 @@ pub fn assert_exception_comments(
         .exception_comments
         .iter()
         .filter(|comment| comment.rel_path == rel_path)
-        .collect::<Vec<&G3RsCodeExceptionComment>>();
+        .collect::<Vec<&code_types::G3RsCodeExceptionComment>>();
 
     assert_eq!(comments.len(), expected.len(), "{input:#?}");
     for (comment, (line, text)) in comments.iter().zip(expected.iter()) {
@@ -113,17 +127,17 @@ pub fn assert_exception_comments(
     }
 }
 
-pub fn assert_parser_backed_config_files_only(input: &G3RsCodeConfigChecksInput) {
+pub fn assert_parser_backed_config_files_only(input: &code_types::G3RsCodeConfigChecksInput) {
     assert!(
         input.files.iter().all(|file| {
             matches!(
                 file.kind,
-                G3RsCodeConfigFileKind::Guardrail3RsToml { .. }
-                    | G3RsCodeConfigFileKind::ClippyToml { .. }
-                    | G3RsCodeConfigFileKind::DenyToml { .. }
-                    | G3RsCodeConfigFileKind::CargoToml { .. }
-                    | G3RsCodeConfigFileKind::RustfmtToml { .. }
-                    | G3RsCodeConfigFileKind::RustToolchainToml { .. }
+                code_types::G3RsCodeConfigFileKind::Guardrail3RsToml { .. }
+                    | code_types::G3RsCodeConfigFileKind::ClippyToml { .. }
+                    | code_types::G3RsCodeConfigFileKind::DenyToml { .. }
+                    | code_types::G3RsCodeConfigFileKind::CargoToml { .. }
+                    | code_types::G3RsCodeConfigFileKind::RustfmtToml { .. }
+                    | code_types::G3RsCodeConfigFileKind::RustToolchainToml { .. }
             )
         }),
         "code config inputs must not expose raw Text files: {input:#?}"
@@ -131,20 +145,24 @@ pub fn assert_parser_backed_config_files_only(input: &G3RsCodeConfigChecksInput)
 }
 
 pub fn assert_workspace_unsafe_code_level(
-    input: &G3RsCodeConfigChecksInput,
+    input: &code_types::G3RsCodeConfigChecksInput,
     rel_path: &str,
     expected: &str,
 ) {
     let file = require_config_file(input, rel_path);
     assert!(
-        matches!(file.kind, G3RsCodeConfigFileKind::CargoToml { .. }),
+        matches!(
+            file.kind,
+            code_types::G3RsCodeConfigFileKind::CargoToml { .. }
+        ),
         "expected Cargo.toml config file in {rel_path}"
     );
-    let G3RsCodeConfigFileKind::CargoToml { cargo } = &file.kind else {
+    let code_types::G3RsCodeConfigFileKind::CargoToml { cargo } = &file.kind else {
         return;
     };
     assert_eq!(
-        cargo.workspace
+        cargo
+            .workspace
             .as_ref()
             .and_then(|workspace| workspace.lints.as_ref())
             .and_then(|lints| lints.tools.get("rust"))
@@ -154,16 +172,19 @@ pub fn assert_workspace_unsafe_code_level(
 }
 
 pub fn assert_workspace_unsafe_code_detailed_level(
-    input: &G3RsCodeConfigChecksInput,
+    input: &code_types::G3RsCodeConfigChecksInput,
     rel_path: &str,
     expected: &str,
 ) {
     let file = require_config_file(input, rel_path);
     assert!(
-        matches!(file.kind, G3RsCodeConfigFileKind::CargoToml { .. }),
+        matches!(
+            file.kind,
+            code_types::G3RsCodeConfigFileKind::CargoToml { .. }
+        ),
         "expected Cargo.toml config file in {rel_path}"
     );
-    let G3RsCodeConfigFileKind::CargoToml { cargo } = &file.kind else {
+    let code_types::G3RsCodeConfigFileKind::CargoToml { cargo } = &file.kind else {
         return;
     };
     let value = cargo
@@ -178,7 +199,7 @@ pub fn assert_workspace_unsafe_code_detailed_level(
     }
 }
 
-pub fn assert_config_file_paths(input: &G3RsCodeConfigChecksInput, expected: &[&str]) {
+pub fn assert_config_file_paths(input: &code_types::G3RsCodeConfigChecksInput, expected: &[&str]) {
     let actual = input
         .files
         .iter()
@@ -233,25 +254,27 @@ pub fn assert_no_results_for_file(results: &[G3CheckResult], file: &str) {
     );
 }
 
-pub fn assert_single_parse_failed_error(
-    err: &g3rs_code_ingestion_runtime::IngestionError,
-) {
+pub fn assert_single_parse_failed_error(err: &g3rs_code_ingestion_runtime::IngestionError) {
     assert!(
-        matches!(err, g3rs_code_ingestion_runtime::IngestionError::ParseFailed { .. }),
+        matches!(
+            err,
+            g3rs_code_ingestion_runtime::IngestionError::ParseFailed { .. }
+        ),
         "unexpected error: {err:?}"
     );
 }
 
-pub fn assert_single_unreadable_error(
-    err: &g3rs_code_ingestion_runtime::IngestionError,
-) {
+pub fn assert_single_unreadable_error(err: &g3rs_code_ingestion_runtime::IngestionError) {
     assert!(
-        matches!(err, g3rs_code_ingestion_runtime::IngestionError::Unreadable { .. }),
+        matches!(
+            err,
+            g3rs_code_ingestion_runtime::IngestionError::Unreadable { .. }
+        ),
         "unexpected error: {err:?}"
     );
 }
 
-pub fn assert_root_cargo_paths(input: &G3RsCodeFileTreeChecksInput, expected: &[&str]) {
+pub fn assert_root_cargo_paths(input: &code_types::G3RsCodeFileTreeChecksInput, expected: &[&str]) {
     let actual = input
         .roots
         .iter()
@@ -261,7 +284,7 @@ pub fn assert_root_cargo_paths(input: &G3RsCodeFileTreeChecksInput, expected: &[
 }
 
 pub fn assert_single_zero_structural_root(
-    input: &G3RsCodeFileTreeChecksInput,
+    input: &code_types::G3RsCodeFileTreeChecksInput,
     cargo_rel_path: &str,
 ) {
     assert_eq!(input.roots.len(), 1, "{input:#?}");
@@ -271,22 +294,28 @@ pub fn assert_single_zero_structural_root(
     assert_eq!(input.roots[0].max_sibling_rs_files, 0);
 }
 
-fn findings_by_file(results: &[G3CheckResult]) -> BTreeMap<String, Vec<&G3CheckResult>> {
-    let mut by_file = BTreeMap::<String, Vec<&G3CheckResult>>::new();
-    for result in results {
-        let key = result.file().unwrap_or("<none>").to_owned();
-        by_file.entry(key).or_default().push(result);
+fn finding_for_file<'a>(results: &'a [G3CheckResult], file: &str) -> &'a G3CheckResult {
+    results
+        .iter()
+        .find(|result| result.file() == Some(file))
+        .expect("expected finding for file")
+}
+
+fn assert_result_set(results: &[G3CheckResult], file: &str, count: usize, ids: &[&str]) {
+    assert_file_result_count(results, file, count);
+    for id in ids {
+        assert_has_result_id(results, file, id);
     }
-    by_file
 }
 
 pub fn assert_pipeline_reports_expected_findings_on_real_source_files(results: &[G3CheckResult]) {
-    assert_file_result_count(results, "src/has_todo.rs", 1);
-    assert_has_result_id(results, "src/has_todo.rs", "RS-CODE-SOURCE-13");
-    assert_file_result_count(results, "src/direct_std_fs.rs", 1);
-    assert_has_result_id(results, "src/direct_std_fs.rs", "RS-CODE-SOURCE-15");
-    assert_file_result_count(results, "src/panic_probe.rs", 1);
-    assert_has_result_id(results, "src/panic_probe.rs", "RS-CODE-SOURCE-16");
+    for (file, id) in [
+        ("src/has_todo.rs", "RS-CODE-SOURCE-13"),
+        ("src/direct_std_fs.rs", "RS-CODE-SOURCE-15"),
+        ("src/panic_probe.rs", "RS-CODE-SOURCE-16"),
+    ] {
+        assert_result_set(results, file, 1, &[id]);
+    }
     assert_no_results_for_file(results, "src/clean_file.rs");
 }
 
@@ -294,7 +323,12 @@ pub fn assert_config_pipeline_reports_exception_comments_and_unsafe_code_lints(
     results: &[G3CheckResult],
 ) {
     assert_has_result_id(results, "Cargo.toml", "RS-CODE-CONFIG-07");
-    assert_has_result_id_with_severity(results, "Cargo.toml", "RS-CODE-CONFIG-12", G3Severity::Info);
+    assert_has_result_id_with_severity(
+        results,
+        "Cargo.toml",
+        "RS-CODE-CONFIG-12",
+        G3Severity::Info,
+    );
     assert_has_result_id(results, "deny.toml", "RS-CODE-CONFIG-07");
 }
 
@@ -302,168 +336,178 @@ pub fn assert_config_pipeline_stays_clean_for_harmless_comments_and_non_workspac
     results: &[G3CheckResult],
 ) {
     assert_result_count(results, 1);
-    assert_file_result_count(results, "crates/core/Cargo.toml", 1);
-    assert_has_result_id(results, "crates/core/Cargo.toml", "RS-CODE-CONFIG-07");
-    assert_no_results_for_file(results, "Cargo.toml");
-    assert_no_results_for_file(results, "deny.toml");
+    assert_result_set(results, "crates/core/Cargo.toml", 1, &["RS-CODE-CONFIG-07"]);
+    for file in ["Cargo.toml", "deny.toml"] {
+        assert_no_results_for_file(results, file);
+    }
 }
 
 pub fn assert_config_pipeline_reports_exact_exception_comment_counts(results: &[G3CheckResult]) {
     assert_result_count(results, 3);
-    assert_file_result_count(results, "Cargo.toml", 2);
-    assert_file_result_count(results, "deny.toml", 1);
+    for (file, count) in [("Cargo.toml", 2), ("deny.toml", 1)] {
+        assert_file_result_count(results, file, count);
+    }
 }
 
 pub fn assert_config_pipeline_ignores_foreign_nested_repo_findings(results: &[G3CheckResult]) {
     assert_result_count(results, 1);
-    assert_file_result_count(results, "Cargo.toml", 1);
-    assert_has_result_id(results, "Cargo.toml", "RS-CODE-CONFIG-12");
-    assert_no_results_for_file(results, "vendor/foreign/Cargo.toml");
-    assert_no_results_for_file(results, "vendor/foreign/deny.toml");
+    assert_result_set(results, "Cargo.toml", 1, &["RS-CODE-CONFIG-12"]);
+    for file in ["vendor/foreign/Cargo.toml", "vendor/foreign/deny.toml"] {
+        assert_no_results_for_file(results, file);
+    }
 }
 
 pub fn assert_config_pipeline_reports_deny_through_full_lane(results: &[G3CheckResult]) {
     assert_result_count(results, 1);
-    assert_file_result_count(results, "Cargo.toml", 1);
-    assert_has_result_id_with_severity(results, "Cargo.toml", "RS-CODE-CONFIG-12", G3Severity::Error);
+    assert_has_result_id_with_severity(
+        results,
+        "Cargo.toml",
+        "RS-CODE-CONFIG-12",
+        G3Severity::Error,
+    );
 }
 
 pub fn assert_pipeline_reports_new_single_file_ast_rules(results: &[G3CheckResult]) {
-    let by_file = findings_by_file(results);
+    for (file, id) in [
+        ("src/crate_allow.rs", "RS-CODE-SOURCE-01"),
+        ("src/unused_crate_deps.rs", "RS-CODE-SOURCE-02"),
+        ("src/item_allow_missing_reason.rs", "RS-CODE-SOURCE-03"),
+        ("src/item_allow_with_reason.rs", "RS-CODE-SOURCE-04"),
+        ("src/garde_skip.rs", "RS-CODE-SOURCE-06"),
+        ("src/garde_skip_no_comment.rs", "RS-CODE-SOURCE-05"),
+        ("src/too_many_lines.rs", "RS-CODE-SOURCE-09"),
+        ("src/too_many_uses.rs", "RS-CODE-SOURCE-10"),
+        ("src/use_error_boundary_clean.rs", "RS-CODE-SOURCE-11"),
+        ("src/many_uses.rs", "RS-CODE-SOURCE-11"),
+        ("src/large_struct.rs", "RS-CODE-SOURCE-19"),
+        ("src/large_enum.rs", "RS-CODE-SOURCE-19"),
+        ("src/path_reason.rs", "RS-CODE-SOURCE-24"),
+        ("src/path_missing_reason.rs", "RS-CODE-SOURCE-24"),
+        ("src/path_weak_reason.rs", "RS-CODE-SOURCE-24"),
+        ("src/path_escape.rs", "RS-CODE-SOURCE-24"),
+        ("src/path_cfg_attr_reason.rs", "RS-CODE-SOURCE-24"),
+        ("src/cfg_attr_unknown.rs", "RS-CODE-SOURCE-08"),
+        ("src/deny_without_reason.rs", "RS-CODE-SOURCE-22"),
+        ("src/cfg_attr.rs", "RS-CODE-SOURCE-18"),
+        ("src/ffi.rs", "RS-CODE-SOURCE-20"),
+        ("src/include_probe.rs", "RS-CODE-SOURCE-23"),
+        ("src/forbid_inventory.rs", "RS-CODE-SOURCE-22"),
+        ("tests/expect_probe.rs", "RS-CODE-SOURCE-32"),
+        ("src/generic_probe.rs", "RS-CODE-SOURCE-34"),
+        ("src/public_weak_error.rs", "RS-CODE-SOURCE-33"),
+        ("src/public_trait_weak_error.rs", "RS-CODE-SOURCE-33"),
+        ("src/public_impl_weak_error.rs", "RS-CODE-SOURCE-33"),
+        ("src/public_str_ref_error.rs", "RS-CODE-SOURCE-33"),
+        ("src/string_dispatch.rs", "RS-CODE-SOURCE-36"),
+    ] {
+        assert_result_set(results, file, 1, &[id]);
+    }
 
-    assert_file_result_count(results, "src/crate_allow.rs", 1);
-    assert_has_result_id(results, "src/crate_allow.rs", "RS-CODE-SOURCE-01");
-    assert_file_result_count(results, "src/unused_crate_deps.rs", 1);
-    assert_has_result_id(results, "src/unused_crate_deps.rs", "RS-CODE-SOURCE-02");
-    assert_file_result_count(results, "src/item_allow_missing_reason.rs", 1);
-    assert_has_result_id(results, "src/item_allow_missing_reason.rs", "RS-CODE-SOURCE-03");
-    assert_file_result_count(results, "src/item_allow_with_reason.rs", 1);
-    assert_has_result_id(results, "src/item_allow_with_reason.rs", "RS-CODE-SOURCE-04");
-    assert_file_result_count(results, "src/garde_skip.rs", 1);
-    assert_has_result_id(results, "src/garde_skip.rs", "RS-CODE-SOURCE-06");
-    assert_file_result_count(results, "src/garde_skip_no_comment.rs", 1);
-    assert_has_result_id(results, "src/garde_skip_no_comment.rs", "RS-CODE-SOURCE-05");
-    assert_file_result_count(results, "src/too_many_lines.rs", 1);
-    assert_has_result_id(results, "src/too_many_lines.rs", "RS-CODE-SOURCE-09");
-    assert_no_results_for_file(results, "src/raw_string_payload_only.rs");
-    assert_file_result_count(results, "src/too_many_uses.rs", 1);
-    assert_has_result_id(results, "src/too_many_uses.rs", "RS-CODE-SOURCE-10");
-    assert_file_result_count(results, "src/use_error_boundary_clean.rs", 1);
-    assert_has_result_id(results, "src/use_error_boundary_clean.rs", "RS-CODE-SOURCE-11");
-    assert_file_result_count(results, "src/many_uses.rs", 1);
-    assert_has_result_id(results, "src/many_uses.rs", "RS-CODE-SOURCE-11");
-    assert_no_results_for_file(results, "src/use_warn_boundary_clean.rs");
-    assert_no_results_for_file(results, "tests/use_exempt.rs");
-    assert_file_result_count(results, "src/large_struct.rs", 1);
-    assert_has_result_id(results, "src/large_struct.rs", "RS-CODE-SOURCE-19");
-    assert_file_result_count(results, "src/large_enum.rs", 1);
-    assert_has_result_id(results, "src/large_enum.rs", "RS-CODE-SOURCE-19");
-    assert_file_result_count(results, "src/path_reason.rs", 1);
-    assert_has_result_id(results, "src/path_reason.rs", "RS-CODE-SOURCE-24");
-    assert_eq!(by_file["src/path_reason.rs"][0].title(), "#[path] with reason", "{results:#?}");
-    assert_file_result_count(results, "src/path_missing_reason.rs", 1);
-    assert_has_result_id(results, "src/path_missing_reason.rs", "RS-CODE-SOURCE-24");
-    assert_eq!(by_file["src/path_missing_reason.rs"][0].title(), "#[path] without reason", "{results:#?}");
-    assert_file_result_count(results, "src/path_weak_reason.rs", 1);
-    assert_has_result_id(results, "src/path_weak_reason.rs", "RS-CODE-SOURCE-24");
-    assert_eq!(by_file["src/path_weak_reason.rs"][0].title(), "#[path] reason too weak", "{results:#?}");
-    assert_file_result_count(results, "src/path_escape.rs", 1);
-    assert_has_result_id(results, "src/path_escape.rs", "RS-CODE-SOURCE-24");
-    assert_eq!(by_file["src/path_escape.rs"][0].title(), "#[path] escapes parent directory", "{results:#?}");
-    assert_file_result_count(results, "src/path_cfg_attr_reason.rs", 1);
-    assert_has_result_id(results, "src/path_cfg_attr_reason.rs", "RS-CODE-SOURCE-24");
-    assert_no_results_for_file(results, "src/path_cfg_attr_known_false.rs");
-    assert_no_results_for_file(results, "src/path_sidecar_exempt.rs");
-    assert_file_result_count(results, "src/cfg_attr_unknown.rs", 1);
-    assert_has_result_id(results, "src/cfg_attr_unknown.rs", "RS-CODE-SOURCE-08");
-    assert_file_result_count(results, "src/deny_without_reason.rs", 1);
-    assert_has_result_id(results, "src/deny_without_reason.rs", "RS-CODE-SOURCE-22");
-    assert_file_result_count(results, "src/impl_allow.rs", 2);
-    assert_has_result_id(results, "src/impl_allow.rs", "RS-CODE-SOURCE-03");
-    assert_has_result_id(results, "src/impl_allow.rs", "RS-CODE-SOURCE-17");
-    assert_file_result_count(results, "src/cfg_attr.rs", 1);
-    assert_has_result_id(results, "src/cfg_attr.rs", "RS-CODE-SOURCE-18");
-    assert_file_result_count(results, "src/ffi.rs", 1);
-    assert_has_result_id(results, "src/ffi.rs", "RS-CODE-SOURCE-20");
-    assert_file_result_count(results, "src/fs_glob.rs", 2);
-    assert_has_result_id(results, "src/fs_glob.rs", "RS-CODE-SOURCE-15");
-    assert_has_result_id(results, "src/fs_glob.rs", "RS-CODE-SOURCE-21");
-    assert_file_result_count(results, "src/include_probe.rs", 1);
-    assert_has_result_id(results, "src/include_probe.rs", "RS-CODE-SOURCE-23");
-    assert_file_result_count(results, "src/forbid_inventory.rs", 1);
-    assert_has_result_id(results, "src/forbid_inventory.rs", "RS-CODE-SOURCE-22");
-    assert!(by_file["src/forbid_inventory.rs"][0].inventory(), "{results:#?}");
-    assert_file_result_count(results, "tests/expect_probe.rs", 1);
-    assert_has_result_id(results, "tests/expect_probe.rs", "RS-CODE-SOURCE-32");
-    assert_file_result_count(results, "src/generic_probe.rs", 1);
-    assert_has_result_id(results, "src/generic_probe.rs", "RS-CODE-SOURCE-34");
-    assert_file_result_count(results, "src/large_trait.rs", 1);
-    assert_has_result_id_with_severity(results, "src/large_trait.rs", "RS-CODE-SOURCE-29", G3Severity::Warn);
-    assert_file_result_count(results, "src/large_trait_boundary.rs", 1);
-    assert_has_result_id_with_severity(results, "src/large_trait_boundary.rs", "RS-CODE-SOURCE-29", G3Severity::Warn);
-    assert_no_results_for_file(results, "src/small_trait.rs");
-    assert_file_result_count(results, "src/public_field_bag.rs", 1);
-    assert_has_result_id_with_severity(results, "src/public_field_bag.rs", "RS-CODE-SOURCE-31", G3Severity::Warn);
-    assert_file_result_count(results, "src/public_field_warn_boundary.rs", 1);
-    assert_has_result_id_with_severity(results, "src/public_field_warn_boundary.rs", "RS-CODE-SOURCE-31", G3Severity::Warn);
-    assert_file_result_count(results, "src/public_field_error_boundary.rs", 1);
-    assert_has_result_id_with_severity(results, "src/public_field_error_boundary.rs", "RS-CODE-SOURCE-31", G3Severity::Error);
-    assert_no_results_for_file(results, "src/private_field_struct.rs");
-    assert_file_result_count(results, "src/public_weak_error.rs", 1);
-    assert_has_result_id(results, "src/public_weak_error.rs", "RS-CODE-SOURCE-33");
-    assert_file_result_count(results, "src/public_trait_weak_error.rs", 1);
-    assert_has_result_id(results, "src/public_trait_weak_error.rs", "RS-CODE-SOURCE-33");
-    assert_file_result_count(results, "src/public_impl_weak_error.rs", 1);
-    assert_has_result_id(results, "src/public_impl_weak_error.rs", "RS-CODE-SOURCE-33");
-    assert_file_result_count(results, "src/public_str_ref_error.rs", 1);
-    assert_has_result_id(results, "src/public_str_ref_error.rs", "RS-CODE-SOURCE-33");
-    assert_no_results_for_file(results, "src/typed_public_error.rs");
-    assert_no_results_for_file(results, "src/private_weak_error.rs");
-    assert_file_result_count(results, "src/string_dispatch.rs", 1);
-    assert_has_result_id(results, "src/string_dispatch.rs", "RS-CODE-SOURCE-36");
+    assert_result_set(
+        results,
+        "src/impl_allow.rs",
+        2,
+        &["RS-CODE-SOURCE-03", "RS-CODE-SOURCE-17"],
+    );
+    assert_result_set(
+        results,
+        "src/fs_glob.rs",
+        2,
+        &["RS-CODE-SOURCE-15", "RS-CODE-SOURCE-21"],
+    );
+
+    for (file, title) in [
+        ("src/path_reason.rs", "#[path] with reason"),
+        ("src/path_missing_reason.rs", "#[path] without reason"),
+        ("src/path_weak_reason.rs", "#[path] reason too weak"),
+        ("src/path_escape.rs", "#[path] escapes parent directory"),
+    ] {
+        assert_eq!(
+            finding_for_file(results, file).title(),
+            title,
+            "{results:#?}"
+        );
+    }
+    assert!(
+        finding_for_file(results, "src/forbid_inventory.rs").inventory(),
+        "{results:#?}"
+    );
+
+    for (file, severity) in [
+        ("src/large_trait.rs", G3Severity::Warn),
+        ("src/large_trait_boundary.rs", G3Severity::Warn),
+        ("src/public_field_bag.rs", G3Severity::Warn),
+        ("src/public_field_warn_boundary.rs", G3Severity::Warn),
+        ("src/public_field_error_boundary.rs", G3Severity::Error),
+    ] {
+        let id = if file.starts_with("src/large_trait") {
+            "RS-CODE-SOURCE-29"
+        } else {
+            "RS-CODE-SOURCE-31"
+        };
+        assert_file_result_count(results, file, 1);
+        assert_has_result_id_with_severity(results, file, id, severity);
+    }
+
+    for file in [
+        "src/raw_string_payload_only.rs",
+        "src/use_warn_boundary_clean.rs",
+        "tests/use_exempt.rs",
+        "src/path_cfg_attr_known_false.rs",
+        "src/path_sidecar_exempt.rs",
+        "src/small_trait.rs",
+        "src/private_field_struct.rs",
+        "src/typed_public_error.rs",
+        "src/private_weak_error.rs",
+    ] {
+        assert_no_results_for_file(results, file);
+    }
 }
 
-pub fn assert_pipeline_reports_effective_line_and_dispatch_boundaries(
-    results: &[G3CheckResult],
-) {
+pub fn assert_pipeline_reports_effective_line_and_dispatch_boundaries(results: &[G3CheckResult]) {
     assert_no_results_for_file(results, "src/line_cap.rs");
-    assert_file_result_count(results, "src/line_over_cap.rs", 1);
-    assert_has_result_id(results, "src/line_over_cap.rs", "RS-CODE-SOURCE-09");
+    assert_result_set(results, "src/line_over_cap.rs", 1, &["RS-CODE-SOURCE-09"]);
     assert_no_results_for_file(results, "src/string_dispatch_clean.rs");
 }
 
 pub fn assert_pipeline_reports_trait_and_public_error_boundaries(results: &[G3CheckResult]) {
     assert_no_results_for_file(results, "src/trait_clean.rs");
-    assert_file_result_count(results, "src/trait_warn.rs", 1);
-    assert_has_result_id(results, "src/trait_warn.rs", "RS-CODE-SOURCE-29");
-    assert_file_result_count(results, "src/trait_error.rs", 1);
-    assert_has_result_id(results, "src/trait_error.rs", "RS-CODE-SOURCE-29");
-    assert_file_result_count(results, "src/public_string_error.rs", 1);
-    assert_has_result_id(results, "src/public_string_error.rs", "RS-CODE-SOURCE-33");
-    assert_file_result_count(results, "src/public_str_error.rs", 1);
-    assert_has_result_id(results, "src/public_str_error.rs", "RS-CODE-SOURCE-33");
-    assert_file_result_count(results, "src/public_anyhow_error.rs", 1);
-    assert_has_result_id(results, "src/public_anyhow_error.rs", "RS-CODE-SOURCE-33");
-    assert_file_result_count(results, "src/public_box_error.rs", 1);
-    assert_has_result_id(results, "src/public_box_error.rs", "RS-CODE-SOURCE-33");
+    for file in ["src/trait_warn.rs", "src/trait_error.rs"] {
+        assert_result_set(results, file, 1, &["RS-CODE-SOURCE-29"]);
+    }
+    for file in [
+        "src/public_string_error.rs",
+        "src/public_str_error.rs",
+        "src/public_anyhow_error.rs",
+        "src/public_box_error.rs",
+        "src/public_trait_error.rs",
+        "src/public_impl_error.rs",
+    ] {
+        assert_result_set(results, file, 1, &["RS-CODE-SOURCE-33"]);
+    }
     assert_no_results_for_file(results, "src/private_string_error.rs");
-    assert_file_result_count(results, "src/public_trait_error.rs", 1);
-    assert_has_result_id(results, "src/public_trait_error.rs", "RS-CODE-SOURCE-33");
-    assert_file_result_count(results, "src/public_impl_error.rs", 1);
-    assert_has_result_id(results, "src/public_impl_error.rs", "RS-CODE-SOURCE-33");
 }
 
 pub fn assert_pipeline_reports_include_str_traversal(results: &[G3CheckResult]) {
-    let by_file = findings_by_file(results);
-    assert_file_result_count(results, "src/include_str_escape.rs", 1);
-    assert_has_result_id(results, "src/include_str_escape.rs", "RS-CODE-SOURCE-23");
-    assert_eq!(by_file["src/include_str_escape.rs"][0].title(), "include path traversal", "{results:#?}");
+    assert_result_set(
+        results,
+        "src/include_str_escape.rs",
+        1,
+        &["RS-CODE-SOURCE-23"],
+    );
+    assert_eq!(
+        finding_for_file(results, "src/include_str_escape.rs").title(),
+        "include path traversal",
+        "{results:#?}"
+    );
 }
 
 pub fn assert_pipeline_preserves_current_test_owned_rule_behavior(results: &[G3CheckResult]) {
     assert_result_count(results, 2);
     assert!(
-        results.iter().all(|result| result.id() == "RS-CODE-SOURCE-13"),
+        results
+            .iter()
+            .all(|result| result.id() == "RS-CODE-SOURCE-13"),
         "{results:#?}"
     );
 }
@@ -475,7 +519,9 @@ pub fn assert_pipeline_emits_explicit_input_failure_for_parse_error(results: &[G
     assert_eq!(result.title(), "code-family input failure");
     assert_eq!(result.file(), Some("src/broken.rs"));
     assert!(
-        result.message().starts_with("Failed to parse Rust source file:"),
+        result
+            .message()
+            .starts_with("Failed to parse Rust source file:"),
         "unexpected message: {result:#?}"
     );
 }
@@ -487,11 +533,12 @@ pub fn assert_pipeline_keeps_other_findings_when_one_file_fails_to_parse(
     assert_has_result_id(results, "src/has_todo.rs", "RS-CODE-SOURCE-13");
 }
 
-pub fn assert_pipeline_classifies_custom_target_paths_before_checks_run(
-    results: &[G3CheckResult],
-) {
-    assert_file_result_count(results, "lib/api.rs", 1);
-    assert_has_result_id_with_severity(results, "lib/api.rs", "RS-CODE-SOURCE-29", G3Severity::Warn);
-    assert_file_result_count(results, "cmd/worker.rs", 1);
-    assert_has_result_id_with_severity(results, "cmd/worker.rs", "RS-CODE-SOURCE-29", G3Severity::Error);
+pub fn assert_pipeline_classifies_custom_target_paths_before_checks_run(results: &[G3CheckResult]) {
+    for (file, severity) in [
+        ("lib/api.rs", G3Severity::Warn),
+        ("cmd/worker.rs", G3Severity::Error),
+    ] {
+        assert_file_result_count(results, file, 1);
+        assert_has_result_id_with_severity(results, file, "RS-CODE-SOURCE-29", severity);
+    }
 }

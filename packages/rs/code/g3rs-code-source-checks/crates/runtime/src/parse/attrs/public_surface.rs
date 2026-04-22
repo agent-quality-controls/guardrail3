@@ -132,9 +132,7 @@ impl<'source> Visit<'source> for PublicResultErrorVisitor {
                 let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                     continue;
                 };
-                if let Some(kind) =
-                    analysis_helpers::result_error_kind(ty, &self.anyhow_bindings)
-                {
+                if let Some(kind) = analysis_helpers::result_error_kind(ty, &self.anyhow_bindings) {
                     self.out.push(PublicResultErrorInfo {
                         line: helpers::span_line(item_fn.sig.ident.span()),
                         fn_name: item_fn.sig.ident.to_string(),
@@ -155,9 +153,7 @@ impl<'source> Visit<'source> for PublicResultErrorVisitor {
                 let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                     continue;
                 };
-                if let Some(kind) =
-                    analysis_helpers::result_error_kind(ty, &self.anyhow_bindings)
-                {
+                if let Some(kind) = analysis_helpers::result_error_kind(ty, &self.anyhow_bindings) {
                     self.out.push(PublicResultErrorInfo {
                         line: helpers::span_line(item_fn.sig.ident.span()),
                         fn_name: format!("{}::{}", item_trait.ident, item_fn.sig.ident),

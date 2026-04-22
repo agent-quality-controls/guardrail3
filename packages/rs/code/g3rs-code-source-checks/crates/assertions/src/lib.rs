@@ -58,3 +58,5 @@ pub mod rs_code_ast_33_public_weak_error_forms;
 pub mod rs_code_ast_34_generic_parameter_cap;
 #[cfg(feature = "checks")]
 pub mod rs_code_ast_36_string_dispatch_cap;
+#[cfg(feature = "checks")]
+pub mod run;
