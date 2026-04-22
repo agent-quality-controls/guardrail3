@@ -113,7 +113,6 @@ fn build_same_layer_cycles_check(
     dependencies: &DependencyCollections,
     crates_by_path: &BTreeMap<String, apparch::G3RsApparchCrate>,
 ) -> apparch::G3RsApparchSameLayerCyclesChecksInput {
-    let mut crates = BTreeMap::<String, apparch::G3RsApparchCrate>::new();
     let edges = dependencies
         .internal_edges
         .iter()
@@ -127,19 +126,14 @@ fn build_same_layer_cycles_check(
             if from_layer != to_layer {
                 return None;
             }
-            let _ = crates.insert(from.cargo_rel_path.clone(), from.clone());
-            let _ = crates.insert(to.cargo_rel_path.clone(), to.clone());
             Some(apparch::G3RsApparchSameLayerDependencyEdge {
-                from_cargo_rel_path: from.cargo_rel_path.clone(),
-                to_cargo_rel_path: to.cargo_rel_path.clone(),
+                from: from.clone(),
+                to: to.clone(),
             })
         })
         .collect();
 
-    apparch::G3RsApparchSameLayerCyclesChecksInput {
-        crates: crates.into_values().collect(),
-        edges,
-    }
+    apparch::G3RsApparchSameLayerCyclesChecksInput { edges }
 }
 
 fn collect_dependency_collections(

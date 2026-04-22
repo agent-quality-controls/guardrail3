@@ -1,5 +1,8 @@
 use g3rs_apparch_config_checks_assertions::rs_apparch_config_06_same_layer_cycles as assertions;
-use g3rs_apparch_types::{G3RsApparchDependencyKind, G3RsApparchLayer};
+use g3rs_apparch_types::{
+    G3RsApparchDependencyKind, G3RsApparchLayer, G3RsApparchSameLayerCyclesChecksInput,
+    G3RsApparchSameLayerDependencyEdge,
+};
 
 use super::helpers::{edge, krate, run_rule};
 
@@ -73,5 +76,31 @@ fn same_layer_self_loop_fires() {
         &results,
         "same-layer logic dependency cycle",
         "logic crate(s)",
+    );
+}
+
+#[test]
+fn cycle_is_not_dropped_when_first_sorted_node_is_missing_from_crate_bag() {
+    let types_a = krate(G3RsApparchLayer::Types, "types/a/Cargo.toml");
+    let types_b = krate(G3RsApparchLayer::Types, "types/b/Cargo.toml");
+    let input = G3RsApparchSameLayerCyclesChecksInput {
+        edges: vec![
+            G3RsApparchSameLayerDependencyEdge {
+                from: types_a.clone(),
+                to: types_b.clone(),
+            },
+            G3RsApparchSameLayerDependencyEdge {
+                from: types_b,
+                to: types_a,
+            },
+        ],
+    };
+    let mut results = Vec::new();
+    crate::rs_apparch_config_06_same_layer_cycles::check(&input, &mut results);
+
+    assertions::assert_cycle(
+        &results,
+        "same-layer types dependency cycle",
+        "types crate(s)",
     );
 }

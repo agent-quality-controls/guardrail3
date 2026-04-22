@@ -9,22 +9,20 @@ pub(crate) fn check(
     input: &G3RsApparchSameLayerCyclesChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    let crates_by_path = input
-        .crates
-        .iter()
-        .map(|krate| (&krate.cargo_rel_path, krate))
-        .collect::<BTreeMap<_, _>>();
     let mut adjacency = BTreeMap::<String, Vec<String>>::new();
+    let mut crates_by_path = BTreeMap::new();
     let mut self_loops = BTreeSet::new();
 
     for edge in &input.edges {
+        let _ = crates_by_path.insert(edge.from.cargo_rel_path.clone(), &edge.from);
+        let _ = crates_by_path.insert(edge.to.cargo_rel_path.clone(), &edge.to);
         adjacency
-            .entry(edge.from_cargo_rel_path.clone())
+            .entry(edge.from.cargo_rel_path.clone())
             .or_default()
-            .push(edge.to_cargo_rel_path.clone());
-        let _ = adjacency.entry(edge.to_cargo_rel_path.clone()).or_default();
-        if edge.from_cargo_rel_path == edge.to_cargo_rel_path {
-            let _ = self_loops.insert(edge.from_cargo_rel_path.clone());
+            .push(edge.to.cargo_rel_path.clone());
+        let _ = adjacency.entry(edge.to.cargo_rel_path.clone()).or_default();
+        if edge.from.cargo_rel_path == edge.to.cargo_rel_path {
+            let _ = self_loops.insert(edge.from.cargo_rel_path.clone());
         }
     }
 
