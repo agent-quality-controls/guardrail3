@@ -1,5 +1,5 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::command_query::{any_resolved_command_on_line, ResolvedCommand};
+use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command_on_line};
 use hook_shell_parser::types::{ParsedShellScript, ShellFunction};
 
 use crate::inputs::ExecutableCommandContextInput;
@@ -61,10 +61,12 @@ fn first_top_level_exit_zero_line(
         }
 
         if is_function_definition_line(parsed, source_line.line_no) {
-            if if_depth == 0 && case_depth == 0 && loop_depth == 0
+            if if_depth == 0
+                && case_depth == 0
+                && loop_depth == 0
                 && let Some(tail) = function_definition_tail(&source_line.raw)
             {
-                if let Some(line_no) = called_function_exit_zero_line_from_tail(
+                if let Some(line_no) = scan_tail_for_unconditional_exit_zero(
                     parsed,
                     tail,
                     source_line.line_no,
@@ -72,16 +74,21 @@ fn first_top_level_exit_zero_line(
                 ) {
                     return Some(line_no);
                 }
-
-                if line_contains_exit_zero_path(parsed, tail, source_line.line_no) {
-                    return Some(source_line.line_no);
-                }
             }
 
             continue;
         }
 
         if line_in_function_body(source_line.line_no, function_ranges.as_slice()) {
+            continue;
+        }
+
+        if let Some(tail) = same_line_scoped_control_flow_tail(trimmed) {
+            if let Some(line_no) =
+                scan_tail_for_unconditional_exit_zero(parsed, tail, source_line.line_no, visiting)
+            {
+                return Some(line_no);
+            }
             continue;
         }
 
@@ -95,7 +102,9 @@ fn first_top_level_exit_zero_line(
             if_depth = if_depth.saturating_sub(1);
         }
 
-        if if_depth == 0 && case_depth == 0 && loop_depth == 0
+        if if_depth == 0
+            && case_depth == 0
+            && loop_depth == 0
             && !opens_case_scope(trimmed)
             && !opens_loop_scope(trimmed)
             && !opens_if_scope(trimmed)
@@ -170,12 +179,9 @@ fn called_function_exit_zero_line_from_tail(
 ) -> Option<usize> {
     let tail_script = hook_shell_parser::parse_script(tail);
     for executable in &tail_script.executable_lines {
-        if let Some(line_no) = called_function_exit_zero_line(
-            parsed,
-            &executable.command_name,
-            call_line_no,
-            visiting,
-        ) {
+        if let Some(line_no) =
+            called_function_exit_zero_line(parsed, &executable.command_name, call_line_no, visiting)
+        {
             return Some(line_no);
         }
     }
@@ -216,24 +222,65 @@ fn line_in_function_body(line_no: usize, ranges: &[(usize, usize)]) -> bool {
 }
 
 fn is_function_definition_line(parsed: &ParsedShellScript, line_no: usize) -> bool {
-    parsed.functions.iter().any(|function| function.line_no == line_no)
+    parsed
+        .functions
+        .iter()
+        .any(|function| function.line_no == line_no)
 }
 
 fn function_definition_tail(line: &str) -> Option<&str> {
-    let (_, tail) = line.rsplit_once('}')?;
-    let tail = tail.trim_start_matches(|c: char| c == ';' || c.is_whitespace());
-    (!tail.is_empty()).then_some(tail)
+    let line = strip_inline_comment(line);
+    let mut single_quoted = false;
+    let mut double_quoted = false;
+    let mut brace_depth = 0usize;
+    let mut saw_open_brace = false;
+
+    for (idx, ch) in line.char_indices() {
+        match ch {
+            '\'' if !double_quoted => single_quoted = !single_quoted,
+            '"' if !single_quoted => double_quoted = !double_quoted,
+            '{' if !single_quoted && !double_quoted => {
+                saw_open_brace = true;
+                brace_depth += 1;
+            }
+            '}' if !single_quoted && !double_quoted && saw_open_brace => {
+                brace_depth = brace_depth.saturating_sub(1);
+                if brace_depth == 0 {
+                    let tail = line[idx + ch.len_utf8()..]
+                        .trim_start_matches(|c: char| c == ';' || c.is_whitespace());
+                    return (!tail.is_empty()).then_some(tail);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    None
 }
 
 fn line_contains_exit_zero_path(parsed: &ParsedShellScript, raw: &str, line_no: usize) -> bool {
     any_resolved_command_on_line(parsed, raw, line_no, &|command: &ResolvedCommand| {
         command.command_name() == "exit"
-            && command
-                .command_text()
-                .split_whitespace()
-                .nth(1)
-                == Some("0")
+            && command.command_text().split_whitespace().nth(1) == Some("0")
     })
+}
+
+fn scan_tail_for_unconditional_exit_zero(
+    parsed: &ParsedShellScript,
+    tail: &str,
+    line_no: usize,
+    visiting: &mut Vec<String>,
+) -> Option<usize> {
+    if let Some(line_no) = called_function_exit_zero_line_from_tail(parsed, tail, line_no, visiting)
+    {
+        return Some(line_no);
+    }
+
+    if line_contains_exit_zero_path(parsed, tail, line_no) {
+        return Some(line_no);
+    }
+
+    None
 }
 
 fn strip_inline_comment(line: &str) -> &str {
@@ -289,8 +336,24 @@ fn is_same_line_scoped_control_flow(line: &str) -> bool {
 }
 
 fn opens_loop_scope(line: &str) -> bool {
-    matches!(line.split_whitespace().next(), Some("for" | "while" | "until"))
-        || starts_time_prefixed_loop_scope(line)
+    matches!(
+        line.split_whitespace().next(),
+        Some("for" | "while" | "until")
+    ) || starts_time_prefixed_loop_scope(line)
+}
+
+fn same_line_scoped_control_flow_tail(line: &str) -> Option<&str> {
+    if starts_shell_keyword(line, "if") && line.contains("then") {
+        return tail_after_shell_keyword(line, "fi");
+    }
+    if starts_shell_keyword(line, "case") && line.contains(" in ") {
+        return tail_after_shell_keyword(line, "esac");
+    }
+    if opens_loop_scope(line) {
+        return tail_after_shell_keyword(line, "done");
+    }
+
+    None
 }
 
 fn closes_loop_scope(parsed: &ParsedShellScript, line_no: usize, line: &str) -> bool {
@@ -310,9 +373,7 @@ fn starts_shell_keyword(line: &str, keyword: &str) -> bool {
         return false;
     };
     rest.is_empty()
-        || rest.starts_with(|c: char| {
-            c.is_whitespace() || matches!(c, ';' | '&' | '|' | '<' | '>')
-        })
+        || rest.starts_with(|c: char| c.is_whitespace() || matches!(c, ';' | '&' | '|' | '<' | '>'))
 }
 
 fn starts_time_prefixed_loop_scope(line: &str) -> bool {
@@ -324,7 +385,10 @@ fn starts_time_prefixed_loop_scope(line: &str) -> bool {
     } else {
         rest
     };
-    matches!(rest.split_whitespace().next(), Some("for" | "while" | "until"))
+    matches!(
+        rest.split_whitespace().next(),
+        Some("for" | "while" | "until")
+    )
 }
 
 fn contains_shell_keyword(line: &str, keyword: &str) -> bool {
@@ -351,6 +415,31 @@ fn contains_shell_keyword(line: &str, keyword: &str) -> bool {
     }
 
     false
+}
+
+fn tail_after_shell_keyword<'a>(line: &'a str, keyword: &str) -> Option<&'a str> {
+    let mut search_end = line.len();
+    while let Some(relative_index) = line[..search_end].rfind(keyword) {
+        let start = relative_index;
+        let end = start + keyword.len();
+        let before_ok = line[..start]
+            .chars()
+            .last()
+            .is_none_or(|ch| ch.is_whitespace() || matches!(ch, ';' | '&' | '|' | '<' | '>'));
+        let after_ok = line[end..]
+            .chars()
+            .next()
+            .is_none_or(|ch| ch.is_whitespace() || matches!(ch, ';' | '&' | '|' | '<' | '>'));
+
+        if before_ok && after_ok {
+            let tail = line[end..].trim_start_matches(|c: char| c == ';' || c.is_whitespace());
+            return Some(tail);
+        }
+
+        search_end = start;
+    }
+
+    None
 }
 
 #[cfg(test)]
