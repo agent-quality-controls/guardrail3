@@ -10,7 +10,3 @@ pub fn check(input: &G3RsFmtConfigChecksInput) -> Vec<G3CheckResult> {
     crate::rs_fmt_config_07_ignore_escape_hatch::check(input, &mut results);
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod run_tests;

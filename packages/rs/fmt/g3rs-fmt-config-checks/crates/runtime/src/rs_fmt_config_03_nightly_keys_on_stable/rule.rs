@@ -1,20 +1,45 @@
 use g3rs_fmt_types::{G3RsFmtConfigChecksInput, G3RsFmtToolchainState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+use crate::inputs::{rustfmt, rustfmt_table};
+
 const ID: &str = "RS-FMT-CONFIG-03";
+pub(crate) const NIGHTLY_KEYS: &[&str] = &[
+    "group_imports",
+    "imports_granularity",
+    "format_code_in_doc_comments",
+    "format_strings",
+    "overflow_delimited_expr",
+    "normalize_comments",
+    "normalize_doc_attributes",
+    "wrap_comments",
+    "format_macro_matchers",
+    "format_macro_bodies",
+    "condense_wildcard_suffixes",
+];
 
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) = &input.rustfmt_state else {
+    let Some(rustfmt) = rustfmt(input) else {
         return;
     };
-    if rustfmt.nightly_keys.is_empty() {
+    let table = rustfmt_table(rustfmt);
+    let nightly_keys = NIGHTLY_KEYS
+        .iter()
+        .copied()
+        .filter(|key| table.contains_key(*key))
+        .collect::<Vec<_>>();
+    if nightly_keys.is_empty() {
         return;
     }
 
     match &input.toolchain_state {
-        G3RsFmtToolchainState::Parsed(toolchain) => match toolchain.channel.as_deref() {
+        G3RsFmtToolchainState::Parsed(toolchain) => match toolchain
+            .toolchain
+            .as_ref()
+            .and_then(|toolchain| toolchain.channel.as_deref())
+        {
             Some("stable") => {
-                for key in &rustfmt.nightly_keys {
+                for key in nightly_keys {
                     results.push(G3CheckResult::new(
                     ID.to_owned(),
                     G3Severity::Warn,

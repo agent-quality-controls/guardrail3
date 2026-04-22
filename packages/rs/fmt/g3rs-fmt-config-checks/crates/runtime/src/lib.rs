@@ -1,3 +1,4 @@
+mod inputs;
 mod rs_fmt_config_01_settings;
 mod rs_fmt_config_02_extra_settings;
 mod rs_fmt_config_03_nightly_keys_on_stable;

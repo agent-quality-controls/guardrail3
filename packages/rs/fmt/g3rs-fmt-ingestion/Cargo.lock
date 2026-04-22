@@ -127,9 +127,12 @@ dependencies = [
 name = "g3rs-fmt-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "g3rs-fmt-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
+ "rustfmt-toml-parser",
+ "toml",
 ]
 
 [[package]]
@@ -197,6 +200,11 @@ version = "0.1.0"
 [[package]]
 name = "g3rs-fmt-types"
 version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser",
+ "rust-toolchain-toml-parser",
+ "rustfmt-toml-parser",
+]
 
 [[package]]
 name = "g3rs-workspace-crawl"

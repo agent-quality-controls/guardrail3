@@ -3,14 +3,16 @@ use std::collections::BTreeSet;
 use g3rs_fmt_types::G3RsFmtConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+use crate::inputs::rustfmt;
+
 const ID: &str = "RS-FMT-CONFIG-02";
 
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) = &input.rustfmt_state else {
+    let Some(_rustfmt) = rustfmt(input) else {
         return;
     };
     let expected = expected_keys();
-    for key in &rustfmt.explicit_keys {
+    for key in &input.rustfmt_explicit_keys {
         if !expected.contains(key.as_str()) {
             results.push(
                 G3CheckResult::new(

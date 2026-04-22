@@ -3,9 +3,6 @@ use g3rs_fmt_config_checks_runtime as _;
 mod common;
 
 #[cfg(feature = "checks")]
-pub mod run;
-
-#[cfg(feature = "checks")]
 pub mod rs_fmt_config_01_settings;
 #[cfg(feature = "checks")]
 pub mod rs_fmt_config_02_extra_settings;

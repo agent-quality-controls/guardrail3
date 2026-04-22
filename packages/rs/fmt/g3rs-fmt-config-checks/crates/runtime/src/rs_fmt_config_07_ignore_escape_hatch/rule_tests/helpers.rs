@@ -1,21 +1,28 @@
 use guardrail3_check_types::G3CheckResult;
+use rustfmt_toml_parser::parse as parse_rustfmt_toml;
 use test_support::{
-    G3RsFmtCargoState, G3RsFmtRustPolicyState, G3RsFmtToolchainState, G3RsFmtWaiver,
-    parsed_rustfmt, rustfmt_input,
+    G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState,
+    G3RsFmtToolchainState, G3RsFmtWaiver,
 };
 
 use super::super::check;
 
 pub(super) fn run_check(rustfmt_toml: &str, waivers: Vec<G3RsFmtWaiver>) -> Vec<G3CheckResult> {
-    let input = rustfmt_input(
-        parsed_rustfmt(rustfmt_toml),
-        G3RsFmtCargoState::Missing,
-        G3RsFmtToolchainState::Missing,
-        G3RsFmtRustPolicyState::Parsed {
+    let input = G3RsFmtConfigChecksInput {
+        rustfmt_rel_path: "rustfmt.toml".to_owned(),
+        rustfmt_state: G3RsFmtRustfmtConfigState::Parsed(
+            parse_rustfmt_toml(rustfmt_toml).expect("rustfmt fixture should parse"),
+        ),
+        rustfmt_explicit_keys: Vec::new(),
+        cargo_rel_path: "Cargo.toml".to_owned(),
+        cargo_state: G3RsFmtCargoState::Missing,
+        toolchain_rel_path: "rust-toolchain.toml".to_owned(),
+        toolchain_state: G3RsFmtToolchainState::Missing,
+        rust_policy: G3RsFmtRustPolicyState::Parsed {
             rel_path: "guardrail3-rs.toml".to_owned(),
             waivers,
         },
-    );
+    };
     let mut results = Vec::new();
     check(&input, &mut results);
     results
