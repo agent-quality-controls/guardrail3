@@ -57,6 +57,7 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
         input.file.assertions_package_name.as_deref(),
         input.proof_bearing_assertion_functions,
     );
+    let imported_local_helpers = imported_local_helper_names(&input.file.parsed.imports);
 
     input.function.body.call_paths.iter().any(|path| {
         if path.len() == 1 {
@@ -69,7 +70,13 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
                 .get(&path[0])
                 .and_then(|alias| alias.last())
                 .is_some_and(|name| local_assertion_helpers.contains(name.as_str()));
-            return direct_local_helper || aliased_local_helper;
+            let imported_local_helper = !input.function.body.shadowed_idents.contains(&path[0])
+                && import_alias_targets_local_helper(
+                    &path[0],
+                    &local_assertion_helpers,
+                    &imported_local_helpers,
+                );
+            return direct_local_helper || aliased_local_helper || imported_local_helper;
         }
         if path_is_qualified_owned_assertion_call(
             path,
@@ -104,6 +111,7 @@ fn local_assertion_helper_names<'a>(
     assertions_package_name: Option<&str>,
     proof_bearing_assertion_functions: Option<&std::collections::BTreeSet<String>>,
 ) -> std::collections::BTreeSet<&'a str> {
+    let imported_local_helpers = imported_local_helper_names(imports);
     let mut assertion_helpers = functions
         .iter()
         .filter(|function| !function.is_test)
@@ -136,6 +144,13 @@ fn local_assertion_helper_names<'a>(
                 (path.len() == 1
                     && assertion_helpers.contains(path[0].as_str())
                     && !function.body.shadowed_idents.contains(&path[0]))
+                    || (path.len() == 1
+                        && !function.body.shadowed_idents.contains(&path[0])
+                        && import_alias_targets_local_helper(
+                            &path[0],
+                            &assertion_helpers,
+                            &imported_local_helpers,
+                        ))
                     || (path.len() > 1
                         && matches!(
                             path.first().map(String::as_str),
@@ -165,6 +180,55 @@ fn import_binds_name(imports: &[UseBinding], name: &str) -> bool {
                     .last()
                     .is_some_and(|segment| segment == name))
         })
+}
+
+fn imported_local_helper_names(
+    imports: &[UseBinding],
+) -> std::collections::BTreeMap<String, Vec<String>> {
+    let mut imported_local_helpers = std::collections::BTreeMap::new();
+
+    for binding in imports {
+        let Some(local_name) = binding.local_name.as_ref().or_else(|| binding.path_segments.last())
+        else {
+            continue;
+        };
+        let _ = imported_local_helpers.insert(local_name.clone(), binding.path_segments.clone());
+    }
+
+    imported_local_helpers
+}
+
+fn import_alias_targets_local_helper(
+    name: &str,
+    local_helpers: &std::collections::BTreeSet<&str>,
+    imported_local_helpers: &std::collections::BTreeMap<String, Vec<String>>,
+) -> bool {
+    let mut current = name;
+    let mut seen = std::collections::BTreeSet::new();
+
+    loop {
+        if local_helpers.contains(current) {
+            return true;
+        }
+        if !seen.insert(current.to_owned()) {
+            return false;
+        }
+        let Some(target) = imported_local_helpers.get(current) else {
+            return false;
+        };
+        if target
+            .first()
+            .is_some_and(|segment| matches!(segment.as_str(), "crate" | "self" | "super"))
+        {
+            return target
+                .last()
+                .is_some_and(|name| local_helpers.contains(name.as_str()));
+        }
+        let Some(next) = target.last() else {
+            return false;
+        };
+        current = next;
+    }
 }
 
 fn qualified_owned_assertion_call(
