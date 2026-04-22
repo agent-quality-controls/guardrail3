@@ -1,11 +1,7 @@
 use proc_macro2::Span;
 use syn::spanned::Spanned;
 
-use g3rs_arch_types::types::{
-    G3RsArchCrateNode, G3RsArchFacadeItem, G3RsArchFacadeSurface, G3RsArchFeatureExport,
-    G3RsArchLibFacadeChecksInput, G3RsArchPathAttrSite, G3RsArchSourceChecksInput,
-    G3RsArchSourceCrate,
-};
+use g3rs_arch_types::types as arch_types;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::error::G3RsArchIngestionError;
@@ -16,13 +12,13 @@ use crate::workspace::{
 
 pub(crate) fn ingest_for_source_checks(
     crawl: &G3RsWorkspaceCrawl,
-) -> Result<Vec<G3RsArchSourceChecksInput>, G3RsArchIngestionError> {
+) -> Result<Vec<arch_types::G3RsArchSourceChecksInput>, G3RsArchIngestionError> {
     let view = CrawlView::new(crawl);
     let crate_nodes = collect_crate_nodes(&view)?;
     let facade_surfaces = collect_facade_surfaces(&view, &crate_nodes);
     let path_attr_sites = collect_path_attr_sites(&view, &crate_nodes)?;
 
-    Ok(vec![G3RsArchSourceChecksInput {
+    Ok(vec![arch_types::G3RsArchSourceChecksInput {
         lib_facade_checks: collect_lib_facade_checks(&crate_nodes, &facade_surfaces),
         mod_facade_surfaces: facade_surfaces
             .into_iter()
@@ -32,10 +28,12 @@ pub(crate) fn ingest_for_source_checks(
     }])
 }
 
-fn collect_source_crates(crate_nodes: &[G3RsArchCrateNode]) -> Vec<G3RsArchSourceCrate> {
+fn collect_source_crates(
+    crate_nodes: &[arch_types::G3RsArchCrateNode],
+) -> Vec<arch_types::G3RsArchSourceCrate> {
     crate_nodes
         .iter()
-        .map(|node| G3RsArchSourceCrate {
+        .map(|node| arch_types::G3RsArchSourceCrate {
             rel_dir: node.rel_dir.clone(),
             lib_rs_rel: node.lib_rs_rel.clone(),
         })
@@ -43,9 +41,9 @@ fn collect_source_crates(crate_nodes: &[G3RsArchCrateNode]) -> Vec<G3RsArchSourc
 }
 
 fn collect_lib_facade_checks(
-    crate_nodes: &[G3RsArchCrateNode],
-    facade_surfaces: &[G3RsArchFacadeSurface],
-) -> Vec<G3RsArchLibFacadeChecksInput> {
+    crate_nodes: &[arch_types::G3RsArchCrateNode],
+    facade_surfaces: &[arch_types::G3RsArchFacadeSurface],
+) -> Vec<arch_types::G3RsArchLibFacadeChecksInput> {
     let facade_map = facade_surfaces
         .iter()
         .map(|surface| (surface.rel_path.as_str(), surface))
@@ -53,7 +51,7 @@ fn collect_lib_facade_checks(
 
     collect_source_crates(crate_nodes)
         .into_iter()
-        .map(|krate| G3RsArchLibFacadeChecksInput {
+        .map(|krate| arch_types::G3RsArchLibFacadeChecksInput {
             lib_surface: krate
                 .lib_rs_rel
                 .as_deref()
@@ -65,8 +63,8 @@ fn collect_lib_facade_checks(
 
 pub(crate) fn collect_facade_surfaces(
     view: &CrawlView<'_>,
-    crate_nodes: &[G3RsArchCrateNode],
-) -> Vec<G3RsArchFacadeSurface> {
+    crate_nodes: &[arch_types::G3RsArchCrateNode],
+) -> Vec<arch_types::G3RsArchFacadeSurface> {
     let mut surfaces = Vec::new();
     let crate_dirs = crate_nodes
         .iter()
@@ -99,7 +97,7 @@ fn collect_mod_rs_recursive(
     root_dir: &str,
     dir: &str,
     crate_dirs: &[&str],
-    surfaces: &mut Vec<G3RsArchFacadeSurface>,
+    surfaces: &mut Vec<arch_types::G3RsArchFacadeSurface>,
 ) {
     let Some(entry) = view.dir_contents(dir) else {
         return;
@@ -124,7 +122,7 @@ fn analyze_facade(
     rel_path: &str,
     is_lib_rs: bool,
     is_mod_rs: bool,
-) -> Option<G3RsArchFacadeSurface> {
+) -> Option<arch_types::G3RsArchFacadeSurface> {
     let content = view.read_file(rel_path).ok()?;
     let ast = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(&content)).ok()?;
 
@@ -142,7 +140,7 @@ fn analyze_facade(
             syn::Item::Mod(module) => {
                 if is_pub(&module.vis) {
                     if module.content.is_some() {
-                        body_items.push(G3RsArchFacadeItem {
+                        body_items.push(arch_types::G3RsArchFacadeItem {
                             line: span_line(module.span()),
                             kind: "inline module",
                             name: module.ident.to_string(),
@@ -151,7 +149,7 @@ fn analyze_facade(
                             gated_on_all,
                         });
                     } else {
-                        pub_exports.push(G3RsArchFeatureExport {
+                        pub_exports.push(arch_types::G3RsArchFeatureExport {
                             line: span_line(module.span()),
                             name: module.ident.to_string(),
                             feature_gate: feature_gate.clone(),
@@ -165,7 +163,7 @@ fn analyze_facade(
                         }
                     }
                 } else if module.content.is_some() {
-                    body_items.push(G3RsArchFacadeItem {
+                    body_items.push(arch_types::G3RsArchFacadeItem {
                         line: span_line(module.span()),
                         kind: "inline module",
                         name: module.ident.to_string(),
@@ -178,7 +176,7 @@ fn analyze_facade(
             syn::Item::Use(item_use) => {
                 if is_pub(&item_use.vis) {
                     let is_broad = is_broad_reexport(&item_use.tree);
-                    let item = G3RsArchFacadeItem {
+                    let item = arch_types::G3RsArchFacadeItem {
                         line: span_line(item_use.span()),
                         kind: "pub use",
                         name: use_tree_name(&item_use.tree),
@@ -189,7 +187,7 @@ fn analyze_facade(
                     if is_broad {
                         broad_reexports.push(item.clone());
                     }
-                    pub_exports.push(G3RsArchFeatureExport {
+                    pub_exports.push(arch_types::G3RsArchFeatureExport {
                         line: item.line,
                         name: item.name.clone(),
                         feature_gate: feature_gate.clone(),
@@ -251,7 +249,7 @@ fn analyze_facade(
         }
     }
 
-    Some(G3RsArchFacadeSurface {
+    Some(arch_types::G3RsArchFacadeSurface {
         rel_path: rel_path.to_owned(),
         is_lib_rs,
         is_mod_rs,
@@ -270,8 +268,8 @@ fn simple_item(
     name: String,
     feature_gate: Option<String>,
     gated_on_all: bool,
-) -> G3RsArchFacadeItem {
-    G3RsArchFacadeItem {
+) -> arch_types::G3RsArchFacadeItem {
+    arch_types::G3RsArchFacadeItem {
         line: span_line(span),
         kind,
         name,
@@ -283,8 +281,8 @@ fn simple_item(
 
 fn collect_path_attr_sites(
     view: &CrawlView<'_>,
-    crate_nodes: &[G3RsArchCrateNode],
-) -> Result<Vec<G3RsArchPathAttrSite>, G3RsArchIngestionError> {
+    crate_nodes: &[arch_types::G3RsArchCrateNode],
+) -> Result<Vec<arch_types::G3RsArchPathAttrSite>, G3RsArchIngestionError> {
     let mut rel_paths = Vec::new();
     let crate_dirs = crate_nodes
         .iter()
@@ -329,7 +327,10 @@ fn collect_path_attr_sites(
         .map(|sites| sites.into_iter().flatten().collect())
 }
 
-fn collect_file_path_attr_sites(rel_path: &str, content: &str) -> Vec<G3RsArchPathAttrSite> {
+fn collect_file_path_attr_sites(
+    rel_path: &str,
+    content: &str,
+) -> Vec<arch_types::G3RsArchPathAttrSite> {
     let Ok(ast) = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content)) else {
         return Vec::new();
     };
@@ -341,7 +342,7 @@ fn collect_file_path_attr_sites(rel_path: &str, content: &str) -> Vec<G3RsArchPa
                 return None;
             };
             let path_attr = module.attrs.iter().find(|attr| attr.path().is_ident("path"))?;
-            Some(G3RsArchPathAttrSite {
+            Some(arch_types::G3RsArchPathAttrSite {
                 rel_path: rel_path.to_owned(),
                 line: span_line(path_attr.span()),
                 module_name: module.ident.to_string(),
