@@ -34,7 +34,10 @@ readme = "README.md"
 internal = { path = "../internal", version = "0.1.0" }
 "#,
     );
-    write(root.join("crates/public/src/lib.rs"), "pub fn public() {}\n");
+    write(
+        root.join("crates/public/src/lib.rs"),
+        "pub fn public() {}\n",
+    );
     write(root.join("crates/public/README.md"), "# Public\n\ncrate\n");
 
     write(
@@ -47,7 +50,10 @@ edition = "2024"
 publish = false
 "#,
     );
-    write(root.join("crates/internal/src/lib.rs"), "pub fn internal() {}\n");
+    write(
+        root.join("crates/internal/src/lib.rs"),
+        "pub fn internal() {}\n",
+    );
 
     write(
         root.join("crates/cli/Cargo.toml"),
@@ -162,7 +168,10 @@ readme = "README.md"
 tooling = { path = "../../../vendor/tooling", version = "0.1.0" }
 "#,
     );
-    write(root.join("crates/public/src/lib.rs"), "pub fn public() {}\n");
+    write(
+        root.join("crates/public/src/lib.rs"),
+        "pub fn public() {}\n",
+    );
     write(root.join("crates/public/README.md"), "# Public\n\ncrate\n");
 
     let crawl = crawl(root);

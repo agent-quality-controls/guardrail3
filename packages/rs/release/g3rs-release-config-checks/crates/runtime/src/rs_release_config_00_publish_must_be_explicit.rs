@@ -22,7 +22,8 @@ pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckRes
 }
 
 #[cfg(test)]
-#[path = "rs_release_config_00_publish_must_be_explicit_tests/mod.rs"] // reason: owned sidecar tests for file module.
+#[path = "rs_release_config_00_publish_must_be_explicit_tests/mod.rs"]
+// reason: owned sidecar tests for file module.
 mod rs_release_config_00_publish_must_be_explicit_tests;
 
 #[cfg(test)]
@@ -30,8 +31,9 @@ pub(crate) fn run_check(
     cargo_toml: &str,
     workspace_cargo_toml: Option<&str>,
 ) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let input = crate::lib_tests::test_support::config_input_for_crate(cargo_toml, workspace_cargo_toml);
+    let input =
+        crate::lib_tests::test_support::config_input_for_crate(cargo_toml, workspace_cargo_toml);
     let mut results = Vec::new();
-    check(&input.crates[0], &mut results);
+    check(&input.crate_checks[0], &mut results);
     results
 }

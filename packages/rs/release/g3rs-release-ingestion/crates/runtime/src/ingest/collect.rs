@@ -7,8 +7,8 @@ use g3rs_release_ingestion_types::G3RsReleaseIngestionError as IngestionError;
 use g3rs_release_types as release_types;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
-use crate::workflow::WorkflowAnalysis;
 use super::{crate_base, deps, paths, repo, root};
+use crate::workflow::WorkflowAnalysis;
 
 #[derive(Debug, Clone)]
 pub(super) struct CollectedRelease {
@@ -83,7 +83,9 @@ pub(crate) fn config_result(
     Ok(config_input(crawl))
 }
 
-pub(super) fn config_input(crawl: &G3RsWorkspaceCrawl) -> release_types::G3RsReleaseConfigChecksInput {
+pub(super) fn config_input(
+    crawl: &G3RsWorkspaceCrawl,
+) -> release_types::G3RsReleaseConfigChecksInput {
     config_input_with_path(crawl, std::env::var_os("PATH").as_deref())
 }
 
@@ -101,7 +103,9 @@ pub(crate) fn source_result(
     Ok(source_input(crawl))
 }
 
-pub(super) fn source_input(crawl: &G3RsWorkspaceCrawl) -> release_types::G3RsReleaseSourceChecksInput {
+pub(super) fn source_input(
+    crawl: &G3RsWorkspaceCrawl,
+) -> release_types::G3RsReleaseSourceChecksInput {
     collect(crawl, std::env::var_os("PATH").as_deref()).source
 }
 
@@ -112,7 +116,9 @@ pub(crate) fn filetree_result(
     Ok(filetree_input(crawl))
 }
 
-pub(super) fn filetree_input(crawl: &G3RsWorkspaceCrawl) -> release_types::G3RsReleaseFileTreeChecksInput {
+pub(super) fn filetree_input(
+    crawl: &G3RsWorkspaceCrawl,
+) -> release_types::G3RsReleaseFileTreeChecksInput {
     collect(crawl, std::env::var_os("PATH").as_deref()).filetree
 }
 
@@ -386,10 +392,10 @@ pub(super) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
 
     CollectedRelease {
         config: release_types::G3RsReleaseConfigChecksInput {
-            repo: Some(repo_config),
-            crates: config_crates,
-            edges,
-            input_failures: config_failures,
+            repo_checks: vec![repo_config],
+            crate_checks: config_crates,
+            edge_checks: edges,
+            input_failure_checks: config_failures,
         },
         filetree: release_types::G3RsReleaseFileTreeChecksInput {
             repo: Some(repo_filetree),

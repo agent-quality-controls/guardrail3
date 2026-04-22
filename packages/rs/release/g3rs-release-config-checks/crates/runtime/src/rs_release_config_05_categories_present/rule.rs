@@ -42,15 +42,17 @@ pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckRes
 #[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
 mod rule_tests;
 
-
 #[cfg(test)]
 pub(crate) fn run_check(cargo_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let input = crate::lib_tests::test_support::config_input_for_publishable_crate(cargo_toml, None);
+    let input =
+        crate::lib_tests::test_support::config_input_for_publishable_crate(cargo_toml, None);
     let mut results = Vec::new();
-    crate::rs_release_config_05_categories_present::check(&input.crates[0], &mut results);
+    crate::rs_release_config_05_categories_present::check(&input.crate_checks[0], &mut results);
     results
 }
 
 #[cfg(test)]
-pub(crate) const GOLDEN: &str =
-    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/fixtures/golden_cargo.toml"));
+pub(crate) const GOLDEN: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/fixtures/golden_cargo.toml"
+));

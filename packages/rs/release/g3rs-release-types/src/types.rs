@@ -93,10 +93,10 @@ pub struct G3RsReleaseConfigRepo {
 
 #[derive(Debug, Clone)]
 pub struct G3RsReleaseConfigChecksInput {
-    pub repo: Option<G3RsReleaseConfigRepo>,
-    pub crates: Vec<G3RsReleaseConfigCrate>,
-    pub edges: Vec<G3RsReleaseConfigEdge>,
-    pub input_failures: Vec<G3RsReleaseInputFailure>,
+    pub repo_checks: Vec<G3RsReleaseConfigRepo>,
+    pub crate_checks: Vec<G3RsReleaseConfigCrate>,
+    pub edge_checks: Vec<G3RsReleaseConfigEdge>,
+    pub input_failure_checks: Vec<G3RsReleaseInputFailure>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
