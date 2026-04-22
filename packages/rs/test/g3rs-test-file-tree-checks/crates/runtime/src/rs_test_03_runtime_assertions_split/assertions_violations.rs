@@ -94,6 +94,7 @@ pub(super) fn collect_assertions_module_violations(
         if helpers::assertions_call_runtime_check_test_tree(
             &file.parsed.imports,
             &file.parsed.file_call_paths,
+            &file.parsed.functions,
             component.runtime_package_name.as_deref(),
         ) {
             violations.push(RuntimeAssertionsViolation {
