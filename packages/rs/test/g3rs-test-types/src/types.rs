@@ -71,6 +71,7 @@ pub struct G3RsTestAnalyzedSourceFile {
     pub component_rel_dir: Option<String>,
     pub assertions_package_name: Option<String>,
     pub parsed: ParsedTestFile,
+    pub local_proof_helper_functions: BTreeSet<String>,
     pub proof_bearing_exported_functions: BTreeSet<String>,
     pub proof_bearing_assertion_functions: BTreeSet<String>,
 }

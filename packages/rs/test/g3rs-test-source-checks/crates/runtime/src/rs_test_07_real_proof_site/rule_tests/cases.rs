@@ -158,6 +158,58 @@ fn reports_same_file_local_result_check_helper() {
 }
 
 #[test]
+fn reports_non_proof_named_same_file_local_result_check_helper() {
+    let results = assertions::check(&assertions::input(
+        vec![assertions::file(
+            "src/feature_tests/local.rs",
+            G3RsTestFileKind::InternalSidecarSupport,
+            Some("demo_assertions"),
+            "fn check_results() { assert_eq!(1, 1); }\n#[test]\nfn local() { check_results(); }\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-07",
+        G3Severity::Error,
+        "test checks results through local path",
+        "src/feature_tests/local.rs",
+        Some(3),
+    );
+
+    assertions::assert_message(
+        &results,
+        "RS-TEST-SOURCE-07",
+        "test checks results through local path",
+        "src/feature_tests/local.rs",
+        "Test `local` in `src/feature_tests/local.rs` checks results through local path `local function `check_results``. Move those result assertions into the shared assertions crate and call that from the test instead, so internal and external tests use the same proof.",
+    );
+}
+
+#[test]
+fn does_not_treat_non_proof_local_assertions_module_as_shared_proof() {
+    let results = assertions::check(&assertions::input(
+        vec![assertions::file(
+            "src/feature_tests/missing.rs",
+            G3RsTestFileKind::InternalSidecarSupport,
+            Some("demo_assertions"),
+            "mod assertions { pub fn setup() {} }\nuse self::assertions::setup as run;\n#[test]\nfn missing() { run(); }\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-07",
+        G3Severity::Error,
+        "test has no shared proof step",
+        "src/feature_tests/missing.rs",
+        Some(4),
+    );
+}
+
+#[test]
 fn inventories_assertion_macro_proof() {
     let results = assertions::check(&assertions::input(
         vec![assertions::file(

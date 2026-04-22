@@ -5,7 +5,6 @@ use g3rs_test_types::{
     G3RsTestAnalyzedSourceFile, G3RsTestFileKind, G3RsTestFileTreeInputFailure, G3RsTestSourceFile,
     G3RsTestSourceInputFailure,
 };
-
 pub(crate) fn analyze_source_files(
     files: Vec<G3RsTestSourceFile>,
 ) -> (
@@ -74,6 +73,7 @@ fn analyze_files(
             component_rel_dir: file.component_rel_dir,
             assertions_package_name: file.assertions_package_name,
             parsed,
+            local_proof_helper_functions: BTreeSet::new(),
             proof_bearing_exported_functions: BTreeSet::new(),
             proof_bearing_assertion_functions: BTreeSet::new(),
         });
@@ -90,6 +90,8 @@ fn analyze_files(
                 file.proof_bearing_assertion_functions = package_proofs.clone();
             }
         }
+        file.local_proof_helper_functions =
+            super::proof_helpers::collect_local_proof_helper_functions(file);
     }
 
     input_failures.sort_by(|left, right| left.0.cmp(&right.0).then_with(|| left.1.cmp(&right.1)));
@@ -98,7 +100,6 @@ fn analyze_files(
 
     (analyzed_files, input_failures)
 }
-
 fn collect_assertions_proof_catalog(
     files: &[G3RsTestAnalyzedSourceFile],
 ) -> (
@@ -322,7 +323,7 @@ fn assertions_module_prefix(rel_path: &str) -> Vec<String> {
     segments.into_iter().map(str::to_owned).collect()
 }
 
-fn qualified_assertion_name(module_prefix: &[String], function_name: &str) -> String {
+pub(super) fn qualified_assertion_name(module_prefix: &[String], function_name: &str) -> String {
     if module_prefix.is_empty() {
         function_name.to_owned()
     } else {
