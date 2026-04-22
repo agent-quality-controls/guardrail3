@@ -28,6 +28,7 @@ pub fn check(input: &G3RsTestFileTreeChecksInput) -> Vec<G3CheckResult> {
         crate::rs_test_18_test_support_generic::check(
             &crate::support::TestSupportFileInput::new(
                 file,
+                &input.files,
                 &input.local_runtime_packages,
                 &input.local_assertions_packages,
             ),

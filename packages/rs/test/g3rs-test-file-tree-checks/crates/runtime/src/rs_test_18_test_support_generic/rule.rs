@@ -56,6 +56,15 @@ fn calls_local_helper(
 pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckResult>) {
     let mut reported = false;
     let local_import_aliases = local_import_aliases(&input.file.parsed.imports);
+    let mut local_canned_helpers =
+        canned_helper_names(&input.file.parsed.functions, &local_import_aliases);
+    let mut local_semantic_helpers =
+        semantic_helper_names_owned(&input.file.parsed.functions, &local_import_aliases);
+    let (glob_canned_helpers, glob_semantic_helpers) = glob_imported_helper_names(input);
+    local_canned_helpers.extend(glob_canned_helpers);
+    local_semantic_helpers.extend(glob_semantic_helpers);
+    let local_canned_helpers = helper_name_refs(&local_canned_helpers);
+    let local_semantic_helpers = helper_name_refs(&local_semantic_helpers);
     let disallowed_packages = input
         .local_runtime_packages
         .iter()
@@ -171,25 +180,6 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
         reported = true;
     }
 
-    let local_canned_helpers = input
-        .file
-        .parsed
-        .functions
-        .iter()
-        .filter(|function| {
-            !function.is_public
-                && !function.is_test
-                && function.signature.arg_count == 0
-                && matches!(
-                    function.signature.return_kind,
-                    ReturnKind::StringLike | ReturnKind::PathLike
-                )
-        })
-        .map(|function| function.name.as_str())
-        .collect::<BTreeSet<_>>();
-    let local_semantic_helpers =
-        semantic_helper_names(&input.file.parsed.functions, &local_import_aliases);
-
     for function in input
         .file
         .parsed
@@ -201,11 +191,8 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
             path.first()
                 .is_some_and(|first| input.file.parsed.file_value_names.contains(first))
         });
-        let calls_local_canned_helper = calls_local_helper(
-            function,
-            &local_canned_helpers,
-            &local_import_aliases,
-        );
+        let calls_local_canned_helper =
+            calls_local_helper(function, &local_canned_helpers, &local_import_aliases);
 
         if matches!(
             function.signature.return_kind,
@@ -269,11 +256,8 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
                     .string_literals
                     .iter()
                     .any(|value| value.starts_with("RS-")));
-        let calls_local_semantic_helper = calls_local_helper(
-            function,
-            &local_semantic_helpers,
-            &local_import_aliases,
-        );
+        let calls_local_semantic_helper =
+            calls_local_helper(function, &local_semantic_helpers, &local_import_aliases);
         if selects_report_semantics || calls_local_semantic_helper {
             results.push(G3CheckResult::new(
                 ID.to_owned(),
@@ -305,58 +289,105 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
-fn semantic_helper_names<'a>(
-    functions: &'a [FunctionInfo],
+fn canned_helper_names(
+    functions: &[FunctionInfo],
     local_import_aliases: &BTreeMap<String, Vec<String>>,
-) -> BTreeSet<&'a str> {
-    let mut semantic_helpers =
-        functions
-            .iter()
-            .filter(|function| !function.is_public && !function.is_test)
-            .filter(|function| {
-                function.signature.has_check_result_arg
-                    && (function.signature.arg_names.contains("rule_id")
-                        || function.signature.arg_names.contains("id")
-                        || function
-                            .body
-                            .field_accesses
-                            .iter()
-                            .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
-                        || function
-                            .body
-                            .method_names
-                            .iter()
-                            .any(|method| REPORT_METHODS.contains(&method.as_str()))
-                        || function.body.path_uses.iter().any(|path| {
-                            path.last().is_some_and(|segment| segment == "CheckResult")
-                        })
-                        || function
-                            .string_literals
-                            .iter()
-                            .any(|value| value.starts_with("RS-")))
-            })
-            .map(|function| function.name.as_str())
-            .collect::<BTreeSet<_>>();
+) -> BTreeSet<String> {
+    let mut canned_helpers = functions
+        .iter()
+        .filter(|function| !function.is_test)
+        .filter(|function| {
+            function.signature.arg_count == 0
+                && matches!(
+                    function.signature.return_kind,
+                    ReturnKind::StringLike | ReturnKind::PathLike
+                )
+        })
+        .map(|function| function.name.clone())
+        .collect::<BTreeSet<_>>();
 
     loop {
         let mut changed = false;
-        for function in functions
-            .iter()
-            .filter(|function| !function.is_public && !function.is_test)
-        {
-            if semantic_helpers.contains(function.name.as_str()) {
+        for function in functions.iter().filter(|function| !function.is_test) {
+            if canned_helpers.contains(&function.name) {
                 continue;
             }
-            if function.body.call_paths.iter().any(|path| {
-                call_path_uses_local_helper(
-                    path,
-                    &semantic_helpers,
-                    &function.body.local_call_aliases,
-                    local_import_aliases,
-                    &function.body.shadowed_idents,
-                )
-            }) {
-                changed |= semantic_helpers.insert(function.name.as_str());
+            let calls_helper = {
+                let helper_refs = helper_name_refs(&canned_helpers);
+                function.body.call_paths.iter().any(|path| {
+                    call_path_uses_local_helper(
+                        path,
+                        &helper_refs,
+                        &function.body.local_call_aliases,
+                        local_import_aliases,
+                        &function.body.shadowed_idents,
+                    )
+                })
+            };
+            if calls_helper {
+                changed |= canned_helpers.insert(function.name.clone());
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    canned_helpers
+}
+
+fn semantic_helper_names_owned(
+    functions: &[FunctionInfo],
+    local_import_aliases: &BTreeMap<String, Vec<String>>,
+) -> BTreeSet<String> {
+    let mut semantic_helpers = functions
+        .iter()
+        .filter(|function| !function.is_public && !function.is_test)
+        .filter(|function| {
+            function.signature.has_check_result_arg
+                && (function.signature.arg_names.contains("rule_id")
+                    || function.signature.arg_names.contains("id")
+                    || function
+                        .body
+                        .field_accesses
+                        .iter()
+                        .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
+                    || function
+                        .body
+                        .method_names
+                        .iter()
+                        .any(|method| REPORT_METHODS.contains(&method.as_str()))
+                    || function.body.path_uses.iter().any(|path| {
+                        path.last().is_some_and(|segment| segment == "CheckResult")
+                    })
+                    || function
+                        .string_literals
+                        .iter()
+                        .any(|value| value.starts_with("RS-")))
+        })
+        .map(|function| function.name.clone())
+        .collect::<BTreeSet<_>>();
+
+    loop {
+        let mut changed = false;
+        for function in functions.iter().filter(|function| !function.is_test) {
+            if semantic_helpers.contains(&function.name) {
+                continue;
+            }
+            let calls_helper = {
+                let helper_refs = helper_name_refs(&semantic_helpers);
+                function.body.call_paths.iter().any(|path| {
+                    call_path_uses_local_helper(
+                        path,
+                        &helper_refs,
+                        &function.body.local_call_aliases,
+                        local_import_aliases,
+                        &function.body.shadowed_idents,
+                    )
+                })
+            };
+            if calls_helper {
+                changed |= semantic_helpers.insert(function.name.clone());
             }
         }
         if !changed {
@@ -365,6 +396,79 @@ fn semantic_helper_names<'a>(
     }
 
     semantic_helpers
+}
+
+fn glob_imported_helper_names(
+    input: &TestSupportFileInput<'_>,
+) -> (BTreeSet<String>, BTreeSet<String>) {
+    let mut canned_helpers = BTreeSet::new();
+    let mut semantic_helpers = BTreeSet::new();
+
+    for binding in input
+        .file
+        .parsed
+        .imports
+        .iter()
+        .filter(|binding| binding.local_name.is_none())
+    {
+        let Some(target_paths) =
+            glob_import_target_paths(&input.file.rel_path, &binding.path_segments)
+        else {
+            continue;
+        };
+        for sibling in input
+            .sibling_files
+            .iter()
+            .filter(|file| file.rel_path != input.file.rel_path)
+        {
+            if !target_paths.iter().any(|target| target == &sibling.rel_path) {
+                continue;
+            }
+            let local_import_aliases = local_import_aliases(&sibling.parsed.imports);
+            canned_helpers.extend(canned_helper_names(
+                &sibling.parsed.functions,
+                &local_import_aliases,
+            ));
+            semantic_helpers.extend(semantic_helper_names_owned(
+                &sibling.parsed.functions,
+                &local_import_aliases,
+            ));
+        }
+    }
+
+    (canned_helpers, semantic_helpers)
+}
+
+fn glob_import_target_paths(file_rel_path: &str, path_segments: &[String]) -> Option<Vec<String>> {
+    let first = path_segments.first()?;
+    let relative = path_segments.get(1..)?.join("/");
+    if relative.is_empty() {
+        return None;
+    }
+    let base_dir = match first.as_str() {
+        "self" => parent_dir(file_rel_path)?.to_owned(),
+        "super" => parent_dir(parent_dir(file_rel_path)?)?.to_owned(),
+        "crate" => package_src_root(file_rel_path)?,
+        _ => return None,
+    };
+
+    Some(vec![
+        format!("{base_dir}/{relative}.rs"),
+        format!("{base_dir}/{relative}/mod.rs"),
+    ])
+}
+
+fn package_src_root(file_rel_path: &str) -> Option<String> {
+    let (prefix, _) = file_rel_path.split_once("/src/")?;
+    Some(format!("{prefix}/src"))
+}
+
+fn parent_dir(path: &str) -> Option<&str> {
+    path.rsplit_once('/').map(|(parent, _)| parent)
+}
+
+fn helper_name_refs<'a>(names: &'a BTreeSet<String>) -> BTreeSet<&'a str> {
+    names.iter().map(String::as_str).collect()
 }
 
 fn call_path_uses_local_helper(
