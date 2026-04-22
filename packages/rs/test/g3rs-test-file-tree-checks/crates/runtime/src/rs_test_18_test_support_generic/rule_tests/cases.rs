@@ -230,6 +230,29 @@ fn reports_canned_fixture_helper() {
 }
 
 #[test]
+fn reports_canned_fixture_helper_via_local_alias() {
+    let mut files = active_files();
+    files.push(file(
+        "test_support/src/lib.rs",
+        G3RsTestFileKind::TestSupport,
+        None,
+        Some("lib"),
+        None,
+        "fn fixture_path() -> &'static str { \"fixtures/demo.json\" }\npub fn demo_fixture() -> Vec<&'static str> { let run = fixture_path; vec![run()] }\n",
+    ));
+    let results = assertions::check(&input(files, vec![active_component()]));
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-FILETREE-18",
+        G3Severity::Error,
+        "test_support exports canned fixture helper",
+        "test_support/src/lib.rs",
+        Some(2),
+    );
+}
+
+#[test]
 fn reports_semantic_finding_helper() {
     let mut files = active_files();
     files.push(file(
@@ -239,6 +262,29 @@ fn reports_semantic_finding_helper() {
         Some("lib"),
         None,
         "use guardrail3_domain_report::CheckResult;\npub fn has_rule(results: &[CheckResult], rule_id: &str) -> bool { results.iter().any(|result| result.id() == rule_id) }\n",
+    ));
+    let results = assertions::check(&input(files, vec![active_component()]));
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-FILETREE-18",
+        G3Severity::Error,
+        "test_support exports semantic finding helper",
+        "test_support/src/lib.rs",
+        Some(2),
+    );
+}
+
+#[test]
+fn reports_semantic_finding_helper_via_local_alias() {
+    let mut files = active_files();
+    files.push(file(
+        "test_support/src/lib.rs",
+        G3RsTestFileKind::TestSupport,
+        None,
+        Some("lib"),
+        None,
+        "fn has_rule(results: &[CheckResult], rule_id: &str) -> bool { results.iter().any(|result| result.id() == rule_id) }\npub fn any_rule(results: &[CheckResult], rule_id: &str) -> bool { let run = has_rule; run(results, rule_id) }\n",
     ));
     let results = assertions::check(&input(files, vec![active_component()]));
 
