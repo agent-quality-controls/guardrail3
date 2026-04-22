@@ -6,3 +6,5 @@ use guardrail3_check_types as _;
 pub mod rs_arch_08a_feature_gated_exports;
 #[cfg(feature = "checks")]
 pub mod rs_arch_09_no_path_attr;
+#[cfg(feature = "checks")]
+pub mod run;
