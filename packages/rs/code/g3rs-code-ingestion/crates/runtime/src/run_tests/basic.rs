@@ -260,6 +260,22 @@ edition = \"2024\"\n",
 }
 
 #[test]
+fn routes_parse_failures_into_source_input() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("src/lib.rs"), "pub fn broken( {}\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs =
+        crate::run::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    let input = assertions::require_source_file(&inputs, "src/lib.rs");
+    assertions::assert_source_parse_failure(input, "src/lib.rs");
+}
+
+#[test]
 fn threads_guardrail3_rs_waivers_into_source_inputs() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
@@ -332,7 +348,10 @@ name = \"demo-types\"\n\
 version = \"0.1.0\"\n\
 edition = \"2024\"\n",
     );
-    write(root.join("crates/types/src/lib.rs"), "pub struct CargoConfigToml;\n");
+    write(
+        root.join("crates/types/src/lib.rs"),
+        "pub struct CargoConfigToml;\n",
+    );
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
     let inputs =
@@ -529,14 +548,10 @@ fn ingested_inputs_drive_code_ast_checks() {
     let inputs =
         crate::run::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
-    let lib_results = g3rs_code_source_checks::check(assertions::require_source_file(
-        &inputs,
-        "src/lib.rs",
-    ));
-    let test_results = g3rs_code_source_checks::check(assertions::require_source_file(
-        &inputs,
-        "tests/smoke.rs",
-    ));
+    let lib_results =
+        g3rs_code_source_checks::check(assertions::require_source_file(&inputs, "src/lib.rs"));
+    let test_results =
+        g3rs_code_source_checks::check(assertions::require_source_file(&inputs, "tests/smoke.rs"));
 
     assertions::assert_code_ast_results(&lib_results, &test_results);
 }
@@ -656,7 +671,10 @@ fn ingests_exception_comments_from_all_supported_owned_config_filenames() {
     write(root.join("deny.toml"), "# EXCEPTION: deny\n");
     write(root.join(".deny.toml"), "# EXCEPTION: dot deny\n");
     write(root.join("rustfmt.toml"), "# EXCEPTION: rustfmt\n");
-    write(root.join("rust-toolchain.toml"), "# EXCEPTION: toolchain toml\n");
+    write(
+        root.join("rust-toolchain.toml"),
+        "# EXCEPTION: toolchain toml\n",
+    );
     write(root.join("rust-toolchain"), "# EXCEPTION: toolchain file\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");

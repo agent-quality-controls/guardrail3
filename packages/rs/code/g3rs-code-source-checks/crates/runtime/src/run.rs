@@ -2,24 +2,13 @@ use g3rs_code_types::G3RsCodeSourceChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsCodeSourceChecksInput) -> Vec<G3CheckResult> {
-    let parsed = match crate::support::parse_input(input) {
-        Ok(parsed) => parsed,
-        Err(parse_error) => {
-            let parse_failure = crate::support::parse_failure_input(input, &parse_error);
+    let rule_input = match crate::support::rule_input(input) {
+        Ok(rule_input) => rule_input,
+        Err(parse_failure) => {
             let mut results = Vec::new();
             crate::rs_code_ast_30_input_failures::check(&parse_failure, &mut results);
             return results;
         }
-    };
-    let rule_input = crate::support::CodeSourceRuleInput {
-        rel_path: &parsed.source_file.rel_path,
-        content: &parsed.source_file.content,
-        source: &parsed.source,
-        is_test: parsed.source_file.is_test,
-        is_shared_crate: input.is_shared_crate,
-        waivers: &input.waivers,
-        profile_name: parsed.source_file.profile_name.as_deref(),
-        is_library_root: parsed.source_file.is_library_root,
     };
     let mut results = Vec::new();
 
@@ -53,3 +42,7 @@ pub fn check(input: &G3RsCodeSourceChecksInput) -> Vec<G3CheckResult> {
 
     results
 }
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"]
+mod run_tests;

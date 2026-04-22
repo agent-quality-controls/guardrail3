@@ -30,13 +30,15 @@ pub(super) fn check_broken_source(
             profile_name: None,
             is_library_root: false,
         },
+        parsed_source: g3rs_code_types::G3RsCodeParsedSourceState::Invalid {
+            message: "Failed to parse Rust source file: fixture parse failure".to_owned(),
+        },
         is_shared_crate,
         waivers: Vec::new(),
     };
-    let parse_error = crate::support::parse_input(&input)
+    let parse_failure = crate::support::rule_input(&input)
         .err()
-        .expect("source fixture should fail to parse");
-    let parse_failure = crate::support::parse_failure_input(&input, &parse_error);
+        .expect("source fixture should route the prebound parse failure");
     let mut results = Vec::new();
     check(&parse_failure, &mut results);
     results

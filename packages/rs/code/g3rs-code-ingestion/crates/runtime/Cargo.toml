@@ -30,6 +30,7 @@ glob = "0.3"
 guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
 rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser", version = "0.1.0" }
 rustfmt-toml-parser = { path = "../../../../../parsers/rustfmt-toml-parser", version = "0.1.0" }
+syn = { version = "2", features = ["full"] }
 
 [dev-dependencies]
 g3rs-code-source-checks = { path = "../../../g3rs-code-source-checks", version = "0.1.0" }

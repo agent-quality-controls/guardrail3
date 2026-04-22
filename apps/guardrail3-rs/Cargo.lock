@@ -429,7 +429,6 @@ dependencies = [
  "g3rs-arch-types",
  "guardrail3-check-types",
  "proc-macro2",
- "syn",
 ]
 
 [[package]]
@@ -636,6 +635,7 @@ dependencies = [
  "guardrail3-rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
+ "syn",
 ]
 
 [[package]]
@@ -672,6 +672,7 @@ dependencies = [
  "guardrail3-rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
+ "syn",
 ]
 
 [[package]]
@@ -929,6 +930,9 @@ dependencies = [
  "g3rs-garde-types",
  "g3rs-workspace-crawl",
  "guardrail3-rs-toml-parser",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -950,9 +954,6 @@ dependencies = [
  "g3rs-garde-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -1091,6 +1092,7 @@ dependencies = [
  "guardrail3-check-types",
  "release-plz-toml-parser",
  "semver",
+ "toml",
 ]
 
 [[package]]
@@ -1142,9 +1144,7 @@ dependencies = [
  "g3rs-workspace-crawl",
  "glob",
  "release-plz-toml-parser",
- "semver",
  "serde_yaml",
- "toml",
 ]
 
 [[package]]

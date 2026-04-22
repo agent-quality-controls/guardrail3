@@ -24,8 +24,8 @@ fn write(path: impl AsRef<Path>, content: &str) {
 
 fn run_file_tree_pipeline(root: &Path) -> Vec<G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input =
-        crate::run::ingest_for_file_tree_checks(&crawl).expect("file-tree ingestion should succeed");
+    let input = crate::run::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
     g3rs_code_file_tree_checks::check(&input)
 }
 
@@ -170,12 +170,21 @@ fn pipeline_excludes_fixture_files_from_structural_caps() {
     );
     write(root.join("src/lib.rs"), "");
     for index in 0..13 {
-        write(root.join(format!("tests/fixtures/generated/dir{index}/mod.rs")), "");
+        write(
+            root.join(format!("tests/fixtures/generated/dir{index}/mod.rs")),
+            "",
+        );
     }
     for index in 0..21 {
-        write(root.join(format!("tests/fixtures/generated/file{index}.rs")), "");
+        write(
+            root.join(format!("tests/fixtures/generated/file{index}.rs")),
+            "",
+        );
     }
-    write(root.join("tests/fixtures/generated/a/b/c/d/e/f/leaf.rs"), "");
+    write(
+        root.join("tests/fixtures/generated/a/b/c/d/e/f/leaf.rs"),
+        "",
+    );
 
     let results = run_file_tree_pipeline(root);
 

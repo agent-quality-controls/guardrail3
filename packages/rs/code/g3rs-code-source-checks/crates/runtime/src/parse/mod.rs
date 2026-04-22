@@ -8,7 +8,9 @@ mod helpers;
 pub(crate) mod types;
 pub(crate) mod visitors;
 
-pub(crate) use core::{count_top_level_use_imports, parse_rust_file};
+pub(crate) use core::count_top_level_use_imports;
+#[cfg(test)]
+pub(crate) use core::parse_rust_file;
 pub(crate) use fs_visitors::{
     find_inline_std_fs_call_lines, find_std_fs_glob_import_lines, find_std_fs_import_lines,
 };

@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 
 use cargo_toml_parser::parse;
 use g3rs_code_types::{
-    G3RsCodeConfigChecksInput, G3RsCodeFileTreeChecksInput, G3RsCodeSourceChecksInput,
-    G3RsCodeStructuralCapRoot,
+    G3RsCodeConfigChecksInput, G3RsCodeFileTreeChecksInput, G3RsCodeParsedSourceState,
+    G3RsCodeSourceChecksInput, G3RsCodeStructuralCapRoot,
 };
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 
@@ -37,10 +37,12 @@ pub fn ingest_for_source_checks(
                         reason: err.to_string(),
                     }
                 })?;
+            let parsed_source = parse_rust_file(&content);
 
             Ok(crate::ingest::assemble(
                 selected.entry.path.rel_path.clone(),
                 content,
+                parsed_source,
                 selected.is_test,
                 selected.profile_name,
                 selected.is_library_root,
@@ -49,6 +51,15 @@ pub fn ingest_for_source_checks(
             ))
         })
         .collect()
+}
+
+fn parse_rust_file(content: &str) -> G3RsCodeParsedSourceState {
+    match syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content)) {
+        Ok(source) => G3RsCodeParsedSourceState::Parsed(source),
+        Err(error) => G3RsCodeParsedSourceState::Invalid {
+            message: format!("Failed to parse Rust source file: {error}"),
+        },
+    }
 }
 
 /// Ingest `code` file-tree checks input from a workspace crawl.

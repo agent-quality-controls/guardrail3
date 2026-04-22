@@ -2,13 +2,32 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use g3rs_code_ingestion_assertions::run as assertions;
+use g3rs_code_ingestion_assertions::run::{
+    assert_config_pipeline_ignores_foreign_nested_repo_findings,
+    assert_config_pipeline_reports_deny_through_full_lane,
+    assert_config_pipeline_reports_exact_exception_comment_counts,
+    assert_config_pipeline_reports_exception_comments_and_unsafe_code_lints,
+    assert_config_pipeline_stays_clean_for_harmless_comments_and_non_workspace_manifests,
+    assert_pipeline_classifies_custom_target_paths_before_checks_run,
+    assert_pipeline_emits_explicit_input_failure_for_parse_error,
+    assert_pipeline_keeps_other_findings_when_one_file_fails_to_parse,
+    assert_pipeline_preserves_current_test_owned_rule_behavior,
+    assert_pipeline_reports_effective_line_and_dispatch_boundaries,
+    assert_pipeline_reports_expected_findings_on_real_source_files,
+    assert_pipeline_reports_include_str_traversal,
+    assert_pipeline_reports_new_single_file_ast_rules,
+    assert_pipeline_reports_trait_and_public_error_boundaries,
+};
+use g3rs_code_ingestion_assertions::run::{
+    assert_single_parse_failed_error, assert_single_unreadable_error,
+};
 use g3rs_code_types::G3RsCodeSourceChecksInput;
 use guardrail3_check_types::G3CheckResult;
 use tempfile::tempdir;
 
 const HAS_TODO: &str = "pub fn run() {\n    todo!(\"finish this\");\n}\n";
-const DIRECT_STD_FS: &str = "pub fn load() {\n    let _ = std::fs::read_to_string(\"/tmp/demo\");\n}\n";
+const DIRECT_STD_FS: &str =
+    "pub fn load() {\n    let _ = std::fs::read_to_string(\"/tmp/demo\");\n}\n";
 const CLEAN_FILE: &str = "pub fn clean() {\n    let value = 1 + 1;\n    let _ = value;\n}\n";
 const COMMENT_USE_STD_FS: &str = "// use std::fs::read_to_string in docs only\npub fn clean() {}\n";
 const STRING_TODO: &str = "pub fn clean() {\n    let _ = \"TODO: literal only\";\n}\n";
@@ -64,7 +83,7 @@ fn pipeline_reports_expected_findings_on_real_source_files() {
     write(root.join("src/clean_file.rs"), CLEAN_FILE);
 
     let results = run_pipeline(root);
-    assertions::assert_pipeline_reports_expected_findings_on_real_source_files(&results);
+    assert_pipeline_reports_expected_findings_on_real_source_files(&results);
 }
 
 #[test]
@@ -94,7 +113,7 @@ unsafe_code = \"forbid\"\n\
     );
 
     let results = run_config_pipeline(root);
-    assertions::assert_config_pipeline_reports_exception_comments_and_unsafe_code_lints(&results);
+    assert_config_pipeline_reports_exception_comments_and_unsafe_code_lints(&results);
 }
 
 #[test]
@@ -130,9 +149,7 @@ edition = \"2024\"\n\
     );
 
     let results = run_config_pipeline(root);
-    assertions::assert_config_pipeline_stays_clean_for_harmless_comments_and_non_workspace_manifests(
-        &results,
-    );
+    assert_config_pipeline_stays_clean_for_harmless_comments_and_non_workspace_manifests(&results);
 }
 
 #[test]
@@ -151,13 +168,10 @@ edition = \"2024\"\n\
 # EXCEPTION: one\n\
 # EXCEPTION: two\n",
     );
-    write(
-        root.join("deny.toml"),
-        "# EXCEPTION: three\n",
-    );
+    write(root.join("deny.toml"), "# EXCEPTION: three\n");
 
     let results = run_config_pipeline(root);
-    assertions::assert_config_pipeline_reports_exact_exception_comment_counts(&results);
+    assert_config_pipeline_reports_exact_exception_comment_counts(&results);
 }
 
 #[test]
@@ -196,7 +210,7 @@ unsafe_code = \"deny\"\n\
     );
 
     let results = run_config_pipeline(root);
-    assertions::assert_config_pipeline_ignores_foreign_nested_repo_findings(&results);
+    assert_config_pipeline_ignores_foreign_nested_repo_findings(&results);
 }
 
 #[test]
@@ -216,7 +230,7 @@ unsafe_code = \"deny\"\n",
     );
 
     let results = run_config_pipeline(root);
-    assertions::assert_config_pipeline_reports_deny_through_full_lane(&results);
+    assert_config_pipeline_reports_deny_through_full_lane(&results);
 }
 
 #[test]
@@ -250,7 +264,7 @@ fn config_ingestion_fails_closed_for_malformed_owned_root_cargo() {
     let error = crate::run::ingest_for_config_checks(&crawl)
         .expect_err("malformed owned root cargo should fail config ingestion");
 
-    assertions::assert_single_parse_failed_error(&error);
+    assert_single_parse_failed_error(&error);
 }
 
 #[cfg(unix)]
@@ -279,7 +293,7 @@ fn config_ingestion_fails_closed_for_unreadable_owned_config_file() {
     let error = crate::run::ingest_for_config_checks(&crawl)
         .expect_err("unreadable owned config should fail config ingestion");
 
-    assertions::assert_single_unreadable_error(&error);
+    assert_single_unreadable_error(&error);
 }
 
 #[test]
@@ -481,7 +495,7 @@ fn pipeline_reports_new_single_file_ast_rules() {
     );
 
     let results = run_pipeline(root);
-    assertions::assert_pipeline_reports_new_single_file_ast_rules(&results);
+    assert_pipeline_reports_new_single_file_ast_rules(&results);
 }
 
 #[test]
@@ -508,7 +522,7 @@ fn pipeline_reports_effective_line_and_dispatch_boundaries() {
     );
 
     let results = run_pipeline(root);
-    assertions::assert_pipeline_reports_effective_line_and_dispatch_boundaries(&results);
+    assert_pipeline_reports_effective_line_and_dispatch_boundaries(&results);
 }
 
 #[test]
@@ -559,7 +573,7 @@ fn pipeline_reports_trait_and_public_error_boundaries() {
     );
 
     let results = run_pipeline(root);
-    assertions::assert_pipeline_reports_trait_and_public_error_boundaries(&results);
+    assert_pipeline_reports_trait_and_public_error_boundaries(&results);
 }
 
 #[test]
@@ -574,7 +588,7 @@ fn pipeline_reports_include_str_traversal() {
     );
 
     let results = run_pipeline(root);
-    assertions::assert_pipeline_reports_include_str_traversal(&results);
+    assert_pipeline_reports_include_str_traversal(&results);
 }
 
 #[test]
@@ -610,7 +624,7 @@ fn pipeline_preserves_current_test_owned_rule_behavior() {
     );
 
     let results = run_pipeline(root);
-    assertions::assert_pipeline_preserves_current_test_owned_rule_behavior(&results);
+    assert_pipeline_preserves_current_test_owned_rule_behavior(&results);
 }
 
 #[test]
@@ -622,7 +636,7 @@ fn pipeline_emits_explicit_input_failure_for_parse_error() {
     write(root.join("src/broken.rs"), "fn broken( {");
 
     let results = run_pipeline(root);
-    assertions::assert_pipeline_emits_explicit_input_failure_for_parse_error(&results);
+    assert_pipeline_emits_explicit_input_failure_for_parse_error(&results);
 }
 
 #[test]
@@ -653,7 +667,7 @@ fn pipeline_keeps_other_findings_when_one_file_fails_to_parse() {
     write(root.join("src/has_todo.rs"), HAS_TODO);
 
     let results = run_pipeline(root);
-    assertions::assert_pipeline_keeps_other_findings_when_one_file_fails_to_parse(&results);
+    assert_pipeline_keeps_other_findings_when_one_file_fails_to_parse(&results);
 }
 
 #[test]
@@ -687,5 +701,5 @@ path = \"cmd/worker.rs\"\n",
     );
 
     let results = run_pipeline(root);
-    assertions::assert_pipeline_classifies_custom_target_paths_before_checks_run(&results);
+    assert_pipeline_classifies_custom_target_paths_before_checks_run(&results);
 }

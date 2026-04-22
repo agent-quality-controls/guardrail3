@@ -4,6 +4,7 @@ use deny_toml_parser::types::DenyToml;
 use guardrail3_rs_toml_parser::types::Guardrail3RsToml;
 use rust_toolchain_toml_parser::types::RustToolchainToml;
 use rustfmt_toml_parser::types::RustfmtToml;
+use syn::File;
 
 #[derive(Debug, Clone)]
 pub enum G3RsCodeConfigFileKind {
@@ -43,9 +44,16 @@ pub struct G3RsSourceFile {
     pub is_library_root: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
+pub enum G3RsCodeParsedSourceState {
+    Parsed(File),
+    Invalid { message: String },
+}
+
+#[derive(Debug, Clone)]
 pub struct G3RsCodeSourceChecksInput {
     pub source_file: G3RsSourceFile,
+    pub parsed_source: G3RsCodeParsedSourceState,
     pub is_shared_crate: bool,
     pub waivers: Vec<G3RsCodeWaiver>,
 }
