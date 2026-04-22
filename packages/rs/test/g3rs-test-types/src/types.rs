@@ -218,9 +218,12 @@ pub mod ast {
 pub struct G3RsTestFileTreeChecksInput {
     pub root_rel_dir: String,
     pub cargo_rel_path: String,
-    pub files: Vec<G3RsTestSourceFile>,
+    pub files: Vec<G3RsTestAnalyzedSourceFile>,
     pub components: Vec<G3RsTestComponentFileTreeFacts>,
+    pub has_tests: bool,
     pub local_package_names: BTreeSet<String>,
+    pub local_runtime_packages: BTreeSet<String>,
+    pub local_assertions_packages: BTreeSet<String>,
     pub input_failures: Vec<G3RsTestFileTreeInputFailure>,
 }
 

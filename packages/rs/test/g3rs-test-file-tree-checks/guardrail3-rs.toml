@@ -1,10 +1,9 @@
 profile = "library"
 
 allowed_deps = [
+  "g3rs-test-ingestion-runtime",
   "g3rs-test-types",
   "guardrail3-check-types",
-  "proc-macro2",
-  "syn",
 ]
 
 [[waivers]]

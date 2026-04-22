@@ -162,6 +162,142 @@ fn ingest_for_file_tree_checks_records_nested_assertions_manifest_path() {
 }
 
 #[test]
+fn ingest_for_file_tree_checks_keeps_valid_analyzed_files_when_one_source_file_fails_to_parse() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\nresolver = \"2\"\n",
+    );
+    write(
+        root.join("crates/runtime/Cargo.toml"),
+        "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
+    );
+    write(
+        root.join("crates/runtime/src/lib.rs"),
+        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n",
+    );
+    write(
+        root.join("crates/runtime/src/lib_tests/mod.rs"),
+        "#[test]\nfn owned() { assert!(true); }\n",
+    );
+    write(
+        root.join("crates/runtime/src/broken.rs"),
+        "pub fn broken( -> u8 { 1 }\n",
+    );
+    write(
+        root.join("crates/assertions/Cargo.toml"),
+        "[package]\nname = \"demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
+    );
+    write(
+        root.join("crates/assertions/src/lib.rs"),
+        "pub fn assert_runtime() {}\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
+
+    assert_eq!(inputs.len(), 1, "{inputs:#?}");
+    let input = &inputs[0];
+    assert!(input.has_tests, "{input:#?}");
+    assert!(
+        input
+            .files
+            .iter()
+            .any(|file| file.rel_path == "crates/runtime/src/lib.rs")
+    );
+    assert!(
+        input
+            .files
+            .iter()
+            .any(|file| file.rel_path == "crates/runtime/src/lib_tests/mod.rs")
+    );
+    assert!(
+        !input
+            .files
+            .iter()
+            .any(|file| file.rel_path == "crates/runtime/src/broken.rs")
+    );
+    let rendered_failures = input
+        .input_failures
+        .iter()
+        .map(|failure| format!("{failure:?}"))
+        .collect::<Vec<_>>();
+    assert!(rendered_failures.iter().any(|failure| {
+        failure.contains("crates/runtime/src/broken.rs")
+            && failure.contains("Failed to parse Rust source file for test-family file-tree analysis")
+    }));
+}
+
+#[test]
+fn ingest_for_file_tree_checks_preserves_calls_inside_macro_arguments() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\nresolver = \"2\"\n",
+    );
+    write(
+        root.join("crates/runtime/Cargo.toml"),
+        "[package]\nname = \"demo-runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\ntest_support = { path = \"../../test_support\" }\n",
+    );
+    write(
+        root.join("crates/runtime/src/lib.rs"),
+        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n",
+    );
+    write(
+        root.join("crates/runtime/src/lib_tests/mod.rs"),
+        "#[test]\nfn owned() { assert!(true); }\n",
+    );
+    write(
+        root.join("crates/assertions/Cargo.toml"),
+        "[package]\nname = \"demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
+    );
+    write(
+        root.join("crates/assertions/src/lib.rs"),
+        "pub fn assert_runtime() {}\n",
+    );
+    write(
+        root.join("test_support/Cargo.toml"),
+        "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(
+        root.join("test_support/src/lib.rs"),
+        "fn fixture_path() -> &'static str { \"fixtures/demo.json\" }\npub fn demo_fixture() -> Vec<&'static str> { vec![fixture_path()] }\n",
+    );
+
+    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
+
+    let file = inputs[0]
+        .files
+        .iter()
+        .find(|file| file.rel_path == "test_support/src/lib.rs")
+        .expect("test_support analyzed file should exist");
+    let function = file
+        .parsed
+        .functions
+        .iter()
+        .find(|function| function.name == "demo_fixture")
+        .expect("demo_fixture should be analyzed");
+
+    assert!(
+        function
+            .body
+            .call_paths
+            .iter()
+            .any(|path| path == &["fixture_path".to_owned()]),
+        "{function:#?}"
+    );
+}
+
+#[test]
 fn file_tree_pipeline_reports_structural_test_findings() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

@@ -1,4 +1,3 @@
-mod parse;
 mod rs_test_02_owned_sidecar_shape;
 mod rs_test_03_runtime_assertions_split;
 mod rs_test_10_input_failures;

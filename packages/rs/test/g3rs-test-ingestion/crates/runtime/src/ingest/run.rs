@@ -108,19 +108,14 @@ pub fn ingest_for_file_tree_checks(
                 crate::components::collect_local_package_names(crawl, root);
             input_failures.append(&mut file_failures);
             input_failures.append(&mut package_failures);
-            input_failures.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
-            input_failures.dedup_by(|left, right| {
-                left.rel_path == right.rel_path && left.message == right.message
-            });
-
-            Ok(G3RsTestFileTreeChecksInput {
-                root_rel_dir: root.root_rel_dir.clone(),
-                cargo_rel_path: root.cargo_rel_path.clone(),
+            Ok(crate::file_tree_analysis::build_file_tree_checks_input(
+                root.root_rel_dir.clone(),
+                root.cargo_rel_path.clone(),
                 files,
-                components: crate::components::public_file_tree_component_facts(&components),
+                crate::components::public_file_tree_component_facts(&components),
                 local_package_names,
                 input_failures,
-            })
+            ))
         })
         .collect()
 }

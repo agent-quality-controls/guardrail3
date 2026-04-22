@@ -2,7 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use g3rs_test_types::ast::{FunctionInfo, UseBinding};
 use g3rs_test_types::{
-    G3RsTestAnalyzedSourceFile, G3RsTestFileKind, G3RsTestSourceFile, G3RsTestSourceInputFailure,
+    G3RsTestAnalyzedSourceFile, G3RsTestFileKind, G3RsTestFileTreeInputFailure, G3RsTestSourceFile,
+    G3RsTestSourceInputFailure,
 };
 
 pub(crate) fn analyze_source_files(
@@ -11,6 +12,46 @@ pub(crate) fn analyze_source_files(
     Vec<G3RsTestAnalyzedSourceFile>,
     Vec<G3RsTestSourceInputFailure>,
 ) {
+    let (analyzed_files, input_failures) = analyze_files(files, "source analysis");
+    (
+        analyzed_files,
+        input_failures
+            .into_iter()
+            .map(|(rel_path, message)| G3RsTestSourceInputFailure { rel_path, message })
+            .collect(),
+    )
+}
+
+pub(crate) fn analyze_file_tree_files(
+    files: Vec<G3RsTestSourceFile>,
+) -> (
+    Vec<G3RsTestAnalyzedSourceFile>,
+    Vec<G3RsTestFileTreeInputFailure>,
+) {
+    let (analyzed_files, input_failures) = analyze_files(files, "file-tree analysis");
+    (
+        analyzed_files,
+        input_failures
+            .into_iter()
+            .map(|(rel_path, message)| G3RsTestFileTreeInputFailure { rel_path, message })
+            .collect(),
+    )
+}
+
+pub(crate) fn file_activates_test_rules(file: &G3RsTestAnalyzedSourceFile) -> bool {
+    matches!(
+        file.kind,
+        G3RsTestFileKind::InternalSidecarMod
+            | G3RsTestFileKind::InternalSidecarSupport
+            | G3RsTestFileKind::ExternalHarness
+    ) || !file.parsed.test_functions.is_empty()
+        || !file.parsed.cfg_test_modules.is_empty()
+}
+
+fn analyze_files(
+    files: Vec<G3RsTestSourceFile>,
+    context: &str,
+) -> (Vec<G3RsTestAnalyzedSourceFile>, Vec<(String, String)>) {
     let mut analyzed_files = Vec::new();
     let mut input_failures = Vec::new();
 
@@ -18,12 +59,10 @@ pub(crate) fn analyze_source_files(
         let source = match crate::parse::parse_rust_file(&file.content) {
             Ok(source) => source,
             Err(err) => {
-                input_failures.push(G3RsTestSourceInputFailure {
-                    rel_path: file.rel_path,
-                    message: format!(
-                        "Failed to parse Rust source file for test-family source analysis: {err}"
-                    ),
-                });
+                input_failures.push((
+                    file.rel_path,
+                    format!("Failed to parse Rust source file for test-family {context}: {err}"),
+                ));
                 continue;
             }
         };
@@ -53,9 +92,8 @@ pub(crate) fn analyze_source_files(
         }
     }
 
-    input_failures.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
-    input_failures
-        .dedup_by(|left, right| left.rel_path == right.rel_path && left.message == right.message);
+    input_failures.sort_by(|left, right| left.0.cmp(&right.0).then_with(|| left.1.cmp(&right.1)));
+    input_failures.dedup();
     analyzed_files.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
 
     (analyzed_files, input_failures)

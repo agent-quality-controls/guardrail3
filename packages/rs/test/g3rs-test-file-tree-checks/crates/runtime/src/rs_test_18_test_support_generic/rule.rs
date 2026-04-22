@@ -1,9 +1,8 @@
 use std::collections::BTreeSet;
 
-use guardrail3_check_types::{G3CheckResult, G3Severity};
-
-use crate::parse::{PublicValueKind, ReturnKind};
 use crate::support::TestSupportFileInput;
+use g3rs_test_types::ast::{FunctionInfo, PublicValueKind, ReturnKind};
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-TEST-FILETREE-18";
 const REPORT_FIELDS: &[&str] = &[
@@ -48,7 +47,7 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
         .collect::<BTreeSet<_>>();
 
     if !disallowed_packages.is_empty() {
-        for binding in &input.parsed.imports {
+        for binding in &input.file.parsed.imports {
             let Some(first) = binding.path_segments.first() else {
                 continue;
             };
@@ -70,7 +69,7 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
     }
 
     let mut reported_route_infra_imports = BTreeSet::new();
-    for binding in &input.parsed.imports {
+    for binding in &input.file.parsed.imports {
         if !path_mentions_route_construction(&binding.path_segments)
             || !reported_route_infra_imports.insert(binding.line)
         {
@@ -90,7 +89,7 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
 
     if !disallowed_packages.is_empty() {
         let mut called_packages = BTreeSet::new();
-        for call_path in &input.parsed.file_call_paths {
+        for call_path in &input.file.parsed.file_call_paths {
             let Some(first) = call_path.first() else {
                 continue;
             };
@@ -112,16 +111,18 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
     }
 
     if input
+        .file
         .parsed
         .file_call_paths
         .iter()
         .any(|call_path| path_mentions_route_construction(call_path))
         || input
+            .file
             .parsed
-        .functions
-        .iter()
-        .flat_map(|function| function.body.path_uses.iter())
-        .any(|path| path_mentions_route_construction(path))
+            .functions
+            .iter()
+            .flat_map(|function| function.body.path_uses.iter())
+            .any(|path| path_mentions_route_construction(path))
     {
         results.push(G3CheckResult::new(
             ID.to_owned(),
@@ -134,7 +135,7 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
         reported = true;
     }
 
-    for value in &input.parsed.public_values {
+    for value in &input.file.parsed.public_values {
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
@@ -154,6 +155,7 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
     }
 
     let local_canned_helpers = input
+        .file
         .parsed
         .functions
         .iter()
@@ -168,9 +170,10 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
         })
         .map(|function| function.name.as_str())
         .collect::<BTreeSet<_>>();
-    let local_semantic_helpers = semantic_helper_names(&input.parsed.functions);
+    let local_semantic_helpers = semantic_helper_names(&input.file.parsed.functions);
 
     for function in input
+        .file
         .parsed
         .functions
         .iter()
@@ -178,7 +181,7 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
     {
         let references_file_value = function.body.path_uses.iter().any(|path| {
             path.first()
-                .is_some_and(|first| input.parsed.file_value_names.contains(first))
+                .is_some_and(|first| input.file.parsed.file_value_names.contains(first))
         });
         let calls_local_canned_helper = function.body.call_paths.iter().any(|path| {
             path.len() == 1
@@ -284,36 +287,35 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
-fn semantic_helper_names<'a>(functions: &'a [crate::parse::FunctionInfo]) -> BTreeSet<&'a str> {
-    let mut semantic_helpers = functions
-        .iter()
-        .filter(|function| !function.is_public && !function.is_test)
-        .filter(|function| {
-            function.signature.has_check_result_arg
-                && (function.signature.arg_names.contains("rule_id")
-                    || function.signature.arg_names.contains("id")
-                    || function
-                        .body
-                        .field_accesses
-                        .iter()
-                        .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
-                    || function
-                        .body
-                        .method_names
-                        .iter()
-                        .any(|method| REPORT_METHODS.contains(&method.as_str()))
-                    || function
-                        .body
-                        .path_uses
-                        .iter()
-                        .any(|path| path.last().is_some_and(|segment| segment == "CheckResult"))
-                    || function
-                        .string_literals
-                        .iter()
-                        .any(|value| value.starts_with("RS-")))
-        })
-        .map(|function| function.name.as_str())
-        .collect::<BTreeSet<_>>();
+fn semantic_helper_names<'a>(functions: &'a [FunctionInfo]) -> BTreeSet<&'a str> {
+    let mut semantic_helpers =
+        functions
+            .iter()
+            .filter(|function| !function.is_public && !function.is_test)
+            .filter(|function| {
+                function.signature.has_check_result_arg
+                    && (function.signature.arg_names.contains("rule_id")
+                        || function.signature.arg_names.contains("id")
+                        || function
+                            .body
+                            .field_accesses
+                            .iter()
+                            .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
+                        || function
+                            .body
+                            .method_names
+                            .iter()
+                            .any(|method| REPORT_METHODS.contains(&method.as_str()))
+                        || function.body.path_uses.iter().any(|path| {
+                            path.last().is_some_and(|segment| segment == "CheckResult")
+                        })
+                        || function
+                            .string_literals
+                            .iter()
+                            .any(|value| value.starts_with("RS-")))
+            })
+            .map(|function| function.name.as_str())
+            .collect::<BTreeSet<_>>();
 
     loop {
         let mut changed = false;

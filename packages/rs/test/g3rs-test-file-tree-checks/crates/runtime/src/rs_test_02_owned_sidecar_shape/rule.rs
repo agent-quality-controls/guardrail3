@@ -1,10 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_test_types::G3RsTestFileTreeChecksInput;
+use g3rs_test_types::G3RsTestAnalyzedSourceFile;
 use g3rs_test_types::G3RsTestFileKind;
+use g3rs_test_types::G3RsTestFileTreeChecksInput;
+use g3rs_test_types::ast::CfgTestModuleInfo;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-
-use crate::support::AnalyzedFile;
 
 const ID: &str = "RS-TEST-FILETREE-02";
 
@@ -22,7 +22,7 @@ struct SidecarViolation {
 
 pub(crate) fn collect(
     input: &G3RsTestFileTreeChecksInput,
-    files: &[AnalyzedFile],
+    files: &[G3RsTestAnalyzedSourceFile],
     results: &mut Vec<G3CheckResult>,
 ) {
     let violations = collect_violations(input, files);
@@ -58,11 +58,11 @@ pub(crate) fn collect(
 
 fn collect_violations(
     input: &G3RsTestFileTreeChecksInput,
-    files: &[AnalyzedFile],
+    files: &[G3RsTestAnalyzedSourceFile],
 ) -> Vec<SidecarViolation> {
     let file_set = files
         .iter()
-        .map(|file| file.file.rel_path.clone())
+        .map(|file| file.rel_path.clone())
         .collect::<BTreeSet<_>>();
     let src_roots = collect_src_roots(input, files);
     let sidecar_dirs = collect_sidecar_dirs(files, &src_roots);
@@ -117,7 +117,7 @@ fn collect_violations(
 
     for file in files {
         if !matches!(
-            file.file.kind,
+            file.kind,
             G3RsTestFileKind::Source
                 | G3RsTestFileKind::InternalSidecarMod
                 | G3RsTestFileKind::InternalSidecarSupport
@@ -125,35 +125,35 @@ fn collect_violations(
             continue;
         }
 
-        if is_flat_test_sidecar(&file.file.rel_path) {
+        if is_flat_test_sidecar(&file.rel_path) {
             violations.push(SidecarViolation {
-                rel_path: file.file.rel_path.clone(),
+                rel_path: file.rel_path.clone(),
                 line: None,
                 title: "flat sidecar test file".to_owned(),
                 message: "Internal test harnesses must live in `*_tests/mod.rs`, not as flat `*_tests.rs`, `*_test.rs`, or `tests.rs` files.".to_owned(),
             });
         }
 
-        if !matches!(file.file.kind, G3RsTestFileKind::Source) {
+        if !matches!(file.kind, G3RsTestFileKind::Source) {
             continue;
         }
         for module in &file.parsed.cfg_test_modules {
-            if cfg_test_decl_is_owned_sidecar(&file.file.rel_path, module, &file_set) {
+            if cfg_test_decl_is_owned_sidecar(&file.rel_path, module, &file_set) {
                 continue;
             }
-            let expected = owned_sidecar_contract(&file.file.rel_path);
+            let expected = owned_sidecar_contract(&file.rel_path);
             violations.push(SidecarViolation {
-                rel_path: file.file.rel_path.clone(),
+                rel_path: file.rel_path.clone(),
                 line: Some(module.line),
                 title: "ad hoc cfg(test) module declaration".to_owned(),
                 message: match expected {
                     Some((module_name, path_attr)) => format!(
                         "File `{}` declares `#[cfg(test)] mod {};` without the owned sidecar declaration `#[path = \"{}\"] mod {};`. Use that exact file-owned sidecar shape, so this module's internal tests live in one sidecar directory.",
-                        file.file.rel_path, module.name, path_attr, module_name,
+                        file.rel_path, module.name, path_attr, module_name,
                     ),
                     None => format!(
                         "Facade file `{}` must not declare internal test sidecars. Move the tests onto a real sibling `x.rs` file and use `#[path = \"x_tests/mod.rs\"] mod x_tests;` there.",
-                        file.file.rel_path,
+                        file.rel_path,
                     ),
                 },
             });
@@ -171,7 +171,7 @@ fn collect_violations(
 
 fn collect_src_roots(
     input: &G3RsTestFileTreeChecksInput,
-    files: &[AnalyzedFile],
+    files: &[G3RsTestAnalyzedSourceFile],
 ) -> BTreeSet<String> {
     let mut roots = input
         .components
@@ -180,9 +180,10 @@ fn collect_src_roots(
         .collect::<BTreeSet<_>>();
 
     let root_src = join_under_root(&input.root_rel_dir, "src");
-    if files.iter().any(|file| {
-        file.file.component_rel_dir.is_none() && path_is_under(&file.file.rel_path, &root_src)
-    }) {
+    if files
+        .iter()
+        .any(|file| file.component_rel_dir.is_none() && path_is_under(&file.rel_path, &root_src))
+    {
         let _ = roots.insert(root_src);
     }
 
@@ -190,17 +191,17 @@ fn collect_src_roots(
 }
 
 fn collect_sidecar_dirs(
-    files: &[AnalyzedFile],
+    files: &[G3RsTestAnalyzedSourceFile],
     src_roots: &BTreeSet<String>,
 ) -> BTreeMap<String, String> {
     let mut dirs = BTreeMap::new();
 
     for file in files {
         for src_root in src_roots {
-            if !path_is_under(&file.file.rel_path, src_root) {
+            if !path_is_under(&file.rel_path, src_root) {
                 continue;
             }
-            let mut current = parent_dir(&file.file.rel_path).to_owned();
+            let mut current = parent_dir(&file.rel_path).to_owned();
             while !current.is_empty() && current != *src_root {
                 let _ = dirs.insert(current.clone(), src_root.clone());
                 current = parent_dir(&current).to_owned();
@@ -235,7 +236,7 @@ fn is_flat_test_sidecar(rel_path: &str) -> bool {
 
 fn cfg_test_decl_is_owned_sidecar(
     file_rel_path: &str,
-    module: &crate::parse::CfgTestModuleInfo,
+    module: &CfgTestModuleInfo,
     file_set: &BTreeSet<String>,
 ) -> bool {
     if module.has_body {
