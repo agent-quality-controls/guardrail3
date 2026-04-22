@@ -30,6 +30,10 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
         &input.file.parsed.file_function_names,
         input.file.assertions_package_name.as_deref(),
         input.proof_bearing_assertion_functions,
+    ) || qualified_owned_assertion_call(
+        &input.function.body.call_paths,
+        input.file.assertions_package_name.as_deref(),
+        input.proof_bearing_assertion_functions,
     ) {
         results.push(
             G3CheckResult::new(
@@ -66,6 +70,13 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
                 .and_then(|alias| alias.last())
                 .is_some_and(|name| local_assertion_helpers.contains(name.as_str()));
             return direct_local_helper || aliased_local_helper;
+        }
+        if path_is_qualified_owned_assertion_call(
+            path,
+            input.file.assertions_package_name.as_deref(),
+            input.proof_bearing_assertion_functions,
+        ) {
+            return false;
         }
         path.last()
             .is_some_and(|name| local_assertion_helpers.contains(name.as_str()))
@@ -145,7 +156,43 @@ fn import_binds_name(imports: &[UseBinding], name: &str) -> bool {
                     .path_segments
                     .last()
                     .is_some_and(|segment| segment == name))
+        })
+}
+
+fn qualified_owned_assertion_call(
+    call_paths: &[Vec<String>],
+    assertions_package_name: Option<&str>,
+    proof_bearing_assertion_functions: Option<&std::collections::BTreeSet<String>>,
+) -> bool {
+    call_paths.iter().any(|path| {
+        path_is_qualified_owned_assertion_call(
+            path,
+            assertions_package_name,
+            proof_bearing_assertion_functions,
+        )
     })
+}
+
+fn path_is_qualified_owned_assertion_call(
+    path: &[String],
+    assertions_package_name: Option<&str>,
+    proof_bearing_assertion_functions: Option<&std::collections::BTreeSet<String>>,
+) -> bool {
+    let Some(assertions_package_name) = assertions_package_name else {
+        return false;
+    };
+    let Some(proof_bearing_assertion_functions) = proof_bearing_assertion_functions else {
+        return false;
+    };
+    let package_root = assertions_package_name.replace('-', "_");
+
+    let Some(first) = path.first() else {
+        return false;
+    };
+    if first != assertions_package_name && first != &package_root {
+        return false;
+    }
+    proof_bearing_assertion_functions.contains(&path[1..].join("::"))
 }
 
 #[cfg(test)]
