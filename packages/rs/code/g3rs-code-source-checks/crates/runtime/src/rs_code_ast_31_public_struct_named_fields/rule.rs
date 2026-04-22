@@ -48,22 +48,35 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
 }
 
 fn struct_has_inherent_impl(source: &syn::File, qualified_name: &str) -> bool {
-    items_have_inherent_impl(&source.items, &mut Vec::new(), qualified_name)
+    let mut module_struct_bindings = BTreeMap::new();
+    collect_module_struct_bindings(&source.items, &mut Vec::new(), &mut module_struct_bindings);
+    items_have_inherent_impl(
+        &source.items,
+        &mut Vec::new(),
+        &module_struct_bindings,
+        qualified_name,
+    )
 }
 
 fn items_have_inherent_impl(
     items: &[syn::Item],
     module_path: &mut Vec<String>,
+    module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
     qualified_name: &str,
 ) -> bool {
-    let local_type_bindings = collect_local_type_bindings(items, module_path);
+    let local_type_bindings = collect_local_type_bindings(items, module_path, module_struct_bindings);
     items.iter().any(|item| match item {
         syn::Item::Mod(item_mod) => {
             let Some((_, nested_items)) = &item_mod.content else {
                 return false;
             };
             module_path.push(item_mod.ident.to_string());
-            let found = items_have_inherent_impl(nested_items, module_path, qualified_name);
+            let found = items_have_inherent_impl(
+                nested_items,
+                module_path,
+                module_struct_bindings,
+                qualified_name,
+            );
             let _ = module_path.pop();
             found
         }
@@ -159,6 +172,7 @@ fn normalize_type_path_with_bindings(
 fn collect_local_type_bindings(
     items: &[syn::Item],
     module_path: &[String],
+    module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
 ) -> BTreeMap<String, Vec<String>> {
     let mut bindings = BTreeMap::new();
     for item in items {
@@ -169,6 +183,7 @@ fn collect_local_type_bindings(
             &item_use.tree,
             &mut Vec::new(),
             module_path,
+            module_struct_bindings,
             &mut bindings,
         );
     }
@@ -179,19 +194,26 @@ fn collect_local_type_bindings_from_use_tree(
     tree: &syn::UseTree,
     prefix: &mut Vec<String>,
     module_path: &[String],
+    module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
     bindings: &mut BTreeMap<String, Vec<String>>,
 ) {
     match tree {
         syn::UseTree::Path(path) => {
             prefix.push(path.ident.to_string());
-            collect_local_type_bindings_from_use_tree(&path.tree, prefix, module_path, bindings);
+            collect_local_type_bindings_from_use_tree(
+                &path.tree,
+                prefix,
+                module_path,
+                module_struct_bindings,
+                bindings,
+            );
             let _ = prefix.pop();
         }
         syn::UseTree::Name(name) => {
             let mut segments = prefix.clone();
             segments.push(name.ident.to_string());
             if let Some(target) =
-                normalize_type_path_with_bindings(module_path, false, &segments, &BTreeMap::new())
+                normalize_type_path_with_bindings(module_path, false, &segments, bindings)
             {
                 let _ = bindings.insert(name.ident.to_string(), target);
             }
@@ -200,18 +222,60 @@ fn collect_local_type_bindings_from_use_tree(
             let mut segments = prefix.clone();
             segments.push(rename.ident.to_string());
             if let Some(target) =
-                normalize_type_path_with_bindings(module_path, false, &segments, &BTreeMap::new())
+                normalize_type_path_with_bindings(module_path, false, &segments, bindings)
             {
                 let _ = bindings.insert(rename.rename.to_string(), target);
             }
         }
         syn::UseTree::Group(group) => {
             for item in &group.items {
-                collect_local_type_bindings_from_use_tree(item, prefix, module_path, bindings);
+                collect_local_type_bindings_from_use_tree(
+                    item,
+                    prefix,
+                    module_path,
+                    module_struct_bindings,
+                    bindings,
+                );
             }
         }
-        syn::UseTree::Glob(_) => {}
+        syn::UseTree::Glob(_) => {
+            if let Some(target_module_path) =
+                normalize_type_path_with_bindings(module_path, false, prefix, bindings)
+                && let Some(target_bindings) = module_struct_bindings.get(&target_module_path)
+            {
+                for (name, target) in target_bindings {
+                    let _ = bindings.entry(name.clone()).or_insert_with(|| target.clone());
+                }
+            }
+        }
     }
+}
+
+fn collect_module_struct_bindings(
+    items: &[syn::Item],
+    module_path: &mut Vec<String>,
+    out: &mut BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+) {
+    let mut bindings = BTreeMap::new();
+    for item in items {
+        match item {
+            syn::Item::Struct(item_struct) => {
+                let mut qualified = module_path.to_vec();
+                qualified.push(item_struct.ident.to_string());
+                let _ = bindings.insert(item_struct.ident.to_string(), qualified);
+            }
+            syn::Item::Mod(item_mod) => {
+                let Some((_, nested_items)) = &item_mod.content else {
+                    continue;
+                };
+                module_path.push(item_mod.ident.to_string());
+                collect_module_struct_bindings(nested_items, module_path, out);
+                let _ = module_path.pop();
+            }
+            _ => {}
+        }
+    }
+    let _ = out.insert(module_path.to_vec(), bindings);
 }
 
 #[cfg(test)]
