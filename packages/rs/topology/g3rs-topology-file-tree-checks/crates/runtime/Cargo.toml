@@ -28,7 +28,6 @@ shared = true
 
 [dependencies]
 g3rs-topology-types = { path = "../../../g3rs-topology-types", version = "0.1.0" }
-glob = "0.3"
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
 [dev-dependencies]

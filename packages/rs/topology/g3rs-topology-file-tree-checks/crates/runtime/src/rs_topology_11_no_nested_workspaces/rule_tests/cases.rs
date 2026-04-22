@@ -1,6 +1,7 @@
 use g3rs_topology_file_tree_checks_assertions::rs_topology_11_no_nested_workspaces::rule as assertions;
+use g3rs_topology_types::G3RsTopologyNestedWorkspaceInput as NestedWorkspaceInput;
 
-use super::super::{NestedWorkspaceInput, check};
+use super::super::check;
 
 #[test]
 fn nested_workspace_root_fires() {

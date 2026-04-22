@@ -1,9 +1,10 @@
 use g3rs_topology_file_tree_checks_assertions::rs_topology_16_workspace_local_file_placement::rule as assertions;
 use g3rs_topology_types::{
+    G3RsTopologyIllegalFamilyFilePlacementInput as IllegalFamilyFilePlacementInput,
     G3RsTopologyWorkspaceFamily,
 };
 
-use super::super::{IllegalFamilyFilePlacementInput, check};
+use super::super::check;
 
 #[test]
 fn nested_policy_file_fires() {

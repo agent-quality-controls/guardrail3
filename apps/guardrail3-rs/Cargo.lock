@@ -1220,8 +1220,6 @@ version = "0.1.0"
 dependencies = [
  "g3rs-test-types",
  "guardrail3-check-types",
- "proc-macro2",
- "syn",
 ]
 
 [[package]]
@@ -1251,6 +1249,7 @@ dependencies = [
  "hook-shell-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
+ "proc-macro2",
  "syn",
 ]
 
@@ -1276,8 +1275,6 @@ dependencies = [
  "g3rs-test-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
- "proc-macro2",
- "syn",
 ]
 
 [[package]]
@@ -1374,7 +1371,6 @@ name = "g3rs-topology-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-topology-types",
- "glob",
  "guardrail3-check-types",
 ]
 
@@ -1401,6 +1397,7 @@ dependencies = [
  "g3rs-topology-ingestion-types",
  "g3rs-topology-types",
  "g3rs-workspace-crawl",
+ "glob",
 ]
 
 [[package]]

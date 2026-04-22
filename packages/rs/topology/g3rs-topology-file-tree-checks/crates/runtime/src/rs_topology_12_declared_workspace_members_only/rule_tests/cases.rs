@@ -1,6 +1,10 @@
 use g3rs_topology_file_tree_checks_assertions::rs_topology_12_declared_workspace_members_only::rule as assertions;
+use g3rs_topology_types::{
+    G3RsTopologyWorkspaceMemberIssueInput as WorkspaceMemberIssueInput,
+    G3RsTopologyWorkspaceMemberIssueKind as WorkspaceMemberIssueKind,
+};
 
-use super::super::{WorkspaceMemberIssueInput, WorkspaceMemberIssueKind, check};
+use super::super::check;
 
 #[test]
 fn undeclared_child_root_fires() {

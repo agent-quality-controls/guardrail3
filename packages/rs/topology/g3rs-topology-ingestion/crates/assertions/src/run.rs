@@ -1,9 +1,9 @@
-use guardrail3_check_types::{G3CheckResult, G3Severity};
 use g3rs_topology_types::{
-    G3RsTopologyCargoManifestKind, G3RsTopologyWorkspaceFamily,
-    G3RsTopologyFileTreeChecksInput,
+    G3RsTopologyCargoManifestKind, G3RsTopologyFileTreeChecksInput, G3RsTopologyWorkspaceFamily,
     G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
+    G3RsTopologyWorkspaceMemberIssueKind,
 };
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
@@ -57,9 +57,9 @@ pub fn assert_present(
 ) {
     let findings = findings(results, id);
     assert!(
-        findings
-            .iter()
-            .any(|finding| finding.title == title && finding.file == file && finding.inventory == inventory),
+        findings.iter().any(|finding| finding.title == title
+            && finding.file == file
+            && finding.inventory == inventory),
         "{findings:#?}"
     );
 }
@@ -89,7 +89,11 @@ pub fn assert_empty(results: &[G3CheckResult]) {
 }
 
 pub fn assert_no_input_failures(input: &G3RsTopologyFileTreeChecksInput) {
-    assert!(input.input_failures.is_empty(), "{:#?}", input.input_failures);
+    assert!(
+        input.input_failures.is_empty(),
+        "{:#?}",
+        input.input_failures
+    );
 }
 
 pub fn assert_input_failure_contains(
@@ -98,9 +102,10 @@ pub fn assert_input_failure_contains(
     needle: &str,
 ) {
     assert!(
-        input.input_failures.iter().any(|failure| {
-            failure.rel_path == rel_path && failure.message.contains(needle)
-        }),
+        input
+            .input_failures
+            .iter()
+            .any(|failure| { failure.rel_path == rel_path && failure.message.contains(needle) }),
         "{:#?}",
         input.input_failures
     );
@@ -167,7 +172,101 @@ pub fn assert_exact_family_file_count(
         .iter()
         .filter(|file| file.rel_path == rel_path)
         .count();
-    assert_eq!(actual, expected, "unexpected family file count for {rel_path}");
+    assert_eq!(
+        actual, expected,
+        "unexpected family file count for {rel_path}"
+    );
+}
+
+pub fn assert_nested_workspace(
+    input: &G3RsTopologyFileTreeChecksInput,
+    rel_dir: &str,
+    cargo_rel_path: &str,
+    parent_workspace_rel: &str,
+) {
+    assert!(
+        input.nested_workspaces.iter().any(|nested| {
+            nested.rel_dir == rel_dir
+                && nested.cargo_rel_path == cargo_rel_path
+                && nested.parent_workspace_rel == parent_workspace_rel
+        }),
+        "{:#?}",
+        input.nested_workspaces
+    );
+}
+
+pub fn assert_escaping_member_path(
+    input: &G3RsTopologyFileTreeChecksInput,
+    cargo_rel_path: &str,
+    workspace_root_rel: &str,
+    member_pattern: &str,
+) {
+    assert!(
+        input.escaping_member_paths.iter().any(|escaping| {
+            escaping.cargo_rel_path == cargo_rel_path
+                && escaping.workspace_root_rel == workspace_root_rel
+                && escaping.member_pattern == member_pattern
+        }),
+        "{:#?}",
+        input.escaping_member_paths
+    );
+}
+
+pub fn assert_undeclared_member_issue(
+    input: &G3RsTopologyFileTreeChecksInput,
+    rel_dir: &str,
+    cargo_rel_path: &str,
+    workspace_root_rel: &str,
+) {
+    assert!(
+        input.membership_issues.iter().any(|issue| {
+            issue.rel_dir == rel_dir
+                && issue.cargo_rel_path == cargo_rel_path
+                && issue.kind
+                    == G3RsTopologyWorkspaceMemberIssueKind::Undeclared {
+                        workspace_root_rel: workspace_root_rel.to_owned(),
+                    }
+        }),
+        "{:#?}",
+        input.membership_issues
+    );
+}
+
+pub fn assert_extra_member_issue(
+    input: &G3RsTopologyFileTreeChecksInput,
+    cargo_rel_path: &str,
+    workspace_root_rel: &str,
+    member_pattern: &str,
+) {
+    assert!(
+        input.membership_issues.iter().any(|issue| {
+            issue.cargo_rel_path == cargo_rel_path
+                && issue.kind
+                    == G3RsTopologyWorkspaceMemberIssueKind::Extra {
+                        workspace_root_rel: workspace_root_rel.to_owned(),
+                        member_pattern: member_pattern.to_owned(),
+                    }
+        }),
+        "{:#?}",
+        input.membership_issues
+    );
+}
+
+pub fn assert_illegal_family_file(
+    input: &G3RsTopologyFileTreeChecksInput,
+    family: G3RsTopologyWorkspaceFamily,
+    rel_path: &str,
+    message_needle: &str,
+) {
+    assert!(
+        input.illegal_family_files.iter().any(|file| {
+            file.family == family
+                && file.rel_path == rel_path
+                && file.reason.contains(message_needle)
+        }),
+        "{:#?}",
+        input.illegal_family_files
+    );
 }
 
 impl<'a> Finding<'a> {

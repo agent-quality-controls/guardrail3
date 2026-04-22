@@ -1,12 +1,10 @@
 use cargo_toml_parser::types::CargoToml;
-use g3rs_topology_ingestion_types::{
-    G3RsTopologyIngestionError as IngestionError,
-};
+use g3rs_topology_ingestion_types::G3RsTopologyIngestionError as IngestionError;
 use g3rs_topology_types::{
     G3RsTopologyCargoManifestKind, G3RsTopologyDescendantCargoRoot,
-    G3RsTopologyFileTreeChecksInput, G3RsTopologyFileTreeInputFailure,
-    G3RsTopologyWorkspaceFamily, G3RsTopologyWorkspaceFamilyFile,
-    G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
+    G3RsTopologyFileTreeChecksInput, G3RsTopologyFileTreeInputFailure, G3RsTopologyWorkspaceFamily,
+    G3RsTopologyWorkspaceFamilyFile, G3RsTopologyWorkspaceFamilyFileAttachment,
+    G3RsTopologyWorkspaceFamilyFileKind,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -20,14 +18,24 @@ pub fn ingest_for_file_tree_checks(
     let (descendant_cargo_roots, input_failures) = collect_descendant_cargo_roots(&view);
     let family_files = collect_family_files(&view, &descendant_cargo_roots);
 
-    Ok(G3RsTopologyFileTreeChecksInput {
+    let mut input = G3RsTopologyFileTreeChecksInput {
         workspace_root_rel_dir: String::new(),
         workspace_root_cargo_rel_path: "Cargo.toml".to_owned(),
         workspace_manifest,
         descendant_cargo_roots,
         family_files,
         input_failures,
-    })
+        nested_workspaces: Vec::new(),
+        membership_issues: Vec::new(),
+        escaping_member_paths: Vec::new(),
+        illegal_family_files: Vec::new(),
+    };
+    let facts = crate::file_tree_facts::collect(&input);
+    input.nested_workspaces = facts.nested_workspaces;
+    input.membership_issues = facts.membership_issues;
+    input.escaping_member_paths = facts.escaping_member_paths;
+    input.illegal_family_files = facts.illegal_family_files;
+    Ok(input)
 }
 
 fn parse_required_root_manifest(view: &CrawlView<'_>) -> Result<CargoToml, IngestionError> {

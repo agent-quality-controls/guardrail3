@@ -1,6 +1,8 @@
 use g3rs_topology_file_tree_checks_runtime as _;
 
 mod common;
+#[cfg(feature = "checks")]
+pub mod run;
 
 #[cfg(feature = "checks")]
 pub mod rs_topology_07_required_inputs_fail_closed;
