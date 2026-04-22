@@ -37,6 +37,25 @@ fn path_mentions_route_construction(path: &[String]) -> bool {
     })
 }
 
+fn calls_local_helper(
+    function: &FunctionInfo,
+    local_helpers: &BTreeSet<&str>,
+) -> bool {
+    function.body.call_paths.iter().any(|path| {
+        if path.len() != 1 {
+            return false;
+        }
+        let name = &path[0];
+        (local_helpers.contains(name.as_str()) && !function.body.shadowed_idents.contains(name))
+            || function
+                .body
+                .local_call_aliases
+                .get(name)
+                .and_then(|target| target.last())
+                .is_some_and(|target| local_helpers.contains(target.as_str()))
+    })
+}
+
 pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckResult>) {
     let mut reported = false;
     let disallowed_packages = input
@@ -183,11 +202,7 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
             path.first()
                 .is_some_and(|first| input.file.parsed.file_value_names.contains(first))
         });
-        let calls_local_canned_helper = function.body.call_paths.iter().any(|path| {
-            path.len() == 1
-                && local_canned_helpers.contains(path[0].as_str())
-                && !function.body.shadowed_idents.contains(&path[0])
-        });
+        let calls_local_canned_helper = calls_local_helper(function, &local_canned_helpers);
 
         if matches!(
             function.signature.return_kind,
@@ -251,11 +266,7 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
                     .string_literals
                     .iter()
                     .any(|value| value.starts_with("RS-")));
-        let calls_local_semantic_helper = function.body.call_paths.iter().any(|path| {
-            path.len() == 1
-                && local_semantic_helpers.contains(path[0].as_str())
-                && !function.body.shadowed_idents.contains(&path[0])
-        });
+        let calls_local_semantic_helper = calls_local_helper(function, &local_semantic_helpers);
         if selects_report_semantics || calls_local_semantic_helper {
             results.push(G3CheckResult::new(
                 ID.to_owned(),
