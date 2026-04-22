@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::parse::attrs::find_public_struct_field_bags;
@@ -54,6 +56,7 @@ fn items_have_inherent_impl(
     module_path: &mut Vec<String>,
     qualified_name: &str,
 ) -> bool {
+    let local_type_bindings = collect_local_type_bindings(items, module_path);
     items.iter().any(|item| match item {
         syn::Item::Mod(item_mod) => {
             let Some((_, nested_items)) = &item_mod.content else {
@@ -71,7 +74,7 @@ fn items_have_inherent_impl(
             let syn::Type::Path(type_path) = item_impl.self_ty.as_ref() else {
                 return false;
             };
-            normalize_impl_self_type_path(module_path, type_path)
+            normalize_impl_self_type_path(module_path, type_path, &local_type_bindings)
                 .is_some_and(|path| path == qualified_name)
         }
         _ => false,
@@ -81,6 +84,7 @@ fn items_have_inherent_impl(
 fn normalize_impl_self_type_path(
     module_path: &[String],
     type_path: &syn::TypePath,
+    local_type_bindings: &BTreeMap<String, Vec<String>>,
 ) -> Option<String> {
     if type_path.qself.is_some() {
         return None;
@@ -96,42 +100,118 @@ fn normalize_impl_self_type_path(
         return None;
     }
 
-    let normalized = if type_path.path.leading_colon.is_some() {
-        match segments.first().map(String::as_str) {
-            Some("crate") => segments.get(1..)?.to_vec(),
-            _ => segments,
+    let normalized = normalize_type_path_with_bindings(
+        module_path,
+        type_path.path.leading_colon.is_some(),
+        &segments,
+        local_type_bindings,
+    )?;
+
+    Some(normalized.join("::"))
+}
+
+fn normalize_type_path_with_bindings(
+    current_module_path: &[String],
+    leading_colon: bool,
+    segments: &[String],
+    local_type_bindings: &BTreeMap<String, Vec<String>>,
+) -> Option<Vec<String>> {
+    let first = segments.first()?;
+
+    if let Some(binding) = local_type_bindings.get(first) {
+        let mut resolved = binding.clone();
+        resolved.extend_from_slice(segments.get(1..).unwrap_or(&[]));
+        return Some(resolved);
+    }
+
+    let normalized = if leading_colon {
+        match first.as_str() {
+            "crate" => segments.get(1..).unwrap_or(&[]).to_vec(),
+            _ => segments.to_vec(),
         }
     } else {
-        match segments.first().map(String::as_str) {
-            Some("crate") => segments.get(1..)?.to_vec(),
-            Some("self") | Some("super") => {
-                let mut resolved = module_path.to_vec();
-                let mut iter = segments.iter();
-                while let Some(segment) = iter.next() {
-                    match segment.as_str() {
-                        "self" => {}
-                        "super" => {
-                            let _ = resolved.pop();
-                        }
-                        _ => {
-                            resolved.push(segment.clone());
-                            resolved.extend(iter.cloned());
-                            break;
-                        }
-                    }
+        match first.as_str() {
+            "crate" => segments.get(1..).unwrap_or(&[]).to_vec(),
+            "self" => {
+                let mut resolved = current_module_path.to_vec();
+                resolved.extend_from_slice(segments.get(1..).unwrap_or(&[]));
+                resolved
+            }
+            "super" => {
+                let mut resolved = current_module_path.to_vec();
+                if resolved.pop().is_none() {
+                    return None;
                 }
+                resolved.extend_from_slice(segments.get(1..).unwrap_or(&[]));
                 resolved
             }
-            Some(_) => {
-                let mut resolved = module_path.to_vec();
-                resolved.extend(segments);
+            _ => {
+                let mut resolved = current_module_path.to_vec();
+                resolved.extend_from_slice(segments);
                 resolved
             }
-            None => return None,
         }
     };
 
-    Some(normalized.join("::"))
+    Some(normalized)
+}
+
+fn collect_local_type_bindings(
+    items: &[syn::Item],
+    module_path: &[String],
+) -> BTreeMap<String, Vec<String>> {
+    let mut bindings = BTreeMap::new();
+    for item in items {
+        let syn::Item::Use(item_use) = item else {
+            continue;
+        };
+        collect_local_type_bindings_from_use_tree(
+            &item_use.tree,
+            &mut Vec::new(),
+            module_path,
+            &mut bindings,
+        );
+    }
+    bindings
+}
+
+fn collect_local_type_bindings_from_use_tree(
+    tree: &syn::UseTree,
+    prefix: &mut Vec<String>,
+    module_path: &[String],
+    bindings: &mut BTreeMap<String, Vec<String>>,
+) {
+    match tree {
+        syn::UseTree::Path(path) => {
+            prefix.push(path.ident.to_string());
+            collect_local_type_bindings_from_use_tree(&path.tree, prefix, module_path, bindings);
+            let _ = prefix.pop();
+        }
+        syn::UseTree::Name(name) => {
+            let mut segments = prefix.clone();
+            segments.push(name.ident.to_string());
+            if let Some(target) =
+                normalize_type_path_with_bindings(module_path, false, &segments, &BTreeMap::new())
+            {
+                let _ = bindings.insert(name.ident.to_string(), target);
+            }
+        }
+        syn::UseTree::Rename(rename) => {
+            let mut segments = prefix.clone();
+            segments.push(rename.ident.to_string());
+            if let Some(target) =
+                normalize_type_path_with_bindings(module_path, false, &segments, &BTreeMap::new())
+            {
+                let _ = bindings.insert(rename.rename.to_string(), target);
+            }
+        }
+        syn::UseTree::Group(group) => {
+            for item in &group.items {
+                collect_local_type_bindings_from_use_tree(item, prefix, module_path, bindings);
+            }
+        }
+        syn::UseTree::Glob(_) => {}
+    }
 }
 
 #[cfg(test)]
