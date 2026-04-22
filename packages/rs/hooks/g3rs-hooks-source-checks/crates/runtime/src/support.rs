@@ -12,7 +12,7 @@ pub(crate) fn inline_comment_text(line: &str) -> Option<&str> {
         }
 
         match ch {
-            '\\' if double_quoted => {
+            '\\' if !single_quoted => {
                 escaped = true;
             }
             '\'' if !double_quoted => {

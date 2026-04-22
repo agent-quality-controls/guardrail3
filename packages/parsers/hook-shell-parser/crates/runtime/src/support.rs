@@ -303,15 +303,25 @@ fn is_escaped(chars: &[(usize, char)], index: usize) -> bool {
 }
 
 pub(super) fn strip_inline_comment(line: &str) -> &str {
+    let chars: Vec<(usize, char)> = line.char_indices().collect();
     let mut single_quoted = false;
     let mut double_quoted = false;
     let mut prev_was_whitespace = true;
 
-    for (idx, ch) in line.char_indices() {
+    for (index, (idx, ch)) in chars.iter().copied().enumerate() {
         match ch {
-            '\'' if !double_quoted => single_quoted = !single_quoted,
-            '"' if !single_quoted => double_quoted = !double_quoted,
-            '#' if !single_quoted && !double_quoted && prev_was_whitespace => {
+            '\'' if !double_quoted && !is_escaped(chars.as_slice(), index) => {
+                single_quoted = !single_quoted;
+            }
+            '"' if !single_quoted && !is_escaped(chars.as_slice(), index) => {
+                double_quoted = !double_quoted;
+            }
+            '#'
+                if !single_quoted
+                    && !double_quoted
+                    && prev_was_whitespace
+                    && !is_escaped(chars.as_slice(), index) =>
+            {
                 return &line[..idx];
             }
             _ => {}
