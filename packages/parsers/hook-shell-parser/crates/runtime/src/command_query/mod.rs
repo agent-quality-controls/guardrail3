@@ -1,6 +1,8 @@
 mod api;
 mod engine;
 mod lex;
+mod state;
+mod wrappers;
 
 pub use api::{
     CommandQueryOptions, CommandVisit, ResolvedCommand, ShellEnvState, any_resolved_command,

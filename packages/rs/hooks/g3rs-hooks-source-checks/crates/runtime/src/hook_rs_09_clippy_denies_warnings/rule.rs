@@ -44,10 +44,7 @@ fn script_contains_clippy_deny(parsed: &ParsedShellScript) -> bool {
     visit_resolved_commands_with_env(
         parsed,
         EnvState::default(),
-        CommandQueryOptions {
-            allow_detached: false,
-            allow_forward_functions: true,
-        },
+        CommandQueryOptions::default().with_forward_functions(),
         |command, state| {
             if command.command_name() == "cargo"
                 && cargo_clippy_denies_warnings(command.args(), state)
