@@ -224,9 +224,7 @@ fn warns_when_same_line_case_scope_has_exit_zero_tail() {
 
 #[test]
 fn warns_when_later_function_redefinition_contains_exit_zero() {
-    let results = run_case(
-        "finish() {\n    echo ok\n}\nfinish() {\n    exit 0\n}\nfinish\n",
-    );
+    let results = run_case("finish() {\n    echo ok\n}\nfinish() {\n    exit 0\n}\nfinish\n");
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
@@ -277,6 +275,51 @@ fn warns_when_loop_close_has_trailing_redirection_before_called_function() {
             severity: Some(assertions::G3Severity::Warn),
             title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
             line: Some(5),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn warns_when_same_line_if_opener_closer_suffix_leaks_later_exit_zero() {
+    let results = run_case("if true; then :; fi && echo after\nexit 0\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(2),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn warns_when_same_line_loop_opener_closer_suffix_leaks_later_exit_zero() {
+    let results = run_case("while true; do :; done && echo after\nexit 0\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(2),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn warns_when_function_definition_tail_has_exit_zero_after_late_brace() {
+    let results = run_case("finish() { echo ok; }; exit 0 # }\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(1),
             inventory: Some(false),
             ..Default::default()
         }],
