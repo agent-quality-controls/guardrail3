@@ -94,6 +94,36 @@ fn warns_when_same_line_loop_terminator_has_exit_zero_tail() {
 }
 
 #[test]
+fn warns_when_same_line_if_terminator_has_and_tail_exit_zero() {
+    let results = run_case("if true; then\n    :\nfi && exit 0\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(3),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn warns_when_same_line_loop_terminator_has_and_tail_exit_zero() {
+    let results = run_case("while true; do\n    :\ndone && exit 0\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(3),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn warns_when_later_function_redefinition_contains_exit_zero() {
     let results = run_case(
         "finish() {\n    echo ok\n}\nfinish() {\n    exit 0\n}\nfinish\n",
