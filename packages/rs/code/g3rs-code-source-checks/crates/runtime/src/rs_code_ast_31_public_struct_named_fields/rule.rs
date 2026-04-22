@@ -50,18 +50,18 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
 fn struct_has_inherent_impl(source: &syn::File, qualified_name: &str) -> bool {
     let mut module_struct_bindings = BTreeMap::new();
     collect_module_struct_bindings(&source.items, &mut Vec::new(), &mut module_struct_bindings);
-    let direct_module_struct_bindings = module_struct_bindings.clone();
+    let mut module_bindings_by_path = module_struct_bindings.clone();
     collect_module_reexport_bindings(
         &source.items,
         &mut Vec::new(),
-        &direct_module_struct_bindings,
-        &mut module_struct_bindings,
+        &module_struct_bindings,
+        &mut module_bindings_by_path,
         &BTreeMap::new(),
     );
     items_have_inherent_impl(
         &source.items,
         &mut Vec::new(),
-        &module_struct_bindings,
+        &module_bindings_by_path,
         qualified_name,
     )
 }
@@ -69,10 +69,11 @@ fn struct_has_inherent_impl(source: &syn::File, qualified_name: &str) -> bool {
 fn items_have_inherent_impl(
     items: &[syn::Item],
     module_path: &mut Vec<String>,
-    module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+    module_bindings_by_path: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
     qualified_name: &str,
 ) -> bool {
-    let local_type_bindings = collect_local_type_bindings(items, module_path, module_struct_bindings);
+    let local_type_bindings =
+        collect_local_type_bindings(items, module_path, module_bindings_by_path);
     items.iter().any(|item| match item {
         syn::Item::Mod(item_mod) => {
             let Some((_, nested_items)) = &item_mod.content else {
@@ -82,7 +83,7 @@ fn items_have_inherent_impl(
             let found = items_have_inherent_impl(
                 nested_items,
                 module_path,
-                module_struct_bindings,
+                module_bindings_by_path,
                 qualified_name,
             );
             let _ = module_path.pop();
@@ -186,12 +187,38 @@ fn resolve_super_relative_path(
     Some(resolved)
 }
 
+fn resolve_binding_target(
+    target: Vec<String>,
+    module_bindings_by_path: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+) -> Vec<String> {
+    let mut resolved = target;
+    loop {
+        let Some((name, module_path)) = resolved.split_last() else {
+            break;
+        };
+        let Some(bindings) = module_bindings_by_path.get(module_path) else {
+            break;
+        };
+        let Some(next) = bindings.get(name) else {
+            break;
+        };
+        if *next == resolved {
+            break;
+        }
+        resolved = next.clone();
+    }
+    resolved
+}
+
 fn collect_local_type_bindings(
     items: &[syn::Item],
     module_path: &[String],
-    module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+    module_bindings_by_path: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
 ) -> BTreeMap<String, Vec<String>> {
-    let mut bindings = BTreeMap::new();
+    let mut bindings = module_bindings_by_path
+        .get(module_path)
+        .cloned()
+        .unwrap_or_default();
     for item in items {
         let syn::Item::Use(item_use) = item else {
             continue;
@@ -200,7 +227,7 @@ fn collect_local_type_bindings(
             &item_use.tree,
             &mut Vec::new(),
             module_path,
-            module_struct_bindings,
+            module_bindings_by_path,
             &mut bindings,
         );
     }
@@ -211,7 +238,7 @@ fn collect_local_type_bindings_from_use_tree(
     tree: &syn::UseTree,
     prefix: &mut Vec<String>,
     module_path: &[String],
-    module_struct_bindings: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
+    module_bindings_by_path: &BTreeMap<Vec<String>, BTreeMap<String, Vec<String>>>,
     bindings: &mut BTreeMap<String, Vec<String>>,
 ) {
     match tree {
@@ -221,7 +248,7 @@ fn collect_local_type_bindings_from_use_tree(
                 &path.tree,
                 prefix,
                 module_path,
-                module_struct_bindings,
+                module_bindings_by_path,
                 bindings,
             );
             let _ = prefix.pop();
@@ -232,6 +259,7 @@ fn collect_local_type_bindings_from_use_tree(
             if let Some(target) =
                 normalize_type_path_with_bindings(module_path, false, &segments, bindings)
             {
+                let target = resolve_binding_target(target, module_bindings_by_path);
                 let _ = bindings.insert(name.ident.to_string(), target);
             }
         }
@@ -241,6 +269,7 @@ fn collect_local_type_bindings_from_use_tree(
             if let Some(target) =
                 normalize_type_path_with_bindings(module_path, false, &segments, bindings)
             {
+                let target = resolve_binding_target(target, module_bindings_by_path);
                 let _ = bindings.insert(rename.rename.to_string(), target);
             }
         }
@@ -250,7 +279,7 @@ fn collect_local_type_bindings_from_use_tree(
                     item,
                     prefix,
                     module_path,
-                    module_struct_bindings,
+                    module_bindings_by_path,
                     bindings,
                 );
             }
@@ -258,10 +287,13 @@ fn collect_local_type_bindings_from_use_tree(
         syn::UseTree::Glob(_) => {
             if let Some(target_module_path) =
                 normalize_type_path_with_bindings(module_path, false, prefix, bindings)
-                && let Some(target_bindings) = module_struct_bindings.get(&target_module_path)
             {
-                for (name, target) in target_bindings {
-                    let _ = bindings.entry(name.clone()).or_insert_with(|| target.clone());
+                let target_module_path =
+                    resolve_binding_target(target_module_path, module_bindings_by_path);
+                if let Some(target_bindings) = module_bindings_by_path.get(&target_module_path) {
+                    for (name, target) in target_bindings {
+                        let _ = bindings.entry(name.clone()).or_insert_with(|| target.clone());
+                    }
                 }
             }
         }
