@@ -106,6 +106,18 @@ run_guardrail
 }
 
 #[test]
+fn ignores_detached_cargo_test_command() {
+    let results = run_case("cargo test --workspace &\n");
+    assertions::assert_rule_quiet(&results);
+}
+
+#[test]
+fn ignores_piped_cargo_test_command() {
+    let results = run_case("cargo test --workspace | tee /tmp/log\n");
+    assertions::assert_rule_quiet(&results);
+}
+
+#[test]
 fn still_reports_inert_guardrail_text_when_only_echo_exists() {
     let results = run_case(
         r#"# g3rs rs validate --staged .

@@ -256,6 +256,7 @@ fn opens_if_scope(line: &str) -> bool {
 
 fn closes_if_scope(line: &str) -> bool {
     matches!(line, "fi" | "else")
+        || starts_shell_keyword(line, "fi")
         || line.starts_with("elif ")
         || line.ends_with("; fi")
         || line.ends_with(";fi")
@@ -266,7 +267,7 @@ fn opens_case_scope(line: &str) -> bool {
 }
 
 fn closes_case_scope(line: &str) -> bool {
-    line == "esac" || line.ends_with("; esac") || line.ends_with(";esac")
+    starts_shell_keyword(line, "esac") || line.ends_with("; esac") || line.ends_with(";esac")
 }
 
 fn opens_loop_scope(line: &str) -> bool {
@@ -282,7 +283,17 @@ fn closes_loop_scope(parsed: &ParsedShellScript, line_no: usize, line: &str) -> 
         return true;
     }
 
-    line == "done" || line.ends_with("; done") || line.ends_with(";done")
+    starts_shell_keyword(line, "done") || line.ends_with("; done") || line.ends_with(";done")
+}
+
+fn starts_shell_keyword(line: &str, keyword: &str) -> bool {
+    let Some(rest) = line.strip_prefix(keyword) else {
+        return false;
+    };
+    rest.is_empty()
+        || rest.starts_with(|c: char| {
+            c.is_whitespace() || matches!(c, ';' | '&' | '|' | '<' | '>')
+        })
 }
 
 #[cfg(test)]

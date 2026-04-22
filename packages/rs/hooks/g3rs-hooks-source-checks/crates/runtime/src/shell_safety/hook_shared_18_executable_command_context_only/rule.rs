@@ -1,5 +1,7 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
+use hook_shell_parser::command_query::{
+    ResolvedCommand, any_resolved_command_relaxed,
+};
 
 use crate::facts::HookScriptKind;
 use crate::inputs::ExecutableCommandContextInput;
@@ -79,7 +81,7 @@ fn step_family_from_text(line: &str) -> Option<&'static str> {
 }
 
 fn matches_step_family(parsed: &hook_shell_parser::types::ParsedShellScript, family: &str) -> bool {
-    any_resolved_command(parsed, predicate_for_step_family(family))
+    any_resolved_command_relaxed(parsed, predicate_for_step_family(family))
 }
 
 fn predicate_for_step_family(family: &str) -> fn(&ResolvedCommand) -> bool {
