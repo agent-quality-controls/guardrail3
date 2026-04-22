@@ -62,3 +62,20 @@ fn warns_when_called_function_contains_exit_zero() {
         }],
     );
 }
+
+#[test]
+fn warns_when_loop_close_has_trailing_redirection_before_called_function() {
+    let results = run_case(
+        "while IFS= read -r file; do\n    echo \"$file\"\ndone <<< \"$STAGED_FILES\"\nfinish() {\n    exit 0\n}\nfinish\n",
+    );
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(5),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
