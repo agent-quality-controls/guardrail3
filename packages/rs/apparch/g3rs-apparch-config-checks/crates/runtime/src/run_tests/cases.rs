@@ -40,7 +40,6 @@ fn run_dispatches_prebound_dependency_and_purity_inputs() {
         }],
         patch_bypass_checks: Vec::<G3RsApparchPatchBypassChecksInput>::new(),
         same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput {
-            crates: Vec::new(),
             edges: Vec::new(),
         },
     };
@@ -60,15 +59,14 @@ fn run_dispatches_prebound_same_layer_cycle_nodes() {
         crate_purity_checks: Vec::new(),
         patch_bypass_checks: Vec::new(),
         same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput {
-            crates: vec![types_a.clone(), types_b.clone()],
             edges: vec![
                 g3rs_apparch_types::G3RsApparchSameLayerDependencyEdge {
-                    from_cargo_rel_path: types_a.cargo_rel_path.clone(),
-                    to_cargo_rel_path: types_b.cargo_rel_path.clone(),
+                    from: types_a.clone(),
+                    to: types_b.clone(),
                 },
                 g3rs_apparch_types::G3RsApparchSameLayerDependencyEdge {
-                    from_cargo_rel_path: types_b.cargo_rel_path.clone(),
-                    to_cargo_rel_path: types_a.cargo_rel_path.clone(),
+                    from: types_b.clone(),
+                    to: types_a.clone(),
                 },
             ],
         },
