@@ -63,3 +63,16 @@ pub fn assert_message(
     let result = find_result(results, rule_id, title, file).expect("missing expected result");
     assert_eq!(result.message(), message);
 }
+
+pub fn assert_no_title(
+    results: &[guardrail3_check_types::G3CheckResult],
+    rule_id: &str,
+    title: &str,
+) {
+    assert!(
+        results
+            .iter()
+            .all(|result| !(result.id() == rule_id && result.title() == title)),
+        "unexpected {rule_id} result with title={title:?}\nactual={results:#?}"
+    );
+}

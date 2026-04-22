@@ -2,7 +2,7 @@ use g3rs_test_types::G3RsTestFileKind;
 use guardrail3_check_types::G3Severity;
 
 use g3rs_test_file_tree_checks_assertions::rs_test_02_owned_sidecar_shape::rule as assertions;
-use g3rs_test_ingestion_runtime::fixtures::file_tree::{component, file, input};
+use g3rs_test_ingestion_runtime::fixtures::file_tree::{component, file, input, with_sidecar};
 
 #[test]
 fn reports_inventory_for_owned_sidecar_shape() {
@@ -25,7 +25,11 @@ fn reports_inventory_for_owned_sidecar_shape() {
                 "#[test]\nfn keeps_shape() { assert!(true); }\n",
             ),
         ],
-        vec![component("", "", Some("demo_runtime"), false, None)],
+        vec![with_sidecar(
+            component("", "", Some("demo_runtime"), false, None),
+            "src/lib_tests/mod.rs",
+            "assertions/src/lib.rs",
+        )],
     ));
 
     assertions::assert_has_inventory(
@@ -129,7 +133,11 @@ fn reports_missing_path_bridge_even_when_sidecar_exists() {
                 "#[test]\nfn keeps_shape() { assert!(true); }\n",
             ),
         ],
-        vec![component("", "", Some("demo_runtime"), false, None)],
+        vec![with_sidecar(
+            component("", "", Some("demo_runtime"), false, None),
+            "src/lib_tests/mod.rs",
+            "assertions/src/lib.rs",
+        )],
     ));
 
     assertions::assert_has_result(
@@ -171,7 +179,11 @@ fn reports_generic_tests_name_even_with_owned_sidecar_folder() {
                 "#[test]\nfn keeps_shape() { assert!(true); }\n",
             ),
         ],
-        vec![component("", "", Some("demo_runtime"), false, None)],
+        vec![with_sidecar(
+            component("", "", Some("demo_runtime"), false, None),
+            "src/rule_tests/mod.rs",
+            "assertions/src/rule.rs",
+        )],
     ));
 
     assertions::assert_message(
@@ -194,7 +206,11 @@ fn reports_orphaned_sidecar_harness() {
             None,
             "#[test]\nfn stray() { assert!(true); }\n",
         )],
-        vec![component("", "", Some("demo_runtime"), false, None)],
+        vec![with_sidecar(
+            component("", "", Some("demo_runtime"), false, None),
+            "src/foo_tests/mod.rs",
+            "assertions/src/foo.rs",
+        )],
     ));
 
     assertions::assert_has_result(
@@ -204,6 +220,37 @@ fn reports_orphaned_sidecar_harness() {
         "orphaned sidecar harness",
         "src/foo_tests/mod.rs",
         None,
+    );
+}
+
+#[test]
+fn does_not_report_prebound_owned_sidecar_as_missing_when_file_bag_is_lossy() {
+    let results = assertions::check(&input(
+        vec![file(
+            "src/foo.rs",
+            G3RsTestFileKind::Source,
+            Some(""),
+            Some("foo"),
+            None,
+            "#[cfg(test)]\n#[path = \"foo_tests/mod.rs\"]\nmod foo_tests;\n",
+        )],
+        vec![with_sidecar(
+            component("", "", Some("demo_runtime"), false, None),
+            "src/foo_tests/mod.rs",
+            "assertions/src/foo.rs",
+        )],
+    ));
+
+    assertions::assert_no_title(
+        &results,
+        "RS-TEST-FILETREE-02",
+        "sidecar directory missing mod.rs",
+    );
+    assertions::assert_no_title(&results, "RS-TEST-FILETREE-02", "orphaned sidecar harness");
+    assertions::assert_no_title(
+        &results,
+        "RS-TEST-FILETREE-02",
+        "ad hoc cfg(test) module declaration",
     );
 }
 

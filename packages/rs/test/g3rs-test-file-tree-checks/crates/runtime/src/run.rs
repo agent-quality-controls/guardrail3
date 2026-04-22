@@ -18,7 +18,7 @@ pub fn check(input: &G3RsTestFileTreeChecksInput) -> Vec<G3CheckResult> {
         );
     }
 
-    crate::rs_test_02_owned_sidecar_shape::collect(input, &input.files, &mut results);
+    crate::rs_test_02_owned_sidecar_shape::collect(input, &mut results);
     crate::rs_test_03_runtime_assertions_split::collect(input, &mut results);
 
     for file in &input.files {

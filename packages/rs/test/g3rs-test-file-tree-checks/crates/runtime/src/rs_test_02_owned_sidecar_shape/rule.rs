@@ -1,6 +1,6 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
-use g3rs_test_types::G3RsTestAnalyzedSourceFile;
+use g3rs_test_types::G3RsTestComponentFileTreeFacts;
 use g3rs_test_types::G3RsTestFileKind;
 use g3rs_test_types::G3RsTestFileTreeChecksInput;
 use g3rs_test_types::ast::CfgTestModuleInfo;
@@ -20,12 +20,8 @@ struct SidecarViolation {
     message: String,
 }
 
-pub(crate) fn collect(
-    input: &G3RsTestFileTreeChecksInput,
-    files: &[G3RsTestAnalyzedSourceFile],
-    results: &mut Vec<G3CheckResult>,
-) {
-    let violations = collect_violations(input, files);
+pub(crate) fn collect(input: &G3RsTestFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
+    let violations = collect_violations(input);
     if violations.is_empty() {
         results.push(
             G3CheckResult::new(
@@ -56,66 +52,26 @@ pub(crate) fn collect(
     }
 }
 
-fn collect_violations(
-    input: &G3RsTestFileTreeChecksInput,
-    files: &[G3RsTestAnalyzedSourceFile],
-) -> Vec<SidecarViolation> {
-    let file_set = files
+fn collect_violations(input: &G3RsTestFileTreeChecksInput) -> Vec<SidecarViolation> {
+    let prebound_sidecar_mod_paths = input
+        .components
         .iter()
-        .map(|file| file.rel_path.clone())
+        .flat_map(|component| {
+            component
+                .sidecars
+                .iter()
+                .map(|sidecar| sidecar.mod_rel_path.clone())
+        })
         .collect::<BTreeSet<_>>();
-    let src_roots = collect_src_roots(input, files);
-    let sidecar_dirs = collect_sidecar_dirs(files, &src_roots);
     let mut violations = Vec::new();
 
-    for (dir_rel, src_root) in sidecar_dirs {
-        let rel_after_src = dir_rel
-            .strip_prefix(src_root.as_str())
-            .and_then(|rest| rest.strip_prefix('/'))
-            .unwrap_or("");
-        if rel_after_src == "tests"
-            || rel_after_src.starts_with("tests/")
-            || rel_after_src.ends_with("/tests")
-            || rel_after_src.contains("/tests/")
-        {
-            violations.push(SidecarViolation {
-                rel_path: dir_rel,
-                line: None,
-                title: "ad hoc src/tests tree".to_owned(),
-                message: "Internal test harnesses must live in module-owned `*_tests/` sidecars, not under `src/**/tests/`.".to_owned(),
-            });
-            continue;
-        }
+    collect_ad_hoc_src_tests_tree_violations(input, &mut violations);
 
-        let Some(owner_module_rel_path) = owned_sidecar_owner_rel_path(&src_root, rel_after_src)
-        else {
-            continue;
-        };
-        let mod_rel_path = format!("{dir_rel}/mod.rs");
-        if !file_set.contains(&mod_rel_path) {
-            violations.push(SidecarViolation {
-                rel_path: dir_rel,
-                line: None,
-                title: "sidecar directory missing mod.rs".to_owned(),
-                message:
-                    "Internal sidecar harness directories must expose `mod.rs` as their entrypoint."
-                        .to_owned(),
-            });
-            continue;
-        }
-        if !file_set.contains(&owner_module_rel_path) {
-            violations.push(SidecarViolation {
-                rel_path: mod_rel_path,
-                line: None,
-                title: "orphaned sidecar harness".to_owned(),
-                message: format!(
-                    "Owned sidecar `{dir_rel}/mod.rs` requires matching production module `{owner_module_rel_path}`."
-                ),
-            });
-        }
+    for component in &input.components {
+        collect_component_sidecar_violations(component, &mut violations);
     }
 
-    for file in files {
+    for file in &input.files {
         if !matches!(
             file.kind,
             G3RsTestFileKind::Source
@@ -138,7 +94,7 @@ fn collect_violations(
             continue;
         }
         for module in &file.parsed.cfg_test_modules {
-            if cfg_test_decl_is_owned_sidecar(&file.rel_path, module, &file_set) {
+            if cfg_test_decl_is_owned_sidecar(&file.rel_path, module, &prebound_sidecar_mod_paths) {
                 continue;
             }
             let expected = owned_sidecar_contract(&file.rel_path);
@@ -169,47 +125,128 @@ fn collect_violations(
     violations
 }
 
-fn collect_src_roots(
+fn collect_ad_hoc_src_tests_tree_violations(
     input: &G3RsTestFileTreeChecksInput,
-    files: &[G3RsTestAnalyzedSourceFile],
-) -> BTreeSet<String> {
-    let mut roots = input
+    violations: &mut Vec<SidecarViolation>,
+) {
+    let mut src_roots = input
         .components
         .iter()
         .map(|component| join_under_root(&component.runtime_rel_dir, "src"))
         .collect::<BTreeSet<_>>();
-
     let root_src = join_under_root(&input.root_rel_dir, "src");
-    if files
+    if input
+        .files
         .iter()
         .any(|file| file.component_rel_dir.is_none() && path_is_under(&file.rel_path, &root_src))
     {
-        let _ = roots.insert(root_src);
+        let _ = src_roots.insert(root_src);
     }
 
-    roots
-}
-
-fn collect_sidecar_dirs(
-    files: &[G3RsTestAnalyzedSourceFile],
-    src_roots: &BTreeSet<String>,
-) -> BTreeMap<String, String> {
-    let mut dirs = BTreeMap::new();
-
-    for file in files {
-        for src_root in src_roots {
+    let mut offending_dirs = BTreeSet::new();
+    for file in &input.files {
+        for src_root in &src_roots {
             if !path_is_under(&file.rel_path, src_root) {
                 continue;
             }
             let mut current = parent_dir(&file.rel_path).to_owned();
             while !current.is_empty() && current != *src_root {
-                let _ = dirs.insert(current.clone(), src_root.clone());
+                let rel_after_src = current
+                    .strip_prefix(src_root.as_str())
+                    .and_then(|rest| rest.strip_prefix('/'))
+                    .unwrap_or("");
+                if rel_after_src == "tests"
+                    || rel_after_src.starts_with("tests/")
+                    || rel_after_src.ends_with("/tests")
+                    || rel_after_src.contains("/tests/")
+                {
+                    let _ = offending_dirs.insert(current.clone());
+                }
                 current = parent_dir(&current).to_owned();
             }
         }
     }
 
-    dirs
+    for dir_rel in offending_dirs {
+        violations.push(SidecarViolation {
+            rel_path: dir_rel,
+            line: None,
+            title: "ad hoc src/tests tree".to_owned(),
+            message: "Internal test harnesses must live in module-owned `*_tests/` sidecars, not under `src/**/tests/`.".to_owned(),
+        });
+    }
+}
+
+fn collect_component_sidecar_violations(
+    component: &G3RsTestComponentFileTreeFacts,
+    violations: &mut Vec<SidecarViolation>,
+) {
+    let src_root = join_under_root(&component.runtime_rel_dir, "src");
+    let declared_sidecar_mods = component
+        .sidecars
+        .iter()
+        .map(|sidecar| sidecar.mod_rel_path.as_str())
+        .collect::<BTreeSet<_>>();
+    let sidecar_dirs = component
+        .sidecar_files
+        .iter()
+        .map(|file| parent_dir(&file.rel_path).to_owned())
+        .collect::<BTreeSet<_>>();
+
+    for dir_rel in sidecar_dirs {
+        let rel_after_src = dir_rel
+            .strip_prefix(src_root.as_str())
+            .and_then(|rest| rest.strip_prefix('/'))
+            .unwrap_or("");
+        if rel_after_src == "tests"
+            || rel_after_src.starts_with("tests/")
+            || rel_after_src.ends_with("/tests")
+            || rel_after_src.contains("/tests/")
+        {
+            violations.push(SidecarViolation {
+                rel_path: dir_rel,
+                line: None,
+                title: "ad hoc src/tests tree".to_owned(),
+                message: "Internal test harnesses must live in module-owned `*_tests/` sidecars, not under `src/**/tests/`.".to_owned(),
+            });
+            continue;
+        }
+
+        let mod_rel_path = format!("{dir_rel}/mod.rs");
+        if !declared_sidecar_mods.contains(mod_rel_path.as_str()) {
+            violations.push(SidecarViolation {
+                rel_path: dir_rel,
+                line: None,
+                title: "sidecar directory missing mod.rs".to_owned(),
+                message:
+                    "Internal sidecar harness directories must expose `mod.rs` as their entrypoint."
+                        .to_owned(),
+            });
+            continue;
+        }
+
+        let Some(owner_module_rel_path) = owned_sidecar_owner_rel_path(&src_root, rel_after_src)
+        else {
+            continue;
+        };
+        let Some(owner_module_name) = owner_module_rel_path
+            .rsplit('/')
+            .next()
+            .and_then(|name| name.strip_suffix(".rs"))
+        else {
+            continue;
+        };
+        if !component.source_module_names.contains(owner_module_name) {
+            violations.push(SidecarViolation {
+                rel_path: mod_rel_path,
+                line: None,
+                title: "orphaned sidecar harness".to_owned(),
+                message: format!(
+                    "Owned sidecar `{dir_rel}/mod.rs` requires matching production module `{owner_module_rel_path}`."
+                ),
+            });
+        }
+    }
 }
 
 fn owned_sidecar_owner_rel_path(src_root: &str, rel_after_src: &str) -> Option<String> {
@@ -237,7 +274,7 @@ fn is_flat_test_sidecar(rel_path: &str) -> bool {
 fn cfg_test_decl_is_owned_sidecar(
     file_rel_path: &str,
     module: &CfgTestModuleInfo,
-    file_set: &BTreeSet<String>,
+    prebound_sidecar_mod_paths: &BTreeSet<String>,
 ) -> bool {
     if module.has_body {
         return false;
@@ -252,7 +289,7 @@ fn cfg_test_decl_is_owned_sidecar(
     }
     let parent = parent_dir(file_rel_path);
     let expected_mod_rel = format!("{parent}/{expected_module_name}/mod.rs");
-    if !file_set.contains(&expected_mod_rel) {
+    if !prebound_sidecar_mod_paths.contains(&expected_mod_rel) {
         return false;
     }
 
