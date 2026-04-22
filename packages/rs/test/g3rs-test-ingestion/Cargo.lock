@@ -150,7 +150,6 @@ dependencies = [
 name = "g3rs-test-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-test-file-tree-checks-types",
  "g3rs-test-types",
  "guardrail3-check-types",
  "proc-macro2",
@@ -195,6 +194,7 @@ dependencies = [
  "g3rs-workspace-crawl",
  "glob",
  "guardrail3-check-types",
+ "hook-shell-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
  "syn",
@@ -220,7 +220,6 @@ dependencies = [
 name = "g3rs-test-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-test-source-checks-types",
  "g3rs-test-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
@@ -332,6 +331,24 @@ name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
+
+[[package]]
+name = "hook-shell-parser"
+version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-runtime",
+]
+
+[[package]]
+name = "hook-shell-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-types",
+]
+
+[[package]]
+name = "hook-shell-parser-types"
+version = "0.1.0"
 
 [[package]]
 name = "id-arena"

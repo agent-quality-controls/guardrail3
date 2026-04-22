@@ -9,6 +9,7 @@ allowed_deps = [
   "g3rs-workspace-crawl",
   "glob",
   "guardrail3-check-types",
+  "hook-shell-parser",
   "mutants-toml-parser",
   "nextest-toml-parser",
   "syn",
