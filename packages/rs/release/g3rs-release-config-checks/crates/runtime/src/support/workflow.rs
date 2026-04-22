@@ -238,22 +238,18 @@ fn command_mentions_crate(
     }
 
     args.windows(2).any(|window| {
-        matches!(
-            window,
-            ["-p" | "--package" | "--manifest-path", value]
-                if crate_reference_matches(value, crate_name, cargo_rel_path)
-        )
+        match window {
+            ["-p" | "--package", value] => *value == crate_name,
+            ["--manifest-path", value] => manifest_path_matches(value, cargo_rel_path),
+            _ => false,
+        }
     }) || args
         .windows(2)
         .any(|window| matches!(window, ["--bin", value] if binary_target_names.contains(*value)))
 }
 
-fn crate_reference_matches(value: &str, crate_name: &str, cargo_rel_path: &str) -> bool {
-    value == crate_name
-        || value == cargo_rel_path
-        || Path::new(value)
-            .file_name()
-            .is_some_and(|name| name == Path::new(cargo_rel_path).file_name().unwrap_or_default())
+fn manifest_path_matches(value: &str, cargo_rel_path: &str) -> bool {
+    Path::new(value).ends_with(Path::new(cargo_rel_path))
 }
 
 fn cargo_subcommand<'a>(args: &'a [&'a str]) -> Option<&'a str> {
