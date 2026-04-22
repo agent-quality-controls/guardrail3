@@ -33,6 +33,21 @@ fn reports_guardrail_command_mentioned_only_in_assignment_text() {
 }
 
 #[test]
+fn warns_when_lookalike_cargo_clippy_command_runs() {
+    let results = run_case("cargo clippy-driver --workspace\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Error),
+            title: Some("required hook step appears only in inert text"),
+            line: Some(1),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn reports_guardrail_command_mentioned_only_in_heredoc_body() {
     let results = run_case("cat <<'EOF'\ng3rs rs validate --staged .\nEOF\n");
     assertions::assert_rule_results(

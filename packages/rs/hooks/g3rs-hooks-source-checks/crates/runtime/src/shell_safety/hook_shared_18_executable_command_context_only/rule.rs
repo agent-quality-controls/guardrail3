@@ -3,6 +3,7 @@ use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use crate::facts::HookScriptKind;
 use crate::inputs::ExecutableCommandContextInput;
+use crate::support::cargo_subcommand_tail;
 
 const ID: &str = "RS-HOOKS-SOURCE-22";
 
@@ -97,35 +98,34 @@ fn predicate_for_step_family(family: &str) -> fn(&ResolvedCommand) -> bool {
 }
 
 fn is_guardrail_rs_validate_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "g3rs" && command.command_text().contains(" rs validate")
+    command.command_name() == "g3rs"
+        && matches!(command.args(), [first, second, ..] if first == "rs" && second == "validate")
 }
 
 fn is_guardrail_validate_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "g3rs"
-        && command.command_text().contains(" validate")
-        && !command.command_text().contains(" rs validate")
+    command.command_name() == "g3rs" && matches!(command.args(), [first, ..] if first == "validate")
 }
 
 fn is_cargo_clippy_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "cargo" && command.command_text().contains(" clippy")
+    command.command_name() == "cargo" && cargo_subcommand_tail(command, "clippy").is_some()
 }
 
 fn is_cargo_deny_command(command: &ResolvedCommand) -> bool {
-    (command.command_name() == "cargo" && command.command_text().contains(" deny"))
+    (command.command_name() == "cargo" && cargo_subcommand_tail(command, "deny").is_some())
         || command.command_name() == "cargo-deny"
 }
 
 fn is_cargo_test_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "cargo" && command.command_text().contains(" test")
+    command.command_name() == "cargo" && cargo_subcommand_tail(command, "test").is_some()
 }
 
 fn is_cargo_machete_command(command: &ResolvedCommand) -> bool {
-    (command.command_name() == "cargo" && command.command_text().contains(" machete"))
+    (command.command_name() == "cargo" && cargo_subcommand_tail(command, "machete").is_some())
         || command.command_name() == "cargo-machete"
 }
 
 fn is_cargo_dupes_command(command: &ResolvedCommand) -> bool {
-    (command.command_name() == "cargo" && command.command_text().contains(" dupes"))
+    (command.command_name() == "cargo" && cargo_subcommand_tail(command, "dupes").is_some())
         || command.command_name() == "cargo-dupes"
 }
 
@@ -135,10 +135,7 @@ fn is_gitleaks_command(command: &ResolvedCommand) -> bool {
 
 fn is_frozen_lockfile_command(command: &ResolvedCommand) -> bool {
     command.command_name() == "pnpm"
-        && matches!(
-            command.args().first().map(String::as_str),
-            Some("install" | "i")
-        )
+        && matches!(command.args().first().map(String::as_str), Some("install" | "i"))
         && command.args().iter().any(|arg| arg == "--frozen-lockfile")
 }
 
