@@ -1,5 +1,5 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
+use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command, any_resolved_command_on_line};
 use hook_shell_parser::types::ParsedShellScript;
 
 use crate::inputs::RustHookCommandInput;
@@ -24,8 +24,25 @@ pub(crate) fn script_contains_guardrail_step(parsed: &ParsedShellScript) -> bool
     any_resolved_command(parsed, is_guardrail_validate_path_command)
 }
 
-pub(crate) fn script_contains_path_qualified_guardrail_step(parsed: &ParsedShellScript) -> bool {
-    any_resolved_command(parsed, is_path_qualified_guardrail_validate_path_command)
+pub(crate) fn line_contains_guardrail_step(
+    parsed: &ParsedShellScript,
+    raw: &str,
+    line_no: usize,
+) -> bool {
+    any_resolved_command_on_line(parsed, raw, line_no, &is_guardrail_validate_path_command)
+}
+
+pub(crate) fn line_contains_path_qualified_guardrail_step(
+    parsed: &ParsedShellScript,
+    raw: &str,
+    line_no: usize,
+) -> bool {
+    any_resolved_command_on_line(
+        parsed,
+        raw,
+        line_no,
+        &is_path_qualified_guardrail_validate_path_command,
+    )
 }
 
 fn is_path_qualified_guardrail_validate_path_command(command: &ResolvedCommand) -> bool {

@@ -39,6 +39,19 @@ fn passes_when_direct_grep_and_validation_chain_covers_all_configs() {
 }
 
 #[test]
+fn passes_when_direct_trigger_line_calls_helper_defined_elsewhere() {
+    let content = r#"
+run_guardrails() {
+    g3rs validate --path .
+}
+
+echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$' && run_guardrails
+"#;
+    let results = run_case(content);
+    assertions::assert_present(&results);
+}
+
+#[test]
 fn passes_when_trigger_logic_checks_all_rust_guardrail_configs() {
     let content = r#"
 if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
@@ -213,6 +226,21 @@ if test -n "$changed_path"; then
             g3rs validate --path .
             ;;
     esac
+fi
+"#;
+    let results = run_case(content);
+    assertions::assert_present(&results);
+}
+
+#[test]
+fn passes_when_matching_branch_calls_helper_defined_outside_branch() {
+    let content = r#"
+run_guardrails() {
+    g3rs validate --path .
+}
+
+if echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
+    run_guardrails
 fi
 "#;
     let results = run_case(content);
