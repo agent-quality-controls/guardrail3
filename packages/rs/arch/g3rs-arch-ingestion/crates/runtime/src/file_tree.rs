@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use g3_workspace_crawl::G3WorkspaceCrawl;
+use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use g3rs_arch_types::types::{
     G3RsArchCrateNode, G3RsArchFileTreeChecksInput, G3RsArchFileTreeCrate, G3RsArchModuleDir,
     G3RsArchRustPolicyState,
@@ -14,7 +14,7 @@ use crate::workspace::{
 };
 
 pub(crate) fn ingest_for_file_tree_checks(
-    crawl: &G3WorkspaceCrawl,
+    crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsArchFileTreeChecksInput, G3RsArchIngestionError> {
     let view = CrawlView::new(crawl);
     let crate_nodes = collect_crate_nodes(&view)?;
