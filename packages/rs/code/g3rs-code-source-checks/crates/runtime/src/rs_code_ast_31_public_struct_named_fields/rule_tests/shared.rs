@@ -111,6 +111,54 @@ fn shared_nested_public_struct_with_self_qualified_impl_still_errors() {
 }
 
 #[test]
+fn shared_nested_public_struct_with_super_qualified_impl_still_errors() {
+    let results = super::super::check_source_with_shared(
+        "src/types.rs",
+        "pub mod api {\n    pub struct Input { pub rel_path: String, pub profile: Option<String>, pub raw: String, pub flags: usize, pub mode: bool }\n    mod nested {\n        impl super::Input { pub fn validate(&self) -> bool { self.mode } }\n    }\n}",
+        false,
+        true,
+    );
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("public struct exposes named public fields"),
+            file: Some("src/types.rs"),
+            inventory: Some(false),
+            message: Some(
+                "Shared-crate struct `Input` exposes 5 named `pub` fields and also defines inherent methods. Keep shared public fields only on plain data structs. Make the fields private or move the behavior out, so shared crates stay as transport data instead of mixing data and API logic.",
+            ),
+            line: Some(2),
+        }],
+    );
+}
+
+#[test]
+fn shared_nested_public_struct_with_absolute_crate_qualified_impl_still_errors() {
+    let results = super::super::check_source_with_shared(
+        "src/types.rs",
+        "pub mod api {\n    pub struct Input { pub rel_path: String, pub profile: Option<String>, pub raw: String, pub flags: usize, pub mode: bool }\n    mod nested {\n        impl ::crate::api::Input { pub fn validate(&self) -> bool { self.mode } }\n    }\n}",
+        false,
+        true,
+    );
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("public struct exposes named public fields"),
+            file: Some("src/types.rs"),
+            inventory: Some(false),
+            message: Some(
+                "Shared-crate struct `Input` exposes 5 named `pub` fields and also defines inherent methods. Keep shared public fields only on plain data structs. Make the fields private or move the behavior out, so shared crates stay as transport data instead of mixing data and API logic.",
+            ),
+            line: Some(2),
+        }],
+    );
+}
+
+#[test]
 fn shared_struct_with_mixed_visibility_still_warns() {
     let results = super::super::check_source_with_shared(
         "src/types.rs",
