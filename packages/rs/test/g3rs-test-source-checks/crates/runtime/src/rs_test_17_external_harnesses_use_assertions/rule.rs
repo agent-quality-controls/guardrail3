@@ -17,9 +17,12 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
         input.file.assertions_package_name.as_deref(),
         input.proof_bearing_assertion_functions,
     );
-    let uses_owned_assertion_alias = input.function.body.call_paths.iter().any(|path| {
-        path.len() == 1 && owned_assertion_aliases.contains_key(&path[0])
-    });
+    let uses_owned_assertion_alias = input
+        .function
+        .body
+        .call_paths
+        .iter()
+        .any(|path| path_uses_owned_assertion_alias(path, &owned_assertion_aliases));
     let uses_owned_assertions = uses_owned_assertion_alias
         || has_owned_assertion_proof(
             input.function,
@@ -95,7 +98,7 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
                     &local_assertion_helpers,
                     &imported_local_helpers,
                 );
-            let owned_assertion_alias = owned_assertion_aliases.contains_key(&path[0]);
+            let owned_assertion_alias = path_uses_owned_assertion_alias(path, &owned_assertion_aliases);
             return (direct_local_helper || aliased_local_helper || imported_local_helper)
                 && !owned_assertion_alias;
         }
@@ -265,6 +268,19 @@ fn insert_owned_assertion_alias(
     owned_assertion_aliases
         .insert(local_name, qualified.clone())
         .is_none_or(|existing| existing != qualified)
+}
+
+fn path_uses_owned_assertion_alias(
+    path: &[String],
+    owned_assertion_aliases: &std::collections::BTreeMap<String, String>,
+) -> bool {
+    match path {
+        [name] => owned_assertion_aliases.contains_key(name),
+        [first, name] if matches!(first.as_str(), "crate" | "self" | "super") => {
+            owned_assertion_aliases.contains_key(name)
+        }
+        _ => false,
+    }
 }
 
 fn import_binds_name(imports: &[UseBinding], name: &str) -> bool {
