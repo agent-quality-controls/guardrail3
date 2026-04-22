@@ -3,9 +3,9 @@ use std::fs;
 use g3rs_release_ingestion_assertions::ingest::collect as assertions;
 use tempfile::tempdir;
 
-use super::support::{crawl, git_init, long_readme, restore_permissions, write};
 #[cfg(unix)]
 use super::support::make_unreadable;
+use super::support::{crawl, git_init, long_readme, restore_permissions, write};
 
 #[test]
 fn config_pipeline_reports_workflow_tooling_and_repo_inventory() {
@@ -98,7 +98,12 @@ jobs:
     let input = super::super::config_input_with_path(&crawl, Some(bin_dir.as_os_str()));
     let results = g3rs_release_config_checks::check(&input);
 
-    for id in ["RS-RELEASE-CONFIG-15", "RS-RELEASE-CONFIG-16", "RS-RELEASE-CONFIG-17", "RS-RELEASE-CONFIG-21"] {
+    for id in [
+        "RS-RELEASE-CONFIG-15",
+        "RS-RELEASE-CONFIG-16",
+        "RS-RELEASE-CONFIG-17",
+        "RS-RELEASE-CONFIG-21",
+    ] {
         assert_eq!(assertions::count(&results, id), 1, "{results:#?}");
     }
 }

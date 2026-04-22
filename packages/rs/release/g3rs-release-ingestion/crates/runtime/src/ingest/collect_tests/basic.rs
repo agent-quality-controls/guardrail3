@@ -1,5 +1,5 @@
-use tempfile::tempdir;
 use std::path::Path;
+use tempfile::tempdir;
 
 use super::support::{crawl, git_init, long_readme, write};
 
@@ -61,16 +61,20 @@ include = ["src/**", "Cargo.toml", "README.md", "LICENSE"]
     let crawl = crawl(root);
 
     let config = super::super::config_result(&crawl).expect("config ingestion should succeed");
-    assert_eq!(config.crates.len(), 1);
-    assert_eq!(config.crates[0].name, "demo");
-    assert!(config.crates[0].publishable);
-    assert_eq!(config.repo.as_ref().unwrap().publishable_count, 1);
-    assert!(config.repo.as_ref().unwrap().release_plz_exists);
-    assert!(config.repo.as_ref().unwrap().cliff_exists);
+    assert_eq!(config.crate_checks.len(), 1);
+    assert_eq!(config.crate_checks[0].name, "demo");
+    assert!(config.crate_checks[0].publishable);
+    assert_eq!(config.repo_checks[0].publishable_count, 1);
+    assert!(config.repo_checks[0].release_plz_exists);
+    assert!(config.repo_checks[0].cliff_exists);
 
-    let filetree = super::super::filetree_result(&crawl).expect("filetree ingestion should succeed");
+    let filetree =
+        super::super::filetree_result(&crawl).expect("filetree ingestion should succeed");
     assert_eq!(filetree.repo.as_ref().unwrap().publishable_count, 1);
-    assert_eq!(filetree.repo.as_ref().unwrap().license_rel_path.as_deref(), Some("LICENSE"));
+    assert_eq!(
+        filetree.repo.as_ref().unwrap().license_rel_path.as_deref(),
+        Some("LICENSE")
+    );
     assert!(filetree.repo.as_ref().unwrap().release_plz_exists);
     assert!(filetree.repo.as_ref().unwrap().cliff_exists);
     assert_eq!(filetree.readmes.len(), 1);
@@ -169,7 +173,8 @@ repository.workspace = true
 
     let crawl = crawl(root);
 
-    let filetree = super::super::filetree_result(&crawl).expect("filetree ingestion should succeed");
+    let filetree =
+        super::super::filetree_result(&crawl).expect("filetree ingestion should succeed");
     assert_eq!(filetree.readmes.len(), 1);
     assert_eq!(filetree.readmes[0].readme_rel_path, "README.md");
     assert!(filetree.readmes[0].readme_exists);
@@ -206,7 +211,10 @@ publish = false
 internal = { path = "../internal", version = "0.1.0" }
 "#,
     );
-    write(root.join("crates/public/src/lib.rs"), "pub fn public() {}\n");
+    write(
+        root.join("crates/public/src/lib.rs"),
+        "pub fn public() {}\n",
+    );
     write(
         root.join("crates/internal/Cargo.toml"),
         r#"
@@ -217,7 +225,10 @@ edition = "2024"
 publish = false
 "#,
     );
-    write(root.join("crates/internal/src/lib.rs"), "pub fn internal() {}\n");
+    write(
+        root.join("crates/internal/src/lib.rs"),
+        "pub fn internal() {}\n",
+    );
 
     let crawl = crawl(root);
 
@@ -225,7 +236,8 @@ publish = false
     let config_results = g3rs_release_config_checks::check(&config);
     assert!(config_results.is_empty(), "{config_results:#?}");
 
-    let filetree = super::super::filetree_result(&crawl).expect("filetree ingestion should succeed");
+    let filetree =
+        super::super::filetree_result(&crawl).expect("filetree ingestion should succeed");
     assert_eq!(filetree.repo.as_ref().unwrap().publishable_count, 0);
     let filetree_results = g3rs_release_filetree_checks::check(&filetree);
     assert!(filetree_results.is_empty(), "{filetree_results:#?}");
@@ -267,7 +279,7 @@ resolver = "2"
 
     std::env::set_current_dir(original_dir).expect("restore current directory");
 
-    let dry_run = config.crates[0]
+    let dry_run = config.crate_checks[0]
         .dry_run
         .as_ref()
         .expect("published crate should have dry-run result");

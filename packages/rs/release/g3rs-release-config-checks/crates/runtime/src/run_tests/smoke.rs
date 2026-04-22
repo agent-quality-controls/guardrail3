@@ -11,7 +11,10 @@ name = "some-crate"
         ),
         Some("# empty cliff.toml\n"),
     );
-    let repo = input.repo.as_mut().expect("repo should exist");
+    let repo = input
+        .repo_checks
+        .first_mut()
+        .expect("repo check should exist");
     repo.publishable_count = 0;
     repo.non_publishable_count = 2;
     repo.semver_checks_installed = false;

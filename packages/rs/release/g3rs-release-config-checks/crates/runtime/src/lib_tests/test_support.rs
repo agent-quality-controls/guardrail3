@@ -3,10 +3,7 @@
 use std::collections::BTreeSet;
 
 use cargo_toml_parser::{
-    types::CargoToml,
-    types::InheritableValue,
-    types::PackageSection,
-    types::VecStringOrBool,
+    types::CargoToml, types::InheritableValue, types::PackageSection, types::VecStringOrBool,
     types::WorkspacePackageSection,
 };
 use g3rs_release_types::{
@@ -26,10 +23,10 @@ pub(crate) fn config_input_for_crate(
     let krate = build_crate("Cargo.toml", cargo, workspace_package);
 
     G3RsReleaseConfigChecksInput {
-        repo: None,
-        crates: vec![krate],
-        edges: Vec::new(),
-        input_failures: Vec::new(),
+        repo_checks: Vec::new(),
+        crate_checks: vec![krate],
+        edge_checks: Vec::new(),
+        input_failure_checks: Vec::new(),
     }
 }
 
@@ -51,10 +48,10 @@ pub(crate) fn config_input_for_publishable_crate(
     let krate = build_crate("Cargo.toml", cargo, workspace_package);
 
     G3RsReleaseConfigChecksInput {
-        repo: None,
-        crates: vec![krate],
-        edges: Vec::new(),
-        input_failures: Vec::new(),
+        repo_checks: Vec::new(),
+        crate_checks: vec![krate],
+        edge_checks: Vec::new(),
+        input_failure_checks: Vec::new(),
     }
 }
 
@@ -69,7 +66,7 @@ pub(crate) fn config_input_for_repo(
         .map(|value| cliff_toml_parser::parse(value).expect("cliff fixture should parse"));
 
     G3RsReleaseConfigChecksInput {
-        repo: Some(G3RsReleaseConfigRepo {
+        repo_checks: vec![G3RsReleaseConfigRepo {
             cargo_rel_path: "Cargo.toml".to_owned(),
             release_plz_rel_path: "release-plz.toml".to_owned(),
             release_plz_exists: release_plz.is_some(),
@@ -91,10 +88,10 @@ pub(crate) fn config_input_for_repo(
             semver_checks_installed: false,
             publish_setting: None,
             release_profile_settings: Vec::new(),
-        }),
-        crates: Vec::new(),
-        edges: Vec::new(),
-        input_failures: Vec::new(),
+        }],
+        crate_checks: Vec::new(),
+        edge_checks: Vec::new(),
+        input_failure_checks: Vec::new(),
     }
 }
 
