@@ -137,7 +137,10 @@ fn local_assertion_helper_names<'a>(
                     && assertion_helpers.contains(path[0].as_str())
                     && !function.body.shadowed_idents.contains(&path[0]))
                     || (path.len() > 1
-                        && matches!(path.first().map(String::as_str), Some("crate" | "self"))
+                        && matches!(
+                            path.first().map(String::as_str),
+                            Some("crate" | "self" | "super")
+                        )
                         && path
                             .last()
                             .is_some_and(|name| assertion_helpers.contains(name.as_str())))

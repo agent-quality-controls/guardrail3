@@ -126,6 +126,28 @@ fn reports_external_harness_using_crate_qualified_local_assertion_wrapper() {
 }
 
 #[test]
+fn reports_external_harness_using_super_qualified_local_assertion_wrapper() {
+    let results = assertions::check(&assertions::input(
+        vec![assertions::file(
+            "tests/super_wrapper.rs",
+            G3RsTestFileKind::ExternalHarness,
+            Some("demo_assertions"),
+            "fn assert_demo() { assert_eq!(1, 1); }\nfn wrapper() { super::assert_demo(); }\n#[test]\nfn harness() { wrapper(); }\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-17",
+        G3Severity::Error,
+        "external harness asserts directly",
+        "tests/super_wrapper.rs",
+        Some(4),
+    );
+}
+
+#[test]
 fn reports_external_harness_using_local_assertion_helper() {
     let results = assertions::check(&assertions::input(
         vec![assertions::file(
