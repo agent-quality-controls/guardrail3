@@ -34,6 +34,22 @@ fn flags_inline_comment_teaching_no_verify() {
 }
 
 #[test]
+fn ignores_escaped_hash_when_comment_text_looks_like_bypass_instruction() {
+    let results =
+        run_case(r#"cargo fmt --check \# use git commit --no-verify if this gets in the way
+"#);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Info),
+            title: Some("no hook bypass instructions"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn ignores_hash_inside_quotes() {
     let results = run_case("printf '# use --no-verify only in docs\\n'\n");
     assertions::assert_rule_results(

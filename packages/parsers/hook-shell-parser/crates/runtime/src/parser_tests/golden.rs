@@ -312,6 +312,27 @@ fn strips_inline_comments_from_executable_commands() {
 }
 
 #[test]
+fn preserves_escaped_hash_outside_quotes_in_executable_commands() {
+    let parsed = parse_script(r#"echo \# g3rs validate --path .
+"#);
+
+    assert_script_matches(
+        &parsed,
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "echo",
+                Some(r#"echo \# g3rs validate --path ."#),
+                None,
+                None,
+                None,
+            )],
+            &[],
+        ),
+    );
+}
+
+#[test]
 fn ignores_heredoc_body_command_text() {
     let parsed = parse_script("cat <<'EOF'\nguardrail3 rs validate --staged .\nEOF\n");
 
