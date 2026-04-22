@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use g3rs_test_types::G3RsTestComponentFileTreeFacts;
-use g3rs_test_types::ast::UseBinding;
+use g3rs_test_types::ast::{FunctionInfo, UseBinding};
 
 pub(super) fn import_uses_external_runtime_boundary(binding: &UseBinding) -> bool {
     binding
@@ -20,6 +20,7 @@ pub(super) fn import_uses_local_boundary(binding: &UseBinding) -> bool {
 pub(super) fn assertions_call_runtime_check_test_tree(
     imports: &[UseBinding],
     call_paths: &[Vec<String>],
+    functions: &[FunctionInfo],
     runtime_package_name: Option<&str>,
 ) -> bool {
     let Some(runtime_package_name) = runtime_package_name else {
@@ -61,6 +62,21 @@ pub(super) fn assertions_call_runtime_check_test_tree(
         [single] => imported_check_test_tree.contains(single),
         [first, second, ..] => runtime_roots.contains(first) && second == "check_test_tree",
         _ => false,
+    }) || functions.iter().any(|function| {
+        function.body.call_paths.iter().any(|path| match path.as_slice() {
+            [single] => function
+                .body
+                .local_call_aliases
+                .get(single)
+                .is_some_and(|target| match target.as_slice() {
+                    [name] => imported_check_test_tree.contains(name),
+                    [first, second, ..] => {
+                        runtime_roots.contains(first) && second == "check_test_tree"
+                    }
+                    _ => false,
+                }),
+            _ => false,
+        })
     })
 }
 
