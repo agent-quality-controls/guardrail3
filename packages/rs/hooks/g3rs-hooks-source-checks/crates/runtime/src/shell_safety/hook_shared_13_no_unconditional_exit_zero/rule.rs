@@ -267,11 +267,15 @@ fn opens_case_scope(line: &str) -> bool {
 }
 
 fn closes_case_scope(line: &str) -> bool {
-    starts_shell_keyword(line, "esac") || line.ends_with("; esac") || line.ends_with(";esac")
+    starts_shell_keyword(line, "esac")
+        || line.ends_with("; esac")
+        || line.ends_with(";esac")
+        || contains_shell_keyword(line, "esac")
 }
 
 fn opens_loop_scope(line: &str) -> bool {
     matches!(line.split_whitespace().next(), Some("for" | "while" | "until"))
+        || starts_time_prefixed_loop_scope(line)
 }
 
 fn closes_loop_scope(parsed: &ParsedShellScript, line_no: usize, line: &str) -> bool {
@@ -294,6 +298,44 @@ fn starts_shell_keyword(line: &str, keyword: &str) -> bool {
         || rest.starts_with(|c: char| {
             c.is_whitespace() || matches!(c, ';' | '&' | '|' | '<' | '>')
         })
+}
+
+fn starts_time_prefixed_loop_scope(line: &str) -> bool {
+    let Some(rest) = line.strip_prefix("time ") else {
+        return false;
+    };
+    let rest = if let Some(after_flag) = rest.strip_prefix("-p ") {
+        after_flag
+    } else {
+        rest
+    };
+    matches!(rest.split_whitespace().next(), Some("for" | "while" | "until"))
+}
+
+fn contains_shell_keyword(line: &str, keyword: &str) -> bool {
+    let mut search_start = 0usize;
+
+    while let Some(relative_index) = line[search_start..].find(keyword) {
+        let start = search_start + relative_index;
+        let end = start + keyword.len();
+
+        let before_ok = line[..start]
+            .chars()
+            .last()
+            .is_none_or(|ch| ch.is_whitespace() || matches!(ch, ';' | '&' | '|' | '<' | '>'));
+        let after_ok = line[end..]
+            .chars()
+            .next()
+            .is_none_or(|ch| ch.is_whitespace() || matches!(ch, ';' | '&' | '|' | '<' | '>'));
+
+        if before_ok && after_ok {
+            return true;
+        }
+
+        search_start = end;
+    }
+
+    false
 }
 
 #[cfg(test)]
