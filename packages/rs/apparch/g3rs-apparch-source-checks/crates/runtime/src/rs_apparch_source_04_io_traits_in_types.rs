@@ -1,34 +1,27 @@
-use std::collections::{BTreeMap, BTreeSet};
-
 use g3rs_apparch_types::{
-    G3RsApparchCrate, G3RsApparchLayer, G3RsApparchPublicItemKind, G3RsApparchSourceChecksInput,
+    G3RsApparchIoTraitsSourceChecksInput, G3RsApparchLayer, G3RsApparchPublicItemKind,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-APPARCH-SOURCE-04";
 
 pub(crate) fn check(
-    input: &G3RsApparchSourceChecksInput,
-    crates_by_path: &BTreeMap<String, &G3RsApparchCrate>,
+    input: &G3RsApparchIoTraitsSourceChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    let mut crates_with_traits = BTreeSet::new();
+    let krate = &input.krate;
+    if !matches!(
+        krate.layer,
+        Some(G3RsApparchLayer::IoInbound) | Some(G3RsApparchLayer::IoOutbound)
+    ) {
+        return;
+    }
 
     for fact in input
-        .public_items
+        .public_traits
         .iter()
         .filter(|fact| fact.kind == G3RsApparchPublicItemKind::Trait)
     {
-        let Some(krate) = crates_by_path.get(&fact.cargo_rel_path).copied() else {
-            continue;
-        };
-        if !matches!(
-            krate.layer,
-            Some(G3RsApparchLayer::IoInbound) | Some(G3RsApparchLayer::IoOutbound)
-        ) {
-            continue;
-        }
-        let _ = crates_with_traits.insert(krate.cargo_rel_path.clone());
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
@@ -46,16 +39,7 @@ pub(crate) fn check(
         ));
     }
 
-    for krate in &input.crates {
-        if !matches!(
-            krate.layer,
-            Some(G3RsApparchLayer::IoInbound) | Some(G3RsApparchLayer::IoOutbound)
-        ) {
-            continue;
-        }
-        if crates_with_traits.contains(&krate.cargo_rel_path) {
-            continue;
-        }
+    if input.public_traits.is_empty() {
         results.push(
             G3CheckResult::new(
                 ID.to_owned(),

@@ -1,8 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_apparch_types::{
-    G3RsApparchPublicItem, G3RsApparchPublicItemKind, G3RsApparchSourceChecksInput,
-};
+use g3rs_apparch_types as apparch;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use super::error::G3RsApparchIngestionError;
@@ -16,26 +14,65 @@ mod source_tests;
 
 pub fn ingest_for_source_checks(
     crawl: &G3RsWorkspaceCrawl,
-) -> Result<G3RsApparchSourceChecksInput, G3RsApparchIngestionError> {
+) -> Result<apparch::G3RsApparchSourceChecksInput, G3RsApparchIngestionError> {
     let view = CrawlView::new(crawl);
     let workspace = load_workspace_root(&view)?;
     let records = collect_workspace_crates(&view, &workspace)?;
 
-    let mut public_items = Vec::new();
+    let mut public_items_by_crate = BTreeMap::new();
     for record in &records {
-        public_items.extend(collect_public_items_for_crate(&view, record)?);
+        let _ = public_items_by_crate.insert(
+            record.krate.cargo_rel_path.clone(),
+            collect_public_items_for_crate(&view, record)?,
+        );
     }
 
-    Ok(G3RsApparchSourceChecksInput {
-        crates: records.iter().map(|record| record.krate.clone()).collect(),
-        public_items,
+    Ok(apparch::G3RsApparchSourceChecksInput {
+        io_traits_checks: records
+            .iter()
+            .filter(|record| {
+                matches!(
+                    record.krate.layer,
+                    Some(apparch::G3RsApparchLayer::IoInbound)
+                        | Some(apparch::G3RsApparchLayer::IoOutbound)
+                )
+            })
+            .map(|record| apparch::G3RsApparchIoTraitsSourceChecksInput {
+                krate: record.krate.clone(),
+                public_traits: public_items_by_crate
+                    .remove(&record.krate.cargo_rel_path)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter(|item| item.kind == apparch::G3RsApparchPublicItemKind::Trait)
+                    .collect(),
+            })
+            .collect(),
+        types_public_surface_checks: records
+            .iter()
+            .filter(|record| record.krate.layer == Some(apparch::G3RsApparchLayer::Types))
+            .map(|record| apparch::G3RsApparchTypesPublicSurfaceChecksInput {
+                krate: record.krate.clone(),
+                public_behavior_items: public_items_by_crate
+                    .remove(&record.krate.cargo_rel_path)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter(|item| {
+                        matches!(
+                            item.kind,
+                            apparch::G3RsApparchPublicItemKind::FreeFunction
+                                | apparch::G3RsApparchPublicItemKind::InherentMethod
+                        )
+                    })
+                    .collect(),
+            })
+            .collect(),
     })
 }
 
 fn collect_public_items_for_crate(
     view: &CrawlView<'_>,
     record: &CrateRecord,
-) -> Result<Vec<G3RsApparchPublicItem>, G3RsApparchIngestionError> {
+) -> Result<Vec<apparch::G3RsApparchPublicItem>, G3RsApparchIngestionError> {
     let entrypoints = determine_entrypoints(view, record);
     let mut public_items = Vec::new();
     let mut visited = BTreeMap::new();
@@ -92,7 +129,7 @@ fn walk_module_file(
     cargo_rel_path: &str,
     visited: &mut BTreeMap<String, bool>,
     public_module: bool,
-    public_items: &mut Vec<G3RsApparchPublicItem>,
+    public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
 ) -> Result<(), G3RsApparchIngestionError> {
     match visited.get(rel_path).copied() {
         Some(true) => return Ok(()),
@@ -144,7 +181,7 @@ fn walk_items(
     items: &[syn::Item],
     visited: &mut BTreeMap<String, bool>,
     public_module: bool,
-    public_items: &mut Vec<G3RsApparchPublicItem>,
+    public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
 ) -> Result<(), G3RsApparchIngestionError> {
     for item in items {
         if is_cfg_test_only(item.attrs()) {
@@ -153,23 +190,23 @@ fn walk_items(
         match item {
             syn::Item::Trait(item_trait) => {
                 if public_module && matches!(item_trait.vis, syn::Visibility::Public(_)) {
-                    public_items.push(G3RsApparchPublicItem {
+                    public_items.push(apparch::G3RsApparchPublicItem {
                         cargo_rel_path: cargo_rel_path.to_owned(),
                         rel_path: rel_path.to_owned(),
                         item_name: item_trait.ident.to_string(),
                         owner_name: None,
-                        kind: G3RsApparchPublicItemKind::Trait,
+                        kind: apparch::G3RsApparchPublicItemKind::Trait,
                     });
                 }
             }
             syn::Item::Fn(item_fn) => {
                 if public_module && matches!(item_fn.vis, syn::Visibility::Public(_)) {
-                    public_items.push(G3RsApparchPublicItem {
+                    public_items.push(apparch::G3RsApparchPublicItem {
                         cargo_rel_path: cargo_rel_path.to_owned(),
                         rel_path: rel_path.to_owned(),
                         item_name: item_fn.sig.ident.to_string(),
                         owner_name: None,
-                        kind: G3RsApparchPublicItemKind::FreeFunction,
+                        kind: apparch::G3RsApparchPublicItemKind::FreeFunction,
                     });
                 }
             }
@@ -185,12 +222,12 @@ fn walk_items(
                     if !matches!(method.vis, syn::Visibility::Public(_)) {
                         continue;
                     }
-                    public_items.push(G3RsApparchPublicItem {
+                    public_items.push(apparch::G3RsApparchPublicItem {
                         cargo_rel_path: cargo_rel_path.to_owned(),
                         rel_path: rel_path.to_owned(),
                         item_name: method.sig.ident.to_string(),
                         owner_name: owner_name.clone(),
-                        kind: G3RsApparchPublicItemKind::InherentMethod,
+                        kind: apparch::G3RsApparchPublicItemKind::InherentMethod,
                     });
                 }
             }
