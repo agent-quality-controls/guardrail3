@@ -5,7 +5,7 @@ use syn::punctuated::Punctuated;
 use syn::visit::Visit;
 
 use super::body::TestBodyVisitor;
-use super::UseBinding;
+use g3rs_test_types::ast::UseBinding;
 
 pub(super) fn is_test_attr(attr: &syn::Attribute) -> bool {
     let predicate = cfg_predicate(attr);

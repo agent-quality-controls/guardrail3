@@ -29,7 +29,7 @@ fn reports_test_checking_results_through_local_path() {
         "RS-TEST-SOURCE-07",
         "test checks results through local path",
         "src/feature_tests/golden.rs",
-        "Test `golden` in `src/feature_tests/golden.rs` checks results through local path `super::assertions::assert_results`. Move those result assertions into the shared assertions crate and call that from the test instead, so internal and external tests use the same proof."
+        "Test `golden` in `src/feature_tests/golden.rs` checks results through local path `super::assertions::assert_results`. Move those result assertions into the shared assertions crate and call that from the test instead, so internal and external tests use the same proof.",
     );
 }
 
@@ -59,7 +59,7 @@ fn reports_test_without_shared_proof_step() {
         "RS-TEST-SOURCE-07",
         "test has no shared proof step",
         "tests/missing.rs",
-        "Test `missing` in `tests/missing.rs` does not call the shared assertions crate. Move the result assertions into the shared assertions crate and call that from the test, so internal and external tests use the same proof."
+        "Test `missing` in `tests/missing.rs` does not call the shared assertions crate. Move the result assertions into the shared assertions crate and call that from the test, so internal and external tests use the same proof.",
     );
 }
 

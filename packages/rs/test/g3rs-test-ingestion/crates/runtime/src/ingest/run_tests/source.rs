@@ -23,8 +23,8 @@ fn write(path: impl AsRef<Path>, content: &str) {
 
 fn run_ast_pipeline(root: &Path) -> Vec<guardrail3_check_types::G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = super::super::ingest_for_source_checks(&crawl)
-        .expect("source ingestion should succeed");
+    let inputs =
+        super::super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     inputs
         .iter()
         .flat_map(g3rs_test_source_checks::check)
@@ -94,7 +94,11 @@ fn pipeline_reports_assertions_boundary_rules() {
     );
 
     let results = run_ast_pipeline(root);
-    assert_file_has_result(&results, "crates/assertions/src/lib.rs", "RS-TEST-SOURCE-16");
+    assert_file_has_result(
+        &results,
+        "crates/assertions/src/lib.rs",
+        "RS-TEST-SOURCE-16",
+    );
     assert_file_has_result(&results, "crates/runtime/tests/api.rs", "RS-TEST-SOURCE-17");
     assert_file_has_result(
         &results,
@@ -124,6 +128,40 @@ fn pipeline_reports_malformed_owned_source_as_rs_test_10() {
         "failed to read test input",
         Some("tests/broken.rs"),
     );
+}
+
+#[test]
+fn pipeline_reports_all_parse_failures_and_still_checks_valid_files() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(
+        root.join("tests/good.rs"),
+        "#[test]\n#[ignore] // reason: blocked on external service\nfn good() {}\n",
+    );
+    write(root.join("tests/broken_a.rs"), "#[test]\nfn broken_a( {\n");
+    write(root.join("tests/broken_b.rs"), "#[test]\nfn broken_b( {\n");
+
+    let results = run_ast_pipeline(root);
+
+    assert_result(
+        &results,
+        "RS-TEST-SOURCE-10",
+        "failed to read test input",
+        Some("tests/broken_a.rs"),
+    );
+    assert_result(
+        &results,
+        "RS-TEST-SOURCE-10",
+        "failed to read test input",
+        Some("tests/broken_b.rs"),
+    );
+    assert_file_has_result(&results, "tests/good.rs", "RS-TEST-SOURCE-04");
 }
 
 #[test]
@@ -174,8 +212,8 @@ fn ingest_for_source_checks_classifies_root_files_by_role() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = super::super::ingest_for_source_checks(&crawl)
-        .expect("source ingestion should succeed");
+    let inputs =
+        super::super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 
     assert_eq!(inputs.len(), 1, "{inputs:#?}");
     let input = &inputs[0];
@@ -245,8 +283,8 @@ fn ingest_for_source_checks_expects_package_style_assertions_after_nested_fix_at
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = super::super::ingest_for_source_checks(&crawl)
-        .expect("source ingestion should succeed");
+    let inputs =
+        super::super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 
     assert_eq!(inputs.len(), 1, "{inputs:#?}");
     let input = &inputs[0];

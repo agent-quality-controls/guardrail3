@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use g3rs_test_types::ast::{FunctionInfo, TestFunctionInfo, TestHarnessFacts, UseBinding};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::parse::{TestFunctionInfo, UseBinding};
 use crate::support::TestFunctionInput;
 
 const ID: &str = "RS-TEST-SOURCE-07";
@@ -11,8 +11,8 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
     if input.function.assertions.has_assertion_macro
         || has_owned_assertion_proof(
             input.function,
-            &input.parsed.imports,
-            &input.parsed.file_function_names,
+            &input.file.parsed.imports,
+            &input.file.parsed.file_function_names,
             input.file.assertions_package_name.as_deref(),
             input.proof_bearing_assertion_functions,
         )
@@ -37,9 +37,9 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
 
     if let Some(local_path) = local_proof_path(
         input.function,
-        &input.parsed.functions,
-        &input.parsed.imports,
-        &input.parsed.file_function_names,
+        &input.file.parsed.functions,
+        &input.file.parsed.imports,
+        &input.file.parsed.file_function_names,
         input.file.assertions_package_name.as_deref(),
         input.proof_bearing_assertion_functions,
     ) {
@@ -75,7 +75,7 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
 
 fn local_proof_path(
     function: &TestFunctionInfo,
-    functions: &[crate::parse::FunctionInfo],
+    functions: &[FunctionInfo],
     imports: &[UseBinding],
     file_function_names: &BTreeSet<String>,
     assertions_package_name: Option<&str>,
@@ -204,7 +204,7 @@ fn looks_like_proof_helper_name(name: &str) -> bool {
 }
 
 fn local_assertion_helper_names<'a>(
-    functions: &'a [crate::parse::FunctionInfo],
+    functions: &'a [FunctionInfo],
     imports: &[UseBinding],
     file_function_names: &BTreeSet<String>,
     assertions_package_name: Option<&str>,
@@ -215,12 +215,12 @@ fn local_assertion_helper_names<'a>(
         .filter(|function| !function.is_test)
         .filter(|function| {
             has_owned_assertion_proof(
-                &crate::parse::TestFunctionInfo {
+                &TestFunctionInfo {
                     line: function.line,
                     name: function.name.clone(),
                     assertions: function.assertions.clone(),
                     body: function.body.clone(),
-                    harness: crate::parse::TestHarnessFacts::default(),
+                    harness: TestHarnessFacts::default(),
                 },
                 imports,
                 file_function_names,
@@ -295,15 +295,19 @@ pub(crate) fn has_owned_assertion_proof(
 
     let bare_call_is_owned = |name: &str| {
         if function.body.shadowed_idents.contains(name) {
-            return function.body.local_call_aliases.get(name).is_some_and(|path| {
-                path_is_owned(
-                    path,
-                    &root_prefixes,
-                    &bare_imports,
-                    &glob_prefixes,
-                    proof_bearing_assertion_functions,
-                )
-            });
+            return function
+                .body
+                .local_call_aliases
+                .get(name)
+                .is_some_and(|path| {
+                    path_is_owned(
+                        path,
+                        &root_prefixes,
+                        &bare_imports,
+                        &glob_prefixes,
+                        proof_bearing_assertion_functions,
+                    )
+                });
         }
         !file_function_names.contains(name)
             && (bare_imports
@@ -315,19 +319,9 @@ pub(crate) fn has_owned_assertion_proof(
                 }))
     };
 
-    function.body.call_paths.iter().any(|path| match path.first() {
-        Some(first) if path.len() == 1 => bare_call_is_owned(first),
-        Some(_) => path_is_owned(
-            path,
-            &root_prefixes,
-            &bare_imports,
-            &glob_prefixes,
-            proof_bearing_assertion_functions,
-        ),
-        None => false,
-    }) || function
-        .harness
-        .method_receiver_paths
+    function
+        .body
+        .call_paths
         .iter()
         .any(|path| match path.first() {
             Some(first) if path.len() == 1 => bare_call_is_owned(first),
@@ -340,6 +334,21 @@ pub(crate) fn has_owned_assertion_proof(
             ),
             None => false,
         })
+        || function
+            .harness
+            .method_receiver_paths
+            .iter()
+            .any(|path| match path.first() {
+                Some(first) if path.len() == 1 => bare_call_is_owned(first),
+                Some(_) => path_is_owned(
+                    path,
+                    &root_prefixes,
+                    &bare_imports,
+                    &glob_prefixes,
+                    proof_bearing_assertion_functions,
+                ),
+                None => false,
+            })
 }
 
 fn qualified_assertion_name(module_prefix: &[String], tail: &str) -> String {

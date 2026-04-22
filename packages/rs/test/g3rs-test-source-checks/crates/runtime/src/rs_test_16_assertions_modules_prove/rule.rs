@@ -1,7 +1,7 @@
 use g3rs_test_types::G3RsTestFileKind;
+use g3rs_test_types::ast::{FieldAccessInfo, FunctionInfo};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::parse::{FieldAccessInfo, FunctionInfo};
 use crate::support::{AssertionsModuleInput, TestFunctionInput};
 
 const ID: &str = "RS-TEST-SOURCE-16";
@@ -26,6 +26,7 @@ const REPORT_METHODS: &[&str] = &[
 
 pub(crate) fn check(input: &AssertionsModuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     let first_exported_function = input
+        .file
         .parsed
         .functions
         .iter()
@@ -103,7 +104,7 @@ fn owns_sidecar_semantic_proof(input: &TestFunctionInput<'_>) -> bool {
         &input.function.body.field_accesses,
         &input.function.body.method_names,
         &input.function.body.path_uses,
-    ) || local_semantic_helper_names(&input.parsed.functions)
+    ) || local_semantic_helper_names(&input.file.parsed.functions)
         .iter()
         .any(|helper| {
             input.function.body.call_paths.iter().any(|path| {

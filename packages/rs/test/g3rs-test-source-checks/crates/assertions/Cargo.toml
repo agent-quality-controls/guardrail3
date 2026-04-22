@@ -21,9 +21,11 @@ checks = []
 workspace = true
 
 [dependencies]
+g3rs-test-ingestion-runtime = { path = "../../../g3rs-test-ingestion/crates/runtime", version = "0.1.0" }
 g3rs-test-types = { path = "../../../g3rs-test-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0", features = ["types"] }
 g3rs-test-source-checks-runtime = { path = "../runtime", version = "0.1.0" }
+syn = { version = "2", features = ["full", "parsing", "visit"] }
 
 [package.metadata.docs.rs]
 all-features = true

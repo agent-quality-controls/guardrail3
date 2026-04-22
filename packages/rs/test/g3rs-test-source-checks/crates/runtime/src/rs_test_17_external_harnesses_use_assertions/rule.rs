@@ -1,7 +1,7 @@
 use g3rs_test_types::G3RsTestFileKind;
+use g3rs_test_types::ast::{FunctionInfo, TestFunctionInfo, TestHarnessFacts, UseBinding};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::parse::FunctionInfo;
 use crate::rs_test_07_real_proof_site::has_owned_assertion_proof;
 use crate::support::TestFunctionInput;
 
@@ -26,8 +26,8 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
 
     if has_owned_assertion_proof(
         input.function,
-        &input.parsed.imports,
-        &input.parsed.file_function_names,
+        &input.file.parsed.imports,
+        &input.file.parsed.file_function_names,
         input.file.assertions_package_name.as_deref(),
         input.proof_bearing_assertion_functions,
     ) {
@@ -47,9 +47,9 @@ pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResu
 
 fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
     let local_assertion_helpers = local_assertion_helper_names(
-        &input.parsed.functions,
-        &input.parsed.imports,
-        &input.parsed.file_function_names,
+        &input.file.parsed.functions,
+        &input.file.parsed.imports,
+        &input.file.parsed.file_function_names,
         input.file.assertions_package_name.as_deref(),
         input.proof_bearing_assertion_functions,
     );
@@ -71,7 +71,7 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
             .is_some_and(|name| local_assertion_helpers.contains(name.as_str()))
             && path
                 .first()
-                .is_none_or(|first| !import_binds_name(&input.parsed.imports, first))
+                .is_none_or(|first| !import_binds_name(&input.file.parsed.imports, first))
     }) || input
         .function
         .body
@@ -88,7 +88,7 @@ fn calls_local_assertion_helper(input: &TestFunctionInput<'_>) -> bool {
 
 fn local_assertion_helper_names<'a>(
     functions: &'a [FunctionInfo],
-    imports: &[crate::parse::UseBinding],
+    imports: &[UseBinding],
     file_function_names: &std::collections::BTreeSet<String>,
     assertions_package_name: Option<&str>,
     proof_bearing_assertion_functions: Option<&std::collections::BTreeSet<String>>,
@@ -99,12 +99,12 @@ fn local_assertion_helper_names<'a>(
         .filter(|function| {
             function.assertions.has_assertion_macro
                 || has_owned_assertion_proof(
-                    &crate::parse::TestFunctionInfo {
+                    &TestFunctionInfo {
                         line: function.line,
                         name: function.name.clone(),
                         assertions: function.assertions.clone(),
                         body: function.body.clone(),
-                        harness: crate::parse::TestHarnessFacts::default(),
+                        harness: TestHarnessFacts::default(),
                     },
                     imports,
                     file_function_names,
@@ -137,7 +137,7 @@ fn local_assertion_helper_names<'a>(
     assertion_helpers
 }
 
-fn import_binds_name(imports: &[crate::parse::UseBinding], name: &str) -> bool {
+fn import_binds_name(imports: &[UseBinding], name: &str) -> bool {
     imports.iter().any(|binding| {
         binding.local_name.as_deref() == Some(name)
             || (binding.local_name.is_none()

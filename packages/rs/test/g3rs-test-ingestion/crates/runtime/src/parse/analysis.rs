@@ -5,7 +5,7 @@ use syn::visit::Visit;
 
 use super::body::{analyze_function, collect_check_result_aliases, maybe_push_test_function};
 use super::helpers;
-use super::types::{
+use g3rs_test_types::ast::{
     CfgTestModuleInfo, IgnoreReasonInfo, ModuleInfo, ParsedTestFile, PublicValueInfo,
     PublicValueKind, UseBinding,
 };
