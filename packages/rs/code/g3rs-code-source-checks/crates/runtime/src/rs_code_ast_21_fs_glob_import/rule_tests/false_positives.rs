@@ -35,3 +35,10 @@ fn skips_std_alias_from_sibling_module() {
     let results = super::super::check_source("src/foo.rs", content, false);
     assert_rule_results(&results, &[]);
 }
+
+#[test]
+fn skips_top_level_cfg_test_std_alias_for_glob_import() {
+    let content = "#[cfg(test)]\nuse std as s;\nuse s::fs::*;\n";
+    let results = super::super::check_source("src/foo.rs", content, false);
+    assert_rule_results(&results, &[]);
+}

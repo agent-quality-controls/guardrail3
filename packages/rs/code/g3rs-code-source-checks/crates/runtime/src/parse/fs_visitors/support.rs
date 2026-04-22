@@ -192,6 +192,64 @@ pub(super) fn collect_std_extern_crate_alias(
     }
 }
 
+pub(super) fn extend_scope_aliases_from_file(
+    file: &syn::File,
+    include_test_items: bool,
+    std_aliases: &mut BTreeSet<String>,
+    fs_aliases: &mut BTreeSet<String>,
+) {
+    extend_scope_aliases_from_items(&file.items, include_test_items, std_aliases, fs_aliases);
+}
+
+pub(super) fn extend_scope_aliases_from_items(
+    items: &[syn::Item],
+    include_test_items: bool,
+    std_aliases: &mut BTreeSet<String>,
+    fs_aliases: &mut BTreeSet<String>,
+) {
+    for item in items {
+        match item {
+            syn::Item::Use(use_item)
+                if include_test_items || !attrs_enter_test_context(&use_item.attrs) =>
+            {
+                collect_std_aliases(&use_item.tree, std_aliases, fs_aliases);
+            }
+            syn::Item::ExternCrate(extern_crate)
+                if include_test_items || !attrs_enter_test_context(&extern_crate.attrs) =>
+            {
+                collect_std_extern_crate_alias(extern_crate, std_aliases);
+            }
+            _ => {}
+        }
+    }
+}
+
+pub(super) fn extend_scope_aliases_from_block(
+    block: &syn::Block,
+    include_test_items: bool,
+    std_aliases: &mut BTreeSet<String>,
+    fs_aliases: &mut BTreeSet<String>,
+) {
+    for stmt in &block.stmts {
+        let syn::Stmt::Item(item) = stmt else {
+            continue;
+        };
+        match item {
+            syn::Item::Use(use_item)
+                if include_test_items || !attrs_enter_test_context(&use_item.attrs) =>
+            {
+                collect_std_aliases(&use_item.tree, std_aliases, fs_aliases);
+            }
+            syn::Item::ExternCrate(extern_crate)
+                if include_test_items || !attrs_enter_test_context(&extern_crate.attrs) =>
+            {
+                collect_std_extern_crate_alias(extern_crate, std_aliases);
+            }
+            _ => {}
+        }
+    }
+}
+
 fn collect_std_aliases_under_std(
     tree: &syn::UseTree,
     std_aliases: &mut BTreeSet<String>,

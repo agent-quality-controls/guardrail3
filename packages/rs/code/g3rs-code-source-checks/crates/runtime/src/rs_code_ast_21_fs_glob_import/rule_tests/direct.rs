@@ -38,6 +38,24 @@ fn errors_on_std_alias_glob_import() {
 }
 
 #[test]
+fn errors_on_forward_std_alias_glob_import() {
+    let content = "use s::fs::*;\nuse std as s;\nfn main() {}";
+    let results = super::super::check_source("src/foo.rs", content, false);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("std::fs glob import"),
+            file: Some("src/foo.rs"),
+            inventory: Some(false),
+            message: Some("Direct `use std::fs::*` glob import bypasses clippy method bans."),
+            line: Some(1),
+        }],
+    );
+}
+
+#[test]
 fn errors_on_std_fs_alias_glob_import() {
     let content = "use std::fs as fs2;\nuse fs2::*;\nfn main() {}";
     let results = super::super::check_source("src/foo.rs", content, false);

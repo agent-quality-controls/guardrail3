@@ -50,3 +50,18 @@ fn skips_std_alias_import_from_inner_block_scope() {
     let results = super::super::check_source("src/lib.rs", content, false);
     assert_rule_results(&results, &[]);
 }
+
+#[test]
+fn skips_top_level_cfg_test_std_alias_for_call() {
+    let content =
+        "#[cfg(test)]\nuse std as s;\nfn probe() { let _ = s::fs::read_to_string(\"fixture\"); }\n";
+    let results = super::super::check_source("src/lib.rs", content, false);
+    assert_rule_results(&results, &[]);
+}
+
+#[test]
+fn skips_top_level_cfg_test_std_alias_for_import() {
+    let content = "#[cfg(test)]\nuse std as s;\nuse s::fs;\n";
+    let results = super::super::check_source("src/lib.rs", content, false);
+    assert_rule_results(&results, &[]);
+}
