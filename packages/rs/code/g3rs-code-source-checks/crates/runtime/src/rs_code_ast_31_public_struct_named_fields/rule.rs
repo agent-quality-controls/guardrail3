@@ -7,7 +7,7 @@ const ID: &str = "RS-CODE-SOURCE-31";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_public_struct_field_bags(input.source) {
-        let has_inherent_impl = struct_has_inherent_impl(input.source, &info.struct_name);
+        let has_inherent_impl = struct_has_inherent_impl(input.source, &info.qualified_name);
         if input.is_shared_crate && info.all_fields_public && !has_inherent_impl {
             continue;
         }
@@ -45,23 +45,45 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
     }
 }
 
-fn struct_has_inherent_impl(source: &syn::File, struct_name: &str) -> bool {
-    source.items.iter().any(|item| {
-        let syn::Item::Impl(item_impl) = item else {
-            return false;
-        };
-        if item_impl.trait_.is_some() {
-            return false;
+fn struct_has_inherent_impl(source: &syn::File, qualified_name: &str) -> bool {
+    items_have_inherent_impl(&source.items, &mut Vec::new(), qualified_name)
+}
+
+fn items_have_inherent_impl(
+    items: &[syn::Item],
+    module_path: &mut Vec<String>,
+    qualified_name: &str,
+) -> bool {
+    items.iter().any(|item| match item {
+        syn::Item::Mod(item_mod) => {
+            let Some((_, nested_items)) = &item_mod.content else {
+                return false;
+            };
+            module_path.push(item_mod.ident.to_string());
+            let found = items_have_inherent_impl(nested_items, module_path, qualified_name);
+            let _ = module_path.pop();
+            found
         }
-        let syn::Type::Path(type_path) = item_impl.self_ty.as_ref() else {
-            return false;
-        };
-        type_path.qself.is_none()
-            && type_path
-                .path
-                .segments
-                .last()
-                .is_some_and(|segment| segment.ident == struct_name)
+        syn::Item::Impl(item_impl) => {
+            if item_impl.trait_.is_some() {
+                return false;
+            }
+            let syn::Type::Path(type_path) = item_impl.self_ty.as_ref() else {
+                return false;
+            };
+            type_path.qself.is_none() && {
+                let mut path = module_path.clone();
+                path.extend(
+                    type_path
+                        .path
+                        .segments
+                        .iter()
+                        .map(|segment| segment.ident.to_string()),
+                );
+                path.join("::") == qualified_name
+            }
+        }
+        _ => false,
     })
 }
 
