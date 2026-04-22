@@ -1,11 +1,11 @@
-use g3rs_fmt_types::{G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState};
+use g3rs_fmt_types::{G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
 const ID: &str = "RS-FMT-CONFIG-07";
 
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    let G3RsFmtRustfmtConfigState::Parsed(rustfmt) = &input.rustfmt_state else {
+    let g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) = &input.rustfmt_state else {
         return;
     };
     if rustfmt.ignore.is_empty() {
