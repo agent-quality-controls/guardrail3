@@ -67,7 +67,7 @@ fn first_top_level_exit_zero_line(
             case_depth = case_depth.saturating_sub(1);
             continue;
         }
-        if closes_loop_scope(trimmed) {
+        if closes_loop_scope(parsed, source_line.line_no, trimmed) {
             loop_depth = loop_depth.saturating_sub(1);
             continue;
         }
@@ -203,13 +203,18 @@ fn closes_case_scope(line: &str) -> bool {
 }
 
 fn opens_loop_scope(line: &str) -> bool {
-    matches!(
-        line.split_whitespace().next(),
-        Some("for" | "while" | "until")
-    ) && !closes_loop_scope(line)
+    matches!(line.split_whitespace().next(), Some("for" | "while" | "until"))
 }
 
-fn closes_loop_scope(line: &str) -> bool {
+fn closes_loop_scope(parsed: &ParsedShellScript, line_no: usize, line: &str) -> bool {
+    if parsed
+        .executable_lines
+        .iter()
+        .any(|executable| executable.line_no == line_no && executable.command_name == "done")
+    {
+        return true;
+    }
+
     line == "done" || line.ends_with("; done") || line.ends_with(";done")
 }
 
