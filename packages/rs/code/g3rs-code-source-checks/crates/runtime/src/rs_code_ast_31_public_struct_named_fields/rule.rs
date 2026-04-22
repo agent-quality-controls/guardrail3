@@ -97,7 +97,10 @@ fn normalize_impl_self_type_path(
     }
 
     let normalized = if type_path.path.leading_colon.is_some() {
-        segments
+        match segments.first().map(String::as_str) {
+            Some("crate") => segments.get(1..)?.to_vec(),
+            _ => segments,
+        }
     } else {
         match segments.first().map(String::as_str) {
             Some("crate") => segments.get(1..)?.to_vec(),
