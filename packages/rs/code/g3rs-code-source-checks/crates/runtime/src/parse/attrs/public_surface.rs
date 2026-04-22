@@ -23,6 +23,7 @@ pub(crate) fn find_public_struct_field_bags(source: &syn::File) -> Vec<PublicStr
     let mut visitor = PublicStructFieldBagVisitor {
         out: Vec::new(),
         public_module_stack: vec![true],
+        module_path: Vec::new(),
     };
     visitor.visit_file(source);
     visitor.out
@@ -39,6 +40,7 @@ struct PublicResultErrorVisitor {
 struct PublicStructFieldBagVisitor {
     out: Vec<PublicStructFieldBagInfo>,
     public_module_stack: Vec<bool>,
+    module_path: Vec<String>,
 }
 
 impl PublicResultErrorVisitor {
@@ -105,7 +107,9 @@ impl PublicStructFieldBagVisitor {
         let next =
             self.current_module_public() && matches!(item_mod.vis, syn::Visibility::Public(_));
         self.public_module_stack.push(next);
+        self.module_path.push(item_mod.ident.to_string());
         visit(self);
+        let _ = self.module_path.pop();
         let _ = self.public_module_stack.pop();
     }
 }
@@ -221,12 +225,24 @@ impl<'source> Visit<'source> for PublicStructFieldBagVisitor {
                 self.out.push(PublicStructFieldBagInfo {
                     line: helpers::span_line(item_struct.ident.span()),
                     struct_name: item_struct.ident.to_string(),
+                    qualified_name: qualified_public_item_name(
+                        &self.module_path,
+                        &item_struct.ident.to_string(),
+                    ),
                     public_field_count,
                     all_fields_public,
                 });
             }
         }
         syn::visit::visit_item_struct(self, item_struct);
+    }
+}
+
+fn qualified_public_item_name(module_path: &[String], item_name: &str) -> String {
+    if module_path.is_empty() {
+        item_name.to_owned()
+    } else {
+        format!("{}::{item_name}", module_path.join("::"))
     }
 }
 

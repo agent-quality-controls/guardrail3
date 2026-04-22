@@ -68,6 +68,7 @@ pub(crate) enum LargeTypeItem {
 pub(crate) struct PublicStructFieldBagInfo {
     pub(crate) line: usize,
     pub(crate) struct_name: String,
+    pub(crate) qualified_name: String,
     pub(crate) public_field_count: usize,
     pub(crate) all_fields_public: bool,
 }
