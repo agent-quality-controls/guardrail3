@@ -40,7 +40,12 @@ pub(super) fn assertions_call_runtime_check_test_tree(
             continue;
         }
         if let Some(local_name) = binding.local_name.as_ref() {
-            if binding.path_segments.len() == 1 {
+            if binding.path_segments.len() == 1
+                || binding
+                    .path_segments
+                    .last()
+                    .is_some_and(|segment| segment == "self")
+            {
                 let _ = runtime_roots.insert(local_name.clone());
             } else if binding
                 .path_segments
