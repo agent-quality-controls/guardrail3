@@ -6,11 +6,11 @@ use crate::support::{error, info};
 const ID: &str = "RS-RELEASE-CONFIG-03";
 
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
-    if !krate.publishable {
+    if !crate::support::crate_publishable(krate) {
         return;
     }
 
-    if krate.repository_present {
+    if crate::support::crate_repository_present(krate) {
         results.push(info(
             ID,
             format!("{}: repository present", krate.name),

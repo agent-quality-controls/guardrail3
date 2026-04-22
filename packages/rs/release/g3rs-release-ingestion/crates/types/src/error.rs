@@ -36,9 +36,7 @@ impl std::fmt::Display for G3RsReleaseIngestionError {
             Self::RepoRootChecksNotImplemented => {
                 f.write_str("repo-root release ingestion is not implemented yet")
             }
-            Self::CargoTomlNotFound => {
-                f.write_str("no Cargo.toml found at the workspace root")
-            }
+            Self::CargoTomlNotFound => f.write_str("no Cargo.toml found at the workspace root"),
             Self::NormalizationFailed { path, reason } => {
                 write!(f, "cannot normalize {}: {reason}", path.display())
             }

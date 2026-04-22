@@ -1,16 +1,21 @@
-use g3rs_release_types::G3RsReleaseConfigRepo;
+use g3rs_release_types::{G3RsReleaseConfigCrate, G3RsReleaseConfigRepo};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::info;
 
 const ID: &str = "RS-RELEASE-CONFIG-17";
 
-pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
-    if repo.publishable_count == 0 {
+pub(crate) fn check(
+    repo: &G3RsReleaseConfigRepo,
+    crates: &[G3RsReleaseConfigCrate],
+    results: &mut Vec<G3CheckResult>,
+) {
+    if crate::support::repo_publishable_count(crates) == 0 {
         return;
     }
 
-    if repo.release_profile_settings.is_empty() {
+    let release_profile_settings = crate::support::repo_release_profile_settings(repo);
+    if release_profile_settings.is_empty() {
         return;
     }
 
@@ -19,7 +24,7 @@ pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResul
         "Release profile inventory",
         format!(
             "Root `[profile.release]` settings: {}.",
-            repo.release_profile_settings.join(", ")
+            release_profile_settings.join(", ")
         ),
         &repo.cargo_rel_path,
     ));

@@ -63,8 +63,16 @@ include = ["src/**", "Cargo.toml", "README.md", "LICENSE"]
     let config = super::super::config_result(&crawl).expect("config ingestion should succeed");
     assert_eq!(config.crate_checks.len(), 1);
     assert_eq!(config.crate_checks[0].name, "demo");
-    assert!(config.crate_checks[0].publishable);
-    assert_eq!(config.repo_checks[0].publishable_count, 1);
+    assert!(matches!(
+        config.crate_checks[0]
+            .cargo
+            .package
+            .as_ref()
+            .and_then(|package| package.publish.as_ref()),
+        Some(cargo_toml_parser::types::InheritableValue::Value(
+            cargo_toml_parser::types::VecStringOrBool::Bool(true)
+        ))
+    ));
     assert!(config.repo_checks[0].release_plz_exists);
     assert!(config.repo_checks[0].cliff_exists);
 

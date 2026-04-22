@@ -1,16 +1,26 @@
-use g3rs_release_types::G3RsReleaseConfigCrate;
+use g3rs_release_types::{G3RsReleaseConfigCrate, G3RsReleaseConfigRepo};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::info;
 
 const ID: &str = "RS-RELEASE-CONFIG-24";
 
-pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
-    if !krate.publishable || !krate.is_binary {
+pub(crate) fn check(
+    repo: Option<&G3RsReleaseConfigRepo>,
+    crates: &[G3RsReleaseConfigCrate],
+    krate: &G3RsReleaseConfigCrate,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if !crate::support::crate_publishable(krate) || !krate.is_binary {
         return;
     }
 
-    let (title, message) = if krate.linux_release_target_present {
+    let publishable_binary_count = crate::support::repo_publishable_binary_crate_count(crates);
+    let linux_release_target_present = repo.is_some_and(|repo| {
+        crate::support::crate_linux_release_target_present(repo, krate, publishable_binary_count)
+    });
+
+    let (title, message) = if linux_release_target_present {
         (
             format!("{}: linux release target present", krate.name),
             "A workflow includes a Linux target.".to_owned(),

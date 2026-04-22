@@ -6,12 +6,12 @@ use crate::support::{error, info};
 const ID: &str = "RS-RELEASE-CONFIG-06";
 
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
-    if !krate.publishable {
+    if !crate::support::crate_publishable(krate) {
         return;
     }
 
-    match krate.version_string.as_ref() {
-        Some(version) if krate.version_valid => {
+    match crate::support::crate_version_string(krate) {
+        Some(version) if crate::support::crate_version_valid(krate) => {
             results.push(info(
                 ID,
                 format!("{}: valid semver", krate.name),

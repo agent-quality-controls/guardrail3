@@ -1,12 +1,16 @@
-use g3rs_release_types::G3RsReleaseConfigRepo;
+use g3rs_release_types::{G3RsReleaseConfigCrate, G3RsReleaseConfigRepo};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, warn};
 
 const ID: &str = "RS-RELEASE-CONFIG-10";
 
-pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
-    if repo.publishable_count == 0 {
+pub(crate) fn check(
+    repo: &G3RsReleaseConfigRepo,
+    crates: &[G3RsReleaseConfigCrate],
+    results: &mut Vec<G3CheckResult>,
+) {
+    if crate::support::repo_publishable_count(crates) == 0 {
         return;
     }
 
@@ -70,9 +74,9 @@ pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResul
         ));
     }
 
-    for crate_name in repo
-        .publishable_crate_names
-        .difference(&repo.release_plz_package_names)
+    let release_plz_package_names = crate::support::repo_release_plz_package_names(repo);
+    for crate_name in
+        crate::support::repo_publishable_crate_names(crates).difference(&release_plz_package_names)
     {
         issues += 1;
         results.push(warn(
@@ -103,7 +107,11 @@ mod rule_tests;
 pub(crate) fn run_check(release_plz_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
     let input = crate::lib_tests::test_support::config_input_for_repo(Some(release_plz_toml), None);
     let mut results = Vec::new();
-    crate::rs_release_config_10_release_plz_baseline::check(&input.repo_checks[0], &mut results);
+    crate::rs_release_config_10_release_plz_baseline::check(
+        &input.repo_checks[0],
+        &input.crate_checks,
+        &mut results,
+    );
     results
 }
 

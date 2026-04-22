@@ -58,24 +58,9 @@ pub(super) fn parse_root_cargo(
         }
     };
 
-    let raw = match crate::parse::parse_raw_toml(&content, &entry.path.abs_path) {
-        Ok(raw) => raw,
-        Err(error) => {
-            push_all_failures(
-                config_failures,
-                filetree_failures,
-                source_failures,
-                &entry.path.rel_path,
-                format!("Failed to parse root Cargo.toml for release checks: {error}"),
-            );
-            return None;
-        }
-    };
-
     Some(RootCargo {
         cargo,
         cargo_abs_path: entry.path.abs_path.clone(),
-        raw,
     })
 }
 

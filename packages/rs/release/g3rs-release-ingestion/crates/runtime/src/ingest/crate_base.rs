@@ -4,11 +4,10 @@ use std::path::Path;
 use cargo_toml_parser::types::{
     CargoToml, InheritableValue, PackageSection, StringOrBool, WorkspacePackageSection,
 };
-use semver::Version;
 
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
-use super::collect::{CrateBase, CrateReadmeFacts, CrateReleaseFacts, ParsedCrate};
+use super::collect::{CrateBase, CrateReadmeFacts, ParsedCrate};
 
 pub(super) fn build_crate_base(
     crawl: &G3RsWorkspaceCrawl,
@@ -19,7 +18,6 @@ pub(super) fn build_crate_base(
     let name = package
         .and_then(|package| package.name.clone())
         .unwrap_or_else(|| krate.cargo_rel_path.clone());
-    let publish_declared = publish_declared(package);
     let publishable = publishable(package, workspace_package);
     let is_binary = is_binary_crate(crawl, &krate.rel_dir, &krate.cargo);
     let binary_target_names = binary_target_names(crawl, &krate.rel_dir, &krate.cargo);
@@ -36,14 +34,11 @@ pub(super) fn build_crate_base(
         readme_field.unwrap_or("README.md"),
     );
 
-    let version_string = version_string(package, workspace_package);
-
     CrateBase {
         name,
         cargo_rel_path: krate.cargo_rel_path.clone(),
         cargo_abs_path: krate.cargo_abs_path.clone(),
         cargo: krate.cargo.clone(),
-        publish_declared,
         publishable,
         is_binary,
         is_library: is_library_crate(crawl, &krate.rel_dir, &krate.cargo),
@@ -52,60 +47,9 @@ pub(super) fn build_crate_base(
             declared_false: readme_declared_false,
             rel_path: readme_rel_path.clone(),
             abs_path: readme_abs_path,
-            exists: !readme_declared_false
-                && super::paths::file_exists(crawl, &readme_rel_path),
-        },
-        release: CrateReleaseFacts {
-            description_present: inherited_string_present(
-                package.and_then(|package| package.description.as_ref()),
-                workspace_package.and_then(|workspace| workspace.description.as_deref()),
-            ),
-            license_present: inherited_string_present(
-                package.and_then(|package| package.license.as_ref()),
-                workspace_package.and_then(|workspace| workspace.license.as_deref()),
-            ) || inherited_string_present(
-                package.and_then(|package| package.license_file.as_ref()),
-                workspace_package.and_then(|workspace| workspace.license_file.as_deref()),
-            ),
-            repository_present: inherited_string_present(
-                package.and_then(|package| package.repository.as_ref()),
-                workspace_package.and_then(|workspace| workspace.repository.as_deref()),
-            ),
-            keywords_count: inherited_vec_count(
-                package.and_then(|package| package.keywords.as_ref()),
-                workspace_package.map(|workspace| workspace.keywords.as_slice()),
-            ),
-            categories_count: inherited_vec_count(
-                package.and_then(|package| package.categories.as_ref()),
-                workspace_package.map(|workspace| workspace.categories.as_slice()),
-            ),
-            version_string: version_string.clone(),
-            workspace_version: matches!(
-                package.and_then(|package| package.version.as_ref()),
-                Some(InheritableValue::Inherit(_))
-            ),
-            version_valid: version_string
-                .as_deref()
-                .is_some_and(|version| Version::parse(version).is_ok()),
-            docs_rs_present: package
-                .and_then(|package| package.metadata.as_ref())
-                .and_then(docs_rs_table)
-                .is_some_and(has_supported_docs_rs_settings),
-            include_exclude_present: package.is_some_and(|package| {
-                package.include.as_ref().is_some_and(non_empty_values)
-                    || package.exclude.as_ref().is_some_and(non_empty_values)
-            }),
-            has_binstall_metadata: package
-                .and_then(|package| package.metadata.as_ref())
-                .and_then(|metadata: &toml::Value| metadata.get("binstall"))
-                .and_then(|value: &toml::Value| value.as_table())
-                .is_some(),
+            exists: !readme_declared_false && super::paths::file_exists(crawl, &readme_rel_path),
         },
     }
-}
-
-fn non_empty_values(value: &InheritableValue<Vec<String>>) -> bool {
-    matches!(value, InheritableValue::Value(values) if !values.is_empty())
 }
 
 fn publishable(
@@ -121,9 +65,9 @@ fn publishable(
         Some(InheritableValue::Value(cargo_toml_parser::types::VecStringOrBool::Bool(false))) => {
             false
         }
-        Some(InheritableValue::Value(
-            cargo_toml_parser::types::VecStringOrBool::VecString(values),
-        )) => !values.is_empty(),
+        Some(InheritableValue::Value(cargo_toml_parser::types::VecStringOrBool::VecString(
+            values,
+        ))) => !values.is_empty(),
         Some(InheritableValue::Value(cargo_toml_parser::types::VecStringOrBool::Bool(true))) => {
             true
         }
@@ -137,49 +81,6 @@ fn publishable(
                 Some(cargo_toml_parser::types::VecStringOrBool::Bool(true)) => true,
             }
         }
-    }
-}
-
-fn publish_declared(package: Option<&PackageSection>) -> bool {
-    package
-        .and_then(|package| package.publish.as_ref())
-        .is_some()
-}
-
-fn inherited_string_present(
-    value: Option<&InheritableValue<String>>,
-    workspace_value: Option<&str>,
-) -> bool {
-    match value {
-        Some(InheritableValue::Value(value)) => !value.trim().is_empty(),
-        Some(InheritableValue::Inherit(_)) => {
-            workspace_value.is_some_and(|value| !value.trim().is_empty())
-        }
-        None => false,
-    }
-}
-
-fn inherited_vec_count(
-    value: Option<&InheritableValue<Vec<String>>>,
-    workspace_values: Option<&[String]>,
-) -> Option<usize> {
-    match value {
-        Some(InheritableValue::Value(values)) => Some(values.len()),
-        Some(InheritableValue::Inherit(_)) => workspace_values.map(|values| values.len()),
-        None => None,
-    }
-}
-
-fn version_string(
-    package: Option<&PackageSection>,
-    workspace_package: Option<&WorkspacePackageSection>,
-) -> Option<String> {
-    match package.and_then(|package| package.version.as_ref()) {
-        Some(InheritableValue::Value(value)) => Some(value.clone()),
-        Some(InheritableValue::Inherit(_)) => {
-            workspace_package.and_then(|workspace| workspace.version.clone())
-        }
-        None => None,
     }
 }
 
@@ -214,33 +115,6 @@ fn readme_path_field<'a>(
         ),
         _ => (None, false),
     }
-}
-
-fn docs_rs_table(metadata: &toml::Value) -> Option<&toml::map::Map<String, toml::Value>> {
-    metadata
-        .get("docs.rs")
-        .and_then(|value| value.as_table())
-        .or_else(|| {
-            metadata
-                .get("docs")
-                .and_then(|docs| docs.as_table())
-                .and_then(|docs| docs.get("rs"))
-                .and_then(|value| value.as_table())
-        })
-}
-
-fn has_supported_docs_rs_settings(table: &toml::map::Map<String, toml::Value>) -> bool {
-    [
-        "all-features",
-        "features",
-        "no-default-features",
-        "default-target",
-        "targets",
-        "rustdoc-args",
-        "cargo-args",
-    ]
-    .iter()
-    .any(|key| table.contains_key(*key))
 }
 
 fn is_library_crate(crawl: &G3RsWorkspaceCrawl, rel_dir: &str, cargo: &CargoToml) -> bool {
@@ -292,11 +166,13 @@ fn binary_target_names(
         return names;
     }
 
-    if super::paths::file_exists(crawl, &super::paths::join_under_root(rel_dir, "src/main.rs"))
-        && let Some(package_name) = cargo
-            .package
-            .as_ref()
-            .and_then(|package| package.name.as_ref())
+    if super::paths::file_exists(
+        crawl,
+        &super::paths::join_under_root(rel_dir, "src/main.rs"),
+    ) && let Some(package_name) = cargo
+        .package
+        .as_ref()
+        .and_then(|package| package.name.as_ref())
     {
         let _ = names.insert(package_name.clone());
     }

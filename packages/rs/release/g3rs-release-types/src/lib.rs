@@ -2,9 +2,34 @@
 mod types;
 
 #[cfg(feature = "api")]
-pub use types::{
-    G3RsReleaseConfigChecksInput, G3RsReleaseConfigCrate, G3RsReleaseConfigEdge,
-    G3RsReleaseConfigRepo, G3RsReleaseDryRunOutcome, G3RsReleaseFileTreeChecksInput,
-    G3RsReleaseFileTreeReadme, G3RsReleaseFileTreeRepo, G3RsReleaseInputFailure,
-    G3RsReleasePathTargetKind, G3RsReleaseSourceChecksInput, G3RsReleaseSourceReadme,
-};
+pub type G3RsReleaseConfigChecksInput = types::G3RsReleaseConfigChecksInput;
+#[cfg(feature = "api")]
+pub type G3RsReleaseConfigCrate = types::G3RsReleaseConfigCrate;
+#[cfg(feature = "api")]
+pub type G3RsReleaseConfigEdge = types::G3RsReleaseConfigEdge;
+#[cfg(feature = "api")]
+pub type G3RsReleaseConfigRepo = types::G3RsReleaseConfigRepo;
+#[cfg(feature = "api")]
+pub type G3RsReleaseDryRunOutcome = types::G3RsReleaseDryRunOutcome;
+#[cfg(feature = "api")]
+pub type G3RsReleaseFileTreeChecksInput = types::G3RsReleaseFileTreeChecksInput;
+#[cfg(feature = "api")]
+pub type G3RsReleaseFileTreeReadme = types::G3RsReleaseFileTreeReadme;
+#[cfg(feature = "api")]
+pub type G3RsReleaseFileTreeRepo = types::G3RsReleaseFileTreeRepo;
+#[cfg(feature = "api")]
+pub type G3RsReleaseInputFailure = types::G3RsReleaseInputFailure;
+#[cfg(feature = "api")]
+pub type G3RsReleasePathTargetKind = types::G3RsReleasePathTargetKind;
+#[cfg(feature = "api")]
+pub type G3RsReleaseSourceChecksInput = types::G3RsReleaseSourceChecksInput;
+#[cfg(feature = "api")]
+pub type G3RsReleaseSourceReadme = types::G3RsReleaseSourceReadme;
+#[cfg(feature = "api")]
+pub type G3RsReleaseWorkflow = types::G3RsReleaseWorkflow;
+#[cfg(feature = "api")]
+pub type G3RsReleaseWorkflowAnalysis = types::G3RsReleaseWorkflowAnalysis;
+#[cfg(feature = "api")]
+pub type G3RsReleaseWorkflowJob = types::G3RsReleaseWorkflowJob;
+#[cfg(feature = "api")]
+pub type G3RsReleaseWorkflowStep = types::G3RsReleaseWorkflowStep;

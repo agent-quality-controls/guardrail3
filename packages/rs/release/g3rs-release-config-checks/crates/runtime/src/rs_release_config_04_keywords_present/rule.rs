@@ -6,11 +6,11 @@ use crate::support::{error, info};
 const ID: &str = "RS-RELEASE-CONFIG-04";
 
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
-    if !krate.publishable {
+    if !crate::support::crate_publishable(krate) {
         return;
     }
 
-    match krate.keywords_count {
+    match crate::support::crate_keywords_count(krate) {
         Some(count) if (1..=5).contains(&count) => {
             results.push(info(
                 ID,

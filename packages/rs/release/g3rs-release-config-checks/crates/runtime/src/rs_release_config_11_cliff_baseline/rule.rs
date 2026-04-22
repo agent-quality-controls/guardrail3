@@ -1,4 +1,4 @@
-use g3rs_release_types::G3RsReleaseConfigRepo;
+use g3rs_release_types::{G3RsReleaseConfigCrate, G3RsReleaseConfigRepo};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, message_covers_prefix, warn};
@@ -15,8 +15,12 @@ const REQUIRED_PREFIXES: &[&str] = &[
     "^chore",
 ];
 
-pub(crate) fn check(repo: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
-    if repo.publishable_count == 0 {
+pub(crate) fn check(
+    repo: &G3RsReleaseConfigRepo,
+    crates: &[G3RsReleaseConfigCrate],
+    results: &mut Vec<G3CheckResult>,
+) {
+    if crate::support::repo_publishable_count(crates) == 0 {
         return;
     }
 
@@ -103,7 +107,11 @@ mod rule_tests;
 pub(crate) fn run_check(cliff_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
     let input = crate::lib_tests::test_support::config_input_for_repo(None, Some(cliff_toml));
     let mut results = Vec::new();
-    crate::rs_release_config_11_cliff_baseline::check(&input.repo_checks[0], &mut results);
+    crate::rs_release_config_11_cliff_baseline::check(
+        &input.repo_checks[0],
+        &input.crate_checks,
+        &mut results,
+    );
     results
 }
 

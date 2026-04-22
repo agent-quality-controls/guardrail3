@@ -13,15 +13,11 @@ pub(crate) fn read_to_string(abs_path: &Path) -> Result<String, IngestionError> 
     })
 }
 
-pub(crate) fn parse_cargo_toml(content: &str, abs_path: &Path) -> Result<CargoToml, IngestionError> {
+pub(crate) fn parse_cargo_toml(
+    content: &str,
+    abs_path: &Path,
+) -> Result<CargoToml, IngestionError> {
     cargo_toml_parser::parse(content).map_err(|err| IngestionError::ParseFailed {
-        path: abs_path.to_path_buf(),
-        reason: err.to_string(),
-    })
-}
-
-pub(crate) fn parse_raw_toml(content: &str, abs_path: &Path) -> Result<toml::Value, IngestionError> {
-    toml::from_str(content).map_err(|err| IngestionError::ParseFailed {
         path: abs_path.to_path_buf(),
         reason: err.to_string(),
     })
@@ -37,7 +33,10 @@ pub(crate) fn parse_release_plz_toml(
     })
 }
 
-pub(crate) fn parse_cliff_toml(content: &str, abs_path: &Path) -> Result<CliffToml, IngestionError> {
+pub(crate) fn parse_cliff_toml(
+    content: &str,
+    abs_path: &Path,
+) -> Result<CliffToml, IngestionError> {
     cliff_toml_parser::parse(content).map_err(|err| IngestionError::ParseFailed {
         path: abs_path.to_path_buf(),
         reason: err.to_string(),

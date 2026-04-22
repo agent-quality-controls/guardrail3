@@ -3,8 +3,6 @@ use g3rs_release_config_checks_runtime as _;
 mod common;
 
 #[cfg(feature = "checks")]
-pub mod run;
-#[cfg(feature = "checks")]
 pub mod rs_release_config_00_publish_must_be_explicit;
 #[cfg(feature = "checks")]
 pub mod rs_release_config_01_description_present;
@@ -32,3 +30,5 @@ pub mod rs_release_config_11_cliff_baseline;
 pub mod rs_release_config_19_no_path_deps_to_unpublishable;
 #[cfg(feature = "checks")]
 pub mod rs_release_config_20_interdependent_version_consistency;
+#[cfg(feature = "checks")]
+pub mod run;

@@ -5,7 +5,9 @@ use semver as _;
 
 #[cfg(test)]
 use g3rs_release_config_checks_assertions as _;
-
+#[cfg(test)]
+#[path = "lib_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod lib_tests;
 mod rs_release_config_00_publish_must_be_explicit;
 mod rs_release_config_01_description_present;
 mod rs_release_config_02_license_present;
@@ -31,9 +33,6 @@ mod rs_release_config_24_linux_release_target;
 mod rs_release_config_25_input_failures;
 mod run;
 mod support;
-#[cfg(test)]
-#[path = "lib_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod lib_tests;
 
 #[cfg(feature = "checks")]
 pub use run::check;

@@ -156,6 +156,7 @@ dependencies = [
  "guardrail3-check-types",
  "release-plz-toml-parser",
  "semver",
+ "toml",
 ]
 
 [[package]]
@@ -219,10 +220,8 @@ dependencies = [
  "g3rs-workspace-crawl",
  "glob",
  "release-plz-toml-parser",
- "semver",
  "serde_yaml",
  "tempfile",
- "toml",
 ]
 
 [[package]]
@@ -241,7 +240,7 @@ dependencies = [
 name = "g3rs-release-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-release-source-checks-types",
+ "g3rs-release-types",
  "guardrail3-check-types",
 ]
 
