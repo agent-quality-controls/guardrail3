@@ -123,6 +123,14 @@ fn errors_on_std_alias_then_fs_import() {
 }
 
 #[test]
+fn does_not_leak_std_alias_across_sibling_functions_for_call() {
+    let content = "fn define_alias() {\n    use std as s;\n}\nfn probe() {\n    let _ = s::fs::read_to_string(\"foo\");\n}";
+    let results = super::super::check_source("src/foo.rs", content, false);
+
+    assert_rule_results(&results, &[]);
+}
+
+#[test]
 fn errors_on_grouped_std_fs_self_import() {
     let content = "use std::fs::{self, *};\nfn main() {}";
     let results = super::super::check_source("src/foo.rs", content, false);
@@ -160,6 +168,14 @@ fn errors_on_alias_backed_grouped_std_fs_self_import() {
             line: Some(2),
         }],
     );
+}
+
+#[test]
+fn does_not_leak_std_alias_across_sibling_functions_for_import() {
+    let content = "fn define_alias() {\n    use std as s;\n}\nfn probe() {\n    use s::fs;\n}";
+    let results = super::super::check_source("src/foo.rs", content, false);
+
+    assert_rule_results(&results, &[]);
 }
 
 #[test]
