@@ -255,6 +255,42 @@ fi
 }
 
 #[test]
+fn warns_when_helper_is_defined_after_the_call() {
+    let content = r#"
+if test -n "$changed_path"; then
+    should_validate_configs
+    g3rs validate --path .
+fi
+
+should_validate_configs() {
+    echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'
+}
+"#;
+    let results = run_case(content);
+    assertions::assert_missing(&results);
+}
+
+#[test]
+fn passes_when_later_helper_redefinition_overrides_earlier_noop() {
+    let content = r#"
+should_validate_configs() {
+    echo "noop"
+}
+
+should_validate_configs() {
+    echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'
+}
+
+if test -n "$changed_path"; then
+    should_validate_configs
+    g3rs validate --path .
+fi
+"#;
+    let results = run_case(content);
+    assertions::assert_present(&results);
+}
+
+#[test]
 fn passes_when_helper_branch_trigger_reaches_validation() {
     let content = r#"
 should_validate_configs() {

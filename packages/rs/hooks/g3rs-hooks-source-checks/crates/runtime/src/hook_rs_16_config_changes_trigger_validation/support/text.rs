@@ -72,7 +72,8 @@ fn line_reaches_config_trigger_inner(
     parsed
         .functions
         .iter()
-        .find(|function| function.name == function_name)
+        .rev()
+        .find(|function| function.name == function_name && function.line_no <= line_no)
         .is_some_and(|function| {
             function.parsed_body.executable_lines.iter().any(|line| {
                 line_reaches_config_trigger_inner(
