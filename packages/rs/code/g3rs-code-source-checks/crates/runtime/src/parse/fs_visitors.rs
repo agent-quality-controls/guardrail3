@@ -23,62 +23,108 @@ pub(crate) fn find_std_fs_glob_import_lines(source: &syn::File) -> Vec<usize> {
     visitor.out
 }
 
-fn use_tree_matches_std_fs(tree: &syn::UseTree) -> bool {
+fn use_tree_matches_std_fs(
+    tree: &syn::UseTree,
+    std_aliases: &BTreeSet<String>,
+    fs_aliases: &BTreeSet<String>,
+) -> bool {
     match tree {
-        syn::UseTree::Path(path) => {
-            if path.ident != "std" {
-                return false;
-            }
+        syn::UseTree::Path(path)
+            if path.ident == "std" || std_aliases.contains(path.ident.to_string().as_str()) =>
+        {
             match &*path.tree {
-                syn::UseTree::Path(inner) => inner.ident == "fs",
-                syn::UseTree::Name(name) => name.ident == "fs",
-                syn::UseTree::Rename(rename) => rename.ident == "fs",
+                syn::UseTree::Path(inner) => {
+                    inner.ident == "fs" || fs_aliases.contains(inner.ident.to_string().as_str())
+                }
+                syn::UseTree::Name(name) => {
+                    name.ident == "fs" || fs_aliases.contains(name.ident.to_string().as_str())
+                }
+                syn::UseTree::Rename(rename) => {
+                    rename.ident == "fs" || fs_aliases.contains(rename.ident.to_string().as_str())
+                }
                 syn::UseTree::Group(group) => group
                     .items
                     .iter()
-                    .any(use_tree_matches_std_fs_with_std_prefix),
+                    .any(|item| use_tree_matches_std_fs_with_std_prefix(item, fs_aliases)),
                 _ => false,
             }
         }
-        syn::UseTree::Group(group) => group.items.iter().any(use_tree_matches_std_fs),
+        syn::UseTree::Path(path)
+            if fs_aliases.contains(path.ident.to_string().as_str()) =>
+        {
+            true
+        }
+        syn::UseTree::Group(group) => group
+            .items
+            .iter()
+            .any(|item| use_tree_matches_std_fs(item, std_aliases, fs_aliases)),
         _ => false,
     }
 }
 
-fn use_tree_matches_std_fs_with_std_prefix(tree: &syn::UseTree) -> bool {
+fn use_tree_matches_std_fs_with_std_prefix(
+    tree: &syn::UseTree,
+    fs_aliases: &BTreeSet<String>,
+) -> bool {
     match tree {
-        syn::UseTree::Path(path) => path.ident == "fs",
-        syn::UseTree::Name(name) => name.ident == "fs",
-        syn::UseTree::Rename(rename) => rename.ident == "fs",
+        syn::UseTree::Path(path) => {
+            path.ident == "fs" || fs_aliases.contains(path.ident.to_string().as_str())
+        }
+        syn::UseTree::Name(name) => {
+            name.ident == "fs" || fs_aliases.contains(name.ident.to_string().as_str())
+        }
+        syn::UseTree::Rename(rename) => {
+            rename.ident == "fs" || fs_aliases.contains(rename.ident.to_string().as_str())
+        }
         _ => false,
     }
 }
 
-fn use_tree_is_std_fs_glob(tree: &syn::UseTree, std_aliases: &BTreeSet<String>) -> bool {
+fn use_tree_is_std_fs_glob(
+    tree: &syn::UseTree,
+    std_aliases: &BTreeSet<String>,
+    fs_aliases: &BTreeSet<String>,
+) -> bool {
     match tree {
-        syn::UseTree::Path(std_path) if std_aliases.contains(&std_path.ident.to_string()) => {
+        syn::UseTree::Path(std_path)
+            if std_path.ident == "std"
+                || std_aliases.contains(std_path.ident.to_string().as_str()) =>
+        {
             match &*std_path.tree {
-                syn::UseTree::Path(fs_path) if fs_path.ident == "fs" => {
+                syn::UseTree::Path(fs_path)
+                    if fs_path.ident == "fs"
+                        || fs_aliases.contains(fs_path.ident.to_string().as_str()) =>
+                {
                     fs_subtree_contains_glob(&fs_path.tree)
                 }
                 syn::UseTree::Group(group) => group
                     .items
                     .iter()
-                    .any(use_tree_is_std_fs_glob_with_std_prefix),
+                    .any(|item| use_tree_is_std_fs_glob_with_std_prefix(item, fs_aliases)),
                 _ => false,
             }
+        }
+        syn::UseTree::Path(fs_path)
+            if fs_aliases.contains(fs_path.ident.to_string().as_str()) =>
+        {
+            fs_subtree_contains_glob(&fs_path.tree)
         }
         syn::UseTree::Group(group) => group
             .items
             .iter()
-            .any(|item| use_tree_is_std_fs_glob(item, std_aliases)),
+            .any(|item| use_tree_is_std_fs_glob(item, std_aliases, fs_aliases)),
         _ => false,
     }
 }
 
-fn use_tree_is_std_fs_glob_with_std_prefix(tree: &syn::UseTree) -> bool {
+fn use_tree_is_std_fs_glob_with_std_prefix(
+    tree: &syn::UseTree,
+    fs_aliases: &BTreeSet<String>,
+) -> bool {
     match tree {
-        syn::UseTree::Path(fs_path) if fs_path.ident == "fs" => {
+        syn::UseTree::Path(fs_path)
+            if fs_path.ident == "fs" || fs_aliases.contains(fs_path.ident.to_string().as_str()) =>
+        {
             fs_subtree_contains_glob(&fs_path.tree)
         }
         _ => false,
@@ -110,18 +156,22 @@ trait TestContextAware {
 struct StdFsImportVisitor {
     out: Vec<usize>,
     in_test_context: bool,
+    std_aliases: BTreeSet<String>,
+    fs_aliases: BTreeSet<String>,
 }
 
 struct StdFsGlobImportVisitor {
     out: Vec<usize>,
     in_test_context: bool,
     std_aliases: BTreeSet<String>,
+    fs_aliases: BTreeSet<String>,
 }
 
 struct InlineStdFsVisitor {
     out: Vec<usize>,
     in_test_context: bool,
     std_aliases: BTreeSet<String>,
+    fs_aliases: BTreeSet<String>,
 }
 
 impl TestContextAware for StdFsImportVisitor {
@@ -143,38 +193,55 @@ impl TestContextAware for InlineStdFsVisitor {
 }
 
 impl InlineStdFsVisitor {
-    fn path_is_std_fs_call(path: &syn::Path, std_aliases: &BTreeSet<String>) -> bool {
-        let mut segments = path
+    fn path_is_std_fs_call(
+        path: &syn::Path,
+        std_aliases: &BTreeSet<String>,
+        fs_aliases: &BTreeSet<String>,
+    ) -> bool {
+        let segments = path
             .segments
             .iter()
-            .map(|segment| segment.ident.to_string());
-        matches!(
-            (
-                segments.next().as_deref(),
-                segments.next().as_deref(),
-                segments.next()
-            ),
-            (Some(first), Some("fs"), Some(_)) if std_aliases.contains(first)
-        )
+            .map(|segment| segment.ident.to_string())
+            .collect::<Vec<_>>();
+        match segments.as_slice() {
+            [first, second, ..] if second == "fs" && std_aliases.contains(first) => true,
+            [first, ..] if fs_aliases.contains(first) && segments.len() > 1 => true,
+            _ => false,
+        }
     }
 }
 
-fn collect_std_aliases(tree: &syn::UseTree, aliases: &mut BTreeSet<String>) {
+fn collect_std_aliases(
+    tree: &syn::UseTree,
+    std_aliases: &mut BTreeSet<String>,
+    fs_aliases: &mut BTreeSet<String>,
+) {
     match tree {
         syn::UseTree::Rename(rename)
             if rename.ident == "std"
-                || aliases.contains(rename.ident.to_string().as_str()) =>
+                || std_aliases.contains(rename.ident.to_string().as_str()) =>
         {
-            let _ = aliases.insert(rename.rename.to_string());
+            let _ = std_aliases.insert(rename.rename.to_string());
+        }
+        syn::UseTree::Rename(rename)
+            if rename.ident == "fs"
+                || fs_aliases.contains(rename.ident.to_string().as_str()) =>
+        {
+            let _ = fs_aliases.insert(rename.rename.to_string());
         }
         syn::UseTree::Path(path)
-            if path.ident == "std" || aliases.contains(path.ident.to_string().as_str()) =>
+            if path.ident == "std" || std_aliases.contains(path.ident.to_string().as_str()) =>
         {
-            collect_std_aliases_under_std(&path.tree, aliases);
+            collect_std_aliases_under_std(&path.tree, std_aliases, fs_aliases);
+        }
+        syn::UseTree::Path(path)
+            if path.ident == "fs" || fs_aliases.contains(path.ident.to_string().as_str()) =>
+        {
+            collect_std_aliases_under_fs(&path.tree, fs_aliases);
         }
         syn::UseTree::Group(group) => {
             for item in &group.items {
-                collect_std_aliases(item, aliases);
+                collect_std_aliases(item, std_aliases, fs_aliases);
             }
         }
         _ => {}
@@ -192,22 +259,58 @@ fn collect_std_extern_crate_alias(item: &syn::ItemExternCrate, aliases: &mut BTr
     }
 }
 
-fn collect_std_aliases_under_std(tree: &syn::UseTree, aliases: &mut BTreeSet<String>) {
+fn collect_std_aliases_under_std(
+    tree: &syn::UseTree,
+    std_aliases: &mut BTreeSet<String>,
+    fs_aliases: &mut BTreeSet<String>,
+) {
     match tree {
         syn::UseTree::Rename(rename)
             if rename.ident == "self"
-                || aliases.contains(rename.ident.to_string().as_str()) =>
+                || std_aliases.contains(rename.ident.to_string().as_str()) =>
         {
-            let _ = aliases.insert(rename.rename.to_string());
+            let _ = std_aliases.insert(rename.rename.to_string());
+        }
+        syn::UseTree::Rename(rename)
+            if rename.ident == "fs"
+                || fs_aliases.contains(rename.ident.to_string().as_str()) =>
+        {
+            let _ = fs_aliases.insert(rename.rename.to_string());
         }
         syn::UseTree::Path(path)
-            if path.ident == "self" || aliases.contains(path.ident.to_string().as_str()) =>
+            if path.ident == "self" || std_aliases.contains(path.ident.to_string().as_str()) =>
         {
-            collect_std_aliases_under_std(&path.tree, aliases);
+            collect_std_aliases_under_std(&path.tree, std_aliases, fs_aliases);
+        }
+        syn::UseTree::Path(path)
+            if path.ident == "fs" || fs_aliases.contains(path.ident.to_string().as_str()) =>
+        {
+            collect_std_aliases_under_fs(&path.tree, fs_aliases);
         }
         syn::UseTree::Group(group) => {
             for item in &group.items {
-                collect_std_aliases_under_std(item, aliases);
+                collect_std_aliases_under_std(item, std_aliases, fs_aliases);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn collect_std_aliases_under_fs(tree: &syn::UseTree, fs_aliases: &mut BTreeSet<String>) {
+    match tree {
+        syn::UseTree::Rename(rename)
+            if rename.ident == "fs" || fs_aliases.contains(rename.ident.to_string().as_str()) =>
+        {
+            let _ = fs_aliases.insert(rename.rename.to_string());
+        }
+        syn::UseTree::Path(path)
+            if path.ident == "fs" || fs_aliases.contains(path.ident.to_string().as_str()) =>
+        {
+            collect_std_aliases_under_fs(&path.tree, fs_aliases);
+        }
+        syn::UseTree::Group(group) => {
+            for item in &group.items {
+                collect_std_aliases_under_fs(item, fs_aliases);
             }
         }
         _ => {}
@@ -220,6 +323,7 @@ impl Default for InlineStdFsVisitor {
             out: Vec::new(),
             in_test_context: false,
             std_aliases: BTreeSet::from([String::from("std")]),
+            fs_aliases: BTreeSet::new(),
         }
     }
 }
@@ -229,6 +333,8 @@ impl Default for StdFsImportVisitor {
         Self {
             out: Vec::new(),
             in_test_context: false,
+            std_aliases: BTreeSet::from([String::from("std")]),
+            fs_aliases: BTreeSet::new(),
         }
     }
 }
@@ -239,6 +345,7 @@ impl Default for StdFsGlobImportVisitor {
             out: Vec::new(),
             in_test_context: false,
             std_aliases: BTreeSet::from([String::from("std")]),
+            fs_aliases: BTreeSet::new(),
         }
     }
 }
@@ -247,8 +354,10 @@ impl<'source> Visit<'source> for InlineStdFsVisitor {
     fn visit_item_mod(&mut self, item_mod: &'source syn::ItemMod) {
         let was = self.save_and_apply_test_context(&item_mod.attrs);
         let std_aliases = self.std_aliases.clone();
+        let fs_aliases = self.fs_aliases.clone();
         syn::visit::visit_item_mod(self, item_mod);
         self.std_aliases = std_aliases;
+        self.fs_aliases = fs_aliases;
         self.restore_test_context(was);
     }
 
@@ -278,7 +387,7 @@ impl<'source> Visit<'source> for InlineStdFsVisitor {
 
     fn visit_item_use(&mut self, use_item: &'source syn::ItemUse) {
         let was = self.save_and_apply_test_context(&use_item.attrs);
-        collect_std_aliases(&use_item.tree, &mut self.std_aliases);
+        collect_std_aliases(&use_item.tree, &mut self.std_aliases, &mut self.fs_aliases);
         syn::visit::visit_item_use(self, use_item);
         self.restore_test_context(was);
     }
@@ -291,7 +400,11 @@ impl<'source> Visit<'source> for InlineStdFsVisitor {
     fn visit_expr_call(&mut self, expr_call: &'source syn::ExprCall) {
         if !self.in_test_context {
             if let syn::Expr::Path(expr_path) = &*expr_call.func {
-                if Self::path_is_std_fs_call(&expr_path.path, &self.std_aliases) {
+                if Self::path_is_std_fs_call(
+                    &expr_path.path,
+                    &self.std_aliases,
+                    &self.fs_aliases,
+                ) {
                     self.out.push(span_line(expr_path.path.span()));
                 }
             }
@@ -304,8 +417,10 @@ impl<'source> Visit<'source> for StdFsGlobImportVisitor {
     fn visit_item_mod(&mut self, item_mod: &'source syn::ItemMod) {
         let was = self.save_and_apply_test_context(&item_mod.attrs);
         let std_aliases = self.std_aliases.clone();
+        let fs_aliases = self.fs_aliases.clone();
         syn::visit::visit_item_mod(self, item_mod);
         self.std_aliases = std_aliases;
+        self.fs_aliases = fs_aliases;
         self.restore_test_context(was);
     }
 
@@ -335,8 +450,10 @@ impl<'source> Visit<'source> for StdFsGlobImportVisitor {
 
     fn visit_item_use(&mut self, use_item: &'source syn::ItemUse) {
         let was = self.save_and_apply_test_context(&use_item.attrs);
-        collect_std_aliases(&use_item.tree, &mut self.std_aliases);
-        if !self.in_test_context && use_tree_is_std_fs_glob(&use_item.tree, &self.std_aliases) {
+        collect_std_aliases(&use_item.tree, &mut self.std_aliases, &mut self.fs_aliases);
+        if !self.in_test_context
+            && use_tree_is_std_fs_glob(&use_item.tree, &self.std_aliases, &self.fs_aliases)
+        {
             self.out.push(span_line(use_item.span()));
         }
         syn::visit::visit_item_use(self, use_item);
@@ -352,7 +469,11 @@ impl<'source> Visit<'source> for StdFsGlobImportVisitor {
 impl<'source> Visit<'source> for StdFsImportVisitor {
     fn visit_item_mod(&mut self, item_mod: &'source syn::ItemMod) {
         let was = self.save_and_apply_test_context(&item_mod.attrs);
+        let std_aliases = self.std_aliases.clone();
+        let fs_aliases = self.fs_aliases.clone();
         syn::visit::visit_item_mod(self, item_mod);
+        self.std_aliases = std_aliases;
+        self.fs_aliases = fs_aliases;
         self.restore_test_context(was);
     }
 
@@ -382,10 +503,18 @@ impl<'source> Visit<'source> for StdFsImportVisitor {
 
     fn visit_item_use(&mut self, use_item: &'source syn::ItemUse) {
         let was = self.save_and_apply_test_context(&use_item.attrs);
-        if !self.in_test_context && use_tree_matches_std_fs(&use_item.tree) {
+        collect_std_aliases(&use_item.tree, &mut self.std_aliases, &mut self.fs_aliases);
+        if !self.in_test_context
+            && use_tree_matches_std_fs(&use_item.tree, &self.std_aliases, &self.fs_aliases)
+        {
             self.out.push(span_line(use_item.span()));
         }
         syn::visit::visit_item_use(self, use_item);
         self.restore_test_context(was);
+    }
+
+    fn visit_item_extern_crate(&mut self, item: &'source syn::ItemExternCrate) {
+        collect_std_extern_crate_alias(item, &mut self.std_aliases);
+        syn::visit::visit_item_extern_crate(self, item);
     }
 }
