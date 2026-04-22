@@ -49,6 +49,20 @@ fn passes_when_exit_zero_is_only_in_no_staged_files_branch() {
 }
 
 #[test]
+fn passes_when_prefixed_loop_opener_keeps_exit_zero_scoped() {
+    let results = run_case("time while false; do\n    exit 0\ndone\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("no unconditional `exit 0` bypass in `.githooks/pre-commit`"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn warns_when_called_function_contains_exit_zero() {
     let results = run_case("finish() {\n    exit 0\n}\nfinish\n");
     assertions::assert_rule_results(
@@ -117,6 +131,21 @@ fn warns_when_same_line_loop_terminator_has_and_tail_exit_zero() {
             severity: Some(assertions::G3Severity::Warn),
             title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
             line: Some(3),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn warns_when_same_line_case_scope_has_exit_zero_tail() {
+    let results = run_case("case \"$x\" in a) : ;; esac && exit 0\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(1),
             inventory: Some(false),
             ..Default::default()
         }],
