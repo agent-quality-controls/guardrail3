@@ -139,13 +139,14 @@ fn first_top_level_exit_zero_line(
 fn called_function_exit_zero_line(
     parsed: &ParsedShellScript,
     command_name: &str,
-    _call_line_no: usize,
+    call_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<usize> {
     let function = parsed
         .functions
         .iter()
-        .find(|function| function.name == command_name)?;
+        .rev()
+        .find(|function| function.name == command_name && function.line_no <= call_line_no)?;
     if visiting.iter().any(|name| name == &function.name) {
         return None;
     }
