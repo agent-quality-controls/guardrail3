@@ -135,42 +135,6 @@ pub(super) fn collect_workflows(
     workflows
 }
 
-pub(super) fn release_profile_settings(raw_root: &toml::Value) -> Vec<String> {
-    raw_root
-        .get("profile")
-        .and_then(|value| value.get("release"))
-        .and_then(|value| value.as_table())
-        .map(|table| {
-            table
-                .iter()
-                .map(|(key, value)| format!("{key} = {value}"))
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default()
-}
-
-pub(super) fn publish_setting_string(raw_root: &toml::Value) -> Option<String> {
-    let publish = raw_root
-        .get("workspace")
-        .and_then(|value| value.get("package"))
-        .and_then(|value| value.get("publish"))
-        .or_else(|| raw_root.get("package").and_then(|value| value.get("publish")))?;
-
-    Some(match publish {
-        toml::Value::Boolean(value) => value.to_string(),
-        toml::Value::Array(values) => format!(
-            "[{}]",
-            values
-                .iter()
-                .filter_map(|value| value.as_str())
-                .map(|value| format!("\"{value}\""))
-                .collect::<Vec<_>>()
-                .join(", ")
-        ),
-        _ => publish.to_string(),
-    })
-}
-
 pub(super) fn tool_is_available(tool: &str, path_env: Option<&OsStr>) -> bool {
     let Some(path_env) = path_env else {
         return false;

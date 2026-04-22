@@ -2,10 +2,7 @@
 
 use std::collections::BTreeSet;
 
-use cargo_toml_parser::{
-    types::CargoToml, types::InheritableValue, types::PackageSection, types::VecStringOrBool,
-    types::WorkspacePackageSection,
-};
+use cargo_toml_parser::types::{CargoToml, InheritableValue, WorkspacePackageSection};
 use g3rs_release_types::{
     G3RsReleaseConfigChecksInput, G3RsReleaseConfigCrate, G3RsReleaseConfigRepo,
 };
@@ -15,16 +12,11 @@ pub(crate) fn config_input_for_crate(
     workspace_cargo_toml: Option<&str>,
 ) -> G3RsReleaseConfigChecksInput {
     let cargo = cargo_toml_parser::parse(cargo_toml).expect("cargo fixture should parse");
-    let workspace_package = workspace_cargo_toml
-        .map(|workspace| {
-            cargo_toml_parser::parse(workspace).expect("workspace cargo fixture should parse")
-        })
-        .and_then(|workspace| workspace.workspace.and_then(|section| section.package));
-    let krate = build_crate("Cargo.toml", cargo, workspace_package);
+    let workspace_package = workspace_package(workspace_cargo_toml);
 
     G3RsReleaseConfigChecksInput {
         repo_checks: Vec::new(),
-        crate_checks: vec![krate],
+        crate_checks: vec![build_crate("Cargo.toml", cargo, workspace_package)],
         edge_checks: Vec::new(),
         input_failure_checks: Vec::new(),
     }
@@ -35,21 +27,21 @@ pub(crate) fn config_input_for_publishable_crate(
     workspace_cargo_toml: Option<&str>,
 ) -> G3RsReleaseConfigChecksInput {
     let mut cargo = cargo_toml_parser::parse(cargo_toml).expect("cargo fixture should parse");
-    if let Some(package) = cargo.package.as_mut() {
-        if package.publish.is_none() {
-            package.publish = Some(InheritableValue::Value(VecStringOrBool::Bool(true)));
-        }
+    if let Some(package) = cargo.package.as_mut()
+        && package.publish.is_none()
+    {
+        package.publish = Some(InheritableValue::Value(
+            cargo_toml_parser::types::VecStringOrBool::Bool(true),
+        ));
     }
-    let workspace_package = workspace_cargo_toml
-        .map(|workspace| {
-            cargo_toml_parser::parse(workspace).expect("workspace cargo fixture should parse")
-        })
-        .and_then(|workspace| workspace.workspace.and_then(|section| section.package));
-    let krate = build_crate("Cargo.toml", cargo, workspace_package);
 
     G3RsReleaseConfigChecksInput {
         repo_checks: Vec::new(),
-        crate_checks: vec![krate],
+        crate_checks: vec![build_crate(
+            "Cargo.toml",
+            cargo,
+            workspace_package(workspace_cargo_toml),
+        )],
         edge_checks: Vec::new(),
         input_failure_checks: Vec::new(),
     }
@@ -64,35 +56,61 @@ pub(crate) fn config_input_for_repo(
     });
     let cliff = cliff_toml
         .map(|value| cliff_toml_parser::parse(value).expect("cliff fixture should parse"));
+    let publishable_name = release_plz
+        .as_ref()
+        .and_then(|release_plz| release_plz.package.first())
+        .and_then(|package| package.name.as_deref())
+        .unwrap_or("demo")
+        .to_owned();
 
     G3RsReleaseConfigChecksInput {
         repo_checks: vec![G3RsReleaseConfigRepo {
             cargo_rel_path: "Cargo.toml".to_owned(),
+            cargo: cargo_toml_parser::parse(
+                r#"
+[workspace]
+members = ["crates/demo"]
+resolver = "2"
+"#,
+            )
+            .expect("repo cargo fixture should parse"),
             release_plz_rel_path: "release-plz.toml".to_owned(),
             release_plz_exists: release_plz.is_some(),
             release_plz,
-            release_plz_package_names: BTreeSet::new(),
             cliff_rel_path: "cliff.toml".to_owned(),
             cliff_exists: cliff.is_some(),
             cliff,
-            has_release_plz_workflow: false,
-            release_plz_workflow_rel_path: None,
-            has_publish_dry_run_workflow: false,
-            publish_dry_run_workflow_rel_path: None,
-            has_registry_token_workflow: false,
-            registry_token_workflow_rel_path: None,
-            publishable_crate_names: BTreeSet::new(),
-            publishable_binary_crate_names: BTreeSet::new(),
-            publishable_count: 1,
-            non_publishable_count: 0,
+            workflows: Vec::new(),
             semver_checks_installed: false,
-            publish_setting: None,
-            release_profile_settings: Vec::new(),
         }],
-        crate_checks: Vec::new(),
+        crate_checks: vec![publishable_crate(&publishable_name)],
         edge_checks: Vec::new(),
         input_failure_checks: Vec::new(),
     }
+}
+
+fn workspace_package(workspace_cargo_toml: Option<&str>) -> Option<WorkspacePackageSection> {
+    workspace_cargo_toml
+        .map(|workspace| {
+            cargo_toml_parser::parse(workspace).expect("workspace cargo fixture should parse")
+        })
+        .and_then(|workspace| workspace.workspace.and_then(|section| section.package))
+}
+
+fn publishable_crate(name: &str) -> G3RsReleaseConfigCrate {
+    build_crate(
+        &format!("crates/{name}/Cargo.toml"),
+        cargo_toml_parser::parse(&format!(
+            r#"
+[package]
+name = "{name}"
+version = "0.1.0"
+publish = true
+"#
+        ))
+        .expect("publishable cargo fixture should parse"),
+        None,
+    )
 }
 
 fn build_crate(
@@ -100,165 +118,24 @@ fn build_crate(
     cargo: CargoToml,
     workspace_package: Option<WorkspacePackageSection>,
 ) -> G3RsReleaseConfigCrate {
-    let package = cargo.package.clone();
-    let package_ref = package.as_ref();
-    let name = package_ref
-        .and_then(|pkg| pkg.name.clone())
+    let name = cargo
+        .package
+        .as_ref()
+        .and_then(|package| package.name.clone())
         .unwrap_or_else(|| cargo_rel_path.to_owned());
-    let publish_declared = publish_declared(package_ref);
-    let publishable = publishable(package_ref, workspace_package.as_ref());
-    let version_string = version_string(package_ref, workspace_package.as_ref());
 
     G3RsReleaseConfigCrate {
         name,
         cargo_rel_path: cargo_rel_path.to_owned(),
-        publish_declared,
+        cargo: cargo.clone(),
+        workspace_package,
         is_binary: !cargo.bin.is_empty(),
         is_library: cargo.lib.is_some(),
-        binary_target_names: BTreeSet::new(),
-        description_present: inherited_string_present(
-            package_ref.and_then(|pkg| pkg.description.as_ref()),
-            workspace_package
-                .as_ref()
-                .and_then(|ws| ws.description.as_deref()),
-        ),
-        license_present: inherited_string_present(
-            package_ref.and_then(|pkg| pkg.license.as_ref()),
-            workspace_package
-                .as_ref()
-                .and_then(|ws| ws.license.as_deref()),
-        ) || inherited_string_present(
-            package_ref.and_then(|pkg| pkg.license_file.as_ref()),
-            workspace_package
-                .as_ref()
-                .and_then(|ws| ws.license_file.as_deref()),
-        ),
-        repository_present: inherited_string_present(
-            package_ref.and_then(|pkg| pkg.repository.as_ref()),
-            workspace_package
-                .as_ref()
-                .and_then(|ws| ws.repository.as_deref()),
-        ),
-        keywords_count: inherited_vec_count(
-            package_ref.and_then(|pkg| pkg.keywords.as_ref()),
-            workspace_package.as_ref().map(|ws| ws.keywords.as_slice()),
-        ),
-        categories_count: inherited_vec_count(
-            package_ref.and_then(|pkg| pkg.categories.as_ref()),
-            workspace_package
-                .as_ref()
-                .map(|ws| ws.categories.as_slice()),
-        ),
-        version_valid: version_string
-            .as_deref()
-            .is_some_and(|version| semver::Version::parse(version).is_ok()),
-        docs_rs_present: package_ref
-            .and_then(|pkg| pkg.metadata.as_ref())
-            .and_then(|metadata| {
-                metadata
-                    .get("docs.rs")
-                    .or_else(|| metadata.get("docs").and_then(|docs| docs.get("rs")))
-            })
-            .and_then(|value| value.as_table())
-            .is_some_and(|table| {
-                [
-                    "all-features",
-                    "features",
-                    "no-default-features",
-                    "default-target",
-                    "targets",
-                    "rustdoc-args",
-                    "cargo-args",
-                ]
-                .iter()
-                .any(|key| table.contains_key(*key))
-            }),
-        include_exclude_present: package_ref.is_some_and(|pkg| {
-            pkg.include.as_ref().is_some_and(
-                |value| matches!(value, InheritableValue::Value(values) if !values.is_empty()),
-            ) || pkg.exclude.as_ref().is_some_and(
-                |value| matches!(value, InheritableValue::Value(values) if !values.is_empty()),
-            )
-        }),
-        has_binstall_metadata: package_ref
-            .and_then(|pkg| pkg.metadata.as_ref())
-            .and_then(|metadata| metadata.get("binstall"))
-            .and_then(|value| value.as_table())
-            .is_some(),
-        publishable,
-        workspace_package,
-        cargo,
-        workspace_version: matches!(
-            package_ref.and_then(|pkg| pkg.version.as_ref()),
-            Some(InheritableValue::Inherit(_))
-        ),
-        version_string,
-        binary_release_workflow_present: false,
-        linux_release_target_present: false,
+        binary_target_names: cargo
+            .bin
+            .iter()
+            .filter_map(|target| target.name.clone())
+            .collect::<BTreeSet<_>>(),
         dry_run: None,
-    }
-}
-
-fn publish_declared(package: Option<&PackageSection>) -> bool {
-    package
-        .and_then(|package| package.publish.as_ref())
-        .is_some()
-}
-
-fn publishable(
-    package: Option<&PackageSection>,
-    workspace_package: Option<&WorkspacePackageSection>,
-) -> bool {
-    let Some(package) = package else {
-        return false;
-    };
-    match package.publish.as_ref() {
-        None => false,
-        Some(InheritableValue::Value(VecStringOrBool::Bool(false))) => false,
-        Some(InheritableValue::Value(VecStringOrBool::VecString(values))) => !values.is_empty(),
-        Some(InheritableValue::Value(VecStringOrBool::Bool(true))) => true,
-        Some(InheritableValue::Inherit(_)) => {
-            match workspace_package.and_then(|ws| ws.publish.as_ref()) {
-                None => false,
-                Some(VecStringOrBool::Bool(false)) => false,
-                Some(VecStringOrBool::VecString(values)) => !values.is_empty(),
-                Some(VecStringOrBool::Bool(true)) => true,
-            }
-        }
-    }
-}
-
-fn inherited_string_present(
-    value: Option<&InheritableValue<String>>,
-    workspace_value: Option<&str>,
-) -> bool {
-    match value {
-        Some(InheritableValue::Value(value)) => !value.trim().is_empty(),
-        Some(InheritableValue::Inherit(_)) => {
-            workspace_value.is_some_and(|value| !value.trim().is_empty())
-        }
-        None => false,
-    }
-}
-
-fn inherited_vec_count(
-    value: Option<&InheritableValue<Vec<String>>>,
-    workspace_values: Option<&[String]>,
-) -> Option<usize> {
-    match value {
-        Some(InheritableValue::Value(values)) => Some(values.len()),
-        Some(InheritableValue::Inherit(_)) => workspace_values.map(|values| values.len()),
-        None => None,
-    }
-}
-
-fn version_string(
-    package: Option<&PackageSection>,
-    workspace_package: Option<&WorkspacePackageSection>,
-) -> Option<String> {
-    match package.and_then(|pkg| pkg.version.as_ref()) {
-        Some(InheritableValue::Value(value)) => Some(value.clone()),
-        Some(InheritableValue::Inherit(_)) => workspace_package.and_then(|ws| ws.version.clone()),
-        None => None,
     }
 }

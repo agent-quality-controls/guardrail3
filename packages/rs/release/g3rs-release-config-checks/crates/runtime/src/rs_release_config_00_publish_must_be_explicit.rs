@@ -6,7 +6,7 @@ use crate::support::error;
 const ID: &str = "RS-RELEASE-CONFIG-00";
 
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
-    if krate.publish_declared {
+    if crate::support::crate_publish_declared(krate) {
         return;
     }
 

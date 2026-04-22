@@ -6,13 +6,16 @@ use crate::support::error;
 const ID: &str = "RS-RELEASE-CONFIG-20";
 
 pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResult>) {
-    if !edge.source_publishable || !edge.has_path || !edge.dep_publishable {
+    if !crate::support::edge_source_publishable(edge)
+        || !edge.has_path
+        || !crate::support::edge_target_publishable(edge)
+    {
         return;
     }
     let Some(version_req) = &edge.version_req else {
         return;
     };
-    if edge.version_satisfied.unwrap_or(true) {
+    if crate::support::edge_version_satisfied(edge) {
         return;
     }
 
@@ -27,7 +30,7 @@ pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResul
 
     results.push(error(
         ID,
-        format!("{}: version mismatch with {}", edge.crate_name, edge.dep_name),
+        format!("{}: version mismatch with {}", edge.source.name, edge.dep_name),
         format!(
             "Dependency `{}`{} in `[{}]`{} requires `{}` but actual local publishable version is `{}`. Update the version requirement to match the local crate's version.",
             edge.dep_name,
@@ -35,12 +38,15 @@ pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResul
             edge.section_label,
             target_suffix,
             version_req,
-            edge.actual_version.as_deref().unwrap_or("unknown"),
+            crate::support::edge_target_version(edge)
+                .as_deref()
+                .unwrap_or("unknown"),
         ),
-        &edge.cargo_rel_path,
+        &edge.source.cargo_rel_path,
     ));
 }
 
 #[cfg(test)]
-#[path = "rs_release_config_20_interdependent_version_consistency_tests/mod.rs"] // reason: owned sidecar tests for file module.
+#[path = "rs_release_config_20_interdependent_version_consistency_tests/mod.rs"]
+// reason: owned sidecar tests for file module.
 mod rs_release_config_20_interdependent_version_consistency_tests;

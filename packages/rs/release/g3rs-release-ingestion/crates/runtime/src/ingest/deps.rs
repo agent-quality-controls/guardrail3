@@ -4,7 +4,6 @@ use std::path::Path;
 use cargo_toml_parser::types::{CargoToml, Dependency, TargetDependencyTables};
 use g3rs_release_types::G3RsReleasePathTargetKind;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
-use semver::{Version, VersionReq};
 
 #[derive(Debug, Clone)]
 pub(super) struct DependencyEdge {
@@ -113,7 +112,11 @@ fn collect_dependency_edges(
                         .and_then(dependency_path)
                         .as_deref()
                         .map(|path| {
-                            super::paths::classify_dependency_path(crawl, &crawl.root_abs_path, path)
+                            super::paths::classify_dependency_path(
+                                crawl,
+                                &crawl.root_abs_path,
+                                path,
+                            )
                         })
                 } else {
                     None
@@ -169,19 +172,4 @@ fn dependency_version(dependency: &Dependency) -> Option<String> {
         Dependency::Simple(version) => Some(version.clone()),
         Dependency::Detailed(detail) => detail.version.clone(),
     }
-}
-
-pub(super) fn version_requirement_satisfied(actual: &str, req: &str) -> bool {
-    let Ok(actual) = Version::parse(actual) else {
-        return false;
-    };
-    let normalized = if req.trim_start().starts_with(['^', '~', '>', '<', '=']) {
-        req.trim().to_owned()
-    } else {
-        format!("^{req}")
-    };
-    let Ok(req) = VersionReq::parse(&normalized) else {
-        return false;
-    };
-    req.matches(&actual)
 }

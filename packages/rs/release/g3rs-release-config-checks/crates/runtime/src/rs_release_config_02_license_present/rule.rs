@@ -6,11 +6,11 @@ use crate::support::{error, info};
 const ID: &str = "RS-RELEASE-CONFIG-02";
 
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
-    if !krate.publishable {
+    if !crate::support::crate_publishable(krate) {
         return;
     }
 
-    if krate.license_present {
+    if crate::support::crate_license_present(krate) {
         results.push(info(
             ID,
             format!("{}: license present", krate.name),

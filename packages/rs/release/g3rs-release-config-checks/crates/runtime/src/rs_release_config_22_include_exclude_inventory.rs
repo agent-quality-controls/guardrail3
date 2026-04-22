@@ -6,11 +6,11 @@ use crate::support::{info, warn};
 const ID: &str = "RS-RELEASE-CONFIG-22";
 
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
-    if !krate.publishable {
+    if !crate::support::crate_publishable(krate) {
         return;
     }
 
-    if krate.include_exclude_present {
+    if crate::support::crate_include_exclude_present(krate) {
         results.push(info(
             ID,
             format!("{}: include/exclude configured", krate.name),

@@ -4,6 +4,7 @@ use guardrail3_check_types::G3CheckResult;
 /// Run all release config checks and return the collected results.
 pub fn check(input: &G3RsReleaseConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
+    let repo = input.repo_checks.first();
     for failure in &input.input_failure_checks {
         crate::rs_release_config_25_input_failures::check(failure, &mut results);
     }
@@ -20,30 +21,48 @@ pub fn check(input: &G3RsReleaseConfigChecksInput) -> Vec<G3CheckResult> {
         crate::rs_release_config_09_accidentally_publishable::check(krate, &mut results);
         crate::rs_release_config_18_publish_dry_run::check(krate, &mut results);
         crate::rs_release_config_22_include_exclude_inventory::check(krate, &mut results);
-        crate::rs_release_config_23_binary_release_workflow::check(krate, &mut results);
-        crate::rs_release_config_24_linux_release_target::check(krate, &mut results);
+        crate::rs_release_config_23_binary_release_workflow::check(
+            repo,
+            &input.crate_checks,
+            krate,
+            &mut results,
+        );
+        crate::rs_release_config_24_linux_release_target::check(
+            repo,
+            &input.crate_checks,
+            krate,
+            &mut results,
+        );
     }
     for repo in &input.repo_checks {
-        crate::rs_release_config_10_release_plz_baseline::check(repo, &mut results);
-        crate::rs_release_config_11_cliff_baseline::check(repo, &mut results);
-        crate::rs_release_config_15_semver_checks_installed::check(repo, &mut results);
-        crate::rs_release_config_16_publish_status_inventory::check(repo, &mut results);
-        crate::rs_release_config_17_release_profile_inventory::check(repo, &mut results);
-        crate::rs_release_config_21_crate_inventory::check(repo, &mut results);
+        crate::rs_release_config_10_release_plz_baseline::check(
+            repo,
+            &input.crate_checks,
+            &mut results,
+        );
+        crate::rs_release_config_11_cliff_baseline::check(repo, &input.crate_checks, &mut results);
+        crate::rs_release_config_15_semver_checks_installed::check(
+            repo,
+            &input.crate_checks,
+            &mut results,
+        );
+        crate::rs_release_config_16_publish_status_inventory::check(
+            repo,
+            &input.crate_checks,
+            &mut results,
+        );
+        crate::rs_release_config_17_release_profile_inventory::check(
+            repo,
+            &input.crate_checks,
+            &mut results,
+        );
+        crate::rs_release_config_21_crate_inventory::check(repo, &input.crate_checks, &mut results);
     }
     for edge in &input.edge_checks {
         crate::rs_release_config_19_no_path_deps_to_unpublishable::check(edge, &mut results);
         crate::rs_release_config_20_interdependent_version_consistency::check(edge, &mut results);
     }
     results
-}
-
-#[cfg(test)]
-pub(crate) fn repo_input(
-    release_plz_toml: Option<&str>,
-    cliff_toml: Option<&str>,
-) -> G3RsReleaseConfigChecksInput {
-    crate::lib_tests::test_support::config_input_for_repo(release_plz_toml, cliff_toml)
 }
 
 #[cfg(test)]

@@ -6,11 +6,11 @@ use crate::support::{info, warn};
 const ID: &str = "RS-RELEASE-CONFIG-08";
 
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
-    if !krate.publishable || !krate.is_binary {
+    if !crate::support::crate_publishable(krate) || !krate.is_binary {
         return;
     }
 
-    if krate.has_binstall_metadata {
+    if crate::support::crate_has_binstall_metadata(krate) {
         results.push(info(
             ID,
             format!("{}: binstall metadata present", krate.name),

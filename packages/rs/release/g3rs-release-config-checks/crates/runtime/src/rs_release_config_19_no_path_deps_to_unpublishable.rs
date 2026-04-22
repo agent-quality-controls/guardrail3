@@ -6,7 +6,10 @@ use crate::support::{error, warn};
 const ID: &str = "RS-RELEASE-CONFIG-19";
 
 pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResult>) {
-    if !edge.source_publishable || !edge.has_path || edge.dep_publishable {
+    if !crate::support::edge_source_publishable(edge)
+        || !edge.has_path
+        || crate::support::edge_target_publishable(edge)
+    {
         return;
     }
 
@@ -23,54 +26,55 @@ pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResul
         Some(G3RsReleasePathTargetKind::InWorkspace) => {
             results.push(error(
                 ID,
-                format!("{}: path dep to non-publishable crate", edge.crate_name),
+                format!("{}: path dep to non-publishable crate", edge.source.name),
                 format!(
                     "Dependency `{}`{} in `[{}]`{} points at a crate inside this workspace that is not publishable. Make the target crate publishable or stop depending on it from a publishable crate.",
                     edge.dep_name, package_suffix, edge.section_label, target_suffix
                 ),
-                &edge.cargo_rel_path,
+                &edge.source.cargo_rel_path,
             ));
         }
         Some(G3RsReleasePathTargetKind::OutsideWorkspace) => {
             if edge.version_req.is_some() {
                 results.push(warn(
                     ID,
-                    format!("{}: path dep escapes workspace", edge.crate_name),
+                    format!("{}: path dep escapes workspace", edge.source.name),
                     format!(
                         "Dependency `{}`{} in `[{}]`{} points outside this workspace by path. Replace it with a normal versioned dependency if this crate is meant to publish.",
                         edge.dep_name, package_suffix, edge.section_label, target_suffix
                     ),
-                    &edge.cargo_rel_path,
+                    &edge.source.cargo_rel_path,
                 ));
             } else {
                 results.push(error(
                     ID,
-                    format!("{}: path dep escapes workspace", edge.crate_name),
+                    format!("{}: path dep escapes workspace", edge.source.name),
                     format!(
                         "Dependency `{}`{} in `[{}]`{} points outside this workspace by path and has no version requirement. Replace it with a normal versioned dependency.",
                         edge.dep_name, package_suffix, edge.section_label, target_suffix
                     ),
-                    &edge.cargo_rel_path,
+                    &edge.source.cargo_rel_path,
                 ));
             }
         }
         None => {
-            if edge.actual_version.is_none() && edge.version_req.is_some() {
+            if crate::support::edge_target_version(edge).is_none() && edge.version_req.is_some() {
                 return;
             }
             results.push(error(
                 ID,
-                format!("{}: path dep to non-publishable crate", edge.crate_name),
+                format!("{}: path dep to non-publishable crate", edge.source.name),
                 format!(
                     "Dependency `{}`{} in `[{}]`{} points at a non-publishable local crate. Either make the target crate publishable or replace the path dependency with a version requirement.",
                     edge.dep_name, package_suffix, edge.section_label, target_suffix
                 ),
-                &edge.cargo_rel_path,
+                &edge.source.cargo_rel_path,
             ));
         }
     }
 }
 
 #[cfg(test)]
-#[path = "rs_release_config_19_no_path_deps_to_unpublishable_tests/mod.rs"] // reason: owned sidecar tests for file module.
+#[path = "rs_release_config_19_no_path_deps_to_unpublishable_tests/mod.rs"]
+// reason: owned sidecar tests for file module.
 mod rs_release_config_19_no_path_deps_to_unpublishable_tests;
