@@ -1,6 +1,13 @@
 use crate::support::*;
 use crate::types::{ParsedShellScript, ShellFunction, SourceLine};
 
+struct PendingFunction {
+    name: String,
+    line_no: usize,
+    body: String,
+    body_starts_on_definition_line: bool,
+}
+
 #[must_use]
 pub fn parse_script(content: &str) -> ParsedShellScript {
     let mut shebang = None;
@@ -16,7 +23,7 @@ pub fn parse_script(content: &str) -> ParsedShellScript {
     let mut executable_lines = Vec::new();
     let mut functions = Vec::new();
     let mut function_brace_depth = 0usize;
-    let mut current_function: Option<ShellFunction> = None;
+    let mut current_function: Option<PendingFunction> = None;
     let mut dead_if_depth = 0usize;
     let mut dead_else_depth = 0usize;
     let mut dead_loop_depth = 0usize;
@@ -31,12 +38,12 @@ pub fn parse_script(content: &str) -> ParsedShellScript {
             continue;
         }
         if let Some(current) = current_function.as_mut() {
-            append_function_body_line(current, raw);
+            append_function_body_line(&mut current.body, raw);
             function_brace_depth = update_function_scope_depth(function_brace_depth, trimmed);
             if function_brace_depth == 0
                 && let Some(function) = current_function.take()
             {
-                functions.push(function);
+                functions.push(finish_function(function));
             }
             continue;
         }
@@ -68,14 +75,14 @@ pub fn parse_script(content: &str) -> ParsedShellScript {
             function_brace_depth = function_scope_depth_after_definition(trimmed);
             let body = initial_function_body_fragment(raw);
             let body_starts_on_definition_line = !body.is_empty();
-            let function = ShellFunction {
+            let function = PendingFunction {
                 name: function_definition_name(trimmed).unwrap_or_default(),
                 line_no,
                 body_starts_on_definition_line,
                 body,
             };
             if function_brace_depth == 0 {
-                functions.push(function);
+                functions.push(finish_function(function));
                 if let Some(tail) = inline_command_after_function_definition(raw)
                     && let Some(executable) = parse_executable_line(tail, line_no)
                 {
@@ -115,6 +122,16 @@ pub fn parse_script(content: &str) -> ParsedShellScript {
         source_lines,
         executable_lines,
         functions,
+    }
+}
+
+fn finish_function(function: PendingFunction) -> ShellFunction {
+    ShellFunction {
+        name: function.name,
+        line_no: function.line_no,
+        body_starts_on_definition_line: function.body_starts_on_definition_line,
+        parsed_body: Box::new(parse_script(&function.body)),
+        body: function.body,
     }
 }
 

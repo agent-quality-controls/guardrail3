@@ -70,13 +70,12 @@ fn called_function_fail_open(
     }
 
     visiting.push(function.name.to_owned());
-    let nested = hook_shell_parser::parse_script(&function.body);
     let nested_line_offset = if function.body_starts_on_definition_line {
         line_offset + function.line_no.saturating_sub(1)
     } else {
         line_offset + function.line_no
     };
-    let found = first_fail_open_critical_command(&nested, nested_line_offset, visiting);
+    let found = first_fail_open_critical_command(&function.parsed_body, nested_line_offset, visiting);
     let _ = visiting.pop();
     found
 }

@@ -36,4 +36,5 @@ pub struct ShellFunction {
     pub line_no: usize,
     pub body: String,
     pub body_starts_on_definition_line: bool,
+    pub parsed_body: Box<ParsedShellScript>,
 }

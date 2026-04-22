@@ -1,4 +1,3 @@
-use hook_shell_parser_runtime::parse_script;
 use hook_shell_parser_runtime::types::{FailOpenWrapper, ParsedShellScript};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -171,8 +170,8 @@ pub fn assert_script_matches(parsed: &ParsedShellScript, expected: ScriptExpecta
             );
         }
         if let Some(body_command_names) = function.body_command_names {
-            let nested = parse_script(&actual.body);
-            let nested_names = nested
+            let nested_names = actual
+                .parsed_body
                 .executable_lines
                 .iter()
                 .map(|line| line.command_name.as_str())
