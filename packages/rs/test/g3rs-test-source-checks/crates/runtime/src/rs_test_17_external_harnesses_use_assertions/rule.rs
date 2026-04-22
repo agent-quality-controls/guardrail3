@@ -133,9 +133,14 @@ fn local_assertion_helper_names<'a>(
                 continue;
             }
             if function.body.call_paths.iter().any(|path| {
-                path.len() == 1
+                (path.len() == 1
                     && assertion_helpers.contains(path[0].as_str())
-                    && !function.body.shadowed_idents.contains(&path[0])
+                    && !function.body.shadowed_idents.contains(&path[0]))
+                    || (path.len() > 1
+                        && matches!(path.first().map(String::as_str), Some("crate" | "self"))
+                        && path
+                            .last()
+                            .is_some_and(|name| assertion_helpers.contains(name.as_str())))
             }) {
                 changed |= assertion_helpers.insert(function.name.as_str());
             }
