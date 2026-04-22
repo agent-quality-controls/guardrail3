@@ -6,3 +6,10 @@ pub fn assert_no_finding_for_file(results: &[G3CheckResult], file: &str) {
         "{results:#?}"
     );
 }
+
+pub fn assert_has_finding_id(results: &[G3CheckResult], id: &str) {
+    assert!(
+        results.iter().any(|result| result.id() == id),
+        "{results:#?}"
+    );
+}

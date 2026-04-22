@@ -1,7 +1,8 @@
 use std::collections::BTreeSet;
 
 use g3rs_apparch_types::{
-    G3RsApparchCrate, G3RsApparchExternalDependency, G3RsApparchLayer, G3RsApparchRustPolicyState,
+    G3RsApparchCrate, G3RsApparchCratePurityChecksInput, G3RsApparchLayer,
+    G3RsApparchRustPolicyState,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
@@ -16,23 +17,19 @@ const BUILTIN_ALLOWED: &[&str] = &[
     "bytes",
 ];
 
-pub(crate) fn check(
-    krate: &G3RsApparchCrate,
-    external_dependencies: &[G3RsApparchExternalDependency],
-    rust_policy: &G3RsApparchRustPolicyState,
-    results: &mut Vec<G3CheckResult>,
-) {
+pub(crate) fn check(input: &G3RsApparchCratePurityChecksInput, results: &mut Vec<G3CheckResult>) {
+    let krate = &input.krate;
     if krate.layer != Some(G3RsApparchLayer::Logic) {
         return;
     }
 
-    let allowed = match allowed_dependencies(rust_policy, krate, results) {
+    let allowed = match allowed_dependencies(&input.rust_policy, krate, results) {
         Some(allowed) => allowed,
         None => return,
     };
-    let violating = external_dependencies
+    let violating = input
+        .external_dependencies
         .iter()
-        .filter(|dep| dep.cargo_rel_path == krate.cargo_rel_path)
         .filter(|dep| !dep.kind.is_dev())
         .filter(|dep| !allowed.contains(dep.dep_name.as_str()))
         .collect::<Vec<_>>();

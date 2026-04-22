@@ -96,6 +96,13 @@ pub struct G3RsApparchExternalDependency {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsApparchBoundDependency {
+    pub dep_name: String,
+    pub kind: G3RsApparchDependencyKind,
+    pub target: G3RsApparchCrate,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsApparchPatchBypass {
     pub cargo_rel_path: String,
     pub key: String,
@@ -122,12 +129,41 @@ pub struct G3RsApparchPublicItem {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct G3RsApparchConfigChecksInput {
-    pub crates: Vec<G3RsApparchCrate>,
-    pub dependency_edges: Vec<G3RsApparchDependencyEdge>,
+pub struct G3RsApparchCrateDependencyChecksInput {
+    pub krate: G3RsApparchCrate,
+    pub internal_dependencies: Vec<G3RsApparchBoundDependency>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3RsApparchCratePurityChecksInput {
+    pub krate: G3RsApparchCrate,
     pub external_dependencies: Vec<G3RsApparchExternalDependency>,
-    pub patch_bypasses: Vec<G3RsApparchPatchBypass>,
     pub rust_policy: G3RsApparchRustPolicyState,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3RsApparchPatchBypassChecksInput {
+    pub patch: G3RsApparchPatchBypass,
+    pub rust_policy: G3RsApparchRustPolicyState,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsApparchSameLayerDependencyEdge {
+    pub from: G3RsApparchCrate,
+    pub to: G3RsApparchCrate,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsApparchSameLayerCyclesChecksInput {
+    pub edges: Vec<G3RsApparchSameLayerDependencyEdge>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3RsApparchConfigChecksInput {
+    pub crate_dependency_checks: Vec<G3RsApparchCrateDependencyChecksInput>,
+    pub crate_purity_checks: Vec<G3RsApparchCratePurityChecksInput>,
+    pub patch_bypass_checks: Vec<G3RsApparchPatchBypassChecksInput>,
+    pub same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

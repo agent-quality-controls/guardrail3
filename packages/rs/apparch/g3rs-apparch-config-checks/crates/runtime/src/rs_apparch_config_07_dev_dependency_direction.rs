@@ -1,34 +1,26 @@
-use std::collections::BTreeMap;
-
-use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchDependencyEdge};
+use g3rs_apparch_types::G3RsApparchCrateDependencyChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-APPARCH-CONFIG-07";
 
 pub(crate) fn check(
-    krate: &G3RsApparchCrate,
-    crates_by_path: &BTreeMap<String, &G3RsApparchCrate>,
-    dependency_edges: &[G3RsApparchDependencyEdge],
+    input: &G3RsApparchCrateDependencyChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
+    let krate = &input.krate;
     let Some(source_layer) = krate.layer else {
         return;
     };
-    let violating = dependency_edges
+    let violating = input
+        .internal_dependencies
         .iter()
-        .filter(|edge| edge.from_cargo_rel_path == krate.cargo_rel_path)
-        .filter(|edge| edge.kind.is_dev())
-        .filter_map(|edge| {
-            crates_by_path
-                .get(&edge.to_cargo_rel_path)
-                .copied()
-                .map(|target| (edge, target))
-        })
-        .filter(|(_, target)| {
-            target.layer.is_some_and(|target_layer| {
+        .filter(|dependency| dependency.kind.is_dev())
+        .filter(|dependency| {
+            dependency.target.layer.is_some_and(|target_layer| {
                 crate::run::forbidden_runtime_dependency(source_layer, target_layer)
                     && !crate::run::is_package_internal_runtime_to_assertions_dev_edge(
-                        krate, target,
+                        krate,
+                        &dependency.target,
                     )
             })
         })
@@ -38,7 +30,8 @@ pub(crate) fn check(
         return;
     }
 
-    for (edge, target) in violating {
+    for dependency in violating {
+        let target = &dependency.target;
         let target_layer = target.layer.expect("filtered to layered target");
         results.push(G3CheckResult::new(
             ID.to_owned(),
@@ -50,7 +43,7 @@ pub(crate) fn check(
                 crate::run::display_crate(krate),
                 crate::run::layer_label(target_layer),
                 crate::run::display_crate(target),
-                edge.kind.label()
+                dependency.kind.label()
             ),
             Some(krate.cargo_rel_path.clone()),
             None,

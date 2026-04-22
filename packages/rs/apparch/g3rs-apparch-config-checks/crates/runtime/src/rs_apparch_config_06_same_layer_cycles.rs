@@ -1,35 +1,30 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchDependencyEdge};
+use g3rs_apparch_types::G3RsApparchSameLayerCyclesChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-APPARCH-CONFIG-06";
 
 pub(crate) fn check(
-    crates: &[G3RsApparchCrate],
-    dependency_edges: &[G3RsApparchDependencyEdge],
+    input: &G3RsApparchSameLayerCyclesChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    let crates_by_path = crates
+    let crates_by_path = input
+        .edges
         .iter()
-        .map(|krate| (krate.cargo_rel_path.clone(), krate))
+        .flat_map(|edge| {
+            [
+                (&edge.from.cargo_rel_path, &edge.from),
+                (&edge.to.cargo_rel_path, &edge.to),
+            ]
+        })
         .collect::<BTreeMap<_, _>>();
     let mut adjacency = BTreeMap::<String, Vec<String>>::new();
     let mut self_loops = BTreeSet::new();
 
-    for edge in dependency_edges.iter().filter(|edge| !edge.kind.is_dev()) {
-        let Some(source) = crates_by_path.get(&edge.from_cargo_rel_path).copied() else {
-            continue;
-        };
-        let Some(target) = crates_by_path.get(&edge.to_cargo_rel_path).copied() else {
-            continue;
-        };
-        let (Some(source_layer), Some(target_layer)) = (source.layer, target.layer) else {
-            continue;
-        };
-        if source_layer != target_layer {
-            continue;
-        }
+    for edge in &input.edges {
+        let source = &edge.from;
+        let target = &edge.to;
         adjacency
             .entry(source.cargo_rel_path.clone())
             .or_default()

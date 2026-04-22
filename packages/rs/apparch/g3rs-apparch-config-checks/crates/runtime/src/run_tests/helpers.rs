@@ -1,24 +1,63 @@
 use g3rs_apparch_types::{
-    G3RsApparchConfigChecksInput, G3RsApparchCrate, G3RsApparchDependencyEdge,
-    G3RsApparchDependencyKind, G3RsApparchLayer, G3RsApparchRustPolicyState,
+    G3RsApparchBoundDependency, G3RsApparchConfigChecksInput, G3RsApparchCrate,
+    G3RsApparchCrateDependencyChecksInput, G3RsApparchCratePurityChecksInput,
+    G3RsApparchDependencyKind, G3RsApparchLayer, G3RsApparchPatchBypassChecksInput,
+    G3RsApparchRustPolicyState, G3RsApparchSameLayerCyclesChecksInput,
 };
 
 pub(super) fn input() -> G3RsApparchConfigChecksInput {
+    let types = crate_input("types/core", G3RsApparchLayer::Types);
+    let logic = crate_input("logic/service", G3RsApparchLayer::Logic);
+    let outbound = crate_input("io/outbound/db", G3RsApparchLayer::IoOutbound);
+    let inbound = crate_input("io/inbound/http", G3RsApparchLayer::IoInbound);
+
     G3RsApparchConfigChecksInput {
-        crates: vec![
-            crate_input("types/core", G3RsApparchLayer::Types),
-            crate_input("logic/service", G3RsApparchLayer::Logic),
-            crate_input("io/outbound/db", G3RsApparchLayer::IoOutbound),
-            crate_input("io/inbound/http", G3RsApparchLayer::IoInbound),
+        crate_dependency_checks: vec![
+            G3RsApparchCrateDependencyChecksInput {
+                krate: types.clone(),
+                internal_dependencies: Vec::new(),
+            },
+            G3RsApparchCrateDependencyChecksInput {
+                krate: logic.clone(),
+                internal_dependencies: Vec::new(),
+            },
+            G3RsApparchCrateDependencyChecksInput {
+                krate: outbound.clone(),
+                internal_dependencies: Vec::new(),
+            },
+            G3RsApparchCrateDependencyChecksInput {
+                krate: inbound.clone(),
+                internal_dependencies: vec![
+                    bound_dependency(&types),
+                    bound_dependency(&logic),
+                    bound_dependency(&outbound),
+                ],
+            },
         ],
-        dependency_edges: vec![
-            edge("io/inbound/http", "types/core"),
-            edge("io/inbound/http", "logic/service"),
-            edge("io/inbound/http", "io/outbound/db"),
+        crate_purity_checks: vec![
+            G3RsApparchCratePurityChecksInput {
+                krate: types,
+                external_dependencies: Vec::new(),
+                rust_policy: G3RsApparchRustPolicyState::Missing,
+            },
+            G3RsApparchCratePurityChecksInput {
+                krate: logic,
+                external_dependencies: Vec::new(),
+                rust_policy: G3RsApparchRustPolicyState::Missing,
+            },
+            G3RsApparchCratePurityChecksInput {
+                krate: outbound,
+                external_dependencies: Vec::new(),
+                rust_policy: G3RsApparchRustPolicyState::Missing,
+            },
+            G3RsApparchCratePurityChecksInput {
+                krate: inbound,
+                external_dependencies: Vec::new(),
+                rust_policy: G3RsApparchRustPolicyState::Missing,
+            },
         ],
-        external_dependencies: Vec::new(),
-        patch_bypasses: Vec::new(),
-        rust_policy: G3RsApparchRustPolicyState::Missing,
+        patch_bypass_checks: Vec::<G3RsApparchPatchBypassChecksInput>::new(),
+        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput { edges: Vec::new() },
     }
 }
 
@@ -35,15 +74,10 @@ fn crate_input(rel_dir: &str, layer: G3RsApparchLayer) -> G3RsApparchCrate {
     }
 }
 
-fn edge(from_rel_dir: &str, to_rel_dir: &str) -> G3RsApparchDependencyEdge {
-    G3RsApparchDependencyEdge {
-        from_cargo_rel_path: format!("{from_rel_dir}/Cargo.toml"),
-        to_cargo_rel_path: format!("{to_rel_dir}/Cargo.toml"),
-        dep_name: to_rel_dir
-            .rsplit('/')
-            .next()
-            .expect("fixture dependency path should end with a crate name")
-            .to_owned(),
+fn bound_dependency(target: &G3RsApparchCrate) -> G3RsApparchBoundDependency {
+    G3RsApparchBoundDependency {
+        dep_name: target.crate_name.clone(),
         kind: G3RsApparchDependencyKind::Dependency,
+        target: target.clone(),
     }
 }

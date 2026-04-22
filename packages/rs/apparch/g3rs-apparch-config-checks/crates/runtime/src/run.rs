@@ -1,65 +1,28 @@
-use std::collections::BTreeMap;
-
 use g3rs_apparch_types::G3RsApparchConfigChecksInput;
 use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchLayer};
 use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3RsApparchConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
-    let crates_by_path = input
-        .crates
-        .iter()
-        .map(|krate| (krate.cargo_rel_path.clone(), krate))
-        .collect::<BTreeMap<_, _>>();
 
-    for krate in &input.crates {
-        crate::rs_apparch_config_01_types_dependency_direction::check(
-            krate,
-            &crates_by_path,
-            &input.dependency_edges,
-            &mut results,
-        );
-        crate::rs_apparch_config_02_logic_dependency_direction::check(
-            krate,
-            &crates_by_path,
-            &input.dependency_edges,
-            &mut results,
-        );
+    for crate_check in &input.crate_dependency_checks {
+        crate::rs_apparch_config_01_types_dependency_direction::check(crate_check, &mut results);
+        crate::rs_apparch_config_02_logic_dependency_direction::check(crate_check, &mut results);
         crate::rs_apparch_config_03_io_outbound_dependency_direction::check(
-            krate,
-            &crates_by_path,
-            &input.dependency_edges,
+            crate_check,
             &mut results,
         );
-        crate::rs_apparch_config_07_dev_dependency_direction::check(
-            krate,
-            &crates_by_path,
-            &input.dependency_edges,
-            &mut results,
-        );
-        crate::rs_apparch_config_08_types_purity::check(
-            krate,
-            &input.external_dependencies,
-            &input.rust_policy,
-            &mut results,
-        );
-        crate::rs_apparch_config_09_logic_purity::check(
-            krate,
-            &input.external_dependencies,
-            &input.rust_policy,
-            &mut results,
-        );
+        crate::rs_apparch_config_07_dev_dependency_direction::check(crate_check, &mut results);
     }
-    for patch in &input.patch_bypasses {
-        crate::rs_apparch_config_05_patch_replace_bypass::check(
-            patch,
-            &input.rust_policy,
-            &mut results,
-        );
+    for purity_check in &input.crate_purity_checks {
+        crate::rs_apparch_config_08_types_purity::check(purity_check, &mut results);
+        crate::rs_apparch_config_09_logic_purity::check(purity_check, &mut results);
+    }
+    for patch_check in &input.patch_bypass_checks {
+        crate::rs_apparch_config_05_patch_replace_bypass::check(patch_check, &mut results);
     }
     crate::rs_apparch_config_06_same_layer_cycles::check(
-        &input.crates,
-        &input.dependency_edges,
+        &input.same_layer_cycles_check,
         &mut results,
     );
 

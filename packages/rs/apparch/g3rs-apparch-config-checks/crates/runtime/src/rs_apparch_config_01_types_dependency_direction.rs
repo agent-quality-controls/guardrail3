@@ -1,25 +1,22 @@
-use std::collections::BTreeMap;
-
-use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchDependencyEdge, G3RsApparchLayer};
+use g3rs_apparch_types::{G3RsApparchCrateDependencyChecksInput, G3RsApparchLayer};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "RS-APPARCH-CONFIG-01";
 
 pub(crate) fn check(
-    krate: &G3RsApparchCrate,
-    crates_by_path: &BTreeMap<String, &G3RsApparchCrate>,
-    dependency_edges: &[G3RsApparchDependencyEdge],
+    input: &G3RsApparchCrateDependencyChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
+    let krate = &input.krate;
     if krate.layer != Some(G3RsApparchLayer::Types) {
         return;
     }
 
-    let violating = dependency_edges
+    let violating = input
+        .internal_dependencies
         .iter()
-        .filter(|edge| edge.from_cargo_rel_path == krate.cargo_rel_path)
-        .filter(|edge| !edge.kind.is_dev())
-        .filter_map(|edge| crates_by_path.get(&edge.to_cargo_rel_path).copied())
+        .filter(|dependency| !dependency.kind.is_dev())
+        .map(|dependency| &dependency.target)
         .filter(|target| {
             matches!(
                 target.layer,

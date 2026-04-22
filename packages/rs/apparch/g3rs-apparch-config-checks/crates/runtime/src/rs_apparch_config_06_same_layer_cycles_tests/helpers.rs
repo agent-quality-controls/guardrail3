@@ -1,5 +1,6 @@
 use g3rs_apparch_types::{
     G3RsApparchCrate, G3RsApparchDependencyEdge, G3RsApparchDependencyKind, G3RsApparchLayer,
+    G3RsApparchSameLayerCyclesChecksInput, G3RsApparchSameLayerDependencyEdge,
 };
 use guardrail3_check_types::G3CheckResult;
 
@@ -30,6 +31,24 @@ pub(super) fn run_rule(
     edges: &[G3RsApparchDependencyEdge],
 ) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
-    crate::rs_apparch_config_06_same_layer_cycles::check(crates, edges, &mut results);
+    let input = G3RsApparchSameLayerCyclesChecksInput {
+        edges: edges
+            .iter()
+            .filter(|edge| !edge.kind.is_dev())
+            .filter_map(|edge| {
+                let from = crates
+                    .iter()
+                    .find(|krate| krate.cargo_rel_path == edge.from_cargo_rel_path)?;
+                let to = crates
+                    .iter()
+                    .find(|krate| krate.cargo_rel_path == edge.to_cargo_rel_path)?;
+                (from.layer == to.layer).then(|| G3RsApparchSameLayerDependencyEdge {
+                    from: from.clone(),
+                    to: to.clone(),
+                })
+            })
+            .collect(),
+    };
+    crate::rs_apparch_config_06_same_layer_cycles::check(&input, &mut results);
     results
 }
