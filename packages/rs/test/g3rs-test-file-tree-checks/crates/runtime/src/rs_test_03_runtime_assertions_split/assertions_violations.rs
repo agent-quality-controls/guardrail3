@@ -1,31 +1,31 @@
 use std::collections::BTreeSet;
 
-use g3rs_test_types::{G3RsTestComponentFileTreeFacts, G3RsTestFileKind, G3RsTestFileTreeChecksInput};
+use g3rs_test_types::{
+    G3RsTestComponentFileTreeFacts, G3RsTestFileKind, G3RsTestFileTreeChecksInput,
+};
 
 use super::helpers;
 use super::violations::RuntimeAssertionsViolation;
-use crate::support::RootAnalysis;
 
 pub(super) fn collect_assertions_module_violations(
     violations: &mut Vec<RuntimeAssertionsViolation>,
     component: &G3RsTestComponentFileTreeFacts,
     input: &G3RsTestFileTreeChecksInput,
-    analysis: &RootAnalysis,
     allowed_assertions_packages: &BTreeSet<String>,
 ) {
-    for file in analysis.files.iter().filter(|file| {
-        file.file.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
-            && matches!(file.file.kind, G3RsTestFileKind::AssertionsModule)
+    for file in input.files.iter().filter(|file| {
+        file.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
+            && matches!(file.kind, G3RsTestFileKind::AssertionsModule)
     }) {
         for binding in &file.parsed.imports {
             if helpers::import_uses_local_boundary(binding) {
                 violations.push(RuntimeAssertionsViolation {
-                    rel_path: file.file.rel_path.clone(),
+                    rel_path: file.rel_path.clone(),
                     line: Some(binding.line),
                     title: "assertions module reaches local private code".to_owned(),
                     message: format!(
                         "Assertions file `{}` imports local path `{}`. Import the runtime crate public API instead, so sidecars and external harnesses can reuse the same assertions without depending on private module layout.",
-                        file.file.rel_path,
+                        file.rel_path,
                         binding.path_segments.join("::"),
                     ),
                 });
@@ -36,7 +36,7 @@ pub(super) fn collect_assertions_module_violations(
                 allowed_assertions_packages,
             ) {
                 violations.push(RuntimeAssertionsViolation {
-                    rel_path: file.file.rel_path.clone(),
+                    rel_path: file.rel_path.clone(),
                     line: Some(binding.line),
                     title: "assertions module imports disallowed local crate".to_owned(),
                     message: format!(
@@ -46,7 +46,7 @@ pub(super) fn collect_assertions_module_violations(
             }
             if path_mentions_route_construction(&binding.path_segments) {
                 violations.push(RuntimeAssertionsViolation {
-                    rel_path: file.file.rel_path.clone(),
+                    rel_path: file.rel_path.clone(),
                     line: Some(binding.line),
                     title: "assertions module imports route construction infrastructure".to_owned(),
                     message: "Assertions modules must stay reusable semantic proof helpers and must not import route-construction infrastructure.".to_owned(),
@@ -62,7 +62,7 @@ pub(super) fn collect_assertions_module_violations(
             .map(str::to_owned)
         }) {
             violations.push(RuntimeAssertionsViolation {
-                rel_path: file.file.rel_path.clone(),
+                rel_path: file.rel_path.clone(),
                 line: None,
                 title: "assertions module calls disallowed local crate".to_owned(),
                 message: format!(
@@ -84,7 +84,7 @@ pub(super) fn collect_assertions_module_violations(
                 .any(|path| path_mentions_route_construction(path))
         {
             violations.push(RuntimeAssertionsViolation {
-                rel_path: file.file.rel_path.clone(),
+                rel_path: file.rel_path.clone(),
                 line: None,
                 title: "assertions module builds routed family input".to_owned(),
                 message: "Assertions modules must stay reusable semantic proof helpers and must not construct routed family inputs through mapper/placement wiring.".to_owned(),
@@ -96,7 +96,7 @@ pub(super) fn collect_assertions_module_violations(
             component.runtime_package_name.as_deref(),
         ) {
             violations.push(RuntimeAssertionsViolation {
-                rel_path: file.file.rel_path.clone(),
+                rel_path: file.rel_path.clone(),
                 line: None,
                 title: "assertions module orchestrates family execution".to_owned(),
                 message: "Assertions modules must not call runtime `check_test_tree(...)`; sidecars own family execution and assertions own reusable semantic proof only.".to_owned(),

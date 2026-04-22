@@ -1,10 +1,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3rs_test_types::{G3RsTestComponentFileTreeFacts, G3RsTestFileKind, G3RsTestFileTreeChecksInput};
+use g3rs_test_types::{
+    G3RsTestAnalyzedSourceFile, G3RsTestComponentFileTreeFacts, G3RsTestFileKind,
+    G3RsTestFileTreeChecksInput,
+};
 
 use super::assertions_violations::collect_assertions_module_violations;
 use super::helpers;
-use crate::support::{AnalyzedFile, RootAnalysis};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct RuntimeAssertionsViolation {
@@ -16,16 +18,15 @@ pub(super) struct RuntimeAssertionsViolation {
 
 pub(super) fn collect_violations(
     input: &G3RsTestFileTreeChecksInput,
-    analysis: &RootAnalysis,
 ) -> Vec<RuntimeAssertionsViolation> {
     let mut violations = Vec::new();
-    let parsed_by_path = analysis
+    let parsed_by_path = input
         .files
         .iter()
-        .map(|file| (file.file.rel_path.clone(), file))
+        .map(|file| (file.rel_path.clone(), file))
         .collect::<BTreeMap<_, _>>();
 
-    violations.extend(non_component_harness_violations(&analysis.files));
+    violations.extend(non_component_harness_violations(&input.files));
 
     for component in &input.components {
         let harnesses_exist =
@@ -141,7 +142,6 @@ pub(super) fn collect_violations(
             &mut violations,
             component,
             input,
-            analysis,
             assertions_package_name,
             &allowed_sidecar_packages,
         );
@@ -149,7 +149,6 @@ pub(super) fn collect_violations(
             &mut violations,
             component,
             input,
-            analysis,
             &allowed_assertions_packages,
         );
     }
@@ -175,7 +174,7 @@ fn collect_external_harness_violations(
     violations: &mut Vec<RuntimeAssertionsViolation>,
     component: &G3RsTestComponentFileTreeFacts,
     input: &G3RsTestFileTreeChecksInput,
-    parsed_by_path: &BTreeMap<String, &AnalyzedFile>,
+    parsed_by_path: &BTreeMap<String, &G3RsTestAnalyzedSourceFile>,
     allowed_external_packages: &BTreeSet<String>,
 ) {
     for external_harness in &component.external_harnesses {
@@ -244,60 +243,56 @@ fn collect_sidecar_violations(
     violations: &mut Vec<RuntimeAssertionsViolation>,
     component: &G3RsTestComponentFileTreeFacts,
     input: &G3RsTestFileTreeChecksInput,
-    analysis: &RootAnalysis,
     assertions_package_name: Option<&str>,
     allowed_sidecar_packages: &BTreeSet<String>,
 ) {
-    for file in analysis.files.iter().filter(|file| {
-        file.file.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
+    for file in input.files.iter().filter(|file| {
+        file.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
             && matches!(
-                file.file.kind,
+                file.kind,
                 G3RsTestFileKind::InternalSidecarMod | G3RsTestFileKind::InternalSidecarSupport
             )
     }) {
-        let Some(owner_module_name) = file.file.owner_module_name.as_deref() else {
+        let Some(owner_module_name) = file.owner_module_name.as_deref() else {
             continue;
         };
-        let local_module_names = analysis
+        let local_module_names = input
             .files
             .iter()
             .filter(|candidate| {
-                candidate.file.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
-                    && matches!(candidate.file.kind, G3RsTestFileKind::Source)
+                candidate.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
+                    && matches!(candidate.kind, G3RsTestFileKind::Source)
             })
-            .filter_map(|candidate| candidate.file.owner_module_name.clone())
+            .filter_map(|candidate| candidate.owner_module_name.clone())
             .collect::<BTreeSet<_>>();
         for binding in &file.parsed.imports {
             if let Some(target) = helpers::disallowed_sidecar_local_boundary_target(
                 &binding.path_segments,
-                &file.file.kind,
+                &file.kind,
                 owner_module_name,
                 &local_module_names,
             ) {
                 violations.push(RuntimeAssertionsViolation {
-                    rel_path: file.file.rel_path.clone(),
+                    rel_path: file.rel_path.clone(),
                     line: Some(binding.line),
                     title: "sidecar escapes owned module boundary".to_owned(),
                     message: format!(
                         "Sidecar file `{}` reaches local path `{}`. Call only the owned production module `{}` or the shared assertions crate from this sidecar, so the sidecar tests one module without reaching into siblings.",
-                        file.file.rel_path,
+                        file.rel_path,
                         target,
                         owner_module_name,
                     ),
                 });
             }
-            if helpers::import_hits_sibling_module(
-                binding,
-                owner_module_name,
-                &local_module_names,
-            ) {
+            if helpers::import_hits_sibling_module(binding, owner_module_name, &local_module_names)
+            {
                 violations.push(RuntimeAssertionsViolation {
-                    rel_path: file.file.rel_path.clone(),
+                    rel_path: file.rel_path.clone(),
                     line: Some(binding.line),
                     title: "sidecar imports sibling local module".to_owned(),
                     message: format!(
                         "Sidecar file `{}` imports sibling local module `{}`. Import only the owned production module `{}` or the shared assertions crate from this sidecar, so the sidecar tests one module without reaching into siblings.",
-                        file.file.rel_path,
+                        file.rel_path,
                         helpers::sibling_module_target(
                             &binding.path_segments,
                             owner_module_name,
@@ -314,7 +309,7 @@ fn collect_sidecar_violations(
                 allowed_sidecar_packages,
             ) {
                 violations.push(RuntimeAssertionsViolation {
-                    rel_path: file.file.rel_path.clone(),
+                    rel_path: file.rel_path.clone(),
                     line: Some(binding.line),
                     title: "sidecar imports disallowed local crate".to_owned(),
                     message: format!(
@@ -325,11 +320,11 @@ fn collect_sidecar_violations(
             if let Some(target_module) = helpers::foreign_assertions_module_target(
                 &binding.path_segments,
                 assertions_package_name,
-                &file.file.rel_path,
+                &file.rel_path,
                 owner_module_name,
             ) {
                 violations.push(RuntimeAssertionsViolation {
-                    rel_path: file.file.rel_path.clone(),
+                    rel_path: file.rel_path.clone(),
                     line: Some(binding.line),
                     title: "sidecar imports sibling assertions module".to_owned(),
                     message: format!(
@@ -341,13 +336,13 @@ fn collect_sidecar_violations(
         if let Some(target) = file.parsed.file_call_paths.iter().find_map(|path| {
             helpers::disallowed_sidecar_local_boundary_target(
                 path,
-                &file.file.kind,
+                &file.kind,
                 owner_module_name,
                 &local_module_names,
             )
         }) {
             violations.push(RuntimeAssertionsViolation {
-                rel_path: file.file.rel_path.clone(),
+                rel_path: file.rel_path.clone(),
                 line: None,
                 title: "sidecar escapes owned module boundary".to_owned(),
                 message: format!(
@@ -359,12 +354,12 @@ fn collect_sidecar_violations(
             helpers::sibling_module_target(path, owner_module_name, &local_module_names)
         }) {
             violations.push(RuntimeAssertionsViolation {
-                rel_path: file.file.rel_path.clone(),
+                rel_path: file.rel_path.clone(),
                 line: None,
                 title: "sidecar calls sibling local module".to_owned(),
                 message: format!(
                     "Sidecar file `{}` calls sibling local module `{}`. Call only the owned production module `{}` or the shared assertions crate from this sidecar, so the sidecar tests one module without reaching into siblings.",
-                    file.file.rel_path,
+                    file.rel_path,
                     target_module,
                     owner_module_name,
                 ),
@@ -379,7 +374,7 @@ fn collect_sidecar_violations(
             .map(str::to_owned)
         }) {
             violations.push(RuntimeAssertionsViolation {
-                rel_path: file.file.rel_path.clone(),
+                rel_path: file.rel_path.clone(),
                 line: None,
                 title: "sidecar calls disallowed local crate".to_owned(),
                 message: format!(
@@ -392,12 +387,12 @@ fn collect_sidecar_violations(
             helpers::foreign_assertions_module_target(
                 path,
                 assertions_package_name,
-                &file.file.rel_path,
+                &file.rel_path,
                 owner_module_name,
             )
         }) {
             violations.push(RuntimeAssertionsViolation {
-                rel_path: file.file.rel_path.clone(),
+                rel_path: file.rel_path.clone(),
                 line: None,
                 title: "sidecar calls sibling assertions module".to_owned(),
                 message: format!(
@@ -408,17 +403,19 @@ fn collect_sidecar_violations(
     }
 }
 
-fn non_component_harness_violations(files: &[AnalyzedFile]) -> Vec<RuntimeAssertionsViolation> {
+fn non_component_harness_violations(
+    files: &[G3RsTestAnalyzedSourceFile],
+) -> Vec<RuntimeAssertionsViolation> {
     files.iter()
-        .filter(|file| file.file.component_rel_dir.is_none())
+        .filter(|file| file.component_rel_dir.is_none())
         .filter(|file| {
             matches!(
-                file.file.kind,
+                file.kind,
                 G3RsTestFileKind::InternalSidecarMod | G3RsTestFileKind::ExternalHarness
             )
         })
         .map(|file| RuntimeAssertionsViolation {
-            rel_path: file.file.rel_path.clone(),
+            rel_path: file.rel_path.clone(),
             line: None,
             title: "test harness outside runtime/assertions split".to_owned(),
             message: "Test harnesses must live under a discovered `runtime` crate with a sibling `assertions` crate; plain root-local sidecars and external harnesses are not allowed.".to_owned(),

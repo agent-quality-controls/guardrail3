@@ -1,8 +1,7 @@
 use std::collections::BTreeSet;
 
 use g3rs_test_types::G3RsTestComponentFileTreeFacts;
-
-use crate::parse::UseBinding;
+use g3rs_test_types::ast::UseBinding;
 
 pub(super) fn import_uses_external_runtime_boundary(binding: &UseBinding) -> bool {
     binding

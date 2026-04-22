@@ -208,10 +208,8 @@ impl<'source> Visit<'source> for TestBodyVisitor {
             if name == "assert_matches" && helpers::macro_has_weak_assert_matches(mac) {
                 self.weak_matches_lines.push(helpers::span_line(mac.span()));
             }
-            if helpers::is_assertion_macro_name(&name) || name == "panic" {
-                helpers::visit_macro_expr_args(self, mac);
-            }
         }
+        helpers::visit_macro_expr_args(self, mac);
         syn::visit::visit_macro(self, mac);
     }
 

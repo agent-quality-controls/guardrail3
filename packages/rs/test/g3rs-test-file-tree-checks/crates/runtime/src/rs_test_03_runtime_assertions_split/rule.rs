@@ -2,7 +2,6 @@ use g3rs_test_types::G3RsTestFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use super::violations::collect_violations;
-use crate::support::RootAnalysis;
 
 const ID: &str = "RS-TEST-FILETREE-03";
 
@@ -10,12 +9,8 @@ const ID: &str = "RS-TEST-FILETREE-03";
 #[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
 mod rule_tests;
 
-pub(crate) fn collect(
-    input: &G3RsTestFileTreeChecksInput,
-    analysis: &RootAnalysis,
-    results: &mut Vec<G3CheckResult>,
-) {
-    let violations = collect_violations(input, analysis);
+pub(crate) fn collect(input: &G3RsTestFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
+    let violations = collect_violations(input);
     if violations.is_empty() {
         results.push(
             G3CheckResult::new(

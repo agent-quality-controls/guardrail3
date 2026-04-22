@@ -1,5 +1,6 @@
 mod activation;
 mod components;
+mod file_tree_analysis;
 #[cfg(feature = "ingest")]
 pub mod fixtures;
 mod fs;
