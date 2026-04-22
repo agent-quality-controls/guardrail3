@@ -1248,6 +1248,7 @@ dependencies = [
  "g3rs-test-types",
  "g3rs-workspace-crawl",
  "glob",
+ "hook-shell-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
  "syn",

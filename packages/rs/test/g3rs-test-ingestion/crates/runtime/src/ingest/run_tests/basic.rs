@@ -89,6 +89,54 @@ tokio = { version = \"1\", features = [\"macros\"] }\n",
 }
 
 #[test]
+fn ingests_mutation_hook_when_hook_dispatches_through_function() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "\
+[package]\n\
+name = \"demo\"\n\
+version = \"0.1.0\"\n\
+edition = \"2024\"\n\
+\n\
+[profile.mutants]\n\
+inherits = \"dev\"\n\
+",
+    );
+    write(root.join("src/lib.rs"), "#[test]\nfn smoke() {}\n");
+    write(
+        root.join(".githooks/pre-commit"),
+        "\
+run_mutants() {\n\
+    cargo mutants --profile dev\n\
+}\n\
+run_mutants\n",
+    );
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs = super::super::ingest_for_config_checks_with_tool_state(&workspace_crawl, true)
+        .expect("ingestion should succeed");
+    assert_eq!(inputs.len(), 1, "{inputs:#?}");
+
+    let input = find_root(&inputs, "");
+    assert!(
+        input.is_some(),
+        "missing test root input ``; available inputs: {inputs:#?}"
+    );
+    let Some(input) = input else {
+        return;
+    };
+    assert!(input.mutation_hook_active, "{input:#?}");
+    assert_eq!(
+        input.mutation_hook_files,
+        vec![".githooks/pre-commit".to_owned()]
+    );
+}
+
+#[test]
 fn only_ingests_owned_workspace_members() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

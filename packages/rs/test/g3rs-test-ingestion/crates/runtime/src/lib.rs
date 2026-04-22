@@ -1,7 +1,6 @@
 mod activation;
 mod components;
 mod fs;
-mod hook_shell;
 mod hooks;
 mod roots;
 mod ingest;

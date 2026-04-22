@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
+use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
-use crate::hook_shell::{ExecutableLine, parse_script};
-use crate::roots::{OwnedTestRoot, TestRootDiscovery, join_under_root};
 use crate::ingest::IngestionError;
+use crate::roots::{OwnedTestRoot, TestRootDiscovery, join_under_root};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub(crate) struct MutationHookState {
@@ -101,159 +101,69 @@ fn script_contains_mutation_step(
             reason: err.to_string(),
         }
     })?;
-    Ok(parse_script(&content)
-        .executable_lines()
-        .iter()
-        .any(executable_line_has_mutation_hook))
+    let parsed = hook_shell_parser::parse_script(&content);
+    Ok(any_resolved_command(&parsed, is_cargo_mutants_command))
 }
 
-fn executable_line_has_mutation_hook(line: &ExecutableLine<'_>) -> bool {
-    is_cargo_mutants_command(line.command_text())
-}
-
-fn is_cargo_mutants_command(command_text: &str) -> bool {
-    let tokens = shell_words(command_text);
-    let mut parts = tokens.iter().map(String::as_str).peekable();
-
-    while matches!(parts.peek(), Some(token) if looks_like_env_assignment(token)) {
-        let _ = parts.next();
-    }
-
-    let Some(first) = parts.next() else {
-        return false;
-    };
-
-    let first = normalize_command_token(first);
-    if matches!(first, "exec" | "command") {
-        while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
-            let _ = parts.next();
-        }
-        let rest = parts.collect::<Vec<_>>();
-        return is_cargo_mutants_from_tokens(&rest);
-    }
-    if matches!(first, "bash" | "sh" | "zsh") {
-        while let Some(flag) = parts.next() {
-            if matches!(flag, "-c" | "-lc") {
-                return parts.next().is_some_and(is_cargo_mutants_command);
-            }
-        }
-        return false;
-    }
-    if first == "env" {
-        while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
-            let _ = parts.next();
-        }
-        while matches!(parts.peek(), Some(token) if looks_like_env_assignment(token)) {
-            let _ = parts.next();
-        }
-        let rest = parts.collect::<Vec<_>>();
-        return is_cargo_mutants_from_tokens(&rest);
-    }
-
-    let rest = parts.collect::<Vec<_>>();
-    is_cargo_mutants_from_tokens_with_first(first, &rest)
-}
-
-fn is_cargo_mutants_from_tokens(tokens: &[&str]) -> bool {
-    let Some((first, rest)) = tokens.split_first() else {
-        return false;
-    };
-    is_cargo_mutants_from_tokens_with_first(normalize_command_token(first), rest)
-}
-
-fn is_cargo_mutants_from_tokens_with_first(first: &str, rest: &[&str]) -> bool {
-    let mut parts = rest.iter().copied().peekable();
-    match first {
-        "cargo" => is_cargo_mutants_invocation(&mut parts),
-        "cargo-mutants" => !parts.any(is_help_or_version_flag),
+fn is_cargo_mutants_command(command: &ResolvedCommand) -> bool {
+    match command.command_name() {
+        "cargo" => cargo_mutants_subcommand(command.args()),
+        "cargo-mutants" => !args_have_help_or_version(command.args()),
         _ => false,
     }
 }
 
-fn is_cargo_mutants_invocation<'a, I>(parts: &mut std::iter::Peekable<I>) -> bool
-where
-    I: Iterator<Item = &'a str>,
-{
-    if matches!(parts.peek(), Some(token) if token.starts_with('+')) {
-        let _ = parts.next();
+fn cargo_mutants_subcommand(args: &[String]) -> bool {
+    let mut index = 0usize;
+
+    if args.get(index).is_some_and(|token| token.starts_with('+')) {
+        index += 1;
     }
 
-    while let Some(token) = parts.peek().copied() {
+    while let Some(token) = args.get(index).map(String::as_str) {
         if !token.starts_with('-') {
             break;
         }
 
-        let flag = parts.next().unwrap_or_default();
-        if is_help_or_version_flag(flag) {
+        if is_help_or_version_flag(token) {
             return false;
         }
-        if cargo_global_flag_takes_value(flag) {
-            let _ = parts.next();
+        if let Some((flag_name, _)) = token.split_once('=')
+            && cargo_global_flag_takes_value(flag_name)
+        {
+            index += 1;
+            continue;
         }
+        if cargo_global_flag_takes_value(token) {
+            index += 2;
+            continue;
+        }
+        index += 1;
     }
 
-    parts.next() == Some("mutants") && !parts.any(is_help_or_version_flag)
+    args.get(index).map(String::as_str) == Some("mutants")
+        && !args_have_help_or_version(args.get(index + 1..).unwrap_or(&[]))
 }
 
 fn cargo_global_flag_takes_value(flag: &str) -> bool {
     matches!(
         flag,
-        "--config" | "-Z" | "--manifest-path" | "--color" | "--target" | "--target-dir" | "--jobs"
+        "--config"
+            | "-Z"
+            | "--manifest-path"
+            | "--color"
+            | "--target"
+            | "--target-dir"
+            | "--jobs"
+            | "-j"
+            | "-C"
     )
+}
+
+fn args_have_help_or_version(args: &[String]) -> bool {
+    args.iter().any(|arg| is_help_or_version_flag(arg))
 }
 
 fn is_help_or_version_flag(token: &str) -> bool {
     matches!(token, "-h" | "--help" | "-V" | "--version")
-}
-
-fn normalize_command_token(token: &str) -> &str {
-    token.rsplit('/').next().unwrap_or(token)
-}
-
-fn looks_like_env_assignment(token: &str) -> bool {
-    let Some((name, _value)) = token.split_once('=') else {
-        return false;
-    };
-    let mut chars = name.chars();
-    let Some(first) = chars.next() else {
-        return false;
-    };
-    (first.is_ascii_alphabetic() || first == '_')
-        && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
-}
-
-fn shell_words(command_text: &str) -> Vec<String> {
-    let mut words = Vec::new();
-    let mut current = String::new();
-    let mut chars = command_text.chars().peekable();
-    let mut single_quoted = false;
-    let mut double_quoted = false;
-
-    while let Some(ch) = chars.next() {
-        match ch {
-            '\'' if !double_quoted => {
-                single_quoted = !single_quoted;
-            }
-            '"' if !single_quoted => {
-                double_quoted = !double_quoted;
-            }
-            '\\' if double_quoted => {
-                if let Some(next) = chars.next() {
-                    current.push(next);
-                }
-            }
-            ch if ch.is_whitespace() && !single_quoted && !double_quoted => {
-                if !current.is_empty() {
-                    words.push(std::mem::take(&mut current));
-                }
-            }
-            _ => current.push(ch),
-        }
-    }
-
-    if !current.is_empty() {
-        words.push(current);
-    }
-
-    words
 }
