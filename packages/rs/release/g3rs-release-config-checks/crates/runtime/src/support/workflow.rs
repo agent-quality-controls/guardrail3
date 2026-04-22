@@ -9,7 +9,7 @@ use g3rs_release_types::{
 pub(crate) fn crate_binary_release_workflow_present(
     repo: &G3RsReleaseConfigRepo,
     krate: &G3RsReleaseConfigCrate,
-    publishable_binary_count: usize,
+    binary_crate_count: usize,
 ) -> bool {
     repo.workflows.iter().any(|workflow| {
         binary_release_present(
@@ -17,7 +17,7 @@ pub(crate) fn crate_binary_release_workflow_present(
             &krate.name,
             &krate.cargo_rel_path,
             &krate.binary_target_names,
-            publishable_binary_count,
+            binary_crate_count,
         )
     })
 }
@@ -25,7 +25,7 @@ pub(crate) fn crate_binary_release_workflow_present(
 pub(crate) fn crate_linux_release_target_present(
     repo: &G3RsReleaseConfigRepo,
     krate: &G3RsReleaseConfigCrate,
-    publishable_binary_count: usize,
+    binary_crate_count: usize,
 ) -> bool {
     repo.workflows.iter().any(|workflow| {
         linux_target_present(
@@ -33,7 +33,7 @@ pub(crate) fn crate_linux_release_target_present(
             &krate.name,
             &krate.cargo_rel_path,
             &krate.binary_target_names,
-            publishable_binary_count,
+            binary_crate_count,
         )
     })
 }
@@ -43,7 +43,7 @@ fn binary_release_present(
     crate_name: &str,
     cargo_rel_path: &str,
     binary_target_names: &BTreeSet<String>,
-    publishable_binary_crate_count: usize,
+    binary_crate_count: usize,
 ) -> bool {
     workflow.jobs.iter().enumerate().any(|(index, job)| {
         !release_path_build_job_indices(
@@ -53,7 +53,7 @@ fn binary_release_present(
             crate_name,
             cargo_rel_path,
             binary_target_names,
-            publishable_binary_crate_count,
+            binary_crate_count,
         )
         .is_empty()
     })
@@ -64,7 +64,7 @@ fn linux_target_present(
     crate_name: &str,
     cargo_rel_path: &str,
     binary_target_names: &BTreeSet<String>,
-    publishable_binary_crate_count: usize,
+    binary_crate_count: usize,
 ) -> bool {
     workflow.jobs.iter().enumerate().any(|(index, job)| {
         release_path_build_job_indices(
@@ -74,7 +74,7 @@ fn linux_target_present(
             crate_name,
             cargo_rel_path,
             binary_target_names,
-            publishable_binary_crate_count,
+            binary_crate_count,
         )
         .into_iter()
         .any(|job_index| {
@@ -84,7 +84,7 @@ fn linux_target_present(
                     crate_name,
                     cargo_rel_path,
                     binary_target_names,
-                    publishable_binary_crate_count,
+                    binary_crate_count,
                 )
             })
         })
@@ -98,7 +98,7 @@ fn release_path_build_job_indices(
     crate_name: &str,
     cargo_rel_path: &str,
     binary_target_names: &BTreeSet<String>,
-    publishable_binary_crate_count: usize,
+    binary_crate_count: usize,
 ) -> Vec<usize> {
     if !job.steps.iter().any(step_uses_release_action) {
         return Vec::new();
@@ -114,7 +114,7 @@ fn release_path_build_job_indices(
                         crate_name,
                         cargo_rel_path,
                         binary_target_names,
-                        publishable_binary_crate_count,
+                        binary_crate_count,
                     )
                 })
             })
@@ -154,7 +154,7 @@ fn job_has_linux_target_for_crate(
     crate_name: &str,
     cargo_rel_path: &str,
     binary_target_names: &BTreeSet<String>,
-    publishable_binary_crate_count: usize,
+    binary_crate_count: usize,
 ) -> bool {
     job.steps.iter().any(|step| {
         step_targets_linux_binary_for(
@@ -162,7 +162,7 @@ fn job_has_linux_target_for_crate(
             crate_name,
             cargo_rel_path,
             binary_target_names,
-            publishable_binary_crate_count,
+            binary_crate_count,
         )
     })
 }
@@ -179,7 +179,7 @@ fn step_builds_release_binary_for(
     crate_name: &str,
     cargo_rel_path: &str,
     binary_target_names: &BTreeSet<String>,
-    publishable_binary_crate_count: usize,
+    binary_crate_count: usize,
 ) -> bool {
     step.run_lines.iter().any(|line| {
         line_has_command(line, |command, args| {
@@ -191,7 +191,7 @@ fn step_builds_release_binary_for(
                     crate_name,
                     cargo_rel_path,
                     binary_target_names,
-                    publishable_binary_crate_count,
+                    binary_crate_count,
                 )
         })
     })
@@ -202,7 +202,7 @@ fn step_targets_linux_binary_for(
     crate_name: &str,
     cargo_rel_path: &str,
     binary_target_names: &BTreeSet<String>,
-    publishable_binary_crate_count: usize,
+    binary_crate_count: usize,
 ) -> bool {
     let has_linux_target = step.run_lines.iter().any(|line| {
         line_has_command(line, |command, args| {
@@ -215,7 +215,7 @@ fn step_targets_linux_binary_for(
                     crate_name,
                     cargo_rel_path,
                     binary_target_names,
-                    publishable_binary_crate_count,
+                    binary_crate_count,
                 )
         })
     });
@@ -231,9 +231,9 @@ fn command_mentions_crate(
     crate_name: &str,
     cargo_rel_path: &str,
     binary_target_names: &BTreeSet<String>,
-    publishable_binary_crate_count: usize,
+    binary_crate_count: usize,
 ) -> bool {
-    if publishable_binary_crate_count == 1 {
+    if binary_crate_count == 1 {
         return true;
     }
 

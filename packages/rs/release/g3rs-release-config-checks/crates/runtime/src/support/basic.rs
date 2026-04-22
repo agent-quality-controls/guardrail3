@@ -229,11 +229,8 @@ pub(crate) fn repo_publishable_crate_names(crates: &[G3RsReleaseConfigCrate]) ->
         .collect()
 }
 
-pub(crate) fn repo_publishable_binary_crate_count(crates: &[G3RsReleaseConfigCrate]) -> usize {
-    crates
-        .iter()
-        .filter(|krate| crate_publishable(krate) && krate.is_binary)
-        .count()
+pub(crate) fn repo_binary_crate_count(crates: &[G3RsReleaseConfigCrate]) -> usize {
+    crates.iter().filter(|krate| krate.is_binary).count()
 }
 
 pub(crate) fn repo_release_plz_package_names(repo: &G3RsReleaseConfigRepo) -> BTreeSet<String> {

@@ -191,6 +191,114 @@ path = "src/main.rs"
 }
 
 #[test]
+fn manifest_path_matching_does_not_credit_other_binary_crates() {
+    let repo = G3RsReleaseConfigRepo {
+        cargo_rel_path: "Cargo.toml".to_owned(),
+        cargo: cargo_toml_parser::parse(
+            r#"
+[workspace]
+members = ["crates/cli", "crates/tool"]
+resolver = "2"
+"#,
+        )
+        .expect("repo cargo fixture should parse"),
+        release_plz_rel_path: "release-plz.toml".to_owned(),
+        release_plz_exists: false,
+        release_plz: None,
+        cliff_rel_path: "cliff.toml".to_owned(),
+        cliff_exists: false,
+        cliff: None,
+        workflows: vec![G3RsReleaseWorkflow {
+            rel_path: ".github/workflows/release-binaries.yml".to_owned(),
+            analysis: G3RsReleaseWorkflowAnalysis {
+                jobs: vec![
+                    G3RsReleaseWorkflowJob {
+                        id: "build".to_owned(),
+                        runs_on: vec!["ubuntu-latest".to_owned()],
+                        needs: vec![],
+                        matrix_axes: BTreeMap::new(),
+                        steps: vec![
+                            G3RsReleaseWorkflowStep {
+                                uses: Some("taiki-e/upload-rust-binary-action@v1".to_owned()),
+                                run_lines: vec![],
+                                env_keys: vec![],
+                                env_bindings: BTreeMap::new(),
+                                with_bindings: BTreeMap::new(),
+                            },
+                            G3RsReleaseWorkflowStep {
+                                uses: None,
+                                run_lines: vec![
+                                    "cargo build --release --manifest-path crates/tool/Cargo.toml --target x86_64-unknown-linux-gnu".to_owned(),
+                                ],
+                                env_keys: vec![],
+                                env_bindings: BTreeMap::new(),
+                                with_bindings: BTreeMap::new(),
+                            },
+                        ],
+                    },
+                ],
+                steps: vec![],
+            },
+        }],
+        semver_checks_installed: false,
+    };
+    let cli = build_crate(
+        "crates/cli/Cargo.toml",
+        cargo_toml_parser::parse(
+            r#"
+[package]
+name = "cli"
+version = "0.1.0"
+publish = true
+
+[[bin]]
+name = "cli"
+path = "src/main.rs"
+"#,
+        )
+        .expect("cli cargo fixture should parse"),
+        None,
+    );
+    let tool = build_crate(
+        "crates/tool/Cargo.toml",
+        cargo_toml_parser::parse(
+            r#"
+[package]
+name = "tool"
+version = "0.1.0"
+publish = false
+
+[[bin]]
+name = "tool"
+path = "src/main.rs"
+"#,
+        )
+        .expect("tool cargo fixture should parse"),
+        None,
+    );
+
+    let results = crate::run::check(&G3RsReleaseConfigChecksInput {
+        repo_checks: vec![repo],
+        crate_checks: vec![cli, tool],
+        edge_checks: Vec::new(),
+        input_failure_checks: Vec::new(),
+    });
+
+    run_assertions::assert_contains_result(
+        &results,
+        "RS-RELEASE-CONFIG-23",
+        G3Severity::Info,
+        "cli: no binary release workflow",
+    );
+    run_assertions::assert_contains_result(
+        &results,
+        "RS-RELEASE-CONFIG-24",
+        G3Severity::Info,
+        "cli: no linux release target",
+    );
+}
+
+#[test]
 fn description_rule_reads_parsed_cargo_surface() {
     let input = config_input_for_publishable_crate(
         r#"
