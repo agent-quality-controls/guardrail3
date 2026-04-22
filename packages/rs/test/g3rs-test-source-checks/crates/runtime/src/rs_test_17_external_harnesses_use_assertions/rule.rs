@@ -188,6 +188,12 @@ fn imported_local_helper_names(
     let mut imported_local_helpers = std::collections::BTreeMap::new();
 
     for binding in imports {
+        let Some(first) = binding.path_segments.first() else {
+            continue;
+        };
+        if !matches!(first.as_str(), "crate" | "self" | "super") {
+            continue;
+        }
         let Some(local_name) = binding.local_name.as_ref().or_else(|| binding.path_segments.last())
         else {
             continue;
