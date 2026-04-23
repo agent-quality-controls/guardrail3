@@ -4,7 +4,8 @@ use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
     allow_selector, explicit_allow_entries, is_approved_allow, lints_table_is_well_formed,
-    policy_override_lints, rust_policy_valid, rust_policy_waivers, waiver_reason,
+    policy_override_lints, root_package_policy_lints, rust_policy_valid, rust_policy_waivers,
+    waiver_reason,
 };
 
 const ID: &str = "RS-CARGO-CONFIG-11";
@@ -21,8 +22,9 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
     let mut documented_count = 0usize;
     let mut missing_reason_count = 0usize;
     let mut weak_reason_count = 0usize;
-    for (family, lints) in [("rust", rust_lints), ("clippy", clippy_lints)] {
-        for lint_name in explicit_allow_entries(lints) {
+
+    let mut inspect_lints = |family: &str, lints| {
+        for lint_name in explicit_allow_entries(Some(lints)) {
             if family == "clippy" && is_approved_allow(&lint_name) {
                 continue;
             }
@@ -74,6 +76,18 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
                 },
             }
         }
+    };
+
+    for (family, lints) in [("rust", rust_lints), ("clippy", clippy_lints)] {
+        if let Some(lints) = lints {
+            inspect_lints(family, lints);
+        }
+
+        if let Some(root_package_lints) = root_package_policy_lints(root, family) {
+            if !matches!(lints, Some(existing) if core::ptr::eq(existing, root_package_lints)) {
+                inspect_lints(family, root_package_lints);
+            }
+        }
     }
 
     let total = documented_count + missing_reason_count + weak_reason_count;
@@ -101,5 +115,6 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_config_11_unapproved_allow_entries_tests/mod.rs"] // reason: owned sidecar tests for file module.
+#[path = "rs_cargo_config_11_unapproved_allow_entries_tests/mod.rs"]
+// reason: owned sidecar tests for file module.
 mod rs_cargo_config_11_unapproved_allow_entries_tests;

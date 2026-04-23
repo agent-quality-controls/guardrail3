@@ -22,6 +22,37 @@ fn errors_on_unapproved_allow_entries() {
 }
 
 #[test]
+fn errors_on_hybrid_root_package_allow_entries() {
+    let root = root(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            [workspace.lints.rust]
+            warnings = "deny"
+
+            [workspace.lints.clippy]
+            all = { level = "deny", priority = -1 }
+
+            [package]
+            name = "hybrid"
+            version = "0.1.0"
+            edition = "2024"
+
+            [lints.rust]
+            warnings = "allow"
+        "#,
+        parsed_rust_policy(None, Vec::new()),
+    );
+    let mut results = Vec::new();
+
+    crate::rs_cargo_config_11_unapproved_allow_entries::check(&root, &mut results);
+
+    assertions::assert_has_error(&results, "unapproved allow entry missing reason", false);
+}
+
+#[test]
 fn errors_on_documented_unapproved_allow_entries() {
     let root = root(
         r#"
