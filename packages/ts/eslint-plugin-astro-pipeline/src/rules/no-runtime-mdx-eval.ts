@@ -10,6 +10,7 @@ import {
   resolveReference
 } from "../utils/ast-helpers.js";
 import { collectImportClosure } from "../utils/import-closure.js";
+import { resolveImportedModuleBinding, type ResolvedModuleBinding } from "../utils/module-exports.js";
 import { classifyModuleRole } from "../utils/module-role.js";
 import {
   astroPipelineOptionsSchema,
@@ -56,12 +57,11 @@ export default createRule<RuleOptionsTuple, MessageIds>({
           return;
         }
 
-        const findings = collectImportClosure(filename, context.sourceCode.text, {
-          program: context.sourceCode.ast,
-          scopeManager: context.sourceCode.scopeManager ?? null
-        }).flatMap(
+        const modules = collectImportClosure(filename, context.sourceCode.text);
+        const findings = modules.flatMap(
           (moduleRecord) =>
             findRuntimeEvalPatterns(
+              modules,
               moduleRecord.program,
               moduleRecord.scopeManager,
               moduleRecord.filename,
@@ -85,6 +85,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
 });
 
 function findRuntimeEvalPatterns(
+  modules: ReturnType<typeof collectImportClosure>,
   program: TSESTree.Program,
   scopeManager: TSESLint.Scope.ScopeManager | null,
   filename: string,
@@ -132,6 +133,16 @@ function findRuntimeEvalPatterns(
     }
 
     const reference = resolveReference(node.callee, imports, aliases);
+    const importedBinding = resolveImportedModuleBinding(modules, filename, reference);
+
+    if (importedBinding) {
+      const importedPattern = classifyImportedRuntimeEval(modules, importedBinding);
+
+      if (importedPattern) {
+        findings.add(importedPattern);
+        return;
+      }
+    }
 
     if (
       reference?.kind === "import" &&
@@ -157,6 +168,88 @@ function findRuntimeEvalPatterns(
   return [...findings];
 }
 
+function classifyImportedRuntimeEval(
+  modules: ReturnType<typeof collectImportClosure>,
+  binding: ResolvedModuleBinding
+): string | null {
+  if (binding.kind === "reference") {
+    if (
+      binding.reference.kind === "import" &&
+      binding.reference.source === "@mdx-js/mdx" &&
+      (binding.reference.importedName === "evaluate" ||
+        binding.reference.importedName === "run")
+    ) {
+      return `@mdx-js/mdx ${String(binding.reference.importedName)}`;
+    }
+
+    if (
+      binding.reference.kind === "member" &&
+      binding.reference.object.kind === "import" &&
+      binding.reference.object.source === "@mdx-js/mdx" &&
+      (binding.reference.object.importedName === "*" ||
+        binding.reference.object.importedName === "default") &&
+      (binding.reference.property === "evaluate" ||
+        binding.reference.property === "run")
+    ) {
+      return `@mdx-js/mdx ${binding.reference.property}`;
+    }
+
+    return null;
+  }
+
+  const imports = collectImportBindings(binding.moduleRecord.program);
+  const aliases = collectSimpleAliases(binding.moduleRecord.program);
+  const declaredNames = collectDeclaredNames(binding.moduleRecord.program);
+  const functionAliases = collectRuntimeFunctionAliases(
+    binding.moduleRecord.program,
+    binding.moduleRecord.scopeManager,
+    declaredNames
+  );
+
+  if (
+    isRuntimeFunctionReference(
+      binding.expression,
+      binding.moduleRecord.scopeManager,
+      functionAliases,
+      declaredNames
+    )
+  ) {
+    return classifyFunctionPattern(binding.expression, "call");
+  }
+
+  const reference = resolveReference(binding.expression, imports, aliases);
+  const nestedBinding = resolveImportedModuleBinding(
+    modules,
+    binding.moduleRecord.filename,
+    reference
+  );
+
+  if (nestedBinding) {
+    return classifyImportedRuntimeEval(modules, nestedBinding);
+  }
+
+  if (
+    reference?.kind === "import" &&
+    reference.source === "@mdx-js/mdx" &&
+    (reference.importedName === "evaluate" || reference.importedName === "run")
+  ) {
+    return `@mdx-js/mdx ${String(reference.importedName)}`;
+  }
+
+  if (
+    reference?.kind === "member" &&
+    reference.object.kind === "import" &&
+    reference.object.source === "@mdx-js/mdx" &&
+    (reference.object.importedName === "*" ||
+      reference.object.importedName === "default") &&
+    (reference.property === "evaluate" || reference.property === "run")
+  ) {
+    return `@mdx-js/mdx ${reference.property}`;
+  }
+
+  return null;
+}
+
 function isRuntimeFunctionReference(
   callee: TSESTree.CallExpression["callee"] | TSESTree.NewExpression["callee"],
   scopeManager: TSESLint.Scope.ScopeManager | null,
@@ -166,8 +259,9 @@ function isRuntimeFunctionReference(
   if (callee.type === AST_NODE_TYPES.Identifier) {
     return (
       (callee.name === "Function" &&
-        (isUnresolvedIdentifierReference(scopeManager, callee) ||
-          !declaredNames.has("Function"))) ||
+        (scopeManager != null
+          ? isUnresolvedIdentifierReference(scopeManager, callee)
+          : !declaredNames.has("Function"))) ||
       functionAliases.has(callee.name)
     );
   }
@@ -193,6 +287,7 @@ function collectRuntimeFunctionAliases(
   declaredNames: Set<string>
 ): Set<string> {
   const aliases = new Set<string>();
+  const globalObjectAliases = new Set(["globalThis", "window", "global"]);
 
   let changed = true;
   while (changed) {
@@ -202,35 +297,114 @@ function collectRuntimeFunctionAliases(
         return;
       }
 
+      if (node.id.type === AST_NODE_TYPES.ObjectPattern) {
+        const nextAliases = collectRuntimeFunctionObjectPatternAliases(
+          node.id,
+          node.init,
+          globalObjectAliases
+        );
+
+        for (const aliasName of nextAliases) {
+          if (!aliases.has(aliasName)) {
+            aliases.add(aliasName);
+            changed = true;
+          }
+        }
+
+        return;
+      }
+
       if (node.id.type !== AST_NODE_TYPES.Identifier || aliases.has(node.id.name)) {
         return;
       }
 
       if (
         node.init.type === AST_NODE_TYPES.Identifier &&
-        ((node.init.name === "Function" &&
-          (isUnresolvedIdentifierReference(scopeManager, node.init) ||
-            !declaredNames.has("Function"))) ||
-          aliases.has(node.init.name))
+        globalObjectAliases.has(node.init.name) &&
+        !globalObjectAliases.has(node.id.name)
       ) {
-        aliases.add(node.id.name);
+        globalObjectAliases.add(node.id.name);
         changed = true;
         return;
       }
 
       if (
-        node.init.type === AST_NODE_TYPES.MemberExpression &&
-        getPropertyName(node.init) === "Function" &&
-        node.init.object.type === AST_NODE_TYPES.Identifier &&
-        ["globalThis", "window", "global"].includes(node.init.object.name)
+        isRuntimeFunctionAliasInitializer(
+          node.init,
+          scopeManager,
+          declaredNames,
+          aliases,
+          globalObjectAliases
+        )
       ) {
         aliases.add(node.id.name);
         changed = true;
+        return;
       }
     });
   }
 
   return aliases;
+}
+
+function collectRuntimeFunctionObjectPatternAliases(
+  pattern: TSESTree.ObjectPattern,
+  init: TSESTree.Expression,
+  globalObjectAliases: Set<string>
+): string[] {
+  if (
+    init.type !== AST_NODE_TYPES.Identifier ||
+    !globalObjectAliases.has(init.name)
+  ) {
+    return [];
+  }
+
+  const aliases: string[] = [];
+
+  for (const property of pattern.properties) {
+    if (property.type !== AST_NODE_TYPES.Property || property.computed) {
+      continue;
+    }
+
+    const keyName =
+      property.key.type === AST_NODE_TYPES.Identifier
+        ? property.key.name
+        : property.key.type === AST_NODE_TYPES.Literal &&
+            typeof property.key.value === "string"
+          ? property.key.value
+          : null;
+
+    if (keyName !== "Function") {
+      continue;
+    }
+
+    if (property.value.type === AST_NODE_TYPES.Identifier) {
+      aliases.push(property.value.name);
+    }
+  }
+
+  return aliases;
+}
+
+function isRuntimeFunctionAliasInitializer(
+  init: TSESTree.Expression,
+  scopeManager: TSESLint.Scope.ScopeManager | null,
+  declaredNames: Set<string>,
+  aliases: Set<string>,
+  globalObjectAliases: Set<string>
+): boolean {
+  return (
+    (init.type === AST_NODE_TYPES.Identifier &&
+      ((init.name === "Function" &&
+        (scopeManager != null
+          ? isUnresolvedIdentifierReference(scopeManager, init)
+          : !declaredNames.has("Function"))) ||
+        aliases.has(init.name))) ||
+    (init.type === AST_NODE_TYPES.MemberExpression &&
+      getPropertyName(init) === "Function" &&
+      init.object.type === AST_NODE_TYPES.Identifier &&
+      globalObjectAliases.has(init.object.name))
+  );
 }
 
 function collectDeclaredNames(program: TSESTree.Program): Set<string> {
@@ -247,14 +421,65 @@ function collectDeclaredNames(program: TSESTree.Program): Set<string> {
 
     if (
       (node.type === AST_NODE_TYPES.FunctionDeclaration ||
+        node.type === AST_NODE_TYPES.FunctionExpression ||
+        node.type === AST_NODE_TYPES.ArrowFunctionExpression ||
         node.type === AST_NODE_TYPES.ClassDeclaration) &&
       node.id
     ) {
       names.add(node.id.name);
     }
+
+    if (
+      node.type === AST_NODE_TYPES.FunctionDeclaration ||
+      node.type === AST_NODE_TYPES.FunctionExpression ||
+      node.type === AST_NODE_TYPES.ArrowFunctionExpression
+    ) {
+      for (const param of node.params) {
+        collectPatternNames(param, names);
+      }
+    }
   });
 
   return names;
+}
+
+function collectPatternNames(
+  pattern: TSESTree.Node,
+  names: Set<string>
+): void {
+  if (pattern.type === AST_NODE_TYPES.Identifier) {
+    names.add(pattern.name);
+    return;
+  }
+
+  if (pattern.type === AST_NODE_TYPES.AssignmentPattern) {
+    collectPatternNames(pattern.left, names);
+    return;
+  }
+
+  if (pattern.type === AST_NODE_TYPES.RestElement) {
+    collectPatternNames(pattern.argument, names);
+    return;
+  }
+
+  if (pattern.type === AST_NODE_TYPES.ArrayPattern) {
+    for (const element of pattern.elements) {
+      if (element) {
+        collectPatternNames(element, names);
+      }
+    }
+    return;
+  }
+
+  if (pattern.type === AST_NODE_TYPES.ObjectPattern) {
+    for (const property of pattern.properties) {
+      if (property.type === AST_NODE_TYPES.Property) {
+        collectPatternNames(property.value, names);
+      } else if (property.type === AST_NODE_TYPES.RestElement) {
+        collectPatternNames(property.argument, names);
+      }
+    }
+  }
 }
 
 function classifyFunctionPattern(

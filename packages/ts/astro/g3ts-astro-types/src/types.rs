@@ -5,12 +5,6 @@ pub enum G3TsAstroContentMode {
     LiveCollections,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum G3TsAstroOutputMode {
-    Static,
-    Server,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroAppRootInput {
     pub app_root_rel_path: String,
@@ -22,12 +16,6 @@ pub struct G3TsAstroAppRootInput {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroRouteMarkdownPageInput {
     pub rel_path: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3TsAstroCrossRootSideLoaderInput {
-    pub loader_rel_path: String,
-    pub target_rel_path: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -48,28 +36,10 @@ pub enum G3TsAstroPackageSurfaceState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3TsAstroConfigSurfaceSnapshot {
-    pub rel_path: String,
-    pub output_mode: Option<G3TsAstroOutputMode>,
-    pub adapter_module: Option<String>,
-    pub integration_modules: Vec<String>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum G3TsAstroConfigSurfaceState {
-    Missing { rel_path: String },
-    Unreadable { rel_path: String, reason: String },
-    ParseError { rel_path: String, reason: String },
-    Parsed { snapshot: G3TsAstroConfigSurfaceSnapshot },
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroIntegrationContractInput {
     pub app_root_rel_path: String,
     pub content_mode: G3TsAstroContentMode,
     pub package: G3TsAstroPackageSurfaceState,
-    pub astro_config: G3TsAstroConfigSurfaceState,
-    pub requires_render_validator: bool,
     pub requires_source_pipeline_linting: bool,
 }
 
@@ -114,5 +84,4 @@ pub struct G3TsAstroFileTreeChecksInput {
     pub build_collection_roots: Vec<G3TsAstroAppRootInput>,
     pub live_collection_roots: Vec<G3TsAstroAppRootInput>,
     pub route_markdown_pages: Vec<G3TsAstroRouteMarkdownPageInput>,
-    pub cross_root_side_loaders: Vec<G3TsAstroCrossRootSideLoaderInput>,
 }

@@ -35,6 +35,20 @@ test("no-side-loader-imports catches one-hop astro content and cross-root helper
         return getCollectionTypes();
       }
     `,
+    "src/pages/reexport-type-only.ts": `
+      import { getCollectionTypes } from "../lib/helpers/reexport-type-only";
+
+      export function GET() {
+        return getCollectionTypes();
+      }
+    `,
+    "src/pages/cross-root-type-only.ts": `
+      import { getCollectionTypes } from "../lib/helpers/cross-root-type-only";
+
+      export function GET() {
+        return getCollectionTypes();
+      }
+    `,
     "src/pages/helper-bypass.ts": `
       import { loadPosts } from "../lib/helpers/posts";
 
@@ -60,6 +74,20 @@ test("no-side-loader-imports catches one-hop astro content and cross-root helper
       import type { CollectionEntry } from "astro:content";
 
       export function getCollectionTypes(): CollectionEntry<"posts">[] {
+        return [];
+      }
+    `,
+    "src/lib/helpers/reexport-type-only.ts": `
+      export { type CollectionEntry } from "astro:content";
+
+      export function getCollectionTypes(): [] {
+        return [];
+      }
+    `,
+    "src/lib/helpers/cross-root-type-only.ts": `
+      export type * from "../../../packages/content-mirror/src/posts";
+
+      export function getCollectionTypes(): [] {
         return [];
       }
     `,
@@ -182,6 +210,16 @@ test("no-side-loader-imports catches one-hop astro content and cross-root helper
           code: await project.read("src/pages/type-only.ts"),
           filename: project.path("src/pages/type-only.ts"),
           options: [baseOptions]
+        },
+        {
+          code: await project.read("src/pages/reexport-type-only.ts"),
+          filename: project.path("src/pages/reexport-type-only.ts"),
+          options: [baseOptions]
+        },
+        {
+          code: await project.read("src/pages/cross-root-type-only.ts"),
+          filename: project.path("src/pages/cross-root-type-only.ts"),
+          options: [baseOptions]
         }
       ],
       invalid: [
@@ -272,6 +310,34 @@ test("no-side-loader-imports catches unsafe cross-root and mdx helpers but allow
         return await mirroredPosts();
       }
     `,
+    "src/pages/cross-root-require.ts": `
+      import { mirroredPosts } from "../../packages/content-mirror/src/posts-require";
+
+      export async function GET() {
+        return await mirroredPosts();
+      }
+    `,
+    "src/pages/cross-root-require-alias.ts": `
+      import { mirroredPosts } from "../../packages/content-mirror/src/posts-require-alias";
+
+      export async function GET() {
+        return await mirroredPosts();
+      }
+    `,
+    "src/pages/cross-root-create-require.ts": `
+      import { mirroredPosts } from "../../packages/content-mirror/src/posts-create-require";
+
+      export async function GET() {
+        return await mirroredPosts();
+      }
+    `,
+    "src/pages/cross-root-module-require-alias.ts": `
+      import { mirroredPosts } from "../../packages/content-mirror/src/posts-module-require-alias";
+
+      export async function GET() {
+        return await mirroredPosts();
+      }
+    `,
     "src/pages/safe-cross-root.ts": `
       import { formatDate } from "../../packages/shared/src/date";
 
@@ -288,6 +354,41 @@ test("no-side-loader-imports catches unsafe cross-root and mdx helpers but allow
     `,
     "packages/content-mirror/src/posts.ts": `
       import { getCollection } from "astro:content";
+
+      export async function mirroredPosts() {
+        return await getCollection("posts");
+      }
+    `,
+    "packages/content-mirror/src/posts-require.ts": `
+      const { getCollection } = require("astro:content");
+
+      export async function mirroredPosts() {
+        return await getCollection("posts");
+      }
+    `,
+    "packages/content-mirror/src/posts-require-alias.ts": `
+      const req = require;
+      const { getCollection } = req("astro:content");
+
+      export async function mirroredPosts() {
+        return await getCollection("posts");
+      }
+    `,
+    "packages/content-mirror/src/posts-create-require.ts": `
+      import { createRequire } from "node:module";
+
+      const req = createRequire(import.meta.url);
+      const { getCollection } = req("astro:content");
+
+      export async function mirroredPosts() {
+        return await getCollection("posts");
+      }
+    `,
+    "packages/content-mirror/src/posts-module-require-alias.ts": `
+      import * as mod from "node:module";
+
+      const { require: req } = mod;
+      const { getCollection } = req("astro:content");
 
       export async function mirroredPosts() {
         return await getCollection("posts");
@@ -343,6 +444,10 @@ export async function loadPosts() {
     }
 
     const invalidCrossRoot = await lint("src/pages/cross-root.ts");
+    const invalidCrossRootRequire = await lint("src/pages/cross-root-require.ts");
+    const invalidCrossRootRequireAlias = await lint("src/pages/cross-root-require-alias.ts");
+    const invalidCrossRootCreateRequire = await lint("src/pages/cross-root-create-require.ts");
+    const invalidCrossRootModuleRequireAlias = await lint("src/pages/cross-root-module-require-alias.ts");
     const invalidMdxHelper = await lint("src/pages/mdx-helper-bypass.ts");
     const validSafeCrossRoot = await lint("src/pages/safe-cross-root.ts");
 
@@ -352,6 +457,22 @@ export async function loadPosts() {
 
     if (invalidMdxHelper[0]?.messages.length !== 1) {
       throw new Error(`expected one mdx-helper violation, got ${JSON.stringify(invalidMdxHelper[0]?.messages)}`);
+    }
+
+    if (invalidCrossRootRequire[0]?.messages.length !== 1) {
+      throw new Error(`expected one require-based cross-root violation, got ${JSON.stringify(invalidCrossRootRequire[0]?.messages)}`);
+    }
+
+    if (invalidCrossRootRequireAlias[0]?.messages.length !== 1) {
+      throw new Error(`expected one require-alias cross-root violation, got ${JSON.stringify(invalidCrossRootRequireAlias[0]?.messages)}`);
+    }
+
+    if (invalidCrossRootCreateRequire[0]?.messages.length !== 1) {
+      throw new Error(`expected one createRequire-based cross-root violation, got ${JSON.stringify(invalidCrossRootCreateRequire[0]?.messages)}`);
+    }
+
+    if (invalidCrossRootModuleRequireAlias[0]?.messages.length !== 1) {
+      throw new Error(`expected one module-require-alias cross-root violation, got ${JSON.stringify(invalidCrossRootModuleRequireAlias[0]?.messages)}`);
     }
 
     if ((validSafeCrossRoot[0]?.messages.length ?? 0) != 0) {

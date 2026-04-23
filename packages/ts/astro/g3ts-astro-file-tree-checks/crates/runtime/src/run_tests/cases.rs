@@ -12,7 +12,6 @@ fn golden_filetree_reports_expected_inventory() {
     assertions::assert_has_inventory(&results, "TS-ASTRO-FILETREE-02");
     assertions::assert_missing(&results, "TS-ASTRO-FILETREE-03");
     assertions::assert_missing(&results, "TS-ASTRO-FILETREE-04");
-    assertions::assert_missing(&results, "TS-ASTRO-FILETREE-05");
 }
 
 #[test]
@@ -27,7 +26,6 @@ fn missing_astro_config_reports_error() {
         build_collection_roots: Vec::new(),
         live_collection_roots: Vec::new(),
         route_markdown_pages: Vec::new(),
-        cross_root_side_loaders: Vec::new(),
     };
 
     let results = crate::run::check(&input);
@@ -51,7 +49,6 @@ fn missing_content_config_reports_error_for_build_collections() {
         }],
         live_collection_roots: Vec::new(),
         route_markdown_pages: Vec::new(),
-        cross_root_side_loaders: Vec::new(),
     };
 
     let results = crate::run::check(&input);
@@ -86,7 +83,6 @@ fn missing_live_config_reports_error_for_live_collections() {
             live_config_rel_path: None,
         }],
         route_markdown_pages: Vec::new(),
-        cross_root_side_loaders: Vec::new(),
     };
 
     let results = crate::run::check(&input);
@@ -107,7 +103,6 @@ fn route_markdown_pages_do_not_fire_without_build_collections() {
         route_markdown_pages: vec![G3TsAstroRouteMarkdownPageInput {
             rel_path: "src/pages/about.mdx".to_owned(),
         }],
-        cross_root_side_loaders: Vec::new(),
     };
 
     let results = crate::run::check(&input);
@@ -133,7 +128,6 @@ fn route_markdown_pages_are_forbidden_for_live_collection_apps() {
         route_markdown_pages: vec![G3TsAstroRouteMarkdownPageInput {
             rel_path: "src/pages/about.mdx".to_owned(),
         }],
-        cross_root_side_loaders: Vec::new(),
     };
 
     let results = crate::run::check(&input);
@@ -153,6 +147,5 @@ fn golden_build_collections_input() -> G3TsAstroFileTreeChecksInput {
         build_collection_roots: vec![root],
         live_collection_roots: Vec::new(),
         route_markdown_pages: Vec::new(),
-        cross_root_side_loaders: Vec::new(),
     }
 }

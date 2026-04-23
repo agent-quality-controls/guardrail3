@@ -27,7 +27,6 @@ shared = true
 all-features = true
 
 [dependencies]
-astro-config-parser = { path = "../../../../../parsers/astro-config-parser", version = "0.1.0", features = ["api"] }
 eslint-config-parser = { path = "../../../../../parsers/eslint-config-parser", version = "0.1.0", features = ["api"] }
 package-json-parser = { path = "../../../../../parsers/package-json-parser", version = "0.1.0", features = ["api"] }
 g3-workspace-crawl = { path = "../../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }

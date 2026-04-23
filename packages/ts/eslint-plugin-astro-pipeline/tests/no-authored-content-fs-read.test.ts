@@ -154,6 +154,48 @@ test("no-authored-content-fs-read catches route helper filesystem reads and resp
         return await loadPost();
       }
     `,
+    "src/pages/require-alias-blog.ts": `
+      import { loadPost } from "../lib/load-post-require-alias";
+
+      export async function GET() {
+        return await loadPost();
+      }
+    `,
+    "src/pages/reexport-blog.ts": `
+      import { loadPost } from "../lib/load-post-reexport";
+
+      export async function GET() {
+        return await loadPost();
+      }
+    `,
+    "src/pages/export-all-blog.ts": `
+      import { loadPost } from "../lib/load-post-export-all";
+
+      export async function GET() {
+        return await loadPost();
+      }
+    `,
+    "src/pages/default-import-blog.ts": `
+      import { loadPost } from "../lib/load-post-default-import";
+
+      export async function GET() {
+        return await loadPost();
+      }
+    `,
+    "src/pages/default-import-promises-blog.ts": `
+      import { loadPost } from "../lib/load-post-default-import-promises";
+
+      export async function GET() {
+        return await loadPost();
+      }
+    `,
+    "src/pages/default-import-reexport-blog.ts": `
+      import { loadPost } from "../lib/load-post-default-import-reexport";
+
+      export async function GET() {
+        return await loadPost();
+      }
+    `,
     "src/lib/load-post-url.ts": `
       import { readFile } from "node:fs/promises";
 
@@ -168,11 +210,65 @@ test("no-authored-content-fs-read catches route helper filesystem reads and resp
         return await readPost();
       }
     `,
+    "src/lib/load-post-require-alias.ts": `
+      const req = require;
+      const { readFile } = req("node:fs/promises");
+
+      export async function loadPost() {
+        return await readFile("./src/content/posts/require-alias.mdx", "utf8");
+      }
+    `,
     "src/lib/reader.ts": `
       import { readFile } from "node:fs/promises";
 
       export async function readPost() {
         return await readFile("./src/content/posts/require.mdx", "utf8");
+      }
+    `,
+    "src/lib/fs-reader-export.ts": `
+      import { readFile } from "node:fs/promises";
+
+      export { readFile as readPostFile };
+    `,
+    "src/lib/load-post-reexport.ts": `
+      import { readPostFile } from "./fs-reader-export";
+
+      export async function loadPost() {
+        return await readPostFile("./src/content/posts/reexport.mdx", "utf8");
+      }
+    `,
+    "src/lib/fs-reader-export-all.ts": `
+      export * from "node:fs/promises";
+    `,
+    "src/lib/load-post-export-all.ts": `
+      import { readFile } from "./fs-reader-export-all";
+
+      export async function loadPost() {
+        return await readFile("./src/content/posts/export-all.mdx", "utf8");
+      }
+    `,
+    "src/lib/load-post-default-import.ts": `
+      import fs from "node:fs";
+
+      export async function loadPost() {
+        return fs.readFileSync("./src/content/posts/default-import.mdx", "utf8");
+      }
+    `,
+    "src/lib/load-post-default-import-promises.ts": `
+      import fs from "node:fs";
+
+      export async function loadPost() {
+        return await fs.promises.readFile("./src/content/posts/default-import-promises.mdx", "utf8");
+      }
+    `,
+    "src/lib/fs-default-export.ts": `
+      export { default as fs } from "node:fs";
+    `,
+    "src/lib/load-post-default-import-reexport.ts": `
+      import { fs } from "./fs-default-export";
+
+      export async function loadPost() {
+        return fs.readFileSync("./src/content/posts/default-import-reexport.mdx", "utf8");
       }
     `
   });
@@ -260,6 +356,66 @@ test("no-authored-content-fs-read catches route helper filesystem reads and resp
         {
           code: await project.read("src/pages/require-blog.ts"),
           filename: project.path("src/pages/require-blog.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenRead"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/reexport-blog.ts"),
+          filename: project.path("src/pages/reexport-blog.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenRead"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/require-alias-blog.ts"),
+          filename: project.path("src/pages/require-alias-blog.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenRead"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/export-all-blog.ts"),
+          filename: project.path("src/pages/export-all-blog.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenRead"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/default-import-blog.ts"),
+          filename: project.path("src/pages/default-import-blog.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenRead"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/default-import-promises-blog.ts"),
+          filename: project.path("src/pages/default-import-promises-blog.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenRead"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/default-import-reexport-blog.ts"),
+          filename: project.path("src/pages/default-import-reexport-blog.ts"),
           options: [baseOptions],
           errors: [
             {

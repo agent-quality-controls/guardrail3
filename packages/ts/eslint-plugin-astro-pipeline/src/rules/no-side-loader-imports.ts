@@ -2,8 +2,12 @@ import { AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/utils";
 import type { TSESTree } from "@typescript-eslint/utils";
 
 import {
+  collectImportBindings,
   collectConstantStringBindings,
+  collectSimpleAliases,
   findNodes,
+  getStaticStringValue,
+  isRequireLikeCall,
   resolveStaticStringExpression
 } from "../utils/ast-helpers.js";
 import { collectImportClosure } from "../utils/import-closure.js";
@@ -148,6 +152,8 @@ function findForbiddenSideLoader(
 
 function programImportsAstroContent(program: TSESTree.Program): boolean {
   const importAliases = collectConstantStringBindings(program);
+  const imports = collectImportBindings(program);
+  const requireAliases = collectSimpleAliases(program);
 
   for (const statement of program.body) {
     if (
@@ -162,13 +168,16 @@ function programImportsAstroContent(program: TSESTree.Program): boolean {
       (statement.type === AST_NODE_TYPES.ExportAllDeclaration ||
         statement.type === AST_NODE_TYPES.ExportNamedDeclaration) &&
       statement.source?.value === "astro:content" &&
-      statement.exportKind !== "type"
+      !isTypeOnlyExport(statement)
     ) {
       return true;
     }
   }
 
-  return hasDynamicAstroContentImport(program, importAliases);
+  return (
+    hasDynamicAstroContentImport(program, importAliases) ||
+    hasRequireAstroContentImport(program, imports, requireAliases)
+  );
 }
 
 function hasDynamicAstroContentImport(
@@ -190,6 +199,42 @@ function hasDynamicAstroContentImport(
   return found;
 }
 
+function hasRequireAstroContentImport(
+  program: TSESTree.Program,
+  imports: ReturnType<typeof collectImportBindings>,
+  requireAliases: ReturnType<typeof collectSimpleAliases>
+): boolean {
+  let found = false;
+
+  findNodes(program, (node) => {
+    if (
+      found ||
+      node.type !== AST_NODE_TYPES.CallExpression ||
+      !isRequireLikeCall(node, imports, requireAliases) ||
+      node.arguments.length === 0 ||
+      node.arguments[0]?.type === AST_NODE_TYPES.SpreadElement
+    ) {
+      return;
+    }
+
+    if (getRequireSource(node) === "astro:content") {
+      found = true;
+    }
+  });
+
+  return found;
+}
+
+function getRequireSource(node: TSESTree.CallExpression): string | null {
+  const firstArg = node.arguments[0];
+
+  if (!firstArg || firstArg.type === AST_NODE_TYPES.SpreadElement) {
+    return null;
+  }
+
+  return getStaticStringValue(firstArg);
+}
+
 function isTypeOnlyImportDeclaration(node: TSESTree.ImportDeclaration): boolean {
   return (
     node.importKind === "type" ||
@@ -198,6 +243,22 @@ function isTypeOnlyImportDeclaration(node: TSESTree.ImportDeclaration): boolean 
         (specifier) =>
           specifier.type === AST_NODE_TYPES.ImportSpecifier &&
           specifier.importKind === "type"
+      ))
+  );
+}
+
+function isTypeOnlyExport(
+  node: TSESTree.ExportAllDeclaration | TSESTree.ExportNamedDeclaration
+): boolean {
+  if (node.type === AST_NODE_TYPES.ExportAllDeclaration) {
+    return node.exportKind === "type";
+  }
+
+  return (
+    node.exportKind === "type" ||
+    (node.specifiers.length > 0 &&
+      node.specifiers.every(
+        (specifier) => "exportKind" in specifier && specifier.exportKind === "type"
       ))
   );
 }

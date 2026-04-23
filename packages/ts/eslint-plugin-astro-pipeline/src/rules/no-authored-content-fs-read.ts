@@ -16,6 +16,7 @@ import {
   resolvesToAuthoredOrSpecContent
 } from "../utils/content-source.js";
 import { collectImportClosure } from "../utils/import-closure.js";
+import { resolveImportedModuleBinding, type ResolvedModuleBinding } from "../utils/module-exports.js";
 import { classifyModuleRole } from "../utils/module-role.js";
 import {
   astroPipelineOptionsSchema,
@@ -60,7 +61,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
           scopeManager: context.sourceCode.scopeManager ?? null
         });
         const offendingReads = modules.flatMap((moduleRecord) =>
-          findForbiddenReads(moduleRecord.program, moduleRecord.filename, options)
+          findForbiddenReads(modules, moduleRecord.program, moduleRecord.filename, options)
         );
 
         for (const read of offendingReads) {
@@ -86,6 +87,7 @@ interface ForbiddenRead {
 }
 
 function findForbiddenReads(
+  modules: ReturnType<typeof collectImportClosure>,
   program: TSESTree.Program,
   filename: string,
   options: ReturnType<typeof resolveOptions>
@@ -107,7 +109,7 @@ function findForbiddenReads(
     }
 
     const resolvedReference = resolveReference(node.callee, imports, aliases);
-    const methodName = classifyFsReadReference(resolvedReference);
+    const methodName = classifyFsReadReference(modules, filename, resolvedReference);
 
     if (!methodName) {
       return;
@@ -345,10 +347,24 @@ function isNodePathModule(source: string): boolean {
 }
 
 function classifyFsReadReference(
+  modules: ReturnType<typeof collectImportClosure>,
+  importerFilename: string,
   reference: ReturnType<typeof resolveReference>
 ): string | null {
   if (!reference) {
     return null;
+  }
+
+  if (reference.kind === "member" && reference.object.kind === "import") {
+    const importedObjectBinding = resolveImportedModuleBinding(
+      modules,
+      importerFilename,
+      reference.object
+    );
+
+    if (importedObjectBinding) {
+      return classifyFsMemberBinding(modules, importedObjectBinding, reference.property);
+    }
   }
 
   if (reference.kind === "import") {
@@ -363,49 +379,104 @@ function classifyFsReadReference(
     ) {
       return String(reference.importedName);
     }
+  } else {
+    const object = reference.object;
 
+    if (
+      object.kind === "import" &&
+      (object.importedName === "*" || object.importedName === "default")
+    ) {
+      if (
+        isNodeFsPromises(object.source) &&
+        reference.property === "readFile"
+      ) {
+        return "readFile";
+      }
+
+      if (
+        isNodeFs(object.source) &&
+        (reference.property === "readFile" || reference.property === "readFileSync")
+      ) {
+        return reference.property;
+      }
+    }
+
+    if (
+      object.kind === "import" &&
+      isNodeFs(object.source) &&
+      object.importedName === "promises" &&
+      reference.property === "readFile"
+    ) {
+      return "promises.readFile";
+    }
+
+    if (
+      object.kind === "member" &&
+      object.object.kind === "import" &&
+      (object.object.importedName === "*" ||
+        object.object.importedName === "default") &&
+      isNodeFs(object.object.source) &&
+      object.property === "promises" &&
+      reference.property === "readFile"
+    ) {
+      return "fs.promises.readFile";
+    }
+  }
+
+  const importedBinding = resolveImportedModuleBinding(modules, importerFilename, reference);
+
+  if (!importedBinding) {
     return null;
   }
 
-  const object = reference.object;
+  return classifyResolvedModuleBinding(modules, importedBinding);
+}
 
-  if (object.kind === "import" && object.importedName === "*") {
-    if (
-      isNodeFsPromises(object.source) &&
-      reference.property === "readFile"
-    ) {
-      return "readFile";
-    }
-
-    if (
-      isNodeFs(object.source) &&
-      (reference.property === "readFile" || reference.property === "readFileSync")
-    ) {
-      return reference.property;
-    }
+function classifyFsMemberBinding(
+  modules: ReturnType<typeof collectImportClosure>,
+  binding: ResolvedModuleBinding,
+  property: string
+): string | null {
+  if (binding.kind === "reference") {
+    return classifyFsReadReference(modules, binding.moduleRecord.filename, {
+      kind: "member",
+      object: binding.reference,
+      property
+    });
   }
 
-  if (
-    object.kind === "import" &&
-    isNodeFs(object.source) &&
-    object.importedName === "promises" &&
-    reference.property === "readFile"
-  ) {
-    return "promises.readFile";
+  const imports = collectImportBindings(binding.moduleRecord.program);
+  const aliases = collectSimpleAliases(binding.moduleRecord.program);
+  const resolvedReference = resolveReference(binding.expression, imports, aliases);
+
+  if (!resolvedReference) {
+    return null;
   }
 
-  if (
-    object.kind === "member" &&
-    object.object.kind === "import" &&
-    object.object.importedName === "*" &&
-    isNodeFs(object.object.source) &&
-    object.property === "promises" &&
-    reference.property === "readFile"
-  ) {
-    return "fs.promises.readFile";
+  return classifyFsReadReference(modules, binding.moduleRecord.filename, {
+    kind: "member",
+    object: resolvedReference,
+    property
+  });
+}
+
+function classifyResolvedModuleBinding(
+  modules: ReturnType<typeof collectImportClosure>,
+  binding: ResolvedModuleBinding
+): string | null {
+  if (binding.kind === "reference") {
+    return classifyFsReadReference(modules, binding.moduleRecord.filename, binding.reference);
   }
 
-  return null;
+  const imports = collectImportBindings(binding.moduleRecord.program);
+  const aliases = collectSimpleAliases(binding.moduleRecord.program);
+  const resolvedReference = resolveReference(binding.expression, imports, aliases);
+
+  if (!resolvedReference) {
+    return null;
+  }
+
+  return classifyFsReadReference(modules, binding.moduleRecord.filename, resolvedReference);
 }
 
 function isNodeFs(source: string): boolean {

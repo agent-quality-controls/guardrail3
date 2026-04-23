@@ -1,6 +1,5 @@
 use g3ts_astro_types::{
-    G3TsAstroContentMode, G3TsAstroEslintSurfaceState, G3TsAstroOutputMode,
-    G3TsAstroPackageSurfaceState,
+    G3TsAstroContentMode, G3TsAstroEslintSurfaceState, G3TsAstroPackageSurfaceState,
 };
 
 #[test]
@@ -12,6 +11,43 @@ fn config_ingestion_returns_empty_for_non_astro_roots() {
 
     assert!(input.integration_contracts.is_empty(), "unexpected config inputs: {input:?}");
     assert!(input.eslint_contracts.is_empty(), "unexpected eslint inputs: {input:?}");
+}
+
+#[test]
+fn ignored_package_json_with_astro_dependency_does_not_create_an_app_root() {
+    let root = super::helpers::fake_astro_workspace();
+
+    std::fs::create_dir_all(root.path().join("node_modules/fake-astro"))
+        .expect("fake astro package directory should be created");
+    std::fs::write(
+        root.path().join("node_modules/fake-astro/package.json"),
+        "{\n  \"dependencies\": {\n    \"astro\": \"1.0.0\"\n  }\n}\n",
+    )
+    .expect("fake astro package manifest should be written");
+
+    let crawl = g3_workspace_crawl::G3RsWorkspaceCrawl {
+        root_abs_path: root.path().to_path_buf(),
+        entries: vec![super::helpers::ignored_entry(
+            &root,
+            "node_modules/fake-astro/package.json",
+        )],
+    };
+
+    let config_input = super::super::ingest_for_config_checks(&crawl);
+    let file_tree_input = super::super::ingest_for_file_tree_checks(&crawl);
+
+    assert!(
+        config_input.integration_contracts.is_empty(),
+        "ignored package should not create config contracts: {config_input:?}"
+    );
+    assert!(
+        config_input.eslint_contracts.is_empty(),
+        "ignored package should not create eslint contracts: {config_input:?}"
+    );
+    assert!(
+        file_tree_input.app_roots.is_empty(),
+        "ignored package should not create file-tree roots: {file_tree_input:?}"
+    );
 }
 
 #[test]
@@ -37,7 +73,6 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
 
     let integration = &input.integration_contracts[0];
     assert_eq!(integration.content_mode, G3TsAstroContentMode::BuildCollections);
-    assert!(!integration.requires_render_validator);
     assert!(integration.requires_source_pipeline_linting);
 
     match &integration.package {
@@ -55,21 +90,6 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             );
         }
         other => panic!("expected parsed package state, got {other:?}"),
-    }
-
-    match &integration.astro_config {
-        g3ts_astro_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } => {
-            assert_eq!(snapshot.output_mode, Some(G3TsAstroOutputMode::Server));
-            assert_eq!(snapshot.adapter_module.as_deref(), Some("@astrojs/node"));
-            assert!(
-                snapshot
-                    .integration_modules
-                    .iter()
-                    .any(|integration| integration == "@nuasite/checks"),
-                "render validator integration should still be surfaced: {snapshot:?}"
-            );
-        }
-        other => panic!("expected parsed astro config state, got {other:?}"),
     }
 
     match &input.eslint_contracts[0].config {
@@ -105,7 +125,7 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
 }
 
 #[test]
-fn plain_astro_app_without_content_does_not_require_render_validator_contracts() {
+fn plain_astro_app_without_content_still_requires_pipeline_linting() {
     let root = super::helpers::fake_astro_workspace();
     let crawl = super::helpers::crawl_with_entries(
         &root,
@@ -123,7 +143,6 @@ fn plain_astro_app_without_content_does_not_require_render_validator_contracts()
     let eslint = &input.eslint_contracts[0];
 
     assert_eq!(integration.content_mode, G3TsAstroContentMode::None);
-    assert!(!integration.requires_render_validator);
     assert!(integration.requires_source_pipeline_linting);
     assert!(eslint.requires_source_pipeline_linting);
 }
@@ -151,7 +170,7 @@ fn config_ingestion_marks_unreadable_package_surface() {
 }
 
 #[test]
-fn file_tree_ingestion_collects_route_mdx_and_cross_root_loader_inputs() {
+fn file_tree_ingestion_collects_route_mdx_inputs() {
     let root = super::helpers::fake_astro_workspace();
     let crawl = super::helpers::crawl_with_entries(
         &root,
@@ -178,11 +197,6 @@ fn file_tree_ingestion_collects_route_mdx_and_cross_root_loader_inputs() {
         input.route_markdown_pages[0].rel_path,
         "src/pages/about.mdx",
         "unexpected markdown page: {input:?}"
-    );
-    assert_eq!(
-        input.cross_root_side_loaders.len(),
-        0,
-        "unexpected side loaders: {input:?}"
     );
 }
 
@@ -254,6 +268,63 @@ fn nested_astro_app_root_uses_its_own_package_and_nearest_eslint_surface() {
         file_tree_input.app_roots[0].astro_config_rel_path.as_deref(),
         Some("apps/landing/astro.config.mjs")
     );
+}
+
+#[test]
+fn package_only_astro_root_is_not_lost_when_another_app_has_astro_config() {
+    let root = super::helpers::fake_astro_workspace();
+
+    std::fs::create_dir_all(root.path().join("apps/landing/src/pages"))
+        .expect("landing pages directory should be created");
+    std::fs::create_dir_all(root.path().join("apps/docs/src/pages"))
+        .expect("docs pages directory should be created");
+
+    std::fs::write(
+        root.path().join("apps/landing/package.json"),
+        "{\n  \"devDependencies\": {\n    \"astro\": \"1.0.0\"\n  },\n  \"scripts\": {\n    \"check\": \"astro check\"\n  }\n}\n",
+    )
+    .expect("landing package manifest should be written");
+    std::fs::write(
+        root.path().join("apps/landing/astro.config.mjs"),
+        "export default { output: 'static' };\n",
+    )
+    .expect("landing astro config should be written");
+    std::fs::write(
+        root.path().join("apps/landing/src/pages/index.astro"),
+        "---\n---\n<main />\n",
+    )
+    .expect("landing route should be written");
+
+    std::fs::write(
+        root.path().join("apps/docs/package.json"),
+        "{\n  \"dependencies\": {\n    \"astro\": \"1.0.0\"\n  },\n  \"scripts\": {\n    \"check\": \"astro check\"\n  }\n}\n",
+    )
+    .expect("docs package manifest should be written");
+    std::fs::write(
+        root.path().join("apps/docs/src/pages/index.astro"),
+        "---\n---\n<main />\n",
+    )
+    .expect("docs route should be written");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "apps/landing/package.json",
+            "apps/landing/astro.config.mjs",
+            "apps/landing/src/pages/index.astro",
+            "apps/docs/package.json",
+            "apps/docs/src/pages/index.astro",
+        ],
+    );
+
+    let config_input = super::super::ingest_for_config_checks(&crawl);
+    let app_roots = config_input
+        .integration_contracts
+        .iter()
+        .map(|contract| contract.app_root_rel_path.as_str())
+        .collect::<Vec<_>>();
+
+    assert_eq!(app_roots, vec!["apps/docs", "apps/landing"]);
 }
 
 #[test]

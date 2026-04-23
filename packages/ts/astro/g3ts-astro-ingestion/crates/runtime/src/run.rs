@@ -1,15 +1,14 @@
-use astro_config_parser::{parse_document as parse_astro_config_document, parse_error_reason as astro_config_parse_error_reason};
 use eslint_config_parser::{parse_document, parse_error_reason as eslint_parse_error_reason};
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_astro_types::{
-    G3TsAstroAppRootInput, G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceSnapshot,
-    G3TsAstroConfigSurfaceState, G3TsAstroContentMode, G3TsAstroOutputMode,
+    G3TsAstroAppRootInput, G3TsAstroConfigChecksInput, G3TsAstroContentMode,
     G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
     G3TsAstroEslintSurfaceState, G3TsAstroFileTreeChecksInput,
     G3TsAstroIntegrationContractInput, G3TsAstroPackageSurfaceSnapshot,
     G3TsAstroPackageSurfaceState, G3TsAstroRouteMarkdownPageInput,
 };
 use package_json_parser::{from_path_document, parse_error_reason as package_parse_error_reason};
+use std::collections::BTreeSet;
 
 const ESLINT_CONFIG_PATTERN: &str = "eslint.config.*";
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
@@ -18,7 +17,7 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
     let app_roots = astro_app_roots(crawl);
 
     if app_roots.is_empty() {
-        return G3TsAstroConfigChecksInput {
+            return G3TsAstroConfigChecksInput {
             integration_contracts: Vec::new(),
             eslint_contracts: Vec::new(),
         };
@@ -31,8 +30,6 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                 app_root_rel_path: app_root_rel_path.clone(),
                 content_mode: classify_content_mode(crawl, app_root_rel_path),
                 package: ingest_package_surface(crawl, app_root_rel_path),
-                astro_config: ingest_astro_config_surface(crawl, app_root_rel_path),
-                requires_render_validator: false,
                 requires_source_pipeline_linting: true,
             })
             .collect(),
@@ -56,7 +53,6 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
             build_collection_roots: Vec::new(),
             live_collection_roots: Vec::new(),
             route_markdown_pages: Vec::new(),
-            cross_root_side_loaders: Vec::new(),
         };
     }
 
@@ -97,22 +93,34 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
             .into_iter()
             .map(|rel_path| G3TsAstroRouteMarkdownPageInput { rel_path })
             .collect(),
-        cross_root_side_loaders: Vec::new(),
     }
 }
 
 fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
-    let discovered = crate::select::select_astro_app_roots(crawl);
+    let mut roots: BTreeSet<String> = crate::select::select_astro_app_roots(crawl).into_iter().collect();
 
-    if !discovered.is_empty() {
-        return discovered;
+    for entry in crawl.entries.iter().filter(|entry| {
+        entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
+            && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+            && (entry.path.rel_path.ends_with("/package.json")
+                || entry.path.rel_path == PACKAGE_JSON_REL_PATH)
+    }) {
+        let app_root_rel_path = if entry.path.rel_path == PACKAGE_JSON_REL_PATH {
+            ".".to_owned()
+        } else {
+            std::path::Path::new(&entry.path.rel_path)
+                .parent()
+                .and_then(|parent| parent.to_str())
+                .unwrap_or(".")
+                .to_owned()
+        };
+
+        if package_surface_has_astro_dependency(&ingest_package_surface(crawl, &app_root_rel_path)) {
+            let _ = roots.insert(app_root_rel_path);
+        }
     }
 
-    if package_surface_has_astro_dependency(&ingest_package_surface(crawl, ".")) {
-        return vec![".".to_owned()];
-    }
-
-    Vec::new()
+    roots.into_iter().collect()
 }
 
 fn classify_content_mode(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> G3TsAstroContentMode {
@@ -177,64 +185,6 @@ fn ingest_package_surface(
                 .scripts
                 .iter()
                 .map(|(name, body)| (name.clone(), body.clone()))
-                .collect(),
-        },
-    }
-}
-
-fn ingest_astro_config_surface(
-    crawl: &G3WorkspaceCrawl,
-    app_root_rel_path: &str,
-) -> G3TsAstroConfigSurfaceState {
-    let Some(entry) = crate::select::select_astro_config(crawl, app_root_rel_path) else {
-        return G3TsAstroConfigSurfaceState::Missing {
-            rel_path: if app_root_rel_path == "." {
-                "astro.config.*".to_owned()
-            } else {
-                format!("{app_root_rel_path}/astro.config.*")
-            },
-        };
-    };
-
-    if !entry.readable {
-        return G3TsAstroConfigSurfaceState::Unreadable {
-            rel_path: entry.path.rel_path.clone(),
-            reason: "workspace crawl marked the selected astro config unreadable".to_owned(),
-        };
-    }
-
-    let document = match parse_astro_config_document(&crawl.root_abs_path, &entry.path.rel_path) {
-        Ok(document) => document,
-        Err(error) => {
-            return G3TsAstroConfigSurfaceState::ParseError {
-                rel_path: entry.path.rel_path.clone(),
-                reason: error.to_string(),
-            };
-        }
-    };
-
-    if let Some(reason) = astro_config_parse_error_reason(&document) {
-        return G3TsAstroConfigSurfaceState::ParseError {
-            rel_path: entry.path.rel_path.clone(),
-            reason: reason.to_owned(),
-        };
-    }
-
-    let typed = astro_config_parser::typed(&document)
-        .expect("parsed astro config document should stay typed");
-
-    G3TsAstroConfigSurfaceState::Parsed {
-        snapshot: G3TsAstroConfigSurfaceSnapshot {
-            rel_path: entry.path.rel_path.clone(),
-            output_mode: typed.output.map(|mode| match mode {
-                astro_config_parser::types::AstroOutputMode::Static => G3TsAstroOutputMode::Static,
-                astro_config_parser::types::AstroOutputMode::Server => G3TsAstroOutputMode::Server,
-            }),
-            adapter_module: typed.adapter.as_ref().and_then(|adapter| adapter.source_module.clone()),
-            integration_modules: typed
-                .integrations
-                .iter()
-                .filter_map(|integration| integration.source_module.clone())
                 .collect(),
         },
     }
