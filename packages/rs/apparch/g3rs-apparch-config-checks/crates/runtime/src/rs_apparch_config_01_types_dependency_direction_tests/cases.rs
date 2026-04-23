@@ -9,7 +9,7 @@ fn forbidden_logic_dependency_fires() {
         "logic/service/Cargo.toml",
     )]));
 
-    assertions::assert_forbidden_dependency(&results, "types/core/Cargo.toml");
+    assertions::assert_forbidden_dependency(&results, "types/core/Cargo.toml", "service");
 }
 
 #[test]
@@ -19,7 +19,7 @@ fn forbidden_same_layer_dependency_fires() {
         "types/shared/Cargo.toml",
     )]));
 
-    assertions::assert_forbidden_dependency(&results, "types/core/Cargo.toml");
+    assertions::assert_forbidden_dependency(&results, "types/core/Cargo.toml", "shared");
 }
 
 #[test]

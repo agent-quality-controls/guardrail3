@@ -9,7 +9,7 @@ fn forbidden_io_dependency_fires() {
         "logic/service/Cargo.toml",
     );
 
-    assertions::assert_forbidden_dependency(&results, "logic/service/Cargo.toml");
+    assertions::assert_forbidden_dependency(&results, "logic/service/Cargo.toml", "db");
 }
 
 #[test]
@@ -19,7 +19,7 @@ fn forbidden_io_inbound_dependency_fires() {
         "logic/service/Cargo.toml",
     );
 
-    assertions::assert_forbidden_dependency(&results, "logic/service/Cargo.toml");
+    assertions::assert_forbidden_dependency(&results, "logic/service/Cargo.toml", "http");
 }
 
 #[test]
@@ -29,7 +29,7 @@ fn forbidden_same_layer_dependency_fires() {
         "logic/service/Cargo.toml",
     );
 
-    assertions::assert_forbidden_dependency(&results, "logic/service/Cargo.toml");
+    assertions::assert_forbidden_dependency(&results, "logic/service/Cargo.toml", "shared");
 }
 
 #[test]
@@ -39,14 +39,14 @@ fn logic_depends_on_types_stays_allowed() {
         "logic/service/Cargo.toml",
     );
 
-    assertions::assert_clean_inventory(&results, "logic/service/Cargo.toml");
+    assertions::assert_clean_inventory(&results, "logic/service/Cargo.toml", "service");
 }
 
 #[test]
 fn clean_logic_crate_emits_inventory() {
     let results = run_rule(&input(&[]), "logic/service/Cargo.toml");
 
-    assertions::assert_clean_inventory(&results, "logic/service/Cargo.toml");
+    assertions::assert_clean_inventory(&results, "logic/service/Cargo.toml", "service");
 }
 
 #[test]
@@ -62,5 +62,6 @@ fn package_internal_assertions_dependency_stays_allowed() {
     assertions::assert_clean_inventory(
         &results,
         "logic/validate-command/crates/assertions/Cargo.toml",
+        "validate-command-assertions",
     );
 }

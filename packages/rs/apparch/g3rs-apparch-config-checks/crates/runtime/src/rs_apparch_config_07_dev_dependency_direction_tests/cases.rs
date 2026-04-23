@@ -16,7 +16,12 @@ fn forbidden_dev_dependency_warns() {
         "logic/service/Cargo.toml",
     );
 
-    assertions::assert_direction_warning(&results, "logic/service/Cargo.toml");
+    assertions::assert_direction_warning(
+        &results,
+        "logic/service/Cargo.toml",
+        "db",
+        "target.*.dev-dependencies",
+    );
 }
 
 #[test]

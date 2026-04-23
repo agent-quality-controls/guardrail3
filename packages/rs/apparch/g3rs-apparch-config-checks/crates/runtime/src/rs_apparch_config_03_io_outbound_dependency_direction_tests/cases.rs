@@ -9,7 +9,7 @@ fn forbidden_logic_dependency_fires() {
         "io/outbound/db/Cargo.toml",
     );
 
-    assertions::assert_forbidden_dependency(&results, "io/outbound/db/Cargo.toml");
+    assertions::assert_forbidden_dependency(&results, "io/outbound/db/Cargo.toml", "service");
 }
 
 #[test]
@@ -19,7 +19,7 @@ fn forbidden_io_inbound_dependency_fires() {
         "io/outbound/db/Cargo.toml",
     );
 
-    assertions::assert_forbidden_dependency(&results, "io/outbound/db/Cargo.toml");
+    assertions::assert_forbidden_dependency(&results, "io/outbound/db/Cargo.toml", "http");
 }
 
 #[test]
@@ -29,7 +29,7 @@ fn forbidden_same_layer_dependency_fires() {
         "io/outbound/db/Cargo.toml",
     );
 
-    assertions::assert_forbidden_dependency(&results, "io/outbound/db/Cargo.toml");
+    assertions::assert_forbidden_dependency(&results, "io/outbound/db/Cargo.toml", "cache");
 }
 
 #[test]
@@ -39,7 +39,7 @@ fn clean_outbound_crate_emits_inventory() {
         "io/outbound/db/Cargo.toml",
     );
 
-    assertions::assert_clean_inventory(&results, "io/outbound/db/Cargo.toml");
+    assertions::assert_clean_inventory(&results, "io/outbound/db/Cargo.toml", "db");
 }
 
 #[test]
@@ -52,5 +52,9 @@ fn package_internal_assertions_dependency_stays_allowed() {
         "io/outbound/report/crates/assertions/Cargo.toml",
     );
 
-    assertions::assert_clean_inventory(&results, "io/outbound/report/crates/assertions/Cargo.toml");
+    assertions::assert_clean_inventory(
+        &results,
+        "io/outbound/report/crates/assertions/Cargo.toml",
+        "report-assertions",
+    );
 }
