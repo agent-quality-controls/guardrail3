@@ -2,6 +2,7 @@ mod config;
 mod error;
 mod model;
 mod source;
+mod source_support;
 mod workspace;
 
 pub use config::ingest_for_config_checks;
