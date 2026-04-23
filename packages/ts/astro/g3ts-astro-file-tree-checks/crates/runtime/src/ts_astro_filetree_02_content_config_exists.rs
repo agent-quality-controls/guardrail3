@@ -23,9 +23,9 @@ pub(crate) fn check(input: &G3TsAstroFileTreeChecksInput, results: &mut Vec<G3Ch
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
-            "content config missing".to_owned(),
+            "Build-collections app root is missing `src/content.config.*`".to_owned(),
             format!(
-                "Astro app root `{}` uses build collections but is missing `src/content.config.*`.",
+                "Astro app root `{}` uses build collections but has no `src/content.config.*` file. Add `src/content.config.ts` at that app root and declare the build collections there. Collection-backed content must be declared in one shared Astro content config instead of route-local loaders.",
                 root.app_root_rel_path
             ),
             None,

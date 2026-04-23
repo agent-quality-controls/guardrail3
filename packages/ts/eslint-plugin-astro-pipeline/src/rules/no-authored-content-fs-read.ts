@@ -16,6 +16,7 @@ import {
   resolvesToAuthoredOrSpecContent
 } from "../utils/content-source.js";
 import { collectImportClosure } from "../utils/import-closure.js";
+import { describeApprovedLoaderOrAdapterSurface } from "../utils/message-surfaces.js";
 import { resolveImportedModuleBinding, type ResolvedModuleBinding } from "../utils/module-exports.js";
 import { classifyModuleRole } from "../utils/module-role.js";
 import {
@@ -41,7 +42,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     schema: astroPipelineOptionsSchema,
     messages: {
       forbiddenRead:
-        "Route or endpoint import closures must not read authored or spec content via {{method}}. Found {{method}} in {{module}} targeting {{target}}."
+        "{{module}} reads authored or spec content at {{target}} via {{method}} in this route import closure. Move that read into {{surface}} and import the typed result from there instead. Routes must stay off raw content files so content goes through one validated pipeline."
     }
   },
   defaultOptions: [{}],
@@ -71,6 +72,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
             data: {
               method: read.method,
               module: read.modulePath,
+              surface: describeApprovedLoaderOrAdapterSurface(options),
               target: read.target
             }
           });

@@ -12,9 +12,9 @@ pub(crate) fn check(input: &G3TsAstroFileTreeChecksInput, results: &mut Vec<G3Ch
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
-            "route markdown page bypasses collections".to_owned(),
+            "Route markdown page bypasses Astro collections".to_owned(),
             format!(
-                "Route markdown page `{}` bypasses the collection-backed Astro content pipeline.",
+                "Route markdown page `{}` lives under the route tree in a collection-backed Astro app. Move that content into `src/content/**` and render it through the declared collection pipeline instead. Route-owned markdown bypasses shared schemas and content adapters.",
                 page.rel_path
             ),
             Some(page.rel_path.clone()),

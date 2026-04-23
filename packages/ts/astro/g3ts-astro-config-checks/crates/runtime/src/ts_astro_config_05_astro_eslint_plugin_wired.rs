@@ -20,14 +20,14 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
         }
 
         let message = match rel_path {
-            Some(rel_path) => {
-                format!("`{rel_path}` does not activate `{PLUGIN_NAME}` for the required Astro source lanes.")
-            }
-            None => "Could not verify the required Astro ESLint plugin wiring because no ESLint config was available.".to_owned(),
+            Some(rel_path) => format!(
+                "`{rel_path}` does not activate `{PLUGIN_NAME}` on the required Astro source lanes. Add the `astro` plugin to the Astro, TS, and TSX lane configs in `{rel_path}`. Astro source files must run through the Astro plugin so framework lint rules actually execute."
+            ),
+            None => "The Astro ESLint wiring contract could not be checked because `eslint.config.*` was not available. Restore the app ESLint config and wire the `astro` plugin there. Astro source files must run through the Astro plugin so framework lint rules actually execute.".to_owned(),
         };
         results.push(crate::support::error(
             ID,
-            "astro ESLint plugin not wired",
+            "Astro ESLint lanes are not wired to the `astro` plugin",
             message,
             rel_path,
         ));

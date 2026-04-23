@@ -13,6 +13,7 @@ import {
 } from "../utils/ast-helpers.js";
 import { resolvesToAuthoredOrSpecContent } from "../utils/content-source.js";
 import { collectImportClosure } from "../utils/import-closure.js";
+import { describeApprovedLoaderOrAdapterSurface } from "../utils/message-surfaces.js";
 import { resolveImportedModuleBinding, type ResolvedModuleBinding } from "../utils/module-exports.js";
 import { classifyModuleRole } from "../utils/module-role.js";
 import {
@@ -38,7 +39,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     schema: astroPipelineOptionsSchema,
     messages: {
       forbiddenGlob:
-        "Route or endpoint import closures must not use {{method}} over authored or spec content. Found {{method}} in {{module}} targeting {{target}}."
+        "{{module}} matches authored or spec content at {{target}} via {{method}} in this route import closure. Move that glob into {{surface}} and import the typed result from there instead. Routes must stay off raw content discovery so content goes through one validated pipeline."
     }
   },
   defaultOptions: [{}],
@@ -68,6 +69,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
             data: {
               method: finding.method,
               module: finding.modulePath,
+              surface: describeApprovedLoaderOrAdapterSurface(options),
               target: finding.target
             }
           });

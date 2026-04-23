@@ -11,6 +11,7 @@ import {
   resolveStaticStringExpression
 } from "../utils/ast-helpers.js";
 import { collectImportClosure } from "../utils/import-closure.js";
+import { describeApprovedContentAdapterSurface } from "../utils/message-surfaces.js";
 import { classifyModuleRole } from "../utils/module-role.js";
 import {
   astroPipelineOptionsSchema,
@@ -40,7 +41,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     schema: astroPipelineOptionsSchema,
     messages: {
       forbiddenSideLoader:
-        "Route or endpoint modules must not import side-loader helpers outside the approved Astro surfaces. Found {{reason}} in {{module}}."
+        "{{badThing}}. Move that content access into {{surface}} and import that adapter from the route instead. Route closures must stay inside approved Astro surfaces so content access stays centralized and auditable."
     }
   },
   defaultOptions: [{}],
@@ -74,8 +75,8 @@ export default createRule<RuleOptionsTuple, MessageIds>({
             node: programNode,
             messageId: "forbiddenSideLoader",
             data: {
-              module: finding.modulePath,
-              reason: finding.reason
+              badThing: describeBadThing(finding),
+              surface: describeApprovedContentAdapterSurface(options)
             }
           });
         }
@@ -87,6 +88,18 @@ export default createRule<RuleOptionsTuple, MessageIds>({
 interface ForbiddenSideLoader {
   modulePath: string;
   reason: string;
+}
+
+function describeBadThing(finding: ForbiddenSideLoader): string {
+  if (finding.reason === "cross-root helper import") {
+    return `Cross-root helper module ${finding.modulePath} imports astro:content inside this route closure`;
+  }
+
+  if (finding.reason === "direct authored/spec content import") {
+    return `Route helper module ${finding.modulePath} is itself an authored or spec content file`;
+  }
+
+  return `Route helper module ${finding.modulePath} imports astro:content`;
 }
 
 function findForbiddenSideLoader(
