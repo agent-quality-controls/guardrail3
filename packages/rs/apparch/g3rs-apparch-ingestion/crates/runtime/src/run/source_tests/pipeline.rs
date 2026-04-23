@@ -69,3 +69,39 @@ pub fn choose_retry_strategy() {}
 
     assertions::assert_has_result(&results, "RS-APPARCH-SOURCE-05", G3Severity::Error, None);
 }
+
+#[test]
+fn private_child_module_behavior_does_not_reach_types_public_surface_inventory() {
+    let root = super::helpers::temp_workspace();
+    super::helpers::write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = [\"types/contracts\"]\n",
+    );
+    super::helpers::write(
+        root.path().join("types/contracts/Cargo.toml"),
+        "[package]\nname = \"types-contracts\"\nversion = \"0.1.0\"\n",
+    );
+    super::helpers::write(
+        root.path().join("types/contracts/src/lib.rs"),
+        "mod internal;\npub struct OrderDto;\n",
+    );
+    super::helpers::write(
+        root.path().join("types/contracts/src/internal.rs"),
+        r#"
+pub fn choose_retry_strategy() {}
+
+impl super::OrderDto {
+    pub fn save_to_db(&self) {}
+}
+"#,
+    );
+
+    let input = super::helpers::source_input(root.path());
+    let types_check = input
+        .types_public_surface_checks
+        .iter()
+        .find(|check| check.krate.cargo_rel_path == "types/contracts/Cargo.toml")
+        .expect("types crate should be present in source checks input");
+
+    assert!(types_check.public_behavior_items.is_empty(), "{types_check:#?}");
+}
