@@ -104,17 +104,35 @@ fn ends_conditional_block(line: &str) -> bool {
         || line.ends_with(";esac")
 }
 
-fn block_contains_validation(parsed: &ParsedShellScript, block: &NumberedBlock) -> bool {
-    block.lines.iter().any(|line| {
-        line_contains_guardrail_step(parsed, &line.raw, line.line_no)
-            || line_contains_path_qualified_guardrail_step(parsed, &line.raw, line.line_no)
-    })
+fn branch_has_trigger_before_validation(
+    parsed: &ParsedShellScript,
+    block: &NumberedBlock,
+    needle: &str,
+) -> bool {
+    let header_span_len = trigger_header_span_len(block);
+    let mut saw_trigger = false;
+
+    for (index, line) in block.lines.iter().enumerate() {
+        if line_reaches_config_trigger(parsed, &line.raw, line.line_no, needle)
+            && (index < header_span_len || !is_discarded_direct_trigger_line(&line.raw, needle))
+        {
+            saw_trigger = true;
+        }
+
+        if saw_trigger
+            && (line_contains_guardrail_step(parsed, &line.raw, line.line_no)
+                || line_contains_path_qualified_guardrail_step(parsed, &line.raw, line.line_no))
+        {
+            return true;
+        }
+    }
+
+    false
 }
 
 fn branch_covers_needle(parsed: &ParsedShellScript, branch: &NumberedBlock, needle: &str) -> bool {
     let (direct_branch, nested_blocks) = partition_branch(branch);
-    (block_contains_validation(parsed, &direct_branch)
-        && block_mentions_config_trigger(parsed, &direct_branch, needle))
+    branch_has_trigger_before_validation(parsed, &direct_branch, needle)
         || nested_blocks.into_iter().any(|nested_block| {
             block_branches(&nested_block)
                 .into_iter()
@@ -334,19 +352,6 @@ fn adjust_depth(depth: usize, trimmed: &str) -> usize {
         next -= 1;
     }
     next
-}
-
-fn block_mentions_config_trigger(
-    parsed: &ParsedShellScript,
-    block: &NumberedBlock,
-    needle: &str,
-) -> bool {
-    let header_span_len = trigger_header_span_len(block);
-
-    block.lines.iter().enumerate().any(|(index, line)| {
-        line_reaches_config_trigger(parsed, &line.raw, line.line_no, needle)
-            && (index < header_span_len || !is_discarded_direct_trigger_line(&line.raw, needle))
-    })
 }
 
 fn content_has_direct_trigger_line_for_needle(parsed: &ParsedShellScript, needle: &str) -> bool {
