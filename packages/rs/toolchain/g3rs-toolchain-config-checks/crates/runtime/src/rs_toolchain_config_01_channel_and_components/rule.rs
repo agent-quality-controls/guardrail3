@@ -116,36 +116,58 @@ fn classify_channel(raw: &str) -> ChannelKind {
     let segments = normalized.split('-').collect::<Vec<_>>();
     let first = segments.first().copied().unwrap_or("");
 
-    if first.starts_with("nightly") {
-        return ChannelKind::Nightly;
-    }
-    if first.starts_with("beta") {
-        return ChannelKind::Beta;
-    }
-
-    if segments
-        .iter()
-        .skip(1)
-        .any(|segment| segment.starts_with("nightly"))
-    {
-        return ChannelKind::Nightly;
-    }
-    if segments
-        .iter()
-        .skip(1)
-        .any(|segment| segment.starts_with("beta"))
-    {
-        return ChannelKind::Beta;
-    }
-
-    if first == "stable" {
-        return ChannelKind::Stable;
+    match first {
+        "nightly" => return classify_named_channel(ChannelKind::Nightly, &segments[1..]),
+        "beta" => return classify_named_channel(ChannelKind::Beta, &segments[1..]),
+        "stable" => return classify_named_channel(ChannelKind::Stable, &segments[1..]),
+        _ => {}
     }
     if parse_pinned_stable(raw).is_some() {
         return ChannelKind::PinnedStable;
     }
 
     ChannelKind::Unsupported
+}
+
+fn classify_named_channel(kind: ChannelKind, suffix: &[&str]) -> ChannelKind {
+    if suffix.is_empty() {
+        return kind;
+    }
+
+    if matches!(kind, ChannelKind::Nightly | ChannelKind::Beta) && suffix_starts_with_date(suffix) {
+        let target = &suffix[1..];
+        return if target.is_empty() || is_target_suffix(target) {
+            kind
+        } else {
+            ChannelKind::Unsupported
+        };
+    }
+
+    if is_target_suffix(suffix) {
+        return kind;
+    }
+
+    ChannelKind::Unsupported
+}
+
+fn suffix_starts_with_date(suffix: &[&str]) -> bool {
+    let [year, month, day, ..] = suffix else {
+        return false;
+    };
+    [*year, *month, *day]
+        .into_iter()
+        .zip([4usize, 2, 2])
+        .all(|(part, len)| part.len() == len && part.chars().all(|ch| ch.is_ascii_digit()))
+}
+
+fn is_target_suffix(suffix: &[&str]) -> bool {
+    suffix.len() >= 2
+        && suffix.iter().all(|segment| {
+            !segment.is_empty()
+                && segment
+                    .chars()
+                    .all(|ch| ch.is_ascii_alphanumeric() || ch == '_')
+        })
 }
 
 fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
