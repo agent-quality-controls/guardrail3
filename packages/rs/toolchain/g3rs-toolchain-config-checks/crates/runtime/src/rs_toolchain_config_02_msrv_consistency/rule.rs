@@ -106,13 +106,10 @@ fn inheritable_string(value: Option<&InheritableValue<String>>) -> Option<&str> 
 
 fn parse_pinned_stable_version(raw: &str) -> Option<(u64, u64, u64)> {
     let normalized = raw.trim().to_ascii_lowercase();
-    let mut segments = normalized.split('-');
-    let version_part = segments.next()?;
-    if segments.any(|segment| segment.starts_with("nightly") || segment.starts_with("beta")) {
+    if normalized.split_once('-').is_some() {
         return None;
     }
-
-    let version_part = version_part.trim_start_matches('v');
+    let version_part = normalized.trim_start_matches('v');
     let mut parts = version_part.split('.');
     let major = parts.next()?.parse().ok()?;
     let minor = parts.next()?.parse().ok()?;

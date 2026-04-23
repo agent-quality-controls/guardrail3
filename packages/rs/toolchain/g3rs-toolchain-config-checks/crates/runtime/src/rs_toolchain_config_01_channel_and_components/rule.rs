@@ -150,9 +150,10 @@ fn classify_channel(raw: &str) -> ChannelKind {
 
 fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
     let normalized = raw.trim().trim_start_matches('v');
-    let version_part = normalized
-        .split_once('-')
-        .map_or(normalized, |(version_part, _)| version_part);
+    if normalized.split_once('-').is_some() {
+        return None;
+    }
+    let version_part = normalized;
     let mut parts = version_part.split('.');
 
     let major = parts.next()?.parse().ok()?;
