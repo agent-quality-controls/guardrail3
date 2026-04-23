@@ -49,6 +49,8 @@ pub struct G3RsReleaseWorkflowJob {
     pub runs_on: Vec<String>,
     pub needs: Vec<String>,
     pub matrix_axes: BTreeMap<String, Vec<String>>,
+    pub env_keys: Vec<String>,
+    pub env_bindings: BTreeMap<String, String>,
     pub steps: Vec<G3RsReleaseWorkflowStep>,
 }
 
@@ -88,6 +90,12 @@ pub struct G3RsReleaseConfigRepo {
     pub cliff_exists: bool,
     pub cliff: Option<CliffToml>,
     pub workflows: Vec<G3RsReleaseWorkflow>,
+    pub has_release_plz_workflow: bool,
+    pub release_plz_workflow_rel_path: Option<String>,
+    pub has_publish_dry_run_workflow: bool,
+    pub publish_dry_run_workflow_rel_path: Option<String>,
+    pub has_registry_token_workflow: bool,
+    pub registry_token_workflow_rel_path: Option<String>,
     pub semver_checks_installed: bool,
 }
 

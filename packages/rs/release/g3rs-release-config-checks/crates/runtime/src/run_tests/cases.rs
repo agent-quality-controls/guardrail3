@@ -92,6 +92,8 @@ resolver = "2"
                         runs_on: vec!["ubuntu-latest".to_owned()],
                         needs: vec![],
                         matrix_axes: BTreeMap::new(),
+                        env_keys: vec![],
+                        env_bindings: BTreeMap::new(),
                         steps: vec![G3RsReleaseWorkflowStep {
                             uses: None,
                             run_lines: vec![
@@ -107,6 +109,8 @@ resolver = "2"
                         runs_on: vec!["ubuntu-latest".to_owned()],
                         needs: vec!["build".to_owned()],
                         matrix_axes: BTreeMap::new(),
+                        env_keys: vec![],
+                        env_bindings: BTreeMap::new(),
                         steps: vec![G3RsReleaseWorkflowStep {
                             uses: Some("softprops/action-gh-release@v2".to_owned()),
                             run_lines: vec![],
@@ -119,6 +123,12 @@ resolver = "2"
                 steps: vec![],
             },
         }],
+        has_release_plz_workflow: false,
+        release_plz_workflow_rel_path: None,
+        has_publish_dry_run_workflow: false,
+        publish_dry_run_workflow_rel_path: None,
+        has_registry_token_workflow: false,
+        registry_token_workflow_rel_path: None,
         semver_checks_installed: false,
     };
 
@@ -217,6 +227,8 @@ resolver = "2"
                         runs_on: vec!["ubuntu-latest".to_owned()],
                         needs: vec![],
                         matrix_axes: BTreeMap::new(),
+                        env_keys: vec![],
+                        env_bindings: BTreeMap::new(),
                         steps: vec![
                             G3RsReleaseWorkflowStep {
                                 uses: Some("taiki-e/upload-rust-binary-action@v1".to_owned()),
@@ -240,6 +252,12 @@ resolver = "2"
                 steps: vec![],
             },
         }],
+        has_release_plz_workflow: false,
+        release_plz_workflow_rel_path: None,
+        has_publish_dry_run_workflow: false,
+        publish_dry_run_workflow_rel_path: None,
+        has_registry_token_workflow: false,
+        registry_token_workflow_rel_path: None,
         semver_checks_installed: false,
     };
     let cli = build_crate(
@@ -419,6 +437,12 @@ resolver = "2"
             cliff_exists: cliff.is_some(),
             cliff,
             workflows: Vec::new(),
+            has_release_plz_workflow: false,
+            release_plz_workflow_rel_path: None,
+            has_publish_dry_run_workflow: false,
+            publish_dry_run_workflow_rel_path: None,
+            has_registry_token_workflow: false,
+            registry_token_workflow_rel_path: None,
             semver_checks_installed: false,
         }],
         crate_checks: vec![publishable_crate(&publishable_name)],

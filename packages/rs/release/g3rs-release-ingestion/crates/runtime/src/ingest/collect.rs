@@ -166,6 +166,21 @@ pub(super) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
         repo::parse_release_plz(crawl, &mut config_failures);
     let (cliff_exists, cliff_rel_path, cliff) = repo::parse_cliff(crawl, &mut config_failures);
     let workflows = repo::collect_workflows(crawl, &mut config_failures);
+    let has_release_plz_workflow = workflows.iter().any(workflow_has_release_plz);
+    let release_plz_workflow_rel_path = workflows
+        .iter()
+        .find(|workflow| workflow_has_release_plz(workflow))
+        .map(|workflow| workflow.rel_path.clone());
+    let has_publish_dry_run_workflow = workflows.iter().any(workflow_has_publish_dry_run);
+    let publish_dry_run_workflow_rel_path = workflows
+        .iter()
+        .find(|workflow| workflow_has_publish_dry_run(workflow))
+        .map(|workflow| workflow.rel_path.clone());
+    let has_registry_token_workflow = workflows.iter().any(workflow_has_registry_token);
+    let registry_token_workflow_rel_path = workflows
+        .iter()
+        .find(|workflow| workflow_has_registry_token(workflow))
+        .map(|workflow| workflow.rel_path.clone());
 
     let repo_config = release_types::G3RsReleaseConfigRepo {
         cargo_rel_path: "Cargo.toml".to_owned(),
@@ -186,6 +201,12 @@ pub(super) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
                 analysis: workflow.analysis.clone(),
             })
             .collect(),
+        has_release_plz_workflow,
+        release_plz_workflow_rel_path,
+        has_publish_dry_run_workflow,
+        publish_dry_run_workflow_rel_path,
+        has_registry_token_workflow,
+        registry_token_workflow_rel_path,
         semver_checks_installed: repo::tool_is_available("cargo-semver-checks", path_env),
     };
 
@@ -352,6 +373,44 @@ pub(super) fn push_all_failures(
     config_failures.push(input_failure(&rel_path, &message));
     filetree_failures.push(input_failure(&rel_path, &message));
     source_failures.push(input_failure(rel_path, message));
+}
+
+fn workflow_has_release_plz(workflow: &WorkflowFacts) -> bool {
+    workflow.analysis.jobs.iter().any(|job| {
+        job.steps.iter().any(|step| {
+            step.uses
+                .as_deref()
+                .is_some_and(|uses| uses.contains("release-plz"))
+        })
+    })
+}
+
+fn workflow_has_publish_dry_run(workflow: &WorkflowFacts) -> bool {
+    workflow.analysis.jobs.iter().any(|job| {
+        job.steps.iter().any(|step| {
+            step.run_lines
+                .iter()
+                .any(|line| line_has_cargo_publish_dry_run(line))
+        })
+    })
+}
+
+fn workflow_has_registry_token(workflow: &WorkflowFacts) -> bool {
+    workflow.analysis.jobs.iter().any(|job| {
+        job.env_keys.iter().any(|key| key == "CARGO_REGISTRY_TOKEN")
+            || job.steps.iter().any(|step| {
+                step.env_keys.iter().any(|key| key == "CARGO_REGISTRY_TOKEN")
+            })
+    })
+}
+
+fn line_has_cargo_publish_dry_run(line: &str) -> bool {
+    let tokens = line.split_whitespace().collect::<Vec<_>>();
+    let Some((command, args)) = tokens.split_first() else {
+        return false;
+    };
+    command == &"cargo"
+        && args.windows(2).any(|window| matches!(window, ["publish", "--dry-run"]))
 }
 
 #[cfg(test)]
