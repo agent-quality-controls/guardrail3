@@ -66,11 +66,14 @@ pub(crate) fn analyze_source_files(
         });
     }
 
-    let mut global_type_validation_map = BTreeMap::<String, (bool, bool)>::new();
+    let mut global_type_validation_map = BTreeMap::<String, Vec<(bool, bool)>>::new();
     let mut simple_type_validation_map = BTreeMap::<String, Vec<(bool, bool)>>::new();
     for parsed_file in &parsed_files {
         for (type_name, state) in &parsed_file.parsed.type_validation_map {
-            let _ = global_type_validation_map.insert(type_name.clone(), *state);
+            global_type_validation_map
+                .entry(type_name.clone())
+                .or_default()
+                .push(*state);
             let simple_name = type_name
                 .rsplit("::")
                 .next()
@@ -232,7 +235,7 @@ pub(crate) fn analyze_source_files(
 
 fn resolve_validation_state(
     candidate_names: &[String],
-    global_type_validation_map: &BTreeMap<String, (bool, bool)>,
+    global_type_validation_map: &BTreeMap<String, Vec<(bool, bool)>>,
     simple_type_validation_map: &BTreeMap<String, Vec<(bool, bool)>>,
     global_manual_validate_types: &BTreeSet<String>,
     simple_manual_validate_counts: &BTreeMap<String, usize>,
@@ -283,18 +286,19 @@ fn resolve_validation_state(
 
 fn resolve_exact_validation_state(
     candidate_name: &str,
-    global_type_validation_map: &BTreeMap<String, (bool, bool)>,
+    global_type_validation_map: &BTreeMap<String, Vec<(bool, bool)>>,
     global_manual_validate_types: &BTreeSet<String>,
 ) -> Option<(bool, bool)> {
-    if let Some((has_non_primitive, has_validate_derive)) =
-        global_type_validation_map.get(candidate_name)
-    {
-        return Some((
-            *has_non_primitive,
-            *has_validate_derive || global_manual_validate_types.contains(candidate_name),
-        ));
+    let states = global_type_validation_map.get(candidate_name)?;
+    if states.len() != 1 {
+        return None;
     }
-    None
+
+    let (has_non_primitive, has_validate_derive) = states[0];
+    Some((
+        has_non_primitive,
+        has_validate_derive || global_manual_validate_types.contains(candidate_name),
+    ))
 }
 
 fn strip_local_path_prefixes(candidate_name: &str) -> Option<&str> {
