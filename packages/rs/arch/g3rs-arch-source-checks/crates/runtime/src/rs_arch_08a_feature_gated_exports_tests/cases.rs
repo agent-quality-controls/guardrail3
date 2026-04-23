@@ -52,3 +52,28 @@ fn properly_gated_exports_inventory_without_feature_table_facts() {
 
     assertions::assert_gated_inventory(&results, "crate_a/src/lib.rs");
 }
+
+#[test]
+fn all_gated_exports_fire_source_rule() {
+    let results = run_rule(
+        &source_crate("crate_a"),
+        &G3RsArchFacadeSurface {
+            rel_path: "crate_a/src/lib.rs".to_owned(),
+            is_lib_rs: true,
+            is_mod_rs: false,
+            body_items: Vec::new(),
+            broad_reexports: Vec::new(),
+            pub_exports: vec![G3RsArchFeatureExport {
+                line: 3,
+                name: "api".to_owned(),
+                feature_gate: Some("all".to_owned()),
+                gated_on_all: true,
+            }],
+            pub_export_count: 1,
+            ungated_export_count: 0,
+            gated_on_all_count: 1,
+        },
+    );
+
+    assertions::assert_all_gated_exports(&results, "crate_a/src/lib.rs");
+}

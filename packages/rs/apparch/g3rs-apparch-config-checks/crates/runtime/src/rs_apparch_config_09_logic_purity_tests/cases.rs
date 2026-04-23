@@ -42,3 +42,17 @@ fn invalid_policy_fires_instead_of_dropping_to_empty_allowlist() {
         "permission denied",
     );
 }
+
+#[test]
+fn parse_error_policy_fires_instead_of_dropping_to_empty_allowlist() {
+    let results = run_rule(&input(
+        "reqwest",
+        G3RsApparchDependencyKind::Dependency,
+        G3RsApparchRustPolicyState::ParseError {
+            rel_path: "guardrail3-rs.toml".to_owned(),
+            reason: "bad toml".to_owned(),
+        },
+    ));
+
+    assertions::assert_policy_error_contains(&results, "logic/service/Cargo.toml", "bad toml");
+}

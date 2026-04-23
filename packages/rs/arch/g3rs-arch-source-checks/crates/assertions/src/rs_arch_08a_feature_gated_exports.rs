@@ -27,3 +27,16 @@ pub fn assert_gated_inventory(results: &[G3CheckResult], file: &str) {
         "{results:#?}"
     );
 }
+
+pub fn assert_all_gated_exports(results: &[G3CheckResult], file: &str) {
+    assert!(
+        results.iter().any(|result| {
+            result.id() == ID
+                && result.severity() == G3Severity::Error
+                && result.title() == "`all` feature must not directly gate exports"
+                && result.file() == Some(file)
+                && !result.inventory()
+        }),
+        "{results:#?}"
+    );
+}
