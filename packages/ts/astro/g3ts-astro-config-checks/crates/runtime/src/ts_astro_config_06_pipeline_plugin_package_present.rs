@@ -25,15 +25,15 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 
         let message = match rel_path {
             Some(rel_path) => format!(
-                "`{rel_path}` does not include the required Astro pipeline ESLint plugin package `{DEPENDENCY_NAME}`."
+                "`{rel_path}` does not list `{DEPENDENCY_NAME}` in dependencies or devDependencies. Add `{DEPENDENCY_NAME}` to `{rel_path}`. Astro source-pipeline rules must come from the shared ESLint plugin so route bypasses fail in lint."
             ),
             None => format!(
-                "Could not verify the required Astro pipeline ESLint plugin package `{DEPENDENCY_NAME}` because no package manifest was available."
+                "The Astro pipeline ESLint plugin package contract could not be checked because `package.json` was not available. Restore the app package manifest and declare `{DEPENDENCY_NAME}` there. Astro source-pipeline rules must come from the shared ESLint plugin so route bypasses fail in lint."
             ),
         };
         results.push(crate::support::error(
             ID,
-            "astro pipeline ESLint plugin package missing",
+            "Astro app package is missing `eslint-plugin-astro-pipeline`",
             message,
             rel_path,
         ));

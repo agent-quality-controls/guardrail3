@@ -35,7 +35,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     schema: astroPipelineOptionsSchema,
     messages: {
       runtimeEval:
-        "Runtime MDX evaluation is forbidden. Found {{pattern}} in {{module}}."
+        "{{module}} evaluates MDX at runtime via {{pattern}}. Precompile the MDX into a generated module and import that generated artifact instead. Runtime evaluation creates a second MDX pipeline outside the approved Astro build path."
     }
   },
   defaultOptions: [{}],
@@ -74,8 +74,8 @@ export default createRule<RuleOptionsTuple, MessageIds>({
             node: programNode,
             messageId: "runtimeEval",
             data: {
-              pattern: finding,
-              module: filename
+              pattern: finding.pattern,
+              module: finding.modulePath
             }
           });
         }
@@ -84,13 +84,18 @@ export default createRule<RuleOptionsTuple, MessageIds>({
   }
 });
 
+interface RuntimeEvalFinding {
+  modulePath: string;
+  pattern: string;
+}
+
 function findRuntimeEvalPatterns(
   modules: ReturnType<typeof collectImportClosure>,
   program: TSESTree.Program,
   scopeManager: TSESLint.Scope.ScopeManager | null,
   filename: string,
   options: ReturnType<typeof resolveOptions>
-): string[] {
+): RuntimeEvalFinding[] {
   const moduleRole = classifyModuleRole(filename, options);
 
   if (moduleRole.isApprovedGeneratedArtifact) {
@@ -165,7 +170,10 @@ function findRuntimeEvalPatterns(
     }
   });
 
-  return [...findings];
+  return [...findings].map((pattern) => ({
+    modulePath: filename,
+    pattern
+  }));
 }
 
 function classifyImportedRuntimeEval(

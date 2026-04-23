@@ -14,6 +14,7 @@ import {
   resolveOptions,
   type RuleOptionsTuple
 } from "../utils/options.js";
+import { describeApprovedContentAdapterSurface } from "../utils/message-surfaces.js";
 
 type MessageIds = "forbiddenImport";
 
@@ -32,7 +33,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     schema: astroPipelineOptionsSchema,
     messages: {
       forbiddenImport:
-        "Route and endpoint modules must not import {{source}} directly. Use an approved content adapter module instead."
+        "{{module}} imports {{source}} directly. Move that collection query into {{surface}} and import that adapter here instead. Routes must not grow their own content-loading logic because that breaks the shared content pipeline."
     }
   },
   defaultOptions: [{}],
@@ -62,10 +63,12 @@ export default createRule<RuleOptionsTuple, MessageIds>({
         context.report({
           node,
           messageId: "forbiddenImport",
-          data: {
-            source: "astro:content"
-          }
-        });
+            data: {
+              module: filename,
+              source: "astro:content",
+              surface: describeApprovedContentAdapterSurface(options)
+            }
+          });
       }
     }
 
@@ -85,7 +88,9 @@ export default createRule<RuleOptionsTuple, MessageIds>({
             node,
             messageId: "forbiddenImport",
             data: {
-              source: "astro:content"
+              module: filename,
+              source: "astro:content",
+              surface: describeApprovedContentAdapterSurface(options)
             }
           });
         }
@@ -106,7 +111,9 @@ export default createRule<RuleOptionsTuple, MessageIds>({
             node,
             messageId: "forbiddenImport",
             data: {
-              source: "astro:content"
+              module: filename,
+              source: "astro:content",
+              surface: describeApprovedContentAdapterSurface(options)
             }
           });
         }

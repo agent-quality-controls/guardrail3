@@ -20,14 +20,16 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
         }
 
         let message = match rel_path {
-            Some(rel_path) => format!("`{rel_path}` does not include `{DEPENDENCY_NAME}`."),
+            Some(rel_path) => format!(
+                "`{rel_path}` does not list `{DEPENDENCY_NAME}` in dependencies or devDependencies. Add `{DEPENDENCY_NAME}` to `{rel_path}`. Astro source files need the Astro ESLint plugin so Astro-specific lint rules can run."
+            ),
             None => format!(
-                "Could not verify `{DEPENDENCY_NAME}` because no package manifest was available."
+                "The Astro ESLint plugin package contract could not be checked because `package.json` was not available. Restore the app package manifest and declare `{DEPENDENCY_NAME}` there. Astro source files need that plugin so Astro-specific lint rules can run."
             ),
         };
         results.push(crate::support::error(
             ID,
-            "astro ESLint plugin package missing",
+            "Astro app package is missing `eslint-plugin-astro`",
             message,
             rel_path,
         ));

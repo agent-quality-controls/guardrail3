@@ -20,13 +20,15 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 
         let message = match rel_path {
             Some(rel_path) => format!(
-                "Could not prove a real `astro check` invocation from `{rel_path}`. Add `astro check` to the app script surface."
+                "`{rel_path}` does not run `astro check` in any app script. Add `astro check` to the script surface in `{rel_path}`. Without that script entry, CI and local validation can pass while Astro type and content errors stay unchecked."
             ),
-            None => {
-                "Could not prove a real `astro check` invocation because no package manifest was available."
-                    .to_owned()
-            }
+            None => "The Astro check contract could not be verified because `package.json` was not available. Restore the app package manifest and add an `astro check` script there. Without that manifest, the app has no normal script surface where Astro diagnostics can be required.".to_owned(),
         };
-        results.push(crate::support::error(ID, "astro check missing", message, rel_path));
+        results.push(crate::support::error(
+            ID,
+            "Astro app scripts do not run `astro check`",
+            message,
+            rel_path,
+        ));
     }
 }

@@ -26,9 +26,9 @@ pub(crate) fn check(input: &G3TsAstroFileTreeChecksInput, results: &mut Vec<G3Ch
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
-            "live config missing".to_owned(),
+            "Live-collections app root is missing `src/live.config.*`".to_owned(),
             format!(
-                "Astro live-collections app root `{}` is missing `src/live.config.*`.",
+                "Astro app root `{}` uses live collections but has no `src/live.config.*` file. Add `src/live.config.ts` at that app root and declare the live collections there. Live content sources must be declared in one shared Astro config surface instead of route-local loaders.",
                 root.app_root_rel_path
             ),
             Some(root.app_root_rel_path.clone()),

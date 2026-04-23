@@ -38,15 +38,15 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 
         let message = match rel_path {
             Some(rel_path) => format!(
-                "`{rel_path}` does not both activate `{PLUGIN_NAME}` and enforce the required Astro pipeline rules at error severity."
+                "`{rel_path}` does not activate `{PLUGIN_NAME}` with all required Astro pipeline rules at error severity. Enable the `astro-pipeline` plugin and set the required Astro pipeline rules to `error` in `{rel_path}`. Route and endpoint code must fail closed when it bypasses the approved Astro content pipeline."
             ),
             None => format!(
-                "Could not verify the required `{PLUGIN_NAME}` ESLint plugin wiring because no ESLint config was available."
+                "The Astro pipeline ESLint wiring contract could not be checked because `eslint.config.*` was not available. Restore the app ESLint config and enable `astro-pipeline` with the required rules there. Route and endpoint code must fail closed when it bypasses the approved Astro content pipeline."
             ),
         };
         results.push(crate::support::error(
             ID,
-            "astro pipeline ESLint plugin not effective",
+            "Astro ESLint lanes are not enforcing the required `astro-pipeline` rules",
             message,
             rel_path,
         ));

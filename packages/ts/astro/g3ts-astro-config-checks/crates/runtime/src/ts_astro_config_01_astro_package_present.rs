@@ -20,16 +20,15 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
         }
 
         let message = match rel_path {
-            Some(rel_path) => format!("`{rel_path}` does not include `{PACKAGE_NAME}`."),
-            None => {
-                "Could not verify the Astro package contract because no package manifest was available."
-                    .to_owned()
-            }
+            Some(rel_path) => format!(
+                "`{rel_path}` does not list `{PACKAGE_NAME}` in dependencies or devDependencies. Add `{PACKAGE_NAME}` to `{rel_path}`. Without that dependency entry, this app can drift away from the Astro framework contract without the package surface showing it."
+            ),
+            None => "The Astro package contract could not be checked because `package.json` was not available. Restore the app package manifest and declare `astro` there. Without that manifest, the app has no package surface that states it is an Astro app.".to_owned(),
         };
 
         results.push(crate::support::error(
             ID,
-            "astro package missing",
+            "Astro app package is missing `astro`",
             message,
             rel_path,
         ));
