@@ -44,3 +44,59 @@ fn passes_when_real_shell_error_handling_line_exists() {
         }],
     );
 }
+
+#[test]
+fn passes_when_equivalent_set_eu_o_pipefail_line_exists() {
+    let results = run_case("#!/usr/bin/env bash\nset -eu -o pipefail\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("`.githooks/pre-commit` enables fail-closed shell options"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn passes_when_equivalent_split_short_flags_line_exists() {
+    let results = run_case("#!/usr/bin/env bash\nset -e -u -o pipefail\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("`.githooks/pre-commit` enables fail-closed shell options"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn passes_when_equivalent_reordered_short_flags_line_exists() {
+    let results = run_case("#!/usr/bin/env bash\nset -ue -o pipefail\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("`.githooks/pre-commit` enables fail-closed shell options"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn passes_when_equivalent_long_errexit_spelling_exists() {
+    let results = run_case("#!/usr/bin/env bash\nset -o errexit -u -o pipefail\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("`.githooks/pre-commit` enables fail-closed shell options"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
