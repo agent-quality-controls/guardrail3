@@ -73,7 +73,7 @@ fn attr_enters_test_context(attr: &syn::Attribute) -> bool {
     let Ok(meta) = list.parse_args::<syn::Meta>() else {
         return false;
     };
-    cfg_meta_mentions_test(&meta, true)
+    cfg_meta_requires_test(&meta)
 }
 
 fn attr_is_direct_test(attr: &syn::Attribute) -> bool {
@@ -84,28 +84,76 @@ fn attr_is_direct_test(attr: &syn::Attribute) -> bool {
     segments.len() == 2 && segments[0].ident == "tokio" && segments[1].ident == "test"
 }
 
-fn cfg_meta_mentions_test(meta: &syn::Meta, positive: bool) -> bool {
+fn cfg_meta_requires_test(meta: &syn::Meta) -> bool {
+    !cfg_meta_eval_without_test(meta).can_be_true
+}
+
+struct CfgEvalWithoutTest {
+    can_be_true: bool,
+    can_be_false: bool,
+}
+
+fn cfg_meta_eval_without_test(meta: &syn::Meta) -> CfgEvalWithoutTest {
     match meta {
-        syn::Meta::Path(path) => positive && path.is_ident("test"),
-        syn::Meta::List(list) if list.path.is_ident("all") || list.path.is_ident("any") => list
+        syn::Meta::Path(path) if path.is_ident("test") => CfgEvalWithoutTest {
+            can_be_true: false,
+            can_be_false: true,
+        },
+        syn::Meta::Path(_) | syn::Meta::NameValue(_) => CfgEvalWithoutTest {
+            can_be_true: true,
+            can_be_false: true,
+        },
+        syn::Meta::List(list) if list.path.is_ident("all") => list
             .parse_args_with(
                 syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
             )
-            .is_ok_and(|items| {
-                items
+            .map(|items| CfgEvalWithoutTest {
+                can_be_true: items.iter().all(|item| cfg_meta_eval_without_test(item).can_be_true),
+                can_be_false: items
                     .iter()
-                    .any(|item| cfg_meta_mentions_test(item, positive))
+                    .any(|item| cfg_meta_eval_without_test(item).can_be_false),
+            })
+            .unwrap_or(CfgEvalWithoutTest {
+                can_be_true: true,
+                can_be_false: true,
+            }),
+        syn::Meta::List(list) if list.path.is_ident("any") => list
+            .parse_args_with(
+                syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+            )
+            .map(|items| CfgEvalWithoutTest {
+                can_be_true: items
+                    .iter()
+                    .any(|item| cfg_meta_eval_without_test(item).can_be_true),
+                can_be_false: items
+                    .iter()
+                    .all(|item| cfg_meta_eval_without_test(item).can_be_false),
+            })
+            .unwrap_or(CfgEvalWithoutTest {
+                can_be_true: true,
+                can_be_false: true,
             }),
         syn::Meta::List(list) if list.path.is_ident("not") => list
             .parse_args_with(
                 syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
             )
-            .is_ok_and(|items| {
-                items
-                    .iter()
-                    .any(|item| cfg_meta_mentions_test(item, !positive))
+            .ok()
+            .and_then(|items| items.first().cloned())
+            .map(|item| {
+                let inner = cfg_meta_eval_without_test(&item);
+                CfgEvalWithoutTest {
+                    can_be_true: inner.can_be_false,
+                    can_be_false: inner.can_be_true,
+                }
+            })
+            .unwrap_or(CfgEvalWithoutTest {
+                can_be_true: true,
+                can_be_false: true,
             }),
-        _ => false,
+        syn::Meta::List(_) => CfgEvalWithoutTest {
+            can_be_true: true,
+            can_be_false: true,
+        },
     }
 }
 

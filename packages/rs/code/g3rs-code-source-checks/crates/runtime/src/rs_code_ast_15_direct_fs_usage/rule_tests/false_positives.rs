@@ -65,3 +65,17 @@ fn skips_top_level_cfg_test_std_alias_for_import() {
     let results = super::super::check_source("src/lib.rs", content, false);
     assert_rule_results(&results, &[]);
 }
+
+#[test]
+fn skips_cfg_all_test_scoped_fs_usage_in_non_test_file() {
+    let content = "#[cfg(all(test, unix))]\nuse std::fs;\n";
+    let results = super::super::check_source("src/lib.rs", content, false);
+    assert_rule_results(&results, &[]);
+}
+
+#[test]
+fn skips_grouped_std_self_alias_without_fs() {
+    let content = "use std::{self as s, io};\nfn probe() { let _ = s::io::ErrorKind::Other; }\n";
+    let results = super::super::check_source("src/lib.rs", content, false);
+    assert_rule_results(&results, &[]);
+}
