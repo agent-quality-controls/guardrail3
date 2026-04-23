@@ -26,43 +26,8 @@ pub(super) fn assertions_call_runtime_check_test_tree(
     let Some(runtime_package_name) = runtime_package_name else {
         return false;
     };
-    let mut runtime_roots = BTreeSet::from([
-        runtime_package_name.to_owned(),
-        runtime_package_name.replace('-', "_"),
-    ]);
-    let mut imported_check_test_tree = BTreeSet::new();
-
-    for binding in imports {
-        if binding
-            .path_segments
-            .first()
-            .is_none_or(|first| !runtime_roots.contains(first))
-        {
-            continue;
-        }
-        if let Some(local_name) = binding.local_name.as_ref() {
-            if binding.path_segments.len() == 1
-                || binding
-                    .path_segments
-                    .last()
-                    .is_some_and(|segment| segment == "self")
-            {
-                let _ = runtime_roots.insert(local_name.clone());
-            } else if binding
-                .path_segments
-                .last()
-                .is_some_and(|segment| segment == "check_test_tree")
-            {
-                let _ = imported_check_test_tree.insert(local_name.clone());
-            }
-        } else if binding
-            .path_segments
-            .last()
-            .is_some_and(|segment| segment == "check_test_tree")
-        {
-            let _ = imported_check_test_tree.insert("check_test_tree".to_owned());
-        }
-    }
+    let (runtime_roots, imported_check_test_tree) =
+        runtime_import_targets(imports, runtime_package_name);
 
     let empty_local_call_aliases = BTreeMap::new();
     call_paths.iter().any(|path| {
@@ -126,6 +91,97 @@ fn path_matches_runtime_check_test_tree_inner(
             })
         }
         [first, second, ..] => runtime_roots.contains(first) && second == "check_test_tree",
+        _ => false,
+    }
+}
+
+fn runtime_import_targets(
+    imports: &[UseBinding],
+    runtime_package_name: &str,
+) -> (BTreeSet<String>, BTreeSet<String>) {
+    let mut runtime_roots = BTreeSet::from([
+        runtime_package_name.to_owned(),
+        runtime_package_name.replace('-', "_"),
+    ]);
+    let mut imported_check_test_tree = BTreeSet::new();
+
+    loop {
+        let mut changed = false;
+        for binding in imports {
+            if import_targets_runtime_root(binding, &runtime_roots) {
+                if let Some(local_name) = binding.local_name.as_ref() {
+                    changed |= runtime_roots.insert(local_name.clone());
+                }
+            }
+            if import_targets_runtime_check_test_tree(
+                binding,
+                &runtime_roots,
+                &imported_check_test_tree,
+            ) {
+                if let Some(local_name) = binding
+                    .local_name
+                    .as_ref()
+                    .or_else(|| binding.path_segments.last())
+                {
+                    changed |= imported_check_test_tree.insert(local_name.clone());
+                }
+            }
+        }
+        if !changed {
+            return (runtime_roots, imported_check_test_tree);
+        }
+    }
+}
+
+fn import_targets_runtime_root(binding: &UseBinding, runtime_roots: &BTreeSet<String>) -> bool {
+    let Some(first) = binding.path_segments.first() else {
+        return false;
+    };
+    if runtime_roots.contains(first) {
+        return binding.path_segments.len() == 1
+            || binding
+                .path_segments
+                .last()
+                .is_some_and(|segment| segment == "self");
+    }
+    if !matches!(first.as_str(), "crate" | "self" | "super") {
+        return false;
+    }
+    let local_segments = binding
+        .path_segments
+        .iter()
+        .skip_while(|segment| matches!(segment.as_str(), "crate" | "self" | "super"))
+        .collect::<Vec<_>>();
+    matches!(local_segments.as_slice(), [target] if runtime_roots.contains(target.as_str()))
+}
+
+fn import_targets_runtime_check_test_tree(
+    binding: &UseBinding,
+    runtime_roots: &BTreeSet<String>,
+    imported_check_test_tree: &BTreeSet<String>,
+) -> bool {
+    let Some(first) = binding.path_segments.first() else {
+        return false;
+    };
+    if runtime_roots.contains(first) {
+        return binding
+            .path_segments
+            .last()
+            .is_some_and(|segment| segment == "check_test_tree");
+    }
+    if !matches!(first.as_str(), "crate" | "self" | "super") {
+        return false;
+    }
+    let local_segments = binding
+        .path_segments
+        .iter()
+        .skip_while(|segment| matches!(segment.as_str(), "crate" | "self" | "super"))
+        .collect::<Vec<_>>();
+    match local_segments.as_slice() {
+        [target] => imported_check_test_tree.contains(target.as_str()),
+        [target, leaf] => {
+            runtime_roots.contains(target.as_str()) && leaf.as_str() == "check_test_tree"
+        }
         _ => false,
     }
 }

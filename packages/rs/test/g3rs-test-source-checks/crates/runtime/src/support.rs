@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use g3rs_test_types::G3RsTestAnalyzedSourceFile;
-use g3rs_test_types::ast::{CfgTestModuleInfo, TestFunctionInfo};
+use g3rs_test_types::ast::{CfgTestModuleInfo, TestFunctionInfo, UseBinding};
 
 pub(crate) struct TestFileInput<'a> {
     pub(crate) file: &'a G3RsTestAnalyzedSourceFile,
@@ -62,4 +62,20 @@ impl<'a> AssertionsModuleInput<'a> {
             proof_bearing_exported_functions,
         }
     }
+}
+
+pub(crate) fn normalized_owned_assertion_relative_segments(
+    binding: &UseBinding,
+    assertions_package_name: &str,
+) -> Option<Vec<String>> {
+    if binding.path_segments.first()? != assertions_package_name {
+        return None;
+    }
+
+    let mut relative_segments = binding.path_segments[1..].to_vec();
+    if matches!(relative_segments.as_slice(), [segment] if segment == "self") {
+        relative_segments.clear();
+    }
+
+    Some(relative_segments)
 }

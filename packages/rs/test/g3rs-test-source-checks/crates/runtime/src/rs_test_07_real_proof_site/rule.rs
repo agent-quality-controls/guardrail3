@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use g3rs_test_types::ast::{TestFunctionInfo, UseBinding};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-use crate::support::TestFunctionInput;
+use crate::support::{TestFunctionInput, normalized_owned_assertion_relative_segments};
 
 const ID: &str = "RS-TEST-SOURCE-07";
 
@@ -214,21 +214,22 @@ pub(crate) fn has_owned_assertion_proof(
     let mut glob_prefixes = Vec::new();
 
     for binding in imports {
-        if binding
-            .path_segments
-            .first()
-            .is_some_and(|segment| segment == assertions_package_name)
-        {
-            let relative_segments = binding.path_segments[1..].to_vec();
-            if let Some(local_name) = binding.local_name.as_ref() {
-                let _ = root_prefixes.insert(local_name.clone(), relative_segments.clone());
+        let Some(relative_segments) =
+            normalized_owned_assertion_relative_segments(binding, assertions_package_name)
+        else {
+            continue;
+        };
+
+        if let Some(local_name) = binding.local_name.as_ref() {
+            let _ = root_prefixes.insert(local_name.clone(), relative_segments.clone());
+            if !relative_segments.is_empty() {
                 let _ = bare_imports.insert(local_name.clone(), relative_segments.join("::"));
-            } else if let Some(last) = relative_segments.last().cloned() {
-                let _ = root_prefixes.insert(last.clone(), relative_segments.clone());
-                let _ = bare_imports.insert(last, relative_segments.join("::"));
-            } else {
-                glob_prefixes.push(relative_segments);
             }
+        } else if let Some(last) = relative_segments.last().cloned() {
+            let _ = root_prefixes.insert(last.clone(), relative_segments.clone());
+            let _ = bare_imports.insert(last, relative_segments.join("::"));
+        } else {
+            glob_prefixes.push(relative_segments);
         }
     }
 

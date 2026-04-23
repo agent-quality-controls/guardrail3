@@ -314,6 +314,34 @@ fn inventories_owned_assertions_wrapper_over_other_assertions_crate() {
 }
 
 #[test]
+fn inventories_owned_assertions_proof_via_root_alias_import() {
+    let results = assertions::check(&assertions::input(
+        vec![
+            assertions::file(
+                "assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo_assertions"),
+                "pub fn assert_demo() { assert_eq!(1, 1); }\n",
+            ),
+            assertions::file(
+                "tests/root_alias.rs",
+                G3RsTestFileKind::ExternalHarness,
+                Some("demo_assertions"),
+                "use demo_assertions::{self as da};\n#[test]\nfn root_alias() { da::assert_demo(); }\n",
+            ),
+        ],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_inventory(
+        &results,
+        "RS-TEST-SOURCE-07",
+        "test uses shared proof",
+        "tests/root_alias.rs",
+    );
+}
+
+#[test]
 fn inventories_define_result_assertions_helper_surface() {
     let helpers = [
         "assert_findings",
