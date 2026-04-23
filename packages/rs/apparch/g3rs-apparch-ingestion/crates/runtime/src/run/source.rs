@@ -52,7 +52,7 @@ pub fn ingest_for_source_checks(
                     &view,
                     record,
                     ChildModuleVisibility::IntersectWithParent,
-                    false,
+                    true,
                 )?
                 .into_iter()
                 .filter(|item| {
