@@ -88,6 +88,13 @@ test("no-authored-content-glob catches route helper globbing and respects approv
         return loadAllPosts();
       }
     `,
+    "src/pages/reexport-posts.ts": `
+      import { loadAllPosts } from "../lib/post-loader-reexport";
+
+      export function GET() {
+        return loadAllPosts();
+      }
+    `,
     "src/lib/post-loader-process-cwd.ts": `
       import path from "node:path";
 
@@ -103,6 +110,16 @@ test("no-authored-content-glob catches route helper globbing and respects approv
 
       export function loadAllPosts() {
         return g("./src/content/posts/**/*.mdx");
+      }
+    `,
+    "src/lib/glob-export.ts": `
+      export const globPosts = import.meta.glob;
+    `,
+    "src/lib/post-loader-reexport.ts": `
+      import { globPosts } from "./glob-export";
+
+      export function loadAllPosts() {
+        return globPosts("./src/content/posts/**/*.mdx");
       }
     `,
     "src/lib/adapters/legacy.ts": `
@@ -172,6 +189,16 @@ test("no-authored-content-glob catches route helper globbing and respects approv
         {
           code: await project.read("src/pages/alias-chain-posts.ts"),
           filename: project.path("src/pages/alias-chain-posts.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenGlob"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/reexport-posts.ts"),
+          filename: project.path("src/pages/reexport-posts.ts"),
           options: [baseOptions],
           errors: [
             {

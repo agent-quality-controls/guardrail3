@@ -20,12 +20,12 @@ pub(super) fn fake_astro_workspace() -> TempDir {
 
     std::fs::write(
         root.path().join("package.json"),
-        "{\n  \"devDependencies\": {\n    \"astro\": \"1.0.0\",\n    \"eslint-plugin-astro\": \"1.0.0\",\n    \"eslint-plugin-astro-pipeline\": \"1.0.0\",\n    \"@nuasite/checks\": \"1.0.0\"\n  },\n  \"scripts\": {\n    \"check\": \"astro check\"\n  }\n}\n",
+        "{\n  \"devDependencies\": {\n    \"astro\": \"1.0.0\",\n    \"eslint-plugin-astro\": \"1.0.0\",\n    \"eslint-plugin-astro-pipeline\": \"1.0.0\"\n  },\n  \"scripts\": {\n    \"check\": \"astro check\"\n  }\n}\n",
     )
     .expect("package manifest should be written");
     std::fs::write(
         root.path().join("astro.config.mjs"),
-        "import checks from '@nuasite/checks';\nimport node from '@astrojs/node';\nexport default { output: 'server', adapter: node({ mode: 'standalone' }), integrations: [checks()] };\n",
+        "import node from '@astrojs/node';\nexport default { output: 'server', adapter: node({ mode: 'standalone' }) };\n",
     )
     .expect("astro config should be written");
     std::fs::write(
@@ -106,6 +106,18 @@ pub(super) fn crawl_with_entries(root: &TempDir, rel_paths: &[&str]) -> G3Worksp
 
 pub(super) fn unreadable_entry(root: &TempDir, rel_path: &str) -> G3WorkspaceEntry {
     entry(root, rel_path, false)
+}
+
+pub(super) fn ignored_entry(root: &TempDir, rel_path: &str) -> G3WorkspaceEntry {
+    G3WorkspaceEntry {
+        path: G3WorkspacePath {
+            rel_path: rel_path.to_owned(),
+            abs_path: root.path().join(rel_path),
+        },
+        kind: G3WorkspaceEntryKind::File,
+        ignore_state: G3WorkspaceIgnoreState::Ignored,
+        readable: true,
+    }
 }
 
 fn entry(root: &TempDir, rel_path: &str, readable: bool) -> G3WorkspaceEntry {

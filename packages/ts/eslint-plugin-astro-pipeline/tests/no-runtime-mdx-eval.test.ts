@@ -65,6 +65,76 @@ test("no-runtime-mdx-eval catches runtime bridges in MDX runtime modules", async
         return LaterAlias(code);
       }
     `,
+    "src/lib/mdx/shadowed-parameter.tsx": `
+      export function render(Function: (code: string) => unknown, code: string) {
+        return Function(code);
+      }
+    `,
+    "src/lib/mdx/unsafe-after-shadow.tsx": `
+      function safe(Function: (code: string) => unknown, code: string) {
+        return Function(code);
+      }
+
+      export function render(code: string) {
+        safe((value) => value, code);
+        return new Function(code);
+      }
+    `,
+    "src/lib/mdx/runtime-function-export.ts": `
+      const RuntimeFunction = Function;
+
+      export { RuntimeFunction };
+    `,
+    "src/lib/mdx/runtime-imported.tsx": `
+      import { RuntimeFunction } from "./runtime-function-export";
+
+      export function render(code: string) {
+        return RuntimeFunction(code);
+      }
+    `,
+    "src/lib/mdx/runtime-destructured.tsx": `
+      const { Function: RuntimeFunction } = globalThis;
+
+      export function render(code: string) {
+        return RuntimeFunction(code);
+      }
+    `,
+    "src/lib/mdx/runtime-global-alias-destructured.tsx": `
+      const root = globalThis;
+      const { Function: RuntimeFunction } = root;
+
+      export function render(code: string) {
+        return RuntimeFunction(code);
+      }
+    `,
+    "src/lib/mdx/runtime-global-alias-member.tsx": `
+      const root = globalThis;
+      const RuntimeFunction = root.Function;
+
+      export function render(code: string) {
+        return RuntimeFunction(code);
+      }
+    `,
+    "src/lib/mdx/mdx-run-export.ts": `
+      export { run as execute } from "@mdx-js/mdx";
+    `,
+    "src/lib/mdx/mdx-run-export-all.ts": `
+      export * from "@mdx-js/mdx";
+    `,
+    "src/lib/mdx/runtime-imported-mdx.tsx": `
+      import { execute } from "./mdx-run-export";
+
+      export async function render(code: string) {
+        return await execute(code);
+      }
+    `,
+    "src/lib/mdx/runtime-imported-mdx-export-all.tsx": `
+      import { run } from "./mdx-run-export-all";
+
+      export async function render(code: string) {
+        return await run(code);
+      }
+    `,
     "src/lib/mdx/bridge.tsx": `
       import { executeCompiledMdx } from "../runtime-exec";
 
@@ -97,6 +167,11 @@ test("no-runtime-mdx-eval catches runtime bridges in MDX runtime modules", async
         {
           code: await project.read("src/lib/mdx/shadowed.tsx"),
           filename: project.path("src/lib/mdx/shadowed.tsx"),
+          options: [baseOptions]
+        },
+        {
+          code: await project.read("src/lib/mdx/shadowed-parameter.tsx"),
+          filename: project.path("src/lib/mdx/shadowed-parameter.tsx"),
           options: [baseOptions]
         },
         {
@@ -152,6 +227,76 @@ test("no-runtime-mdx-eval catches runtime bridges in MDX runtime modules", async
         {
           code: await project.read("src/lib/mdx/runtime-namespace.tsx"),
           filename: project.path("src/lib/mdx/runtime-namespace.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/runtime-imported.tsx"),
+          filename: project.path("src/lib/mdx/runtime-imported.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/runtime-destructured.tsx"),
+          filename: project.path("src/lib/mdx/runtime-destructured.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/runtime-global-alias-destructured.tsx"),
+          filename: project.path("src/lib/mdx/runtime-global-alias-destructured.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/runtime-global-alias-member.tsx"),
+          filename: project.path("src/lib/mdx/runtime-global-alias-member.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/runtime-imported-mdx.tsx"),
+          filename: project.path("src/lib/mdx/runtime-imported-mdx.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/runtime-imported-mdx-export-all.tsx"),
+          filename: project.path("src/lib/mdx/runtime-imported-mdx-export-all.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/unsafe-after-shadow.tsx"),
+          filename: project.path("src/lib/mdx/unsafe-after-shadow.tsx"),
           options: [baseOptions],
           errors: [
             {

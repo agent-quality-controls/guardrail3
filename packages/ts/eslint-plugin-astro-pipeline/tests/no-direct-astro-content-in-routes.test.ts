@@ -41,6 +41,37 @@ test("no-direct-astro-content-in-routes only fires on direct route imports", asy
         return await import(source);
       }
     `,
+    "src/pages/data-require.endpoint.ts": `
+      export async function GET() {
+        const { getCollection } = require("astro:content");
+        return await getCollection("posts");
+      }
+    `,
+    "src/pages/data-require-alias.endpoint.ts": `
+      export async function GET() {
+        const req = require;
+        const { getCollection } = req("astro:content");
+        return await getCollection("posts");
+      }
+    `,
+    "src/pages/data-create-require.endpoint.ts": `
+      import { createRequire } from "node:module";
+
+      export async function GET() {
+        const req = createRequire(import.meta.url);
+        const { getCollection } = req("astro:content");
+        return await getCollection("posts");
+      }
+    `,
+    "src/pages/data-module-require-alias.endpoint.ts": `
+      import * as mod from "node:module";
+
+      export async function GET() {
+        const { require: req } = mod;
+        const { getCollection } = req("astro:content");
+        return await getCollection("posts");
+      }
+    `,
     "src/lib/content/posts.ts": `
       import { getCollection } from "astro:content";
 
@@ -90,6 +121,46 @@ test("no-direct-astro-content-in-routes only fires on direct route imports", asy
         {
           code: await project.read("src/pages/data-alias.endpoint.ts"),
           filename: project.path("src/pages/data-alias.endpoint.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenImport"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/data-require.endpoint.ts"),
+          filename: project.path("src/pages/data-require.endpoint.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenImport"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/data-require-alias.endpoint.ts"),
+          filename: project.path("src/pages/data-require-alias.endpoint.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenImport"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/data-create-require.endpoint.ts"),
+          filename: project.path("src/pages/data-create-require.endpoint.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenImport"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/data-module-require-alias.endpoint.ts"),
+          filename: project.path("src/pages/data-module-require-alias.endpoint.ts"),
           options: [baseOptions],
           errors: [
             {

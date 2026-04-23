@@ -1,7 +1,6 @@
 use g3ts_astro_types::{
-    G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState,
-    G3TsAstroContentMode, G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
-    G3TsAstroEslintSurfaceState, G3TsAstroIntegrationContractInput, G3TsAstroOutputMode,
+    G3TsAstroConfigChecksInput, G3TsAstroContentMode, G3TsAstroEslintPluginContractInput,
+    G3TsAstroEslintSurfaceSnapshot, G3TsAstroEslintSurfaceState, G3TsAstroIntegrationContractInput,
     G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState,
 };
 
@@ -9,9 +8,7 @@ pub(super) fn golden() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            true,
-            parsed_package(true, true, true, true, true),
-            parsed_astro_config(true),
+            parsed_package(true, true, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -21,9 +18,7 @@ pub(super) fn missing_astro_check() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            true,
-            parsed_package(false, true, true, true, true),
-            parsed_astro_config(true),
+            parsed_package(false, true, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -33,15 +28,7 @@ pub(super) fn fake_astro_check_text_only() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            true,
-            parsed_package_with_script(
-                "echo astro check && eslint .",
-                true,
-                true,
-                true,
-                true,
-            ),
-            parsed_astro_config(true),
+            parsed_package_with_script("echo astro check && eslint .", true, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -51,15 +38,12 @@ pub(super) fn astro_check_wrapper_forms() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            true,
             parsed_package_with_script(
                 "npm exec -- astro check && npx --yes astro check",
                 true,
                 true,
                 true,
-                true,
             ),
-            parsed_astro_config(true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -69,9 +53,7 @@ pub(super) fn missing_required_packages() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            true,
-            parsed_package(true, false, false, false, false),
-            parsed_astro_config(false),
+            parsed_package(true, false, false, false),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -81,9 +63,7 @@ pub(super) fn missing_astro_plugin_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            true,
-            parsed_package(true, true, true, true, true),
-            parsed_astro_config(true),
+            parsed_package(true, true, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(false, false, true))],
     }
@@ -93,9 +73,7 @@ pub(super) fn missing_pipeline_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            true,
-            parsed_package(true, true, true, true, true),
-            parsed_astro_config(true),
+            parsed_package(true, true, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, false, true))],
     }
@@ -105,9 +83,7 @@ pub(super) fn missing_pipeline_rule_enforcement() -> G3TsAstroConfigChecksInput 
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            true,
-            parsed_package(true, true, true, true, true),
-            parsed_astro_config(true),
+            parsed_package(true, true, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, false))],
     }
@@ -117,9 +93,7 @@ pub(super) fn optional_contracts_not_required() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             false,
-            false,
-            parsed_package(true, true, false, false, true),
-            parsed_astro_config(false),
+            parsed_package(true, true, false, true),
         )],
         eslint_contracts: vec![eslint_contract(false, parsed_eslint(true, false, false))],
     }
@@ -129,12 +103,8 @@ pub(super) fn missing_package_eslint_and_astro_config_surfaces() -> G3TsAstroCon
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            true,
             G3TsAstroPackageSurfaceState::Missing {
                 rel_path: "package.json".to_owned(),
-            },
-            G3TsAstroConfigSurfaceState::Missing {
-                rel_path: "astro.config.*".to_owned(),
             },
         )],
         eslint_contracts: vec![eslint_contract(
@@ -147,17 +117,13 @@ pub(super) fn missing_package_eslint_and_astro_config_surfaces() -> G3TsAstroCon
 }
 
 fn integration_contract(
-    requires_render_validator: bool,
     requires_source_pipeline_linting: bool,
     package: G3TsAstroPackageSurfaceState,
-    astro_config: G3TsAstroConfigSurfaceState,
 ) -> G3TsAstroIntegrationContractInput {
     G3TsAstroIntegrationContractInput {
         app_root_rel_path: ".".to_owned(),
         content_mode: G3TsAstroContentMode::BuildCollections,
         package,
-        astro_config,
-        requires_render_validator,
         requires_source_pipeline_linting,
     }
 }
@@ -177,7 +143,6 @@ fn parsed_package(
     has_astro_check: bool,
     has_astro_package: bool,
     has_astro_plugin: bool,
-    has_render_validator: bool,
     has_pipeline_plugin: bool,
 ) -> G3TsAstroPackageSurfaceState {
     let script_body = if has_astro_check {
@@ -186,20 +151,13 @@ fn parsed_package(
         "eslint ."
     };
 
-    parsed_package_with_script(
-        script_body,
-        has_astro_package,
-        has_astro_plugin,
-        has_render_validator,
-        has_pipeline_plugin,
-    )
+    parsed_package_with_script(script_body, has_astro_package, has_astro_plugin, has_pipeline_plugin)
 }
 
 fn parsed_package_with_script(
     script_body: &str,
     has_astro_package: bool,
     has_astro_plugin: bool,
-    has_render_validator: bool,
     has_pipeline_plugin: bool,
 ) -> G3TsAstroPackageSurfaceState {
     let mut dev_dependencies = Vec::new();
@@ -208,9 +166,6 @@ fn parsed_package_with_script(
     }
     if has_astro_plugin {
         dev_dependencies.push("eslint-plugin-astro".to_owned());
-    }
-    if has_render_validator {
-        dev_dependencies.push("@nuasite/checks".to_owned());
     }
     if has_pipeline_plugin {
         dev_dependencies.push("eslint-plugin-astro-pipeline".to_owned());
@@ -272,22 +227,6 @@ fn parsed_eslint(
             astro_source_error_rules,
             ts_source_error_rules,
             tsx_source_error_rules,
-        },
-    }
-}
-
-fn parsed_astro_config(has_render_validator_integration: bool) -> G3TsAstroConfigSurfaceState {
-    let mut integration_modules = Vec::new();
-    if has_render_validator_integration {
-        integration_modules.push("@nuasite/checks".to_owned());
-    }
-
-    G3TsAstroConfigSurfaceState::Parsed {
-        snapshot: G3TsAstroConfigSurfaceSnapshot {
-            rel_path: "astro.config.mjs".to_owned(),
-            output_mode: Some(G3TsAstroOutputMode::Server),
-            adapter_module: Some("@astrojs/node".to_owned()),
-            integration_modules,
         },
     }
 }

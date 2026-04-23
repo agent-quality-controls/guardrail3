@@ -6,15 +6,7 @@ pub use types::G3TsAstroAppRootInput;
 #[cfg(feature = "api")]
 pub use types::G3TsAstroConfigChecksInput;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroConfigSurfaceSnapshot;
-#[cfg(feature = "api")]
-pub use types::G3TsAstroConfigSurfaceState;
-#[cfg(feature = "api")]
 pub use types::G3TsAstroContentMode;
-#[cfg(feature = "api")]
-pub use types::G3TsAstroCrossRootSideLoaderInput;
-#[cfg(feature = "api")]
-pub use types::G3TsAstroOutputMode;
 #[cfg(feature = "api")]
 pub use types::G3TsAstroEslintPluginContractInput;
 #[cfg(feature = "api")]

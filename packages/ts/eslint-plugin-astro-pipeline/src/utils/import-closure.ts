@@ -9,7 +9,10 @@ import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
 import {
   collectConstantStringBindings,
+  collectImportBindings,
+  collectSimpleAliases,
   findNodes,
+  isRequireLikeCall,
   isUnresolvedIdentifierReference,
   listStaticImportSources,
   resolveStaticStringExpression
@@ -150,7 +153,7 @@ function parseModule(
   }
 }
 
-function resolveLocalImport(
+export function resolveLocalImport(
   importerFilename: string,
   importSource: string
 ): string | null {
@@ -236,13 +239,13 @@ function listDependencySources(
 ): string[] {
   const sources = new Set(listStaticImportSources(program));
   const constants = collectConstantStringBindings(program);
+  const imports = collectImportBindings(program);
+  const aliases = collectSimpleAliases(program);
 
   findNodes(program, (node) => {
     if (
       node.type !== AST_NODE_TYPES.CallExpression ||
-      node.callee.type !== AST_NODE_TYPES.Identifier ||
-      node.callee.name !== "require" ||
-      !isUnresolvedIdentifierReference(scopeManager, node.callee)
+      !isRequireLikeCall(node, imports, aliases, scopeManager)
     ) {
       return;
     }

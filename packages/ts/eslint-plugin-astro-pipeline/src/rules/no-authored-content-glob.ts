@@ -13,6 +13,7 @@ import {
 } from "../utils/ast-helpers.js";
 import { resolvesToAuthoredOrSpecContent } from "../utils/content-source.js";
 import { collectImportClosure } from "../utils/import-closure.js";
+import { resolveImportedModuleBinding, type ResolvedModuleBinding } from "../utils/module-exports.js";
 import { classifyModuleRole } from "../utils/module-role.js";
 import {
   astroPipelineOptionsSchema,
@@ -52,11 +53,12 @@ export default createRule<RuleOptionsTuple, MessageIds>({
           return;
         }
 
-        const findings = collectImportClosure(filename, context.sourceCode.text, {
+        const modules = collectImportClosure(filename, context.sourceCode.text, {
           program: context.sourceCode.ast,
           scopeManager: context.sourceCode.scopeManager ?? null
-        }).flatMap(
-          (moduleRecord) => findForbiddenGlobs(moduleRecord.program, moduleRecord.filename, options)
+        });
+        const findings = modules.flatMap((moduleRecord) =>
+          findForbiddenGlobs(modules, moduleRecord.program, moduleRecord.filename, options)
         );
 
         for (const finding of findings) {
@@ -82,6 +84,7 @@ interface ForbiddenGlob {
 }
 
 function findForbiddenGlobs(
+  modules: ReturnType<typeof collectImportClosure>,
   program: TSESTree.Program,
   filename: string,
   options: ReturnType<typeof resolveOptions>
@@ -103,7 +106,14 @@ function findForbiddenGlobs(
       return;
     }
 
-    const methodName = getImportMetaGlobMethod(node.callee, globAliases);
+    const methodName = classifyGlobLikeExpression(
+      modules,
+      filename,
+      node.callee,
+      globAliases,
+      imports,
+      aliases
+    );
 
     if (!methodName) {
       return;
@@ -133,36 +143,77 @@ function findForbiddenGlobs(
   return findings;
 }
 
-function getImportMetaGlobMethod(
-  callee: TSESTree.CallExpression["callee"],
-  globAliases: Map<string, string>
+function classifyGlobLikeExpression(
+  modules: ReturnType<typeof collectImportClosure>,
+  importerFilename: string,
+  expression: TSESTree.Expression | TSESTree.PrivateIdentifier,
+  globAliases: Map<string, string>,
+  imports: ReturnType<typeof collectImportBindings>,
+  aliases: ReturnType<typeof collectSimpleAliases>
 ): string | null {
-  if (
-    callee.type === AST_NODE_TYPES.Identifier &&
-    globAliases.has(callee.name)
-  ) {
-    return globAliases.get(callee.name) ?? null;
-  }
-
-  if (callee.type !== AST_NODE_TYPES.MemberExpression) {
+  if (expression.type === AST_NODE_TYPES.PrivateIdentifier) {
     return null;
   }
 
   if (
-    callee.object.type !== AST_NODE_TYPES.MetaProperty ||
-    callee.object.meta.name !== "import" ||
-    callee.object.property.name !== "meta"
+    expression.type === AST_NODE_TYPES.Identifier &&
+    globAliases.has(expression.name)
+  ) {
+    return globAliases.get(expression.name) ?? null;
+  }
+
+  const resolvedReference = resolveReference(expression, imports, aliases);
+  const importedBinding = resolveImportedModuleBinding(
+    modules,
+    importerFilename,
+    resolvedReference
+  );
+
+  if (importedBinding) {
+    return classifyGlobBinding(modules, importedBinding);
+  }
+
+  if (expression.type !== AST_NODE_TYPES.MemberExpression) {
+    return null;
+  }
+
+  if (
+    expression.object.type !== AST_NODE_TYPES.MetaProperty ||
+    expression.object.meta.name !== "import" ||
+    expression.object.property.name !== "meta"
   ) {
     return null;
   }
 
-  const propertyName = getPropertyName(callee);
+  const propertyName = getPropertyName(expression);
 
   if (propertyName === "glob" || propertyName === "globEager") {
     return `import.meta.${propertyName}`;
   }
 
   return null;
+}
+
+function classifyGlobBinding(
+  modules: ReturnType<typeof collectImportClosure>,
+  binding: ResolvedModuleBinding
+): string | null {
+  const imports = collectImportBindings(binding.moduleRecord.program);
+  const aliases = collectSimpleAliases(binding.moduleRecord.program);
+  const localGlobAliases = collectGlobAliases(binding.moduleRecord.program);
+
+  if (binding.kind === "reference") {
+    return null;
+  }
+
+  return classifyGlobLikeExpression(
+    modules,
+    binding.moduleRecord.filename,
+    binding.expression,
+    localGlobAliases,
+    imports,
+    aliases
+  );
 }
 
 function collectGlobAliases(program: TSESTree.Program): Map<string, string> {
@@ -181,7 +232,14 @@ function collectGlobAliases(program: TSESTree.Program): Map<string, string> {
         return;
       }
 
-      const methodName = getImportMetaGlobMethod(node.init, aliases);
+      const methodName = classifyGlobLikeExpression(
+        [],
+        "",
+        node.init,
+        aliases,
+        new Map(),
+        new Map()
+      );
 
       if (methodName) {
         aliases.set(node.id.name, methodName);

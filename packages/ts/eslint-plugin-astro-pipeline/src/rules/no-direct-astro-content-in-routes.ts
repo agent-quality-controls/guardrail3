@@ -2,7 +2,10 @@ import { AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/utils";
 import type { TSESTree } from "@typescript-eslint/utils";
 
 import {
+  collectImportBindings,
   collectConstantStringBindings,
+  collectSimpleAliases,
+  isRequireLikeCall,
   resolveStaticStringExpression
 } from "../utils/ast-helpers.js";
 import { classifyModuleRole } from "../utils/module-role.js";
@@ -43,6 +46,8 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     }
 
     const importAliases = collectConstantStringBindings(context.sourceCode.ast);
+    const imports = collectImportBindings(context.sourceCode.ast);
+    const requireAliases = collectSimpleAliases(context.sourceCode.ast);
 
     function reportIfAstroContentImport(
       node: TSESTree.ImportDeclaration | TSESTree.ExportNamedDeclaration | TSESTree.ExportAllDeclaration
@@ -76,6 +81,27 @@ export default createRule<RuleOptionsTuple, MessageIds>({
       },
       ImportExpression(node): void {
         if (resolveStaticStringExpression(node.source, importAliases) === "astro:content") {
+          context.report({
+            node,
+            messageId: "forbiddenImport",
+            data: {
+              source: "astro:content"
+            }
+          });
+        }
+      },
+      CallExpression(node): void {
+        if (
+          isRequireLikeCall(
+            node,
+            imports,
+            requireAliases,
+            context.sourceCode.scopeManager ?? null
+          ) &&
+          node.arguments.length > 0 &&
+          node.arguments[0]?.type !== AST_NODE_TYPES.SpreadElement &&
+          resolveStaticStringExpression(node.arguments[0], importAliases) === "astro:content"
+        ) {
           context.report({
             node,
             messageId: "forbiddenImport",
