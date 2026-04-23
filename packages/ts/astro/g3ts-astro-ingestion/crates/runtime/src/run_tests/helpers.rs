@@ -25,7 +25,7 @@ pub(super) fn fake_astro_workspace() -> TempDir {
     .expect("package manifest should be written");
     std::fs::write(
         root.path().join("astro.config.mjs"),
-        "export default {};\n",
+        "import checks from '@nuasite/checks';\nimport node from '@astrojs/node';\nexport default { output: 'server', adapter: node({ mode: 'standalone' }), integrations: [checks()] };\n",
     )
     .expect("astro config should be written");
     std::fs::write(

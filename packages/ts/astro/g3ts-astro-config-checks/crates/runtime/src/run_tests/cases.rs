@@ -1,9 +1,9 @@
 use g3ts_astro_config_checks_assertions::run as assertions;
 
 use super::helpers::{
-    fake_astro_check_text_only, golden, missing_astro_check,
-    missing_package_and_eslint_surface, missing_pipeline_wiring,
-    missing_pipeline_rule_enforcement, missing_required_packages,
+    astro_check_wrapper_forms, fake_astro_check_text_only, golden, missing_astro_check,
+    missing_astro_plugin_wiring, missing_package_eslint_and_astro_config_surfaces,
+    missing_pipeline_rule_enforcement, missing_pipeline_wiring, missing_required_packages,
     optional_contracts_not_required,
 };
 
@@ -37,10 +37,10 @@ fn golden_config_reports_expected_inventory() {
                 true,
             ),
             assertions::info(
-                "TS-ASTRO-CONFIG-04",
-                "render validator package present",
-                "`package.json` includes `@nuasite/checks`.",
-                Some("package.json"),
+                "TS-ASTRO-CONFIG-05",
+                "astro ESLint plugin wired",
+                "`eslint.config.mjs` activates `astro` for the required Astro source lanes.",
+                Some("eslint.config.mjs"),
                 true,
             ),
             assertions::info(
@@ -96,6 +96,23 @@ fn quoted_astro_check_text_does_not_satisfy_the_script_contract() {
 }
 
 #[test]
+fn wrapper_forms_satisfy_the_astro_check_contract() {
+    let input = astro_check_wrapper_forms();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::info(
+            "TS-ASTRO-CONFIG-02",
+            "astro check present",
+            "`package.json` invokes `astro check` in the app script surface.",
+            Some("package.json"),
+            true,
+        )],
+    );
+}
+
+#[test]
 fn missing_required_packages_report_package_contract_errors() {
     let input = missing_required_packages();
     let results = super::super::check(&input);
@@ -118,13 +135,6 @@ fn missing_required_packages_report_package_contract_errors() {
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-04",
-                "render validator package missing",
-                "`package.json` does not include the required Astro render validator package `@nuasite/checks`.",
-                Some("package.json"),
-                false,
-            ),
-            assertions::error(
                 "TS-ASTRO-CONFIG-06",
                 "astro pipeline ESLint plugin package missing",
                 "`package.json` does not include the required Astro pipeline ESLint plugin package `eslint-plugin-astro-pipeline`.",
@@ -137,6 +147,23 @@ fn missing_required_packages_report_package_contract_errors() {
 
 #[test]
 fn missing_pipeline_wiring_reports_wiring_error() {
+    let input = missing_astro_plugin_wiring();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-05",
+            "astro ESLint plugin not wired",
+            "`eslint.config.mjs` does not activate `astro` for the required Astro source lanes.",
+            Some("eslint.config.mjs"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn missing_pipeline_wiring_reports_pipeline_wiring_error() {
     let input = missing_pipeline_wiring();
     let results = super::super::check(&input);
 
@@ -174,14 +201,13 @@ fn optional_contracts_do_not_fire_when_policy_is_disabled() {
     let input = optional_contracts_not_required();
     let results = super::super::check(&input);
 
-    assertions::assert_no_findings_for_id(&results, "TS-ASTRO-CONFIG-04");
     assertions::assert_no_findings_for_id(&results, "TS-ASTRO-CONFIG-06");
     assertions::assert_no_findings_for_id(&results, "TS-ASTRO-CONFIG-07");
 }
 
 #[test]
-fn missing_package_and_eslint_surfaces_fail_closed() {
-    let input = missing_package_and_eslint_surface();
+fn missing_package_eslint_and_astro_config_surfaces_fail_closed() {
+    let input = missing_package_eslint_and_astro_config_surfaces();
     let results = super::super::check(&input);
 
     assertions::assert_contains(
@@ -209,10 +235,10 @@ fn missing_package_and_eslint_surfaces_fail_closed() {
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-04",
-                "render validator package missing",
-                "`package.json` does not include the required Astro render validator package `@nuasite/checks`.",
-                Some("package.json"),
+                "TS-ASTRO-CONFIG-05",
+                "astro ESLint plugin not wired",
+                "`eslint.config.*` does not activate `astro` for the required Astro source lanes.",
+                Some("eslint.config.*"),
                 false,
             ),
             assertions::error(

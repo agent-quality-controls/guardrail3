@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 
 import { RuleTester } from "eslint";
+import * as astroParser from "astro-eslint-parser";
 import tsParser from "@typescript-eslint/parser";
 
 import type { AstroPipelineOptions } from "../src/utils/options.js";
@@ -30,6 +31,17 @@ export function createRuleTester(): RuleTester {
     }
   });
 }
+
+export const astroLanguageOptions = {
+  ecmaVersion: "latest" as const,
+  parser: astroParser,
+  parserOptions: {
+    ecmaVersion: "latest" as const,
+    extraFileExtensions: [".astro"],
+    parser: tsParser,
+    sourceType: "module" as const
+  }
+};
 
 export interface FixtureProject {
   rootDir: string;

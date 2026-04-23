@@ -1,0 +1,13 @@
+profile = "library"
+
+allowed_deps = [
+  "jsonc-parser",
+  "serde_json",
+  "tempfile",
+  "package-json-parser-runtime",
+  "package-json-parser-runtime-assertions",
+  "package-json-parser-types",
+]
+
+[checks]
+garde = false

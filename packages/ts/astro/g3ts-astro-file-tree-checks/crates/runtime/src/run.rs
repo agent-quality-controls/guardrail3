@@ -7,7 +7,6 @@ pub fn check(input: &G3TsAstroFileTreeChecksInput) -> Vec<G3CheckResult> {
     crate::ts_astro_filetree_02_content_config_exists::check(input, &mut results);
     crate::ts_astro_filetree_03_live_config_exists::check(input, &mut results);
     crate::ts_astro_filetree_04_no_route_markdown_pages::check(input, &mut results);
-    crate::ts_astro_filetree_05_no_cross_root_side_loaders::check(input, &mut results);
     results
 }
 

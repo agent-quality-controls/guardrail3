@@ -55,6 +55,7 @@ pub struct EslintEffectiveConfigProbe {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum EslintProbeKind {
+    AstroSource,
     TsSource,
     TsxSource,
     TsTest,

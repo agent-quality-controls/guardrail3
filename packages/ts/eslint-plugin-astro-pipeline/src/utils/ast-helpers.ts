@@ -245,6 +245,7 @@ export function findNodes(
 
 export function listStaticImportSources(program: TSESTree.Program): string[] {
   const sources: string[] = [];
+  const constants = collectConstantStringBindings(program);
 
   for (const statement of program.body) {
     if (
@@ -259,6 +260,16 @@ export function listStaticImportSources(program: TSESTree.Program): string[] {
       }
     }
   }
+
+  findNodes(program, (node) => {
+    if (node.type === AST_NODE_TYPES.ImportExpression) {
+      const source = resolveStaticStringExpression(node.source, constants);
+
+      if (source) {
+        sources.push(source);
+      }
+    }
+  });
 
   return sources;
 }
@@ -294,6 +305,57 @@ function predicateFromExpression(
   }
 
   return predicate(resolveReference(node, new Map(), new Map()) as never);
+}
+
+export function collectConstantStringBindings(
+  program: TSESTree.Program
+): Map<string, TSESTree.Expression> {
+  const constants = new Map<string, TSESTree.Expression>();
+
+  findNodes(program, (node) => {
+    if (node.type !== AST_NODE_TYPES.VariableDeclarator || !node.init) {
+      return;
+    }
+
+    if (node.id.type !== AST_NODE_TYPES.Identifier) {
+      return;
+    }
+
+    constants.set(node.id.name, node.init);
+  });
+
+  return constants;
+}
+
+export function resolveStaticStringExpression(
+  node: TSESTree.Expression,
+  constants: Map<string, TSESTree.Expression>,
+  seen = new Set<string>()
+): string | null {
+  const direct = getStaticStringValue(node);
+
+  if (direct) {
+    return direct;
+  }
+
+  if (node.type !== AST_NODE_TYPES.Identifier) {
+    return null;
+  }
+
+  if (seen.has(node.name)) {
+    return null;
+  }
+
+  const target = constants.get(node.name);
+
+  if (!target) {
+    return null;
+  }
+
+  seen.add(node.name);
+  const resolved = resolveStaticStringExpression(target, constants, seen);
+  seen.delete(node.name);
+  return resolved;
 }
 
 function expressionToAliasReference(

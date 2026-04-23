@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import type { RuleContext } from "@typescript-eslint/utils/ts-eslint";
 import { AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/utils";
 import type { TSESTree } from "@typescript-eslint/utils";
@@ -53,7 +55,10 @@ export default createRule<RuleOptionsTuple, MessageIds>({
           return;
         }
 
-        const modules = collectImportClosure(filename, context.sourceCode.text);
+        const modules = collectImportClosure(filename, context.sourceCode.text, {
+          program: context.sourceCode.ast,
+          scopeManager: context.sourceCode.scopeManager ?? null
+        });
         const offendingReads = modules.flatMap((moduleRecord) =>
           findForbiddenReads(moduleRecord.program, moduleRecord.filename, options)
         );
@@ -93,6 +98,7 @@ function findForbiddenReads(
 
   const imports = collectImportBindings(program);
   const aliases = collectSimpleAliases(program);
+  const constants = collectConstantBindings(program);
   const findings: ForbiddenRead[] = [];
 
   findNodes(program, (node) => {
@@ -107,7 +113,12 @@ function findForbiddenReads(
       return;
     }
 
-    const targetLiteral = getStaticStringValue(node.arguments[0] as TSESTree.Expression);
+    const targetLiteral = resolveStaticPathLike(
+      node.arguments[0] as TSESTree.Expression,
+      imports,
+      aliases,
+      constants
+    );
 
     if (!targetLiteral) {
       return;
@@ -128,6 +139,209 @@ function findForbiddenReads(
   });
 
   return findings;
+}
+
+function collectConstantBindings(
+  program: TSESTree.Program
+): Map<string, TSESTree.Expression> {
+  const constants = new Map<string, TSESTree.Expression>();
+
+  findNodes(program, (node) => {
+    if (node.type !== AST_NODE_TYPES.VariableDeclarator || !node.init) {
+      return;
+    }
+
+    if (node.id.type !== AST_NODE_TYPES.Identifier) {
+      return;
+    }
+
+    constants.set(node.id.name, node.init);
+  });
+
+  return constants;
+}
+
+function resolveStaticPathLike(
+  node: TSESTree.Expression | TSESTree.PrivateIdentifier | null | undefined,
+  imports: Map<string, ReturnType<typeof collectImportBindings> extends Map<string, infer T> ? T : never>,
+  aliases: ReturnType<typeof collectSimpleAliases>,
+  constants: Map<string, TSESTree.Expression>,
+  seen = new Set<string>()
+): string | null {
+  const direct = getStaticStringValue(node);
+
+  if (direct) {
+    return direct;
+  }
+
+  if (!node || node.type === AST_NODE_TYPES.PrivateIdentifier) {
+    return null;
+  }
+
+  if (node.type === AST_NODE_TYPES.Identifier) {
+    if (seen.has(node.name)) {
+      return null;
+    }
+
+    const target = constants.get(node.name);
+
+    if (!target) {
+      return null;
+    }
+
+    seen.add(node.name);
+    const resolved = resolveStaticPathLike(target, imports, aliases, constants, seen);
+    seen.delete(node.name);
+    return resolved;
+  }
+
+  if (node.type === AST_NODE_TYPES.CallExpression) {
+    return resolvePathJoinLikeCall(node, imports, aliases, constants, seen);
+  }
+
+  if (node.type === AST_NODE_TYPES.NewExpression) {
+    return resolveFileUrlLike(node, imports, aliases, constants, seen);
+  }
+
+  return null;
+}
+
+function resolvePathJoinLikeCall(
+  node: TSESTree.CallExpression,
+  imports: Map<string, ReturnType<typeof collectImportBindings> extends Map<string, infer T> ? T : never>,
+  aliases: ReturnType<typeof collectSimpleAliases>,
+  constants: Map<string, TSESTree.Expression>,
+  seen: Set<string>
+): string | null {
+  const reference = resolveReference(node.callee, imports, aliases);
+
+  if (!reference || !isNodePathJoinLike(reference)) {
+    return null;
+  }
+
+  const parts = node.arguments
+    .map((argument, index) => {
+      if (argument.type === AST_NODE_TYPES.SpreadElement) {
+        return null;
+      }
+
+      if (index === 0 && isProcessCwdCall(argument)) {
+        return "";
+      }
+
+      return resolveStaticPathLike(argument, imports, aliases, constants, seen);
+    });
+
+  if (parts.some((part) => part == null)) {
+    return null;
+  }
+
+  return path.posix.join(...(parts as string[]));
+}
+
+function resolveFileUrlLike(
+  node: TSESTree.NewExpression,
+  imports: Map<string, ReturnType<typeof collectImportBindings> extends Map<string, infer T> ? T : never>,
+  aliases: ReturnType<typeof collectSimpleAliases>,
+  constants: Map<string, TSESTree.Expression>,
+  seen: Set<string>
+): string | null {
+  if (
+    node.callee.type !== AST_NODE_TYPES.Identifier ||
+    node.callee.name !== "URL" ||
+    node.arguments.length < 2
+  ) {
+    return null;
+  }
+
+  const target = node.arguments[0];
+  const base = node.arguments[1];
+
+  if (
+    target.type === AST_NODE_TYPES.SpreadElement ||
+    base.type === AST_NODE_TYPES.SpreadElement ||
+    !isImportMetaUrl(base)
+  ) {
+    return null;
+  }
+
+  return resolveStaticPathLike(target, imports, aliases, constants, seen);
+}
+
+function isProcessCwdCall(node: TSESTree.Expression): boolean {
+  return (
+    node.type === AST_NODE_TYPES.CallExpression &&
+    node.arguments.length === 0 &&
+    node.callee.type === AST_NODE_TYPES.MemberExpression &&
+    node.callee.object.type === AST_NODE_TYPES.Identifier &&
+    node.callee.object.name === "process" &&
+    !node.callee.computed &&
+    node.callee.property.type === AST_NODE_TYPES.Identifier &&
+    node.callee.property.name === "cwd"
+  );
+}
+
+function isImportMetaUrl(node: TSESTree.Expression): boolean {
+  return (
+    node.type === AST_NODE_TYPES.MemberExpression &&
+    node.object.type === AST_NODE_TYPES.MetaProperty &&
+    node.object.meta.name === "import" &&
+    node.object.property.name === "meta" &&
+    !node.computed &&
+    node.property.type === AST_NODE_TYPES.Identifier &&
+    node.property.name === "url"
+  );
+}
+
+function isNodePathJoinLike(
+  reference: ReturnType<typeof resolveReference>
+): boolean {
+  if (!reference) {
+    return false;
+  }
+
+  if (reference.kind === "import") {
+    return (
+      isNodePathModule(reference.source) &&
+      (reference.importedName === "join" || reference.importedName === "resolve")
+    );
+  }
+
+  if (reference.kind !== "member") {
+    return false;
+  }
+
+  if (
+    reference.object.kind === "import" &&
+    isNodePathModule(reference.object.source) &&
+    (reference.object.importedName === "*" || reference.object.importedName === "default") &&
+    (reference.property === "join" || reference.property === "resolve")
+  ) {
+    return true;
+  }
+
+  if (
+    reference.object.kind === "import" &&
+    isNodePathModule(reference.object.source) &&
+    reference.object.importedName === "posix" &&
+    (reference.property === "join" || reference.property === "resolve")
+  ) {
+    return true;
+  }
+
+  return (
+    reference.object.kind === "member" &&
+    reference.object.object.kind === "import" &&
+    isNodePathModule(reference.object.object.source) &&
+    (reference.object.object.importedName === "*" ||
+      reference.object.object.importedName === "default") &&
+    reference.object.property === "posix" &&
+    (reference.property === "join" || reference.property === "resolve")
+  );
+}
+
+function isNodePathModule(source: string): boolean {
+  return source === "path" || source === "node:path";
 }
 
 function classifyFsReadReference(

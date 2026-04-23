@@ -35,6 +35,12 @@ test("no-direct-astro-content-in-routes only fires on direct route imports", asy
         return await import("astro:content");
       }
     `,
+    "src/pages/data-alias.endpoint.ts": `
+      export async function GET() {
+        const source = "astro:content";
+        return await import(source);
+      }
+    `,
     "src/lib/content/posts.ts": `
       import { getCollection } from "astro:content";
 
@@ -74,6 +80,16 @@ test("no-direct-astro-content-in-routes only fires on direct route imports", asy
         {
           code: await project.read("src/pages/data.endpoint.ts"),
           filename: project.path("src/pages/data.endpoint.ts"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenImport"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/data-alias.endpoint.ts"),
+          filename: project.path("src/pages/data-alias.endpoint.ts"),
           options: [baseOptions],
           errors: [
             {
