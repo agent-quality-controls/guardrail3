@@ -1,0 +1,35 @@
+[package]
+name = "astro-config-parser-runtime"
+version.workspace = true
+edition = "2024"
+description = "Parser implementation for Astro config facade packages"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["astro", "config", "parser", "typescript", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+publish = false
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+astro-config-parser-types = { path = "../types", version = "0.1.0" }
+serde_json = "1"
+swc_common = "21.0.1"
+swc_ecma_ast = "23.0.0"
+swc_ecma_parser = { version = "39.0.0", features = ["typescript"] }
+
+[dev-dependencies]
+astro-config-parser-runtime-assertions = { path = "../assertions" }
+tempfile = "3"
+
+[package.metadata.docs.rs]
+all-features = true

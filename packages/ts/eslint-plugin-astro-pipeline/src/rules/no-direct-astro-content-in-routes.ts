@@ -1,6 +1,10 @@
 import { AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/utils";
 import type { TSESTree } from "@typescript-eslint/utils";
 
+import {
+  collectConstantStringBindings,
+  resolveStaticStringExpression
+} from "../utils/ast-helpers.js";
 import { classifyModuleRole } from "../utils/module-role.js";
 import {
   astroPipelineOptionsSchema,
@@ -38,6 +42,8 @@ export default createRule<RuleOptionsTuple, MessageIds>({
       return {};
     }
 
+    const importAliases = collectConstantStringBindings(context.sourceCode.ast);
+
     function reportIfAstroContentImport(
       node: TSESTree.ImportDeclaration | TSESTree.ExportNamedDeclaration | TSESTree.ExportAllDeclaration
     ): void {
@@ -69,10 +75,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
         reportIfAstroContentImport(node);
       },
       ImportExpression(node): void {
-        if (
-          node.source.type === AST_NODE_TYPES.Literal &&
-          node.source.value === "astro:content"
-        ) {
+        if (resolveStaticStringExpression(node.source, importAliases) === "astro:content") {
           context.report({
             node,
             messageId: "forbiddenImport",

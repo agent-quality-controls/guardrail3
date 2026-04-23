@@ -26,6 +26,13 @@ test("no-runtime-mdx-eval catches runtime bridges in MDX runtime modules", async
         return [compileAtRuntime(code), await execute(code)];
       }
     `,
+    "src/lib/mdx/runtime-namespace.tsx": `
+      import * as mdx from "@mdx-js/mdx";
+
+      export async function render(code: string) {
+        return await mdx.evaluate(code);
+      }
+    `,
     "src/lib/mdx/helper.tsx": `
       export function compileAtRuntime(code: string) {
         return new Function(code);
@@ -48,6 +55,26 @@ test("no-runtime-mdx-eval catches runtime bridges in MDX runtime modules", async
     "src/lib/mdx/global.tsx": `
       export function render(code: string) {
         return globalThis.Function(code);
+      }
+    `,
+    "src/lib/mdx/chained.tsx": `
+      const RuntimeFunction = Function;
+      const LaterAlias = RuntimeFunction;
+
+      export function render(code: string) {
+        return LaterAlias(code);
+      }
+    `,
+    "src/lib/mdx/bridge.tsx": `
+      import { executeCompiledMdx } from "../runtime-exec";
+
+      export function render(code: string) {
+        return executeCompiledMdx(code);
+      }
+    `,
+    "src/lib/runtime-exec.ts": `
+      export function executeCompiledMdx(code: string) {
+        return new Function(code);
       }
     `,
     "src/generated/mdx/runtime.tsx": `
@@ -95,6 +122,36 @@ test("no-runtime-mdx-eval catches runtime bridges in MDX runtime modules", async
         {
           code: await project.read("src/lib/mdx/global.tsx"),
           filename: project.path("src/lib/mdx/global.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/chained.tsx"),
+          filename: project.path("src/lib/mdx/chained.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/bridge.tsx"),
+          filename: project.path("src/lib/mdx/bridge.tsx"),
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "runtimeEval"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/lib/mdx/runtime-namespace.tsx"),
+          filename: project.path("src/lib/mdx/runtime-namespace.tsx"),
           options: [baseOptions],
           errors: [
             {

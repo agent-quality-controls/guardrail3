@@ -9,6 +9,7 @@ use crate::parser::{EslintConfigFileKind, EslintProbeKind, EslintProbeTarget, Es
 fn parses_effective_config_probes_via_node_helper() {
     let root = fake_workspace();
     let probes = vec![
+        probe(EslintProbeKind::AstroSource, "src/pages/index.astro"),
         probe(EslintProbeKind::TsSource, "src/index.ts"),
         probe(EslintProbeKind::TsxSource, "src/app/page.tsx"),
         probe(EslintProbeKind::TsTest, "src/index.test.ts"),
@@ -23,6 +24,7 @@ fn parses_effective_config_probes_via_node_helper() {
     assertions::assert_probe_kinds(
         &snapshot,
         &[
+            EslintProbeKind::AstroSource,
             EslintProbeKind::TsSource,
             EslintProbeKind::TsxSource,
             EslintProbeKind::TsTest,
@@ -30,9 +32,16 @@ fn parses_effective_config_probes_via_node_helper() {
             EslintProbeKind::ConfigFile,
         ],
     );
+    assertions::assert_project_service(&snapshot, EslintProbeKind::AstroSource, Some(false));
     assertions::assert_project_service(&snapshot, EslintProbeKind::TsSource, Some(true));
     assertions::assert_project_service(&snapshot, EslintProbeKind::TsxSource, Some(true));
     assertions::assert_project_service(&snapshot, EslintProbeKind::JsSource, Some(false));
+    assertions::assert_rule_severity(
+        &snapshot,
+        EslintProbeKind::AstroSource,
+        "astro/no-set-html-directive",
+        EslintRuleSeverity::Error,
+    );
     assertions::assert_rule_severity(
         &snapshot,
         EslintProbeKind::TsSource,
@@ -102,6 +111,8 @@ fn probe(probe: EslintProbeKind, rel_path: &str) -> EslintProbeTarget {
 fn fake_workspace() -> TempDir {
     let root = TempDir::new().expect("tempdir should be created");
     fs::create_dir_all(root.path().join("src")).expect("src directory should be created");
+    fs::create_dir_all(root.path().join("src/pages"))
+        .expect("astro source directory should be created");
     fs::create_dir_all(root.path().join("scripts")).expect("scripts directory should be created");
     fs::create_dir_all(root.path().join("node_modules/eslint"))
         .expect("fake eslint module directory should be created");
@@ -128,6 +139,11 @@ fn fake_workspace() -> TempDir {
         "export function Page() { return <main />; }\n",
     )
     .expect("tsx source should be written");
+    fs::write(
+        root.path().join("src/pages/index.astro"),
+        "---\nconst title = 'Report';\n---\n<html><body>{title}</body></html>\n",
+    )
+    .expect("astro source should be written");
     fs::write(
         root.path().join("scripts/build.js"),
         "console.log('build');\n",
@@ -163,6 +179,14 @@ class ESLint {
       return {
         plugins: { unicorn: {} },
         rules: { "no-console": "error" },
+        languageOptions: { parserOptions: { projectService: false } },
+      };
+    }
+
+    if (rel.endsWith(".astro")) {
+      return {
+        plugins: { astro: {} },
+        rules: { "astro/no-set-html-directive": "error" },
         languageOptions: { parserOptions: { projectService: false } },
       };
     }

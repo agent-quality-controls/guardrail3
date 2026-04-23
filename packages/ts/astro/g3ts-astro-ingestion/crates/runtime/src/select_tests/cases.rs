@@ -89,10 +89,19 @@ fn eslint_probe_targets_use_real_source_files() {
     let root = super::helpers::fake_root();
     let crawl = super::helpers::crawl_with_entries(
         &root,
-        &["eslint.config.mjs", "src/index.ts", "src/app/page.tsx"],
+        &[
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/index.ts",
+            "src/app/page.tsx",
+        ],
     );
 
     let probes = super::super::probe_targets(&crawl, "eslint.config.mjs");
+    let astro_source = probes
+        .iter()
+        .find(|probe| probe.probe == EslintProbeKind::AstroSource)
+        .expect("Astro source probe should exist");
     let ts_source = probes
         .iter()
         .find(|probe| probe.probe == EslintProbeKind::TsSource)
@@ -102,6 +111,7 @@ fn eslint_probe_targets_use_real_source_files() {
         .find(|probe| probe.probe == EslintProbeKind::TsxSource)
         .expect("TSX source probe should exist");
 
+    assert_eq!(astro_source.rel_path, "src/pages/index.astro");
     assert_eq!(ts_source.rel_path, "src/index.ts");
     assert_eq!(tsx_source.rel_path, "src/app/page.tsx");
 }

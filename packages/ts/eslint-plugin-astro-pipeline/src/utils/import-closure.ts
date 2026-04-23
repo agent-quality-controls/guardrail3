@@ -1,10 +1,20 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import * as astroParser from "astro-eslint-parser";
+import * as mdxParser from "eslint-mdx";
 import tsParser from "@typescript-eslint/parser";
+import { AST_NODE_TYPES } from "@typescript-eslint/utils";
 import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
-import { listStaticImportSources } from "./ast-helpers.js";
+import {
+  collectConstantStringBindings,
+  findNodes,
+  isUnresolvedIdentifierReference,
+  listStaticImportSources,
+  resolveStaticStringExpression
+} from "./ast-helpers.js";
+import { inferPathPolicyRoot } from "./path-policy.js";
 
 const SOURCE_EXTENSIONS = [
   ".ts",
@@ -14,7 +24,9 @@ const SOURCE_EXTENSIONS = [
   ".mts",
   ".cts",
   ".mjs",
-  ".cjs"
+  ".cjs",
+  ".astro",
+  ".mdx"
 ] as const;
 
 export interface ModuleRecord {
@@ -24,13 +36,25 @@ export interface ModuleRecord {
   importChain: string[];
 }
 
+export interface EntryModuleRecord {
+  program: TSESTree.Program;
+  scopeManager: TSESLint.Scope.ScopeManager | null;
+}
+
 export function collectImportClosure(
   entryFilename: string,
-  entrySource: string
+  entrySource: string,
+  entryModule?: EntryModuleRecord
 ): ModuleRecord[] {
-  const entryModule = parseModule(entryFilename, entrySource);
+  const fallbackEntryModule = parseModule(entryFilename, entrySource);
+  const parsedEntryModule = entryModule
+    ? {
+        program: entryModule.program,
+        scopeManager: entryModule.scopeManager ?? fallbackEntryModule?.scopeManager ?? null
+      }
+    : fallbackEntryModule;
 
-  if (!entryModule) {
+  if (!parsedEntryModule) {
     return [];
   }
 
@@ -38,8 +62,8 @@ export function collectImportClosure(
   const queue: ModuleRecord[] = [
     {
       filename: entryFilename,
-      program: entryModule.program,
-      scopeManager: entryModule.scopeManager,
+      program: parsedEntryModule.program,
+      scopeManager: parsedEntryModule.scopeManager,
       importChain: [entryFilename]
     }
   ];
@@ -55,7 +79,7 @@ export function collectImportClosure(
     visited.add(current.filename);
     modules.push(current);
 
-    for (const importSource of listStaticImportSources(current.program)) {
+    for (const importSource of listDependencySources(current.program, current.scopeManager)) {
       const resolvedImport = resolveLocalImport(current.filename, importSource);
 
       if (!resolvedImport || visited.has(resolvedImport)) {
@@ -91,18 +115,35 @@ function parseModule(
   sourceText: string
 ): { program: TSESTree.Program; scopeManager: TSESLint.Scope.ScopeManager | null } | null {
   try {
-    const parsed = tsParser.parseForESLint(sourceText, {
-      ecmaVersion: "latest",
-      filePath: filename,
-      jsx: hasJsxSyntax(filename),
-      loc: true,
-      range: true,
-      sourceType: "module"
-    });
+    const parsed = filename.endsWith(".astro")
+      ? astroParser.parseForESLint(sourceText, {
+          ecmaVersion: "latest",
+          filePath: filename,
+          loc: true,
+          parser: tsParser,
+          range: true,
+          sourceType: "module"
+        })
+      : filename.endsWith(".mdx")
+      ? mdxParser.parseForESLint(sourceText, {
+          ecmaVersion: "latest",
+          filePath: filename,
+          loc: true,
+          range: true,
+          sourceType: "module"
+        })
+      : tsParser.parseForESLint(sourceText, {
+          ecmaVersion: "latest",
+          filePath: filename,
+          jsx: hasJsxSyntax(filename),
+          loc: true,
+          range: true,
+          sourceType: "module"
+        });
 
     return {
-      program: parsed.ast,
-      scopeManager: parsed.scopeManager ?? null
+      program: parsed.ast as unknown as TSESTree.Program,
+      scopeManager: (parsed.scopeManager as TSESLint.Scope.ScopeManager | null) ?? null
     };
   } catch {
     return null;
@@ -113,11 +154,12 @@ function resolveLocalImport(
   importerFilename: string,
   importSource: string
 ): string | null {
-  if (!importSource.startsWith(".") && !path.isAbsolute(importSource)) {
+  const resolvedBase = resolveImportBase(importerFilename, importSource);
+
+  if (!resolvedBase) {
     return null;
   }
 
-  const resolvedBase = path.resolve(path.dirname(importerFilename), importSource);
   const resolvedAsFile = resolveExistingFile(resolvedBase);
 
   if (resolvedAsFile) {
@@ -130,6 +172,31 @@ function resolveLocalImport(
     if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
       return candidate;
     }
+  }
+
+  return null;
+}
+
+function resolveImportBase(
+  importerFilename: string,
+  importSource: string
+): string | null {
+  if (path.isAbsolute(importSource)) {
+    return importSource;
+  }
+
+  if (importSource.startsWith(".")) {
+    return path.resolve(path.dirname(importerFilename), importSource);
+  }
+
+  const appRoot = inferPathPolicyRoot(importerFilename);
+
+  if (importSource.startsWith("@/") || importSource.startsWith("~/")) {
+    return path.resolve(appRoot, "src", importSource.slice(2));
+  }
+
+  if (importSource.startsWith("src/")) {
+    return path.resolve(appRoot, importSource);
   }
 
   return null;
@@ -161,4 +228,37 @@ function safeReadFile(filename: string): string | null {
 
 function hasJsxSyntax(filename: string): boolean {
   return [".tsx", ".jsx"].includes(path.extname(filename));
+}
+
+function listDependencySources(
+  program: TSESTree.Program,
+  scopeManager: TSESLint.Scope.ScopeManager | null
+): string[] {
+  const sources = new Set(listStaticImportSources(program));
+  const constants = collectConstantStringBindings(program);
+
+  findNodes(program, (node) => {
+    if (
+      node.type !== AST_NODE_TYPES.CallExpression ||
+      node.callee.type !== AST_NODE_TYPES.Identifier ||
+      node.callee.name !== "require" ||
+      !isUnresolvedIdentifierReference(scopeManager, node.callee)
+    ) {
+      return;
+    }
+
+    const firstArg = node.arguments[0];
+
+    if (!firstArg || firstArg.type === AST_NODE_TYPES.SpreadElement) {
+      return;
+    }
+
+    const source = resolveStaticStringExpression(firstArg, constants);
+
+    if (source) {
+      sources.add(source);
+    }
+  });
+
+  return [...sources];
 }
