@@ -1,6 +1,7 @@
 use std::fs;
 
 use g3rs_release_ingestion_assertions::ingest::collect as assertions;
+use g3rs_release_types::G3RsReleaseConfigChecksInput;
 use tempfile::tempdir;
 
 #[cfg(unix)]
@@ -176,12 +177,180 @@ jobs:
     let input = super::super::config_input_with_path(&crawl, None);
 
     assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
-    assert!(input.repo_checks[0].has_registry_token_workflow, "{input:#?}");
+    assert!(
+        input.repo_checks[0].has_registry_token_workflow,
+        "{input:#?}"
+    );
     assert_eq!(
-        input.repo_checks[0].registry_token_workflow_rel_path.as_deref(),
+        input.repo_checks[0]
+            .registry_token_workflow_rel_path
+            .as_deref(),
         Some(".github/workflows/release.yml"),
         "{input:#?}"
     );
+}
+
+#[test]
+fn config_pipeline_detects_registry_token_from_workflow_env() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/demo"]
+resolver = "2"
+"#,
+    );
+    write(
+        root.join("crates/demo/Cargo.toml"),
+        r#"
+[package]
+name = "demo"
+version = "0.1.0"
+edition = "2024"
+publish = true
+description = "demo crate"
+license = "MIT"
+repository = "https://example.com/demo"
+readme = "README.md"
+"#,
+    );
+    write(root.join("crates/demo/src/lib.rs"), "pub fn demo() {}\n");
+    write(
+        root.join(".github/workflows/release.yml"),
+        r#"
+name: release
+on:
+  push:
+    branches: [main]
+env:
+  CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-plz/action@v0
+        with:
+          command: release
+"#,
+    );
+
+    let crawl = crawl(root);
+    let input = super::super::config_input_with_path(&crawl, None);
+
+    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert!(
+        input.repo_checks[0].has_registry_token_workflow,
+        "{input:#?}"
+    );
+    assert_eq!(
+        input.repo_checks[0]
+            .registry_token_workflow_rel_path
+            .as_deref(),
+        Some(".github/workflows/release.yml"),
+        "{input:#?}"
+    );
+}
+
+#[test]
+fn config_pipeline_detects_publish_dry_run_through_cd_wrapper() {
+    let input = input_with_publish_dry_run_wrapper(
+        "cd x && cargo publish --dry-run --manifest-path crates/demo/Cargo.toml",
+        ".github/workflows/release.yml",
+    );
+
+    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert!(input.repo_checks[0].has_publish_dry_run_workflow, "{input:#?}");
+    assert_eq!(
+        input.repo_checks[0].publish_dry_run_workflow_rel_path.as_deref(),
+        Some(".github/workflows/release.yml"),
+        "{input:#?}"
+    );
+}
+
+#[test]
+fn config_pipeline_detects_publish_dry_run_through_env_wrapper() {
+    let input = input_with_publish_dry_run_wrapper(
+        "env FOO=bar cargo publish --dry-run --manifest-path crates/demo/Cargo.toml",
+        ".github/workflows/release.yml",
+    );
+
+    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert!(input.repo_checks[0].has_publish_dry_run_workflow, "{input:#?}");
+    assert_eq!(
+        input.repo_checks[0].publish_dry_run_workflow_rel_path.as_deref(),
+        Some(".github/workflows/release.yml"),
+        "{input:#?}"
+    );
+}
+
+#[test]
+fn config_pipeline_detects_publish_dry_run_through_shell_wrapper() {
+    let input = input_with_publish_dry_run_wrapper(
+        "sh -c 'cargo publish --dry-run --manifest-path crates/demo/Cargo.toml'",
+        ".github/workflows/release.yml",
+    );
+
+    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert!(input.repo_checks[0].has_publish_dry_run_workflow, "{input:#?}");
+    assert_eq!(
+        input.repo_checks[0].publish_dry_run_workflow_rel_path.as_deref(),
+        Some(".github/workflows/release.yml"),
+        "{input:#?}"
+    );
+}
+
+fn input_with_publish_dry_run_wrapper(
+    run_line: &str,
+    workflow_rel_path: &str,
+) -> G3RsReleaseConfigChecksInput {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/demo"]
+resolver = "2"
+"#,
+    );
+    write(
+        root.join("crates/demo/Cargo.toml"),
+        r#"
+[package]
+name = "demo"
+version = "0.1.0"
+edition = "2024"
+publish = true
+description = "demo crate"
+license = "MIT"
+repository = "https://example.com/demo"
+readme = "README.md"
+"#,
+    );
+    write(root.join("crates/demo/src/lib.rs"), "pub fn demo() {}\n");
+    let workflow = format!(
+        r#"
+name: release
+on:
+  push:
+    branches: [main]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - run: {run_line}
+"#
+    );
+    write(root.join(workflow_rel_path), &workflow);
+
+    let crawl = crawl(root);
+    super::super::config_input_with_path(&crawl, None)
 }
 
 #[test]

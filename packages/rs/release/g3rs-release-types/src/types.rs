@@ -56,6 +56,8 @@ pub struct G3RsReleaseWorkflowJob {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct G3RsReleaseWorkflowAnalysis {
+    pub env_keys: Vec<String>,
+    pub env_bindings: BTreeMap<String, String>,
     pub jobs: Vec<G3RsReleaseWorkflowJob>,
     pub steps: Vec<G3RsReleaseWorkflowStep>,
 }

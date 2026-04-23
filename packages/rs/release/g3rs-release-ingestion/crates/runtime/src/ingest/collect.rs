@@ -396,21 +396,70 @@ fn workflow_has_publish_dry_run(workflow: &WorkflowFacts) -> bool {
 }
 
 fn workflow_has_registry_token(workflow: &WorkflowFacts) -> bool {
-    workflow.analysis.jobs.iter().any(|job| {
-        job.env_keys.iter().any(|key| key == "CARGO_REGISTRY_TOKEN")
-            || job.steps.iter().any(|step| {
-                step.env_keys.iter().any(|key| key == "CARGO_REGISTRY_TOKEN")
+    workflow
+        .analysis
+        .env_keys
+        .iter()
+        .any(|key| key == "CARGO_REGISTRY_TOKEN")
+        || workflow.analysis.jobs.iter().any(|job| {
+            job.env_keys.iter().any(|key| key == "CARGO_REGISTRY_TOKEN")
+                || job.steps.iter().any(|step| {
+                    step.env_keys
+                        .iter()
+                        .any(|key| key == "CARGO_REGISTRY_TOKEN")
+                })
+        })
+}
+
+fn line_has_cargo_publish_dry_run(line: &str) -> bool {
+    line.split("&&").any(|segment| {
+        let segment = strip_shell_wrapper(segment.trim());
+        let tokens = segment
+            .split_whitespace()
+            .map(normalize_run_token)
+            .collect::<Vec<_>>();
+        let Some(command_index) = first_command_token_index(&tokens) else {
+            return false;
+        };
+        tokens
+            .get(command_index)
+            .is_some_and(|command| command == "cargo")
+            && tokens[command_index..].windows(3).any(|window| {
+                window[0] == "cargo" && window[1] == "publish" && window[2] == "--dry-run"
             })
     })
 }
 
-fn line_has_cargo_publish_dry_run(line: &str) -> bool {
-    let tokens = line.split_whitespace().collect::<Vec<_>>();
-    let Some((command, args)) = tokens.split_first() else {
-        return false;
+fn normalize_run_token(token: &str) -> String {
+    token.trim_matches(['"', '\'']).to_owned()
+}
+
+fn strip_shell_wrapper(segment: &str) -> &str {
+    for prefix in ["sh -c ", "bash -c ", "dash -c ", "zsh -c "] {
+        if let Some(command) = segment.strip_prefix(prefix) {
+            return command.trim().trim_matches(['"', '\'']);
+        }
+    }
+    segment
+}
+
+fn first_command_token_index(tokens: &[String]) -> Option<usize> {
+    let Some(first) = tokens.first() else {
+        return None;
     };
-    command == &"cargo"
-        && args.windows(2).any(|window| matches!(window, ["publish", "--dry-run"]))
+    if first != "env" {
+        return Some(0);
+    }
+
+    let mut index = 1;
+    while let Some(token) = tokens.get(index) {
+        if token.starts_with('-') || token.contains('=') {
+            index += 1;
+            continue;
+        }
+        return Some(index);
+    }
+    None
 }
 
 #[cfg(test)]

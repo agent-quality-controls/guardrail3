@@ -6,6 +6,16 @@ use std::collections::BTreeMap;
 
 pub(crate) fn extract_workflow_analysis(parsed: &serde_yaml::Value) -> WorkflowAnalysis {
     let mut analysis = WorkflowAnalysis::default();
+    if let Some(env) = yaml_mapping_value(parsed, "env").and_then(serde_yaml::Value::as_mapping) {
+        for (key, value) in env {
+            if let Some(key) = key.as_str() {
+                analysis.env_keys.push(key.to_owned());
+                let _ = analysis
+                    .env_bindings
+                    .insert(key.to_owned(), scalar_as_string(value).unwrap_or_default());
+            }
+        }
+    }
     if let Some(jobs) = yaml_mapping_value(parsed, "jobs").and_then(serde_yaml::Value::as_mapping) {
         for (job_key, job) in jobs {
             let job_id = job_key.as_str().unwrap_or_default();
