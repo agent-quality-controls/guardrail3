@@ -258,6 +258,34 @@ fn inventories_owned_assertions_proof_via_alias_import() {
 }
 
 #[test]
+fn inventories_owned_assertions_proof_via_root_aliased_local_import_chain() {
+    let results = assertions::check(&assertions::input(
+        vec![
+            assertions::file(
+                "assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo_assertions"),
+                "pub fn assert_demo() { assert_eq!(1, 1); }\n",
+            ),
+            assertions::file(
+                "tests/root_alias_chain.rs",
+                G3RsTestFileKind::ExternalHarness,
+                Some("demo_assertions"),
+                "use demo_assertions::{self as da};\nuse self::da::assert_demo as prove;\n#[test]\nfn harness() { prove(); }\n",
+            ),
+        ],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_inventory(
+        &results,
+        "RS-TEST-SOURCE-07",
+        "test uses shared proof",
+        "tests/root_alias_chain.rs",
+    );
+}
+
+#[test]
 fn inventories_owned_assertions_proof_via_glob_import() {
     let results = assertions::check(&assertions::input(
         vec![
