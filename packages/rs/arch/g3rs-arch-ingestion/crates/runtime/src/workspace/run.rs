@@ -391,18 +391,34 @@ pub(crate) fn normalize_path(base: &str, rel: &str) -> String {
 }
 
 fn count_dependencies(parsed: &Value) -> (usize, usize) {
-    let mut production_count = 0;
-    let mut dev_count = 0;
-    if let Some(deps) = parsed.get("dependencies").and_then(Value::as_table) {
-        production_count += deps.len();
-    }
-    if let Some(deps) = parsed.get("build-dependencies").and_then(Value::as_table) {
-        production_count += deps.len();
-    }
-    if let Some(deps) = parsed.get("dev-dependencies").and_then(Value::as_table) {
-        dev_count += deps.len();
-    }
+    let mut production_count = count_dependency_table(parsed, "dependencies");
+    production_count += count_dependency_table(parsed, "build-dependencies");
+    production_count += count_target_dependency_tables(parsed, "dependencies");
+    production_count += count_target_dependency_tables(parsed, "build-dependencies");
+
+    let dev_count = count_dependency_table(parsed, "dev-dependencies");
+
     (production_count, dev_count)
+}
+
+fn count_dependency_table(parsed: &Value, key: &str) -> usize {
+    parsed
+        .get(key)
+        .and_then(Value::as_table)
+        .map_or(0, |deps| deps.len())
+}
+
+fn count_target_dependency_tables(parsed: &Value, key: &str) -> usize {
+    parsed
+        .get("target")
+        .and_then(Value::as_table)
+        .map_or(0, |targets| {
+            targets
+                .values()
+                .filter_map(Value::as_table)
+                .map(|target| count_dependency_table(&Value::Table(target.clone()), key))
+                .sum()
+        })
 }
 
 pub(crate) fn is_test_or_example_path(rel_path: &str) -> bool {

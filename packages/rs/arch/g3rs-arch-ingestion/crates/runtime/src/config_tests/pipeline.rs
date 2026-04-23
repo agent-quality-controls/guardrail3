@@ -175,3 +175,33 @@ fn split_rule_ignores_dev_dependencies_in_hard_config_cap() {
     assert_eq!(config_crate.dev_dependency_count, 2);
     assertions::assert_missing_result(&results, "RS-ARCH-CONFIG-07");
 }
+
+#[test]
+fn split_rule_counts_cfg_target_dependencies_in_production_cap() {
+    let root = temp_workspace_root();
+
+    write_file(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crate_a\"]\n",
+    );
+    make_dir(&root, "crate_a/src");
+    write_file(
+        &root,
+        "crate_a/Cargo.toml",
+        "[package]\nname = \"crate_a\"\nversion = \"0.1.0\"\n\n[dependencies]\none = \"1\"\ntwo = \"1\"\nthree = \"1\"\nfour = \"1\"\nfive = \"1\"\nsix = \"1\"\nseven = \"1\"\neight = \"1\"\nnine = \"1\"\nten = \"1\"\neleven = \"1\"\n\n[target.'cfg(unix)'.dependencies]\nserde = \"1\"\n\n[target.'cfg(unix)'.build-dependencies]\ncc = \"1\"\n",
+    );
+    write_file(&root, "crate_a/src/lib.rs", "pub mod api;\n");
+
+    let inputs = config_inputs(&root);
+    let config_crate = &inputs[0].crates[0];
+    let results = config_results(&root);
+
+    assert_eq!(config_crate.production_dependency_count, 13);
+    assertions::assert_has_result(
+        &results,
+        "RS-ARCH-CONFIG-07",
+        G3Severity::Error,
+        Some("crate_a/Cargo.toml"),
+    );
+}
