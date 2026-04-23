@@ -105,3 +105,41 @@ impl super::OrderDto {
 
     assert!(types_check.public_behavior_items.is_empty(), "{types_check:#?}");
 }
+
+#[test]
+fn types_public_behavior_reexported_from_private_child_module_is_reported() {
+    let root = super::helpers::temp_workspace();
+    super::helpers::write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = [\"types/contracts\"]\n",
+    );
+    super::helpers::write(
+        root.path().join("types/contracts/Cargo.toml"),
+        "[package]\nname = \"types-contracts\"\nversion = \"0.1.0\"\n",
+    );
+    super::helpers::write(
+        root.path().join("types/contracts/src/lib.rs"),
+        "mod internal;\npub use internal::choose_retry_strategy;\n",
+    );
+    super::helpers::write(
+        root.path().join("types/contracts/src/internal.rs"),
+        "pub fn choose_retry_strategy() {}\n",
+    );
+
+    let input = super::helpers::source_input(root.path());
+    let types_check = input
+        .types_public_surface_checks
+        .iter()
+        .find(|check| check.krate.cargo_rel_path == "types/contracts/Cargo.toml")
+        .expect("types crate should be present in source checks input");
+
+    assert_eq!(types_check.public_behavior_items.len(), 1, "{types_check:#?}");
+    assert_eq!(
+        types_check.public_behavior_items[0].rel_path,
+        "types/contracts/src/internal.rs"
+    );
+    assert_eq!(
+        types_check.public_behavior_items[0].item_name,
+        "choose_retry_strategy"
+    );
+}
