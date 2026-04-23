@@ -1,5 +1,8 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command_on_line};
+use hook_shell_parser::command_query::{
+    ResolvedCommand, any_resolved_command_on_line_in_context,
+};
+use hook_shell_parser::types::{ParsedShellScript, ShellFunction};
 
 use crate::inputs::FailOpenWrapperInput;
 
@@ -7,7 +10,7 @@ const ID: &str = "RS-HOOKS-SOURCE-24";
 
 pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckResult>) {
     if let Some((line_no, command_text)) =
-        first_fail_open_critical_command(input.parsed, 0, &mut Vec::new())
+        first_fail_open_critical_command(input.parsed, input.parsed, 1, 0, &mut Vec::new())
     {
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
@@ -25,26 +28,39 @@ pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckR
 }
 
 fn first_fail_open_critical_command(
-    parsed: &hook_shell_parser::types::ParsedShellScript,
-    line_offset: usize,
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
+    absolute_base: usize,
+    root_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<(usize, String)> {
-    for line in &parsed.executable_lines {
+    for line in &local.executable_lines {
+        let absolute_line_no = absolute_line_no(absolute_base, line.line_no);
+        let visible_root_line_no = if std::ptr::eq(local, root) {
+            absolute_line_no
+        } else {
+            root_line_no
+        };
+
         if line.softened_by.is_some()
-            && any_resolved_command_on_line(
-                parsed,
+            && any_resolved_command_on_line_in_context(
+                local,
+                root,
                 &line.raw,
                 line.line_no,
+                visible_root_line_no,
                 is_guardrail_critical_command,
             )
         {
-            return Some((line.line_no + line_offset, line.command_text.to_owned()));
+            return Some((absolute_line_no, line.command_text.to_owned()));
         }
         if let Some(found) = called_function_fail_open(
-            parsed,
+            local,
+            root,
             &line.command_name,
             line.line_no,
-            line_offset,
+            absolute_base,
+            visible_root_line_no,
             visiting,
         ) {
             return Some(found);
@@ -55,27 +71,28 @@ fn first_fail_open_critical_command(
 }
 
 fn called_function_fail_open(
-    parsed: &hook_shell_parser::types::ParsedShellScript,
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
     command_name: &str,
     call_line_no: usize,
-    line_offset: usize,
+    absolute_base: usize,
+    root_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<(usize, String)> {
-    let function = parsed
-        .functions
-        .iter()
-        .find(|function| function.name == command_name && function.line_no <= call_line_no)?;
+    let (function, function_absolute_base) =
+        resolve_visible_function(local, root, command_name, call_line_no, absolute_base, root_line_no)?;
     if visiting.iter().any(|name| name == &function.name) {
         return None;
     }
 
     visiting.push(function.name.to_owned());
-    let nested_line_offset = if function.body_starts_on_definition_line {
-        line_offset + function.line_no.saturating_sub(1)
-    } else {
-        line_offset + function.line_no
-    };
-    let found = first_fail_open_critical_command(&function.parsed_body, nested_line_offset, visiting);
+    let found = first_fail_open_critical_command(
+        &function.parsed_body,
+        root,
+        function_absolute_base,
+        root_line_no,
+        visiting,
+    );
     let _ = visiting.pop();
     found
 }
@@ -138,6 +155,47 @@ fn cargo_global_flag_takes_value(flag: &str) -> bool {
             | "-j"
             | "-C"
     )
+}
+
+fn absolute_line_no(absolute_base: usize, local_line_no: usize) -> usize {
+    absolute_base + local_line_no.saturating_sub(1)
+}
+
+fn function_body_absolute_base(absolute_base: usize, function: &ShellFunction) -> usize {
+    absolute_base
+        + if function.body_starts_on_definition_line {
+            function.line_no.saturating_sub(1)
+        } else {
+            function.line_no
+        }
+}
+
+fn resolve_visible_function<'a>(
+    local: &'a ParsedShellScript,
+    root: &'a ParsedShellScript,
+    command_name: &str,
+    local_line_no: usize,
+    absolute_base: usize,
+    root_line_no: usize,
+) -> Option<(&'a ShellFunction, usize)> {
+    if let Some(function) = local
+        .functions
+        .iter()
+        .rev()
+        .find(|function| function.name == command_name && function.line_no <= local_line_no)
+    {
+        return Some((function, function_body_absolute_base(absolute_base, function)));
+    }
+
+    if std::ptr::eq(local, root) {
+        return None;
+    }
+
+    root.functions
+        .iter()
+        .rev()
+        .find(|function| function.name == command_name && function.line_no <= root_line_no)
+        .map(|function| (function, function_body_absolute_base(1, function)))
 }
 
 #[cfg(test)]

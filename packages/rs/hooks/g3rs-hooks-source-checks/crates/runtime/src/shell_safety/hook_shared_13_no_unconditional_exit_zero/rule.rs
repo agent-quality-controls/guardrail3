@@ -1,5 +1,7 @@
 use crate::compat::{G3CheckResult, G3Severity};
-use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command_on_line};
+use hook_shell_parser::command_query::{
+    ResolvedCommand, any_resolved_command_on_line_in_context,
+};
 use hook_shell_parser::types::{ParsedShellScript, ShellFunction};
 
 use crate::inputs::ExecutableCommandContextInput;
@@ -7,7 +9,9 @@ use crate::inputs::ExecutableCommandContextInput;
 const ID: &str = "RS-HOOKS-SOURCE-18";
 
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
-    if let Some(line_no) = first_unconditional_exit_zero_line(input.parsed, &mut Vec::new()) {
+    if let Some(line_no) =
+        first_unconditional_exit_zero_line(input.parsed, input.parsed, 1, 0, &mut Vec::new())
+    {
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
             G3Severity::Warn,
@@ -35,10 +39,15 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
 }
 
 fn first_unconditional_exit_zero_line(
-    parsed: &ParsedShellScript,
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
+    absolute_base: usize,
+    root_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<usize> {
-    if let Some(line_no) = first_top_level_exit_zero_line(parsed, visiting) {
+    if let Some(line_no) =
+        first_top_level_exit_zero_line(local, root, absolute_base, root_line_no, visiting)
+    {
         return Some(line_no);
     }
 
@@ -46,30 +55,43 @@ fn first_unconditional_exit_zero_line(
 }
 
 fn first_top_level_exit_zero_line(
-    parsed: &ParsedShellScript,
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
+    absolute_base: usize,
+    root_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<usize> {
-    let function_ranges = function_line_ranges(parsed);
+    let function_ranges = function_line_ranges(local);
     let mut if_depth = 0usize;
     let mut case_depth = 0usize;
     let mut loop_depth = 0usize;
 
-    for source_line in &parsed.source_lines {
+    for source_line in &local.source_lines {
         let trimmed = strip_inline_comment(&source_line.raw).trim();
         if trimmed.is_empty() || trimmed.starts_with("#!") {
             continue;
         }
 
-        if is_function_definition_line(parsed, source_line.line_no) {
+        let absolute_line_no = absolute_line_no(absolute_base, source_line.line_no);
+        let visible_root_line_no = if std::ptr::eq(local, root) {
+            absolute_line_no
+        } else {
+            root_line_no
+        };
+
+        if is_function_definition_line(local, source_line.line_no) {
             if if_depth == 0
                 && case_depth == 0
                 && loop_depth == 0
                 && let Some(tail) = function_definition_tail(&source_line.raw)
             {
                 if let Some(line_no) = scan_tail_for_unconditional_exit_zero(
-                    parsed,
+                    local,
+                    root,
                     tail,
                     source_line.line_no,
+                    absolute_base,
+                    visible_root_line_no,
                     visiting,
                 ) {
                     return Some(line_no);
@@ -85,7 +107,15 @@ fn first_top_level_exit_zero_line(
 
         if let Some(tail) = same_line_scoped_control_flow_tail(trimmed) {
             if let Some(line_no) =
-                scan_tail_for_unconditional_exit_zero(parsed, tail, source_line.line_no, visiting)
+                scan_tail_for_unconditional_exit_zero(
+                    local,
+                    root,
+                    tail,
+                    source_line.line_no,
+                    absolute_base,
+                    visible_root_line_no,
+                    visiting,
+                )
             {
                 return Some(line_no);
             }
@@ -95,7 +125,7 @@ fn first_top_level_exit_zero_line(
         if closes_case_scope(trimmed) {
             case_depth = case_depth.saturating_sub(1);
         }
-        if closes_loop_scope(parsed, source_line.line_no, trimmed) {
+        if closes_loop_scope(local, source_line.line_no, trimmed) {
             loop_depth = loop_depth.saturating_sub(1);
         }
         if closes_if_scope(trimmed) {
@@ -113,23 +143,32 @@ fn first_top_level_exit_zero_line(
                 continue;
             }
 
-            for line in parsed
+            for line in local
                 .executable_lines
                 .iter()
                 .filter(|line| line.line_no == source_line.line_no)
             {
                 if let Some(line_no) = called_function_exit_zero_line(
-                    parsed,
+                    local,
+                    root,
                     &line.command_name,
                     line.line_no,
+                    absolute_base,
+                    visible_root_line_no,
                     visiting,
                 ) {
                     return Some(line_no);
                 }
             }
 
-            if line_contains_exit_zero_path(parsed, &source_line.raw, source_line.line_no) {
-                return Some(source_line.line_no);
+            if line_contains_exit_zero_path(
+                local,
+                root,
+                &source_line.raw,
+                source_line.line_no,
+                visible_root_line_no,
+            ) {
+                return Some(absolute_line_no);
             }
         }
 
@@ -150,52 +189,63 @@ fn first_top_level_exit_zero_line(
 }
 
 fn called_function_exit_zero_line(
-    parsed: &ParsedShellScript,
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
     command_name: &str,
     call_line_no: usize,
+    absolute_base: usize,
+    root_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<usize> {
-    let function = parsed
-        .functions
-        .iter()
-        .rev()
-        .find(|function| function.name == command_name && function.line_no <= call_line_no)?;
+    let (function, function_absolute_base) = resolve_visible_function(
+        local,
+        root,
+        command_name,
+        call_line_no,
+        absolute_base,
+        root_line_no,
+    )?;
     if visiting.iter().any(|name| name == &function.name) {
         return None;
     }
 
     visiting.push(function.name.to_owned());
-    let line_no = first_unconditional_exit_zero_line(&function.parsed_body, visiting)
-        .map(|nested_line_no| absolute_function_body_line(function, nested_line_no));
+    let line_no = first_unconditional_exit_zero_line(
+        &function.parsed_body,
+        root,
+        function_absolute_base,
+        root_line_no,
+        visiting,
+    );
     let _ = visiting.pop();
     line_no
 }
 
 fn called_function_exit_zero_line_from_tail(
-    parsed: &ParsedShellScript,
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
     tail: &str,
     call_line_no: usize,
+    absolute_base: usize,
+    root_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<usize> {
     let tail_script = hook_shell_parser::parse_script(tail);
     for executable in &tail_script.executable_lines {
-        if let Some(line_no) =
-            called_function_exit_zero_line(parsed, &executable.command_name, call_line_no, visiting)
-        {
+        if let Some(line_no) = called_function_exit_zero_line(
+            local,
+            root,
+            &executable.command_name,
+            call_line_no,
+            absolute_base,
+            root_line_no,
+            visiting,
+        ) {
             return Some(line_no);
         }
     }
 
     None
-}
-
-fn absolute_function_body_line(function: &ShellFunction, nested_line_no: usize) -> usize {
-    let body_start_line = if function.body_starts_on_definition_line {
-        function.line_no
-    } else {
-        function.line_no + 1
-    };
-    body_start_line + nested_line_no.saturating_sub(1)
 }
 
 fn function_line_ranges(parsed: &ParsedShellScript) -> Vec<(usize, usize)> {
@@ -258,26 +308,50 @@ fn function_definition_tail(line: &str) -> Option<&str> {
     None
 }
 
-fn line_contains_exit_zero_path(parsed: &ParsedShellScript, raw: &str, line_no: usize) -> bool {
-    any_resolved_command_on_line(parsed, raw, line_no, &|command: &ResolvedCommand| {
-        command.command_name() == "exit"
-            && command.command_text().split_whitespace().nth(1) == Some("0")
-    })
+fn line_contains_exit_zero_path(
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
+    raw: &str,
+    line_no: usize,
+    root_line_no: usize,
+) -> bool {
+    any_resolved_command_on_line_in_context(
+        local,
+        root,
+        raw,
+        line_no,
+        root_line_no,
+        &|command: &ResolvedCommand| {
+            command.command_name() == "exit"
+                && command.command_text().split_whitespace().nth(1) == Some("0")
+        },
+    )
 }
 
 fn scan_tail_for_unconditional_exit_zero(
-    parsed: &ParsedShellScript,
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
     tail: &str,
     line_no: usize,
+    absolute_base: usize,
+    root_line_no: usize,
     visiting: &mut Vec<String>,
 ) -> Option<usize> {
-    if let Some(line_no) = called_function_exit_zero_line_from_tail(parsed, tail, line_no, visiting)
+    if let Some(line_no) = called_function_exit_zero_line_from_tail(
+        local,
+        root,
+        tail,
+        line_no,
+        absolute_base,
+        root_line_no,
+        visiting,
+    )
     {
         return Some(line_no);
     }
 
-    if line_contains_exit_zero_path(parsed, tail, line_no) {
-        return Some(line_no);
+    if line_contains_exit_zero_path(local, root, tail, line_no, root_line_no) {
+        return Some(absolute_line_no(absolute_base, line_no));
     }
 
     None
@@ -440,6 +514,47 @@ fn tail_after_shell_keyword<'a>(line: &'a str, keyword: &str) -> Option<&'a str>
     }
 
     None
+}
+
+fn absolute_line_no(absolute_base: usize, local_line_no: usize) -> usize {
+    absolute_base + local_line_no.saturating_sub(1)
+}
+
+fn function_body_absolute_base(absolute_base: usize, function: &ShellFunction) -> usize {
+    absolute_base
+        + if function.body_starts_on_definition_line {
+            function.line_no.saturating_sub(1)
+        } else {
+            function.line_no
+        }
+}
+
+fn resolve_visible_function<'a>(
+    local: &'a ParsedShellScript,
+    root: &'a ParsedShellScript,
+    command_name: &str,
+    local_line_no: usize,
+    absolute_base: usize,
+    root_line_no: usize,
+) -> Option<(&'a ShellFunction, usize)> {
+    if let Some(function) = local
+        .functions
+        .iter()
+        .rev()
+        .find(|function| function.name == command_name && function.line_no <= local_line_no)
+    {
+        return Some((function, function_body_absolute_base(absolute_base, function)));
+    }
+
+    if std::ptr::eq(local, root) {
+        return None;
+    }
+
+    root.functions
+        .iter()
+        .rev()
+        .find(|function| function.name == command_name && function.line_no <= root_line_no)
+        .map(|function| (function, function_body_absolute_base(1, function)))
 }
 
 #[cfg(test)]

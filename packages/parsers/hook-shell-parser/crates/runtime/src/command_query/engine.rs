@@ -33,13 +33,27 @@ pub(super) fn any_resolved_command_on_line<F>(
 where
     F: Fn(&ResolvedCommand) -> bool,
 {
+    any_resolved_command_on_line_in_context(parsed, parsed, raw, line_no, line_no, predicate)
+}
+
+pub(super) fn any_resolved_command_on_line_in_context<F>(
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
+    raw: &str,
+    line_no: usize,
+    root_line_no: usize,
+    predicate: &F,
+) -> bool
+where
+    F: Fn(&ResolvedCommand) -> bool,
+{
     let mut visiting = Vec::new();
     let mut state = state::NoEnvState;
     let mut found = false;
     let _ = line_visits_with_mode(
         raw,
-        parsed,
-        parsed,
+        local,
+        root,
         &mut visiting,
         &mut state,
         &mut |command: &ResolvedCommand, _state: &state::NoEnvState| {
@@ -51,6 +65,7 @@ where
             }
         },
         line_no,
+        root_line_no,
         CommandQueryOptions::default(),
     );
     found
@@ -97,6 +112,7 @@ pub(super) fn visit_resolved_commands_with_env<S, F>(
             &mut state,
             &mut visitor,
             line.line_no,
+            line.line_no,
             options,
         ) {
             break;
@@ -112,6 +128,7 @@ pub(super) fn line_visits_with_mode<S, F>(
     state: &mut S,
     visitor: &mut F,
     line_no: usize,
+    root_line_no: usize,
     options: CommandQueryOptions,
 ) -> bool
 where
@@ -128,6 +145,7 @@ where
             state,
             visitor,
             line_no,
+            root_line_no,
             options,
         )
         .stopped;
@@ -154,6 +172,7 @@ where
                 &mut segment_state,
                 visitor,
                 line_no,
+                root_line_no,
                 options,
             );
             if outcome.stopped {
@@ -173,6 +192,7 @@ where
                     &mut substitution_state,
                     visitor,
                     line_no,
+                    root_line_no,
                     options,
                 ) {
                     return true;
@@ -199,6 +219,7 @@ pub(super) fn segment_visits<S, F>(
     state: &mut S,
     visitor: &mut F,
     line_no: usize,
+    root_line_no: usize,
     options: CommandQueryOptions,
 ) -> state::SegmentOutcome
 where
@@ -253,6 +274,7 @@ where
                         &mut function_state,
                         visitor,
                         line_no,
+                        root_line_no,
                         options,
                     ),
                     persist_state: false,
@@ -267,6 +289,7 @@ where
                         state,
                         visitor,
                         line_no,
+                        root_line_no,
                         options,
                     ),
                     persist_state: true,
@@ -275,7 +298,7 @@ where
         }
         command_name
             if !std::ptr::eq(local, root)
-                && function_defined(command_name, root, line_no, options) =>
+                && function_defined(command_name, root, root_line_no, options) =>
         {
             if has_local_overlay {
                 let mut function_state = local_state;
@@ -287,7 +310,8 @@ where
                         visiting,
                         &mut function_state,
                         visitor,
-                        line_no,
+                        root_line_no,
+                        root_line_no,
                         options,
                     ),
                     persist_state: false,
@@ -301,7 +325,8 @@ where
                         visiting,
                         state,
                         visitor,
-                        line_no,
+                        root_line_no,
+                        root_line_no,
                         options,
                     ),
                     persist_state: true,
@@ -318,6 +343,7 @@ where
                 &mut local_state,
                 visitor,
                 line_no,
+                root_line_no,
                 options,
             ),
             persist_state: false,
@@ -334,6 +360,7 @@ pub(super) fn dispatch_external_token<S, F>(
     state: &mut S,
     visitor: &mut F,
     line_no: usize,
+    root_line_no: usize,
     options: CommandQueryOptions,
 ) -> bool
 where
@@ -342,16 +369,16 @@ where
 {
     match lex::normalize_command_token(token) {
         "env" => wrappers::env_wrapper_visits(
-            cursor, local, root, visiting, state, visitor, line_no, options,
+            cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
         ),
         "sh" | "bash" => wrappers::shell_wrapper_visits(
-            cursor, local, root, visiting, state, visitor, line_no, options,
+            cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
         ),
         "command" => wrappers::command_wrapper_visits(
-            cursor, local, root, visiting, state, visitor, line_no, options,
+            cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
         ),
         "exec" => wrappers::exec_wrapper_visits(
-            cursor, local, root, visiting, state, visitor, line_no, options,
+            cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
         ),
         _ => matches!(
             visitor(&resolved_command(token, cursor, line_no), state),
@@ -366,10 +393,7 @@ fn function_defined(
     line_no: usize,
     options: CommandQueryOptions,
 ) -> bool {
-    parsed.functions.iter().any(|function| {
-        function.name == command_name
-            && (options.allow_forward_functions() || function.line_no <= line_no)
-    })
+    matching_function(command_name, parsed, line_no, options).is_some()
 }
 
 fn called_function_visits<S, F>(
@@ -380,16 +404,14 @@ fn called_function_visits<S, F>(
     state: &mut S,
     visitor: &mut F,
     line_no: usize,
+    root_line_no: usize,
     options: CommandQueryOptions,
 ) -> bool
 where
     S: ShellEnvState,
     F: FnMut(&ResolvedCommand, &S) -> CommandVisit,
 {
-    let Some(function) = lookup.functions.iter().find(|function| {
-        function.name == command_name
-            && (options.allow_forward_functions() || function.line_no <= line_no)
-    }) else {
+    let Some(function) = matching_function(command_name, lookup, line_no, options) else {
         return false;
     };
     if visiting.iter().any(|name| name == &function.name) {
@@ -407,6 +429,7 @@ where
             state,
             visitor,
             line.line_no,
+            root_line_no,
             options,
         ) {
             stopped = true;
@@ -433,4 +456,16 @@ fn resolved_command(
         lex::normalize_command_token(token).to_owned(),
         tokens,
     )
+}
+
+fn matching_function<'a>(
+    command_name: &str,
+    parsed: &'a ParsedShellScript,
+    line_no: usize,
+    options: CommandQueryOptions,
+) -> Option<&'a crate::types::ShellFunction> {
+    parsed.functions.iter().rev().find(|function| {
+        function.name == command_name
+            && (options.allow_forward_functions() || function.line_no <= line_no)
+    })
 }

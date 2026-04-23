@@ -134,6 +134,25 @@ pub fn any_resolved_command_on_line(
 }
 
 #[must_use]
+pub fn any_resolved_command_on_line_in_context(
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
+    raw: &str,
+    line_no: usize,
+    root_line_no: usize,
+    predicate: impl Fn(&ResolvedCommand) -> bool,
+) -> bool {
+    engine::any_resolved_command_on_line_in_context(
+        local,
+        root,
+        raw,
+        line_no,
+        root_line_no,
+        &predicate,
+    )
+}
+
+#[must_use]
 pub fn any_resolved_command_relaxed(
     parsed: &ParsedShellScript,
     predicate: impl Fn(&ResolvedCommand) -> bool,

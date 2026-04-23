@@ -255,6 +255,34 @@ fi
 }
 
 #[test]
+fn passes_when_branch_uses_multi_hop_trigger_and_validation_helpers() {
+    let content = r#"
+matches_rust_config_changes() {
+    echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'
+}
+
+should_validate_configs() {
+    matches_rust_config_changes
+}
+
+run_guardrails() {
+    g3rs validate --path .
+}
+
+validate_config_changes() {
+    run_guardrails
+}
+
+if test -n "$changed_path"; then
+    should_validate_configs
+    validate_config_changes
+fi
+"#;
+    let results = run_case(content);
+    assertions::assert_present(&results);
+}
+
+#[test]
 fn warns_when_helper_is_defined_after_the_call() {
     let content = r#"
 if test -n "$changed_path"; then
@@ -268,6 +296,23 @@ should_validate_configs() {
 "#;
     let results = run_case(content);
     assertions::assert_missing(&results);
+}
+
+#[test]
+fn passes_when_later_validation_helper_redefinition_overrides_earlier_noop() {
+    let content = r#"
+run_guardrails() {
+    echo "noop"
+}
+
+run_guardrails() {
+    g3rs validate --path .
+}
+
+echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$' && run_guardrails
+"#;
+    let results = run_case(content);
+    assertions::assert_present(&results);
 }
 
 #[test]
