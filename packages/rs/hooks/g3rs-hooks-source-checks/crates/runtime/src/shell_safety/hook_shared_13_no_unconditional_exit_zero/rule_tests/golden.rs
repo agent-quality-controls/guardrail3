@@ -78,6 +78,39 @@ fn warns_when_called_function_contains_exit_zero() {
 }
 
 #[test]
+fn warns_when_multi_hop_called_function_contains_exit_zero() {
+    let results =
+        run_case("finish_leaf() {\n    exit 0\n}\nfinish_mid() {\n    finish_leaf\n}\nfinish_mid\n");
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(2),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
+fn warns_when_chained_helper_uses_later_redefinition_with_exit_zero() {
+    let results = run_case(
+        "finish_leaf() {\n    echo ok\n}\nfinish_leaf() {\n    exit 0\n}\nfinish_mid() {\n    finish_leaf\n}\nfinish_mid\n",
+    );
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::G3Severity::Warn),
+            title: Some("remove unconditional `exit 0` from `.githooks/pre-commit`"),
+            line: Some(5),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn warns_when_same_line_function_definition_has_exit_zero_tail() {
     let results = run_case("finish() { exit 0; }; exit 0\n");
     assertions::assert_rule_results(

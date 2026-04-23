@@ -1,5 +1,6 @@
 use super::super::{
-    CommandQueryOptions, CommandVisit, ShellEnvState, parse_script_for_tests,
+    CommandQueryOptions, CommandVisit, ShellEnvState, any_resolved_command_on_line_in_context,
+    parse_script_for_tests,
     visit_resolved_commands_with_env,
 };
 use hook_shell_parser_runtime_assertions::command_query::api as query_assertions;
@@ -165,6 +166,42 @@ fn visits_forward_called_functions_when_enabled() {
     );
 
     assert_eq!(snapshots, vec![("cargo".to_owned(), None, false)]);
+}
+
+#[test]
+fn resolves_multi_hop_called_functions_defined_at_root_scope() {
+    let script = "run_leaf() {\n    cargo test\n}\nrun_mid() {\n    run_leaf\n}\nrun_checks() {\n    run_mid\n}\nrun_checks\n";
+
+    query_assertions::assert_script_has_resolved_command(script, "cargo", "test");
+}
+
+#[test]
+fn resolves_called_function_to_latest_visible_redefinition() {
+    let script =
+        "run_checks() {\n    echo noop\n}\nrun_checks() {\n    cargo test\n}\nrun_checks\n";
+
+    query_assertions::assert_script_has_resolved_command(script, "cargo", "test");
+}
+
+#[test]
+fn resolves_nested_body_calls_against_root_visible_helpers() {
+    let parsed = parse_script_for_tests(
+        "run_leaf() {\n    cargo test\n}\nrun_mid() {\n    run_leaf\n}\nrun_checks() {\n    run_mid\n}\nrun_checks\n",
+    );
+    let run_checks = parsed
+        .functions
+        .iter()
+        .find(|function| function.name == "run_checks")
+        .expect("expected run_checks helper");
+
+    assert!(any_resolved_command_on_line_in_context(
+        &run_checks.parsed_body,
+        &parsed,
+        "run_mid",
+        1,
+        10,
+        |command| command.command_name() == "cargo" && command.command_text().contains("test"),
+    ));
 }
 
 #[test]

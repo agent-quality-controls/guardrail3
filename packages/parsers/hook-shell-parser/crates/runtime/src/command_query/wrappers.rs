@@ -11,6 +11,7 @@ pub(super) fn env_wrapper_visits<S, F>(
     state: &mut S,
     visitor: &mut F,
     line_no: usize,
+    root_line_no: usize,
     options: CommandQueryOptions,
 ) -> bool
 where
@@ -77,6 +78,7 @@ where
             state,
             visitor,
             line_no,
+            root_line_no,
             options,
         )
         .stopped;
@@ -87,7 +89,7 @@ where
     };
 
     engine::dispatch_external_token(
-        next, cursor, local, root, visiting, state, visitor, line_no, options,
+        next, cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
     )
 }
 
@@ -99,6 +101,7 @@ pub(super) fn shell_wrapper_visits<S, F>(
     state: &mut S,
     visitor: &mut F,
     line_no: usize,
+    root_line_no: usize,
     options: CommandQueryOptions,
 ) -> bool
 where
@@ -149,7 +152,7 @@ where
 
     if let Some(script) = script {
         return engine::line_visits_with_mode(
-            &script, local, root, visiting, state, visitor, line_no, options,
+            &script, local, root, visiting, state, visitor, line_no, root_line_no, options,
         );
     }
 
@@ -158,7 +161,7 @@ where
     };
 
     engine::dispatch_external_token(
-        next, cursor, local, root, visiting, state, visitor, line_no, options,
+        next, cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
     )
 }
 
@@ -170,6 +173,7 @@ pub(super) fn command_wrapper_visits<S, F>(
     state: &mut S,
     visitor: &mut F,
     line_no: usize,
+    root_line_no: usize,
     options: CommandQueryOptions,
 ) -> bool
 where
@@ -194,7 +198,7 @@ where
     };
 
     engine::dispatch_external_token(
-        next, cursor, local, root, visiting, state, visitor, line_no, options,
+        next, cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
     )
 }
 
@@ -206,6 +210,7 @@ pub(super) fn exec_wrapper_visits<S, F>(
     state: &mut S,
     visitor: &mut F,
     line_no: usize,
+    root_line_no: usize,
     options: CommandQueryOptions,
 ) -> bool
 where
@@ -233,7 +238,7 @@ where
     };
 
     engine::dispatch_external_token(
-        next, cursor, local, root, visiting, state, visitor, line_no, options,
+        next, cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
     )
 }
 

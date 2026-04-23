@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use hook_shell_parser::types::ParsedShellScript;
+use hook_shell_parser::types::{ParsedShellScript, ShellFunction};
 
 pub(super) fn is_trigger_like_line(line: &str) -> bool {
     if line.starts_with("printf ") || line.starts_with("cat ") {
@@ -38,13 +38,23 @@ pub(super) fn line_reaches_config_trigger(
     line_no: usize,
     needle: &str,
 ) -> bool {
-    line_reaches_config_trigger_inner(parsed, raw, line_no, needle, &mut BTreeSet::new())
+    line_reaches_config_trigger_inner(
+        parsed,
+        parsed,
+        raw,
+        line_no,
+        line_no,
+        needle,
+        &mut BTreeSet::new(),
+    )
 }
 
 fn line_reaches_config_trigger_inner(
-    parsed: &ParsedShellScript,
+    local: &ParsedShellScript,
+    root: &ParsedShellScript,
     raw: &str,
     line_no: usize,
+    root_line_no: usize,
     needle: &str,
     visited_functions: &mut BTreeSet<String>,
 ) -> bool {
@@ -56,34 +66,62 @@ fn line_reaches_config_trigger_inner(
         return true;
     }
 
-    let Some(function_name) = parsed
+    local
         .executable_lines
         .iter()
-        .find(|line| line.line_no == line_no && line.raw == raw)
-        .map(|line| line.command_name.as_str())
-    else {
-        return false;
-    };
+        .filter(|line| line.line_no == line_no && line.raw == raw)
+        .any(|line| {
+            let Some(function) = resolve_visible_function(
+                local,
+                root,
+                &line.command_name,
+                line_no,
+                root_line_no,
+            ) else {
+                return false;
+            };
 
-    if !visited_functions.insert(function_name.to_owned()) {
-        return false;
-    }
+            if !visited_functions.insert(function.name.clone()) {
+                return false;
+            }
 
-    parsed
+            let found = function.parsed_body.executable_lines.iter().any(|nested_line| {
+                line_reaches_config_trigger_inner(
+                    &function.parsed_body,
+                    root,
+                    &nested_line.raw,
+                    nested_line.line_no,
+                    root_line_no,
+                    needle,
+                    visited_functions,
+                )
+            });
+            let _ = visited_functions.remove(&function.name);
+            found
+        })
+}
+
+fn resolve_visible_function<'a>(
+    local: &'a ParsedShellScript,
+    root: &'a ParsedShellScript,
+    function_name: &str,
+    line_no: usize,
+    root_line_no: usize,
+) -> Option<&'a ShellFunction> {
+    local
         .functions
         .iter()
         .rev()
         .find(|function| function.name == function_name && function.line_no <= line_no)
-        .is_some_and(|function| {
-            function.parsed_body.executable_lines.iter().any(|line| {
-                line_reaches_config_trigger_inner(
-                    &function.parsed_body,
-                    &line.raw,
-                    line.line_no,
-                    needle,
-                    visited_functions,
-                )
-            })
+        .or_else(|| {
+            if std::ptr::eq(local, root) {
+                None
+            } else {
+                root.functions
+                    .iter()
+                    .rev()
+                    .find(|function| function.name == function_name && function.line_no <= root_line_no)
+            }
         })
 }
 
