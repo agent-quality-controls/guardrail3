@@ -1,4 +1,6 @@
-use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, root_file};
+use g3_workspace_crawl::{
+    G3RsWorkspaceCrawl as G3WorkspaceCrawl, G3RsWorkspaceEntry as G3WorkspaceEntry, root_file,
+};
 use g3ts_tsconfig_types::{G3TsTsconfigChecksInput, G3TsTsconfigState, inline_strict_flags};
 use tsconfig_json_parser::{from_path_document, parse_error_reason};
 

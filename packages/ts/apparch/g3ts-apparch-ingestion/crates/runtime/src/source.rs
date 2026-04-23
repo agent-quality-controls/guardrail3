@@ -16,7 +16,7 @@ pub(crate) struct AppFacts {
 }
 
 pub(crate) fn collect_app_facts(
-    crawl: &workspace_crawl::G3WorkspaceCrawl,
+    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
 ) -> Result<AppFacts, G3TsApparchIngestionError> {
     let files = source_files(crawl);
     let mut internal_edges = BTreeSet::new();
@@ -73,13 +73,13 @@ pub(crate) fn collect_app_facts(
 }
 
 fn source_files(
-    crawl: &workspace_crawl::G3WorkspaceCrawl,
+    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
 ) -> Vec<apparch_types::G3TsApparchSourceFile> {
     let mut files = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == workspace_crawl::G3WorkspaceEntryKind::File)
-        .filter(|entry| entry.ignore_state == workspace_crawl::G3WorkspaceIgnoreState::Included)
+        .filter(|entry| entry.kind == workspace_crawl::G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.ignore_state == workspace_crawl::G3RsWorkspaceIgnoreState::Included)
         .filter(|entry| entry.readable)
         .filter_map(|entry| {
             classify_layer(&entry.path.rel_path).map(|layer| apparch_types::G3TsApparchSourceFile {
@@ -119,7 +119,7 @@ fn is_source_extension(rel_path: &str) -> bool {
 }
 
 fn read_source_file(
-    crawl: &workspace_crawl::G3WorkspaceCrawl,
+    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
     rel_path: &str,
 ) -> Result<String, G3TsApparchIngestionError> {
     let Some(workspace_entry) = workspace_crawl::entry(crawl, rel_path) else {
@@ -367,7 +367,7 @@ enum ResolvedImport {
 }
 
 fn resolve_import(
-    crawl: &workspace_crawl::G3WorkspaceCrawl,
+    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
     from_rel_path: &str,
     specifier: &str,
 ) -> Option<ResolvedImport> {
@@ -384,7 +384,7 @@ fn resolve_import(
 }
 
 fn resolve_internal_target(
-    crawl: &workspace_crawl::G3WorkspaceCrawl,
+    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
     base_rel_path: &str,
 ) -> Option<ResolvedImport> {
     for candidate in candidate_source_paths(base_rel_path) {

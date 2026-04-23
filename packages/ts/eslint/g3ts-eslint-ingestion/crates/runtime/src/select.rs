@@ -1,6 +1,8 @@
 use eslint_config_parser::types::{EslintProbeKind, EslintProbeTarget};
 use g3_workspace_crawl::{
-    G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState, root_file,
+    G3RsWorkspaceCrawl as G3WorkspaceCrawl, G3RsWorkspaceEntry as G3WorkspaceEntry,
+    G3RsWorkspaceEntryKind as G3WorkspaceEntryKind,
+    G3RsWorkspaceIgnoreState as G3WorkspaceIgnoreState, root_file,
 };
 
 const ROOT_ESLINT_CONFIGS: [&str; 6] = [

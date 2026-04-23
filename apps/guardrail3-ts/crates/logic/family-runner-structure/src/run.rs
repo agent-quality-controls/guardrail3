@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3WorkspaceCrawl;
+use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use guardrail3_ts_app_types::{FamilyResults, FamilyRunError, SupportedFamily};
 
 /// Runs the TS structure family group against the prepared crawl.
@@ -11,6 +11,15 @@ pub fn run(
     crawl: &G3WorkspaceCrawl,
 ) -> Result<FamilyResults, FamilyRunError> {
     match family {
+        SupportedFamily::Astro => {
+            let config_input = g3ts_astro_ingestion::ingest_for_config_checks(crawl);
+            let file_tree_input = g3ts_astro_ingestion::ingest_for_file_tree_checks(crawl);
+
+            let mut results = Vec::new();
+            results.extend(g3ts_astro_config_checks::check(&config_input));
+            results.extend(g3ts_astro_file_tree_checks::check(&file_tree_input));
+            Ok(results)
+        }
         SupportedFamily::Arch => {
             let config_inputs =
                 g3ts_arch_ingestion::ingest_for_config_checks(crawl).map_err(|error| {

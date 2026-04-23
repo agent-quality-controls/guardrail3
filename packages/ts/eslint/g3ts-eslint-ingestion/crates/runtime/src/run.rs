@@ -1,5 +1,5 @@
 use eslint_config_parser::{parse_document, parse_error_reason};
-use g3_workspace_crawl::G3WorkspaceCrawl;
+use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_eslint_types::{G3TsEslintConfigChecksInput, G3TsEslintConfigState, snapshot_from_parser};
 
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsEslintConfigChecksInput {

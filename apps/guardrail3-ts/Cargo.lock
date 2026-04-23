@@ -228,24 +228,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
-name = "g3-workspace-crawl"
+name = "g3rs-workspace-crawl"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl-runtime",
- "g3-workspace-crawl-types",
+ "g3rs-workspace-crawl-runtime",
+ "g3rs-workspace-crawl-types",
 ]
 
 [[package]]
-name = "g3-workspace-crawl-runtime"
+name = "g3rs-workspace-crawl-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl-types",
+ "g3rs-workspace-crawl-types",
  "ignore",
  "walkdir",
 ]
 
 [[package]]
-name = "g3-workspace-crawl-types"
+name = "g3rs-workspace-crawl-types"
 version = "0.1.0"
 
 [[package]]
@@ -253,7 +253,7 @@ name = "g3ts"
 version = "0.1.0"
 dependencies = [
  "clap",
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "guardrail3-ts-app-types",
  "guardrail3-ts-assertions",
  "guardrail3-ts-family-runner-config",
@@ -291,7 +291,7 @@ dependencies = [
 name = "g3ts-apparch-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "g3ts-apparch-types",
  "tree-sitter",
  "tree-sitter-typescript",
@@ -360,7 +360,7 @@ dependencies = [
 name = "g3ts-arch-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "g3ts-arch-types",
  "package-json-parser",
  "serde_json",
@@ -386,6 +386,66 @@ dependencies = [
 
 [[package]]
 name = "g3ts-arch-types"
+version = "0.1.0"
+
+[[package]]
+name = "g3ts-astro-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-config-checks-runtime",
+ "g3ts-astro-config-checks-types",
+]
+
+[[package]]
+name = "g3ts-astro-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-config-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-types",
+]
+
+[[package]]
+name = "g3ts-astro-file-tree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-file-tree-checks-runtime",
+ "g3ts-astro-types",
+]
+
+[[package]]
+name = "g3ts-astro-file-tree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-astro-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "eslint-config-parser",
+ "g3rs-workspace-crawl",
+ "g3ts-astro-types",
+ "package-json-parser",
+]
+
+[[package]]
+name = "g3ts-astro-types"
 version = "0.1.0"
 
 [[package]]
@@ -425,7 +485,7 @@ name = "g3ts-eslint-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "g3ts-eslint-types",
 ]
 
@@ -471,7 +531,7 @@ dependencies = [
 name = "g3ts-jscpd-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "g3ts-jscpd-types",
  "jscpd-json-parser",
 ]
@@ -517,7 +577,7 @@ dependencies = [
 name = "g3ts-npmrc-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "g3ts-npmrc-types",
  "npmrc-parser",
 ]
@@ -563,7 +623,7 @@ dependencies = [
 name = "g3ts-package-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "g3ts-package-types",
  "package-json-parser",
 ]
@@ -610,7 +670,7 @@ dependencies = [
 name = "g3ts-tsconfig-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "g3ts-tsconfig-types",
  "tsconfig-json-parser",
 ]
@@ -656,7 +716,7 @@ version = "0.1.0"
 name = "guardrail3-ts-app-types"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "guardrail3-check-types",
 ]
 
@@ -672,7 +732,7 @@ dependencies = [
 name = "guardrail3-ts-family-runner-config"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "g3ts-eslint-config-checks",
  "g3ts-eslint-ingestion",
  "g3ts-jscpd-config-checks",
@@ -690,7 +750,7 @@ dependencies = [
 name = "guardrail3-ts-family-runner-structure"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "g3ts-apparch-config-checks",
  "g3ts-apparch-ingestion",
  "g3ts-apparch-source-checks",
@@ -698,6 +758,9 @@ dependencies = [
  "g3ts-arch-file-tree-checks",
  "g3ts-arch-ingestion",
  "g3ts-arch-source-checks",
+ "g3ts-astro-config-checks",
+ "g3ts-astro-file-tree-checks",
+ "g3ts-astro-ingestion",
  "guardrail3-ts-app-types",
 ]
 
@@ -705,7 +768,7 @@ dependencies = [
 name = "guardrail3-ts-packages"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "guardrail3-ts-app-types",
 ]
 
@@ -729,7 +792,7 @@ dependencies = [
 name = "guardrail3-ts-validate-command"
 version = "0.1.0"
 dependencies = [
- "g3-workspace-crawl",
+ "g3rs-workspace-crawl",
  "guardrail3-check-types",
  "guardrail3-ts-app-types",
  "guardrail3-ts-validate-command-assertions",

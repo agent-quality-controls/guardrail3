@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3WorkspaceCrawl;
+use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use guardrail3_ts_app_types::{FamilyResults, FamilyRunError, SupportedFamily};
 
 /// Runs the supported config family group against the prepared crawl.
@@ -14,6 +14,9 @@ pub fn run(
         SupportedFamily::Eslint => Ok(g3ts_eslint_config_checks::check(
             &g3ts_eslint_ingestion::ingest_for_config_checks(crawl),
         )),
+        SupportedFamily::Astro => Err(FamilyRunError {
+            message: "config group does not handle Astro".to_owned(),
+        }),
         SupportedFamily::Arch => Err(FamilyRunError {
             message: "config group does not handle Arch".to_owned(),
         }),

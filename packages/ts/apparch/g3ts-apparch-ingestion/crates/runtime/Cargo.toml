@@ -27,7 +27,7 @@ shared = true
 all-features = true
 
 [dependencies]
-g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
+g3-workspace-crawl = { path = "../../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 g3ts-apparch-types = { path = "../../../g3ts-apparch-types", version = "0.1.0" }
 tree-sitter = "0.25.9"
 tree-sitter-typescript = "0.23.2"

@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3WorkspaceCrawl;
+use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use guardrail3_ts_app_types::{
     FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily, ValidateRequest,
     WorkspaceCrawler,
@@ -19,13 +19,14 @@ impl FamilyRunner for CliFamilyRunner {
     ) -> Result<FamilyResults, FamilyRunError> {
         match family {
             SupportedFamily::Eslint
+            | SupportedFamily::Astro
             | SupportedFamily::Arch
             | SupportedFamily::Apparch
             | SupportedFamily::Tsconfig
             | SupportedFamily::Package
             | SupportedFamily::Npmrc
             | SupportedFamily::Jscpd => match family {
-                SupportedFamily::Arch | SupportedFamily::Apparch => {
+                SupportedFamily::Astro | SupportedFamily::Arch | SupportedFamily::Apparch => {
                     guardrail3_ts_family_runner_structure::run(family, crawl)
                 }
                 SupportedFamily::Eslint

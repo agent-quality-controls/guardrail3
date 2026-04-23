@@ -1,4 +1,4 @@
-use g3_workspace_crawl::{G3WorkspaceCrawl, root_file};
+use g3_workspace_crawl::{G3RsWorkspaceCrawl as G3WorkspaceCrawl, root_file};
 use g3ts_jscpd_types::{G3TsJscpdChecksInput, G3TsJscpdRootState, root_snapshot};
 use jscpd_json_parser::{from_path_document, parse_error_reason, typed};
 

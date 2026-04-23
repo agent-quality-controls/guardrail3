@@ -1,0 +1,17 @@
+profile = "library"
+
+allowed_deps = [
+  "eslint-config-parser",
+  "g3-workspace-crawl",
+  "g3ts-eslint-types",
+  "tempfile",
+]
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/assertions/Cargo.toml"
+selector = "structural-split"
+reason = "Assertions crate intentionally keeps one shared proof module per tested ingestion surface."
+
+[checks]
+garde = false
