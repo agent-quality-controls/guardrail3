@@ -141,3 +141,21 @@ fn errors_on_grouped_std_fs_glob_import() {
         }],
     );
 }
+
+#[test]
+fn errors_on_mixed_cfg_any_std_fs_glob_import() {
+    let content = "#[cfg(any(test, unix))]\nuse std::fs::*;\nfn main() {}";
+    let results = super::super::check_source("src/foo.rs", content, false);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("std::fs glob import"),
+            file: Some("src/foo.rs"),
+            inventory: Some(false),
+            message: Some("Direct `use std::fs::*` glob import bypasses clippy method bans."),
+            line: Some(2),
+        }],
+    );
+}

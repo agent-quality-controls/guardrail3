@@ -42,3 +42,19 @@ fn skips_top_level_cfg_test_std_alias_for_glob_import() {
     let results = super::super::check_source("src/foo.rs", content, false);
     assert_rule_results(&results, &[]);
 }
+
+#[test]
+fn skips_cfg_all_test_std_fs_glob_import() {
+    let content = "#[cfg(all(test, unix))]\nuse std::fs::*;\n";
+    let results = super::super::check_source("src/foo.rs", content, false);
+    assert_rule_results(&results, &[]);
+}
+
+#[test]
+fn skips_grouped_non_fs_std_glob_imports() {
+    let direct = "use std::{*};\nfn main() {}";
+    let aliased = "use std as s;\nuse s::{*};\nfn main() {}";
+
+    assert_rule_results(&super::super::check_source("src/foo.rs", direct, false), &[]);
+    assert_rule_results(&super::super::check_source("src/foo.rs", aliased, false), &[]);
+}

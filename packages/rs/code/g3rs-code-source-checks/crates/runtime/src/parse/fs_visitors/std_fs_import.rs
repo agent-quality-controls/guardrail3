@@ -136,7 +136,7 @@ impl<'source> Visit<'source> for StdFsImportVisitor {
         if !self.in_test_context
             && use_tree_matches_std_fs(&use_item.tree, &self.std_aliases, &self.fs_aliases)
         {
-            self.out.push(span_line(use_item.span()));
+            self.out.push(span_line(use_item.tree.span()));
         }
         syn::visit::visit_item_use(self, use_item);
         self.restore_test_context(was);

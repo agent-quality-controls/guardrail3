@@ -212,6 +212,26 @@ fn errors_on_alias_backed_grouped_std_fs_self_import() {
 }
 
 #[test]
+fn errors_on_mixed_cfg_any_std_fs_import() {
+    let content = "#[cfg(any(test, unix))]\nuse std::fs;\nfn main() {}";
+    let results = super::super::check_source("src/foo.rs", content, false);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Some(G3Severity::Error),
+            title: Some("direct std::fs import"),
+            file: Some("src/foo.rs"),
+            inventory: Some(false),
+            message: Some(
+                "Direct `use std::fs` import found: `use std::fs;`. Route filesystem access through a dedicated `fs` module or crate instead of using `std::fs` directly.",
+            ),
+            line: Some(2),
+        }],
+    );
+}
+
+#[test]
 fn does_not_leak_std_alias_across_sibling_functions_for_import() {
     let content = "fn define_alias() {\n    use std as s;\n}\nfn probe() {\n    use s::fs;\n}";
     let results = super::super::check_source("src/foo.rs", content, false);
