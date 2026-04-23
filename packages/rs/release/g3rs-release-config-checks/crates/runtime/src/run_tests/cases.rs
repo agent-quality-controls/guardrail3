@@ -4,9 +4,8 @@ use cargo_toml_parser::types::{CargoToml, InheritableValue, WorkspacePackageSect
 use g3rs_release_config_checks_assertions::run as run_assertions;
 use g3rs_release_types::{
     G3RsReleaseConfigChecksInput, G3RsReleaseConfigCrate, G3RsReleaseConfigEdge,
-    G3RsReleaseConfigRepo, G3RsReleaseInputFailure, G3RsReleasePathTargetKind,
-    G3RsReleaseWorkflow, G3RsReleaseWorkflowAnalysis, G3RsReleaseWorkflowJob,
-    G3RsReleaseWorkflowStep,
+    G3RsReleaseConfigRepo, G3RsReleaseInputFailure, G3RsReleasePathTargetKind, G3RsReleaseWorkflow,
+    G3RsReleaseWorkflowAnalysis, G3RsReleaseWorkflowJob, G3RsReleaseWorkflowStep,
 };
 use guardrail3_check_types::G3Severity;
 
@@ -86,6 +85,8 @@ resolver = "2"
         workflows: vec![G3RsReleaseWorkflow {
             rel_path: ".github/workflows/release-binaries.yml".to_owned(),
             analysis: G3RsReleaseWorkflowAnalysis {
+                env_keys: vec![],
+                env_bindings: BTreeMap::new(),
                 jobs: vec![
                     G3RsReleaseWorkflowJob {
                         id: "build".to_owned(),
@@ -221,6 +222,8 @@ resolver = "2"
         workflows: vec![G3RsReleaseWorkflow {
             rel_path: ".github/workflows/release-binaries.yml".to_owned(),
             analysis: G3RsReleaseWorkflowAnalysis {
+                env_keys: vec![],
+                env_bindings: BTreeMap::new(),
                 jobs: vec![
                     G3RsReleaseWorkflowJob {
                         id: "build".to_owned(),
