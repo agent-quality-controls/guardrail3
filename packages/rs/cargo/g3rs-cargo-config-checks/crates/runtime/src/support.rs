@@ -285,8 +285,18 @@ pub(crate) fn policy_root_edition(cargo: &CargoToml) -> Option<Result<&str, ()>>
 pub(crate) fn policy_override_lints<'a>(
     root: &'a G3RsCargoPolicyRoot,
     family: &str,
-)-> Option<&'a ToolLints> {
+) -> Option<&'a ToolLints> {
     cargo_toml_parser::document::policy_lints(&root.cargo, family)
+}
+
+pub(crate) fn root_package_policy_lints<'a>(
+    root: &'a G3RsCargoPolicyRoot,
+    family: &str,
+) -> Option<&'a ToolLints> {
+    cargo_toml_parser::document::typed(&root.cargo)?
+        .lints
+        .as_ref()
+        .and_then(|lints| lints.tools.get(family))
 }
 
 pub(crate) fn member_override_lints<'a>(
@@ -309,7 +319,9 @@ pub(crate) fn explicit_allow_entries(lints: Option<&ToolLints>) -> Vec<String> {
     };
     let mut entries = lints
         .iter()
-        .filter_map(|(name, value)| (lint_level_from_value(value) == Some("allow")).then(|| name.clone()))
+        .filter_map(|(name, value)| {
+            (lint_level_from_value(value) == Some("allow")).then(|| name.clone())
+        })
         .collect::<Vec<_>>();
     entries.sort();
     entries
@@ -369,7 +381,10 @@ pub(crate) fn has_valid_lint_level(value: &LintValue) -> bool {
 }
 
 pub(crate) fn lint_level_for_name(lints: &ToolLints, name: &str) -> Option<String> {
-    lints.get(name).and_then(lint_level_from_value).map(str::to_owned)
+    lints
+        .get(name)
+        .and_then(lint_level_from_value)
+        .map(str::to_owned)
 }
 
 pub(crate) fn is_valid_lint_level(level: &str) -> bool {

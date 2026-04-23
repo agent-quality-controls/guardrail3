@@ -39,6 +39,42 @@ fn inventories_documented_approved_allow_entries() {
 }
 
 #[test]
+fn inventories_hybrid_root_package_approved_allow_entries() {
+    let root = root(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            [workspace.lints.clippy]
+            all = { level = "deny", priority = -1 }
+
+            [package]
+            name = "hybrid"
+            version = "0.1.0"
+            edition = "2024"
+
+            [lints.clippy]
+            module_name_repetitions = "allow"
+        "#,
+        parsed_rust_policy(
+            None,
+            vec![waiver(
+                "RS-CARGO-CONFIG-07",
+                "Cargo.toml",
+                "clippy:module_name_repetitions",
+                "Temporary lint suppression while API cleanup lands.",
+            )],
+        ),
+    );
+    let mut results = Vec::new();
+
+    crate::rs_cargo_config_07_approved_allow_inventory::check(&root, &mut results);
+
+    assertions::assert_has_warn(&results, "approved allow entry", false);
+}
+
+#[test]
 fn errors_when_approved_allow_reason_is_too_weak() {
     let root = root(
         r#"
