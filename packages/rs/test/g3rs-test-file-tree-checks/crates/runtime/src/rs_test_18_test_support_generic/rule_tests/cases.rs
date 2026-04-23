@@ -322,6 +322,43 @@ fn reports_canned_fixture_helper_via_module_alias_call() {
 }
 
 #[test]
+fn does_not_report_canned_helper_when_sibling_module_alias_points_to_different_module() {
+    let mut files = active_files();
+    files.push(file(
+        "test_support/src/lib.rs",
+        G3RsTestFileKind::TestSupport,
+        None,
+        Some("lib"),
+        None,
+        "mod canned;\nmod generic;\nuse self::canned::*;\nuse self::generic as h;\npub fn demo_fixture() -> Vec<String> { vec![h::fixture_path(\"demo\")] }\n",
+    ));
+    files.push(file(
+        "test_support/src/canned.rs",
+        G3RsTestFileKind::TestSupport,
+        None,
+        Some("canned"),
+        None,
+        "fn fixture_path() -> &'static str { \"fixtures/demo.json\" }\n",
+    ));
+    files.push(file(
+        "test_support/src/generic.rs",
+        G3RsTestFileKind::TestSupport,
+        None,
+        Some("generic"),
+        None,
+        "pub fn fixture_path(name: &str) -> String { name.to_owned() }\n",
+    ));
+    let results = assertions::check(&input(files, vec![active_component()]));
+
+    assertions::assert_has_inventory(
+        &results,
+        "RS-TEST-FILETREE-18",
+        "test_support stays generic",
+        "test_support/src/lib.rs",
+    );
+}
+
+#[test]
 fn reports_canned_fixture_helper_via_use_alias() {
     let mut files = active_files();
     files.push(file(
@@ -364,6 +401,43 @@ fn reports_semantic_finding_helper_via_module_alias_call() {
         "test_support exports semantic finding helper",
         "test_support/src/lib.rs",
         Some(9),
+    );
+}
+
+#[test]
+fn does_not_report_semantic_helper_when_sibling_module_alias_points_to_different_module() {
+    let mut files = active_files();
+    files.push(file(
+        "test_support/src/lib.rs",
+        G3RsTestFileKind::TestSupport,
+        None,
+        Some("lib"),
+        None,
+        "use guardrail3_domain_report::CheckResult;\nmod semantic;\nmod generic;\nuse self::semantic::*;\nuse self::generic as h;\npub fn report_any_rule(results: &[CheckResult]) -> bool { h::any_rule(results) }\n",
+    ));
+    files.push(file(
+        "test_support/src/semantic.rs",
+        G3RsTestFileKind::TestSupport,
+        None,
+        Some("semantic"),
+        None,
+        "use guardrail3_domain_report::CheckResult;\nfn any_rule(results: &[CheckResult], rule_id: &str) -> bool {\n    results.iter().any(|result| result.id() == rule_id)\n}\n",
+    ));
+    files.push(file(
+        "test_support/src/generic.rs",
+        G3RsTestFileKind::TestSupport,
+        None,
+        Some("generic"),
+        None,
+        "use guardrail3_domain_report::CheckResult;\npub fn any_rule(results: &[CheckResult]) -> bool { results.is_empty() }\n",
+    ));
+    let results = assertions::check(&input(files, vec![active_component()]));
+
+    assertions::assert_has_inventory(
+        &results,
+        "RS-TEST-FILETREE-18",
+        "test_support stays generic",
+        "test_support/src/lib.rs",
     );
 }
 

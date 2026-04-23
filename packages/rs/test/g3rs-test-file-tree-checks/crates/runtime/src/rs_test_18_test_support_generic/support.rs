@@ -35,6 +35,7 @@ pub(super) fn calls_local_helper(
     function: &FunctionInfo,
     local_helpers: &BTreeSet<&str>,
     local_import_aliases: &BTreeMap<String, Vec<String>>,
+    imported_module_helpers: &BTreeMap<String, BTreeSet<String>>,
 ) -> bool {
     function.body.call_paths.iter().any(|path| {
         call_path_uses_local_helper(
@@ -42,6 +43,7 @@ pub(super) fn calls_local_helper(
             local_helpers,
             &function.body.local_call_aliases,
             local_import_aliases,
+            imported_module_helpers,
             &function.body.shadowed_idents,
         )
     })
@@ -51,6 +53,7 @@ pub(super) fn canned_helper_names(
     functions: &[FunctionInfo],
     local_import_aliases: &BTreeMap<String, Vec<String>>,
 ) -> BTreeSet<String> {
+    let imported_module_helpers = BTreeMap::new();
     let mut canned_helpers = functions
         .iter()
         .filter(|function| !function.is_test)
@@ -78,6 +81,7 @@ pub(super) fn canned_helper_names(
                         &helper_refs,
                         &function.body.local_call_aliases,
                         local_import_aliases,
+                        &imported_module_helpers,
                         &function.body.shadowed_idents,
                     )
                 })
@@ -98,6 +102,7 @@ pub(super) fn semantic_helper_names_owned(
     functions: &[FunctionInfo],
     local_import_aliases: &BTreeMap<String, Vec<String>>,
 ) -> BTreeSet<String> {
+    let imported_module_helpers = BTreeMap::new();
     let mut semantic_helpers = functions
         .iter()
         .filter(|function| !function.is_public && !function.is_test)
@@ -140,6 +145,7 @@ pub(super) fn semantic_helper_names_owned(
                         &helper_refs,
                         &function.body.local_call_aliases,
                         local_import_aliases,
+                        &imported_module_helpers,
                         &function.body.shadowed_idents,
                     )
                 })
@@ -187,6 +193,61 @@ pub(super) fn glob_imported_helper_names(
             ));
         }
     }
+
+    (canned_helpers, semantic_helpers)
+}
+
+pub(super) fn imported_module_helper_names(
+    input: &TestSupportFileInput<'_>,
+) -> (BTreeMap<String, BTreeSet<String>>, BTreeMap<String, BTreeSet<String>>) {
+    let mut canned_helpers = BTreeMap::new();
+    let mut semantic_helpers = BTreeMap::new();
+
+    for binding in &input.file.parsed.imports {
+        let Some(local_name) = binding
+            .local_name
+            .clone()
+            .or_else(|| binding.path_segments.last().cloned())
+        else {
+            continue;
+        };
+        let Some(target_paths) =
+            glob_import_target_paths(&input.file.rel_path, &binding.path_segments)
+        else {
+            continue;
+        };
+
+        let mut binding_canned_helpers = BTreeSet::new();
+        let mut binding_semantic_helpers = BTreeSet::new();
+        let mut matched_sibling = false;
+        for sibling in input
+            .sibling_files
+            .iter()
+            .filter(|file| file.rel_path != input.file.rel_path)
+        {
+            if !target_paths.iter().any(|target| target == &sibling.rel_path) {
+                continue;
+            }
+            matched_sibling = true;
+            let local_import_aliases = local_import_aliases(&sibling.parsed.imports);
+            binding_canned_helpers.extend(canned_helper_names(
+                &sibling.parsed.functions,
+                &local_import_aliases,
+            ));
+            binding_semantic_helpers.extend(semantic_helper_names_owned(
+                &sibling.parsed.functions,
+                &local_import_aliases,
+            ));
+        }
+        if !matched_sibling {
+            continue;
+        }
+        let _ = canned_helpers.insert(local_name.clone(), binding_canned_helpers);
+        let _ = semantic_helpers.insert(local_name, binding_semantic_helpers);
+    }
+
+    propagate_imported_module_helper_aliases(&input.file.parsed.imports, &mut canned_helpers);
+    propagate_imported_module_helper_aliases(&input.file.parsed.imports, &mut semantic_helpers);
 
     (canned_helpers, semantic_helpers)
 }
@@ -264,6 +325,7 @@ fn call_path_uses_local_helper(
     local_helpers: &BTreeSet<&str>,
     local_call_aliases: &BTreeMap<String, Vec<String>>,
     local_import_aliases: &BTreeMap<String, Vec<String>>,
+    imported_module_helpers: &BTreeMap<String, BTreeSet<String>>,
     shadowed_idents: &BTreeSet<String>,
 ) -> bool {
     match path {
@@ -292,10 +354,54 @@ fn call_path_uses_local_helper(
         [first, ..]
             if local_import_aliases.contains_key(first) && !shadowed_idents.contains(first) =>
         {
+            if let Some(module_helpers) = imported_module_helpers.get(first) {
+                return path
+                    .last()
+                    .is_some_and(|name| module_helpers.contains(name));
+            }
             path.last()
                 .is_some_and(|name| local_helpers.contains(name.as_str()))
         }
         _ => false,
+    }
+}
+
+fn propagate_imported_module_helper_aliases(
+    imports: &[UseBinding],
+    imported_module_helpers: &mut BTreeMap<String, BTreeSet<String>>,
+) {
+    loop {
+        let mut changed = false;
+        for binding in imports {
+            let Some(local_name) = binding
+                .local_name
+                .clone()
+                .or_else(|| binding.path_segments.last().cloned())
+            else {
+                continue;
+            };
+            if imported_module_helpers.contains_key(&local_name) {
+                continue;
+            }
+            let local_segments = binding
+                .path_segments
+                .iter()
+                .skip_while(|segment| matches!(segment.as_str(), "crate" | "self" | "super"))
+                .collect::<Vec<_>>();
+            let [target] = local_segments.as_slice() else {
+                continue;
+            };
+            let Some(target_helpers) = imported_module_helpers.get(target.as_str()).cloned() else {
+                continue;
+            };
+            let previous = imported_module_helpers.insert(local_name, target_helpers.clone());
+            changed |= previous
+                .as_ref()
+                .is_none_or(|existing| existing != &target_helpers);
+        }
+        if !changed {
+            break;
+        }
     }
 }
 

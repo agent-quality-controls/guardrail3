@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 
 use super::support::{
     calls_local_helper, canned_helper_names, glob_imported_helper_names,
-    helper_name_refs_owned, local_import_aliases, path_mentions_route_construction,
-    semantic_helper_names_owned,
+    helper_name_refs_owned, imported_module_helper_names, local_import_aliases,
+    path_mentions_route_construction, semantic_helper_names_owned,
 };
 use crate::support::TestSupportFileInput;
 use g3rs_test_types::ast::{PublicValueKind, ReturnKind};
@@ -41,6 +41,8 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
     let mut local_semantic_helpers =
         semantic_helper_names_owned(&input.file.parsed.functions, &local_import_aliases);
     let (glob_canned_helpers, glob_semantic_helpers) = glob_imported_helper_names(input);
+    let (imported_module_canned_helpers, imported_module_semantic_helpers) =
+        imported_module_helper_names(input);
     local_canned_helpers.extend(glob_canned_helpers);
     local_semantic_helpers.extend(glob_semantic_helpers);
     let local_canned_helpers = helper_name_refs_owned(&local_canned_helpers);
@@ -171,8 +173,12 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
             path.first()
                 .is_some_and(|first| input.file.parsed.file_value_names.contains(first))
         });
-        let calls_local_canned_helper =
-            calls_local_helper(function, &local_canned_helpers, &local_import_aliases);
+        let calls_local_canned_helper = calls_local_helper(
+            function,
+            &local_canned_helpers,
+            &local_import_aliases,
+            &imported_module_canned_helpers,
+        );
 
         if matches!(
             function.signature.return_kind,
@@ -236,8 +242,12 @@ pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckR
                     .string_literals
                     .iter()
                     .any(|value| value.starts_with("RS-")));
-        let calls_local_semantic_helper =
-            calls_local_helper(function, &local_semantic_helpers, &local_import_aliases);
+        let calls_local_semantic_helper = calls_local_helper(
+            function,
+            &local_semantic_helpers,
+            &local_import_aliases,
+            &imported_module_semantic_helpers,
+        );
         if selects_report_semantics || calls_local_semantic_helper {
             results.push(G3CheckResult::new(
                 ID.to_owned(),
