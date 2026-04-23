@@ -74,6 +74,7 @@ dependencies = [
 name = "g3rs-release-repo-root-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "g3rs-release-repo-root-checks-assertions",
  "g3rs-release-types",
  "guardrail3-check-types",

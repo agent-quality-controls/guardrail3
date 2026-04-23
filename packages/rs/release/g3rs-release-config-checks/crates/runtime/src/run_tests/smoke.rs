@@ -57,6 +57,12 @@ resolver = "2"
             cliff: cliff_toml
                 .map(|value| cliff_toml_parser::parse(value).expect("cliff fixture should parse")),
             workflows: Vec::new(),
+            has_release_plz_workflow: false,
+            release_plz_workflow_rel_path: None,
+            has_publish_dry_run_workflow: false,
+            publish_dry_run_workflow_rel_path: None,
+            has_registry_token_workflow: false,
+            registry_token_workflow_rel_path: None,
             semver_checks_installed: false,
         }],
         crate_checks: vec![publishable_crate("demo")],

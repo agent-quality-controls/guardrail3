@@ -109,6 +109,82 @@ jobs:
 }
 
 #[test]
+fn config_pipeline_detects_registry_token_from_job_env() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["crates/demo"]
+resolver = "2"
+"#,
+    );
+    write(
+        root.join("crates/demo/Cargo.toml"),
+        r#"
+[package]
+name = "demo"
+version = "0.1.0"
+edition = "2024"
+publish = true
+description = "demo crate"
+license = "MIT"
+repository = "https://example.com/demo"
+readme = "README.md"
+"#,
+    );
+    write(root.join("crates/demo/src/lib.rs"), "pub fn demo() {}\n");
+    write(
+        root.join("release-plz.toml"),
+        r#"
+[workspace]
+git_release_enable = true
+release_always = false
+changelog_config = "cliff.toml"
+"#,
+    );
+    write(
+        root.join("cliff.toml"),
+        r#"
+[git]
+conventional_commits = true
+"#,
+    );
+    write(
+        root.join(".github/workflows/release.yml"),
+        r#"
+name: release
+on:
+  push:
+    branches: [main]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+    steps:
+      - uses: release-plz/action@v0
+        with:
+          command: release
+"#,
+    );
+
+    let crawl = crawl(root);
+    let input = super::super::config_input_with_path(&crawl, None);
+
+    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert!(input.repo_checks[0].has_registry_token_workflow, "{input:#?}");
+    assert_eq!(
+        input.repo_checks[0].registry_token_workflow_rel_path.as_deref(),
+        Some(".github/workflows/release.yml"),
+        "{input:#?}"
+    );
+}
+
+#[test]
 fn filetree_pipeline_reports_missing_publishable_readme() {
     let temp = tempdir().expect("create temporary workspace");
     let root = temp.path();

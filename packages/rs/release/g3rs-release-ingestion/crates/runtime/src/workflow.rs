@@ -33,8 +33,20 @@ fn collect_job(
         runs_on,
         needs,
         matrix_axes: matrix_axes_from_job(job),
+        env_keys: Vec::new(),
+        env_bindings: BTreeMap::new(),
         steps: Vec::new(),
     };
+    if let Some(env) = yaml_mapping_value(job, "env").and_then(serde_yaml::Value::as_mapping) {
+        for (key, value) in env {
+            if let Some(key) = key.as_str() {
+                job_facts.env_keys.push(key.to_owned());
+                let _ = job_facts
+                    .env_bindings
+                    .insert(key.to_owned(), scalar_as_string(value).unwrap_or_default());
+            }
+        }
+    }
     if let Some(steps) = yaml_mapping_value(job, "steps").and_then(serde_yaml::Value::as_sequence) {
         for step in steps {
             let step_facts = collect_step(step);
