@@ -92,3 +92,28 @@ fn pipeline_marks_family_inactive_when_no_garde_dependency_and_no_guardrail_toml
     let source_results = g3rs_garde_source_checks::check(&source_input);
     assertions::assert_no_results(&source_results);
 }
+
+#[test]
+fn pipeline_does_not_false_positive_on_duplicate_simple_type_names() {
+    let temp = super::helpers::new_root();
+    let root = temp.path();
+
+    super::helpers::write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n\n[dependencies]\ngarde = \"0.22\"\nserde = { version = \"1\", features = [\"derive\"] }\n",
+    );
+    super::helpers::write(
+        root.join("src/a.rs"),
+        "use garde::Validate;\nuse serde::Deserialize;\n\n#[derive(Deserialize, Validate)]\nstruct Input {\n    payload: Payload,\n}\n\nstruct Payload {\n    value: String,\n}\n",
+    );
+    super::helpers::write(
+        root.join("src/z.rs"),
+        "use garde::Validate;\n\n#[derive(Validate)]\nstruct Payload {\n    value: String,\n}\n",
+    );
+
+    let crawl = super::helpers::crawl(root);
+    let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let results = g3rs_garde_source_checks::check(&input);
+
+    assertions::assert_rule_absent(&results, "RS-GARDE-SOURCE-06", "nested dive false positive");
+}
