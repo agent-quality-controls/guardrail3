@@ -3,7 +3,7 @@ use g3rs_test_types::ast::{FunctionInfo, TestFunctionInfo, TestHarnessFacts, Use
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::rs_test_07_real_proof_site::has_owned_assertion_proof;
-use crate::support::TestFunctionInput;
+use crate::support::{TestFunctionInput, normalized_owned_assertion_relative_segments};
 
 const ID: &str = "RS-TEST-SOURCE-17";
 
@@ -208,13 +208,11 @@ fn owned_assertion_alias_names(
     };
 
     let mut owned_assertion_aliases = std::collections::BTreeMap::new();
+    let mut root_prefixes = std::collections::BTreeMap::from([(assertions_package_name.to_owned(), Vec::new())]);
 
     loop {
         let mut changed = false;
         for binding in imports {
-            let Some(first) = binding.path_segments.first() else {
-                continue;
-            };
             let Some(local_name) = binding
                 .local_name
                 .as_ref()
@@ -222,29 +220,22 @@ fn owned_assertion_alias_names(
             else {
                 continue;
             };
-
-            if first == assertions_package_name {
-                let qualified = binding.path_segments[1..].join("::");
-                if !qualified.is_empty()
-                    && proof_bearing_assertion_functions.contains(&qualified)
-                {
-                    changed |= insert_owned_assertion_alias(
-                        local_name.clone(),
-                        qualified,
-                        &mut owned_assertion_aliases,
-                    );
-                }
-                continue;
-            }
-
-            if !matches!(first.as_str(), "crate" | "self" | "super") {
-                continue;
-            }
-
-            let Some(target) = binding.path_segments.last() else {
+            let Some(relative_segments) = normalized_owned_assertion_relative_segments(
+                binding,
+                assertions_package_name,
+                &root_prefixes,
+            ) else {
                 continue;
             };
-            if let Some(qualified) = owned_assertion_aliases.get(target).cloned() {
+
+            changed |= root_prefixes
+                .insert(local_name.clone(), relative_segments.clone())
+                .as_ref()
+                .is_none_or(|existing| existing != &relative_segments);
+            let qualified = relative_segments.join("::");
+            if !qualified.is_empty()
+                && proof_bearing_assertion_functions.contains(&qualified)
+            {
                 changed |= insert_owned_assertion_alias(
                     local_name.clone(),
                     qualified,

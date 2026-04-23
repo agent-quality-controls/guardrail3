@@ -213,23 +213,46 @@ pub(crate) fn has_owned_assertion_proof(
     let mut bare_imports = BTreeMap::new();
     let mut glob_prefixes = Vec::new();
 
-    for binding in imports {
-        let Some(relative_segments) =
-            normalized_owned_assertion_relative_segments(binding, assertions_package_name)
-        else {
-            continue;
-        };
+    loop {
+        let mut changed = false;
+        for binding in imports {
+            let Some(relative_segments) = normalized_owned_assertion_relative_segments(
+                binding,
+                assertions_package_name,
+                &root_prefixes,
+            ) else {
+                continue;
+            };
 
-        if let Some(local_name) = binding.local_name.as_ref() {
-            let _ = root_prefixes.insert(local_name.clone(), relative_segments.clone());
-            if !relative_segments.is_empty() {
-                let _ = bare_imports.insert(local_name.clone(), relative_segments.join("::"));
+            if let Some(local_name) = binding.local_name.as_ref() {
+                changed |= root_prefixes
+                    .insert(local_name.clone(), relative_segments.clone())
+                    .as_ref()
+                    .is_none_or(|existing| existing != &relative_segments);
+                if !relative_segments.is_empty() {
+                    let qualified = relative_segments.join("::");
+                    changed |= bare_imports
+                        .insert(local_name.clone(), qualified.clone())
+                        .as_ref()
+                        .is_none_or(|existing| existing != &qualified);
+                }
+            } else if let Some(last) = relative_segments.last().cloned() {
+                changed |= root_prefixes
+                    .insert(last.clone(), relative_segments.clone())
+                    .as_ref()
+                    .is_none_or(|existing| existing != &relative_segments);
+                let qualified = relative_segments.join("::");
+                changed |= bare_imports
+                    .insert(last, qualified.clone())
+                    .as_ref()
+                    .is_none_or(|existing| existing != &qualified);
+            } else if !glob_prefixes.contains(&relative_segments) {
+                glob_prefixes.push(relative_segments);
+                changed = true;
             }
-        } else if let Some(last) = relative_segments.last().cloned() {
-            let _ = root_prefixes.insert(last.clone(), relative_segments.clone());
-            let _ = bare_imports.insert(last, relative_segments.join("::"));
-        } else {
-            glob_prefixes.push(relative_segments);
+        }
+        if !changed {
+            break;
         }
     }
 
