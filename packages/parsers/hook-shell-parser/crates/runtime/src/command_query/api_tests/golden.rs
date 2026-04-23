@@ -67,6 +67,13 @@ fn visits_commands_with_persisted_export_state() {
 }
 
 #[test]
+fn resolves_shell_command_string_after_clustered_c_flag() {
+    let script = "bash -ceu 'g3rs validate --path .'";
+
+    query_assertions::assert_script_has_resolved_command(script, "g3rs", "validate --path .");
+}
+
+#[test]
 fn visits_commands_with_env_wrapper_state_changes() {
     let parsed =
         parse_script_for_tests("export RUSTFLAGS='-D warnings'\nenv -u RUSTFLAGS cargo clippy\n");

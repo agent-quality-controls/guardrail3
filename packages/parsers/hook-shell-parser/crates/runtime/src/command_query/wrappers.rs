@@ -120,22 +120,17 @@ where
             return false;
         }
 
-        if let Some(value) = shell_inline_script(flag) {
-            script = Some(value.to_owned());
-            continue;
-        }
-
-        if shell_cluster_uses_next_script(flag) {
-            script = Some(cursor.next().unwrap_or_default().to_owned());
-            continue;
-        }
-
         if let Some((flag_name, value)) = flag.split_once('=')
             && lex::shell_flag_takes_value(flag_name)
         {
             if flag_name == "-c" {
                 script = Some(value.to_owned());
             }
+            continue;
+        }
+
+        if shell_cluster_uses_next_script(flag) {
+            script = Some(cursor.next().unwrap_or_default().to_owned());
             continue;
         }
 
@@ -242,22 +237,11 @@ where
     )
 }
 
-fn shell_inline_script(flag: &str) -> Option<&str> {
-    if !flag.starts_with('-') || flag.starts_with("--") {
-        return None;
-    }
-
-    let short = &flag[1..];
-    let c_pos = short.find('c')?;
-    let attached = short.get(c_pos + 1..)?;
-    (!attached.is_empty()).then_some(attached)
-}
-
 fn shell_cluster_uses_next_script(flag: &str) -> bool {
     if !flag.starts_with('-') || flag.starts_with("--") {
         return false;
     }
 
     let short = &flag[1..];
-    short.len() > 1 && short.ends_with('c')
+    short.contains('c')
 }
