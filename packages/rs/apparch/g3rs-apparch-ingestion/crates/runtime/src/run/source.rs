@@ -18,60 +18,63 @@ pub fn ingest_for_source_checks(
     let view = CrawlView::new(crawl);
     let workspace = load_workspace_root(&view)?;
     let records = collect_workspace_crates(&view, &workspace)?;
-
-    let mut public_items_by_crate = BTreeMap::new();
-    for record in &records {
-        let _ = public_items_by_crate.insert(
-            record.krate.cargo_rel_path.clone(),
-            collect_public_items_for_crate(&view, record)?,
-        );
-    }
+    let io_traits_checks = records
+        .iter()
+        .filter(|record| {
+            matches!(
+                record.krate.layer,
+                Some(apparch::G3RsApparchLayer::IoInbound)
+                    | Some(apparch::G3RsApparchLayer::IoOutbound)
+            )
+        })
+        .map(|record| {
+            Ok(apparch::G3RsApparchIoTraitsSourceChecksInput {
+                krate: record.krate.clone(),
+                public_traits: collect_public_items_for_crate(
+                    &view,
+                    record,
+                    ChildModuleVisibility::InheritParent,
+                )?
+                .into_iter()
+                .filter(|item| item.kind == apparch::G3RsApparchPublicItemKind::Trait)
+                .collect(),
+            })
+        })
+        .collect::<Result<Vec<_>, G3RsApparchIngestionError>>()?;
+    let types_public_surface_checks = records
+        .iter()
+        .filter(|record| record.krate.layer == Some(apparch::G3RsApparchLayer::Types))
+        .map(|record| {
+            Ok(apparch::G3RsApparchTypesPublicSurfaceChecksInput {
+                krate: record.krate.clone(),
+                public_behavior_items: collect_public_items_for_crate(
+                    &view,
+                    record,
+                    ChildModuleVisibility::IntersectWithParent,
+                )?
+                .into_iter()
+                .filter(|item| {
+                    matches!(
+                        item.kind,
+                        apparch::G3RsApparchPublicItemKind::FreeFunction
+                            | apparch::G3RsApparchPublicItemKind::InherentMethod
+                    )
+                })
+                .collect(),
+            })
+        })
+        .collect::<Result<Vec<_>, G3RsApparchIngestionError>>()?;
 
     Ok(apparch::G3RsApparchSourceChecksInput {
-        io_traits_checks: records
-            .iter()
-            .filter(|record| {
-                matches!(
-                    record.krate.layer,
-                    Some(apparch::G3RsApparchLayer::IoInbound)
-                        | Some(apparch::G3RsApparchLayer::IoOutbound)
-                )
-            })
-            .map(|record| apparch::G3RsApparchIoTraitsSourceChecksInput {
-                krate: record.krate.clone(),
-                public_traits: public_items_by_crate
-                    .remove(&record.krate.cargo_rel_path)
-                    .unwrap_or_default()
-                    .into_iter()
-                    .filter(|item| item.kind == apparch::G3RsApparchPublicItemKind::Trait)
-                    .collect(),
-            })
-            .collect(),
-        types_public_surface_checks: records
-            .iter()
-            .filter(|record| record.krate.layer == Some(apparch::G3RsApparchLayer::Types))
-            .map(|record| apparch::G3RsApparchTypesPublicSurfaceChecksInput {
-                krate: record.krate.clone(),
-                public_behavior_items: public_items_by_crate
-                    .remove(&record.krate.cargo_rel_path)
-                    .unwrap_or_default()
-                    .into_iter()
-                    .filter(|item| {
-                        matches!(
-                            item.kind,
-                            apparch::G3RsApparchPublicItemKind::FreeFunction
-                                | apparch::G3RsApparchPublicItemKind::InherentMethod
-                        )
-                    })
-                    .collect(),
-            })
-            .collect(),
+        io_traits_checks,
+        types_public_surface_checks,
     })
 }
 
 fn collect_public_items_for_crate(
     view: &CrawlView<'_>,
     record: &CrateRecord,
+    child_module_visibility: ChildModuleVisibility,
 ) -> Result<Vec<apparch::G3RsApparchPublicItem>, G3RsApparchIngestionError> {
     let entrypoints = determine_entrypoints(view, record);
     let mut public_items = Vec::new();
@@ -83,6 +86,7 @@ fn collect_public_items_for_crate(
             &record.krate.cargo_rel_path,
             &mut visited,
             true,
+            child_module_visibility,
             &mut public_items,
         )?;
     }
@@ -129,6 +133,7 @@ fn walk_module_file(
     cargo_rel_path: &str,
     visited: &mut BTreeMap<String, bool>,
     public_module: bool,
+    child_module_visibility: ChildModuleVisibility,
     public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
 ) -> Result<(), G3RsApparchIngestionError> {
     match visited.get(rel_path).copied() {
@@ -170,6 +175,7 @@ fn walk_module_file(
         &parsed.items,
         visited,
         public_module,
+        child_module_visibility,
         public_items,
     )
 }
@@ -181,12 +187,13 @@ fn walk_items(
     items: &[syn::Item],
     visited: &mut BTreeMap<String, bool>,
     public_module: bool,
+    child_module_visibility: ChildModuleVisibility,
     public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
 ) -> Result<(), G3RsApparchIngestionError> {
     for item in items {
         if is_cfg_test_only(item.attrs()) {
             continue;
-        }
+            }
         match item {
             syn::Item::Trait(item_trait) => {
                 if public_module && matches!(item_trait.vis, syn::Visibility::Public(_)) {
@@ -232,6 +239,7 @@ fn walk_items(
                 }
             }
             syn::Item::Mod(item_mod) => {
+                let child_public_module = child_module_visibility.apply(public_module, &item_mod.vis);
                 if let Some((_, nested_items)) = &item_mod.content {
                     walk_items(
                         view,
@@ -239,7 +247,8 @@ fn walk_items(
                         cargo_rel_path,
                         nested_items,
                         visited,
-                        public_module,
+                        child_public_module,
+                        child_module_visibility,
                         public_items,
                     )?;
                 } else {
@@ -249,7 +258,8 @@ fn walk_items(
                         &module_path,
                         cargo_rel_path,
                         visited,
-                        public_module,
+                        child_public_module,
+                        child_module_visibility,
                         public_items,
                     )?;
                 }
@@ -268,6 +278,23 @@ fn self_type_name(self_ty: &syn::Type) -> Option<String> {
             .last()
             .map(|segment| segment.ident.to_string()),
         _ => None,
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ChildModuleVisibility {
+    InheritParent,
+    IntersectWithParent,
+}
+
+impl ChildModuleVisibility {
+    fn apply(self, parent_is_public: bool, visibility: &syn::Visibility) -> bool {
+        match self {
+            Self::InheritParent => parent_is_public,
+            Self::IntersectWithParent => {
+                parent_is_public && matches!(visibility, syn::Visibility::Public(_))
+            }
+        }
     }
 }
 
