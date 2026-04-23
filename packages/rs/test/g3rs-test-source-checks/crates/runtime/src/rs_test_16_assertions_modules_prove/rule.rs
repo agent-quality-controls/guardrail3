@@ -1,5 +1,7 @@
+use std::collections::BTreeMap;
+
 use g3rs_test_types::G3RsTestFileKind;
-use g3rs_test_types::ast::{FieldAccessInfo, FunctionInfo};
+use g3rs_test_types::ast::{FieldAccessInfo, FunctionInfo, UseBinding};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{AssertionsModuleInput, TestFunctionInput};
@@ -100,24 +102,48 @@ pub(crate) fn check_sidecar_semantic_proof(
 }
 
 fn owns_sidecar_semantic_proof(input: &TestFunctionInput<'_>) -> bool {
+    let local_semantic_helpers =
+        local_semantic_helper_names(&input.file.parsed.functions, &input.file.parsed.imports);
+    let imported_local_helpers = imported_local_helper_names(&input.file.parsed.imports);
+
     owns_result_shape_assertion(
         &input.function.body.field_accesses,
         &input.function.body.method_names,
         &input.function.body.path_uses,
-    ) || local_semantic_helper_names(&input.file.parsed.functions)
-        .iter()
-        .any(|helper| {
-            input.function.body.call_paths.iter().any(|path| {
-                path.len() == 1
-                    && path[0] == *helper
-                    && !input.function.body.shadowed_idents.contains(&path[0])
-            })
-        })
+    ) || input.function.body.call_paths.iter().any(|path| {
+        if path.len() == 1 {
+            let direct_local_helper = local_semantic_helpers.contains(path[0].as_str())
+                && !input.function.body.shadowed_idents.contains(&path[0]);
+            let local_alias_helper = input
+                .function
+                .body
+                .local_call_aliases
+                .get(&path[0])
+                .and_then(|alias| alias.last())
+                .is_some_and(|name| local_semantic_helpers.contains(name.as_str()));
+            let imported_local_helper = !input.function.body.shadowed_idents.contains(&path[0])
+                && import_alias_targets_local_helper(
+                    &path[0],
+                    &local_semantic_helpers,
+                    &imported_local_helpers,
+                );
+            return direct_local_helper || local_alias_helper || imported_local_helper;
+        }
+
+        matches!(
+            path.first().map(String::as_str),
+            Some("crate" | "self" | "super")
+        ) && path
+            .last()
+            .is_some_and(|name| local_semantic_helpers.contains(name.as_str()))
+    })
 }
 
 fn local_semantic_helper_names<'a>(
     functions: &'a [FunctionInfo],
+    imports: &[UseBinding],
 ) -> std::collections::BTreeSet<&'a str> {
+    let imported_local_helpers = imported_local_helper_names(imports);
     let mut semantic_helpers = functions
         .iter()
         .filter(|function| !function.is_test)
@@ -138,9 +164,31 @@ fn local_semantic_helper_names<'a>(
                 continue;
             }
             if function.body.call_paths.iter().any(|path| {
-                path.len() == 1
+                (path.len() == 1
                     && semantic_helpers.contains(path[0].as_str())
-                    && !function.body.shadowed_idents.contains(&path[0])
+                    && !function.body.shadowed_idents.contains(&path[0]))
+                    || (path.len() == 1
+                        && function
+                            .body
+                            .local_call_aliases
+                            .get(&path[0])
+                            .and_then(|alias| alias.last())
+                            .is_some_and(|name| semantic_helpers.contains(name.as_str())))
+                    || (path.len() == 1
+                        && !function.body.shadowed_idents.contains(&path[0])
+                        && import_alias_targets_local_helper(
+                            &path[0],
+                            &semantic_helpers,
+                            &imported_local_helpers,
+                        ))
+                    || (path.len() > 1
+                        && matches!(
+                            path.first().map(String::as_str),
+                            Some("crate" | "self" | "super")
+                        )
+                        && path
+                            .last()
+                            .is_some_and(|name| semantic_helpers.contains(name.as_str())))
             }) {
                 changed |= semantic_helpers.insert(function.name.as_str());
             }
@@ -151,6 +199,59 @@ fn local_semantic_helper_names<'a>(
     }
 
     semantic_helpers
+}
+
+fn imported_local_helper_names(imports: &[UseBinding]) -> BTreeMap<String, Vec<String>> {
+    let mut imported_local_helpers = BTreeMap::new();
+
+    for binding in imports {
+        let Some(first) = binding.path_segments.first() else {
+            continue;
+        };
+        if !matches!(first.as_str(), "crate" | "self" | "super") {
+            continue;
+        }
+        let Some(local_name) = binding.local_name.as_ref().or_else(|| binding.path_segments.last())
+        else {
+            continue;
+        };
+        let _ = imported_local_helpers.insert(local_name.clone(), binding.path_segments.clone());
+    }
+
+    imported_local_helpers
+}
+
+fn import_alias_targets_local_helper(
+    name: &str,
+    local_helpers: &std::collections::BTreeSet<&str>,
+    imported_local_helpers: &BTreeMap<String, Vec<String>>,
+) -> bool {
+    let mut current = name;
+    let mut seen = std::collections::BTreeSet::new();
+
+    loop {
+        if local_helpers.contains(current) {
+            return true;
+        }
+        if !seen.insert(current.to_owned()) {
+            return false;
+        }
+        let Some(target) = imported_local_helpers.get(current) else {
+            return false;
+        };
+        if target
+            .first()
+            .is_some_and(|segment| matches!(segment.as_str(), "crate" | "self" | "super"))
+        {
+            return target
+                .last()
+                .is_some_and(|name| local_helpers.contains(name.as_str()));
+        }
+        let Some(next) = target.last() else {
+            return false;
+        };
+        current = next;
+    }
 }
 
 fn owns_result_shape_assertion(

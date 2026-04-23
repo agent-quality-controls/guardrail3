@@ -86,3 +86,91 @@ fn inventories_sidecar_delegating_semantic_proof() {
         "src/feature_tests/mod.rs",
     );
 }
+
+#[test]
+fn reports_sidecar_owning_semantic_result_assertions_through_self_qualified_helper() {
+    let results = assertions::check(&assertions::input(
+        vec![assertions::file(
+            "src/feature_tests/mod.rs",
+            G3RsTestFileKind::InternalSidecarMod,
+            Some("demo_assertions"),
+            "fn helper(result: CheckResult) {\n    assert_eq!(result.id(), \"\");\n}\n#[test]\nfn sidecar() {\n    let result = CheckResult::new(String::new(), Severity::Info, String::new(), String::new(), None, None);\n    self::helper(result);\n}\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-16",
+        G3Severity::Error,
+        "sidecar owns semantic result assertion",
+        "src/feature_tests/mod.rs",
+        Some(5),
+    );
+}
+
+#[test]
+fn reports_sidecar_owning_semantic_result_assertions_through_imported_helper_alias() {
+    let results = assertions::check(&assertions::input(
+        vec![assertions::file(
+            "src/feature_tests/mod.rs",
+            G3RsTestFileKind::InternalSidecarMod,
+            Some("demo_assertions"),
+            "fn helper(result: CheckResult) {\n    assert_eq!(result.id(), \"\");\n}\nuse self::helper as run;\n#[test]\nfn sidecar() {\n    let result = CheckResult::new(String::new(), Severity::Info, String::new(), String::new(), None, None);\n    run(result);\n}\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-16",
+        G3Severity::Error,
+        "sidecar owns semantic result assertion",
+        "src/feature_tests/mod.rs",
+        Some(6),
+    );
+}
+
+#[test]
+fn reports_sidecar_owning_semantic_result_assertions_through_self_qualified_wrapper() {
+    let results = assertions::check(&assertions::input(
+        vec![assertions::file(
+            "src/feature_tests/mod.rs",
+            G3RsTestFileKind::InternalSidecarMod,
+            Some("demo_assertions"),
+            "fn helper(result: CheckResult) {\n    assert_eq!(result.id(), \"\");\n}\nfn wrapper(result: CheckResult) {\n    self::helper(result);\n}\n#[test]\nfn sidecar() {\n    let result = CheckResult::new(String::new(), Severity::Info, String::new(), String::new(), None, None);\n    wrapper(result);\n}\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-16",
+        G3Severity::Error,
+        "sidecar owns semantic result assertion",
+        "src/feature_tests/mod.rs",
+        Some(8),
+    );
+}
+
+#[test]
+fn reports_sidecar_owning_semantic_result_assertions_through_imported_wrapper_alias() {
+    let results = assertions::check(&assertions::input(
+        vec![assertions::file(
+            "src/feature_tests/mod.rs",
+            G3RsTestFileKind::InternalSidecarMod,
+            Some("demo_assertions"),
+            "fn helper(result: CheckResult) {\n    assert_eq!(result.id(), \"\");\n}\nuse self::helper as run;\nfn wrapper(result: CheckResult) {\n    run(result);\n}\n#[test]\nfn sidecar() {\n    let result = CheckResult::new(String::new(), Severity::Info, String::new(), String::new(), None, None);\n    wrapper(result);\n}\n",
+        )],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_result(
+        &results,
+        "RS-TEST-SOURCE-16",
+        G3Severity::Error,
+        "sidecar owns semantic result assertion",
+        "src/feature_tests/mod.rs",
+        Some(9),
+    );
+}
