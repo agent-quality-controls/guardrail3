@@ -122,6 +122,18 @@ fi
 }
 
 #[test]
+fn warns_when_validation_runs_before_the_config_trigger_check() {
+    let content = r#"
+if true; then
+    g3rs validate --path .
+    echo "$STAGED_FILES" | grep -qE '(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'
+fi
+"#;
+    let results = run_case(content);
+    assertions::assert_missing(&results);
+}
+
+#[test]
 fn warns_when_only_dotted_variants_are_covered() {
     let content = r#"
 if echo "$STAGED_FILES" | grep -qE '(\.clippy\.toml|\.deny\.toml|\.rustfmt\.toml|guardrail3-rs\.toml|rust-toolchain\.toml)$'; then
