@@ -273,11 +273,12 @@ fn dependency_package(
     match dependency {
         Dependency::Simple(_) => dep_name.to_owned(),
         Dependency::Detailed(detail) => {
-            if detail.workspace == Some(true)
-                && let Some(workspace_dep) =
+            if detail.workspace == Some(true) {
+                if let Some(workspace_dep) =
                     workspace_dependencies.and_then(|deps| deps.get(dep_name))
-            {
-                return dependency_package(dep_name, workspace_dep, None);
+                {
+                    return dependency_package(dep_name, workspace_dep, None);
+                }
             }
             detail
                 .package

@@ -38,7 +38,7 @@ fn source_ingest_collects_public_traits_from_nested_modules() {
 }
 
 #[test]
-fn source_ingest_collects_public_trait_from_private_module() {
+fn source_ingest_ignores_public_trait_in_private_child_module() {
     let root = super::helpers::temp_workspace();
     super::helpers::write(
         root.path().join("Cargo.toml"),
@@ -56,7 +56,7 @@ fn source_ingest_collects_public_trait_from_private_module() {
 
     let input = super::helpers::source_input(root.path());
 
-    assert!(contains_io_trait(
+    assert!(!contains_io_trait(
         &input,
         "io/outbound/db/Cargo.toml",
         "io/outbound/db/src/adapter.rs",

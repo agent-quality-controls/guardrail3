@@ -33,7 +33,8 @@ pub fn ingest_for_source_checks(
                 public_traits: collect_public_items_for_crate(
                     &view,
                     record,
-                    ChildModuleVisibility::InheritParent,
+                    ChildModuleVisibility::IntersectWithParent,
+                    false,
                 )?
                 .into_iter()
                 .filter(|item| item.kind == apparch::G3RsApparchPublicItemKind::Trait)
@@ -51,6 +52,7 @@ pub fn ingest_for_source_checks(
                     &view,
                     record,
                     ChildModuleVisibility::IntersectWithParent,
+                    false,
                 )?
                 .into_iter()
                 .filter(|item| {
@@ -75,6 +77,7 @@ fn collect_public_items_for_crate(
     view: &CrawlView<'_>,
     record: &CrateRecord,
     child_module_visibility: ChildModuleVisibility,
+    include_behavior_reexports: bool,
 ) -> Result<Vec<apparch::G3RsApparchPublicItem>, G3RsApparchIngestionError> {
     let entrypoints = determine_entrypoints(view, record);
     let mut public_items = Vec::new();
@@ -87,6 +90,7 @@ fn collect_public_items_for_crate(
             &mut visited,
             true,
             child_module_visibility,
+            include_behavior_reexports,
             &mut public_items,
         )?;
     }
@@ -97,12 +101,12 @@ fn determine_entrypoints(view: &CrawlView<'_>, record: &CrateRecord) -> Vec<Stri
     let mut entrypoints = BTreeSet::new();
     let rel_dir = &record.krate.rel_dir;
 
-    if let Some(lib) = &record.cargo.lib
-        && let Some(path) = &lib.path
-    {
-        let rel_path = CrawlView::join_rel(rel_dir, path);
-        if view.file_exists(&rel_path) {
-            let _ = entrypoints.insert(rel_path);
+    if let Some(lib) = &record.cargo.lib {
+        if let Some(path) = &lib.path {
+            let rel_path = CrawlView::join_rel(rel_dir, path);
+            if view.file_exists(&rel_path) {
+                let _ = entrypoints.insert(rel_path);
+            }
         }
     }
 
@@ -134,6 +138,7 @@ fn walk_module_file(
     visited: &mut BTreeMap<String, bool>,
     public_module: bool,
     child_module_visibility: ChildModuleVisibility,
+    include_behavior_reexports: bool,
     public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
 ) -> Result<(), G3RsApparchIngestionError> {
     match visited.get(rel_path).copied() {
@@ -176,6 +181,7 @@ fn walk_module_file(
         visited,
         public_module,
         child_module_visibility,
+        include_behavior_reexports,
         public_items,
     )
 }
@@ -188,6 +194,7 @@ fn walk_items(
     visited: &mut BTreeMap<String, bool>,
     public_module: bool,
     child_module_visibility: ChildModuleVisibility,
+    include_behavior_reexports: bool,
     public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
 ) -> Result<(), G3RsApparchIngestionError> {
     for item in items {
@@ -197,24 +204,30 @@ fn walk_items(
         match item {
             syn::Item::Trait(item_trait) => {
                 if public_module && matches!(item_trait.vis, syn::Visibility::Public(_)) {
-                    public_items.push(apparch::G3RsApparchPublicItem {
-                        cargo_rel_path: cargo_rel_path.to_owned(),
-                        rel_path: rel_path.to_owned(),
-                        item_name: item_trait.ident.to_string(),
-                        owner_name: None,
-                        kind: apparch::G3RsApparchPublicItemKind::Trait,
-                    });
+                    push_public_item(
+                        public_items,
+                        apparch::G3RsApparchPublicItem {
+                            cargo_rel_path: cargo_rel_path.to_owned(),
+                            rel_path: rel_path.to_owned(),
+                            item_name: item_trait.ident.to_string(),
+                            owner_name: None,
+                            kind: apparch::G3RsApparchPublicItemKind::Trait,
+                        },
+                    );
                 }
             }
             syn::Item::Fn(item_fn) => {
                 if public_module && matches!(item_fn.vis, syn::Visibility::Public(_)) {
-                    public_items.push(apparch::G3RsApparchPublicItem {
-                        cargo_rel_path: cargo_rel_path.to_owned(),
-                        rel_path: rel_path.to_owned(),
-                        item_name: item_fn.sig.ident.to_string(),
-                        owner_name: None,
-                        kind: apparch::G3RsApparchPublicItemKind::FreeFunction,
-                    });
+                    push_public_item(
+                        public_items,
+                        apparch::G3RsApparchPublicItem {
+                            cargo_rel_path: cargo_rel_path.to_owned(),
+                            rel_path: rel_path.to_owned(),
+                            item_name: item_fn.sig.ident.to_string(),
+                            owner_name: None,
+                            kind: apparch::G3RsApparchPublicItemKind::FreeFunction,
+                        },
+                    );
                 }
             }
             syn::Item::Impl(item_impl) => {
@@ -229,13 +242,16 @@ fn walk_items(
                     if !matches!(method.vis, syn::Visibility::Public(_)) {
                         continue;
                     }
-                    public_items.push(apparch::G3RsApparchPublicItem {
-                        cargo_rel_path: cargo_rel_path.to_owned(),
-                        rel_path: rel_path.to_owned(),
-                        item_name: method.sig.ident.to_string(),
-                        owner_name: owner_name.clone(),
-                        kind: apparch::G3RsApparchPublicItemKind::InherentMethod,
-                    });
+                    push_public_item(
+                        public_items,
+                        apparch::G3RsApparchPublicItem {
+                            cargo_rel_path: cargo_rel_path.to_owned(),
+                            rel_path: rel_path.to_owned(),
+                            item_name: method.sig.ident.to_string(),
+                            owner_name: owner_name.clone(),
+                            kind: apparch::G3RsApparchPublicItemKind::InherentMethod,
+                        },
+                    );
                 }
             }
             syn::Item::Mod(item_mod) => {
@@ -249,6 +265,7 @@ fn walk_items(
                         visited,
                         child_public_module,
                         child_module_visibility,
+                        include_behavior_reexports,
                         public_items,
                     )?;
                 } else {
@@ -260,6 +277,20 @@ fn walk_items(
                         visited,
                         child_public_module,
                         child_module_visibility,
+                        include_behavior_reexports,
+                        public_items,
+                    )?;
+                }
+            }
+            syn::Item::Use(item_use) => {
+                if public_module && matches!(item_use.vis, syn::Visibility::Public(_)) {
+                    collect_public_use_items(
+                        view,
+                        rel_path,
+                        cargo_rel_path,
+                        items,
+                        &item_use.tree,
+                        include_behavior_reexports,
                         public_items,
                     )?;
                 }
@@ -268,6 +299,240 @@ fn walk_items(
         }
     }
     Ok(())
+}
+
+fn push_public_item(
+    public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
+    item: apparch::G3RsApparchPublicItem,
+) {
+    if !public_items.iter().any(|existing| existing == &item) {
+        public_items.push(item);
+    }
+}
+
+fn collect_public_use_items(
+    view: &CrawlView<'_>,
+    rel_path: &str,
+    cargo_rel_path: &str,
+    items: &[syn::Item],
+    tree: &syn::UseTree,
+    include_behavior_reexports: bool,
+    public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
+) -> Result<(), G3RsApparchIngestionError> {
+    collect_public_use_items_with_prefix(
+        view,
+        rel_path,
+        cargo_rel_path,
+        items,
+        tree,
+        &mut Vec::new(),
+        include_behavior_reexports,
+        public_items,
+    )
+}
+
+fn collect_public_use_items_with_prefix(
+    view: &CrawlView<'_>,
+    rel_path: &str,
+    cargo_rel_path: &str,
+    items: &[syn::Item],
+    tree: &syn::UseTree,
+    prefix: &mut Vec<String>,
+    include_behavior_reexports: bool,
+    public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
+) -> Result<(), G3RsApparchIngestionError> {
+    match tree {
+        syn::UseTree::Path(path) => {
+            prefix.push(path.ident.to_string());
+            collect_public_use_items_with_prefix(
+                view,
+                rel_path,
+                cargo_rel_path,
+                items,
+                &path.tree,
+                prefix,
+                include_behavior_reexports,
+                public_items,
+            )?;
+            let _ = prefix.pop();
+        }
+        syn::UseTree::Name(name) => {
+            let mut segments = prefix.clone();
+            segments.push(name.ident.to_string());
+            collect_public_use_target(
+                view,
+                rel_path,
+                cargo_rel_path,
+                items,
+                &segments,
+                &name.ident.to_string(),
+                include_behavior_reexports,
+                public_items,
+            )?;
+        }
+        syn::UseTree::Rename(rename) => {
+            let mut segments = prefix.clone();
+            segments.push(rename.ident.to_string());
+            collect_public_use_target(
+                view,
+                rel_path,
+                cargo_rel_path,
+                items,
+                &segments,
+                &rename.rename.to_string(),
+                include_behavior_reexports,
+                public_items,
+            )?;
+        }
+        syn::UseTree::Group(group) => {
+            for item in &group.items {
+                collect_public_use_items_with_prefix(
+                    view,
+                    rel_path,
+                    cargo_rel_path,
+                    items,
+                    item,
+                    prefix,
+                    include_behavior_reexports,
+                    public_items,
+                )?;
+            }
+        }
+        syn::UseTree::Glob(_) => {}
+    }
+    Ok(())
+}
+
+fn collect_public_use_target(
+    view: &CrawlView<'_>,
+    rel_path: &str,
+    cargo_rel_path: &str,
+    items: &[syn::Item],
+    segments: &[String],
+    exported_name: &str,
+    include_behavior_reexports: bool,
+    public_items: &mut Vec<apparch::G3RsApparchPublicItem>,
+) -> Result<(), G3RsApparchIngestionError> {
+    let Some((head, tail)) = segments.split_first() else {
+        return Ok(());
+    };
+
+    if tail.is_empty() {
+        for item in items {
+            if is_cfg_test_only(item.attrs()) {
+                continue;
+            }
+            match item {
+                syn::Item::Trait(item_trait) if item_trait.ident == *head => {
+                    push_public_item(
+                        public_items,
+                        apparch::G3RsApparchPublicItem {
+                            cargo_rel_path: cargo_rel_path.to_owned(),
+                            rel_path: rel_path.to_owned(),
+                            item_name: exported_name.to_owned(),
+                            owner_name: None,
+                            kind: apparch::G3RsApparchPublicItemKind::Trait,
+                        },
+                    );
+                    return Ok(());
+                }
+                syn::Item::Fn(item_fn)
+                    if include_behavior_reexports
+                        && matches!(item_fn.vis, syn::Visibility::Public(_))
+                        && item_fn.sig.ident == *head =>
+                {
+                    push_public_item(
+                        public_items,
+                        apparch::G3RsApparchPublicItem {
+                            cargo_rel_path: cargo_rel_path.to_owned(),
+                            rel_path: rel_path.to_owned(),
+                            item_name: exported_name.to_owned(),
+                            owner_name: None,
+                            kind: apparch::G3RsApparchPublicItemKind::FreeFunction,
+                        },
+                    );
+                    return Ok(());
+                }
+                syn::Item::Impl(item_impl) if include_behavior_reexports => {
+                    let owner_name = self_type_name(item_impl.self_ty.as_ref());
+                    for impl_item in &item_impl.items {
+                        let syn::ImplItem::Fn(method) = impl_item else {
+                            continue;
+                        };
+                        if !matches!(method.vis, syn::Visibility::Public(_))
+                            || method.sig.ident != *head
+                        {
+                            continue;
+                        }
+                        push_public_item(
+                            public_items,
+                            apparch::G3RsApparchPublicItem {
+                                cargo_rel_path: cargo_rel_path.to_owned(),
+                                rel_path: rel_path.to_owned(),
+                                item_name: exported_name.to_owned(),
+                                owner_name: owner_name.clone(),
+                                kind: apparch::G3RsApparchPublicItemKind::InherentMethod,
+                            },
+                        );
+                        return Ok(());
+                    }
+                }
+                _ => {}
+            }
+        }
+        return Ok(());
+    }
+
+    let Some(item_mod) = items.iter().find_map(|item| match item {
+        syn::Item::Mod(item_mod) if item_mod.ident == *head => Some(item_mod),
+        _ => None,
+    }) else {
+        return Ok(());
+    };
+
+    if let Some((_, nested_items)) = &item_mod.content {
+        return collect_public_use_target(
+            view,
+            rel_path,
+            cargo_rel_path,
+            nested_items,
+            tail,
+            exported_name,
+            include_behavior_reexports,
+            public_items,
+        );
+    }
+
+    let module_path = resolve_module_path(view, rel_path, item_mod)?;
+    let Some(entry) = view.entry(&module_path) else {
+        return Ok(());
+    };
+    if !entry.readable {
+        return Ok(());
+    }
+    let content = view.read_file(&module_path).map_err(|error| {
+        G3RsApparchIngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: error.to_string(),
+        }
+    })?;
+    let parsed = syn::parse_file(&content).map_err(|error| G3RsApparchIngestionError::ParseFailed {
+        path: entry.path.abs_path.clone(),
+        reason: error.to_string(),
+    })?;
+    if is_cfg_test_only(&parsed.attrs) {
+        return Ok(());
+    }
+    collect_public_use_target(
+        view,
+        &module_path,
+        cargo_rel_path,
+        &parsed.items,
+        tail,
+        exported_name,
+        include_behavior_reexports,
+        public_items,
+    )
 }
 
 fn self_type_name(self_ty: &syn::Type) -> Option<String> {
@@ -283,14 +548,12 @@ fn self_type_name(self_ty: &syn::Type) -> Option<String> {
 
 #[derive(Clone, Copy)]
 enum ChildModuleVisibility {
-    InheritParent,
     IntersectWithParent,
 }
 
 impl ChildModuleVisibility {
     fn apply(self, parent_is_public: bool, visibility: &syn::Visibility) -> bool {
         match self {
-            Self::InheritParent => parent_is_public,
             Self::IntersectWithParent => {
                 parent_is_public && matches!(visibility, syn::Visibility::Public(_))
             }
