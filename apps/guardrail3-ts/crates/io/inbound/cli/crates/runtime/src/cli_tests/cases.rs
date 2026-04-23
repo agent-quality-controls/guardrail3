@@ -9,6 +9,8 @@ fn parse_command_accepts_family_and_inventory_flags() {
             "--family",
             "eslint",
             "--family",
+            "astro",
+            "--family",
             "arch",
             "--family",
             "apparch",
@@ -24,7 +26,7 @@ fn parse_command_accepts_family_and_inventory_flags() {
         ],
         ".",
         &[
-            "eslint", "arch", "apparch", "tsconfig", "package", "npmrc", "jscpd",
+            "eslint", "astro", "arch", "apparch", "tsconfig", "package", "npmrc", "jscpd",
         ],
         true,
     );
@@ -55,6 +57,16 @@ fn parse_command_accepts_validate_without_family_flag() {
         ["g3ts", "validate", "--path", "."],
         ".",
         &[],
+        false,
+    );
+}
+
+#[test]
+fn parse_command_accepts_astro_family() {
+    guardrail3_ts_assertions::cli::assert_validate_command_from(
+        ["g3ts", "validate", "--path", ".", "--family", "astro"],
+        ".",
+        &["astro"],
         false,
     );
 }

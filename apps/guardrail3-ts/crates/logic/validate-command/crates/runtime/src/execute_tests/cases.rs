@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use g3_workspace_crawl::G3WorkspaceCrawl;
+use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_ts_app_types::{
     FamilyRun, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily, ValidateReport,
@@ -49,6 +49,17 @@ impl FamilyRunner for StubFamilyRunner {
                     Some("eslint.config.mjs".to_owned()),
                     None,
                 ),
+            ],
+            SupportedFamily::Astro => vec![
+                G3CheckResult::new(
+                    "TS-ASTRO-CONFIG-01".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some("astro.config.mjs".to_owned()),
+                    None,
+                )
+                .into_inventory(),
             ],
             SupportedFamily::Arch => vec![
                 G3CheckResult::new(
@@ -250,7 +261,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=7 inventory=false",
+        "runs=8 inventory=false",
         "",
         0,
     );
@@ -268,6 +279,9 @@ impl FamilyRunner for ErroringFamilyRunner {
         match family {
             SupportedFamily::Eslint => Err(FamilyRunError {
                 message: "eslint runner exploded".to_owned(),
+            }),
+            SupportedFamily::Astro => Err(FamilyRunError {
+                message: "astro runner exploded".to_owned(),
             }),
             SupportedFamily::Arch => Err(FamilyRunError {
                 message: "arch runner exploded".to_owned(),

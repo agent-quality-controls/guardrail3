@@ -1,4 +1,4 @@
-use g3_workspace_crawl::{G3WorkspaceCrawl, root_file};
+use g3_workspace_crawl::{G3RsWorkspaceCrawl as G3WorkspaceCrawl, root_file};
 use g3ts_npmrc_types::{G3TsNpmrcChecksInput, G3TsNpmrcRootState, root_snapshot};
 use npmrc_parser::{from_path_document, parse_error_reason, typed};
 

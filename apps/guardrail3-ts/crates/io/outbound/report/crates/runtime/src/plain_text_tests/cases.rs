@@ -79,3 +79,27 @@ fn renderer_includes_rule_message() {
 
     assertions::assert_includes_rule_message(&output);
 }
+
+#[test]
+fn renderer_uses_astro_family_header() {
+    let report = ValidateReport {
+        runs: vec![FamilyRun {
+            family: SupportedFamily::Astro,
+            results: vec![G3CheckResult::new(
+                "TS-ASTRO-FILETREE-01".to_owned(),
+                G3Severity::Error,
+                "astro config missing".to_owned(),
+                "Add `astro.config.*` to the app root.".to_owned(),
+                Some("astro.config.mjs".to_owned()),
+                None,
+            )],
+        }],
+    };
+
+    let output = super::super::render_report(&report, false);
+
+    assert!(
+        output.contains("== astro =="),
+        "expected astro family heading, got: {output}"
+    );
+}

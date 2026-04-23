@@ -27,6 +27,6 @@ all-features = true
 shared = true
 
 [dependencies]
-g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", features = ["api"], default-features = false }
+g3-workspace-crawl = { path = "../../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", version = "0.1.0", features = ["api"], default-features = false }
 g3ts-eslint-ingestion-runtime = { path = "../runtime" }
 g3ts-eslint-types = { path = "../../../g3ts-eslint-types", version = "0.1.0" }

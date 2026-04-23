@@ -3,6 +3,8 @@
 pub enum SupportedFamily {
     /// ESLint checks.
     Eslint,
+    /// Astro framework checks.
+    Astro,
     /// TS architecture checks.
     Arch,
     /// TS app architecture checks.
@@ -18,8 +20,9 @@ pub enum SupportedFamily {
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 7] = [
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 8] = [
     SupportedFamily::Eslint,
+    SupportedFamily::Astro,
     SupportedFamily::Arch,
     SupportedFamily::Apparch,
     SupportedFamily::Tsconfig,

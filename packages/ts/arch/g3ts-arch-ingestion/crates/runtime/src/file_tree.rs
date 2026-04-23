@@ -1,6 +1,9 @@
 use std::collections::BTreeSet;
 
-use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind, G3WorkspaceIgnoreState, entry};
+use g3_workspace_crawl::{
+    G3RsWorkspaceCrawl as G3WorkspaceCrawl, G3RsWorkspaceEntryKind as G3WorkspaceEntryKind,
+    G3RsWorkspaceIgnoreState as G3WorkspaceIgnoreState, entry,
+};
 use g3ts_arch_types::{G3TsArchManifestState, G3TsArchSourceTree};
 
 pub(crate) fn existing_entrypoints(

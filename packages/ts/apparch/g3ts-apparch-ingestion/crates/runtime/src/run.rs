@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3WorkspaceCrawl;
+use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_apparch_types::{G3TsApparchConfigChecksInput, G3TsApparchSourceChecksInput};
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -1,4 +1,7 @@
-use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, root_file};
+use g3_workspace_crawl::{
+    G3RsWorkspaceCrawl as G3WorkspaceCrawl, G3RsWorkspaceEntry as G3WorkspaceEntry,
+    G3RsWorkspaceEntryKind as G3WorkspaceEntryKind, root_file,
+};
 use g3ts_package_types::{
     G3TsPackageChecksInput, G3TsPackageLocalState, G3TsPackageRootState, local_snapshot,
     root_snapshot,

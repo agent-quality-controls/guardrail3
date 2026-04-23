@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use g3_workspace_crawl::G3WorkspaceCrawl;
+use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use guardrail3_ts_app_types::{
     FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily, ValidateReport,
     WorkspaceCrawlError, WorkspaceCrawler,
@@ -142,5 +142,27 @@ fn run_command_uses_real_apparch_wiring_for_forbidden_types_dependency() {
         "== apparch ==\n[Error] TS-APPARCH-CONFIG-01 src/types/user.ts types layer imports forbidden app layer\n  `src/types/user.ts` in `types` imports `src/logic/format_user.ts` in `logic`. Keep `types` passive and move behavior or framework coupling outward.\n",
         "",
         1,
+    );
+}
+
+#[test]
+fn run_command_uses_structure_runner_for_astro_family() {
+    let tempdir = tempfile::tempdir().expect("create temporary ts workspace for astro wiring");
+    std::fs::write(
+        tempdir.path().join("package.json"),
+        "{\n  \"dependencies\": {\n    \"astro\": \"5.0.0\"\n  }\n}\n",
+    )
+    .expect("write temporary workspace package.json for astro wiring");
+
+    let output = super::super::run_command_with_defaults(super::super::Command::Validate {
+        path: tempdir.path().to_path_buf(),
+        family: vec![super::super::super::cli::FamilyArg::Astro],
+        inventory: false,
+    });
+
+    assert!(
+        output.stdout.contains("== astro =="),
+        "expected astro findings on stdout, got: {:?}",
+        output
     );
 }

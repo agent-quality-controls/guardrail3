@@ -35,24 +35,25 @@ The family plans must define which roots each family owns.
 
 The TypeScript families are:
 
-1. `ts/arch`
-2. `ts/eslint`
-3. `ts/tsconfig`
-4. `ts/npmrc`
-5. `ts/package`
-6. `ts/fmt`
-7. `ts/spelling`
-8. `ts/typecov`
-9. `ts/size`
-10. `ts/jscpd`
-11. `ts/css`
-12. `ts/code`
-13. `ts/hexarch`
-14. `ts/libarch`
-15. `ts/content`
-16. `ts/i18n`
-17. `ts/seo`
-18. `ts/tests`
+1. `ts/astro`
+2. `ts/arch`
+3. `ts/eslint`
+4. `ts/tsconfig`
+5. `ts/npmrc`
+6. `ts/package`
+7. `ts/fmt`
+8. `ts/spelling`
+9. `ts/typecov`
+10. `ts/size`
+11. `ts/jscpd`
+12. `ts/css`
+13. `ts/code`
+14. `ts/hexarch`
+15. `ts/libarch`
+16. `ts/content`
+17. `ts/i18n`
+18. `ts/seo`
+19. `ts/tests`
 
 Sibling TS-adjacent plans remain:
 - `.plans/todo/typescript/checks/hooks/ts.md`
@@ -63,6 +64,8 @@ They are not part of the canonical active TS family set.
 
 ## Family intent
 
+- `ts/astro`
+  - Astro framework setup, Astro-specific config requirements, and Astro file-tree contracts
 - `ts/arch`
   - repo-global TS root placement, ownership, and overlap
 - `ts/eslint`

@@ -1,4 +1,4 @@
-use g3_workspace_crawl::{G3WorkspaceCrawl, entry};
+use g3_workspace_crawl::{G3RsWorkspaceCrawl as G3WorkspaceCrawl, entry};
 use g3ts_arch_types::{
     G3TsArchFacadeFileState, G3TsArchFacadeItem, G3TsArchFacadeReexport, G3TsArchFacadeSurface,
     G3TsArchManifestState,

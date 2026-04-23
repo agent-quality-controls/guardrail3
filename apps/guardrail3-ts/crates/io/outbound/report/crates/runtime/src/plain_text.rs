@@ -47,6 +47,7 @@ pub(crate) fn render_report(report: &ValidateReport, include_inventory: bool) ->
 const fn family_cli_name(family: SupportedFamily) -> &'static str {
     match family {
         SupportedFamily::Eslint => "eslint",
+        SupportedFamily::Astro => "astro",
         SupportedFamily::Arch => "arch",
         SupportedFamily::Apparch => "apparch",
         SupportedFamily::Tsconfig => "tsconfig",

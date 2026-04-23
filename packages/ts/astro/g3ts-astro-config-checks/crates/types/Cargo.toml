@@ -1,0 +1,27 @@
+[package]
+name = "g3ts-astro-config-checks-types"
+version.workspace = true
+edition = "2024"
+description = "Types reexports for g3ts astro config checks"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["guardrail3", "typescript", "astro", "types"]
+categories = ["development-tools"]
+publish = false
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+g3ts-astro-types = { path = "../../../g3ts-astro-types", version = "0.1.0" }
+
+[package.metadata.docs.rs]
+all-features = true
