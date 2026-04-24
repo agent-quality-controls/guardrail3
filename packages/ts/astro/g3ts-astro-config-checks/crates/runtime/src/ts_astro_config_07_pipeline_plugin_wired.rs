@@ -28,7 +28,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                     ID,
                     "astro pipeline ESLint plugin wired and effective",
                     format!(
-                        "`{rel_path}` activates `{PLUGIN_NAME}` and enforces the required Astro pipeline rules at error severity."
+                        "`{rel_path}` activates `{PLUGIN_NAME}` and enforces the required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes."
                     ),
                     rel_path,
                 ));
@@ -38,10 +38,10 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 
         let message = match rel_path {
             Some(rel_path) => format!(
-                "`{rel_path}` does not activate `{PLUGIN_NAME}` with all required Astro pipeline rules at error severity. Enable the `astro-pipeline` plugin and set the required Astro pipeline rules to `error` in `{rel_path}`. Route and endpoint code must fail closed when it bypasses the approved Astro content pipeline."
+                "`{rel_path}` does not activate `{PLUGIN_NAME}` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes. Enable the `astro-pipeline` plugin and set the required Astro pipeline rules to `error` in the Astro, TS, and TSX lane configs in `{rel_path}`. Astro source files must run through the shared pipeline rules so route bypass checks and runtime MDX checks actually execute."
             ),
             None => format!(
-                "The Astro pipeline ESLint wiring contract could not be checked because `eslint.config.*` was not available. Restore the app ESLint config and enable `astro-pipeline` with the required rules there. Route and endpoint code must fail closed when it bypasses the approved Astro content pipeline."
+                "The Astro pipeline ESLint wiring contract could not be checked because `eslint.config.*` was not available. Restore the app ESLint config and enable `astro-pipeline` with the required rules on the Astro, TS, and TSX source lanes there. Astro source files must run through the shared pipeline rules so route bypass checks and runtime MDX checks actually execute."
             ),
         };
         results.push(crate::support::error(

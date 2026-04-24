@@ -89,6 +89,27 @@ pub(super) fn missing_pipeline_rule_enforcement() -> G3TsAstroConfigChecksInput 
     }
 }
 
+pub(super) fn route_only_pipeline_wiring() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_lanes(
+                true,
+                LanePresence {
+                    astro: true,
+                    ts: false,
+                    tsx: false,
+                },
+                true,
+            ),
+        )],
+    }
+}
+
 pub(super) fn optional_contracts_not_required() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
@@ -187,6 +208,28 @@ fn parsed_eslint(
     has_pipeline_plugin: bool,
     has_required_pipeline_rules: bool,
 ) -> G3TsAstroEslintSurfaceState {
+    let pipeline_lanes = if has_pipeline_plugin {
+        LanePresence {
+            astro: true,
+            ts: true,
+            tsx: true,
+        }
+    } else {
+        LanePresence::none()
+    };
+
+    parsed_eslint_with_pipeline_lanes(
+        has_astro_plugin,
+        pipeline_lanes,
+        has_required_pipeline_rules,
+    )
+}
+
+fn parsed_eslint_with_pipeline_lanes(
+    has_astro_plugin: bool,
+    pipeline_lanes: LanePresence,
+    has_required_pipeline_rules: bool,
+) -> G3TsAstroEslintSurfaceState {
     let mut astro_source_plugins = Vec::new();
     let mut ts_source_plugins = Vec::new();
     let mut tsx_source_plugins = Vec::new();
@@ -198,9 +241,13 @@ fn parsed_eslint(
         ts_source_plugins.push("astro".to_owned());
         tsx_source_plugins.push("astro".to_owned());
     }
-    if has_pipeline_plugin {
+    if pipeline_lanes.astro {
         astro_source_plugins.push("astro-pipeline".to_owned());
+    }
+    if pipeline_lanes.ts {
         ts_source_plugins.push("astro-pipeline".to_owned());
+    }
+    if pipeline_lanes.tsx {
         tsx_source_plugins.push("astro-pipeline".to_owned());
     }
     if has_required_pipeline_rules {
@@ -228,5 +275,22 @@ fn parsed_eslint(
             ts_source_error_rules,
             tsx_source_error_rules,
         },
+    }
+}
+
+#[derive(Clone, Copy)]
+struct LanePresence {
+    astro: bool,
+    ts: bool,
+    tsx: bool,
+}
+
+impl LanePresence {
+    const fn none() -> Self {
+        Self {
+            astro: false,
+            ts: false,
+            tsx: false,
+        }
     }
 }
