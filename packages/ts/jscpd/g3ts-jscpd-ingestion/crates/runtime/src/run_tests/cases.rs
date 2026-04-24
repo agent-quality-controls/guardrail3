@@ -24,6 +24,48 @@ fn parses_root_jscpd_when_present() {
 }
 
 #[test]
+fn parses_ancestor_root_jscpd_when_validating_nested_app_root() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace");
+    super::helpers::write(
+        tempdir.path(),
+        ".jscpd.json",
+        r#"{ "threshold": 0, "minTokens": 50, "absolute": true, "format": ["typescript"] }"#,
+    );
+    super::helpers::write(
+        tempdir.path(),
+        "apps/landing/package.json",
+        r#"{ "name": "landing" }"#,
+    );
+
+    let crawl =
+        g3_workspace_crawl::crawl(&tempdir.path().join("apps/landing")).expect("crawl app root");
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    g3ts_jscpd_ingestion_assertions::run::assert_root_parsed(&input, "../../.jscpd.json");
+}
+
+#[test]
+fn prefers_nested_root_jscpd_over_ancestor_root_jscpd() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace");
+    super::helpers::write(
+        tempdir.path(),
+        ".jscpd.json",
+        r#"{ "threshold": 1, "minTokens": 50, "absolute": false, "format": ["typescript"] }"#,
+    );
+    super::helpers::write(
+        tempdir.path(),
+        "apps/landing/.jscpd.json",
+        r#"{ "threshold": 0, "minTokens": 50, "absolute": true, "format": ["typescript"] }"#,
+    );
+
+    let crawl =
+        g3_workspace_crawl::crawl(&tempdir.path().join("apps/landing")).expect("crawl app root");
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    g3ts_jscpd_ingestion_assertions::run::assert_root_parsed(&input, ".jscpd.json");
+}
+
+#[test]
 fn surfaces_parse_error_for_invalid_root_jscpd() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace");
     super::helpers::write(tempdir.path(), ".jscpd.json", "{ invalid ");
@@ -32,6 +74,23 @@ fn surfaces_parse_error_for_invalid_root_jscpd() {
     let input = super::super::ingest_for_config_checks(&crawl);
 
     g3ts_jscpd_ingestion_assertions::run::assert_root_parse_error(&input, ".jscpd.json");
+}
+
+#[test]
+fn surfaces_parse_error_for_invalid_ancestor_root_jscpd() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace");
+    super::helpers::write(tempdir.path(), ".jscpd.json", "{ invalid ");
+    super::helpers::write(
+        tempdir.path(),
+        "apps/landing/package.json",
+        r#"{ "name": "landing" }"#,
+    );
+
+    let crawl =
+        g3_workspace_crawl::crawl(&tempdir.path().join("apps/landing")).expect("crawl app root");
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    g3ts_jscpd_ingestion_assertions::run::assert_root_parse_error(&input, "../../.jscpd.json");
 }
 
 #[cfg(unix)]
