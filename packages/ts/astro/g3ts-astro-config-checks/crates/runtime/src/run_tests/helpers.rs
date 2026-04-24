@@ -89,6 +89,46 @@ pub(super) fn missing_pipeline_rule_enforcement() -> G3TsAstroConfigChecksInput 
     }
 }
 
+pub(super) fn missing_pipeline_scope_options() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_contract(
+                true,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_without_scope_options(),
+                    ts: PipelineLaneState::rules_without_scope_options(),
+                    tsx: PipelineLaneState::rules_without_scope_options(),
+                },
+            ),
+        )],
+    }
+}
+
+pub(super) fn endpoint_only_pipeline_scope_options() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_contract(
+                true,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_with_endpoint_scope(),
+                    ts: PipelineLaneState::rules_with_endpoint_scope(),
+                    tsx: PipelineLaneState::rules_with_endpoint_scope(),
+                },
+            ),
+        )],
+    }
+}
+
 pub(super) fn route_only_pipeline_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
@@ -97,14 +137,13 @@ pub(super) fn route_only_pipeline_wiring() -> G3TsAstroConfigChecksInput {
         )],
         eslint_contracts: vec![eslint_contract(
             true,
-            parsed_eslint_with_pipeline_lanes(
+            parsed_eslint_with_pipeline_contract(
                 true,
-                LanePresence {
-                    astro: true,
-                    ts: false,
-                    tsx: false,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_with_scope(),
+                    ts: PipelineLaneState::disabled(),
+                    tsx: PipelineLaneState::disabled(),
                 },
-                true,
             ),
         )],
     }
@@ -208,59 +247,48 @@ fn parsed_eslint(
     has_pipeline_plugin: bool,
     has_required_pipeline_rules: bool,
 ) -> G3TsAstroEslintSurfaceState {
-    let pipeline_lanes = if has_pipeline_plugin {
-        LanePresence {
-            astro: true,
-            ts: true,
-            tsx: true,
-        }
+    let lane_state = if !has_pipeline_plugin {
+        PipelineLaneState::disabled()
+    } else if has_required_pipeline_rules {
+        PipelineLaneState::rules_with_scope()
     } else {
-        LanePresence::none()
+        PipelineLaneState::plugin_only()
     };
 
-    parsed_eslint_with_pipeline_lanes(
+    parsed_eslint_with_pipeline_contract(
         has_astro_plugin,
-        pipeline_lanes,
-        has_required_pipeline_rules,
+        PipelineLaneContract {
+            astro: lane_state,
+            ts: lane_state,
+            tsx: lane_state,
+        },
     )
 }
 
-fn parsed_eslint_with_pipeline_lanes(
+fn parsed_eslint_with_pipeline_contract(
     has_astro_plugin: bool,
-    pipeline_lanes: LanePresence,
-    has_required_pipeline_rules: bool,
+    pipeline_contract: PipelineLaneContract,
 ) -> G3TsAstroEslintSurfaceState {
     let mut astro_source_plugins = Vec::new();
     let mut ts_source_plugins = Vec::new();
     let mut tsx_source_plugins = Vec::new();
-    let mut astro_source_error_rules = Vec::new();
-    let mut ts_source_error_rules = Vec::new();
-    let mut tsx_source_error_rules = Vec::new();
     if has_astro_plugin {
         astro_source_plugins.push("astro".to_owned());
         ts_source_plugins.push("astro".to_owned());
         tsx_source_plugins.push("astro".to_owned());
     }
-    if pipeline_lanes.astro {
+    if pipeline_contract.astro.has_plugin {
         astro_source_plugins.push("astro-pipeline".to_owned());
     }
-    if pipeline_lanes.ts {
+    if pipeline_contract.ts.has_plugin {
         ts_source_plugins.push("astro-pipeline".to_owned());
     }
-    if pipeline_lanes.tsx {
+    if pipeline_contract.tsx.has_plugin {
         tsx_source_plugins.push("astro-pipeline".to_owned());
     }
-    if has_required_pipeline_rules {
-        astro_source_error_rules = vec![
-            "astro-pipeline/no-authored-content-fs-read".to_owned(),
-            "astro-pipeline/no-authored-content-glob".to_owned(),
-            "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
-            "astro-pipeline/no-runtime-mdx-eval".to_owned(),
-            "astro-pipeline/no-side-loader-imports".to_owned(),
-        ];
-        ts_source_error_rules = astro_source_error_rules.clone();
-        tsx_source_error_rules = astro_source_error_rules.clone();
-    }
+    let astro_source_error_rules = pipeline_contract.astro.error_rules();
+    let ts_source_error_rules = pipeline_contract.ts.error_rules();
+    let tsx_source_error_rules = pipeline_contract.tsx.error_rules();
 
     G3TsAstroEslintSurfaceState::Parsed {
         snapshot: G3TsAstroEslintSurfaceSnapshot {
@@ -274,23 +302,105 @@ fn parsed_eslint_with_pipeline_lanes(
             astro_source_error_rules,
             ts_source_error_rules,
             tsx_source_error_rules,
+            astro_source_effective_route_scoped_pipeline_rules: pipeline_contract
+                .astro
+                .effective_route_scoped_rules(),
+            ts_source_effective_route_scoped_pipeline_rules: pipeline_contract
+                .ts
+                .effective_route_scoped_rules(),
+            tsx_source_effective_route_scoped_pipeline_rules: pipeline_contract
+                .tsx
+                .effective_route_scoped_rules(),
         },
     }
 }
 
 #[derive(Clone, Copy)]
-struct LanePresence {
-    astro: bool,
-    ts: bool,
-    tsx: bool,
+struct PipelineLaneContract {
+    astro: PipelineLaneState,
+    ts: PipelineLaneState,
+    tsx: PipelineLaneState,
 }
 
-impl LanePresence {
-    const fn none() -> Self {
+#[derive(Clone, Copy)]
+struct PipelineLaneState {
+    has_plugin: bool,
+    has_required_rules: bool,
+    scope_kind: ScopeKind,
+}
+
+impl PipelineLaneState {
+    const fn disabled() -> Self {
         Self {
-            astro: false,
-            ts: false,
-            tsx: false,
+            has_plugin: false,
+            has_required_rules: false,
+            scope_kind: ScopeKind::None,
         }
     }
+
+    const fn plugin_only() -> Self {
+        Self {
+            has_plugin: true,
+            has_required_rules: false,
+            scope_kind: ScopeKind::None,
+        }
+    }
+
+    const fn rules_without_scope_options() -> Self {
+        Self {
+            has_plugin: true,
+            has_required_rules: true,
+            scope_kind: ScopeKind::None,
+        }
+    }
+
+    const fn rules_with_scope() -> Self {
+        Self {
+            has_plugin: true,
+            has_required_rules: true,
+            scope_kind: ScopeKind::Route,
+        }
+    }
+
+    const fn rules_with_endpoint_scope() -> Self {
+        Self {
+            has_plugin: true,
+            has_required_rules: true,
+            scope_kind: ScopeKind::Endpoint,
+        }
+    }
+
+    fn error_rules(self) -> Vec<String> {
+        if !self.has_required_rules {
+            return Vec::new();
+        }
+
+        vec![
+            "astro-pipeline/no-authored-content-fs-read".to_owned(),
+            "astro-pipeline/no-authored-content-glob".to_owned(),
+            "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
+            "astro-pipeline/no-runtime-mdx-eval".to_owned(),
+            "astro-pipeline/no-side-loader-imports".to_owned(),
+        ]
+    }
+
+    fn effective_route_scoped_rules(self) -> Vec<String> {
+        if !self.has_required_rules || matches!(self.scope_kind, ScopeKind::None) {
+            return Vec::new();
+        }
+
+        vec![
+            "astro-pipeline/no-authored-content-fs-read".to_owned(),
+            "astro-pipeline/no-authored-content-glob".to_owned(),
+            "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
+            "astro-pipeline/no-side-loader-imports".to_owned(),
+        ]
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ScopeKind {
+    None,
+    Route,
+    Endpoint,
 }

@@ -55,6 +55,9 @@ pub struct G3TsAstroEslintSurfaceSnapshot {
     pub astro_source_error_rules: Vec<String>,
     pub ts_source_error_rules: Vec<String>,
     pub tsx_source_error_rules: Vec<String>,
+    pub astro_source_effective_route_scoped_pipeline_rules: Vec<String>,
+    pub ts_source_effective_route_scoped_pipeline_rules: Vec<String>,
+    pub tsx_source_effective_route_scoped_pipeline_rules: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
