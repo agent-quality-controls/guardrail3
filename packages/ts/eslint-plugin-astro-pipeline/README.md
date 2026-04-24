@@ -12,12 +12,13 @@ This package is for Astro apps that want lint failures when routes or endpoint c
 
 ## Status
 
-- Package surface is ready for npm publication.
+- Package is published on npm.
 
 ## Compatibility
 
 - Node: `>=20`
 - ESLint: `^9`
+- TypeScript: `>=4.8.4 <6.1.0`
 
 ## Install
 
@@ -28,7 +29,7 @@ pnpm add -D eslint-plugin-astro-pipeline
 You still need the normal Astro lint stack in the app:
 
 ```sh
-pnpm add -D eslint eslint-plugin-astro astro-eslint-parser eslint-mdx
+pnpm add -D eslint eslint-plugin-astro astro-eslint-parser eslint-mdx typescript
 ```
 
 This package only documents its own plugin surface. Keep your existing Astro parser and Astro ESLint setup, then add `astro-pipeline` on top.
