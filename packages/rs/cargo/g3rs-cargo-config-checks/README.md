@@ -4,9 +4,13 @@ Extracted Cargo config checks for guardrail3.
 
 Current package boundary:
 
-- one pointed workspace root
-- one parsed root `Cargo.toml`
-- zero or more parsed workspace member `Cargo.toml` files
+- one pointed crawl root
+- one parsed root `Cargo.toml` that may be:
+  - a workspace root
+  - a standalone package root
+  - another Cargo manifest shape
+- zero or more parsed workspace member `Cargo.toml` files when that root is a workspace root
+  - members come from normalized `[workspace].members` expansion after `[workspace].exclude`
 - optional root-local `guardrail3-rs.toml` Rust policy state
 
 Package-owned config rules:
