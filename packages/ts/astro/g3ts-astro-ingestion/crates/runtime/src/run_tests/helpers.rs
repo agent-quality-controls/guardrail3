@@ -78,8 +78,9 @@ pub(super) fn fake_astro_workspace() -> TempDir {
         "astro-pipeline": {},
       },
       rules: {
-        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
-        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
+        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"], authoredContentGlobs: ["src/content/**"] }],
         "astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }],
         "astro-pipeline/no-direct-astro-content-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
         "astro-pipeline/no-runtime-mdx-eval": "error",

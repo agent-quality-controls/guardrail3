@@ -6,6 +6,7 @@ This package is for Astro apps that want lint failures when routes or endpoint c
 
 - read authored content files directly
 - glob authored content directly
+- import authored content files directly
 - source page copy from ad hoc data modules
 - import `astro:content` directly from routes
 - evaluate MDX at runtime
@@ -40,9 +41,10 @@ This package only documents its own plugin surface. Keep your existing Astro par
 
 - default ESLint plugin export
 - `configs.recommended`
-- 7 rules:
+- 8 rules:
   - `astro-pipeline/no-authored-content-fs-read`
   - `astro-pipeline/no-authored-content-glob`
+  - `astro-pipeline/no-authored-content-imports`
   - `astro-pipeline/no-content-data-modules-in-routes`
   - `astro-pipeline/no-direct-astro-content-in-routes`
   - `astro-pipeline/no-runtime-mdx-eval`
@@ -89,6 +91,10 @@ export default [
         "error",
         astroPipelineOptions
       ],
+      "astro-pipeline/no-authored-content-imports": [
+        "error",
+        astroPipelineOptions
+      ],
       "astro-pipeline/no-content-data-modules-in-routes": [
         "error",
         astroPipelineOptions
@@ -127,6 +133,12 @@ Use this to force content reads into loader or adapter modules.
 Flags route or endpoint import closures that discover authored or spec content with `import.meta.glob` or imported aliases of that glob surface.
 
 Use this to force content discovery into loader or adapter modules.
+
+### `no-authored-content-imports`
+
+Flags route or endpoint import closures that import authored or spec content modules directly.
+
+Use this to keep public routes off raw JSON, Markdown, MDX, and similar content-file imports, and on loader or adapter surfaces instead.
 
 ### `no-direct-astro-content-in-routes`
 

@@ -1,6 +1,7 @@
 import recommended from "./configs/recommended.js";
 import noAuthoredContentFsRead from "./rules/no-authored-content-fs-read.js";
 import noAuthoredContentGlob from "./rules/no-authored-content-glob.js";
+import noAuthoredContentImports from "./rules/no-authored-content-imports.js";
 import noContentDataModulesInRoutes from "./rules/no-content-data-modules-in-routes.js";
 import noDirectAstroContentInRoutes from "./rules/no-direct-astro-content-in-routes.js";
 import noRuntimeMdxEval from "./rules/no-runtime-mdx-eval.js";
@@ -10,6 +11,7 @@ import noVeliteImports from "./rules/no-velite-imports.js";
 const rules = {
   "no-authored-content-fs-read": noAuthoredContentFsRead,
   "no-authored-content-glob": noAuthoredContentGlob,
+  "no-authored-content-imports": noAuthoredContentImports,
   "no-content-data-modules-in-routes": noContentDataModulesInRoutes,
   "no-direct-astro-content-in-routes": noDirectAstroContentInRoutes,
   "no-runtime-mdx-eval": noRuntimeMdxEval,

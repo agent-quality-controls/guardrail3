@@ -121,6 +121,13 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             );
             assert!(
                 snapshot
+                    .ts_source_error_rules
+                    .iter()
+                    .any(|rule| rule == "astro-pipeline/no-authored-content-imports"),
+                "authored-content import rule missing: {snapshot:?}"
+            );
+            assert!(
+                snapshot
                     .ts_source_effective_route_scoped_pipeline_rules
                     .iter()
                     .any(|rule| rule == "astro-pipeline/no-authored-content-fs-read"),
@@ -132,6 +139,13 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                     .iter()
                     .any(|rule| rule == "astro-pipeline/no-content-data-modules-in-routes"),
                 "content-data pipeline options missing: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .ts_source_effective_content_source_pipeline_rules
+                    .iter()
+                    .any(|rule| rule == "astro-pipeline/no-authored-content-imports"),
+                "content-source pipeline options missing: {snapshot:?}"
             );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
@@ -161,8 +175,9 @@ fn config_ingestion_accepts_endpoint_only_scope_options_for_route_scoped_pipelin
         "astro-pipeline": {},
       },
       rules: {
-        "astro-pipeline/no-authored-content-fs-read": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
-        "astro-pipeline/no-authored-content-glob": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
+        "astro-pipeline/no-authored-content-fs-read": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-imports": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"], authoredContentGlobs: ["src/content/**"] }],
         "astro-pipeline/no-content-data-modules-in-routes": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }],
         "astro-pipeline/no-direct-astro-content-in-routes": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
         "astro-pipeline/no-runtime-mdx-eval": "error",
@@ -198,13 +213,18 @@ module.exports = { ESLint };
         G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
             assert_eq!(
                 snapshot.ts_source_effective_route_scoped_pipeline_rules.len(),
-                6,
+                7,
                 "endpoint-scoped rules should count as effective: {snapshot:?}"
             );
             assert_eq!(
                 snapshot.ts_source_effective_content_data_pipeline_rules.len(),
                 1,
                 "content-data rule should count as effective: {snapshot:?}"
+            );
+            assert_eq!(
+                snapshot.ts_source_effective_content_source_pipeline_rules.len(),
+                3,
+                "content-source rules should count as effective: {snapshot:?}"
             );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
@@ -234,8 +254,9 @@ fn config_ingestion_rejects_malformed_scope_options_for_route_scoped_pipeline_ru
         "astro-pipeline": {},
       },
       rules: {
-        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: [1] }],
-        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: [1] }],
+        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: [1], authoredContentGlobs: [1] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: [1], authoredContentGlobs: [1] }],
+        "astro-pipeline/no-authored-content-imports": ["error", { routeGlobs: [1], authoredContentGlobs: [1] }],
         "astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: [1], contentDataModuleGlobs: [1] }],
         "astro-pipeline/no-direct-astro-content-in-routes": ["error", { routeGlobs: [1] }],
         "astro-pipeline/no-runtime-mdx-eval": "error",
@@ -280,6 +301,12 @@ module.exports = { ESLint };
                     .ts_source_effective_content_data_pipeline_rules
                     .is_empty(),
                 "malformed content-data scope options must not count as effective: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .ts_source_effective_content_source_pipeline_rules
+                    .is_empty(),
+                "malformed content-source scope options must not count as effective: {snapshot:?}"
             );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),

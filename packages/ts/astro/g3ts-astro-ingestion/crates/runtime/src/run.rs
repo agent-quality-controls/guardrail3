@@ -12,15 +12,21 @@ use std::collections::BTreeSet;
 
 const ESLINT_CONFIG_PATTERN: &str = "eslint.config.*";
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
-const ROUTE_SCOPED_PIPELINE_RULES: [&str; 6] = [
+const ROUTE_SCOPED_PIPELINE_RULES: [&str; 7] = [
     "astro-pipeline/no-authored-content-fs-read",
     "astro-pipeline/no-authored-content-glob",
+    "astro-pipeline/no-authored-content-imports",
     "astro-pipeline/no-content-data-modules-in-routes",
     "astro-pipeline/no-direct-astro-content-in-routes",
     "astro-pipeline/no-side-loader-imports",
     "astro-pipeline/no-velite-imports",
 ];
 const CONTENT_DATA_PIPELINE_RULES: [&str; 1] = ["astro-pipeline/no-content-data-modules-in-routes"];
+const CONTENT_SOURCE_PIPELINE_RULES: [&str; 3] = [
+    "astro-pipeline/no-authored-content-fs-read",
+    "astro-pipeline/no-authored-content-glob",
+    "astro-pipeline/no-authored-content-imports",
+];
 
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChecksInput {
     let app_roots = astro_app_roots(crawl);
@@ -280,6 +286,12 @@ fn ingest_eslint_surface(
                 effective_content_data_pipeline_rules(ts_source_probe),
             tsx_source_effective_content_data_pipeline_rules:
                 effective_content_data_pipeline_rules(tsx_source_probe),
+            astro_source_effective_content_source_pipeline_rules:
+                effective_content_source_pipeline_rules(astro_source_probe),
+            ts_source_effective_content_source_pipeline_rules:
+                effective_content_source_pipeline_rules(ts_source_probe),
+            tsx_source_effective_content_source_pipeline_rules:
+                effective_content_source_pipeline_rules(tsx_source_probe),
         },
     }
 }
@@ -349,6 +361,25 @@ fn effective_content_data_pipeline_rules(
         .collect()
 }
 
+fn effective_content_source_pipeline_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+) -> Vec<String> {
+    let Some(probe) = probe else {
+        return Vec::new();
+    };
+
+    CONTENT_SOURCE_PIPELINE_RULES
+        .iter()
+        .filter(|rule_name| {
+            probe
+                .rules
+                .get(**rule_name)
+                .is_some_and(rule_setting_has_content_source_scope)
+        })
+        .map(|rule_name| (*rule_name).to_owned())
+        .collect()
+}
+
 fn rule_setting_has_route_or_endpoint_scope(
     setting: &eslint_config_parser::types::EslintRuleSetting,
 ) -> bool {
@@ -366,6 +397,17 @@ fn rule_setting_has_content_data_scope(
     setting.options.iter().any(|option| {
         option.as_object().is_some_and(|object| {
             has_non_empty_string_array_option(object.get("contentDataModuleGlobs"))
+        })
+    })
+}
+
+fn rule_setting_has_content_source_scope(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+) -> bool {
+    setting.options.iter().any(|option| {
+        option.as_object().is_some_and(|object| {
+            has_non_empty_string_array_option(object.get("authoredContentGlobs"))
+                || has_non_empty_string_array_option(object.get("specContentGlobs"))
         })
     })
 }
