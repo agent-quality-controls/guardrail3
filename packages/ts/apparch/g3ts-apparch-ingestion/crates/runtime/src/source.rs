@@ -176,15 +176,15 @@ fn parse_source_file(
         });
     };
 
-    if tree.root_node().has_error() {
+    let root = tree.root_node();
+    if let Some(reason) = first_intolerable_parse_error(root, source, rel_path.ends_with(".tsx")) {
         return Err(G3TsApparchIngestionError {
-            message: format!("TypeScript parser reported syntax errors in `{rel_path}`"),
+            message: format!("TypeScript parser reported syntax errors in `{rel_path}`: {reason}"),
         });
     }
 
     let mut imports = BTreeSet::new();
     let mut public_items = Vec::new();
-    let root = tree.root_node();
     let mut cursor = root.walk();
     for child in root.children(&mut cursor) {
         let kind = child.kind();
@@ -213,6 +213,74 @@ fn parse_source_file(
         imports: imports.into_iter().collect(),
         public_items,
     })
+}
+
+fn first_intolerable_parse_error(
+    node: tree_sitter::Node<'_>,
+    source: &str,
+    is_tsx: bool,
+) -> Option<String> {
+    if node.is_missing() {
+        return Some(format!(
+            "missing `{}` token at line {}",
+            node.kind(),
+            node.start_position().row + 1
+        ));
+    }
+
+    if node.is_error() && !is_tolerable_jsx_text_ampersand_error(node, source, is_tsx) {
+        return Some(format!(
+            "unexpected token {:?} at line {}",
+            node.utf8_text(source.as_bytes())
+                .unwrap_or("<invalid utf8>"),
+            node.start_position().row + 1
+        ));
+    }
+
+    if !node.has_error() {
+        return None;
+    }
+
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        if let Some(reason) = first_intolerable_parse_error(child, source, is_tsx) {
+            return Some(reason);
+        }
+    }
+
+    None
+}
+
+fn is_tolerable_jsx_text_ampersand_error(
+    node: tree_sitter::Node<'_>,
+    source: &str,
+    is_tsx: bool,
+) -> bool {
+    if !is_tsx || !node.is_error() || node.kind() != "ERROR" {
+        return false;
+    }
+
+    let Ok(text) = node.utf8_text(source.as_bytes()) else {
+        return false;
+    };
+
+    if !text.contains('&')
+        || text
+            .chars()
+            .any(|ch| matches!(ch, '<' | '>' | '{' | '}' | '(' | ')'))
+    {
+        return false;
+    }
+
+    let mut current = node.parent();
+    while let Some(parent) = current {
+        if matches!(parent.kind(), "jsx_element" | "jsx_fragment" | "jsx_text") {
+            return true;
+        }
+        current = parent.parent();
+    }
+
+    false
 }
 
 fn module_specifier_text(node: tree_sitter::Node<'_>, source: &str) -> Option<String> {

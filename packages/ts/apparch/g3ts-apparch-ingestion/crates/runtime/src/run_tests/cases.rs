@@ -67,6 +67,68 @@ fn ingest_collects_internal_edge_for_dynamic_import() {
 }
 
 #[test]
+fn ingest_accepts_valid_tsx_with_ampersand_in_jsx_text() {
+    let tempdir =
+        tempfile::tempdir().expect("create temporary workspace for apparch tsx-text fixture");
+    fs::create_dir_all(tempdir.path().join("src/app"))
+        .expect("create apparch tsx-text app fixture directory");
+    fs::write(
+        tempdir.path().join("src/app/hub-hero.tsx"),
+        "import type { ReactElement } from \"react\";\nexport function HubHero(): ReactElement {\n  return (\n    <section>\n      <h1>\n        Technical SEO &\n        <br />\n        <span>AI-search</span> playbook.\n      </h1>\n    </section>\n  );\n}\n",
+    )
+    .expect("write tsx-text fixture file");
+
+    let crawl = crawl(tempdir.path()).expect("crawl apparch tsx-text fixture");
+    let input = crate::run::ingest_for_config_checks(&crawl);
+
+    assert!(
+        input.is_ok(),
+        "expected valid TSX with JSX text ampersand to ingest cleanly, got {:?}",
+        input
+    );
+}
+
+#[test]
+fn ingest_accepts_valid_tsx_with_ampersand_phrase_in_jsx_text() {
+    let tempdir =
+        tempfile::tempdir().expect("create temporary workspace for apparch tsx-phrase fixture");
+    fs::create_dir_all(tempdir.path().join("src/app"))
+        .expect("create apparch tsx-phrase app fixture directory");
+    fs::write(
+        tempdir.path().join("src/app/styleguide.tsx"),
+        "export function Styleguide() {\n  return (\n    <p>AI Search & GEO dashboards</p>\n  );\n}\n",
+    )
+    .expect("write tsx-phrase fixture file");
+
+    let crawl = crawl(tempdir.path()).expect("crawl apparch tsx-phrase fixture");
+    let input = crate::run::ingest_for_config_checks(&crawl);
+
+    assert!(
+        input.is_ok(),
+        "expected valid TSX with JSX text ampersand phrase to ingest cleanly, got {:?}",
+        input
+    );
+}
+
+#[test]
+fn ingest_still_rejects_real_tsx_syntax_errors() {
+    let tempdir =
+        tempfile::tempdir().expect("create temporary workspace for apparch invalid-tsx fixture");
+    fs::create_dir_all(tempdir.path().join("src/app"))
+        .expect("create apparch invalid-tsx app fixture directory");
+    fs::write(
+        tempdir.path().join("src/app/broken.tsx"),
+        "export function Broken() {\n  return <section>{foo(}</section>;\n}\n",
+    )
+    .expect("write invalid-tsx fixture file");
+
+    let crawl = crawl(tempdir.path()).expect("crawl apparch invalid-tsx fixture");
+    let input = crate::run::ingest_for_config_checks(&crawl);
+
+    assert!(input.is_err(), "expected invalid TSX to stay rejected");
+}
+
+#[test]
 fn ingest_collects_external_imports() {
     let tempdir =
         tempfile::tempdir().expect("create temporary workspace for apparch external fixture");
