@@ -8,7 +8,7 @@ pub(super) fn golden() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true),
+            parsed_package(true, true, true, true, false),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -18,7 +18,7 @@ pub(super) fn missing_astro_check() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(false, true, true, true),
+            parsed_package(false, true, true, true, false),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -28,7 +28,7 @@ pub(super) fn fake_astro_check_text_only() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package_with_script("echo astro check && eslint .", true, true, true),
+            parsed_package_with_script("echo astro check && eslint .", true, true, true, false),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -43,6 +43,7 @@ pub(super) fn astro_check_wrapper_forms() -> G3TsAstroConfigChecksInput {
                 true,
                 true,
                 true,
+                false,
             ),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
@@ -53,7 +54,7 @@ pub(super) fn missing_required_packages() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, false, false, false),
+            parsed_package(true, false, false, false, false),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -63,7 +64,7 @@ pub(super) fn missing_astro_plugin_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true),
+            parsed_package(true, true, true, true, false),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(false, false, true))],
     }
@@ -73,7 +74,7 @@ pub(super) fn missing_pipeline_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true),
+            parsed_package(true, true, true, true, false),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, false, true))],
     }
@@ -83,7 +84,7 @@ pub(super) fn missing_pipeline_rule_enforcement() -> G3TsAstroConfigChecksInput 
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true),
+            parsed_package(true, true, true, true, false),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, false))],
     }
@@ -93,7 +94,7 @@ pub(super) fn missing_pipeline_scope_options() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true),
+            parsed_package(true, true, true, true, false),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -113,7 +114,7 @@ pub(super) fn endpoint_only_pipeline_scope_options() -> G3TsAstroConfigChecksInp
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true),
+            parsed_package(true, true, true, true, false),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -129,11 +130,31 @@ pub(super) fn endpoint_only_pipeline_scope_options() -> G3TsAstroConfigChecksInp
     }
 }
 
+pub(super) fn missing_content_data_module_scope_options() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, false),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_contract(
+                true,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_with_scope_but_without_content_data_scope(),
+                    ts: PipelineLaneState::rules_with_scope_but_without_content_data_scope(),
+                    tsx: PipelineLaneState::rules_with_scope_but_without_content_data_scope(),
+                },
+            ),
+        )],
+    }
+}
+
 pub(super) fn route_only_pipeline_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true),
+            parsed_package(true, true, true, true, false),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -153,9 +174,19 @@ pub(super) fn optional_contracts_not_required() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             false,
-            parsed_package(true, true, false, true),
+            parsed_package(true, true, false, true, false),
         )],
         eslint_contracts: vec![eslint_contract(false, parsed_eslint(true, false, false))],
+    }
+}
+
+pub(super) fn velite_package_present() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, true),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
 }
 
@@ -204,6 +235,7 @@ fn parsed_package(
     has_astro_package: bool,
     has_astro_plugin: bool,
     has_pipeline_plugin: bool,
+    has_velite_package: bool,
 ) -> G3TsAstroPackageSurfaceState {
     let script_body = if has_astro_check {
         "astro check && eslint ."
@@ -211,7 +243,13 @@ fn parsed_package(
         "eslint ."
     };
 
-    parsed_package_with_script(script_body, has_astro_package, has_astro_plugin, has_pipeline_plugin)
+    parsed_package_with_script(
+        script_body,
+        has_astro_package,
+        has_astro_plugin,
+        has_pipeline_plugin,
+        has_velite_package,
+    )
 }
 
 fn parsed_package_with_script(
@@ -219,6 +257,7 @@ fn parsed_package_with_script(
     has_astro_package: bool,
     has_astro_plugin: bool,
     has_pipeline_plugin: bool,
+    has_velite_package: bool,
 ) -> G3TsAstroPackageSurfaceState {
     let mut dev_dependencies = Vec::new();
     if has_astro_package {
@@ -229,6 +268,9 @@ fn parsed_package_with_script(
     }
     if has_pipeline_plugin {
         dev_dependencies.push("eslint-plugin-astro-pipeline".to_owned());
+    }
+    if has_velite_package {
+        dev_dependencies.push("velite".to_owned());
     }
 
     G3TsAstroPackageSurfaceState::Parsed {
@@ -311,6 +353,15 @@ fn parsed_eslint_with_pipeline_contract(
             tsx_source_effective_route_scoped_pipeline_rules: pipeline_contract
                 .tsx
                 .effective_route_scoped_rules(),
+            astro_source_effective_content_data_pipeline_rules: pipeline_contract
+                .astro
+                .effective_content_data_rules(),
+            ts_source_effective_content_data_pipeline_rules: pipeline_contract
+                .ts
+                .effective_content_data_rules(),
+            tsx_source_effective_content_data_pipeline_rules: pipeline_contract
+                .tsx
+                .effective_content_data_rules(),
         },
     }
 }
@@ -327,6 +378,7 @@ struct PipelineLaneState {
     has_plugin: bool,
     has_required_rules: bool,
     scope_kind: ScopeKind,
+    has_content_data_scope: bool,
 }
 
 impl PipelineLaneState {
@@ -335,6 +387,7 @@ impl PipelineLaneState {
             has_plugin: false,
             has_required_rules: false,
             scope_kind: ScopeKind::None,
+            has_content_data_scope: false,
         }
     }
 
@@ -343,6 +396,7 @@ impl PipelineLaneState {
             has_plugin: true,
             has_required_rules: false,
             scope_kind: ScopeKind::None,
+            has_content_data_scope: false,
         }
     }
 
@@ -351,6 +405,7 @@ impl PipelineLaneState {
             has_plugin: true,
             has_required_rules: true,
             scope_kind: ScopeKind::None,
+            has_content_data_scope: false,
         }
     }
 
@@ -359,6 +414,7 @@ impl PipelineLaneState {
             has_plugin: true,
             has_required_rules: true,
             scope_kind: ScopeKind::Route,
+            has_content_data_scope: true,
         }
     }
 
@@ -367,6 +423,16 @@ impl PipelineLaneState {
             has_plugin: true,
             has_required_rules: true,
             scope_kind: ScopeKind::Endpoint,
+            has_content_data_scope: true,
+        }
+    }
+
+    const fn rules_with_scope_but_without_content_data_scope() -> Self {
+        Self {
+            has_plugin: true,
+            has_required_rules: true,
+            scope_kind: ScopeKind::Route,
+            has_content_data_scope: false,
         }
     }
 
@@ -378,9 +444,11 @@ impl PipelineLaneState {
         vec![
             "astro-pipeline/no-authored-content-fs-read".to_owned(),
             "astro-pipeline/no-authored-content-glob".to_owned(),
+            "astro-pipeline/no-content-data-modules-in-routes".to_owned(),
             "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
             "astro-pipeline/no-runtime-mdx-eval".to_owned(),
             "astro-pipeline/no-side-loader-imports".to_owned(),
+            "astro-pipeline/no-velite-imports".to_owned(),
         ]
     }
 
@@ -392,9 +460,19 @@ impl PipelineLaneState {
         vec![
             "astro-pipeline/no-authored-content-fs-read".to_owned(),
             "astro-pipeline/no-authored-content-glob".to_owned(),
+            "astro-pipeline/no-content-data-modules-in-routes".to_owned(),
             "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
             "astro-pipeline/no-side-loader-imports".to_owned(),
+            "astro-pipeline/no-velite-imports".to_owned(),
         ]
+    }
+
+    fn effective_content_data_rules(self) -> Vec<String> {
+        if !self.has_required_rules || !self.has_content_data_scope {
+            return Vec::new();
+        }
+
+        vec!["astro-pipeline/no-content-data-modules-in-routes".to_owned()]
     }
 }
 

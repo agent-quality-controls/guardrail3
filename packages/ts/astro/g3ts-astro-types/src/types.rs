@@ -11,6 +11,8 @@ pub struct G3TsAstroAppRootInput {
     pub astro_config_rel_path: Option<String>,
     pub content_config_rel_path: Option<String>,
     pub live_config_rel_path: Option<String>,
+    pub velite_config_rel_path: Option<String>,
+    pub velite_output_rel_paths: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -58,6 +60,9 @@ pub struct G3TsAstroEslintSurfaceSnapshot {
     pub astro_source_effective_route_scoped_pipeline_rules: Vec<String>,
     pub ts_source_effective_route_scoped_pipeline_rules: Vec<String>,
     pub tsx_source_effective_route_scoped_pipeline_rules: Vec<String>,
+    pub astro_source_effective_content_data_pipeline_rules: Vec<String>,
+    pub ts_source_effective_content_data_pipeline_rules: Vec<String>,
+    pub tsx_source_effective_content_data_pipeline_rules: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

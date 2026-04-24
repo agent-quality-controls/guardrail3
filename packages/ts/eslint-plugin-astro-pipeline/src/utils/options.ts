@@ -1,6 +1,7 @@
 export interface AstroPipelineOptions {
   routeGlobs?: string[];
   endpointGlobs?: string[];
+  contentDataModuleGlobs?: string[];
   adapterModuleGlobs?: string[];
   mdxRuntimeModuleGlobs?: string[];
   routeRegistryModuleGlobs?: string[];
@@ -15,6 +16,7 @@ export interface AstroPipelineOptions {
 export interface ResolvedAstroPipelineOptions {
   routeGlobs: string[];
   endpointGlobs: string[];
+  contentDataModuleGlobs: string[];
   adapterModuleGlobs: string[];
   mdxRuntimeModuleGlobs: string[];
   routeRegistryModuleGlobs: string[];
@@ -29,6 +31,7 @@ export interface ResolvedAstroPipelineOptions {
 const ARRAY_OPTION_KEYS = [
   "routeGlobs",
   "endpointGlobs",
+  "contentDataModuleGlobs",
   "adapterModuleGlobs",
   "mdxRuntimeModuleGlobs",
   "routeRegistryModuleGlobs",
@@ -67,6 +70,7 @@ export function resolveOptions(
   return {
     routeGlobs: normalizeStringArray(source.routeGlobs),
     endpointGlobs: normalizeStringArray(source.endpointGlobs),
+    contentDataModuleGlobs: normalizeStringArray(source.contentDataModuleGlobs),
     adapterModuleGlobs: normalizeStringArray(source.adapterModuleGlobs),
     mdxRuntimeModuleGlobs: normalizeStringArray(source.mdxRuntimeModuleGlobs),
     routeRegistryModuleGlobs: normalizeStringArray(source.routeRegistryModuleGlobs),

@@ -3,9 +3,10 @@ use g3ts_astro_config_checks_assertions::run as assertions;
 use super::helpers::{
     astro_check_wrapper_forms, endpoint_only_pipeline_scope_options, fake_astro_check_text_only,
     golden, missing_astro_check, missing_astro_plugin_wiring,
+    missing_content_data_module_scope_options,
     missing_package_eslint_and_astro_config_surfaces, missing_pipeline_rule_enforcement,
     missing_pipeline_scope_options, missing_pipeline_wiring, missing_required_packages,
-    optional_contracts_not_required, route_only_pipeline_wiring,
+    optional_contracts_not_required, route_only_pipeline_wiring, velite_package_present,
 };
 
 #[test]
@@ -38,6 +39,13 @@ fn golden_config_reports_expected_inventory() {
                 true,
             ),
             assertions::info(
+                "TS-ASTRO-CONFIG-04",
+                "velite package absent from Astro app",
+                "`package.json` does not include `velite`.",
+                Some("package.json"),
+                true,
+            ),
+            assertions::info(
                 "TS-ASTRO-CONFIG-05",
                 "astro ESLint plugin wired",
                 "`eslint.config.mjs` activates `astro` for the required Astro source lanes.",
@@ -54,11 +62,28 @@ fn golden_config_reports_expected_inventory() {
             assertions::info(
                 "TS-ASTRO-CONFIG-07",
                 "astro pipeline ESLint plugin wired and effective",
-                "`eslint.config.mjs` activates `astro-pipeline` and enforces the required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with route or endpoint scope options present for the route-scoped pipeline rules.",
+                "`eslint.config.mjs` activates `astro-pipeline` and enforces the required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with route or endpoint scope options present for the route-scoped pipeline rules and non-empty `contentDataModuleGlobs` on the content-data rule.",
                 Some("eslint.config.mjs"),
                 true,
             ),
         ],
+    );
+}
+
+#[test]
+fn velite_package_reports_astro_package_contract_error() {
+    let input = velite_package_present();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-04",
+            "Astro app package must not include `velite`",
+            "`package.json` lists `velite` in dependencies or devDependencies. Remove `velite` from this Astro app and move page content onto Astro collections instead. Keeping Velite in an Astro app recreates the parallel content pipeline this family is meant to forbid.",
+            Some("package.json"),
+            false,
+        )],
     );
 }
 
@@ -135,6 +160,13 @@ fn missing_required_packages_report_package_contract_errors() {
                 Some("package.json"),
                 false,
             ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-04",
+                "velite package absent from Astro app",
+                "`package.json` does not include `velite`.",
+                Some("package.json"),
+                true,
+            ),
             assertions::error(
                 "TS-ASTRO-CONFIG-06",
                 "Astro app package is missing `eslint-plugin-astro-pipeline`",
@@ -173,7 +205,7 @@ fn missing_pipeline_wiring_reports_pipeline_wiring_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-07",
             "Astro ESLint lanes are not enforcing the required `astro-pipeline` rules",
-            "`eslint.config.mjs` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in those rule options in the Astro, TS, and TSX lane configs in `eslint.config.mjs`. Without those scope options, the route-scoped pipeline rules stay inert and route bypasses can pass lint silently.",
+            "`eslint.config.mjs` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules and non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes`. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in the route-scoped rule options plus non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes` in the Astro, TS, and TSX lane configs in `eslint.config.mjs`. Without those options, the route-scoped and content-data pipeline rules stay inert and route bypasses can pass lint silently.",
             Some("eslint.config.mjs"),
             false,
         )],
@@ -190,7 +222,7 @@ fn missing_pipeline_rule_enforcement_reports_effectiveness_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-07",
             "Astro ESLint lanes are not enforcing the required `astro-pipeline` rules",
-            "`eslint.config.mjs` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in those rule options in the Astro, TS, and TSX lane configs in `eslint.config.mjs`. Without those scope options, the route-scoped pipeline rules stay inert and route bypasses can pass lint silently.",
+            "`eslint.config.mjs` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules and non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes`. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in the route-scoped rule options plus non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes` in the Astro, TS, and TSX lane configs in `eslint.config.mjs`. Without those options, the route-scoped and content-data pipeline rules stay inert and route bypasses can pass lint silently.",
             Some("eslint.config.mjs"),
             false,
         )],
@@ -207,7 +239,24 @@ fn missing_pipeline_scope_options_reports_effectiveness_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-07",
             "Astro ESLint lanes are not enforcing the required `astro-pipeline` rules",
-            "`eslint.config.mjs` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in those rule options in the Astro, TS, and TSX lane configs in `eslint.config.mjs`. Without those scope options, the route-scoped pipeline rules stay inert and route bypasses can pass lint silently.",
+            "`eslint.config.mjs` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules and non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes`. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in the route-scoped rule options plus non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes` in the Astro, TS, and TSX lane configs in `eslint.config.mjs`. Without those options, the route-scoped and content-data pipeline rules stay inert and route bypasses can pass lint silently.",
+            Some("eslint.config.mjs"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn missing_content_data_module_scope_options_reports_effectiveness_error() {
+    let input = missing_content_data_module_scope_options();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-07",
+            "Astro ESLint lanes are not enforcing the required `astro-pipeline` rules",
+            "`eslint.config.mjs` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules and non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes`. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in the route-scoped rule options plus non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes` in the Astro, TS, and TSX lane configs in `eslint.config.mjs`. Without those options, the route-scoped and content-data pipeline rules stay inert and route bypasses can pass lint silently.",
             Some("eslint.config.mjs"),
             false,
         )],
@@ -224,7 +273,7 @@ fn route_only_pipeline_wiring_still_fails_the_source_lane_contract() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-07",
             "Astro ESLint lanes are not enforcing the required `astro-pipeline` rules",
-            "`eslint.config.mjs` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in those rule options in the Astro, TS, and TSX lane configs in `eslint.config.mjs`. Without those scope options, the route-scoped pipeline rules stay inert and route bypasses can pass lint silently.",
+            "`eslint.config.mjs` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules and non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes`. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in the route-scoped rule options plus non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes` in the Astro, TS, and TSX lane configs in `eslint.config.mjs`. Without those options, the route-scoped and content-data pipeline rules stay inert and route bypasses can pass lint silently.",
             Some("eslint.config.mjs"),
             false,
         )],
@@ -241,7 +290,7 @@ fn endpoint_only_scope_options_satisfy_pipeline_effectiveness() {
         &[assertions::info(
             "TS-ASTRO-CONFIG-07",
             "astro pipeline ESLint plugin wired and effective",
-            "`eslint.config.mjs` activates `astro-pipeline` and enforces the required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with route or endpoint scope options present for the route-scoped pipeline rules.",
+            "`eslint.config.mjs` activates `astro-pipeline` and enforces the required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with route or endpoint scope options present for the route-scoped pipeline rules and non-empty `contentDataModuleGlobs` on the content-data rule.",
             Some("eslint.config.mjs"),
             true,
         )],
@@ -287,6 +336,13 @@ fn missing_package_eslint_and_astro_config_surfaces_fail_closed() {
                 false,
             ),
             assertions::error(
+                "TS-ASTRO-CONFIG-04",
+                "Astro app package must not include `velite`",
+                "`package.json` does not parse through an app package surface, so the Astro family cannot prove `velite` is absent. Restore `package.json` and keep `velite` out of this Astro app. Parallel Velite content pipelines are forbidden in Astro apps.",
+                Some("package.json"),
+                false,
+            ),
+            assertions::error(
                 "TS-ASTRO-CONFIG-05",
                 "Astro ESLint lanes are not wired to the `astro` plugin",
                 "`eslint.config.*` does not activate `astro` on the required Astro source lanes. Add the `astro` plugin to the Astro, TS, and TSX lane configs in `eslint.config.*`. Astro source files must run through the Astro plugin so framework lint rules actually execute.",
@@ -303,7 +359,7 @@ fn missing_package_eslint_and_astro_config_surfaces_fail_closed() {
             assertions::error(
                 "TS-ASTRO-CONFIG-07",
                 "Astro ESLint lanes are not enforcing the required `astro-pipeline` rules",
-                "`eslint.config.*` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in those rule options in the Astro, TS, and TSX lane configs in `eslint.config.*`. Without those scope options, the route-scoped pipeline rules stay inert and route bypasses can pass lint silently.",
+                "`eslint.config.*` does not activate `astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source lanes, with non-empty `routeGlobs` or `endpointGlobs` options on the route-scoped pipeline rules and non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes`. Enable the `astro-pipeline` plugin, set the required Astro pipeline rules to `error`, and pass non-empty `routeGlobs` or `endpointGlobs` in the route-scoped rule options plus non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes` in the Astro, TS, and TSX lane configs in `eslint.config.*`. Without those options, the route-scoped and content-data pipeline rules stay inert and route bypasses can pass lint silently.",
                 Some("eslint.config.*"),
                 false,
             ),

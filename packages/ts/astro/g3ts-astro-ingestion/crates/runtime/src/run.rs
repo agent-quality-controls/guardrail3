@@ -12,12 +12,15 @@ use std::collections::BTreeSet;
 
 const ESLINT_CONFIG_PATTERN: &str = "eslint.config.*";
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
-const ROUTE_SCOPED_PIPELINE_RULES: [&str; 4] = [
+const ROUTE_SCOPED_PIPELINE_RULES: [&str; 6] = [
     "astro-pipeline/no-authored-content-fs-read",
     "astro-pipeline/no-authored-content-glob",
+    "astro-pipeline/no-content-data-modules-in-routes",
     "astro-pipeline/no-direct-astro-content-in-routes",
     "astro-pipeline/no-side-loader-imports",
+    "astro-pipeline/no-velite-imports",
 ];
+const CONTENT_DATA_PIPELINE_RULES: [&str; 1] = ["astro-pipeline/no-content-data-modules-in-routes"];
 
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChecksInput {
     let app_roots = astro_app_roots(crawl);
@@ -72,6 +75,9 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
                 .map(|entry| entry.path.rel_path.clone()),
             live_config_rel_path: crate::select::select_live_config(crawl, app_root_rel_path)
                 .map(|entry| entry.path.rel_path.clone()),
+            velite_config_rel_path: crate::select::select_velite_config(crawl, app_root_rel_path)
+                .map(|entry| entry.path.rel_path.clone()),
+            velite_output_rel_paths: crate::select::velite_output_paths(crawl, app_root_rel_path),
         })
         .collect();
 
@@ -268,6 +274,12 @@ fn ingest_eslint_surface(
                 effective_route_scoped_pipeline_rules(ts_source_probe),
             tsx_source_effective_route_scoped_pipeline_rules:
                 effective_route_scoped_pipeline_rules(tsx_source_probe),
+            astro_source_effective_content_data_pipeline_rules:
+                effective_content_data_pipeline_rules(astro_source_probe),
+            ts_source_effective_content_data_pipeline_rules:
+                effective_content_data_pipeline_rules(ts_source_probe),
+            tsx_source_effective_content_data_pipeline_rules:
+                effective_content_data_pipeline_rules(tsx_source_probe),
         },
     }
 }
@@ -318,6 +330,25 @@ fn effective_route_scoped_pipeline_rules(
         .collect()
 }
 
+fn effective_content_data_pipeline_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+) -> Vec<String> {
+    let Some(probe) = probe else {
+        return Vec::new();
+    };
+
+    CONTENT_DATA_PIPELINE_RULES
+        .iter()
+        .filter(|rule_name| {
+            probe
+                .rules
+                .get(**rule_name)
+                .is_some_and(rule_setting_has_content_data_scope)
+        })
+        .map(|rule_name| (*rule_name).to_owned())
+        .collect()
+}
+
 fn rule_setting_has_route_or_endpoint_scope(
     setting: &eslint_config_parser::types::EslintRuleSetting,
 ) -> bool {
@@ -325,6 +356,16 @@ fn rule_setting_has_route_or_endpoint_scope(
         option.as_object().is_some_and(|object| {
             has_non_empty_string_array_option(object.get("routeGlobs"))
                 || has_non_empty_string_array_option(object.get("endpointGlobs"))
+        })
+    })
+}
+
+fn rule_setting_has_content_data_scope(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+) -> bool {
+    setting.options.iter().any(|option| {
+        option.as_object().is_some_and(|object| {
+            has_non_empty_string_array_option(object.get("contentDataModuleGlobs"))
         })
     })
 }

@@ -11,6 +11,10 @@ import type { AstroPipelineOptions } from "../src/utils/options.js";
 export const baseOptions: AstroPipelineOptions = {
   routeGlobs: ["src/pages/**/*.{ts,tsx,js,jsx,astro}"],
   endpointGlobs: ["src/pages/**/*.endpoint.{ts,tsx,js,jsx}"],
+  contentDataModuleGlobs: [
+    "src/**/*.data.{ts,tsx,js,jsx,mts,cts,mjs,cjs}",
+    "app/**/*.data.{ts,tsx,js,jsx,mts,cts,mjs,cjs}"
+  ],
   adapterModuleGlobs: ["src/lib/content/**/*.{ts,tsx,js,jsx}"],
   mdxRuntimeModuleGlobs: ["src/lib/mdx/**/*.{ts,tsx,js,jsx}"],
   routeRegistryModuleGlobs: ["src/lib/routes/**/*.{ts,tsx,js,jsx}"],
