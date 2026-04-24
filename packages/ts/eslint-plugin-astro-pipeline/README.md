@@ -13,7 +13,6 @@ This package is for Astro apps that want lint failures when routes or endpoint c
 ## Status
 
 - Package surface is ready for npm publication.
-- License is intentionally `UNLICENSED` until the final license text is chosen.
 
 ## Compatibility
 
