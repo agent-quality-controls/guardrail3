@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-astro-pipeline",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Astro source-policy rules for content pipeline enforcement.",
   "repository": {
     "type": "git",
