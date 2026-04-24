@@ -45,13 +45,9 @@ export default createRule<RuleOptionsTuple, MessageIds>({
         const offendingModule = collectImportClosure(filename, context.sourceCode.text, {
           program: context.sourceCode.ast,
           scopeManager: context.sourceCode.scopeManager ?? null
-        }).find((moduleRecord) => {
-          if (moduleRecord.importChain.length <= 1) {
-            return false;
-          }
-
-          return matchesFileGlobs(moduleRecord.filename, options.contentDataModuleGlobs);
-        });
+        }).find((moduleRecord) =>
+          matchesFileGlobs(moduleRecord.filename, options.contentDataModuleGlobs)
+        );
 
         if (!offendingModule) {
           return;

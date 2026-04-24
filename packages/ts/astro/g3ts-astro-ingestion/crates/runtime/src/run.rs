@@ -3,10 +3,10 @@ use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_astro_types::{
     G3TsAstroAppRootInput, G3TsAstroConfigChecksInput, G3TsAstroContentMode,
     G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
-    G3TsAstroEslintSurfaceState, G3TsAstroFileTreeChecksInput,
-    G3TsAstroIntegrationContractInput, G3TsAstroPackageSurfaceSnapshot,
-    G3TsAstroPackageSurfaceState, G3TsAstroRouteMarkdownPageInput,
+    G3TsAstroEslintSurfaceState, G3TsAstroFileTreeChecksInput, G3TsAstroIntegrationContractInput,
+    G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState, G3TsAstroRouteMarkdownPageInput,
 };
+use globset::{Glob, GlobSetBuilder};
 use package_json_parser::{from_path_document, parse_error_reason as package_parse_error_reason};
 use std::collections::BTreeSet;
 
@@ -32,7 +32,7 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
     let app_roots = astro_app_roots(crawl);
 
     if app_roots.is_empty() {
-            return G3TsAstroConfigChecksInput {
+        return G3TsAstroConfigChecksInput {
             integration_contracts: Vec::new(),
             eslint_contracts: Vec::new(),
         };
@@ -107,7 +107,9 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
             .collect(),
         route_markdown_pages: app_roots
             .iter()
-            .flat_map(|app_root_rel_path| crate::select::route_markdown_pages(crawl, app_root_rel_path))
+            .flat_map(|app_root_rel_path| {
+                crate::select::route_markdown_pages(crawl, app_root_rel_path)
+            })
             .into_iter()
             .map(|rel_path| G3TsAstroRouteMarkdownPageInput { rel_path })
             .collect(),
@@ -115,7 +117,9 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
 }
 
 fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
-    let mut roots: BTreeSet<String> = crate::select::select_astro_app_roots(crawl).into_iter().collect();
+    let mut roots: BTreeSet<String> = crate::select::select_astro_app_roots(crawl)
+        .into_iter()
+        .collect();
 
     for entry in crawl.entries.iter().filter(|entry| {
         entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
@@ -133,7 +137,8 @@ fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
                 .to_owned()
         };
 
-        if package_surface_has_astro_dependency(&ingest_package_surface(crawl, &app_root_rel_path)) {
+        if package_surface_has_astro_dependency(&ingest_package_surface(crawl, &app_root_rel_path))
+        {
             let _ = roots.insert(app_root_rel_path);
         }
     }
@@ -141,7 +146,10 @@ fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     roots.into_iter().collect()
 }
 
-fn classify_content_mode(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> G3TsAstroContentMode {
+fn classify_content_mode(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+) -> G3TsAstroContentMode {
     if crate::select::select_live_config(crawl, app_root_rel_path).is_some() {
         G3TsAstroContentMode::LiveCollections
     } else if crate::select::select_content_config(crawl, app_root_rel_path).is_some()
@@ -249,12 +257,20 @@ fn ingest_eslint_surface(
 
     let typed = eslint_config_parser::typed(&document)
         .expect("parsed eslint config document should stay typed");
-    let astro_source_probe =
-        active_probe(&typed, eslint_config_parser::types::EslintProbeKind::AstroSource);
-    let ts_source_probe =
-        active_probe(&typed, eslint_config_parser::types::EslintProbeKind::TsSource);
-    let tsx_source_probe =
-        active_probe(&typed, eslint_config_parser::types::EslintProbeKind::TsxSource);
+    let route_page_paths = crate::select::route_page_paths(crawl, app_root_rel_path);
+    let endpoint_paths = crate::select::endpoint_paths(crawl, app_root_rel_path);
+    let astro_source_probe = active_probe(
+        &typed,
+        eslint_config_parser::types::EslintProbeKind::AstroSource,
+    );
+    let ts_source_probe = active_probe(
+        &typed,
+        eslint_config_parser::types::EslintProbeKind::TsSource,
+    );
+    let tsx_source_probe = active_probe(
+        &typed,
+        eslint_config_parser::types::EslintProbeKind::TsxSource,
+    );
 
     G3TsAstroEslintSurfaceState::Parsed {
         snapshot: G3TsAstroEslintSurfaceSnapshot {
@@ -275,23 +291,55 @@ fn ingest_eslint_surface(
             ts_source_error_rules: active_error_rules(ts_source_probe),
             tsx_source_error_rules: active_error_rules(tsx_source_probe),
             astro_source_effective_route_scoped_pipeline_rules:
-                effective_route_scoped_pipeline_rules(astro_source_probe),
-            ts_source_effective_route_scoped_pipeline_rules:
-                effective_route_scoped_pipeline_rules(ts_source_probe),
-            tsx_source_effective_route_scoped_pipeline_rules:
-                effective_route_scoped_pipeline_rules(tsx_source_probe),
+                effective_route_scoped_pipeline_rules(
+                    astro_source_probe,
+                    &route_page_paths,
+                    &endpoint_paths,
+                ),
+            ts_source_effective_route_scoped_pipeline_rules: effective_route_scoped_pipeline_rules(
+                ts_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+            ),
+            tsx_source_effective_route_scoped_pipeline_rules: effective_route_scoped_pipeline_rules(
+                tsx_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+            ),
             astro_source_effective_content_data_pipeline_rules:
-                effective_content_data_pipeline_rules(astro_source_probe),
-            ts_source_effective_content_data_pipeline_rules:
-                effective_content_data_pipeline_rules(ts_source_probe),
-            tsx_source_effective_content_data_pipeline_rules:
-                effective_content_data_pipeline_rules(tsx_source_probe),
+                effective_content_data_pipeline_rules(
+                    astro_source_probe,
+                    &route_page_paths,
+                    &endpoint_paths,
+                ),
+            ts_source_effective_content_data_pipeline_rules: effective_content_data_pipeline_rules(
+                ts_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+            ),
+            tsx_source_effective_content_data_pipeline_rules: effective_content_data_pipeline_rules(
+                tsx_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+            ),
             astro_source_effective_content_source_pipeline_rules:
-                effective_content_source_pipeline_rules(astro_source_probe),
+                effective_content_source_pipeline_rules(
+                    astro_source_probe,
+                    &route_page_paths,
+                    &endpoint_paths,
+                ),
             ts_source_effective_content_source_pipeline_rules:
-                effective_content_source_pipeline_rules(ts_source_probe),
+                effective_content_source_pipeline_rules(
+                    ts_source_probe,
+                    &route_page_paths,
+                    &endpoint_paths,
+                ),
             tsx_source_effective_content_source_pipeline_rules:
-                effective_content_source_pipeline_rules(tsx_source_probe),
+                effective_content_source_pipeline_rules(
+                    tsx_source_probe,
+                    &route_page_paths,
+                    &endpoint_paths,
+                ),
         },
     }
 }
@@ -325,6 +373,8 @@ fn active_error_rules(
 
 fn effective_route_scoped_pipeline_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    route_page_paths: &[String],
+    endpoint_paths: &[String],
 ) -> Vec<String> {
     let Some(probe) = probe else {
         return Vec::new();
@@ -333,10 +383,13 @@ fn effective_route_scoped_pipeline_rules(
     ROUTE_SCOPED_PIPELINE_RULES
         .iter()
         .filter(|rule_name| {
-            probe
-                .rules
-                .get(**rule_name)
-                .is_some_and(rule_setting_has_route_or_endpoint_scope)
+            probe.rules.get(**rule_name).is_some_and(|setting| {
+                rule_setting_has_route_and_endpoint_coverage(
+                    setting,
+                    route_page_paths,
+                    endpoint_paths,
+                )
+            })
         })
         .map(|rule_name| (*rule_name).to_owned())
         .collect()
@@ -344,6 +397,8 @@ fn effective_route_scoped_pipeline_rules(
 
 fn effective_content_data_pipeline_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    route_page_paths: &[String],
+    endpoint_paths: &[String],
 ) -> Vec<String> {
     let Some(probe) = probe else {
         return Vec::new();
@@ -352,10 +407,13 @@ fn effective_content_data_pipeline_rules(
     CONTENT_DATA_PIPELINE_RULES
         .iter()
         .filter(|rule_name| {
-            probe
-                .rules
-                .get(**rule_name)
-                .is_some_and(rule_setting_has_content_data_scope)
+            probe.rules.get(**rule_name).is_some_and(|setting| {
+                rule_setting_has_route_and_endpoint_coverage(
+                    setting,
+                    route_page_paths,
+                    endpoint_paths,
+                ) && rule_setting_has_content_data_scope(setting)
+            })
         })
         .map(|rule_name| (*rule_name).to_owned())
         .collect()
@@ -363,6 +421,8 @@ fn effective_content_data_pipeline_rules(
 
 fn effective_content_source_pipeline_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    route_page_paths: &[String],
+    endpoint_paths: &[String],
 ) -> Vec<String> {
     let Some(probe) = probe else {
         return Vec::new();
@@ -371,24 +431,29 @@ fn effective_content_source_pipeline_rules(
     CONTENT_SOURCE_PIPELINE_RULES
         .iter()
         .filter(|rule_name| {
-            probe
-                .rules
-                .get(**rule_name)
-                .is_some_and(rule_setting_has_content_source_scope)
+            probe.rules.get(**rule_name).is_some_and(|setting| {
+                rule_setting_has_route_and_endpoint_coverage(
+                    setting,
+                    route_page_paths,
+                    endpoint_paths,
+                ) && rule_setting_has_content_source_scope(setting)
+            })
         })
         .map(|rule_name| (*rule_name).to_owned())
         .collect()
 }
 
-fn rule_setting_has_route_or_endpoint_scope(
+fn rule_setting_has_route_and_endpoint_coverage(
     setting: &eslint_config_parser::types::EslintRuleSetting,
+    route_page_paths: &[String],
+    endpoint_paths: &[String],
 ) -> bool {
-    setting.options.iter().any(|option| {
-        option.as_object().is_some_and(|object| {
-            has_non_empty_string_array_option(object.get("routeGlobs"))
-                || has_non_empty_string_array_option(object.get("endpointGlobs"))
-        })
-    })
+    let route_coverage = route_page_paths.is_empty()
+        || rule_setting_option_globs_match_any_path(setting, "routeGlobs", route_page_paths);
+    let endpoint_coverage = endpoint_paths.is_empty()
+        || rule_setting_option_globs_match_any_path(setting, "endpointGlobs", endpoint_paths);
+
+    route_coverage && endpoint_coverage
 }
 
 fn rule_setting_has_content_data_scope(
@@ -421,6 +486,66 @@ fn has_non_empty_string_array_option(option: Option<&serde_json::Value>) -> bool
                     .iter()
                     .all(|value| value.as_str().is_some_and(|text| !text.trim().is_empty()))
         })
+}
+
+fn rule_setting_option_globs_match_any_path(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+    option_name: &str,
+    candidate_paths: &[String],
+) -> bool {
+    setting.options.iter().any(|option| {
+        option.as_object().is_some_and(|object| {
+            non_empty_string_array_option(object.get(option_name))
+                .is_some_and(|patterns| all_paths_match_globs(&patterns, candidate_paths))
+        })
+    })
+}
+
+fn non_empty_string_array_option(option: Option<&serde_json::Value>) -> Option<Vec<&str>> {
+    let values = option.and_then(serde_json::Value::as_array)?;
+
+    if values.is_empty() {
+        return None;
+    }
+
+    let mut strings = Vec::with_capacity(values.len());
+
+    for value in values {
+        let text = value.as_str()?.trim();
+        if text.is_empty() {
+            return None;
+        }
+        strings.push(text);
+    }
+
+    Some(strings)
+}
+
+fn all_paths_match_globs(patterns: &[&str], candidate_paths: &[String]) -> bool {
+    let mut builder = GlobSetBuilder::new();
+
+    for pattern in patterns {
+        let Ok(glob) = Glob::new(&normalize_glob(pattern)) else {
+            return false;
+        };
+        let _ = builder.add(glob);
+    }
+
+    let Ok(glob_set) = builder.build() else {
+        return false;
+    };
+
+    candidate_paths
+        .iter()
+        .all(|candidate_path| glob_set.is_match(normalize_glob(candidate_path)))
+}
+
+fn normalize_glob(value: &str) -> String {
+    let mut normalized = value.replace('\\', "/");
+    while normalized.contains("//") {
+        normalized = normalized.replace("//", "/");
+    }
+    normalized.trim_start_matches("./").to_owned()
 }
 
 fn package_surface_has_astro_dependency(package: &G3TsAstroPackageSurfaceState) -> bool {

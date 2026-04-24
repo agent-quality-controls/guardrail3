@@ -60,7 +60,10 @@ pub(crate) fn select_astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
             continue;
         }
 
-        let Some(file_name) = Path::new(&entry.path.rel_path).file_name().and_then(|name| name.to_str()) else {
+        let Some(file_name) = Path::new(&entry.path.rel_path)
+            .file_name()
+            .and_then(|name| name.to_str())
+        else {
             continue;
         };
 
@@ -84,57 +87,64 @@ pub(crate) fn select_astro_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> Option<&'a G3WorkspaceEntry> {
-    ROOT_ASTRO_CONFIGS
-        .iter()
-        .find_map(|file_name| {
-            exact_file(crawl, &scoped_rel_path(app_root_rel_path, file_name))
-                .filter(|entry| is_included_file(entry))
-        })
+    ROOT_ASTRO_CONFIGS.iter().find_map(|file_name| {
+        exact_file(crawl, &scoped_rel_path(app_root_rel_path, file_name))
+            .filter(|entry| is_included_file(entry))
+    })
 }
 
 pub(crate) fn select_content_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> Option<&'a G3WorkspaceEntry> {
-    CONTENT_CONFIGS
-        .iter()
-        .find_map(|rel_path| {
-            exact_file(crawl, &scoped_rel_path(app_root_rel_path, rel_path))
-                .filter(|entry| is_included_file(entry))
-        })
+    CONTENT_CONFIGS.iter().find_map(|rel_path| {
+        exact_file(crawl, &scoped_rel_path(app_root_rel_path, rel_path))
+            .filter(|entry| is_included_file(entry))
+    })
 }
 
 pub(crate) fn select_live_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> Option<&'a G3WorkspaceEntry> {
-    LIVE_CONFIGS
-        .iter()
-        .find_map(|rel_path| {
-            exact_file(crawl, &scoped_rel_path(app_root_rel_path, rel_path))
-                .filter(|entry| is_included_file(entry))
-        })
+    LIVE_CONFIGS.iter().find_map(|rel_path| {
+        exact_file(crawl, &scoped_rel_path(app_root_rel_path, rel_path))
+            .filter(|entry| is_included_file(entry))
+    })
 }
 
 pub(crate) fn select_velite_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> Option<&'a G3WorkspaceEntry> {
-    VELITE_CONFIGS.iter().find_map(|rel_path| {
-        exact_file(crawl, &scoped_rel_path(app_root_rel_path, rel_path))
-            .filter(|entry| is_included_file(entry))
-    })
-}
-
-pub(crate) fn velite_output_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
-    let prefix = scoped_rel_path(app_root_rel_path, ".velite/");
-
-    crawl.entries
+    crawl
+        .entries
         .iter()
         .filter(|entry| {
             is_included_file(entry)
                 && entry.kind == G3WorkspaceEntryKind::File
-                && entry.path.rel_path.starts_with(&prefix)
+                && is_under_app_root(&entry.path.rel_path, app_root_rel_path)
+                && !is_route_tree_path(&entry.path.rel_path, app_root_rel_path)
+                && Path::new(&entry.path.rel_path)
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .is_some_and(|file_name| VELITE_CONFIGS.contains(&file_name))
+        })
+        .min_by(|left, right| left.path.rel_path.cmp(&right.path.rel_path))
+}
+
+pub(crate) fn velite_output_paths(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+) -> Vec<String> {
+    crawl
+        .entries
+        .iter()
+        .filter(|entry| {
+            is_included_file(entry)
+                && entry.kind == G3WorkspaceEntryKind::File
+                && is_under_app_root(&entry.path.rel_path, app_root_rel_path)
+                && path_has_segment(&entry.path.rel_path, ".velite")
         })
         .map(|entry| entry.path.rel_path.clone())
         .collect()
@@ -156,7 +166,8 @@ pub(crate) fn route_markdown_pages(
 ) -> Vec<String> {
     let pages_prefix = scoped_rel_path(app_root_rel_path, "src/pages/");
 
-    crawl.entries
+    crawl
+        .entries
         .iter()
         .filter(|entry| {
             is_included_file(entry)
@@ -168,16 +179,50 @@ pub(crate) fn route_markdown_pages(
         .collect()
 }
 
+pub(crate) fn route_page_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
+    let pages_prefix = scoped_rel_path(app_root_rel_path, "src/pages/");
+
+    crawl
+        .entries
+        .iter()
+        .filter(|entry| {
+            is_included_file(entry)
+                && entry.kind == G3WorkspaceEntryKind::File
+                && entry.path.rel_path.starts_with(&pages_prefix)
+                && is_route_page_file(&entry.path.rel_path)
+        })
+        .map(|entry| app_relative_path(&entry.path.rel_path, app_root_rel_path))
+        .collect()
+}
+
+pub(crate) fn endpoint_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
+    let pages_prefix = scoped_rel_path(app_root_rel_path, "src/pages/");
+
+    crawl
+        .entries
+        .iter()
+        .filter(|entry| {
+            is_included_file(entry)
+                && entry.kind == G3WorkspaceEntryKind::File
+                && entry.path.rel_path.starts_with(&pages_prefix)
+                && is_endpoint_file(&entry.path.rel_path)
+        })
+        .map(|entry| app_relative_path(&entry.path.rel_path, app_root_rel_path))
+        .collect()
+}
+
 pub(crate) fn select_active_eslint_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> Option<&'a G3WorkspaceEntry> {
-    ancestor_rel_paths(app_root_rel_path).into_iter().find_map(|candidate_root| {
-        ROOT_ESLINT_CONFIGS.iter().find_map(|file_name| {
-            exact_file(crawl, &scoped_rel_path(&candidate_root, file_name))
-                .filter(|entry| is_included_file(entry))
+    ancestor_rel_paths(app_root_rel_path)
+        .into_iter()
+        .find_map(|candidate_root| {
+            ROOT_ESLINT_CONFIGS.iter().find_map(|file_name| {
+                exact_file(crawl, &scoped_rel_path(&candidate_root, file_name))
+                    .filter(|entry| is_included_file(entry))
+            })
         })
-    })
 }
 
 pub(crate) fn probe_targets(
@@ -209,7 +254,8 @@ pub(crate) fn probe_targets(
 }
 
 fn exact_file<'a>(crawl: &'a G3WorkspaceCrawl, rel_path: &str) -> Option<&'a G3WorkspaceEntry> {
-    crawl.entries
+    crawl
+        .entries
         .iter()
         .find(|entry| entry.path.rel_path == rel_path && entry.kind == G3WorkspaceEntryKind::File)
 }
@@ -232,7 +278,10 @@ fn ancestor_rel_paths(app_root_rel_path: &str) -> Vec<String> {
 }
 
 fn parent_rel_path(rel_path: &str) -> String {
-    let Some(parent) = Path::new(rel_path).parent().and_then(|parent| parent.to_str()) else {
+    let Some(parent) = Path::new(rel_path)
+        .parent()
+        .and_then(|parent| parent.to_str())
+    else {
         return ".".to_owned();
     };
 
@@ -260,6 +309,45 @@ fn first_ts_source_rel_path(
         .or_else(|| first_tsx_source_rel_path(crawl, config_scope))
 }
 
+fn is_under_app_root(rel_path: &str, app_root_rel_path: &str) -> bool {
+    app_root_rel_path == "."
+        || rel_path == app_root_rel_path
+        || rel_path.starts_with(&format!("{app_root_rel_path}/"))
+}
+
+fn path_has_segment(rel_path: &str, segment: &str) -> bool {
+    Path::new(rel_path)
+        .components()
+        .any(|component| component.as_os_str() == segment)
+}
+
+fn app_relative_path(rel_path: &str, app_root_rel_path: &str) -> String {
+    if app_root_rel_path == "." {
+        rel_path.to_owned()
+    } else {
+        rel_path
+            .strip_prefix(&format!("{app_root_rel_path}/"))
+            .unwrap_or(rel_path)
+            .to_owned()
+    }
+}
+
+fn is_route_tree_path(rel_path: &str, app_root_rel_path: &str) -> bool {
+    let pages_prefix = scoped_rel_path(app_root_rel_path, "src/pages/");
+    rel_path.starts_with(&pages_prefix)
+}
+
+fn is_route_page_file(rel_path: &str) -> bool {
+    rel_path.ends_with(".astro")
+        || rel_path.ends_with(".md")
+        || rel_path.ends_with(".mdx")
+        || rel_path.ends_with(".html")
+}
+
+fn is_endpoint_file(rel_path: &str) -> bool {
+    (rel_path.ends_with(".js") || rel_path.ends_with(".ts")) && !rel_path.ends_with(".d.ts")
+}
+
 fn first_tsx_source_rel_path(
     crawl: &G3WorkspaceCrawl,
     config_scope: Option<&str>,
@@ -281,7 +369,8 @@ fn first_matching_rel_path(
     config_scope: Option<&str>,
     predicate: impl Fn(&str) -> bool,
 ) -> Option<String> {
-    crawl.entries
+    crawl
+        .entries
         .iter()
         .find(|entry| {
             is_included_file(entry)
@@ -294,7 +383,11 @@ fn first_matching_rel_path(
 fn config_scope_dir(config_rel_path: &str) -> Option<&str> {
     let parent = std::path::Path::new(config_rel_path).parent()?;
     let parent = parent.to_str()?;
-    if parent.is_empty() { None } else { Some(parent) }
+    if parent.is_empty() {
+        None
+    } else {
+        Some(parent)
+    }
 }
 
 fn in_config_scope(rel_path: &str, config_scope: Option<&str>) -> bool {
@@ -351,7 +444,9 @@ fn is_fallback_tsx_source_rel_path(rel_path: &str) -> bool {
 }
 
 fn is_primary_astro_source_rel_path(rel_path: &str) -> bool {
-    rel_path.starts_with("src/") && rel_path.ends_with(".astro") && !is_config_like_rel_path(rel_path)
+    rel_path.starts_with("src/")
+        && rel_path.ends_with(".astro")
+        && !is_config_like_rel_path(rel_path)
 }
 
 fn is_fallback_astro_source_rel_path(rel_path: &str) -> bool {

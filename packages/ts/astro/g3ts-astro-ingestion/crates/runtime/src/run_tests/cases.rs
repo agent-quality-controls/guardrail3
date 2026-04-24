@@ -9,8 +9,14 @@ fn config_ingestion_returns_empty_for_non_astro_roots() {
 
     let input = super::super::ingest_for_config_checks(&crawl);
 
-    assert!(input.integration_contracts.is_empty(), "unexpected config inputs: {input:?}");
-    assert!(input.eslint_contracts.is_empty(), "unexpected eslint inputs: {input:?}");
+    assert!(
+        input.integration_contracts.is_empty(),
+        "unexpected config inputs: {input:?}"
+    );
+    assert!(
+        input.eslint_contracts.is_empty(),
+        "unexpected eslint inputs: {input:?}"
+    );
 }
 
 #[test]
@@ -68,17 +74,31 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
 
     let input = super::super::ingest_for_config_checks(&crawl);
 
-    assert_eq!(input.integration_contracts.len(), 1, "unexpected inputs: {input:?}");
-    assert_eq!(input.eslint_contracts.len(), 1, "unexpected inputs: {input:?}");
+    assert_eq!(
+        input.integration_contracts.len(),
+        1,
+        "unexpected inputs: {input:?}"
+    );
+    assert_eq!(
+        input.eslint_contracts.len(),
+        1,
+        "unexpected inputs: {input:?}"
+    );
 
     let integration = &input.integration_contracts[0];
-    assert_eq!(integration.content_mode, G3TsAstroContentMode::BuildCollections);
+    assert_eq!(
+        integration.content_mode,
+        G3TsAstroContentMode::BuildCollections
+    );
     assert!(integration.requires_source_pipeline_linting);
 
     match &integration.package {
         G3TsAstroPackageSurfaceState::Parsed { snapshot } => {
             assert!(
-                snapshot.dev_dependencies.iter().any(|dependency| dependency == "astro"),
+                snapshot
+                    .dev_dependencies
+                    .iter()
+                    .any(|dependency| dependency == "astro"),
                 "astro dependency missing: {snapshot:?}"
             );
             assert!(
@@ -102,7 +122,10 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                 "astro plugin missing from astro lane: {snapshot:?}"
             );
             assert!(
-                snapshot.ts_source_plugins.iter().any(|plugin| plugin == "astro"),
+                snapshot
+                    .ts_source_plugins
+                    .iter()
+                    .any(|plugin| plugin == "astro"),
                 "astro plugin missing: {snapshot:?}"
             );
             assert!(
@@ -201,8 +224,7 @@ module.exports = { ESLint };
             "astro.config.mjs",
             "src/content.config.ts",
             "eslint.config.mjs",
-            "src/pages/index.astro",
-            "src/pages/index.ts",
+            "src/pages/feed.json.ts",
             "node_modules/eslint/index.js",
         ],
     );
@@ -212,19 +234,261 @@ module.exports = { ESLint };
     match &input.eslint_contracts[0].config {
         G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
             assert_eq!(
-                snapshot.ts_source_effective_route_scoped_pipeline_rules.len(),
+                snapshot
+                    .ts_source_effective_route_scoped_pipeline_rules
+                    .len(),
                 7,
                 "endpoint-scoped rules should count as effective: {snapshot:?}"
             );
             assert_eq!(
-                snapshot.ts_source_effective_content_data_pipeline_rules.len(),
+                snapshot
+                    .ts_source_effective_content_data_pipeline_rules
+                    .len(),
                 1,
                 "content-data rule should count as effective: {snapshot:?}"
             );
             assert_eq!(
-                snapshot.ts_source_effective_content_source_pipeline_rules.len(),
+                snapshot
+                    .ts_source_effective_content_source_pipeline_rules
+                    .len(),
                 3,
                 "content-source rules should count as effective: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_rejects_endpoint_only_scope_options_when_route_pages_exist() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"class ESLint {
+  constructor(options) {
+    this.cwd = options.cwd;
+    this.overrideConfigFile = options.overrideConfigFile;
+  }
+
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    const isTsx = String(_filePath).endsWith('.tsx');
+    return {
+      plugins: {
+        astro: {},
+        "astro-pipeline": {},
+      },
+      rules: {
+        "astro-pipeline/no-authored-content-fs-read": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-imports": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-content-data-modules-in-routes": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }],
+        "astro-pipeline/no-direct-astro-content-in-routes": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
+        "astro-pipeline/no-runtime-mdx-eval": "error",
+        "astro-pipeline/no-side-loader-imports": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
+        "astro-pipeline/no-velite-imports": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
+      },
+      languageOptions: { parserOptions: { projectService: true, jsx: isTsx } },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint runtime should be rewritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/pages/feed.json.ts",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert!(
+                snapshot
+                    .ts_source_effective_route_scoped_pipeline_rules
+                    .is_empty(),
+                "endpoint-only coverage must not count when route pages exist: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_rejects_partial_route_coverage_for_route_scoped_rules() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"class ESLint {
+  constructor(options) {
+    this.cwd = options.cwd;
+    this.overrideConfigFile = options.overrideConfigFile;
+  }
+
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    const isTsx = String(_filePath).endsWith('.tsx');
+    return {
+      plugins: {
+        astro: {},
+        "astro-pipeline": {},
+      },
+      rules: {
+        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: ["src/pages/index.astro"], endpointGlobs: ["src/pages/**/*.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: ["src/pages/index.astro"], endpointGlobs: ["src/pages/**/*.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-imports": ["error", { routeGlobs: ["src/pages/index.astro"], endpointGlobs: ["src/pages/**/*.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: ["src/pages/index.astro"], endpointGlobs: ["src/pages/**/*.json.ts"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }],
+        "astro-pipeline/no-direct-astro-content-in-routes": ["error", { routeGlobs: ["src/pages/index.astro"], endpointGlobs: ["src/pages/**/*.json.ts"] }],
+        "astro-pipeline/no-runtime-mdx-eval": "error",
+        "astro-pipeline/no-side-loader-imports": ["error", { routeGlobs: ["src/pages/index.astro"], endpointGlobs: ["src/pages/**/*.json.ts"] }],
+        "astro-pipeline/no-velite-imports": ["error", { routeGlobs: ["src/pages/index.astro"], endpointGlobs: ["src/pages/**/*.json.ts"] }],
+      },
+      languageOptions: { parserOptions: { projectService: true, jsx: isTsx } },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint runtime should be rewritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/pages/blog.astro",
+            "src/pages/feed.json.ts",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert!(
+                snapshot
+                    .ts_source_effective_route_scoped_pipeline_rules
+                    .is_empty(),
+                "partial route coverage must not count as effective: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .ts_source_effective_content_data_pipeline_rules
+                    .is_empty(),
+                "content-data rules must not count as effective when route coverage is partial: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .ts_source_effective_content_source_pipeline_rules
+                    .is_empty(),
+                "content-source rules must not count as effective when route coverage is partial: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_rejects_partial_endpoint_coverage_for_route_scoped_rules() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"class ESLint {
+  constructor(options) {
+    this.cwd = options.cwd;
+    this.overrideConfigFile = options.overrideConfigFile;
+  }
+
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    const isTsx = String(_filePath).endsWith('.tsx');
+    return {
+      plugins: {
+        astro: {},
+        "astro-pipeline": {},
+      },
+      rules: {
+        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["src/pages/feed.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["src/pages/feed.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-imports": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["src/pages/feed.json.ts"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["src/pages/feed.json.ts"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }],
+        "astro-pipeline/no-direct-astro-content-in-routes": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["src/pages/feed.json.ts"] }],
+        "astro-pipeline/no-runtime-mdx-eval": "error",
+        "astro-pipeline/no-side-loader-imports": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["src/pages/feed.json.ts"] }],
+        "astro-pipeline/no-velite-imports": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["src/pages/feed.json.ts"] }],
+      },
+      languageOptions: { parserOptions: { projectService: true, jsx: isTsx } },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint runtime should be rewritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/pages/feed.json.ts",
+            "src/pages/search.json.ts",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert!(
+                snapshot
+                    .ts_source_effective_route_scoped_pipeline_rules
+                    .is_empty(),
+                "partial endpoint coverage must not count as effective: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .ts_source_effective_content_data_pipeline_rules
+                    .is_empty(),
+                "content-data rules must not count as effective when endpoint coverage is partial: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .ts_source_effective_content_source_pipeline_rules
+                    .is_empty(),
+                "content-source rules must not count as effective when endpoint coverage is partial: {snapshot:?}"
             );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
@@ -314,6 +578,58 @@ module.exports = { ESLint };
 }
 
 #[test]
+fn filetree_ingestion_discovers_nested_velite_surfaces_under_astro_root() {
+    let root = super::helpers::fake_astro_workspace();
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "src/content/landing/velite.config.ts",
+            "src/generated/.velite/landing.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_file_tree_checks(&crawl);
+    let app_root = input
+        .app_roots
+        .first()
+        .expect("astro root should be discovered");
+
+    assert_eq!(
+        app_root.velite_config_rel_path.as_deref(),
+        Some("src/content/landing/velite.config.ts")
+    );
+    assert_eq!(
+        app_root.velite_output_rel_paths,
+        vec!["src/generated/.velite/landing.js".to_owned()]
+    );
+}
+
+#[test]
+fn filetree_ingestion_does_not_misclassify_route_files_named_velite_config() {
+    let root = super::helpers::fake_astro_workspace();
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "src/pages/velite.config.ts",
+        ],
+    );
+
+    let input = super::super::ingest_for_file_tree_checks(&crawl);
+    let app_root = input
+        .app_roots
+        .first()
+        .expect("astro root should be discovered");
+
+    assert_eq!(app_root.velite_config_rel_path, None);
+}
+
+#[test]
 fn plain_astro_app_without_content_still_requires_pipeline_linting() {
     let root = super::helpers::fake_astro_workspace();
     let crawl = super::helpers::crawl_with_entries(
@@ -349,7 +665,11 @@ fn config_ingestion_marks_unreadable_package_surface() {
 
     let input = super::super::ingest_for_config_checks(&crawl);
 
-    assert_eq!(input.integration_contracts.len(), 1, "unexpected inputs: {input:?}");
+    assert_eq!(
+        input.integration_contracts.len(),
+        1,
+        "unexpected inputs: {input:?}"
+    );
     match &input.integration_contracts[0].package {
         G3TsAstroPackageSurfaceState::Unreadable { rel_path, .. } => {
             assert_eq!(rel_path, "package.json");
@@ -375,16 +695,23 @@ fn file_tree_ingestion_collects_route_mdx_inputs() {
 
     let input = super::super::ingest_for_file_tree_checks(&crawl);
 
-    assert_eq!(input.app_roots.len(), 1, "unexpected file-tree inputs: {input:?}");
+    assert_eq!(
+        input.app_roots.len(),
+        1,
+        "unexpected file-tree inputs: {input:?}"
+    );
     assert_eq!(
         input.build_collection_roots.len(),
         1,
         "unexpected build-collection roots: {input:?}"
     );
-    assert_eq!(input.route_markdown_pages.len(), 1, "unexpected markdown pages: {input:?}");
     assert_eq!(
-        input.route_markdown_pages[0].rel_path,
-        "src/pages/about.mdx",
+        input.route_markdown_pages.len(),
+        1,
+        "unexpected markdown pages: {input:?}"
+    );
+    assert_eq!(
+        input.route_markdown_pages[0].rel_path, "src/pages/about.mdx",
         "unexpected markdown page: {input:?}"
     );
 }
@@ -431,8 +758,16 @@ fn nested_astro_app_root_uses_its_own_package_and_nearest_eslint_surface() {
     );
 
     let config_input = super::super::ingest_for_config_checks(&crawl);
-    assert_eq!(config_input.integration_contracts.len(), 1, "unexpected config inputs: {config_input:?}");
-    assert_eq!(config_input.eslint_contracts.len(), 1, "unexpected config inputs: {config_input:?}");
+    assert_eq!(
+        config_input.integration_contracts.len(),
+        1,
+        "unexpected config inputs: {config_input:?}"
+    );
+    assert_eq!(
+        config_input.eslint_contracts.len(),
+        1,
+        "unexpected config inputs: {config_input:?}"
+    );
 
     let integration = &config_input.integration_contracts[0];
     assert_eq!(integration.app_root_rel_path, "apps/landing");
@@ -451,10 +786,19 @@ fn nested_astro_app_root_uses_its_own_package_and_nearest_eslint_surface() {
     }
 
     let file_tree_input = super::super::ingest_for_file_tree_checks(&crawl);
-    assert_eq!(file_tree_input.app_roots.len(), 1, "unexpected file-tree inputs: {file_tree_input:?}");
-    assert_eq!(file_tree_input.app_roots[0].app_root_rel_path, "apps/landing");
     assert_eq!(
-        file_tree_input.app_roots[0].astro_config_rel_path.as_deref(),
+        file_tree_input.app_roots.len(),
+        1,
+        "unexpected file-tree inputs: {file_tree_input:?}"
+    );
+    assert_eq!(
+        file_tree_input.app_roots[0].app_root_rel_path,
+        "apps/landing"
+    );
+    assert_eq!(
+        file_tree_input.app_roots[0]
+            .astro_config_rel_path
+            .as_deref(),
         Some("apps/landing/astro.config.mjs")
     );
 }
@@ -571,8 +915,14 @@ module.exports = { ESLint };
     let input = super::super::ingest_for_config_checks(&crawl);
     match &input.eslint_contracts[0].config {
         G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
-            assert!(!snapshot.astro_source_probe_present, "ignored astro probe should not count: {snapshot:?}");
-            assert!(snapshot.ts_source_probe_present, "ts lane should stay present: {snapshot:?}");
+            assert!(
+                !snapshot.astro_source_probe_present,
+                "ignored astro probe should not count: {snapshot:?}"
+            );
+            assert!(
+                snapshot.ts_source_probe_present,
+                "ts lane should stay present: {snapshot:?}"
+            );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
     }

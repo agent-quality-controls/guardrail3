@@ -46,8 +46,12 @@ pub(crate) fn package_has_script_fragment(
     contract: &G3TsAstroIntegrationContractInput,
     fragment: &str,
 ) -> bool {
-    parsed_package(contract)
-        .is_some_and(|snapshot| snapshot.script_bodies.iter().any(|(_, body)| has_command(body, fragment)))
+    parsed_package(contract).is_some_and(|snapshot| {
+        snapshot
+            .script_bodies
+            .iter()
+            .any(|(_, body)| has_command(body, fragment))
+    })
 }
 
 #[must_use]
@@ -94,8 +98,7 @@ pub(crate) fn eslint_required_lanes_have_effective_pipeline_rules(
             route_scoped_rules,
             content_data_rules,
             content_source_rules,
-        ) &&
-        lane_has_plugin_and_rules(
+        ) && lane_has_plugin_and_rules(
             snapshot.ts_source_probe_present,
             &snapshot.ts_source_plugins,
             &snapshot.ts_source_error_rules,
@@ -141,8 +144,7 @@ pub(crate) fn eslint_required_lanes_have_plugin(
             &[],
             &[],
             &[],
-        ) &&
-        lane_has_plugin_and_rules(
+        ) && lane_has_plugin_and_rules(
             snapshot.ts_source_probe_present,
             &snapshot.ts_source_plugins,
             &snapshot.ts_source_error_rules,
@@ -230,12 +232,24 @@ fn lane_has_plugin_and_rules(
         .map(String::as_str)
         .collect::<std::collections::BTreeSet<_>>();
 
-    let effective_route_scope = effective_route_scoped_rules
-        .map(|rules| rules.iter().map(String::as_str).collect::<std::collections::BTreeSet<_>>());
-    let effective_content_data_scope = effective_content_data_rules
-        .map(|rules| rules.iter().map(String::as_str).collect::<std::collections::BTreeSet<_>>());
-    let effective_content_source_scope = effective_content_source_rules
-        .map(|rules| rules.iter().map(String::as_str).collect::<std::collections::BTreeSet<_>>());
+    let effective_route_scope = effective_route_scoped_rules.map(|rules| {
+        rules
+            .iter()
+            .map(String::as_str)
+            .collect::<std::collections::BTreeSet<_>>()
+    });
+    let effective_content_data_scope = effective_content_data_rules.map(|rules| {
+        rules
+            .iter()
+            .map(String::as_str)
+            .collect::<std::collections::BTreeSet<_>>()
+    });
+    let effective_content_source_scope = effective_content_source_rules.map(|rules| {
+        rules
+            .iter()
+            .map(String::as_str)
+            .collect::<std::collections::BTreeSet<_>>()
+    });
 
     required_rules
         .iter()
@@ -290,11 +304,7 @@ fn skip_command_wrapper(command: &[String], start: usize) -> usize {
 
     if matches!(
         (first, second),
-        ("npm", "exec")
-            | ("pnpm", "exec")
-            | ("yarn", "exec")
-            | ("pnpm", "dlx")
-            | ("yarn", "dlx")
+        ("npm", "exec") | ("pnpm", "exec") | ("yarn", "exec") | ("pnpm", "dlx") | ("yarn", "dlx")
     ) {
         return skip_wrapper_options(command, start + 2);
     }

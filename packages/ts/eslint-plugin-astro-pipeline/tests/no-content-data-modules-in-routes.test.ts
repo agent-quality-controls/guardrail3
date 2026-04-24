@@ -11,6 +11,11 @@ import {
 
 test("no-content-data-modules-in-routes catches route closures that reach data modules", async () => {
   const project = await createFixtureProject({
+    "src/pages/direct.ts": `
+      import { HERO_COPY } from "../components/landing/homepage-v2.data";
+
+      export const GET = () => new Response(HERO_COPY.title);
+    `,
     "src/pages/index.astro": `
       ---
       import HomePage from "../app/page";
@@ -85,6 +90,16 @@ test("no-content-data-modules-in-routes catches route closures that reach data m
           code: await project.read("src/pages/index.astro"),
           filename: project.path("src/pages/index.astro"),
           languageOptions: astroLanguageOptions,
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenContentDataModule"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/direct.ts"),
+          filename: project.path("src/pages/direct.ts"),
           options: [baseOptions],
           errors: [
             {

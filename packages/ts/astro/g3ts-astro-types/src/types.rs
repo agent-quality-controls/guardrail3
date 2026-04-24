@@ -31,10 +31,20 @@ pub struct G3TsAstroPackageSurfaceSnapshot {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3TsAstroPackageSurfaceState {
-    Missing { rel_path: String },
-    Unreadable { rel_path: String, reason: String },
-    ParseError { rel_path: String, reason: String },
-    Parsed { snapshot: G3TsAstroPackageSurfaceSnapshot },
+    Missing {
+        rel_path: String,
+    },
+    Unreadable {
+        rel_path: String,
+        reason: String,
+    },
+    ParseError {
+        rel_path: String,
+        reason: String,
+    },
+    Parsed {
+        snapshot: G3TsAstroPackageSurfaceSnapshot,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -70,10 +80,20 @@ pub struct G3TsAstroEslintSurfaceSnapshot {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3TsAstroEslintSurfaceState {
-    Missing { rel_path: String },
-    Unreadable { rel_path: String, reason: String },
-    ParseError { rel_path: String, reason: String },
-    Parsed { snapshot: G3TsAstroEslintSurfaceSnapshot },
+    Missing {
+        rel_path: String,
+    },
+    Unreadable {
+        rel_path: String,
+        reason: String,
+    },
+    ParseError {
+        rel_path: String,
+        reason: String,
+    },
+    Parsed {
+        snapshot: G3TsAstroEslintSurfaceSnapshot,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
