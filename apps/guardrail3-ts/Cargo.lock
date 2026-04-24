@@ -442,6 +442,7 @@ dependencies = [
  "g3rs-workspace-crawl",
  "g3ts-astro-types",
  "package-json-parser",
+ "serde_json",
 ]
 
 [[package]]

@@ -12,6 +12,12 @@ use std::collections::BTreeSet;
 
 const ESLINT_CONFIG_PATTERN: &str = "eslint.config.*";
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
+const ROUTE_SCOPED_PIPELINE_RULES: [&str; 4] = [
+    "astro-pipeline/no-authored-content-fs-read",
+    "astro-pipeline/no-authored-content-glob",
+    "astro-pipeline/no-direct-astro-content-in-routes",
+    "astro-pipeline/no-side-loader-imports",
+];
 
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChecksInput {
     let app_roots = astro_app_roots(crawl);
@@ -256,6 +262,12 @@ fn ingest_eslint_surface(
             astro_source_error_rules: active_error_rules(astro_source_probe),
             ts_source_error_rules: active_error_rules(ts_source_probe),
             tsx_source_error_rules: active_error_rules(tsx_source_probe),
+            astro_source_effective_route_scoped_pipeline_rules:
+                effective_route_scoped_pipeline_rules(astro_source_probe),
+            ts_source_effective_route_scoped_pipeline_rules:
+                effective_route_scoped_pipeline_rules(ts_source_probe),
+            tsx_source_effective_route_scoped_pipeline_rules:
+                effective_route_scoped_pipeline_rules(tsx_source_probe),
         },
     }
 }
@@ -285,6 +297,47 @@ fn active_error_rules(
                 .collect()
         })
         .unwrap_or_default()
+}
+
+fn effective_route_scoped_pipeline_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+) -> Vec<String> {
+    let Some(probe) = probe else {
+        return Vec::new();
+    };
+
+    ROUTE_SCOPED_PIPELINE_RULES
+        .iter()
+        .filter(|rule_name| {
+            probe
+                .rules
+                .get(**rule_name)
+                .is_some_and(rule_setting_has_route_or_endpoint_scope)
+        })
+        .map(|rule_name| (*rule_name).to_owned())
+        .collect()
+}
+
+fn rule_setting_has_route_or_endpoint_scope(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+) -> bool {
+    setting.options.iter().any(|option| {
+        option.as_object().is_some_and(|object| {
+            has_non_empty_string_array_option(object.get("routeGlobs"))
+                || has_non_empty_string_array_option(object.get("endpointGlobs"))
+        })
+    })
+}
+
+fn has_non_empty_string_array_option(option: Option<&serde_json::Value>) -> bool {
+    option
+        .and_then(serde_json::Value::as_array)
+        .is_some_and(|values| {
+            !values.is_empty()
+                && values
+                    .iter()
+                    .all(|value| value.as_str().is_some_and(|text| !text.trim().is_empty()))
+        })
 }
 
 fn package_surface_has_astro_dependency(package: &G3TsAstroPackageSurfaceState) -> bool {

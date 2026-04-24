@@ -119,6 +119,146 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                     .any(|rule| rule == "astro-pipeline/no-authored-content-fs-read"),
                 "astro pipeline rules missing: {snapshot:?}"
             );
+            assert!(
+                snapshot
+                    .ts_source_effective_route_scoped_pipeline_rules
+                    .iter()
+                    .any(|rule| rule == "astro-pipeline/no-authored-content-fs-read"),
+                "route-scoped pipeline options missing: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_accepts_endpoint_only_scope_options_for_route_scoped_pipeline_rules() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"class ESLint {
+  constructor(options) {
+    this.cwd = options.cwd;
+    this.overrideConfigFile = options.overrideConfigFile;
+  }
+
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    const isTsx = String(_filePath).endsWith('.tsx');
+    return {
+      plugins: {
+        astro: {},
+        "astro-pipeline": {},
+      },
+      rules: {
+        "astro-pipeline/no-authored-content-fs-read": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
+        "astro-pipeline/no-direct-astro-content-in-routes": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
+        "astro-pipeline/no-runtime-mdx-eval": "error",
+        "astro-pipeline/no-side-loader-imports": ["error", { endpointGlobs: ["src/pages/**/*.json.ts"] }],
+      },
+      languageOptions: { parserOptions: { projectService: true, jsx: isTsx } },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint runtime should be rewritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/pages/index.ts",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert_eq!(
+                snapshot.ts_source_effective_route_scoped_pipeline_rules.len(),
+                4,
+                "endpoint-scoped rules should count as effective: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_rejects_malformed_scope_options_for_route_scoped_pipeline_rules() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"class ESLint {
+  constructor(options) {
+    this.cwd = options.cwd;
+    this.overrideConfigFile = options.overrideConfigFile;
+  }
+
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    const isTsx = String(_filePath).endsWith('.tsx');
+    return {
+      plugins: {
+        astro: {},
+        "astro-pipeline": {},
+      },
+      rules: {
+        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: [1] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: [1] }],
+        "astro-pipeline/no-direct-astro-content-in-routes": ["error", { routeGlobs: [1] }],
+        "astro-pipeline/no-runtime-mdx-eval": "error",
+        "astro-pipeline/no-side-loader-imports": ["error", { routeGlobs: [1] }],
+      },
+      languageOptions: { parserOptions: { projectService: true, jsx: isTsx } },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint runtime should be rewritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/pages/index.ts",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert!(
+                snapshot
+                    .ts_source_effective_route_scoped_pipeline_rules
+                    .is_empty(),
+                "malformed numeric scope options must not count as effective: {snapshot:?}"
+            );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
     }
