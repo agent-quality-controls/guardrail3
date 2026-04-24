@@ -1,0 +1,18 @@
+too-many-lines-threshold = 75
+cognitive-complexity-threshold = 15
+too-many-arguments-threshold = 7
+type-complexity-threshold = 75
+max-struct-bools = 3
+max-fn-params-bools = 3
+excessive-nesting-threshold = 4
+avoid-breaking-exported-api = false
+allow-dbg-in-tests = false
+allow-expect-in-tests = true
+allow-panic-in-tests = false
+allow-print-in-tests = false
+allow-unwrap-in-tests = false
+disallowed-methods = [
+    { path = "std::fs::read_to_string", reason = "Use the parser fs module." },
+]
+disallowed-types = [
+]

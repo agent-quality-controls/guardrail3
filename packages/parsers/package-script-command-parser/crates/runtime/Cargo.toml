@@ -1,0 +1,30 @@
+[package]
+name = "package-script-command-parser-runtime"
+version.workspace = true
+edition = "2024"
+description = "Parser implementation for package.json script commands"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+readme = "README.md"
+keywords = ["typescript", "package-json", "scripts", "parser", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+package-script-command-parser-types = { path = "../types", version = "0.1.0" }
+
+[dev-dependencies]
+tempfile = "3"
+package-script-command-parser-runtime-assertions = { path = "../assertions" }
+
+[package.metadata.docs.rs]
+all-features = true

@@ -1,0 +1,18 @@
+[package]
+name = "eslint-directive-parser-types"
+version.workspace = true
+edition = "2024"
+description = "Types for ESLint directive parser crates"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+readme = "README.md"
+keywords = ["eslint", "typescript", "parser", "comments", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
