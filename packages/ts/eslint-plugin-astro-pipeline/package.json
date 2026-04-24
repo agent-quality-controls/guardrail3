@@ -2,9 +2,28 @@
   "name": "eslint-plugin-astro-pipeline",
   "version": "0.1.0",
   "description": "Astro source-policy rules for content pipeline enforcement.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/websmasher/guardrail3.git",
+    "directory": "packages/ts/eslint-plugin-astro-pipeline"
+  },
+  "homepage": "https://github.com/websmasher/guardrail3/tree/main/packages/ts/eslint-plugin-astro-pipeline",
+  "bugs": {
+    "url": "https://github.com/websmasher/guardrail3/issues"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "astro",
+    "mdx",
+    "content-pipeline",
+    "guardrails"
+  ],
+  "license": "UNLICENSED",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -21,8 +40,13 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
+    "prepack": "npm run clean && npm run build",
+    "prepublishOnly": "npm test",
     "pretest": "npm run build",
     "test": "tsx --test tests/*.test.ts"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "engines": {
     "node": ">=20"
