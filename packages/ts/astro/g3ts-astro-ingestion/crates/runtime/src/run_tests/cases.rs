@@ -65,6 +65,7 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             "package.json",
             "astro.config.mjs",
             "src/content.config.ts",
+            ".syncpackrc",
             "eslint.config.mjs",
             "src/pages/index.astro",
             "src/pages/index.ts",
@@ -108,8 +109,38 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                     .any(|(_, body)| body.contains("astro check")),
                 "astro check script missing: {snapshot:?}"
             );
+            assert!(
+                snapshot.script_commands.iter().any(|command| {
+                    command.script_name == "check"
+                        && command.executable == "astro"
+                        && command.args.first().is_some_and(|arg| arg == "check")
+                }),
+                "typed astro check command missing: {snapshot:?}"
+            );
+            assert!(
+                snapshot.safely_runs_astro_check,
+                "safe astro check fact missing: {snapshot:?}"
+            );
         }
         other => panic!("expected parsed package state, got {other:?}"),
+    }
+
+    match &integration.syncpack_config {
+        g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => {
+            assert!(
+                snapshot.source_covers_package_manifest,
+                "syncpack source should cover package.json: {snapshot:?}"
+            );
+            assert!(
+                snapshot.missing_required_stack_pins.is_empty(),
+                "required pin facts should be satisfied: {snapshot:?}"
+            );
+            assert!(
+                snapshot.missing_forbidden_bans.is_empty(),
+                "forbidden ban facts should be satisfied: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed syncpack state, got {other:?}"),
     }
 
     match &input.eslint_contracts[0].config {
@@ -172,6 +203,357 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_sets_syncpack_lint_safety_from_real_package_scripts() {
+    for (case_name, scripts_json, expected_safe) in [
+        (
+            "canonical",
+            r#"{ "check": "astro check && syncpack lint" }"#,
+            true,
+        ),
+        (
+            "fake text",
+            r#"{ "check": "astro check && echo syncpack lint" }"#,
+            false,
+        ),
+        (
+            "leading fail-open",
+            r#"{ "check": "true || syncpack lint" }"#,
+            false,
+        ),
+        (
+            "later fail-open",
+            r#"{ "check": "syncpack lint && true || true" }"#,
+            false,
+        ),
+        (
+            "duplicate unsafe surface",
+            r#"{ "check": "astro check && syncpack lint", "test": "syncpack lint || true" }"#,
+            false,
+        ),
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        std::fs::write(
+            root.path().join("package.json"),
+            format!(
+                "{{\n  \"devDependencies\": {{\n    \"astro\": \"1.0.0\",\n    \"syncpack\": \"1.0.0\"\n  }},\n  \"scripts\": {scripts_json}\n}}\n"
+            ),
+        )
+        .expect("package manifest should be rewritten");
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "package.json",
+                "astro.config.mjs",
+                "src/content.config.ts",
+                ".syncpackrc",
+                "src/pages/index.astro",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        match &input.integration_contracts[0].package {
+            G3TsAstroPackageSurfaceState::Parsed { snapshot } => assert_eq!(
+                snapshot.safely_runs_syncpack_lint, expected_safe,
+                "case {case_name} had wrong syncpack lint safety fact: {snapshot:?}"
+            ),
+            other => panic!("expected parsed package state, got {other:?}"),
+        }
+    }
+}
+
+#[test]
+fn app_local_syncpack_rejects_repo_relative_source_entry() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::create_dir_all(root.path().join("apps/landing/src/pages"))
+        .expect("nested pages directory should be created");
+    std::fs::create_dir_all(root.path().join("apps/landing/src/content"))
+        .expect("nested content directory should be created");
+    std::fs::write(
+        root.path().join("apps/landing/package.json"),
+        "{\n  \"devDependencies\": {\n    \"astro\": \"1.0.0\",\n    \"syncpack\": \"1.0.0\"\n  },\n  \"scripts\": {\n    \"check\": \"astro check && syncpack lint\"\n  }\n}\n",
+    )
+    .expect("nested package manifest should be written");
+    std::fs::write(
+        root.path().join("apps/landing/astro.config.mjs"),
+        "export default {};\n",
+    )
+    .expect("nested astro config should be written");
+    std::fs::write(
+        root.path().join("apps/landing/src/content.config.ts"),
+        "export default {};\n",
+    )
+    .expect("nested content config should be written");
+    let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+        .expect("root syncpack config should be readable")
+        .replace(
+            "\"source\": [\"package.json\"]",
+            "\"source\": [\"apps/landing/package.json\"]",
+        );
+    std::fs::write(
+        root.path().join("apps/landing/.syncpackrc"),
+        syncpack_config,
+    )
+    .expect("nested syncpack config should be written");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "apps/landing/package.json",
+            "apps/landing/astro.config.mjs",
+            "apps/landing/src/content.config.ts",
+            "apps/landing/.syncpackrc",
+            "apps/landing/src/pages/index.astro",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    let integration = input
+        .integration_contracts
+        .iter()
+        .find(|contract| contract.app_root_rel_path == "apps/landing")
+        .expect("nested Astro app contract should exist");
+
+    match &integration.syncpack_config {
+        g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => assert!(
+            !snapshot.source_covers_package_manifest,
+            "app-local .syncpackrc must not accept repo-relative source entries: {snapshot:?}"
+        ),
+        other => panic!("expected parsed syncpack state, got {other:?}"),
+    }
+}
+
+#[test]
+fn root_syncpack_rejects_non_exact_sources_for_nested_app_manifest() {
+    for source_entry in ["package.json", "apps/*/package.json"] {
+        let root = super::helpers::fake_astro_workspace();
+        std::fs::create_dir_all(root.path().join("apps/landing/src/pages"))
+            .expect("nested pages directory should be created");
+        std::fs::create_dir_all(root.path().join("apps/landing/src/content"))
+            .expect("nested content directory should be created");
+        std::fs::write(
+            root.path().join("apps/landing/package.json"),
+            "{\n  \"devDependencies\": {\n    \"astro\": \"1.0.0\",\n    \"syncpack\": \"1.0.0\"\n  },\n  \"scripts\": {\n    \"check\": \"astro check && syncpack lint\"\n  }\n}\n",
+        )
+        .expect("nested package manifest should be written");
+        std::fs::write(
+            root.path().join("apps/landing/astro.config.mjs"),
+            "export default {};\n",
+        )
+        .expect("nested astro config should be written");
+        std::fs::write(
+            root.path().join("apps/landing/src/content.config.ts"),
+            "export default {};\n",
+        )
+        .expect("nested content config should be written");
+        let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+            .expect("root syncpack config should be readable")
+            .replace(
+                "\"source\": [\"package.json\"]",
+                &format!("\"source\": [\"{source_entry}\"]"),
+            );
+        std::fs::write(root.path().join(".syncpackrc"), syncpack_config)
+            .expect("root syncpack config should be rewritten");
+
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "apps/landing/package.json",
+                "apps/landing/astro.config.mjs",
+                "apps/landing/src/content.config.ts",
+                ".syncpackrc",
+                "apps/landing/src/pages/index.astro",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        let integration = input
+            .integration_contracts
+            .iter()
+            .find(|contract| contract.app_root_rel_path == "apps/landing")
+            .expect("nested Astro app contract should exist");
+
+        match &integration.syncpack_config {
+            g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => assert!(
+                !snapshot.source_covers_package_manifest,
+                "root .syncpackrc source entry {source_entry:?} must not cover nested app manifest: {snapshot:?}"
+            ),
+            other => panic!("expected parsed syncpack state, got {other:?}"),
+        }
+    }
+}
+
+#[test]
+fn root_syncpack_rejects_source_alias_entries() {
+    for source_entry in [
+        "./package.json",
+        "/package.json",
+        "foo/../package.json",
+        "../package.json",
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+            .expect("root syncpack config should be readable")
+            .replace(
+                "\"source\": [\"package.json\"]",
+                &format!("\"source\": [\"{source_entry}\"]"),
+            );
+        std::fs::write(root.path().join(".syncpackrc"), syncpack_config)
+            .expect("syncpack config should be rewritten");
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "package.json",
+                "astro.config.mjs",
+                "src/content.config.ts",
+                ".syncpackrc",
+                "src/pages/index.astro",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        let integration = &input.integration_contracts[0];
+
+        match &integration.syncpack_config {
+            g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => assert!(
+                !snapshot.source_covers_package_manifest,
+                "root .syncpackrc must not accept alias source entry {source_entry:?}: {snapshot:?}"
+            ),
+            other => panic!("expected parsed syncpack state, got {other:?}"),
+        }
+    }
+}
+
+#[test]
+fn app_local_syncpack_rejects_source_alias_entries() {
+    for source_entry in [
+        "./package.json",
+        "/package.json",
+        "foo/../package.json",
+        "../landing/package.json",
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        std::fs::create_dir_all(root.path().join("apps/landing/src/pages"))
+            .expect("nested pages directory should be created");
+        std::fs::create_dir_all(root.path().join("apps/landing/src/content"))
+            .expect("nested content directory should be created");
+        std::fs::write(
+            root.path().join("apps/landing/package.json"),
+            "{\n  \"devDependencies\": {\n    \"astro\": \"1.0.0\",\n    \"syncpack\": \"1.0.0\"\n  },\n  \"scripts\": {\n    \"check\": \"astro check && syncpack lint\"\n  }\n}\n",
+        )
+        .expect("nested package manifest should be written");
+        std::fs::write(
+            root.path().join("apps/landing/astro.config.mjs"),
+            "export default {};\n",
+        )
+        .expect("nested astro config should be written");
+        std::fs::write(
+            root.path().join("apps/landing/src/content.config.ts"),
+            "export default {};\n",
+        )
+        .expect("nested content config should be written");
+        let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+            .expect("root syncpack config should be readable")
+            .replace(
+                "\"source\": [\"package.json\"]",
+                &format!("\"source\": [\"{source_entry}\"]"),
+            );
+        std::fs::write(
+            root.path().join("apps/landing/.syncpackrc"),
+            syncpack_config,
+        )
+        .expect("nested syncpack config should be written");
+
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "apps/landing/package.json",
+                "apps/landing/astro.config.mjs",
+                "apps/landing/src/content.config.ts",
+                "apps/landing/.syncpackrc",
+                "apps/landing/src/pages/index.astro",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        let integration = input
+            .integration_contracts
+            .iter()
+            .find(|contract| contract.app_root_rel_path == "apps/landing")
+            .expect("nested Astro app contract should exist");
+
+        match &integration.syncpack_config {
+            g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => assert!(
+                !snapshot.source_covers_package_manifest,
+                "app-local .syncpackrc must not accept alias source entry {source_entry:?}: {snapshot:?}"
+            ),
+            other => panic!("expected parsed syncpack state, got {other:?}"),
+        }
+    }
+}
+
+#[test]
+fn config_ingestion_rejects_noncanonical_forbidden_ban_groups() {
+    let canonical_next_ban = r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true }"#;
+
+    for (case_name, replacement) in [
+        (
+            "shadowed",
+            r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": false },
+    { "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true }"#,
+        ),
+        (
+            "package scoped",
+            r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "packages": ["other-package"], "isBanned": true }"#,
+        ),
+        (
+            "specifier scoped",
+            r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "specifierTypes": ["!exact"], "isBanned": true }"#,
+        ),
+        (
+            "wrong dependencyTypes",
+            r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev"], "isBanned": true }"#,
+        ),
+        (
+            "ignored",
+            r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true, "isIgnored": true }"#,
+        ),
+        (
+            "pinVersion present",
+            r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true, "pinVersion": "0.0.0" }"#,
+        ),
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+            .expect("root syncpack config should be readable")
+            .replace(canonical_next_ban, replacement);
+        std::fs::write(root.path().join(".syncpackrc"), syncpack_config)
+            .expect("syncpack config should be rewritten");
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "package.json",
+                "astro.config.mjs",
+                "src/content.config.ts",
+                ".syncpackrc",
+                "src/pages/index.astro",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        match &input.integration_contracts[0].syncpack_config {
+            g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => assert!(
+                snapshot
+                    .missing_forbidden_bans
+                    .iter()
+                    .any(|dependency| dependency == "next"),
+                "case {case_name} should report next as missing: {snapshot:?}"
+            ),
+            other => panic!("expected parsed syncpack state, got {other:?}"),
+        }
     }
 }
 

@@ -1,0 +1,27 @@
+[package]
+name = "syncpack-config-parser-runtime-assertions"
+version.workspace = true
+edition = "2024"
+description = "Assertions for Syncpack config parser runtime tests"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["typescript", "syncpack", "parser", "config", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+publish = false
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+syncpack-config-parser-runtime = { path = "../runtime", version = "0.1.0" }
+
+[package.metadata.docs.rs]
+all-features = true

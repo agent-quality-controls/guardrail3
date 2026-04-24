@@ -1,14 +1,32 @@
 use g3ts_astro_types::{
     G3TsAstroConfigChecksInput, G3TsAstroContentMode, G3TsAstroEslintPluginContractInput,
     G3TsAstroEslintSurfaceSnapshot, G3TsAstroEslintSurfaceState, G3TsAstroIntegrationContractInput,
-    G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState,
+    G3TsAstroPackageScriptCommand, G3TsAstroPackageScriptCommandSeparator,
+    G3TsAstroPackageScriptParseBlocker, G3TsAstroPackageScriptToolInvocation,
+    G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState, G3TsAstroSyncpackConfigSnapshot,
+    G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
 };
+use package_script_command_parser::types::{
+    PackageScriptCommand, PackageScriptCommandSeparator, PackageScriptParseFact,
+    PackageScriptParseState, PackageScriptToolInvocation,
+};
+
+#[derive(Clone)]
+struct TestSyncpackVersionGroup {
+    dependencies: Vec<String>,
+    dependency_types: Vec<String>,
+    packages: Vec<String>,
+    specifier_types: Vec<String>,
+    pin_version: Option<String>,
+    is_banned: bool,
+    is_ignored: bool,
+}
 
 pub(super) fn golden() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -18,7 +36,7 @@ pub(super) fn missing_astro_check() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(false, true, true, true, false),
+            parsed_package(false, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -28,7 +46,14 @@ pub(super) fn fake_astro_check_text_only() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package_with_script("echo astro check && eslint .", true, true, true, false),
+            parsed_package_with_script(
+                "echo astro check && syncpack lint && eslint .",
+                true,
+                true,
+                true,
+                false,
+                true,
+            ),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -39,11 +64,12 @@ pub(super) fn astro_check_wrapper_forms() -> G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
             parsed_package_with_script(
-                "npm exec -- astro check && npx --yes astro check",
+                "npm exec -- astro check && npx --yes astro check && syncpack lint",
                 true,
                 true,
                 true,
                 false,
+                true,
             ),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
@@ -54,7 +80,7 @@ pub(super) fn missing_required_packages() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, false, false, false, false),
+            parsed_package(true, false, false, false, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -64,7 +90,7 @@ pub(super) fn missing_astro_plugin_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(false, false, true))],
     }
@@ -74,7 +100,7 @@ pub(super) fn missing_pipeline_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, false, true))],
     }
@@ -84,7 +110,7 @@ pub(super) fn missing_pipeline_rule_enforcement() -> G3TsAstroConfigChecksInput 
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, false))],
     }
@@ -94,7 +120,7 @@ pub(super) fn missing_pipeline_scope_options() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -114,7 +140,7 @@ pub(super) fn endpoint_only_pipeline_scope_options() -> G3TsAstroConfigChecksInp
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -134,7 +160,7 @@ pub(super) fn endpoint_only_pipeline_scope_without_route_coverage() -> G3TsAstro
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -154,7 +180,7 @@ pub(super) fn missing_content_data_module_scope_options() -> G3TsAstroConfigChec
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -174,7 +200,7 @@ pub(super) fn missing_content_source_scope_options() -> G3TsAstroConfigChecksInp
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -194,7 +220,7 @@ pub(super) fn route_only_pipeline_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -214,7 +240,7 @@ pub(super) fn tsx_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecks
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -234,7 +260,7 @@ pub(super) fn astro_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChec
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -254,7 +280,7 @@ pub(super) fn ts_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecksI
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, false),
+            parsed_package(true, true, true, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(
             true,
@@ -274,17 +300,468 @@ pub(super) fn optional_contracts_not_required() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             false,
-            parsed_package(true, true, false, true, false),
+            parsed_package(true, true, false, true, false, true, true),
         )],
         eslint_contracts: vec![eslint_contract(false, parsed_eslint(true, false, false))],
     }
 }
 
-pub(super) fn velite_package_present() -> G3TsAstroConfigChecksInput {
+pub(super) fn missing_syncpack_package() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
             true,
-            parsed_package(true, true, true, true, true),
+            parsed_package(true, true, true, true, false, false, true),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn missing_syncpack_lint_script() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, false, true, false),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn fake_syncpack_lint_text_only() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package_with_script(
+                "astro check && echo syncpack lint",
+                true,
+                true,
+                true,
+                false,
+                true,
+            ),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_lint_or_chain_fail_open() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package_with_script(
+                "astro check && syncpack lint && true || true",
+                true,
+                true,
+                true,
+                false,
+                true,
+            ),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn missing_syncpack_package_with_unsafe_script() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package_with_script(
+                "astro check && syncpack lint || true",
+                true,
+                true,
+                true,
+                false,
+                false,
+            ),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_lint_wrapper_forms() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package_with_script(
+                "npx --yes astro check && pnpm --filter landing exec syncpack lint",
+                true,
+                true,
+                true,
+                false,
+                true,
+            ),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn missing_syncpack_config() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            G3TsAstroSyncpackConfigState::Missing {
+                rel_path: ".syncpackrc".to_owned(),
+            },
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn unreadable_syncpack_config() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            G3TsAstroSyncpackConfigState::Unreadable {
+                rel_path: ".syncpackrc".to_owned(),
+                reason: "permission denied".to_owned(),
+            },
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn malformed_syncpack_config() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            G3TsAstroSyncpackConfigState::ParseError {
+                rel_path: ".syncpackrc".to_owned(),
+                reason: "Syncpack config field `versionGroups` must be an array".to_owned(),
+            },
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_source_excludes_package() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_source_and_groups(
+                vec!["unrelated/package.json".to_owned()],
+                required_syncpack_version_groups(),
+            ),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn root_syncpack_package_source_does_not_cover_nested_app() -> G3TsAstroConfigChecksInput
+{
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_for_app_with_syncpack(
+            "apps/landing",
+            true,
+            nested_parsed_package(),
+            syncpack_config_for_package_at_with_source_and_groups(
+                ".syncpackrc",
+                "apps/landing/package.json",
+                Some("landing"),
+                vec!["package.json".to_owned()],
+                required_syncpack_version_groups(),
+            ),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn root_syncpack_exact_source_covers_nested_app() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_for_app_with_syncpack(
+            "apps/landing",
+            true,
+            nested_parsed_package(),
+            syncpack_config_for_package_at_with_source_and_groups(
+                ".syncpackrc",
+                "apps/landing/package.json",
+                Some("landing"),
+                vec!["apps/landing/package.json".to_owned()],
+                required_syncpack_version_groups(),
+            ),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn local_syncpack_package_source_covers_nested_app() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_for_app_with_syncpack(
+            "apps/landing",
+            true,
+            nested_parsed_package(),
+            syncpack_config_for_package_at_with_source_and_groups(
+                "apps/landing/.syncpackrc",
+                "apps/landing/package.json",
+                Some("landing"),
+                vec!["package.json".to_owned()],
+                required_syncpack_version_groups(),
+            ),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_missing_stack_pin() -> G3TsAstroConfigChecksInput {
+    let mut groups = required_syncpack_version_groups();
+    groups.retain(|group| {
+        !group
+            .dependencies
+            .iter()
+            .any(|dependency| dependency == "astro")
+    });
+
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_groups(groups),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_wrong_stack_pin() -> G3TsAstroConfigChecksInput {
+    let mut groups = required_syncpack_version_groups();
+    for group in &mut groups {
+        if group
+            .dependencies
+            .iter()
+            .any(|dependency| dependency == "astro")
+        {
+            group.pin_version = Some("6.1.8".to_owned());
+        }
+    }
+
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_groups(groups),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_shadowed_stack_pin() -> G3TsAstroConfigChecksInput {
+    let mut groups = required_syncpack_version_groups();
+    groups.insert(
+        0,
+        TestSyncpackVersionGroup {
+            dependencies: vec!["astro".to_owned()],
+            dependency_types: vec!["prod".to_owned(), "dev".to_owned()],
+            packages: Vec::new(),
+            specifier_types: Vec::new(),
+            pin_version: Some("6.1.8".to_owned()),
+            is_banned: false,
+            is_ignored: false,
+        },
+    );
+
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_groups(groups),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_scoped_away_stack_pin() -> G3TsAstroConfigChecksInput {
+    let mut groups = required_syncpack_version_groups();
+    for group in &mut groups {
+        if group
+            .dependencies
+            .iter()
+            .any(|dependency| dependency == "astro")
+        {
+            group.packages = vec!["other-package".to_owned()];
+        }
+    }
+
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_groups(groups),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_specifier_scoped_stack_pin() -> G3TsAstroConfigChecksInput {
+    let mut groups = required_syncpack_version_groups();
+    for group in &mut groups {
+        if group
+            .dependencies
+            .iter()
+            .any(|dependency| dependency == "astro")
+        {
+            group.specifier_types = vec!["!exact".to_owned()];
+        }
+    }
+
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_groups(groups),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_catch_all_forbidden_ban() -> G3TsAstroConfigChecksInput {
+    let mut groups = required_syncpack_version_groups()
+        .into_iter()
+        .filter(|group| !group.is_banned)
+        .collect::<Vec<_>>();
+    groups.push(TestSyncpackVersionGroup {
+        dependencies: vec!["**".to_owned()],
+        dependency_types: vec!["**".to_owned()],
+        packages: Vec::new(),
+        specifier_types: Vec::new(),
+        pin_version: None,
+        is_banned: true,
+        is_ignored: false,
+    });
+
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_groups(groups),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_shadowed_forbidden_ban() -> G3TsAstroConfigChecksInput {
+    let mut groups = required_syncpack_version_groups();
+    let next_ban_index = groups
+        .iter()
+        .position(|group| {
+            group.is_banned
+                && group
+                    .dependencies
+                    .iter()
+                    .any(|dependency| dependency == "next")
+        })
+        .expect("next ban should exist");
+    let canonical_next_ban = groups.remove(next_ban_index);
+    groups.insert(
+        next_ban_index,
+        TestSyncpackVersionGroup {
+            dependencies: vec!["next".to_owned()],
+            dependency_types: vec![
+                "prod".to_owned(),
+                "dev".to_owned(),
+                "optional".to_owned(),
+                "peer".to_owned(),
+            ],
+            packages: Vec::new(),
+            specifier_types: Vec::new(),
+            pin_version: None,
+            is_banned: false,
+            is_ignored: false,
+        },
+    );
+    groups.push(canonical_next_ban);
+
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_groups(groups),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_scoped_away_forbidden_ban() -> G3TsAstroConfigChecksInput {
+    syncpack_mutated_next_ban(|group| {
+        group.packages = vec!["other-package".to_owned()];
+    })
+}
+
+pub(super) fn syncpack_specifier_scoped_forbidden_ban() -> G3TsAstroConfigChecksInput {
+    syncpack_mutated_next_ban(|group| {
+        group.specifier_types = vec!["!exact".to_owned()];
+    })
+}
+
+pub(super) fn syncpack_wrong_forbidden_ban_dependency_types() -> G3TsAstroConfigChecksInput {
+    syncpack_mutated_next_ban(|group| {
+        group.dependency_types = vec!["prod".to_owned(), "dev".to_owned()];
+    })
+}
+
+pub(super) fn syncpack_ignored_forbidden_ban() -> G3TsAstroConfigChecksInput {
+    syncpack_mutated_next_ban(|group| {
+        group.is_ignored = true;
+    })
+}
+
+pub(super) fn syncpack_pinned_forbidden_ban() -> G3TsAstroConfigChecksInput {
+    syncpack_mutated_next_ban(|group| {
+        group.pin_version = Some("0.0.0".to_owned());
+    })
+}
+
+fn syncpack_mutated_next_ban(
+    mut mutate: impl FnMut(&mut TestSyncpackVersionGroup),
+) -> G3TsAstroConfigChecksInput {
+    let mut groups = required_syncpack_version_groups();
+    for group in &mut groups {
+        if group.is_banned
+            && group
+                .dependencies
+                .iter()
+                .any(|dependency| dependency == "next")
+        {
+            mutate(group);
+        }
+    }
+
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_groups(groups),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn velite_package_with_syncpack_ban() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, true, true, true),
+        )],
+        eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
+    }
+}
+
+pub(super) fn syncpack_missing_forbidden_ban() -> G3TsAstroConfigChecksInput {
+    let groups = required_syncpack_version_groups()
+        .into_iter()
+        .map(|mut group| {
+            if group.is_banned {
+                group.dependencies.retain(|dependency| dependency != "next");
+            }
+            group
+        })
+        .collect();
+
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract_with_syncpack(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+            syncpack_config_with_groups(groups),
         )],
         eslint_contracts: vec![eslint_contract(true, parsed_eslint(true, true, true))],
     }
@@ -292,10 +769,13 @@ pub(super) fn velite_package_present() -> G3TsAstroConfigChecksInput {
 
 pub(super) fn missing_package_eslint_and_astro_config_surfaces() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
-        integration_contracts: vec![integration_contract(
+        integration_contracts: vec![integration_contract_with_syncpack(
             true,
             G3TsAstroPackageSurfaceState::Missing {
                 rel_path: "package.json".to_owned(),
+            },
+            G3TsAstroSyncpackConfigState::Missing {
+                rel_path: ".syncpackrc".to_owned(),
             },
         )],
         eslint_contracts: vec![eslint_contract(
@@ -311,10 +791,35 @@ fn integration_contract(
     requires_source_pipeline_linting: bool,
     package: G3TsAstroPackageSurfaceState,
 ) -> G3TsAstroIntegrationContractInput {
+    integration_contract_with_syncpack(requires_source_pipeline_linting, package, syncpack_config())
+}
+
+fn integration_contract_with_syncpack(
+    requires_source_pipeline_linting: bool,
+    package: G3TsAstroPackageSurfaceState,
+    syncpack_config: G3TsAstroSyncpackConfigState,
+) -> G3TsAstroIntegrationContractInput {
+    integration_contract_for_app_with_syncpack(
+        ".",
+        requires_source_pipeline_linting,
+        package,
+        syncpack_config,
+    )
+}
+
+fn integration_contract_for_app_with_syncpack(
+    app_root_rel_path: &str,
+    requires_source_pipeline_linting: bool,
+    package: G3TsAstroPackageSurfaceState,
+    syncpack_config: G3TsAstroSyncpackConfigState,
+) -> G3TsAstroIntegrationContractInput {
     G3TsAstroIntegrationContractInput {
-        app_root_rel_path: ".".to_owned(),
+        app_root_rel_path: app_root_rel_path.to_owned(),
         content_mode: G3TsAstroContentMode::BuildCollections,
         package,
+        syncpack_config,
+        required_syncpack_pins: required_syncpack_pins(),
+        forbidden_syncpack_deps: forbidden_syncpack_deps(),
         requires_source_pipeline_linting,
     }
 }
@@ -336,9 +841,15 @@ fn parsed_package(
     has_astro_plugin: bool,
     has_pipeline_plugin: bool,
     has_velite_package: bool,
+    has_syncpack_package: bool,
+    has_syncpack_script: bool,
 ) -> G3TsAstroPackageSurfaceState {
     let script_body = if has_astro_check {
-        "astro check && eslint ."
+        if has_syncpack_script {
+            "astro check && syncpack lint && eslint ."
+        } else {
+            "astro check && eslint ."
+        }
     } else {
         "eslint ."
     };
@@ -349,6 +860,7 @@ fn parsed_package(
         has_astro_plugin,
         has_pipeline_plugin,
         has_velite_package,
+        has_syncpack_package,
     )
 }
 
@@ -358,6 +870,7 @@ fn parsed_package_with_script(
     has_astro_plugin: bool,
     has_pipeline_plugin: bool,
     has_velite_package: bool,
+    has_syncpack_package: bool,
 ) -> G3TsAstroPackageSurfaceState {
     let mut dev_dependencies = Vec::new();
     if has_astro_package {
@@ -372,16 +885,397 @@ fn parsed_package_with_script(
     if has_velite_package {
         dev_dependencies.push("velite".to_owned());
     }
+    if has_syncpack_package {
+        dev_dependencies.push("syncpack".to_owned());
+    }
 
     G3TsAstroPackageSurfaceState::Parsed {
         snapshot: G3TsAstroPackageSurfaceSnapshot {
             rel_path: "package.json".to_owned(),
+            package_name: Some("landing".to_owned()),
             dependencies: Vec::new(),
             dev_dependencies,
             script_names: vec!["check".to_owned()],
             script_bodies: vec![("check".to_owned(), script_body.to_owned())],
+            script_commands: script_commands_for_test("check", script_body),
+            script_tool_invocations: script_tool_invocations_for_test("check", script_body),
+            script_parse_blockers: script_parse_blockers_for_test("check", script_body),
+            safely_runs_astro_check: package_script_command_parser::has_safe_tool_invocation(
+                &[script_fact_for_test("check", script_body)],
+                "astro",
+                "check",
+            ),
+            safely_runs_syncpack_lint: package_script_command_parser::has_safe_tool_invocation(
+                &[script_fact_for_test("check", script_body)],
+                "syncpack",
+                "lint",
+            ),
         },
     }
+}
+
+fn nested_parsed_package() -> G3TsAstroPackageSurfaceState {
+    let mut package = parsed_package(true, true, true, true, false, true, true);
+    if let G3TsAstroPackageSurfaceState::Parsed { snapshot } = &mut package {
+        snapshot.rel_path = "apps/landing/package.json".to_owned();
+        snapshot.package_name = Some("landing".to_owned());
+    }
+    package
+}
+
+fn script_commands_for_test(
+    script_name: &str,
+    script_body: &str,
+) -> Vec<G3TsAstroPackageScriptCommand> {
+    script_fact_for_test(script_name, script_body)
+        .commands
+        .iter()
+        .map(|command| convert_script_command(script_name, command))
+        .collect()
+}
+
+fn script_tool_invocations_for_test(
+    script_name: &str,
+    script_body: &str,
+) -> Vec<G3TsAstroPackageScriptToolInvocation> {
+    script_fact_for_test(script_name, script_body)
+        .tool_invocations
+        .iter()
+        .map(convert_script_tool_invocation)
+        .collect()
+}
+
+fn convert_script_tool_invocation(
+    invocation: &PackageScriptToolInvocation,
+) -> G3TsAstroPackageScriptToolInvocation {
+    G3TsAstroPackageScriptToolInvocation {
+        script_name: invocation.script_name.clone(),
+        command_index: invocation.command_index,
+        invocation: invocation.invocation.clone(),
+        executable: invocation.executable.clone(),
+        args: invocation.args.clone(),
+        preceded_by: invocation.preceded_by.map(convert_script_separator),
+        followed_by: invocation.followed_by.map(convert_script_separator),
+    }
+}
+
+fn script_parse_blockers_for_test(
+    script_name: &str,
+    script_body: &str,
+) -> Vec<G3TsAstroPackageScriptParseBlocker> {
+    let fact = script_fact_for_test(script_name, script_body);
+    convert_script_parse_blocker(&fact).into_iter().collect()
+}
+
+fn script_fact_for_test(script_name: &str, script_body: &str) -> PackageScriptParseFact {
+    package_script_command_parser::parse(script_name, script_body)
+        .expect("test package script should parse")
+}
+
+fn convert_script_command(
+    script_name: &str,
+    command: &PackageScriptCommand,
+) -> G3TsAstroPackageScriptCommand {
+    G3TsAstroPackageScriptCommand {
+        script_name: script_name.to_owned(),
+        invocation: command.invocation.clone(),
+        executable: command.executable.clone(),
+        args: command.args.clone(),
+        preceded_by: command.preceded_by.map(convert_script_separator),
+    }
+}
+
+fn convert_script_separator(
+    separator: PackageScriptCommandSeparator,
+) -> G3TsAstroPackageScriptCommandSeparator {
+    match separator {
+        PackageScriptCommandSeparator::And => G3TsAstroPackageScriptCommandSeparator::And,
+        PackageScriptCommandSeparator::Or => G3TsAstroPackageScriptCommandSeparator::Or,
+    }
+}
+
+fn convert_script_parse_blocker(
+    fact: &PackageScriptParseFact,
+) -> Option<G3TsAstroPackageScriptParseBlocker> {
+    match &fact.state {
+        PackageScriptParseState::Unsupported { reason }
+        | PackageScriptParseState::ParseError { reason } => {
+            Some(G3TsAstroPackageScriptParseBlocker {
+                script_name: fact.script_name.clone(),
+                reason: reason.clone(),
+            })
+        }
+        PackageScriptParseState::Parsed { .. } | PackageScriptParseState::NoEslintInvocation => {
+            None
+        }
+    }
+}
+
+fn syncpack_config() -> G3TsAstroSyncpackConfigState {
+    syncpack_config_with_groups(required_syncpack_version_groups())
+}
+
+fn syncpack_config_with_groups(
+    version_groups: Vec<TestSyncpackVersionGroup>,
+) -> G3TsAstroSyncpackConfigState {
+    syncpack_config_with_source_and_groups(vec!["package.json".to_owned()], version_groups)
+}
+
+fn syncpack_config_with_source_and_groups(
+    source: Vec<String>,
+    version_groups: Vec<TestSyncpackVersionGroup>,
+) -> G3TsAstroSyncpackConfigState {
+    syncpack_config_at_with_source_and_groups(".syncpackrc", source, version_groups)
+}
+
+fn syncpack_config_at_with_source_and_groups(
+    rel_path: &str,
+    source: Vec<String>,
+    version_groups: Vec<TestSyncpackVersionGroup>,
+) -> G3TsAstroSyncpackConfigState {
+    syncpack_config_for_package_at_with_source_and_groups(
+        rel_path,
+        "package.json",
+        Some("landing"),
+        source,
+        version_groups,
+    )
+}
+
+fn syncpack_config_for_package_at_with_source_and_groups(
+    rel_path: &str,
+    package_rel_path: &str,
+    _package_name: Option<&str>,
+    source: Vec<String>,
+    version_groups: Vec<TestSyncpackVersionGroup>,
+) -> G3TsAstroSyncpackConfigState {
+    let source_covers_package_manifest =
+        syncpack_source_covers_package(&source, rel_path, package_rel_path);
+    let missing_required_stack_pins = required_syncpack_pins()
+        .into_iter()
+        .filter(|pin| {
+            !has_canonical_pin_in_prefix(
+                &version_groups,
+                23,
+                &pin.dependency,
+                &pin.version,
+                &["prod", "dev"],
+            )
+        })
+        .collect::<Vec<_>>();
+    let missing_forbidden_bans = ["next", "velite", "eslint-mdx"]
+        .into_iter()
+        .filter(|dependency| {
+            !has_canonical_ban_in_prefix(
+                &version_groups,
+                23,
+                dependency,
+                &["prod", "dev", "optional", "peer"],
+            )
+        })
+        .map(str::to_owned)
+        .collect();
+
+    G3TsAstroSyncpackConfigState::Parsed {
+        snapshot: G3TsAstroSyncpackConfigSnapshot {
+            rel_path: rel_path.to_owned(),
+            source_covers_package_manifest,
+            missing_required_stack_pins,
+            missing_forbidden_bans,
+        },
+    }
+}
+
+fn syncpack_source_covers_package(
+    source: &[String],
+    syncpack_rel_path: &str,
+    package_rel_path: &str,
+) -> bool {
+    !source.is_empty()
+        && source.iter().any(|entry| {
+            exact_source_entry_matches_package(entry, syncpack_rel_path, package_rel_path)
+        })
+}
+
+fn has_canonical_pin_in_prefix(
+    version_groups: &[TestSyncpackVersionGroup],
+    prefix_len: usize,
+    dependency: &str,
+    version: &str,
+    dependency_types: &[&str],
+) -> bool {
+    version_groups
+        .iter()
+        .take(prefix_len)
+        .find(|group| group_targets_dependency(group, dependency, dependency_types))
+        .is_some_and(|group| canonical_pin_group(group, version))
+}
+
+fn has_canonical_ban_in_prefix(
+    version_groups: &[TestSyncpackVersionGroup],
+    prefix_len: usize,
+    dependency: &str,
+    dependency_types: &[&str],
+) -> bool {
+    version_groups
+        .iter()
+        .take(prefix_len)
+        .find(|group| group_targets_dependency(group, dependency, dependency_types))
+        .is_some_and(canonical_ban_group)
+}
+
+fn group_targets_dependency(
+    group: &TestSyncpackVersionGroup,
+    dependency: &str,
+    dependency_types: &[&str],
+) -> bool {
+    strings_match_exactly(&group.dependencies, &[dependency])
+        && strings_match_exactly(&group.dependency_types, dependency_types)
+}
+
+fn canonical_pin_group(group: &TestSyncpackVersionGroup, version: &str) -> bool {
+    group.packages.is_empty()
+        && group.specifier_types.is_empty()
+        && !group.is_ignored
+        && !group.is_banned
+        && group.pin_version.as_deref() == Some(version)
+}
+
+fn canonical_ban_group(group: &TestSyncpackVersionGroup) -> bool {
+    group.packages.is_empty()
+        && group.specifier_types.is_empty()
+        && !group.is_ignored
+        && group.is_banned
+        && group.pin_version.is_none()
+}
+
+fn strings_match_exactly(left: &[String], right: &[&str]) -> bool {
+    left.len() == right.len()
+        && left
+            .iter()
+            .map(String::as_str)
+            .zip(right.iter().copied())
+            .all(|(left, right)| left == right)
+}
+
+fn exact_source_entry_matches_package(
+    source_entry: &str,
+    syncpack_rel_path: &str,
+    package_rel_path: &str,
+) -> bool {
+    let config_dir = rel_parent(syncpack_rel_path);
+    let expected_source_entry = if config_dir.is_empty() {
+        package_rel_path
+    } else {
+        let config_prefix = format!("{config_dir}/");
+        let Some(app_local_package_rel_path) = package_rel_path.strip_prefix(&config_prefix) else {
+            return false;
+        };
+        app_local_package_rel_path
+    };
+
+    source_entry == expected_source_entry
+}
+
+fn rel_parent(rel_path: &str) -> String {
+    rel_path
+        .rsplit_once('/')
+        .map_or_else(String::new, |(parent, _)| parent.to_owned())
+}
+
+fn required_syncpack_pins() -> Vec<G3TsAstroSyncpackRequiredPin> {
+    [
+        ("astro", "6.1.9"),
+        ("@astrojs/node", "10.0.6"),
+        ("@astrojs/react", "5.0.4"),
+        ("@astrojs/mdx", "5.0.4"),
+        ("@astrojs/check", "0.9.8"),
+        ("react", "19.2.5"),
+        ("react-dom", "19.2.5"),
+        ("@types/react", "19.2.14"),
+        ("@types/react-dom", "19.2.3"),
+        ("typescript", "5.9.3"),
+        ("eslint-plugin-astro", "1.7.0"),
+        ("eslint-plugin-astro-pipeline", "0.1.2"),
+        ("tailwindcss", "4.2.4"),
+        ("@tailwindcss/postcss", "4.2.4"),
+        ("class-variance-authority", "0.7.1"),
+        ("clsx", "2.1.1"),
+        ("tailwind-merge", "3.5.0"),
+        ("lucide-react", "0.577.0"),
+        ("zod", "4.3.6"),
+        ("@types/node", "25.6.0"),
+    ]
+    .into_iter()
+    .map(|(dependency, version)| G3TsAstroSyncpackRequiredPin {
+        dependency: dependency.to_owned(),
+        version: version.to_owned(),
+    })
+    .collect()
+}
+
+fn forbidden_syncpack_deps() -> Vec<String> {
+    ["next", "velite", "eslint-mdx"]
+        .into_iter()
+        .map(str::to_owned)
+        .collect()
+}
+
+fn required_syncpack_version_groups() -> Vec<TestSyncpackVersionGroup> {
+    let mut groups = [
+        ("astro", "6.1.9"),
+        ("@astrojs/node", "10.0.6"),
+        ("@astrojs/react", "5.0.4"),
+        ("@astrojs/mdx", "5.0.4"),
+        ("@astrojs/check", "0.9.8"),
+        ("react", "19.2.5"),
+        ("react-dom", "19.2.5"),
+        ("@types/react", "19.2.14"),
+        ("@types/react-dom", "19.2.3"),
+        ("typescript", "5.9.3"),
+        ("eslint-plugin-astro", "1.7.0"),
+        ("eslint-plugin-astro-pipeline", "0.1.2"),
+        ("tailwindcss", "4.2.4"),
+        ("@tailwindcss/postcss", "4.2.4"),
+        ("class-variance-authority", "0.7.1"),
+        ("clsx", "2.1.1"),
+        ("tailwind-merge", "3.5.0"),
+        ("lucide-react", "0.577.0"),
+        ("zod", "4.3.6"),
+        ("@types/node", "25.6.0"),
+    ]
+    .into_iter()
+    .map(|(dependency, version)| TestSyncpackVersionGroup {
+        dependencies: vec![dependency.to_owned()],
+        dependency_types: vec!["prod".to_owned(), "dev".to_owned()],
+        packages: Vec::new(),
+        specifier_types: Vec::new(),
+        pin_version: Some(version.to_owned()),
+        is_banned: false,
+        is_ignored: false,
+    })
+    .collect::<Vec<_>>();
+
+    groups.extend(
+        ["next", "velite", "eslint-mdx"]
+            .into_iter()
+            .map(|dependency| TestSyncpackVersionGroup {
+                dependencies: vec![dependency.to_owned()],
+                dependency_types: vec![
+                    "prod".to_owned(),
+                    "dev".to_owned(),
+                    "optional".to_owned(),
+                    "peer".to_owned(),
+                ],
+                packages: Vec::new(),
+                specifier_types: Vec::new(),
+                pin_version: None,
+                is_banned: true,
+                is_ignored: false,
+            }),
+    );
+
+    groups
 }
 
 fn parsed_eslint(

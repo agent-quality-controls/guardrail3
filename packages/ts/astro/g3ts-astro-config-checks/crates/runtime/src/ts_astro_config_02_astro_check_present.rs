@@ -6,7 +6,7 @@ const ID: &str = "TS-ASTRO-CONFIG-02";
 pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     for contract in &input.integration_contracts {
         let rel_path = crate::support::package_rel_path(contract);
-        if crate::support::package_has_script_fragment(contract, "astro check") {
+        if crate::support::package_safely_runs_astro_check(contract) {
             if let Some(rel_path) = rel_path {
                 results.push(crate::support::info(
                     ID,

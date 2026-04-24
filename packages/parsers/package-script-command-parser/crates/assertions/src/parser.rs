@@ -64,12 +64,7 @@ pub fn assert_state_reason_contains(
 }
 
 pub fn assert_command_count(document: &PackageScriptCommandDocument, expected: usize) {
-    let PackageScriptParseState::Parsed { commands, .. } =
-        &package_script_command_parser_runtime::typed(document).state
-    else {
-        assert!(false, "document should parse");
-        return;
-    };
+    let commands = &package_script_command_parser_runtime::typed(document).commands;
     assert_eq!(commands.len(), expected, "command count mismatch");
 }
 
@@ -81,12 +76,7 @@ pub fn assert_command(
     expected_args: &[&str],
     expected_preceded_by: Option<PackageScriptCommandSeparator>,
 ) {
-    let PackageScriptParseState::Parsed { commands, .. } =
-        &package_script_command_parser_runtime::typed(document).state
-    else {
-        assert!(false, "document should parse");
-        return;
-    };
+    let commands = &package_script_command_parser_runtime::typed(document).commands;
     let command = commands.get(index).expect("command should exist");
     assert_eq!(
         command.invocation, expected_invocation,
@@ -121,14 +111,68 @@ pub struct ExpectedEslintInvocation<'a> {
     pub config_path: Option<&'a str>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ExpectedToolInvocation<'a> {
+    pub script_name: &'a str,
+    pub command_index: usize,
+    pub invocation: &'a str,
+    pub executable: &'a str,
+    pub args: &'a [&'a str],
+    pub preceded_by: Option<PackageScriptCommandSeparator>,
+    pub followed_by: Option<PackageScriptCommandSeparator>,
+}
+
+pub fn assert_tool_invocation(
+    document: &PackageScriptCommandDocument,
+    index: usize,
+    expected: ExpectedToolInvocation<'_>,
+) {
+    let invocations = &package_script_command_parser_runtime::typed(document).tool_invocations;
+    let invocation = invocations
+        .get(index)
+        .expect("tool invocation should exist");
+    assert_eq!(
+        invocation.script_name, expected.script_name,
+        "tool script name mismatch"
+    );
+    assert_eq!(
+        invocation.command_index, expected.command_index,
+        "tool command index mismatch"
+    );
+    assert_eq!(
+        invocation.invocation, expected.invocation,
+        "tool raw invocation mismatch"
+    );
+    assert_eq!(
+        invocation.executable, expected.executable,
+        "tool executable mismatch"
+    );
+    assert_eq!(
+        invocation.args,
+        expected
+            .args
+            .iter()
+            .map(|item| (*item).to_owned())
+            .collect::<Vec<_>>(),
+        "tool args mismatch"
+    );
+    assert_eq!(
+        invocation.preceded_by, expected.preceded_by,
+        "tool preceding separator mismatch"
+    );
+    assert_eq!(
+        invocation.followed_by, expected.followed_by,
+        "tool following separator mismatch"
+    );
+}
+
 pub fn assert_eslint_invocation(
     document: &PackageScriptCommandDocument,
     index: usize,
     expected: ExpectedEslintInvocation<'_>,
 ) {
     let PackageScriptParseState::Parsed {
-        eslint_invocations,
-        ..
+        eslint_invocations, ..
     } = &package_script_command_parser_runtime::typed(document).state
     else {
         assert!(false, "document should parse");

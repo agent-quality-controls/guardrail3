@@ -1,6 +1,7 @@
 use package_script_command_parser_types::document::{
     EslintInvocation, PackageScriptCommand, PackageScriptCommandDocument,
     PackageScriptCommandSeparator, PackageScriptParseFact, PackageScriptParseState,
+    PackageScriptToolInvocation,
 };
 
 #[allow(
@@ -44,17 +45,85 @@ pub fn from_path_document(
     parse_document(script_name, &content)
 }
 
+#[must_use]
+pub fn has_safe_tool_invocation(
+    facts: &[PackageScriptParseFact],
+    executable: &str,
+    first_arg: &str,
+) -> bool {
+    facts.iter().all(|fact| {
+        !matches!(
+            fact.state,
+            PackageScriptParseState::Unsupported { .. }
+                | PackageScriptParseState::ParseError { .. }
+        )
+    }) && facts
+        .iter()
+        .all(|fact| !fact_has_unsafe_tool_invocation(fact, executable, first_arg))
+        && facts.iter().any(|fact| {
+            !fact_has_or_separator(fact)
+                && fact.tool_invocations.iter().any(|invocation| {
+                    invocation_targets_tool(invocation, executable, first_arg)
+                        && safe_tool_invocation_position(
+                            invocation.preceded_by,
+                            invocation.followed_by,
+                        )
+                })
+        })
+}
+
+fn fact_has_or_separator(fact: &PackageScriptParseFact) -> bool {
+    fact.commands
+        .iter()
+        .any(|command| command.preceded_by == Some(PackageScriptCommandSeparator::Or))
+}
+
+fn fact_has_unsafe_tool_invocation(
+    fact: &PackageScriptParseFact,
+    executable: &str,
+    first_arg: &str,
+) -> bool {
+    fact.tool_invocations
+        .iter()
+        .any(|invocation| invocation_targets_tool(invocation, executable, first_arg))
+        && (fact_has_or_separator(fact)
+            || fact.tool_invocations.iter().any(|invocation| {
+                invocation_targets_tool(invocation, executable, first_arg)
+                    && !safe_tool_invocation_position(
+                        invocation.preceded_by,
+                        invocation.followed_by,
+                    )
+            }))
+}
+
+fn invocation_targets_tool(
+    invocation: &PackageScriptToolInvocation,
+    executable: &str,
+    first_arg: &str,
+) -> bool {
+    invocation.executable == executable
+        && invocation.args.first().is_some_and(|arg| arg == first_arg)
+}
+
 fn normalize_fact(script_name: &str, input: &str) -> PackageScriptParseFact {
-    let state = match parse_commands(input) {
-        Ok(commands) => command_state(script_name, input, commands),
-        Err(reason) if script_name_is_lint_related(script_name) || raw_has_eslint_token(input) => {
-            PackageScriptParseState::ParseError { reason }
+    let (commands, state) = match parse_commands(input) {
+        Ok(commands) => {
+            let state = command_state(script_name, input, &commands);
+            (commands, state)
         }
-        Err(_reason) => PackageScriptParseState::NoEslintInvocation,
+        Err(reason)
+            if script_name_is_guardrail_related(script_name) || raw_has_guardrail_tool(input) =>
+        {
+            (Vec::new(), PackageScriptParseState::ParseError { reason })
+        }
+        Err(_reason) => (Vec::new(), PackageScriptParseState::NoEslintInvocation),
     };
+    let tool_invocations = tool_invocations(script_name, &commands);
 
     PackageScriptParseFact {
         script_name: script_name.to_owned(),
+        commands,
+        tool_invocations,
         state,
     }
 }
@@ -62,15 +131,15 @@ fn normalize_fact(script_name: &str, input: &str) -> PackageScriptParseFact {
 fn command_state(
     script_name: &str,
     input: &str,
-    commands: Vec<PackageScriptCommand>,
+    commands: &[PackageScriptCommand],
 ) -> PackageScriptParseState {
-    let lint_related = script_name_is_lint_related(script_name)
-        || commands.iter().any(command_has_eslint)
-        || raw_has_eslint_token(input);
+    let guardrail_related = script_name_is_guardrail_related(script_name)
+        || commands.iter().any(command_has_guardrail_tool)
+        || raw_has_guardrail_tool(input);
 
-    if lint_related && has_unsupported_lint_related_syntax(input) {
+    if guardrail_related && has_unsupported_guardrail_syntax(input) {
         return PackageScriptParseState::Unsupported {
-            reason: "lint-related script uses unsupported shell syntax".to_owned(),
+            reason: "guardrail-related script uses unsupported shell syntax".to_owned(),
         };
     }
 
@@ -87,7 +156,7 @@ fn command_state(
         PackageScriptParseState::NoEslintInvocation
     } else {
         PackageScriptParseState::Parsed {
-            commands,
+            commands: commands.to_owned(),
             eslint_invocations,
         }
     }
@@ -152,6 +221,10 @@ fn split_segments(input: &str) -> Result<Vec<Segment>, String> {
                 let _ = chars.next();
                 push_segment(&mut segments, &mut current, preceded_by);
                 preceded_by = Some(PackageScriptCommandSeparator::Or);
+            }
+            ';' if !in_single_quote && !in_double_quote => {
+                push_segment(&mut segments, &mut current, preceded_by);
+                preceded_by = None;
             }
             _ => current.push(ch),
         }
@@ -256,20 +329,63 @@ fn eslint_invocation(
     }))
 }
 
-fn command_has_eslint(command: &PackageScriptCommand) -> bool {
-    eslint_args_from_command(command).is_some()
+fn command_has_guardrail_tool(command: &PackageScriptCommand) -> bool {
+    normalized_tool(command).is_some_and(|(executable, _args)| {
+        matches!(executable.as_str(), "eslint" | "astro" | "syncpack")
+    })
+}
+
+fn tool_invocations(
+    script_name: &str,
+    commands: &[PackageScriptCommand],
+) -> Vec<PackageScriptToolInvocation> {
+    commands
+        .iter()
+        .enumerate()
+        .filter_map(|(index, command)| {
+            let (executable, args) = normalized_tool(command)?;
+            Some(PackageScriptToolInvocation {
+                script_name: script_name.to_owned(),
+                command_index: index,
+                invocation: command.invocation.clone(),
+                executable,
+                args,
+                preceded_by: command.preceded_by,
+                followed_by: commands
+                    .get(index.saturating_add(1))
+                    .and_then(|next| next.preceded_by),
+            })
+        })
+        .collect()
+}
+
+fn safe_tool_invocation_position(
+    preceded_by: Option<PackageScriptCommandSeparator>,
+    followed_by: Option<PackageScriptCommandSeparator>,
+) -> bool {
+    matches!(preceded_by, None | Some(PackageScriptCommandSeparator::And))
+        && matches!(followed_by, None | Some(PackageScriptCommandSeparator::And))
+}
+
+fn normalized_tool(command: &PackageScriptCommand) -> Option<(String, Vec<String>)> {
+    let executable = executable_name(&command.executable);
+    match executable.as_str() {
+        "env" | "cross-env" => normalized_env_tool(&command.args),
+        "npm" => normalized_package_manager_tool(&command.args, PnpmMode::Npm),
+        "pnpm" => normalized_package_manager_tool(&command.args, PnpmMode::Pnpm),
+        "yarn" => normalized_package_manager_tool(&command.args, PnpmMode::Yarn),
+        "bun" => normalized_package_manager_tool(&command.args, PnpmMode::Bun),
+        "npx" | "bunx" => normalized_package_runner_tool(&command.args),
+        _ => Some((executable, command.args.clone())),
+    }
 }
 
 fn eslint_args_from_command(command: &PackageScriptCommand) -> Option<Vec<String>> {
-    match executable_name(&command.executable).as_str() {
-        "eslint" => Some(command.args.clone()),
-        "pnpm" => package_manager_eslint_args(&command.args, PnpmMode::Pnpm),
-        "npm" => package_manager_eslint_args(&command.args, PnpmMode::Npm),
-        "yarn" => package_manager_eslint_args(&command.args, PnpmMode::Yarn),
-        "bun" => package_manager_eslint_args(&command.args, PnpmMode::Bun),
-        "npx" | "bunx" => package_runner_eslint_args(&command.args),
-        "env" | "cross-env" => env_wrapper_eslint_args(&command.args),
-        _ => None,
+    let (executable, args) = normalized_tool(command)?;
+    if executable == "eslint" {
+        Some(args)
+    } else {
+        None
     }
 }
 
@@ -358,22 +474,30 @@ enum PnpmMode {
     Bun,
 }
 
-fn package_manager_eslint_args(args: &[String], mode: PnpmMode) -> Option<Vec<String>> {
+fn normalized_package_manager_tool(
+    args: &[String],
+    mode: PnpmMode,
+) -> Option<(String, Vec<String>)> {
     let mut idx = 0usize;
     while idx < args.len() {
         let arg = args.get(idx)?;
-        if mode.allows_direct_eslint() && arg == "eslint" {
-            return Some(args.iter().skip(idx + 1).cloned().collect());
-        }
         if mode.allows_exec() && (arg == "exec" || arg == "x" || arg == "dlx") {
             let command_idx = if args.get(idx + 1).is_some_and(|next| next == "--") {
                 idx + 2
             } else {
                 idx + 1
             };
-            if args.get(command_idx).is_some_and(|next| next == "eslint") {
-                return Some(args.iter().skip(command_idx + 1).cloned().collect());
-            }
+            let executable = executable_name(args.get(command_idx)?);
+            return Some((
+                executable,
+                args.iter().skip(command_idx + 1).cloned().collect(),
+            ));
+        }
+        if mode.allows_direct_tool() && !arg.starts_with('-') {
+            return Some((
+                executable_name(arg),
+                args.iter().skip(idx + 1).cloned().collect(),
+            ));
         }
         let width = package_manager_wrapper_arg_width(args, idx, mode);
         if width == 1 {
@@ -385,7 +509,7 @@ fn package_manager_eslint_args(args: &[String], mode: PnpmMode) -> Option<Vec<St
 }
 
 impl PnpmMode {
-    fn allows_direct_eslint(self) -> bool {
+    fn allows_direct_tool(self) -> bool {
         matches!(self, Self::Pnpm | Self::Yarn | Self::Bun)
     }
 
@@ -412,12 +536,19 @@ fn package_manager_wrapper_arg_width(args: &[String], idx: usize, mode: PnpmMode
     }
 }
 
-fn package_runner_eslint_args(args: &[String]) -> Option<Vec<String>> {
+fn normalized_package_runner_tool(args: &[String]) -> Option<(String, Vec<String>)> {
     let mut idx = 0usize;
     while idx < args.len() {
         let arg = args.get(idx)?;
-        if arg == "eslint" {
-            return Some(args.iter().skip(idx + 1).cloned().collect());
+        if arg == "--" {
+            idx = idx.saturating_add(1);
+            continue;
+        }
+        if !arg.starts_with('-') {
+            return Some((
+                executable_name(arg),
+                args.iter().skip(idx + 1).cloned().collect(),
+            ));
         }
         idx += package_runner_arg_width(args, idx);
     }
@@ -435,7 +566,7 @@ fn package_runner_arg_width(args: &[String], idx: usize) -> usize {
     }
 }
 
-fn env_wrapper_eslint_args(args: &[String]) -> Option<Vec<String>> {
+fn normalized_env_tool(args: &[String]) -> Option<(String, Vec<String>)> {
     let tokens = strip_env_assignments(args.to_vec());
     let command = PackageScriptCommand {
         invocation: tokens.join(" "),
@@ -443,10 +574,10 @@ fn env_wrapper_eslint_args(args: &[String]) -> Option<Vec<String>> {
         args: tokens.iter().skip(1).cloned().collect(),
         preceded_by: None,
     };
-    eslint_args_from_command(&command)
+    normalized_tool(&command)
 }
 
-fn has_unsupported_lint_related_syntax(input: &str) -> bool {
+fn has_unsupported_guardrail_syntax(input: &str) -> bool {
     let mut chars = input.chars().peekable();
     let mut in_single_quote = false;
     let mut in_double_quote = false;
@@ -477,17 +608,20 @@ fn has_unsupported_lint_related_syntax(input: &str) -> bool {
     false
 }
 
-fn script_name_is_lint_related(script_name: &str) -> bool {
+fn script_name_is_guardrail_related(script_name: &str) -> bool {
     let normalized = script_name.to_ascii_lowercase();
-    if normalized == "prelint" || normalized == "postlint" {
+    if matches!(
+        normalized.as_str(),
+        "check" | "precheck" | "postcheck" | "lint" | "prelint" | "postlint"
+    ) {
         return true;
     }
     normalized
         .split([':', '-', '_', '.', '/'])
-        .any(|token| token == "lint" || token == "eslint")
+        .any(|token| matches!(token, "check" | "lint" | "eslint" | "astro" | "syncpack"))
 }
 
-fn raw_has_eslint_token(input: &str) -> bool {
+fn raw_has_guardrail_tool(input: &str) -> bool {
     input
         .split(|ch: char| {
             ch.is_whitespace()
@@ -496,7 +630,12 @@ fn raw_has_eslint_token(input: &str) -> bool {
                     '\'' | '"' | '(' | ')' | '[' | ']' | '{' | '}' | '&' | '|' | ';' | '<' | '>'
                 )
         })
-        .any(|token| executable_name(token) == "eslint")
+        .any(|token| {
+            matches!(
+                executable_name(token).as_str(),
+                "eslint" | "astro" | "syncpack"
+            )
+        })
 }
 
 #[cfg(test)]
