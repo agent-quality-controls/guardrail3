@@ -1,0 +1,11 @@
+profile = "library"
+
+allowed_deps = [
+  "tempfile",
+  "package-script-command-parser-runtime",
+  "package-script-command-parser-runtime-assertions",
+  "package-script-command-parser-types",
+]
+
+[checks]
+garde = false

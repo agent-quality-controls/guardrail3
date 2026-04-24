@@ -1,0 +1,30 @@
+[package]
+name = "eslint-directive-parser-runtime"
+version.workspace = true
+edition = "2024"
+description = "Parser implementation for ESLint directive comments"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+readme = "README.md"
+keywords = ["eslint", "typescript", "parser", "comments", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+eslint-directive-parser-types = { path = "../types", version = "0.1.0" }
+
+[dev-dependencies]
+tempfile = "3"
+eslint-directive-parser-runtime-assertions = { path = "../assertions" }
+
+[package.metadata.docs.rs]
+all-features = true

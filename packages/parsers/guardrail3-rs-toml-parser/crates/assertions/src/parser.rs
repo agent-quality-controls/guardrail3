@@ -7,7 +7,8 @@
 )]
 
 use guardrail3_rs_toml_parser_runtime::types::{
-    Guardrail3RsToml, RustChecksConfig, RustProfile, Value, WaiverConfig,
+    Guardrail3RsToml, RustChecksConfig, RustProfile, TsAstroPolicyConfig, TsPolicyConfig, Value,
+    WaiverConfig,
 };
 
 pub fn assert_core_fields_empty(cfg: &Guardrail3RsToml) {
@@ -19,6 +20,7 @@ pub fn assert_core_fields_empty(cfg: &Guardrail3RsToml) {
     );
     assert!(cfg.allowed_deps.is_empty(), "allowed_deps should be empty");
     assert_eq!(cfg.checks, None, "checks should be None for empty input");
+    assert_eq!(cfg.ts, None, "ts should be None for empty input");
     assert!(cfg.waivers.is_empty(), "waivers should be empty");
 }
 
@@ -85,6 +87,36 @@ pub fn assert_check_extra_table(checks: Option<&RustChecksConfig>, key: &str) {
             .and_then(|checks| checks.extra.get(key))
             .is_some_and(Value::is_table),
         "{key} should be preserved as an extra table",
+    );
+}
+
+#[must_use]
+pub fn assert_ts_astro_policy(ts: Option<&TsPolicyConfig>) -> &TsAstroPolicyConfig {
+    let ts = ts.expect("ts policy should exist");
+    ts.astro.as_ref().expect("ts.astro policy should exist")
+}
+
+pub fn assert_ts_extra_string(ts: Option<&TsPolicyConfig>, key: &str, expected: &str) {
+    assert_eq!(
+        ts.and_then(|ts| ts.extra.get(key)).and_then(Value::as_str),
+        Some(expected),
+        "ts extra value mismatch",
+    );
+}
+
+pub fn assert_ts_astro_profile(astro: &TsAstroPolicyConfig, expected: Option<&str>) {
+    assert_eq!(astro.profile.as_deref(), expected, "ts.astro profile mismatch");
+}
+
+pub fn assert_ts_astro_extra_string(
+    astro: &TsAstroPolicyConfig,
+    key: &str,
+    expected: &str,
+) {
+    assert_eq!(
+        astro.extra.get(key).and_then(Value::as_str),
+        Some(expected),
+        "ts.astro extra value mismatch",
     );
 }
 

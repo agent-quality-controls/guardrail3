@@ -1,0 +1,22 @@
+[package]
+name = "eslint-directive-parser-runtime-assertions"
+version = "0.0.0"
+edition = "2024"
+description = "Assertion helpers for ESLint directive parser tests"
+license.workspace = true
+repository.workspace = true
+publish = false
+readme = "README.md"
+keywords = ["eslint", "typescript", "assertions", "comments", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[dependencies]
+eslint-directive-parser-runtime = { path = "../runtime" }

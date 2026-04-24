@@ -1,3 +1,14 @@
+#![allow(
+    clippy::missing_const_for_fn,
+    clippy::missing_docs_in_private_items,
+    clippy::missing_errors_doc,
+    clippy::must_use_candidate,
+    clippy::option_if_let_else,
+    clippy::shadow_unrelated,
+    clippy::type_complexity,
+    reason = "parser runtime keeps the same public parser facade as other parser packages"
+)]
+
 mod document;
 mod error;
 mod fs;

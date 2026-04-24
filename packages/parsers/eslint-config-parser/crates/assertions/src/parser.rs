@@ -1,5 +1,6 @@
 use eslint_config_parser_runtime::types::{
-    EslintConfigFileKind, EslintConfigSnapshot, EslintProbeKind, EslintRuleSeverity,
+    EslintConfigFileKind, EslintConfigSnapshot, EslintProbeKind, EslintReportUnusedSetting,
+    EslintRuleSeverity,
 };
 
 pub fn assert_selected_config(
@@ -30,6 +31,79 @@ pub fn assert_project_service(
     assert_eq!(probe.project_service, expected, "project_service mismatch");
 }
 
+pub fn assert_probe_ignored(snapshot: &EslintConfigSnapshot, rel_path: &str, expected: bool) {
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.rel_path == rel_path)
+        .expect("probe should exist");
+    assert_eq!(probe.ignored, expected, "probe ignored state mismatch");
+}
+
+pub fn assert_plugins(snapshot: &EslintConfigSnapshot, probe_kind: EslintProbeKind, expected: &[&str]) {
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == probe_kind)
+        .expect("probe should exist");
+    assert_eq!(
+        probe.plugins,
+        expected
+            .iter()
+            .map(|plugin| (*plugin).to_owned())
+            .collect::<Vec<_>>(),
+        "plugins mismatch"
+    );
+}
+
+pub fn assert_no_inline_config(
+    snapshot: &EslintConfigSnapshot,
+    probe_kind: EslintProbeKind,
+    expected: Option<bool>,
+) {
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == probe_kind)
+        .expect("probe should exist");
+    assert_eq!(
+        probe.linter_options_no_inline_config, expected,
+        "noInlineConfig mismatch"
+    );
+}
+
+pub fn assert_report_unused_disable_directives(
+    snapshot: &EslintConfigSnapshot,
+    probe_kind: EslintProbeKind,
+    expected: Option<EslintReportUnusedSetting>,
+) {
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == probe_kind)
+        .expect("probe should exist");
+    assert_eq!(
+        probe.linter_options_report_unused_disable_directives, expected,
+        "reportUnusedDisableDirectives mismatch"
+    );
+}
+
+pub fn assert_report_unused_inline_configs(
+    snapshot: &EslintConfigSnapshot,
+    probe_kind: EslintProbeKind,
+    expected: Option<EslintReportUnusedSetting>,
+) {
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == probe_kind)
+        .expect("probe should exist");
+    assert_eq!(
+        probe.linter_options_report_unused_inline_configs, expected,
+        "reportUnusedInlineConfigs mismatch"
+    );
+}
+
 pub fn assert_rule_severity(
     snapshot: &EslintConfigSnapshot,
     probe_kind: EslintProbeKind,
@@ -43,6 +117,21 @@ pub fn assert_rule_severity(
         .expect("probe should exist");
     let rule = probe.rules.get(rule_name).expect("rule should exist");
     assert_eq!(rule.severity, expected, "rule severity mismatch");
+}
+
+pub fn assert_rule_options_len(
+    snapshot: &EslintConfigSnapshot,
+    probe_kind: EslintProbeKind,
+    rule_name: &str,
+    expected: usize,
+) {
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == probe_kind)
+        .expect("probe should exist");
+    let rule = probe.rules.get(rule_name).expect("rule should exist");
+    assert_eq!(rule.options.len(), expected, "rule options length mismatch");
 }
 
 pub fn assert_parse_error(err: &impl std::fmt::Display) {

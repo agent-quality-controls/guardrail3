@@ -6,7 +6,9 @@ pub(super) use crate::types::{
 };
 
 #[cfg(test)]
-pub(crate) use crate::types::{EslintConfigFileKind, EslintProbeKind, EslintRuleSeverity};
+pub(crate) use crate::types::{
+    EslintConfigFileKind, EslintProbeKind, EslintReportUnusedSetting, EslintRuleSeverity,
+};
 
 const NODE_HELPER: &str = r#"
 import path from 'node:path';
@@ -41,6 +43,14 @@ function normalizeRule(value) {
     severity: normalizeSeverity(value),
     options: [],
   };
+}
+
+function normalizeReportUnusedSetting(value) {
+  if (value === undefined || value === null) return null;
+  if (value === false || value === 0 || value === 'off') return 'Off';
+  if (value === true || value === 1 || value === 'warn') return 'Warn';
+  if (value === 2 || value === 'error') return 'Error';
+  throw new Error(`unsupported linter option severity: ${JSON.stringify(value)}`);
 }
 
 function normalizePlugins(plugins) {
@@ -78,6 +88,21 @@ for (const probe of probes) {
   const probeAbsPath = path.join(workspaceRoot, probe.rel_path);
   const ignored = await eslint.isPathIgnored(probeAbsPath);
   const config = await eslint.calculateConfigForFile(probeAbsPath);
+  if (config === undefined || config === null) {
+    payload.probes.push({
+      probe: probe.probe,
+      rel_path: probe.rel_path,
+      ignored,
+      plugins: [],
+      rules: {},
+      project_service: null,
+      linter_options_no_inline_config: null,
+      linter_options_report_unused_disable_directives: null,
+      linter_options_report_unused_inline_configs: null,
+    });
+    continue;
+  }
+  const linterOptions = config.linterOptions ?? {};
   const rules = {};
   for (const ruleName of Object.keys(config.rules ?? {}).sort()) {
     rules[ruleName] = normalizeRule(config.rules[ruleName]);
@@ -90,6 +115,14 @@ for (const probe of probes) {
     plugins: normalizePlugins(config.plugins),
     rules,
     project_service: typeof projectService === 'boolean' ? projectService : null,
+    linter_options_no_inline_config:
+      typeof linterOptions.noInlineConfig === 'boolean'
+        ? linterOptions.noInlineConfig
+        : null,
+    linter_options_report_unused_disable_directives:
+      normalizeReportUnusedSetting(linterOptions.reportUnusedDisableDirectives),
+    linter_options_report_unused_inline_configs:
+      normalizeReportUnusedSetting(linterOptions.reportUnusedInlineConfigs),
   });
 }
 

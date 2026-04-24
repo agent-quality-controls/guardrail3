@@ -1,0 +1,18 @@
+[package]
+name = "package-script-command-parser-types"
+version.workspace = true
+edition = "2024"
+description = "Types for package script command parser crates"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+readme = "README.md"
+keywords = ["typescript", "package-json", "scripts", "parser", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
