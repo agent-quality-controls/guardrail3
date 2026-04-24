@@ -18,7 +18,11 @@ import {
   resolveOptions,
   type RuleOptionsTuple
 } from "../utils/options.js";
-import { inferPathPolicyRoot, normalizePathFromCwd } from "../utils/path-policy.js";
+import {
+  inferPathPolicyRoot,
+  normalizePathFromCwd,
+  normalizeSlashes
+} from "../utils/path-policy.js";
 
 type MessageIds = "forbiddenVeliteImport";
 
@@ -82,7 +86,7 @@ function moduleUsesVelite(
   const cwd = inferPathPolicyRoot(routeFilename);
   const normalizedModulePath = normalizePathFromCwd(moduleRecord.filename, cwd);
 
-  if (isVelitePath(normalizedModulePath)) {
+  if (moduleRecord.filename !== routeFilename && isVelitePath(normalizedModulePath)) {
     return true;
   }
 
@@ -131,10 +135,20 @@ function isVeliteSpecifier(value: string | null | undefined): boolean {
 }
 
 function isVelitePath(value: string): boolean {
+  const normalizedValue = normalizeSlashes(value);
+  const segments = normalizedValue.split("/").filter((segment) => segment.length > 0);
+  const basename = segments.at(-1) ?? normalizedValue;
+
+  return segments.includes(".velite") || isVeliteConfigBasename(basename);
+}
+
+function isVeliteConfigBasename(value: string): boolean {
   return (
-    value.includes(".velite") ||
-    value.includes("velite.config.") ||
-    value.startsWith(".velite/") ||
-    value.endsWith("/.velite")
+    value === "velite.config.js" ||
+    value === "velite.config.mjs" ||
+    value === "velite.config.cjs" ||
+    value === "velite.config.ts" ||
+    value === "velite.config.mts" ||
+    value === "velite.config.cts"
   );
 }

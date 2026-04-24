@@ -11,8 +11,7 @@ pub(super) fn fake_astro_workspace() -> TempDir {
 
     std::fs::create_dir_all(root.path().join("src/pages"))
         .expect("pages directory should be created");
-    std::fs::create_dir_all(root.path().join("src/lib"))
-        .expect("lib directory should be created");
+    std::fs::create_dir_all(root.path().join("src/lib")).expect("lib directory should be created");
     std::fs::create_dir_all(root.path().join("src/content/posts"))
         .expect("content directory should be created");
     std::fs::create_dir_all(root.path().join("node_modules/eslint"))
@@ -48,11 +47,8 @@ pub(super) fn fake_astro_workspace() -> TempDir {
         "export const taxonomy = '../../packages/spec/src/data/taxonomy.json';\n",
     )
     .expect("side loader source should be written");
-    std::fs::write(
-        root.path().join("src/pages/about.mdx"),
-        "# about\n",
-    )
-    .expect("route markdown page should be written");
+    std::fs::write(root.path().join("src/pages/about.mdx"), "# about\n")
+        .expect("route markdown page should be written");
     std::fs::write(
         root.path().join("node_modules/eslint/package.json"),
         "{\n  \"name\": \"eslint\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
@@ -78,14 +74,14 @@ pub(super) fn fake_astro_workspace() -> TempDir {
         "astro-pipeline": {},
       },
       rules: {
-        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"], authoredContentGlobs: ["src/content/**"] }],
-        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"], authoredContentGlobs: ["src/content/**"] }],
-        "astro-pipeline/no-authored-content-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"], authoredContentGlobs: ["src/content/**"] }],
-        "astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }],
-        "astro-pipeline/no-direct-astro-content-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
+        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }],
+        "astro-pipeline/no-direct-astro-content-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"] }],
         "astro-pipeline/no-runtime-mdx-eval": "error",
-        "astro-pipeline/no-side-loader-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
-        "astro-pipeline/no-velite-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
+        "astro-pipeline/no-side-loader-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"] }],
+        "astro-pipeline/no-velite-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"] }],
       },
       languageOptions: { parserOptions: { projectService: true, jsx: isTsx } },
     };
@@ -103,7 +99,10 @@ module.exports = { ESLint };
 pub(super) fn crawl_with_entries(root: &TempDir, rel_paths: &[&str]) -> G3WorkspaceCrawl {
     G3WorkspaceCrawl {
         root_abs_path: root.path().to_path_buf(),
-        entries: rel_paths.iter().map(|rel_path| entry(root, rel_path, true)).collect(),
+        entries: rel_paths
+            .iter()
+            .map(|rel_path| entry(root, rel_path, true))
+            .collect(),
     }
 }
 

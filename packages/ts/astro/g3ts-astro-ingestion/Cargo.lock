@@ -157,6 +157,7 @@ dependencies = [
  "eslint-config-parser",
  "g3rs-workspace-crawl",
  "g3ts-astro-types",
+ "globset",
  "package-json-parser",
  "serde_json",
  "tempfile",

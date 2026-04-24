@@ -130,6 +130,26 @@ pub(super) fn endpoint_only_pipeline_scope_options() -> G3TsAstroConfigChecksInp
     }
 }
 
+pub(super) fn endpoint_only_pipeline_scope_without_route_coverage() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, false),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_contract(
+                true,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_without_effective_route_coverage(),
+                    ts: PipelineLaneState::rules_without_effective_route_coverage(),
+                    tsx: PipelineLaneState::rules_without_effective_route_coverage(),
+                },
+            ),
+        )],
+    }
+}
+
 pub(super) fn missing_content_data_module_scope_options() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
@@ -184,6 +204,66 @@ pub(super) fn route_only_pipeline_wiring() -> G3TsAstroConfigChecksInput {
                     astro: PipelineLaneState::rules_with_scope(),
                     ts: PipelineLaneState::disabled(),
                     tsx: PipelineLaneState::disabled(),
+                },
+            ),
+        )],
+    }
+}
+
+pub(super) fn tsx_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, false),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_contract(
+                true,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_with_scope(),
+                    ts: PipelineLaneState::rules_with_scope(),
+                    tsx: PipelineLaneState::rules_without_effective_route_coverage(),
+                },
+            ),
+        )],
+    }
+}
+
+pub(super) fn astro_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, false),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_contract(
+                true,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_without_effective_route_coverage(),
+                    ts: PipelineLaneState::rules_with_scope(),
+                    tsx: PipelineLaneState::rules_with_scope(),
+                },
+            ),
+        )],
+    }
+}
+
+pub(super) fn ts_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, false),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_contract(
+                true,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_with_scope(),
+                    ts: PipelineLaneState::rules_without_effective_route_coverage(),
+                    tsx: PipelineLaneState::rules_with_scope(),
                 },
             ),
         )],
@@ -478,6 +558,16 @@ impl PipelineLaneState {
             has_required_rules: true,
             scope_kind: ScopeKind::Route,
             has_content_data_scope: true,
+            has_content_source_scope: false,
+        }
+    }
+
+    const fn rules_without_effective_route_coverage() -> Self {
+        Self {
+            has_plugin: true,
+            has_required_rules: true,
+            scope_kind: ScopeKind::None,
+            has_content_data_scope: false,
             has_content_source_scope: false,
         }
     }

@@ -66,9 +66,11 @@ fn missing_content_config_reports_error_for_build_collections() {
 #[test]
 fn route_markdown_pages_are_forbidden_for_build_collection_apps() {
     let mut input = golden_build_collections_input();
-    input.route_markdown_pages.push(G3TsAstroRouteMarkdownPageInput {
-        rel_path: "src/pages/about.mdx".to_owned(),
-    });
+    input
+        .route_markdown_pages
+        .push(G3TsAstroRouteMarkdownPageInput {
+            rel_path: "src/pages/about.mdx".to_owned(),
+        });
 
     let results = crate::run::check(&input);
     assertions::assert_has_error(&results, "TS-ASTRO-FILETREE-04");

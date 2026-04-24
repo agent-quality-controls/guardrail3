@@ -43,12 +43,38 @@ test("no-velite-imports catches velite package and generated artifact imports in
       ---
       <HomePage />
     `,
+    "src/pages/novelite.astro": `
+      ---
+      import HomePage from "../app/novelite-page";
+      ---
+      <HomePage />
+    `,
+    "src/pages/velite.config.ts": `
+      export const GET = () => new Response("not velite");
+    `,
+    "src/pages/endpoint.ts": `
+      import { defineCollection } from "velite";
+
+      export const GET = () => new Response(typeof defineCollection);
+    `,
     "src/app/valid-page.tsx": `
       import { LandingHomepage } from "../components/landing/valid-homepage";
 
       export default function Page() {
         return <LandingHomepage title="Typed content" />;
       }
+    `,
+    "src/app/novelite-page.tsx": `
+      import { copy } from "../lib/novelite.config";
+
+      export default function Page() {
+        return <section>{copy.title}</section>;
+      }
+    `,
+    "src/lib/novelite.config.ts": `
+      export const copy = {
+        title: "Not Velite"
+      };
     `,
     "src/components/landing/valid-homepage.tsx": `
       export function LandingHomepage(props: { title: string }) {
@@ -66,6 +92,17 @@ test("no-velite-imports catches velite package and generated artifact imports in
           code: await project.read("src/pages/valid.astro"),
           filename: project.path("src/pages/valid.astro"),
           languageOptions: astroLanguageOptions,
+          options: [baseOptions]
+        },
+        {
+          code: await project.read("src/pages/novelite.astro"),
+          filename: project.path("src/pages/novelite.astro"),
+          languageOptions: astroLanguageOptions,
+          options: [baseOptions]
+        },
+        {
+          code: await project.read("src/pages/velite.config.ts"),
+          filename: project.path("src/pages/velite.config.ts"),
           options: [baseOptions]
         }
       ],
@@ -85,6 +122,16 @@ test("no-velite-imports catches velite package and generated artifact imports in
           code: await project.read("src/pages/package.astro"),
           filename: project.path("src/pages/package.astro"),
           languageOptions: astroLanguageOptions,
+          options: [baseOptions],
+          errors: [
+            {
+              messageId: "forbiddenVeliteImport"
+            }
+          ]
+        },
+        {
+          code: await project.read("src/pages/endpoint.ts"),
+          filename: project.path("src/pages/endpoint.ts"),
           options: [baseOptions],
           errors: [
             {
