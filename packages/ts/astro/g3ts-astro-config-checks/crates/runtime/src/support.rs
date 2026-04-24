@@ -79,6 +79,7 @@ pub(crate) fn eslint_required_lanes_have_effective_pipeline_rules(
     required_rules: &[&str],
     route_scoped_rules: &[&str],
     content_data_rules: &[&str],
+    content_source_rules: &[&str],
 ) -> bool {
     parsed_eslint_surface(contract).is_some_and(|snapshot| {
         lane_has_plugin_and_rules(
@@ -87,10 +88,12 @@ pub(crate) fn eslint_required_lanes_have_effective_pipeline_rules(
             &snapshot.astro_source_error_rules,
             Some(&snapshot.astro_source_effective_route_scoped_pipeline_rules),
             Some(&snapshot.astro_source_effective_content_data_pipeline_rules),
+            Some(&snapshot.astro_source_effective_content_source_pipeline_rules),
             plugin_name,
             required_rules,
             route_scoped_rules,
             content_data_rules,
+            content_source_rules,
         ) &&
         lane_has_plugin_and_rules(
             snapshot.ts_source_probe_present,
@@ -98,20 +101,24 @@ pub(crate) fn eslint_required_lanes_have_effective_pipeline_rules(
             &snapshot.ts_source_error_rules,
             Some(&snapshot.ts_source_effective_route_scoped_pipeline_rules),
             Some(&snapshot.ts_source_effective_content_data_pipeline_rules),
+            Some(&snapshot.ts_source_effective_content_source_pipeline_rules),
             plugin_name,
             required_rules,
             route_scoped_rules,
             content_data_rules,
+            content_source_rules,
         ) && lane_has_plugin_and_rules(
             snapshot.tsx_source_probe_present,
             &snapshot.tsx_source_plugins,
             &snapshot.tsx_source_error_rules,
             Some(&snapshot.tsx_source_effective_route_scoped_pipeline_rules),
             Some(&snapshot.tsx_source_effective_content_data_pipeline_rules),
+            Some(&snapshot.tsx_source_effective_content_source_pipeline_rules),
             plugin_name,
             required_rules,
             route_scoped_rules,
             content_data_rules,
+            content_source_rules,
         )
     })
 }
@@ -128,7 +135,9 @@ pub(crate) fn eslint_required_lanes_have_plugin(
             &snapshot.astro_source_error_rules,
             None,
             None,
+            None,
             plugin_name,
+            &[],
             &[],
             &[],
             &[],
@@ -139,7 +148,9 @@ pub(crate) fn eslint_required_lanes_have_plugin(
             &snapshot.ts_source_error_rules,
             None,
             None,
+            None,
             plugin_name,
+            &[],
             &[],
             &[],
             &[],
@@ -149,7 +160,9 @@ pub(crate) fn eslint_required_lanes_have_plugin(
             &snapshot.tsx_source_error_rules,
             None,
             None,
+            None,
             plugin_name,
+            &[],
             &[],
             &[],
             &[],
@@ -197,10 +210,12 @@ fn lane_has_plugin_and_rules(
     error_rules: &[String],
     effective_route_scoped_rules: Option<&[String]>,
     effective_content_data_rules: Option<&[String]>,
+    effective_content_source_rules: Option<&[String]>,
     plugin_name: &str,
     required_rules: &[&str],
     route_scoped_rules: &[&str],
     content_data_rules: &[&str],
+    content_source_rules: &[&str],
 ) -> bool {
     if !lane_present {
         return true;
@@ -219,6 +234,8 @@ fn lane_has_plugin_and_rules(
         .map(|rules| rules.iter().map(String::as_str).collect::<std::collections::BTreeSet<_>>());
     let effective_content_data_scope = effective_content_data_rules
         .map(|rules| rules.iter().map(String::as_str).collect::<std::collections::BTreeSet<_>>());
+    let effective_content_source_scope = effective_content_source_rules
+        .map(|rules| rules.iter().map(String::as_str).collect::<std::collections::BTreeSet<_>>());
 
     required_rules
         .iter()
@@ -230,6 +247,11 @@ fn lane_has_plugin_and_rules(
         })
         && content_data_rules.iter().all(|required_rule| {
             effective_content_data_scope
+                .as_ref()
+                .is_none_or(|effective_rules| effective_rules.contains(*required_rule))
+        })
+        && content_source_rules.iter().all(|required_rule| {
+            effective_content_source_scope
                 .as_ref()
                 .is_none_or(|effective_rules| effective_rules.contains(*required_rule))
         })

@@ -150,6 +150,26 @@ pub(super) fn missing_content_data_module_scope_options() -> G3TsAstroConfigChec
     }
 }
 
+pub(super) fn missing_content_source_scope_options() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, false),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_contract(
+                true,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_with_scope_but_without_content_source_scope(),
+                    ts: PipelineLaneState::rules_with_scope_but_without_content_source_scope(),
+                    tsx: PipelineLaneState::rules_with_scope_but_without_content_source_scope(),
+                },
+            ),
+        )],
+    }
+}
+
 pub(super) fn route_only_pipeline_wiring() -> G3TsAstroConfigChecksInput {
     G3TsAstroConfigChecksInput {
         integration_contracts: vec![integration_contract(
@@ -362,6 +382,15 @@ fn parsed_eslint_with_pipeline_contract(
             tsx_source_effective_content_data_pipeline_rules: pipeline_contract
                 .tsx
                 .effective_content_data_rules(),
+            astro_source_effective_content_source_pipeline_rules: pipeline_contract
+                .astro
+                .effective_content_source_rules(),
+            ts_source_effective_content_source_pipeline_rules: pipeline_contract
+                .ts
+                .effective_content_source_rules(),
+            tsx_source_effective_content_source_pipeline_rules: pipeline_contract
+                .tsx
+                .effective_content_source_rules(),
         },
     }
 }
@@ -379,6 +408,7 @@ struct PipelineLaneState {
     has_required_rules: bool,
     scope_kind: ScopeKind,
     has_content_data_scope: bool,
+    has_content_source_scope: bool,
 }
 
 impl PipelineLaneState {
@@ -388,6 +418,7 @@ impl PipelineLaneState {
             has_required_rules: false,
             scope_kind: ScopeKind::None,
             has_content_data_scope: false,
+            has_content_source_scope: false,
         }
     }
 
@@ -397,6 +428,7 @@ impl PipelineLaneState {
             has_required_rules: false,
             scope_kind: ScopeKind::None,
             has_content_data_scope: false,
+            has_content_source_scope: false,
         }
     }
 
@@ -406,6 +438,7 @@ impl PipelineLaneState {
             has_required_rules: true,
             scope_kind: ScopeKind::None,
             has_content_data_scope: false,
+            has_content_source_scope: false,
         }
     }
 
@@ -415,6 +448,7 @@ impl PipelineLaneState {
             has_required_rules: true,
             scope_kind: ScopeKind::Route,
             has_content_data_scope: true,
+            has_content_source_scope: true,
         }
     }
 
@@ -424,6 +458,7 @@ impl PipelineLaneState {
             has_required_rules: true,
             scope_kind: ScopeKind::Endpoint,
             has_content_data_scope: true,
+            has_content_source_scope: true,
         }
     }
 
@@ -433,6 +468,17 @@ impl PipelineLaneState {
             has_required_rules: true,
             scope_kind: ScopeKind::Route,
             has_content_data_scope: false,
+            has_content_source_scope: true,
+        }
+    }
+
+    const fn rules_with_scope_but_without_content_source_scope() -> Self {
+        Self {
+            has_plugin: true,
+            has_required_rules: true,
+            scope_kind: ScopeKind::Route,
+            has_content_data_scope: true,
+            has_content_source_scope: false,
         }
     }
 
@@ -444,6 +490,7 @@ impl PipelineLaneState {
         vec![
             "astro-pipeline/no-authored-content-fs-read".to_owned(),
             "astro-pipeline/no-authored-content-glob".to_owned(),
+            "astro-pipeline/no-authored-content-imports".to_owned(),
             "astro-pipeline/no-content-data-modules-in-routes".to_owned(),
             "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
             "astro-pipeline/no-runtime-mdx-eval".to_owned(),
@@ -460,6 +507,7 @@ impl PipelineLaneState {
         vec![
             "astro-pipeline/no-authored-content-fs-read".to_owned(),
             "astro-pipeline/no-authored-content-glob".to_owned(),
+            "astro-pipeline/no-authored-content-imports".to_owned(),
             "astro-pipeline/no-content-data-modules-in-routes".to_owned(),
             "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
             "astro-pipeline/no-side-loader-imports".to_owned(),
@@ -473,6 +521,18 @@ impl PipelineLaneState {
         }
 
         vec!["astro-pipeline/no-content-data-modules-in-routes".to_owned()]
+    }
+
+    fn effective_content_source_rules(self) -> Vec<String> {
+        if !self.has_required_rules || !self.has_content_source_scope {
+            return Vec::new();
+        }
+
+        vec![
+            "astro-pipeline/no-authored-content-fs-read".to_owned(),
+            "astro-pipeline/no-authored-content-glob".to_owned(),
+            "astro-pipeline/no-authored-content-imports".to_owned(),
+        ]
     }
 }
 
