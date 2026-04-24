@@ -1,7 +1,8 @@
 use package_script_command_parser_runtime_assertions::parser::{
-    assert_command, assert_command_count, assert_eslint_invocation, assert_no_eslint_invocation,
-    assert_parse_error_document, assert_parsed_document, assert_state_reason_contains,
-    assert_unsupported_document, ExpectedEslintInvocation,
+    ExpectedEslintInvocation, ExpectedToolInvocation, assert_command, assert_command_count,
+    assert_eslint_invocation, assert_no_eslint_invocation, assert_parse_error_document,
+    assert_parsed_document, assert_state_reason_contains, assert_tool_invocation,
+    assert_unsupported_document,
 };
 
 use crate::types::PackageScriptCommandSeparator;
@@ -67,7 +68,14 @@ fn parses_pnpm_eslint_wrappers_and_separators() {
 
     assert_parsed_document(&document);
     assert_command_count(&document, 3);
-    assert_command(&document, 0, "pnpm eslint .", "pnpm", &["eslint", "."], None);
+    assert_command(
+        &document,
+        0,
+        "pnpm eslint .",
+        "pnpm",
+        &["eslint", "."],
+        None,
+    );
     assert_command(
         &document,
         1,
@@ -110,6 +118,153 @@ fn parses_pnpm_eslint_wrappers_and_separators() {
             config_path: Some("custom.config.mjs"),
         },
     );
+}
+
+#[test]
+fn retains_commands_when_script_has_no_eslint_invocation() {
+    let document = super::super::parse_document("check", "astro check && syncpack lint")
+        .expect("script command document should parse");
+
+    assert_no_eslint_invocation(&document);
+    assert_command_count(&document, 2);
+    assert_command(&document, 0, "astro check", "astro", &["check"], None);
+    assert_command(
+        &document,
+        1,
+        "syncpack lint",
+        "syncpack",
+        &["lint"],
+        Some(PackageScriptCommandSeparator::And),
+    );
+    assert_tool_invocation(
+        &document,
+        0,
+        ExpectedToolInvocation {
+            script_name: "check",
+            command_index: 0,
+            invocation: "astro check",
+            executable: "astro",
+            args: &["check"],
+            preceded_by: None,
+            followed_by: Some(PackageScriptCommandSeparator::And),
+        },
+    );
+    assert_tool_invocation(
+        &document,
+        1,
+        ExpectedToolInvocation {
+            script_name: "check",
+            command_index: 1,
+            invocation: "syncpack lint",
+            executable: "syncpack",
+            args: &["lint"],
+            preceded_by: Some(PackageScriptCommandSeparator::And),
+            followed_by: None,
+        },
+    );
+}
+
+#[test]
+fn normalizes_non_eslint_package_runner_invocations() {
+    let document = super::super::parse_document(
+        "check",
+        "npx --yes astro check && pnpm --filter app exec syncpack lint",
+    )
+    .expect("script command document should parse");
+
+    assert_no_eslint_invocation(&document);
+    assert_tool_invocation(
+        &document,
+        0,
+        ExpectedToolInvocation {
+            script_name: "check",
+            command_index: 0,
+            invocation: "npx --yes astro check",
+            executable: "astro",
+            args: &["check"],
+            preceded_by: None,
+            followed_by: Some(PackageScriptCommandSeparator::And),
+        },
+    );
+    assert_tool_invocation(
+        &document,
+        1,
+        ExpectedToolInvocation {
+            script_name: "check",
+            command_index: 1,
+            invocation: "pnpm --filter app exec syncpack lint",
+            executable: "syncpack",
+            args: &["lint"],
+            preceded_by: Some(PackageScriptCommandSeparator::And),
+            followed_by: None,
+        },
+    );
+}
+
+#[test]
+fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
+    let safe = super::super::parse("check", "astro check && syncpack lint")
+        .expect("script command fact should parse");
+    let fake_text = super::super::parse("check", "echo syncpack lint")
+        .expect("script command fact should parse");
+    let unsafe_after = super::super::parse("check", "astro check && syncpack lint || true")
+        .expect("script command fact should parse");
+    let unsafe_before = super::super::parse("check", "true || syncpack lint")
+        .expect("script command fact should parse");
+    let unsafe_later_or = super::super::parse("check", "syncpack lint && true || true")
+        .expect("script command fact should parse");
+    let unsafe_astro_later_or = super::super::parse("check", "astro check && true || true")
+        .expect("script command fact should parse");
+    let unsafe_duplicate_surface = super::super::parse("test", "syncpack lint || true")
+        .expect("script command fact should parse");
+
+    assert!(
+        super::super::has_safe_tool_invocation(std::slice::from_ref(&safe), "syncpack", "lint"),
+        "syncpack lint in an && chain should be accepted"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(&[fake_text], "syncpack", "lint"),
+        "fake syncpack lint text should be rejected"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(&[unsafe_after], "syncpack", "lint"),
+        "syncpack lint followed by || should be rejected"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(&[unsafe_before], "syncpack", "lint"),
+        "syncpack lint preceded by || should be rejected"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(&[unsafe_later_or], "syncpack", "lint"),
+        "syncpack lint in a later fail-open || chain should be rejected"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(&[unsafe_astro_later_or], "astro", "check"),
+        "astro check in a later fail-open || chain should be rejected"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(
+            &[safe, unsafe_duplicate_surface],
+            "syncpack",
+            "lint"
+        ),
+        "one safe syncpack lint script must not mask another fail-open syncpack lint script"
+    );
+}
+
+#[test]
+fn unsupported_guardrail_shell_syntax_fails_closed() {
+    for command in [
+        "syncpack lint | tee log",
+        "astro check; syncpack lint",
+        "echo $(syncpack lint)",
+    ] {
+        let document = super::super::parse_document("check", command)
+            .expect("script command parser should produce a document");
+
+        assert_unsupported_document(&document);
+        assert_state_reason_contains(&document, "unsupported shell syntax");
+    }
 }
 
 #[test]
@@ -165,21 +320,13 @@ fn parses_common_eslint_wrappers() {
         ("lint:yarn", "yarn eslint src", &["src"][..]),
         ("lint:bun", "bun eslint src", &["src"][..]),
         ("lint:bunx", "bunx eslint src", &["src"][..]),
-        (
-            "lint:env",
-            "env NODE_ENV=test eslint .",
-            &["."][..],
-        ),
+        ("lint:env", "env NODE_ENV=test eslint .", &["."][..]),
         (
             "lint:cross-env",
             "cross-env NODE_ENV=test eslint .",
             &["."][..],
         ),
-        (
-            "lint:local-bin",
-            "./node_modules/.bin/eslint .",
-            &["."][..],
-        ),
+        ("lint:local-bin", "./node_modules/.bin/eslint .", &["."][..]),
     ] {
         let document = super::super::parse_document(script, command)
             .expect("script command document should parse");
@@ -221,11 +368,8 @@ fn package_manager_install_commands_are_not_eslint_invocations() {
 
 #[test]
 fn strips_environment_assignments_before_executable() {
-    let document = super::super::parse_document(
-        "lint",
-        "NODE_ENV=production CI=true eslint .",
-    )
-    .expect("script command document should parse");
+    let document = super::super::parse_document("lint", "NODE_ENV=production CI=true eslint .")
+        .expect("script command document should parse");
 
     assert_parsed_document(&document);
     assert_command(
@@ -265,7 +409,10 @@ fn missing_eslint_flag_values_fail_closed() {
         ("lint:config-long", "eslint . --config"),
         ("lint:config-long-attached", "eslint . --config="),
         ("lint:config-short", "eslint . -c"),
-        ("lint:pattern-before-config", "eslint . --ignore-pattern --config eslint.config.mjs"),
+        (
+            "lint:pattern-before-config",
+            "eslint . --ignore-pattern --config eslint.config.mjs",
+        ),
     ] {
         let document = super::super::parse_document(script, command)
             .expect("script command parser should produce a document");
@@ -359,11 +506,11 @@ fn unsupported_lint_related_separator_fails_closed() {
 }
 
 #[test]
-fn unsupported_non_lint_script_without_eslint_is_not_a_lint_invocation() {
+fn unsupported_guardrail_script_without_eslint_fails_closed() {
     let document = super::super::parse_document("build", "astro build | tee build.log")
         .expect("script command parser should produce a document");
 
-    assert_no_eslint_invocation(&document);
+    assert_unsupported_document(&document);
 }
 
 #[test]

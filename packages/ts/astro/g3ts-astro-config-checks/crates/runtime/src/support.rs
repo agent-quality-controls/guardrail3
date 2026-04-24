@@ -42,16 +42,72 @@ pub(crate) fn package_has_dependency(
 }
 
 #[must_use]
-pub(crate) fn package_has_script_fragment(
+pub(crate) fn package_safely_runs_astro_check(
     contract: &G3TsAstroIntegrationContractInput,
-    fragment: &str,
+) -> bool {
+    parsed_package(contract).is_some_and(|snapshot| snapshot.safely_runs_astro_check)
+}
+
+#[must_use]
+pub(crate) fn package_safely_runs_syncpack_lint(
+    contract: &G3TsAstroIntegrationContractInput,
+) -> bool {
+    parsed_package(contract).is_some_and(|snapshot| snapshot.safely_runs_syncpack_lint)
+}
+
+#[must_use]
+pub(crate) fn package_invokes_tool(
+    contract: &G3TsAstroIntegrationContractInput,
+    executable: &str,
+    first_arg: &str,
 ) -> bool {
     parsed_package(contract).is_some_and(|snapshot| {
-        snapshot
-            .script_bodies
-            .iter()
-            .any(|(_, body)| has_command(body, fragment))
+        snapshot.script_tool_invocations.iter().any(|invocation| {
+            invocation.executable == executable
+                && invocation.args.first().is_some_and(|arg| arg == first_arg)
+        })
     })
+}
+
+#[must_use]
+pub(crate) fn expected_syncpack_source_entry(
+    syncpack_rel_path: &str,
+    package_rel_path: &str,
+) -> Option<String> {
+    let config_dir = syncpack_rel_path
+        .rsplit_once('/')
+        .map_or("", |(parent, _)| parent);
+    if config_dir.is_empty() {
+        return Some(package_rel_path.to_owned());
+    }
+
+    package_rel_path
+        .strip_prefix(&format!("{config_dir}/"))
+        .map(str::to_owned)
+}
+
+#[must_use]
+pub(crate) fn required_syncpack_pins_message(
+    contract: &G3TsAstroIntegrationContractInput,
+) -> String {
+    contract
+        .required_syncpack_pins
+        .iter()
+        .map(|pin| format!("`{}` -> `{}`", pin.dependency, pin.version))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+#[must_use]
+pub(crate) fn forbidden_syncpack_deps_message(
+    contract: &G3TsAstroIntegrationContractInput,
+) -> String {
+    contract
+        .forbidden_syncpack_deps
+        .iter()
+        .map(|dependency| format!("`{dependency}`"))
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 #[must_use]
@@ -197,15 +253,6 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: Option<&str>) 
     )
 }
 
-fn has_command(script_body: &str, command_fragment: &str) -> bool {
-    let wanted = command_fragment.split_whitespace().collect::<Vec<_>>();
-    let commands = shell_like_commands(script_body);
-
-    commands
-        .iter()
-        .any(|command| command_invokes(command, &wanted))
-}
-
 fn lane_has_plugin_and_rules(
     lane_present: bool,
     plugins: &[String],
@@ -269,103 +316,4 @@ fn lane_has_plugin_and_rules(
                 .as_ref()
                 .is_none_or(|effective_rules| effective_rules.contains(*required_rule))
         })
-}
-
-fn command_invokes(command: &[String], wanted: &[&str]) -> bool {
-    let mut start = 0;
-    while command
-        .get(start)
-        .is_some_and(|token| token.contains('=') && !token.starts_with('='))
-    {
-        start += 1;
-    }
-
-    let remainder = &command[skip_command_wrapper(command, start)..];
-    remainder.len() >= wanted.len()
-        && remainder
-            .iter()
-            .take(wanted.len())
-            .zip(wanted.iter())
-            .all(|(left, right)| left == right)
-}
-
-fn skip_command_wrapper(command: &[String], start: usize) -> usize {
-    let Some(first) = command.get(start).map(String::as_str) else {
-        return start;
-    };
-
-    if matches!(first, "npx" | "bunx" | "pnpm" | "yarn") {
-        return skip_wrapper_options(command, start + 1);
-    }
-
-    let Some(second) = command.get(start + 1).map(String::as_str) else {
-        return start;
-    };
-
-    if matches!(
-        (first, second),
-        ("npm", "exec") | ("pnpm", "exec") | ("yarn", "exec") | ("pnpm", "dlx") | ("yarn", "dlx")
-    ) {
-        return skip_wrapper_options(command, start + 2);
-    }
-
-    start
-}
-
-fn skip_wrapper_options(command: &[String], mut index: usize) -> usize {
-    while command
-        .get(index)
-        .is_some_and(|token| token == "--" || token.starts_with('-'))
-    {
-        index += 1;
-    }
-
-    index
-}
-
-fn shell_like_commands(script_body: &str) -> Vec<Vec<String>> {
-    let mut commands = Vec::new();
-    let mut current_command = Vec::new();
-    let mut current = String::new();
-    let mut quote: Option<char> = None;
-
-    for ch in script_body.chars() {
-        if let Some(active_quote) = quote {
-            if ch == active_quote {
-                quote = None;
-            }
-            current.push(ch);
-            continue;
-        }
-
-        match ch {
-            '"' | '\'' => {
-                quote = Some(ch);
-            }
-            ' ' | '\t' | '\n' | '\r' => {
-                if !current.is_empty() {
-                    current_command.push(std::mem::take(&mut current));
-                }
-            }
-            ';' | '&' | '|' | '(' | ')' => {
-                if !current.is_empty() {
-                    current_command.push(std::mem::take(&mut current));
-                }
-                if !current_command.is_empty() {
-                    commands.push(std::mem::take(&mut current_command));
-                }
-            }
-            _ => current.push(ch),
-        }
-    }
-
-    if !current.is_empty() {
-        current_command.push(current);
-    }
-
-    if !current_command.is_empty() {
-        commands.push(current_command);
-    }
-
-    commands
 }

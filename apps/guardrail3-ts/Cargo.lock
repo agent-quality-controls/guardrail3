@@ -443,7 +443,9 @@ dependencies = [
  "g3ts-astro-types",
  "globset",
  "package-json-parser",
+ "package-script-command-parser",
  "serde_json",
+ "syncpack-config-parser",
 ]
 
 [[package]]
@@ -991,6 +993,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "package-script-command-parser"
+version = "0.1.0"
+dependencies = [
+ "package-script-command-parser-runtime",
+]
+
+[[package]]
+name = "package-script-command-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "package-script-command-parser-types",
+]
+
+[[package]]
+name = "package-script-command-parser-types"
+version = "0.1.0"
+
+[[package]]
 name = "prettyplease"
 version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1152,6 +1172,28 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "syncpack-config-parser"
+version = "0.1.0"
+dependencies = [
+ "syncpack-config-parser-runtime",
+]
+
+[[package]]
+name = "syncpack-config-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "syncpack-config-parser-types",
+]
+
+[[package]]
+name = "syncpack-config-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
 ]
 
 [[package]]

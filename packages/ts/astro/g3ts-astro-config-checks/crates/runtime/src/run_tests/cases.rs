@@ -3,19 +3,38 @@ use g3ts_astro_config_checks_assertions::run as assertions;
 use super::helpers::{
     astro_check_wrapper_forms, astro_lane_missing_pipeline_effectiveness,
     endpoint_only_pipeline_scope_options, endpoint_only_pipeline_scope_without_route_coverage,
-    fake_astro_check_text_only, golden, missing_astro_check, missing_astro_plugin_wiring,
-    missing_content_data_module_scope_options, missing_content_source_scope_options,
-    missing_package_eslint_and_astro_config_surfaces, missing_pipeline_rule_enforcement,
-    missing_pipeline_scope_options, missing_pipeline_wiring, missing_required_packages,
-    optional_contracts_not_required, route_only_pipeline_wiring,
-    ts_lane_missing_pipeline_effectiveness, tsx_lane_missing_pipeline_effectiveness,
-    velite_package_present,
+    fake_astro_check_text_only, fake_syncpack_lint_text_only, golden,
+    local_syncpack_package_source_covers_nested_app, malformed_syncpack_config,
+    missing_astro_check, missing_astro_plugin_wiring, missing_content_data_module_scope_options,
+    missing_content_source_scope_options, missing_package_eslint_and_astro_config_surfaces,
+    missing_pipeline_rule_enforcement, missing_pipeline_scope_options, missing_pipeline_wiring,
+    missing_required_packages, missing_syncpack_config, missing_syncpack_lint_script,
+    missing_syncpack_package, missing_syncpack_package_with_unsafe_script,
+    optional_contracts_not_required, root_syncpack_exact_source_covers_nested_app,
+    root_syncpack_package_source_does_not_cover_nested_app, route_only_pipeline_wiring,
+    syncpack_catch_all_forbidden_ban, syncpack_ignored_forbidden_ban,
+    syncpack_lint_or_chain_fail_open, syncpack_lint_wrapper_forms, syncpack_missing_forbidden_ban,
+    syncpack_missing_stack_pin, syncpack_pinned_forbidden_ban, syncpack_scoped_away_forbidden_ban,
+    syncpack_scoped_away_stack_pin, syncpack_shadowed_forbidden_ban, syncpack_shadowed_stack_pin,
+    syncpack_source_excludes_package, syncpack_specifier_scoped_forbidden_ban,
+    syncpack_specifier_scoped_stack_pin, syncpack_wrong_forbidden_ban_dependency_types,
+    syncpack_wrong_stack_pin, ts_lane_missing_pipeline_effectiveness,
+    tsx_lane_missing_pipeline_effectiveness, unreadable_syncpack_config,
+    velite_package_with_syncpack_ban,
 };
 
 #[test]
 fn golden_config_reports_expected_inventory() {
     let input = golden();
     let results = super::super::check(&input);
+    let pins_message = format!(
+        "`.syncpackrc` pins the required Syncpack package policy: {}.",
+        crate::support::required_syncpack_pins_message(&input.integration_contracts[0])
+    );
+    let bans_message = format!(
+        "`.syncpackrc` bans forbidden Astro landing deps through Syncpack: {}.",
+        crate::support::forbidden_syncpack_deps_message(&input.integration_contracts[0])
+    );
 
     assertions::assert_exact(
         &results,
@@ -42,13 +61,6 @@ fn golden_config_reports_expected_inventory() {
                 true,
             ),
             assertions::info(
-                "TS-ASTRO-CONFIG-04",
-                "velite package absent from Astro app",
-                "`package.json` does not include `velite`.",
-                Some("package.json"),
-                true,
-            ),
-            assertions::info(
                 "TS-ASTRO-CONFIG-05",
                 "astro ESLint plugin wired",
                 "`eslint.config.mjs` activates `astro` for the required Astro source lanes.",
@@ -69,23 +81,502 @@ fn golden_config_reports_expected_inventory() {
                 Some("eslint.config.mjs"),
                 true,
             ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-08",
+                "Syncpack package policy validator is installed and wired",
+                "`package.json` includes `syncpack` and invokes `syncpack lint`.",
+                Some("package.json"),
+                true,
+            ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-09",
+                "Syncpack pins the required Astro stack",
+                &pins_message,
+                Some(".syncpackrc"),
+                true,
+            ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-10",
+                "Syncpack bans forbidden Astro landing deps",
+                &bans_message,
+                Some(".syncpackrc"),
+                true,
+            ),
         ],
     );
 }
 
 #[test]
-fn velite_package_reports_astro_package_contract_error() {
-    let input = velite_package_present();
+fn missing_syncpack_package_reports_validator_setup_error() {
+    let input = missing_syncpack_package();
     let results = super::super::check(&input);
 
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-04",
-            "Astro app package must not include `velite`",
-            "`package.json` lists `velite` in dependencies or devDependencies. Remove `velite` from this Astro app and move page content onto Astro collections instead. Keeping Velite in an Astro app recreates the parallel content pipeline this family is meant to forbid.",
+            "TS-ASTRO-CONFIG-08",
+            "Syncpack package policy validator is not installed and wired",
+            "`package.json` runs `syncpack lint` but does not list `syncpack` in dependencies or devDependencies. Add `syncpack` so the app uses the repo-pinned validator.",
             Some("package.json"),
             false,
+        )],
+    );
+}
+
+#[test]
+fn missing_syncpack_package_with_unsafe_script_reports_both_setup_errors() {
+    let input = missing_syncpack_package_with_unsafe_script();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-08",
+            "Syncpack package policy validator is not installed and wired",
+            "`package.json` invokes `syncpack lint`, but not in a supported fail-closed app script position, and does not list `syncpack` in dependencies or devDependencies. Add `syncpack` and remove fail-open `||` chains and unsupported shell syntax so Syncpack failure cannot be hidden.",
+            Some("package.json"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn missing_syncpack_lint_script_reports_validator_setup_error() {
+    let input = missing_syncpack_lint_script();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-08",
+            "Syncpack package policy validator is not installed and wired",
+            "`package.json` lists `syncpack` but does not run `syncpack lint` in any app script. Add `syncpack lint` to the script surface so the package policy validator actually runs.",
+            Some("package.json"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn fake_syncpack_lint_text_does_not_satisfy_the_script_contract() {
+    let input = fake_syncpack_lint_text_only();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-08",
+            "Syncpack package policy validator is not installed and wired",
+            "`package.json` lists `syncpack` but does not run `syncpack lint` in any app script. Add `syncpack lint` to the script surface so the package policy validator actually runs.",
+            Some("package.json"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn fail_open_syncpack_lint_or_chain_does_not_satisfy_the_script_contract() {
+    let input = syncpack_lint_or_chain_fail_open();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-08",
+            "Syncpack package policy validator is not installed and wired",
+            "`package.json` invokes `syncpack lint`, but not in a supported fail-closed app script position. Remove fail-open `||` chains and unsupported shell syntax so Syncpack failure cannot be hidden.",
+            Some("package.json"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn syncpack_lint_wrapper_forms_satisfy_the_script_contract() {
+    let input = syncpack_lint_wrapper_forms();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::info(
+            "TS-ASTRO-CONFIG-08",
+            "Syncpack package policy validator is installed and wired",
+            "`package.json` includes `syncpack` and invokes `syncpack lint`.",
+            Some("package.json"),
+            true,
+        )],
+    );
+}
+
+#[test]
+fn missing_syncpack_config_reports_stack_pin_and_ban_errors() {
+    let input = missing_syncpack_config();
+    let results = super::super::check(&input);
+    let pins_message = format!(
+        "`.syncpackrc` is missing, so the Astro family cannot prove Syncpack pins the required Astro stack for `package.json`. Add a parseable `.syncpackrc` with canonical pinned `versionGroups` for: {}.",
+        crate::support::required_syncpack_pins_message(&input.integration_contracts[0])
+    );
+    let bans_message = format!(
+        "`.syncpackrc` is missing, so the Astro family cannot prove Syncpack bans forbidden Astro deps for `package.json`. Add a parseable `.syncpackrc` with canonical `isBanned: true` versionGroups for {}.",
+        crate::support::forbidden_syncpack_deps_message(&input.integration_contracts[0])
+    );
+
+    assertions::assert_contains(
+        &results,
+        &[
+            assertions::error(
+                "TS-ASTRO-CONFIG-09",
+                "Syncpack does not pin the required Astro stack",
+                &pins_message,
+                Some(".syncpackrc"),
+                false,
+            ),
+            assertions::error(
+                "TS-ASTRO-CONFIG-10",
+                "Syncpack does not ban forbidden Astro landing deps",
+                &bans_message,
+                Some(".syncpackrc"),
+                false,
+            ),
+        ],
+    );
+}
+
+#[test]
+fn unavailable_syncpack_config_reports_unreadable_and_parse_error_reasons() {
+    for (input, reason) in [
+        (unreadable_syncpack_config(), "permission denied"),
+        (
+            malformed_syncpack_config(),
+            "Syncpack config field `versionGroups` must be an array",
+        ),
+    ] {
+        let results = super::super::check(&input);
+        let pins_message = format!(
+            "`.syncpackrc` {reason}, so the Astro family cannot prove Syncpack pins the required Astro stack for `package.json`. Add a parseable `.syncpackrc` with canonical pinned `versionGroups` for: {}.",
+            crate::support::required_syncpack_pins_message(&input.integration_contracts[0])
+        );
+        let bans_message = format!(
+            "`.syncpackrc` {reason}, so the Astro family cannot prove Syncpack bans forbidden Astro deps for `package.json`. Add a parseable `.syncpackrc` with canonical `isBanned: true` versionGroups for {}.",
+            crate::support::forbidden_syncpack_deps_message(&input.integration_contracts[0])
+        );
+
+        assertions::assert_contains(
+            &results,
+            &[
+                assertions::error(
+                    "TS-ASTRO-CONFIG-09",
+                    "Syncpack does not pin the required Astro stack",
+                    &pins_message,
+                    Some(".syncpackrc"),
+                    false,
+                ),
+                assertions::error(
+                    "TS-ASTRO-CONFIG-10",
+                    "Syncpack does not ban forbidden Astro landing deps",
+                    &bans_message,
+                    Some(".syncpackrc"),
+                    false,
+                ),
+            ],
+        );
+    }
+}
+
+#[test]
+fn syncpack_source_must_cover_the_app_package_manifest() {
+    let input = syncpack_source_excludes_package();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[
+            assertions::error(
+                "TS-ASTRO-CONFIG-09",
+                "Syncpack does not pin the required Astro stack",
+                "`.syncpackrc` does not include exact `source` entry `package.json` for `package.json`, so `syncpack lint` cannot prove package policy for this Astro app.",
+                Some(".syncpackrc"),
+                false,
+            ),
+            assertions::error(
+                "TS-ASTRO-CONFIG-10",
+                "Syncpack does not ban forbidden Astro landing deps",
+                "`.syncpackrc` does not include exact `source` entry `package.json` for `package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app.",
+                Some(".syncpackrc"),
+                false,
+            ),
+        ],
+    );
+}
+
+#[test]
+fn root_syncpack_source_package_json_does_not_cover_nested_app_manifest() {
+    let input = root_syncpack_package_source_does_not_cover_nested_app();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[
+            assertions::error(
+                "TS-ASTRO-CONFIG-09",
+                "Syncpack does not pin the required Astro stack",
+                "`.syncpackrc` does not include exact `source` entry `apps/landing/package.json` for `apps/landing/package.json`, so `syncpack lint` cannot prove package policy for this Astro app.",
+                Some(".syncpackrc"),
+                false,
+            ),
+            assertions::error(
+                "TS-ASTRO-CONFIG-10",
+                "Syncpack does not ban forbidden Astro landing deps",
+                "`.syncpackrc` does not include exact `source` entry `apps/landing/package.json` for `apps/landing/package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app.",
+                Some(".syncpackrc"),
+                false,
+            ),
+        ],
+    );
+}
+
+#[test]
+fn root_syncpack_source_exact_path_covers_nested_app_manifest() {
+    let input = root_syncpack_exact_source_covers_nested_app();
+    let results = super::super::check(&input);
+    let pins_message = format!(
+        "`.syncpackrc` pins the required Syncpack package policy: {}.",
+        crate::support::required_syncpack_pins_message(&input.integration_contracts[0])
+    );
+    let bans_message = format!(
+        "`.syncpackrc` bans forbidden Astro landing deps through Syncpack: {}.",
+        crate::support::forbidden_syncpack_deps_message(&input.integration_contracts[0])
+    );
+
+    assertions::assert_contains(
+        &results,
+        &[
+            assertions::info(
+                "TS-ASTRO-CONFIG-09",
+                "Syncpack pins the required Astro stack",
+                &pins_message,
+                Some(".syncpackrc"),
+                true,
+            ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-10",
+                "Syncpack bans forbidden Astro landing deps",
+                &bans_message,
+                Some(".syncpackrc"),
+                true,
+            ),
+        ],
+    );
+}
+
+#[test]
+fn app_local_syncpack_source_package_json_covers_nested_app_manifest() {
+    let input = local_syncpack_package_source_covers_nested_app();
+    let results = super::super::check(&input);
+    let pins_message = format!(
+        "`apps/landing/.syncpackrc` pins the required Syncpack package policy: {}.",
+        crate::support::required_syncpack_pins_message(&input.integration_contracts[0])
+    );
+    let bans_message = format!(
+        "`apps/landing/.syncpackrc` bans forbidden Astro landing deps through Syncpack: {}.",
+        crate::support::forbidden_syncpack_deps_message(&input.integration_contracts[0])
+    );
+
+    assertions::assert_contains(
+        &results,
+        &[
+            assertions::info(
+                "TS-ASTRO-CONFIG-09",
+                "Syncpack pins the required Astro stack",
+                &pins_message,
+                Some("apps/landing/.syncpackrc"),
+                true,
+            ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-10",
+                "Syncpack bans forbidden Astro landing deps",
+                &bans_message,
+                Some("apps/landing/.syncpackrc"),
+                true,
+            ),
+        ],
+    );
+}
+
+#[test]
+fn missing_syncpack_stack_pin_reports_policy_error() {
+    let input = syncpack_missing_stack_pin();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-09",
+            "Syncpack does not pin the required Astro stack",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            Some(".syncpackrc"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn wrong_syncpack_stack_pin_reports_policy_error() {
+    let input = syncpack_wrong_stack_pin();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-09",
+            "Syncpack does not pin the required Astro stack",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            Some(".syncpackrc"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn shadowed_syncpack_stack_pin_reports_policy_error() {
+    let input = syncpack_shadowed_stack_pin();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-09",
+            "Syncpack does not pin the required Astro stack",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            Some(".syncpackrc"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn package_scoped_away_syncpack_stack_pin_reports_policy_error() {
+    let input = syncpack_scoped_away_stack_pin();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-09",
+            "Syncpack does not pin the required Astro stack",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            Some(".syncpackrc"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn specifier_scoped_syncpack_stack_pin_reports_policy_error() {
+    let input = syncpack_specifier_scoped_stack_pin();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-09",
+            "Syncpack does not pin the required Astro stack",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            Some(".syncpackrc"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn syncpack_catch_all_forbidden_ban_does_not_satisfy_canonical_contract() {
+    let input = syncpack_catch_all_forbidden_ban();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-10",
+            "Syncpack does not ban forbidden Astro landing deps",
+            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`, `velite`, `eslint-mdx`. Add one canonical banned versionGroup per listed dependency before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\", \"optional\", \"peer\"]`, `isBanned: true`, and no `packages` or `specifierTypes`.",
+            Some(".syncpackrc"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn noncanonical_syncpack_forbidden_bans_report_policy_error() {
+    for (case_name, input) in [
+        (
+            "shadowed",
+            syncpack_shadowed_forbidden_ban as fn() -> g3ts_astro_types::G3TsAstroConfigChecksInput,
+        ),
+        ("package scoped", syncpack_scoped_away_forbidden_ban),
+        ("specifier scoped", syncpack_specifier_scoped_forbidden_ban),
+        (
+            "wrong dependency types",
+            syncpack_wrong_forbidden_ban_dependency_types,
+        ),
+        ("ignored", syncpack_ignored_forbidden_ban),
+        ("pinned", syncpack_pinned_forbidden_ban),
+    ] {
+        let results = super::super::check(&input());
+
+        assertions::assert_contains(
+            &results,
+            &[assertions::error(
+                "TS-ASTRO-CONFIG-10",
+                "Syncpack does not ban forbidden Astro landing deps",
+                "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`. Add one canonical banned versionGroup per listed dependency before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\", \"optional\", \"peer\"]`, `isBanned: true`, and no `packages` or `specifierTypes`.",
+                Some(".syncpackrc"),
+                false,
+            )],
+        );
+        assert!(
+            results.iter().any(|finding| {
+                finding.id() == "TS-ASTRO-CONFIG-10" && finding.message().contains("`next`")
+            }),
+            "case {case_name} should report `next` as missing: {results:?}"
+        );
+    }
+}
+
+#[test]
+fn missing_syncpack_forbidden_ban_reports_policy_error() {
+    let input = syncpack_missing_forbidden_ban();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-10",
+            "Syncpack does not ban forbidden Astro landing deps",
+            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`. Add one canonical banned versionGroup per listed dependency before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\", \"optional\", \"peer\"]`, `isBanned: true`, and no `packages` or `specifierTypes`.",
+            Some(".syncpackrc"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn direct_velite_package_is_not_scanned_when_syncpack_ban_contract_is_valid() {
+    let input = velite_package_with_syncpack_ban();
+    let results = super::super::check(&input);
+    let bans_message = format!(
+        "`.syncpackrc` bans forbidden Astro landing deps through Syncpack: {}.",
+        crate::support::forbidden_syncpack_deps_message(&input.integration_contracts[0])
+    );
+
+    assertions::assert_no_findings_for_id(&results, "TS-ASTRO-CONFIG-04");
+    assertions::assert_contains(
+        &results,
+        &[assertions::info(
+            "TS-ASTRO-CONFIG-10",
+            "Syncpack bans forbidden Astro landing deps",
+            &bans_message,
+            Some(".syncpackrc"),
+            true,
         )],
     );
 }
@@ -162,13 +653,6 @@ fn missing_required_packages_report_package_contract_errors() {
                 "`package.json` does not list `eslint-plugin-astro` in dependencies or devDependencies. Add `eslint-plugin-astro` to `package.json`. Astro source files need the Astro ESLint plugin so Astro-specific lint rules can run.",
                 Some("package.json"),
                 false,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-04",
-                "velite package absent from Astro app",
-                "`package.json` does not include `velite`.",
-                Some("package.json"),
-                true,
             ),
             assertions::error(
                 "TS-ASTRO-CONFIG-06",
@@ -420,13 +904,6 @@ fn missing_package_eslint_and_astro_config_surfaces_fail_closed() {
                 "TS-ASTRO-CONFIG-03",
                 "Astro app package is missing `eslint-plugin-astro`",
                 "`package.json` does not list `eslint-plugin-astro` in dependencies or devDependencies. Add `eslint-plugin-astro` to `package.json`. Astro source files need the Astro ESLint plugin so Astro-specific lint rules can run.",
-                Some("package.json"),
-                false,
-            ),
-            assertions::error(
-                "TS-ASTRO-CONFIG-04",
-                "Astro app package must not include `velite`",
-                "`package.json` does not parse through an app package surface, so the Astro family cannot prove `velite` is absent. Restore `package.json` and keep `velite` out of this Astro app. Parallel Velite content pipelines are forbidden in Astro apps.",
                 Some("package.json"),
                 false,
             ),

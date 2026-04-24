@@ -12,6 +12,8 @@ pub struct PackageScriptCommandDocument {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PackageScriptParseFact {
     pub script_name: String,
+    pub commands: Vec<PackageScriptCommand>,
+    pub tool_invocations: Vec<PackageScriptToolInvocation>,
     pub state: PackageScriptParseState,
 }
 
@@ -42,6 +44,17 @@ pub struct PackageScriptCommand {
 pub enum PackageScriptCommandSeparator {
     And,
     Or,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PackageScriptToolInvocation {
+    pub script_name: String,
+    pub command_index: usize,
+    pub invocation: String,
+    pub executable: String,
+    pub args: Vec<String>,
+    pub preceded_by: Option<PackageScriptCommandSeparator>,
+    pub followed_by: Option<PackageScriptCommandSeparator>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
