@@ -6,9 +6,11 @@ This package is for Astro apps that want lint failures when routes or endpoint c
 
 - read authored content files directly
 - glob authored content directly
+- source page copy from ad hoc data modules
 - import `astro:content` directly from routes
 - evaluate MDX at runtime
 - pull side-loader helper modules into route closures
+- pull Velite package or `.velite` outputs into route closures
 
 ## Status
 
@@ -38,12 +40,14 @@ This package only documents its own plugin surface. Keep your existing Astro par
 
 - default ESLint plugin export
 - `configs.recommended`
-- 5 rules:
+- 7 rules:
   - `astro-pipeline/no-authored-content-fs-read`
   - `astro-pipeline/no-authored-content-glob`
+  - `astro-pipeline/no-content-data-modules-in-routes`
   - `astro-pipeline/no-direct-astro-content-in-routes`
   - `astro-pipeline/no-runtime-mdx-eval`
   - `astro-pipeline/no-side-loader-imports`
+  - `astro-pipeline/no-velite-imports`
 
 ## Example config
 
@@ -53,6 +57,9 @@ import astroPipeline from "eslint-plugin-astro-pipeline";
 const astroPipelineOptions = {
   routeGlobs: ["src/pages/**/*.{astro,ts,tsx,js,jsx}"],
   endpointGlobs: ["src/pages/**/*.json.ts", "src/pages/**/*.xml.ts"],
+  contentDataModuleGlobs: [
+    "src/**/*.data.{ts,tsx,js,jsx,mts,cts,mjs,cjs}"
+  ],
   adapterModuleGlobs: ["src/lib/content/adapters/**/*.{ts,tsx,js,jsx}"],
   mdxRuntimeModuleGlobs: ["src/lib/mdx/**/*.{ts,tsx,js,jsx}"],
   routeRegistryModuleGlobs: [],
@@ -82,6 +89,10 @@ export default [
         "error",
         astroPipelineOptions
       ],
+      "astro-pipeline/no-content-data-modules-in-routes": [
+        "error",
+        astroPipelineOptions
+      ],
       "astro-pipeline/no-direct-astro-content-in-routes": [
         "error",
         astroPipelineOptions
@@ -91,6 +102,10 @@ export default [
         astroPipelineOptions
       ],
       "astro-pipeline/no-side-loader-imports": [
+        "error",
+        astroPipelineOptions
+      ],
+      "astro-pipeline/no-velite-imports": [
         "error",
         astroPipelineOptions
       ]
@@ -119,6 +134,12 @@ Flags route or endpoint modules that import `astro:content` directly.
 
 Use this to keep collection queries behind app-owned content adapters.
 
+### `no-content-data-modules-in-routes`
+
+Flags route or endpoint import closures that reach configured page-copy data modules such as `homepage-v2.data.ts`.
+
+Use this to keep landing and public page copy out of ad hoc `*.data.*` modules and on the typed content pipeline.
+
 ### `no-runtime-mdx-eval`
 
 Flags runtime MDX bridges such as:
@@ -136,6 +157,12 @@ Flags one-hop route helper imports that pull unapproved content-loading helpers 
 
 Use this to stop routes from smuggling content access through cross-root helpers or helper modules that import `astro:content`.
 
+### `no-velite-imports`
+
+Flags route or endpoint import closures that reach the `velite` package, `velite.config.*`, or `.velite` generated artifacts.
+
+Use this to keep Astro apps off parallel Velite content pipelines.
+
 ## Options
 
 Every rule takes the same option object.
@@ -144,6 +171,7 @@ Every rule takes the same option object.
 | --- | --- |
 | `routeGlobs` | Files treated as route modules |
 | `endpointGlobs` | Files treated as endpoint modules |
+| `contentDataModuleGlobs` | Data-module globs that must not appear in route import closures |
 | `adapterModuleGlobs` | General adapter modules for Astro route consumption |
 | `mdxRuntimeModuleGlobs` | Allowed MDX runtime helper modules |
 | `routeRegistryModuleGlobs` | Route registry modules that should not count as side-loaders |

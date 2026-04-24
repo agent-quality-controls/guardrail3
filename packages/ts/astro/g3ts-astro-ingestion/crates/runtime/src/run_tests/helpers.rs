@@ -80,9 +80,11 @@ pub(super) fn fake_astro_workspace() -> TempDir {
       rules: {
         "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
         "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
+        "astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }],
         "astro-pipeline/no-direct-astro-content-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
         "astro-pipeline/no-runtime-mdx-eval": "error",
         "astro-pipeline/no-side-loader-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
+        "astro-pipeline/no-velite-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,ts,tsx}"] }],
       },
       languageOptions: { parserOptions: { projectService: true, jsx: isTsx } },
     };

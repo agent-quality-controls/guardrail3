@@ -43,6 +43,15 @@ const LIVE_CONFIGS: [&str; 6] = [
     "src/live.config.cts",
 ];
 
+const VELITE_CONFIGS: [&str; 6] = [
+    "velite.config.js",
+    "velite.config.mjs",
+    "velite.config.cjs",
+    "velite.config.ts",
+    "velite.config.mts",
+    "velite.config.cts",
+];
+
 pub(crate) fn select_astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     let mut roots = BTreeSet::new();
 
@@ -105,6 +114,30 @@ pub(crate) fn select_live_config<'a>(
             exact_file(crawl, &scoped_rel_path(app_root_rel_path, rel_path))
                 .filter(|entry| is_included_file(entry))
         })
+}
+
+pub(crate) fn select_velite_config<'a>(
+    crawl: &'a G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+) -> Option<&'a G3WorkspaceEntry> {
+    VELITE_CONFIGS.iter().find_map(|rel_path| {
+        exact_file(crawl, &scoped_rel_path(app_root_rel_path, rel_path))
+            .filter(|entry| is_included_file(entry))
+    })
+}
+
+pub(crate) fn velite_output_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
+    let prefix = scoped_rel_path(app_root_rel_path, ".velite/");
+
+    crawl.entries
+        .iter()
+        .filter(|entry| {
+            is_included_file(entry)
+                && entry.kind == G3WorkspaceEntryKind::File
+                && entry.path.rel_path.starts_with(&prefix)
+        })
+        .map(|entry| entry.path.rel_path.clone())
+        .collect()
 }
 
 pub(crate) fn has_content_files(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> bool {
