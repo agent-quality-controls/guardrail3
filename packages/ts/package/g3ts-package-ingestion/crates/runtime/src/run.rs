@@ -21,7 +21,7 @@ use syncpack_config_parser::{
 
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
 const SYNCPACK_CONFIG_REL_PATH: &str = ".syncpackrc";
-const FORBIDDEN_SYNCPACK_DEPS: [&str; 20] = [
+const FORBIDDEN_SYNCPACK_DEPS: [&str; 19] = [
     "axios",
     "lodash",
     "moment",
@@ -41,7 +41,6 @@ const FORBIDDEN_SYNCPACK_DEPS: [&str; 20] = [
     "cross-fetch",
     "xregexp",
     "regexp-tree",
-    "embla-carousel*",
 ];
 const BAN_DEPENDENCY_TYPES: [&str; 4] = ["prod", "dev", "optional", "peer"];
 const SYNCPACK_PACKAGE_POLICY_PREFIX_LEN: usize = FORBIDDEN_SYNCPACK_DEPS.len();

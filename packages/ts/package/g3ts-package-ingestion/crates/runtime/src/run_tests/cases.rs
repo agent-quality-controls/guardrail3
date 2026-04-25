@@ -191,8 +191,4 @@ fn parses_syncpack_config_policy_facts() {
         &input,
         "axios",
     );
-    g3ts_package_ingestion_assertions::run::assert_syncpack_missing_forbidden_ban(
-        &input,
-        "embla-carousel*",
-    );
 }

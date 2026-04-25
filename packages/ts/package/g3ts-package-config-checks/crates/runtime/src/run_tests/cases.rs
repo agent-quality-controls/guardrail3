@@ -61,7 +61,7 @@ fn golden_root_reports_inventory_only() {
         &[assertions::info(
             "TS-PACKAGE-CONFIG-08",
             "Syncpack bans forbidden package dependencies",
-            "`package.json` lists `syncpack`, runs `syncpack lint` fail-closed, and `.syncpackrc` bans forbidden package deps through Syncpack: `axios`, `embla-carousel*`.",
+            "`package.json` lists `syncpack`, runs `syncpack lint` fail-closed, and `.syncpackrc` bans forbidden package deps through Syncpack: `axios`.",
             Some("package.json"),
             true,
         )],
@@ -155,7 +155,7 @@ fn missing_syncpack_config_reports_validator_contract_error() {
         &[assertions::error(
             "TS-PACKAGE-CONFIG-08",
             "Syncpack does not ban forbidden package dependencies",
-            "`.syncpackrc` is missing, so the package family cannot prove Syncpack bans forbidden package deps for `package.json`. Add a parseable `.syncpackrc` with exact `source` entries and canonical `isBanned: true` versionGroups for `axios`, `embla-carousel*`.",
+            "`.syncpackrc` is missing, so the package family cannot prove Syncpack bans forbidden package deps for `package.json`. Add a parseable `.syncpackrc` with exact `source` entries and canonical `isBanned: true` versionGroups for `axios`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -225,7 +225,7 @@ fn pg_dependency_is_not_treated_as_generic_banned_manifest_policy() {
         &[assertions::info(
             "TS-PACKAGE-CONFIG-08",
             "Syncpack bans forbidden package dependencies",
-            "`package.json` lists `syncpack`, runs `syncpack lint` fail-closed, and `.syncpackrc` bans forbidden package deps through Syncpack: `axios`, `embla-carousel*`.",
+            "`package.json` lists `syncpack`, runs `syncpack lint` fail-closed, and `.syncpackrc` bans forbidden package deps through Syncpack: `axios`.",
             Some("package.json"),
             true,
         )],

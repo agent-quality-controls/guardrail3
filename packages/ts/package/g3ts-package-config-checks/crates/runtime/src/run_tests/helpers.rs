@@ -232,5 +232,5 @@ fn syncpack_config(
 }
 
 fn forbidden_syncpack_deps() -> Vec<String> {
-    vec!["axios".to_owned(), "embla-carousel*".to_owned()]
+    vec!["axios".to_owned()]
 }
