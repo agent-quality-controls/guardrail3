@@ -13,7 +13,7 @@ pub enum AstroConfigParseState {
     Invalid(String),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AstroConfigSnapshot {
     pub selected_config: AstroConfigSelectedFile,
     pub site: Option<String>,
@@ -44,14 +44,44 @@ pub enum AstroOutputMode {
     Server,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct AstroIntegrationSnapshot {
     pub source_module: Option<String>,
     pub name: Option<String>,
+    pub imported_name: Option<String>,
+    pub call: Option<AstroCallSnapshot>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct AstroAdapterSnapshot {
     pub source_module: Option<String>,
     pub name: Option<String>,
+    pub imported_name: Option<String>,
+    pub call: Option<AstroCallSnapshot>,
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct AstroCallSnapshot {
+    pub first_arg: Option<AstroStaticValue>,
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub enum AstroStaticValue {
+    Bool(bool),
+    Number(f64),
+    String(String),
+    Null,
+    Array(Vec<AstroStaticValue>),
+    Object(Vec<AstroStaticObjectProperty>),
+    ImportedIdentifier {
+        local_name: String,
+        source_module: Option<String>,
+        imported_name: Option<String>,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct AstroStaticObjectProperty {
+    pub key: String,
+    pub value: AstroStaticValue,
 }

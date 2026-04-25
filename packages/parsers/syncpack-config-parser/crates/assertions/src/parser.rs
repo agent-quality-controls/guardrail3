@@ -90,7 +90,8 @@ pub fn assert_has_banned_group(document: &SyncpackConfigDocument, dependency: &s
     };
     assert!(
         snapshot.version_groups.iter().any(|group| {
-            group.is_banned && group.dependencies.iter().any(|item| item == dependency)
+            group.is_banned == Some(true)
+                && group.dependencies.iter().any(|item| item == dependency)
         }),
         "expected banned group for {dependency}, got: {snapshot:#?}"
     );

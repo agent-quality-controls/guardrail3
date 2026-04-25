@@ -39,11 +39,11 @@ fn parses_syncpack_policy_groups() {
             label: Some("Pin Astro".to_owned()),
             dependencies: vec!["astro".to_owned()],
             dependency_types: vec!["prod".to_owned(), "dev".to_owned()],
-            packages: Vec::new(),
-            specifier_types: Vec::new(),
+            packages: None,
+            specifier_types: None,
             pin_version: Some("6.1.9".to_owned()),
-            is_banned: false,
-            is_ignored: false,
+            is_banned: None,
+            is_ignored: None,
         },
     );
     assert_has_pinned_group(&document, "astro", "6.1.9");
@@ -82,11 +82,49 @@ fn parses_packages_and_ignored_groups() {
             label: Some("Ignored package scoped group".to_owned()),
             dependencies: vec!["astro".to_owned()],
             dependency_types: vec!["**".to_owned()],
-            packages: vec!["landing".to_owned()],
-            specifier_types: vec!["!range".to_owned()],
+            packages: Some(vec!["landing".to_owned()]),
+            specifier_types: Some(vec!["!range".to_owned()]),
             pin_version: Some("6.1.9".to_owned()),
-            is_banned: false,
-            is_ignored: true,
+            is_banned: None,
+            is_ignored: Some(true),
+        },
+    );
+}
+
+#[test]
+fn preserves_explicit_empty_and_false_policy_fields() {
+    let document = super::super::parse_document(
+        r#"
+        {
+          "source": ["package.json"],
+          "versionGroups": [
+            {
+              "dependencies": ["astro"],
+              "dependencyTypes": ["prod", "dev"],
+              "packages": [],
+              "specifierTypes": [],
+              "pinVersion": "6.1.9",
+              "isBanned": false,
+              "isIgnored": false
+            }
+          ]
+        }
+        "#,
+    )
+    .expect("Syncpack config JSON should parse");
+
+    assert_group_exact(
+        &document,
+        0,
+        &SyncpackVersionGroup {
+            label: None,
+            dependencies: vec!["astro".to_owned()],
+            dependency_types: vec!["prod".to_owned(), "dev".to_owned()],
+            packages: Some(Vec::new()),
+            specifier_types: Some(Vec::new()),
+            pin_version: Some("6.1.9".to_owned()),
+            is_banned: Some(false),
+            is_ignored: Some(false),
         },
     );
 }

@@ -227,24 +227,34 @@ pub(crate) fn select_active_eslint_config<'a>(
 
 pub(crate) fn probe_targets(
     crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
     config_rel_path: &str,
 ) -> Vec<EslintProbeTarget> {
-    let config_scope = config_scope_dir(config_rel_path);
     let mut probes = Vec::new();
 
-    if let Some(rel_path) = first_astro_source_rel_path(crawl, config_scope) {
-        probes.push(probe(EslintProbeKind::AstroSource, rel_path));
-    }
+    probes.push(probe(
+        EslintProbeKind::AstroSource,
+        first_astro_source_rel_path(crawl, app_root_rel_path)
+            .unwrap_or_else(|| scoped_rel_path(app_root_rel_path, "src/__g3ts_probe__.astro")),
+    ));
 
     probes.push(probe(
         EslintProbeKind::TsSource,
-        first_ts_source_rel_path(crawl, config_scope)
-            .unwrap_or_else(|| scoped_default_rel_path(config_scope, "src/index.ts")),
+        first_ts_source_rel_path(crawl, app_root_rel_path)
+            .unwrap_or_else(|| scoped_rel_path(app_root_rel_path, "src/index.ts")),
     ));
 
-    if let Some(rel_path) = first_tsx_source_rel_path(crawl, config_scope) {
-        probes.push(probe(EslintProbeKind::TsxSource, rel_path));
-    }
+    probes.push(probe(
+        EslintProbeKind::TsxSource,
+        first_tsx_source_rel_path(crawl, app_root_rel_path)
+            .unwrap_or_else(|| scoped_rel_path(app_root_rel_path, "src/__g3ts_probe__.tsx")),
+    ));
+
+    probes.push(probe(
+        EslintProbeKind::MdxContent,
+        first_mdx_content_rel_path(crawl, app_root_rel_path)
+            .unwrap_or_else(|| scoped_rel_path(app_root_rel_path, "content/__g3ts_probe__.mdx")),
+    ));
 
     probes.push(probe(
         EslintProbeKind::ConfigFile,
@@ -300,13 +310,8 @@ fn scoped_rel_path(app_root_rel_path: &str, rel_path: &str) -> String {
     }
 }
 
-fn first_ts_source_rel_path(
-    crawl: &G3WorkspaceCrawl,
-    config_scope: Option<&str>,
-) -> Option<String> {
-    first_matching_rel_path(crawl, config_scope, is_primary_ts_source_rel_path)
-        .or_else(|| first_matching_rel_path(crawl, config_scope, is_fallback_ts_source_rel_path))
-        .or_else(|| first_tsx_source_rel_path(crawl, config_scope))
+fn first_ts_source_rel_path(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<String> {
+    first_matching_app_rel_path(crawl, app_root_rel_path, is_primary_ts_source_rel_path)
 }
 
 fn is_under_app_root(rel_path: &str, app_root_rel_path: &str) -> bool {
@@ -348,25 +353,31 @@ fn is_endpoint_file(rel_path: &str) -> bool {
     (rel_path.ends_with(".js") || rel_path.ends_with(".ts")) && !rel_path.ends_with(".d.ts")
 }
 
-fn first_tsx_source_rel_path(
-    crawl: &G3WorkspaceCrawl,
-    config_scope: Option<&str>,
-) -> Option<String> {
-    first_matching_rel_path(crawl, config_scope, is_primary_tsx_source_rel_path)
-        .or_else(|| first_matching_rel_path(crawl, config_scope, is_fallback_tsx_source_rel_path))
+fn first_tsx_source_rel_path(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<String> {
+    first_matching_app_rel_path(crawl, app_root_rel_path, is_primary_tsx_source_rel_path)
 }
 
 fn first_astro_source_rel_path(
     crawl: &G3WorkspaceCrawl,
-    config_scope: Option<&str>,
+    app_root_rel_path: &str,
 ) -> Option<String> {
-    first_matching_rel_path(crawl, config_scope, is_primary_astro_source_rel_path)
-        .or_else(|| first_matching_rel_path(crawl, config_scope, is_fallback_astro_source_rel_path))
+    first_matching_app_rel_path(crawl, app_root_rel_path, is_primary_astro_source_rel_path)
 }
 
-fn first_matching_rel_path(
+fn first_mdx_content_rel_path(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<String> {
+    first_matching_app_rel_path(crawl, app_root_rel_path, |rel_path| {
+        rel_path.starts_with("content/") && rel_path.ends_with(".mdx")
+    })
+    .or_else(|| {
+        first_matching_app_rel_path(crawl, app_root_rel_path, |rel_path| {
+            rel_path.starts_with("src/content/") && rel_path.ends_with(".mdx")
+        })
+    })
+}
+
+fn first_matching_app_rel_path(
     crawl: &G3WorkspaceCrawl,
-    config_scope: Option<&str>,
+    app_root_rel_path: &str,
     predicate: impl Fn(&str) -> bool,
 ) -> Option<String> {
     crawl
@@ -374,34 +385,10 @@ fn first_matching_rel_path(
         .iter()
         .find(|entry| {
             is_included_file(entry)
-                && in_config_scope(&entry.path.rel_path, config_scope)
-                && predicate(&entry.path.rel_path)
+                && is_under_app_root(&entry.path.rel_path, app_root_rel_path)
+                && predicate(&app_relative_path(&entry.path.rel_path, app_root_rel_path))
         })
         .map(|entry| entry.path.rel_path.clone())
-}
-
-fn config_scope_dir(config_rel_path: &str) -> Option<&str> {
-    let parent = std::path::Path::new(config_rel_path).parent()?;
-    let parent = parent.to_str()?;
-    if parent.is_empty() {
-        None
-    } else {
-        Some(parent)
-    }
-}
-
-fn in_config_scope(rel_path: &str, config_scope: Option<&str>) -> bool {
-    let Some(config_scope) = config_scope else {
-        return true;
-    };
-    rel_path == config_scope || rel_path.starts_with(&format!("{config_scope}/"))
-}
-
-fn scoped_default_rel_path(config_scope: Option<&str>, default_rel_path: &str) -> String {
-    match config_scope {
-        Some(config_scope) => format!("{config_scope}/{default_rel_path}"),
-        None => default_rel_path.to_owned(),
-    }
 }
 
 fn probe(probe: EslintProbeKind, rel_path: String) -> EslintProbeTarget {
@@ -414,50 +401,13 @@ fn is_included_file(entry: &G3WorkspaceEntry) -> bool {
 }
 
 fn is_primary_ts_source_rel_path(rel_path: &str) -> bool {
-    rel_path.starts_with("src/")
-        && rel_path.ends_with(".ts")
-        && !rel_path.ends_with(".d.ts")
-        && !rel_path.ends_with(".test.ts")
-        && !rel_path.ends_with(".spec.ts")
-        && !is_config_like_rel_path(rel_path)
+    rel_path.starts_with("src/") && rel_path.ends_with(".ts")
 }
 
 fn is_primary_tsx_source_rel_path(rel_path: &str) -> bool {
-    rel_path.starts_with("src/")
-        && rel_path.ends_with(".tsx")
-        && !rel_path.ends_with(".test.tsx")
-        && !rel_path.ends_with(".spec.tsx")
-        && !is_config_like_rel_path(rel_path)
-}
-
-fn is_fallback_ts_source_rel_path(rel_path: &str) -> bool {
-    rel_path.ends_with(".ts")
-        && !rel_path.ends_with(".d.ts")
-        && !rel_path.contains("/node_modules/")
-        && !is_config_like_rel_path(rel_path)
-}
-
-fn is_fallback_tsx_source_rel_path(rel_path: &str) -> bool {
-    rel_path.ends_with(".tsx")
-        && !rel_path.contains("/node_modules/")
-        && !is_config_like_rel_path(rel_path)
+    rel_path.starts_with("src/") && rel_path.ends_with(".tsx")
 }
 
 fn is_primary_astro_source_rel_path(rel_path: &str) -> bool {
-    rel_path.starts_with("src/")
-        && rel_path.ends_with(".astro")
-        && !is_config_like_rel_path(rel_path)
-}
-
-fn is_fallback_astro_source_rel_path(rel_path: &str) -> bool {
-    rel_path.ends_with(".astro")
-        && !rel_path.contains("/node_modules/")
-        && !is_config_like_rel_path(rel_path)
-}
-
-fn is_config_like_rel_path(rel_path: &str) -> bool {
-    std::path::Path::new(rel_path)
-        .file_name()
-        .and_then(|name| name.to_str())
-        .is_some_and(|name| name.contains(".config."))
+    rel_path.starts_with("src/") && rel_path.ends_with(".astro")
 }

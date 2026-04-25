@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum G3TsAstroContentMode {
     None,
@@ -32,6 +34,7 @@ pub struct G3TsAstroPackageSurfaceSnapshot {
     pub script_tool_invocations: Vec<G3TsAstroPackageScriptToolInvocation>,
     pub script_parse_blockers: Vec<G3TsAstroPackageScriptParseBlocker>,
     pub safely_runs_astro_check: bool,
+    pub safely_runs_astro_build: bool,
     pub safely_runs_syncpack_lint: bool,
 }
 
@@ -117,15 +120,83 @@ pub enum G3TsAstroSyncpackConfigState {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroConfigSurfaceSnapshot {
+    pub rel_path: String,
+    pub site: Option<String>,
+    pub output: Option<G3TsAstroOutputMode>,
+    pub integrations: Vec<G3TsAstroIntegrationSnapshot>,
+    pub adapter: Option<G3TsAstroIntegrationSnapshot>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum G3TsAstroOutputMode {
+    Static,
+    Server,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroIntegrationSnapshot {
+    pub source_module: Option<String>,
+    pub name: Option<String>,
+    pub imported_name: Option<String>,
+    pub call: Option<G3TsAstroCallSnapshot>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroCallSnapshot {
+    pub first_arg: Option<G3TsAstroStaticValue>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum G3TsAstroStaticValue {
+    Bool(bool),
+    Number(f64),
+    String(String),
+    Null,
+    Array(Vec<G3TsAstroStaticValue>),
+    Object(Vec<G3TsAstroStaticObjectProperty>),
+    ImportedIdentifier {
+        local_name: String,
+        source_module: Option<String>,
+        imported_name: Option<String>,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroStaticObjectProperty {
+    pub key: String,
+    pub value: G3TsAstroStaticValue,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum G3TsAstroConfigSurfaceState {
+    Missing {
+        rel_path: String,
+    },
+    Unreadable {
+        rel_path: String,
+        reason: String,
+    },
+    ParseError {
+        rel_path: String,
+        reason: String,
+    },
+    Parsed {
+        snapshot: G3TsAstroConfigSurfaceSnapshot,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct G3TsAstroIntegrationContractInput {
     pub app_root_rel_path: String,
     pub content_mode: G3TsAstroContentMode,
     pub package: G3TsAstroPackageSurfaceState,
     pub syncpack_config: G3TsAstroSyncpackConfigState,
+    pub astro_config: G3TsAstroConfigSurfaceState,
+    pub llms_txt_rel_path: Option<String>,
     pub required_syncpack_pins: Vec<G3TsAstroSyncpackRequiredPin>,
     pub forbidden_syncpack_deps: Vec<String>,
-    pub requires_source_pipeline_linting: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -134,12 +205,23 @@ pub struct G3TsAstroEslintSurfaceSnapshot {
     pub astro_source_probe_present: bool,
     pub ts_source_probe_present: bool,
     pub tsx_source_probe_present: bool,
+    pub mdx_content_probe_present: bool,
     pub astro_source_plugins: Vec<String>,
     pub ts_source_plugins: Vec<String>,
     pub tsx_source_plugins: Vec<String>,
+    pub mdx_content_plugins: Vec<String>,
+    pub astro_source_plugin_meta_names: BTreeMap<String, String>,
+    pub ts_source_plugin_meta_names: BTreeMap<String, String>,
+    pub tsx_source_plugin_meta_names: BTreeMap<String, String>,
+    pub mdx_content_plugin_meta_names: BTreeMap<String, String>,
+    pub astro_source_plugin_package_names: BTreeMap<String, Vec<String>>,
+    pub ts_source_plugin_package_names: BTreeMap<String, Vec<String>>,
+    pub tsx_source_plugin_package_names: BTreeMap<String, Vec<String>>,
+    pub mdx_content_plugin_package_names: BTreeMap<String, Vec<String>>,
     pub astro_source_error_rules: Vec<String>,
     pub ts_source_error_rules: Vec<String>,
     pub tsx_source_error_rules: Vec<String>,
+    pub mdx_content_error_rules: Vec<String>,
     pub astro_source_effective_route_scoped_pipeline_rules: Vec<String>,
     pub ts_source_effective_route_scoped_pipeline_rules: Vec<String>,
     pub tsx_source_effective_route_scoped_pipeline_rules: Vec<String>,
@@ -152,6 +234,10 @@ pub struct G3TsAstroEslintSurfaceSnapshot {
     pub astro_source_effective_inline_public_content_rules: Vec<String>,
     pub ts_source_effective_inline_public_content_rules: Vec<String>,
     pub tsx_source_effective_inline_public_content_rules: Vec<String>,
+    pub astro_source_probe_ignored: bool,
+    pub ts_source_probe_ignored: bool,
+    pub tsx_source_probe_ignored: bool,
+    pub mdx_content_probe_ignored: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -176,10 +262,9 @@ pub enum G3TsAstroEslintSurfaceState {
 pub struct G3TsAstroEslintPluginContractInput {
     pub app_root_rel_path: String,
     pub config: G3TsAstroEslintSurfaceState,
-    pub requires_source_pipeline_linting: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct G3TsAstroConfigChecksInput {
     pub integration_contracts: Vec<G3TsAstroIntegrationContractInput>,
     pub eslint_contracts: Vec<G3TsAstroEslintPluginContractInput>,

@@ -1,13 +1,22 @@
-use eslint_config_parser::{parse_document, parse_error_reason as eslint_parse_error_reason};
+use astro_config_parser::{
+    parse_document as parse_astro_config_document,
+    parse_error_reason as astro_config_parse_error_reason,
+};
+use eslint_config_parser::{
+    parse_document as parse_eslint_document, parse_error_reason as eslint_parse_error_reason,
+};
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_astro_types::{
-    G3TsAstroAppRootInput, G3TsAstroConfigChecksInput, G3TsAstroContentMode,
+    G3TsAstroAppRootInput, G3TsAstroCallSnapshot, G3TsAstroConfigChecksInput,
+    G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState, G3TsAstroContentMode,
     G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
     G3TsAstroEslintSurfaceState, G3TsAstroFileTreeChecksInput, G3TsAstroIntegrationContractInput,
-    G3TsAstroPackageScriptCommand, G3TsAstroPackageScriptCommandSeparator,
-    G3TsAstroPackageScriptParseBlocker, G3TsAstroPackageScriptToolInvocation,
-    G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState, G3TsAstroRouteMarkdownPageInput,
-    G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
+    G3TsAstroIntegrationSnapshot, G3TsAstroOutputMode, G3TsAstroPackageScriptCommand,
+    G3TsAstroPackageScriptCommandSeparator, G3TsAstroPackageScriptParseBlocker,
+    G3TsAstroPackageScriptToolInvocation, G3TsAstroPackageSurfaceSnapshot,
+    G3TsAstroPackageSurfaceState, G3TsAstroRouteMarkdownPageInput, G3TsAstroStaticObjectProperty,
+    G3TsAstroStaticValue, G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState,
+    G3TsAstroSyncpackRequiredPin,
 };
 use globset::{Glob, GlobSetBuilder};
 use package_json_parser::{from_path_document, parse_error_reason as package_parse_error_reason};
@@ -24,12 +33,13 @@ use syncpack_config_parser::{
 const ESLINT_CONFIG_PATTERN: &str = "eslint.config.*";
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
 const SYNCPACK_CONFIG_REL_PATH: &str = ".syncpackrc";
-const ROUTE_SCOPED_PIPELINE_RULES: [&str; 7] = [
+const ROUTE_SCOPED_PIPELINE_RULES: [&str; 8] = [
     "astro-pipeline/no-authored-content-fs-read",
     "astro-pipeline/no-authored-content-glob",
     "astro-pipeline/no-authored-content-imports",
     "astro-pipeline/no-content-data-modules-in-routes",
     "astro-pipeline/no-direct-astro-content-in-routes",
+    "astro-pipeline/require-approved-content-adapter-in-routes",
     "astro-pipeline/no-side-loader-imports",
     "astro-pipeline/no-velite-imports",
 ];
@@ -40,32 +50,39 @@ const CONTENT_SOURCE_PIPELINE_RULES: [&str; 3] = [
     "astro-pipeline/no-authored-content-imports",
 ];
 const INLINE_PUBLIC_CONTENT_RULE: &str = "i18next/no-literal-string";
-const COPY_BEARING_JSX_ATTRIBUTES: [&str; 5] =
-    ["alt", "aria-label", "title", "placeholder", "value"];
-const REQUIRED_SYNCPACK_PINS: [(&str, &str); 20] = [
+const INLINE_PUBLIC_CONTENT_MESSAGE: &str = "Inline public copy must live in Astro content entries. Move this text into the content collection, validate it through the collection schema, and pass the typed value into source.";
+const CONTENT_ADAPTER_PIPELINE_RULE: &str =
+    "astro-pipeline/require-approved-content-adapter-in-routes";
+const REQUIRED_SYNCPACK_PINS: [(&str, &str); 19] = [
     ("astro", "6.1.9"),
-    ("@astrojs/node", "10.0.6"),
     ("@astrojs/react", "5.0.4"),
     ("@astrojs/mdx", "5.0.4"),
     ("@astrojs/check", "0.9.8"),
+    ("@astrojs/sitemap", "3.7.2"),
+    ("astro-robots", "2.3.1"),
+    ("@nuasite/checks", "0.18.0"),
+    ("g3ts-astro-nuasite-checks", "0.1.0"),
+    ("astro-seo", "1.1.0"),
+    ("schema-dts", "2.0.0"),
     ("react", "19.2.5"),
     ("react-dom", "19.2.5"),
     ("@types/react", "19.2.14"),
     ("@types/react-dom", "19.2.3"),
     ("typescript", "5.9.3"),
     ("eslint-plugin-astro", "1.7.0"),
-    ("eslint-plugin-astro-pipeline", "0.1.4"),
-    ("tailwindcss", "4.2.4"),
-    ("@tailwindcss/postcss", "4.2.4"),
-    ("class-variance-authority", "0.7.1"),
-    ("clsx", "2.1.1"),
-    ("tailwind-merge", "3.5.0"),
-    ("lucide-react", "0.577.0"),
-    ("zod", "4.3.6"),
-    ("@types/node", "25.6.0"),
+    ("g3ts-eslint-plugin-astro-pipeline", "0.1.5"),
+    ("eslint-plugin-i18next", "6.1.4"),
+    ("eslint-plugin-mdx", "3.7.0"),
 ];
-const FORBIDDEN_SYNCPACK_DEPS: [&str; 4] =
-    ["next", "velite", "eslint-mdx", "eslint-plugin-i18next"];
+const FORBIDDEN_SYNCPACK_DEPS: [&str; 7] = [
+    "next",
+    "velite",
+    "@astrojs/node",
+    "eslint-plugin-astro-pipeline",
+    "@codemint/astro-meta",
+    "astro-seo-meta",
+    "astro-seo-schema",
+];
 const PIN_DEPENDENCY_TYPES: [&str; 2] = ["prod", "dev"];
 const BAN_DEPENDENCY_TYPES: [&str; 4] = ["prod", "dev", "optional", "peer"];
 const SYNCPACK_ASTRO_POLICY_PREFIX_LEN: usize =
@@ -88,17 +105,19 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                 let package = ingest_package_surface(crawl, app_root_rel_path);
                 let syncpack_config =
                     ingest_syncpack_config_surface(crawl, app_root_rel_path, &package);
+                let astro_config = ingest_astro_config_surface(crawl, app_root_rel_path);
                 G3TsAstroIntegrationContractInput {
                     app_root_rel_path: app_root_rel_path.clone(),
                     content_mode: classify_content_mode(crawl, app_root_rel_path),
                     package,
                     syncpack_config,
+                    astro_config,
+                    llms_txt_rel_path: select_llms_txt(crawl, app_root_rel_path),
                     required_syncpack_pins: required_syncpack_pins(),
                     forbidden_syncpack_deps: FORBIDDEN_SYNCPACK_DEPS
                         .into_iter()
                         .map(str::to_owned)
                         .collect(),
-                    requires_source_pipeline_linting: true,
                 }
             })
             .collect(),
@@ -107,7 +126,6 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
             .map(|app_root_rel_path| G3TsAstroEslintPluginContractInput {
                 app_root_rel_path: app_root_rel_path.clone(),
                 config: ingest_eslint_surface(crawl, app_root_rel_path),
-                requires_source_pipeline_linting: true,
             })
             .collect(),
     }
@@ -286,6 +304,12 @@ fn ingest_package_surface(
                 "astro",
                 "check",
             ),
+            safely_runs_astro_build: has_safe_tool_invocation_in_script(
+                &script_facts,
+                "build",
+                "astro",
+                "build",
+            ),
             safely_runs_syncpack_lint: package_script_command_parser::has_safe_tool_invocation(
                 &script_facts,
                 "syncpack",
@@ -298,6 +322,26 @@ fn ingest_package_surface(
 fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
     package_script_command_parser::parse(name, body)
         .expect("package script command parser should not fail on string input")
+}
+
+fn has_safe_tool_invocation_in_script(
+    facts: &[PackageScriptParseFact],
+    script_name: &str,
+    executable: &str,
+    first_arg: &str,
+) -> bool {
+    let scoped_facts = facts
+        .iter()
+        .filter(|fact| fact.script_name == script_name)
+        .cloned()
+        .collect::<Vec<_>>();
+
+    !scoped_facts.is_empty()
+        && package_script_command_parser::has_safe_tool_invocation(
+            &scoped_facts,
+            executable,
+            first_arg,
+        )
 }
 
 fn script_commands(fact: &PackageScriptParseFact) -> Vec<G3TsAstroPackageScriptCommand> {
@@ -366,6 +410,132 @@ fn script_parse_blocker(
         PackageScriptParseState::Parsed { .. } | PackageScriptParseState::NoEslintInvocation => {
             None
         }
+    }
+}
+
+fn ingest_astro_config_surface(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+) -> G3TsAstroConfigSurfaceState {
+    let Some(entry) = crate::select::select_astro_config(crawl, app_root_rel_path) else {
+        return G3TsAstroConfigSurfaceState::Missing {
+            rel_path: if app_root_rel_path == "." {
+                "astro.config.*".to_owned()
+            } else {
+                format!("{app_root_rel_path}/astro.config.*")
+            },
+        };
+    };
+
+    if !entry.readable {
+        return G3TsAstroConfigSurfaceState::Unreadable {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "workspace crawl marked the selected Astro config unreadable".to_owned(),
+        };
+    }
+
+    let document = match parse_astro_config_document(&crawl.root_abs_path, &entry.path.rel_path) {
+        Ok(document) => document,
+        Err(error) => {
+            return G3TsAstroConfigSurfaceState::ParseError {
+                rel_path: entry.path.rel_path.clone(),
+                reason: error.to_string(),
+            };
+        }
+    };
+
+    if let Some(reason) = astro_config_parse_error_reason(&document) {
+        return G3TsAstroConfigSurfaceState::ParseError {
+            rel_path: entry.path.rel_path.clone(),
+            reason: reason.to_owned(),
+        };
+    }
+
+    let typed = astro_config_parser::typed(&document)
+        .expect("parsed Astro config document should stay typed");
+    G3TsAstroConfigSurfaceState::Parsed {
+        snapshot: G3TsAstroConfigSurfaceSnapshot {
+            rel_path: typed.selected_config.rel_path.clone(),
+            site: typed.site.clone(),
+            output: typed.output.map(astro_output_mode),
+            integrations: typed.integrations.iter().map(astro_integration).collect(),
+            adapter: typed.adapter.as_ref().map(astro_adapter_as_integration),
+        },
+    }
+}
+
+fn astro_output_mode(value: astro_config_parser::types::AstroOutputMode) -> G3TsAstroOutputMode {
+    match value {
+        astro_config_parser::types::AstroOutputMode::Static => G3TsAstroOutputMode::Static,
+        astro_config_parser::types::AstroOutputMode::Server => G3TsAstroOutputMode::Server,
+    }
+}
+
+fn astro_integration(
+    value: &astro_config_parser::types::AstroIntegrationSnapshot,
+) -> G3TsAstroIntegrationSnapshot {
+    G3TsAstroIntegrationSnapshot {
+        source_module: value.source_module.clone(),
+        name: value.name.clone(),
+        imported_name: value.imported_name.clone(),
+        call: value.call.as_ref().map(astro_call),
+    }
+}
+
+fn astro_adapter_as_integration(
+    value: &astro_config_parser::types::AstroAdapterSnapshot,
+) -> G3TsAstroIntegrationSnapshot {
+    G3TsAstroIntegrationSnapshot {
+        source_module: value.source_module.clone(),
+        name: value.name.clone(),
+        imported_name: value.imported_name.clone(),
+        call: value.call.as_ref().map(astro_call),
+    }
+}
+
+fn astro_call(value: &astro_config_parser::types::AstroCallSnapshot) -> G3TsAstroCallSnapshot {
+    G3TsAstroCallSnapshot {
+        first_arg: value.first_arg.as_ref().map(astro_static_value),
+    }
+}
+
+fn astro_static_value(
+    value: &astro_config_parser::types::AstroStaticValue,
+) -> G3TsAstroStaticValue {
+    match value {
+        astro_config_parser::types::AstroStaticValue::Bool(value) => {
+            G3TsAstroStaticValue::Bool(*value)
+        }
+        astro_config_parser::types::AstroStaticValue::Number(value) => {
+            G3TsAstroStaticValue::Number(*value)
+        }
+        astro_config_parser::types::AstroStaticValue::String(value) => {
+            G3TsAstroStaticValue::String(value.clone())
+        }
+        astro_config_parser::types::AstroStaticValue::Null => G3TsAstroStaticValue::Null,
+        astro_config_parser::types::AstroStaticValue::Array(values) => {
+            G3TsAstroStaticValue::Array(values.iter().map(astro_static_value).collect())
+        }
+        astro_config_parser::types::AstroStaticValue::Object(properties) => {
+            G3TsAstroStaticValue::Object(
+                properties
+                    .iter()
+                    .map(|property| G3TsAstroStaticObjectProperty {
+                        key: property.key.clone(),
+                        value: astro_static_value(&property.value),
+                    })
+                    .collect(),
+            )
+        }
+        astro_config_parser::types::AstroStaticValue::ImportedIdentifier {
+            local_name,
+            source_module,
+            imported_name,
+        } => G3TsAstroStaticValue::ImportedIdentifier {
+            local_name: local_name.clone(),
+            source_module: source_module.clone(),
+            imported_name: imported_name.clone(),
+        },
     }
 }
 
@@ -480,10 +650,9 @@ fn syncpack_source_covers_package(
     syncpack_rel_path: &str,
     package_rel_path: &str,
 ) -> bool {
-    !source.is_empty()
-        && source.iter().any(|entry| {
-            exact_source_entry_matches_package(entry, syncpack_rel_path, package_rel_path)
-        })
+    source.len() == 1
+        && source.first().is_some_and(|entry| entry == "package.json")
+        && syncpack_config_is_app_local(syncpack_rel_path, package_rel_path)
 }
 
 fn has_canonical_pin_in_prefix(
@@ -526,18 +695,18 @@ fn canonical_pin_group(
     group: &syncpack_config_parser::types::SyncpackVersionGroup,
     version: &str,
 ) -> bool {
-    group.packages.is_empty()
-        && group.specifier_types.is_empty()
-        && !group.is_ignored
-        && !group.is_banned
+    group.packages.is_none()
+        && group.specifier_types.is_none()
+        && group.is_ignored.is_none()
+        && group.is_banned.is_none()
         && group.pin_version.as_deref() == Some(version)
 }
 
 fn canonical_ban_group(group: &syncpack_config_parser::types::SyncpackVersionGroup) -> bool {
-    group.packages.is_empty()
-        && group.specifier_types.is_empty()
-        && !group.is_ignored
-        && group.is_banned
+    group.packages.is_none()
+        && group.specifier_types.is_none()
+        && group.is_ignored.is_none()
+        && group.is_banned == Some(true)
         && group.pin_version.is_none()
 }
 
@@ -550,29 +719,13 @@ fn strings_match_exactly(left: &[String], right: &[&str]) -> bool {
             .all(|(left, right)| left == right)
 }
 
-fn exact_source_entry_matches_package(
-    source_entry: &str,
-    syncpack_rel_path: &str,
-    package_rel_path: &str,
-) -> bool {
-    let config_dir = rel_parent(syncpack_rel_path);
-    let expected_source_entry = if config_dir.is_empty() {
-        package_rel_path
-    } else {
-        let config_prefix = format!("{config_dir}/");
-        let Some(app_local_package_rel_path) = package_rel_path.strip_prefix(&config_prefix) else {
-            return false;
-        };
-        app_local_package_rel_path
-    };
+fn syncpack_config_is_app_local(syncpack_rel_path: &str, package_rel_path: &str) -> bool {
+    let expected_rel_path = package_rel_path.strip_suffix("/package.json").map_or_else(
+        || ".syncpackrc".to_owned(),
+        |app_root| format!("{app_root}/.syncpackrc"),
+    );
 
-    source_entry == expected_source_entry
-}
-
-fn rel_parent(rel_path: &str) -> String {
-    rel_path
-        .rsplit_once('/')
-        .map_or_else(String::new, |(parent, _)| parent.to_owned())
+    syncpack_rel_path == expected_rel_path
 }
 
 fn select_syncpack_config<'crawl>(
@@ -581,7 +734,6 @@ fn select_syncpack_config<'crawl>(
 ) -> Option<&'crawl g3_workspace_crawl::G3RsWorkspaceEntry> {
     let app_config = scoped_rel_path(app_root_rel_path, SYNCPACK_CONFIG_REL_PATH);
     exact_included_file(crawl, &app_config)
-        .or_else(|| exact_included_file(crawl, SYNCPACK_CONFIG_REL_PATH))
 }
 
 fn exact_included_file<'crawl>(
@@ -611,6 +763,11 @@ fn scoped_rel_path(app_root_rel_path: &str, rel_path: &str) -> String {
     }
 }
 
+fn select_llms_txt(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<String> {
+    let rel_path = scoped_rel_path(app_root_rel_path, "public/llms.txt");
+    exact_included_file(crawl, &rel_path).map(|entry| entry.path.rel_path.clone())
+}
+
 fn ingest_eslint_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -632,8 +789,9 @@ fn ingest_eslint_surface(
         };
     }
 
-    let probes = crate::select::probe_targets(crawl, &entry.path.rel_path);
-    let document = match parse_document(&crawl.root_abs_path, &entry.path.rel_path, &probes) {
+    let probes = crate::select::probe_targets(crawl, app_root_rel_path, &entry.path.rel_path);
+    let document = match parse_eslint_document(&crawl.root_abs_path, &entry.path.rel_path, &probes)
+    {
         Ok(document) => document,
         Err(error) => {
             return G3TsAstroEslintSurfaceState::ParseError {
@@ -666,6 +824,10 @@ fn ingest_eslint_surface(
         &typed,
         eslint_config_parser::types::EslintProbeKind::TsxSource,
     );
+    let mdx_content_probe = active_probe(
+        &typed,
+        eslint_config_parser::types::EslintProbeKind::MdxContent,
+    );
 
     G3TsAstroEslintSurfaceState::Parsed {
         snapshot: G3TsAstroEslintSurfaceSnapshot {
@@ -673,6 +835,7 @@ fn ingest_eslint_surface(
             astro_source_probe_present: astro_source_probe.is_some(),
             ts_source_probe_present: ts_source_probe.is_some(),
             tsx_source_probe_present: tsx_source_probe.is_some(),
+            mdx_content_probe_present: mdx_content_probe.is_some(),
             astro_source_plugins: astro_source_probe
                 .map(|probe| probe.plugins.clone())
                 .unwrap_or_default(),
@@ -682,9 +845,37 @@ fn ingest_eslint_surface(
             tsx_source_plugins: tsx_source_probe
                 .map(|probe| probe.plugins.clone())
                 .unwrap_or_default(),
+            mdx_content_plugins: mdx_content_probe
+                .map(|probe| probe.plugins.clone())
+                .unwrap_or_default(),
+            astro_source_plugin_meta_names: astro_source_probe
+                .map(|probe| probe.plugin_meta_names.clone())
+                .unwrap_or_default(),
+            ts_source_plugin_meta_names: ts_source_probe
+                .map(|probe| probe.plugin_meta_names.clone())
+                .unwrap_or_default(),
+            tsx_source_plugin_meta_names: tsx_source_probe
+                .map(|probe| probe.plugin_meta_names.clone())
+                .unwrap_or_default(),
+            mdx_content_plugin_meta_names: mdx_content_probe
+                .map(|probe| probe.plugin_meta_names.clone())
+                .unwrap_or_default(),
+            astro_source_plugin_package_names: astro_source_probe
+                .map(|probe| probe.plugin_package_names.clone())
+                .unwrap_or_default(),
+            ts_source_plugin_package_names: ts_source_probe
+                .map(|probe| probe.plugin_package_names.clone())
+                .unwrap_or_default(),
+            tsx_source_plugin_package_names: tsx_source_probe
+                .map(|probe| probe.plugin_package_names.clone())
+                .unwrap_or_default(),
+            mdx_content_plugin_package_names: mdx_content_probe
+                .map(|probe| probe.plugin_package_names.clone())
+                .unwrap_or_default(),
             astro_source_error_rules: active_error_rules(astro_source_probe),
             ts_source_error_rules: active_error_rules(ts_source_probe),
             tsx_source_error_rules: active_error_rules(tsx_source_probe),
+            mdx_content_error_rules: active_error_rules(mdx_content_probe),
             astro_source_effective_route_scoped_pipeline_rules:
                 effective_route_scoped_pipeline_rules(
                     astro_source_probe,
@@ -743,6 +934,22 @@ fn ingest_eslint_surface(
             tsx_source_effective_inline_public_content_rules: effective_inline_public_content_rules(
                 tsx_source_probe,
             ),
+            astro_source_probe_ignored: probe_ignored(
+                &typed,
+                eslint_config_parser::types::EslintProbeKind::AstroSource,
+            ),
+            ts_source_probe_ignored: probe_ignored(
+                &typed,
+                eslint_config_parser::types::EslintProbeKind::TsSource,
+            ),
+            tsx_source_probe_ignored: probe_ignored(
+                &typed,
+                eslint_config_parser::types::EslintProbeKind::TsxSource,
+            ),
+            mdx_content_probe_ignored: probe_ignored(
+                &typed,
+                eslint_config_parser::types::EslintProbeKind::MdxContent,
+            ),
         },
     }
 }
@@ -751,10 +958,21 @@ fn active_probe<'a>(
     typed: &'a eslint_config_parser::types::EslintConfigSnapshot,
     kind: eslint_config_parser::types::EslintProbeKind,
 ) -> Option<&'a eslint_config_parser::types::EslintEffectiveConfigProbe> {
-    typed
-        .probes
-        .iter()
-        .find(|probe| probe.probe == kind && !probe.ignored)
+    probe_by_kind(typed, kind).filter(|probe| !probe.ignored)
+}
+
+fn probe_by_kind(
+    typed: &eslint_config_parser::types::EslintConfigSnapshot,
+    kind: eslint_config_parser::types::EslintProbeKind,
+) -> Option<&eslint_config_parser::types::EslintEffectiveConfigProbe> {
+    typed.probes.iter().find(|probe| probe.probe == kind)
+}
+
+fn probe_ignored(
+    typed: &eslint_config_parser::types::EslintConfigSnapshot,
+    kind: eslint_config_parser::types::EslintProbeKind,
+) -> bool {
+    probe_by_kind(typed, kind).is_none_or(|probe| probe.ignored)
 }
 
 fn active_error_rules(
@@ -787,11 +1005,14 @@ fn effective_route_scoped_pipeline_rules(
         .iter()
         .filter(|rule_name| {
             probe.rules.get(**rule_name).is_some_and(|setting| {
-                rule_setting_has_route_and_endpoint_coverage(
-                    setting,
-                    route_page_paths,
-                    endpoint_paths,
-                )
+                rule_setting_is_error(setting)
+                    && rule_setting_has_route_and_endpoint_coverage(
+                        setting,
+                        route_page_paths,
+                        endpoint_paths,
+                    )
+                    && (**rule_name != CONTENT_ADAPTER_PIPELINE_RULE
+                        || rule_setting_has_approved_content_adapter_scope(setting))
             })
         })
         .map(|rule_name| (*rule_name).to_owned())
@@ -811,11 +1032,13 @@ fn effective_content_data_pipeline_rules(
         .iter()
         .filter(|rule_name| {
             probe.rules.get(**rule_name).is_some_and(|setting| {
-                rule_setting_has_route_and_endpoint_coverage(
-                    setting,
-                    route_page_paths,
-                    endpoint_paths,
-                ) && rule_setting_has_content_data_scope(setting)
+                rule_setting_is_error(setting)
+                    && rule_setting_has_route_and_endpoint_coverage(
+                        setting,
+                        route_page_paths,
+                        endpoint_paths,
+                    )
+                    && rule_setting_has_content_data_scope(setting)
             })
         })
         .map(|rule_name| (*rule_name).to_owned())
@@ -835,11 +1058,13 @@ fn effective_content_source_pipeline_rules(
         .iter()
         .filter(|rule_name| {
             probe.rules.get(**rule_name).is_some_and(|setting| {
-                rule_setting_has_route_and_endpoint_coverage(
-                    setting,
-                    route_page_paths,
-                    endpoint_paths,
-                ) && rule_setting_has_content_source_scope(setting)
+                rule_setting_is_error(setting)
+                    && rule_setting_has_route_and_endpoint_coverage(
+                        setting,
+                        route_page_paths,
+                        endpoint_paths,
+                    )
+                    && rule_setting_has_content_source_scope(setting)
             })
         })
         .map(|rule_name| (*rule_name).to_owned())
@@ -853,16 +1078,18 @@ fn effective_inline_public_content_rules(
         return Vec::new();
     };
 
-    probe.rules.get(INLINE_PUBLIC_CONTENT_RULE).map_or_else(
-        Vec::new,
-        |setting| {
-            if rule_setting_has_inline_public_content_policy(setting) {
+    probe
+        .rules
+        .get(INLINE_PUBLIC_CONTENT_RULE)
+        .map_or_else(Vec::new, |setting| {
+            if rule_setting_is_error(setting)
+                && rule_setting_has_inline_public_content_policy(setting)
+            {
                 vec![INLINE_PUBLIC_CONTENT_RULE.to_owned()]
             } else {
                 Vec::new()
             }
-        },
-    )
+        })
 }
 
 fn rule_setting_has_route_and_endpoint_coverage(
@@ -870,10 +1097,13 @@ fn rule_setting_has_route_and_endpoint_coverage(
     route_page_paths: &[String],
     endpoint_paths: &[String],
 ) -> bool {
-    let route_coverage = route_page_paths.is_empty()
-        || rule_setting_option_globs_match_any_path(setting, "routeGlobs", route_page_paths);
-    let endpoint_coverage = endpoint_paths.is_empty()
-        || rule_setting_option_globs_match_any_path(setting, "endpointGlobs", endpoint_paths);
+    let route_coverage = !route_page_paths.is_empty()
+        && rule_setting_option_globs_match_any_path(setting, "routeGlobs", route_page_paths);
+    let endpoint_coverage = if endpoint_paths.is_empty() {
+        rule_setting_option_globs_are_valid(setting, "endpointGlobs")
+    } else {
+        rule_setting_option_globs_match_any_path(setting, "endpointGlobs", endpoint_paths)
+    };
 
     route_coverage && endpoint_coverage
 }
@@ -881,41 +1111,141 @@ fn rule_setting_has_route_and_endpoint_coverage(
 fn rule_setting_has_content_data_scope(
     setting: &eslint_config_parser::types::EslintRuleSetting,
 ) -> bool {
-    setting.options.iter().any(|option| {
-        option.as_object().is_some_and(|object| {
-            has_non_empty_string_array_option(object.get("contentDataModuleGlobs"))
-        })
+    first_option_object(setting).is_some_and(|object| {
+        has_non_empty_string_array_option(object.get("contentDataModuleGlobs"))
     })
 }
 
 fn rule_setting_has_content_source_scope(
     setting: &eslint_config_parser::types::EslintRuleSetting,
 ) -> bool {
-    setting.options.iter().any(|option| {
-        option.as_object().is_some_and(|object| {
-            has_non_empty_string_array_option(object.get("authoredContentGlobs"))
-                || has_non_empty_string_array_option(object.get("specContentGlobs"))
-        })
+    first_option_object(setting).is_some_and(|object| {
+        has_non_empty_string_array_option(object.get("authoredContentGlobs"))
+            || has_non_empty_string_array_option(object.get("specContentGlobs"))
+    })
+}
+
+fn rule_setting_has_approved_content_adapter_scope(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+) -> bool {
+    first_option_object(setting).is_some_and(|object| {
+        has_non_empty_string_array_option(object.get("approvedContentAdapterModules"))
     })
 }
 
 fn rule_setting_has_inline_public_content_policy(
     setting: &eslint_config_parser::types::EslintRuleSetting,
 ) -> bool {
-    setting.options.iter().any(|option| {
-        option.as_object().is_some_and(|object| {
-            object_string_value(object.get("framework")) == Some("react")
-                && object_string_value(object.get("mode")) == Some("all")
-                && object_bool_value(object.get("should-validate-template")) == Some(true)
-                && object_string_value(object.get("message"))
-                    .is_some_and(|message| message.contains("Astro content"))
-                && words_policy_preserves_copy_detection(object)
-                && jsx_component_policy_preserves_copy_detection(object)
-                && object_property_policy_preserves_copy_detection(object)
-                && callee_policy_preserves_copy_detection(object)
-                && !jsx_attribute_policy_allows_copy_attrs(object)
-        })
-    })
+    let Some(object) = setting
+        .options
+        .first()
+        .and_then(serde_json::Value::as_object)
+    else {
+        return false;
+    };
+
+    object.len() == 10
+        && object_string_value(object.get("framework")) == Some("react")
+        && object_string_value(object.get("mode")) == Some("all")
+        && object_string_value(object.get("message")) == Some(INLINE_PUBLIC_CONTENT_MESSAGE)
+        && object_bool_value(object.get("should-validate-template")) == Some(true)
+        && object_has_exact_string_arrays(
+            object.get("words"),
+            "include",
+            &[],
+            "exclude",
+            &["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"],
+        )
+        && object_has_exact_string_arrays(
+            object.get("jsx-components"),
+            "include",
+            &[],
+            "exclude",
+            &[],
+        )
+        && object_has_exact_string_arrays(
+            object.get("jsx-attributes"),
+            "include",
+            &[],
+            "exclude",
+            &[
+                "as",
+                "class",
+                "className",
+                "color",
+                "data-.+",
+                "height",
+                "href",
+                "id",
+                "intent",
+                "key",
+                "name",
+                "rel",
+                "role",
+                "size",
+                "slot",
+                "src",
+                "style",
+                "styleName",
+                "target",
+                "tone",
+                "type",
+                "variant",
+                "width",
+                "aria-hidden",
+            ],
+        )
+        && object_has_exact_string_arrays(
+            object.get("callees"),
+            "include",
+            &[],
+            "exclude",
+            &[
+                "require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL",
+            ],
+        )
+        && object_has_exact_string_arrays(
+            object.get("object-properties"),
+            "include",
+            &[],
+            "exclude",
+            &["[A-Z_-]+"],
+        )
+        && object_has_exact_string_arrays(
+            object.get("class-properties"),
+            "include",
+            &[],
+            "exclude",
+            &["displayName"],
+        )
+}
+
+fn object_has_exact_string_arrays(
+    value: Option<&serde_json::Value>,
+    first_key: &str,
+    first_expected: &[&str],
+    second_key: &str,
+    second_expected: &[&str],
+) -> bool {
+    let Some(object) = value.and_then(serde_json::Value::as_object) else {
+        return false;
+    };
+
+    object.len() == 2
+        && string_array_exactly(object.get(first_key), first_expected)
+        && string_array_exactly(object.get(second_key), second_expected)
+}
+
+fn string_array_exactly(value: Option<&serde_json::Value>, expected: &[&str]) -> bool {
+    let Some(values) = value.and_then(serde_json::Value::as_array) else {
+        return false;
+    };
+
+    values.len() == expected.len()
+        && values
+            .iter()
+            .zip(expected.iter().copied())
+            .all(|(value, expected)| value.as_str() == Some(expected))
 }
 
 fn object_string_value(option: Option<&serde_json::Value>) -> Option<&str> {
@@ -924,153 +1254,6 @@ fn object_string_value(option: Option<&serde_json::Value>) -> Option<&str> {
 
 fn object_bool_value(option: Option<&serde_json::Value>) -> Option<bool> {
     option.and_then(serde_json::Value::as_bool)
-}
-
-fn words_policy_preserves_copy_detection(object: &serde_json::Map<String, serde_json::Value>) -> bool {
-    let Some(words) = object
-        .get("words")
-        .and_then(serde_json::Value::as_object)
-    else {
-        return true;
-    };
-
-    let StringArrayOption::Valid(included_words) = string_array_option(words.get("include")) else {
-        return false;
-    };
-    let StringArrayOption::Valid(excluded_words) = string_array_option(words.get("exclude")) else {
-        return false;
-    };
-
-    included_words.is_empty()
-        && !excluded_words
-        .iter()
-        .any(|pattern| regex_pattern_matches(pattern, "Request an audit"))
-}
-
-fn jsx_component_policy_preserves_copy_detection(
-    object: &serde_json::Map<String, serde_json::Value>,
-) -> bool {
-    let Some(jsx_components) = object
-        .get("jsx-components")
-        .and_then(serde_json::Value::as_object)
-    else {
-        return false;
-    };
-
-    let StringArrayOption::Valid(included_components) =
-        string_array_option(jsx_components.get("include"))
-    else {
-        return false;
-    };
-    let StringArrayOption::Valid(excluded_components) =
-        string_array_option(jsx_components.get("exclude"))
-    else {
-        return false;
-    };
-
-    included_components.is_empty()
-        && !excluded_components
-            .iter()
-            .any(|pattern| regex_pattern_matches(pattern, "CopyProbe"))
-}
-
-fn object_property_policy_preserves_copy_detection(
-    object: &serde_json::Map<String, serde_json::Value>,
-) -> bool {
-    let Some(object_properties) = object
-        .get("object-properties")
-        .and_then(serde_json::Value::as_object)
-    else {
-        return true;
-    };
-
-    let StringArrayOption::Valid(included_properties) =
-        string_array_option(object_properties.get("include"))
-    else {
-        return false;
-    };
-    let StringArrayOption::Valid(excluded_properties) =
-        string_array_option(object_properties.get("exclude"))
-    else {
-        return false;
-    };
-
-    included_properties.is_empty()
-        && !excluded_properties.iter().any(|pattern| {
-            ["title", "name", "label", "description", "copy"]
-                .iter()
-                .any(|property| regex_pattern_matches(pattern, property))
-        })
-}
-
-fn callee_policy_preserves_copy_detection(object: &serde_json::Map<String, serde_json::Value>) -> bool {
-    let Some(callees) = object.get("callees").and_then(serde_json::Value::as_object) else {
-        return false;
-    };
-
-    let StringArrayOption::Valid(included_callees) = string_array_option(callees.get("include"))
-    else {
-        return false;
-    };
-    let StringArrayOption::Valid(excluded_callees) = string_array_option(callees.get("exclude"))
-    else {
-        return false;
-    };
-
-    included_callees.is_empty()
-        && !excluded_callees.iter().any(|pattern| {
-            [
-                "t",
-                "i18n",
-                "postMessage",
-                "copy.includes",
-                "z.enum",
-                "includes",
-                "enum",
-            ]
-            .iter()
-            .any(|callee| regex_pattern_matches(pattern, callee))
-        })
-}
-
-fn jsx_attribute_policy_allows_copy_attrs(object: &serde_json::Map<String, serde_json::Value>) -> bool {
-    let Some(jsx_attributes) = object
-        .get("jsx-attributes")
-        .and_then(serde_json::Value::as_object)
-    else {
-        return false;
-    };
-
-    let StringArrayOption::Valid(included_attrs) = string_array_option(jsx_attributes.get("include"))
-    else {
-        return true;
-    };
-    if !included_attrs.is_empty() {
-        return true;
-    }
-
-    let StringArrayOption::Valid(excluded_attrs) = string_array_option(jsx_attributes.get("exclude"))
-    else {
-        return true;
-    };
-
-    excluded_attrs
-        .iter()
-        .any(|pattern| jsx_attribute_exclusion_matches_copy_attr(pattern))
-}
-
-fn jsx_attribute_exclusion_matches_copy_attr(pattern: &str) -> bool {
-    COPY_BEARING_JSX_ATTRIBUTES
-        .iter()
-        .any(|attr| *attr == pattern || regex_pattern_matches(pattern, attr))
-}
-
-fn regex_pattern_matches(pattern: &str, value: &str) -> bool {
-    if pattern == "[0-9!-/:-@[-`{-~]+" {
-        return false;
-    }
-
-    regex::Regex::new(&format!("^(?:{pattern})$")).map_or(true, |regex| regex.is_match(value))
 }
 
 fn has_non_empty_string_array_option(option: Option<&serde_json::Value>) -> bool {
@@ -1084,43 +1267,38 @@ fn has_non_empty_string_array_option(option: Option<&serde_json::Value>) -> bool
         })
 }
 
-enum StringArrayOption<'a> {
-    Valid(Vec<&'a str>),
-    Invalid,
-}
-
-fn string_array_option(option: Option<&serde_json::Value>) -> StringArrayOption<'_> {
-    let Some(option) = option else {
-        return StringArrayOption::Valid(Vec::new());
-    };
-
-    let Some(values) = option.as_array() else {
-        return StringArrayOption::Invalid;
-    };
-
-    let mut strings = Vec::with_capacity(values.len());
-
-    for value in values {
-        let Some(text) = value.as_str().map(str::trim).filter(|text| !text.is_empty()) else {
-            return StringArrayOption::Invalid;
-        };
-        strings.push(text);
-    }
-
-    StringArrayOption::Valid(strings)
-}
-
 fn rule_setting_option_globs_match_any_path(
     setting: &eslint_config_parser::types::EslintRuleSetting,
     option_name: &str,
     candidate_paths: &[String],
 ) -> bool {
-    setting.options.iter().any(|option| {
-        option.as_object().is_some_and(|object| {
-            non_empty_string_array_option(object.get(option_name))
-                .is_some_and(|patterns| all_paths_match_globs(&patterns, candidate_paths))
-        })
+    first_option_object(setting).is_some_and(|object| {
+        non_empty_string_array_option(object.get(option_name))
+            .is_some_and(|patterns| all_paths_match_globs(&patterns, candidate_paths))
     })
+}
+
+fn rule_setting_option_globs_are_valid(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+    option_name: &str,
+) -> bool {
+    first_option_object(setting).is_some_and(|object| {
+        non_empty_string_array_option(object.get(option_name))
+            .is_some_and(|patterns| globs_are_valid(&patterns))
+    })
+}
+
+fn first_option_object(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+) -> Option<&serde_json::Map<String, serde_json::Value>> {
+    setting
+        .options
+        .first()
+        .and_then(serde_json::Value::as_object)
+}
+
+fn rule_setting_is_error(setting: &eslint_config_parser::types::EslintRuleSetting) -> bool {
+    setting.severity == eslint_config_parser::types::EslintRuleSeverity::Error
 }
 
 fn non_empty_string_array_option(option: Option<&serde_json::Value>) -> Option<Vec<&str>> {
@@ -1160,6 +1338,19 @@ fn all_paths_match_globs(patterns: &[&str], candidate_paths: &[String]) -> bool 
     candidate_paths
         .iter()
         .all(|candidate_path| glob_set.is_match(normalize_glob(candidate_path)))
+}
+
+fn globs_are_valid(patterns: &[&str]) -> bool {
+    let mut builder = GlobSetBuilder::new();
+
+    for pattern in patterns {
+        let Ok(glob) = Glob::new(&normalize_glob(pattern)) else {
+            return false;
+        };
+        let _ = builder.add(glob);
+    }
+
+    builder.build().is_ok()
 }
 
 fn normalize_glob(value: &str) -> String {

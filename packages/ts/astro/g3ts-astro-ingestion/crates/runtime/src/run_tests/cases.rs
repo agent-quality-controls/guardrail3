@@ -72,7 +72,7 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             "src/content.config.ts",
             ".syncpackrc",
             "eslint.config.mjs",
-            "src/pages/index.astro",
+            "src/pages/index.html",
             "src/pages/index.ts",
             "src/pages/card.tsx",
             "node_modules/eslint/index.js",
@@ -97,7 +97,6 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
         integration.content_mode,
         G3TsAstroContentMode::BuildCollections
     );
-    assert!(integration.requires_source_pipeline_linting);
 
     match &integration.package {
         G3TsAstroPackageSurfaceState::Parsed { snapshot } => {
@@ -195,6 +194,13 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             );
             assert!(
                 snapshot
+                    .ts_source_effective_route_scoped_pipeline_rules
+                    .iter()
+                    .any(|rule| rule == "astro-pipeline/require-approved-content-adapter-in-routes"),
+                "approved content adapter option missing: {snapshot:?}"
+            );
+            assert!(
+                snapshot
                     .ts_source_effective_content_data_pipeline_rules
                     .iter()
                     .any(|rule| rule == "astro-pipeline/no-content-data-modules-in-routes"),
@@ -242,6 +248,20 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                     .any(|rule| rule == "i18next/no-literal-string"),
                 "inline public content policy missing from tsx lane: {snapshot:?}"
             );
+            assert!(
+                snapshot
+                    .mdx_content_plugins
+                    .iter()
+                    .any(|plugin| plugin == "mdx"),
+                "mdx plugin missing from mdx lane: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .mdx_content_error_rules
+                    .iter()
+                    .any(|rule| rule == "mdx/remark"),
+                "mdx remark rule missing from mdx lane: {snapshot:?}"
+            );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
     }
@@ -252,27 +272,27 @@ fn config_ingestion_requires_inline_public_content_rule_to_scan_copy_attributes(
     for (case_name, original_policy, replacement_policy) in [
         (
             "exact copy attr exclude",
-            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
-            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden", "alt"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["as", "class", "className", "color", "data-.+", "height", "href", "id", "intent", "key", "name", "rel", "role", "size", "slot", "src", "style", "styleName", "target", "tone", "type", "variant", "width", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["as", "class", "className", "color", "data-.+", "height", "href", "id", "intent", "key", "name", "rel", "role", "size", "slot", "src", "style", "styleName", "target", "tone", "type", "variant", "width", "aria-hidden", "alt"] }"#,
         ),
         (
             "regex copy attr exclude",
-            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
-            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden", "aria-.+"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["as", "class", "className", "color", "data-.+", "height", "href", "id", "intent", "key", "name", "rel", "role", "size", "slot", "src", "style", "styleName", "target", "tone", "type", "variant", "width", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["as", "class", "className", "color", "data-.+", "height", "href", "id", "intent", "key", "name", "rel", "role", "size", "slot", "src", "style", "styleName", "target", "tone", "type", "variant", "width", "aria-hidden", "aria-.+"] }"#,
         ),
         (
             "catch-all attr exclude",
-            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
-            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden", ".*"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["as", "class", "className", "color", "data-.+", "height", "href", "id", "intent", "key", "name", "rel", "role", "size", "slot", "src", "style", "styleName", "target", "tone", "type", "variant", "width", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["as", "class", "className", "color", "data-.+", "height", "href", "id", "intent", "key", "name", "rel", "role", "size", "slot", "src", "style", "styleName", "target", "tone", "type", "variant", "width", "aria-hidden", ".*"] }"#,
         ),
         (
             "attr include allowlist",
-            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
-            r#""jsx-attributes": { include: ["className"], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["as", "class", "className", "color", "data-.+", "height", "href", "id", "intent", "key", "name", "rel", "role", "size", "slot", "src", "style", "styleName", "target", "tone", "type", "variant", "width", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: ["className"], exclude: ["as", "class", "className", "color", "data-.+", "height", "href", "id", "intent", "key", "name", "rel", "role", "size", "slot", "src", "style", "styleName", "target", "tone", "type", "variant", "width", "aria-hidden"] }"#,
         ),
         (
             "non-string attr exclude",
-            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["as", "class", "className", "color", "data-.+", "height", "href", "id", "intent", "key", "name", "rel", "role", "size", "slot", "src", "style", "styleName", "target", "tone", "type", "variant", "width", "aria-hidden"] }"#,
             r#""jsx-attributes": { include: [], exclude: [{}] }"#,
         ),
     ] {
@@ -281,8 +301,11 @@ fn config_ingestion_requires_inline_public_content_rule_to_scan_copy_attributes(
             std::fs::read_to_string(root.path().join("node_modules/eslint/index.js"))
                 .expect("fake eslint runtime should be readable")
                 .replace(original_policy, replacement_policy);
-        std::fs::write(root.path().join("node_modules/eslint/index.js"), eslint_runtime)
-            .expect("fake eslint runtime should be rewritten");
+        std::fs::write(
+            root.path().join("node_modules/eslint/index.js"),
+            eslint_runtime,
+        )
+        .expect("fake eslint runtime should be rewritten");
 
         let crawl = super::helpers::crawl_with_entries(
             &root,
@@ -325,22 +348,22 @@ fn config_ingestion_rejects_broad_inline_public_content_option_allowlists() {
     for (case_name, original_policy, replacement_policy) in [
         (
             "broad words exclude",
-            r#"words: { exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
+            r#"words: { include: [], exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
             r#"words: { exclude: [".*"] }"#,
         ),
         (
             "js-only broad words exclude",
-            r#"words: { exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
+            r#"words: { include: [], exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
             r#"words: { exclude: ["(?=.*Request an audit).*"] }"#,
         ),
         (
             "non-string words exclude",
-            r#"words: { exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
+            r#"words: { include: [], exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
             r#"words: { exclude: [{}] }"#,
         ),
         (
             "words include allowlist",
-            r#"words: { exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
+            r#"words: { include: [], exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
             r#"words: { include: ["OK"], exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
         ),
         (
@@ -380,27 +403,27 @@ fn config_ingestion_rejects_broad_inline_public_content_option_allowlists() {
         ),
         (
             "i18n callee exclude",
-            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
-            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL", "i18n(ext)?"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL", "i18n(ext)?"] }"#,
         ),
         (
             "postMessage callee exclude",
-            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
-            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL", "postMessage"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL", "postMessage"] }"#,
         ),
         (
             "member callee exclude",
-            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
-            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL", "z\\.enum"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL", "z\\.enum"] }"#,
         ),
         (
             "callee include allowlist",
-            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
-            r#"callees: { include: ["clsx"], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL"] }"#,
+            r#"callees: { include: ["clsx"], exclude: ["require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL"] }"#,
         ),
         (
             "non-string callee exclude",
-            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL"] }"#,
             r#"callees: { include: [], exclude: [{}] }"#,
         ),
     ] {
@@ -409,8 +432,11 @@ fn config_ingestion_rejects_broad_inline_public_content_option_allowlists() {
             std::fs::read_to_string(root.path().join("node_modules/eslint/index.js"))
                 .expect("fake eslint runtime should be readable")
                 .replace(original_policy, replacement_policy);
-        std::fs::write(root.path().join("node_modules/eslint/index.js"), eslint_runtime)
-            .expect("fake eslint runtime should be rewritten");
+        std::fs::write(
+            root.path().join("node_modules/eslint/index.js"),
+            eslint_runtime,
+        )
+        .expect("fake eslint runtime should be rewritten");
 
         let crawl = super::helpers::crawl_with_entries(
             &root,
@@ -492,6 +518,55 @@ fn config_ingestion_sets_syncpack_lint_safety_from_real_package_scripts() {
             G3TsAstroPackageSurfaceState::Parsed { snapshot } => assert_eq!(
                 snapshot.safely_runs_syncpack_lint, expected_safe,
                 "case {case_name} had wrong syncpack lint safety fact: {snapshot:?}"
+            ),
+            other => panic!("expected parsed package state, got {other:?}"),
+        }
+    }
+}
+
+#[test]
+fn config_ingestion_requires_safe_astro_build_in_build_script() {
+    for (case_name, scripts_json, expected_safe) in [
+        (
+            "canonical build script",
+            r#"{ "check": "astro check", "build": "astro build" }"#,
+            true,
+        ),
+        (
+            "astro build hidden in check script",
+            r#"{ "check": "astro build" }"#,
+            false,
+        ),
+        (
+            "fail open build script",
+            r#"{ "build": "astro build || true" }"#,
+            false,
+        ),
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        std::fs::write(
+            root.path().join("package.json"),
+            format!(
+                "{{\n  \"devDependencies\": {{\n    \"astro\": \"1.0.0\"\n  }},\n  \"scripts\": {scripts_json}\n}}\n"
+            ),
+        )
+        .expect("package manifest should be rewritten");
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "package.json",
+                "astro.config.mjs",
+                "src/content.config.ts",
+                ".syncpackrc",
+                "src/pages/index.astro",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        match &input.integration_contracts[0].package {
+            G3TsAstroPackageSurfaceState::Parsed { snapshot } => assert_eq!(
+                snapshot.safely_runs_astro_build, expected_safe,
+                "case {case_name} had wrong astro build safety fact: {snapshot:?}"
             ),
             other => panic!("expected parsed package state, got {other:?}"),
         }
@@ -610,11 +685,10 @@ fn root_syncpack_rejects_non_exact_sources_for_nested_app_manifest() {
             .expect("nested Astro app contract should exist");
 
         match &integration.syncpack_config {
-            g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => assert!(
-                !snapshot.source_covers_package_manifest,
-                "root .syncpackrc source entry {source_entry:?} must not cover nested app manifest: {snapshot:?}"
-            ),
-            other => panic!("expected parsed syncpack state, got {other:?}"),
+            g3ts_astro_types::G3TsAstroSyncpackConfigState::Missing { rel_path } => {
+                assert_eq!(rel_path, "apps/landing/.syncpackrc");
+            }
+            other => panic!("expected missing app-local syncpack state, got {other:?}"),
         }
     }
 }
@@ -657,6 +731,40 @@ fn root_syncpack_rejects_source_alias_entries() {
             ),
             other => panic!("expected parsed syncpack state, got {other:?}"),
         }
+    }
+}
+
+#[test]
+fn syncpack_source_must_be_exactly_the_app_manifest() {
+    let root = super::helpers::fake_astro_workspace();
+    let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+        .expect("root syncpack config should be readable")
+        .replace(
+            "\"source\": [\"package.json\"]",
+            "\"source\": [\"package.json\", \"other/package.json\"]",
+        );
+    std::fs::write(root.path().join(".syncpackrc"), syncpack_config)
+        .expect("syncpack config should be rewritten");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "src/pages/index.html",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    let integration = &input.integration_contracts[0];
+
+    match &integration.syncpack_config {
+        g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => assert!(
+            !snapshot.source_covers_package_manifest,
+            "source must contain only package.json for this app: {snapshot:?}"
+        ),
+        other => panic!("expected parsed syncpack state, got {other:?}"),
     }
 }
 
@@ -791,7 +899,7 @@ fn config_ingestion_rejects_noncanonical_forbidden_ban_groups() {
 }
 
 #[test]
-fn config_ingestion_accepts_endpoint_only_scope_options_for_route_scoped_pipeline_rules() {
+fn config_ingestion_rejects_route_scoped_pipeline_rules_when_no_page_routes_exist() {
     let root = super::helpers::fake_astro_workspace();
     std::fs::write(
         root.path().join("node_modules/eslint/index.js"),
@@ -852,22 +960,22 @@ module.exports = { ESLint };
                 snapshot
                     .ts_source_effective_route_scoped_pipeline_rules
                     .len(),
-                7,
-                "endpoint-scoped rules should count as effective: {snapshot:?}"
+                0,
+                "route-scoped rules require at least one actual page route: {snapshot:?}"
             );
             assert_eq!(
                 snapshot
                     .ts_source_effective_content_data_pipeline_rules
                     .len(),
-                1,
-                "content-data rule should count as effective: {snapshot:?}"
+                0,
+                "content-data rule requires route coverage before it is effective: {snapshot:?}"
             );
             assert_eq!(
                 snapshot
                     .ts_source_effective_content_source_pipeline_rules
                     .len(),
-                3,
-                "content-source rules should count as effective: {snapshot:?}"
+                0,
+                "content-source rules require route coverage before they are effective: {snapshot:?}"
             );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
@@ -938,6 +1046,75 @@ module.exports = { ESLint };
                     .ts_source_effective_route_scoped_pipeline_rules
                     .is_empty(),
                 "endpoint-only coverage must not count when route pages exist: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_rejects_invalid_endpoint_globs_even_when_no_endpoints_exist() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"class ESLint {
+  constructor(options) {
+    this.cwd = options.cwd;
+    this.overrideConfigFile = options.overrideConfigFile;
+  }
+
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    const isTsx = String(_filePath).endsWith('.tsx');
+    return {
+      plugins: {
+        astro: {},
+        "astro-pipeline": {},
+      },
+      rules: {
+        "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["["], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-glob": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["["], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-authored-content-imports": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["["], authoredContentGlobs: ["src/content/**"] }],
+        "astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["["], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }],
+        "astro-pipeline/no-direct-astro-content-in-routes": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["["] }],
+        "astro-pipeline/no-runtime-mdx-eval": "error",
+        "astro-pipeline/no-side-loader-imports": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["["] }],
+        "astro-pipeline/no-velite-imports": ["error", { routeGlobs: ["src/pages/**/*.astro"], endpointGlobs: ["["] }],
+      },
+      languageOptions: { parserOptions: { projectService: true, jsx: isTsx } },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint runtime should be rewritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert!(
+                snapshot
+                    .ts_source_effective_route_scoped_pipeline_rules
+                    .is_empty(),
+                "invalid endpoint globs must not count as effective with an empty endpoint set: {snapshot:?}"
             );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
@@ -1193,6 +1370,94 @@ module.exports = { ESLint };
 }
 
 #[test]
+fn config_ingestion_uses_only_first_eslint_rule_options_object_for_pipeline_scope() {
+    let root = super::helpers::fake_astro_workspace();
+    let eslint_runtime = std::fs::read_to_string(root.path().join("node_modules/eslint/index.js"))
+        .expect("fake eslint runtime should be readable")
+        .replace(
+            r#""astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }]"#,
+            r#""astro-pipeline/no-content-data-modules-in-routes": ["error", {}, { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }]"#,
+        );
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        eslint_runtime,
+    )
+    .expect("fake eslint runtime should be rewritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/pages/index.ts",
+            "src/pages/card.tsx",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => assert!(
+            !snapshot
+                .ts_source_effective_content_data_pipeline_rules
+                .iter()
+                .any(|rule| rule == "astro-pipeline/no-content-data-modules-in-routes"),
+            "valid options in later objects must not count as effective: {snapshot:?}"
+        ),
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_does_not_mark_warn_pipeline_rules_effective() {
+    let root = super::helpers::fake_astro_workspace();
+    let eslint_runtime = std::fs::read_to_string(root.path().join("node_modules/eslint/index.js"))
+        .expect("fake eslint runtime should be readable")
+        .replace(
+            r#""astro-pipeline/no-content-data-modules-in-routes": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }]"#,
+            r#""astro-pipeline/no-content-data-modules-in-routes": ["warn", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"], contentDataModuleGlobs: ["src/**/*.data.{ts,tsx}"] }]"#,
+        );
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        eslint_runtime,
+    )
+    .expect("fake eslint runtime should be rewritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/pages/index.ts",
+            "src/pages/card.tsx",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => assert!(
+            !snapshot
+                .ts_source_effective_content_data_pipeline_rules
+                .iter()
+                .any(|rule| rule == "astro-pipeline/no-content-data-modules-in-routes"),
+            "warn severity must not count as effective: {snapshot:?}"
+        ),
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
 fn filetree_ingestion_discovers_nested_velite_surfaces_under_astro_root() {
     let root = super::helpers::fake_astro_workspace();
     let crawl = super::helpers::crawl_with_entries(
@@ -1263,8 +1528,7 @@ fn plain_astro_app_without_content_still_requires_pipeline_linting() {
     let eslint = &input.eslint_contracts[0];
 
     assert_eq!(integration.content_mode, G3TsAstroContentMode::None);
-    assert!(integration.requires_source_pipeline_linting);
-    assert!(eslint.requires_source_pipeline_linting);
+    assert_eq!(eslint.app_root_rel_path, ".");
 }
 
 #[test]
@@ -1537,6 +1801,161 @@ module.exports = { ESLint };
             assert!(
                 snapshot.ts_source_probe_present,
                 "ts lane should stay present: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn source_lane_probes_use_only_src_files_or_exact_synthetic_fallbacks() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::create_dir_all(root.path().join("scripts")).expect("scripts dir should be created");
+    std::fs::create_dir_all(root.path().join("components"))
+        .expect("components dir should be created");
+    std::fs::create_dir_all(root.path().join("tools")).expect("tools dir should be created");
+    std::fs::write(root.path().join("scripts/build.ts"), "export {};\n")
+        .expect("script ts file should be written");
+    std::fs::write(
+        root.path().join("components/card.astro"),
+        "---\n---\n<div />\n",
+    )
+    .expect("non-src astro file should be written");
+    std::fs::write(
+        root.path().join("tools/card.tsx"),
+        "export function Card() { return null; }\n",
+    )
+    .expect("non-src tsx file should be written");
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"class ESLint {
+  constructor(options) {
+    this.cwd = options.cwd;
+    this.overrideConfigFile = options.overrideConfigFile;
+  }
+
+  async isPathIgnored(filePath) {
+    return String(filePath).endsWith("src/__g3ts_probe__.astro")
+      || String(filePath).endsWith("src/index.ts")
+      || String(filePath).endsWith("src/__g3ts_probe__.tsx");
+  }
+
+  async calculateConfigForFile(_filePath) {
+    return { plugins: { astro: {}, "astro-pipeline": {} }, rules: {} };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint runtime should be overwritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "eslint.config.mjs",
+            "components/card.astro",
+            "scripts/build.ts",
+            "tools/card.tsx",
+            "src/pages/index.html",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert!(
+                !snapshot.astro_source_probe_present,
+                "non-src astro files must not be selected as AstroSource probes: {snapshot:?}"
+            );
+            assert!(
+                snapshot.ts_source_probe_present,
+                "src/content.config.ts satisfies the written TsSource probe glob: {snapshot:?}"
+            );
+            assert!(
+                !snapshot.tsx_source_probe_present,
+                "non-src tsx files must not be selected as TsxSource probes: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn source_lane_probes_follow_written_src_globs_without_test_or_config_exclusions() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("src/vitest.config.ts"),
+        "export default {};\n",
+    )
+    .expect("src config ts file should be written");
+    std::fs::write(
+        root.path().join("src/component.spec.tsx"),
+        "export function Component() { return null; }\n",
+    )
+    .expect("src spec tsx file should be written");
+    std::fs::write(
+        root.path().join("src/layout.config.astro"),
+        "---\n---\n<div />\n",
+    )
+    .expect("src config astro file should be written");
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"class ESLint {
+  constructor(options) {
+    this.cwd = options.cwd;
+    this.overrideConfigFile = options.overrideConfigFile;
+  }
+
+  async isPathIgnored(filePath) {
+    return String(filePath).endsWith("src/__g3ts_probe__.astro")
+      || String(filePath).endsWith("src/index.ts")
+      || String(filePath).endsWith("src/__g3ts_probe__.tsx");
+  }
+
+  async calculateConfigForFile(_filePath) {
+    return { plugins: { astro: {}, "astro-pipeline": {} }, rules: {} };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint runtime should be overwritten");
+
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "eslint.config.mjs",
+            "src/layout.config.astro",
+            "src/vitest.config.ts",
+            "src/component.spec.tsx",
+            "src/pages/index.html",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert!(
+                snapshot.astro_source_probe_present,
+                "src/**/*.astro config-like files still satisfy the written AstroSource probe glob: {snapshot:?}"
+            );
+            assert!(
+                snapshot.ts_source_probe_present,
+                "src/**/*.ts config-like files still satisfy the written TsSource probe glob: {snapshot:?}"
+            );
+            assert!(
+                snapshot.tsx_source_probe_present,
+                "src/**/*.tsx spec files still satisfy the written TsxSource probe glob: {snapshot:?}"
             );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),

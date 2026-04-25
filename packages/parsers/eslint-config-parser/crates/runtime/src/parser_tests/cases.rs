@@ -43,11 +43,7 @@ fn parses_effective_config_probes_via_node_helper() {
     assertions::assert_project_service(&snapshot, EslintProbeKind::TsSource, Some(true));
     assertions::assert_project_service(&snapshot, EslintProbeKind::TsxSource, Some(true));
     assertions::assert_project_service(&snapshot, EslintProbeKind::MdxContent, Some(false));
-    assertions::assert_project_service(
-        &snapshot,
-        EslintProbeKind::AstroContentConfig,
-        Some(true),
-    );
+    assertions::assert_project_service(&snapshot, EslintProbeKind::AstroContentConfig, Some(true));
     assertions::assert_project_service(&snapshot, EslintProbeKind::JsSource, Some(false));
     assertions::assert_plugins(
         &snapshot,
@@ -55,6 +51,18 @@ fn parses_effective_config_probes_via_node_helper() {
         &["@typescript-eslint", "react"],
     );
     assertions::assert_plugins(&snapshot, EslintProbeKind::MdxContent, &["astro-pipeline"]);
+    assertions::assert_plugin_meta_name(
+        &snapshot,
+        EslintProbeKind::MdxContent,
+        "astro-pipeline",
+        "g3ts-eslint-plugin-astro-pipeline",
+    );
+    assertions::assert_plugin_package_name(
+        &snapshot,
+        EslintProbeKind::MdxContent,
+        "astro-pipeline",
+        "g3ts-eslint-plugin-astro-pipeline",
+    );
     assertions::assert_no_inline_config(&snapshot, EslintProbeKind::TsSource, Some(true));
     assertions::assert_report_unused_disable_directives(
         &snapshot,
@@ -67,11 +75,7 @@ fn parses_effective_config_probes_via_node_helper() {
         Some(EslintReportUnusedSetting::Error),
     );
     assertions::assert_no_inline_config(&snapshot, EslintProbeKind::JsSource, None);
-    assertions::assert_report_unused_disable_directives(
-        &snapshot,
-        EslintProbeKind::JsSource,
-        None,
-    );
+    assertions::assert_report_unused_disable_directives(&snapshot, EslintProbeKind::JsSource, None);
     assertions::assert_report_unused_inline_configs(&snapshot, EslintProbeKind::JsSource, None);
     assertions::assert_rule_severity(
         &snapshot,
@@ -103,6 +107,311 @@ fn parses_effective_config_probes_via_node_helper() {
         EslintProbeKind::JsSource,
         "no-console",
         EslintRuleSeverity::Error,
+    );
+}
+
+#[test]
+fn resolves_plugin_package_identity_from_selected_config_location() {
+    let root = TempDir::new().expect("tempdir should be created");
+    fs::create_dir_all(root.path().join("apps/site/src"))
+        .expect("nested app source directory should be created");
+    fs::create_dir_all(root.path().join("apps/site/node_modules/eslint"))
+        .expect("nested fake eslint module directory should be created");
+    fs::create_dir_all(
+        root.path()
+            .join("apps/site/node_modules/g3ts-eslint-plugin-astro-pipeline"),
+    )
+    .expect("nested fake astro pipeline plugin module directory should be created");
+    fs::write(
+        root.path().join("apps/site/eslint.config.mjs"),
+        "import astroPipeline from \"g3ts-eslint-plugin-astro-pipeline\";\nexport default [{ plugins: { \"astro-pipeline\": astroPipeline } }];\n",
+    )
+    .expect("nested eslint config should be written");
+    fs::write(
+        root.path().join("apps/site/src/index.ts"),
+        "export const value = 1;\n",
+    )
+    .expect("nested source should be written");
+    fs::write(
+        root.path()
+            .join("apps/site/node_modules/eslint/package.json"),
+        "{\n  \"name\": \"eslint\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("nested fake eslint package manifest should be written");
+    fs::write(
+        root.path()
+            .join("apps/site/node_modules/g3ts-eslint-plugin-astro-pipeline/package.json"),
+        "{\n  \"name\": \"g3ts-eslint-plugin-astro-pipeline\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("nested fake astro pipeline package manifest should be written");
+    fs::write(
+        root.path()
+            .join("apps/site/node_modules/g3ts-eslint-plugin-astro-pipeline/index.js"),
+        "module.exports = { meta: { name: \"g3ts-eslint-plugin-astro-pipeline\" } };\n",
+    )
+    .expect("nested fake astro pipeline module should be written");
+    fs::write(
+        root.path().join("apps/site/node_modules/eslint/index.js"),
+        r#"const astroPipeline = require("g3ts-eslint-plugin-astro-pipeline");
+
+class ESLint {
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    return {
+      plugins: { "astro-pipeline": astroPipeline },
+      rules: { "astro-pipeline/no-velite-imports": "error" },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("nested fake eslint module should be written");
+
+    let snapshot = crate::parser::parse(
+        root.path(),
+        "apps/site/eslint.config.mjs",
+        &[probe(EslintProbeKind::TsSource, "apps/site/src/index.ts")],
+    )
+    .expect("parse should resolve nested config-local package identity");
+
+    assertions::assert_plugin_package_name(
+        &snapshot,
+        EslintProbeKind::TsSource,
+        "astro-pipeline",
+        "g3ts-eslint-plugin-astro-pipeline",
+    );
+}
+
+#[test]
+fn rejects_spoofed_plugin_package_identity_with_matching_shape() {
+    let root = TempDir::new().expect("tempdir should be created");
+    fs::create_dir_all(root.path().join("src")).expect("src directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint"))
+        .expect("fake eslint module directory should be created");
+    fs::create_dir_all(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline"),
+    )
+    .expect("fake astro pipeline plugin module directory should be created");
+    fs::write(
+        root.path().join("eslint.config.mjs"),
+        r#"const noopRule = { create() { return {}; } };
+const fakeAstroPipeline = {
+  meta: { name: "g3ts-eslint-plugin-astro-pipeline" },
+  rules: {
+    "no-authored-content-fs-read": noopRule,
+    "no-authored-content-glob": noopRule,
+    "no-authored-content-imports": noopRule,
+    "no-content-data-modules-in-routes": noopRule,
+    "no-direct-astro-content-in-routes": noopRule,
+    "no-runtime-mdx-eval": noopRule,
+    "no-side-loader-imports": noopRule,
+    "no-velite-imports": noopRule,
+    "require-approved-content-adapter-in-routes": noopRule
+  }
+};
+
+export default [{ plugins: { "astro-pipeline": fakeAstroPipeline } }];
+"#,
+    )
+    .expect("eslint config should be written");
+    fs::write(
+        root.path().join("src/index.ts"),
+        "export const value = 1;\n",
+    )
+    .expect("source file should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/package.json"),
+        "{\n  \"name\": \"eslint\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake eslint package manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline/package.json"),
+        "{\n  \"name\": \"g3ts-eslint-plugin-astro-pipeline\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake astro pipeline package manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline/index.js"),
+        r#"const noopRule = { create() { return {}; } };
+module.exports = {
+  meta: { name: "g3ts-eslint-plugin-astro-pipeline" },
+  rules: {
+    "no-authored-content-fs-read": noopRule,
+    "no-authored-content-glob": noopRule,
+    "no-authored-content-imports": noopRule,
+    "no-content-data-modules-in-routes": noopRule,
+    "no-direct-astro-content-in-routes": noopRule,
+    "no-runtime-mdx-eval": noopRule,
+    "no-side-loader-imports": noopRule,
+    "no-velite-imports": noopRule,
+    "require-approved-content-adapter-in-routes": noopRule
+  }
+};
+"#,
+    )
+    .expect("fake astro pipeline package should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"const noopRule = { create() { return {}; } };
+const fakeAstroPipeline = {
+  meta: { name: "g3ts-eslint-plugin-astro-pipeline" },
+  rules: {
+    "no-authored-content-fs-read": noopRule,
+    "no-authored-content-glob": noopRule,
+    "no-authored-content-imports": noopRule,
+    "no-content-data-modules-in-routes": noopRule,
+    "no-direct-astro-content-in-routes": noopRule,
+    "no-runtime-mdx-eval": noopRule,
+    "no-side-loader-imports": noopRule,
+    "no-velite-imports": noopRule,
+    "require-approved-content-adapter-in-routes": noopRule
+  }
+};
+
+class ESLint {
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    return {
+      plugins: { "astro-pipeline": fakeAstroPipeline },
+      rules: { "astro-pipeline/no-velite-imports": "error" },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint module should be written");
+
+    let snapshot = crate::parser::parse(
+        root.path(),
+        "eslint.config.mjs",
+        &[probe(EslintProbeKind::TsSource, "src/index.ts")],
+    )
+    .expect("parse should succeed without trusting fake plugin package identity");
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == EslintProbeKind::TsSource)
+        .expect("ts probe should exist");
+
+    assert!(
+        !probe
+            .plugin_package_names
+            .get("astro-pipeline")
+            .is_some_and(|package_names| package_names
+                .iter()
+                .any(|name| name == "g3ts-eslint-plugin-astro-pipeline")),
+        "matching meta/rule shape must not prove package identity: {probe:?}"
+    );
+}
+
+#[test]
+fn rejects_raw_package_identity_when_effective_plugin_is_different_object() {
+    let root = TempDir::new().expect("tempdir should be created");
+    fs::create_dir_all(root.path().join("src")).expect("src directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint"))
+        .expect("fake eslint module directory should be created");
+    fs::create_dir_all(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline"),
+    )
+    .expect("fake astro pipeline plugin module directory should be created");
+    fs::write(
+        root.path().join("eslint.config.mjs"),
+        r#"import realAstroPipeline from "g3ts-eslint-plugin-astro-pipeline";
+
+const noopRule = { create() { return {}; } };
+const fakeAstroPipeline = {
+  meta: { name: "g3ts-eslint-plugin-astro-pipeline" },
+  rules: { "no-velite-imports": noopRule }
+};
+
+export default [
+  { files: ["ignored/**"], plugins: { "astro-pipeline": realAstroPipeline } },
+  { files: ["src/**"], plugins: { "astro-pipeline": fakeAstroPipeline } }
+];
+"#,
+    )
+    .expect("eslint config should be written");
+    fs::write(
+        root.path().join("src/index.ts"),
+        "export const value = 1;\n",
+    )
+    .expect("source file should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/package.json"),
+        "{\n  \"name\": \"eslint\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake eslint package manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline/package.json"),
+        "{\n  \"name\": \"g3ts-eslint-plugin-astro-pipeline\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake astro pipeline package manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline/index.js"),
+        "module.exports = { meta: { name: \"g3ts-eslint-plugin-astro-pipeline\" } };\n",
+    )
+    .expect("fake astro pipeline package should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"const noopRule = { create() { return {}; } };
+const fakeAstroPipeline = {
+  meta: { name: "g3ts-eslint-plugin-astro-pipeline" },
+  rules: { "no-velite-imports": noopRule }
+};
+
+class ESLint {
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    return {
+      plugins: { "astro-pipeline": fakeAstroPipeline },
+      rules: { "astro-pipeline/no-velite-imports": "error" },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint module should be written");
+
+    let snapshot = crate::parser::parse(
+        root.path(),
+        "eslint.config.mjs",
+        &[probe(EslintProbeKind::TsSource, "src/index.ts")],
+    )
+    .expect("parse should not smear raw package identity onto a fake effective plugin");
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == EslintProbeKind::TsSource)
+        .expect("ts probe should exist");
+
+    assert!(
+        !probe
+            .plugin_package_names
+            .get("astro-pipeline")
+            .is_some_and(|package_names| package_names
+                .iter()
+                .any(|name| name == "g3ts-eslint-plugin-astro-pipeline")),
+        "raw config package identity must not apply to a different effective plugin: {probe:?}"
     );
 }
 
@@ -152,10 +461,7 @@ fn helper_failures_surface_as_parse_errors() {
 #[test]
 fn unsupported_linter_option_severity_surfaces_as_parse_error() {
     let root = fake_workspace();
-    let probes = vec![probe(
-        EslintProbeKind::TsSource,
-        "src/malformed-option.ts",
-    )];
+    let probes = vec![probe(EslintProbeKind::TsSource, "src/malformed-option.ts")];
 
     let err = crate::parser::parse(root.path(), "eslint.config.mjs", &probes)
         .expect_err("parse should fail on unsupported linter option severity");
@@ -215,6 +521,11 @@ fn fake_workspace() -> TempDir {
     fs::create_dir_all(root.path().join("scripts")).expect("scripts directory should be created");
     fs::create_dir_all(root.path().join("node_modules/eslint"))
         .expect("fake eslint module directory should be created");
+    fs::create_dir_all(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline"),
+    )
+    .expect("fake astro pipeline plugin module directory should be created");
 
     fs::write(
         root.path().join("eslint.config.mjs"),
@@ -256,11 +567,8 @@ fn fake_workspace() -> TempDir {
         "export const collections = {};\n",
     )
     .expect("content config should be written");
-    fs::write(
-        root.path().join("src/content/posts/post.mdx"),
-        "# Post\n",
-    )
-    .expect("mdx content should be written");
+    fs::write(root.path().join("src/content/posts/post.mdx"), "# Post\n")
+        .expect("mdx content should be written");
     fs::create_dir_all(root.path().join("src/app"))
         .expect("tsx source directory should be created");
     fs::write(
@@ -284,8 +592,21 @@ fn fake_workspace() -> TempDir {
     )
     .expect("fake eslint package manifest should be written");
     fs::write(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline/package.json"),
+        "{\n  \"name\": \"g3ts-eslint-plugin-astro-pipeline\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake astro pipeline plugin manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline/index.js"),
+        "module.exports = { meta: { name: \"g3ts-eslint-plugin-astro-pipeline\" } };\n",
+    )
+    .expect("fake astro pipeline plugin module should be written");
+    fs::write(
         root.path().join("node_modules/eslint/index.js"),
         r#"const path = require("node:path");
+const astroPipeline = require("g3ts-eslint-plugin-astro-pipeline");
 
 class ESLint {
   constructor(options) {
@@ -364,7 +685,7 @@ class ESLint {
 
     if (rel.endsWith(".mdx")) {
       return {
-        plugins: { "astro-pipeline": {} },
+        plugins: { "astro-pipeline": astroPipeline },
         rules: { "astro-pipeline/mdx-imports-from-approved-component-globs": "error" },
         languageOptions: { parserOptions: { projectService: false } },
         linterOptions: {

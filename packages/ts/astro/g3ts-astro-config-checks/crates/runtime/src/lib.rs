@@ -6,9 +6,20 @@ mod ts_astro_config_03_astro_eslint_plugin_package_present;
 mod ts_astro_config_05_astro_eslint_plugin_wired;
 mod ts_astro_config_06_pipeline_plugin_package_present;
 mod ts_astro_config_07_pipeline_plugin_wired;
-mod ts_astro_config_08_syncpack_package_and_script;
 mod ts_astro_config_09_syncpack_stack_pins;
 mod ts_astro_config_10_syncpack_forbidden_deps;
+mod ts_astro_config_11_site_url;
+mod ts_astro_config_12_static_output;
+mod ts_astro_config_13_nuasite_checks;
+mod ts_astro_config_14_sitemap_integration;
+mod ts_astro_config_15_robots_integration;
+mod ts_astro_config_16_llms_txt;
+mod ts_astro_config_17_seo_packages;
+mod ts_astro_config_18_content_adapter_rule;
+mod ts_astro_config_19_inline_copy_rule;
+mod ts_astro_config_20_mdx_lane;
+mod ts_astro_config_21_required_integrations;
+mod ts_astro_config_22_structured_data_check;
 
 #[cfg(feature = "checks")]
 pub use run::check;

@@ -128,10 +128,7 @@ fn normalize_fact(script_name: &str, input: &str) -> PackageScriptParseFact {
     }
 }
 
-fn command_state(
-    script_name: &str,
-    parsed: &ParsedScriptCommands,
-) -> PackageScriptParseState {
+fn command_state(script_name: &str, parsed: &ParsedScriptCommands) -> PackageScriptParseState {
     let guardrail_related = script_name_is_guardrail_related(script_name)
         || parsed.commands.iter().any(command_has_guardrail_tool)
         || parsed.any_command_has_guardrail_tool;
@@ -210,7 +207,8 @@ fn parse_script_commands(input: &str) -> Result<ParsedScriptCommands, String> {
         any_command_has_guardrail_tool,
         has_parse_error: root.has_error(),
         has_unsupported_guardrail_syntax: has_unsupported_ast_shape(root)
-            || has_unsupported_command_separators(input, &top_level_commands),
+            || has_unsupported_command_separators(input, &top_level_commands)
+            || has_unsupported_trailing_operator(input, &top_level_commands),
     })
 }
 
@@ -363,12 +361,29 @@ fn has_unsupported_command_separators(input: &str, commands: &[Node<'_>]) -> boo
         let Some(between) = bytes_between(input, previous.end_byte(), current.start_byte()) else {
             return true;
         };
-        let compact = between
+        let trimmed = between.trim();
+        let compact = trimmed
             .chars()
             .filter(|ch| !ch.is_whitespace())
             .collect::<String>();
-        !matches!(compact.as_str(), "&&" | "||" | "")
+        !matches!(compact.as_str(), "&&" | "||")
     })
+}
+
+fn has_unsupported_trailing_operator(input: &str, commands: &[Node<'_>]) -> bool {
+    let Some(last_command) = commands.last() else {
+        return false;
+    };
+    let Some(after) = bytes_between(input, last_command.end_byte(), input.len()) else {
+        return true;
+    };
+    let compact = after
+        .trim()
+        .chars()
+        .filter(|ch| !ch.is_whitespace())
+        .collect::<String>();
+
+    !compact.is_empty()
 }
 
 fn has_unsupported_ast_shape(node: Node<'_>) -> bool {

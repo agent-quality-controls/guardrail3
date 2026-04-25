@@ -9,9 +9,20 @@ pub fn check(input: &G3TsAstroConfigChecksInput) -> Vec<G3CheckResult> {
     crate::ts_astro_config_05_astro_eslint_plugin_wired::check(input, &mut results);
     crate::ts_astro_config_06_pipeline_plugin_package_present::check(input, &mut results);
     crate::ts_astro_config_07_pipeline_plugin_wired::check(input, &mut results);
-    crate::ts_astro_config_08_syncpack_package_and_script::check(input, &mut results);
     crate::ts_astro_config_09_syncpack_stack_pins::check(input, &mut results);
     crate::ts_astro_config_10_syncpack_forbidden_deps::check(input, &mut results);
+    crate::ts_astro_config_11_site_url::check(input, &mut results);
+    crate::ts_astro_config_12_static_output::check(input, &mut results);
+    crate::ts_astro_config_13_nuasite_checks::check(input, &mut results);
+    crate::ts_astro_config_14_sitemap_integration::check(input, &mut results);
+    crate::ts_astro_config_15_robots_integration::check(input, &mut results);
+    crate::ts_astro_config_16_llms_txt::check(input, &mut results);
+    crate::ts_astro_config_17_seo_packages::check(input, &mut results);
+    crate::ts_astro_config_18_content_adapter_rule::check(input, &mut results);
+    crate::ts_astro_config_19_inline_copy_rule::check(input, &mut results);
+    crate::ts_astro_config_20_mdx_lane::check(input, &mut results);
+    crate::ts_astro_config_21_required_integrations::check(input, &mut results);
+    crate::ts_astro_config_22_structured_data_check::check(input, &mut results);
     results
 }
 
