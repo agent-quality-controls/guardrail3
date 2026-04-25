@@ -16,3 +16,15 @@ pub use types::G3TsPackageLocalState;
 pub use types::G3TsPackageRootSnapshot;
 #[cfg(feature = "api")]
 pub use types::G3TsPackageRootState;
+#[cfg(feature = "api")]
+pub use types::G3TsPackageScriptCommand;
+#[cfg(feature = "api")]
+pub use types::G3TsPackageScriptCommandSeparator;
+#[cfg(feature = "api")]
+pub use types::G3TsPackageScriptParseBlocker;
+#[cfg(feature = "api")]
+pub use types::G3TsPackageScriptToolInvocation;
+#[cfg(feature = "api")]
+pub use types::G3TsPackageSyncpackConfigSnapshot;
+#[cfg(feature = "api")]
+pub use types::G3TsPackageSyncpackConfigState;

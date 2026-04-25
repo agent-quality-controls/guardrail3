@@ -12,12 +12,11 @@ pub(crate) fn check(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckRes
 
     let mut problems = Vec::new();
 
-    if !snapshot
-        .preinstall_script
-        .as_deref()
-        .is_some_and(|script| script.contains("only-allow pnpm"))
-    {
-        problems.push("scripts.preinstall must contain `only-allow pnpm`".to_owned());
+    if !snapshot.safely_runs_only_allow_pnpm {
+        problems.push(
+            "scripts.preinstall must run `only-allow pnpm` in a supported fail-closed command position"
+                .to_owned(),
+        );
     }
     if snapshot.prepare_script.is_none() {
         problems.push("scripts.prepare is missing".to_owned());

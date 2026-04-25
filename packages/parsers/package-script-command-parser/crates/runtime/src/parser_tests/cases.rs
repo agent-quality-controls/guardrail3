@@ -217,6 +217,12 @@ fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
         .expect("script command fact should parse");
     let unsafe_duplicate_surface = super::super::parse("test", "syncpack lint || true")
         .expect("script command fact should parse");
+    let fake_only_allow = super::super::parse("preinstall", "echo only-allow pnpm")
+        .expect("script command fact should parse");
+    let unsafe_only_allow = super::super::parse("preinstall", "only-allow pnpm || true")
+        .expect("script command fact should parse");
+    let unsupported_only_allow = super::super::parse("preinstall", "only-allow pnpm | tee log")
+        .expect("script command fact should parse");
 
     assert!(
         super::super::has_safe_tool_invocation(std::slice::from_ref(&safe), "syncpack", "lint"),
@@ -249,6 +255,18 @@ fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
             "lint"
         ),
         "one safe syncpack lint script must not mask another fail-open syncpack lint script"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(&[fake_only_allow], "only-allow", "pnpm"),
+        "echoed only-allow text should be rejected"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(&[unsafe_only_allow], "only-allow", "pnpm"),
+        "fail-open only-allow invocation should be rejected"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(&[unsupported_only_allow], "only-allow", "pnpm"),
+        "unsupported only-allow shell syntax should be rejected"
     );
 }
 
@@ -519,7 +537,7 @@ fn invalid_quote_in_lint_script_is_fail_closed_document_state() {
         .expect("script command parser should produce a document");
 
     assert_parse_error_document(&document);
-    assert_state_reason_contains(&document, "unterminated quote");
+    assert_state_reason_contains(&document, "invalid shell syntax");
 }
 
 #[test]
@@ -528,5 +546,5 @@ fn invalid_quote_after_exact_eslint_token_is_fail_closed_document_state() {
         .expect("script command parser should produce a document");
 
     assert_parse_error_document(&document);
-    assert_state_reason_contains(&document, "unterminated quote");
+    assert_state_reason_contains(&document, "invalid shell syntax");
 }

@@ -14,8 +14,15 @@ pub fn root_snapshot(rel_path: &str, snapshot: &PackageJsonSnapshot) -> G3TsPack
         prepare_script: snapshot.scripts.get("prepare").cloned(),
         lint_script: snapshot.scripts.get("lint").cloned(),
         typecheck_script: snapshot.scripts.get("typecheck").cloned(),
+        dependencies: snapshot.dependencies.clone(),
+        dev_dependencies: snapshot.dev_dependencies.clone(),
         pnpm_override_keys: snapshot.pnpm_override_keys.clone(),
         pnpm_only_built_dependencies: snapshot.pnpm_only_built_dependencies.clone(),
+        script_commands: Vec::new(),
+        script_tool_invocations: Vec::new(),
+        script_parse_blockers: Vec::new(),
+        safely_runs_only_allow_pnpm: false,
+        safely_runs_syncpack_lint: false,
     }
 }
 
