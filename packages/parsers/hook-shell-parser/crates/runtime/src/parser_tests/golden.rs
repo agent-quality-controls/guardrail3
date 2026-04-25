@@ -313,8 +313,10 @@ fn strips_inline_comments_from_executable_commands() {
 
 #[test]
 fn preserves_escaped_hash_outside_quotes_in_executable_commands() {
-    let parsed = parse_script(r#"echo \# g3rs validate --path .
-"#);
+    let parsed = parse_script(
+        r#"echo \# g3rs validate --path .
+"#,
+    );
 
     assert_script_matches(
         &parsed,
@@ -334,8 +336,10 @@ fn preserves_escaped_hash_outside_quotes_in_executable_commands() {
 
 #[test]
 fn preserves_escaped_space_before_hash_outside_quotes_in_executable_commands() {
-    let parsed = parse_script(r#"echo foo\ # g3rs validate --path .
-"#);
+    let parsed = parse_script(
+        r#"echo foo\ # g3rs validate --path .
+"#,
+    );
 
     assert_script_matches(
         &parsed,
@@ -528,8 +532,18 @@ fn keeps_inline_command_after_function_definition_when_command_substitution_cont
         &parsed,
         ScriptExpectation::new(
             None,
-            &[CommandExpectation::new("exit", None, None, None, Some(true))],
-            &[FunctionExpectation::new("finish", Some(": $(printf '}')"), None)],
+            &[CommandExpectation::new(
+                "exit",
+                None,
+                None,
+                None,
+                Some(true),
+            )],
+            &[FunctionExpectation::new(
+                "finish",
+                Some(": $(printf '}')"),
+                None,
+            )],
         ),
     );
 }
@@ -603,6 +617,30 @@ fn keeps_all_semicolon_separated_commands_in_single_line_true_if_branch() {
             None,
             &[
                 CommandExpectation::new("echo", None, None, None, None),
+                CommandExpectation::new(
+                    "g3rs",
+                    Some("g3rs rs validate --staged ."),
+                    None,
+                    None,
+                    None,
+                ),
+            ],
+            &[],
+        ),
+    );
+}
+
+#[test]
+fn does_not_split_semicolon_inside_quoted_argument() {
+    let parsed =
+        parse_script("if true; then echo \"left; right\"; g3rs rs validate --staged .; fi\n");
+
+    assert_script_matches(
+        &parsed,
+        ScriptExpectation::new(
+            None,
+            &[
+                CommandExpectation::new("echo", Some("echo \"left; right\""), None, None, None),
                 CommandExpectation::new(
                     "g3rs",
                     Some("g3rs rs validate --staged ."),

@@ -1,7 +1,6 @@
 use super::super::{
     CommandQueryOptions, CommandVisit, ShellEnvState, any_resolved_command_on_line_in_context,
-    parse_script_for_tests,
-    visit_resolved_commands_with_env,
+    parse_script_for_tests, visit_resolved_commands_with_env,
 };
 use hook_shell_parser_runtime_assertions::command_query::api as query_assertions;
 
@@ -71,6 +70,27 @@ fn resolves_shell_command_string_after_clustered_c_flag() {
     let script = "bash -ceu 'g3rs validate --path .'";
 
     query_assertions::assert_script_has_resolved_command(script, "g3rs", "validate --path .");
+}
+
+#[test]
+fn keeps_semicolon_inside_shell_string_argument() {
+    let parsed = parse_script_for_tests("echo \"left; right\"; cargo test\n");
+    let mut commands = Vec::new();
+
+    visit_resolved_commands_with_env(
+        &parsed,
+        TestEnv::default(),
+        CommandQueryOptions::default(),
+        |command, _state| {
+            commands.push(command.command_text().to_owned());
+            CommandVisit::Continue
+        },
+    );
+
+    assert_eq!(
+        commands,
+        vec!["echo left; right".to_owned(), "cargo test".to_owned()]
+    );
 }
 
 #[test]
