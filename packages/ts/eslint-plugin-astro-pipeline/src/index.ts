@@ -1,4 +1,4 @@
-import recommended from "./configs/recommended.js";
+import recommended, { strictContent } from "./configs/recommended.js";
 import noAuthoredContentFsRead from "./rules/no-authored-content-fs-read.js";
 import noAuthoredContentGlob from "./rules/no-authored-content-glob.js";
 import noAuthoredContentImports from "./rules/no-authored-content-imports.js";
@@ -24,10 +24,11 @@ const plugin = {
     name: "eslint-plugin-astro-pipeline"
   },
   configs: {
-    recommended
+    recommended,
+    "strict-content": strictContent
   },
   rules
 };
 
-export { recommended, rules };
+export { recommended, rules, strictContent };
 export default plugin;

@@ -149,6 +149,9 @@ pub struct G3TsAstroEslintSurfaceSnapshot {
     pub astro_source_effective_content_source_pipeline_rules: Vec<String>,
     pub ts_source_effective_content_source_pipeline_rules: Vec<String>,
     pub tsx_source_effective_content_source_pipeline_rules: Vec<String>,
+    pub astro_source_effective_inline_public_content_rules: Vec<String>,
+    pub ts_source_effective_inline_public_content_rules: Vec<String>,
+    pub tsx_source_effective_inline_public_content_rules: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

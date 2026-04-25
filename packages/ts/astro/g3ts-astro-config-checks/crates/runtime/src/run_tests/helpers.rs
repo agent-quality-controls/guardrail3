@@ -11,6 +11,9 @@ use package_script_command_parser::types::{
     PackageScriptParseState, PackageScriptToolInvocation,
 };
 
+const FORBIDDEN_SYNCPACK_DEPS: [&str; 4] =
+    ["next", "velite", "eslint-mdx", "eslint-plugin-i18next"];
+
 #[derive(Clone)]
 struct TestSyncpackVersionGroup {
     dependencies: Vec<String>,
@@ -210,6 +213,28 @@ pub(super) fn missing_content_source_scope_options() -> G3TsAstroConfigChecksInp
                     astro: PipelineLaneState::rules_with_scope_but_without_content_source_scope(),
                     ts: PipelineLaneState::rules_with_scope_but_without_content_source_scope(),
                     tsx: PipelineLaneState::rules_with_scope_but_without_content_source_scope(),
+                },
+            ),
+        )],
+    }
+}
+
+pub(super) fn missing_inline_public_content_rule() -> G3TsAstroConfigChecksInput {
+    G3TsAstroConfigChecksInput {
+        integration_contracts: vec![integration_contract(
+            true,
+            parsed_package(true, true, true, true, false, true, true),
+        )],
+        eslint_contracts: vec![eslint_contract(
+            true,
+            parsed_eslint_with_pipeline_contract(
+                true,
+                PipelineLaneContract {
+                    astro: PipelineLaneState::rules_with_scope_but_without_inline_public_content_policy(
+                    ),
+                    ts: PipelineLaneState::rules_with_scope_but_without_inline_public_content_policy(),
+                    tsx: PipelineLaneState::rules_with_scope_but_without_inline_public_content_policy(
+                    ),
                 },
             ),
         )],
@@ -524,14 +549,25 @@ pub(super) fn syncpack_missing_stack_pin() -> G3TsAstroConfigChecksInput {
 }
 
 pub(super) fn syncpack_wrong_stack_pin() -> G3TsAstroConfigChecksInput {
+    syncpack_wrong_pin_for_dependency("astro", "6.1.8")
+}
+
+pub(super) fn syncpack_wrong_astro_pipeline_stack_pin() -> G3TsAstroConfigChecksInput {
+    syncpack_wrong_pin_for_dependency("eslint-plugin-astro-pipeline", "0.1.3")
+}
+
+fn syncpack_wrong_pin_for_dependency(
+    dependency_name: &str,
+    wrong_version: &str,
+) -> G3TsAstroConfigChecksInput {
     let mut groups = required_syncpack_version_groups();
     for group in &mut groups {
         if group
             .dependencies
             .iter()
-            .any(|dependency| dependency == "astro")
+            .any(|dependency| dependency == dependency_name)
         {
-            group.pin_version = Some("6.1.8".to_owned());
+            group.pin_version = Some(wrong_version.to_owned());
         }
     }
 
@@ -1056,19 +1092,19 @@ fn syncpack_config_for_package_at_with_source_and_groups(
         .filter(|pin| {
             !has_canonical_pin_in_prefix(
                 &version_groups,
-                23,
+                syncpack_astro_policy_prefix_len(),
                 &pin.dependency,
                 &pin.version,
                 &["prod", "dev"],
             )
         })
         .collect::<Vec<_>>();
-    let missing_forbidden_bans = ["next", "velite", "eslint-mdx"]
+    let missing_forbidden_bans = FORBIDDEN_SYNCPACK_DEPS
         .into_iter()
         .filter(|dependency| {
             !has_canonical_ban_in_prefix(
                 &version_groups,
-                23,
+                syncpack_astro_policy_prefix_len(),
                 dependency,
                 &["prod", "dev", "optional", "peer"],
             )
@@ -1095,6 +1131,10 @@ fn syncpack_source_covers_package(
         && source.iter().any(|entry| {
             exact_source_entry_matches_package(entry, syncpack_rel_path, package_rel_path)
         })
+}
+
+fn syncpack_astro_policy_prefix_len() -> usize {
+    required_syncpack_pins().len() + FORBIDDEN_SYNCPACK_DEPS.len()
 }
 
 fn has_canonical_pin_in_prefix(
@@ -1196,7 +1236,7 @@ fn required_syncpack_pins() -> Vec<G3TsAstroSyncpackRequiredPin> {
         ("@types/react-dom", "19.2.3"),
         ("typescript", "5.9.3"),
         ("eslint-plugin-astro", "1.7.0"),
-        ("eslint-plugin-astro-pipeline", "0.1.2"),
+        ("eslint-plugin-astro-pipeline", "0.1.4"),
         ("tailwindcss", "4.2.4"),
         ("@tailwindcss/postcss", "4.2.4"),
         ("class-variance-authority", "0.7.1"),
@@ -1215,10 +1255,7 @@ fn required_syncpack_pins() -> Vec<G3TsAstroSyncpackRequiredPin> {
 }
 
 fn forbidden_syncpack_deps() -> Vec<String> {
-    ["next", "velite", "eslint-mdx"]
-        .into_iter()
-        .map(str::to_owned)
-        .collect()
+    FORBIDDEN_SYNCPACK_DEPS.into_iter().map(str::to_owned).collect()
 }
 
 fn required_syncpack_version_groups() -> Vec<TestSyncpackVersionGroup> {
@@ -1234,7 +1271,7 @@ fn required_syncpack_version_groups() -> Vec<TestSyncpackVersionGroup> {
         ("@types/react-dom", "19.2.3"),
         ("typescript", "5.9.3"),
         ("eslint-plugin-astro", "1.7.0"),
-        ("eslint-plugin-astro-pipeline", "0.1.2"),
+        ("eslint-plugin-astro-pipeline", "0.1.4"),
         ("tailwindcss", "4.2.4"),
         ("@tailwindcss/postcss", "4.2.4"),
         ("class-variance-authority", "0.7.1"),
@@ -1257,7 +1294,7 @@ fn required_syncpack_version_groups() -> Vec<TestSyncpackVersionGroup> {
     .collect::<Vec<_>>();
 
     groups.extend(
-        ["next", "velite", "eslint-mdx"]
+        FORBIDDEN_SYNCPACK_DEPS
             .into_iter()
             .map(|dependency| TestSyncpackVersionGroup {
                 dependencies: vec![dependency.to_owned()],
@@ -1316,11 +1353,20 @@ fn parsed_eslint_with_pipeline_contract(
     if pipeline_contract.astro.has_plugin {
         astro_source_plugins.push("astro-pipeline".to_owned());
     }
+    if pipeline_contract.astro.has_inline_public_content_plugin {
+        astro_source_plugins.push("i18next".to_owned());
+    }
     if pipeline_contract.ts.has_plugin {
         ts_source_plugins.push("astro-pipeline".to_owned());
     }
+    if pipeline_contract.ts.has_inline_public_content_plugin {
+        ts_source_plugins.push("i18next".to_owned());
+    }
     if pipeline_contract.tsx.has_plugin {
         tsx_source_plugins.push("astro-pipeline".to_owned());
+    }
+    if pipeline_contract.tsx.has_inline_public_content_plugin {
+        tsx_source_plugins.push("i18next".to_owned());
     }
     let astro_source_error_rules = pipeline_contract.astro.error_rules();
     let ts_source_error_rules = pipeline_contract.ts.error_rules();
@@ -1365,6 +1411,15 @@ fn parsed_eslint_with_pipeline_contract(
             tsx_source_effective_content_source_pipeline_rules: pipeline_contract
                 .tsx
                 .effective_content_source_rules(),
+            astro_source_effective_inline_public_content_rules: pipeline_contract
+                .astro
+                .effective_inline_public_content_rules(),
+            ts_source_effective_inline_public_content_rules: pipeline_contract
+                .ts
+                .effective_inline_public_content_rules(),
+            tsx_source_effective_inline_public_content_rules: pipeline_contract
+                .tsx
+                .effective_inline_public_content_rules(),
         },
     }
 }
@@ -1383,6 +1438,8 @@ struct PipelineLaneState {
     scope_kind: ScopeKind,
     has_content_data_scope: bool,
     has_content_source_scope: bool,
+    has_inline_public_content_plugin: bool,
+    has_inline_public_content_policy: bool,
 }
 
 impl PipelineLaneState {
@@ -1393,6 +1450,8 @@ impl PipelineLaneState {
             scope_kind: ScopeKind::None,
             has_content_data_scope: false,
             has_content_source_scope: false,
+            has_inline_public_content_plugin: false,
+            has_inline_public_content_policy: false,
         }
     }
 
@@ -1403,6 +1462,8 @@ impl PipelineLaneState {
             scope_kind: ScopeKind::None,
             has_content_data_scope: false,
             has_content_source_scope: false,
+            has_inline_public_content_plugin: true,
+            has_inline_public_content_policy: false,
         }
     }
 
@@ -1413,6 +1474,8 @@ impl PipelineLaneState {
             scope_kind: ScopeKind::None,
             has_content_data_scope: false,
             has_content_source_scope: false,
+            has_inline_public_content_plugin: true,
+            has_inline_public_content_policy: true,
         }
     }
 
@@ -1423,6 +1486,8 @@ impl PipelineLaneState {
             scope_kind: ScopeKind::Route,
             has_content_data_scope: true,
             has_content_source_scope: true,
+            has_inline_public_content_plugin: true,
+            has_inline_public_content_policy: true,
         }
     }
 
@@ -1433,6 +1498,8 @@ impl PipelineLaneState {
             scope_kind: ScopeKind::Endpoint,
             has_content_data_scope: true,
             has_content_source_scope: true,
+            has_inline_public_content_plugin: true,
+            has_inline_public_content_policy: true,
         }
     }
 
@@ -1443,6 +1510,8 @@ impl PipelineLaneState {
             scope_kind: ScopeKind::Route,
             has_content_data_scope: false,
             has_content_source_scope: true,
+            has_inline_public_content_plugin: true,
+            has_inline_public_content_policy: true,
         }
     }
 
@@ -1453,6 +1522,20 @@ impl PipelineLaneState {
             scope_kind: ScopeKind::Route,
             has_content_data_scope: true,
             has_content_source_scope: false,
+            has_inline_public_content_plugin: true,
+            has_inline_public_content_policy: true,
+        }
+    }
+
+    const fn rules_with_scope_but_without_inline_public_content_policy() -> Self {
+        Self {
+            has_plugin: true,
+            has_required_rules: true,
+            scope_kind: ScopeKind::Route,
+            has_content_data_scope: true,
+            has_content_source_scope: true,
+            has_inline_public_content_plugin: true,
+            has_inline_public_content_policy: false,
         }
     }
 
@@ -1463,6 +1546,8 @@ impl PipelineLaneState {
             scope_kind: ScopeKind::None,
             has_content_data_scope: false,
             has_content_source_scope: false,
+            has_inline_public_content_plugin: true,
+            has_inline_public_content_policy: true,
         }
     }
 
@@ -1471,7 +1556,7 @@ impl PipelineLaneState {
             return Vec::new();
         }
 
-        vec![
+        let mut rules = vec![
             "astro-pipeline/no-authored-content-fs-read".to_owned(),
             "astro-pipeline/no-authored-content-glob".to_owned(),
             "astro-pipeline/no-authored-content-imports".to_owned(),
@@ -1480,7 +1565,11 @@ impl PipelineLaneState {
             "astro-pipeline/no-runtime-mdx-eval".to_owned(),
             "astro-pipeline/no-side-loader-imports".to_owned(),
             "astro-pipeline/no-velite-imports".to_owned(),
-        ]
+        ];
+        if self.has_inline_public_content_policy {
+            rules.push("i18next/no-literal-string".to_owned());
+        }
+        rules
     }
 
     fn effective_route_scoped_rules(self) -> Vec<String> {
@@ -1517,6 +1606,14 @@ impl PipelineLaneState {
             "astro-pipeline/no-authored-content-glob".to_owned(),
             "astro-pipeline/no-authored-content-imports".to_owned(),
         ]
+    }
+
+    fn effective_inline_public_content_rules(self) -> Vec<String> {
+        if !self.has_inline_public_content_policy {
+            return Vec::new();
+        }
+
+        vec!["i18next/no-literal-string".to_owned()]
     }
 }
 

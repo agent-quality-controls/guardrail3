@@ -444,6 +444,7 @@ dependencies = [
  "globset",
  "package-json-parser",
  "package-script-command-parser",
+ "regex",
  "serde_json",
  "syncpack-config-parser",
 ]

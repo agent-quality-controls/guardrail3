@@ -12,6 +12,7 @@ This package is for Astro apps that want lint failures when routes or endpoint c
 - evaluate MDX at runtime
 - pull side-loader helper modules into route closures
 - pull Velite package or `.velite` outputs into route closures
+- render authored public copy from source literals instead of Astro content entries
 
 ## Status
 
@@ -32,15 +33,18 @@ pnpm add -D eslint-plugin-astro-pipeline
 You still need the normal Astro lint stack in the app:
 
 ```sh
-pnpm add -D eslint eslint-plugin-astro astro-eslint-parser eslint-mdx typescript
+pnpm add -D eslint eslint-plugin-astro astro-eslint-parser typescript
 ```
 
 This package only documents its own plugin surface. Keep your existing Astro parser and Astro ESLint setup, then add `astro-pipeline` on top.
+
+`eslint-plugin-astro-pipeline` depends on `eslint-plugin-i18next` and `eslint-mdx`. Do not install those directly in Astro apps. The custom Astro plugin owns the content-pipeline policy and config; maintained parser/lint packages own source and MDX AST handling under that plugin boundary.
 
 ## What it exports
 
 - default ESLint plugin export
 - `configs.recommended`
+- `configs["strict-content"]`
 - 8 rules:
   - `astro-pipeline/no-authored-content-fs-read`
   - `astro-pipeline/no-authored-content-glob`
@@ -50,6 +54,8 @@ This package only documents its own plugin surface. Keep your existing Astro par
   - `astro-pipeline/no-runtime-mdx-eval`
   - `astro-pipeline/no-side-loader-imports`
   - `astro-pipeline/no-velite-imports`
+- delegated public-copy rule in the strict content config:
+  - `i18next/no-literal-string`
 
 ## Example config
 
@@ -120,6 +126,39 @@ export default [
 ];
 ```
 
+## Strict content config
+
+Use `configs["strict-content"]` on public Astro source lanes to reject hardcoded page copy in routes, UI, and source data objects:
+
+```js
+import astroPipeline from "eslint-plugin-astro-pipeline";
+
+export default [
+  {
+    files: ["src/**/*.{astro,ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
+    plugins: {
+      "astro-pipeline": astroPipeline
+    },
+    rules: {
+      ...astroPipeline.configs.recommended.rules
+    }
+  },
+  {
+    files: [
+      "src/pages/**/*.{astro,ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "src/ui/**/*.{astro,ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "src/components/**/*.{astro,ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "src/content/**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"
+    ],
+    ...astroPipeline.configs["strict-content"]
+  }
+];
+```
+
+The strict content config delegates to `i18next/no-literal-string` with `mode: "all"` so both JSX/Astro text and source object literals are checked. It allows structural strings such as classes, IDs, URLs, asset paths, import paths, TS literal types, enum-like uppercase tokens, and decorative `alt=""`.
+
+It intentionally does not allow public-copy attributes such as `alt`, `aria-label`, `title`, or `placeholder`. If those contain words, they are user-facing content and should come from an Astro content entry.
+
 ## Rule intent
 
 ### `no-authored-content-fs-read`
@@ -174,6 +213,17 @@ Use this to stop routes from smuggling content access through cross-root helpers
 Flags route or endpoint import closures that reach the `velite` package, `velite.config.*`, or `.velite` generated artifacts.
 
 Use this to keep Astro apps off parallel Velite content pipelines.
+
+### `i18next/no-literal-string` through `configs["strict-content"]`
+
+Flags hardcoded authored copy in public source files:
+
+- JSX and Astro text nodes
+- string literals in public-copy attributes such as `alt`, `aria-label`, `title`, and `placeholder`
+- object or array literals used as source data
+- frontmatter or module-scope string literals that would bypass Astro content collections
+
+Use this to keep landing pages, blog shells, and public UI rendering from typed Astro content entries instead of from source literals.
 
 ## Options
 

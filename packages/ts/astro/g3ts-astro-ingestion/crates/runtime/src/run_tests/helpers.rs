@@ -39,7 +39,36 @@ pub(super) fn fake_astro_workspace() -> TempDir {
     .expect("eslint config should be written");
     std::fs::write(
         root.path().join(".syncpackrc"),
-        "{\n  \"source\": [\"package.json\"],\n  \"versionGroups\": [\n    { \"dependencies\": [\"astro\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"6.1.9\" },\n    { \"dependencies\": [\"@astrojs/node\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"10.0.6\" },\n    { \"dependencies\": [\"@astrojs/react\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"5.0.4\" },\n    { \"dependencies\": [\"@astrojs/mdx\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"5.0.4\" },\n    { \"dependencies\": [\"@astrojs/check\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"0.9.8\" },\n    { \"dependencies\": [\"react\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"19.2.5\" },\n    { \"dependencies\": [\"react-dom\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"19.2.5\" },\n    { \"dependencies\": [\"@types/react\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"19.2.14\" },\n    { \"dependencies\": [\"@types/react-dom\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"19.2.3\" },\n    { \"dependencies\": [\"typescript\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"5.9.3\" },\n    { \"dependencies\": [\"eslint-plugin-astro\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"1.7.0\" },\n    { \"dependencies\": [\"eslint-plugin-astro-pipeline\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"0.1.2\" },\n    { \"dependencies\": [\"tailwindcss\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"4.2.4\" },\n    { \"dependencies\": [\"@tailwindcss/postcss\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"4.2.4\" },\n    { \"dependencies\": [\"class-variance-authority\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"0.7.1\" },\n    { \"dependencies\": [\"clsx\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"2.1.1\" },\n    { \"dependencies\": [\"tailwind-merge\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"3.5.0\" },\n    { \"dependencies\": [\"lucide-react\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"0.577.0\" },\n    { \"dependencies\": [\"zod\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"4.3.6\" },\n    { \"dependencies\": [\"@types/node\"], \"dependencyTypes\": [\"prod\", \"dev\"], \"pinVersion\": \"25.6.0\" },\n    { \"dependencies\": [\"next\"], \"dependencyTypes\": [\"prod\", \"dev\", \"optional\", \"peer\"], \"isBanned\": true },\n    { \"dependencies\": [\"velite\"], \"dependencyTypes\": [\"prod\", \"dev\", \"optional\", \"peer\"], \"isBanned\": true },\n    { \"dependencies\": [\"eslint-mdx\"], \"dependencyTypes\": [\"prod\", \"dev\", \"optional\", \"peer\"], \"isBanned\": true }\n  ]\n}\n",
+        r#"{
+  "source": ["package.json"],
+  "versionGroups": [
+    { "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "6.1.9" },
+    { "dependencies": ["@astrojs/node"], "dependencyTypes": ["prod", "dev"], "pinVersion": "10.0.6" },
+    { "dependencies": ["@astrojs/react"], "dependencyTypes": ["prod", "dev"], "pinVersion": "5.0.4" },
+    { "dependencies": ["@astrojs/mdx"], "dependencyTypes": ["prod", "dev"], "pinVersion": "5.0.4" },
+    { "dependencies": ["@astrojs/check"], "dependencyTypes": ["prod", "dev"], "pinVersion": "0.9.8" },
+    { "dependencies": ["react"], "dependencyTypes": ["prod", "dev"], "pinVersion": "19.2.5" },
+    { "dependencies": ["react-dom"], "dependencyTypes": ["prod", "dev"], "pinVersion": "19.2.5" },
+    { "dependencies": ["@types/react"], "dependencyTypes": ["prod", "dev"], "pinVersion": "19.2.14" },
+    { "dependencies": ["@types/react-dom"], "dependencyTypes": ["prod", "dev"], "pinVersion": "19.2.3" },
+    { "dependencies": ["typescript"], "dependencyTypes": ["prod", "dev"], "pinVersion": "5.9.3" },
+    { "dependencies": ["eslint-plugin-astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "1.7.0" },
+    { "dependencies": ["eslint-plugin-astro-pipeline"], "dependencyTypes": ["prod", "dev"], "pinVersion": "0.1.4" },
+    { "dependencies": ["tailwindcss"], "dependencyTypes": ["prod", "dev"], "pinVersion": "4.2.4" },
+    { "dependencies": ["@tailwindcss/postcss"], "dependencyTypes": ["prod", "dev"], "pinVersion": "4.2.4" },
+    { "dependencies": ["class-variance-authority"], "dependencyTypes": ["prod", "dev"], "pinVersion": "0.7.1" },
+    { "dependencies": ["clsx"], "dependencyTypes": ["prod", "dev"], "pinVersion": "2.1.1" },
+    { "dependencies": ["tailwind-merge"], "dependencyTypes": ["prod", "dev"], "pinVersion": "3.5.0" },
+    { "dependencies": ["lucide-react"], "dependencyTypes": ["prod", "dev"], "pinVersion": "0.577.0" },
+    { "dependencies": ["zod"], "dependencyTypes": ["prod", "dev"], "pinVersion": "4.3.6" },
+    { "dependencies": ["@types/node"], "dependencyTypes": ["prod", "dev"], "pinVersion": "25.6.0" },
+    { "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+    { "dependencies": ["velite"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+    { "dependencies": ["eslint-mdx"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+    { "dependencies": ["eslint-plugin-i18next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true }
+  ]
+}
+"#,
     )
     .expect("syncpack config should be written");
     std::fs::write(
@@ -77,6 +106,7 @@ pub(super) fn fake_astro_workspace() -> TempDir {
       plugins: {
         astro: {},
         "astro-pipeline": {},
+        "i18next": {},
       },
       rules: {
         "astro-pipeline/no-authored-content-fs-read": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"], authoredContentGlobs: ["src/content/**"] }],
@@ -87,6 +117,7 @@ pub(super) fn fake_astro_workspace() -> TempDir {
         "astro-pipeline/no-runtime-mdx-eval": "error",
         "astro-pipeline/no-side-loader-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"] }],
         "astro-pipeline/no-velite-imports": ["error", { routeGlobs: ["src/pages/**/*.{astro,md,mdx,html}"], endpointGlobs: ["src/pages/**/*.{ts,js}"] }],
+        "i18next/no-literal-string": ["error", { framework: "react", mode: "all", message: "Inline public copy must live in Astro content entries.", "should-validate-template": true, words: { exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }, "jsx-components": { include: [], exclude: [] }, "jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }, callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }, "object-properties": { include: [], exclude: ["[A-Z_-]+"] } }],
       },
       languageOptions: { parserOptions: { projectService: true, jsx: isTsx } },
     };
