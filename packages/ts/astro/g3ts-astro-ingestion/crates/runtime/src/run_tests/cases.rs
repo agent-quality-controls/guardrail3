@@ -59,6 +59,11 @@ fn ignored_package_json_with_astro_dependency_does_not_create_an_app_root() {
 #[test]
 fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
     let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("src/pages/card.tsx"),
+        "export function Card() { return null; }\n",
+    )
+    .expect("tsx source probe should be written");
     let crawl = super::helpers::crawl_with_entries(
         &root,
         &[
@@ -69,6 +74,7 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             "eslint.config.mjs",
             "src/pages/index.astro",
             "src/pages/index.ts",
+            "src/pages/card.tsx",
             "node_modules/eslint/index.js",
         ],
     );
@@ -201,8 +207,235 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                     .any(|rule| rule == "astro-pipeline/no-authored-content-imports"),
                 "content-source pipeline options missing: {snapshot:?}"
             );
+            assert!(
+                snapshot
+                    .astro_source_plugins
+                    .iter()
+                    .any(|plugin| plugin == "i18next"),
+                "inline public content plugin missing from astro lane: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .ts_source_error_rules
+                    .iter()
+                    .any(|rule| rule == "i18next/no-literal-string"),
+                "inline public content rule missing: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .astro_source_effective_inline_public_content_rules
+                    .iter()
+                    .any(|rule| rule == "i18next/no-literal-string"),
+                "inline public content policy missing from astro lane: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .ts_source_effective_inline_public_content_rules
+                    .iter()
+                    .any(|rule| rule == "i18next/no-literal-string"),
+                "inline public content policy missing from ts lane: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .tsx_source_effective_inline_public_content_rules
+                    .iter()
+                    .any(|rule| rule == "i18next/no-literal-string"),
+                "inline public content policy missing from tsx lane: {snapshot:?}"
+            );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_requires_inline_public_content_rule_to_scan_copy_attributes() {
+    for (case_name, original_policy, replacement_policy) in [
+        (
+            "exact copy attr exclude",
+            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden", "alt"] }"#,
+        ),
+        (
+            "regex copy attr exclude",
+            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden", "aria-.+"] }"#,
+        ),
+        (
+            "catch-all attr exclude",
+            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden", ".*"] }"#,
+        ),
+        (
+            "attr include allowlist",
+            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: ["className"], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
+        ),
+        (
+            "non-string attr exclude",
+            r#""jsx-attributes": { include: [], exclude: ["className", "class", "href", "src", "id", "aria-hidden"] }"#,
+            r#""jsx-attributes": { include: [], exclude: [{}] }"#,
+        ),
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        let eslint_runtime =
+            std::fs::read_to_string(root.path().join("node_modules/eslint/index.js"))
+                .expect("fake eslint runtime should be readable")
+                .replace(original_policy, replacement_policy);
+        std::fs::write(root.path().join("node_modules/eslint/index.js"), eslint_runtime)
+            .expect("fake eslint runtime should be rewritten");
+
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "package.json",
+                "astro.config.mjs",
+                "src/content.config.ts",
+                ".syncpackrc",
+                "eslint.config.mjs",
+                "src/pages/index.astro",
+                "src/pages/index.ts",
+                "node_modules/eslint/index.js",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        match &input.eslint_contracts[0].config {
+            G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+                assert!(
+                    snapshot
+                        .ts_source_error_rules
+                        .iter()
+                        .any(|rule| rule == "i18next/no-literal-string"),
+                    "inline public content rule should still be present at error severity for {case_name}: {snapshot:?}"
+                );
+                assert!(
+                    snapshot
+                        .ts_source_effective_inline_public_content_rules
+                        .is_empty(),
+                    "{case_name} must make delegated inline-copy policy ineffective: {snapshot:?}"
+                );
+            }
+            other => panic!("expected parsed eslint state, got {other:?}"),
+        }
+    }
+}
+
+#[test]
+fn config_ingestion_rejects_broad_inline_public_content_option_allowlists() {
+    for (case_name, original_policy, replacement_policy) in [
+        (
+            "broad words exclude",
+            r#"words: { exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
+            r#"words: { exclude: [".*"] }"#,
+        ),
+        (
+            "js-only broad words exclude",
+            r#"words: { exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
+            r#"words: { exclude: ["(?=.*Request an audit).*"] }"#,
+        ),
+        (
+            "non-string words exclude",
+            r#"words: { exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
+            r#"words: { exclude: [{}] }"#,
+        ),
+        (
+            "words include allowlist",
+            r#"words: { exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
+            r#"words: { include: ["OK"], exclude: ["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"] }"#,
+        ),
+        (
+            "broad component exclude",
+            r#""jsx-components": { include: [], exclude: [] }"#,
+            r#""jsx-components": { include: [], exclude: [".*"] }"#,
+        ),
+        (
+            "component include allowlist",
+            r#""jsx-components": { include: [], exclude: [] }"#,
+            r#""jsx-components": { include: ["CopyProbe"], exclude: [] }"#,
+        ),
+        (
+            "non-string component exclude",
+            r#""jsx-components": { include: [], exclude: [] }"#,
+            r#""jsx-components": { include: [], exclude: [{}] }"#,
+        ),
+        (
+            "object property name exclude",
+            r#""object-properties": { include: [], exclude: ["[A-Z_-]+"] }"#,
+            r#""object-properties": { include: [], exclude: ["[A-Z_-]+", "name"] }"#,
+        ),
+        (
+            "object property title exclude",
+            r#""object-properties": { include: [], exclude: ["[A-Z_-]+"] }"#,
+            r#""object-properties": { include: [], exclude: ["[A-Z_-]+", "title"] }"#,
+        ),
+        (
+            "object property include allowlist",
+            r#""object-properties": { include: [], exclude: ["[A-Z_-]+"] }"#,
+            r#""object-properties": { include: ["id"], exclude: ["[A-Z_-]+"] }"#,
+        ),
+        (
+            "non-string object property exclude",
+            r#""object-properties": { include: [], exclude: ["[A-Z_-]+"] }"#,
+            r#""object-properties": { include: [], exclude: [{}] }"#,
+        ),
+        (
+            "i18n callee exclude",
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL", "i18n(ext)?"] }"#,
+        ),
+        (
+            "postMessage callee exclude",
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL", "postMessage"] }"#,
+        ),
+        (
+            "member callee exclude",
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL", "z\\.enum"] }"#,
+        ),
+        (
+            "callee include allowlist",
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
+            r#"callees: { include: ["clsx"], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
+        ),
+        (
+            "non-string callee exclude",
+            r#"callees: { include: [], exclude: ["require", "clsx", "cn", "cva", "twMerge", "URL"] }"#,
+            r#"callees: { include: [], exclude: [{}] }"#,
+        ),
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        let eslint_runtime =
+            std::fs::read_to_string(root.path().join("node_modules/eslint/index.js"))
+                .expect("fake eslint runtime should be readable")
+                .replace(original_policy, replacement_policy);
+        std::fs::write(root.path().join("node_modules/eslint/index.js"), eslint_runtime)
+            .expect("fake eslint runtime should be rewritten");
+
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "package.json",
+                "astro.config.mjs",
+                "src/content.config.ts",
+                ".syncpackrc",
+                "eslint.config.mjs",
+                "src/pages/index.astro",
+                "src/pages/index.ts",
+                "node_modules/eslint/index.js",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        match &input.eslint_contracts[0].config {
+            G3TsAstroEslintSurfaceState::Parsed { snapshot } => assert!(
+                snapshot
+                    .ts_source_effective_inline_public_content_rules
+                    .is_empty(),
+                "{case_name} must make delegated inline-copy policy ineffective: {snapshot:?}"
+            ),
+            other => panic!("expected parsed eslint state, got {other:?}"),
+        }
     }
 }
 

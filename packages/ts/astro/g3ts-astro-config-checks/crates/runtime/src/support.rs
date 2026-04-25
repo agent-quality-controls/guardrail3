@@ -183,6 +183,38 @@ pub(crate) fn eslint_required_lanes_have_effective_pipeline_rules(
 }
 
 #[must_use]
+pub(crate) fn eslint_required_lanes_have_inline_public_content_rule(
+    contract: &G3TsAstroEslintPluginContractInput,
+    plugin_name: &str,
+    rule_name: &str,
+) -> bool {
+    parsed_eslint_surface(contract).is_some_and(|snapshot| {
+        lane_has_inline_public_content_rule(
+            snapshot.astro_source_probe_present,
+            &snapshot.astro_source_plugins,
+            &snapshot.astro_source_error_rules,
+            &snapshot.astro_source_effective_inline_public_content_rules,
+            plugin_name,
+            rule_name,
+        ) && lane_has_inline_public_content_rule(
+            snapshot.ts_source_probe_present,
+            &snapshot.ts_source_plugins,
+            &snapshot.ts_source_error_rules,
+            &snapshot.ts_source_effective_inline_public_content_rules,
+            plugin_name,
+            rule_name,
+        ) && lane_has_inline_public_content_rule(
+            snapshot.tsx_source_probe_present,
+            &snapshot.tsx_source_plugins,
+            &snapshot.tsx_source_error_rules,
+            &snapshot.tsx_source_effective_inline_public_content_rules,
+            plugin_name,
+            rule_name,
+        )
+    })
+}
+
+#[must_use]
 pub(crate) fn eslint_required_lanes_have_plugin(
     contract: &G3TsAstroEslintPluginContractInput,
     plugin_name: &str,
@@ -226,6 +258,25 @@ pub(crate) fn eslint_required_lanes_have_plugin(
             &[],
         )
     })
+}
+
+fn lane_has_inline_public_content_rule(
+    lane_present: bool,
+    plugins: &[String],
+    error_rules: &[String],
+    effective_inline_public_content_rules: &[String],
+    plugin_name: &str,
+    rule_name: &str,
+) -> bool {
+    if !lane_present {
+        return true;
+    }
+
+    plugins.iter().any(|plugin| plugin == plugin_name)
+        && error_rules.iter().any(|rule| rule == rule_name)
+        && effective_inline_public_content_rules
+            .iter()
+            .any(|rule| rule == rule_name)
 }
 
 #[must_use]

@@ -39,6 +39,9 @@ const CONTENT_SOURCE_PIPELINE_RULES: [&str; 3] = [
     "astro-pipeline/no-authored-content-glob",
     "astro-pipeline/no-authored-content-imports",
 ];
+const INLINE_PUBLIC_CONTENT_RULE: &str = "i18next/no-literal-string";
+const COPY_BEARING_JSX_ATTRIBUTES: [&str; 5] =
+    ["alt", "aria-label", "title", "placeholder", "value"];
 const REQUIRED_SYNCPACK_PINS: [(&str, &str); 20] = [
     ("astro", "6.1.9"),
     ("@astrojs/node", "10.0.6"),
@@ -51,7 +54,7 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 20] = [
     ("@types/react-dom", "19.2.3"),
     ("typescript", "5.9.3"),
     ("eslint-plugin-astro", "1.7.0"),
-    ("eslint-plugin-astro-pipeline", "0.1.2"),
+    ("eslint-plugin-astro-pipeline", "0.1.4"),
     ("tailwindcss", "4.2.4"),
     ("@tailwindcss/postcss", "4.2.4"),
     ("class-variance-authority", "0.7.1"),
@@ -61,7 +64,8 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 20] = [
     ("zod", "4.3.6"),
     ("@types/node", "25.6.0"),
 ];
-const FORBIDDEN_SYNCPACK_DEPS: [&str; 3] = ["next", "velite", "eslint-mdx"];
+const FORBIDDEN_SYNCPACK_DEPS: [&str; 4] =
+    ["next", "velite", "eslint-mdx", "eslint-plugin-i18next"];
 const PIN_DEPENDENCY_TYPES: [&str; 2] = ["prod", "dev"];
 const BAN_DEPENDENCY_TYPES: [&str; 4] = ["prod", "dev", "optional", "peer"];
 const SYNCPACK_ASTRO_POLICY_PREFIX_LEN: usize =
@@ -731,6 +735,14 @@ fn ingest_eslint_surface(
                     &route_page_paths,
                     &endpoint_paths,
                 ),
+            astro_source_effective_inline_public_content_rules:
+                effective_inline_public_content_rules(astro_source_probe),
+            ts_source_effective_inline_public_content_rules: effective_inline_public_content_rules(
+                ts_source_probe,
+            ),
+            tsx_source_effective_inline_public_content_rules: effective_inline_public_content_rules(
+                tsx_source_probe,
+            ),
         },
     }
 }
@@ -834,6 +846,25 @@ fn effective_content_source_pipeline_rules(
         .collect()
 }
 
+fn effective_inline_public_content_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+) -> Vec<String> {
+    let Some(probe) = probe else {
+        return Vec::new();
+    };
+
+    probe.rules.get(INLINE_PUBLIC_CONTENT_RULE).map_or_else(
+        Vec::new,
+        |setting| {
+            if rule_setting_has_inline_public_content_policy(setting) {
+                vec![INLINE_PUBLIC_CONTENT_RULE.to_owned()]
+            } else {
+                Vec::new()
+            }
+        },
+    )
+}
+
 fn rule_setting_has_route_and_endpoint_coverage(
     setting: &eslint_config_parser::types::EslintRuleSetting,
     route_page_paths: &[String],
@@ -868,6 +899,180 @@ fn rule_setting_has_content_source_scope(
     })
 }
 
+fn rule_setting_has_inline_public_content_policy(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+) -> bool {
+    setting.options.iter().any(|option| {
+        option.as_object().is_some_and(|object| {
+            object_string_value(object.get("framework")) == Some("react")
+                && object_string_value(object.get("mode")) == Some("all")
+                && object_bool_value(object.get("should-validate-template")) == Some(true)
+                && object_string_value(object.get("message"))
+                    .is_some_and(|message| message.contains("Astro content"))
+                && words_policy_preserves_copy_detection(object)
+                && jsx_component_policy_preserves_copy_detection(object)
+                && object_property_policy_preserves_copy_detection(object)
+                && callee_policy_preserves_copy_detection(object)
+                && !jsx_attribute_policy_allows_copy_attrs(object)
+        })
+    })
+}
+
+fn object_string_value(option: Option<&serde_json::Value>) -> Option<&str> {
+    option.and_then(serde_json::Value::as_str)
+}
+
+fn object_bool_value(option: Option<&serde_json::Value>) -> Option<bool> {
+    option.and_then(serde_json::Value::as_bool)
+}
+
+fn words_policy_preserves_copy_detection(object: &serde_json::Map<String, serde_json::Value>) -> bool {
+    let Some(words) = object
+        .get("words")
+        .and_then(serde_json::Value::as_object)
+    else {
+        return true;
+    };
+
+    let StringArrayOption::Valid(included_words) = string_array_option(words.get("include")) else {
+        return false;
+    };
+    let StringArrayOption::Valid(excluded_words) = string_array_option(words.get("exclude")) else {
+        return false;
+    };
+
+    included_words.is_empty()
+        && !excluded_words
+        .iter()
+        .any(|pattern| regex_pattern_matches(pattern, "Request an audit"))
+}
+
+fn jsx_component_policy_preserves_copy_detection(
+    object: &serde_json::Map<String, serde_json::Value>,
+) -> bool {
+    let Some(jsx_components) = object
+        .get("jsx-components")
+        .and_then(serde_json::Value::as_object)
+    else {
+        return false;
+    };
+
+    let StringArrayOption::Valid(included_components) =
+        string_array_option(jsx_components.get("include"))
+    else {
+        return false;
+    };
+    let StringArrayOption::Valid(excluded_components) =
+        string_array_option(jsx_components.get("exclude"))
+    else {
+        return false;
+    };
+
+    included_components.is_empty()
+        && !excluded_components
+            .iter()
+            .any(|pattern| regex_pattern_matches(pattern, "CopyProbe"))
+}
+
+fn object_property_policy_preserves_copy_detection(
+    object: &serde_json::Map<String, serde_json::Value>,
+) -> bool {
+    let Some(object_properties) = object
+        .get("object-properties")
+        .and_then(serde_json::Value::as_object)
+    else {
+        return true;
+    };
+
+    let StringArrayOption::Valid(included_properties) =
+        string_array_option(object_properties.get("include"))
+    else {
+        return false;
+    };
+    let StringArrayOption::Valid(excluded_properties) =
+        string_array_option(object_properties.get("exclude"))
+    else {
+        return false;
+    };
+
+    included_properties.is_empty()
+        && !excluded_properties.iter().any(|pattern| {
+            ["title", "name", "label", "description", "copy"]
+                .iter()
+                .any(|property| regex_pattern_matches(pattern, property))
+        })
+}
+
+fn callee_policy_preserves_copy_detection(object: &serde_json::Map<String, serde_json::Value>) -> bool {
+    let Some(callees) = object.get("callees").and_then(serde_json::Value::as_object) else {
+        return false;
+    };
+
+    let StringArrayOption::Valid(included_callees) = string_array_option(callees.get("include"))
+    else {
+        return false;
+    };
+    let StringArrayOption::Valid(excluded_callees) = string_array_option(callees.get("exclude"))
+    else {
+        return false;
+    };
+
+    included_callees.is_empty()
+        && !excluded_callees.iter().any(|pattern| {
+            [
+                "t",
+                "i18n",
+                "postMessage",
+                "copy.includes",
+                "z.enum",
+                "includes",
+                "enum",
+            ]
+            .iter()
+            .any(|callee| regex_pattern_matches(pattern, callee))
+        })
+}
+
+fn jsx_attribute_policy_allows_copy_attrs(object: &serde_json::Map<String, serde_json::Value>) -> bool {
+    let Some(jsx_attributes) = object
+        .get("jsx-attributes")
+        .and_then(serde_json::Value::as_object)
+    else {
+        return false;
+    };
+
+    let StringArrayOption::Valid(included_attrs) = string_array_option(jsx_attributes.get("include"))
+    else {
+        return true;
+    };
+    if !included_attrs.is_empty() {
+        return true;
+    }
+
+    let StringArrayOption::Valid(excluded_attrs) = string_array_option(jsx_attributes.get("exclude"))
+    else {
+        return true;
+    };
+
+    excluded_attrs
+        .iter()
+        .any(|pattern| jsx_attribute_exclusion_matches_copy_attr(pattern))
+}
+
+fn jsx_attribute_exclusion_matches_copy_attr(pattern: &str) -> bool {
+    COPY_BEARING_JSX_ATTRIBUTES
+        .iter()
+        .any(|attr| *attr == pattern || regex_pattern_matches(pattern, attr))
+}
+
+fn regex_pattern_matches(pattern: &str, value: &str) -> bool {
+    if pattern == "[0-9!-/:-@[-`{-~]+" {
+        return false;
+    }
+
+    regex::Regex::new(&format!("^(?:{pattern})$")).map_or(true, |regex| regex.is_match(value))
+}
+
 fn has_non_empty_string_array_option(option: Option<&serde_json::Value>) -> bool {
     option
         .and_then(serde_json::Value::as_array)
@@ -877,6 +1082,32 @@ fn has_non_empty_string_array_option(option: Option<&serde_json::Value>) -> bool
                     .iter()
                     .all(|value| value.as_str().is_some_and(|text| !text.trim().is_empty()))
         })
+}
+
+enum StringArrayOption<'a> {
+    Valid(Vec<&'a str>),
+    Invalid,
+}
+
+fn string_array_option(option: Option<&serde_json::Value>) -> StringArrayOption<'_> {
+    let Some(option) = option else {
+        return StringArrayOption::Valid(Vec::new());
+    };
+
+    let Some(values) = option.as_array() else {
+        return StringArrayOption::Invalid;
+    };
+
+    let mut strings = Vec::with_capacity(values.len());
+
+    for value in values {
+        let Some(text) = value.as_str().map(str::trim).filter(|text| !text.is_empty()) else {
+            return StringArrayOption::Invalid;
+        };
+        strings.push(text);
+    }
+
+    StringArrayOption::Valid(strings)
 }
 
 fn rule_setting_option_globs_match_any_path(

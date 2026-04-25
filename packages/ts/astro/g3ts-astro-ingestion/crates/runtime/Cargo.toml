@@ -34,6 +34,7 @@ syncpack-config-parser = { path = "../../../../../parsers/syncpack-config-parser
 g3-workspace-crawl = { path = "../../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 g3ts-astro-types = { path = "../../../g3ts-astro-types", version = "0.1.0" }
 globset = "0.4"
+regex = "1"
 serde_json = "1"
 
 [dev-dependencies]
