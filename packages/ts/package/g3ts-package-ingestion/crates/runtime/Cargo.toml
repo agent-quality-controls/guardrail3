@@ -30,6 +30,8 @@ all-features = true
 g3-workspace-crawl = { path = "../../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 g3ts-package-types = { path = "../../../g3ts-package-types", version = "0.1.0" }
 package-json-parser = { path = "../../../../../parsers/package-json-parser", version = "0.1.0", features = ["api"] }
+package-script-command-parser = { path = "../../../../../parsers/package-script-command-parser", version = "0.1.0", features = ["api"] }
+syncpack-config-parser = { path = "../../../../../parsers/syncpack-config-parser", version = "0.1.0", features = ["api"] }
 
 [dev-dependencies]
 g3ts-package-ingestion-assertions = { path = "../assertions" }

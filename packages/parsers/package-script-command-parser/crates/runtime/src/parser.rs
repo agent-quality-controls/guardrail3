@@ -3,6 +3,7 @@ use package_script_command_parser_types::document::{
     PackageScriptCommandSeparator, PackageScriptParseFact, PackageScriptParseState,
     PackageScriptToolInvocation,
 };
+use tree_sitter::{Node, Parser};
 
 #[allow(
     clippy::disallowed_methods,
@@ -106,14 +107,13 @@ fn invocation_targets_tool(
 }
 
 fn normalize_fact(script_name: &str, input: &str) -> PackageScriptParseFact {
-    let (commands, state) = match parse_commands(input) {
-        Ok(commands) => {
-            let state = command_state(script_name, input, &commands);
-            (commands, state)
+    let parsed = parse_script_commands(input);
+    let (commands, state) = match parsed {
+        Ok(parsed) => {
+            let state = command_state(script_name, &parsed);
+            (parsed.commands, state)
         }
-        Err(reason)
-            if script_name_is_guardrail_related(script_name) || raw_has_guardrail_tool(input) =>
-        {
+        Err(reason) if script_name_is_guardrail_related(script_name) => {
             (Vec::new(), PackageScriptParseState::ParseError { reason })
         }
         Err(_reason) => (Vec::new(), PackageScriptParseState::NoEslintInvocation),
@@ -130,21 +130,26 @@ fn normalize_fact(script_name: &str, input: &str) -> PackageScriptParseFact {
 
 fn command_state(
     script_name: &str,
-    input: &str,
-    commands: &[PackageScriptCommand],
+    parsed: &ParsedScriptCommands,
 ) -> PackageScriptParseState {
     let guardrail_related = script_name_is_guardrail_related(script_name)
-        || commands.iter().any(command_has_guardrail_tool)
-        || raw_has_guardrail_tool(input);
+        || parsed.commands.iter().any(command_has_guardrail_tool)
+        || parsed.any_command_has_guardrail_tool;
 
-    if guardrail_related && has_unsupported_guardrail_syntax(input) {
+    if guardrail_related && parsed.has_parse_error {
+        return PackageScriptParseState::ParseError {
+            reason: "script command contains invalid shell syntax".to_owned(),
+        };
+    }
+
+    if guardrail_related && parsed.has_unsupported_guardrail_syntax {
         return PackageScriptParseState::Unsupported {
             reason: "guardrail-related script uses unsupported shell syntax".to_owned(),
         };
     }
 
     let mut eslint_invocations = Vec::new();
-    for (command_index, command) in commands.iter().enumerate() {
+    for (command_index, command) in parsed.commands.iter().enumerate() {
         match eslint_invocation(script_name, command_index, command) {
             Ok(Some(invocation)) => eslint_invocations.push(invocation),
             Ok(None) => {}
@@ -156,139 +161,241 @@ fn command_state(
         PackageScriptParseState::NoEslintInvocation
     } else {
         PackageScriptParseState::Parsed {
-            commands: commands.to_owned(),
+            commands: parsed.commands.clone(),
             eslint_invocations,
         }
     }
 }
 
-fn parse_commands(input: &str) -> Result<Vec<PackageScriptCommand>, String> {
-    let mut commands = Vec::new();
-    for segment in split_segments(input)? {
-        let tokens = split_tokens(&segment.invocation)?;
-        if tokens.is_empty() {
-            continue;
-        }
-        let tokens = strip_env_assignments(tokens);
-        if tokens.is_empty() {
-            continue;
-        }
-        let mut tokens = tokens.into_iter();
-        let Some(executable) = tokens.next() else {
-            continue;
-        };
-        let args = tokens.collect::<Vec<_>>();
-        commands.push(PackageScriptCommand {
-            invocation: segment.invocation,
-            executable,
-            args,
-            preceded_by: segment.preceded_by,
-        });
-    }
-    Ok(commands)
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct Segment {
-    invocation: String,
-    preceded_by: Option<PackageScriptCommandSeparator>,
+struct ParsedScriptCommands {
+    commands: Vec<PackageScriptCommand>,
+    any_command_has_guardrail_tool: bool,
+    has_parse_error: bool,
+    has_unsupported_guardrail_syntax: bool,
 }
 
-fn split_segments(input: &str) -> Result<Vec<Segment>, String> {
-    let mut segments = Vec::new();
-    let mut current = String::new();
-    let mut chars = input.chars().peekable();
-    let mut in_single_quote = false;
-    let mut in_double_quote = false;
-    let mut preceded_by = None;
+fn parse_script_commands(input: &str) -> Result<ParsedScriptCommands, String> {
+    let tree = parse_bash_tree(input)?;
+    let root = tree.root_node();
+    let mut top_level_commands = Vec::new();
+    let mut all_commands = Vec::new();
+    collect_command_nodes(root, &mut top_level_commands, &mut all_commands);
 
-    while let Some(ch) = chars.next() {
-        match ch {
-            '\'' if !in_double_quote => {
-                in_single_quote = !in_single_quote;
-                current.push(ch);
-            }
-            '"' if !in_single_quote => {
-                in_double_quote = !in_double_quote;
-                current.push(ch);
-            }
-            '&' if !in_single_quote && !in_double_quote && chars.peek() == Some(&'&') => {
-                let _ = chars.next();
-                push_segment(&mut segments, &mut current, preceded_by);
-                preceded_by = Some(PackageScriptCommandSeparator::And);
-            }
-            '|' if !in_single_quote && !in_double_quote && chars.peek() == Some(&'|') => {
-                let _ = chars.next();
-                push_segment(&mut segments, &mut current, preceded_by);
-                preceded_by = Some(PackageScriptCommandSeparator::Or);
-            }
-            ';' if !in_single_quote && !in_double_quote => {
-                push_segment(&mut segments, &mut current, preceded_by);
-                preceded_by = None;
-            }
-            _ => current.push(ch),
-        }
-    }
+    let commands = top_level_commands
+        .iter()
+        .enumerate()
+        .filter_map(|(index, command_node)| {
+            let preceded_by = index
+                .checked_sub(1)
+                .and_then(|previous_index| top_level_commands.get(previous_index))
+                .and_then(|previous| separator_between(input, *previous, *command_node));
+            package_command_from_node(input, *command_node, preceded_by)
+        })
+        .collect::<Vec<_>>();
 
-    if in_single_quote || in_double_quote {
-        return Err("script command contains an unterminated quote".to_owned());
-    }
+    let any_command_has_guardrail_tool = all_commands.iter().any(|node| {
+        package_command_from_node(input, *node, None).is_some_and(|command| {
+            normalized_tool(&command).is_some_and(|(executable, _args)| {
+                matches!(
+                    executable.as_str(),
+                    "eslint" | "astro" | "syncpack" | "only-allow"
+                )
+            })
+        })
+    });
 
-    push_segment(&mut segments, &mut current, preceded_by);
-    Ok(segments)
+    Ok(ParsedScriptCommands {
+        commands,
+        any_command_has_guardrail_tool,
+        has_parse_error: root.has_error(),
+        has_unsupported_guardrail_syntax: has_unsupported_ast_shape(root)
+            || has_unsupported_command_separators(input, &top_level_commands),
+    })
 }
 
-fn push_segment(
-    segments: &mut Vec<Segment>,
-    current: &mut String,
-    preceded_by: Option<PackageScriptCommandSeparator>,
+fn parse_bash_tree(input: &str) -> Result<tree_sitter::Tree, String> {
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_bash::LANGUAGE.into())
+        .map_err(|err| format!("failed to load Bash parser: {err}"))?;
+    parser
+        .parse(input, None)
+        .ok_or_else(|| "Bash parser did not return a parse tree".to_owned())
+}
+
+fn collect_command_nodes<'tree>(
+    node: Node<'tree>,
+    top_level_commands: &mut Vec<Node<'tree>>,
+    all_commands: &mut Vec<Node<'tree>>,
 ) {
-    let trimmed = current.trim();
-    if !trimmed.is_empty() {
-        segments.push(Segment {
-            invocation: trimmed.to_owned(),
-            preceded_by,
-        });
-    }
-    current.clear();
-}
-
-fn split_tokens(segment: &str) -> Result<Vec<String>, String> {
-    let mut tokens = Vec::new();
-    let mut current = String::new();
-    let mut chars = segment.chars();
-    let mut in_single_quote = false;
-    let mut in_double_quote = false;
-
-    while let Some(ch) = chars.next() {
-        match ch {
-            '\\' if !in_single_quote => {
-                if let Some(next) = chars.next() {
-                    current.push(next);
-                }
-            }
-            '\'' if !in_double_quote => in_single_quote = !in_single_quote,
-            '"' if !in_single_quote => in_double_quote = !in_double_quote,
-            ch if ch.is_whitespace() && !in_single_quote && !in_double_quote => {
-                push_token(&mut tokens, &mut current);
-            }
-            _ => current.push(ch),
+    if node.kind() == "command" {
+        all_commands.push(node);
+        if !has_non_top_level_command_ancestor(node) {
+            top_level_commands.push(node);
         }
     }
 
-    if in_single_quote || in_double_quote {
-        return Err("script command contains an unterminated quote".to_owned());
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        collect_command_nodes(child, top_level_commands, all_commands);
     }
-
-    push_token(&mut tokens, &mut current);
-    Ok(tokens)
 }
 
-fn push_token(tokens: &mut Vec<String>, current: &mut String) {
-    if !current.is_empty() {
-        tokens.push(current.clone());
-        current.clear();
+fn has_non_top_level_command_ancestor(node: Node<'_>) -> bool {
+    let mut current = node.parent();
+    while let Some(parent) = current {
+        if matches!(
+            parent.kind(),
+            "command"
+                | "command_substitution"
+                | "process_substitution"
+                | "subshell"
+                | "function_definition"
+                | "if_statement"
+                | "while_statement"
+                | "for_statement"
+                | "c_style_for_statement"
+                | "case_statement"
+        ) {
+            return true;
+        }
+        current = parent.parent();
     }
+    false
+}
+
+fn package_command_from_node(
+    input: &str,
+    command_node: Node<'_>,
+    preceded_by: Option<PackageScriptCommandSeparator>,
+) -> Option<PackageScriptCommand> {
+    let name_node = command_node.child_by_field_name("name")?;
+    let invocation = node_text(input, command_node)?.trim().to_owned();
+    let executable = shell_word_text(input, name_node)?;
+    let args = command_arguments(input, command_node);
+    let args = strip_env_assignments(args);
+
+    Some(PackageScriptCommand {
+        invocation,
+        executable,
+        args,
+        preceded_by,
+    })
+}
+
+fn command_arguments(input: &str, command_node: Node<'_>) -> Vec<String> {
+    let mut args = Vec::new();
+    let mut cursor = command_node.walk();
+    for child in command_node.children(&mut cursor) {
+        if child.kind() == "command_name"
+            || child.kind() == "variable_assignment"
+            || child.kind().contains("redirect")
+        {
+            continue;
+        }
+        if let Some(text) = shell_word_text(input, child) {
+            args.push(text);
+        }
+    }
+    args
+}
+
+fn shell_word_text(input: &str, node: Node<'_>) -> Option<String> {
+    let text = node_text(input, node)?.trim();
+    if text.is_empty() {
+        return None;
+    }
+    Some(strip_balanced_shell_quotes(text))
+}
+
+fn node_text<'input>(input: &'input str, node: Node<'_>) -> Option<&'input str> {
+    node.utf8_text(input.as_bytes()).ok()
+}
+
+fn strip_balanced_shell_quotes(value: &str) -> String {
+    let mut chars = value.chars();
+    let Some(first) = chars.next() else {
+        return String::new();
+    };
+    let Some(last) = value.chars().last() else {
+        return String::new();
+    };
+    let char_count = value.chars().count();
+    if char_count >= 2 && matches!((first, last), ('\'', '\'') | ('"', '"')) {
+        return value.chars().skip(1).take(char_count - 2).collect();
+    }
+    value.to_owned()
+}
+
+fn separator_between(
+    input: &str,
+    previous: Node<'_>,
+    current: Node<'_>,
+) -> Option<PackageScriptCommandSeparator> {
+    let between = bytes_between(input, previous.end_byte(), current.start_byte())?;
+    let compact = between
+        .chars()
+        .filter(|ch| !ch.is_whitespace())
+        .collect::<String>();
+    match compact.as_str() {
+        "&&" => Some(PackageScriptCommandSeparator::And),
+        "||" => Some(PackageScriptCommandSeparator::Or),
+        _ => None,
+    }
+}
+
+fn bytes_between(input: &str, start: usize, end: usize) -> Option<&str> {
+    if start > end {
+        return None;
+    }
+    input.get(start..end)
+}
+
+fn has_unsupported_command_separators(input: &str, commands: &[Node<'_>]) -> bool {
+    commands.windows(2).any(|pair| {
+        let Some(previous) = pair.first() else {
+            return false;
+        };
+        let Some(current) = pair.get(1) else {
+            return false;
+        };
+        let Some(between) = bytes_between(input, previous.end_byte(), current.start_byte()) else {
+            return true;
+        };
+        let compact = between
+            .chars()
+            .filter(|ch| !ch.is_whitespace())
+            .collect::<String>();
+        !matches!(compact.as_str(), "&&" | "||" | "")
+    })
+}
+
+fn has_unsupported_ast_shape(node: Node<'_>) -> bool {
+    if matches!(
+        node.kind(),
+        "command_substitution"
+            | "process_substitution"
+            | "pipeline"
+            | "file_redirect"
+            | "herestring_redirect"
+            | "heredoc_redirect"
+            | "redirected_statement"
+            | "subshell"
+            | "function_definition"
+            | "if_statement"
+            | "while_statement"
+            | "for_statement"
+            | "c_style_for_statement"
+            | "case_statement"
+            | "simple_expansion"
+            | "expansion"
+    ) {
+        return true;
+    }
+
+    let mut cursor = node.walk();
+    node.children(&mut cursor).any(has_unsupported_ast_shape)
 }
 
 fn strip_env_assignments(tokens: Vec<String>) -> Vec<String> {
@@ -331,7 +438,10 @@ fn eslint_invocation(
 
 fn command_has_guardrail_tool(command: &PackageScriptCommand) -> bool {
     normalized_tool(command).is_some_and(|(executable, _args)| {
-        matches!(executable.as_str(), "eslint" | "astro" | "syncpack")
+        matches!(
+            executable.as_str(),
+            "eslint" | "astro" | "syncpack" | "only-allow"
+        )
     })
 }
 
@@ -577,37 +687,6 @@ fn normalized_env_tool(args: &[String]) -> Option<(String, Vec<String>)> {
     normalized_tool(&command)
 }
 
-fn has_unsupported_guardrail_syntax(input: &str) -> bool {
-    let mut chars = input.chars().peekable();
-    let mut in_single_quote = false;
-    let mut in_double_quote = false;
-
-    while let Some(ch) = chars.next() {
-        match ch {
-            '\'' if !in_double_quote => in_single_quote = !in_single_quote,
-            '"' if !in_single_quote => in_double_quote = !in_double_quote,
-            ';' | '<' | '>' | '`' if !in_single_quote && !in_double_quote => return true,
-            '$' if !in_single_quote => return true,
-            '&' if !in_single_quote && !in_double_quote => {
-                if chars.peek() == Some(&'&') {
-                    let _ = chars.next();
-                } else {
-                    return true;
-                }
-            }
-            '|' if !in_single_quote && !in_double_quote => {
-                if chars.peek() == Some(&'|') {
-                    let _ = chars.next();
-                } else {
-                    return true;
-                }
-            }
-            _ => {}
-        }
-    }
-    false
-}
-
 fn script_name_is_guardrail_related(script_name: &str) -> bool {
     let normalized = script_name.to_ascii_lowercase();
     if matches!(
@@ -619,23 +698,6 @@ fn script_name_is_guardrail_related(script_name: &str) -> bool {
     normalized
         .split([':', '-', '_', '.', '/'])
         .any(|token| matches!(token, "check" | "lint" | "eslint" | "astro" | "syncpack"))
-}
-
-fn raw_has_guardrail_tool(input: &str) -> bool {
-    input
-        .split(|ch: char| {
-            ch.is_whitespace()
-                || matches!(
-                    ch,
-                    '\'' | '"' | '(' | ')' | '[' | ']' | '{' | '}' | '&' | '|' | ';' | '<' | '>'
-                )
-        })
-        .any(|token| {
-            matches!(
-                executable_name(token).as_str(),
-                "eslint" | "astro" | "syncpack"
-            )
-        })
 }
 
 #[cfg(test)]

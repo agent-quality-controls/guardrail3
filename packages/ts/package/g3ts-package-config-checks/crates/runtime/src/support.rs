@@ -1,32 +1,7 @@
 use g3ts_package_types::{
-    G3TsPackageChecksInput, G3TsPackageLocalSnapshot, G3TsPackageLocalState,
-    G3TsPackageRootSnapshot, G3TsPackageRootState,
+    G3TsPackageChecksInput, G3TsPackageRootSnapshot, G3TsPackageRootState,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-
-const BANNED_DEPENDENCIES: &[&str] = &[
-    "axios",
-    "lodash",
-    "moment",
-    "uuid",
-    "nanoid",
-    "express",
-    "classnames",
-    "winston",
-    "pino",
-    "request",
-    "got",
-    "superagent",
-    "node-fetch",
-    "isomorphic-fetch",
-    "underscore",
-    "request-promise",
-    "cross-fetch",
-    "xregexp",
-    "regexp-tree",
-];
-
-const BANNED_PREFIXES: &[&str] = &["embla-carousel"];
 
 #[must_use]
 pub(crate) fn root_rel_path(input: &G3TsPackageChecksInput) -> Option<&str> {
@@ -51,44 +26,34 @@ pub(crate) fn parsed_root(input: &G3TsPackageChecksInput) -> Option<&G3TsPackage
 }
 
 #[must_use]
-pub(crate) fn local_parse_blockers(input: &G3TsPackageChecksInput) -> Vec<(&str, String)> {
-    input
-        .locals
+pub(crate) fn root_has_dependency(snapshot: &G3TsPackageRootSnapshot, dependency: &str) -> bool {
+    snapshot
+        .dependencies
         .iter()
-        .filter_map(|state| match state {
-            G3TsPackageLocalState::Unreadable { rel_path, reason }
-            | G3TsPackageLocalState::ParseError { rel_path, reason } => {
-                Some((rel_path.as_str(), reason.clone()))
-            }
-            G3TsPackageLocalState::Parsed { .. } => None,
-        })
-        .collect()
+        .chain(snapshot.dev_dependencies.iter())
+        .any(|declared| declared == dependency)
 }
 
 #[must_use]
-pub(crate) fn local_banned_dependencies(
-    input: &G3TsPackageChecksInput,
-) -> Vec<(&G3TsPackageLocalSnapshot, String)> {
+pub(crate) fn root_invokes_tool(
+    snapshot: &G3TsPackageRootSnapshot,
+    executable: &str,
+    first_arg: &str,
+) -> bool {
+    snapshot.script_tool_invocations.iter().any(|invocation| {
+        invocation.executable == executable
+            && invocation.args.first().is_some_and(|arg| arg == first_arg)
+    })
+}
+
+#[must_use]
+pub(crate) fn forbidden_syncpack_deps_message(input: &G3TsPackageChecksInput) -> String {
     input
-        .locals
+        .forbidden_syncpack_deps
         .iter()
-        .filter_map(|state| match state {
-            G3TsPackageLocalState::Parsed { snapshot } => Some(snapshot),
-            G3TsPackageLocalState::Unreadable { .. } | G3TsPackageLocalState::ParseError { .. } => {
-                None
-            }
-        })
-        .flat_map(|snapshot| {
-            snapshot
-                .dependencies
-                .iter()
-                .chain(snapshot.dev_dependencies.iter())
-                .filter(|dependency| is_banned_dependency(dependency))
-                .cloned()
-                .map(|dependency| (snapshot, dependency))
-                .collect::<Vec<_>>()
-        })
-        .collect()
+        .map(|dependency| format!("`{dependency}`"))
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 #[must_use]
@@ -127,11 +92,4 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: &str) -> G3Che
         Some(file.to_owned()),
         None,
     )
-}
-
-fn is_banned_dependency(dependency: &str) -> bool {
-    BANNED_DEPENDENCIES.contains(&dependency)
-        || BANNED_PREFIXES
-            .iter()
-            .any(|prefix| dependency.starts_with(prefix))
 }
