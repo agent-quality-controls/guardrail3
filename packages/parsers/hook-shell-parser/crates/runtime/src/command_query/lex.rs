@@ -1,163 +1,30 @@
 use super::api::CommandSegment;
 
 pub(super) fn split_command_segments(raw: &str) -> Vec<CommandSegment> {
-    let mut line = strip_inline_comment(raw).trim();
-
-    if let Some(stripped) = line.strip_prefix("if ") {
-        line = stripped.trim();
-    }
-    line = line.strip_suffix("; then").unwrap_or(line).trim();
-    line = line.strip_suffix("then").unwrap_or(line).trim();
-
-    let pieces = split_unquoted_commands(line);
-    let trailing_operator = trailing_control_operator(line);
-
-    pieces
-        .iter()
-        .enumerate()
-        .map(|(index, (segment, operator_before))| {
-            let mut segment = segment.trim();
-            if let Some(stripped) = segment.strip_prefix("then ") {
-                segment = stripped.trim();
-            }
-            segment = segment
-                .trim_end_matches(|c: char| c == ';' || c == ' ')
-                .trim();
-            if let Some(stripped) = segment.strip_suffix(" fi") {
-                segment = stripped.trim();
-            }
-
-            CommandSegment {
-                text: normalize_segment_text(segment),
-                operator_before: *operator_before,
-                operator_after: pieces.get(index + 1).and_then(|(_, op)| *op).or_else(|| {
-                    (index + 1 == pieces.len())
-                        .then_some(trailing_operator)
-                        .flatten()
-                }),
-            }
+    crate::shell_ast::command_segments(raw)
+        .into_iter()
+        .map(|segment| CommandSegment {
+            text: segment.text,
+            operator_before: segment.operator_before,
+            operator_after: segment.operator_after,
         })
-        .filter(|segment| !segment.text.is_empty())
         .collect()
 }
 
 pub(super) fn constant_exit_status(segment: &str) -> Option<bool> {
-    let mut segment = segment.trim().trim_end_matches(';').trim();
-    let mut negated = false;
-
-    while let Some(stripped) = segment.strip_prefix('!') {
-        negated = !negated;
-        segment = stripped.trim();
-    }
-
-    segment = segment.trim_matches(|c: char| c == '(' || c == ')' || c == '{' || c == '}');
-
-    let status = match segment {
-        "true" | ":" => Some(true),
-        "false" => Some(false),
-        value if value.starts_with("exit ") => Some(value.split_whitespace().nth(1) == Some("0")),
-        _ => None,
-    }?;
-
-    Some(if negated { !status } else { status })
+    crate::shell_ast::constant_exit_status(segment)
 }
 
 pub(super) fn is_terminal_exit(segment: &str) -> bool {
-    let mut segment = segment.trim().trim_end_matches(';').trim();
-    while let Some(stripped) = segment.strip_prefix('!') {
-        segment = stripped.trim();
-    }
-    segment = segment.trim_matches(|c: char| c == '(' || c == ')' || c == '{' || c == '}');
-    segment.starts_with("exit ")
+    crate::shell_ast::is_terminal_exit(segment)
 }
 
 pub(super) fn shell_words(command_text: &str) -> Vec<String> {
-    let mut words = Vec::new();
-    let mut current = String::new();
-    let mut chars = command_text.chars().peekable();
-    let mut single_quoted = false;
-    let mut double_quoted = false;
-
-    while let Some(ch) = chars.next() {
-        match ch {
-            '\'' if !double_quoted => single_quoted = !single_quoted,
-            '"' if !single_quoted => double_quoted = !double_quoted,
-            '\\' if !single_quoted && !double_quoted => {
-                if matches!(chars.peek(), Some('\n')) {
-                    let _ = chars.next();
-                    while matches!(chars.peek(), Some(next) if next.is_whitespace()) {
-                        let _ = chars.next();
-                    }
-                    continue;
-                }
-                current.push(ch);
-            }
-            '\\' if double_quoted => {
-                if let Some(next) = chars.next() {
-                    current.push(next);
-                }
-            }
-            ch if ch.is_whitespace() && !single_quoted && !double_quoted => {
-                if !current.is_empty() {
-                    words.push(std::mem::take(&mut current));
-                }
-            }
-            _ => current.push(ch),
-        }
-    }
-
-    if !current.is_empty() {
-        words.push(current);
-    }
-
-    words
+    crate::shell_ast::shell_words(command_text)
 }
 
 pub(super) fn extract_command_substitutions(line: &str) -> Vec<String> {
-    let mut substitutions = Vec::new();
-    let mut single_quoted = false;
-    let mut double_quoted = false;
-    let mut depth = 0usize;
-    let mut start = None;
-    let mut backtick_start = None;
-    let chars: Vec<(usize, char)> = line.char_indices().collect();
-    let mut i = 0usize;
-
-    while i < chars.len() {
-        let (idx, ch) = chars[i];
-        match ch {
-            '\'' if !double_quoted => single_quoted = !single_quoted,
-            '"' if !single_quoted => double_quoted = !double_quoted,
-            '`' if !single_quoted && !double_quoted && !is_escaped(chars.as_slice(), i) => {
-                if let Some(start_idx) = backtick_start.take() {
-                    substitutions.push(line[start_idx..idx].trim().to_owned());
-                } else {
-                    backtick_start = chars.get(i + 1).map(|(next_idx, _)| *next_idx);
-                }
-            }
-            '$' if !single_quoted && !is_escaped(chars.as_slice(), i) => {
-                if chars.get(i + 1).is_some_and(|(_, next)| *next == '(') {
-                    if depth == 0 {
-                        start = chars.get(i + 2).map(|(next_idx, _)| *next_idx);
-                    }
-                    depth += 1;
-                    i += 1;
-                }
-            }
-            ')' if !single_quoted && depth > 0 => {
-                depth -= 1;
-                if depth == 0
-                    && let Some(start_idx) = start.take()
-                {
-                    substitutions.push(line[start_idx..idx].trim().to_owned());
-                }
-            }
-            _ => {}
-        }
-        i += 1;
-    }
-
-    substitutions
+    crate::shell_ast::command_substitutions(line)
 }
 
 pub(super) fn is_help_or_version_flag(token: &str) -> bool {
@@ -197,141 +64,4 @@ pub(super) fn looks_like_env_assignment(token: &str) -> bool {
     };
     (first.is_ascii_alphabetic() || first == '_')
         && chars.all(|ch| ch.is_ascii_alphanumeric() || ch == '_')
-}
-
-fn normalize_segment_text(segment: &str) -> String {
-    let mut segment = segment
-        .trim_matches(|c: char| c == '{' || c == '}' || c == ';' || c == '&' || c == '|')
-        .trim();
-
-    if segment.starts_with('(') && segment.ends_with(')') && !segment.contains("$(") {
-        segment = segment.trim_start_matches('(').trim_end_matches(')').trim();
-    }
-
-    if !segment.contains("$(") {
-        segment = segment.trim_start_matches('(').trim_end_matches(')').trim();
-    }
-
-    segment.to_owned()
-}
-
-fn split_unquoted_commands(line: &str) -> Vec<(&str, Option<&'static str>)> {
-    let mut segments = Vec::new();
-    let mut single_quoted = false;
-    let mut double_quoted = false;
-    let mut command_substitution_depth = 0usize;
-    let mut start = 0usize;
-    let mut operator_before = None;
-    let chars: Vec<(usize, char)> = line.char_indices().collect();
-    let mut i = 0usize;
-
-    while i < chars.len() {
-        let (idx, ch) = chars[i];
-        match ch {
-            '\'' if !double_quoted => single_quoted = !single_quoted,
-            '"' if !single_quoted => double_quoted = !double_quoted,
-            '$' if !single_quoted && !is_escaped(chars.as_slice(), i) => {
-                if chars.get(i + 1).is_some_and(|(_, next)| *next == '(') {
-                    command_substitution_depth += 1;
-                    i += 1;
-                }
-            }
-            ')' if !single_quoted && command_substitution_depth > 0 => {
-                command_substitution_depth -= 1;
-            }
-            ';' if !single_quoted && !double_quoted && command_substitution_depth == 0 => {
-                if start < idx {
-                    segments.push((line[start..idx].trim(), operator_before));
-                }
-                operator_before = Some(";");
-                start = idx + ch.len_utf8();
-            }
-            '&' if !single_quoted && !double_quoted && command_substitution_depth == 0 => {
-                let next_is_ampersand = chars.get(i + 1).is_some_and(|(_, next)| *next == '&');
-                if start < idx {
-                    segments.push((line[start..idx].trim(), operator_before));
-                }
-                operator_before = Some(if next_is_ampersand { "&&" } else { "&" });
-                let next_idx = if next_is_ampersand {
-                    chars[i + 1].0
-                } else {
-                    idx
-                };
-                start = next_idx + 1;
-                if next_is_ampersand {
-                    i += 1;
-                }
-            }
-            '|' if !single_quoted && !double_quoted && command_substitution_depth == 0 => {
-                let next_is_pipe = chars.get(i + 1).is_some_and(|(_, next)| *next == '|');
-                if start < idx {
-                    segments.push((line[start..idx].trim(), operator_before));
-                }
-                operator_before = Some(if next_is_pipe { "||" } else { "|" });
-                let next_idx = if next_is_pipe { chars[i + 1].0 } else { idx };
-                start = next_idx + 1;
-                if next_is_pipe {
-                    i += 1;
-                }
-            }
-            _ => {}
-        }
-        i += 1;
-    }
-
-    if start < line.len() {
-        segments.push((line[start..].trim(), operator_before));
-    }
-
-    segments
-}
-
-fn trailing_control_operator(line: &str) -> Option<&'static str> {
-    let trimmed = line.trim_end();
-    if trimmed.ends_with("&&") || trimmed.ends_with("||") {
-        return None;
-    }
-    if trimmed.ends_with('&') {
-        return Some("&");
-    }
-    if trimmed.ends_with('|') {
-        return Some("|");
-    }
-    None
-}
-
-fn strip_inline_comment(line: &str) -> &str {
-    let mut single_quoted = false;
-    let mut double_quoted = false;
-    let mut prev_was_whitespace = true;
-
-    for (idx, ch) in line.char_indices() {
-        match ch {
-            '\'' if !double_quoted => single_quoted = !single_quoted,
-            '"' if !single_quoted => double_quoted = !double_quoted,
-            '#' if !single_quoted && !double_quoted && prev_was_whitespace => {
-                return &line[..idx];
-            }
-            _ => {}
-        }
-        prev_was_whitespace = ch.is_whitespace();
-    }
-
-    line
-}
-
-fn is_escaped(chars: &[(usize, char)], index: usize) -> bool {
-    let mut backslashes = 0usize;
-    let mut cursor = index;
-
-    while cursor > 0 {
-        cursor -= 1;
-        if chars[cursor].1 == '\\' {
-            backslashes += 1;
-        } else {
-            break;
-        }
-    }
-
-    backslashes % 2 == 1
 }
