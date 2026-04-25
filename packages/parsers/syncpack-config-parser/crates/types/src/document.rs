@@ -29,9 +29,9 @@ pub struct SyncpackVersionGroup {
     pub label: Option<String>,
     pub dependencies: Vec<String>,
     pub dependency_types: Vec<String>,
-    pub packages: Vec<String>,
-    pub specifier_types: Vec<String>,
+    pub packages: Option<Vec<String>>,
+    pub specifier_types: Option<Vec<String>>,
     pub pin_version: Option<String>,
-    pub is_banned: bool,
-    pub is_ignored: bool,
+    pub is_banned: Option<bool>,
+    pub is_ignored: Option<bool>,
 }

@@ -4,7 +4,13 @@ mod types;
 #[cfg(feature = "api")]
 pub use types::G3TsAstroAppRootInput;
 #[cfg(feature = "api")]
+pub use types::G3TsAstroCallSnapshot;
+#[cfg(feature = "api")]
 pub use types::G3TsAstroConfigChecksInput;
+#[cfg(feature = "api")]
+pub use types::G3TsAstroConfigSurfaceSnapshot;
+#[cfg(feature = "api")]
+pub use types::G3TsAstroConfigSurfaceState;
 #[cfg(feature = "api")]
 pub use types::G3TsAstroContentMode;
 #[cfg(feature = "api")]
@@ -17,6 +23,10 @@ pub use types::G3TsAstroEslintSurfaceState;
 pub use types::G3TsAstroFileTreeChecksInput;
 #[cfg(feature = "api")]
 pub use types::G3TsAstroIntegrationContractInput;
+#[cfg(feature = "api")]
+pub use types::G3TsAstroIntegrationSnapshot;
+#[cfg(feature = "api")]
+pub use types::G3TsAstroOutputMode;
 #[cfg(feature = "api")]
 pub use types::G3TsAstroPackageScriptCommand;
 #[cfg(feature = "api")]
@@ -31,6 +41,10 @@ pub use types::G3TsAstroPackageSurfaceSnapshot;
 pub use types::G3TsAstroPackageSurfaceState;
 #[cfg(feature = "api")]
 pub use types::G3TsAstroRouteMarkdownPageInput;
+#[cfg(feature = "api")]
+pub use types::G3TsAstroStaticObjectProperty;
+#[cfg(feature = "api")]
+pub use types::G3TsAstroStaticValue;
 #[cfg(feature = "api")]
 pub use types::G3TsAstroSyncpackConfigSnapshot;
 #[cfg(feature = "api")]

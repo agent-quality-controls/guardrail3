@@ -13,6 +13,7 @@ pub(crate) use crate::types::{
 const NODE_HELPER: &str = r#"
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 
 function fileKind(relPath) {
   if (relPath.endsWith('.config.js') || relPath.endsWith('.js')) return 'Js';
@@ -61,6 +62,71 @@ function normalizePlugins(plugins) {
   return Object.keys(plugins).sort();
 }
 
+function normalizePluginMetaNames(plugins) {
+  if (!plugins || typeof plugins !== 'object') {
+    return {};
+  }
+
+  const metaNames = {};
+  for (const namespace of Object.keys(plugins).sort()) {
+    const metaName = plugins[namespace]?.meta?.name;
+    if (typeof metaName === 'string' && metaName.length > 0) {
+      metaNames[namespace] = metaName;
+    }
+  }
+  return metaNames;
+}
+
+function candidatePluginPackageNames(namespace, plugin) {
+  const candidates = new Set();
+  const metaName = plugin?.meta?.name;
+  if (typeof metaName === 'string' && metaName.length > 0) {
+    candidates.add(metaName);
+  }
+  if (/^[a-z0-9-]+$/.test(namespace)) {
+    candidates.add(`eslint-plugin-${namespace}`);
+  }
+  return [...candidates].sort();
+}
+
+function packageModuleExportsPlugin(module, plugin) {
+  return exportedPluginCandidates(module).some((candidate) =>
+    candidate === plugin
+  );
+}
+
+function exportedPluginCandidates(module) {
+  return [module?.default, module?.['module.exports'], ...Object.values(module ?? {})].filter(
+    (value) => value && typeof value === 'object'
+  );
+}
+
+async function normalizePluginPackageNames(plugins, require) {
+  if (!plugins || typeof plugins !== 'object') {
+    return {};
+  }
+
+  const packageNames = {};
+  for (const namespace of Object.keys(plugins).sort()) {
+    const plugin = plugins[namespace];
+    const matches = new Set();
+    for (const packageName of candidatePluginPackageNames(namespace, plugin)) {
+      try {
+        const resolved = require.resolve(packageName);
+        const module = await import(pathToFileURL(resolved).href);
+        if (packageModuleExportsPlugin(module, plugin)) {
+          matches.add(packageName);
+        }
+      } catch {
+      }
+    }
+    if (matches.size > 0) {
+      packageNames[namespace] = [...matches].sort();
+    }
+  }
+  return packageNames;
+}
+
 const workspaceRoot = process.env.G3_WORKSPACE_ROOT;
 const configRelPath = process.env.G3_CONFIG_REL_PATH;
 const probes = JSON.parse(process.env.G3_PROBES_JSON ?? '[]');
@@ -69,11 +135,12 @@ if (!workspaceRoot || !configRelPath) {
   throw new Error('workspace root and config rel path are required');
 }
 
-const require = createRequire(path.join(workspaceRoot, '__g3_eslint_loader__.cjs'));
-const { ESLint } = require('eslint');
+const configAbsPath = path.join(workspaceRoot, configRelPath);
+const configRequire = createRequire(configAbsPath);
+const { ESLint } = configRequire('eslint');
 const eslint = new ESLint({
   cwd: workspaceRoot,
-  overrideConfigFile: path.join(workspaceRoot, configRelPath),
+  overrideConfigFile: configAbsPath,
 });
 
 const payload = {
@@ -94,6 +161,8 @@ for (const probe of probes) {
       rel_path: probe.rel_path,
       ignored,
       plugins: [],
+      plugin_meta_names: {},
+      plugin_package_names: {},
       rules: {},
       project_service: null,
       linter_options_no_inline_config: null,
@@ -113,6 +182,8 @@ for (const probe of probes) {
     rel_path: probe.rel_path,
     ignored,
     plugins: normalizePlugins(config.plugins),
+    plugin_meta_names: normalizePluginMetaNames(config.plugins),
+    plugin_package_names: await normalizePluginPackageNames(config.plugins, configRequire),
     rules,
     project_service: typeof projectService === 'boolean' ? projectService : null,
     linter_options_no_inline_config:

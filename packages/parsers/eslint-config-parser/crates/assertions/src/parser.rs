@@ -40,7 +40,11 @@ pub fn assert_probe_ignored(snapshot: &EslintConfigSnapshot, rel_path: &str, exp
     assert_eq!(probe.ignored, expected, "probe ignored state mismatch");
 }
 
-pub fn assert_plugins(snapshot: &EslintConfigSnapshot, probe_kind: EslintProbeKind, expected: &[&str]) {
+pub fn assert_plugins(
+    snapshot: &EslintConfigSnapshot,
+    probe_kind: EslintProbeKind,
+    expected: &[&str],
+) {
     let probe = snapshot
         .probes
         .iter()
@@ -53,6 +57,44 @@ pub fn assert_plugins(snapshot: &EslintConfigSnapshot, probe_kind: EslintProbeKi
             .map(|plugin| (*plugin).to_owned())
             .collect::<Vec<_>>(),
         "plugins mismatch"
+    );
+}
+
+pub fn assert_plugin_meta_name(
+    snapshot: &EslintConfigSnapshot,
+    probe_kind: EslintProbeKind,
+    namespace: &str,
+    expected: &str,
+) {
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == probe_kind)
+        .expect("probe should exist");
+    assert_eq!(
+        probe.plugin_meta_names.get(namespace).map(String::as_str),
+        Some(expected),
+        "plugin metadata name mismatch"
+    );
+}
+
+pub fn assert_plugin_package_name(
+    snapshot: &EslintConfigSnapshot,
+    probe_kind: EslintProbeKind,
+    namespace: &str,
+    expected: &str,
+) {
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == probe_kind)
+        .expect("probe should exist");
+    assert!(
+        probe
+            .plugin_package_names
+            .get(namespace)
+            .is_some_and(|package_names| package_names.iter().any(|name| name == expected)),
+        "plugin package name mismatch"
     );
 }
 

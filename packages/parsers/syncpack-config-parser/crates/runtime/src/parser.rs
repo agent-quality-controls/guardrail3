@@ -92,11 +92,14 @@ fn normalize_version_group(value: &Value, index: usize) -> Result<SyncpackVersio
         label: normalize_optional_string(object, "label", index)?,
         dependencies: normalize_string_array(object.get("dependencies"), "dependencies")?,
         dependency_types: normalize_string_array(object.get("dependencyTypes"), "dependencyTypes")?,
-        packages: normalize_string_array(object.get("packages"), "packages")?,
-        specifier_types: normalize_string_array(object.get("specifierTypes"), "specifierTypes")?,
+        packages: normalize_optional_string_array(object.get("packages"), "packages")?,
+        specifier_types: normalize_optional_string_array(
+            object.get("specifierTypes"),
+            "specifierTypes",
+        )?,
         pin_version: normalize_optional_string(object, "pinVersion", index)?,
-        is_banned: normalize_optional_bool(object, "isBanned", index)?.unwrap_or(false),
-        is_ignored: normalize_optional_bool(object, "isIgnored", index)?.unwrap_or(false),
+        is_banned: normalize_optional_bool(object, "isBanned", index)?,
+        is_ignored: normalize_optional_bool(object, "isIgnored", index)?,
     })
 }
 
@@ -146,6 +149,17 @@ fn normalize_string_array(value: Option<&Value>, field_name: &str) -> Result<Vec
             })
         })
         .collect()
+}
+
+fn normalize_optional_string_array(
+    value: Option<&Value>,
+    field_name: &str,
+) -> Result<Option<Vec<String>>, String> {
+    let Some(value) = value else {
+        return Ok(None);
+    };
+
+    normalize_string_array(Some(value), field_name).map(Some)
 }
 
 #[cfg(test)]

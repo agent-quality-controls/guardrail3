@@ -3,8 +3,8 @@ use g3_workspace_crawl::{
     G3RsWorkspaceEntryKind as G3WorkspaceEntryKind, root_file,
 };
 use g3ts_package_types::{
-    G3TsPackageChecksInput, G3TsPackageLocalState, G3TsPackageRootState,
-    G3TsPackageScriptCommand, G3TsPackageScriptCommandSeparator, G3TsPackageScriptParseBlocker,
+    G3TsPackageChecksInput, G3TsPackageLocalState, G3TsPackageRootState, G3TsPackageScriptCommand,
+    G3TsPackageScriptCommandSeparator, G3TsPackageScriptParseBlocker,
     G3TsPackageScriptToolInvocation, G3TsPackageSyncpackConfigSnapshot,
     G3TsPackageSyncpackConfigState, local_snapshot, root_snapshot,
 };
@@ -110,8 +110,14 @@ fn ingest_root(crawl: &G3WorkspaceCrawl) -> G3TsPackageRootState {
         .collect::<Vec<_>>();
     let mut root = root_snapshot(&entry.path.rel_path, snapshot);
     root.script_commands = script_facts.iter().flat_map(script_commands).collect();
-    root.script_tool_invocations = script_facts.iter().flat_map(script_tool_invocations).collect();
-    root.script_parse_blockers = script_facts.iter().filter_map(script_parse_blocker).collect();
+    root.script_tool_invocations = script_facts
+        .iter()
+        .flat_map(script_tool_invocations)
+        .collect();
+    root.script_parse_blockers = script_facts
+        .iter()
+        .filter_map(script_parse_blocker)
+        .collect();
     let preinstall_script_facts = script_facts
         .iter()
         .filter(|fact| fact.script_name == "preinstall")
@@ -125,9 +131,7 @@ fn ingest_root(crawl: &G3WorkspaceCrawl) -> G3TsPackageRootState {
     root.safely_runs_syncpack_lint =
         package_script_command_parser::has_safe_tool_invocation(&script_facts, "syncpack", "lint");
 
-    G3TsPackageRootState::Parsed {
-        snapshot: root,
-    }
+    G3TsPackageRootState::Parsed { snapshot: root }
 }
 
 fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
@@ -142,10 +146,7 @@ fn script_commands(fact: &PackageScriptParseFact) -> Vec<G3TsPackageScriptComman
         .collect()
 }
 
-fn script_command(
-    script_name: &str,
-    command: &PackageScriptCommand,
-) -> G3TsPackageScriptCommand {
+fn script_command(script_name: &str, command: &PackageScriptCommand) -> G3TsPackageScriptCommand {
     G3TsPackageScriptCommand {
         script_name: script_name.to_owned(),
         invocation: command.invocation.clone(),
@@ -164,9 +165,7 @@ fn script_command_separator(
     }
 }
 
-fn script_tool_invocations(
-    fact: &PackageScriptParseFact,
-) -> Vec<G3TsPackageScriptToolInvocation> {
+fn script_tool_invocations(fact: &PackageScriptParseFact) -> Vec<G3TsPackageScriptToolInvocation> {
     fact.tool_invocations
         .iter()
         .map(script_tool_invocation)
@@ -187,17 +186,13 @@ fn script_tool_invocation(
     }
 }
 
-fn script_parse_blocker(
-    fact: &PackageScriptParseFact,
-) -> Option<G3TsPackageScriptParseBlocker> {
+fn script_parse_blocker(fact: &PackageScriptParseFact) -> Option<G3TsPackageScriptParseBlocker> {
     match &fact.state {
         PackageScriptParseState::Unsupported { reason }
-        | PackageScriptParseState::ParseError { reason } => {
-            Some(G3TsPackageScriptParseBlocker {
-                script_name: fact.script_name.clone(),
-                reason: reason.clone(),
-            })
-        }
+        | PackageScriptParseState::ParseError { reason } => Some(G3TsPackageScriptParseBlocker {
+            script_name: fact.script_name.clone(),
+            reason: reason.clone(),
+        }),
         PackageScriptParseState::Parsed { .. } | PackageScriptParseState::NoEslintInvocation => {
             None
         }
@@ -352,10 +347,10 @@ fn group_targets_dependency(
 }
 
 fn canonical_ban_group(group: &syncpack_config_parser::types::SyncpackVersionGroup) -> bool {
-    group.packages.is_empty()
-        && group.specifier_types.is_empty()
-        && !group.is_ignored
-        && group.is_banned
+    group.packages.is_none()
+        && group.specifier_types.is_none()
+        && group.is_ignored.is_none()
+        && group.is_banned == Some(true)
         && group.pin_version.is_none()
 }
 

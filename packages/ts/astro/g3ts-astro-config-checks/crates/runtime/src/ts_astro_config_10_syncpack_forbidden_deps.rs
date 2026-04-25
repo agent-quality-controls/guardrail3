@@ -19,7 +19,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                     .unwrap_or_else(|| package_path.to_owned());
                     results.push(crate::support::error(
                         ID,
-                        "Syncpack does not ban forbidden Astro landing deps",
+                        "Syncpack does not ban forbidden Astro deps",
                         format!(
                             "`{}` does not include exact `source` entry `{expected_source}` for `{package_path}`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app.",
                             snapshot.rel_path,
@@ -33,9 +33,9 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                 {
                     results.push(crate::support::info(
                         ID,
-                        "Syncpack bans forbidden Astro landing deps",
+                        "Syncpack bans forbidden Astro deps",
                         format!(
-                            "`{}` bans forbidden Astro landing deps through Syncpack: {}.",
+                            "`{}` bans forbidden Astro deps through Syncpack: {}.",
                             snapshot.rel_path,
                             crate::support::forbidden_syncpack_deps_message(contract)
                         ),
@@ -47,7 +47,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                 if !snapshot.missing_forbidden_bans.is_empty() {
                     results.push(crate::support::error(
                         ID,
-                        "Syncpack does not ban forbidden Astro landing deps",
+                        "Syncpack does not ban forbidden Astro deps",
                         format!(
                         "`{}` is missing Syncpack banned versionGroups for: {}. Add one canonical banned versionGroup per listed dependency before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\", \"optional\", \"peer\"]`, `isBanned: true`, and no `packages` or `specifierTypes`.",
                         snapshot.rel_path,
@@ -82,7 +82,7 @@ fn push_unavailable_error(
     let package_path = crate::support::package_rel_path(contract).unwrap_or("package.json");
     results.push(crate::support::error(
         ID,
-        "Syncpack does not ban forbidden Astro landing deps",
+        "Syncpack does not ban forbidden Astro deps",
         format!(
             "`{rel_path}` {reason}, so the Astro family cannot prove Syncpack bans forbidden Astro deps for `{package_path}`. Add a parseable `{rel_path}` with canonical `isBanned: true` versionGroups for {}.",
             crate::support::forbidden_syncpack_deps_message(contract)

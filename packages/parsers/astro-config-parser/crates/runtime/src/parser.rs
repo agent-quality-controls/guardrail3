@@ -1,17 +1,18 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 use astro_config_parser_types::document::{
-    AstroAdapterSnapshot, AstroConfigDocument, AstroConfigFileKind, AstroConfigParseState,
-    AstroConfigSelectedFile, AstroConfigSnapshot, AstroIntegrationSnapshot, AstroOutputMode,
+    AstroAdapterSnapshot, AstroCallSnapshot, AstroConfigDocument, AstroConfigFileKind,
+    AstroConfigParseState, AstroConfigSelectedFile, AstroConfigSnapshot, AstroIntegrationSnapshot,
+    AstroOutputMode, AstroStaticObjectProperty, AstroStaticValue,
 };
 use swc_common::{FileName, SourceMap, sync::Lrc};
 use swc_ecma_ast::{
-    ArrowExpr, AssignExpr, BindingIdent, BlockStmt, BlockStmtOrExpr, Callee, Decl, EsVersion,
-    Expr, ExprOrSpread, KeyValueProp, Lit, MemberProp, Module, ModuleDecl,
-    ModuleItem, ObjectLit, Pat, Prop, PropName, PropOrSpread, ReturnStmt, Script, Stmt,
-    VarDeclarator,
+    ArrowExpr, AssignExpr, BindingIdent, BlockStmt, BlockStmtOrExpr, Callee, Decl, EsVersion, Expr,
+    ExprOrSpread, KeyValueProp, Lit, MemberProp, Module, ModuleDecl, ModuleItem, ObjectLit,
+    OptCall, OptChainBase, Pat, Prop, PropName, PropOrSpread, ReturnStmt, Script, Stmt, VarDecl,
+    VarDeclKind, VarDeclOrExpr, VarDeclarator,
 };
 use swc_ecma_parser::{EsSyntax, Parser, StringInput, Syntax, TsSyntax, lexer::Lexer};
 
@@ -82,7 +83,10 @@ fn parse_program(
     kind: AstroConfigFileKind,
 ) -> Result<swc_ecma_ast::Program, crate::error::Error> {
     let cm: Lrc<SourceMap> = Default::default();
-    let fm = cm.new_source_file(FileName::Real(PathBuf::from(abs_path)).into(), source.to_owned());
+    let fm = cm.new_source_file(
+        FileName::Real(PathBuf::from(abs_path)).into(),
+        source.to_owned(),
+    );
     let syntax = match kind {
         AstroConfigFileKind::Ts | AstroConfigFileKind::Mts | AstroConfigFileKind::Cts => {
             Syntax::Typescript(TsSyntax {
@@ -149,9 +153,25 @@ fn normalize_snapshot(
 
 #[derive(Default)]
 struct AnalysisState {
-    import_sources: BTreeMap<String, String>,
+    import_bindings: BTreeMap<String, ImportBinding>,
     const_bindings: BTreeMap<String, Expr>,
+    const_aliases: BTreeMap<String, BTreeSet<String>>,
+    mutated_bindings: BTreeSet<String>,
     module_exports: Vec<Expr>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct ImportBinding {
+    source_module: String,
+    imported_name: Option<String>,
+    kind: ImportBindingKind,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ImportBindingKind {
+    Default,
+    Named,
+    Namespace,
 }
 
 fn collect_state(program: &swc_ecma_ast::Program, state: &mut AnalysisState) {
@@ -169,24 +189,45 @@ fn collect_module_state(module: &Module, state: &mut AnalysisState) {
                 for specifier in &import_decl.specifiers {
                     match specifier {
                         swc_ecma_ast::ImportSpecifier::Default(default_specifier) => {
-                            let _ = state
-                                .import_sources
-                                .insert(default_specifier.local.sym.to_string(), source.clone());
+                            let _ = state.import_bindings.insert(
+                                default_specifier.local.sym.to_string(),
+                                ImportBinding {
+                                    source_module: source.clone(),
+                                    imported_name: None,
+                                    kind: ImportBindingKind::Default,
+                                },
+                            );
                         }
                         swc_ecma_ast::ImportSpecifier::Named(named_specifier) => {
-                            let _ = state
-                                .import_sources
-                                .insert(named_specifier.local.sym.to_string(), source.clone());
+                            let imported_name = named_specifier
+                                .imported
+                                .as_ref()
+                                .map(module_export_name)
+                                .unwrap_or_else(|| named_specifier.local.sym.to_string());
+                            let _ = state.import_bindings.insert(
+                                named_specifier.local.sym.to_string(),
+                                ImportBinding {
+                                    source_module: source.clone(),
+                                    imported_name: Some(imported_name),
+                                    kind: ImportBindingKind::Named,
+                                },
+                            );
                         }
                         swc_ecma_ast::ImportSpecifier::Namespace(namespace_specifier) => {
-                            let _ = state
-                                .import_sources
-                                .insert(namespace_specifier.local.sym.to_string(), source.clone());
+                            let _ = state.import_bindings.insert(
+                                namespace_specifier.local.sym.to_string(),
+                                ImportBinding {
+                                    source_module: source.clone(),
+                                    imported_name: Some("*".to_owned()),
+                                    kind: ImportBindingKind::Namespace,
+                                },
+                            );
                         }
                     }
                 }
             }
             ModuleItem::ModuleDecl(ModuleDecl::ExportDefaultExpr(default_expr)) => {
+                collect_expression_mutations(&default_expr.expr, state);
                 state.module_exports.push((*default_expr.expr).clone());
             }
             ModuleItem::Stmt(stmt) => collect_statement_state(stmt, state),
@@ -203,17 +244,93 @@ fn collect_script_state(script: &Script, state: &mut AnalysisState) {
 
 fn collect_statement_state(stmt: &Stmt, state: &mut AnalysisState) {
     match stmt {
-        Stmt::Decl(Decl::Var(var_decl)) => {
-            for declarator in &var_decl.decls {
-                collect_var_declarator(declarator, state);
+        Stmt::Decl(Decl::Var(var_decl)) if var_decl.kind == VarDeclKind::Const => {
+            collect_var_decl(var_decl, state);
+        }
+        Stmt::Decl(Decl::Var(var_decl)) => collect_var_decl_mutations(var_decl, state),
+        Stmt::Expr(expr_stmt) => collect_expression_mutations(&expr_stmt.expr, state),
+        Stmt::Block(block) => collect_block_statement_state(block, state),
+        Stmt::Labeled(labeled) => collect_statement_state(&labeled.body, state),
+        Stmt::If(if_stmt) => {
+            collect_expression_mutations(&if_stmt.test, state);
+            collect_statement_state(&if_stmt.cons, state);
+            if let Some(alt) = &if_stmt.alt {
+                collect_statement_state(alt, state);
             }
         }
-        Stmt::Expr(expr_stmt) => {
-            if let Expr::Assign(assign_expr) = &*expr_stmt.expr {
-                collect_assignment(assign_expr, state);
+        Stmt::Switch(switch_stmt) => {
+            collect_expression_mutations(&switch_stmt.discriminant, state);
+            for case in &switch_stmt.cases {
+                if let Some(test) = &case.test {
+                    collect_expression_mutations(test, state);
+                }
+                for stmt in &case.cons {
+                    collect_statement_state(stmt, state);
+                }
             }
         }
+        Stmt::Try(try_stmt) => {
+            collect_block_statement_state(&try_stmt.block, state);
+            if let Some(handler) = &try_stmt.handler {
+                collect_block_statement_state(&handler.body, state);
+            }
+            if let Some(finalizer) = &try_stmt.finalizer {
+                collect_block_statement_state(finalizer, state);
+            }
+        }
+        Stmt::While(while_stmt) => {
+            collect_expression_mutations(&while_stmt.test, state);
+            collect_statement_state(&while_stmt.body, state);
+        }
+        Stmt::DoWhile(do_while_stmt) => {
+            collect_statement_state(&do_while_stmt.body, state);
+            collect_expression_mutations(&do_while_stmt.test, state);
+        }
+        Stmt::For(for_stmt) => {
+            if let Some(init) = &for_stmt.init {
+                collect_for_init_state(init, state);
+            }
+            if let Some(test) = &for_stmt.test {
+                collect_expression_mutations(test, state);
+            }
+            if let Some(update) = &for_stmt.update {
+                collect_expression_mutations(update, state);
+            }
+            collect_statement_state(&for_stmt.body, state);
+        }
+        Stmt::ForIn(for_in_stmt) => collect_statement_state(&for_in_stmt.body, state),
+        Stmt::ForOf(for_of_stmt) => collect_statement_state(&for_of_stmt.body, state),
         _ => {}
+    }
+}
+
+fn collect_block_statement_state(block: &BlockStmt, state: &mut AnalysisState) {
+    for stmt in &block.stmts {
+        collect_statement_state(stmt, state);
+    }
+}
+
+fn collect_for_init_state(init: &VarDeclOrExpr, state: &mut AnalysisState) {
+    match init {
+        VarDeclOrExpr::VarDecl(var_decl) if var_decl.kind == VarDeclKind::Const => {
+            collect_var_decl(var_decl, state);
+        }
+        VarDeclOrExpr::VarDecl(var_decl) => collect_var_decl_mutations(var_decl, state),
+        VarDeclOrExpr::Expr(expr) => collect_expression_mutations(expr, state),
+    }
+}
+
+fn collect_var_decl(var_decl: &VarDecl, state: &mut AnalysisState) {
+    for declarator in &var_decl.decls {
+        collect_var_declarator(declarator, state);
+    }
+}
+
+fn collect_var_decl_mutations(var_decl: &VarDecl, state: &mut AnalysisState) {
+    for declarator in &var_decl.decls {
+        if let Some(init) = &declarator.init {
+            collect_expression_mutations(init, state);
+        }
     }
 }
 
@@ -221,17 +338,269 @@ fn collect_var_declarator(declarator: &VarDeclarator, state: &mut AnalysisState)
     let Some(init) = &declarator.init else {
         return;
     };
+    collect_expression_mutations(init, state);
     let Pat::Ident(BindingIdent { id, .. }) = &declarator.name else {
         return;
     };
     let _ = state
         .const_bindings
         .insert(id.sym.to_string(), (**init).clone());
+    let Some(alias_name) = expr_root_ident(init) else {
+        return;
+    };
+    let mut aliases = binding_aliases(state, alias_name);
+    let _ = aliases.insert(alias_name.to_owned());
+    let _ = state.const_aliases.insert(id.sym.to_string(), aliases);
+}
+
+fn collect_expression_mutations(expr: &Expr, state: &mut AnalysisState) {
+    match strip_wrappers(expr) {
+        Expr::Assign(assign_expr) => {
+            collect_assignment(assign_expr, state);
+            collect_expression_mutations(&assign_expr.right, state);
+        }
+        Expr::Update(update_expr) => {
+            if let Some(name) = expr_root_ident(&update_expr.arg) {
+                mark_binding_mutated(state, name);
+            }
+        }
+        Expr::Call(call_expr) => {
+            collect_mutating_call(call_expr, state);
+            if let Callee::Expr(callee_expr) = &call_expr.callee {
+                collect_expression_mutations(callee_expr, state);
+            }
+            for arg in &call_expr.args {
+                if arg.spread.is_none() {
+                    collect_expression_mutations(&arg.expr, state);
+                }
+            }
+        }
+        Expr::OptChain(opt_chain) => match &*opt_chain.base {
+            OptChainBase::Call(opt_call) => {
+                collect_optional_mutating_call(opt_call, state);
+                collect_expression_mutations(&opt_call.callee, state);
+                for arg in &opt_call.args {
+                    if arg.spread.is_none() {
+                        collect_expression_mutations(&arg.expr, state);
+                    } else {
+                        mark_all_static_bindings_mutated(state);
+                    }
+                }
+            }
+            OptChainBase::Member(member) => collect_expression_mutations(&member.obj, state),
+        },
+        Expr::Arrow(arrow) => match &*arrow.body {
+            BlockStmtOrExpr::Expr(expr) => collect_expression_mutations(expr, state),
+            BlockStmtOrExpr::BlockStmt(block) => collect_block_statement_state(block, state),
+        },
+        Expr::Fn(function) => {
+            if let Some(body) = &function.function.body {
+                collect_block_statement_state(body, state);
+            }
+        }
+        Expr::Array(array) => {
+            for element in array.elems.iter().flatten() {
+                if element.spread.is_none() {
+                    collect_expression_mutations(&element.expr, state);
+                }
+            }
+        }
+        Expr::Object(object) => {
+            for prop in &object.props {
+                let PropOrSpread::Prop(prop) = prop else {
+                    continue;
+                };
+                if let Prop::KeyValue(KeyValueProp { value, .. }) = &**prop {
+                    collect_expression_mutations(value, state);
+                }
+            }
+        }
+        Expr::Cond(cond) => {
+            collect_expression_mutations(&cond.test, state);
+            collect_expression_mutations(&cond.cons, state);
+            collect_expression_mutations(&cond.alt, state);
+        }
+        Expr::Bin(bin) => {
+            collect_expression_mutations(&bin.left, state);
+            collect_expression_mutations(&bin.right, state);
+        }
+        Expr::Unary(unary) => collect_expression_mutations(&unary.arg, state),
+        Expr::Await(await_expr) => collect_expression_mutations(&await_expr.arg, state),
+        Expr::Seq(seq) => {
+            for expr in &seq.exprs {
+                collect_expression_mutations(expr, state);
+            }
+        }
+        _ => {}
+    }
 }
 
 fn collect_assignment(assign_expr: &AssignExpr, state: &mut AnalysisState) {
     if assignment_exports_target(assign_expr) {
+        collect_expression_mutations(&assign_expr.right, state);
         state.module_exports.push((*assign_expr.right).clone());
+        return;
+    }
+
+    if let Some(name) = assignment_root_ident(&assign_expr.left) {
+        mark_binding_mutated(state, name);
+    }
+}
+
+fn collect_mutating_call(call_expr: &swc_ecma_ast::CallExpr, state: &mut AnalysisState) {
+    let Callee::Expr(callee_expr) = &call_expr.callee else {
+        return;
+    };
+
+    let Expr::Member(member) = strip_wrappers(callee_expr) else {
+        return;
+    };
+
+    let Some(method_name) = member_property_name(&member.prop) else {
+        return;
+    };
+
+    if is_mutating_member_method(&method_name) {
+        if let Some(name) = expr_root_ident(&member.obj) {
+            mark_binding_mutated(state, name);
+        }
+        return;
+    }
+
+    if is_global_mutating_call(&member.obj, &method_name) {
+        let Some(first_arg) = call_expr.args.first() else {
+            return;
+        };
+        if first_arg.spread.is_some() {
+            mark_all_static_bindings_mutated(state);
+            return;
+        }
+        if let Some(name) = expr_root_ident(&first_arg.expr) {
+            mark_binding_mutated(state, name);
+        }
+    }
+}
+
+fn collect_optional_mutating_call(opt_call: &OptCall, state: &mut AnalysisState) {
+    let Expr::Member(member) = strip_wrappers(&opt_call.callee) else {
+        return;
+    };
+
+    let Some(method_name) = member_property_name(&member.prop) else {
+        return;
+    };
+
+    if is_global_mutating_call(&member.obj, &method_name) {
+        mark_all_static_bindings_mutated(state);
+        return;
+    }
+
+    if is_mutating_member_method(&method_name) {
+        if let Some(name) = expr_root_ident(&member.obj) {
+            mark_binding_mutated(state, name);
+        } else {
+            mark_all_static_bindings_mutated(state);
+        }
+    }
+}
+
+fn is_mutating_member_method(method_name: &str) -> bool {
+    matches!(
+        method_name,
+        "copyWithin"
+            | "fill"
+            | "pop"
+            | "push"
+            | "reverse"
+            | "shift"
+            | "sort"
+            | "splice"
+            | "unshift"
+    )
+}
+
+fn is_global_mutating_call(object: &Expr, method_name: &str) -> bool {
+    matches!(
+        (strip_wrappers(object), method_name),
+        (Expr::Ident(ident), "assign") if ident.sym == *"Object"
+    ) || matches!(
+        (strip_wrappers(object), method_name),
+        (Expr::Ident(ident), "set") if ident.sym == *"Reflect"
+    )
+}
+
+fn assignment_root_ident(target: &swc_ecma_ast::AssignTarget) -> Option<&str> {
+    match target {
+        swc_ecma_ast::AssignTarget::Simple(simple) => simple_assignment_root_ident(simple),
+        swc_ecma_ast::AssignTarget::Pat(pat) => pat_assignment_root_ident(pat),
+    }
+}
+
+fn simple_assignment_root_ident(target: &swc_ecma_ast::SimpleAssignTarget) -> Option<&str> {
+    match target {
+        swc_ecma_ast::SimpleAssignTarget::Ident(ident) => Some(ident.id.sym.as_ref()),
+        swc_ecma_ast::SimpleAssignTarget::Member(member) => expr_root_ident(&member.obj),
+        swc_ecma_ast::SimpleAssignTarget::Paren(paren) => expr_root_ident(&paren.expr),
+        swc_ecma_ast::SimpleAssignTarget::TsAs(ts_as) => expr_root_ident(&ts_as.expr),
+        swc_ecma_ast::SimpleAssignTarget::TsSatisfies(ts_satisfies) => {
+            expr_root_ident(&ts_satisfies.expr)
+        }
+        swc_ecma_ast::SimpleAssignTarget::TsNonNull(non_null) => {
+            expr_root_ident(&non_null.expr)
+        }
+        swc_ecma_ast::SimpleAssignTarget::TsTypeAssertion(assertion) => {
+            expr_root_ident(&assertion.expr)
+        }
+        _ => None,
+    }
+}
+
+fn pat_assignment_root_ident(target: &swc_ecma_ast::AssignTargetPat) -> Option<&str> {
+    match target {
+        swc_ecma_ast::AssignTargetPat::Array(_) | swc_ecma_ast::AssignTargetPat::Object(_) => None,
+        swc_ecma_ast::AssignTargetPat::Invalid(_) => None,
+    }
+}
+
+fn expr_root_ident(expr: &Expr) -> Option<&str> {
+    match strip_wrappers(expr) {
+        Expr::Ident(ident) => Some(ident.sym.as_ref()),
+        Expr::Member(member) => expr_root_ident(&member.obj),
+        _ => None,
+    }
+}
+
+fn const_binding<'a>(state: &'a AnalysisState, name: &str) -> Option<&'a Expr> {
+    (!state.mutated_bindings.contains(name))
+        .then(|| state.const_bindings.get(name))
+        .flatten()
+}
+
+fn mark_binding_mutated(state: &mut AnalysisState, name: &str) {
+    let _ = state.mutated_bindings.insert(name.to_owned());
+    for alias in binding_aliases(state, name) {
+        let _ = state.mutated_bindings.insert(alias);
+    }
+}
+
+fn mark_all_static_bindings_mutated(state: &mut AnalysisState) {
+    state.mutated_bindings.extend(state.const_bindings.keys().cloned());
+}
+
+fn binding_aliases(state: &AnalysisState, name: &str) -> BTreeSet<String> {
+    let mut aliases = BTreeSet::new();
+    collect_binding_aliases(state, name, &mut aliases);
+    aliases
+}
+
+fn collect_binding_aliases(state: &AnalysisState, name: &str, aliases: &mut BTreeSet<String>) {
+    let Some(direct_aliases) = state.const_aliases.get(name) else {
+        return;
+    };
+    for alias in direct_aliases {
+        if aliases.insert(alias.clone()) {
+            collect_binding_aliases(state, alias, aliases);
+        }
     }
 }
 
@@ -268,9 +637,7 @@ fn resolve_to_config_expr<'a>(
     }
     match strip_wrappers(expr) {
         Expr::Object(_) => Some(strip_wrappers(expr)),
-        Expr::Ident(ident) => state
-            .const_bindings
-            .get(ident.sym.as_ref())
+        Expr::Ident(ident) => const_binding(state, ident.sym.as_ref())
             .and_then(|binding| resolve_to_config_expr(binding, state, depth + 1)),
         Expr::Call(call_expr) => {
             let callee = match &call_expr.callee {
@@ -280,9 +647,9 @@ fn resolve_to_config_expr<'a>(
             match callee {
                 Expr::Ident(ident)
                     if state
-                        .import_sources
+                        .import_bindings
                         .get(ident.sym.as_ref())
-                        .is_some_and(|source| source == "astro/config") =>
+                        .is_some_and(|binding| binding.source_module == "astro/config") =>
                 {
                     let first_arg = call_expr.args.first()?;
                     resolve_callable_config_arg(&first_arg.expr, state, depth + 1)
@@ -340,9 +707,7 @@ fn as_object<'a>(expr: &'a Expr, state: &'a AnalysisState, depth: usize) -> Opti
     }
     match strip_wrappers(expr) {
         Expr::Object(object) => Some(object),
-        Expr::Ident(ident) => state
-            .const_bindings
-            .get(ident.sym.as_ref())
+        Expr::Ident(ident) => const_binding(state, ident.sym.as_ref())
             .and_then(|binding| as_object(binding, state, depth + 1)),
         _ => None,
     }
@@ -358,9 +723,7 @@ fn as_array<'a>(
     }
     match strip_wrappers(expr) {
         Expr::Array(array) => Some(array),
-        Expr::Ident(ident) => state
-            .const_bindings
-            .get(ident.sym.as_ref())
+        Expr::Ident(ident) => const_binding(state, ident.sym.as_ref())
             .and_then(|binding| as_array(binding, state, depth + 1)),
         _ => None,
     }
@@ -371,19 +734,21 @@ fn property_string(
     property_name: &str,
     state: &AnalysisState,
 ) -> Result<Option<String>, String> {
-    let Some(expr) = find_property_value(object, property_name, state) else {
+    let Some(expr) = find_property_value(object, property_name, state)? else {
         return Ok(None);
     };
-    resolve_string_expr(expr, state, 0).map(Some).ok_or_else(|| {
-        format!("Astro config property `{property_name}` must resolve to a string literal")
-    })
+    resolve_string_expr(expr, state, 0)
+        .map(Some)
+        .ok_or_else(|| {
+            format!("Astro config property `{property_name}` must resolve to a string literal")
+        })
 }
 
 fn property_output(
     object: &ObjectLit,
     state: &AnalysisState,
 ) -> Result<Option<AstroOutputMode>, String> {
-    let Some(expr) = find_property_value(object, "output", state) else {
+    let Some(expr) = find_property_value(object, "output", state)? else {
         return Ok(None);
     };
     let value = resolve_string_expr(expr, state, 0).ok_or_else(|| {
@@ -402,7 +767,7 @@ fn property_integrations(
     object: &ObjectLit,
     state: &AnalysisState,
 ) -> Result<Vec<AstroIntegrationSnapshot>, String> {
-    let Some(expr) = find_property_value(object, "integrations", state) else {
+    let Some(expr) = find_property_value(object, "integrations", state)? else {
         return Ok(Vec::new());
     };
     let array = as_array(expr, state, 0).ok_or_else(|| {
@@ -411,7 +776,13 @@ fn property_integrations(
 
     let mut integrations = Vec::new();
     collect_integrations_from_array(array, state, &mut integrations, 0)?;
-    integrations.sort();
+    integrations.sort_by(|left, right| {
+        (&left.source_module, &left.name, &left.imported_name).cmp(&(
+            &right.source_module,
+            &right.name,
+            &right.imported_name,
+        ))
+    });
     Ok(integrations)
 }
 
@@ -442,7 +813,7 @@ fn collect_integrations_from_array(
             continue;
         }
 
-        integrations.push(expr_to_plugin_snapshot(expr, state, depth + 1));
+        integrations.push(expr_to_plugin_snapshot(expr, state, depth + 1)?);
     }
 
     Ok(())
@@ -452,13 +823,15 @@ fn property_adapter(
     object: &ObjectLit,
     state: &AnalysisState,
 ) -> Result<Option<AstroAdapterSnapshot>, String> {
-    let Some(expr) = find_property_value(object, "adapter", state) else {
+    let Some(expr) = find_property_value(object, "adapter", state)? else {
         return Ok(None);
     };
-    let plugin = expr_to_plugin_snapshot(expr, state, 0);
+    let plugin = expr_to_plugin_snapshot(expr, state, 0)?;
     Ok(Some(AstroAdapterSnapshot {
         source_module: plugin.source_module,
         name: plugin.name,
+        imported_name: plugin.imported_name,
+        call: plugin.call,
     }))
 }
 
@@ -466,58 +839,80 @@ fn expr_to_plugin_snapshot(
     expr: &Expr,
     state: &AnalysisState,
     depth: usize,
-) -> AstroIntegrationSnapshot {
+) -> Result<AstroIntegrationSnapshot, String> {
     if depth > 16 {
-        return AstroIntegrationSnapshot {
+        return Ok(AstroIntegrationSnapshot {
             source_module: None,
             name: None,
-        };
+            imported_name: None,
+            call: None,
+        });
     }
     match strip_wrappers(expr) {
         Expr::Ident(ident) => {
-            if let Some(binding) = state.const_bindings.get(ident.sym.as_ref()) {
+            if let Some(binding) = const_binding(state, ident.sym.as_ref()) {
                 return expr_to_plugin_snapshot(binding, state, depth + 1);
             }
-            AstroIntegrationSnapshot {
+            Ok(AstroIntegrationSnapshot {
                 source_module: None,
                 name: Some(ident.sym.to_string()),
-            }
+                imported_name: None,
+                call: None,
+            })
         }
         Expr::Call(call_expr) => {
             if let Some(source_module) = require_call_source_module(call_expr) {
-                return AstroIntegrationSnapshot {
+                return Ok(AstroIntegrationSnapshot {
                     source_module: Some(source_module),
                     name: Some("require".to_owned()),
-                };
+                    imported_name: Some("require".to_owned()),
+                    call: Some(AstroCallSnapshot {
+                        first_arg: static_call_first_arg(call_expr, state, depth + 1)?,
+                    }),
+                });
             }
-            match &call_expr.callee {
+            let mut snapshot = match &call_expr.callee {
                 Callee::Expr(callee_expr) => {
-                    called_expr_to_plugin_snapshot(callee_expr, state, depth + 1)
+                    called_expr_to_plugin_snapshot(callee_expr, state, depth + 1)?
                 }
                 _ => AstroIntegrationSnapshot {
                     source_module: None,
                     name: None,
+                    imported_name: None,
+                    call: None,
                 },
-            }
+            };
+            snapshot.call = Some(AstroCallSnapshot {
+                first_arg: static_call_first_arg(call_expr, state, depth + 1)?,
+            });
+            Ok(snapshot)
         }
-        Expr::Member(member) => match &*member.obj {
+        Expr::Member(member) => Ok(match &*member.obj {
             Expr::Ident(ident) => AstroIntegrationSnapshot {
                 source_module: None,
                 name: member_property_name(&member.prop).or_else(|| Some(ident.sym.to_string())),
+                imported_name: None,
+                call: None,
             },
             _ => AstroIntegrationSnapshot {
                 source_module: None,
                 name: member_property_name(&member.prop),
+                imported_name: None,
+                call: None,
             },
-        },
-        Expr::Object(_) => AstroIntegrationSnapshot {
+        }),
+        Expr::Object(_) => Ok(AstroIntegrationSnapshot {
             source_module: None,
             name: Some("object".to_owned()),
-        },
-        other => AstroIntegrationSnapshot {
+            imported_name: None,
+            call: None,
+        }),
+        other => Ok(AstroIntegrationSnapshot {
             source_module: None,
             name: Some(expr_kind_name(other).to_owned()),
-        },
+            imported_name: None,
+            call: None,
+        }),
     }
 }
 
@@ -525,33 +920,170 @@ fn called_expr_to_plugin_snapshot(
     expr: &Expr,
     state: &AnalysisState,
     depth: usize,
-) -> AstroIntegrationSnapshot {
+) -> Result<AstroIntegrationSnapshot, String> {
     if depth > 16 {
-        return AstroIntegrationSnapshot {
+        return Ok(AstroIntegrationSnapshot {
             source_module: None,
             name: None,
-        };
+            imported_name: None,
+            call: None,
+        });
     }
 
     match strip_wrappers(expr) {
         Expr::Ident(ident) => {
-            if let Some(binding) = state.const_bindings.get(ident.sym.as_ref()) {
+            if let Some(binding) = const_binding(state, ident.sym.as_ref()) {
                 return called_expr_to_plugin_snapshot(binding, state, depth + 1);
             }
-            AstroIntegrationSnapshot {
-                source_module: state.import_sources.get(ident.sym.as_ref()).cloned(),
+            let import_binding = state.import_bindings.get(ident.sym.as_ref());
+            Ok(AstroIntegrationSnapshot {
+                source_module: import_binding.map(|binding| binding.source_module.clone()),
                 name: Some(ident.sym.to_string()),
-            }
+                imported_name: import_binding.and_then(|binding| binding.imported_name.clone()),
+                call: None,
+            })
         }
-        Expr::Member(member) => match &*member.obj {
-            Expr::Ident(ident) => AstroIntegrationSnapshot {
-                source_module: state.import_sources.get(ident.sym.as_ref()).cloned(),
-                name: member_property_name(&member.prop).or_else(|| Some(ident.sym.to_string())),
-            },
-            _ => expr_to_plugin_snapshot(expr, state, depth + 1),
-        },
+        Expr::Member(member) => Ok(match &*member.obj {
+            Expr::Ident(ident) => {
+                let import_binding = state.import_bindings.get(ident.sym.as_ref());
+                AstroIntegrationSnapshot {
+                    source_module: import_binding.map(|binding| binding.source_module.clone()),
+                    name: member_property_name(&member.prop)
+                        .or_else(|| Some(ident.sym.to_string())),
+                    imported_name: import_binding
+                        .and_then(|binding| {
+                            (binding.kind == ImportBindingKind::Namespace).then(|| "*".to_owned())
+                        })
+                        .or_else(|| member_property_name(&member.prop)),
+                    call: None,
+                }
+            }
+            _ => expr_to_plugin_snapshot(expr, state, depth + 1)?,
+        }),
         _ => expr_to_plugin_snapshot(expr, state, depth + 1),
     }
+}
+
+fn static_call_first_arg(
+    call_expr: &swc_ecma_ast::CallExpr,
+    state: &AnalysisState,
+    depth: usize,
+) -> Result<Option<AstroStaticValue>, String> {
+    let Some(first_arg) = call_expr.args.first() else {
+        return Ok(None);
+    };
+    if first_arg.spread.is_some() {
+        return Err("Astro integration call arguments must not use spread syntax".to_owned());
+    }
+    static_value(&first_arg.expr, state, depth).map(Some)
+}
+
+fn static_value(
+    expr: &Expr,
+    state: &AnalysisState,
+    depth: usize,
+) -> Result<AstroStaticValue, String> {
+    if depth > 16 {
+        return Err("Astro config static value exceeded supported nesting depth".to_owned());
+    }
+
+    match strip_wrappers(expr) {
+        Expr::Lit(Lit::Bool(value)) => Ok(AstroStaticValue::Bool(value.value)),
+        Expr::Lit(Lit::Num(value)) => Ok(AstroStaticValue::Number(value.value)),
+        Expr::Lit(Lit::Str(value)) => Ok(AstroStaticValue::String(
+            value.value.to_string_lossy().into_owned(),
+        )),
+        Expr::Lit(Lit::Null(_)) => Ok(AstroStaticValue::Null),
+        Expr::Tpl(template) if template.exprs.is_empty() && template.quasis.len() == 1 => template
+            .quasis
+            .first()
+            .map(|quasi| AstroStaticValue::String(quasi.raw.to_string()))
+            .ok_or_else(|| "Astro config static template literal is empty".to_owned()),
+        Expr::Array(array) => {
+            let mut values = Vec::new();
+            for element in &array.elems {
+                let Some(element) = element else {
+                    return Err("Astro config static arrays must not contain holes".to_owned());
+                };
+                if element.spread.is_some() {
+                    return Err(
+                        "Astro config static arrays must not contain spread elements".to_owned(),
+                    );
+                }
+                values.push(static_value(&element.expr, state, depth + 1)?);
+            }
+            Ok(AstroStaticValue::Array(values))
+        }
+        Expr::Object(object) => {
+            let mut properties = Vec::new();
+            let mut seen_keys = std::collections::BTreeSet::new();
+            for property in &object.props {
+                let PropOrSpread::Prop(property) = property else {
+                    return Err(
+                        "Astro config static objects must not contain spread properties".to_owned(),
+                    );
+                };
+                match &**property {
+                    Prop::KeyValue(KeyValueProp { key, value }) => {
+                        let key = prop_name(key).ok_or_else(|| {
+                            "Astro config static object keys must be static identifiers or strings"
+                                .to_owned()
+                        })?;
+                        if !seen_keys.insert(key.to_owned()) {
+                            return Err(format!(
+                                "Astro config static object has duplicate `{key}` property"
+                            ));
+                        }
+                        properties.push(AstroStaticObjectProperty {
+                            key: key.to_owned(),
+                            value: static_value(value, state, depth + 1)?,
+                        });
+                    }
+                    Prop::Shorthand(ident) => {
+                        let key = ident.sym.to_string();
+                        if !seen_keys.insert(key.clone()) {
+                            return Err(format!(
+                                "Astro config static object has duplicate `{key}` property"
+                            ));
+                        }
+                        properties.push(AstroStaticObjectProperty {
+                            key,
+                            value: static_identifier_value(ident.sym.as_ref(), state, depth + 1)?,
+                        });
+                    }
+                    _ => {
+                        return Err(
+                            "Astro config static objects must contain only key-value or shorthand properties"
+                                .to_owned(),
+                        );
+                    }
+                }
+            }
+            Ok(AstroStaticValue::Object(properties))
+        }
+        Expr::Ident(ident) => static_identifier_value(ident.sym.as_ref(), state, depth + 1),
+        _ => Err("Astro integration options must resolve to static values".to_owned()),
+    }
+}
+
+fn static_identifier_value(
+    name: &str,
+    state: &AnalysisState,
+    depth: usize,
+) -> Result<AstroStaticValue, String> {
+    if let Some(binding) = const_binding(state, name) {
+        return static_value(binding, state, depth + 1);
+    }
+
+    state
+        .import_bindings
+        .get(name)
+        .map(|binding| AstroStaticValue::ImportedIdentifier {
+            local_name: name.to_owned(),
+            source_module: Some(binding.source_module.clone()),
+            imported_name: binding.imported_name.clone(),
+        })
+        .ok_or_else(|| format!("Astro config static identifier `{name}` is unresolved"))
 }
 
 fn resolve_string_expr(expr: &Expr, state: &AnalysisState, depth: usize) -> Option<String> {
@@ -561,14 +1093,9 @@ fn resolve_string_expr(expr: &Expr, state: &AnalysisState, depth: usize) -> Opti
     match strip_wrappers(expr) {
         Expr::Lit(Lit::Str(value)) => Some(value.value.to_string_lossy().into_owned()),
         Expr::Tpl(template) if template.exprs.is_empty() && template.quasis.len() == 1 => {
-            template
-                .quasis
-                .first()
-                .map(|quasi| quasi.raw.to_string())
+            template.quasis.first().map(|quasi| quasi.raw.to_string())
         }
-        Expr::Ident(ident) => state
-            .const_bindings
-            .get(ident.sym.as_ref())
+        Expr::Ident(ident) => const_binding(state, ident.sym.as_ref())
             .and_then(|binding| resolve_string_expr(binding, state, depth + 1)),
         _ => None,
     }
@@ -578,19 +1105,51 @@ fn find_property_value<'a>(
     object: &'a ObjectLit,
     property_name: &str,
     state: &'a AnalysisState,
-) -> Option<&'a Expr> {
-    object.props.iter().find_map(|prop| match prop {
-        PropOrSpread::Prop(prop) => match &**prop {
-            Prop::KeyValue(KeyValueProp { key, value }) if prop_name(key) == Some(property_name) => {
-                Some(&**value)
+) -> Result<Option<&'a Expr>, String> {
+    let mut found = None;
+
+    for prop in &object.props {
+        let PropOrSpread::Prop(prop) = prop else {
+            return Err("Astro config object must not contain spread properties".to_owned());
+        };
+
+        match &**prop {
+            Prop::KeyValue(KeyValueProp { key, value }) => {
+                let Some(key) = prop_name(key) else {
+                    return Err(
+                        "Astro config object keys must be static identifiers or strings".to_owned(),
+                    );
+                };
+                if key == property_name {
+                    if found.is_some() {
+                        return Err(format!(
+                            "Astro config object has duplicate `{property_name}` property"
+                        ));
+                    }
+                    found = Some(&**value);
+                }
             }
             Prop::Shorthand(ident) if ident.sym == *property_name => {
-                state.const_bindings.get(ident.sym.as_ref())
+                if found.is_some() {
+                    return Err(format!(
+                        "Astro config object has duplicate `{property_name}` property"
+                    ));
+                }
+                found = Some(const_binding(state, ident.sym.as_ref()).ok_or_else(|| {
+                    format!("Astro config shorthand `{property_name}` must resolve to an unmutated const binding")
+                })?);
             }
-            _ => None,
-        },
-        PropOrSpread::Spread(_) => None,
-    })
+            Prop::Shorthand(_) => {}
+            _ => {
+                return Err(
+                    "Astro config object must contain only key-value or shorthand properties"
+                        .to_owned(),
+                );
+            }
+        }
+    }
+
+    Ok(found)
 }
 
 fn prop_name(name: &PropName) -> Option<&str> {
@@ -609,6 +1168,13 @@ fn member_property_name(prop: &MemberProp) -> Option<String> {
             Expr::Lit(Lit::Str(value)) => Some(value.value.to_string_lossy().into_owned()),
             _ => None,
         },
+    }
+}
+
+fn module_export_name(name: &swc_ecma_ast::ModuleExportName) -> String {
+    match name {
+        swc_ecma_ast::ModuleExportName::Ident(ident) => ident.sym.to_string(),
+        swc_ecma_ast::ModuleExportName::Str(value) => value.value.to_string_lossy().into_owned(),
     }
 }
 

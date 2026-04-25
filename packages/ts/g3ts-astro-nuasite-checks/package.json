@@ -1,0 +1,59 @@
+{
+  "name": "g3ts-astro-nuasite-checks",
+  "version": "0.1.0",
+  "description": "G3TS-owned custom checks for @nuasite/checks in Astro content sites.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/websmasher/guardrail3.git",
+    "directory": "packages/ts/g3ts-astro-nuasite-checks"
+  },
+  "homepage": "https://github.com/websmasher/guardrail3/tree/main/packages/ts/g3ts-astro-nuasite-checks",
+  "bugs": {
+    "url": "https://github.com/websmasher/guardrail3/issues"
+  },
+  "keywords": [
+    "astro",
+    "nuasite",
+    "checks",
+    "json-ld",
+    "guardrails",
+    "g3ts"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "prepack": "npm run clean && npm run build",
+    "prepublishOnly": "npm test",
+    "pretest": "npm run build",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@nuasite/checks": "0.18.0"
+  },
+  "devDependencies": {
+    "@nuasite/checks": "0.18.0",
+    "@types/node": "^24.9.1",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3"
+  }
+}

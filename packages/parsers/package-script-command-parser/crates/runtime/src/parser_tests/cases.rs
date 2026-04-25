@@ -215,6 +215,10 @@ fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
         .expect("script command fact should parse");
     let unsafe_astro_later_or = super::super::parse("check", "astro check && true || true")
         .expect("script command fact should parse");
+    let unsafe_newline_chain = super::super::parse("check", "astro check\ntrue")
+        .expect("script command fact should parse");
+    let unsafe_background_build = super::super::parse("build", "astro build &")
+        .expect("script command fact should parse");
     let unsafe_duplicate_surface = super::super::parse("test", "syncpack lint || true")
         .expect("script command fact should parse");
     let fake_only_allow = super::super::parse("preinstall", "echo only-allow pnpm")
@@ -249,6 +253,14 @@ fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
         "astro check in a later fail-open || chain should be rejected"
     );
     assert!(
+        !super::super::has_safe_tool_invocation(&[unsafe_newline_chain], "astro", "check"),
+        "newline-separated astro check scripts should be rejected as unsupported shell syntax"
+    );
+    assert!(
+        !super::super::has_safe_tool_invocation(&[unsafe_background_build], "astro", "build"),
+        "backgrounded astro build should be rejected as unsupported shell syntax"
+    );
+    assert!(
         !super::super::has_safe_tool_invocation(
             &[safe, unsafe_duplicate_surface],
             "syncpack",
@@ -275,6 +287,7 @@ fn unsupported_guardrail_shell_syntax_fails_closed() {
     for command in [
         "syncpack lint | tee log",
         "astro check; syncpack lint",
+        "astro build &",
         "echo $(syncpack lint)",
     ] {
         let document = super::super::parse_document("check", command)

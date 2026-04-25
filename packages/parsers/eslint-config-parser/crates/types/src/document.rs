@@ -54,6 +54,8 @@ pub struct EslintEffectiveConfigProbe {
     pub rel_path: String,
     pub ignored: bool,
     pub plugins: Vec<String>,
+    pub plugin_meta_names: BTreeMap<String, String>,
+    pub plugin_package_names: BTreeMap<String, Vec<String>>,
     pub rules: BTreeMap<String, EslintRuleSetting>,
     pub project_service: Option<bool>,
     pub linter_options_no_inline_config: Option<bool>,
