@@ -138,6 +138,8 @@ Delegate:
 
 Owner: G3TS Astro config checks.
 
+Implemented in this slice.
+
 Rule:
 
 - A route file must not match both `content_routes` and `non_content_routes`.
@@ -240,7 +242,7 @@ Style family may own:
 # Implementation Order
 
 1. Done: `TS-ASTRO-CONFIG-24`.
-2. Finish `TS-ASTRO-CONFIG-25`.
+2. Done: `TS-ASTRO-CONFIG-25`.
 3. Finish `TS-ASTRO-CONFIG-26`.
 4. Finish `TS-ASTRO-CONFIG-27`.
 5. Finish `TS-ASTRO-FILETREE-12`.

@@ -25,6 +25,7 @@ pub fn check(input: &G3TsAstroConfigChecksInput) -> Vec<G3CheckResult> {
     crate::ts_astro_config_22_structured_data_check::check(input, &mut results);
     crate::ts_astro_config_23_strict_content_policy::check(input, &mut results);
     crate::ts_astro_config_24_strict_policy_paths::check(input, &mut results);
+    crate::ts_astro_config_25_route_scope_overlap::check(input, &mut results);
     results
 }
 

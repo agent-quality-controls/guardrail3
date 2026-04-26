@@ -112,6 +112,8 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                 G3TsAstroIntegrationContractInput {
                     app_root_rel_path: app_root_rel_path.clone(),
                     content_mode: classify_content_mode(crawl, app_root_rel_path),
+                    route_page_paths: crate::select::route_page_paths(crawl, app_root_rel_path),
+                    endpoint_paths: crate::select::endpoint_paths(crawl, app_root_rel_path),
                     package,
                     syncpack_config,
                     astro_policy,

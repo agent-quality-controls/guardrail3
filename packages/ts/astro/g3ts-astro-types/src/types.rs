@@ -213,6 +213,8 @@ pub enum G3TsAstroConfigSurfaceState {
 pub struct G3TsAstroIntegrationContractInput {
     pub app_root_rel_path: String,
     pub content_mode: G3TsAstroContentMode,
+    pub route_page_paths: Vec<String>,
+    pub endpoint_paths: Vec<String>,
     pub package: G3TsAstroPackageSurfaceState,
     pub syncpack_config: G3TsAstroSyncpackConfigState,
     pub astro_policy: G3TsAstroPolicySurfaceState,
