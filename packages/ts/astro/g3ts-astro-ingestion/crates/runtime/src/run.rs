@@ -109,12 +109,15 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                 let syncpack_config =
                     ingest_syncpack_config_surface(crawl, app_root_rel_path, &package);
                 let astro_policy = ingest_astro_policy_surface(crawl, app_root_rel_path);
+                let content_adapter_source_paths =
+                    content_adapter_source_paths(crawl, app_root_rel_path, &astro_policy);
                 let astro_config = ingest_astro_config_surface(crawl, app_root_rel_path);
                 G3TsAstroIntegrationContractInput {
                     app_root_rel_path: app_root_rel_path.clone(),
                     content_mode: classify_content_mode(crawl, app_root_rel_path),
                     route_page_paths: crate::select::route_page_paths(crawl, app_root_rel_path),
                     endpoint_paths: crate::select::endpoint_paths(crawl, app_root_rel_path),
+                    content_adapter_source_paths,
                     package,
                     syncpack_config,
                     astro_policy,
@@ -427,6 +430,43 @@ fn script_parse_blocker(
             None
         }
     }
+}
+
+fn content_adapter_source_paths(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+    astro_policy: &G3TsAstroPolicySurfaceState,
+) -> Vec<String> {
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } = astro_policy else {
+        return Vec::new();
+    };
+    let Some(content_adapter) = snapshot.content_adapter.as_deref() else {
+        return Vec::new();
+    };
+
+    let scoped_adapter = scoped_rel_path(app_root_rel_path, content_adapter.trim_end_matches('/'));
+    let scoped_adapter_prefix = format!("{scoped_adapter}/");
+
+    crawl
+        .entries
+        .iter()
+        .filter(|entry| {
+            entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
+                && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+                && is_adapter_source_file(&entry.path.rel_path)
+                && (entry.path.rel_path == scoped_adapter
+                    || entry.path.rel_path.starts_with(&scoped_adapter_prefix))
+        })
+        .map(|entry| app_relative_path(&entry.path.rel_path, app_root_rel_path))
+        .collect()
+}
+
+fn is_adapter_source_file(rel_path: &str) -> bool {
+    [
+        ".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".astro",
+    ]
+    .iter()
+    .any(|extension| rel_path.ends_with(extension))
 }
 
 fn ingest_astro_config_surface(
@@ -828,6 +868,17 @@ fn scoped_rel_path(app_root_rel_path: &str, rel_path: &str) -> String {
         rel_path.to_owned()
     } else {
         format!("{app_root_rel_path}/{rel_path}")
+    }
+}
+
+fn app_relative_path(rel_path: &str, app_root_rel_path: &str) -> String {
+    if app_root_rel_path == "." {
+        rel_path.to_owned()
+    } else {
+        rel_path
+            .strip_prefix(&format!("{app_root_rel_path}/"))
+            .unwrap_or(rel_path)
+            .to_owned()
     }
 }
 

@@ -710,6 +710,7 @@ fn integration_contract_for_app_with_syncpack(
         content_mode: G3TsAstroContentMode::BuildCollections,
         route_page_paths: vec!["src/pages/index.astro".to_owned()],
         endpoint_paths: vec!["src/pages/rss.ts".to_owned()],
+        content_adapter_source_paths: vec!["src/lib/content/index.ts".to_owned()],
         package,
         syncpack_config,
         astro_policy: astro_policy(),

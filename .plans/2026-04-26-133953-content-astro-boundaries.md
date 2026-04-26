@@ -174,6 +174,8 @@ Delegate:
 
 Owner: G3TS Astro config or file-tree checks.
 
+Implemented in this slice.
+
 Rule:
 
 - `content_adapter` must resolve to a real directory or module under the app root.
@@ -246,6 +248,6 @@ Style family may own:
 1. Done: `TS-ASTRO-CONFIG-24`.
 2. Done: `TS-ASTRO-CONFIG-25`.
 3. Done: `TS-ASTRO-CONFIG-26`.
-4. Finish `TS-ASTRO-CONFIG-27`.
+4. Done: `TS-ASTRO-CONFIG-27`.
 5. Finish `TS-ASTRO-FILETREE-12`.
 6. Then design framework-independent `TS-CONTENT` from normalized content facts only.
