@@ -28,7 +28,7 @@ allowed_deps = ["serde", "toml"]
 #[test]
 #[allow(
     clippy::too_many_lines,
-    reason = "single parser test proves all ts.astro fields map to typed output"
+    reason = "single parser test proves all top-level parser fields map to typed output"
 )]
 fn realistic_config_parses_known_fields() {
     let cfg = parse_fixture(
@@ -50,32 +50,12 @@ future_ts_key = "preserve-ts"
 
 [ts.astro]
 profile = "strict-local-content"
-authored_content_globs = ["content/**/*.mdx"]
-content_route_globs = ["src/pages/**/*.astro"]
-chrome_route_globs = ["src/pages/_chrome/**/*.astro"]
-utility_route_globs = ["src/pages/health.astro"]
-generated_route_globs = ["src/pages/generated/**/*.astro"]
-report_shell_route_globs = ["src/pages/reports/**/*.astro"]
-endpoint_globs = ["src/pages/**/*.ts"]
-content_data_module_globs = ["src/**/*.data.ts"]
-query_adapter_globs = ["src/content/query/**/*.ts"]
-adapter_barrel_globs = ["src/content/index.ts"]
-adapter_helper_globs = ["src/content/helpers/**/*.ts"]
-route_registry_globs = ["src/content/routes.ts"]
-content_component_globs = ["src/content/components/**/*.tsx"]
-content_config_globs = ["src/content.config.ts"]
-mdx_content_globs = ["src/content/**/*.mdx"]
-approved_mdx_component_globs = ["src/content/components/**/*.tsx"]
-approved_generated_artifact_globs = ["src/generated/content/**/*.json"]
-astro_content_type_import_globs = ["src/content/types.ts"]
-contentlayer_config_globs = ["contentlayer.config.*"]
-contentlayer_generated_globs = [".contentlayer/**"]
-forbidden_generated_state_globs = [".next/**", ".velite/**", ".contentlayer/**"]
-build_output_globs = ["dist/**"]
-blog_index_route_globs = ["src/pages/blog.astro"]
-blog_article_route_globs = ["src/pages/blog/[slug].astro"]
-metadata_helper_globs = ["src/content/metadata.ts"]
-json_ld_helper_globs = ["src/content/json-ld.ts"]
+content_routes = ["src/pages/**/*.astro"]
+non_content_routes = ["src/pages/404.astro"]
+endpoints = ["src/pages/**/*.ts"]
+content_root = "src/content"
+content_adapter = "src/lib/content"
+forbidden_state = [".next/**", ".velite/**", ".contentlayer/**"]
 future_astro_key = "preserve-astro"
 
 [[waivers]]
@@ -103,134 +83,34 @@ reviewer = "guardrail-team"
     let astro = assertions::assert_ts_astro_policy(cfg.ts.as_ref());
     assertions::assert_ts_astro_profile(astro, Some("strict-local-content"));
     assertions::assert_string_list(
-        &astro.authored_content_globs,
-        &["content/**/*.mdx"],
-        "ts.astro.authored_content_globs",
-    );
-    assertions::assert_string_list(
-        &astro.content_route_globs,
+        &astro.content_routes,
         &["src/pages/**/*.astro"],
-        "ts.astro.content_route_globs",
+        "ts.astro.content_routes",
     );
     assertions::assert_string_list(
-        &astro.chrome_route_globs,
-        &["src/pages/_chrome/**/*.astro"],
-        "ts.astro.chrome_route_globs",
+        &astro.non_content_routes,
+        &["src/pages/404.astro"],
+        "ts.astro.non_content_routes",
     );
     assertions::assert_string_list(
-        &astro.utility_route_globs,
-        &["src/pages/health.astro"],
-        "ts.astro.utility_route_globs",
-    );
-    assertions::assert_string_list(
-        &astro.generated_route_globs,
-        &["src/pages/generated/**/*.astro"],
-        "ts.astro.generated_route_globs",
-    );
-    assertions::assert_string_list(
-        &astro.report_shell_route_globs,
-        &["src/pages/reports/**/*.astro"],
-        "ts.astro.report_shell_route_globs",
-    );
-    assertions::assert_string_list(
-        &astro.endpoint_globs,
+        &astro.endpoints,
         &["src/pages/**/*.ts"],
-        "ts.astro.endpoint_globs",
+        "ts.astro.endpoints",
+    );
+    assert_eq!(
+        astro.content_root.as_deref(),
+        Some("src/content"),
+        "ts.astro.content_root mismatch"
+    );
+    assert_eq!(
+        astro.content_adapter.as_deref(),
+        Some("src/lib/content"),
+        "ts.astro.content_adapter mismatch"
     );
     assertions::assert_string_list(
-        &astro.content_data_module_globs,
-        &["src/**/*.data.ts"],
-        "ts.astro.content_data_module_globs",
-    );
-    assertions::assert_string_list(
-        &astro.query_adapter_globs,
-        &["src/content/query/**/*.ts"],
-        "ts.astro.query_adapter_globs",
-    );
-    assertions::assert_string_list(
-        &astro.adapter_barrel_globs,
-        &["src/content/index.ts"],
-        "ts.astro.adapter_barrel_globs",
-    );
-    assertions::assert_string_list(
-        &astro.adapter_helper_globs,
-        &["src/content/helpers/**/*.ts"],
-        "ts.astro.adapter_helper_globs",
-    );
-    assertions::assert_string_list(
-        &astro.route_registry_globs,
-        &["src/content/routes.ts"],
-        "ts.astro.route_registry_globs",
-    );
-    assertions::assert_string_list(
-        &astro.content_component_globs,
-        &["src/content/components/**/*.tsx"],
-        "ts.astro.content_component_globs",
-    );
-    assertions::assert_string_list(
-        &astro.content_config_globs,
-        &["src/content.config.ts"],
-        "ts.astro.content_config_globs",
-    );
-    assertions::assert_string_list(
-        &astro.mdx_content_globs,
-        &["src/content/**/*.mdx"],
-        "ts.astro.mdx_content_globs",
-    );
-    assertions::assert_string_list(
-        &astro.approved_mdx_component_globs,
-        &["src/content/components/**/*.tsx"],
-        "ts.astro.approved_mdx_component_globs",
-    );
-    assertions::assert_string_list(
-        &astro.approved_generated_artifact_globs,
-        &["src/generated/content/**/*.json"],
-        "ts.astro.approved_generated_artifact_globs",
-    );
-    assertions::assert_string_list(
-        &astro.astro_content_type_import_globs,
-        &["src/content/types.ts"],
-        "ts.astro.astro_content_type_import_globs",
-    );
-    assertions::assert_string_list(
-        &astro.contentlayer_config_globs,
-        &["contentlayer.config.*"],
-        "ts.astro.contentlayer_config_globs",
-    );
-    assertions::assert_string_list(
-        &astro.contentlayer_generated_globs,
-        &[".contentlayer/**"],
-        "ts.astro.contentlayer_generated_globs",
-    );
-    assertions::assert_string_list(
-        &astro.forbidden_generated_state_globs,
+        &astro.forbidden_state,
         &[".next/**", ".velite/**", ".contentlayer/**"],
-        "ts.astro.forbidden_generated_state_globs",
-    );
-    assertions::assert_string_list(
-        &astro.build_output_globs,
-        &["dist/**"],
-        "ts.astro.build_output_globs",
-    );
-    assertions::assert_string_list(
-        &astro.blog_index_route_globs,
-        &["src/pages/blog.astro"],
-        "ts.astro.blog_index_route_globs",
-    );
-    assertions::assert_string_list(
-        &astro.blog_article_route_globs,
-        &["src/pages/blog/[slug].astro"],
-        "ts.astro.blog_article_route_globs",
-    );
-    assertions::assert_string_list(
-        &astro.metadata_helper_globs,
-        &["src/content/metadata.ts"],
-        "ts.astro.metadata_helper_globs",
-    );
-    assertions::assert_string_list(
-        &astro.json_ld_helper_globs,
-        &["src/content/json-ld.ts"],
-        "ts.astro.json_ld_helper_globs",
+        "ts.astro.forbidden_state",
     );
     assertions::assert_ts_astro_extra_string(astro, "future_astro_key", "preserve-astro");
     assertions::assert_waiver(
@@ -281,21 +161,22 @@ profile = "strict-local-content"
 
     let astro = assertions::assert_ts_astro_policy(cfg.ts.as_ref());
     assertions::assert_ts_astro_profile(astro, Some("strict-local-content"));
+    assertions::assert_string_list(&astro.content_routes, &[], "ts.astro.content_routes");
     assertions::assert_string_list(
-        &astro.authored_content_globs,
+        &astro.non_content_routes,
         &[],
-        "ts.astro.authored_content_globs",
+        "ts.astro.non_content_routes",
     );
-    assertions::assert_string_list(
-        &astro.content_route_globs,
-        &[],
-        "ts.astro.content_route_globs",
+    assertions::assert_string_list(&astro.endpoints, &[], "ts.astro.endpoints");
+    assert_eq!(
+        astro.content_root, None,
+        "ts.astro.content_root should be None"
     );
-    assertions::assert_string_list(
-        &astro.content_data_module_globs,
-        &[],
-        "ts.astro.content_data_module_globs",
+    assert_eq!(
+        astro.content_adapter, None,
+        "ts.astro.content_adapter should be None"
     );
+    assertions::assert_string_list(&astro.forbidden_state, &[], "ts.astro.forbidden_state");
 }
 
 #[test]
@@ -390,7 +271,7 @@ fn parse_error_on_wrong_ts_astro_field_type() {
     let err = parse_error(
         r#"
 [ts.astro]
-content_route_globs = "src/pages/**/*.astro"
+content_routes = "src/pages/**/*.astro"
 "#,
     );
 

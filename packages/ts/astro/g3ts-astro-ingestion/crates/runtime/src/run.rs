@@ -14,9 +14,9 @@ use g3ts_astro_types::{
     G3TsAstroIntegrationSnapshot, G3TsAstroOutputMode, G3TsAstroPackageScriptCommand,
     G3TsAstroPackageScriptCommandSeparator, G3TsAstroPackageScriptParseBlocker,
     G3TsAstroPackageScriptToolInvocation, G3TsAstroPackageSurfaceSnapshot,
-    G3TsAstroPackageSurfaceState, G3TsAstroRouteMarkdownPageInput, G3TsAstroStaticObjectProperty,
-    G3TsAstroStaticValue, G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState,
-    G3TsAstroSyncpackRequiredPin,
+    G3TsAstroPackageSurfaceState, G3TsAstroPolicySnapshot, G3TsAstroPolicySurfaceState,
+    G3TsAstroRouteMarkdownPageInput, G3TsAstroStaticObjectProperty, G3TsAstroStaticValue,
+    G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
 };
 use globset::{Glob, GlobSetBuilder};
 use package_json_parser::{from_path_document, parse_error_reason as package_parse_error_reason};
@@ -31,6 +31,7 @@ use syncpack_config_parser::{
 };
 
 const ESLINT_CONFIG_PATTERN: &str = "eslint.config.*";
+const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-rs.toml";
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
 const SYNCPACK_CONFIG_REL_PATH: &str = ".syncpackrc";
 const ROUTE_SCOPED_PIPELINE_RULES: [&str; 8] = [
@@ -106,12 +107,14 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                 let package = ingest_package_surface(crawl, app_root_rel_path);
                 let syncpack_config =
                     ingest_syncpack_config_surface(crawl, app_root_rel_path, &package);
+                let astro_policy = ingest_astro_policy_surface(crawl, app_root_rel_path);
                 let astro_config = ingest_astro_config_surface(crawl, app_root_rel_path);
                 G3TsAstroIntegrationContractInput {
                     app_root_rel_path: app_root_rel_path.clone(),
                     content_mode: classify_content_mode(crawl, app_root_rel_path),
                     package,
                     syncpack_config,
+                    astro_policy,
                     astro_config,
                     llms_txt_rel_path: select_llms_txt(crawl, app_root_rel_path),
                     required_syncpack_pins: required_syncpack_pins(),
@@ -727,7 +730,7 @@ fn canonical_ban_group(
 fn string_sets_match_exactly(left: &[String], right: &[&str]) -> bool {
     left.len() == right.len()
         && BTreeSet::from_iter(left.iter().map(String::as_str))
-        == BTreeSet::from_iter(right.iter().copied())
+            == BTreeSet::from_iter(right.iter().copied())
 }
 
 fn syncpack_config_is_app_local(syncpack_rel_path: &str, package_rel_path: &str) -> bool {
@@ -763,6 +766,57 @@ fn missing_syncpack_config_rel_path(app_root_rel_path: &str) -> String {
         SYNCPACK_CONFIG_REL_PATH.to_owned()
     } else {
         format!("{app_root_rel_path}/{SYNCPACK_CONFIG_REL_PATH}")
+    }
+}
+
+fn ingest_astro_policy_surface(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+) -> G3TsAstroPolicySurfaceState {
+    let rel_path = scoped_rel_path(app_root_rel_path, GUARDRAIL_CONFIG_REL_PATH);
+    let Some(entry) = exact_included_file(crawl, &rel_path) else {
+        return G3TsAstroPolicySurfaceState::Missing { rel_path };
+    };
+
+    if !entry.readable {
+        return G3TsAstroPolicySurfaceState::Unreadable {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "workspace crawl marked the guardrail config unreadable".to_owned(),
+        };
+    }
+
+    let config = match guardrail3_rs_toml_parser::from_path(&entry.path.abs_path) {
+        Ok(config) => config,
+        Err(error) => {
+            return G3TsAstroPolicySurfaceState::ParseError {
+                rel_path: entry.path.rel_path.clone(),
+                reason: error.to_string(),
+            };
+        }
+    };
+
+    let Some(ts) = config.ts else {
+        return G3TsAstroPolicySurfaceState::MissingAstroPolicy {
+            rel_path: entry.path.rel_path.clone(),
+        };
+    };
+    let Some(astro) = ts.astro else {
+        return G3TsAstroPolicySurfaceState::MissingAstroPolicy {
+            rel_path: entry.path.rel_path.clone(),
+        };
+    };
+
+    G3TsAstroPolicySurfaceState::Parsed {
+        snapshot: G3TsAstroPolicySnapshot {
+            rel_path: entry.path.rel_path.clone(),
+            profile: astro.profile,
+            content_routes: astro.content_routes,
+            non_content_routes: astro.non_content_routes,
+            endpoints: astro.endpoints,
+            content_root: astro.content_root,
+            content_adapter: astro.content_adapter,
+            forbidden_state: astro.forbidden_state,
+        },
     }
 }
 

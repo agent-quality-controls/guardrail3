@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use super::super::{from_path, parse, Error, Guardrail3RsToml};
+use super::super::{Error, Guardrail3RsToml, from_path, parse};
 
 pub(super) fn parse_fixture(input: &str) -> Guardrail3RsToml {
     parse(input).expect("should parse valid guardrail3-rs.toml")

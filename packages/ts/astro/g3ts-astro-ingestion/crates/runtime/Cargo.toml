@@ -29,6 +29,7 @@ all-features = true
 [dependencies]
 astro-config-parser = { path = "../../../../../parsers/astro-config-parser", version = "0.1.0", features = ["api"] }
 eslint-config-parser = { path = "../../../../../parsers/eslint-config-parser", version = "0.1.0", features = ["api"] }
+guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0", features = ["api"] }
 package-json-parser = { path = "../../../../../parsers/package-json-parser", version = "0.1.0", features = ["api"] }
 package-script-command-parser = { path = "../../../../../parsers/package-script-command-parser", version = "0.1.0", features = ["api"] }
 syncpack-config-parser = { path = "../../../../../parsers/syncpack-config-parser", version = "0.1.0", features = ["api"] }

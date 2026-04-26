@@ -105,14 +105,14 @@ pub fn assert_ts_extra_string(ts: Option<&TsPolicyConfig>, key: &str, expected: 
 }
 
 pub fn assert_ts_astro_profile(astro: &TsAstroPolicyConfig, expected: Option<&str>) {
-    assert_eq!(astro.profile.as_deref(), expected, "ts.astro profile mismatch");
+    assert_eq!(
+        astro.profile.as_deref(),
+        expected,
+        "ts.astro profile mismatch"
+    );
 }
 
-pub fn assert_ts_astro_extra_string(
-    astro: &TsAstroPolicyConfig,
-    key: &str,
-    expected: &str,
-) {
+pub fn assert_ts_astro_extra_string(astro: &TsAstroPolicyConfig, key: &str, expected: &str) {
     assert_eq!(
         astro.extra.get(key).and_then(Value::as_str),
         Some(expected),

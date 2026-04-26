@@ -5,8 +5,9 @@ use g3ts_astro_types::{
     G3TsAstroIntegrationSnapshot, G3TsAstroOutputMode, G3TsAstroPackageScriptCommand,
     G3TsAstroPackageScriptCommandSeparator, G3TsAstroPackageScriptParseBlocker,
     G3TsAstroPackageScriptToolInvocation, G3TsAstroPackageSurfaceSnapshot,
-    G3TsAstroPackageSurfaceState, G3TsAstroStaticObjectProperty, G3TsAstroStaticValue,
-    G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
+    G3TsAstroPackageSurfaceState, G3TsAstroPolicySnapshot, G3TsAstroPolicySurfaceState,
+    G3TsAstroStaticObjectProperty, G3TsAstroStaticValue, G3TsAstroSyncpackConfigSnapshot,
+    G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
 };
 use package_script_command_parser::types::{
     PackageScriptCommand, PackageScriptCommandSeparator, PackageScriptParseFact,
@@ -709,10 +710,30 @@ fn integration_contract_for_app_with_syncpack(
         content_mode: G3TsAstroContentMode::BuildCollections,
         package,
         syncpack_config,
+        astro_policy: astro_policy(),
         astro_config: astro_config(),
         llms_txt_rel_path: Some("public/llms.txt".to_owned()),
         required_syncpack_pins: required_syncpack_pins(),
         forbidden_syncpack_deps: forbidden_syncpack_deps(),
+    }
+}
+
+fn astro_policy() -> G3TsAstroPolicySurfaceState {
+    G3TsAstroPolicySurfaceState::Parsed {
+        snapshot: G3TsAstroPolicySnapshot {
+            rel_path: "guardrail3-rs.toml".to_owned(),
+            profile: Some("strict-local-content".to_owned()),
+            content_routes: vec!["src/pages/**/*.astro".to_owned()],
+            non_content_routes: vec!["src/pages/404.astro".to_owned()],
+            endpoints: vec!["src/pages/**/*.ts".to_owned()],
+            content_root: Some("src/content".to_owned()),
+            content_adapter: Some("src/lib/content".to_owned()),
+            forbidden_state: vec![
+                ".next/**".to_owned(),
+                ".velite/**".to_owned(),
+                ".contentlayer/**".to_owned(),
+            ],
+        },
     }
 }
 
@@ -1108,10 +1129,7 @@ fn has_one_canonical_ban_group(
     matching_groups.next().is_none() && canonical_ban_group(group, dependency_types)
 }
 
-fn group_targets_dependency(
-    group: &TestSyncpackVersionGroup,
-    dependency: &str,
-) -> bool {
+fn group_targets_dependency(group: &TestSyncpackVersionGroup, dependency: &str) -> bool {
     string_sets_match_exactly(&group.dependencies, &[dependency])
 }
 

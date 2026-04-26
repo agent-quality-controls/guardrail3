@@ -1,5 +1,6 @@
 use g3ts_astro_types::{
     G3TsAstroContentMode, G3TsAstroEslintSurfaceState, G3TsAstroPackageSurfaceState,
+    G3TsAstroPolicySurfaceState,
 };
 use std::process::Command;
 
@@ -72,6 +73,7 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             "astro.config.mjs",
             "src/content.config.ts",
             ".syncpackrc",
+            "guardrail3-rs.toml",
             "eslint.config.mjs",
             "src/pages/index.html",
             "src/pages/index.ts",
@@ -147,6 +149,32 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             );
         }
         other => panic!("expected parsed syncpack state, got {other:?}"),
+    }
+
+    match &integration.astro_policy {
+        G3TsAstroPolicySurfaceState::Parsed { snapshot } => {
+            assert_eq!(
+                snapshot.profile.as_deref(),
+                Some("strict-local-content"),
+                "strict Astro policy profile missing: {snapshot:?}"
+            );
+            assert_eq!(
+                snapshot.content_routes,
+                vec!["src/pages/**/*.astro".to_owned()],
+                "content route policy mismatch: {snapshot:?}"
+            );
+            assert_eq!(
+                snapshot.content_root.as_deref(),
+                Some("src/content"),
+                "content root policy mismatch: {snapshot:?}"
+            );
+            assert_eq!(
+                snapshot.content_adapter.as_deref(),
+                Some("src/lib/content"),
+                "content adapter policy mismatch: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed astro policy, got {other:?}"),
     }
 
     match &input.eslint_contracts[0].config {
@@ -1300,7 +1328,7 @@ module.exports = { ESLint };
 }
 
 #[test]
-fn config_ingestion_rejects_invalid_endpoint_globs_even_when_no_endpoints_exist() {
+fn config_ingestion_rejects_invalid_endpoint_scope_options_even_when_no_endpoints_exist() {
     let root = super::helpers::fake_astro_workspace();
     std::fs::write(
         root.path().join("node_modules/eslint/index.js"),
@@ -1803,8 +1831,11 @@ fn filetree_ingestion_discovers_gitignored_generated_state_from_real_crawl() {
         .status()
         .expect("git init should succeed");
     assert!(status.success(), "git init failed with {status}");
-    std::fs::write(root.path().join(".gitignore"), ".next/\n.velite/\n.contentlayer/\n")
-        .expect("gitignore should be written");
+    std::fs::write(
+        root.path().join(".gitignore"),
+        ".next/\n.velite/\n.contentlayer/\n",
+    )
+    .expect("gitignore should be written");
     std::fs::create_dir_all(root.path().join(".next/server/app"))
         .expect(".next output should be created");
     std::fs::create_dir_all(root.path().join(".velite")).expect(".velite output should be created");

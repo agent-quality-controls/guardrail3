@@ -71,57 +71,17 @@ pub struct TsPolicyConfig {
 pub struct TsAstroPolicyConfig {
     pub profile: Option<String>,
     #[serde(default)]
-    pub authored_content_globs: Vec<String>,
+    pub content_routes: Vec<String>,
     #[serde(default)]
-    pub content_route_globs: Vec<String>,
+    pub non_content_routes: Vec<String>,
     #[serde(default)]
-    pub chrome_route_globs: Vec<String>,
+    pub endpoints: Vec<String>,
     #[serde(default)]
-    pub utility_route_globs: Vec<String>,
+    pub content_root: Option<String>,
     #[serde(default)]
-    pub generated_route_globs: Vec<String>,
+    pub content_adapter: Option<String>,
     #[serde(default)]
-    pub report_shell_route_globs: Vec<String>,
-    #[serde(default)]
-    pub endpoint_globs: Vec<String>,
-    #[serde(default)]
-    pub content_data_module_globs: Vec<String>,
-    #[serde(default)]
-    pub query_adapter_globs: Vec<String>,
-    #[serde(default)]
-    pub adapter_barrel_globs: Vec<String>,
-    #[serde(default)]
-    pub adapter_helper_globs: Vec<String>,
-    #[serde(default)]
-    pub route_registry_globs: Vec<String>,
-    #[serde(default)]
-    pub content_component_globs: Vec<String>,
-    #[serde(default)]
-    pub content_config_globs: Vec<String>,
-    #[serde(default)]
-    pub mdx_content_globs: Vec<String>,
-    #[serde(default)]
-    pub approved_mdx_component_globs: Vec<String>,
-    #[serde(default)]
-    pub approved_generated_artifact_globs: Vec<String>,
-    #[serde(default)]
-    pub astro_content_type_import_globs: Vec<String>,
-    #[serde(default)]
-    pub contentlayer_config_globs: Vec<String>,
-    #[serde(default)]
-    pub contentlayer_generated_globs: Vec<String>,
-    #[serde(default)]
-    pub forbidden_generated_state_globs: Vec<String>,
-    #[serde(default)]
-    pub build_output_globs: Vec<String>,
-    #[serde(default)]
-    pub blog_index_route_globs: Vec<String>,
-    #[serde(default)]
-    pub blog_article_route_globs: Vec<String>,
-    #[serde(default)]
-    pub metadata_helper_globs: Vec<String>,
-    #[serde(default)]
-    pub json_ld_helper_globs: Vec<String>,
+    pub forbidden_state: Vec<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }
