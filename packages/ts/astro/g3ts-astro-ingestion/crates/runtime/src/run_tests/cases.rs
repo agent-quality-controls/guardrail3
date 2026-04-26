@@ -1,6 +1,7 @@
 use g3ts_astro_types::{
     G3TsAstroContentMode, G3TsAstroEslintSurfaceState, G3TsAstroPackageSurfaceState,
 };
+use std::process::Command;
 
 #[test]
 fn config_ingestion_returns_empty_for_non_astro_roots() {
@@ -355,6 +356,52 @@ fn config_ingestion_accepts_syncpack_dependency_types_as_sets() {
             );
         }
         other => panic!("expected parsed syncpack state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_requires_all_contentlayer_syncpack_bans_from_real_config() {
+    for dependency in [
+        "contentlayer",
+        "next-contentlayer",
+        "@contentlayer/core",
+        "@contentlayer/source-files",
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+            .expect("root syncpack config should be readable")
+            .lines()
+            .filter(|line| !line.contains(&format!(r#""{dependency}""#)))
+            .collect::<Vec<_>>()
+            .join("\n")
+            .replace(",\n  ]", "\n  ]");
+        std::fs::write(root.path().join(".syncpackrc"), syncpack_config)
+            .expect("syncpack config should be rewritten");
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "package.json",
+                "astro.config.mjs",
+                "src/content.config.ts",
+                ".syncpackrc",
+                "eslint.config.mjs",
+                "src/pages/index.astro",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        match &input.integration_contracts[0].syncpack_config {
+            g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => {
+                assert!(
+                    snapshot
+                        .missing_forbidden_bans
+                        .iter()
+                        .any(|missing| missing == dependency),
+                    "missing `{dependency}` ban should be detected: {snapshot:?}"
+                );
+            }
+            other => panic!("expected parsed syncpack state, got {other:?}"),
+        }
     }
 }
 
@@ -1684,6 +1731,200 @@ fn filetree_ingestion_discovers_nested_velite_surfaces_under_astro_root() {
     assert_eq!(
         app_root.velite_output_rel_paths,
         vec!["src/generated/.velite/landing.js".to_owned()]
+    );
+}
+
+#[test]
+fn filetree_ingestion_discovers_legacy_generated_state_under_astro_root() {
+    let root = super::helpers::fake_astro_workspace();
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".next/server/app/page.js",
+            ".contentlayer/generated/Post.mjs",
+            "contentlayer.config.ts",
+        ],
+    );
+
+    let input = super::super::ingest_for_file_tree_checks(&crawl);
+    let app_root = input
+        .app_roots
+        .first()
+        .expect("astro root should be discovered");
+
+    assert_eq!(
+        app_root.legacy_generated_state_rel_paths,
+        vec![
+            ".next/server/app/page.js".to_owned(),
+            ".contentlayer/generated/Post.mjs".to_owned(),
+            "contentlayer.config.ts".to_owned(),
+        ]
+    );
+}
+
+#[test]
+fn filetree_ingestion_discovers_ignored_legacy_generated_state_sentinels() {
+    let root = super::helpers::fake_astro_workspace();
+    let mut crawl = super::helpers::crawl_with_entries(
+        &root,
+        &["package.json", "astro.config.mjs", "src/content.config.ts"],
+    );
+    crawl.entries.extend([
+        super::helpers::ignored_directory_entry(&root, ".next"),
+        super::helpers::ignored_directory_entry(&root, ".contentlayer"),
+        super::helpers::ignored_entry(&root, "contentlayer.config.ts"),
+    ]);
+
+    let input = super::super::ingest_for_file_tree_checks(&crawl);
+    let app_root = input
+        .app_roots
+        .first()
+        .expect("astro root should be discovered");
+
+    assert_eq!(
+        app_root.legacy_generated_state_rel_paths,
+        vec![
+            ".next".to_owned(),
+            ".contentlayer".to_owned(),
+            "contentlayer.config.ts".to_owned(),
+        ]
+    );
+}
+
+#[test]
+fn filetree_ingestion_discovers_gitignored_generated_state_from_real_crawl() {
+    let root = super::helpers::fake_astro_workspace();
+    let status = Command::new("git")
+        .args(["init", "--quiet"])
+        .current_dir(root.path())
+        .status()
+        .expect("git init should succeed");
+    assert!(status.success(), "git init failed with {status}");
+    std::fs::write(root.path().join(".gitignore"), ".next/\n.velite/\n.contentlayer/\n")
+        .expect("gitignore should be written");
+    std::fs::create_dir_all(root.path().join(".next/server/app"))
+        .expect(".next output should be created");
+    std::fs::create_dir_all(root.path().join(".velite")).expect(".velite output should be created");
+    std::fs::create_dir_all(root.path().join(".contentlayer/generated"))
+        .expect(".contentlayer output should be created");
+
+    let crawl = g3_workspace_crawl::crawl(root.path()).expect("real crawl should succeed");
+    let input = super::super::ingest_for_file_tree_checks(&crawl);
+    let app_root = input
+        .app_roots
+        .first()
+        .expect("astro root should be discovered");
+
+    assert!(
+        app_root
+            .legacy_generated_state_rel_paths
+            .iter()
+            .any(|path| path == ".next"),
+        "real crawl should recover ignored .next sentinel: {app_root:?}"
+    );
+    assert!(
+        app_root
+            .legacy_generated_state_rel_paths
+            .iter()
+            .any(|path| path == ".contentlayer"),
+        "real crawl should recover ignored .contentlayer sentinel: {app_root:?}"
+    );
+    assert!(
+        app_root
+            .velite_output_rel_paths
+            .iter()
+            .any(|path| path == ".velite"),
+        "real crawl should recover ignored .velite sentinel: {app_root:?}"
+    );
+}
+
+#[test]
+fn filetree_ingestion_does_not_misclassify_contentlayer_config_route_files() {
+    let root = super::helpers::fake_astro_workspace();
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "src/pages/contentlayer.config.ts",
+        ],
+    );
+
+    let input = super::super::ingest_for_file_tree_checks(&crawl);
+    let app_root = input
+        .app_roots
+        .first()
+        .expect("astro root should be discovered");
+
+    assert!(
+        app_root.legacy_generated_state_rel_paths.is_empty(),
+        "route files named contentlayer.config.* must not be treated as root Contentlayer config: {app_root:?}"
+    );
+}
+
+#[test]
+fn filetree_ingestion_assigns_legacy_state_to_nearest_nested_astro_root() {
+    let root = super::helpers::fake_astro_workspace();
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            "apps/child/package.json",
+            "apps/child/astro.config.mjs",
+            "apps/child/src/content.config.ts",
+            "apps/child/.next/server/app/page.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_file_tree_checks(&crawl);
+    let parent = input
+        .app_roots
+        .iter()
+        .find(|root| root.app_root_rel_path == ".")
+        .expect("parent Astro root should be discovered");
+    let child = input
+        .app_roots
+        .iter()
+        .find(|root| root.app_root_rel_path == "apps/child")
+        .expect("child Astro root should be discovered");
+
+    assert!(
+        parent.legacy_generated_state_rel_paths.is_empty(),
+        "parent must not own nested child generated state: {parent:?}"
+    );
+    assert_eq!(
+        child.legacy_generated_state_rel_paths,
+        vec!["apps/child/.next/server/app/page.js".to_owned()]
+    );
+}
+
+#[test]
+fn filetree_ingestion_discovers_empty_included_legacy_state_directories() {
+    let root = super::helpers::fake_astro_workspace();
+    let mut crawl = super::helpers::crawl_with_entries(
+        &root,
+        &["package.json", "astro.config.mjs", "src/content.config.ts"],
+    );
+    crawl.entries.extend([
+        super::helpers::included_directory_entry(&root, ".next"),
+        super::helpers::included_directory_entry(&root, ".contentlayer"),
+    ]);
+
+    let input = super::super::ingest_for_file_tree_checks(&crawl);
+    let app_root = input
+        .app_roots
+        .first()
+        .expect("astro root should be discovered");
+
+    assert_eq!(
+        app_root.legacy_generated_state_rel_paths,
+        vec![".next".to_owned(), ".contentlayer".to_owned()]
     );
 }
 

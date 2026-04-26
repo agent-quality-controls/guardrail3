@@ -73,7 +73,7 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 18] = [
     ("eslint-plugin-i18next", "6.1.4"),
     ("eslint-plugin-mdx", "3.7.0"),
 ];
-const FORBIDDEN_SYNCPACK_DEPS: [&str; 8] = [
+const FORBIDDEN_SYNCPACK_DEPS: [&str; 12] = [
     "next",
     "velite",
     "@astrojs/node",
@@ -82,6 +82,10 @@ const FORBIDDEN_SYNCPACK_DEPS: [&str; 8] = [
     "astro-seo",
     "astro-seo-meta",
     "astro-seo-schema",
+    "contentlayer",
+    "next-contentlayer",
+    "@contentlayer/core",
+    "@contentlayer/source-files",
 ];
 const PIN_DEPENDENCY_TYPES: [&str; 2] = ["prod", "dev"];
 const BAN_DEPENDENCY_TYPES: [&str; 4] = ["prod", "dev", "optional", "peer"];
@@ -152,7 +156,16 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
                 .map(|entry| entry.path.rel_path.clone()),
             velite_config_rel_path: crate::select::select_velite_config(crawl, app_root_rel_path)
                 .map(|entry| entry.path.rel_path.clone()),
-            velite_output_rel_paths: crate::select::velite_output_paths(crawl, app_root_rel_path),
+            velite_output_rel_paths: crate::select::velite_output_paths(
+                crawl,
+                app_root_rel_path,
+                &app_roots,
+            ),
+            legacy_generated_state_rel_paths: crate::select::legacy_generated_state_paths(
+                crawl,
+                app_root_rel_path,
+                &app_roots,
+            ),
         })
         .collect();
 

@@ -231,6 +231,43 @@ fn recovery_finds_ignored_config_in_non_banned_directory() {
 }
 
 #[test]
+fn recovery_finds_ignored_generated_state_directory_sentinels() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join(".gitignore"), ".next/\n.velite/\n.contentlayer/\n");
+    fs::create_dir_all(root.join(".next/server/app")).expect("create .next output");
+    fs::create_dir_all(root.join(".velite")).expect("create .velite output");
+    fs::create_dir_all(root.join(".contentlayer/generated")).expect("create .contentlayer output");
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
+
+    assertions::assert_crawl_entry(
+        &crawl,
+        ".next",
+        crate::G3RsWorkspaceEntryKind::Directory,
+        crate::G3RsWorkspaceIgnoreState::Ignored,
+        true,
+    );
+    assertions::assert_crawl_entry(
+        &crawl,
+        ".velite",
+        crate::G3RsWorkspaceEntryKind::Directory,
+        crate::G3RsWorkspaceIgnoreState::Ignored,
+        true,
+    );
+    assertions::assert_crawl_entry(
+        &crawl,
+        ".contentlayer",
+        crate::G3RsWorkspaceEntryKind::Directory,
+        crate::G3RsWorkspaceIgnoreState::Ignored,
+        true,
+    );
+}
+
+#[test]
 fn recovery_uses_guardrail3_rs_toml_and_not_dead_guardrail3_toml() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

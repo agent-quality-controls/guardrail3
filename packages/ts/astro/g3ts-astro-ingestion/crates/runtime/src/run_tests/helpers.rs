@@ -67,7 +67,11 @@ pub(super) fn fake_astro_workspace() -> TempDir {
     { "dependencies": ["@codemint/astro-meta"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
     { "dependencies": ["astro-seo"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
     { "dependencies": ["astro-seo-meta"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
-    { "dependencies": ["astro-seo-schema"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true }
+    { "dependencies": ["astro-seo-schema"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+    { "dependencies": ["contentlayer"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+    { "dependencies": ["next-contentlayer"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+    { "dependencies": ["@contentlayer/core"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+    { "dependencies": ["@contentlayer/source-files"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true }
   ]
 }
 "#,
@@ -152,13 +156,40 @@ pub(super) fn unreadable_entry(root: &TempDir, rel_path: &str) -> G3WorkspaceEnt
 }
 
 pub(super) fn ignored_entry(root: &TempDir, rel_path: &str) -> G3WorkspaceEntry {
+    custom_entry(root, rel_path, G3WorkspaceEntryKind::File, G3WorkspaceIgnoreState::Ignored)
+}
+
+pub(super) fn ignored_directory_entry(root: &TempDir, rel_path: &str) -> G3WorkspaceEntry {
+    custom_entry(
+        root,
+        rel_path,
+        G3WorkspaceEntryKind::Directory,
+        G3WorkspaceIgnoreState::Ignored,
+    )
+}
+
+pub(super) fn included_directory_entry(root: &TempDir, rel_path: &str) -> G3WorkspaceEntry {
+    custom_entry(
+        root,
+        rel_path,
+        G3WorkspaceEntryKind::Directory,
+        G3WorkspaceIgnoreState::Included,
+    )
+}
+
+fn custom_entry(
+    root: &TempDir,
+    rel_path: &str,
+    kind: G3WorkspaceEntryKind,
+    ignore_state: G3WorkspaceIgnoreState,
+) -> G3WorkspaceEntry {
     G3WorkspaceEntry {
         path: G3WorkspacePath {
             rel_path: rel_path.to_owned(),
             abs_path: root.path().join(rel_path),
         },
-        kind: G3WorkspaceEntryKind::File,
-        ignore_state: G3WorkspaceIgnoreState::Ignored,
+        kind,
+        ignore_state,
         readable: true,
     }
 }

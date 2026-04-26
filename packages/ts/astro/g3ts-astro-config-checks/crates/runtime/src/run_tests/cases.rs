@@ -1,7 +1,8 @@
 use g3ts_astro_config_checks_assertions::run as assertions;
 use g3ts_astro_types::{
-    G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceState, G3TsAstroEslintSurfaceState,
-    G3TsAstroOutputMode, G3TsAstroPackageSurfaceState, G3TsAstroStaticValue,
+    G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceState, G3TsAstroContentMode,
+    G3TsAstroEslintSurfaceState, G3TsAstroOutputMode, G3TsAstroPackageSurfaceState,
+    G3TsAstroStaticValue,
 };
 
 use super::helpers::{
@@ -16,8 +17,9 @@ use super::helpers::{
     root_syncpack_exact_source_covers_nested_app,
     root_syncpack_package_source_does_not_cover_nested_app, route_only_pipeline_wiring,
     syncpack_catch_all_forbidden_ban, syncpack_ignored_forbidden_ban,
-    syncpack_missing_astro_seo_ban, syncpack_missing_forbidden_ban, syncpack_missing_stack_pin,
-    syncpack_pinned_forbidden_ban, syncpack_scoped_away_forbidden_ban,
+    syncpack_missing_astro_seo_ban, syncpack_missing_contentlayer_ban,
+    syncpack_missing_forbidden_ban, syncpack_missing_stack_pin, syncpack_pinned_forbidden_ban,
+    syncpack_scoped_away_forbidden_ban, syncpack_missing_forbidden_ban_named,
     syncpack_scoped_away_stack_pin, syncpack_shadowed_forbidden_ban, syncpack_shadowed_stack_pin,
     syncpack_source_excludes_package, syncpack_specifier_scoped_forbidden_ban,
     syncpack_specifier_scoped_stack_pin, syncpack_wrong_astro_pipeline_stack_pin,
@@ -1041,7 +1043,7 @@ fn syncpack_catch_all_forbidden_ban_does_not_satisfy_canonical_contract() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-10",
             "Syncpack does not ban forbidden Astro deps",
-            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`, `velite`, `@astrojs/node`, `eslint-plugin-astro-pipeline`, `@codemint/astro-meta`, `astro-seo`, `astro-seo-meta`, `astro-seo-schema`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`. `astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.",
+            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`, `velite`, `@astrojs/node`, `eslint-plugin-astro-pipeline`, `@codemint/astro-meta`, `astro-seo`, `astro-seo-meta`, `astro-seo-schema`, `contentlayer`, `next-contentlayer`, `@contentlayer/core`, `@contentlayer/source-files`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`. `astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -1116,6 +1118,59 @@ fn missing_astro_seo_syncpack_ban_explains_approved_seo_path() {
             Some(".syncpackrc"),
             false,
         )],
+    );
+}
+
+#[test]
+fn missing_contentlayer_syncpack_ban_reports_policy_error() {
+    let input = syncpack_missing_contentlayer_ban();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-10",
+            "Syncpack does not ban forbidden Astro deps",
+            "`.syncpackrc` is missing Syncpack banned versionGroups for: `contentlayer`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
+            Some(".syncpackrc"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn all_contentlayer_syncpack_bans_are_required() {
+    for dependency in [
+        "contentlayer",
+        "next-contentlayer",
+        "@contentlayer/core",
+        "@contentlayer/source-files",
+    ] {
+        let input = syncpack_missing_forbidden_ban_named(dependency);
+        let results = super::super::check(&input);
+
+        assert!(
+            results.iter().any(|finding| {
+                finding.id() == "TS-ASTRO-CONFIG-10"
+                    && finding.message().contains(&format!("`{dependency}`"))
+            }),
+            "missing `{dependency}` ban should be reported: {results:?}"
+        );
+    }
+}
+
+#[test]
+fn contentlayer_syncpack_bans_are_not_required_for_non_content_astro_apps() {
+    let mut input = syncpack_missing_forbidden_ban_named("contentlayer");
+    input.integration_contracts[0].content_mode = G3TsAstroContentMode::None;
+    let results = super::super::check(&input);
+
+    assert!(
+        results.iter().all(|finding| {
+            finding.id() != "TS-ASTRO-CONFIG-10"
+                || !finding.message().contains("`contentlayer`")
+        }),
+        "non-content Astro apps should not require Contentlayer-specific bans: {results:?}"
     );
 }
 

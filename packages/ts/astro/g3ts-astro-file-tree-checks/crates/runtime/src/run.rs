@@ -9,6 +9,7 @@ pub fn check(input: &G3TsAstroFileTreeChecksInput) -> Vec<G3CheckResult> {
     crate::ts_astro_filetree_04_no_route_markdown_pages::check(input, &mut results);
     crate::ts_astro_filetree_05_no_velite_config::check(input, &mut results);
     crate::ts_astro_filetree_06_no_velite_output::check(input, &mut results);
+    crate::ts_astro_filetree_11_no_legacy_parallel_state::check(input, &mut results);
     results
 }
 

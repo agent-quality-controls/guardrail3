@@ -52,6 +52,15 @@ const VELITE_CONFIGS: [&str; 6] = [
     "velite.config.cts",
 ];
 
+const CONTENTLAYER_CONFIGS: [&str; 6] = [
+    "contentlayer.config.js",
+    "contentlayer.config.mjs",
+    "contentlayer.config.cjs",
+    "contentlayer.config.ts",
+    "contentlayer.config.mts",
+    "contentlayer.config.cts",
+];
+
 pub(crate) fn select_astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     let mut roots = BTreeSet::new();
 
@@ -136,15 +145,36 @@ pub(crate) fn select_velite_config<'a>(
 pub(crate) fn velite_output_paths(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
+    app_root_rel_paths: &[String],
 ) -> Vec<String> {
     crawl
         .entries
         .iter()
         .filter(|entry| {
-            is_included_file(entry)
-                && entry.kind == G3WorkspaceEntryKind::File
+            is_app_visible(entry)
                 && is_under_app_root(&entry.path.rel_path, app_root_rel_path)
+                && nearest_app_root(&entry.path.rel_path, app_root_rel_paths)
+                    .is_some_and(|nearest| nearest == app_root_rel_path)
                 && path_has_segment(&entry.path.rel_path, ".velite")
+        })
+        .map(|entry| entry.path.rel_path.clone())
+        .collect()
+}
+
+pub(crate) fn legacy_generated_state_paths(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+    app_root_rel_paths: &[String],
+) -> Vec<String> {
+    crawl
+        .entries
+        .iter()
+        .filter(|entry| {
+            is_app_visible(entry)
+                && is_under_app_root(&entry.path.rel_path, app_root_rel_path)
+                && nearest_app_root(&entry.path.rel_path, app_root_rel_paths)
+                    .is_some_and(|nearest| nearest == app_root_rel_path)
+                && is_legacy_generated_state_path(&entry.path.rel_path, app_root_rel_path)
         })
         .map(|entry| entry.path.rel_path.clone())
         .collect()
@@ -398,6 +428,32 @@ fn probe(probe: EslintProbeKind, rel_path: String) -> EslintProbeTarget {
 fn is_included_file(entry: &G3WorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
+}
+
+fn is_app_visible(entry: &G3WorkspaceEntry) -> bool {
+    entry.readable
+        && matches!(
+            entry.kind,
+            G3WorkspaceEntryKind::File | G3WorkspaceEntryKind::Directory
+        )
+}
+
+fn nearest_app_root<'a>(rel_path: &str, app_root_rel_paths: &'a [String]) -> Option<&'a str> {
+    app_root_rel_paths
+        .iter()
+        .filter(|root| is_under_app_root(rel_path, root))
+        .max_by_key(|root| root.len())
+        .map(String::as_str)
+}
+
+fn is_legacy_generated_state_path(rel_path: &str, app_root_rel_path: &str) -> bool {
+    path_has_segment(rel_path, ".next")
+        || path_has_segment(rel_path, ".contentlayer")
+        || (!is_route_tree_path(rel_path, app_root_rel_path)
+            && Path::new(rel_path)
+                .file_name()
+                .and_then(|name| name.to_str())
+                .is_some_and(|file_name| CONTENTLAYER_CONFIGS.contains(&file_name)))
 }
 
 fn is_primary_ts_source_rel_path(rel_path: &str) -> bool {

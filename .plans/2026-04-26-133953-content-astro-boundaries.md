@@ -440,7 +440,8 @@ Owner: G3TS Astro file-tree checks.
 
 Rule:
 
-- Strict Astro landing/content app roots must not contain `.next/**`, `.velite/**`, `.contentlayer/**`, or other paths listed in `forbidden_generated_state_globs`.
+- Strict Astro landing/content app roots must not contain `.next/**`, `.contentlayer/**`, `contentlayer.config.*`, or other non-Velite paths listed in `forbidden_generated_state_globs`.
+- `.velite/**` remains covered by existing `TS-ASTRO-FILETREE-06` until Velite checks are consolidated.
 - `dist/**` is allowed only when matched by `build_output_globs`; it must not be treated as authored content, generated content data, or source.
 - Generated output directories must be ignored or classified as build output. They must not satisfy content, route, adapter, or MDX requirements.
 
