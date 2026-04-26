@@ -22,6 +22,7 @@ mod ts_astro_config_20_mdx_lane;
 mod ts_astro_config_21_required_integrations;
 mod ts_astro_config_22_structured_data_check;
 mod ts_astro_config_23_strict_content_policy;
+mod ts_astro_config_24_strict_policy_paths;
 
 #[cfg(feature = "checks")]
 pub use run::check;

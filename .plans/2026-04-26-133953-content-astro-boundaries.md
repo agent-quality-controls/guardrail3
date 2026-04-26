@@ -118,6 +118,8 @@ Delegate:
 
 Owner: G3TS Astro config checks.
 
+Implemented in this slice.
+
 Rule:
 
 - Every `content_routes`, `non_content_routes`, `endpoints`, and `forbidden_state` entry must be app-relative.
@@ -237,7 +239,7 @@ Style family may own:
 
 # Implementation Order
 
-1. Finish `TS-ASTRO-CONFIG-24`.
+1. Done: `TS-ASTRO-CONFIG-24`.
 2. Finish `TS-ASTRO-CONFIG-25`.
 3. Finish `TS-ASTRO-CONFIG-26`.
 4. Finish `TS-ASTRO-CONFIG-27`.

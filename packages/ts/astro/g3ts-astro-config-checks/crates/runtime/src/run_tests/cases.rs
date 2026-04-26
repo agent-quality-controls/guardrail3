@@ -199,6 +199,13 @@ fn golden_config_reports_expected_inventory() {
                 Some("guardrail3-rs.toml"),
                 true,
             ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-24",
+                "Astro strict content policy paths are structurally valid",
+                "`guardrail3-rs.toml` uses app-relative `content_routes`, `non_content_routes`, `endpoints`, `content_root`, `content_adapter`, and `forbidden_state` values without parent traversal.",
+                Some("guardrail3-rs.toml"),
+                true,
+            ),
         ],
     );
 }
@@ -236,6 +243,63 @@ fn strict_content_policy_rule_rejects_old_route_class_policy() {
         "TS-ASTRO-CONFIG-23",
         "old `*_globs` route-class fields are not supported",
     );
+}
+
+#[test]
+fn strict_content_policy_path_rule_rejects_absolute_parent_and_backslash_paths() {
+    let mut input = golden();
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.content_routes = vec!["/src/pages/**/*.astro".to_owned()];
+    snapshot.non_content_routes = vec!["../src/pages/404.astro".to_owned()];
+    snapshot.endpoints = vec!["src\\pages\\api.ts".to_owned()];
+    snapshot.forbidden_state = vec![".next/**".to_owned(), "../.velite/**".to_owned()];
+
+    let results = super::super::check(&input);
+
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-CONFIG-24",
+        "Astro strict content policy paths are invalid",
+    );
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "content_routes");
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "non_content_routes");
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "endpoints");
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "forbidden_state");
+}
+
+#[test]
+fn strict_content_policy_path_rule_rejects_glob_dirs_and_overlapping_roots() {
+    let mut input = golden();
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.content_root = Some("src/content".to_owned());
+    snapshot.content_adapter = Some("src/content/adapters".to_owned());
+
+    let results = super::super::check(&input);
+
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-24",
+        "content_root overlaps content_adapter",
+    );
+
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.content_adapter = Some("src/lib/content/**".to_owned());
+
+    let results = super::super::check(&input);
+
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "content_adapter");
 }
 
 #[test]
