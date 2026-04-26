@@ -7,5 +7,8 @@ pub fn assert_selected_families(
     actual: &[guardrail3_rs_app_types::SupportedFamily],
     expected: &[guardrail3_rs_app_types::SupportedFamily],
 ) {
-    assert_eq!(actual, expected, "selected families should keep the expected order");
+    assert_eq!(
+        actual, expected,
+        "selected families should keep the expected order"
+    );
 }

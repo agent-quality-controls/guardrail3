@@ -11,36 +11,36 @@ impl ReportRenderer for PlainTextReportRenderer {
 
 /// Renders the validation report into the plain text CLI format.
 pub(crate) fn render_report(report: &ValidateReport, include_inventory: bool) -> String {
-        let mut lines = Vec::new();
+    let mut lines = Vec::new();
 
-        for run in &report.runs {
-            let mut family_lines = Vec::new();
-            for result in &run.results {
-                if !include_inventory && result.inventory() {
-                    continue;
-                }
-                let file = result.file().unwrap_or("-");
-                family_lines.push(format!(
-                    "[{:?}] {} {} {}",
-                    result.severity(),
-                    result.id(),
-                    file,
-                    result.title()
-                ));
-                family_lines.push(format!("  {}", result.message()));
-            }
-            if family_lines.is_empty() {
+    for run in &report.runs {
+        let mut family_lines = Vec::new();
+        for result in &run.results {
+            if !include_inventory && result.inventory() {
                 continue;
             }
-            lines.push(format!("== {} ==", family_cli_name(run.family)));
-            lines.extend(family_lines);
+            let file = result.file().unwrap_or("-");
+            family_lines.push(format!(
+                "[{:?}] {} {} {}",
+                result.severity(),
+                result.id(),
+                file,
+                result.title()
+            ));
+            family_lines.push(format!("  {}", result.message()));
         }
-
-        if lines.is_empty() {
-            lines.push("No findings.".to_owned());
+        if family_lines.is_empty() {
+            continue;
         }
+        lines.push(format!("== {} ==", family_cli_name(run.family)));
+        lines.extend(family_lines);
+    }
 
-        format!("{}\n", lines.join("\n"))
+    if lines.is_empty() {
+        lines.push("No findings.".to_owned());
+    }
+
+    format!("{}\n", lines.join("\n"))
 }
 
 /// Returns the stable CLI name for one supported family.

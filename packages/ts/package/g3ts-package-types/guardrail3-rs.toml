@@ -6,3 +6,9 @@ allowed_deps = [
 
 [checks]
 garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-19"
+file = "src/types.rs"
+selector = "struct:G3TsPackageRootSnapshot"
+reason = "Root package snapshot intentionally mirrors the full package.json policy surface used by package guardrails."

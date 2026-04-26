@@ -1,5 +1,5 @@
 use astro_config_parser_runtime_assertions::parser as assertions;
-use astro_config_parser_types::document::{
+use astro_config_parser_runtime_assertions::parser::{
     AstroConfigParseState, AstroOutputMode, AstroStaticValue,
 };
 
@@ -13,7 +13,7 @@ fn parses_define_config_module_with_integrations() {
     )
     .expect("config should be written");
 
-    let document = crate::parse_document(root.path(), rel_path).expect("astro config should parse");
+    let document = assertions::parse_document(root.path(), rel_path).expect("astro config should parse");
 
     assertions::assert_parsed_document(&document);
     assertions::assert_snapshot(
@@ -35,7 +35,7 @@ fn parses_function_config_and_cjs_export() {
     )
     .expect("config should be written");
 
-    let document = crate::parse_document(root.path(), rel_path).expect("astro config should parse");
+    let document = assertions::parse_document(root.path(), rel_path).expect("astro config should parse");
 
     assertions::assert_parsed_document(&document);
     assertions::assert_snapshot(
@@ -57,7 +57,7 @@ fn parses_identifier_bound_integrations_array() {
     )
     .expect("config should be written");
 
-    let document = crate::parse_document(root.path(), rel_path).expect("astro config should parse");
+    let document = assertions::parse_document(root.path(), rel_path).expect("astro config should parse");
 
     assertions::assert_parsed_document(&document);
     assertions::assert_snapshot(&document, None, None, &["@astrojs/mdx"], None);
@@ -73,7 +73,7 @@ fn bare_imported_identifier_does_not_count_as_wired_integration() {
     )
     .expect("config should be written");
 
-    let document = crate::parse_document(root.path(), rel_path).expect("astro config should parse");
+    let document = assertions::parse_document(root.path(), rel_path).expect("astro config should parse");
 
     assertions::assert_parsed_document(&document);
     assertions::assert_snapshot(&document, None, None, &[], None);
@@ -89,7 +89,7 @@ fn spread_integrations_resolve_when_they_point_to_array_literals() {
     )
     .expect("config should be written");
 
-    let document = crate::parse_document(root.path(), rel_path).expect("astro config should parse");
+    let document = assertions::parse_document(root.path(), rel_path).expect("astro config should parse");
 
     assertions::assert_parsed_document(&document);
     assertions::assert_snapshot(
@@ -112,7 +112,7 @@ fn dynamic_spread_integrations_are_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(
         &document,
@@ -131,7 +131,7 @@ fn local_define_config_does_not_count_as_astro_wrapper() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -147,7 +147,7 @@ fn root_object_spreads_are_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "must not contain spread properties");
 }
@@ -163,7 +163,7 @@ fn duplicate_root_config_keys_are_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "duplicate `output` property");
 }
@@ -179,7 +179,7 @@ fn mutable_bindings_do_not_count_as_static_config_values() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(
         &document,
@@ -198,7 +198,7 @@ fn mutated_exported_config_identifier_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -214,7 +214,7 @@ fn object_assign_mutated_exported_config_identifier_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -230,7 +230,7 @@ fn object_assign_in_initializer_mutating_exported_config_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -246,7 +246,7 @@ fn object_assign_in_let_initializer_mutating_exported_config_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -262,7 +262,7 @@ fn optional_object_assign_mutating_exported_config_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -278,7 +278,7 @@ fn spread_object_assign_mutating_exported_config_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -294,7 +294,7 @@ fn callable_config_body_mutating_exported_config_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -310,7 +310,7 @@ fn block_nested_exported_config_mutation_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -326,7 +326,7 @@ fn alias_mutated_exported_config_identifier_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -342,7 +342,7 @@ fn transitive_alias_mutated_exported_config_identifier_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "could not reduce exported Astro config");
 }
@@ -358,7 +358,7 @@ fn mutated_integrations_array_identifier_is_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(
         &document,
@@ -377,7 +377,7 @@ fn dynamic_integration_options_are_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "must resolve to static values");
 }
@@ -393,7 +393,7 @@ fn spread_integration_options_are_invalid() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
 
     assertions::assert_invalid_document(&document, "must not contain spread properties");
 }
@@ -409,7 +409,7 @@ fn named_alias_and_imported_custom_check_are_preserved() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
     let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
         panic!("expected parsed document, got {document:?}");
     };
@@ -459,7 +459,7 @@ fn namespace_imports_are_distinct_from_named_imports() {
     .expect("config should be written");
 
     let document =
-        crate::parse_document(root.path(), rel_path).expect("astro config document should exist");
+        assertions::parse_document(root.path(), rel_path).expect("astro config document should exist");
     let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
         panic!("expected parsed document, got {document:?}");
     };

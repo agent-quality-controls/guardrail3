@@ -1,5 +1,6 @@
 mod document;
 mod error;
+mod fs;
 mod parser;
 #[cfg(feature = "api")]
 pub mod types;

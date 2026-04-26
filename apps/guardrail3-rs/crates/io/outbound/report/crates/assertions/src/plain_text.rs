@@ -24,10 +24,7 @@ pub fn assert_inventory_hidden(output: &str) {
 ///
 /// Panics if the renderer output is not the exact clean no-findings text.
 pub fn assert_no_findings(output: &str) {
-    assert_eq!(
-        output, "No findings.\n",
-        "expected exact clean output line"
-    );
+    assert_eq!(output, "No findings.\n", "expected exact clean output line");
 }
 
 /// Checks that the rendered output keeps the rule message line.

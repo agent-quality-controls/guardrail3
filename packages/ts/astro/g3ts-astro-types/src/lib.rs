@@ -2,52 +2,52 @@
 mod types;
 
 #[cfg(feature = "api")]
-pub use types::G3TsAstroAppRootInput;
+pub type G3TsAstroAppRootInput = types::G3TsAstroAppRootInput;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroCallSnapshot;
+pub type G3TsAstroCallSnapshot = types::G3TsAstroCallSnapshot;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroConfigChecksInput;
+pub type G3TsAstroConfigChecksInput = types::G3TsAstroConfigChecksInput;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroConfigSurfaceSnapshot;
+pub type G3TsAstroConfigSurfaceSnapshot = types::G3TsAstroConfigSurfaceSnapshot;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroConfigSurfaceState;
+pub type G3TsAstroConfigSurfaceState = types::G3TsAstroConfigSurfaceState;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroContentMode;
+pub type G3TsAstroContentMode = types::G3TsAstroContentMode;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroEslintPluginContractInput;
+pub type G3TsAstroEslintPluginContractInput = types::G3TsAstroEslintPluginContractInput;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroEslintSurfaceSnapshot;
+pub type G3TsAstroEslintSurfaceSnapshot = types::G3TsAstroEslintSurfaceSnapshot;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroEslintSurfaceState;
+pub type G3TsAstroEslintSurfaceState = types::G3TsAstroEslintSurfaceState;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroFileTreeChecksInput;
+pub type G3TsAstroFileTreeChecksInput = types::G3TsAstroFileTreeChecksInput;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroIntegrationContractInput;
+pub type G3TsAstroIntegrationContractInput = types::G3TsAstroIntegrationContractInput;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroIntegrationSnapshot;
+pub type G3TsAstroIntegrationSnapshot = types::G3TsAstroIntegrationSnapshot;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroOutputMode;
+pub type G3TsAstroOutputMode = types::G3TsAstroOutputMode;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroPackageScriptCommand;
+pub type G3TsAstroPackageScriptCommand = types::G3TsAstroPackageScriptCommand;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroPackageScriptCommandSeparator;
+pub type G3TsAstroPackageScriptCommandSeparator = types::G3TsAstroPackageScriptCommandSeparator;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroPackageScriptParseBlocker;
+pub type G3TsAstroPackageScriptParseBlocker = types::G3TsAstroPackageScriptParseBlocker;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroPackageScriptToolInvocation;
+pub type G3TsAstroPackageScriptToolInvocation = types::G3TsAstroPackageScriptToolInvocation;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroPackageSurfaceSnapshot;
+pub type G3TsAstroPackageSurfaceSnapshot = types::G3TsAstroPackageSurfaceSnapshot;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroPackageSurfaceState;
+pub type G3TsAstroPackageSurfaceState = types::G3TsAstroPackageSurfaceState;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroRouteMarkdownPageInput;
+pub type G3TsAstroRouteMarkdownPageInput = types::G3TsAstroRouteMarkdownPageInput;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroStaticObjectProperty;
+pub type G3TsAstroStaticObjectProperty = types::G3TsAstroStaticObjectProperty;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroStaticValue;
+pub type G3TsAstroStaticValue = types::G3TsAstroStaticValue;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroSyncpackConfigSnapshot;
+pub type G3TsAstroSyncpackConfigSnapshot = types::G3TsAstroSyncpackConfigSnapshot;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroSyncpackConfigState;
+pub type G3TsAstroSyncpackConfigState = types::G3TsAstroSyncpackConfigState;
 #[cfg(feature = "api")]
-pub use types::G3TsAstroSyncpackRequiredPin;
+pub type G3TsAstroSyncpackRequiredPin = types::G3TsAstroSyncpackRequiredPin;

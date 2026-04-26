@@ -34,7 +34,11 @@ pub fn run(
             let mut results = Vec::new();
             results.extend(g3rs_hooks_config_checks::check(&config_input));
             results.extend(g3rs_hooks_file_tree_checks::check(&filetree_input));
-            results.extend(source_inputs.iter().flat_map(g3rs_hooks_source_checks::check));
+            results.extend(
+                source_inputs
+                    .iter()
+                    .flat_map(g3rs_hooks_source_checks::check),
+            );
             Ok(results)
         }
         SupportedFamily::Release => {
@@ -44,11 +48,9 @@ pub fn run(
                         message: format!("{error:?}"),
                     }
                 })?;
-            let filetree_input =
-                g3rs_release_ingestion::ingest_for_file_tree_checks(crawl).map_err(|error| {
-                    FamilyRunError {
-                        message: format!("{error:?}"),
-                    }
+            let filetree_input = g3rs_release_ingestion::ingest_for_file_tree_checks(crawl)
+                .map_err(|error| FamilyRunError {
+                    message: format!("{error:?}"),
                 })?;
             let source_input =
                 g3rs_release_ingestion::ingest_for_source_checks(crawl).map_err(|error| {

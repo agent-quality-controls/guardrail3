@@ -22,13 +22,12 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             continue;
         }
 
-        let missing = match (has_check_package, safely_runs_astro_check) {
-            (false, false) => format!(
-                "`{DEPENDENCY_NAME}` is missing and no app script safely invokes `astro check`"
-            ),
-            (false, true) => format!("`{DEPENDENCY_NAME}` is missing"),
-            (true, false) => "no app script safely invokes `astro check`".to_owned(),
-            (true, true) => unreachable!("passing state returned above"),
+        let missing = if !has_check_package && !safely_runs_astro_check {
+            format!("`{DEPENDENCY_NAME}` is missing and no app script safely invokes `astro check`")
+        } else if !has_check_package {
+            format!("`{DEPENDENCY_NAME}` is missing")
+        } else {
+            "no app script safely invokes `astro check`".to_owned()
         };
         let message = match rel_path {
             Some(rel_path) => format!(

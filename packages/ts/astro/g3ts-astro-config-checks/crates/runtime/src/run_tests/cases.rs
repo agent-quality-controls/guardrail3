@@ -209,7 +209,7 @@ fn astro_config_site_url_rule_rejects_missing_or_non_https_site() {
         snapshot.site = site;
 
         let results = super::super::check(&input);
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-11",
             "Astro config is missing an absolute HTTPS `site` URL",
@@ -229,7 +229,7 @@ fn astro_static_output_rule_rejects_missing_or_server_output() {
         snapshot.output = output;
 
         let results = super::super::check(&input);
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-12",
             "Astro public content app must use explicit static output",
@@ -250,7 +250,7 @@ fn astro_check_rule_requires_package_and_safe_script() {
         .retain(|dependency| dependency != "@astrojs/check");
 
     let results = super::super::check(&input);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-02",
         "Astro app typecheck contract is missing",
@@ -267,7 +267,7 @@ fn nuasite_rule_rejects_unsafe_build_and_fail_open_options() {
     };
     snapshot.safely_runs_astro_build = false;
     let results = super::super::check(&unsafe_build);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-13",
         "Nuasite rendered-output checks are not installed and wired",
@@ -295,13 +295,13 @@ fn nuasite_rule_rejects_unsafe_build_and_fail_open_options() {
         let mut input = golden();
         mutate_nuasite_option(&mut input, key, value);
         let results = super::super::check(&input);
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-13",
             "Nuasite rendered-output checks are not installed and wired",
         );
         if key == "customChecks" {
-            assert_error_id_title(
+            assertions::assert_has_error_title(
                 &results,
                 "TS-ASTRO-CONFIG-22",
                 "JSON-LD presence check is not delegated to Nuasite",
@@ -323,13 +323,13 @@ fn nuasite_rule_rejects_missing_required_options_and_duplicate_keys() {
         let mut input = golden();
         remove_nuasite_option(&mut input, key);
         let results = super::super::check(&input);
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-13",
             "Nuasite rendered-output checks are not installed and wired",
         );
         if key == "customChecks" {
-            assert_error_id_title(
+            assertions::assert_has_error_title(
                 &results,
                 "TS-ASTRO-CONFIG-22",
                 "JSON-LD presence check is not delegated to Nuasite",
@@ -344,7 +344,7 @@ fn nuasite_rule_rejects_missing_required_options_and_duplicate_keys() {
         G3TsAstroStaticValue::String("full".to_owned()),
     );
     let results = super::super::check(&duplicate);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-13",
         "Nuasite rendered-output checks are not installed and wired",
@@ -353,7 +353,7 @@ fn nuasite_rule_rejects_missing_required_options_and_duplicate_keys() {
     let mut unknown = golden();
     mutate_nuasite_option(&mut unknown, "unreviewed", G3TsAstroStaticValue::Bool(true));
     let results = super::super::check(&unknown);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-13",
         "Nuasite rendered-output checks are not installed and wired",
@@ -376,17 +376,17 @@ fn astro_generation_rules_reject_missing_integration_surfaces() {
     });
 
     let results = super::super::check(&input);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-14",
         "Astro sitemap integration is not installed and wired",
     );
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-15",
         "Astro robots integration is not installed and wired",
     );
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-21",
         "Required Astro integrations are missing",
@@ -419,20 +419,20 @@ fn astro_generation_rules_reject_non_exact_integration_calls() {
             .first_arg = Some(G3TsAstroStaticValue::Object(Vec::new()));
 
         let results = super::super::check(&input);
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-21",
             "Required Astro integrations are missing",
         );
         if module == "@astrojs/sitemap" {
-            assert_error_id_title(
+            assertions::assert_has_error_title(
                 &results,
                 "TS-ASTRO-CONFIG-14",
                 "Astro sitemap integration is not installed and wired",
             );
         }
         if module == "astro-robots" {
-            assert_error_id_title(
+            assertions::assert_has_error_title(
                 &results,
                 "TS-ASTRO-CONFIG-15",
                 "Astro robots integration is not installed and wired",
@@ -463,7 +463,7 @@ fn required_integrations_rule_rejects_wrapped_or_wrong_import_shapes() {
         integration.imported_name = Some("named".to_owned());
 
         let results = super::super::check(&input);
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-21",
             "Required Astro integrations are missing",
@@ -478,7 +478,7 @@ fn required_integrations_rule_rejects_wrapped_or_wrong_import_shapes() {
     };
     snapshot.integrations[0].call = None;
     let results = super::super::check(&wrapped);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-21",
         "Required Astro integrations are missing",
@@ -499,7 +499,7 @@ fn required_integrations_rule_rejects_missing_react_mdx_or_nuasite_integrations(
             .retain(|integration| integration.source_module.as_deref() != Some(module));
 
         let results = super::super::check(&input);
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-21",
             "Required Astro integrations are missing",
@@ -527,7 +527,7 @@ fn required_integrations_rule_rejects_nuasite_call_without_options_object() {
         .first_arg = Some(G3TsAstroStaticValue::Bool(false));
 
     let results = super::super::check(&input);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-21",
         "Required Astro integrations are missing",
@@ -548,21 +548,17 @@ fn content_discovery_and_seo_package_rules_reject_missing_surfaces() {
         .retain(|dependency| dependency != "schema-dts");
 
     let results = super::super::check(&input);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-16",
         "Astro public content app is missing `public/llms.txt`",
     );
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-17",
         "Astro JSON-LD type package is missing",
     );
-    assert!(
-        results.iter().all(|finding| finding.id() != "TS-ASTRO-CONFIG-17"
-            || !finding.message().contains("`astro-seo`")),
-        "missing schema-dts error must not tell agents to install astro-seo: {results:?}"
-    );
+    assertions::assert_no_id_message_contains(&results, "TS-ASTRO-CONFIG-17", "`astro-seo`");
 }
 
 #[test]
@@ -570,11 +566,7 @@ fn seo_package_rule_does_not_require_bare_astro_seo_package() {
     let input = golden();
     let results = super::super::check(&input);
 
-    assert!(
-        results.iter().all(|finding| finding.id() != "TS-ASTRO-CONFIG-17"
-            || !finding.message().contains("`astro-seo`")),
-        "bare astro-seo must not appear in the required SEO package finding: {results:?}"
-    );
+    assertions::assert_no_id_message_contains(&results, "TS-ASTRO-CONFIG-17", "`astro-seo`");
 }
 
 #[test]
@@ -594,7 +586,7 @@ fn mdx_lane_rule_rejects_ignored_or_missing_mdx_probe() {
     snapshot.mdx_content_error_rules.clear();
 
     let results = super::super::check(&input);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-20",
         "MDX ESLint lane is not wired",
@@ -607,7 +599,7 @@ fn structured_data_rule_rejects_local_or_missing_custom_check() {
         let mut input = golden();
         replace_structured_data_check_source(&mut input, source_module);
         let results = super::super::check(&input);
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-22",
             "JSON-LD presence check is not delegated to Nuasite",
@@ -625,12 +617,12 @@ fn structured_data_rule_rejects_wrong_custom_check_identity_or_shape() {
         let mut input = golden();
         replace_structured_data_check_identity(&mut input, local_name, imported_name);
         let results = super::super::check(&input);
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-22",
             "JSON-LD presence check is not delegated to Nuasite",
         );
-        assert_error_id_title(
+        assertions::assert_has_error_title(
             &results,
             "TS-ASTRO-CONFIG-13",
             "Nuasite rendered-output checks are not installed and wired",
@@ -644,7 +636,7 @@ fn structured_data_rule_rejects_wrong_custom_check_identity_or_shape() {
         G3TsAstroStaticValue::Bool(true),
     );
     let results = super::super::check(&non_array);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-22",
         "JSON-LD presence check is not delegated to Nuasite",
@@ -669,12 +661,12 @@ fn pipeline_rules_reject_local_plugin_registered_under_astro_pipeline_namespace(
         .remove("astro-pipeline");
 
     let results = super::super::check(&input);
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-07",
         "Astro ESLint lanes are not enforcing the required content rules",
     );
-    assert_error_id_title(
+    assertions::assert_has_error_title(
         &results,
         "TS-ASTRO-CONFIG-18",
         "Astro content adapter route rule is not effective",
@@ -694,12 +686,12 @@ fn delegated_eslint_rules_accept_effective_public_namespaces_without_package_ide
     let _ = snapshot.mdx_content_plugin_package_names.remove("mdx");
 
     let results = super::super::check(&input);
-    assert_info_id_title(
+    assertions::assert_has_info_title(
         &results,
         "TS-ASTRO-CONFIG-19",
         "Inline public-copy ESLint rule is effective",
     );
-    assert_info_id_title(&results, "TS-ASTRO-CONFIG-20", "MDX ESLint lane is wired");
+    assertions::assert_has_info_title(&results, "TS-ASTRO-CONFIG-20", "MDX ESLint lane is wired");
 }
 
 #[test]
@@ -712,7 +704,7 @@ fn astro_eslint_rule_accepts_effective_namespace_without_package_identity() {
     let _ = snapshot.astro_source_plugin_package_names.remove("astro");
 
     let results = super::super::check(&input);
-    assert_info_id_title(&results, "TS-ASTRO-CONFIG-05", "astro ESLint plugin wired");
+    assertions::assert_has_info_title(&results, "TS-ASTRO-CONFIG-05", "astro ESLint plugin wired");
 }
 
 #[test]
@@ -726,12 +718,12 @@ fn syncpack_policy_rules_do_not_own_safe_syncpack_lint_script() {
     snapshot.safely_runs_syncpack_lint = false;
 
     let results = super::super::check(&input);
-    assert_info_id_title(
+    assertions::assert_has_info_title(
         &results,
         "TS-ASTRO-CONFIG-09",
         "Syncpack pins the required Astro stack",
     );
-    assert_info_id_title(
+    assertions::assert_has_info_title(
         &results,
         "TS-ASTRO-CONFIG-10",
         "Syncpack bans forbidden Astro deps",
@@ -1052,7 +1044,7 @@ fn syncpack_catch_all_forbidden_ban_does_not_satisfy_canonical_contract() {
 
 #[test]
 fn noncanonical_syncpack_forbidden_bans_report_policy_error() {
-    for (case_name, input) in [
+    for (_case_name, input) in [
         (
             "shadowed",
             syncpack_shadowed_forbidden_ban as fn() -> g3ts_astro_types::G3TsAstroConfigChecksInput,
@@ -1078,12 +1070,7 @@ fn noncanonical_syncpack_forbidden_bans_report_policy_error() {
                 false,
             )],
         );
-        assert!(
-            results.iter().any(|finding| {
-                finding.id() == "TS-ASTRO-CONFIG-10" && finding.message().contains("`next`")
-            }),
-            "case {case_name} should report `next` as missing: {results:?}"
-        );
+        assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-10", "`next`");
     }
 }
 
@@ -1149,12 +1136,10 @@ fn all_contentlayer_syncpack_bans_are_required() {
         let input = syncpack_missing_forbidden_ban_named(dependency);
         let results = super::super::check(&input);
 
-        assert!(
-            results.iter().any(|finding| {
-                finding.id() == "TS-ASTRO-CONFIG-10"
-                    && finding.message().contains(&format!("`{dependency}`"))
-            }),
-            "missing `{dependency}` ban should be reported: {results:?}"
+        assertions::assert_id_message_contains(
+            &results,
+            "TS-ASTRO-CONFIG-10",
+            &format!("`{dependency}`"),
         );
     }
 }
@@ -1165,13 +1150,7 @@ fn contentlayer_syncpack_bans_are_not_required_for_non_content_astro_apps() {
     input.integration_contracts[0].content_mode = G3TsAstroContentMode::None;
     let results = super::super::check(&input);
 
-    assert!(
-        results.iter().all(|finding| {
-            finding.id() != "TS-ASTRO-CONFIG-10"
-                || !finding.message().contains("`contentlayer`")
-        }),
-        "non-content Astro apps should not require Contentlayer-specific bans: {results:?}"
-    );
+    assertions::assert_no_id_message_contains(&results, "TS-ASTRO-CONFIG-10", "`contentlayer`");
 }
 
 #[test]
@@ -1552,28 +1531,6 @@ fn missing_package_eslint_and_astro_config_surfaces_fail_closed() {
                 false,
             ),
         ],
-    );
-}
-
-fn assert_error_id_title(results: &[guardrail3_check_types::G3CheckResult], id: &str, title: &str) {
-    assert!(
-        results.iter().any(|result| {
-            result.id() == id
-                && result.title() == title
-                && result.severity() == guardrail3_check_types::G3Severity::Error
-        }),
-        "expected error {id} / {title}, got: {results:?}"
-    );
-}
-
-fn assert_info_id_title(results: &[guardrail3_check_types::G3CheckResult], id: &str, title: &str) {
-    assert!(
-        results.iter().any(|result| {
-            result.id() == id
-                && result.title() == title
-                && result.severity() == guardrail3_check_types::G3Severity::Info
-        }),
-        "expected info {id} / {title}, got: {results:?}"
     );
 }
 

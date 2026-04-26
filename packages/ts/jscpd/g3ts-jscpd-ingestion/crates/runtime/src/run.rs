@@ -1,4 +1,3 @@
-use std::fs::File;
 use std::path::{Path, PathBuf};
 
 use g3_workspace_crawl::{G3RsWorkspaceCrawl as G3WorkspaceCrawl, root_file};
@@ -80,7 +79,7 @@ fn find_ancestor_root_jscpd(crawl: &G3WorkspaceCrawl) -> Option<SelectedRootJscp
         let candidate = dir.join(".jscpd.json");
         if candidate.is_file() {
             let rel_path = relative_ancestor_config_path(&crawl.root_abs_path, dir);
-            let readable = File::open(&candidate).is_ok();
+            let readable = crate::fs::is_readable_file(&candidate);
             let reason = (!readable).then(|| {
                 "selected ancestor root .jscpd.json could not be opened from the validation root"
                     .to_owned()

@@ -4,10 +4,10 @@ mod cli;
 mod run;
 
 #[cfg(feature = "api")]
+pub use cli::{Cli, Command, FamilyArg, parse_command_from};
+#[cfg(feature = "api")]
 pub use guardrail3_rs_packages::PackageRuntime;
 #[cfg(feature = "api")]
 pub use guardrail3_rs_report::PlainTextReportRenderer;
-#[cfg(feature = "api")]
-pub use cli::{Cli, Command, FamilyArg, parse_command_from};
 #[cfg(feature = "api")]
 pub use run::{CliFamilyRunner, CliOutput, run_command};

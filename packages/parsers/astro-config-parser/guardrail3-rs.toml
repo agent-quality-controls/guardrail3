@@ -2,7 +2,11 @@ profile = "library"
 
 allowed_deps = [
   "jsonc-parser",
+  "serde",
   "serde_json",
+  "swc_common",
+  "swc_ecma_ast",
+  "swc_ecma_parser",
   "tempfile",
   "package-json-parser-runtime",
   "package-json-parser-runtime-assertions",
@@ -11,3 +15,15 @@ allowed_deps = [
 
 [checks]
 garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-09"
+file = "crates/runtime/src/parser.rs"
+selector = "effective-code-lines"
+reason = "Astro config parser is a SWC reducer state machine; splitting it safely requires a dedicated parser-module extraction."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-10"
+file = "crates/runtime/src/parser.rs"
+selector = "top-level-use-imports"
+reason = "Astro config parser imports one SWC AST surface in a single reducer; reducing imports safely belongs with the parser-module split."

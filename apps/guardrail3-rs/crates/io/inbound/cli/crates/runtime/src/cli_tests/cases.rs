@@ -1,14 +1,19 @@
 #[test]
 fn parse_command_accepts_family_and_inventory_flags() {
-    guardrail3_rs_assertions::cli::assert_validate_command_from([
-        "guardrail3-rs",
-        "validate",
-        "--path",
+    guardrail3_rs_assertions::cli::assert_validate_command_from(
+        [
+            "guardrail3-rs",
+            "validate",
+            "--path",
+            ".",
+            "--family",
+            "fmt",
+            "--inventory",
+        ],
         ".",
-        "--family",
-        "fmt",
-        "--inventory",
-    ], ".", &["fmt"], true);
+        &["fmt"],
+        true,
+    );
 }
 
 #[test]

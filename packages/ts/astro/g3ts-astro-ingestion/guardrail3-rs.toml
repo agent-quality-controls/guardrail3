@@ -1,9 +1,18 @@
 profile = "library"
 
 allowed_deps = [
+  "astro-config-parser",
   "eslint-config-parser",
   "g3-workspace-crawl",
+  "g3rs-workspace-crawl",
+  "g3ts-astro-ingestion-assertions",
+  "g3ts-astro-types",
   "g3ts-eslint-types",
+  "globset",
+  "package-json-parser",
+  "package-script-command-parser",
+  "serde_json",
+  "syncpack-config-parser",
   "tempfile",
 ]
 
@@ -12,6 +21,18 @@ rule = "RS-ARCH-FILETREE-07"
 file = "crates/assertions/Cargo.toml"
 selector = "structural-split"
 reason = "Assertions crate intentionally keeps one shared proof module per tested ingestion surface."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-09"
+file = "crates/runtime/src/run.rs"
+selector = "effective-code-lines"
+reason = "Astro ingestion is a parser-normalizer state machine; split requires dedicated behavior-preserving extraction across package, ESLint, Astro, Syncpack, and route facts."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-10"
+file = "crates/runtime/src/run.rs"
+selector = "top-level-use-imports"
+reason = "Astro ingestion imports all normalized fact surfaces in one state machine; reducing imports safely belongs with the module split."
 
 [checks]
 garde = false

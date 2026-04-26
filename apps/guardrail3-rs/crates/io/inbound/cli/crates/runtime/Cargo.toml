@@ -29,5 +29,9 @@ api = []
 [package.metadata.guardrail3]
 shared = true
 
+[[bin]]
+name = "g3rs"
+path = "src/main.rs"
+
 [lints]
 workspace = true

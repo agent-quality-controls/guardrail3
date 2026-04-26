@@ -11,8 +11,14 @@ pub fn assert_execution_outcome(
     expected_stderr: &str,
     expected_exit_code: i32,
 ) {
-    assert_eq!(stdout, expected_stdout, "stdout should match expected output");
-    assert_eq!(stderr, expected_stderr, "stderr should match expected output");
+    assert_eq!(
+        stdout, expected_stdout,
+        "stdout should match expected output"
+    );
+    assert_eq!(
+        stderr, expected_stderr,
+        "stderr should match expected output"
+    );
     assert_eq!(
         exit_code, expected_exit_code,
         "exit code should match expected outcome"

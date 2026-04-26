@@ -4,3 +4,9 @@ allowed_deps = []
 
 [checks]
 garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-19"
+file = "src/types.rs"
+selector = "struct:G3TsAstroEslintSurfaceSnapshot"
+reason = "ESLint effective-config facts intentionally mirror every Astro, TS, TSX, and MDX lane in one transport snapshot."

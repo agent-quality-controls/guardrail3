@@ -23,3 +23,15 @@ rule = "RS-CLIPPY-CONFIG-01"
 file = "clippy.toml"
 selector = "key:max-struct-bools"
 reason = "Schema mirror parser package needs a higher bool-field threshold than the repo baseline."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-04"
+file = "crates/runtime/src/fs.rs"
+selector = "lint:clippy::disallowed_methods"
+reason = "fs.rs is the centralized filesystem boundary for this parser crate."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-04"
+file = "crates/runtime/src/parser.rs"
+selector = "lint:clippy::disallowed_methods"
+reason = "parser.rs is the centralized TOML parser boundary for this parser crate."

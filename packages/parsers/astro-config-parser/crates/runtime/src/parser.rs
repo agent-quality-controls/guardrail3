@@ -32,7 +32,7 @@ pub fn parse_document(
     config_rel_path: &str,
 ) -> Result<AstroConfigDocument, crate::error::Error> {
     let abs_path = workspace_root.as_ref().join(config_rel_path);
-    let source = std::fs::read_to_string(&abs_path)?;
+    let source = crate::fs::read_to_string(&abs_path)?;
     let selected_config = AstroConfigSelectedFile {
         rel_path: config_rel_path.to_owned(),
         kind: file_kind(config_rel_path)?,

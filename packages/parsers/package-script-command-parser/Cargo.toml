@@ -18,7 +18,7 @@ package-script-command-parser-runtime = { path = "crates/runtime", version = "0.
 [features]
 default = ["all"]
 all = ["api"]
-api = ["dep:package-script-command-parser-runtime"]
+api = ["dep:package-script-command-parser-runtime", "package-script-command-parser-runtime?/api"]
 
 [lints]
 workspace = true

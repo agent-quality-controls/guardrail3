@@ -18,7 +18,7 @@ eslint-directive-parser-runtime = { path = "crates/runtime", version = "0.1.0", 
 [features]
 default = ["all"]
 all = ["api"]
-api = ["dep:eslint-directive-parser-runtime"]
+api = ["dep:eslint-directive-parser-runtime", "eslint-directive-parser-runtime?/api"]
 
 [lints]
 workspace = true

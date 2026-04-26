@@ -5,8 +5,10 @@
     reason = "assertion helpers are panic-based proof sites for parser tests"
 )]
 
+pub use package_script_command_parser_runtime::types::PackageScriptCommandSeparator;
+
 use package_script_command_parser_runtime::types::{
-    PackageScriptCommandDocument, PackageScriptCommandSeparator, PackageScriptParseState,
+    PackageScriptCommandDocument, PackageScriptParseState,
 };
 
 pub fn assert_parsed_document(document: &PackageScriptCommandDocument) {
