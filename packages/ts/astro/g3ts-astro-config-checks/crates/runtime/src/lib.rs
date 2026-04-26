@@ -26,6 +26,7 @@ mod ts_astro_config_24_strict_policy_paths;
 mod ts_astro_config_25_route_scope_overlap;
 mod ts_astro_config_26_policy_eslint_coverage;
 mod ts_astro_config_27_content_adapter_exists;
+mod ts_astro_config_28_content_adapter_astro_content;
 
 #[cfg(feature = "checks")]
 pub use run::check;

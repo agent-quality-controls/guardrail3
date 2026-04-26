@@ -105,7 +105,7 @@ forbidden_state = [".next/**", ".velite/**", ".contentlayer/**"]
     .expect("side loader source should be written");
     std::fs::write(
         root.path().join("src/lib/content/index.ts"),
-        "export const getContent = () => null;\n",
+        "import { getEntry } from \"astro:content\";\nexport const getContent = () => getEntry;\n",
     )
     .expect("content adapter source should be written");
     std::fs::write(root.path().join("src/pages/about.mdx"), "# about\n")

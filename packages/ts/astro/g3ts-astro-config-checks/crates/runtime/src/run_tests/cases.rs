@@ -227,6 +227,13 @@ fn golden_config_reports_expected_inventory() {
                 Some("guardrail3-ts.toml"),
                 true,
             ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-28",
+                "Astro content adapter sources import Astro content collections",
+                "`guardrail3-ts.toml` resolves `content_adapter` to adapter source files that import `astro:content` at runtime: `src/lib/content/index.ts`.",
+                Some("guardrail3-ts.toml"),
+                true,
+            ),
         ],
     );
 }
@@ -429,6 +436,29 @@ fn strict_content_policy_adapter_rule_rejects_missing_adapter_source() {
         "Astro content adapter source is missing",
     );
     assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-27", "src/lib/content");
+}
+
+#[test]
+fn strict_content_policy_adapter_rule_rejects_adapter_source_without_astro_content_import() {
+    let mut input = golden();
+    input.integration_contracts[0]
+        .content_adapter_astro_content_source_paths
+        .clear();
+
+    let results = super::super::check(&input);
+
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-CONFIG-28",
+        "Astro content adapter source does not use Astro content collections",
+    );
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-28",
+        "src/lib/content/index.ts",
+    );
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-28", "astro:content");
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-28", "Type-only imports");
 }
 
 #[test]

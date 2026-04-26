@@ -59,6 +59,25 @@ pub fn from_path(
     parse(workspace_root, config_rel_path)
 }
 
+pub fn module_has_runtime_source_import(
+    workspace_root: impl AsRef<Path>,
+    module_rel_path: &str,
+    source_module: &str,
+) -> Result<bool, crate::error::Error> {
+    let abs_path = workspace_root.as_ref().join(module_rel_path);
+    let source = crate::fs::read_to_string(&abs_path)?;
+    let kind = file_kind(module_rel_path)?;
+    let program = parse_program(&abs_path, &source, kind)?;
+    let swc_ecma_ast::Program::Module(module) = program else {
+        return Ok(false);
+    };
+
+    Ok(module
+        .body
+        .iter()
+        .any(|item| module_item_has_runtime_source_import(item, source_module)))
+}
+
 fn file_kind(config_rel_path: &str) -> Result<AstroConfigFileKind, crate::error::Error> {
     match Path::new(config_rel_path)
         .extension()
@@ -74,6 +93,25 @@ fn file_kind(config_rel_path: &str) -> Result<AstroConfigFileKind, crate::error:
         _ => Err(crate::error::Error::Parse(format!(
             "unsupported Astro config file kind: {config_rel_path}"
         ))),
+    }
+}
+
+fn module_item_has_runtime_source_import(item: &ModuleItem, source_module: &str) -> bool {
+    match item {
+        ModuleItem::ModuleDecl(ModuleDecl::Import(import_decl)) => {
+            !import_decl.type_only && import_decl.src.value.to_string_lossy() == source_module
+        }
+        ModuleItem::ModuleDecl(ModuleDecl::ExportNamed(export_decl)) => {
+            !export_decl.type_only
+                && export_decl
+                    .src
+                    .as_ref()
+                    .is_some_and(|source| source.value.to_string_lossy() == source_module)
+        }
+        ModuleItem::ModuleDecl(ModuleDecl::ExportAll(export_decl)) => {
+            !export_decl.type_only && export_decl.src.value.to_string_lossy() == source_module
+        }
+        ModuleItem::ModuleDecl(_) | ModuleItem::Stmt(_) => false,
     }
 }
 
@@ -545,9 +583,7 @@ fn simple_assignment_root_ident(target: &swc_ecma_ast::SimpleAssignTarget) -> Op
         swc_ecma_ast::SimpleAssignTarget::TsSatisfies(ts_satisfies) => {
             expr_root_ident(&ts_satisfies.expr)
         }
-        swc_ecma_ast::SimpleAssignTarget::TsNonNull(non_null) => {
-            expr_root_ident(&non_null.expr)
-        }
+        swc_ecma_ast::SimpleAssignTarget::TsNonNull(non_null) => expr_root_ident(&non_null.expr),
         swc_ecma_ast::SimpleAssignTarget::TsTypeAssertion(assertion) => {
             expr_root_ident(&assertion.expr)
         }
@@ -584,7 +620,9 @@ fn mark_binding_mutated(state: &mut AnalysisState, name: &str) {
 }
 
 fn mark_all_static_bindings_mutated(state: &mut AnalysisState) {
-    state.mutated_bindings.extend(state.const_bindings.keys().cloned());
+    state
+        .mutated_bindings
+        .extend(state.const_bindings.keys().cloned());
 }
 
 fn binding_aliases(state: &AnalysisState, name: &str) -> BTreeSet<String> {
