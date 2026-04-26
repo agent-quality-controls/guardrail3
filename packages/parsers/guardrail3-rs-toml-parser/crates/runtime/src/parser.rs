@@ -1,11 +1,11 @@
 #[cfg(test)]
-pub(super) use crate::types::Guardrail3RsToml;
-#[cfg(test)]
 pub(super) use crate::Error;
 #[cfg(not(test))]
-use crate::types::Guardrail3RsToml;
-#[cfg(not(test))]
 use crate::Error;
+#[cfg(test)]
+pub(super) use crate::types::Guardrail3RsToml;
+#[cfg(not(test))]
+use crate::types::Guardrail3RsToml;
 
 /// Parse `guardrail3-rs.toml` content into typed data.
 ///

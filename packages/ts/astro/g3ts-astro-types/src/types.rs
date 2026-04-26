@@ -104,6 +104,27 @@ pub struct G3TsAstroSyncpackRequiredPin {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroPolicySnapshot {
+    pub rel_path: String,
+    pub profile: Option<String>,
+    pub content_routes: Vec<String>,
+    pub non_content_routes: Vec<String>,
+    pub endpoints: Vec<String>,
+    pub content_root: Option<String>,
+    pub content_adapter: Option<String>,
+    pub forbidden_state: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum G3TsAstroPolicySurfaceState {
+    Missing { rel_path: String },
+    Unreadable { rel_path: String, reason: String },
+    ParseError { rel_path: String, reason: String },
+    MissingAstroPolicy { rel_path: String },
+    Parsed { snapshot: G3TsAstroPolicySnapshot },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3TsAstroSyncpackConfigState {
     Missing {
         rel_path: String,
@@ -194,6 +215,7 @@ pub struct G3TsAstroIntegrationContractInput {
     pub content_mode: G3TsAstroContentMode,
     pub package: G3TsAstroPackageSurfaceState,
     pub syncpack_config: G3TsAstroSyncpackConfigState,
+    pub astro_policy: G3TsAstroPolicySurfaceState,
     pub astro_config: G3TsAstroConfigSurfaceState,
     pub llms_txt_rel_path: Option<String>,
     pub required_syncpack_pins: Vec<G3TsAstroSyncpackRequiredPin>,

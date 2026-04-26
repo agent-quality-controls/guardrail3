@@ -2,7 +2,7 @@ use g3ts_astro_config_checks_assertions::run as assertions;
 use g3ts_astro_types::{
     G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceState, G3TsAstroContentMode,
     G3TsAstroEslintSurfaceState, G3TsAstroOutputMode, G3TsAstroPackageSurfaceState,
-    G3TsAstroStaticValue,
+    G3TsAstroPolicySurfaceState, G3TsAstroStaticValue,
 };
 
 use super::helpers::{
@@ -18,15 +18,14 @@ use super::helpers::{
     root_syncpack_package_source_does_not_cover_nested_app, route_only_pipeline_wiring,
     syncpack_catch_all_forbidden_ban, syncpack_ignored_forbidden_ban,
     syncpack_missing_astro_seo_ban, syncpack_missing_contentlayer_ban,
-    syncpack_missing_forbidden_ban, syncpack_missing_stack_pin, syncpack_pinned_forbidden_ban,
-    syncpack_scoped_away_forbidden_ban, syncpack_missing_forbidden_ban_named,
+    syncpack_missing_forbidden_ban, syncpack_missing_forbidden_ban_named,
+    syncpack_missing_stack_pin, syncpack_pinned_forbidden_ban, syncpack_scoped_away_forbidden_ban,
     syncpack_scoped_away_stack_pin, syncpack_shadowed_forbidden_ban, syncpack_shadowed_stack_pin,
     syncpack_source_excludes_package, syncpack_specifier_scoped_forbidden_ban,
     syncpack_specifier_scoped_stack_pin, syncpack_wrong_astro_pipeline_stack_pin,
     syncpack_wrong_forbidden_ban_dependency_types, syncpack_wrong_stack_pin,
-    ts_lane_missing_pipeline_effectiveness,
-    tsx_lane_missing_pipeline_effectiveness, unreadable_syncpack_config,
-    velite_package_with_syncpack_ban,
+    ts_lane_missing_pipeline_effectiveness, tsx_lane_missing_pipeline_effectiveness,
+    unreadable_syncpack_config, velite_package_with_syncpack_ban,
 };
 
 const PIPELINE_CONTENT_INFO_TITLE: &str = "Astro pipeline ESLint plugin is wired and effective";
@@ -193,7 +192,49 @@ fn golden_config_reports_expected_inventory() {
                 Some("astro.config.mjs"),
                 true,
             ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-23",
+                "Astro strict content policy is configured",
+                "`guardrail3-rs.toml` sets `[ts.astro] profile = \"strict-local-content\"`, declares non-empty `content_routes`, `content_root`, and `content_adapter`, and forbids `.next/**`, `.velite/**`, and `.contentlayer/**` generated state.",
+                Some("guardrail3-rs.toml"),
+                true,
+            ),
         ],
+    );
+}
+
+#[test]
+fn strict_content_policy_rule_rejects_missing_policy() {
+    let mut input = golden();
+    input.integration_contracts[0].astro_policy = G3TsAstroPolicySurfaceState::MissingAstroPolicy {
+        rel_path: "guardrail3-rs.toml".to_owned(),
+    };
+
+    let results = super::super::check(&input);
+
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-CONFIG-23",
+        "Astro strict content policy is missing or incomplete",
+    );
+}
+
+#[test]
+fn strict_content_policy_rule_rejects_old_route_class_policy() {
+    let mut input = golden();
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.content_routes.clear();
+
+    let results = super::super::check(&input);
+
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-23",
+        "old `*_globs` route-class fields are not supported",
     );
 }
 

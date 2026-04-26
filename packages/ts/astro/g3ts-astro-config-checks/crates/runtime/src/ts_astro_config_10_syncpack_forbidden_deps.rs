@@ -42,9 +42,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                     .cloned()
                     .collect::<Vec<_>>();
 
-                if missing_forbidden_bans.is_empty()
-                    && snapshot.source_covers_package_manifest
-                {
+                if missing_forbidden_bans.is_empty() && snapshot.source_covers_package_manifest {
                     results.push(crate::support::info(
                         ID,
                         "Syncpack bans forbidden Astro deps",

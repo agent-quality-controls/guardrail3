@@ -78,6 +78,20 @@ pub(super) fn fake_astro_workspace() -> TempDir {
     )
     .expect("syncpack config should be written");
     std::fs::write(
+        root.path().join("guardrail3-rs.toml"),
+        r#"
+[ts.astro]
+profile = "strict-local-content"
+content_routes = ["src/pages/**/*.astro"]
+non_content_routes = ["src/pages/404.astro"]
+endpoints = ["src/pages/**/*.ts"]
+content_root = "src/content"
+content_adapter = "src/lib/content"
+forbidden_state = [".next/**", ".velite/**", ".contentlayer/**"]
+"#,
+    )
+    .expect("guardrail config should be written");
+    std::fs::write(
         root.path().join("src/pages/index.ts"),
         "export const GET = () => null;\n",
     )
@@ -156,7 +170,12 @@ pub(super) fn unreadable_entry(root: &TempDir, rel_path: &str) -> G3WorkspaceEnt
 }
 
 pub(super) fn ignored_entry(root: &TempDir, rel_path: &str) -> G3WorkspaceEntry {
-    custom_entry(root, rel_path, G3WorkspaceEntryKind::File, G3WorkspaceIgnoreState::Ignored)
+    custom_entry(
+        root,
+        rel_path,
+        G3WorkspaceEntryKind::File,
+        G3WorkspaceIgnoreState::Ignored,
+    )
 }
 
 pub(super) fn ignored_directory_entry(root: &TempDir, rel_path: &str) -> G3WorkspaceEntry {

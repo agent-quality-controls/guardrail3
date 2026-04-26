@@ -11,9 +11,3 @@ allowed_deps = [
 
 [checks]
 garde = false
-
-[[waivers]]
-rule = "RS-CODE-SOURCE-19"
-file = "crates/types/src/guardrail3_rs_toml.rs"
-selector = "struct:TsAstroPolicyConfig"
-reason = "Schema mirror intentionally matches the TypeScript Astro guardrail config surface."

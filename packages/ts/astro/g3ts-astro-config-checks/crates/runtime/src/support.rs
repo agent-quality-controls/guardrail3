@@ -2,7 +2,8 @@ use g3ts_astro_types::{
     G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState,
     G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
     G3TsAstroEslintSurfaceState, G3TsAstroIntegrationContractInput, G3TsAstroOutputMode,
-    G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState, G3TsAstroStaticValue,
+    G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState, G3TsAstroPolicySnapshot,
+    G3TsAstroPolicySurfaceState, G3TsAstroStaticValue,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use std::collections::BTreeMap;
@@ -117,6 +118,30 @@ pub(crate) fn parsed_astro_config(
 }
 
 #[must_use]
+pub(crate) fn parsed_astro_policy(
+    contract: &G3TsAstroIntegrationContractInput,
+) -> Option<&G3TsAstroPolicySnapshot> {
+    match &contract.astro_policy {
+        G3TsAstroPolicySurfaceState::Parsed { snapshot } => Some(snapshot),
+        G3TsAstroPolicySurfaceState::Missing { .. }
+        | G3TsAstroPolicySurfaceState::Unreadable { .. }
+        | G3TsAstroPolicySurfaceState::ParseError { .. }
+        | G3TsAstroPolicySurfaceState::MissingAstroPolicy { .. } => None,
+    }
+}
+
+#[must_use]
+pub(crate) fn astro_policy_rel_path(contract: &G3TsAstroIntegrationContractInput) -> Option<&str> {
+    match &contract.astro_policy {
+        G3TsAstroPolicySurfaceState::Missing { rel_path }
+        | G3TsAstroPolicySurfaceState::Unreadable { rel_path, .. }
+        | G3TsAstroPolicySurfaceState::ParseError { rel_path, .. }
+        | G3TsAstroPolicySurfaceState::MissingAstroPolicy { rel_path } => Some(rel_path),
+        G3TsAstroPolicySurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+    }
+}
+
+#[must_use]
 pub(crate) fn astro_config_rel_path(contract: &G3TsAstroIntegrationContractInput) -> Option<&str> {
     match &contract.astro_config {
         G3TsAstroConfigSurfaceState::Missing { rel_path }
@@ -204,7 +229,9 @@ pub(crate) fn checks_options_include_structured_data_check(
                 .call
                 .as_ref()
                 .and_then(|call| call.first_arg.as_ref())
-                .is_some_and(crate::support_nuasite::checks_options_have_structured_data_custom_check)
+                .is_some_and(
+                    crate::support_nuasite::checks_options_have_structured_data_custom_check,
+                )
     })
 }
 
