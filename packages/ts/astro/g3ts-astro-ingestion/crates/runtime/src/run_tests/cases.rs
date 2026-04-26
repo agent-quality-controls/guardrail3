@@ -268,6 +268,97 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
 }
 
 #[test]
+fn config_ingestion_accepts_syncpack_astro_policy_groups_as_a_set() {
+    let root = super::helpers::fake_astro_workspace();
+    let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+        .expect("root syncpack config should be readable")
+        .replace(
+            r#"    { "dependencies": ["react"], "dependencyTypes": ["prod", "dev"], "pinVersion": "19.2.5" },"#,
+            r#"    { "dependencies": ["@project/app-specific"], "dependencyTypes": ["prod", "dev"], "pinVersion": "1.0.0" },
+    { "dependencies": ["react"], "dependencyTypes": ["prod", "dev"], "pinVersion": "19.2.5" },"#,
+        )
+        .replace(
+            r#"    { "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },"#,
+            r#"    { "dependencies": ["@project/after-policy"], "dependencyTypes": ["prod", "dev"], "pinVersion": "2.0.0" },
+    { "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },"#,
+        );
+    std::fs::write(root.path().join(".syncpackrc"), syncpack_config)
+        .expect("syncpack config should be rewritten");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/pages/index.ts",
+            "src/pages/card.tsx",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    match &input.integration_contracts[0].syncpack_config {
+        g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => {
+            assert!(
+                snapshot.missing_required_stack_pins.is_empty(),
+                "extra app pins must not make required Astro pins look missing: {snapshot:?}"
+            );
+            assert!(
+                snapshot.missing_forbidden_bans.is_empty(),
+                "extra app pins must not make forbidden Astro bans look missing: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed syncpack state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_accepts_syncpack_dependency_types_as_sets() {
+    let root = super::helpers::fake_astro_workspace();
+    let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+        .expect("root syncpack config should be readable")
+        .replace(
+            r#"    { "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "6.1.9" },"#,
+            r#"    { "dependencies": ["astro"], "dependencyTypes": ["dev", "prod"], "pinVersion": "6.1.9" },"#,
+        )
+        .replace(
+            r#"    { "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },"#,
+            r#"    { "dependencies": ["next"], "dependencyTypes": ["peer", "optional", "dev", "prod"], "isBanned": true },"#,
+        );
+    std::fs::write(root.path().join(".syncpackrc"), syncpack_config)
+        .expect("syncpack config should be rewritten");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    match &input.integration_contracts[0].syncpack_config {
+        g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => {
+            assert!(
+                snapshot.missing_required_stack_pins.is_empty(),
+                "dependencyTypes order must not make required Astro pins look missing: {snapshot:?}"
+            );
+            assert!(
+                snapshot.missing_forbidden_bans.is_empty(),
+                "dependencyTypes order must not make forbidden Astro bans look missing: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed syncpack state, got {other:?}"),
+    }
+}
+
+#[test]
 fn config_ingestion_requires_inline_public_content_rule_to_scan_copy_attributes() {
     for (case_name, original_policy, replacement_policy) in [
         (
@@ -837,6 +928,76 @@ fn app_local_syncpack_rejects_source_alias_entries() {
 }
 
 #[test]
+fn config_ingestion_rejects_noncanonical_required_pin_groups() {
+    let canonical_astro_pin = r#"{ "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "6.1.9" }"#;
+
+    for (case_name, replacement) in [
+        (
+            "shadowed",
+            r#"{ "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "6.1.9" },
+    { "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "6.1.9" }"#,
+        ),
+        (
+            "shadowed with wrong dependencyTypes",
+            r#"{ "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "6.1.9" },
+    { "dependencies": ["astro"], "dependencyTypes": ["prod"], "pinVersion": "6.1.9" }"#,
+        ),
+        (
+            "wrong dependencyTypes",
+            r#"{ "dependencies": ["astro"], "dependencyTypes": ["prod"], "pinVersion": "6.1.9" }"#,
+        ),
+        (
+            "wrong version",
+            r#"{ "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "6.1.8" }"#,
+        ),
+        (
+            "package scoped",
+            r#"{ "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "packages": ["other-package"], "pinVersion": "6.1.9" }"#,
+        ),
+        (
+            "specifier scoped",
+            r#"{ "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "specifierTypes": ["!exact"], "pinVersion": "6.1.9" }"#,
+        ),
+        (
+            "ignored",
+            r#"{ "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "6.1.9", "isIgnored": true }"#,
+        ),
+        (
+            "banned",
+            r#"{ "dependencies": ["astro"], "dependencyTypes": ["prod", "dev"], "pinVersion": "6.1.9", "isBanned": true }"#,
+        ),
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+            .expect("root syncpack config should be readable")
+            .replace(canonical_astro_pin, replacement);
+        std::fs::write(root.path().join(".syncpackrc"), syncpack_config)
+            .expect("syncpack config should be rewritten");
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "package.json",
+                "astro.config.mjs",
+                "src/content.config.ts",
+                ".syncpackrc",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+        match &input.integration_contracts[0].syncpack_config {
+            g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => assert!(
+                snapshot
+                    .missing_required_stack_pins
+                    .iter()
+                    .any(|pin| pin.dependency == "astro"),
+                "case {case_name} should make astro pin missing: {snapshot:?}"
+            ),
+            other => panic!("expected parsed syncpack state for {case_name}, got {other:?}"),
+        }
+    }
+}
+
+#[test]
 fn config_ingestion_rejects_noncanonical_forbidden_ban_groups() {
     let canonical_next_ban = r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true }"#;
 
@@ -845,6 +1006,11 @@ fn config_ingestion_rejects_noncanonical_forbidden_ban_groups() {
             "shadowed",
             r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": false },
     { "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true }"#,
+        ),
+        (
+            "shadowed with wrong dependencyTypes",
+            r#"{ "dependencies": ["next"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+    { "dependencies": ["next"], "dependencyTypes": ["prod", "dev"], "isBanned": true }"#,
         ),
         (
             "package scoped",

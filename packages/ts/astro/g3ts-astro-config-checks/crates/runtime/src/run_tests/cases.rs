@@ -149,8 +149,8 @@ fn golden_config_reports_expected_inventory() {
             ),
             assertions::info(
                 "TS-ASTRO-CONFIG-17",
-                "Astro SEO generation packages are present",
-                "`package.json` lists `astro-seo` and `schema-dts`.",
+                "Astro JSON-LD type package is present",
+                "`package.json` lists `schema-dts` for typed JSON-LD data.",
                 Some("package.json"),
                 true,
             ),
@@ -541,7 +541,7 @@ fn content_discovery_and_seo_package_rules_reject_missing_surfaces() {
     };
     snapshot
         .dev_dependencies
-        .retain(|dependency| dependency != "astro-seo" && dependency != "schema-dts");
+        .retain(|dependency| dependency != "schema-dts");
 
     let results = super::super::check(&input);
     assert_error_id_title(
@@ -552,7 +552,20 @@ fn content_discovery_and_seo_package_rules_reject_missing_surfaces() {
     assert_error_id_title(
         &results,
         "TS-ASTRO-CONFIG-17",
-        "Astro SEO generation packages are missing",
+        "Astro JSON-LD type package is missing",
+    );
+}
+
+#[test]
+fn seo_package_rule_does_not_require_bare_astro_seo_package() {
+    let input = golden();
+    let results = super::super::check(&input);
+
+    assert!(
+        results
+            .iter()
+            .all(|finding| !finding.message().contains("`astro-seo`")),
+        "bare astro-seo must not appear in any required package finding: {results:?}"
     );
 }
 
@@ -914,7 +927,7 @@ fn missing_syncpack_stack_pin_reports_policy_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
-            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -931,7 +944,7 @@ fn wrong_syncpack_stack_pin_reports_policy_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
-            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -948,7 +961,7 @@ fn wrong_astro_pipeline_syncpack_stack_pin_reports_policy_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
-            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `g3ts-eslint-plugin-astro-pipeline` -> `0.1.5`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `g3ts-eslint-plugin-astro-pipeline` -> `0.1.5`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -965,7 +978,7 @@ fn shadowed_syncpack_stack_pin_reports_policy_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
-            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -982,7 +995,7 @@ fn package_scoped_away_syncpack_stack_pin_reports_policy_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
-            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -999,7 +1012,7 @@ fn specifier_scoped_syncpack_stack_pin_reports_policy_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
-            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+            "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -1016,7 +1029,7 @@ fn syncpack_catch_all_forbidden_ban_does_not_satisfy_canonical_contract() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-10",
             "Syncpack does not ban forbidden Astro deps",
-            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`, `velite`, `@astrojs/node`, `eslint-plugin-astro-pipeline`, `@codemint/astro-meta`, `astro-seo-meta`, `astro-seo-schema`. Add one canonical banned versionGroup per listed dependency before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\", \"optional\", \"peer\"]`, `isBanned: true`, and no `packages` or `specifierTypes`.",
+            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`, `velite`, `@astrojs/node`, `eslint-plugin-astro-pipeline`, `@codemint/astro-meta`, `astro-seo-meta`, `astro-seo-schema`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -1046,7 +1059,7 @@ fn noncanonical_syncpack_forbidden_bans_report_policy_error() {
             &[assertions::error(
                 "TS-ASTRO-CONFIG-10",
                 "Syncpack does not ban forbidden Astro deps",
-                "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`. Add one canonical banned versionGroup per listed dependency before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\", \"optional\", \"peer\"]`, `isBanned: true`, and no `packages` or `specifierTypes`.",
+                "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
                 Some(".syncpackrc"),
                 false,
             )],
@@ -1070,7 +1083,7 @@ fn missing_syncpack_forbidden_ban_reports_policy_error() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-10",
             "Syncpack does not ban forbidden Astro deps",
-            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`. Add one canonical banned versionGroup per listed dependency before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\", \"optional\", \"peer\"]`, `isBanned: true`, and no `packages` or `specifierTypes`.",
+            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
             Some(".syncpackrc"),
             false,
         )],

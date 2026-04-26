@@ -14,6 +14,7 @@ pub struct PackageScriptParseFact {
     pub script_name: String,
     pub commands: Vec<PackageScriptCommand>,
     pub tool_invocations: Vec<PackageScriptToolInvocation>,
+    pub all_tool_invocations: Vec<PackageScriptToolInvocation>,
     pub state: PackageScriptParseState,
 }
 

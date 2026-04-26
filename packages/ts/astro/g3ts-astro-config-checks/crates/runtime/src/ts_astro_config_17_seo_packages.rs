@@ -2,22 +2,17 @@ use g3ts_astro_types::G3TsAstroConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-CONFIG-17";
-const REQUIRED_DEPS: [&str; 2] = ["astro-seo", "schema-dts"];
+const REQUIRED_DEP: &str = "schema-dts";
 
 pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     for contract in &input.integration_contracts {
         let rel_path = crate::support::package_rel_path(contract);
-        let missing = REQUIRED_DEPS
-            .into_iter()
-            .filter(|dependency| !crate::support::package_has_dependency(contract, dependency))
-            .collect::<Vec<_>>();
-
-        if missing.is_empty() {
+        if crate::support::package_has_dependency(contract, REQUIRED_DEP) {
             if let Some(rel_path) = rel_path {
                 results.push(crate::support::info(
                     ID,
-                    "Astro SEO generation packages are present",
-                    format!("`{rel_path}` lists `astro-seo` and `schema-dts`."),
+                    "Astro JSON-LD type package is present",
+                    format!("`{rel_path}` lists `schema-dts` for typed JSON-LD data."),
                     rel_path,
                 ));
             }
@@ -26,14 +21,9 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 
         results.push(crate::support::error(
             ID,
-            "Astro SEO generation packages are missing",
+            "Astro JSON-LD type package is missing",
             format!(
-                "This Astro app must list `astro-seo` for rendered SEO tags and `schema-dts` for typed JSON-LD data. Missing package entries: {}. G3TS checks package presence here; rendered SEO correctness is delegated to `@nuasite/checks`.",
-                missing
-                    .iter()
-                    .map(|dependency| format!("`{dependency}`"))
-                    .collect::<Vec<_>>()
-                    .join(", ")
+                "This Astro app must list `schema-dts` for typed JSON-LD data. G3TS checks package presence here; rendered SEO tags and JSON-LD presence are delegated to `@nuasite/checks`."
             ),
             rel_path,
         ));

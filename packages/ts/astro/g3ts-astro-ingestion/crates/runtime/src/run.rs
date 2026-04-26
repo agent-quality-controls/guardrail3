@@ -53,7 +53,7 @@ const INLINE_PUBLIC_CONTENT_RULE: &str = "i18next/no-literal-string";
 const INLINE_PUBLIC_CONTENT_MESSAGE: &str = "Inline public copy must live in Astro content entries. Move this text into the content collection, validate it through the collection schema, and pass the typed value into source.";
 const CONTENT_ADAPTER_PIPELINE_RULE: &str =
     "astro-pipeline/require-approved-content-adapter-in-routes";
-const REQUIRED_SYNCPACK_PINS: [(&str, &str); 19] = [
+const REQUIRED_SYNCPACK_PINS: [(&str, &str); 18] = [
     ("astro", "6.1.9"),
     ("@astrojs/react", "5.0.4"),
     ("@astrojs/mdx", "5.0.4"),
@@ -62,7 +62,6 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 19] = [
     ("astro-robots", "2.3.1"),
     ("@nuasite/checks", "0.18.0"),
     ("g3ts-astro-nuasite-checks", "0.1.0"),
-    ("astro-seo", "1.1.0"),
     ("schema-dts", "2.0.0"),
     ("react", "19.2.5"),
     ("react-dom", "19.2.5"),
@@ -85,9 +84,6 @@ const FORBIDDEN_SYNCPACK_DEPS: [&str; 7] = [
 ];
 const PIN_DEPENDENCY_TYPES: [&str; 2] = ["prod", "dev"];
 const BAN_DEPENDENCY_TYPES: [&str; 4] = ["prod", "dev", "optional", "peer"];
-const SYNCPACK_ASTRO_POLICY_PREFIX_LEN: usize =
-    REQUIRED_SYNCPACK_PINS.len() + FORBIDDEN_SYNCPACK_DEPS.len();
-
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChecksInput {
     let app_roots = astro_app_roots(crawl);
 
@@ -582,9 +578,8 @@ fn ingest_syncpack_config_surface(
     let missing_required_stack_pins = REQUIRED_SYNCPACK_PINS
         .iter()
         .filter(|(dependency, version)| {
-            !has_canonical_pin_in_prefix(
+            !has_one_canonical_pin_group(
                 &typed.version_groups,
-                SYNCPACK_ASTRO_POLICY_PREFIX_LEN,
                 dependency,
                 version,
                 &PIN_DEPENDENCY_TYPES,
@@ -598,12 +593,7 @@ fn ingest_syncpack_config_surface(
     let missing_forbidden_bans = FORBIDDEN_SYNCPACK_DEPS
         .iter()
         .filter(|dependency| {
-            !has_canonical_ban_in_prefix(
-                &typed.version_groups,
-                SYNCPACK_ASTRO_POLICY_PREFIX_LEN,
-                dependency,
-                &BAN_DEPENDENCY_TYPES,
-            )
+            !has_one_canonical_ban_group(&typed.version_groups, dependency, &BAN_DEPENDENCY_TYPES)
         })
         .map(|dependency| (*dependency).to_owned())
         .collect();
@@ -655,68 +645,75 @@ fn syncpack_source_covers_package(
         && syncpack_config_is_app_local(syncpack_rel_path, package_rel_path)
 }
 
-fn has_canonical_pin_in_prefix(
+fn has_one_canonical_pin_group(
     version_groups: &[syncpack_config_parser::types::SyncpackVersionGroup],
-    prefix_len: usize,
     dependency: &str,
     version: &str,
     dependency_types: &[&str],
 ) -> bool {
-    version_groups
+    let mut matching_groups = version_groups
         .iter()
-        .take(prefix_len)
-        .find(|group| group_targets_dependency(group, dependency, dependency_types))
-        .is_some_and(|group| canonical_pin_group(group, version))
+        .filter(|group| group_targets_dependency(group, dependency));
+
+    let Some(group) = matching_groups.next() else {
+        return false;
+    };
+
+    matching_groups.next().is_none() && canonical_pin_group(group, version, dependency_types)
 }
 
-fn has_canonical_ban_in_prefix(
+fn has_one_canonical_ban_group(
     version_groups: &[syncpack_config_parser::types::SyncpackVersionGroup],
-    prefix_len: usize,
     dependency: &str,
     dependency_types: &[&str],
 ) -> bool {
-    version_groups
+    let mut matching_groups = version_groups
         .iter()
-        .take(prefix_len)
-        .find(|group| group_targets_dependency(group, dependency, dependency_types))
-        .is_some_and(canonical_ban_group)
+        .filter(|group| group_targets_dependency(group, dependency));
+
+    let Some(group) = matching_groups.next() else {
+        return false;
+    };
+
+    matching_groups.next().is_none() && canonical_ban_group(group, dependency_types)
 }
 
 fn group_targets_dependency(
     group: &syncpack_config_parser::types::SyncpackVersionGroup,
     dependency: &str,
-    dependency_types: &[&str],
 ) -> bool {
-    strings_match_exactly(&group.dependencies, &[dependency])
-        && strings_match_exactly(&group.dependency_types, dependency_types)
+    string_sets_match_exactly(&group.dependencies, &[dependency])
 }
 
 fn canonical_pin_group(
     group: &syncpack_config_parser::types::SyncpackVersionGroup,
     version: &str,
+    dependency_types: &[&str],
 ) -> bool {
     group.packages.is_none()
         && group.specifier_types.is_none()
+        && string_sets_match_exactly(&group.dependency_types, dependency_types)
         && group.is_ignored.is_none()
         && group.is_banned.is_none()
         && group.pin_version.as_deref() == Some(version)
 }
 
-fn canonical_ban_group(group: &syncpack_config_parser::types::SyncpackVersionGroup) -> bool {
+fn canonical_ban_group(
+    group: &syncpack_config_parser::types::SyncpackVersionGroup,
+    dependency_types: &[&str],
+) -> bool {
     group.packages.is_none()
         && group.specifier_types.is_none()
+        && string_sets_match_exactly(&group.dependency_types, dependency_types)
         && group.is_ignored.is_none()
         && group.is_banned == Some(true)
         && group.pin_version.is_none()
 }
 
-fn strings_match_exactly(left: &[String], right: &[&str]) -> bool {
+fn string_sets_match_exactly(left: &[String], right: &[&str]) -> bool {
     left.len() == right.len()
-        && left
-            .iter()
-            .map(String::as_str)
-            .zip(right.iter().copied())
-            .all(|(left, right)| left == right)
+        && BTreeSet::from_iter(left.iter().map(String::as_str))
+        == BTreeSet::from_iter(right.iter().copied())
 }
 
 fn syncpack_config_is_app_local(syncpack_rel_path: &str, package_rel_path: &str) -> bool {
