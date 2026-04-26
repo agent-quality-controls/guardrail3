@@ -12,6 +12,8 @@ pub(super) fn fake_astro_workspace() -> TempDir {
     std::fs::create_dir_all(root.path().join("src/pages"))
         .expect("pages directory should be created");
     std::fs::create_dir_all(root.path().join("src/lib")).expect("lib directory should be created");
+    std::fs::create_dir_all(root.path().join("src/lib/content"))
+        .expect("content adapter directory should be created");
     std::fs::create_dir_all(root.path().join("src/content/posts"))
         .expect("content directory should be created");
     std::fs::create_dir_all(root.path().join("node_modules/eslint"))
@@ -101,6 +103,11 @@ forbidden_state = [".next/**", ".velite/**", ".contentlayer/**"]
         "export const taxonomy = '../../packages/spec/src/data/taxonomy.json';\n",
     )
     .expect("side loader source should be written");
+    std::fs::write(
+        root.path().join("src/lib/content/index.ts"),
+        "export const getContent = () => null;\n",
+    )
+    .expect("content adapter source should be written");
     std::fs::write(root.path().join("src/pages/about.mdx"), "# about\n")
         .expect("route markdown page should be written");
     std::fs::write(

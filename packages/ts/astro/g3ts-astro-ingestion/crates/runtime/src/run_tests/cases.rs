@@ -78,6 +78,7 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             "src/pages/index.html",
             "src/pages/index.ts",
             "src/pages/card.tsx",
+            "src/lib/content/index.ts",
             "node_modules/eslint/index.js",
         ],
     );
@@ -172,6 +173,11 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                 snapshot.content_adapter.as_deref(),
                 Some("src/lib/content"),
                 "content adapter policy mismatch: {snapshot:?}"
+            );
+            assert_eq!(
+                integration.content_adapter_source_paths,
+                vec!["src/lib/content/index.ts".to_owned()],
+                "content adapter source path mismatch: {integration:?}"
             );
         }
         other => panic!("expected parsed astro policy, got {other:?}"),

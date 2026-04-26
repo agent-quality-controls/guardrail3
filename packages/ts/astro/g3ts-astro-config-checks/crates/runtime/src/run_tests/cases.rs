@@ -220,6 +220,13 @@ fn golden_config_reports_expected_inventory() {
                 Some("eslint.config.mjs"),
                 true,
             ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-27",
+                "Astro content adapter source exists",
+                "`guardrail3-rs.toml` resolves `content_adapter = \"src/lib/content\"` to adapter source files: `src/lib/content/index.ts`.",
+                Some("guardrail3-rs.toml"),
+                true,
+            ),
         ],
     );
 }
@@ -405,6 +412,23 @@ fn strict_content_policy_eslint_coverage_rule_rejects_missing_content_route_cove
         "TS-ASTRO-CONFIG-26",
         "Astro lane `astro-pipeline/",
     );
+}
+
+#[test]
+fn strict_content_policy_adapter_rule_rejects_missing_adapter_source() {
+    let mut input = golden();
+    input.integration_contracts[0]
+        .content_adapter_source_paths
+        .clear();
+
+    let results = super::super::check(&input);
+
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-CONFIG-27",
+        "Astro content adapter source is missing",
+    );
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-27", "src/lib/content");
 }
 
 #[test]
