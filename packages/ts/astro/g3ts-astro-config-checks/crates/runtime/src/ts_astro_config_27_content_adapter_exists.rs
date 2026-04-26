@@ -14,14 +14,14 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             .as_deref()
             .unwrap_or("content_adapter");
 
-        if !contract.content_adapter_source_paths.is_empty() {
+        if !contract.approved_surface_sources.content_adapter.is_empty() {
             results.push(crate::support::info(
                 ID,
                 "Astro content adapter source exists",
                 format!(
                     "`{}` resolves `content_adapter = \"{content_adapter}\"` to adapter source files: {}.",
                     policy.rel_path,
-                    format_paths(&contract.content_adapter_source_paths)
+                    format_paths(&contract.approved_surface_sources.content_adapter)
                 ),
                 &policy.rel_path,
             ));

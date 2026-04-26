@@ -11,6 +11,7 @@ import type { AstroPipelineOptions } from "../src/utils/options.js";
 export const baseOptions: AstroPipelineOptions = {
   routeGlobs: ["src/pages/**/*.{ts,tsx,js,jsx,astro}"],
   endpointGlobs: ["src/pages/**/*.endpoint.{ts,tsx,js,jsx}"],
+  mdxContentGlobs: ["src/content/**/*.mdx"],
   contentDataModuleGlobs: [
     "src/**/*.data.{ts,tsx,js,jsx,mts,cts,mjs,cjs}",
     "app/**/*.data.{ts,tsx,js,jsx,mts,cts,mjs,cjs}"
@@ -19,6 +20,8 @@ export const baseOptions: AstroPipelineOptions = {
   mdxRuntimeModuleGlobs: ["src/lib/mdx/**/*.{ts,tsx,js,jsx}"],
   routeRegistryModuleGlobs: ["src/lib/routes/**/*.{ts,tsx,js,jsx}"],
   approvedContentAdapterModules: ["src/lib/content/**/*.{ts,tsx,js,jsx}"],
+  approvedMetadataHelperModules: ["src/lib/metadata/**/*.{ts,tsx,js,jsx}"],
+  approvedJsonLdHelperModules: ["src/lib/json-ld/**/*.{ts,tsx,js,jsx}"],
   approvedLoaderModules: ["src/lib/content/**/*.{ts,tsx,js,jsx}"],
   approvedMdxComponentModules: ["src/components/mdx/**/*.{ts,tsx,js,jsx}"],
   approvedGeneratedArtifactRoots: ["src/generated/**"],

@@ -113,6 +113,9 @@ pub struct G3TsAstroPolicySnapshot {
     pub endpoints: Vec<String>,
     pub content_root: Option<String>,
     pub content_adapter: Option<String>,
+    pub mdx_component_maps: Vec<String>,
+    pub metadata_helpers: Vec<String>,
+    pub json_ld_helpers: Vec<String>,
     pub forbidden_state: Vec<String>,
 }
 
@@ -216,8 +219,7 @@ pub struct G3TsAstroIntegrationContractInput {
     pub content_mode: G3TsAstroContentMode,
     pub route_page_paths: Vec<String>,
     pub endpoint_paths: Vec<String>,
-    pub content_adapter_source_paths: Vec<String>,
-    pub content_adapter_astro_content_source_paths: Vec<String>,
+    pub approved_surface_sources: G3TsAstroApprovedSurfaceSourcePaths,
     pub package: G3TsAstroPackageSurfaceState,
     pub syncpack_config: G3TsAstroSyncpackConfigState,
     pub astro_policy: G3TsAstroPolicySurfaceState,
@@ -225,6 +227,18 @@ pub struct G3TsAstroIntegrationContractInput {
     pub llms_txt_rel_path: Option<String>,
     pub required_syncpack_pins: Vec<G3TsAstroSyncpackRequiredPin>,
     pub forbidden_syncpack_deps: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroApprovedSurfaceSourcePaths {
+    pub content_adapter: Vec<String>,
+    pub content_adapter_astro_content: Vec<String>,
+    pub mdx_component_maps: Vec<String>,
+    pub missing_mdx_component_maps: Vec<String>,
+    pub metadata_helpers: Vec<String>,
+    pub missing_metadata_helpers: Vec<String>,
+    pub json_ld_helpers: Vec<String>,
+    pub missing_json_ld_helpers: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -265,6 +279,13 @@ pub struct G3TsAstroEslintSurfaceSnapshot {
     pub astro_source_effective_inline_public_content_rules: Vec<String>,
     pub ts_source_effective_inline_public_content_rules: Vec<String>,
     pub tsx_source_effective_inline_public_content_rules: Vec<String>,
+    pub mdx_content_effective_mdx_component_map_rules: Vec<String>,
+    pub astro_source_effective_metadata_helper_rules: Vec<String>,
+    pub ts_source_effective_metadata_helper_rules: Vec<String>,
+    pub tsx_source_effective_metadata_helper_rules: Vec<String>,
+    pub astro_source_effective_json_ld_helper_rules: Vec<String>,
+    pub ts_source_effective_json_ld_helper_rules: Vec<String>,
+    pub tsx_source_effective_json_ld_helper_rules: Vec<String>,
     pub astro_source_probe_ignored: bool,
     pub ts_source_probe_ignored: bool,
     pub tsx_source_probe_ignored: bool,

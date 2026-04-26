@@ -7,9 +7,9 @@ use eslint_config_parser::{
 };
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_astro_types::{
-    G3TsAstroAppRootInput, G3TsAstroCallSnapshot, G3TsAstroConfigChecksInput,
-    G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState, G3TsAstroContentMode,
-    G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
+    G3TsAstroAppRootInput, G3TsAstroApprovedSurfaceSourcePaths, G3TsAstroCallSnapshot,
+    G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState,
+    G3TsAstroContentMode, G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
     G3TsAstroEslintSurfaceState, G3TsAstroFileTreeChecksInput, G3TsAstroIntegrationContractInput,
     G3TsAstroIntegrationSnapshot, G3TsAstroOutputMode, G3TsAstroPackageScriptCommand,
     G3TsAstroPackageScriptCommandSeparator, G3TsAstroPackageScriptParseBlocker,
@@ -55,6 +55,15 @@ const INLINE_PUBLIC_CONTENT_RULE: &str = "i18next/no-literal-string";
 const INLINE_PUBLIC_CONTENT_MESSAGE: &str = "Inline public copy must live in Astro content entries. Move this text into the content collection, validate it through the collection schema, and pass the typed value into source.";
 const CONTENT_ADAPTER_PIPELINE_RULE: &str =
     "astro-pipeline/require-approved-content-adapter-in-routes";
+const MDX_COMPONENT_MAP_PIPELINE_RULE: &str =
+    "astro-pipeline/mdx-component-imports-from-approved-map";
+const METADATA_HELPER_PIPELINE_RULE: &str =
+    "astro-pipeline/require-approved-metadata-helper-in-routes";
+const JSON_LD_HELPER_PIPELINE_RULE: &str =
+    "astro-pipeline/require-approved-json-ld-helper-in-routes";
+const SOURCE_MODULE_EXTENSIONS: [&str; 9] = [
+    ".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".astro",
+];
 const REQUIRED_SYNCPACK_PINS: [(&str, &str); 18] = [
     ("astro", "6.1.9"),
     ("@astrojs/react", "5.0.4"),
@@ -71,7 +80,7 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 18] = [
     ("@types/react-dom", "19.2.3"),
     ("typescript", "5.9.3"),
     ("eslint-plugin-astro", "1.7.0"),
-    ("g3ts-eslint-plugin-astro-pipeline", "0.1.5"),
+    ("g3ts-eslint-plugin-astro-pipeline", "0.1.6"),
     ("eslint-plugin-i18next", "6.1.4"),
     ("eslint-plugin-mdx", "3.7.0"),
 ];
@@ -117,14 +126,34 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                         app_root_rel_path,
                         &content_adapter_source_paths,
                     );
+                let mdx_component_map_sources =
+                    policy_module_source_facts(crawl, app_root_rel_path, &astro_policy, |policy| {
+                        &policy.mdx_component_maps
+                    });
+                let metadata_helper_sources =
+                    policy_module_source_facts(crawl, app_root_rel_path, &astro_policy, |policy| {
+                        &policy.metadata_helpers
+                    });
+                let json_ld_helper_sources =
+                    policy_module_source_facts(crawl, app_root_rel_path, &astro_policy, |policy| {
+                        &policy.json_ld_helpers
+                    });
                 let astro_config = ingest_astro_config_surface(crawl, app_root_rel_path);
                 G3TsAstroIntegrationContractInput {
                     app_root_rel_path: app_root_rel_path.clone(),
                     content_mode: classify_content_mode(crawl, app_root_rel_path),
                     route_page_paths: crate::select::route_page_paths(crawl, app_root_rel_path),
                     endpoint_paths: crate::select::endpoint_paths(crawl, app_root_rel_path),
-                    content_adapter_source_paths,
-                    content_adapter_astro_content_source_paths,
+                    approved_surface_sources: G3TsAstroApprovedSurfaceSourcePaths {
+                        content_adapter: content_adapter_source_paths,
+                        content_adapter_astro_content: content_adapter_astro_content_source_paths,
+                        mdx_component_maps: mdx_component_map_sources.source_paths,
+                        missing_mdx_component_maps: mdx_component_map_sources.missing_policy_paths,
+                        metadata_helpers: metadata_helper_sources.source_paths,
+                        missing_metadata_helpers: metadata_helper_sources.missing_policy_paths,
+                        json_ld_helpers: json_ld_helper_sources.source_paths,
+                        missing_json_ld_helpers: json_ld_helper_sources.missing_policy_paths,
+                    },
                     package,
                     syncpack_config,
                     astro_policy,
@@ -140,9 +169,12 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
             .collect(),
         eslint_contracts: app_roots
             .iter()
-            .map(|app_root_rel_path| G3TsAstroEslintPluginContractInput {
-                app_root_rel_path: app_root_rel_path.clone(),
-                config: ingest_eslint_surface(crawl, app_root_rel_path),
+            .map(|app_root_rel_path| {
+                let astro_policy = ingest_astro_policy_surface(crawl, app_root_rel_path);
+                G3TsAstroEslintPluginContractInput {
+                    app_root_rel_path: app_root_rel_path.clone(),
+                config: ingest_eslint_surface(crawl, app_root_rel_path, &astro_policy),
+                }
             })
             .collect(),
     }
@@ -483,6 +515,87 @@ fn content_adapter_source_paths(
         .collect()
 }
 
+fn content_adapter_policy_paths(astro_policy: &G3TsAstroPolicySurfaceState) -> Vec<String> {
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } = astro_policy else {
+        return Vec::new();
+    };
+
+    snapshot
+        .content_adapter
+        .iter()
+        .map(|path| path.to_owned())
+        .collect()
+}
+
+fn policy_configured_paths(
+    astro_policy: &G3TsAstroPolicySurfaceState,
+    select_paths: fn(&G3TsAstroPolicySnapshot) -> &Vec<String>,
+) -> Vec<String> {
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } = astro_policy else {
+        return Vec::new();
+    };
+
+    select_paths(snapshot).clone()
+}
+
+struct PolicyModuleSourceFacts {
+    source_paths: Vec<String>,
+    missing_policy_paths: Vec<String>,
+}
+
+fn policy_module_source_facts(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+    astro_policy: &G3TsAstroPolicySurfaceState,
+    select_paths: fn(&G3TsAstroPolicySnapshot) -> &Vec<String>,
+) -> PolicyModuleSourceFacts {
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } = astro_policy else {
+        return PolicyModuleSourceFacts {
+            source_paths: Vec::new(),
+            missing_policy_paths: Vec::new(),
+        };
+    };
+
+    let mut source_paths = Vec::new();
+    let mut missing_policy_paths = Vec::new();
+
+    for policy_path in select_paths(snapshot) {
+        let paths = source_paths_under_policy_path(crawl, app_root_rel_path, policy_path);
+        if paths.is_empty() {
+            missing_policy_paths.push(policy_path.clone());
+        } else {
+            source_paths.extend(paths);
+        }
+    }
+
+    PolicyModuleSourceFacts {
+        source_paths,
+        missing_policy_paths,
+    }
+}
+
+fn source_paths_under_policy_path(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+    policy_path: &str,
+) -> Vec<String> {
+    let scoped_path = scoped_rel_path(app_root_rel_path, policy_path.trim_end_matches('/'));
+    let scoped_prefix = format!("{scoped_path}/");
+
+    crawl
+        .entries
+        .iter()
+        .filter(|entry| {
+            entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
+                && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+                && is_adapter_source_file(&entry.path.rel_path)
+                && (entry.path.rel_path == scoped_path
+                    || entry.path.rel_path.starts_with(&scoped_prefix))
+        })
+        .map(|entry| app_relative_path(&entry.path.rel_path, app_root_rel_path))
+        .collect()
+}
+
 fn forbidden_state_paths(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -516,11 +629,13 @@ fn forbidden_state_paths(
 }
 
 fn is_adapter_source_file(rel_path: &str) -> bool {
-    [
-        ".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".astro",
-    ]
-    .iter()
-    .any(|extension| rel_path.ends_with(extension))
+    is_source_module_file(rel_path)
+}
+
+fn is_source_module_file(rel_path: &str) -> bool {
+    SOURCE_MODULE_EXTENSIONS
+        .iter()
+        .any(|extension| rel_path.ends_with(extension))
 }
 
 fn content_adapter_astro_content_source_paths(
@@ -934,6 +1049,9 @@ fn ingest_astro_policy_surface(
             endpoints: astro.endpoints,
             content_root: astro.content_root,
             content_adapter: astro.content_adapter,
+            mdx_component_maps: astro.mdx_component_maps,
+            metadata_helpers: astro.metadata_helpers,
+            json_ld_helpers: astro.json_ld_helpers,
             forbidden_state: astro.forbidden_state,
         },
     }
@@ -977,9 +1095,40 @@ fn select_llms_txt(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<
     exact_included_file(crawl, &rel_path).map(|entry| entry.path.rel_path.clone())
 }
 
+fn mdx_content_paths(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+    astro_policy: &G3TsAstroPolicySurfaceState,
+) -> Vec<String> {
+    let content_root = match astro_policy {
+        G3TsAstroPolicySurfaceState::Parsed { snapshot } => snapshot.content_root.as_deref(),
+        G3TsAstroPolicySurfaceState::Missing { .. }
+        | G3TsAstroPolicySurfaceState::Unreadable { .. }
+        | G3TsAstroPolicySurfaceState::ParseError { .. }
+        | G3TsAstroPolicySurfaceState::MissingAstroPolicy { .. } => None,
+    }
+    .unwrap_or("src/content")
+    .trim_end_matches('/');
+    let scoped_content_root = scoped_rel_path(app_root_rel_path, content_root);
+    let scoped_prefix = format!("{scoped_content_root}/");
+
+    crawl
+        .entries
+        .iter()
+        .filter(|entry| {
+            entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
+                && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+                && entry.path.rel_path.starts_with(&scoped_prefix)
+                && entry.path.rel_path.ends_with(".mdx")
+        })
+        .map(|entry| app_relative_path(&entry.path.rel_path, app_root_rel_path))
+        .collect()
+}
+
 fn ingest_eslint_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
+    astro_policy: &G3TsAstroPolicySurfaceState,
 ) -> G3TsAstroEslintSurfaceState {
     let Some(entry) = crate::select::select_active_eslint_config(crawl, app_root_rel_path) else {
         return G3TsAstroEslintSurfaceState::Missing {
@@ -1021,6 +1170,14 @@ fn ingest_eslint_surface(
         .expect("parsed eslint config document should stay typed");
     let route_page_paths = crate::select::route_page_paths(crawl, app_root_rel_path);
     let endpoint_paths = crate::select::endpoint_paths(crawl, app_root_rel_path);
+    let content_adapter_policy_paths = content_adapter_policy_paths(astro_policy);
+    let mdx_component_map_policy_paths =
+        policy_configured_paths(astro_policy, |policy| &policy.mdx_component_maps);
+    let metadata_helper_policy_paths =
+        policy_configured_paths(astro_policy, |policy| &policy.metadata_helpers);
+    let json_ld_helper_policy_paths =
+        policy_configured_paths(astro_policy, |policy| &policy.json_ld_helpers);
+    let mdx_content_paths = mdx_content_paths(crawl, app_root_rel_path, astro_policy);
     let astro_source_probe = active_probe(
         &typed,
         eslint_config_parser::types::EslintProbeKind::AstroSource,
@@ -1151,6 +1308,50 @@ fn ingest_eslint_surface(
             ),
             tsx_source_effective_inline_public_content_rules: effective_inline_public_content_rules(
                 tsx_source_probe,
+            ),
+            mdx_content_effective_mdx_component_map_rules: effective_mdx_component_map_rules(
+                mdx_content_probe,
+                &mdx_content_paths,
+                &mdx_component_map_policy_paths,
+            ),
+            astro_source_effective_metadata_helper_rules: effective_metadata_helper_rules(
+                astro_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+                &metadata_helper_policy_paths,
+                &content_adapter_policy_paths,
+            ),
+            ts_source_effective_metadata_helper_rules: effective_metadata_helper_rules(
+                ts_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+                &metadata_helper_policy_paths,
+                &content_adapter_policy_paths,
+            ),
+            tsx_source_effective_metadata_helper_rules: effective_metadata_helper_rules(
+                tsx_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+                &metadata_helper_policy_paths,
+                &content_adapter_policy_paths,
+            ),
+            astro_source_effective_json_ld_helper_rules: effective_json_ld_helper_rules(
+                astro_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+                &json_ld_helper_policy_paths,
+            ),
+            ts_source_effective_json_ld_helper_rules: effective_json_ld_helper_rules(
+                ts_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+                &json_ld_helper_policy_paths,
+            ),
+            tsx_source_effective_json_ld_helper_rules: effective_json_ld_helper_rules(
+                tsx_source_probe,
+                &route_page_paths,
+                &endpoint_paths,
+                &json_ld_helper_policy_paths,
             ),
             astro_source_probe_ignored: probe_ignored(
                 &typed,
@@ -1333,6 +1534,117 @@ fn effective_inline_public_content_rules(
         })
 }
 
+fn effective_mdx_component_map_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    mdx_content_paths: &[String],
+    approved_mdx_component_modules: &[String],
+) -> Vec<String> {
+    let Some(probe) = probe else {
+        return Vec::new();
+    };
+
+    probe
+        .rules
+        .get(MDX_COMPONENT_MAP_PIPELINE_RULE)
+        .map_or_else(Vec::new, |setting| {
+            if rule_setting_is_error(setting)
+                && probe_has_pipeline_plugin_package(probe)
+                && rule_setting_has_option_globs_coverage(
+                    setting,
+                    "mdxContentGlobs",
+                    mdx_content_paths,
+                )
+                && rule_setting_has_expected_module_globs(
+                    setting,
+                    "approvedMdxComponentModules",
+                    approved_mdx_component_modules,
+                )
+            {
+                vec![MDX_COMPONENT_MAP_PIPELINE_RULE.to_owned()]
+            } else {
+                Vec::new()
+            }
+        })
+}
+
+fn effective_metadata_helper_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    route_page_paths: &[String],
+    endpoint_paths: &[String],
+    approved_metadata_helpers: &[String],
+    approved_content_adapters: &[String],
+) -> Vec<String> {
+    let required_modules = [
+        ("approvedMetadataHelperModules", approved_metadata_helpers),
+        ("approvedContentAdapterModules", approved_content_adapters),
+    ];
+    effective_route_helper_rules(
+        probe,
+        route_page_paths,
+        endpoint_paths,
+        METADATA_HELPER_PIPELINE_RULE,
+        &required_modules,
+    )
+}
+
+fn effective_json_ld_helper_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    route_page_paths: &[String],
+    endpoint_paths: &[String],
+    approved_json_ld_helpers: &[String],
+) -> Vec<String> {
+    let required_modules = [("approvedJsonLdHelperModules", approved_json_ld_helpers)];
+    effective_route_helper_rules(
+        probe,
+        route_page_paths,
+        endpoint_paths,
+        JSON_LD_HELPER_PIPELINE_RULE,
+        &required_modules,
+    )
+}
+
+fn effective_route_helper_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    route_page_paths: &[String],
+    endpoint_paths: &[String],
+    rule_name: &str,
+    required_module_options: &[(&str, &[String])],
+) -> Vec<String> {
+    let Some(probe) = probe else {
+        return Vec::new();
+    };
+
+    probe.rules.get(rule_name).map_or_else(Vec::new, |setting| {
+        if rule_setting_is_error(setting)
+            && probe_has_pipeline_plugin_package(probe)
+            && rule_setting_has_route_and_endpoint_coverage(
+                setting,
+                route_page_paths,
+                endpoint_paths,
+            )
+            && required_module_options
+                .iter()
+                .all(|(key, expected)| rule_setting_has_expected_module_globs(setting, key, expected))
+        {
+            vec![rule_name.to_owned()]
+        } else {
+            Vec::new()
+        }
+    })
+}
+
+fn rule_setting_has_option_globs_coverage(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+    key: &str,
+    candidate_paths: &[String],
+) -> bool {
+    if candidate_paths.is_empty() {
+        return rule_setting_option_globs_are_valid(setting, key);
+    }
+
+    rule_setting_option_globs_match_any_path(setting, key, candidate_paths)
+}
+
 fn rule_setting_has_route_and_endpoint_coverage(
     setting: &eslint_config_parser::types::EslintRuleSetting,
     route_page_paths: &[String],
@@ -1364,6 +1676,50 @@ fn rule_setting_has_content_source_scope(
         has_non_empty_string_array_option(object.get("authoredContentGlobs"))
             || has_non_empty_string_array_option(object.get("specContentGlobs"))
     })
+}
+
+fn probe_has_pipeline_plugin_package(
+    probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
+) -> bool {
+    probe
+        .plugin_package_names
+        .get("astro-pipeline")
+        .is_some_and(|package_names| {
+            package_names
+                .iter()
+                .any(|name| name == "g3ts-eslint-plugin-astro-pipeline")
+        })
+}
+
+fn rule_setting_has_expected_module_globs(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+    key: &str,
+    expected_sources: &[String],
+) -> bool {
+    let expected = expected_module_globs(expected_sources);
+    !expected.is_empty() && string_arrays_match_as_sets(&string_array_option(setting, key), &expected)
+}
+
+fn expected_module_globs(source_paths: &[String]) -> Vec<String> {
+    let mut globs = source_paths
+        .iter()
+        .map(|source_path| {
+            let source_path = source_path.trim_end_matches('/');
+            if is_source_module_file(source_path) {
+                normalize_glob(source_path)
+            } else {
+                format!("{}/**/*", normalize_glob(source_path))
+            }
+        })
+        .collect::<Vec<_>>();
+    globs.sort();
+    globs.dedup();
+    globs
+}
+
+fn string_arrays_match_as_sets(left: &[String], right: &[String]) -> bool {
+    BTreeSet::from_iter(left.iter().map(|value| normalize_glob(value)))
+        == BTreeSet::from_iter(right.iter().map(|value| normalize_glob(value)))
 }
 
 fn rule_setting_has_approved_content_adapter_scope(

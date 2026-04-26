@@ -55,6 +55,9 @@ non_content_routes = ["src/pages/404.astro"]
 endpoints = ["src/pages/**/*.ts"]
 content_root = "src/content"
 content_adapter = "src/lib/content"
+mdx_component_maps = ["src/components/mdx"]
+metadata_helpers = ["src/lib/metadata"]
+json_ld_helpers = ["src/lib/json-ld"]
 forbidden_state = [".next/**", ".velite/**", ".contentlayer/**"]
 future_astro_key = "preserve-astro"
 
@@ -106,6 +109,21 @@ reviewer = "guardrail-team"
         astro.content_adapter.as_deref(),
         Some("src/lib/content"),
         "ts.astro.content_adapter mismatch"
+    );
+    assertions::assert_string_list(
+        &astro.mdx_component_maps,
+        &["src/components/mdx"],
+        "ts.astro.mdx_component_maps",
+    );
+    assertions::assert_string_list(
+        &astro.metadata_helpers,
+        &["src/lib/metadata"],
+        "ts.astro.metadata_helpers",
+    );
+    assertions::assert_string_list(
+        &astro.json_ld_helpers,
+        &["src/lib/json-ld"],
+        "ts.astro.json_ld_helpers",
     );
     assertions::assert_string_list(
         &astro.forbidden_state,
@@ -176,6 +194,17 @@ profile = "strict-local-content"
         astro.content_adapter, None,
         "ts.astro.content_adapter should be None"
     );
+    assertions::assert_string_list(
+        &astro.mdx_component_maps,
+        &[],
+        "ts.astro.mdx_component_maps",
+    );
+    assertions::assert_string_list(
+        &astro.metadata_helpers,
+        &[],
+        "ts.astro.metadata_helpers",
+    );
+    assertions::assert_string_list(&astro.json_ld_helpers, &[], "ts.astro.json_ld_helpers");
     assertions::assert_string_list(&astro.forbidden_state, &[], "ts.astro.forbidden_state");
 }
 

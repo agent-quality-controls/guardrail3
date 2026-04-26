@@ -12,17 +12,17 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             continue;
         };
 
-        if contract.content_adapter_source_paths.is_empty() {
+        if contract.approved_surface_sources.content_adapter.is_empty() {
             continue;
         }
 
         let astro_content_sources: BTreeSet<&str> = contract
-            .content_adapter_astro_content_source_paths
+            .approved_surface_sources.content_adapter_astro_content
             .iter()
             .map(String::as_str)
             .collect();
         let adapter_sources: Vec<&str> = contract
-            .content_adapter_source_paths
+            .approved_surface_sources.content_adapter
             .iter()
             .map(String::as_str)
             .collect();

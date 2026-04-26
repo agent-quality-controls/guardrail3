@@ -14,10 +14,10 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
         let errors = invalid_policy_entries(policy);
         if errors.is_empty() {
             results.push(crate::support::info(
-                ID,
-                "Astro strict content policy paths are structurally valid",
-                format!(
-                    "`{}` uses app-relative `content_routes`, `non_content_routes`, `endpoints`, `content_root`, `content_adapter`, and `forbidden_state` values without parent traversal.",
+                    ID,
+                    "Astro strict content policy paths are structurally valid",
+                    format!(
+                    "`{}` uses app-relative `content_routes`, `non_content_routes`, `endpoints`, `content_root`, `content_adapter`, `mdx_component_maps`, `metadata_helpers`, `json_ld_helpers`, and `forbidden_state` values without parent traversal.",
                     policy.rel_path
                 ),
                 &policy.rel_path,
@@ -47,16 +47,38 @@ fn invalid_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
         &mut errors,
     );
     collect_invalid_list("endpoints", &policy.endpoints, &mut errors);
+    collect_invalid_helper_list("mdx_component_maps", &policy.mdx_component_maps, &mut errors);
+    collect_invalid_helper_list("metadata_helpers", &policy.metadata_helpers, &mut errors);
+    collect_invalid_helper_list("json_ld_helpers", &policy.json_ld_helpers, &mut errors);
     collect_invalid_list("forbidden_state", &policy.forbidden_state, &mut errors);
     collect_invalid_optional_dir("content_root", &policy.content_root, &mut errors);
     collect_invalid_optional_dir("content_adapter", &policy.content_adapter, &mut errors);
 
-    if let (Some(content_root), Some(content_adapter)) =
-        (&policy.content_root, &policy.content_adapter)
-    {
+    if let (Some(content_root), Some(content_adapter)) = (&policy.content_root, &policy.content_adapter) {
         if dirs_overlap(content_root, content_adapter) {
             errors.push("content_root overlaps content_adapter".to_owned());
         }
+    }
+
+    if let Some(content_root) = &policy.content_root {
+        collect_content_root_overlaps(
+            "mdx_component_maps",
+            content_root,
+            &policy.mdx_component_maps,
+            &mut errors,
+        );
+        collect_content_root_overlaps(
+            "metadata_helpers",
+            content_root,
+            &policy.metadata_helpers,
+            &mut errors,
+        );
+        collect_content_root_overlaps(
+            "json_ld_helpers",
+            content_root,
+            &policy.json_ld_helpers,
+            &mut errors,
+        );
     }
 
     errors
@@ -77,6 +99,27 @@ fn collect_invalid_optional_dir(field: &str, value: &Option<String>, errors: &mu
 
     if !is_app_relative_dir(value) {
         errors.push(format!("{field} is `{value}`"));
+    }
+}
+
+fn collect_invalid_helper_list(field: &str, values: &[String], errors: &mut Vec<String>) {
+    for value in values {
+        if !is_app_relative_dir(value) {
+            errors.push(format!("{field} contains `{value}`"));
+        }
+    }
+}
+
+fn collect_content_root_overlaps(
+    field: &str,
+    content_root: &str,
+    values: &[String],
+    errors: &mut Vec<String>,
+) {
+    for value in values {
+        if dirs_overlap(content_root, value) {
+            errors.push(format!("content_root overlaps {field} `{value}`"));
+        }
     }
 }
 

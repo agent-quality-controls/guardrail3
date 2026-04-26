@@ -1,6 +1,6 @@
 {
   "name": "g3ts-eslint-plugin-astro-pipeline",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Astro source-policy rules for content pipeline enforcement.",
   "repository": {
     "type": "git",

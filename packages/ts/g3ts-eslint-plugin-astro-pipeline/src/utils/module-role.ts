@@ -6,6 +6,7 @@ export interface ModuleRole {
   isEndpoint: boolean;
   isRouteOrEndpoint: boolean;
   isApprovedContentAdapter: boolean;
+  isMdxContent: boolean;
   isApprovedLoader: boolean;
   isMdxRuntimeModule: boolean;
   isRouteRegistryModule: boolean;
@@ -30,6 +31,7 @@ export function classifyModuleRole(
       options.approvedContentAdapterModules,
       cwd
     ),
+    isMdxContent: matchesFileGlobs(filename, options.mdxContentGlobs, cwd),
     isApprovedLoader: matchesFileGlobs(filename, options.approvedLoaderModules, cwd),
     isMdxRuntimeModule: matchesFileGlobs(filename, options.mdxRuntimeModuleGlobs, cwd),
     isRouteRegistryModule: matchesFileGlobs(

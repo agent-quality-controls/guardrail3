@@ -79,6 +79,10 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             "src/pages/index.ts",
             "src/pages/card.tsx",
             "src/lib/content/index.ts",
+            "src/content/posts/example.mdx",
+            "src/components/mdx/index.tsx",
+            "src/lib/metadata/index.ts",
+            "src/lib/json-ld/index.ts",
             "node_modules/eslint/index.js",
         ],
     );
@@ -175,14 +179,50 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                 "content adapter policy mismatch: {snapshot:?}"
             );
             assert_eq!(
-                integration.content_adapter_source_paths,
+                integration.approved_surface_sources.content_adapter,
                 vec!["src/lib/content/index.ts".to_owned()],
                 "content adapter source path mismatch: {integration:?}"
             );
             assert_eq!(
-                integration.content_adapter_astro_content_source_paths,
+                integration.approved_surface_sources.content_adapter_astro_content,
                 vec!["src/lib/content/index.ts".to_owned()],
                 "astro:content adapter source path mismatch: {integration:?}"
+            );
+            assert_eq!(
+                integration.approved_surface_sources.mdx_component_maps,
+                vec!["src/components/mdx/index.tsx".to_owned()],
+                "mdx component map source path mismatch: {integration:?}"
+            );
+            assert!(
+                integration
+                    .approved_surface_sources
+                    .missing_mdx_component_maps
+                    .is_empty(),
+                "mdx component map source should exist: {integration:?}"
+            );
+            assert_eq!(
+                integration.approved_surface_sources.metadata_helpers,
+                vec!["src/lib/metadata/index.ts".to_owned()],
+                "metadata helper source path mismatch: {integration:?}"
+            );
+            assert!(
+                integration
+                    .approved_surface_sources
+                    .missing_metadata_helpers
+                    .is_empty(),
+                "metadata helper source should exist: {integration:?}"
+            );
+            assert_eq!(
+                integration.approved_surface_sources.json_ld_helpers,
+                vec!["src/lib/json-ld/index.ts".to_owned()],
+                "json-ld helper source path mismatch: {integration:?}"
+            );
+            assert!(
+                integration
+                    .approved_surface_sources
+                    .missing_json_ld_helpers
+                    .is_empty(),
+                "json-ld helper source should exist: {integration:?}"
             );
         }
         other => panic!("expected parsed astro policy, got {other:?}"),
@@ -302,6 +342,33 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                     .any(|rule| rule == "mdx/remark"),
                 "mdx remark rule missing from mdx lane: {snapshot:?}"
             );
+            assert!(
+                snapshot
+                    .mdx_content_effective_mdx_component_map_rules
+                    .iter()
+                    .any(|rule| {
+                        rule == "astro-pipeline/mdx-component-imports-from-approved-map"
+                    }),
+                "mdx component-map rule missing from mdx lane: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .ts_source_effective_metadata_helper_rules
+                    .iter()
+                    .any(|rule| {
+                        rule == "astro-pipeline/require-approved-metadata-helper-in-routes"
+                    }),
+                "metadata helper rule missing from ts lane: {snapshot:?}"
+            );
+            assert!(
+                snapshot
+                    .tsx_source_effective_json_ld_helper_rules
+                    .iter()
+                    .any(|rule| {
+                        rule == "astro-pipeline/require-approved-json-ld-helper-in-routes"
+                    }),
+                "json-ld helper rule missing from tsx lane: {snapshot:?}"
+            );
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
     }
@@ -345,6 +412,187 @@ fn config_ingestion_ignores_rust_policy_filename_for_astro_policy() {
 }
 
 #[test]
+fn config_ingestion_rejects_helper_rules_with_eslint_options_outside_policy_sources() {
+    for (case_name, original_option, replacement_option, assertion) in [
+        (
+            "mdx component map",
+            r#"mdxContentGlobs: ["src/content/**/*.mdx"], approvedMdxComponentModules: ["src/components/mdx/**/*"]"#,
+            r#"mdxContentGlobs: ["src/content/**/*.mdx"], approvedMdxComponentModules: ["src/components/private/**/*"]"#,
+            "mdx",
+        ),
+        (
+            "metadata helper",
+            r#"approvedMetadataHelperModules: ["src/lib/metadata/**/*"], approvedContentAdapterModules: ["src/lib/content/**/*"]"#,
+            r#"approvedMetadataHelperModules: ["src/lib/private-metadata/**/*"], approvedContentAdapterModules: ["src/lib/content/**/*"]"#,
+            "metadata",
+        ),
+        (
+            "json-ld helper",
+            r#"approvedJsonLdHelperModules: ["src/lib/json-ld/**/*"]"#,
+            r#"approvedJsonLdHelperModules: ["src/lib/private-json-ld/**/*"]"#,
+            "json-ld",
+        ),
+    ] {
+        let root = super::helpers::fake_astro_workspace();
+        let eslint_runtime =
+            std::fs::read_to_string(root.path().join("node_modules/eslint/index.js"))
+                .expect("fake eslint runtime should be readable")
+                .replace(original_option, replacement_option);
+        std::fs::write(
+            root.path().join("node_modules/eslint/index.js"),
+            eslint_runtime,
+        )
+        .expect("fake eslint runtime should be rewritten");
+        let crawl = super::helpers::crawl_with_entries(
+            &root,
+            &[
+                "package.json",
+                "astro.config.mjs",
+                "src/content.config.ts",
+                ".syncpackrc",
+                "guardrail3-ts.toml",
+                "eslint.config.mjs",
+                "src/pages/index.astro",
+                "src/pages/index.ts",
+                "src/pages/card.tsx",
+                "src/content/posts/example.mdx",
+                "src/components/mdx/index.tsx",
+                "src/lib/metadata/index.ts",
+                "src/lib/json-ld/index.ts",
+                "src/lib/content/index.ts",
+                "node_modules/eslint/index.js",
+            ],
+        );
+
+        let input = super::super::ingest_for_config_checks(&crawl);
+
+        match &input.eslint_contracts[0].config {
+            G3TsAstroEslintSurfaceState::Parsed { snapshot } => match assertion {
+                "mdx" => assert!(
+                    snapshot
+                        .mdx_content_effective_mdx_component_map_rules
+                        .is_empty(),
+                    "{case_name} must make MDX component-map rule ineffective: {snapshot:?}"
+                ),
+                "metadata" => assert!(
+                    snapshot.ts_source_effective_metadata_helper_rules.is_empty(),
+                    "{case_name} must make metadata helper rule ineffective: {snapshot:?}"
+                ),
+                "json-ld" => assert!(
+                    snapshot.ts_source_effective_json_ld_helper_rules.is_empty(),
+                    "{case_name} must make JSON-LD helper rule ineffective: {snapshot:?}"
+                ),
+                other => panic!("unknown assertion case: {other}"),
+            },
+            other => panic!("expected parsed eslint state for {case_name}, got {other:?}"),
+        }
+    }
+}
+
+#[test]
+fn config_ingestion_rejects_helper_rules_missing_one_configured_policy_surface() {
+    let root = super::helpers::fake_astro_workspace();
+    let policy = std::fs::read_to_string(root.path().join("guardrail3-ts.toml"))
+        .expect("guardrail policy should be readable")
+        .replace(
+            r#"metadata_helpers = ["src/lib/metadata"]"#,
+            r#"metadata_helpers = ["src/lib/metadata", "src/lib/metadata-extra"]"#,
+        );
+    std::fs::write(root.path().join("guardrail3-ts.toml"), policy)
+        .expect("guardrail policy should be rewritten");
+    std::fs::create_dir_all(root.path().join("src/lib/metadata-extra"))
+        .expect("extra metadata helper directory should be created");
+    std::fs::write(
+        root.path().join("src/lib/metadata-extra/index.ts"),
+        "export const extraMetadata = {};\n",
+    )
+    .expect("extra metadata helper source should be written");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "guardrail3-ts.toml",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/pages/index.ts",
+            "src/pages/card.tsx",
+            "src/lib/content/index.ts",
+            "src/lib/metadata/index.ts",
+            "src/lib/metadata-extra/index.ts",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    let integration = &input.integration_contracts[0];
+    assert!(
+        integration
+            .approved_surface_sources
+            .missing_metadata_helpers
+            .is_empty(),
+        "all configured metadata helper sources should exist: {integration:?}"
+    );
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert!(
+                snapshot.ts_source_effective_metadata_helper_rules.is_empty(),
+                "omitting one configured metadata helper surface from ESLint options must make the rule ineffective: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
+fn config_ingestion_rejects_helper_rules_with_eslint_mdx_content_globs_outside_content() {
+    let root = super::helpers::fake_astro_workspace();
+    let eslint_runtime = std::fs::read_to_string(root.path().join("node_modules/eslint/index.js"))
+        .expect("fake eslint runtime should be readable")
+        .replace(
+            r#"mdxContentGlobs: ["src/content/**/*.mdx"], approvedMdxComponentModules: ["src/components/mdx/**/*"]"#,
+            r#"mdxContentGlobs: ["src/pages/**/*.mdx"], approvedMdxComponentModules: ["src/components/mdx/**/*"]"#,
+        );
+    std::fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        eslint_runtime,
+    )
+    .expect("fake eslint runtime should be rewritten");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "guardrail3-ts.toml",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/content/posts/example.mdx",
+            "src/components/mdx/index.tsx",
+            "node_modules/eslint/index.js",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    match &input.eslint_contracts[0].config {
+        G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
+            assert!(
+                snapshot
+                    .mdx_content_effective_mdx_component_map_rules
+                    .is_empty(),
+                "wrong mdxContentGlobs must make MDX component-map rule ineffective: {snapshot:?}"
+            );
+        }
+        other => panic!("expected parsed eslint state, got {other:?}"),
+    }
+}
+
+#[test]
 fn config_ingestion_rejects_adapter_source_without_runtime_astro_content_import() {
     let root = super::helpers::fake_astro_workspace();
     std::fs::write(
@@ -370,13 +618,13 @@ fn config_ingestion_rejects_adapter_source_without_runtime_astro_content_import(
     let integration = &input.integration_contracts[0];
 
     assert_eq!(
-        integration.content_adapter_source_paths,
+        integration.approved_surface_sources.content_adapter,
         vec!["src/lib/content/index.ts".to_owned()],
         "adapter source should still exist: {integration:?}"
     );
     assert!(
         integration
-            .content_adapter_astro_content_source_paths
+            .approved_surface_sources.content_adapter_astro_content
             .is_empty(),
         "adapter source without runtime astro:content import must not be accepted: {integration:?}"
     );
@@ -408,7 +656,7 @@ fn config_ingestion_rejects_adapter_source_with_type_only_astro_content_import()
 
     assert!(
         input.integration_contracts[0]
-            .content_adapter_astro_content_source_paths
+            .approved_surface_sources.content_adapter_astro_content
             .is_empty(),
         "type-only astro:content import must not satisfy adapter runtime contract: {input:?}"
     );

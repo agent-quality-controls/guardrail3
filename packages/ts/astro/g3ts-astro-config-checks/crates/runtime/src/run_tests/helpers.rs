@@ -1,5 +1,6 @@
 use g3ts_astro_types::{
-    G3TsAstroCallSnapshot, G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceSnapshot,
+    G3TsAstroApprovedSurfaceSourcePaths, G3TsAstroCallSnapshot, G3TsAstroConfigChecksInput,
+    G3TsAstroConfigSurfaceSnapshot,
     G3TsAstroConfigSurfaceState, G3TsAstroContentMode, G3TsAstroEslintPluginContractInput,
     G3TsAstroEslintSurfaceSnapshot, G3TsAstroEslintSurfaceState, G3TsAstroIntegrationContractInput,
     G3TsAstroIntegrationSnapshot, G3TsAstroOutputMode, G3TsAstroPackageScriptCommand,
@@ -710,8 +711,16 @@ fn integration_contract_for_app_with_syncpack(
         content_mode: G3TsAstroContentMode::BuildCollections,
         route_page_paths: vec!["src/pages/index.astro".to_owned()],
         endpoint_paths: vec!["src/pages/rss.ts".to_owned()],
-        content_adapter_source_paths: vec!["src/lib/content/index.ts".to_owned()],
-        content_adapter_astro_content_source_paths: vec!["src/lib/content/index.ts".to_owned()],
+        approved_surface_sources: G3TsAstroApprovedSurfaceSourcePaths {
+            content_adapter: vec!["src/lib/content/index.ts".to_owned()],
+            content_adapter_astro_content: vec!["src/lib/content/index.ts".to_owned()],
+            mdx_component_maps: vec!["src/components/mdx/index.tsx".to_owned()],
+            missing_mdx_component_maps: Vec::new(),
+            metadata_helpers: vec!["src/lib/metadata/index.ts".to_owned()],
+            missing_metadata_helpers: Vec::new(),
+            json_ld_helpers: vec!["src/lib/json-ld/index.ts".to_owned()],
+            missing_json_ld_helpers: Vec::new(),
+        },
         package,
         syncpack_config,
         astro_policy: astro_policy(),
@@ -732,6 +741,9 @@ fn astro_policy() -> G3TsAstroPolicySurfaceState {
             endpoints: vec!["src/pages/**/*.ts".to_owned()],
             content_root: Some("src/content".to_owned()),
             content_adapter: Some("src/lib/content".to_owned()),
+            mdx_component_maps: vec!["src/components/mdx".to_owned()],
+            metadata_helpers: vec!["src/lib/metadata".to_owned()],
+            json_ld_helpers: vec!["src/lib/json-ld".to_owned()],
             forbidden_state: vec![
                 ".next/**".to_owned(),
                 ".velite/**".to_owned(),
@@ -1191,7 +1203,7 @@ fn required_syncpack_pins() -> Vec<G3TsAstroSyncpackRequiredPin> {
         ("@types/react-dom", "19.2.3"),
         ("typescript", "5.9.3"),
         ("eslint-plugin-astro", "1.7.0"),
-        ("g3ts-eslint-plugin-astro-pipeline", "0.1.5"),
+        ("g3ts-eslint-plugin-astro-pipeline", "0.1.6"),
         ("eslint-plugin-i18next", "6.1.4"),
         ("eslint-plugin-mdx", "3.7.0"),
     ]
@@ -1227,7 +1239,7 @@ fn required_syncpack_version_groups() -> Vec<TestSyncpackVersionGroup> {
         ("@types/react-dom", "19.2.3"),
         ("typescript", "5.9.3"),
         ("eslint-plugin-astro", "1.7.0"),
-        ("g3ts-eslint-plugin-astro-pipeline", "0.1.5"),
+        ("g3ts-eslint-plugin-astro-pipeline", "0.1.6"),
         ("eslint-plugin-i18next", "6.1.4"),
         ("eslint-plugin-mdx", "3.7.0"),
     ]
@@ -1418,6 +1430,27 @@ fn parsed_eslint_with_pipeline_contract(
             tsx_source_effective_inline_public_content_rules: pipeline_contract
                 .tsx
                 .effective_inline_public_content_rules(),
+            mdx_content_effective_mdx_component_map_rules: pipeline_contract
+                .astro
+                .effective_mdx_component_map_rules(),
+            astro_source_effective_metadata_helper_rules: pipeline_contract
+                .astro
+                .effective_metadata_helper_rules(),
+            ts_source_effective_metadata_helper_rules: pipeline_contract
+                .ts
+                .effective_metadata_helper_rules(),
+            tsx_source_effective_metadata_helper_rules: pipeline_contract
+                .tsx
+                .effective_metadata_helper_rules(),
+            astro_source_effective_json_ld_helper_rules: pipeline_contract
+                .astro
+                .effective_json_ld_helper_rules(),
+            ts_source_effective_json_ld_helper_rules: pipeline_contract
+                .ts
+                .effective_json_ld_helper_rules(),
+            tsx_source_effective_json_ld_helper_rules: pipeline_contract
+                .tsx
+                .effective_json_ld_helper_rules(),
             astro_source_probe_ignored: false,
             ts_source_probe_ignored: false,
             tsx_source_probe_ignored: false,
@@ -1595,8 +1628,11 @@ impl PipelineLaneState {
             "astro-pipeline/no-authored-content-imports".to_owned(),
             "astro-pipeline/no-content-data-modules-in-routes".to_owned(),
             "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
+            "astro-pipeline/mdx-component-imports-from-approved-map".to_owned(),
             "astro-pipeline/no-runtime-mdx-eval".to_owned(),
             "astro-pipeline/require-approved-content-adapter-in-routes".to_owned(),
+            "astro-pipeline/require-approved-json-ld-helper-in-routes".to_owned(),
+            "astro-pipeline/require-approved-metadata-helper-in-routes".to_owned(),
             "astro-pipeline/no-side-loader-imports".to_owned(),
             "astro-pipeline/no-velite-imports".to_owned(),
         ];
@@ -1618,6 +1654,8 @@ impl PipelineLaneState {
             "astro-pipeline/no-content-data-modules-in-routes".to_owned(),
             "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
             "astro-pipeline/require-approved-content-adapter-in-routes".to_owned(),
+            "astro-pipeline/require-approved-json-ld-helper-in-routes".to_owned(),
+            "astro-pipeline/require-approved-metadata-helper-in-routes".to_owned(),
             "astro-pipeline/no-side-loader-imports".to_owned(),
             "astro-pipeline/no-velite-imports".to_owned(),
         ]
@@ -1675,6 +1713,30 @@ impl PipelineLaneState {
         }
 
         vec!["i18next/no-literal-string".to_owned()]
+    }
+
+    fn effective_mdx_component_map_rules(self) -> Vec<String> {
+        if !self.has_required_rules {
+            return Vec::new();
+        }
+
+        vec!["astro-pipeline/mdx-component-imports-from-approved-map".to_owned()]
+    }
+
+    fn effective_metadata_helper_rules(self) -> Vec<String> {
+        if !self.has_required_rules || matches!(self.scope_kind, ScopeKind::None) {
+            return Vec::new();
+        }
+
+        vec!["astro-pipeline/require-approved-metadata-helper-in-routes".to_owned()]
+    }
+
+    fn effective_json_ld_helper_rules(self) -> Vec<String> {
+        if !self.has_required_rules || matches!(self.scope_kind, ScopeKind::None) {
+            return Vec::new();
+        }
+
+        vec!["astro-pipeline/require-approved-json-ld-helper-in-routes".to_owned()]
     }
 }
 

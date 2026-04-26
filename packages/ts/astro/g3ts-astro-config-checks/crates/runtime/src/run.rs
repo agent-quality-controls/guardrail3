@@ -29,6 +29,10 @@ pub fn check(input: &G3TsAstroConfigChecksInput) -> Vec<G3CheckResult> {
     crate::ts_astro_config_26_policy_eslint_coverage::check(input, &mut results);
     crate::ts_astro_config_27_content_adapter_exists::check(input, &mut results);
     crate::ts_astro_config_28_content_adapter_astro_content::check(input, &mut results);
+    crate::ts_astro_config_29_policy_helper_surfaces::check(input, &mut results);
+    crate::ts_astro_config_30_mdx_component_map_rule::check(input, &mut results);
+    crate::ts_astro_config_31_metadata_helper_rule::check(input, &mut results);
+    crate::ts_astro_config_32_json_ld_helper_rule::check(input, &mut results);
     results
 }
 
