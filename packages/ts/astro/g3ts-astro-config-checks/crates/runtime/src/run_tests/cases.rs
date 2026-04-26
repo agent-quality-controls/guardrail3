@@ -206,6 +206,13 @@ fn golden_config_reports_expected_inventory() {
                 Some("guardrail3-rs.toml"),
                 true,
             ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-25",
+                "Astro content and non-content route scopes are disjoint",
+                "`guardrail3-rs.toml` classifies discovered route pages without overlap between `content_routes` and `non_content_routes`.",
+                Some("guardrail3-rs.toml"),
+                true,
+            ),
         ],
     );
 }
@@ -300,6 +307,49 @@ fn strict_content_policy_path_rule_rejects_glob_dirs_and_overlapping_roots() {
     let results = super::super::check(&input);
 
     assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "content_adapter");
+}
+
+#[test]
+fn strict_content_policy_route_scope_rule_rejects_discovered_overlap() {
+    let mut input = golden();
+    input.integration_contracts[0]
+        .route_page_paths
+        .push("src/pages/404.astro".to_owned());
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.content_routes = vec!["src/pages/**/*.astro".to_owned()];
+    snapshot.non_content_routes = vec!["src/pages/404.astro".to_owned()];
+
+    let results = super::super::check(&input);
+
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-CONFIG-25",
+        "Astro content and non-content route scopes overlap",
+    );
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-25", "src/pages/404.astro");
+}
+
+#[test]
+fn strict_content_policy_route_scope_rule_rejects_invalid_globs() {
+    let mut input = golden();
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.content_routes = vec!["src/pages/[".to_owned()];
+
+    let results = super::super::check(&input);
+
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-CONFIG-25",
+        "Astro route scope policy contains an invalid glob",
+    );
 }
 
 #[test]

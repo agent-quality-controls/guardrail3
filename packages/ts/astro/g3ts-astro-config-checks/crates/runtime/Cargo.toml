@@ -28,6 +28,7 @@ all-features = true
 
 [dependencies]
 g3ts-astro-types = { path = "../../../g3ts-astro-types", version = "0.1.0" }
+globset = "0.4"
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 url = "2.5.7"
 
