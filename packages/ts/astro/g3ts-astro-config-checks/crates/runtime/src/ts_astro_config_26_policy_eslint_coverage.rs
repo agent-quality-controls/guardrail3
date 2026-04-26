@@ -162,7 +162,7 @@ fn error(policy_rel_path: Option<&str>, reason: &str) -> G3CheckResult {
         "Astro ESLint route coverage does not match strict content policy",
         format!(
             "`{}` must configure `g3ts-eslint-plugin-astro-pipeline` so Astro, TS, and TSX source lanes cover every discovered `[ts.astro].content_routes` page, exclude `[ts.astro].non_content_routes` pages from route-scoped content enforcement, and cover every discovered `[ts.astro].endpoints` file. Mismatch: {reason}.",
-            policy_rel_path.unwrap_or("guardrail3-rs.toml")
+            policy_rel_path.unwrap_or("guardrail3-ts.toml")
         ),
         policy_rel_path,
     )

@@ -724,7 +724,7 @@ fn integration_contract_for_app_with_syncpack(
 fn astro_policy() -> G3TsAstroPolicySurfaceState {
     G3TsAstroPolicySurfaceState::Parsed {
         snapshot: G3TsAstroPolicySnapshot {
-            rel_path: "guardrail3-rs.toml".to_owned(),
+            rel_path: "guardrail3-ts.toml".to_owned(),
             profile: Some("strict-local-content".to_owned()),
             content_routes: vec!["src/pages/**/*.astro".to_owned()],
             non_content_routes: vec!["src/pages/404.astro".to_owned()],

@@ -98,7 +98,7 @@ Implemented in this slice.
 
 Rule:
 
-- For every detected Astro app root, read app-local `guardrail3-rs.toml`.
+- For every detected Astro app root, read app-local `guardrail3-ts.toml`.
 - Parse through shared `guardrail3-rs-toml-parser`.
 - Require `[ts.astro]`.
 - Require `profile = "strict-local-content"`.

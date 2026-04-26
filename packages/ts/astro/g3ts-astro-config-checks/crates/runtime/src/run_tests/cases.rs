@@ -195,36 +195,36 @@ fn golden_config_reports_expected_inventory() {
             assertions::info(
                 "TS-ASTRO-CONFIG-23",
                 "Astro strict content policy is configured",
-                "`guardrail3-rs.toml` sets `[ts.astro] profile = \"strict-local-content\"`, declares non-empty `content_routes`, `content_root`, and `content_adapter`, and forbids `.next/**`, `.velite/**`, and `.contentlayer/**` generated state.",
-                Some("guardrail3-rs.toml"),
+                "`guardrail3-ts.toml` sets `[ts.astro] profile = \"strict-local-content\"`, declares non-empty `content_routes`, `content_root`, and `content_adapter`, and forbids `.next/**`, `.velite/**`, and `.contentlayer/**` generated state.",
+                Some("guardrail3-ts.toml"),
                 true,
             ),
             assertions::info(
                 "TS-ASTRO-CONFIG-24",
                 "Astro strict content policy paths are structurally valid",
-                "`guardrail3-rs.toml` uses app-relative `content_routes`, `non_content_routes`, `endpoints`, `content_root`, `content_adapter`, and `forbidden_state` values without parent traversal.",
-                Some("guardrail3-rs.toml"),
+                "`guardrail3-ts.toml` uses app-relative `content_routes`, `non_content_routes`, `endpoints`, `content_root`, `content_adapter`, and `forbidden_state` values without parent traversal.",
+                Some("guardrail3-ts.toml"),
                 true,
             ),
             assertions::info(
                 "TS-ASTRO-CONFIG-25",
                 "Astro content and non-content route scopes are disjoint",
-                "`guardrail3-rs.toml` classifies discovered route pages without overlap between `content_routes` and `non_content_routes`.",
-                Some("guardrail3-rs.toml"),
+                "`guardrail3-ts.toml` classifies discovered route pages without overlap between `content_routes` and `non_content_routes`.",
+                Some("guardrail3-ts.toml"),
                 true,
             ),
             assertions::info(
                 "TS-ASTRO-CONFIG-26",
                 "Astro ESLint route coverage matches strict content policy",
-                "`guardrail3-rs.toml` and `eslint.config.mjs` agree on content route, non-content route, and endpoint coverage for the required Astro pipeline rules.",
+                "`guardrail3-ts.toml` and `eslint.config.mjs` agree on content route, non-content route, and endpoint coverage for the required Astro pipeline rules.",
                 Some("eslint.config.mjs"),
                 true,
             ),
             assertions::info(
                 "TS-ASTRO-CONFIG-27",
                 "Astro content adapter source exists",
-                "`guardrail3-rs.toml` resolves `content_adapter = \"src/lib/content\"` to adapter source files: `src/lib/content/index.ts`.",
-                Some("guardrail3-rs.toml"),
+                "`guardrail3-ts.toml` resolves `content_adapter = \"src/lib/content\"` to adapter source files: `src/lib/content/index.ts`.",
+                Some("guardrail3-ts.toml"),
                 true,
             ),
         ],
@@ -235,7 +235,7 @@ fn golden_config_reports_expected_inventory() {
 fn strict_content_policy_rule_rejects_missing_policy() {
     let mut input = golden();
     input.integration_contracts[0].astro_policy = G3TsAstroPolicySurfaceState::MissingAstroPolicy {
-        rel_path: "guardrail3-rs.toml".to_owned(),
+        rel_path: "guardrail3-ts.toml".to_owned(),
     };
 
     let results = super::super::check(&input);

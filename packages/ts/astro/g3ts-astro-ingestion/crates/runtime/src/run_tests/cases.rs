@@ -73,7 +73,7 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
             "astro.config.mjs",
             "src/content.config.ts",
             ".syncpackrc",
-            "guardrail3-rs.toml",
+            "guardrail3-ts.toml",
             "eslint.config.mjs",
             "src/pages/index.html",
             "src/pages/index.ts",
@@ -300,6 +300,43 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
         }
         other => panic!("expected parsed eslint state, got {other:?}"),
     }
+}
+
+#[test]
+fn config_ingestion_ignores_rust_policy_filename_for_astro_policy() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::rename(
+        root.path().join("guardrail3-ts.toml"),
+        root.path().join("guardrail3-rs.toml"),
+    )
+    .expect("test policy file should be renamed to the old Rust filename");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "guardrail3-rs.toml",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    assert_eq!(
+        input.integration_contracts.len(),
+        1,
+        "astro app should still be detected: {input:?}"
+    );
+    assert_eq!(
+        input.integration_contracts[0].astro_policy,
+        G3TsAstroPolicySurfaceState::Missing {
+            rel_path: "guardrail3-ts.toml".to_owned()
+        },
+        "G3TS Astro policy must use the TypeScript filename"
+    );
 }
 
 #[test]
