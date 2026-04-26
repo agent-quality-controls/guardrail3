@@ -43,3 +43,20 @@ fn inventories_expect_with_useful_reason() {
         }],
     );
 }
+
+#[test]
+fn matching_waiver_suppresses_allow_inventory() {
+    let results = super::super::check_source_with_waivers(
+        "src/lib.rs",
+        "#[allow(dead_code)] // reason: proc macro entrypoint\nfn probe() {}\n",
+        false,
+        &[(
+            "RS-CODE-SOURCE-04",
+            "src/lib.rs",
+            "lint:dead_code",
+            "inventory accepted for generated boundary",
+        )],
+    );
+
+    assert_rule_results(&results, &[]);
+}

@@ -12,11 +12,12 @@ pub fn run(
 ) -> Result<FamilyResults, FamilyRunError> {
     match family {
         SupportedFamily::Topology => {
-            let input = g3rs_topology_ingestion::ingest_for_file_tree_checks(crawl).map_err(
-                |error| FamilyRunError {
-                    message: format!("{error:?}"),
-                },
-            )?;
+            let input =
+                g3rs_topology_ingestion::ingest_for_file_tree_checks(crawl).map_err(|error| {
+                    FamilyRunError {
+                        message: format!("{error:?}"),
+                    }
+                })?;
             Ok(g3rs_topology_file_tree_checks::check(&input))
         }
         SupportedFamily::Arch => {

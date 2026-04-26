@@ -14,5 +14,13 @@ categories = ["development-tools", "parser-implementations"]
 [lints]
 workspace = true
 
+[package.metadata.guardrail3]
+shared = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
 [package.metadata.docs.rs]
 all-features = true

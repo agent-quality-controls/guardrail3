@@ -14,20 +14,18 @@ pub fn run(
         SupportedFamily::Toolchain => {
             let mut results = match g3rs_toolchain_ingestion::ingest_for_config_checks(crawl) {
                 Ok(config_input) => g3rs_toolchain_config_checks::check(&config_input),
-                Err(g3rs_toolchain_ingestion::G3RsToolchainIngestionError::ToolchainTomlNotFound) => {
-                    Vec::new()
-                }
+                Err(
+                    g3rs_toolchain_ingestion::G3RsToolchainIngestionError::ToolchainTomlNotFound,
+                ) => Vec::new(),
                 Err(error) => {
                     return Err(FamilyRunError {
                         message: format!("{error:?}"),
                     });
                 }
             };
-            let filetree_input =
-                g3rs_toolchain_ingestion::ingest_for_file_tree_checks(crawl).map_err(|error| {
-                    FamilyRunError {
-                        message: format!("{error:?}"),
-                    }
+            let filetree_input = g3rs_toolchain_ingestion::ingest_for_file_tree_checks(crawl)
+                .map_err(|error| FamilyRunError {
+                    message: format!("{error:?}"),
                 })?;
             results.extend(g3rs_toolchain_filetree_checks::check(&filetree_input));
             Ok(results)

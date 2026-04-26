@@ -9,6 +9,14 @@ const ID: &str = "RS-CODE-SOURCE-31";
 
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_public_struct_field_bags(input.source) {
+        if crate::support::has_matching_waiver(
+            input,
+            ID,
+            &format!("struct:{}", info.struct_name),
+        ) {
+            continue;
+        }
+
         let has_inherent_impl = struct_has_inherent_impl(input.source, &info.qualified_name);
         if input.is_shared_crate && info.all_fields_public && !has_inherent_impl {
             continue;
@@ -474,7 +482,7 @@ pub(super) fn check_source(
     content: &str,
     is_test: bool,
 ) -> Vec<guardrail3_check_types::G3CheckResult> {
-    check_source_with_shared(rel_path, content, is_test, false)
+    check_source_with_waivers(rel_path, content, is_test, false, &[])
 }
 
 #[cfg(test)]
@@ -483,6 +491,17 @@ pub(super) fn check_source_with_shared(
     content: &str,
     is_test: bool,
     is_shared_crate: bool,
+) -> Vec<guardrail3_check_types::G3CheckResult> {
+    check_source_with_waivers(rel_path, content, is_test, is_shared_crate, &[])
+}
+
+#[cfg(test)]
+pub(super) fn check_source_with_waivers(
+    rel_path: &str,
+    content: &str,
+    is_test: bool,
+    is_shared_crate: bool,
+    waivers: &[(&str, &str, &str, &str)],
 ) -> Vec<guardrail3_check_types::G3CheckResult> {
     let source = crate::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
@@ -498,6 +517,15 @@ pub(super) fn check_source_with_shared(
     };
     let input = crate::support::CodeSourceRuleInput {
         is_shared_crate,
+        waivers: &waivers
+            .iter()
+            .map(|(rule, file, selector, reason)| g3rs_code_types::G3RsCodeWaiver {
+                rule: (*rule).to_owned(),
+                file: (*file).to_owned(),
+                selector: (*selector).to_owned(),
+                reason: (*reason).to_owned(),
+            })
+            .collect::<Vec<_>>(),
         ..crate::support::CodeSourceRuleInput::from(&parsed)
     };
     let mut results = Vec::new();

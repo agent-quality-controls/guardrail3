@@ -26,3 +26,9 @@ rule = "RS-ARCH-FILETREE-07"
 file = "crates/assertions/Cargo.toml"
 selector = "structural-split"
 reason = "Assertions crate intentionally keeps one shared proof module per rule."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-09"
+file = "crates/runtime/src/rs_code_ast_31_public_struct_named_fields/rule.rs"
+selector = "effective-code-lines"
+reason = "This rule owns a large public-field AST resolver; splitting the resolver safely is a dedicated source-rule refactor."

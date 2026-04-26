@@ -24,3 +24,24 @@ fn errors_when_effective_code_lines_exceed_cap() {
         }],
     );
 }
+
+#[test]
+fn matching_waiver_suppresses_effective_code_line_error() {
+    let content = (0..501)
+        .map(|i| format!("fn f{i}() {{}}\n"))
+        .collect::<String>();
+
+    let results = super::super::check_source_with_waivers(
+        "src/lib.rs",
+        &content,
+        false,
+        &[(
+            "RS-CODE-SOURCE-09",
+            "src/lib.rs",
+            "effective-code-lines",
+            "state machine split tracked separately",
+        )],
+    );
+
+    assert_rule_results(&results, &[]);
+}

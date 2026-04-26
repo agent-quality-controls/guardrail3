@@ -1,5 +1,6 @@
 mod run;
 mod support;
+mod support_nuasite;
 mod ts_astro_config_01_astro_package_present;
 mod ts_astro_config_02_astro_check_present;
 mod ts_astro_config_03_astro_eslint_plugin_package_present;

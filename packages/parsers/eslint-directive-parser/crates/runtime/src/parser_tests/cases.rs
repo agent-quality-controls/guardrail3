@@ -1,9 +1,8 @@
 use eslint_directive_parser_runtime_assertions::parser::{
     assert_ambiguous_document, assert_directive, assert_directive_count, assert_parse_error_document,
     assert_parsed_document, assert_state_reason_contains, assert_unsupported_document,
+    EslintDirectiveKind, EslintDisabledRuleSet,
 };
-
-use crate::types::{EslintDirectiveKind, EslintDisabledRuleSet};
 
 #[test]
 fn parses_eslint_directives_from_supported_comment_forms() {

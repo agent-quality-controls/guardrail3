@@ -43,6 +43,25 @@ fn errors_on_public_struct_with_five_public_fields() {
 }
 
 #[test]
+fn matching_waiver_suppresses_public_struct_field_error() {
+    let content = "pub struct User { pub a: u8, pub b: u8, pub c: u8, pub d: u8, pub e: u8 }";
+    let results = super::super::check_source_with_waivers(
+        "src/lib.rs",
+        content,
+        false,
+        false,
+        &[(
+            "RS-CODE-SOURCE-31",
+            "src/lib.rs",
+            "struct:User",
+            "test fixture shape is intentionally declarative",
+        )],
+    );
+
+    assert_rule_results(&results, &[]);
+}
+
+#[test]
 fn warns_on_public_struct_with_four_public_fields() {
     let content = "pub struct User { pub a: u8, pub b: u8, pub c: u8, pub d: u8 }";
     let results = super::super::check_source("src/lib.rs", content, false);

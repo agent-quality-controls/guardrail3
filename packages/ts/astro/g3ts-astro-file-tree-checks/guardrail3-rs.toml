@@ -2,6 +2,7 @@ profile = "library"
 
 allowed_deps = [
   "g3ts-arch-types",
+  "g3ts-astro-types",
   "guardrail3-check-types",
 ]
 

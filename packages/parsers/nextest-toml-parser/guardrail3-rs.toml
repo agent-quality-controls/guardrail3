@@ -23,3 +23,15 @@ rule = "RS-CODE-SOURCE-19"
 file = "crates/types/src/nextest_toml/profile.rs"
 selector = "struct:ProfileOverride"
 reason = "Schema mirror intentionally matches nextest's profile override surface."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-04"
+file = "crates/runtime/src/fs.rs"
+selector = "lint:clippy::disallowed_methods"
+reason = "fs.rs is the centralized filesystem boundary for this parser crate."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-04"
+file = "crates/runtime/src/parser.rs"
+selector = "lint:clippy::disallowed_methods"
+reason = "parser.rs is the centralized TOML parser boundary for this parser crate."

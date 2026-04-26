@@ -18,7 +18,7 @@ syncpack-config-parser-runtime = { path = "crates/runtime", version = "0.1.0", o
 [features]
 default = ["all"]
 all = ["api"]
-api = ["dep:syncpack-config-parser-runtime"]
+api = ["dep:syncpack-config-parser-runtime", "syncpack-config-parser-runtime?/api"]
 
 [lints]
 workspace = true

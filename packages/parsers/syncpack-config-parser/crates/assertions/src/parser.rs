@@ -1,5 +1,7 @@
+pub use syncpack_config_parser_runtime::types::SyncpackVersionGroup;
+
 use syncpack_config_parser_runtime::types::{
-    SyncpackConfigDocument, SyncpackConfigParseState, SyncpackVersionGroup,
+    SyncpackConfigDocument, SyncpackConfigParseState,
 };
 
 pub fn assert_parsed_document(document: &SyncpackConfigDocument) {

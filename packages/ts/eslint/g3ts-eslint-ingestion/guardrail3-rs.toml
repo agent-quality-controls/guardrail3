@@ -3,6 +3,7 @@ profile = "library"
 allowed_deps = [
   "eslint-config-parser",
   "g3-workspace-crawl",
+  "g3rs-workspace-crawl",
   "g3ts-eslint-types",
   "tempfile",
 ]

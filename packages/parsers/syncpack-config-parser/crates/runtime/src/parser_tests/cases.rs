@@ -1,9 +1,7 @@
 use syncpack_config_parser_runtime_assertions::parser::{
     assert_group_exact, assert_has_banned_group, assert_has_pinned_group, assert_invalid_document,
-    assert_parsed_document, assert_source,
+    assert_parsed_document, assert_source, SyncpackVersionGroup,
 };
-
-use crate::types::SyncpackVersionGroup;
 
 #[test]
 fn parses_syncpack_policy_groups() {

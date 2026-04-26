@@ -2,8 +2,8 @@ use std::path::Path;
 
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use guardrail3_rs_app_types::{
-    FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily,
-    ValidateReport, WorkspaceCrawlError, WorkspaceCrawler,
+    FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily, ValidateReport,
+    WorkspaceCrawlError, WorkspaceCrawler,
 };
 #[derive(Debug)]
 struct StubCrawler;

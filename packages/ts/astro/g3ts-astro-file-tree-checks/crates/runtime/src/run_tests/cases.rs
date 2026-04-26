@@ -217,13 +217,14 @@ fn legacy_generated_state_is_forbidden_for_astro_apps() {
         .clone();
 
     let results = crate::run::check(&input);
-    assert_eq!(
-        error_files(&results, "TS-ASTRO-FILETREE-11"),
-        vec![
+    assertions::assert_error_files(
+        &results,
+        "TS-ASTRO-FILETREE-11",
+        &[
             ".next/server/app/page.js",
             ".contentlayer/generated/Post.mjs",
             "contentlayer.config.ts",
-        ]
+        ],
     );
 }
 
@@ -278,12 +279,4 @@ fn golden_build_collections_input() -> G3TsAstroFileTreeChecksInput {
         live_collection_roots: Vec::new(),
         route_markdown_pages: Vec::new(),
     }
-}
-
-fn error_files(results: &[guardrail3_check_types::G3CheckResult], id: &str) -> Vec<String> {
-    results
-        .iter()
-        .filter(|result| result.id() == id && !result.inventory())
-        .map(|result| result.file().unwrap_or("<missing>").to_owned())
-        .collect()
 }

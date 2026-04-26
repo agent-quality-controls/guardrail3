@@ -1,3 +1,4 @@
+mod fs;
 mod run;
 
 #[cfg(feature = "ingest")]

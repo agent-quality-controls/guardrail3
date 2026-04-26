@@ -2,9 +2,7 @@ use std::path::Path;
 
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
-use crate::{
-    FamilyResults, FamilyRunError, SupportedFamily, ValidateReport, WorkspaceCrawlError,
-};
+use crate::{FamilyResults, FamilyRunError, SupportedFamily, ValidateReport, WorkspaceCrawlError};
 
 /// Crawls a workspace into the shared snapshot used by all family runners.
 pub trait WorkspaceCrawler {

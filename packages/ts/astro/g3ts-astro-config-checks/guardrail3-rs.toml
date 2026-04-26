@@ -1,9 +1,12 @@
 profile = "library"
 
 allowed_deps = [
+  "g3ts-astro-types",
   "g3ts-npmrc-types",
   "guardrail3-check-types",
   "npmrc-parser",
+  "package-script-command-parser",
+  "url",
 ]
 
 [[waivers]]
@@ -11,6 +14,12 @@ rule = "RS-ARCH-FILETREE-07"
 file = "crates/runtime/Cargo.toml"
 selector = "structural-split"
 reason = "config-check packages keep one rule per file at runtime root"
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-09"
+file = "crates/runtime/src/support.rs"
+selector = "effective-code-lines"
+reason = "Astro config support still carries cross-rule helper glue; low-risk Nuasite helper extraction landed, broader split needs a dedicated behavior-preserving change."
 
 [checks]
 garde = false

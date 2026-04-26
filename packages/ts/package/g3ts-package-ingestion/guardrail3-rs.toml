@@ -2,9 +2,12 @@ profile = "library"
 
 allowed_deps = [
   "g3-workspace-crawl",
+  "g3rs-workspace-crawl",
   "g3ts-package-types",
-  "tempfile",
   "package-json-parser",
+  "package-script-command-parser",
+  "syncpack-config-parser",
+  "tempfile",
 ]
 
 [checks]

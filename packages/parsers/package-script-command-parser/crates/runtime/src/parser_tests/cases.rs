@@ -2,10 +2,8 @@ use package_script_command_parser_runtime_assertions::parser::{
     ExpectedEslintInvocation, ExpectedToolInvocation, assert_command, assert_command_count,
     assert_eslint_invocation, assert_no_eslint_invocation, assert_parse_error_document,
     assert_parsed_document, assert_state_reason_contains, assert_tool_invocation,
-    assert_unsupported_document,
+    assert_unsupported_document, PackageScriptCommandSeparator,
 };
-
-use crate::types::PackageScriptCommandSeparator;
 
 #[test]
 fn parses_eslint_invocations_and_ignore_flags() {
