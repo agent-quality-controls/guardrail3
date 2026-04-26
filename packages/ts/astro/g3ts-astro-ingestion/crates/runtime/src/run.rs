@@ -32,7 +32,7 @@ use syncpack_config_parser::{
 };
 
 const ESLINT_CONFIG_PATTERN: &str = "eslint.config.*";
-const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-rs.toml";
+const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-ts.toml";
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
 const SYNCPACK_CONFIG_REL_PATH: &str = ".syncpackrc";
 const ROUTE_SCOPED_PIPELINE_RULES: [&str; 8] = [

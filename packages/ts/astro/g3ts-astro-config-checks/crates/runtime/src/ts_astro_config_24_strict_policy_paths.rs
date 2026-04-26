@@ -30,7 +30,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             "Astro strict content policy paths are invalid",
             format!(
                 "`{}` has invalid `[ts.astro]` paths: {}. Use app-relative values only, do not use absolute paths, `..`, or backslashes, and keep `content_root` separate from `content_adapter`.",
-                rel_path.unwrap_or("guardrail3-rs.toml"),
+                rel_path.unwrap_or("guardrail3-ts.toml"),
                 errors.join("; ")
             ),
             rel_path,

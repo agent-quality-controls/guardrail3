@@ -80,7 +80,7 @@ pub(super) fn fake_astro_workspace() -> TempDir {
     )
     .expect("syncpack config should be written");
     std::fs::write(
-        root.path().join("guardrail3-rs.toml"),
+        root.path().join("guardrail3-ts.toml"),
         r#"
 [ts.astro]
 profile = "strict-local-content"

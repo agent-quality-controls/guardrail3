@@ -98,7 +98,7 @@ Then add the first rule:
 
 - Done: `guardrail3-rs-toml-parser` exposes only the minimal `[ts.astro]` fields.
 - Done: parser tests prove the minimal field mapping and wrong new-field types.
-- Done: Astro ingestion reads app-local `guardrail3-rs.toml` through the shared parser.
+- Done: Astro ingestion reads app-local `guardrail3-ts.toml` through the shared parser.
 - Done: Astro config checks include `TS-ASTRO-CONFIG-23` for the strict content policy.
 - Not done: route overlap checks.
 - Not done: wiring ESLint plugin option checks to policy-derived content route scopes.

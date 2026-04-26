@@ -25,7 +25,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             "Astro strict content policy is missing or incomplete",
             format!(
                 "`{}` must define `[ts.astro]` with `profile = \"{PROFILE}\"`, non-empty `content_routes`, `content_root`, `content_adapter`, and `forbidden_state = [\".next/**\", \".velite/**\", \".contentlayer/**\"]`. These are the only app-level Astro policy fields G3TS reads; old `*_globs` route-class fields are not supported.",
-                rel_path.unwrap_or("guardrail3-rs.toml")
+                rel_path.unwrap_or("guardrail3-ts.toml")
             ),
             rel_path,
         ));
