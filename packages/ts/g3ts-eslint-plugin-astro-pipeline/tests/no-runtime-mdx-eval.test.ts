@@ -7,6 +7,7 @@ import rule from "../src/rules/no-runtime-mdx-eval.js";
 import { baseOptions, createFixtureProject, createRuleTester } from "./rule-tester.js";
 
 const plannedRuleNames = [
+  "mdx-component-imports-from-approved-map",
   "no-authored-content-fs-read",
   "no-authored-content-glob",
   "no-authored-content-imports",
@@ -15,7 +16,9 @@ const plannedRuleNames = [
   "no-runtime-mdx-eval",
   "no-side-loader-imports",
   "no-velite-imports",
-  "require-approved-content-adapter-in-routes"
+  "require-approved-content-adapter-in-routes",
+  "require-approved-json-ld-helper-in-routes",
+  "require-approved-metadata-helper-in-routes"
 ];
 
 test("recommended config exports all implemented rules at error", () => {
@@ -26,8 +29,11 @@ test("recommended config exports all implemented rules at error", () => {
     "astro-pipeline/no-authored-content-imports": "error",
     "astro-pipeline/no-content-data-modules-in-routes": "error",
     "astro-pipeline/no-direct-astro-content-in-routes": "error",
+    "astro-pipeline/mdx-component-imports-from-approved-map": "error",
     "astro-pipeline/no-runtime-mdx-eval": "error",
     "astro-pipeline/require-approved-content-adapter-in-routes": "error",
+    "astro-pipeline/require-approved-json-ld-helper-in-routes": "error",
+    "astro-pipeline/require-approved-metadata-helper-in-routes": "error",
     "astro-pipeline/no-side-loader-imports": "error",
     "astro-pipeline/no-velite-imports": "error"
   });

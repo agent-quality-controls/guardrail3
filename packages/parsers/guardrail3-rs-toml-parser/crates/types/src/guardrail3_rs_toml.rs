@@ -81,6 +81,12 @@ pub struct TsAstroPolicyConfig {
     #[serde(default)]
     pub content_adapter: Option<String>,
     #[serde(default)]
+    pub mdx_component_maps: Vec<String>,
+    #[serde(default)]
+    pub metadata_helpers: Vec<String>,
+    #[serde(default)]
+    pub json_ld_helpers: Vec<String>,
+    #[serde(default)]
     pub forbidden_state: Vec<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,

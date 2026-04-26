@@ -1,11 +1,14 @@
 export interface AstroPipelineOptions {
   routeGlobs?: string[];
   endpointGlobs?: string[];
+  mdxContentGlobs?: string[];
   contentDataModuleGlobs?: string[];
   adapterModuleGlobs?: string[];
   mdxRuntimeModuleGlobs?: string[];
   routeRegistryModuleGlobs?: string[];
   approvedContentAdapterModules?: string[];
+  approvedMetadataHelperModules?: string[];
+  approvedJsonLdHelperModules?: string[];
   approvedLoaderModules?: string[];
   approvedMdxComponentModules?: string[];
   approvedGeneratedArtifactRoots?: string[];
@@ -16,11 +19,14 @@ export interface AstroPipelineOptions {
 export interface ResolvedAstroPipelineOptions {
   routeGlobs: string[];
   endpointGlobs: string[];
+  mdxContentGlobs: string[];
   contentDataModuleGlobs: string[];
   adapterModuleGlobs: string[];
   mdxRuntimeModuleGlobs: string[];
   routeRegistryModuleGlobs: string[];
   approvedContentAdapterModules: string[];
+  approvedMetadataHelperModules: string[];
+  approvedJsonLdHelperModules: string[];
   approvedLoaderModules: string[];
   approvedMdxComponentModules: string[];
   approvedGeneratedArtifactRoots: string[];
@@ -31,11 +37,14 @@ export interface ResolvedAstroPipelineOptions {
 const ARRAY_OPTION_KEYS = [
   "routeGlobs",
   "endpointGlobs",
+  "mdxContentGlobs",
   "contentDataModuleGlobs",
   "adapterModuleGlobs",
   "mdxRuntimeModuleGlobs",
   "routeRegistryModuleGlobs",
   "approvedContentAdapterModules",
+  "approvedMetadataHelperModules",
+  "approvedJsonLdHelperModules",
   "approvedLoaderModules",
   "approvedMdxComponentModules",
   "approvedGeneratedArtifactRoots",
@@ -70,12 +79,19 @@ export function resolveOptions(
   return {
     routeGlobs: normalizeStringArray(source.routeGlobs),
     endpointGlobs: normalizeStringArray(source.endpointGlobs),
+    mdxContentGlobs: normalizeStringArray(source.mdxContentGlobs),
     contentDataModuleGlobs: normalizeStringArray(source.contentDataModuleGlobs),
     adapterModuleGlobs: normalizeStringArray(source.adapterModuleGlobs),
     mdxRuntimeModuleGlobs: normalizeStringArray(source.mdxRuntimeModuleGlobs),
     routeRegistryModuleGlobs: normalizeStringArray(source.routeRegistryModuleGlobs),
     approvedContentAdapterModules: normalizeStringArray(
       source.approvedContentAdapterModules
+    ),
+    approvedMetadataHelperModules: normalizeStringArray(
+      source.approvedMetadataHelperModules
+    ),
+    approvedJsonLdHelperModules: normalizeStringArray(
+      source.approvedJsonLdHelperModules
     ),
     approvedLoaderModules: normalizeStringArray(source.approvedLoaderModules),
     approvedMdxComponentModules: normalizeStringArray(

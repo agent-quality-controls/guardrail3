@@ -4,6 +4,8 @@ mod types;
 #[cfg(feature = "api")]
 pub type G3TsAstroAppRootInput = types::G3TsAstroAppRootInput;
 #[cfg(feature = "api")]
+pub type G3TsAstroApprovedSurfaceSourcePaths = types::G3TsAstroApprovedSurfaceSourcePaths;
+#[cfg(feature = "api")]
 pub type G3TsAstroCallSnapshot = types::G3TsAstroCallSnapshot;
 #[cfg(feature = "api")]
 pub type G3TsAstroConfigChecksInput = types::G3TsAstroConfigChecksInput;

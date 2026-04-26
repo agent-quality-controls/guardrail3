@@ -9,6 +9,33 @@ export function describeApprovedContentAdapterSurface(
   );
 }
 
+export function describeApprovedMetadataHelperSurface(
+  options: ResolvedAstroPipelineOptions
+): string {
+  return describeSurface(
+    options.approvedMetadataHelperModules,
+    "approved metadata helper module"
+  );
+}
+
+export function describeApprovedJsonLdHelperSurface(
+  options: ResolvedAstroPipelineOptions
+): string {
+  return describeSurface(
+    options.approvedJsonLdHelperModules,
+    "approved JSON-LD helper module"
+  );
+}
+
+export function describeApprovedMdxComponentSurface(
+  options: ResolvedAstroPipelineOptions
+): string {
+  return describeSurface(
+    options.approvedMdxComponentModules,
+    "approved MDX component-map module"
+  );
+}
+
 export function describeApprovedLoaderOrAdapterSurface(
   options: ResolvedAstroPipelineOptions
 ): string {

@@ -90,7 +90,7 @@ test("package contract does not hide delegated ESLint validators", async () => {
   const runtimePackages = await collectRuntimePackages();
 
   assert.equal(packageJson.name, "g3ts-eslint-plugin-astro-pipeline");
-  assert.equal(packageJson.version, "0.1.5");
+  assert.equal(packageJson.version, "0.1.6");
   assert.deepEqual(Object.keys(plugin.configs), ["recommended"]);
   assert.equal(
     "strict-content" in plugin.configs,
@@ -131,7 +131,7 @@ test("published package contains only dist and package metadata", async () => {
   const filePaths = packResult.files.map((file) => file.path).sort();
 
   assert.equal(packResult.name, "g3ts-eslint-plugin-astro-pipeline");
-  assert.equal(packResult.version, "0.1.5");
+  assert.equal(packResult.version, "0.1.6");
   assert.deepEqual(
     filePaths.filter((filePath) => !isAllowedPublishedPath(filePath)),
     [],

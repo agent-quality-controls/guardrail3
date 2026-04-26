@@ -13,7 +13,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                 results.push(crate::support::info(
                     ID,
                     "Astro strict content policy is configured",
-                    format!("`{rel_path}` sets `[ts.astro] profile = \"{PROFILE}\"`, declares non-empty `content_routes`, `content_root`, and `content_adapter`, and forbids `.next/**`, `.velite/**`, and `.contentlayer/**` generated state."),
+                    format!("`{rel_path}` sets `[ts.astro] profile = \"{PROFILE}\"`, declares non-empty `content_routes`, `content_root`, `content_adapter`, `mdx_component_maps`, `metadata_helpers`, and `json_ld_helpers`, and forbids `.next/**`, `.velite/**`, and `.contentlayer/**` generated state."),
                     rel_path,
                 ));
             }
@@ -24,7 +24,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             ID,
             "Astro strict content policy is missing or incomplete",
             format!(
-                "`{}` must define `[ts.astro]` with `profile = \"{PROFILE}\"`, non-empty `content_routes`, `content_root`, `content_adapter`, and `forbidden_state = [\".next/**\", \".velite/**\", \".contentlayer/**\"]`. These are the only app-level Astro policy fields G3TS reads; old `*_globs` route-class fields are not supported.",
+                "`{}` must define `[ts.astro]` with `profile = \"{PROFILE}\"`, non-empty `content_routes`, `content_root`, `content_adapter`, `mdx_component_maps`, `metadata_helpers`, `json_ld_helpers`, and `forbidden_state = [\".next/**\", \".velite/**\", \".contentlayer/**\"]`. These are app-level Astro policy fields G3TS reads; old `*_globs` route-class fields are not supported.",
                 rel_path.unwrap_or("guardrail3-ts.toml")
             ),
             rel_path,
@@ -37,6 +37,9 @@ fn policy_is_strict(policy: &G3TsAstroPolicySnapshot) -> bool {
         && !policy.content_routes.is_empty()
         && non_empty_optional_string(&policy.content_root)
         && non_empty_optional_string(&policy.content_adapter)
+        && !policy.mdx_component_maps.is_empty()
+        && !policy.metadata_helpers.is_empty()
+        && !policy.json_ld_helpers.is_empty()
         && REQUIRED_FORBIDDEN_STATE
             .iter()
             .all(|required| policy.forbidden_state.iter().any(|value| value == required))
