@@ -19,7 +19,7 @@ use g3ts_astro_types::{
     G3TsAstroStaticValue, G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState,
     G3TsAstroSyncpackRequiredPin,
 };
-use globset::{Glob, GlobSetBuilder};
+use globset::{Glob, GlobSet, GlobSetBuilder};
 use package_json_parser::{from_path_document, parse_error_reason as package_parse_error_reason};
 use package_script_command_parser::types::{
     PackageScriptCommand, PackageScriptCommandSeparator, PackageScriptParseFact,
@@ -155,26 +155,41 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
 
     let roots: Vec<_> = app_roots
         .iter()
-        .map(|app_root_rel_path| G3TsAstroAppRootInput {
-            app_root_rel_path: app_root_rel_path.clone(),
-            astro_config_rel_path: crate::select::select_astro_config(crawl, app_root_rel_path)
+        .map(|app_root_rel_path| {
+            let astro_policy = ingest_astro_policy_surface(crawl, app_root_rel_path);
+            G3TsAstroAppRootInput {
+                app_root_rel_path: app_root_rel_path.clone(),
+                astro_config_rel_path: crate::select::select_astro_config(crawl, app_root_rel_path)
+                    .map(|entry| entry.path.rel_path.clone()),
+                content_config_rel_path: crate::select::select_content_config(
+                    crawl,
+                    app_root_rel_path,
+                )
                 .map(|entry| entry.path.rel_path.clone()),
-            content_config_rel_path: crate::select::select_content_config(crawl, app_root_rel_path)
+                live_config_rel_path: crate::select::select_live_config(crawl, app_root_rel_path)
+                    .map(|entry| entry.path.rel_path.clone()),
+                velite_config_rel_path: crate::select::select_velite_config(
+                    crawl,
+                    app_root_rel_path,
+                )
                 .map(|entry| entry.path.rel_path.clone()),
-            live_config_rel_path: crate::select::select_live_config(crawl, app_root_rel_path)
-                .map(|entry| entry.path.rel_path.clone()),
-            velite_config_rel_path: crate::select::select_velite_config(crawl, app_root_rel_path)
-                .map(|entry| entry.path.rel_path.clone()),
-            velite_output_rel_paths: crate::select::velite_output_paths(
-                crawl,
-                app_root_rel_path,
-                &app_roots,
-            ),
-            legacy_generated_state_rel_paths: crate::select::legacy_generated_state_paths(
-                crawl,
-                app_root_rel_path,
-                &app_roots,
-            ),
+                velite_output_rel_paths: crate::select::velite_output_paths(
+                    crawl,
+                    app_root_rel_path,
+                    &app_roots,
+                ),
+                legacy_generated_state_rel_paths: crate::select::legacy_generated_state_paths(
+                    crawl,
+                    app_root_rel_path,
+                    &app_roots,
+                ),
+                forbidden_state_rel_paths: forbidden_state_paths(
+                    crawl,
+                    app_root_rel_path,
+                    &app_roots,
+                    &astro_policy,
+                ),
+            }
         })
         .collect();
 
@@ -458,6 +473,38 @@ fn content_adapter_source_paths(
                     || entry.path.rel_path.starts_with(&scoped_adapter_prefix))
         })
         .map(|entry| app_relative_path(&entry.path.rel_path, app_root_rel_path))
+        .collect()
+}
+
+fn forbidden_state_paths(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+    app_root_rel_paths: &[String],
+    astro_policy: &G3TsAstroPolicySurfaceState,
+) -> Vec<String> {
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } = astro_policy else {
+        return Vec::new();
+    };
+    let Ok(globs) = glob_set_from_strings(&snapshot.forbidden_state) else {
+        return Vec::new();
+    };
+
+    crawl
+        .entries
+        .iter()
+        .filter(|entry| {
+            entry.readable
+                && matches!(
+                    entry.kind,
+                    g3_workspace_crawl::G3RsWorkspaceEntryKind::File
+                        | g3_workspace_crawl::G3RsWorkspaceEntryKind::Directory
+                )
+                && is_under_app_root(&entry.path.rel_path, app_root_rel_path)
+                && nearest_app_root(&entry.path.rel_path, app_root_rel_paths)
+                    .is_some_and(|nearest| nearest == app_root_rel_path)
+                && globs.is_match(app_relative_path(&entry.path.rel_path, app_root_rel_path))
+        })
+        .map(|entry| entry.path.rel_path.clone())
         .collect()
 }
 
@@ -880,6 +927,20 @@ fn app_relative_path(rel_path: &str, app_root_rel_path: &str) -> String {
             .unwrap_or(rel_path)
             .to_owned()
     }
+}
+
+fn is_under_app_root(rel_path: &str, app_root_rel_path: &str) -> bool {
+    app_root_rel_path == "."
+        || rel_path == app_root_rel_path
+        || rel_path.starts_with(&format!("{app_root_rel_path}/"))
+}
+
+fn nearest_app_root<'a>(rel_path: &str, app_root_rel_paths: &'a [String]) -> Option<&'a str> {
+    app_root_rel_paths
+        .iter()
+        .filter(|root| is_under_app_root(rel_path, root))
+        .max_by_key(|root| root.len())
+        .map(String::as_str)
 }
 
 fn select_llms_txt(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<String> {
@@ -1521,6 +1582,16 @@ fn globs_are_valid(patterns: &[&str]) -> bool {
     }
 
     builder.build().is_ok()
+}
+
+fn glob_set_from_strings(patterns: &[String]) -> Result<GlobSet, globset::Error> {
+    let mut builder = GlobSetBuilder::new();
+
+    for pattern in patterns {
+        let _ = builder.add(Glob::new(&normalize_glob(pattern))?);
+    }
+
+    builder.build()
 }
 
 fn normalize_glob(value: &str) -> String {

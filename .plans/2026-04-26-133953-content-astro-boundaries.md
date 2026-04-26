@@ -191,6 +191,8 @@ Delegate:
 
 Owner: G3TS Astro file-tree checks.
 
+Implemented in this slice.
+
 Rule:
 
 - Every configured `forbidden_state` pattern must be checked against included and ignored workspace entries.
@@ -249,5 +251,5 @@ Style family may own:
 2. Done: `TS-ASTRO-CONFIG-25`.
 3. Done: `TS-ASTRO-CONFIG-26`.
 4. Done: `TS-ASTRO-CONFIG-27`.
-5. Finish `TS-ASTRO-FILETREE-12`.
+5. Done: `TS-ASTRO-FILETREE-12`.
 6. Then design framework-independent `TS-CONTENT` from normalized content facts only.
