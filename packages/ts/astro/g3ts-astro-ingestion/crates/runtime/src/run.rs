@@ -111,6 +111,12 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                 let astro_policy = ingest_astro_policy_surface(crawl, app_root_rel_path);
                 let content_adapter_source_paths =
                     content_adapter_source_paths(crawl, app_root_rel_path, &astro_policy);
+                let content_adapter_astro_content_source_paths =
+                    content_adapter_astro_content_source_paths(
+                        crawl,
+                        app_root_rel_path,
+                        &content_adapter_source_paths,
+                    );
                 let astro_config = ingest_astro_config_surface(crawl, app_root_rel_path);
                 G3TsAstroIntegrationContractInput {
                     app_root_rel_path: app_root_rel_path.clone(),
@@ -118,6 +124,7 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                     route_page_paths: crate::select::route_page_paths(crawl, app_root_rel_path),
                     endpoint_paths: crate::select::endpoint_paths(crawl, app_root_rel_path),
                     content_adapter_source_paths,
+                    content_adapter_astro_content_source_paths,
                     package,
                     syncpack_config,
                     astro_policy,
@@ -514,6 +521,28 @@ fn is_adapter_source_file(rel_path: &str) -> bool {
     ]
     .iter()
     .any(|extension| rel_path.ends_with(extension))
+}
+
+fn content_adapter_astro_content_source_paths(
+    crawl: &G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+    content_adapter_source_paths: &[String],
+) -> Vec<String> {
+    content_adapter_source_paths
+        .iter()
+        .filter(|app_relative_path| {
+            let rel_path = scoped_rel_path(app_root_rel_path, app_relative_path);
+            exact_included_file(crawl, &rel_path).is_some_and(|entry| {
+                astro_config_parser::module_has_runtime_source_import(
+                    &crawl.root_abs_path,
+                    &entry.path.rel_path,
+                    "astro:content",
+                )
+                .unwrap_or(false)
+            })
+        })
+        .cloned()
+        .collect()
 }
 
 fn ingest_astro_config_surface(

@@ -217,6 +217,7 @@ pub struct G3TsAstroIntegrationContractInput {
     pub route_page_paths: Vec<String>,
     pub endpoint_paths: Vec<String>,
     pub content_adapter_source_paths: Vec<String>,
+    pub content_adapter_astro_content_source_paths: Vec<String>,
     pub package: G3TsAstroPackageSurfaceState,
     pub syncpack_config: G3TsAstroSyncpackConfigState,
     pub astro_policy: G3TsAstroPolicySurfaceState,

@@ -179,6 +179,11 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                 vec!["src/lib/content/index.ts".to_owned()],
                 "content adapter source path mismatch: {integration:?}"
             );
+            assert_eq!(
+                integration.content_adapter_astro_content_source_paths,
+                vec!["src/lib/content/index.ts".to_owned()],
+                "astro:content adapter source path mismatch: {integration:?}"
+            );
         }
         other => panic!("expected parsed astro policy, got {other:?}"),
     }
@@ -336,6 +341,76 @@ fn config_ingestion_ignores_rust_policy_filename_for_astro_policy() {
             rel_path: "guardrail3-ts.toml".to_owned()
         },
         "G3TS Astro policy must use the TypeScript filename"
+    );
+}
+
+#[test]
+fn config_ingestion_rejects_adapter_source_without_runtime_astro_content_import() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("src/lib/content/index.ts"),
+        "export const getContent = () => null;\n",
+    )
+    .expect("adapter source should be rewritten");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "guardrail3-ts.toml",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/lib/content/index.ts",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    let integration = &input.integration_contracts[0];
+
+    assert_eq!(
+        integration.content_adapter_source_paths,
+        vec!["src/lib/content/index.ts".to_owned()],
+        "adapter source should still exist: {integration:?}"
+    );
+    assert!(
+        integration
+            .content_adapter_astro_content_source_paths
+            .is_empty(),
+        "adapter source without runtime astro:content import must not be accepted: {integration:?}"
+    );
+}
+
+#[test]
+fn config_ingestion_rejects_adapter_source_with_type_only_astro_content_import() {
+    let root = super::helpers::fake_astro_workspace();
+    std::fs::write(
+        root.path().join("src/lib/content/index.ts"),
+        "import type { CollectionEntry } from \"astro:content\";\nexport type Entry = CollectionEntry<\"posts\">;\n",
+    )
+    .expect("adapter source should be rewritten");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "guardrail3-ts.toml",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/lib/content/index.ts",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+
+    assert!(
+        input.integration_contracts[0]
+            .content_adapter_astro_content_source_paths
+            .is_empty(),
+        "type-only astro:content import must not satisfy adapter runtime contract: {input:?}"
     );
 }
 
