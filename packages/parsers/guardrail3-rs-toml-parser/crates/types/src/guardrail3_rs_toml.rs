@@ -106,6 +106,22 @@ pub struct TsAstroPolicyConfig {
     pub approved_generated_artifact_globs: Vec<String>,
     #[serde(default)]
     pub astro_content_type_import_globs: Vec<String>,
+    #[serde(default)]
+    pub contentlayer_config_globs: Vec<String>,
+    #[serde(default)]
+    pub contentlayer_generated_globs: Vec<String>,
+    #[serde(default)]
+    pub forbidden_generated_state_globs: Vec<String>,
+    #[serde(default)]
+    pub build_output_globs: Vec<String>,
+    #[serde(default)]
+    pub blog_index_route_globs: Vec<String>,
+    #[serde(default)]
+    pub blog_article_route_globs: Vec<String>,
+    #[serde(default)]
+    pub metadata_helper_globs: Vec<String>,
+    #[serde(default)]
+    pub json_ld_helper_globs: Vec<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }
