@@ -65,6 +65,7 @@ pub(super) fn fake_astro_workspace() -> TempDir {
     { "dependencies": ["@astrojs/node"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
     { "dependencies": ["eslint-plugin-astro-pipeline"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
     { "dependencies": ["@codemint/astro-meta"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+    { "dependencies": ["astro-seo"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
     { "dependencies": ["astro-seo-meta"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
     { "dependencies": ["astro-seo-schema"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true }
   ]

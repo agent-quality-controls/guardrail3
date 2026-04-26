@@ -16,12 +16,13 @@ use super::helpers::{
     root_syncpack_exact_source_covers_nested_app,
     root_syncpack_package_source_does_not_cover_nested_app, route_only_pipeline_wiring,
     syncpack_catch_all_forbidden_ban, syncpack_ignored_forbidden_ban,
-    syncpack_missing_forbidden_ban, syncpack_missing_stack_pin, syncpack_pinned_forbidden_ban,
-    syncpack_scoped_away_forbidden_ban, syncpack_scoped_away_stack_pin,
-    syncpack_shadowed_forbidden_ban, syncpack_shadowed_stack_pin, syncpack_source_excludes_package,
-    syncpack_specifier_scoped_forbidden_ban, syncpack_specifier_scoped_stack_pin,
-    syncpack_wrong_astro_pipeline_stack_pin, syncpack_wrong_forbidden_ban_dependency_types,
-    syncpack_wrong_stack_pin, ts_lane_missing_pipeline_effectiveness,
+    syncpack_missing_astro_seo_ban, syncpack_missing_forbidden_ban, syncpack_missing_stack_pin,
+    syncpack_pinned_forbidden_ban, syncpack_scoped_away_forbidden_ban,
+    syncpack_scoped_away_stack_pin, syncpack_shadowed_forbidden_ban, syncpack_shadowed_stack_pin,
+    syncpack_source_excludes_package, syncpack_specifier_scoped_forbidden_ban,
+    syncpack_specifier_scoped_stack_pin, syncpack_wrong_astro_pipeline_stack_pin,
+    syncpack_wrong_forbidden_ban_dependency_types, syncpack_wrong_stack_pin,
+    ts_lane_missing_pipeline_effectiveness,
     tsx_lane_missing_pipeline_effectiveness, unreadable_syncpack_config,
     velite_package_with_syncpack_ban,
 };
@@ -32,6 +33,7 @@ const PIPELINE_CONTENT_ERROR_TITLE: &str =
 const PIPELINE_CONTENT_INFO_MJS: &str = "`eslint.config.mjs` activates `astro-pipeline` from `g3ts-eslint-plugin-astro-pipeline` and enforces the required Astro pipeline rules at error severity on the Astro, TS, and TSX source probes. Route-scoped rules cover actual page routes and endpoints; the content-data rule has non-empty `contentDataModuleGlobs`; the authored-content rules have non-empty `authoredContentGlobs` or `specContentGlobs`; and `astro-pipeline/require-approved-content-adapter-in-routes` has non-empty `approvedContentAdapterModules`.";
 const PIPELINE_CONTENT_ERROR_MJS: &str = "`eslint.config.mjs` does not activate `astro-pipeline` from `g3ts-eslint-plugin-astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source probes. Import `g3ts-eslint-plugin-astro-pipeline`, register it as `astro-pipeline`, and enable the required Astro pipeline rules, route coverage for actual Astro page routes, endpoint coverage for actual Astro endpoints, non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes`, non-empty `authoredContentGlobs` or `specContentGlobs` on the authored-content rules, and non-empty `approvedContentAdapterModules` on `astro-pipeline/require-approved-content-adapter-in-routes`. Without those effective delegated rules, routes can bypass Astro content collections while the package is still installed.";
 const PIPELINE_CONTENT_ERROR_GLOB: &str = "`eslint.config.*` does not activate `astro-pipeline` from `g3ts-eslint-plugin-astro-pipeline` with all required Astro pipeline rules at error severity on the Astro, TS, and TSX source probes. Import `g3ts-eslint-plugin-astro-pipeline`, register it as `astro-pipeline`, and enable the required Astro pipeline rules, route coverage for actual Astro page routes, endpoint coverage for actual Astro endpoints, non-empty `contentDataModuleGlobs` on `astro-pipeline/no-content-data-modules-in-routes`, non-empty `authoredContentGlobs` or `specContentGlobs` on the authored-content rules, and non-empty `approvedContentAdapterModules` on `astro-pipeline/require-approved-content-adapter-in-routes`. Without those effective delegated rules, routes can bypass Astro content collections while the package is still installed.";
+const ASTRO_SEO_BAN_REASON: &str = "`astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.";
 
 #[test]
 fn golden_config_reports_expected_inventory() {
@@ -554,6 +556,11 @@ fn content_discovery_and_seo_package_rules_reject_missing_surfaces() {
         "TS-ASTRO-CONFIG-17",
         "Astro JSON-LD type package is missing",
     );
+    assert!(
+        results.iter().all(|finding| finding.id() != "TS-ASTRO-CONFIG-17"
+            || !finding.message().contains("`astro-seo`")),
+        "missing schema-dts error must not tell agents to install astro-seo: {results:?}"
+    );
 }
 
 #[test]
@@ -562,10 +569,9 @@ fn seo_package_rule_does_not_require_bare_astro_seo_package() {
     let results = super::super::check(&input);
 
     assert!(
-        results
-            .iter()
-            .all(|finding| !finding.message().contains("`astro-seo`")),
-        "bare astro-seo must not appear in any required package finding: {results:?}"
+        results.iter().all(|finding| finding.id() != "TS-ASTRO-CONFIG-17"
+            || !finding.message().contains("`astro-seo`")),
+        "bare astro-seo must not appear in the required SEO package finding: {results:?}"
     );
 }
 
@@ -739,7 +745,7 @@ fn missing_syncpack_config_reports_stack_pin_and_ban_errors() {
         crate::support::required_syncpack_pins_message(&input.integration_contracts[0])
     );
     let bans_message = format!(
-        "`.syncpackrc` is missing, so the Astro family cannot prove Syncpack bans forbidden Astro deps for `package.json`. Add a parseable `.syncpackrc` with canonical `isBanned: true` versionGroups for {}.",
+        "`.syncpackrc` is missing, so the Astro family cannot prove Syncpack bans forbidden Astro deps for `package.json`. Add a parseable `.syncpackrc` with canonical `isBanned: true` versionGroups for {}. {ASTRO_SEO_BAN_REASON}",
         crate::support::forbidden_syncpack_deps_message(&input.integration_contracts[0])
     );
 
@@ -779,7 +785,7 @@ fn unavailable_syncpack_config_reports_unreadable_and_parse_error_reasons() {
             crate::support::required_syncpack_pins_message(&input.integration_contracts[0])
         );
         let bans_message = format!(
-            "`.syncpackrc` {reason}, so the Astro family cannot prove Syncpack bans forbidden Astro deps for `package.json`. Add a parseable `.syncpackrc` with canonical `isBanned: true` versionGroups for {}.",
+            "`.syncpackrc` {reason}, so the Astro family cannot prove Syncpack bans forbidden Astro deps for `package.json`. Add a parseable `.syncpackrc` with canonical `isBanned: true` versionGroups for {}. {ASTRO_SEO_BAN_REASON}",
             crate::support::forbidden_syncpack_deps_message(&input.integration_contracts[0])
         );
 
@@ -823,7 +829,9 @@ fn syncpack_source_must_cover_the_app_package_manifest() {
             assertions::error(
                 "TS-ASTRO-CONFIG-10",
                 "Syncpack does not ban forbidden Astro deps",
-                "`.syncpackrc` does not include exact `source` entry `package.json` for `package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app.",
+                &format!(
+                    "`.syncpackrc` does not include exact `source` entry `package.json` for `package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app. {ASTRO_SEO_BAN_REASON}"
+                ),
                 Some(".syncpackrc"),
                 false,
             ),
@@ -849,7 +857,9 @@ fn root_syncpack_source_package_json_does_not_cover_nested_app_manifest() {
             assertions::error(
                 "TS-ASTRO-CONFIG-10",
                 "Syncpack does not ban forbidden Astro deps",
-                "`.syncpackrc` does not include exact `source` entry `package.json` for `apps/landing/package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app.",
+                &format!(
+                    "`.syncpackrc` does not include exact `source` entry `package.json` for `apps/landing/package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app. {ASTRO_SEO_BAN_REASON}"
+                ),
                 Some(".syncpackrc"),
                 false,
             ),
@@ -875,7 +885,9 @@ fn root_syncpack_source_exact_path_does_not_cover_nested_app_manifest() {
             assertions::error(
                 "TS-ASTRO-CONFIG-10",
                 "Syncpack does not ban forbidden Astro deps",
-                "`.syncpackrc` does not include exact `source` entry `package.json` for `apps/landing/package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app.",
+                &format!(
+                    "`.syncpackrc` does not include exact `source` entry `package.json` for `apps/landing/package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app. {ASTRO_SEO_BAN_REASON}"
+                ),
                 Some(".syncpackrc"),
                 false,
             ),
@@ -1029,7 +1041,7 @@ fn syncpack_catch_all_forbidden_ban_does_not_satisfy_canonical_contract() {
         &[assertions::error(
             "TS-ASTRO-CONFIG-10",
             "Syncpack does not ban forbidden Astro deps",
-            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`, `velite`, `@astrojs/node`, `eslint-plugin-astro-pipeline`, `@codemint/astro-meta`, `astro-seo-meta`, `astro-seo-schema`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
+            "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`, `velite`, `@astrojs/node`, `eslint-plugin-astro-pipeline`, `@codemint/astro-meta`, `astro-seo`, `astro-seo-meta`, `astro-seo-schema`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`. `astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.",
             Some(".syncpackrc"),
             false,
         )],
@@ -1084,6 +1096,23 @@ fn missing_syncpack_forbidden_ban_reports_policy_error() {
             "TS-ASTRO-CONFIG-10",
             "Syncpack does not ban forbidden Astro deps",
             "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
+            Some(".syncpackrc"),
+            false,
+        )],
+    );
+}
+
+#[test]
+fn missing_astro_seo_syncpack_ban_explains_approved_seo_path() {
+    let input = syncpack_missing_astro_seo_ban();
+    let results = super::super::check(&input);
+
+    assertions::assert_contains(
+        &results,
+        &[assertions::error(
+            "TS-ASTRO-CONFIG-10",
+            "Syncpack does not ban forbidden Astro deps",
+            "`.syncpackrc` is missing Syncpack banned versionGroups for: `astro-seo`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`. `astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.",
             Some(".syncpackrc"),
             false,
         )],

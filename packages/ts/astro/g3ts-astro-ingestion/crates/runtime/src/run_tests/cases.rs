@@ -1065,6 +1065,40 @@ fn config_ingestion_rejects_noncanonical_forbidden_ban_groups() {
 }
 
 #[test]
+fn config_ingestion_requires_astro_seo_forbidden_ban() {
+    let root = super::helpers::fake_astro_workspace();
+    let astro_seo_ban = r#"    { "dependencies": ["astro-seo"], "dependencyTypes": ["prod", "dev", "optional", "peer"], "isBanned": true },
+"#;
+    let syncpack_config = std::fs::read_to_string(root.path().join(".syncpackrc"))
+        .expect("root syncpack config should be readable")
+        .replace(astro_seo_ban, "");
+    std::fs::write(root.path().join(".syncpackrc"), syncpack_config)
+        .expect("syncpack config should be rewritten");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "src/pages/index.astro",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    match &input.integration_contracts[0].syncpack_config {
+        g3ts_astro_types::G3TsAstroSyncpackConfigState::Parsed { snapshot } => assert!(
+            snapshot
+                .missing_forbidden_bans
+                .iter()
+                .any(|dependency| dependency == "astro-seo"),
+            "missing astro-seo ban should be reported: {snapshot:?}"
+        ),
+        other => panic!("expected parsed syncpack state, got {other:?}"),
+    }
+}
+
+#[test]
 fn config_ingestion_rejects_route_scoped_pipeline_rules_when_no_page_routes_exist() {
     let root = super::helpers::fake_astro_workspace();
     std::fs::write(
