@@ -3,6 +3,10 @@ profile = "service"
 allowed_deps = [
   "clap",
   "g3-workspace-crawl",
+  "g3rs-workspace-crawl",
+  "g3ts-astro-config-checks",
+  "g3ts-astro-file-tree-checks",
+  "g3ts-astro-ingestion",
   "g3ts-eslint-config-checks",
   "g3ts-eslint-ingestion",
   "g3ts-arch-config-checks",
