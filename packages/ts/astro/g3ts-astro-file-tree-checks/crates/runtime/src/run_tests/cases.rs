@@ -15,6 +15,7 @@ fn golden_filetree_reports_expected_inventory() {
     assertions::assert_missing(&results, "TS-ASTRO-FILETREE-05");
     assertions::assert_missing(&results, "TS-ASTRO-FILETREE-06");
     assertions::assert_missing(&results, "TS-ASTRO-FILETREE-11");
+    assertions::assert_missing(&results, "TS-ASTRO-FILETREE-12");
 }
 
 #[test]
@@ -28,6 +29,7 @@ fn missing_astro_config_reports_error() {
             velite_config_rel_path: None,
             velite_output_rel_paths: Vec::new(),
             legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: Vec::new(),
         }],
         build_collection_roots: Vec::new(),
         live_collection_roots: Vec::new(),
@@ -49,6 +51,7 @@ fn missing_content_config_reports_error_for_build_collections() {
             velite_config_rel_path: None,
             velite_output_rel_paths: Vec::new(),
             legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: Vec::new(),
         }],
         build_collection_roots: vec![G3TsAstroAppRootInput {
             app_root_rel_path: ".".to_owned(),
@@ -58,6 +61,7 @@ fn missing_content_config_reports_error_for_build_collections() {
             velite_config_rel_path: None,
             velite_output_rel_paths: Vec::new(),
             legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: Vec::new(),
         }],
         live_collection_roots: Vec::new(),
         route_markdown_pages: Vec::new(),
@@ -91,6 +95,7 @@ fn missing_live_config_reports_error_for_live_collections() {
             velite_config_rel_path: None,
             velite_output_rel_paths: Vec::new(),
             legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: Vec::new(),
         }],
         build_collection_roots: Vec::new(),
         live_collection_roots: vec![G3TsAstroAppRootInput {
@@ -101,6 +106,7 @@ fn missing_live_config_reports_error_for_live_collections() {
             velite_config_rel_path: None,
             velite_output_rel_paths: Vec::new(),
             legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: Vec::new(),
         }],
         route_markdown_pages: Vec::new(),
     };
@@ -120,6 +126,7 @@ fn route_markdown_pages_do_not_fire_without_build_collections() {
             velite_config_rel_path: None,
             velite_output_rel_paths: Vec::new(),
             legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: Vec::new(),
         }],
         build_collection_roots: Vec::new(),
         live_collection_roots: Vec::new(),
@@ -143,6 +150,7 @@ fn route_markdown_pages_are_forbidden_for_live_collection_apps() {
             velite_config_rel_path: None,
             velite_output_rel_paths: Vec::new(),
             legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: Vec::new(),
         }],
         build_collection_roots: Vec::new(),
         live_collection_roots: vec![G3TsAstroAppRootInput {
@@ -153,6 +161,7 @@ fn route_markdown_pages_are_forbidden_for_live_collection_apps() {
             velite_config_rel_path: None,
             velite_output_rel_paths: Vec::new(),
             legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: Vec::new(),
         }],
         route_markdown_pages: vec![G3TsAstroRouteMarkdownPageInput {
             rel_path: "src/pages/about.mdx".to_owned(),
@@ -194,6 +203,7 @@ fn velite_output_rule_only_applies_to_content_apps() {
             velite_config_rel_path: None,
             velite_output_rel_paths: vec![".velite/landing.js".to_owned()],
             legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: Vec::new(),
         }],
         build_collection_roots: Vec::new(),
         live_collection_roots: Vec::new(),
@@ -212,9 +222,8 @@ fn legacy_generated_state_is_forbidden_for_astro_apps() {
         ".contentlayer/generated/Post.mjs".to_owned(),
         "contentlayer.config.ts".to_owned(),
     ];
-    input.build_collection_roots[0].legacy_generated_state_rel_paths = input.app_roots[0]
-        .legacy_generated_state_rel_paths
-        .clone();
+    input.build_collection_roots[0].legacy_generated_state_rel_paths =
+        input.app_roots[0].legacy_generated_state_rel_paths.clone();
 
     let results = crate::run::check(&input);
     assertions::assert_error_files(
@@ -239,6 +248,7 @@ fn legacy_generated_state_rule_only_applies_to_content_apps() {
             velite_config_rel_path: None,
             velite_output_rel_paths: Vec::new(),
             legacy_generated_state_rel_paths: vec![".next/server/app/page.js".to_owned()],
+            forbidden_state_rel_paths: Vec::new(),
         }],
         build_collection_roots: Vec::new(),
         live_collection_roots: Vec::new(),
@@ -262,6 +272,46 @@ fn velite_and_legacy_state_can_report_together() {
     assertions::assert_has_error(&results, "TS-ASTRO-FILETREE-11");
 }
 
+#[test]
+fn configured_forbidden_state_is_forbidden_for_astro_content_apps() {
+    let mut input = golden_build_collections_input();
+    input.app_roots[0].forbidden_state_rel_paths = vec![
+        ".next/server/app/page.js".to_owned(),
+        ".velite/landing.js".to_owned(),
+    ];
+    input.build_collection_roots[0].forbidden_state_rel_paths =
+        input.app_roots[0].forbidden_state_rel_paths.clone();
+
+    let results = crate::run::check(&input);
+    assertions::assert_error_files(
+        &results,
+        "TS-ASTRO-FILETREE-12",
+        &[".next/server/app/page.js", ".velite/landing.js"],
+    );
+}
+
+#[test]
+fn configured_forbidden_state_rule_only_applies_to_content_apps() {
+    let input = G3TsAstroFileTreeChecksInput {
+        app_roots: vec![G3TsAstroAppRootInput {
+            app_root_rel_path: ".".to_owned(),
+            astro_config_rel_path: Some("astro.config.mjs".to_owned()),
+            content_config_rel_path: None,
+            live_config_rel_path: None,
+            velite_config_rel_path: None,
+            velite_output_rel_paths: Vec::new(),
+            legacy_generated_state_rel_paths: Vec::new(),
+            forbidden_state_rel_paths: vec![".next/server/app/page.js".to_owned()],
+        }],
+        build_collection_roots: Vec::new(),
+        live_collection_roots: Vec::new(),
+        route_markdown_pages: Vec::new(),
+    };
+
+    let results = crate::run::check(&input);
+    assertions::assert_missing(&results, "TS-ASTRO-FILETREE-12");
+}
+
 fn golden_build_collections_input() -> G3TsAstroFileTreeChecksInput {
     let root = G3TsAstroAppRootInput {
         app_root_rel_path: ".".to_owned(),
@@ -271,6 +321,7 @@ fn golden_build_collections_input() -> G3TsAstroFileTreeChecksInput {
         velite_config_rel_path: None,
         velite_output_rel_paths: Vec::new(),
         legacy_generated_state_rel_paths: Vec::new(),
+        forbidden_state_rel_paths: Vec::new(),
     };
 
     G3TsAstroFileTreeChecksInput {
