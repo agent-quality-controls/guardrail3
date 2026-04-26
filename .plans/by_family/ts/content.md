@@ -1,71 +1,118 @@
 # TS-CONTENT
 
-Status: planned family contract, partial legacy implementation only, still very under-specified.
-
-Implementation roots:
-
-- content-specific portions of `apps/guardrail3/crates/app/ts/validate/jscpd_check.rs`
-- content gating in `apps/guardrail3/crates/app/ts/validate/mod.rs`
+Status: planned framework-independent family. No cohesive runtime exists yet.
 
 Current source of truth:
 
-- this file for family planning/status
-- `.plans/todo/checks/ts/content.md` as the detailed family ledger until the cutover is complete
+- `.plans/2026-04-26-133953-content-astro-boundaries.md`
+- this file for compact family status
+- `.plans/todo/checks/ts/content.md` is legacy background and must not be treated as authoritative where it conflicts with the boundary plan
+- legacy mentions of Velite, Contentlayer, content-pipeline presence, API route safety, generated artifact freshness, or image component choice are not final `TS-CONTENT` scope
 
-Current state:
+## Boundary
 
-- content-specific ideas exist in planning and some mixed runtime logic
-- no cohesive family runtime exists yet
-- compared with Rust family discipline, this family is currently mixing root discovery, pipeline/tooling, schema ownership, and content-specific architecture in one early plan
+`TS-CONTENT` owns authored-content product invariants that survive a framework replacement.
 
-Rule inventory:
+If removing Astro changes the rule, the rule belongs to `TS-ASTRO`, not `TS-CONTENT`.
 
-- `TS-CONTENT-01` — content apps are identified explicitly.
-  - What it should do: consume content-root classification from the shared TS architecture layer, or verify explicit content-root typing if that stays a family-owned contract.
-  - What it is for: content-specific rules should not fire on unrelated service/library roots.
-- `TS-CONTENT-02` — a content pipeline is configured.
-  - What it should do: require a configured content system such as Velite or Contentlayer when the root is a content app.
-  - What it is for: content apps should not have ad hoc untyped content ingestion.
-- `TS-CONTENT-03` — content directories and generated artifacts live in canonical places.
-  - What it should do: enforce canonical content roots and generated artifact ownership.
-  - What it is for: this prevents content data and generated outputs from scattering across the app.
-- `TS-CONTENT-04` — content schema/model ownership is explicit.
-  - What it should do: require a clear content-model/schema surface for content roots.
-  - What it is for: content should not be “just blobs of markdown/json” without owned structure.
-- `TS-CONTENT-05` — content import/use boundaries are respected.
-  - What it should do: enforce content-only structural restrictions, such as safe import boundaries for content apps.
-  - What it is for: content apps should not quietly accumulate service/database behavior through unowned imports.
+`TS-CONTENT` must not require:
 
-Current mixed code mapping:
+- Astro collections
+- `astro:content`
+- `src/content.config.ts`
+- `.astro` route files
+- Astro integrations
+- Astro route adapters
+- Astro MDX integration
+- Astro output mode
+- Astro package pins
 
-- content-specific portions of `apps/guardrail3/crates/app/ts/validate/jscpd_check.rs`
-  - currently carry `T60` content import restriction
-  - currently carry `T61` velite config existence
-- content gating in `apps/guardrail3/crates/app/ts/validate/mod.rs`
-  - currently influences whether certain mixed checks run at all
+Those are `TS-ASTRO`.
 
-Current doc/code reconciliation notes:
+## Intended Inputs
 
-- this family is still mostly planning-led
-- the clearest live content checks are currently stuck in the wrong runtime file (`jscpd_check.rs`)
-- content ownership still overlaps with `ts/i18n` and `ts/seo`, so the family boundary should be kept explicit while reconciling
-- compared with Rust design standards:
-  - root discovery should not stay here long term; it belongs in `TS-ARCH`
-  - content-pipeline config should not stay trapped in duplication tooling
-  - this family needs an explicit statement of what `i18n` and `seo` own versus what stays in `content`
+The family should consume normalized content facts produced by framework families or shared parsers.
 
-Historical/supplemental references:
+Future minimal input shape:
 
-- `.plans/todo/checks/ts/content.md`
-- `.plans/by_family/rs/arch.md`
-- `.plans/by_family/rs/hexarch.md`
-- `.plans/by_family/rs/code.md`
+- `schema_validated`
+- `root_rel_path`
+- `content_domain`
+- `entry_rel_path`
+- `entry_kind`
+- `slug`
+- `canonical_path`
+- `status`
+- `title_present`
+- `description_present`
+- `published_at`
+- `updated_at`
+- `asset_refs`
+- `internal_links`
+- `rich_component_refs`
+- `generated`
+- `preview_mode`
 
-Next planning focus:
+The family must not parse Astro collection config directly.
+The family must not require framework validator package/config names directly.
 
-- separate content-pipeline rules from duplication and generic site checks
-- move content app discovery to the future shared TS arch layer
-- define the content-family boundary explicitly against:
-  - `ts/i18n`
-  - `ts/seo`
-  - `ts/code`
+## Planned Rules
+
+- `TS-CONTENT-01` - content roots are explicitly declared or routed from shared app classification.
+- `TS-CONTENT-02` - content entries have required identity fields: `slug`, `title`, `description`, `status`, `publishedAt`, and `canonicalPath`.
+- `TS-CONTENT-03` - slugs are unique within a content domain.
+- `TS-CONTENT-04` - canonical paths are unique across public content.
+- `TS-CONTENT-05` - drafts are not public unless preview mode is explicit.
+- `TS-CONTENT-06` - published content has valid dates.
+- `TS-CONTENT-07` - `updatedAt` is not earlier than `publishedAt`.
+- `TS-CONTENT-08` - required landing/blog/docs fields are present for declared entry kinds.
+- `TS-CONTENT-09` - referenced content assets exist.
+- `TS-CONTENT-10` - required image alt/caption fields are present.
+- `TS-CONTENT-11` - internal content links resolve.
+- `TS-CONTENT-12` - internal content anchors resolve where feasible.
+- `TS-CONTENT-13` - rich text uses only approved portable component names or shortcodes.
+- `TS-CONTENT-14` - unsafe HTML in authored content is rejected unless waived.
+- `TS-CONTENT-15` - generated content artifacts are declared as generated and are not hand-authored.
+
+## Delegation
+
+Prefer delegated validators:
+
+- schema validation through JSON Schema, Zod, or a framework-owned schema output
+- Markdown/MDX checks through remark/rehype plugins
+- link checking through a dedicated link checker or remark plugin
+- image/reference checks through a dedicated content asset validator where available
+- draft and future-date policy through normalized content facts, not framework route parsing
+
+Framework families or shared ingestion should enforce the delegated validator setup and expose normalized facts to `TS-CONTENT`.
+
+`TS-CONTENT` can require framework-neutral facts such as `schema_validated = true`, but it cannot require Astro collections, Velite config, Contentlayer config, Zod files, or a specific package directly.
+
+If a content-validation script is required, `TS-CONTENT` should require the framework-neutral result it produces:
+
+- slug uniqueness facts
+- draft/public facts
+- future-date facts
+- internal-link facts
+- image-reference facts
+
+It must not own the Astro command, Astro config, or Astro route wiring that produced those facts.
+
+## Not Owned Here
+
+- Astro collection setup
+- Astro content adapter setup
+- Astro MDX wiring
+- SEO rendered tags
+- sitemap and robots generation
+- spelling
+- style/design-token policy
+- generic package manager policy
+
+## Implementation Order
+
+Do not implement this family first for Astro apps.
+
+Immediate work stays in `TS-ASTRO` until strict Astro local-content profile, route classes, adapter globs, plugin option checks, and Astro waivers exist.
+
+After that, implement `TS-CONTENT` over framework-neutral `ContentEntry` facts.
