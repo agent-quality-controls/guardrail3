@@ -16,7 +16,8 @@ The app owns third-party delegated plugins directly. This package does not depen
 
 - default ESLint plugin export
 - `configs.recommended`
-- 9 custom rules:
+- 12 custom rules:
+- `astro-pipeline/mdx-component-imports-from-approved-map`
 - `astro-pipeline/no-authored-content-fs-read`
 - `astro-pipeline/no-authored-content-glob`
 - `astro-pipeline/no-authored-content-imports`
@@ -26,6 +27,8 @@ The app owns third-party delegated plugins directly. This package does not depen
 - `astro-pipeline/no-side-loader-imports`
 - `astro-pipeline/no-velite-imports`
 - `astro-pipeline/require-approved-content-adapter-in-routes`
+- `astro-pipeline/require-approved-json-ld-helper-in-routes`
+- `astro-pipeline/require-approved-metadata-helper-in-routes`
 
 ## Example
 
@@ -37,6 +40,10 @@ const astroPipelineOptions = {
   endpointGlobs: ["src/pages/**/*.{ts,js}"],
   contentDataModuleGlobs: ["src/**/*.data.{ts,tsx,js,jsx,mts,cts,mjs,cjs}"],
   approvedContentAdapterModules: ["src/content/landing-homepage.ts"],
+  approvedJsonLdHelperModules: ["src/seo/json-ld.ts"],
+  approvedMetadataHelperModules: ["src/seo/metadata.ts"],
+  mdxContentGlobs: ["content/**/*.{md,mdx}"],
+  approvedMdxComponentMapModules: ["src/mdx-components.tsx"],
   authoredContentGlobs: ["src/content/**"],
   specContentGlobs: ["specs/**"]
 };
@@ -59,6 +66,8 @@ export default [
 
 ## Rule Intent
 
+`mdx-component-imports-from-approved-map` requires MDX component imports to come from approved component-map modules only.
+
 `no-authored-content-fs-read` blocks route and endpoint import closures from reading authored content files with `fs`.
 
 `no-authored-content-glob` blocks route and endpoint import closures from discovering authored content with `import.meta.glob`.
@@ -76,3 +85,23 @@ export default [
 `no-velite-imports` blocks route and endpoint import closures from reaching Velite packages, Velite config, or `.velite` outputs.
 
 `require-approved-content-adapter-in-routes` requires public page routes to import an approved content adapter module.
+
+`require-approved-json-ld-helper-in-routes` requires public page routes to render JSON-LD through an approved helper module.
+
+`require-approved-metadata-helper-in-routes` requires public page routes to derive metadata through an approved helper module.
+
+## Publish
+
+The repo keeps the npm token in root `.env.local` as `NPM_TOKEN`. npm does not read that file by itself, so publish with a temporary user config:
+
+```sh
+set -a
+source /Users/tartakovsky/Projects/websmasher/guardrail3/.env.local
+set +a
+TMP_NPMRC=$(mktemp)
+printf '%s\n' 'registry=https://registry.npmjs.org/' "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$TMP_NPMRC"
+npm --userconfig "$TMP_NPMRC" publish --access public
+STATUS=$?
+rm -f "$TMP_NPMRC"
+exit $STATUS
+```
