@@ -14,9 +14,10 @@ use g3ts_astro_types::{
     G3TsAstroIntegrationSnapshot, G3TsAstroOutputMode, G3TsAstroPackageScriptCommand,
     G3TsAstroPackageScriptCommandSeparator, G3TsAstroPackageScriptParseBlocker,
     G3TsAstroPackageScriptToolInvocation, G3TsAstroPackageSurfaceSnapshot,
-    G3TsAstroPackageSurfaceState, G3TsAstroPolicySnapshot, G3TsAstroPolicySurfaceState,
-    G3TsAstroRouteMarkdownPageInput, G3TsAstroStaticObjectProperty, G3TsAstroStaticValue,
-    G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
+    G3TsAstroPackageSurfaceState, G3TsAstroPipelineRuleScopeSnapshot, G3TsAstroPolicySnapshot,
+    G3TsAstroPolicySurfaceState, G3TsAstroRouteMarkdownPageInput, G3TsAstroStaticObjectProperty,
+    G3TsAstroStaticValue, G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState,
+    G3TsAstroSyncpackRequiredPin,
 };
 use globset::{Glob, GlobSetBuilder};
 use package_json_parser::{from_path_document, parse_error_reason as package_parse_error_reason};
@@ -959,6 +960,15 @@ fn ingest_eslint_surface(
                 &route_page_paths,
                 &endpoint_paths,
             ),
+            astro_source_route_scoped_pipeline_rule_scopes: route_scoped_pipeline_rule_scopes(
+                astro_source_probe,
+            ),
+            ts_source_route_scoped_pipeline_rule_scopes: route_scoped_pipeline_rule_scopes(
+                ts_source_probe,
+            ),
+            tsx_source_route_scoped_pipeline_rule_scopes: route_scoped_pipeline_rule_scopes(
+                tsx_source_probe,
+            ),
             astro_source_effective_content_data_pipeline_rules:
                 effective_content_data_pipeline_rules(
                     astro_source_probe,
@@ -1057,6 +1067,29 @@ fn active_error_rules(
                 .collect()
         })
         .unwrap_or_default()
+}
+
+fn route_scoped_pipeline_rule_scopes(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+) -> Vec<G3TsAstroPipelineRuleScopeSnapshot> {
+    let Some(probe) = probe else {
+        return Vec::new();
+    };
+
+    ROUTE_SCOPED_PIPELINE_RULES
+        .iter()
+        .filter_map(|rule_name| {
+            let setting = probe.rules.get(*rule_name)?;
+            if !rule_setting_is_error(setting) {
+                return None;
+            }
+            Some(G3TsAstroPipelineRuleScopeSnapshot {
+                rule_name: (*rule_name).to_owned(),
+                route_globs: string_array_option(setting, "routeGlobs"),
+                endpoint_globs: string_array_option(setting, "endpointGlobs"),
+            })
+        })
+        .collect()
 }
 
 fn effective_route_scoped_pipeline_rules(
@@ -1386,6 +1419,25 @@ fn non_empty_string_array_option(option: Option<&serde_json::Value>) -> Option<V
     }
 
     Some(strings)
+}
+
+fn string_array_option(
+    setting: &eslint_config_parser::types::EslintRuleSetting,
+    option_name: &str,
+) -> Vec<String> {
+    first_option_object(setting)
+        .and_then(|object| object.get(option_name))
+        .and_then(serde_json::Value::as_array)
+        .map(|values| {
+            values
+                .iter()
+                .filter_map(serde_json::Value::as_str)
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_owned)
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn all_paths_match_globs(patterns: &[&str], candidate_paths: &[String]) -> bool {

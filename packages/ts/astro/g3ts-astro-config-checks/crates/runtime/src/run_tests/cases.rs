@@ -213,6 +213,13 @@ fn golden_config_reports_expected_inventory() {
                 Some("guardrail3-rs.toml"),
                 true,
             ),
+            assertions::info(
+                "TS-ASTRO-CONFIG-26",
+                "Astro ESLint route coverage matches strict content policy",
+                "`guardrail3-rs.toml` and `eslint.config.mjs` agree on content route, non-content route, and endpoint coverage for the required Astro pipeline rules.",
+                Some("eslint.config.mjs"),
+                true,
+            ),
         ],
     );
 }
@@ -349,6 +356,54 @@ fn strict_content_policy_route_scope_rule_rejects_invalid_globs() {
         &results,
         "TS-ASTRO-CONFIG-25",
         "Astro route scope policy contains an invalid glob",
+    );
+}
+
+#[test]
+fn strict_content_policy_eslint_coverage_rule_rejects_non_content_route_coverage() {
+    let mut input = golden();
+    input.integration_contracts[0]
+        .route_page_paths
+        .push("src/pages/404.astro".to_owned());
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.content_routes = vec!["src/pages/index.astro".to_owned()];
+    snapshot.non_content_routes = vec!["src/pages/404.astro".to_owned()];
+
+    let results = super::super::check(&input);
+
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-CONFIG-26",
+        "Astro ESLint route coverage does not match strict content policy",
+    );
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-26",
+        "exclude `[ts.astro].non_content_routes`",
+    );
+}
+
+#[test]
+fn strict_content_policy_eslint_coverage_rule_rejects_missing_content_route_coverage() {
+    let mut input = golden();
+    let G3TsAstroEslintSurfaceState::Parsed { snapshot } = &mut input.eslint_contracts[0].config
+    else {
+        panic!("golden eslint surface should be parsed");
+    };
+    for scope in &mut snapshot.astro_source_route_scoped_pipeline_rule_scopes {
+        scope.route_globs = vec!["src/pages/other.astro".to_owned()];
+    }
+
+    let results = super::super::check(&input);
+
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-26",
+        "Astro lane `astro-pipeline/",
     );
 }
 

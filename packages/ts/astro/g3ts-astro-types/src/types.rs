@@ -250,6 +250,9 @@ pub struct G3TsAstroEslintSurfaceSnapshot {
     pub astro_source_effective_route_scoped_pipeline_rules: Vec<String>,
     pub ts_source_effective_route_scoped_pipeline_rules: Vec<String>,
     pub tsx_source_effective_route_scoped_pipeline_rules: Vec<String>,
+    pub astro_source_route_scoped_pipeline_rule_scopes: Vec<G3TsAstroPipelineRuleScopeSnapshot>,
+    pub ts_source_route_scoped_pipeline_rule_scopes: Vec<G3TsAstroPipelineRuleScopeSnapshot>,
+    pub tsx_source_route_scoped_pipeline_rule_scopes: Vec<G3TsAstroPipelineRuleScopeSnapshot>,
     pub astro_source_effective_content_data_pipeline_rules: Vec<String>,
     pub ts_source_effective_content_data_pipeline_rules: Vec<String>,
     pub tsx_source_effective_content_data_pipeline_rules: Vec<String>,
@@ -263,6 +266,13 @@ pub struct G3TsAstroEslintSurfaceSnapshot {
     pub ts_source_probe_ignored: bool,
     pub tsx_source_probe_ignored: bool,
     pub mdx_content_probe_ignored: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroPipelineRuleScopeSnapshot {
+    pub rule_name: String,
+    pub route_globs: Vec<String>,
+    pub endpoint_globs: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
