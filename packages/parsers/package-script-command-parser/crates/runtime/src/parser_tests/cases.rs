@@ -283,6 +283,55 @@ fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
 }
 
 #[test]
+fn safe_tool_invocation_query_ignores_unrelated_unsupported_scripts() {
+    let safe_typecheck = super::super::parse("typecheck", "astro check")
+        .expect("script command fact should parse");
+    let unsupported_start = super::super::parse("start", "astro dev --host 0.0.0.0 | cat")
+        .expect("script command fact should parse");
+    let unsupported_other_tool = super::super::parse("assets", "syncpack lint | tee log")
+        .expect("script command fact should parse");
+
+    assert!(
+        super::super::has_safe_tool_invocation(
+            &[safe_typecheck, unsupported_start, unsupported_other_tool],
+            "astro",
+            "check",
+        ),
+        "unrelated unsupported scripts must not hide a safe astro check script"
+    );
+}
+
+#[test]
+fn safe_tool_invocation_query_rejects_unsupported_target_script() {
+    let safe_typecheck = super::super::parse("typecheck", "astro check")
+        .expect("script command fact should parse");
+    let unsupported_nested_target = super::super::parse("start", "echo $(astro check)")
+        .expect("script command fact should parse");
+
+    assert!(
+        !super::super::has_safe_tool_invocation(
+            &[safe_typecheck.clone(), unsupported_nested_target],
+            "astro",
+            "check",
+        ),
+        "unsupported syntax that contains the requested tool must fail closed"
+    );
+
+    let unsupported_control_flow_target =
+        super::super::parse("start", "if astro check; then echo ok; fi")
+            .expect("script command fact should parse");
+
+    assert!(
+        !super::super::has_safe_tool_invocation(
+            &[safe_typecheck, unsupported_control_flow_target],
+            "astro",
+            "check",
+        ),
+        "unsupported control flow that contains the requested tool must fail closed"
+    );
+}
+
+#[test]
 fn unsupported_guardrail_shell_syntax_fails_closed() {
     for command in [
         "syncpack lint | tee log",

@@ -52,15 +52,12 @@ pub fn has_safe_tool_invocation(
     executable: &str,
     first_arg: &str,
 ) -> bool {
-    facts.iter().all(|fact| {
-        !matches!(
-            fact.state,
-            PackageScriptParseState::Unsupported { .. }
-                | PackageScriptParseState::ParseError { .. }
-        )
-    }) && facts
+    facts
         .iter()
-        .all(|fact| !fact_has_unsafe_tool_invocation(fact, executable, first_arg))
+        .all(|fact| !fact_has_unsupported_target_invocation(fact, executable, first_arg))
+        && facts
+            .iter()
+            .all(|fact| !fact_has_unsafe_tool_invocation(fact, executable, first_arg))
         && facts.iter().any(|fact| {
             !fact_has_or_separator(fact)
                 && fact.tool_invocations.iter().any(|invocation| {
@@ -71,6 +68,20 @@ pub fn has_safe_tool_invocation(
                         )
                 })
         })
+}
+
+fn fact_has_unsupported_target_invocation(
+    fact: &PackageScriptParseFact,
+    executable: &str,
+    first_arg: &str,
+) -> bool {
+    matches!(
+        fact.state,
+        PackageScriptParseState::Unsupported { .. } | PackageScriptParseState::ParseError { .. }
+    ) && fact
+        .all_tool_invocations
+        .iter()
+        .any(|invocation| invocation_targets_tool(invocation, executable, first_arg))
 }
 
 fn fact_has_or_separator(fact: &PackageScriptParseFact) -> bool {
@@ -108,22 +119,32 @@ fn invocation_targets_tool(
 
 fn normalize_fact(script_name: &str, input: &str) -> PackageScriptParseFact {
     let parsed = parse_script_commands(input);
-    let (commands, state) = match parsed {
+    let (commands, all_commands, state) = match parsed {
         Ok(parsed) => {
             let state = command_state(script_name, &parsed);
-            (parsed.commands, state)
+            (parsed.commands, parsed.all_commands, state)
         }
         Err(reason) if script_name_is_guardrail_related(script_name) => {
-            (Vec::new(), PackageScriptParseState::ParseError { reason })
+            (
+                Vec::new(),
+                Vec::new(),
+                PackageScriptParseState::ParseError { reason },
+            )
         }
-        Err(_reason) => (Vec::new(), PackageScriptParseState::NoEslintInvocation),
+        Err(_reason) => (
+            Vec::new(),
+            Vec::new(),
+            PackageScriptParseState::NoEslintInvocation,
+        ),
     };
-    let tool_invocations = tool_invocations(script_name, &commands);
+    let visible_tool_invocations = tool_invocations(script_name, &commands);
+    let all_tool_invocations = tool_invocations(script_name, &all_commands);
 
     PackageScriptParseFact {
         script_name: script_name.to_owned(),
         commands,
-        tool_invocations,
+        tool_invocations: visible_tool_invocations,
+        all_tool_invocations,
         state,
     }
 }
@@ -167,6 +188,7 @@ fn command_state(script_name: &str, parsed: &ParsedScriptCommands) -> PackageScr
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct ParsedScriptCommands {
     commands: Vec<PackageScriptCommand>,
+    all_commands: Vec<PackageScriptCommand>,
     any_command_has_guardrail_tool: bool,
     has_parse_error: bool,
     has_unsupported_guardrail_syntax: bool,
@@ -190,20 +212,23 @@ fn parse_script_commands(input: &str) -> Result<ParsedScriptCommands, String> {
             package_command_from_node(input, *command_node, preceded_by)
         })
         .collect::<Vec<_>>();
+    let all_commands = all_commands
+        .iter()
+        .filter_map(|command_node| package_command_from_node(input, *command_node, None))
+        .collect::<Vec<_>>();
 
-    let any_command_has_guardrail_tool = all_commands.iter().any(|node| {
-        package_command_from_node(input, *node, None).is_some_and(|command| {
-            normalized_tool(&command).is_some_and(|(executable, _args)| {
-                matches!(
-                    executable.as_str(),
-                    "eslint" | "astro" | "syncpack" | "only-allow"
-                )
-            })
+    let any_command_has_guardrail_tool = all_commands.iter().any(|command| {
+        normalized_tool(command).is_some_and(|(executable, _args)| {
+            matches!(
+                executable.as_str(),
+                "eslint" | "astro" | "syncpack" | "only-allow"
+            )
         })
     });
 
     Ok(ParsedScriptCommands {
         commands,
+        all_commands,
         any_command_has_guardrail_tool,
         has_parse_error: root.has_error(),
         has_unsupported_guardrail_syntax: has_unsupported_ast_shape(root)

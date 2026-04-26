@@ -12,7 +12,7 @@ use package_script_command_parser::types::{
     PackageScriptCommand, PackageScriptCommandSeparator, PackageScriptParseFact,
     PackageScriptParseState, PackageScriptToolInvocation,
 };
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 const FORBIDDEN_SYNCPACK_DEPS: [&str; 7] = [
     "next",
@@ -805,7 +805,6 @@ fn parsed_package_with_script(
                 "astro-robots",
                 "@nuasite/checks",
                 "g3ts-astro-nuasite-checks",
-                "astro-seo",
                 "schema-dts",
                 "react",
                 "react-dom",
@@ -1011,9 +1010,8 @@ fn syncpack_config_for_package_at_with_source_and_groups(
     let missing_required_stack_pins = required_syncpack_pins()
         .into_iter()
         .filter(|pin| {
-            !has_canonical_pin_in_prefix(
+            !has_one_canonical_pin_group(
                 &version_groups,
-                syncpack_astro_policy_prefix_len(),
                 &pin.dependency,
                 &pin.version,
                 &["prod", "dev"],
@@ -1023,9 +1021,8 @@ fn syncpack_config_for_package_at_with_source_and_groups(
     let missing_forbidden_bans = FORBIDDEN_SYNCPACK_DEPS
         .into_iter()
         .filter(|dependency| {
-            !has_canonical_ban_in_prefix(
+            !has_one_canonical_ban_group(
                 &version_groups,
-                syncpack_astro_policy_prefix_len(),
                 dependency,
                 &["prod", "dev", "optional", "peer"],
             )
@@ -1053,69 +1050,72 @@ fn syncpack_source_covers_package(
         && syncpack_config_is_app_local(syncpack_rel_path, package_rel_path)
 }
 
-fn syncpack_astro_policy_prefix_len() -> usize {
-    required_syncpack_pins().len() + FORBIDDEN_SYNCPACK_DEPS.len()
-}
-
-fn has_canonical_pin_in_prefix(
+fn has_one_canonical_pin_group(
     version_groups: &[TestSyncpackVersionGroup],
-    prefix_len: usize,
     dependency: &str,
     version: &str,
     dependency_types: &[&str],
 ) -> bool {
-    version_groups
+    let mut matching_groups = version_groups
         .iter()
-        .take(prefix_len)
-        .find(|group| group_targets_dependency(group, dependency, dependency_types))
-        .is_some_and(|group| canonical_pin_group(group, version))
+        .filter(|group| group_targets_dependency(group, dependency));
+
+    let Some(group) = matching_groups.next() else {
+        return false;
+    };
+
+    matching_groups.next().is_none() && canonical_pin_group(group, version, dependency_types)
 }
 
-fn has_canonical_ban_in_prefix(
+fn has_one_canonical_ban_group(
     version_groups: &[TestSyncpackVersionGroup],
-    prefix_len: usize,
     dependency: &str,
     dependency_types: &[&str],
 ) -> bool {
-    version_groups
+    let mut matching_groups = version_groups
         .iter()
-        .take(prefix_len)
-        .find(|group| group_targets_dependency(group, dependency, dependency_types))
-        .is_some_and(canonical_ban_group)
+        .filter(|group| group_targets_dependency(group, dependency));
+
+    let Some(group) = matching_groups.next() else {
+        return false;
+    };
+
+    matching_groups.next().is_none() && canonical_ban_group(group, dependency_types)
 }
 
 fn group_targets_dependency(
     group: &TestSyncpackVersionGroup,
     dependency: &str,
-    dependency_types: &[&str],
 ) -> bool {
-    strings_match_exactly(&group.dependencies, &[dependency])
-        && strings_match_exactly(&group.dependency_types, dependency_types)
+    string_sets_match_exactly(&group.dependencies, &[dependency])
 }
 
-fn canonical_pin_group(group: &TestSyncpackVersionGroup, version: &str) -> bool {
+fn canonical_pin_group(
+    group: &TestSyncpackVersionGroup,
+    version: &str,
+    dependency_types: &[&str],
+) -> bool {
     group.packages.is_empty()
         && group.specifier_types.is_empty()
+        && string_sets_match_exactly(&group.dependency_types, dependency_types)
         && !group.is_ignored
         && !group.is_banned
         && group.pin_version.as_deref() == Some(version)
 }
 
-fn canonical_ban_group(group: &TestSyncpackVersionGroup) -> bool {
+fn canonical_ban_group(group: &TestSyncpackVersionGroup, dependency_types: &[&str]) -> bool {
     group.packages.is_empty()
         && group.specifier_types.is_empty()
+        && string_sets_match_exactly(&group.dependency_types, dependency_types)
         && !group.is_ignored
         && group.is_banned
         && group.pin_version.is_none()
 }
 
-fn strings_match_exactly(left: &[String], right: &[&str]) -> bool {
+fn string_sets_match_exactly(left: &[String], right: &[&str]) -> bool {
     left.len() == right.len()
-        && left
-            .iter()
-            .map(String::as_str)
-            .zip(right.iter().copied())
-            .all(|(left, right)| left == right)
+        && BTreeSet::from_iter(left.iter().map(String::as_str))
+            == BTreeSet::from_iter(right.iter().copied())
 }
 
 fn syncpack_config_is_app_local(syncpack_rel_path: &str, package_rel_path: &str) -> bool {
@@ -1137,7 +1137,6 @@ fn required_syncpack_pins() -> Vec<G3TsAstroSyncpackRequiredPin> {
         ("astro-robots", "2.3.1"),
         ("@nuasite/checks", "0.18.0"),
         ("g3ts-astro-nuasite-checks", "0.1.0"),
-        ("astro-seo", "1.1.0"),
         ("schema-dts", "2.0.0"),
         ("react", "19.2.5"),
         ("react-dom", "19.2.5"),
@@ -1174,7 +1173,6 @@ fn required_syncpack_version_groups() -> Vec<TestSyncpackVersionGroup> {
         ("astro-robots", "2.3.1"),
         ("@nuasite/checks", "0.18.0"),
         ("g3ts-astro-nuasite-checks", "0.1.0"),
-        ("astro-seo", "1.1.0"),
         ("schema-dts", "2.0.0"),
         ("react", "19.2.5"),
         ("react-dom", "19.2.5"),

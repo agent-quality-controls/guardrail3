@@ -19,7 +19,7 @@ pub(super) fn fake_astro_workspace() -> TempDir {
 
     std::fs::write(
         root.path().join("package.json"),
-        "{\n  \"devDependencies\": {\n    \"astro\": \"6.1.9\",\n    \"@astrojs/react\": \"5.0.4\",\n    \"@astrojs/mdx\": \"5.0.4\",\n    \"@astrojs/check\": \"0.9.8\",\n    \"@astrojs/sitemap\": \"3.7.2\",\n    \"astro-robots\": \"2.3.1\",\n    \"@nuasite/checks\": \"0.18.0\",\n    \"g3ts-astro-nuasite-checks\": \"0.1.0\",\n    \"astro-seo\": \"1.1.0\",\n    \"schema-dts\": \"2.0.0\",\n    \"react\": \"19.2.5\",\n    \"react-dom\": \"19.2.5\",\n    \"@types/react\": \"19.2.14\",\n    \"@types/react-dom\": \"19.2.3\",\n    \"typescript\": \"5.9.3\",\n    \"eslint-plugin-astro\": \"1.7.0\",\n    \"g3ts-eslint-plugin-astro-pipeline\": \"0.1.5\",\n    \"eslint-plugin-i18next\": \"6.1.4\",\n    \"eslint-plugin-mdx\": \"3.7.0\",\n    \"syncpack\": \"14.0.0\"\n  },\n  \"scripts\": {\n    \"check\": \"astro check && syncpack lint\",\n    \"build\": \"astro build\"\n  }\n}\n",
+        "{\n  \"devDependencies\": {\n    \"astro\": \"6.1.9\",\n    \"@astrojs/react\": \"5.0.4\",\n    \"@astrojs/mdx\": \"5.0.4\",\n    \"@astrojs/check\": \"0.9.8\",\n    \"@astrojs/sitemap\": \"3.7.2\",\n    \"astro-robots\": \"2.3.1\",\n    \"@nuasite/checks\": \"0.18.0\",\n    \"g3ts-astro-nuasite-checks\": \"0.1.0\",\n    \"schema-dts\": \"2.0.0\",\n    \"react\": \"19.2.5\",\n    \"react-dom\": \"19.2.5\",\n    \"@types/react\": \"19.2.14\",\n    \"@types/react-dom\": \"19.2.3\",\n    \"typescript\": \"5.9.3\",\n    \"eslint-plugin-astro\": \"1.7.0\",\n    \"g3ts-eslint-plugin-astro-pipeline\": \"0.1.5\",\n    \"eslint-plugin-i18next\": \"6.1.4\",\n    \"eslint-plugin-mdx\": \"3.7.0\",\n    \"syncpack\": \"14.0.0\"\n  },\n  \"scripts\": {\n    \"check\": \"astro check && syncpack lint\",\n    \"build\": \"astro build\"\n  }\n}\n",
     )
     .expect("package manifest should be written");
     std::fs::write(
@@ -50,7 +50,6 @@ pub(super) fn fake_astro_workspace() -> TempDir {
     { "dependencies": ["astro-robots"], "dependencyTypes": ["prod", "dev"], "pinVersion": "2.3.1" },
     { "dependencies": ["@nuasite/checks"], "dependencyTypes": ["prod", "dev"], "pinVersion": "0.18.0" },
     { "dependencies": ["g3ts-astro-nuasite-checks"], "dependencyTypes": ["prod", "dev"], "pinVersion": "0.1.0" },
-    { "dependencies": ["astro-seo"], "dependencyTypes": ["prod", "dev"], "pinVersion": "1.1.0" },
     { "dependencies": ["schema-dts"], "dependencyTypes": ["prod", "dev"], "pinVersion": "2.0.0" },
     { "dependencies": ["react"], "dependencyTypes": ["prod", "dev"], "pinVersion": "19.2.5" },
     { "dependencies": ["react-dom"], "dependencyTypes": ["prod", "dev"], "pinVersion": "19.2.5" },

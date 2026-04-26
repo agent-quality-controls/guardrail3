@@ -49,7 +49,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                         ID,
                         "Syncpack does not pin the required Astro stack",
                         format!(
-                        "`{}` is missing required Syncpack pinned versionGroups: {}. Add one canonical versionGroup per listed package before any app-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\"]`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
+                        "`{}` is missing required Syncpack pinned versionGroups: {}. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
                         snapshot.rel_path,
                         snapshot
                             .missing_required_stack_pins
