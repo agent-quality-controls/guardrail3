@@ -95,6 +95,7 @@ pub(crate) fn required_syncpack_pins_message(
 }
 
 #[must_use]
+#[cfg(test)]
 pub(crate) fn forbidden_syncpack_deps_message(
     contract: &G3TsAstroIntegrationContractInput,
 ) -> String {

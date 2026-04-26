@@ -94,9 +94,13 @@ pub(crate) fn crawl_workspace(
         if path == workspace_root {
             continue;
         }
-        if !entry.file_type().is_file() {
+        let kind = if entry.file_type().is_file() {
+            G3RsWorkspaceEntryKind::File
+        } else if entry.file_type().is_dir() {
+            G3RsWorkspaceEntryKind::Directory
+        } else {
             continue;
-        }
+        };
         if included_paths.contains(path) {
             continue;
         }
@@ -110,14 +114,19 @@ pub(crate) fn crawl_workspace(
             .map(|n| n.to_string_lossy())
             .unwrap_or_default();
 
-        if !crate::recovery::should_recover(&name, &rel_path) {
+        let should_recover = match kind {
+            G3RsWorkspaceEntryKind::File => crate::recovery::should_recover(&name, &rel_path),
+            G3RsWorkspaceEntryKind::Directory => crate::recovery::should_recover_dir(&name),
+        };
+
+        if !should_recover {
             continue;
         }
 
         entries.push(crate::support::build_entry(
             workspace_root,
             path,
-            G3RsWorkspaceEntryKind::File,
+            kind,
             G3RsWorkspaceIgnoreState::Ignored,
         ));
     }

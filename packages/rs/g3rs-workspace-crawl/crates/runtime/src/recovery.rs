@@ -59,6 +59,10 @@ const RECOVER_PREFIX: &[&str] = &[
     "playwright.config.",
 ];
 
+/// Directory names recovered as ignored sentinels because their mere presence
+/// is a guardrail-relevant fact.
+const RECOVER_DIR_NAMES: &[&str] = &[".next", ".velite", ".contentlayer"];
+
 /// Whether this file should be recovered from ignored space.
 pub(crate) fn should_recover(name: &str, rel_path: &str) -> bool {
     if RECOVER_EXACT.contains(&name) {
@@ -106,6 +110,11 @@ pub(crate) fn should_recover(name: &str, rel_path: &str) -> bool {
         return true;
     }
     false
+}
+
+/// Whether this directory should be recovered from ignored space.
+pub(crate) fn should_recover_dir(name: &str) -> bool {
+    RECOVER_DIR_NAMES.contains(&name)
 }
 
 /// Whether a relative path falls under a banned subtree.

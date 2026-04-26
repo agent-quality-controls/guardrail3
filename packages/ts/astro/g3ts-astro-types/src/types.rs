@@ -15,6 +15,7 @@ pub struct G3TsAstroAppRootInput {
     pub live_config_rel_path: Option<String>,
     pub velite_config_rel_path: Option<String>,
     pub velite_output_rel_paths: Vec<String>,
+    pub legacy_generated_state_rel_paths: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
