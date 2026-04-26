@@ -14,12 +14,13 @@ use package_script_command_parser::types::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 
-const FORBIDDEN_SYNCPACK_DEPS: [&str; 7] = [
+const FORBIDDEN_SYNCPACK_DEPS: [&str; 8] = [
     "next",
     "velite",
     "@astrojs/node",
     "eslint-plugin-astro-pipeline",
     "@codemint/astro-meta",
+    "astro-seo",
     "astro-seo-meta",
     "astro-seo-schema",
 ];
@@ -626,11 +627,21 @@ pub(super) fn velite_package_with_syncpack_ban() -> G3TsAstroConfigChecksInput {
 }
 
 pub(super) fn syncpack_missing_forbidden_ban() -> G3TsAstroConfigChecksInput {
+    syncpack_missing_forbidden_ban_for("next")
+}
+
+pub(super) fn syncpack_missing_astro_seo_ban() -> G3TsAstroConfigChecksInput {
+    syncpack_missing_forbidden_ban_for("astro-seo")
+}
+
+fn syncpack_missing_forbidden_ban_for(forbidden_dependency: &str) -> G3TsAstroConfigChecksInput {
     let groups = required_syncpack_version_groups()
         .into_iter()
         .map(|mut group| {
             if group.is_banned {
-                group.dependencies.retain(|dependency| dependency != "next");
+                group
+                    .dependencies
+                    .retain(|dependency| dependency != forbidden_dependency);
             }
             group
         })

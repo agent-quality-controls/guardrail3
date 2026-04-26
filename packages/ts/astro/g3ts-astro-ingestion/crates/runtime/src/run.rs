@@ -73,12 +73,13 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 18] = [
     ("eslint-plugin-i18next", "6.1.4"),
     ("eslint-plugin-mdx", "3.7.0"),
 ];
-const FORBIDDEN_SYNCPACK_DEPS: [&str; 7] = [
+const FORBIDDEN_SYNCPACK_DEPS: [&str; 8] = [
     "next",
     "velite",
     "@astrojs/node",
     "eslint-plugin-astro-pipeline",
     "@codemint/astro-meta",
+    "astro-seo",
     "astro-seo-meta",
     "astro-seo-schema",
 ];

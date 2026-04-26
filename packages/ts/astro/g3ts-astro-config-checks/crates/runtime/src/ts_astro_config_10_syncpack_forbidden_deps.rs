@@ -4,6 +4,7 @@ use g3ts_astro_types::{
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-CONFIG-10";
+const ASTRO_SEO_BAN_REASON: &str = "`astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.";
 
 pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     for contract in &input.integration_contracts {
@@ -21,7 +22,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                         ID,
                         "Syncpack does not ban forbidden Astro deps",
                         format!(
-                            "`{}` does not include exact `source` entry `{expected_source}` for `{package_path}`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app.",
+                            "`{}` does not include exact `source` entry `{expected_source}` for `{package_path}`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app. {ASTRO_SEO_BAN_REASON}",
                             snapshot.rel_path,
                         ),
                         Some(&snapshot.rel_path),
@@ -49,15 +50,16 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                         ID,
                         "Syncpack does not ban forbidden Astro deps",
                         format!(
-                        "`{}` is missing Syncpack banned versionGroups for: {}. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
-                        snapshot.rel_path,
-                        snapshot
-                            .missing_forbidden_bans
-                            .iter()
-                            .map(|dependency| format!("`{dependency}`"))
-                            .collect::<Vec<_>>()
-                            .join(", ")
-                    ),
+                            "`{}` is missing Syncpack banned versionGroups for: {}. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.{}",
+                            snapshot.rel_path,
+                            snapshot
+                                .missing_forbidden_bans
+                                .iter()
+                                .map(|dependency| format!("`{dependency}`"))
+                                .collect::<Vec<_>>()
+                                .join(", "),
+                            forbidden_dependency_explanation(&snapshot.missing_forbidden_bans)
+                        ),
                         Some(&snapshot.rel_path),
                     ));
                 }
@@ -84,9 +86,20 @@ fn push_unavailable_error(
         ID,
         "Syncpack does not ban forbidden Astro deps",
         format!(
-            "`{rel_path}` {reason}, so the Astro family cannot prove Syncpack bans forbidden Astro deps for `{package_path}`. Add a parseable `{rel_path}` with canonical `isBanned: true` versionGroups for {}.",
+            "`{rel_path}` {reason}, so the Astro family cannot prove Syncpack bans forbidden Astro deps for `{package_path}`. Add a parseable `{rel_path}` with canonical `isBanned: true` versionGroups for {}. {ASTRO_SEO_BAN_REASON}",
             crate::support::forbidden_syncpack_deps_message(contract)
         ),
         Some(rel_path),
     ));
+}
+
+fn forbidden_dependency_explanation(missing_forbidden_bans: &[String]) -> String {
+    if missing_forbidden_bans
+        .iter()
+        .any(|dependency| dependency == "astro-seo")
+    {
+        format!(" {ASTRO_SEO_BAN_REASON}")
+    } else {
+        String::new()
+    }
 }
