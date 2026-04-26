@@ -68,6 +68,14 @@ mdx_content_globs = ["src/content/**/*.mdx"]
 approved_mdx_component_globs = ["src/content/components/**/*.tsx"]
 approved_generated_artifact_globs = ["src/generated/content/**/*.json"]
 astro_content_type_import_globs = ["src/content/types.ts"]
+contentlayer_config_globs = ["contentlayer.config.*"]
+contentlayer_generated_globs = [".contentlayer/**"]
+forbidden_generated_state_globs = [".next/**", ".velite/**", ".contentlayer/**"]
+build_output_globs = ["dist/**"]
+blog_index_route_globs = ["src/pages/blog.astro"]
+blog_article_route_globs = ["src/pages/blog/[slug].astro"]
+metadata_helper_globs = ["src/content/metadata.ts"]
+json_ld_helper_globs = ["src/content/json-ld.ts"]
 future_astro_key = "preserve-astro"
 
 [[waivers]]
@@ -183,6 +191,46 @@ reviewer = "guardrail-team"
         &astro.astro_content_type_import_globs,
         &["src/content/types.ts"],
         "ts.astro.astro_content_type_import_globs",
+    );
+    assertions::assert_string_list(
+        &astro.contentlayer_config_globs,
+        &["contentlayer.config.*"],
+        "ts.astro.contentlayer_config_globs",
+    );
+    assertions::assert_string_list(
+        &astro.contentlayer_generated_globs,
+        &[".contentlayer/**"],
+        "ts.astro.contentlayer_generated_globs",
+    );
+    assertions::assert_string_list(
+        &astro.forbidden_generated_state_globs,
+        &[".next/**", ".velite/**", ".contentlayer/**"],
+        "ts.astro.forbidden_generated_state_globs",
+    );
+    assertions::assert_string_list(
+        &astro.build_output_globs,
+        &["dist/**"],
+        "ts.astro.build_output_globs",
+    );
+    assertions::assert_string_list(
+        &astro.blog_index_route_globs,
+        &["src/pages/blog.astro"],
+        "ts.astro.blog_index_route_globs",
+    );
+    assertions::assert_string_list(
+        &astro.blog_article_route_globs,
+        &["src/pages/blog/[slug].astro"],
+        "ts.astro.blog_article_route_globs",
+    );
+    assertions::assert_string_list(
+        &astro.metadata_helper_globs,
+        &["src/content/metadata.ts"],
+        "ts.astro.metadata_helper_globs",
+    );
+    assertions::assert_string_list(
+        &astro.json_ld_helper_globs,
+        &["src/content/json-ld.ts"],
+        "ts.astro.json_ld_helper_globs",
     );
     assertions::assert_ts_astro_extra_string(astro, "future_astro_key", "preserve-astro");
     assertions::assert_waiver(
