@@ -155,6 +155,8 @@ Delegate:
 
 Owner: G3TS Astro config checks.
 
+Implemented in this slice.
+
 Rule:
 
 - Effective ESLint config for Astro, TS, and TSX probes must enable `g3ts-eslint-plugin-astro-pipeline`.
@@ -243,7 +245,7 @@ Style family may own:
 
 1. Done: `TS-ASTRO-CONFIG-24`.
 2. Done: `TS-ASTRO-CONFIG-25`.
-3. Finish `TS-ASTRO-CONFIG-26`.
+3. Done: `TS-ASTRO-CONFIG-26`.
 4. Finish `TS-ASTRO-CONFIG-27`.
 5. Finish `TS-ASTRO-FILETREE-12`.
 6. Then design framework-independent `TS-CONTENT` from normalized content facts only.

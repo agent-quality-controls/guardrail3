@@ -5,9 +5,9 @@ use g3ts_astro_types::{
     G3TsAstroIntegrationSnapshot, G3TsAstroOutputMode, G3TsAstroPackageScriptCommand,
     G3TsAstroPackageScriptCommandSeparator, G3TsAstroPackageScriptParseBlocker,
     G3TsAstroPackageScriptToolInvocation, G3TsAstroPackageSurfaceSnapshot,
-    G3TsAstroPackageSurfaceState, G3TsAstroPolicySnapshot, G3TsAstroPolicySurfaceState,
-    G3TsAstroStaticObjectProperty, G3TsAstroStaticValue, G3TsAstroSyncpackConfigSnapshot,
-    G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
+    G3TsAstroPackageSurfaceState, G3TsAstroPipelineRuleScopeSnapshot, G3TsAstroPolicySnapshot,
+    G3TsAstroPolicySurfaceState, G3TsAstroStaticObjectProperty, G3TsAstroStaticValue,
+    G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
 };
 use package_script_command_parser::types::{
     PackageScriptCommand, PackageScriptCommandSeparator, PackageScriptParseFact,
@@ -1380,6 +1380,15 @@ fn parsed_eslint_with_pipeline_contract(
             tsx_source_effective_route_scoped_pipeline_rules: pipeline_contract
                 .tsx
                 .effective_route_scoped_rules(),
+            astro_source_route_scoped_pipeline_rule_scopes: pipeline_contract
+                .astro
+                .route_scoped_rule_scopes(),
+            ts_source_route_scoped_pipeline_rule_scopes: pipeline_contract
+                .ts
+                .route_scoped_rule_scopes(),
+            tsx_source_route_scoped_pipeline_rule_scopes: pipeline_contract
+                .tsx
+                .route_scoped_rule_scopes(),
             astro_source_effective_content_data_pipeline_rules: pipeline_contract
                 .astro
                 .effective_content_data_rules(),
@@ -1610,6 +1619,32 @@ impl PipelineLaneState {
             "astro-pipeline/no-side-loader-imports".to_owned(),
             "astro-pipeline/no-velite-imports".to_owned(),
         ]
+    }
+
+    fn route_scoped_rule_scopes(self) -> Vec<G3TsAstroPipelineRuleScopeSnapshot> {
+        if !self.has_required_rules {
+            return Vec::new();
+        }
+
+        let route_globs = match self.scope_kind {
+            ScopeKind::None => Vec::new(),
+            ScopeKind::Route => vec!["src/pages/**/*.astro".to_owned()],
+            ScopeKind::Endpoint => vec!["src/pages/**/*.json.astro".to_owned()],
+        };
+        let endpoint_globs = match self.scope_kind {
+            ScopeKind::None => Vec::new(),
+            ScopeKind::Route => vec!["src/pages/**/*.ts".to_owned()],
+            ScopeKind::Endpoint => vec!["src/pages/**/*.json.ts".to_owned()],
+        };
+
+        self.effective_route_scoped_rules()
+            .into_iter()
+            .map(|rule_name| G3TsAstroPipelineRuleScopeSnapshot {
+                rule_name,
+                route_globs: route_globs.clone(),
+                endpoint_globs: endpoint_globs.clone(),
+            })
+            .collect()
     }
 
     fn effective_content_data_rules(self) -> Vec<String> {
