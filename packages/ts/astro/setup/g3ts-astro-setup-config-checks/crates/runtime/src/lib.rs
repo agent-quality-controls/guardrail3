@@ -9,6 +9,8 @@ mod ts_astro_config_10_syncpack_forbidden_deps;
 mod ts_astro_config_11_site_url;
 mod ts_astro_config_12_static_output;
 mod ts_astro_config_21_required_integrations;
+mod ts_astro_config_33_lint_script;
+mod ts_astro_config_34_syncpack_lint_script;
 
 #[cfg(feature = "checks")]
 pub use run::check;
