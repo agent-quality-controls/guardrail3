@@ -3,4 +3,8 @@ pub mod core;
 #[cfg(feature = "api")]
 pub mod eslint;
 #[cfg(feature = "api")]
+pub mod ingestion;
+#[cfg(feature = "api")]
+pub mod ingestion_select;
+#[cfg(feature = "api")]
 pub mod support_nuasite;
