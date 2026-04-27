@@ -1,10 +1,14 @@
 import recommended from "./configs/recommended.js";
+import mdxComponentMapNoRawUiExports from "./rules/mdx-component-map-no-raw-ui-exports.js";
 import mdxComponentImportsFromApprovedMap from "./rules/mdx-component-imports-from-approved-map.js";
+import mdxComponentWrapperRequiresZodParse from "./rules/mdx-component-wrapper-requires-zod-parse.js";
+import mdxImportsOnlyApprovedComponents from "./rules/mdx-imports-only-approved-components.js";
 import noAuthoredContentFsRead from "./rules/no-authored-content-fs-read.js";
 import noAuthoredContentGlob from "./rules/no-authored-content-glob.js";
 import noAuthoredContentImports from "./rules/no-authored-content-imports.js";
 import noContentDataModulesInRoutes from "./rules/no-content-data-modules-in-routes.js";
 import noDirectAstroContentInRoutes from "./rules/no-direct-astro-content-in-routes.js";
+import noRawMdxImages from "./rules/no-raw-mdx-images.js";
 import noRuntimeMdxEval from "./rules/no-runtime-mdx-eval.js";
 import noSideLoaderImports from "./rules/no-side-loader-imports.js";
 import noVeliteImports from "./rules/no-velite-imports.js";
@@ -13,12 +17,16 @@ import requireApprovedJsonLdHelperInRoutes from "./rules/require-approved-json-l
 import requireApprovedMetadataHelperInRoutes from "./rules/require-approved-metadata-helper-in-routes.js";
 
 const rules = {
+  "mdx-component-map-no-raw-ui-exports": mdxComponentMapNoRawUiExports,
   "mdx-component-imports-from-approved-map": mdxComponentImportsFromApprovedMap,
+  "mdx-component-wrapper-requires-zod-parse": mdxComponentWrapperRequiresZodParse,
+  "mdx-imports-only-approved-components": mdxImportsOnlyApprovedComponents,
   "no-authored-content-fs-read": noAuthoredContentFsRead,
   "no-authored-content-glob": noAuthoredContentGlob,
   "no-authored-content-imports": noAuthoredContentImports,
   "no-content-data-modules-in-routes": noContentDataModulesInRoutes,
   "no-direct-astro-content-in-routes": noDirectAstroContentInRoutes,
+  "no-raw-mdx-images": noRawMdxImages,
   "no-runtime-mdx-eval": noRuntimeMdxEval,
   "no-side-loader-imports": noSideLoaderImports,
   "no-velite-imports": noVeliteImports,

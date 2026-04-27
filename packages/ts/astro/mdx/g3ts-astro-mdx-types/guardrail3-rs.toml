@@ -1,5 +1,7 @@
 profile = "library"
 
+allowed_deps = []
+
 [checks]
 garde = false
 
@@ -24,5 +26,47 @@ reason = "Type package exposes typed DTOs consumed by separate ingestion and che
 [[waivers]]
 rule = "RS-CODE-SOURCE-31"
 file = "src/types.rs"
+selector = "struct:G3TsAstroPackageScriptParseBlocker"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroMdxPolicySnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroMdxApprovedSourcePaths"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
 selector = "struct:G3TsAstroMdxEslintSurfaceSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroMdxMissingComponentMapInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroMdxEslintPluginContractInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroMdxIntegrationContractInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroMdxConfigChecksInput"
 reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."

@@ -16,13 +16,17 @@ The app owns third-party delegated plugins directly. This package does not depen
 
 - default ESLint plugin export
 - `configs.recommended`
-- 12 custom rules:
+- 16 custom rules:
 - `astro-pipeline/mdx-component-imports-from-approved-map`
+- `astro-pipeline/mdx-component-map-no-raw-ui-exports`
+- `astro-pipeline/mdx-component-wrapper-requires-zod-parse`
+- `astro-pipeline/mdx-imports-only-approved-components`
 - `astro-pipeline/no-authored-content-fs-read`
 - `astro-pipeline/no-authored-content-glob`
 - `astro-pipeline/no-authored-content-imports`
 - `astro-pipeline/no-content-data-modules-in-routes`
 - `astro-pipeline/no-direct-astro-content-in-routes`
+- `astro-pipeline/no-raw-mdx-images`
 - `astro-pipeline/no-runtime-mdx-eval`
 - `astro-pipeline/no-side-loader-imports`
 - `astro-pipeline/no-velite-imports`
@@ -43,7 +47,12 @@ const astroPipelineOptions = {
   approvedJsonLdHelperModules: ["src/seo/json-ld.ts"],
   approvedMetadataHelperModules: ["src/seo/metadata.ts"],
   mdxContentGlobs: ["content/**/*.{md,mdx}"],
-  approvedMdxComponentMapModules: ["src/mdx-components.tsx"],
+  approvedMdxComponentModules: ["src/mdx-components.tsx"],
+  approvedMdxComponentNames: ["Callout", "FAQ", "ArticleImage"],
+  allowedMdxComponentMapExports: ["mdxComponents"],
+  approvedMdxImageComponents: ["ArticleImage"],
+  mdxPropsParserName: ["parseMdxComponentProps"],
+  rawUiModuleGlobs: ["@project/ui"],
   authoredContentGlobs: ["src/content/**"],
   specContentGlobs: ["specs/**"]
 };
@@ -68,6 +77,12 @@ export default [
 
 `mdx-component-imports-from-approved-map` requires MDX component imports to come from approved component-map modules only.
 
+`mdx-component-map-no-raw-ui-exports` blocks approved component-map modules from directly re-exporting raw UI components.
+
+`mdx-component-wrapper-requires-zod-parse` requires every approved MDX component-map export to validate raw props through a local Zod schema and configured parser helper before rendering UI.
+
+`mdx-imports-only-approved-components` requires MDX files to import only explicitly approved component names from approved component-map modules.
+
 `no-authored-content-fs-read` blocks route and endpoint import closures from reading authored content files with `fs`.
 
 `no-authored-content-glob` blocks route and endpoint import closures from discovering authored content with `import.meta.glob`.
@@ -77,6 +92,8 @@ export default [
 `no-content-data-modules-in-routes` blocks route and endpoint import closures from reaching ad hoc page-copy data modules.
 
 `no-direct-astro-content-in-routes` blocks route and endpoint modules from importing `astro:content` directly.
+
+`no-raw-mdx-images` blocks Markdown image syntax and raw `<img>` elements in MDX content so images use configured validated wrappers.
 
 `no-runtime-mdx-eval` blocks runtime MDX bridges such as `new Function`, `@mdx-js/mdx` `evaluate`, and `@mdx-js/mdx` `run`.
 

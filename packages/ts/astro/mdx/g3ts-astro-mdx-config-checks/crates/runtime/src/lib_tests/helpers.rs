@@ -66,6 +66,28 @@ fn eslint_config() -> G3TsAstroMdxEslintSurfaceState {
             mdx_content_effective_mdx_component_map_rules: vec![
                 "astro-pipeline/mdx-component-imports-from-approved-map".to_owned(),
             ],
+            mdx_content_effective_named_component_import_rules: vec![
+                "astro-pipeline/mdx-imports-only-approved-components".to_owned(),
+            ],
+            mdx_content_effective_no_raw_image_rules: vec![
+                "astro-pipeline/no-raw-mdx-images".to_owned(),
+            ],
+            component_map_probe_present: true,
+            component_map_plugin_package_names: BTreeMap::from([(
+                "astro-pipeline".to_owned(),
+                vec!["g3ts-eslint-plugin-astro-pipeline".to_owned()],
+            )]),
+            component_map_error_rules: vec![
+                "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
+                "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
+            ],
+            component_map_effective_no_raw_ui_export_rules: vec![
+                "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
+            ],
+            component_map_effective_wrapper_zod_parse_rules: vec![
+                "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
+            ],
+            component_map_probe_ignored: false,
             mdx_content_probe_ignored: false,
         },
     }

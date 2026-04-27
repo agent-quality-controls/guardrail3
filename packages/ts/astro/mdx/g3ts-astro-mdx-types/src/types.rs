@@ -111,6 +111,14 @@ pub struct G3TsAstroMdxEslintSurfaceSnapshot {
     pub mdx_content_plugin_package_names: BTreeMap<String, Vec<String>>,
     pub mdx_content_error_rules: Vec<String>,
     pub mdx_content_effective_mdx_component_map_rules: Vec<String>,
+    pub mdx_content_effective_named_component_import_rules: Vec<String>,
+    pub mdx_content_effective_no_raw_image_rules: Vec<String>,
+    pub component_map_probe_present: bool,
+    pub component_map_plugin_package_names: BTreeMap<String, Vec<String>>,
+    pub component_map_error_rules: Vec<String>,
+    pub component_map_effective_no_raw_ui_export_rules: Vec<String>,
+    pub component_map_effective_wrapper_zod_parse_rules: Vec<String>,
+    pub component_map_probe_ignored: bool,
     pub mdx_content_probe_ignored: bool,
 }
 
