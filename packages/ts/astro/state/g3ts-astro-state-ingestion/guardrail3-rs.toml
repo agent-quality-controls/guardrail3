@@ -1,0 +1,11 @@
+profile = "library"
+
+allowed_deps = [
+  "g3-workspace-crawl",
+  "g3rs-workspace-crawl",
+  "g3ts-astro-ingestion",
+  "g3ts-astro-types",
+]
+
+[checks]
+garde = false

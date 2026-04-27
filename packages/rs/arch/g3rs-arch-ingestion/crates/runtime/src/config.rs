@@ -23,6 +23,7 @@ pub(crate) fn ingest_for_config_checks(
     Ok(vec![G3RsArchConfigChecksInput {
         crates: collect_config_crates(&crate_nodes, &facade_surfaces),
         dependency_edges,
+        rust_policy: crate::file_tree::ingest_rust_policy(&view),
     }])
 }
 

@@ -2,4 +2,4 @@
 mod run;
 
 #[cfg(feature = "api")]
-pub use run::check;
+pub use run::ingest_for_config_checks;

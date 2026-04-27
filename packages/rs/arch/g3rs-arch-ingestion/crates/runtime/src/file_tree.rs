@@ -1,10 +1,10 @@
 use std::collections::BTreeMap;
 
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use g3rs_arch_types::types::{
     G3RsArchCrateNode, G3RsArchFileTreeChecksInput, G3RsArchFileTreeCrate, G3RsArchModuleDir,
     G3RsArchRustPolicyState,
 };
+use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::error::G3RsArchIngestionError;
 use crate::view::CrawlView;
@@ -27,7 +27,7 @@ pub(crate) fn ingest_for_file_tree_checks(
     })
 }
 
-fn ingest_rust_policy(view: &CrawlView<'_>) -> G3RsArchRustPolicyState {
+pub(crate) fn ingest_rust_policy(view: &CrawlView<'_>) -> G3RsArchRustPolicyState {
     let Some(entry) = view.entry("guardrail3-rs.toml") else {
         return G3RsArchRustPolicyState::Missing;
     };
