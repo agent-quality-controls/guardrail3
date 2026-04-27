@@ -1,0 +1,52 @@
+profile = "library"
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-10"
+file = "src/lib.rs"
+selector = "top-level-use-imports"
+reason = "Type package facade explicitly re-exports the public DTO contract; broad re-exports are forbidden and splitting the contract would hide package ownership."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroPackageSurfaceSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroPackageScriptCommand"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroPackageScriptToolInvocation"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroPackageScriptParseBlocker"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroConfigSurfaceSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroSeoEslintSurfaceSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroSeoIntegrationContractInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."

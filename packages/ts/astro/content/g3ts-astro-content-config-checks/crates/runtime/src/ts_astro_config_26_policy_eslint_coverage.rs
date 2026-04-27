@@ -1,6 +1,6 @@
-use g3ts_astro_types::{
-    G3TsAstroContentConfigChecksInput, G3TsAstroContentIntegrationContractInput,
-    G3TsAstroPipelineRuleScopeSnapshot, G3TsAstroPolicySnapshot,
+use g3ts_astro_content_types::{
+    G3TsAstroContentEslintSurfaceState, G3TsAstroContentPolicyEslintContractInput,
+    G3TsAstroContentPolicySnapshot, G3TsAstroPipelineRuleScopeSnapshot,
 };
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use guardrail3_check_types::G3CheckResult;
@@ -17,55 +17,51 @@ const ROUTE_SCOPED_PIPELINE_RULES: [&str; 8] = [
     "astro-pipeline/no-velite-imports",
 ];
 
-pub(crate) fn check(input: &G3TsAstroContentConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
-        let policy_rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
-        let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
-            continue;
-        };
-        let Some(eslint_contract) = input.eslint_contracts.iter().find(|eslint_contract| {
-            eslint_contract.app_root_rel_path == contract.app_root_rel_path
-        }) else {
-            results.push(error(policy_rel_path, "missing ESLint contract"));
-            continue;
-        };
-        let Some(eslint) = g3ts_astro_check_support::core::parsed_eslint_surface(eslint_contract) else {
-            results.push(error(
-                policy_rel_path,
-                "ESLint config is missing or not parsed",
-            ));
-            continue;
-        };
+pub(crate) fn check(
+    contract: &G3TsAstroContentPolicyEslintContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let policy_rel_path = crate::support::content_policy_rel_path(&contract.astro_policy);
+    let Some(policy) = crate::support::parsed_content_policy(&contract.astro_policy) else {
+        return;
+    };
+    let G3TsAstroContentEslintSurfaceState::Parsed { snapshot: eslint } = &contract.eslint_config
+    else {
+        results.push(error(
+            policy_rel_path,
+            "ESLint config is missing or not parsed",
+        ));
+        return;
+    };
 
-        let coverage = policy_coverage(contract, policy);
-        let lanes = [
-            (
-                "Astro",
-                &eslint.astro_source_route_scoped_pipeline_rule_scopes,
+    let coverage = policy_coverage(contract, policy);
+    let lanes = [
+        (
+            "Astro",
+            &eslint.astro_source_route_scoped_pipeline_rule_scopes,
+        ),
+        ("TS", &eslint.ts_source_route_scoped_pipeline_rule_scopes),
+        ("TSX", &eslint.tsx_source_route_scoped_pipeline_rule_scopes),
+    ];
+    let missing = lanes
+        .into_iter()
+        .flat_map(|(lane, scopes)| missing_lane_coverage(lane, scopes, &coverage))
+        .collect::<Vec<_>>();
+
+    if missing.is_empty() {
+        results.push(crate::support::info(
+            ID,
+            "Astro ESLint route coverage matches strict content policy",
+            format!(
+                "`{}` and `{}` agree on content route, non-content route, and endpoint coverage for the required Astro pipeline rules.",
+                policy.rel_path, eslint.rel_path
             ),
-            ("TS", &eslint.ts_source_route_scoped_pipeline_rule_scopes),
-            ("TSX", &eslint.tsx_source_route_scoped_pipeline_rule_scopes),
-        ];
-        let missing = lanes
-            .into_iter()
-            .flat_map(|(lane, scopes)| missing_lane_coverage(lane, scopes, &coverage))
-            .collect::<Vec<_>>();
-
-        if missing.is_empty() {
-            results.push(g3ts_astro_check_support::core::info(
-                ID,
-                "Astro ESLint route coverage matches strict content policy",
-                format!(
-                    "`{}` and `{}` agree on content route, non-content route, and endpoint coverage for the required Astro pipeline rules.",
-                    policy.rel_path, eslint.rel_path
-                ),
-                &eslint.rel_path,
-            ));
-            continue;
-        }
-
-        results.push(error(policy_rel_path, &missing.join("; ")));
+            &eslint.rel_path,
+        ));
+        return;
     }
+
+    results.push(error(policy_rel_path, &missing.join("; ")));
 }
 
 struct PolicyCoverage {
@@ -75,8 +71,8 @@ struct PolicyCoverage {
 }
 
 fn policy_coverage(
-    contract: &G3TsAstroContentIntegrationContractInput,
-    policy: &G3TsAstroPolicySnapshot,
+    contract: &G3TsAstroContentPolicyEslintContractInput,
+    policy: &G3TsAstroContentPolicySnapshot,
 ) -> PolicyCoverage {
     let content_globs = glob_set(&policy.content_routes).ok();
     let non_content_globs = glob_set(&policy.non_content_routes).ok();
@@ -157,7 +153,7 @@ fn glob_set(patterns: &[String]) -> Result<GlobSet, globset::Error> {
 }
 
 fn error(policy_rel_path: Option<&str>, reason: &str) -> G3CheckResult {
-    g3ts_astro_check_support::core::error(
+    crate::support::error(
         ID,
         "Astro ESLint route coverage does not match strict content policy",
         format!(

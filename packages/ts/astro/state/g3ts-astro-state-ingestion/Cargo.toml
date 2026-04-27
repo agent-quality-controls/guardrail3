@@ -15,7 +15,10 @@ include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 [dependencies]
 g3-workspace-crawl = { path = "../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
 g3ts-astro-check-support = { path = "../../g3ts-astro-check-support", version = "0.1.0" }
-g3ts-astro-types = { path = "../../g3ts-astro-types", version = "0.1.0" }
+g3ts-astro-state-types = { path = "../g3ts-astro-state-types", version = "0.1.0" }
+globset = "0.4"
+guardrail3-rs-toml-parser = { path = "../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0", features = ["api"] }
+package-json-parser = { path = "../../../../parsers/package-json-parser", version = "0.1.0", features = ["api"] }
 
 [features]
 default = ["api"]

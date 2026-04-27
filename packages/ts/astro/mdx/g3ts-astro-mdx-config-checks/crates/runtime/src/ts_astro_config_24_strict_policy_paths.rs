@@ -1,12 +1,15 @@
-use g3ts_astro_types::{G3TsAstroMdxIntegrationContractInput, G3TsAstroPolicySnapshot};
+use g3ts_astro_mdx_types::{G3TsAstroMdxIntegrationContractInput, G3TsAstroMdxPolicySnapshot};
 use guardrail3_check_types::G3CheckResult;
 use std::path::{Component, Path};
 
 const MDX_ID: &str = "TS-ASTRO-MDX-CONFIG-24";
 
-pub(crate) fn check_mdx(contracts: &[G3TsAstroMdxIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check_mdx(
+    contract: &G3TsAstroMdxIntegrationContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
     check_policy_paths(
-        contracts,
+        contract,
         "Astro MDX policy paths are structurally valid",
         "Astro MDX policy paths are invalid",
         "`{}` uses app-relative `[ts.astro.mdx].component_maps` paths without parent traversal.",
@@ -18,43 +21,41 @@ pub(crate) fn check_mdx(contracts: &[G3TsAstroMdxIntegrationContractInput], resu
 }
 
 fn check_policy_paths(
-    contracts: &[G3TsAstroMdxIntegrationContractInput],
+    contract: &G3TsAstroMdxIntegrationContractInput,
     info_title: &str,
     error_title: &str,
     info_message: &str,
     error_message: &str,
-    invalid_entries: fn(&G3TsAstroPolicySnapshot) -> Vec<String>,
+    invalid_entries: fn(&G3TsAstroMdxPolicySnapshot) -> Vec<String>,
     id: &str,
     results: &mut Vec<G3CheckResult>,
 ) {
-    for contract in contracts {
-        let rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
-        let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
-            continue;
-        };
+    let rel_path = crate::support::mdx_policy_rel_path(&contract.astro_policy);
+    let Some(policy) = crate::support::parsed_mdx_policy(&contract.astro_policy) else {
+        return;
+    };
 
-        let errors = invalid_entries(policy);
-        if errors.is_empty() {
-            results.push(g3ts_astro_check_support::core::info(
-                id,
-                info_title,
-                format_message(info_message, &policy.rel_path, None),
-                &policy.rel_path,
-            ));
-            continue;
-        }
-
-        results.push(g3ts_astro_check_support::core::error(
+    let errors = invalid_entries(policy);
+    if errors.is_empty() {
+        results.push(crate::support::info(
             id,
-            error_title,
-            format_message(
-                error_message,
-                rel_path.unwrap_or("guardrail3-ts.toml"),
-                Some(&errors.join("; ")),
-            ),
-            rel_path,
+            info_title,
+            format_message(info_message, &policy.rel_path, None),
+            &policy.rel_path,
         ));
+        return;
     }
+
+    results.push(crate::support::error(
+        id,
+        error_title,
+        format_message(
+            error_message,
+            rel_path.unwrap_or("guardrail3-ts.toml"),
+            Some(&errors.join("; ")),
+        ),
+        rel_path,
+    ));
 }
 
 fn format_message(template: &str, rel_path: &str, errors: Option<&str>) -> String {
@@ -67,7 +68,7 @@ fn format_message(template: &str, rel_path: &str, errors: Option<&str>) -> Strin
     }
 }
 
-fn invalid_mdx_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
+fn invalid_mdx_policy_entries(policy: &G3TsAstroMdxPolicySnapshot) -> Vec<String> {
     let mut errors = Vec::new();
     collect_invalid_helper_list(
         "[ts.astro.mdx].component_maps",

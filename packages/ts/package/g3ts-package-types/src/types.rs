@@ -85,10 +85,20 @@ pub struct G3TsPackageSyncpackConfigSnapshot {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3TsPackageSyncpackConfigState {
     NotRequired,
-    Missing { rel_path: String },
-    Unreadable { rel_path: String, reason: String },
-    ParseError { rel_path: String, reason: String },
-    Parsed { snapshot: G3TsPackageSyncpackConfigSnapshot },
+    Missing {
+        rel_path: String,
+    },
+    Unreadable {
+        rel_path: String,
+        reason: String,
+    },
+    ParseError {
+        rel_path: String,
+        reason: String,
+    },
+    Parsed {
+        snapshot: G3TsPackageSyncpackConfigSnapshot,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

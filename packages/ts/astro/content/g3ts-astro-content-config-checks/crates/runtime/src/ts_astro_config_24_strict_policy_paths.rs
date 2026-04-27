@@ -1,12 +1,17 @@
-use g3ts_astro_types::{G3TsAstroContentIntegrationContractInput, G3TsAstroPolicySnapshot};
+use g3ts_astro_content_types::{
+    G3TsAstroContentIntegrationContractInput, G3TsAstroContentPolicySnapshot,
+};
 use guardrail3_check_types::G3CheckResult;
 use std::path::{Component, Path};
 
 const CONTENT_ID: &str = "TS-ASTRO-CONTENT-CONFIG-24";
 
-pub(crate) fn check_content(contracts: &[G3TsAstroContentIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check_content(
+    contract: &G3TsAstroContentIntegrationContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
     check_policy_paths(
-        contracts,
+        contract,
         "Astro strict content policy paths are structurally valid",
         "Astro strict content policy paths are invalid",
         "`{}` uses app-relative nested Astro content policy paths without parent traversal in `[ts.astro.routes]` and `[ts.astro.content]`.",
@@ -18,43 +23,41 @@ pub(crate) fn check_content(contracts: &[G3TsAstroContentIntegrationContractInpu
 }
 
 fn check_policy_paths(
-    contracts: &[G3TsAstroContentIntegrationContractInput],
+    contract: &G3TsAstroContentIntegrationContractInput,
     info_title: &str,
     error_title: &str,
     info_message: &str,
     error_message: &str,
-    invalid_entries: fn(&G3TsAstroPolicySnapshot) -> Vec<String>,
+    invalid_entries: fn(&G3TsAstroContentPolicySnapshot) -> Vec<String>,
     id: &str,
     results: &mut Vec<G3CheckResult>,
 ) {
-    for contract in contracts {
-        let rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
-        let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
-            continue;
-        };
+    let rel_path = crate::support::content_policy_rel_path(&contract.astro_policy);
+    let Some(policy) = crate::support::parsed_content_policy(&contract.astro_policy) else {
+        return;
+    };
 
-        let errors = invalid_entries(policy);
-        if errors.is_empty() {
-            results.push(g3ts_astro_check_support::core::info(
-                id,
-                info_title,
-                format_message(info_message, &policy.rel_path, None),
-                &policy.rel_path,
-            ));
-            continue;
-        }
-
-        results.push(g3ts_astro_check_support::core::error(
+    let errors = invalid_entries(policy);
+    if errors.is_empty() {
+        results.push(crate::support::info(
             id,
-            error_title,
-            format_message(
-                error_message,
-                rel_path.unwrap_or("guardrail3-ts.toml"),
-                Some(&errors.join("; ")),
-            ),
-            rel_path,
+            info_title,
+            format_message(info_message, &policy.rel_path, None),
+            &policy.rel_path,
         ));
+        return;
     }
+
+    results.push(crate::support::error(
+        id,
+        error_title,
+        format_message(
+            error_message,
+            rel_path.unwrap_or("guardrail3-ts.toml"),
+            Some(&errors.join("; ")),
+        ),
+        rel_path,
+    ));
 }
 
 fn format_message(template: &str, rel_path: &str, errors: Option<&str>) -> String {
@@ -67,7 +70,7 @@ fn format_message(template: &str, rel_path: &str, errors: Option<&str>) -> Strin
     }
 }
 
-fn invalid_content_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
+fn invalid_content_policy_entries(policy: &G3TsAstroContentPolicySnapshot) -> Vec<String> {
     let mut errors = Vec::new();
     collect_invalid_list(
         "[ts.astro.routes].content",
@@ -99,24 +102,6 @@ fn invalid_content_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<Strin
                 ));
             }
         }
-        collect_content_root_overlaps(
-            "[ts.astro.mdx].component_maps",
-            content_root,
-            &policy.mdx_component_maps,
-            &mut errors,
-        );
-        collect_content_root_overlaps(
-            "[ts.astro.seo].metadata_helpers",
-            content_root,
-            &policy.metadata_helpers,
-            &mut errors,
-        );
-        collect_content_root_overlaps(
-            "[ts.astro.seo].json_ld_helpers",
-            content_root,
-            &policy.json_ld_helpers,
-            &mut errors,
-        );
     }
     errors
 }
@@ -143,21 +128,6 @@ fn collect_invalid_helper_list(field: &str, values: &[String], errors: &mut Vec<
     for value in values {
         if !is_app_relative_dir(value) {
             errors.push(format!("{field} contains `{value}`"));
-        }
-    }
-}
-
-fn collect_content_root_overlaps(
-    field: &str,
-    content_root: &str,
-    values: &[String],
-    errors: &mut Vec<String>,
-) {
-    for value in values {
-        if dirs_overlap(content_root, value) {
-            errors.push(format!(
-                "[ts.astro.content].root overlaps {field} `{value}`"
-            ));
         }
     }
 }

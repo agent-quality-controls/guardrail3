@@ -135,23 +135,26 @@ pub fn assert_local_dependency_names(
 pub fn assert_syncpack_not_required(input: &G3TsPackageChecksInput) {
     match &input.syncpack_config {
         g3ts_package_types::G3TsPackageSyncpackConfigState::NotRequired => {}
-        other => assert!(false, "expected Syncpack not-required state, got: {other:?}"),
+        other => assert!(
+            false,
+            "expected Syncpack not-required state, got: {other:?}"
+        ),
     }
 }
 
 pub fn assert_syncpack_missing(input: &G3TsPackageChecksInput, expected_rel_path: &str) {
     match &input.syncpack_config {
         g3ts_package_types::G3TsPackageSyncpackConfigState::Missing { rel_path } => {
-            assert_eq!(rel_path, expected_rel_path, "Syncpack missing path mismatch");
+            assert_eq!(
+                rel_path, expected_rel_path,
+                "Syncpack missing path mismatch"
+            );
         }
         other => assert!(false, "expected missing Syncpack state, got: {other:?}"),
     }
 }
 
-pub fn assert_syncpack_missing_source_entries(
-    input: &G3TsPackageChecksInput,
-    expected: &[&str],
-) {
+pub fn assert_syncpack_missing_source_entries(input: &G3TsPackageChecksInput, expected: &[&str]) {
     match &input.syncpack_config {
         g3ts_package_types::G3TsPackageSyncpackConfigState::Parsed { snapshot } => {
             let expected = expected

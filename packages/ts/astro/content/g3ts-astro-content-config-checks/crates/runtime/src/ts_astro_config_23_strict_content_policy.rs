@@ -1,27 +1,31 @@
-use g3ts_astro_types::{G3TsAstroContentIntegrationContractInput, G3TsAstroPolicySnapshot};
+use g3ts_astro_content_types::{
+    G3TsAstroContentIntegrationContractInput, G3TsAstroContentPolicySnapshot,
+};
 use guardrail3_check_types::G3CheckResult;
 
 const CONTENT_ID: &str = "TS-ASTRO-CONTENT-CONFIG-23";
 const PROFILE: &str = "strict-static-content";
 
-pub(crate) fn check_content(contracts: &[G3TsAstroContentIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
-    for contract in contracts {
-        let rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
-        if g3ts_astro_check_support::core::parsed_astro_policy(contract)
-            .is_some_and(policy_content_is_strict)
-        {
-            if let Some(rel_path) = rel_path {
-                results.push(g3ts_astro_check_support::core::info(
+pub(crate) fn check_content(
+    contract: &G3TsAstroContentIntegrationContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let rel_path = crate::support::content_policy_rel_path(&contract.astro_policy);
+    if crate::support::parsed_content_policy(&contract.astro_policy)
+        .is_some_and(policy_content_is_strict)
+    {
+        if let Some(rel_path) = rel_path {
+            results.push(crate::support::info(
                     CONTENT_ID,
                     "Astro strict content policy is configured",
                     format!("`{rel_path}` sets `[ts.astro] profile = \"{PROFILE}\"`, declares non-empty `[ts.astro.routes].content`, `[ts.astro.content].root`, and `[ts.astro.content].adapters`."),
                     rel_path,
                 ));
-            }
-            continue;
         }
+        return;
+    }
 
-        results.push(g3ts_astro_check_support::core::error(
+    results.push(crate::support::error(
             CONTENT_ID,
             "Astro strict content policy is missing or incomplete",
             format!(
@@ -30,10 +34,9 @@ pub(crate) fn check_content(contracts: &[G3TsAstroContentIntegrationContractInpu
             ),
             rel_path,
         ));
-    }
 }
 
-fn policy_content_is_strict(policy: &G3TsAstroPolicySnapshot) -> bool {
+fn policy_content_is_strict(policy: &G3TsAstroContentPolicySnapshot) -> bool {
     policy.profile.as_deref() == Some(PROFILE)
         && !policy.content_routes.is_empty()
         && non_empty_optional_string(&policy.content_root)

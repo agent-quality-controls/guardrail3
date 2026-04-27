@@ -1,4 +1,4 @@
-use g3ts_astro_types::{G3TsAstroSetupIntegrationContractInput, G3TsAstroConfigSurfaceState};
+use g3ts_astro_setup_types::{G3TsAstroConfigSurfaceState, G3TsAstroSetupIntegrationContractInput};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SETUP-CONFIG-21";
@@ -10,57 +10,57 @@ const REQUIRED_PACKAGES: [&str; 5] = [
     "@nuasite/checks",
 ];
 
-pub(crate) fn check(contracts: &[G3TsAstroSetupIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
-    for contract in contracts {
-        let rel_path = g3ts_astro_check_support::core::astro_config_rel_path(contract);
-        let missing_packages = REQUIRED_PACKAGES
+pub(crate) fn check(
+    contract: &G3TsAstroSetupIntegrationContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let rel_path = crate::support::astro_config_rel_path(&contract.astro_config);
+    let missing_packages = REQUIRED_PACKAGES
+        .into_iter()
+        .filter(|dependency| !crate::support::package_has_dependency(&contract.package, dependency))
+        .collect::<Vec<_>>();
+    let missing_integrations = match &contract.astro_config {
+        G3TsAstroConfigSurfaceState::Parsed { snapshot } => required_integrations()
             .into_iter()
-            .filter(|dependency| {
-                !g3ts_astro_check_support::core::package_has_dependency(contract, dependency)
+            .filter(|integration| !match integration.argument {
+                RequiredIntegrationArgument::None => {
+                    crate::support::astro_config_has_zero_arg_integration(
+                        snapshot,
+                        integration.module,
+                        integration.accepted_imports,
+                    )
+                }
+                RequiredIntegrationArgument::Some => {
+                    crate::support::astro_config_has_object_arg_integration(
+                        snapshot,
+                        integration.module,
+                        integration.accepted_imports,
+                    )
+                }
             })
-            .collect::<Vec<_>>();
-        let missing_integrations = match &contract.astro_config {
-            G3TsAstroConfigSurfaceState::Parsed { snapshot } => required_integrations()
-                .into_iter()
-                .filter(|integration| !match integration.argument {
-                    RequiredIntegrationArgument::None => {
-                        g3ts_astro_check_support::core::astro_config_has_zero_arg_integration(
-                            snapshot,
-                            integration.module,
-                            integration.accepted_imports,
-                        )
-                    }
-                    RequiredIntegrationArgument::Some => {
-                        g3ts_astro_check_support::core::astro_config_has_object_arg_integration(
-                            snapshot,
-                            integration.module,
-                            integration.accepted_imports,
-                        )
-                    }
-                })
-                .map(|integration| integration.module)
-                .collect::<Vec<_>>(),
-            G3TsAstroConfigSurfaceState::Missing { .. }
-            | G3TsAstroConfigSurfaceState::Unreadable { .. }
-            | G3TsAstroConfigSurfaceState::ParseError { .. } => required_integrations()
-                .into_iter()
-                .map(|integration| integration.module)
-                .collect(),
-        };
+            .map(|integration| integration.module)
+            .collect::<Vec<_>>(),
+        G3TsAstroConfigSurfaceState::Missing { .. }
+        | G3TsAstroConfigSurfaceState::Unreadable { .. }
+        | G3TsAstroConfigSurfaceState::ParseError { .. } => required_integrations()
+            .into_iter()
+            .map(|integration| integration.module)
+            .collect(),
+    };
 
-        if missing_packages.is_empty() && missing_integrations.is_empty() {
-            if let Some(rel_path) = rel_path {
-                results.push(g3ts_astro_check_support::core::info(
+    if missing_packages.is_empty() && missing_integrations.is_empty() {
+        if let Some(rel_path) = rel_path {
+            results.push(crate::support::info(
                     ID,
                     "Required Astro integrations are present",
                     format!("`{rel_path}` wires React, MDX, sitemap, robots, and Nuasite checks integrations from the approved packages."),
                     rel_path,
                 ));
-            }
-            continue;
         }
+        return;
+    }
 
-        results.push(g3ts_astro_check_support::core::error(
+    results.push(crate::support::error(
             ID,
             "Required Astro integrations are missing",
             format!(
@@ -70,7 +70,6 @@ pub(crate) fn check(contracts: &[G3TsAstroSetupIntegrationContractInput], result
             ),
             rel_path,
         ));
-    }
 }
 
 struct RequiredIntegration {

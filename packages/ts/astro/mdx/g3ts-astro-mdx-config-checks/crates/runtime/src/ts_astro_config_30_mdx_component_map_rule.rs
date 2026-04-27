@@ -1,64 +1,72 @@
-use g3ts_astro_types::G3TsAstroMdxConfigChecksInput;
+use g3ts_astro_mdx_types::{
+    G3TsAstroMdxEslintPluginContractInput, G3TsAstroMdxEslintSurfaceState,
+    G3TsAstroMdxMissingComponentMapInput,
+};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-MDX-CONFIG-30";
 const PLUGIN_PACKAGE_NAME: &str = "g3ts-eslint-plugin-astro-pipeline";
 const RULE_NAME: &str = "astro-pipeline/mdx-component-imports-from-approved-map";
 
-pub(crate) fn check(input: &G3TsAstroMdxConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
-        let policy_rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
-        let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
-            continue;
-        };
+pub(crate) fn check_missing_source(
+    contract: &G3TsAstroMdxMissingComponentMapInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    results.push(crate::support::error(
+        ID,
+        "Astro MDX component-map source is missing",
+        format!(
+            "`{}` declares `[ts.astro.mdx].component_maps` path `{}`, but G3TS found no source files there. Configure the approved MDX component-map module that MDX files may import.",
+            contract.policy_rel_path, contract.configured_path
+        ),
+        Some(&contract.policy_rel_path),
+    ));
+}
 
-        if !contract
-            .mdx_sources
-            .missing_mdx_component_maps
-            .is_empty()
-        {
-            results.push(g3ts_astro_check_support::core::error(
+pub(crate) fn check_eslint(
+    contract: &G3TsAstroMdxEslintPluginContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let rel_path = eslint_rel_path(contract);
+    if mdx_component_map_rule_effective(contract) {
+        if let Some(rel_path) = rel_path {
+            results.push(crate::support::info(
                 ID,
-                "Astro MDX component-map sources are missing",
-                format!(
-                    "`{}` declares `[ts.astro.mdx].component_maps = [{}]`, but G3TS found no source files at those app-relative paths. Configure the approved MDX component-map modules that MDX files may import.",
-                    policy.rel_path,
-                    contract.mdx_sources.missing_mdx_component_maps.join(", ")
-                ),
-                policy_rel_path,
+                "Astro MDX component-map rule is effective",
+                format!("`{rel_path}` enforces `{RULE_NAME}` from `{PLUGIN_PACKAGE_NAME}` on the MDX content lane with non-empty `mdxContentGlobs` and `approvedMdxComponentModules`."),
+                rel_path,
             ));
         }
+        return;
     }
 
-    for contract in &input.eslint_contracts {
-        let rel_path = g3ts_astro_check_support::eslint::eslint_rel_path(contract);
-        let Some(eslint) = g3ts_astro_check_support::core::parsed_eslint_surface(contract) else {
-            results.push(error(rel_path));
-            continue;
-        };
+    results.push(error(rel_path));
+}
 
-        if eslint
-            .mdx_content_effective_mdx_component_map_rules
-            .iter()
-            .any(|rule| rule == RULE_NAME)
-        {
-            if let Some(rel_path) = rel_path {
-                results.push(g3ts_astro_check_support::core::info(
-                    ID,
-                    "Astro MDX component-map rule is effective",
-                    format!("`{rel_path}` enforces `{RULE_NAME}` from `{PLUGIN_PACKAGE_NAME}` on the MDX content lane with non-empty `mdxContentGlobs` and `approvedMdxComponentModules`."),
-                    rel_path,
-                ));
-            }
-            continue;
-        }
-
-        results.push(error(rel_path));
+fn eslint_rel_path(contract: &G3TsAstroMdxEslintPluginContractInput) -> Option<&str> {
+    match &contract.config {
+        G3TsAstroMdxEslintSurfaceState::Missing { rel_path }
+        | G3TsAstroMdxEslintSurfaceState::Unreadable { rel_path, .. }
+        | G3TsAstroMdxEslintSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
+        G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
     }
 }
 
+fn mdx_component_map_rule_effective(contract: &G3TsAstroMdxEslintPluginContractInput) -> bool {
+    let G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = &contract.config else {
+        return false;
+    };
+
+    snapshot.mdx_content_probe_present
+        && !snapshot.mdx_content_probe_ignored
+        && snapshot
+            .mdx_content_effective_mdx_component_map_rules
+            .iter()
+            .any(|rule| rule == RULE_NAME)
+}
+
 fn error(rel_path: Option<&str>) -> G3CheckResult {
-    g3ts_astro_check_support::core::error(
+    crate::support::error(
         ID,
         "Astro MDX component-map rule is not effective",
         format!(

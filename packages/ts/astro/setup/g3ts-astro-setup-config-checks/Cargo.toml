@@ -14,12 +14,12 @@ include = ["src/**", "crates/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
 g3ts-astro-setup-config-checks-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
-g3ts-astro-types = { path = "../../g3ts-astro-types", version = "0.1.0", optional = true }
+g3ts-astro-setup-types = { path = "../g3ts-astro-setup-types", version = "0.1.0", optional = true }
 
 [features]
 default = ["all"]
 all = ["api"]
-api = ["dep:g3ts-astro-setup-config-checks-runtime", "dep:g3ts-astro-types"]
+api = ["dep:g3ts-astro-setup-config-checks-runtime", "dep:g3ts-astro-setup-types"]
 
 [package.metadata.guardrail3]
 shared = true

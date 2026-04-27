@@ -1,4 +1,6 @@
 mod run;
+mod support;
+mod ts_astro_config_17_pipeline_plugin_package_present;
 mod ts_astro_config_18_content_adapter_rule;
 mod ts_astro_config_19_inline_copy_rule;
 mod ts_astro_config_23_strict_content_policy;

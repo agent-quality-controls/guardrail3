@@ -9,8 +9,6 @@ fn golden_setup_package_reports_owned_ids() {
             "TS-ASTRO-SETUP-CONFIG-02",
             "TS-ASTRO-SETUP-CONFIG-03",
             "TS-ASTRO-SETUP-CONFIG-05",
-            "TS-ASTRO-SETUP-CONFIG-06",
-            "TS-ASTRO-SETUP-CONFIG-07",
             "TS-ASTRO-SETUP-CONFIG-09",
             "TS-ASTRO-SETUP-CONFIG-10",
             "TS-ASTRO-SETUP-CONFIG-11",

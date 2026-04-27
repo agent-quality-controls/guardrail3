@@ -236,7 +236,10 @@ fn recovery_finds_ignored_generated_state_directory_sentinels() {
     let root = temp_dir.path();
     git_init(root);
 
-    write(root.join(".gitignore"), ".next/\n.velite/\n.contentlayer/\n");
+    write(
+        root.join(".gitignore"),
+        ".next/\n.velite/\n.contentlayer/\n",
+    );
     fs::create_dir_all(root.join(".next/server/app")).expect("create .next output");
     fs::create_dir_all(root.join(".velite")).expect("create .velite output");
     fs::create_dir_all(root.join(".contentlayer/generated")).expect("create .contentlayer output");

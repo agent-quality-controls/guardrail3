@@ -124,13 +124,11 @@ fn normalize_fact(script_name: &str, input: &str) -> PackageScriptParseFact {
             let state = command_state(script_name, &parsed);
             (parsed.commands, parsed.all_commands, state)
         }
-        Err(reason) if script_name_is_guardrail_related(script_name) => {
-            (
-                Vec::new(),
-                Vec::new(),
-                PackageScriptParseState::ParseError { reason },
-            )
-        }
+        Err(reason) if script_name_is_guardrail_related(script_name) => (
+            Vec::new(),
+            Vec::new(),
+            PackageScriptParseState::ParseError { reason },
+        ),
         Err(_reason) => (
             Vec::new(),
             Vec::new(),

@@ -1,5 +1,5 @@
 pub fn assert_runtime_check_exact_ids(
-    input: &g3ts_astro_types::G3TsAstroContentConfigChecksInput,
+    input: &g3ts_astro_content_types::G3TsAstroContentConfigChecksInput,
     expected: &[&str],
 ) {
     let results = g3ts_astro_content_config_checks_runtime::check(input);

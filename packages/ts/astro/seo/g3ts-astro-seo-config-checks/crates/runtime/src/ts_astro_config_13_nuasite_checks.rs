@@ -1,40 +1,39 @@
-use g3ts_astro_types::{G3TsAstroSeoIntegrationContractInput, G3TsAstroConfigSurfaceState};
+use g3ts_astro_seo_types::{G3TsAstroConfigSurfaceState, G3TsAstroSeoIntegrationContractInput};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SEO-CONFIG-13";
 const DEPENDENCY_NAME: &str = "@nuasite/checks";
 
-pub(crate) fn check(contracts: &[G3TsAstroSeoIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
-    for contract in contracts {
-        let rel_path = g3ts_astro_check_support::core::astro_config_rel_path(contract);
-        let has_package =
-            g3ts_astro_check_support::core::package_has_dependency(contract, DEPENDENCY_NAME);
-        let has_build_script = g3ts_astro_check_support::core::package_safely_runs_astro_build(contract);
-        let has_static_output = g3ts_astro_check_support::core::astro_config_is_static(contract);
-        let has_checks = match &contract.astro_config {
-            G3TsAstroConfigSurfaceState::Parsed { snapshot } => {
-                g3ts_astro_check_support::core::astro_config_has_nuasite_checks_with_required_options(
-                    snapshot,
-                )
-            }
-            G3TsAstroConfigSurfaceState::Missing { .. }
-            | G3TsAstroConfigSurfaceState::Unreadable { .. }
-            | G3TsAstroConfigSurfaceState::ParseError { .. } => false,
-        };
+pub(crate) fn check(
+    contract: &G3TsAstroSeoIntegrationContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let rel_path = crate::support::astro_config_rel_path(&contract.astro_config);
+    let has_package = crate::support::package_has_dependency(&contract.package, DEPENDENCY_NAME);
+    let has_build_script = crate::support::package_safely_runs_astro_build(&contract.package);
+    let has_static_output = crate::support::astro_config_is_static(&contract.astro_config);
+    let has_checks = match &contract.astro_config {
+        G3TsAstroConfigSurfaceState::Parsed { snapshot } => {
+            crate::nuasite_options::astro_config_has_nuasite_checks_with_required_options(snapshot)
+        }
+        G3TsAstroConfigSurfaceState::Missing { .. }
+        | G3TsAstroConfigSurfaceState::Unreadable { .. }
+        | G3TsAstroConfigSurfaceState::ParseError { .. } => false,
+    };
 
-        if has_package && has_build_script && has_static_output && has_checks {
-            if let Some(rel_path) = rel_path {
-                results.push(g3ts_astro_check_support::core::info(
+    if has_package && has_build_script && has_static_output && has_checks {
+        if let Some(rel_path) = rel_path {
+            results.push(crate::support::info(
                     ID,
                     "Nuasite rendered-output checks are installed and wired",
                     format!("`{rel_path}` wires `checks()` from `@nuasite/checks` with fail-closed options and the package scripts safely run `astro build`."),
                     rel_path,
                 ));
-            }
-            continue;
         }
+        return;
+    }
 
-        results.push(g3ts_astro_check_support::core::error(
+    results.push(crate::support::error(
             ID,
             "Nuasite rendered-output checks are not installed and wired",
             format!(
@@ -43,7 +42,6 @@ pub(crate) fn check(contracts: &[G3TsAstroSeoIntegrationContractInput], results:
             ),
             rel_path,
         ));
-    }
 }
 
 fn missing_parts(

@@ -50,17 +50,11 @@ impl FamilyRunner for StubFamilyRunner {
                     None,
                 ),
             ],
-            SupportedFamily::AstroSetup | SupportedFamily::AstroContent | SupportedFamily::AstroMdx | SupportedFamily::AstroSeo | SupportedFamily::AstroState => vec![
-                G3CheckResult::new(
-                    "TS-ASTRO-CONFIG-01".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("astro.config.mjs".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
+            SupportedFamily::AstroSetup => astro_inventory("TS-ASTRO-SETUP-CONFIG-01"),
+            SupportedFamily::AstroContent => astro_inventory("TS-ASTRO-CONTENT-CONFIG-17"),
+            SupportedFamily::AstroMdx => astro_inventory("TS-ASTRO-MDX-CONFIG-20"),
+            SupportedFamily::AstroSeo => astro_inventory("TS-ASTRO-SEO-CONFIG-13"),
+            SupportedFamily::AstroState => astro_inventory("TS-ASTRO-STATE-FILETREE-11"),
             SupportedFamily::Arch => vec![
                 G3CheckResult::new(
                     "TS-ARCH-CONFIG-01".to_owned(),
@@ -131,6 +125,20 @@ impl FamilyRunner for StubFamilyRunner {
 
         Ok(results)
     }
+}
+
+fn astro_inventory(id: &str) -> Vec<G3CheckResult> {
+    vec![
+        G3CheckResult::new(
+            id.to_owned(),
+            G3Severity::Info,
+            "inventory".to_owned(),
+            "inventory".to_owned(),
+            Some("astro.config.mjs".to_owned()),
+            None,
+        )
+        .into_inventory(),
+    ]
 }
 
 #[derive(Debug)]
@@ -280,7 +288,11 @@ impl FamilyRunner for ErroringFamilyRunner {
             SupportedFamily::Eslint => Err(FamilyRunError {
                 message: "eslint runner exploded".to_owned(),
             }),
-            SupportedFamily::AstroSetup | SupportedFamily::AstroContent | SupportedFamily::AstroMdx | SupportedFamily::AstroSeo | SupportedFamily::AstroState => Err(FamilyRunError {
+            SupportedFamily::AstroSetup
+            | SupportedFamily::AstroContent
+            | SupportedFamily::AstroMdx
+            | SupportedFamily::AstroSeo
+            | SupportedFamily::AstroState => Err(FamilyRunError {
                 message: "astro runner exploded".to_owned(),
             }),
             SupportedFamily::Arch => Err(FamilyRunError {

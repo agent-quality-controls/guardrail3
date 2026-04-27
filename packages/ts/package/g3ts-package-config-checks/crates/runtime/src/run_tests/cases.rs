@@ -1,9 +1,9 @@
 use g3ts_package_config_checks_assertions::run as assertions;
 
 use super::helpers::{
-    fail_open_syncpack_script, fake_only_allow_preinstall, golden_root, local_pg_dependency_allowed,
-    local_root_only, missing_root, missing_syncpack_config, missing_syncpack_source_and_bans,
-    root_parse_error, weak_root,
+    fail_open_syncpack_script, fake_only_allow_preinstall, golden_root,
+    local_pg_dependency_allowed, local_root_only, missing_root, missing_syncpack_config,
+    missing_syncpack_source_and_bans, root_parse_error, weak_root,
 };
 
 #[test]

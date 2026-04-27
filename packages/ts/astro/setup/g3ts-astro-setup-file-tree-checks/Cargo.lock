@@ -7,7 +7,7 @@ name = "g3ts-astro-setup-file-tree-checks"
 version = "0.1.0"
 dependencies = [
  "g3ts-astro-setup-file-tree-checks-runtime",
- "g3ts-astro-types",
+ "g3ts-astro-setup-types",
 ]
 
 [[package]]
@@ -15,7 +15,7 @@ name = "g3ts-astro-setup-file-tree-checks-assertions"
 version = "0.1.0"
 dependencies = [
  "g3ts-astro-setup-file-tree-checks-runtime",
- "g3ts-astro-types",
+ "g3ts-astro-setup-types",
  "guardrail3-check-types",
 ]
 
@@ -24,12 +24,12 @@ name = "g3ts-astro-setup-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3ts-astro-setup-file-tree-checks-assertions",
- "g3ts-astro-types",
+ "g3ts-astro-setup-types",
  "guardrail3-check-types",
 ]
 
 [[package]]
-name = "g3ts-astro-types"
+name = "g3ts-astro-setup-types"
 version = "0.1.0"
 
 [[package]]

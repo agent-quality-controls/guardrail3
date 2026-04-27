@@ -1,31 +1,20 @@
-use g3ts_astro_types::{G3TsAstroAppRootInput, G3TsAstroStateFileTreeChecksInput};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "TS-ASTRO-STATE-FILETREE-11";
 
-pub(crate) fn check(input: &G3TsAstroStateFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
-    for app_root in strict_content_roots(input) {
-        for rel_path in &app_root.legacy_generated_state_rel_paths {
-            results.push(G3CheckResult::new(
-                ID.to_owned(),
-                G3Severity::Error,
-                "Astro content app must not contain legacy parallel framework state".to_owned(),
-                format!(
-                    "Astro content app `{}` contains `{rel_path}`. Remove `.next/**`, `.contentlayer/**`, and `contentlayer.config.*` from this Astro app. These files prove a parallel Next/Contentlayer pipeline is present or was left behind, so agents can bypass Astro content collections.",
-                    app_root.app_root_rel_path
-                ),
-                Some(rel_path.clone()),
-                None,
-            ));
-        }
-    }
-}
-
-fn strict_content_roots(
-    input: &G3TsAstroStateFileTreeChecksInput,
-) -> impl Iterator<Item = &G3TsAstroAppRootInput> {
-    input
-        .build_collection_roots
-        .iter()
-        .chain(input.live_collection_roots.iter())
+pub(crate) fn check(
+    app_root_rel_path: &str,
+    legacy_state_rel_path: &str,
+    results: &mut Vec<G3CheckResult>,
+) {
+    results.push(G3CheckResult::new(
+        ID.to_owned(),
+        G3Severity::Error,
+        "Astro content app must not contain legacy parallel framework state".to_owned(),
+        format!(
+            "Astro content app `{app_root_rel_path}` contains `{legacy_state_rel_path}`. Remove `.next/**`, `.contentlayer/**`, and `contentlayer.config.*` from this Astro app. These files prove a parallel Next/Contentlayer pipeline is present or was left behind, so agents can bypass Astro content collections."
+        ),
+        Some(legacy_state_rel_path.to_owned()),
+        None,
+    ));
 }
