@@ -142,8 +142,8 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                 G3TsAstroIntegrationContractInput {
                     app_root_rel_path: app_root_rel_path.clone(),
                     content_mode: classify_content_mode(crawl, app_root_rel_path),
-                    route_page_paths: crate::select::route_page_paths(crawl, app_root_rel_path),
-                    endpoint_paths: crate::select::endpoint_paths(crawl, app_root_rel_path),
+                    route_page_paths: crate::ingestion_select::route_page_paths(crawl, app_root_rel_path),
+                    endpoint_paths: crate::ingestion_select::endpoint_paths(crawl, app_root_rel_path),
                     approved_surface_sources: G3TsAstroApprovedSurfaceSourcePaths {
                         content_adapter: content_adapter_source_paths,
                         content_adapter_astro_content: content_adapter_astro_content_source_paths,
@@ -198,26 +198,26 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
             let astro_policy = ingest_astro_policy_surface(crawl, app_root_rel_path);
             G3TsAstroAppRootInput {
                 app_root_rel_path: app_root_rel_path.clone(),
-                astro_config_rel_path: crate::select::select_astro_config(crawl, app_root_rel_path)
+                astro_config_rel_path: crate::ingestion_select::select_astro_config(crawl, app_root_rel_path)
                     .map(|entry| entry.path.rel_path.clone()),
-                content_config_rel_path: crate::select::select_content_config(
+                content_config_rel_path: crate::ingestion_select::select_content_config(
                     crawl,
                     app_root_rel_path,
                 )
                 .map(|entry| entry.path.rel_path.clone()),
-                live_config_rel_path: crate::select::select_live_config(crawl, app_root_rel_path)
+                live_config_rel_path: crate::ingestion_select::select_live_config(crawl, app_root_rel_path)
                     .map(|entry| entry.path.rel_path.clone()),
-                velite_config_rel_path: crate::select::select_velite_config(
+                velite_config_rel_path: crate::ingestion_select::select_velite_config(
                     crawl,
                     app_root_rel_path,
                 )
                 .map(|entry| entry.path.rel_path.clone()),
-                velite_output_rel_paths: crate::select::velite_output_paths(
+                velite_output_rel_paths: crate::ingestion_select::velite_output_paths(
                     crawl,
                     app_root_rel_path,
                     &app_roots,
                 ),
-                legacy_generated_state_rel_paths: crate::select::legacy_generated_state_paths(
+                legacy_generated_state_rel_paths: crate::ingestion_select::legacy_generated_state_paths(
                     crawl,
                     app_root_rel_path,
                     &app_roots,
@@ -253,7 +253,7 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
         route_markdown_pages: app_roots
             .iter()
             .flat_map(|app_root_rel_path| {
-                crate::select::route_markdown_pages(crawl, app_root_rel_path)
+                crate::ingestion_select::route_markdown_pages(crawl, app_root_rel_path)
             })
             .into_iter()
             .map(|rel_path| G3TsAstroRouteMarkdownPageInput { rel_path })
@@ -262,7 +262,7 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroFileTre
 }
 
 fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
-    let mut roots: BTreeSet<String> = crate::select::select_astro_app_roots(crawl)
+    let mut roots: BTreeSet<String> = crate::ingestion_select::select_astro_app_roots(crawl)
         .into_iter()
         .collect();
 
@@ -295,10 +295,10 @@ fn classify_content_mode(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> G3TsAstroContentMode {
-    if crate::select::select_live_config(crawl, app_root_rel_path).is_some() {
+    if crate::ingestion_select::select_live_config(crawl, app_root_rel_path).is_some() {
         G3TsAstroContentMode::LiveCollections
-    } else if crate::select::select_content_config(crawl, app_root_rel_path).is_some()
-        || crate::select::has_content_files(crawl, app_root_rel_path)
+    } else if crate::ingestion_select::select_content_config(crawl, app_root_rel_path).is_some()
+        || crate::ingestion_select::has_content_files(crawl, app_root_rel_path)
     {
         G3TsAstroContentMode::BuildCollections
     } else {
@@ -310,7 +310,7 @@ fn ingest_package_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> G3TsAstroPackageSurfaceState {
-    let Some(entry) = crate::select::select_package_json(crawl, app_root_rel_path) else {
+    let Some(entry) = crate::ingestion_select::select_package_json(crawl, app_root_rel_path) else {
         return G3TsAstroPackageSurfaceState::Missing {
             rel_path: if app_root_rel_path == "." {
                 PACKAGE_JSON_REL_PATH.to_owned()
@@ -675,7 +675,7 @@ fn ingest_astro_config_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> G3TsAstroConfigSurfaceState {
-    let Some(entry) = crate::select::select_astro_config(crawl, app_root_rel_path) else {
+    let Some(entry) = crate::ingestion_select::select_astro_config(crawl, app_root_rel_path) else {
         return G3TsAstroConfigSurfaceState::Missing {
             rel_path: if app_root_rel_path == "." {
                 "astro.config.*".to_owned()
@@ -1143,7 +1143,7 @@ fn ingest_eslint_surface(
     app_root_rel_path: &str,
     astro_policy: &G3TsAstroPolicySurfaceState,
 ) -> G3TsAstroEslintSurfaceState {
-    let Some(entry) = crate::select::select_active_eslint_config(crawl, app_root_rel_path) else {
+    let Some(entry) = crate::ingestion_select::select_active_eslint_config(crawl, app_root_rel_path) else {
         return G3TsAstroEslintSurfaceState::Missing {
             rel_path: if app_root_rel_path == "." {
                 ESLINT_CONFIG_PATTERN.to_owned()
@@ -1160,7 +1160,7 @@ fn ingest_eslint_surface(
         };
     }
 
-    let probes = crate::select::probe_targets(crawl, app_root_rel_path, &entry.path.rel_path);
+    let probes = crate::ingestion_select::probe_targets(crawl, app_root_rel_path, &entry.path.rel_path);
     let document = match parse_eslint_document(&crawl.root_abs_path, &entry.path.rel_path, &probes)
     {
         Ok(document) => document,
@@ -1181,8 +1181,8 @@ fn ingest_eslint_surface(
 
     let typed = eslint_config_parser::typed(&document)
         .expect("parsed eslint config document should stay typed");
-    let route_page_paths = crate::select::route_page_paths(crawl, app_root_rel_path);
-    let endpoint_paths = crate::select::endpoint_paths(crawl, app_root_rel_path);
+    let route_page_paths = crate::ingestion_select::route_page_paths(crawl, app_root_rel_path);
+    let endpoint_paths = crate::ingestion_select::endpoint_paths(crawl, app_root_rel_path);
     let content_adapter_policy_paths = content_adapter_policy_paths(astro_policy);
     let mdx_component_map_policy_paths =
         policy_configured_paths(astro_policy, |policy| &policy.mdx_component_maps);
@@ -2037,7 +2037,3 @@ fn package_surface_has_astro_dependency(package: &G3TsAstroPackageSurfaceState) 
         | G3TsAstroPackageSurfaceState::ParseError { .. } => false,
     }
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

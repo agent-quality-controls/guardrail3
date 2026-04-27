@@ -3,5 +3,5 @@ use g3ts_astro_types::G3TsAstroConfigChecksInput;
 
 #[must_use]
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChecksInput {
-    g3ts_astro_ingestion::ingest_for_config_checks(crawl)
+    g3ts_astro_check_support::ingestion::ingest_for_config_checks(crawl)
 }
