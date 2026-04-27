@@ -5,7 +5,7 @@ pub fn check(input: &G3RsArchConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for node in &input.crates {
-        crate::rs_arch_07b_dependency_count_split::check(node, &mut results);
+        crate::rs_arch_07b_dependency_count_split::check(node, &input.rust_policy, &mut results);
         crate::rs_arch_08b_feature_contract::check(node, &mut results);
     }
 

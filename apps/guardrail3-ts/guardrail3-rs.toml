@@ -4,15 +4,18 @@ allowed_deps = [
   "clap",
   "g3-workspace-crawl",
   "g3rs-workspace-crawl",
-  "g3ts-astro-checks",
   "g3ts-astro-content-config-checks",
   "g3ts-astro-content-file-tree-checks",
-  "g3ts-astro-ingestion",
+  "g3ts-astro-content-ingestion",
   "g3ts-astro-mdx-config-checks",
+  "g3ts-astro-mdx-ingestion",
   "g3ts-astro-seo-config-checks",
+  "g3ts-astro-seo-ingestion",
   "g3ts-astro-setup-config-checks",
   "g3ts-astro-setup-file-tree-checks",
+  "g3ts-astro-setup-ingestion",
   "g3ts-astro-state-file-tree-checks",
+  "g3ts-astro-state-ingestion",
   "g3ts-eslint-config-checks",
   "g3ts-eslint-ingestion",
   "g3ts-arch-config-checks",
@@ -43,3 +46,9 @@ allowed_deps = [
   "guardrail3-ts-validate-command-assertions",
   "tempfile",
 ]
+
+[[waivers]]
+rule = "RS-ARCH-CONFIG-07"
+file = "crates/logic/family-runner-structure/Cargo.toml"
+selector = "dependency-count"
+reason = "The TS structure runner intentionally composes explicit structure-family packages. Astro setup, content, MDX, SEO, and state dependencies stay visible here instead of being hidden behind an aggregate Astro facade."

@@ -474,7 +474,11 @@ fn file_tree_pipeline_reports_dense_nested_member_module_in_mixed_root_workspace
         "crates/assertions/Cargo.toml",
         "[package]\nname = \"pkg-assertions\"\nversion = \"0.1.0\"\n",
     );
-    write_file(&root, "crates/assertions/src/lib.rs", "pub struct Assertions;\n");
+    write_file(
+        &root,
+        "crates/assertions/src/lib.rs",
+        "pub struct Assertions;\n",
+    );
 
     make_dir(&root, "crates/types/src");
     write_file(
@@ -497,19 +501,8 @@ fn file_tree_pipeline_reports_dense_nested_member_module_in_mixed_root_workspace
         "pub mod baseline;\n",
     );
     for name in [
-        "baseline",
-        "support",
-        "one",
-        "two",
-        "three",
-        "four",
-        "five",
-        "six",
-        "seven",
-        "eight",
-        "nine",
-        "ten",
-        "eleven",
+        "baseline", "support", "one", "two", "three", "four", "five", "six", "seven", "eight",
+        "nine", "ten", "eleven",
     ] {
         write_file(
             &root,

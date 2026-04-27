@@ -1,32 +1,24 @@
 [package]
-name = "g3ts-astro-checks"
+name = "g3ts-astro-content-ingestion"
 version = "0.1.0"
 edition = "2024"
-description = "Facade crate for guardrail3 TypeScript Astro check families"
+description = "Ingestion for guardrail3 TypeScript Astro content checks"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
 repository = "https://github.com/ArcticLens/websmasher"
-keywords = ["guardrail3", "typescript", "astro", "checks"]
+keywords = ["guardrail3", "typescript", "astro", "content", "ingestion"]
 categories = ["development-tools"]
 publish = false
 readme = "README.md"
 include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
-g3-workspace-crawl = { path = "../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
-g3ts-astro-content-config-checks = { path = "../content/g3ts-astro-content-config-checks", version = "0.1.0" }
-g3ts-astro-content-file-tree-checks = { path = "../content/g3ts-astro-content-file-tree-checks", version = "0.1.0" }
-g3ts-astro-ingestion = { path = "../g3ts-astro-ingestion", version = "0.1.0" }
-g3ts-astro-mdx-config-checks = { path = "../mdx/g3ts-astro-mdx-config-checks", version = "0.1.0" }
-g3ts-astro-seo-config-checks = { path = "../seo/g3ts-astro-seo-config-checks", version = "0.1.0" }
-g3ts-astro-setup-config-checks = { path = "../setup/g3ts-astro-setup-config-checks", version = "0.1.0" }
-g3ts-astro-setup-file-tree-checks = { path = "../setup/g3ts-astro-setup-file-tree-checks", version = "0.1.0" }
-g3ts-astro-state-file-tree-checks = { path = "../state/g3ts-astro-state-file-tree-checks", version = "0.1.0" }
-guardrail3-check-types = { path = "../../../shared/guardrail3-check-types", version = "0.1.0" }
+g3-workspace-crawl = { path = "../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
+g3ts-astro-ingestion = { path = "../../g3ts-astro-ingestion", version = "0.1.0" }
+g3ts-astro-types = { path = "../../g3ts-astro-types", version = "0.1.0" }
 
 [features]
-default = ["all"]
-all = ["api"]
+default = ["api"]
 api = []
 
 [package.metadata.guardrail3]

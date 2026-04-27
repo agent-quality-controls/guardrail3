@@ -1,4 +1,4 @@
-use g3rs_arch_types::types::G3RsArchConfigCrate;
+use g3rs_arch_types::types::{G3RsArchConfigCrate, G3RsArchRustPolicyState};
 use guardrail3_check_types::G3CheckResult;
 
 pub(super) fn config_crate(rel_dir: &str) -> G3RsArchConfigCrate {
@@ -18,6 +18,10 @@ pub(super) fn config_crate(rel_dir: &str) -> G3RsArchConfigCrate {
 
 pub(super) fn run_rule(node: &G3RsArchConfigCrate) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
-    crate::rs_arch_07b_dependency_count_split::check(node, &mut results);
+    crate::rs_arch_07b_dependency_count_split::check(
+        node,
+        &G3RsArchRustPolicyState::Missing,
+        &mut results,
+    );
     results
 }

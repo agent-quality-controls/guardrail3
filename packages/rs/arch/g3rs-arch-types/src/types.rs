@@ -141,10 +141,11 @@ pub struct G3RsArchConfigCrate {
     pub default_feature_deps: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct G3RsArchConfigChecksInput {
     pub crates: Vec<G3RsArchConfigCrate>,
     pub dependency_edges: Vec<G3RsArchDependencyEdge>,
+    pub rust_policy: G3RsArchRustPolicyState,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

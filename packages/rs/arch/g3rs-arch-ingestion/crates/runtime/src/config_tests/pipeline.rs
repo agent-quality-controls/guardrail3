@@ -151,6 +151,32 @@ fn split_rule_pipeline_routes_dependency_threshold_to_config_only() {
 }
 
 #[test]
+fn split_rule_allows_explicit_dependency_count_waiver() {
+    let root = temp_workspace_root();
+
+    write_file(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crate_a\"]\n",
+    );
+    write_file(
+        &root,
+        "guardrail3-rs.toml",
+        "profile = \"service\"\n\n[[waivers]]\nrule = \"RS-ARCH-CONFIG-07\"\nfile = \"crate_a/Cargo.toml\"\nselector = \"dependency-count\"\nreason = \"This runner explicitly composes independent check packages; hiding them behind an aggregate facade is worse architecture.\"\n",
+    );
+    make_dir(&root, "crate_a/src");
+    write_file(
+        &root,
+        "crate_a/Cargo.toml",
+        "[package]\nname = \"crate_a\"\nversion = \"0.1.0\"\n\n[dependencies]\none = \"1\"\ntwo = \"1\"\nthree = \"1\"\nfour = \"1\"\nfive = \"1\"\nsix = \"1\"\nseven = \"1\"\neight = \"1\"\nnine = \"1\"\nten = \"1\"\neleven = \"1\"\ntwelve = \"1\"\nthirteen = \"1\"\n",
+    );
+    write_file(&root, "crate_a/src/lib.rs", "pub mod api;\n");
+
+    let results = config_results(&root);
+    assertions::assert_missing_result(&results, "RS-ARCH-CONFIG-07");
+}
+
+#[test]
 fn split_rule_ignores_dev_dependencies_in_hard_config_cap() {
     let root = temp_workspace_root();
 
