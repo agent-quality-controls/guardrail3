@@ -34,7 +34,7 @@ Complete the `clippy` family under the package model by:
   - filetree = coverage, placement, shadowing, input-failure surfacing
   - config = `clippy.toml`, `guardrail3.toml`, and `.cargo/config*` semantics
   - source = none unless the app proves a real source rule
-- Treat the current `RS-CLIPPY-CONFIG-01..08` package rules as meaningful package checks, not dead code.
+- Treat the current `g3rs-clippy/max-struct-bools..08` package rules as meaningful package checks, not dead code.
   - They stay and the migrated app-owned rules will be added around them.
 - Fix public API leakage first.
   - A package must not publicly expose unimplemented lanes as if they are real.

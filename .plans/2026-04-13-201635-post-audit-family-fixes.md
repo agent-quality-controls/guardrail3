@@ -11,7 +11,7 @@ Approach
    - root `[package]` without `[workspace]` must fail for config, filetree, and source ingestion
    - stale not-implemented error variants must be removed from the public ingestion contract
 3. Fix clippy and release at the ingestion/package-contract boundary, not in downstream checks.
-4. Resolve code family drift by updating package-facing docs/comments/tests to reflect the deliberate decision that `RS-CODE-SOURCE-24` stays in code.
+4. Resolve code family drift by updating package-facing docs/comments/tests to reflect the deliberate decision that `g3rs-code/ast-24-path-attr-with-reason` stays in code.
 5. Fix stale hooks READMEs so they describe hooks, not topology/code.
 6. Re-run the affected family suites plus `git diff --check`.
 7. Write a standalone worklog and commit the fix set separately.
@@ -19,7 +19,7 @@ Approach
 Key decisions
 
 - Do not touch hexarch in this pass.
-- Treat `RS-CODE-SOURCE-24` as an intentional divergence from the old app because that decision was made explicitly in-session.
+- Treat `g3rs-code/ast-24-path-attr-with-reason` as an intentional divergence from the old app because that decision was made explicitly in-session.
 - Remove fake/public package surfaces when a lane is not real rather than keeping compatibility stubs.
 - Fix behavior at ingestion boundaries so rules see the intended typed states.
 

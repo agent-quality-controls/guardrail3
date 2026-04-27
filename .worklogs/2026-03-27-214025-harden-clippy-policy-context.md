@@ -18,7 +18,7 @@ This contradicted both the family README and the plan, which already said the fa
 At the same time, the clippy worktree already contained a coherent but uncommitted sub-slice:
 
 - `allow-panic-in-tests = false` had been added to the family root config and support helpers
-- `RS-CLIPPY-CONFIG-15` tests had been updated for that managed key
+- `g3rs-clippy/avoid-breaking-exported-api` tests had been updated for that managed key
 - published-library workspace helpers/tests had been added for `RS-CLIPPY-14` and `RS-CLIPPY-16`
 
 Leaving those changes out would keep the family half-updated and the nested workspace green only by accident.
@@ -36,14 +36,14 @@ Leaving those changes out would keep the family half-updated and the nested work
 - **Chose:** Store `policy_context_parse_error` in `ClippyFacts` and each `ClippyConfigFacts`, then make the profile/garde-dependent rules (`04`, `05`, `06`, `07`, `13`, `14`, `16`) return early when that failure is present.
 - **Why:** Those rules need trustworthy profile/garde context. If the context is broken, `RS-CLIPPY-23` should own the failure instead of letting dependent rules misclassify.
 - **Alternatives considered:**
-  - Suppress every config rule on policy-context failure — rejected because rules like `RS-CLIPPY-CONFIG-15` do not depend on `guardrail3.toml` and can still evaluate meaningfully.
+  - Suppress every config rule on policy-context failure — rejected because rules like `g3rs-clippy/avoid-breaking-exported-api` do not depend on `guardrail3.toml` and can still evaluate meaningfully.
   - Leave dependent rules running alongside `RS-CLIPPY-23` — rejected because they can still emit misleading results from defaulted profile/garde values.
 
-### Keep `RS-CLIPPY-CONFIG-15` independent of guardrail policy context
-- **Chose:** Do not short-circuit `RS-CLIPPY-CONFIG-15` on malformed `guardrail3.toml`.
+### Keep `g3rs-clippy/avoid-breaking-exported-api` independent of guardrail policy context
+- **Chose:** Do not short-circuit `g3rs-clippy/avoid-breaking-exported-api` on malformed `guardrail3.toml`.
 - **Why:** Its managed booleans are fixed Clippy policy knobs and do not depend on profile/garde resolution.
 - **Alternatives considered:**
-  - Treat `RS-CLIPPY-CONFIG-15` like the profile-sensitive rules and suppress it — rejected because that would hide real misconfiguration unrelated to profile resolution.
+  - Treat `g3rs-clippy/avoid-breaking-exported-api` like the profile-sensitive rules and suppress it — rejected because that would hide real misconfiguration unrelated to profile resolution.
 
 ### Fold in the already-live `allow-panic-in-tests` and published-library workspace coverage changes
 - **Chose:** Include the dirty-but-coherent clippy changes that were already in the worktree: managed `allow-panic-in-tests = false`, updated key parity tests, and the missing workspace publishability regressions/helpers.

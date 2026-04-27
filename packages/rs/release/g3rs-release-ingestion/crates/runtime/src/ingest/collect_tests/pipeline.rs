@@ -100,10 +100,10 @@ jobs:
     let results = g3rs_release_config_checks::check(&input);
 
     for id in [
-        "RS-RELEASE-CONFIG-15",
-        "RS-RELEASE-CONFIG-16",
-        "RS-RELEASE-CONFIG-17",
-        "RS-RELEASE-CONFIG-21",
+        "g3rs-release/semver-checks-installed",
+        "g3rs-release/publish-status-inventory",
+        "g3rs-release/release-profile-inventory",
+        "g3rs-release/crate-inventory",
     ] {
         assert_eq!(assertions::count(&results, id), 1, "{results:#?}");
     }
@@ -263,9 +263,14 @@ fn config_pipeline_detects_publish_dry_run_through_cd_wrapper() {
     );
 
     assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
-    assert!(input.repo_checks[0].has_publish_dry_run_workflow, "{input:#?}");
+    assert!(
+        input.repo_checks[0].has_publish_dry_run_workflow,
+        "{input:#?}"
+    );
     assert_eq!(
-        input.repo_checks[0].publish_dry_run_workflow_rel_path.as_deref(),
+        input.repo_checks[0]
+            .publish_dry_run_workflow_rel_path
+            .as_deref(),
         Some(".github/workflows/release.yml"),
         "{input:#?}"
     );
@@ -279,9 +284,14 @@ fn config_pipeline_detects_publish_dry_run_through_env_wrapper() {
     );
 
     assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
-    assert!(input.repo_checks[0].has_publish_dry_run_workflow, "{input:#?}");
+    assert!(
+        input.repo_checks[0].has_publish_dry_run_workflow,
+        "{input:#?}"
+    );
     assert_eq!(
-        input.repo_checks[0].publish_dry_run_workflow_rel_path.as_deref(),
+        input.repo_checks[0]
+            .publish_dry_run_workflow_rel_path
+            .as_deref(),
         Some(".github/workflows/release.yml"),
         "{input:#?}"
     );
@@ -295,9 +305,14 @@ fn config_pipeline_detects_publish_dry_run_through_shell_wrapper() {
     );
 
     assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
-    assert!(input.repo_checks[0].has_publish_dry_run_workflow, "{input:#?}");
+    assert!(
+        input.repo_checks[0].has_publish_dry_run_workflow,
+        "{input:#?}"
+    );
     assert_eq!(
-        input.repo_checks[0].publish_dry_run_workflow_rel_path.as_deref(),
+        input.repo_checks[0]
+            .publish_dry_run_workflow_rel_path
+            .as_deref(),
         Some(".github/workflows/release.yml"),
         "{input:#?}"
     );
@@ -389,7 +404,7 @@ readme = "README.md"
 
     assertions::assert_present(
         &results,
-        "RS-RELEASE-FILETREE-04",
+        "g3rs-release/readme-exists",
         "demo: README missing",
         Some("crates/demo/Cargo.toml"),
         false,
@@ -439,10 +454,10 @@ readme = "README.md"
 
     assertions::assert_present(
         &results,
-        "RS-RELEASE-SOURCE-02",
+        "g3rs-release/source-input-failures",
         "failed to read release source input",
         Some("crates/demo/README.md"),
         false,
     );
-    assertions::assert_no_results(&results, "RS-RELEASE-SOURCE-01");
+    assertions::assert_no_results(&results, "g3rs-release/readme-quality");
 }

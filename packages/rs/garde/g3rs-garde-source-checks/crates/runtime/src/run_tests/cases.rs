@@ -46,5 +46,5 @@ fn dispatches_prebound_source_inputs() {
 
     let results = crate::run::check(&input);
 
-    assertions::assert_contains_result(&results, "RS-GARDE-SOURCE-01");
+    assertions::assert_contains_result(&results, "g3rs-garde/struct-derive-validate");
 }

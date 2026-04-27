@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-HOOKS-SOURCE-15` so a discarded trigger-like comparison inside a branch no longer counts as config-change gating.
+- Fixed `g3rs-hooks/hook-rs-16-config-changes-trigger-validation` so a discarded trigger-like comparison inside a branch no longer counts as config-change gating.
 - Helper-dispatched trigger logic still counts when the branch actually routes through a helper that performs the real guard and validation.
 
 Decisions made

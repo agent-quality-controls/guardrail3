@@ -11,8 +11,8 @@ This package is intentionally narrower than the in-app toolchain family:
 
 Current scope:
 
-- `RS-TOOLCHAIN-CONFIG-01`: channel and components policy
-- `RS-TOOLCHAIN-CONFIG-02`: pinned stable toolchain vs `Cargo.toml` `rust-version`
+- `g3rs-toolchain/channel-and-components`: channel and components policy
+- `g3rs-toolchain/msrv-consistency`: pinned stable toolchain vs `Cargo.toml` `rust-version`
 
 The app remains responsible for:
 

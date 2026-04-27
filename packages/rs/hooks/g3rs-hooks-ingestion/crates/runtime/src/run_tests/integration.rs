@@ -18,8 +18,8 @@ fn hook_results(root: &Path) -> Vec<G3CheckResult> {
 
 fn code_results(root: &Path) -> Vec<G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs =
-        g3rs_code_ingestion::ingest_for_source_checks(&crawl).expect("code ingestion should succeed");
+    let inputs = g3rs_code_ingestion::ingest_for_source_checks(&crawl)
+        .expect("code ingestion should succeed");
     inputs
         .iter()
         .flat_map(g3rs_code_source_checks::check)
@@ -28,8 +28,8 @@ fn code_results(root: &Path) -> Vec<G3CheckResult> {
 
 fn clippy_results(root: &Path) -> Vec<G3CheckResult> {
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input =
-        g3rs_clippy_ingestion::ingest_for_config_checks(&crawl).expect("clippy ingestion should succeed");
+    let input = g3rs_clippy_ingestion::ingest_for_config_checks(&crawl)
+        .expect("clippy ingestion should succeed");
     g3rs_clippy_config_checks::check(&input)
 }
 
@@ -48,14 +48,14 @@ fn integration_reports_hook_breakage_when_rust_hook_is_misconfigured() {
 
     assertions::assert_present(
         &results,
-        "RS-HOOKS-SOURCE-09",
+        "g3rs-hooks/guardrail-validate-staged-present",
         "Rust guardrail validate step missing",
         Some(".githooks/pre-commit"),
         false,
     );
     assertions::assert_present(
         &results,
-        "RS-HOOKS-SOURCE-15",
+        "g3rs-hooks/config-changes-trigger-validation",
         "Rust config-change trigger coverage incomplete",
         Some(".githooks/pre-commit"),
         false,
@@ -71,21 +71,24 @@ fn integration_aligns_hook_validation_step_with_source_family_breakage() {
         root.join(".githooks/pre-commit"),
         "#!/usr/bin/env bash\nset -e\ng3rs validate --path .\n",
     );
-    write_fixture(root.join("src/lib.rs"), "pub fn demo() { todo!(\"broken\"); }\n");
+    write_fixture(
+        root.join("src/lib.rs"),
+        "pub fn demo() { todo!(\"broken\"); }\n",
+    );
 
     let hook_results = hook_results(root);
     let code_results = code_results(root);
 
     assertions::assert_present(
         &hook_results,
-        "RS-HOOKS-SOURCE-09",
+        "g3rs-hooks/guardrail-validate-staged-present",
         "Rust guardrail validate step present",
         Some(".githooks/pre-commit"),
         true,
     );
     assertions::assert_present(
         &code_results,
-        "RS-CODE-SOURCE-13",
+        "g3rs-code/todo-macros",
         "todo! macro",
         Some("src/lib.rs"),
         false,
@@ -109,14 +112,14 @@ fn integration_aligns_hook_config_trigger_with_config_family_breakage() {
 
     assertions::assert_present(
         &hook_results,
-        "RS-HOOKS-SOURCE-15",
+        "g3rs-hooks/config-changes-trigger-validation",
         "Rust config changes trigger hook validation",
         Some(".githooks/pre-commit"),
         true,
     );
     assertions::assert_present(
         &clippy_results,
-        "RS-CLIPPY-CONFIG-03",
+        "g3rs-clippy/too-many-lines-threshold",
         "too-many-lines-threshold wrong value",
         Some("clippy.toml"),
         false,

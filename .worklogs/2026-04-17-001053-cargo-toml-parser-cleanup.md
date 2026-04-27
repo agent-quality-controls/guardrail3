@@ -3,9 +3,9 @@ Summary
 - Fixed the parser test layout, moved final proof into the shared assertions crate, and added package policy files and schema waivers so the package validates cleanly.
 
 Decisions made
-- Kept the public root type names as explicit type aliases in `src/lib.rs` instead of forcing a repo-wide caller rewrite. This preserves the stable facade without the wildcard re-export that `RS-ARCH-SOURCE-02` rejects.
+- Kept the public root type names as explicit type aliases in `src/lib.rs` instead of forcing a repo-wide caller rewrite. This preserves the stable facade without the wildcard re-export that `g3rs-arch/lib-facade-only` rejects.
 - Marked the facade and all internal crates `publish = false` so release checks stand down for this internal parser package.
-- Added narrow `RS-CODE-SOURCE-19` waivers for the schema-mirror structs in `crates/types/src/cargo_toml.rs`. The file intentionally mirrors Cargo's manifest surface and grouping those fields just to satisfy inventory limits would make the parser API less truthful.
+- Added narrow `g3rs-code/ast-19-large-type-inventory` waivers for the schema-mirror structs in `crates/types/src/cargo_toml.rs`. The file intentionally mirrors Cargo's manifest surface and grouping those fields just to satisfy inventory limits would make the parser API less truthful.
 - Kept the centralized `std::fs::read_to_string` and `toml::from_str` boundaries, but switched their `#[allow]` attributes to the inline `reason = ...` form that the code rule expects.
 
 Key files for context

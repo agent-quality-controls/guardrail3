@@ -1,5 +1,5 @@
 Goal:
-Fix `RS-CODE-SOURCE-31` so re-export aliases imported through `use super::Alias` resolve to the underlying public struct target instead of the alias path, and reversed alias import order still normalizes to the concrete struct.
+Fix `g3rs-code/ast-31-public-struct-named-fields` so re-export aliases imported through `use super::Alias` resolve to the underlying public struct target instead of the alias path, and reversed alias import order still normalizes to the concrete struct.
 
 Approach:
 - Add red-first regressions in the shared rule tests using valid nested-module Rust with `pub use self::Input as Alias;` followed by `use super::Alias; impl Alias { ... }`, plus a reversed alias import order that still has to resolve through the same boundary.

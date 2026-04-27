@@ -2,7 +2,7 @@
 Allow a package to add a narrow local wrapper exception for a centrally managed banned crate without hard-failing the package. The exception should stay visible as a warning instead of an error.
 
 # Approach
-1. Change the direct `RS-DENY-CONFIG-27` tests for managed wrapper additions to expect a warning message instead of an error.
+1. Change the direct `g3rs-deny/wrappers` tests for managed wrapper additions to expect a warning message instead of an error.
 2. Run the targeted tests to prove the current rule is too strict.
 3. Update `rs_deny_config_27_wrappers.rs` so managed wrapper changes emit warnings, not errors.
 4. Verify the deny workspace tests pass.

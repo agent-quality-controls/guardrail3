@@ -65,7 +65,7 @@ pub fn assert_missing_root(results: &[G3CheckResult]) {
     assert_eq!(
         findings(results),
         vec![finding(
-            "RS-FMT-FILETREE-01",
+            "g3rs-fmt/rustfmt-config-exists",
             G3Severity::Error,
             "rustfmt config missing",
             "Expected `rustfmt.toml` at workspace root. Create one with the required formatting settings.",
@@ -80,7 +80,7 @@ pub fn assert_nested_override_and_dual_conflict(results: &[G3CheckResult]) {
         findings(results),
         vec![
             finding(
-                "RS-FMT-FILETREE-05",
+                "g3rs-fmt/per-crate-override",
                 G3Severity::Error,
                 "Illegal nested rustfmt config",
                 "`.rustfmt.toml` below repository root is forbidden; rustfmt policy is root-only. Delete this file and ensure all formatting settings are in the root `rustfmt.toml`.",
@@ -88,7 +88,7 @@ pub fn assert_nested_override_and_dual_conflict(results: &[G3CheckResult]) {
                 false,
             ),
             finding(
-                "RS-FMT-FILETREE-05",
+                "g3rs-fmt/per-crate-override",
                 G3Severity::Error,
                 "Illegal nested rustfmt config",
                 "`rustfmt.toml` below repository root is forbidden; rustfmt policy is root-only. Delete this file and ensure all formatting settings are in the root `rustfmt.toml`.",
@@ -96,7 +96,7 @@ pub fn assert_nested_override_and_dual_conflict(results: &[G3CheckResult]) {
                 false,
             ),
             finding(
-                "RS-FMT-FILETREE-08",
+                "g3rs-fmt/dual-file-conflict",
                 G3Severity::Warn,
                 "Conflicting rustfmt config files",
                 "Both `rustfmt.toml` and `.rustfmt.toml` exist in `crates/api`. Delete `.rustfmt.toml` and keep `rustfmt.toml`.",
@@ -110,7 +110,7 @@ pub fn assert_nested_override_and_dual_conflict(results: &[G3CheckResult]) {
 pub fn assert_nightly_rustfmt_keys_on_stable(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-FMT-CONFIG-03"
+            result.id() == "g3rs-fmt/nightly-keys-on-stable"
                 && result.title() == "nightly-only rustfmt setting `group_imports` on stable"
                 && result.file() == Some("rustfmt.toml")
         }),
@@ -121,7 +121,7 @@ pub fn assert_nightly_rustfmt_keys_on_stable(results: &[G3CheckResult]) {
 pub fn assert_nightly_key_blocker_when_toolchain_is_missing(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-FMT-CONFIG-03"
+            result.id() == "g3rs-fmt/nightly-keys-on-stable"
                 && result.title() == "rust-toolchain.toml missing"
                 && result.file() == Some("rust-toolchain.toml")
         }),
@@ -132,7 +132,7 @@ pub fn assert_nightly_key_blocker_when_toolchain_is_missing(results: &[G3CheckRe
 pub fn assert_edition_blocker_when_cargo_is_missing(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-FMT-CONFIG-04"
+            result.id() == "g3rs-fmt/edition-mismatch"
                 && result.title() == "Cargo.toml missing"
                 && result.file() == Some("Cargo.toml")
         }),
@@ -143,7 +143,7 @@ pub fn assert_edition_blocker_when_cargo_is_missing(results: &[G3CheckResult]) {
 pub fn assert_rustfmt_parse_error(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-FMT-CONFIG-01"
+            result.id() == "g3rs-fmt/rustfmt-required-settings"
                 && result.title() == "rustfmt config parse error"
                 && result.file() == Some("rustfmt.toml")
         }),
@@ -154,7 +154,7 @@ pub fn assert_rustfmt_parse_error(results: &[G3CheckResult]) {
 pub fn assert_rustfmt_ignore_waiver(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-FMT-CONFIG-07"
+            result.id() == "g3rs-fmt/ignore-escape-hatch"
                 && result.title() == "rustfmt ignore waiver"
                 && result.file() == Some("rustfmt.toml")
         }),
@@ -166,7 +166,7 @@ pub fn assert_root_dot_rustfmt_toml_for_config_checks(results: &[G3CheckResult])
     assert_eq!(
         results
             .iter()
-            .filter(|result| result.id() == "RS-FMT-CONFIG-03")
+            .filter(|result| result.id() == "g3rs-fmt/nightly-keys-on-stable")
             .map(|result| (result.title().to_owned(), result.file().map(str::to_owned)))
             .collect::<Vec<_>>(),
         vec![(
@@ -191,12 +191,12 @@ pub fn assert_keeps_config_01_active_when_cargo_is_parse_error(results: &[G3Chec
             .collect::<Vec<_>>(),
         vec![
             (
-                "RS-FMT-CONFIG-01".to_owned(),
+                "g3rs-fmt/rustfmt-required-settings".to_owned(),
                 "rustfmt max_width wrong".to_owned(),
                 Some("rustfmt.toml".to_owned()),
             ),
             (
-                "RS-FMT-CONFIG-04".to_owned(),
+                "g3rs-fmt/edition-mismatch".to_owned(),
                 "Cargo.toml parse error".to_owned(),
                 Some("Cargo.toml".to_owned()),
             ),

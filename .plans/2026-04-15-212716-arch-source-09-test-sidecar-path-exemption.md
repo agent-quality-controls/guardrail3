@@ -1,10 +1,10 @@
 Goal
-- Make `RS-ARCH-SOURCE-09` allow the chosen file-module test sidecar shape:
+- Make `g3rs-arch/no-path-attr` allow the chosen file-module test sidecar shape:
   - `x.rs`
   - `#[cfg(test)] #[path = "x_tests/mod.rs"] mod x_tests;`
 
 Approach
-- Add a direct regression test for `RS-ARCH-SOURCE-09`.
+- Add a direct regression test for `g3rs-arch/no-path-attr`.
 - Exempt only cfg(test) modules whose name ends with `_tests` and whose path is exactly `<module_name>/mod.rs`.
 - Keep all other `#[path]` uses forbidden.
 - Rewire `packages/rs/cargo/g3rs-cargo-filetree-checks` back to `run_tests/mod.rs`.

@@ -11,7 +11,7 @@ Approach
   - legacy `guardrail3.toml` is ignored.
 - Replace `G3RsFmtEscapeHatch` with typed Rust-policy waiver state in `g3rs-fmt-types`.
 - Update `g3rs-fmt-ingestion` to read `guardrail3-rs.toml` via the parser package and pass waivers through typed state.
-- Update `RS-FMT-CONFIG-07` and its tests to use waivers and Rust-only wording.
+- Update `g3rs-fmt/ignore-escape-hatch` and its tests to use waivers and Rust-only wording.
 - Update package READMEs to stop advertising dead universal-config vocabulary.
 
 Key decisions

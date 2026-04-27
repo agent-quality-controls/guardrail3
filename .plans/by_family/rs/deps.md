@@ -86,11 +86,11 @@ Current explicit gaps:
 Target split:
 
 - config checks:
-  - `RS-DEPS-CONFIG-01`
-  - `RS-DEPS-CONFIG-02`
-  - `RS-DEPS-CONFIG-03`
-  - `RS-DEPS-CONFIG-04`
-  - `RS-DEPS-CONFIG-05`
+  - `g3rs-deps/dependencies-allowlisted`
+  - `g3rs-deps/build-dependencies-allowlisted`
+  - `g3rs-deps/dev-dependencies-allowlisted`
+  - `g3rs-deps/library-allowlist-present`
+  - `g3rs-deps/direct-dependency-cap`
 - file-tree checks:
   - local path target existence
   - local path target `Cargo.toml` validity
@@ -142,10 +142,10 @@ pub struct G3RsDepsResolvedDependency {
 
 Why this is the target:
 
-- `RS-DEPS-CONFIG-01..03` need normalized external dependency names plus section ownership
-- `RS-DEPS-CONFIG-04` needs profile/library-ness plus allowlist presence
+- `g3rs-deps/dependencies-allowlisted..03` need normalized external dependency names plus section ownership
+- `g3rs-deps/library-allowlist-present` needs profile/library-ness plus allowlist presence
 - `allowlist_present` is explicit because the current `guardrail3-rs.toml` parser normalizes missing and empty `allowed_deps` to the same `Vec<String>` shape
-- `RS-DEPS-CONFIG-05` needs normalized dependency names for unique counting
+- `g3rs-deps/direct-dependency-cap` needs normalized dependency names for unique counting
 
 They do not need full workspace manifests, full crate manifests, or file-tree target manifests once ingestion has normalized dependency identity.
 
@@ -195,7 +195,7 @@ Not owned by config ingestion output:
 
 ## Recently Closed Inventory Gap
 
-### `RS-DEPS-CONFIG-05`
+### `g3rs-deps/direct-dependency-cap`
 
 This was the last still-planned rule needed to make the dependency-policy inventory complete.
 
@@ -230,7 +230,7 @@ The family is now explicit about those choices in code, tests, and docs.
 
 `RS-DEPS` is only in a strong target state when all of the following are true:
 
-- `RS-DEPS-CONFIG-05` is implemented and stays fact-driven rather than reparsing manifests per rule
+- `g3rs-deps/direct-dependency-cap` is implemented and stays fact-driven rather than reparsing manifests per rule
 - the workspace-local contract remains explicit and visible in docs
 - dependency counting semantics are centralized instead of re-parsed ad hoc in each rule
 - `workspace = true`, renamed dependencies, and internal workspace-path exclusions behave consistently between allowlist ownership and dependency-count ownership

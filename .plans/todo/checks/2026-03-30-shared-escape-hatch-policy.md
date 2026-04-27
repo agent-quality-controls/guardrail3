@@ -391,7 +391,7 @@ Target:
 - `RS-DENY-17`, `23`, `24`, `26` use shared validator
 - valid documented `licenses.exceptions`, `skip`, and `ignore` become visible `Warn`
 - missing or weak reasons remain `Error`
-- `RS-DENY-CONFIG-17 allow-git` uses sidecar registry reason matching
+- `g3rs-deny/extra-feature-bans-inventory allow-git` uses sidecar registry reason matching
 - `RS-DENY-25 bans.allow` uses sidecar registry reason matching, but remains `Error` even when documented if policy stays “forbidden hatch”
 - add deny-family escape-hatch count summary
 
@@ -424,7 +424,7 @@ Current gaps:
 Target:
 
 - replace local reason policy with shared validator
-- `RS-CLIPPY-08` and `RS-CLIPPY-15` should collapse into one shared-quality interpretation:
+- `RS-CLIPPY-08` and `g3rs-clippy/no-op-placeholder` should collapse into one shared-quality interpretation:
   - missing reason: `Error`
   - weak reason: `Error`
   - valid reason: visible `Warn`

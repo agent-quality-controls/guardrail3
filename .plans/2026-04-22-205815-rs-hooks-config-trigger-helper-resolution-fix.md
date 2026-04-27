@@ -1,5 +1,5 @@
 Goal
-- Fix `RS-HOOKS-SOURCE-15` so config-trigger coverage detection follows helper-function dispatch through the full parsed hook script instead of reparsing isolated branch strings.
+- Fix `g3rs-hooks/hook-rs-16-config-changes-trigger-validation` so config-trigger coverage detection follows helper-function dispatch through the full parsed hook script instead of reparsing isolated branch strings.
 - Remove the production-path branch reparsing in `hook_rs_16_config_changes_trigger_validation/support.rs`.
 
 Approach

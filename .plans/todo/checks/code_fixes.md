@@ -28,7 +28,7 @@ These are NOT new rules. They are bugs in existing rule implementations that nee
 |----------|-----|-----|
 | `toolchain_check.rs` | `nightly-YYYY-MM-DD` falls into `Some(other)` catch-all, gets Info ("pinned version") instead of Error. Pinned nightlies are still nightly. | Match `starts_with("nightly")` before the catch-all. |
 | `toolchain_check.rs` | `channel = "beta"` same catch-all, gets Info instead of Warn. Beta is pre-release. | Add explicit `"beta"` arm with Warn severity. |
-| `toolchain_check.rs` | All sub-checks share ID "R25" — JSON filtering ambiguous | Split into distinct sub-IDs during RS-TOOLCHAIN-CONFIG-01 migration. |
+| `toolchain_check.rs` | All sub-checks share ID "R25" — JSON filtering ambiguous | Split into distinct sub-IDs during g3rs-toolchain/channel-and-components migration. |
 
 ## RS-FMT
 
@@ -53,7 +53,7 @@ These are NOT new rules. They are bugs in existing rule implementations that nee
 | Location | Bug | Fix |
 |----------|-----|-----|
 | `cargo_lints.rs` line 313 | `crate_cargo.exists()` bypasses FileSystem trait | Use `fs.metadata()`. Also emit Warn when declared member has no Cargo.toml. |
-| `workspace_metadata.rs` wiring | RS-CARGO-CONFIG-04 called from config_files.rs, not cargo_lints.rs | Move call into cargo_lints module |
+| `workspace_metadata.rs` wiring | g3rs-cargo/priority-order called from config_files.rs, not cargo_lints.rs | Move call into cargo_lints module |
 | Canonical lint drift | EXPECTED_* arrays can drift from canonical.rs CARGO_LINTS module | Add `#[test]` for consistency |
 
 ## RS-GARDE
@@ -87,6 +87,6 @@ These are NOT new rules. They are bugs in existing rule implementations that nee
 | Location | Bug | Fix |
 |----------|-----|-----|
 | `deny_audit.rs` RS-DENY-09 | Registry URL check doesn't accept sparse protocol URL | Accept `sparse+https://index.crates.io/` |
-| `deny_inventory.rs` RS-DENY-CONFIG-09 | Malformed skip entries silently report "unknown" | Warn on entries missing both `crate` and `name` fields |
-| `deny_inventory.rs` RS-DENY-CONFIG-09 | `reason` field present but not a string treated as empty | Warn on wrong type |
-| `deny_inventory.rs` RS-DENY-CONFIG-10 | Missing `.as_inventory()` on advisory ignore Info entries | Add for `--inventory` consistency |
+| `deny_inventory.rs` g3rs-deny/wildcards-inventory | Malformed skip entries silently report "unknown" | Warn on entries missing both `crate` and `name` fields |
+| `deny_inventory.rs` g3rs-deny/wildcards-inventory | `reason` field present but not a string treated as empty | Warn on wrong type |
+| `deny_inventory.rs` g3rs-deny/license-allow-baseline | Missing `.as_inventory()` on advisory ignore Info entries | Add for `--inventory` consistency |

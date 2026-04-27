@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-TEST-FILETREE-18` so module-qualified helper calls keep module identity instead of flattening on the leaf helper name.
+- Fixed `g3rs-test/test-support-generic` so module-qualified helper calls keep module identity instead of flattening on the leaf helper name.
 - Added regressions proving sibling-module alias collisions stay quiet while real module-alias helper calls still fire.
 
 Decisions made

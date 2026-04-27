@@ -9,7 +9,7 @@ fn renderer_hides_inventory_by_default() {
             family: SupportedFamily::Eslint,
             results: vec![
                 G3CheckResult::new(
-                    "TS-ESLINT-CONFIG-01".to_owned(),
+                    "g3ts-eslint/exists".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -18,7 +18,7 @@ fn renderer_hides_inventory_by_default() {
                 )
                 .into_inventory(),
                 G3CheckResult::new(
-                    "TS-ESLINT-CONFIG-02".to_owned(),
+                    "g3ts-eslint/parseable".to_owned(),
                     G3Severity::Warn,
                     "warn".to_owned(),
                     "warn".to_owned(),
@@ -41,7 +41,7 @@ fn renderer_reports_no_findings_when_all_results_are_hidden() {
             family: SupportedFamily::Eslint,
             results: vec![
                 G3CheckResult::new(
-                    "TS-ESLINT-CONFIG-01".to_owned(),
+                    "g3ts-eslint/exists".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -64,7 +64,7 @@ fn renderer_includes_rule_message() {
         runs: vec![FamilyRun {
             family: SupportedFamily::Eslint,
             results: vec![G3CheckResult::new(
-                "TS-ESLINT-CONFIG-09".to_owned(),
+                "g3ts-eslint/type-safety-rules".to_owned(),
                 G3Severity::Warn,
                 "typed lint configuration drifted".to_owned(),
                 "`eslint.config.mjs` must keep `projectService: true` for typed linting."
@@ -86,7 +86,7 @@ fn renderer_uses_astro_family_header() {
         runs: vec![FamilyRun {
             family: SupportedFamily::AstroSetup,
             results: vec![G3CheckResult::new(
-                "TS-ASTRO-SETUP-FILETREE-01".to_owned(),
+                "g3ts-astro-setup/astro-config-exists".to_owned(),
                 G3Severity::Error,
                 "astro config missing".to_owned(),
                 "Add `astro.config.*` to the app root.".to_owned(),

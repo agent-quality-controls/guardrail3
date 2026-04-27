@@ -27,12 +27,12 @@ subset policy types.
 
 This package owns:
 
-- `RS-DEPS-CONFIG-01`
-- `RS-DEPS-CONFIG-02`
-- `RS-DEPS-CONFIG-03`
-- `RS-DEPS-CONFIG-04`
-- `RS-DEPS-CONFIG-05`
-- `RS-DEPS-CONFIG-06`
-- `RS-DEPS-CONFIG-07`
-- `RS-DEPS-CONFIG-08`
-- `RS-DEPS-CONFIG-09`
+- `g3rs-deps/dependencies-allowlisted`
+- `g3rs-deps/build-dependencies-allowlisted`
+- `g3rs-deps/dev-dependencies-allowlisted`
+- `g3rs-deps/library-allowlist-present`
+- `g3rs-deps/direct-dependency-cap`
+- `g3rs-deps/cargo-deny-installed`
+- `g3rs-deps/cargo-machete-installed`
+- `g3rs-deps/cargo-dupes-installed`
+- `g3rs-deps/gitleaks-installed`

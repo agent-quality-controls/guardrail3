@@ -2,7 +2,7 @@
 
 ## Summary
 
-Completed the remaining `garde` package migration by moving clippy missing/invalid handling and no-garde gating into the package config lane. The config package now owns `RS-GARDE-CONFIG-01..05` end to end, while the source package remains the owner of `RS-GARDE-SOURCE-01..08` and `RS-GARDE-SOURCE-10`.
+Completed the remaining `garde` package migration by moving clippy missing/invalid handling and no-garde gating into the package config lane. The config package now owns `g3rs-garde/dependency-present..05` end to end, while the source package remains the owner of `g3rs-garde/ast-01-struct-derive-validate..08` and `g3rs-garde/input-failures`.
 
 ## Decisions made
 

@@ -102,35 +102,35 @@ jobs:
 
     assertions::assert_present(
         &results,
-        "RS-RELEASE-CONFIG-19",
+        "g3rs-release/no-path-deps-to-unpublishable",
         "public: path dep to non-publishable crate",
         Some("crates/public/Cargo.toml"),
         false,
     );
     assertions::assert_present(
         &results,
-        "RS-RELEASE-CONFIG-20",
+        "g3rs-release/interdependent-version-consistency",
         "cli: version mismatch with public",
         Some("crates/cli/Cargo.toml"),
         false,
     );
     assertions::assert_present(
         &results,
-        "RS-RELEASE-CONFIG-22",
+        "g3rs-release/include-exclude-inventory",
         "public: include/exclude missing",
         Some("crates/public/Cargo.toml"),
         false,
     );
     assertions::assert_present(
         &results,
-        "RS-RELEASE-CONFIG-23",
+        "g3rs-release/binary-release-workflow",
         "cli: binary release workflow present",
         Some("crates/cli/Cargo.toml"),
         true,
     );
     assertions::assert_present(
         &results,
-        "RS-RELEASE-CONFIG-24",
+        "g3rs-release/linux-release-target",
         "cli: linux release target present",
         Some("crates/cli/Cargo.toml"),
         true,
@@ -180,7 +180,7 @@ tooling = { path = "../../../vendor/tooling", version = "0.1.0" }
 
     assertions::assert_present(
         &results,
-        "RS-RELEASE-CONFIG-19",
+        "g3rs-release/no-path-deps-to-unpublishable",
         "public: path dep escapes workspace",
         Some("crates/public/Cargo.toml"),
         false,

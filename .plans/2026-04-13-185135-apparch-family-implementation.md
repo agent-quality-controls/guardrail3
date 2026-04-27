@@ -11,8 +11,8 @@ Approach
    - public trait fact
    - one shared input-failure type
    - config/source lane inputs only
-2. Create `packages/rs/apparch/g3rs-apparch-config-checks` with lane-local re-export types and runtime rules for `RS-APPARCH-CONFIG-01..03`.
-3. Create `packages/rs/apparch/g3rs-apparch-source-checks` with lane-local re-export types and runtime rule for `RS-APPARCH-SOURCE-04`.
+2. Create `packages/rs/apparch/g3rs-apparch-config-checks` with lane-local re-export types and runtime rules for `g3rs-apparch/types-dependency-direction..03`.
+3. Create `packages/rs/apparch/g3rs-apparch-source-checks` with lane-local re-export types and runtime rule for `g3rs-apparch/io-traits-in-types`.
 4. Create `packages/rs/apparch/g3rs-apparch-ingestion` that:
    - discovers the pointed workspace root
    - resolves workspace members

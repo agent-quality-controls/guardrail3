@@ -1,5 +1,5 @@
 Goal
-- Fix RS-TEST-SOURCE-17 so an owned assertions import aliased into a local name and then re-aliased again is still recognized as owned assertions, not as a local assertion helper.
+- Fix g3rs-test/external-harnesses-use-assertions so an owned assertions import aliased into a local name and then re-aliased again is still recognized as owned assertions, not as a local assertion helper.
 
 Approach
 - Add a regression test in the source-checks sidecar for `use demo_assertions::assert_demo as run; use self::run as again;`.

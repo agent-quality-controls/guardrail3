@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-TEST-FILETREE-03` so assertions modules cannot hide runtime `check_test_tree()` behind a chained local alias. Added red tests covering `let check = rt::check_test_tree; let run = check; run()` and `let check = check_test_tree; let run = check; run()`, then extended the shared helper to resolve alias chains recursively.
+Fixed `g3rs-test/runtime-assertions-split` so assertions modules cannot hide runtime `check_test_tree()` behind a chained local alias. Added red tests covering `let check = rt::check_test_tree; let run = check; run()` and `let check = check_test_tree; let run = check; run()`, then extended the shared helper to resolve alias chains recursively.
 
 ## Decisions made
 

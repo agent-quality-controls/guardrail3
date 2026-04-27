@@ -1,1 +1,1 @@
-pub mod rs_test_config_09_nextest_timeouts;
+pub mod nextest_timeouts;

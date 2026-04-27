@@ -34,8 +34,8 @@ fn run_dispatches_prebound_source_inputs() {
 
     let results = crate::run::check(&input);
 
-    assertions::assert_has_finding_id(&results, "RS-APPARCH-SOURCE-04");
-    assertions::assert_has_finding_id(&results, "RS-APPARCH-SOURCE-05");
+    assertions::assert_has_finding_id(&results, "g3rs-apparch/io-traits-in-types");
+    assertions::assert_has_finding_id(&results, "g3rs-apparch/types-public-surface");
 }
 
 fn fixture_crate(rel_dir: &str, layer: G3RsApparchLayer) -> G3RsApparchCrate {

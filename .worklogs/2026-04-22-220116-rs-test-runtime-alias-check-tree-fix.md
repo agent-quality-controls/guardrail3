@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-TEST-FILETREE-03` so assertions modules can no longer hide runtime orchestration behind `use runtime::{self as alias, check_test_tree}; alias::check_test_tree(...)`. The runtime alias collector now treats `self as <alias>` as a runtime root alias.
+Fixed `g3rs-test/runtime-assertions-split` so assertions modules can no longer hide runtime orchestration behind `use runtime::{self as alias, check_test_tree}; alias::check_test_tree(...)`. The runtime alias collector now treats `self as <alias>` as a runtime root alias.
 
 ## Decisions made
 
@@ -17,5 +17,5 @@ Fixed `RS-TEST-FILETREE-03` so assertions modules can no longer hide runtime orc
 
 ## Next steps
 
-- Fix the follow-up `RS-CODE-SOURCE-31` false negative for `impl crate::...` / `impl self::...` inherent impls on nested public structs.
+- Fix the follow-up `g3rs-code/ast-31-public-struct-named-fields` false negative for `impl crate::...` / `impl self::...` inherent impls on nested public structs.
 - Keep the parallel attack queue running on `rs/release` and `rs/hooks`.

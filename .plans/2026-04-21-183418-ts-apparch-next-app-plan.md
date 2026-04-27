@@ -152,18 +152,18 @@ These are the TS adaptations of the live Rust config rules.
 
 Wave 1 rules:
 
-- `TS-APPARCH-CONFIG-01`
+- `g3ts-apparch/types-dependency-direction`
   - `types` files must not import `logic`, `io/inbound`, `io/outbound`, or `app`
-- `TS-APPARCH-CONFIG-02`
+- `g3ts-apparch/logic-dependency-direction`
   - `logic` files must not import `io/inbound`, `io/outbound`, or `app`
   - same-layer `logic -> logic` imports are allowed
-- `TS-APPARCH-CONFIG-03`
+- `g3ts-apparch/io-outbound-dependency-direction`
   - `io/outbound` files must not import `logic`, `io/inbound`, or `app`
   - same-layer `io/outbound -> io/outbound` imports are allowed
-- `TS-APPARCH-CONFIG-04`
+- `g3ts-apparch/io-inbound-dependency-direction`
   - `io/inbound` files must not import `io/outbound` or `app`
   - may import `logic` and `types`
-- `TS-APPARCH-CONFIG-05`
+- `g3ts-apparch/app-no-direct-outbound`
   - `app` files must not import `io/outbound` directly
   - the Next shell must go through inbound adapters or logic
 
@@ -176,10 +176,10 @@ Explicit adaptation from Rust:
 
 Wave 1 source rules:
 
-- `TS-APPARCH-SOURCE-01`
+- `g3ts-apparch/types-public-surface`
   - `types` files must not export public functions or classes
   - keep `types` passive
-- `TS-APPARCH-SOURCE-02`
+- `g3ts-apparch/io-contracts-in-types`
   - `io/inbound` and `io/outbound` files must not export interfaces
   - transport/adapter contracts belong in `types`
 

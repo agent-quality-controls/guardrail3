@@ -2,7 +2,7 @@
 
 Fix the two confirmed guardrail bugs:
 
-- `TS-JSCPD-CONFIG-01` incorrectly reports missing root `.jscpd.json` when validating a nested app path under a repo that has the config at an ancestor root.
+- `g3ts-jscpd/root-exists` incorrectly reports missing root `.jscpd.json` when validating a nested app path under a repo that has the config at an ancestor root.
 - `ts/apparch` ingestion rejects valid TSX like the real `apps/landing/src/app/blog/_sections/hub-hero.tsx`.
 
 ## Approach

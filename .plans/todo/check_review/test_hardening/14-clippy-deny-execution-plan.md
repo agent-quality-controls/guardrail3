@@ -11,7 +11,7 @@ Completed so far:
 - generator-backed parity support for clippy and deny
 - migration of:
   - `RS-CLIPPY-12`
-  - `RS-CLIPPY-13`
+  - `g3rs-clippy/local-policy-root`
   - `RS-CLIPPY-14`
   - `RS-CLIPPY-19`
   - `RS-CLIPPY-01`
@@ -19,23 +19,23 @@ Completed so far:
   - `RS-CLIPPY-05`
   - `RS-DENY-02`
   - `RS-DENY-03`
-  - `RS-DENY-CONFIG-16`
-  - `RS-DENY-CONFIG-20`
-  - `RS-DENY-CONFIG-21`
-  - `RS-DENY-CONFIG-25`
-  - `RS-DENY-CONFIG-26`
+  - `g3rs-deny/tokio-full-ban`
+  - `g3rs-deny/duplicate-entries`
+  - `g3rs-deny/unknown-keys`
+  - `g3rs-deny/allow-override-channel`
+  - `g3rs-deny/extra-deny-bans-inventory`
   - `RS-DENY-30`
   - `RS-DENY-01`
   - `RS-DENY-09`
-  - `RS-DENY-CONFIG-11`
-  - `RS-DENY-CONFIG-15`
-  - `RS-DENY-CONFIG-17`
+  - `g3rs-deny/confidence-threshold`
+  - `g3rs-deny/allow-git-inventory`
+  - `g3rs-deny/extra-feature-bans-inventory`
 - support helpers that copy the real `tests/fixtures/r_arch_01/golden/` scaffold and run clippy/deny families end-to-end
 
 Current next rule targets in this order:
 - refresh `14-clippy-deny-coverage-matrix.md` to current migrated directory state
 - audit remaining unmigrated clippy rules after `RS-CLIPPY-05`
-- audit remaining unmigrated deny rules after `RS-DENY-CONFIG-17`
+- audit remaining unmigrated deny rules after `g3rs-deny/extra-feature-bans-inventory`
 
 ## First action
 
@@ -133,27 +133,27 @@ This first step prevents blind directory churn and makes the migration measurabl
 
 18. Use this rule order for clippy so the root and policy semantics are hardened before the lower-risk threshold checks:
    - `RS-CLIPPY-12`
-   - `RS-CLIPPY-13`
+   - `g3rs-clippy/local-policy-root`
    - `RS-CLIPPY-14`
    - `RS-CLIPPY-19`
    - `RS-CLIPPY-01`
    - `RS-CLIPPY-04`
    - `RS-CLIPPY-05`
-   - `RS-CLIPPY-06`
+   - `g3rs-clippy/package-native-policy`
    - `RS-CLIPPY-07`
    - `RS-CLIPPY-08`
-   - `RS-CLIPPY-15`
+   - `g3rs-clippy/no-op-placeholder`
    - `RS-CLIPPY-16`
-   - `RS-CLIPPY-CONFIG-15`
+   - `g3rs-clippy/avoid-breaking-exported-api`
    - `RS-CLIPPY-18`
    - `RS-CLIPPY-20`
-   - `RS-CLIPPY-CONFIG-01`
-   - `RS-CLIPPY-CONFIG-02`
-   - `RS-CLIPPY-CONFIG-08`
-   - `RS-CLIPPY-CONFIG-09`
-   - `RS-CLIPPY-CONFIG-10`
-   - `RS-CLIPPY-CONFIG-19`
-   - `RS-CLIPPY-CONFIG-20`
+   - `g3rs-clippy/max-struct-bools`
+   - `g3rs-clippy/max-fn-params-bools`
+   - `g3rs-clippy/type-complexity-threshold`
+   - `g3rs-clippy/missing-method-ban`
+   - `g3rs-clippy/missing-type-ban`
+   - `g3rs-clippy/policy-context-parseable`
+   - `g3rs-clippy/forbid-clippy-conf-dir-override`
 
 19. For each clippy rule, create a rule-specific test module directory with semantic files only as needed:
    - `mod.rs`
@@ -216,34 +216,34 @@ This first step prevents blind directory churn and makes the migration measurabl
 29. Use this rule order for deny so location, precedence, profile, and escape-hatch semantics are hardened before the more static inventory rules:
    - `RS-DENY-02`
    - `RS-DENY-03`
-   - `RS-DENY-CONFIG-16`
-   - `RS-DENY-CONFIG-20`
-   - `RS-DENY-CONFIG-21`
-   - `RS-DENY-CONFIG-26`
+   - `g3rs-deny/tokio-full-ban`
+   - `g3rs-deny/duplicate-entries`
+   - `g3rs-deny/unknown-keys`
+   - `g3rs-deny/extra-deny-bans-inventory`
    - `RS-DENY-30`
-   - `RS-DENY-CONFIG-25`
+   - `g3rs-deny/allow-override-channel`
    - `RS-DENY-01`
-   - `RS-DENY-CONFIG-01`
-   - `RS-DENY-CONFIG-02`
-   - `RS-DENY-CONFIG-03`
-   - `RS-DENY-CONFIG-04`
-   - `RS-DENY-CONFIG-05`
+   - `g3rs-deny/deprecated-advisories`
+   - `g3rs-deny/advisories-baseline`
+   - `g3rs-deny/stricter-advisories-inventory`
+   - `g3rs-deny/graph-all-features`
+   - `g3rs-deny/graph-no-default-features`
    - `RS-DENY-09`
-   - `RS-DENY-CONFIG-07`
-   - `RS-DENY-CONFIG-08`
-   - `RS-DENY-CONFIG-09`
-   - `RS-DENY-CONFIG-10`
-   - `RS-DENY-CONFIG-11`
-   - `RS-DENY-CONFIG-12`
-   - `RS-DENY-CONFIG-13`
+   - `g3rs-deny/highlight-inventory`
+   - `g3rs-deny/allow-wildcard-paths`
+   - `g3rs-deny/wildcards-inventory`
+   - `g3rs-deny/license-allow-baseline`
+   - `g3rs-deny/confidence-threshold`
+   - `g3rs-deny/copyleft-allowlist`
+   - `g3rs-deny/unknown-sources-policy`
    - `RS-DENY-17`
-   - `RS-DENY-CONFIG-15`
-   - `RS-DENY-CONFIG-17`
-   - `RS-DENY-CONFIG-18`
-   - `RS-DENY-CONFIG-19`
+   - `g3rs-deny/allow-git-inventory`
+   - `g3rs-deny/extra-feature-bans-inventory`
+   - `g3rs-deny/skip-hygiene`
+   - `g3rs-deny/ignore-hygiene`
    - `RS-DENY-25`
    - `RS-DENY-26`
-   - `RS-DENY-CONFIG-24`
+   - `g3rs-deny/license-exceptions-inventory`
 
 30. For each deny rule, create a rule-specific test module directory with semantic files only as needed:
    - `mod.rs`
@@ -285,7 +285,7 @@ This first step prevents blind directory churn and makes the migration measurabl
 
 36. For deny generator-sensitive rules, explicitly compare checker behavior against generated baseline output instead of trusting copied fixtures.
 
-37. Resolve `RS-DENY-CONFIG-16` explicitly.
+37. Resolve `g3rs-deny/tokio-full-ban` explicitly.
    - confirm the intended policy source
    - update tests to lock that decision
    - if the correct policy is still ambiguous, stop and record the ambiguity in the lane doc instead of guessing

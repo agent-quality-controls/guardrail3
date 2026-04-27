@@ -22,8 +22,8 @@ Once `missing_debug_implementations` was enforced, workspace builds started fail
 - **Chose:** Add the missing root metadata and lint entries directly in `apps/guardrail3/Cargo.toml`.
 - **Why:** The family plan already expects these invariants, and the goal of the sweep is to make the repo comply with the guardrails rather than soften the guardrails for the current tree.
 - **Alternatives considered:**
-  - Remove `missing_debug_implementations` from the cargo baseline — rejected because `RS-CARGO-CONFIG-01` explicitly owns the lint completeness contract.
-  - Relax `RS-CARGO-CONFIG-07` back out of the root baseline — rejected because macro bans need the cargo-side enforcement switch to be meaningful.
+  - Remove `missing_debug_implementations` from the cargo baseline — rejected because `g3rs-cargo/workspace-lints` explicitly owns the lint completeness contract.
+  - Relax `g3rs-cargo/approved-allow-inventory` back out of the root baseline — rejected because macro bans need the cargo-side enforcement switch to be meaningful.
 
 ### Fix member inheritance at the manifests, not by special-casing paths
 - **Chose:** Add `[lints] workspace = true` to the eight member crates that were missing it.
@@ -42,7 +42,7 @@ Once `missing_debug_implementations` was enforced, workspace builds started fail
 ## Architectural Notes
 This checkpoint makes the app-root workspace manifest the real, enforceable source of lint policy again. That matters beyond `cargo` itself:
 
-- `RS-CARGO-CONFIG-07` now makes macro bans enforceable for downstream policy families.
+- `g3rs-cargo/approved-allow-inventory` now makes macro bans enforceable for downstream policy families.
 - member manifests are structurally consistent, which reduces hidden per-crate policy drift.
 - the workspace build now runs under the same lint baseline the guardrails expect, instead of a weaker accidental baseline.
 

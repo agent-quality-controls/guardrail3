@@ -37,7 +37,7 @@ These families are mostly implemented. The hardening work is parity and policy-e
 - `RS-CLIPPY-12` now uses a rule-specific test directory and proves:
   - both forbidden nested filename variants fire
   - same-root precedence conflict still fires exactly on the lower-precedence sibling
-- `RS-CLIPPY-13` now uses a rule-specific test directory and proves:
+- `g3rs-clippy/local-policy-root` now uses a rule-specific test directory and proves:
   - full local baseline inventory path
   - incomplete local-root failure path with exact missing-section set
   - parse-failure path for a local policy root that replaces inherited policy
@@ -57,12 +57,12 @@ These families are mostly implemented. The hardening work is parity and policy-e
   - the real bug was root package-profile resolution, not standalone-root coverage in that fixture
   - `clippy/facts.rs` and `deny/facts.rs` now treat the root config as package-profile-driven when `[rust.packages]` owns root generation
   - `generate_helpers.rs` now generates per-app `deny.toml` from the app's effective profile instead of the outer default profile
-- `RS-CLIPPY-CONFIG-01` now uses a rule-specific test directory and proves:
+- `g3rs-clippy/max-struct-bools` now uses a rule-specific test directory and proves:
   - the generated `max-struct-bools` baseline inventories cleanly
   - wrong values error
   - missing values error
   - malformed `clippy.toml` errors through the rule-local parse-error branch
-- `RS-CLIPPY-CONFIG-02` now uses a rule-specific test directory and proves:
+- `g3rs-clippy/max-fn-params-bools` now uses a rule-specific test directory and proves:
   - the generated `max-fn-params-bools` baseline inventories cleanly
   - wrong values error
   - missing values error
@@ -76,7 +76,7 @@ These families are mostly implemented. The hardening work is parity and policy-e
   - garde-owned extractor type bans are not required when `garde = false`
   - library profile expands the required type-ban set to include global-state types
   - each missing required type ban produces its own hard error
-- `RS-CLIPPY-06` now uses a rule-specific test directory and proves:
+- `g3rs-clippy/package-native-policy` now uses a rule-specific test directory and proves:
   - the generated service method baseline does not false-positive
   - project-specific extra method bans inventory
   - `garde = false` converts garde-owned method bans into project-specific extras
@@ -88,7 +88,7 @@ These families are mostly implemented. The hardening work is parity and policy-e
 - `RS-CLIPPY-08` now uses a rule-specific test directory and proves:
   - generated reasoned table-format ban entries do not false-positive
   - plain-string and missing-reason entries warn across methods, types, and macros
-- `RS-CLIPPY-15` now uses a rule-specific test directory and proves:
+- `g3rs-clippy/no-op-placeholder` now uses a rule-specific test directory and proves:
   - generated substantive reasons do not false-positive
   - trivial or placeholder reasons warn across methods, types, and macros
 - `RS-CLIPPY-20` now uses a rule-specific test directory and proves:
@@ -99,7 +99,7 @@ These families are mostly implemented. The hardening work is parity and policy-e
   - `true` warns for non-published roots
   - `true` inventories for published library packages
   - missing value warns
-- `RS-CLIPPY-CONFIG-15` now uses a rule-specific test directory and proves:
+- `g3rs-clippy/avoid-breaking-exported-api` now uses a rule-specific test directory and proves:
   - generated test-relaxation baseline stays quiet
   - each enabled test-relaxation key warns independently
 - `RS-CLIPPY-18` now uses a rule-specific test directory and proves:
@@ -108,13 +108,13 @@ These families are mostly implemented. The hardening work is parity and policy-e
 - rule-local parity is now verified for:
   - `RS-CLIPPY-04`
   - `RS-CLIPPY-05`
-  - `RS-CLIPPY-06`
+  - `g3rs-clippy/package-native-policy`
   - `RS-CLIPPY-07`
   - `RS-CLIPPY-08`
   - `RS-CLIPPY-14`
-  - `RS-CLIPPY-15`
+  - `g3rs-clippy/no-op-placeholder`
   - `RS-CLIPPY-16`
-  - `RS-CLIPPY-CONFIG-15`
+  - `g3rs-clippy/avoid-breaking-exported-api`
   - `RS-CLIPPY-18`
   - `RS-CLIPPY-19`
   - `RS-CLIPPY-20`
@@ -132,7 +132,7 @@ These families are mostly implemented. The hardening work is parity and policy-e
 - add direct generator-vs-checker parity tests
 - attack mixed workspace profile selection
 - attack nested config placement, same-root precedence, malformed exceptions/skips/ignores/wrappers
-- resolve and test the `RS-DENY-CONFIG-16` policy decision explicitly
+- resolve and test the `g3rs-deny/tokio-full-ban` policy decision explicitly
 
 ### Progress
 
@@ -153,29 +153,29 @@ These families are mostly implemented. The hardening work is parity and policy-e
   - all three deny filename variants fire shadowing errors when nested below an allowed root
   - same-root multi-file conflicts still fire exactly once with the expected precedence-set message
   - allowed local policy roots do not false-positive as shadowing
-- `RS-DENY-CONFIG-16` now uses a rule-specific test directory and proves:
+- `g3rs-deny/tokio-full-ban` now uses a rule-specific test directory and proves:
   - both accepted crates.io allow-list forms are tolerated
   - missing sources section, missing crates.io, and unexpected extra registries all error distinctly
-- `RS-DENY-CONFIG-20` now uses a rule-specific test directory and proves:
+- `g3rs-deny/duplicate-entries` now uses a rule-specific test directory and proves:
   - malformed skip entries warn
   - missing skip reasons warn
   - non-string skip reasons warn
   - supported skip entry shapes inventory cleanly, including legacy `name` + `version`
   - malformed `[bans].skip` container shape now warns instead of failing open
   - a local skip inventory entry only reports on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-21` now uses a rule-specific test directory and proves:
+- `g3rs-deny/unknown-keys` now uses a rule-specific test directory and proves:
   - malformed ignore entries warn
   - missing ignore reasons warn
   - non-string ignore reasons warn
   - supported ignore entry shapes inventory cleanly for both plain-string and table forms
   - malformed `[advisories].ignore` container shape now warns instead of failing open
   - a local advisory ignore inventory entry only reports on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-25` now uses a rule-specific test directory and proves:
+- `g3rs-deny/allow-override-channel` now uses a rule-specific test directory and proves:
   - top-level and core-section unknown keys warn
   - nested unknown keys in skip, ignore, license exceptions, and feature-ban entries warn
   - unknown keys in `[bans]` and `[sources]` are now covered explicitly with structured config mutation
   - local unknown-key drift only warns on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-26` now uses a rule-specific test directory and proves:
+- `g3rs-deny/extra-deny-bans-inventory` now uses a rule-specific test directory and proves:
   - ignore accumulation warns only above threshold
   - mixed valid ignore-entry shapes at threshold do not overfire
   - malformed ignore entries still count toward accumulation threshold because the rule owns container size, not entry validity
@@ -200,79 +200,79 @@ These families are mostly implemented. The hardening work is parity and policy-e
   - missing `[bans]` and missing `[bans].deny` fail closed
   - canonical managed wrapper drift still errors as baseline weakening
   - exact generator-vs-checker parity is now pinned for both service and library profiles
-- `RS-DENY-CONFIG-11` now uses a rule-specific test directory and proves:
+- `g3rs-deny/confidence-threshold` now uses a rule-specific test directory and proves:
   - generated license baseline passes without false positives
   - missing baseline allowed licenses error
   - missing `[licenses]` fails closed
   - `[licenses.private].ignore` must stay exactly `true`
   - exact generated allow-list and `private.ignore` parity is now pinned in the rule-local suite
-- `RS-DENY-CONFIG-15` now uses a rule-specific test directory and proves:
+- `g3rs-deny/allow-git-inventory` now uses a rule-specific test directory and proves:
   - generated unknown-source policy passes without false positives
   - missing `[sources]` fails closed
   - weakened `unknown-registry` and `unknown-git` values each error independently
   - exact generated registry list and unknown-source policy parity is now pinned in the rule-local suite
-- `RS-DENY-CONFIG-17` now uses a rule-specific test directory and proves:
+- `g3rs-deny/extra-feature-bans-inventory` now uses a rule-specific test directory and proves:
   - empty `allow-git` stays quiet
   - non-empty `allow-git` warns once per config
   - each allowed git source is inventoried individually
   - exact generated empty `allow-git` baseline is now pinned in the rule-local suite
 - verified deny parity packet now includes:
   - `RS-DENY-09`
-  - `RS-DENY-CONFIG-11`
-  - `RS-DENY-CONFIG-15`
-  - `RS-DENY-CONFIG-17`
-- `RS-DENY-CONFIG-01` now uses a rule-specific test directory and proves:
+  - `g3rs-deny/confidence-threshold`
+  - `g3rs-deny/allow-git-inventory`
+  - `g3rs-deny/extra-feature-bans-inventory`
+- `g3rs-deny/deprecated-advisories` now uses a rule-specific test directory and proves:
   - the generated advisories baseline stays quiet
   - each deprecated advisory key warns independently
   - local deprecated advisory fields only warn on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-02` now uses a rule-specific test directory and proves:
+- `g3rs-deny/advisories-baseline` now uses a rule-specific test directory and proves:
   - the generated advisories baseline stays quiet
   - missing `[advisories]` fails closed
   - missing baseline values error independently
   - weakened `unmaintained` and `yanked` values error independently
   - a local weakened advisory baseline only errors on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-03` now uses a rule-specific test directory and proves:
+- `g3rs-deny/stricter-advisories-inventory` now uses a rule-specific test directory and proves:
   - the generated advisories baseline stays quiet
   - `unmaintained = "deny"` and `yanked = "deny"` each inventory independently as stricter-than-baseline policy
   - a local stricter advisory policy only inventories on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-04` now uses a rule-specific test directory and proves:
+- `g3rs-deny/graph-all-features` now uses a rule-specific test directory and proves:
   - the generated graph baseline stays quiet
   - missing `[graph]` fails closed
   - missing or weakened `all-features` errors
   - local `all-features` drift only errors on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-05` now uses a rule-specific test directory and proves:
+- `g3rs-deny/graph-no-default-features` now uses a rule-specific test directory and proves:
   - the generated graph baseline stays quiet
   - missing `[graph]` fails closed
   - missing or weakened `no-default-features` errors
   - local `no-default-features` drift only errors on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-07` now uses a rule-specific test directory and proves:
+- `g3rs-deny/highlight-inventory` now uses a rule-specific test directory and proves:
   - the generated multiple-versions baseline stays quiet
   - missing `[bans]` warns
   - missing `multiple-versions` warns
   - weakened `multiple-versions` warns
   - local multiple-versions weakening only warns on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-08` now uses a rule-specific test directory and proves:
+- `g3rs-deny/allow-wildcard-paths` now uses a rule-specific test directory and proves:
   - the generated highlight baseline stays quiet
   - missing `highlight` inventories
   - project-specific `highlight` values inventory
   - local highlight drift only inventories on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-09` now uses a rule-specific test directory and proves:
+- `g3rs-deny/wildcards-inventory` now uses a rule-specific test directory and proves:
   - the generated allow-wildcard-paths baseline stays quiet
   - missing `[bans]` fails closed
   - missing or weakened `allow-wildcard-paths` errors
   - local allow-wildcard-paths drift only errors on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-10` now uses a rule-specific test directory and proves:
+- `g3rs-deny/license-allow-baseline` now uses a rule-specific test directory and proves:
   - the generated wildcards baseline stays quiet
   - missing `wildcards` warns
   - project-specific `wildcards` values warn
   - local wildcards drift only warns on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-12` now uses a rule-specific test directory and proves:
+- `g3rs-deny/copyleft-allowlist` now uses a rule-specific test directory and proves:
   - the generated confidence-threshold baseline stays quiet
   - weaker threshold values warn
   - stricter threshold values inventory
   - missing or invalid threshold values warn
   - a local weaker confidence threshold only warns on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-13` now uses a rule-specific test directory and proves:
+- `g3rs-deny/unknown-sources-policy` now uses a rule-specific test directory and proves:
   - the generated license allow-list stays quiet
   - each added copyleft license warns independently
   - a local copyleft allowance only warns on the owned local root that replaced ancestor coverage
@@ -280,12 +280,12 @@ These families are mostly implemented. The hardening work is parity and policy-e
   - the generated baseline stays quiet when no exceptions exist
   - each named or crate-keyed license exception inventories independently
   - a local license exception only inventories on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-18` now uses a rule-specific test directory and proves:
+- `g3rs-deny/skip-hygiene` now uses a rule-specific test directory and proves:
   - the generated tokio feature policy stays quiet
   - missing `tokio` `full` denial warns
   - drifting tokio allow-list warns
   - a broken local tokio feature policy only warns on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-19` now uses a rule-specific test directory and proves:
+- `g3rs-deny/ignore-hygiene` now uses a rule-specific test directory and proves:
   - the generated tokio-only feature baseline stays quiet
   - each non-tokio feature-ban entry inventories independently
   - a local extra feature-ban entry inventories only on the owned local root that replaced ancestor coverage
@@ -300,7 +300,7 @@ These families are mostly implemented. The hardening work is parity and policy-e
   - each deny entry lacking a non-empty reason inventories independently
   - whitespace-only reasons inventory as missing
   - a local missing ban reason only inventories on the owned local root that replaced ancestor coverage
-- `RS-DENY-CONFIG-24` now uses a rule-specific test directory and proves:
+- `g3rs-deny/license-exceptions-inventory` now uses a rule-specific test directory and proves:
   - the generated canonical deny config stays quiet
   - duplicate deny, skip, advisory-ignore, and feature-ban entries each warn once per duplicated identity
   - distinct near-duplicates do not warn
@@ -310,7 +310,7 @@ These families are mostly implemented. The hardening work is parity and policy-e
 
 - rule-local parity tests still need to be added for:
   - `RS-DENY-30`
-- `RS-DENY-CONFIG-16`, `21`, `22`, and `30` now have direct parity framing too; their remaining gaps are broader mixed-root/profile breadth, not silent canonical drift
+- `g3rs-deny/tokio-full-ban`, `21`, `22`, and `30` now have direct parity framing too; their remaining gaps are broader mixed-root/profile breadth, not silent canonical drift
 - broad root-resolution and mixed-profile mutation tests are still mostly missing
 - deny is now structurally migrated; remaining deny work is parity tightening and broader multi-root/profile attack coverage
 

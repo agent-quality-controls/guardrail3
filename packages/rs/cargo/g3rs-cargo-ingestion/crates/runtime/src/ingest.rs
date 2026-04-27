@@ -1,8 +1,7 @@
 use cargo_toml_parser::types::CargoTomlDocument;
 use g3rs_cargo_types::{
-    G3RsCargoFileTreeRoot, G3RsCargoInputFailure, G3RsCargoMissingMember,
-    G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState,
-    G3RsCargoWorkspaceMember,
+    G3RsCargoFileTreeRoot, G3RsCargoInputFailure, G3RsCargoMissingMember, G3RsCargoPolicyRoot,
+    G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoWorkspaceMember,
 };
 
 pub(crate) fn build_root(
@@ -56,7 +55,10 @@ pub(crate) fn filetree_root(
     }
 }
 
-pub(crate) fn input_failure(rel_path: impl Into<String>, message: impl Into<String>) -> G3RsCargoInputFailure {
+pub(crate) fn input_failure(
+    rel_path: impl Into<String>,
+    message: impl Into<String>,
+) -> G3RsCargoInputFailure {
     G3RsCargoInputFailure {
         rel_path: rel_path.into(),
         message: message.into(),

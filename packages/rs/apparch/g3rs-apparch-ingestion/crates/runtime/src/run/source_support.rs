@@ -203,16 +203,17 @@ fn collect_public_use_target(
     if !entry.readable {
         return Ok(());
     }
-    let content = view.read_file(&module_path).map_err(|error| {
-        G3RsApparchIngestionError::Unreadable {
+    let content =
+        view.read_file(&module_path)
+            .map_err(|error| G3RsApparchIngestionError::Unreadable {
+                path: entry.path.abs_path.clone(),
+                reason: error.to_string(),
+            })?;
+    let parsed =
+        syn::parse_file(&content).map_err(|error| G3RsApparchIngestionError::ParseFailed {
             path: entry.path.abs_path.clone(),
             reason: error.to_string(),
-        }
-    })?;
-    let parsed = syn::parse_file(&content).map_err(|error| G3RsApparchIngestionError::ParseFailed {
-        path: entry.path.abs_path.clone(),
-        reason: error.to_string(),
-    })?;
+        })?;
     if is_cfg_test_only(&parsed.attrs) {
         return Ok(());
     }
@@ -256,15 +257,16 @@ pub(crate) fn resolve_module_path(
     let file_dir = rel_path.rsplit_once('/').map_or("", |(dir, _)| dir);
     if let Some(path_attr) = module_path_attr(item_mod) {
         let candidate = CrawlView::join_rel(file_dir, &path_attr);
-        return view.file_exists(&candidate).then_some(candidate).ok_or_else(|| {
-            G3RsApparchIngestionError::NormalizationFailed {
+        return view
+            .file_exists(&candidate)
+            .then_some(candidate)
+            .ok_or_else(|| G3RsApparchIngestionError::NormalizationFailed {
                 path: std::path::PathBuf::from(rel_path),
                 reason: format!(
                     "declared module `{}` points to missing file `{}`",
                     item_mod.ident, path_attr
                 ),
-            }
-        });
+            });
     }
 
     let module_name = item_mod.ident.to_string();

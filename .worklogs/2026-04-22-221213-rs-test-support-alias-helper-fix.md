@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-TEST-FILETREE-18` so `test_support` cannot hide canned helper and semantic helper usage behind a local alias like `let run = fixture_path; run()`. Added red tests for both alias-routed cases and fixed the rule to resolve called local aliases instead of only direct helper names.
+Fixed `g3rs-test/test-support-generic` so `test_support` cannot hide canned helper and semantic helper usage behind a local alias like `let run = fixture_path; run()`. Added red tests for both alias-routed cases and fixed the rule to resolve called local aliases instead of only direct helper names.
 
 ## Decisions made
 

@@ -6,8 +6,8 @@ use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use super::error::G3RsApparchIngestionError;
 use super::model::CrateRecord;
 use super::source_support::{
-    collect_public_use_items, is_cfg_test_only, push_public_item, resolve_module_path,
-    self_type_name, ItemAttrs,
+    ItemAttrs, collect_public_use_items, is_cfg_test_only, push_public_item, resolve_module_path,
+    self_type_name,
 };
 use super::workspace::{collect_workspace_crates, load_workspace_root};
 use crate::view::CrawlView;
@@ -164,16 +164,17 @@ fn walk_module_file(
             reason: "file is not readable".to_owned(),
         });
     }
-    let content = view
-        .read_file(rel_path)
-        .map_err(|error| G3RsApparchIngestionError::Unreadable {
+    let content =
+        view.read_file(rel_path)
+            .map_err(|error| G3RsApparchIngestionError::Unreadable {
+                path: entry.path.abs_path.clone(),
+                reason: error.to_string(),
+            })?;
+    let parsed =
+        syn::parse_file(&content).map_err(|error| G3RsApparchIngestionError::ParseFailed {
             path: entry.path.abs_path.clone(),
             reason: error.to_string(),
         })?;
-    let parsed = syn::parse_file(&content).map_err(|error| G3RsApparchIngestionError::ParseFailed {
-        path: entry.path.abs_path.clone(),
-        reason: error.to_string(),
-    })?;
     if is_cfg_test_only(&parsed.attrs) {
         return Ok(());
     }
@@ -204,7 +205,7 @@ fn walk_items(
     for item in items {
         if is_cfg_test_only(item.attrs()) {
             continue;
-            }
+        }
         match item {
             syn::Item::Trait(item_trait) => {
                 if public_module && matches!(item_trait.vis, syn::Visibility::Public(_)) {
@@ -259,7 +260,8 @@ fn walk_items(
                 }
             }
             syn::Item::Mod(item_mod) => {
-                let child_public_module = child_module_visibility.apply(public_module, &item_mod.vis);
+                let child_public_module =
+                    child_module_visibility.apply(public_module, &item_mod.vis);
                 if let Some((_, nested_items)) = &item_mod.content {
                     walk_items(
                         view,

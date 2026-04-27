@@ -6,7 +6,7 @@ Closed the concrete `ts/arch` attack findings from the first adversarial pass. T
 
 - Fixed the file-tree bug in ingestion, not in the rule.
   - Why: the off-by-one depth and ignored-subtree inflation were fact-generation bugs in `g3ts-arch-ingestion`.
-  - Rejected: weakening `TS-ARCH-FILETREE-02`, because the rule thresholds were already correct.
+  - Rejected: weakening `g3ts-arch/structural-split`, because the rule thresholds were already correct.
 
 - Ignored only non-source structural subtrees under `src`.
   - Chosen exclusions:

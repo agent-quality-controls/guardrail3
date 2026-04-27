@@ -19,6 +19,6 @@ Key files for context
 - .plans/2026-04-22-233042-rs-code-fs-visitors-scope-precollection-fix.md
 
 Next steps
-- Fix `RS-TEST-SOURCE-17` for qualified calls to re-aliased owned assertions names such as `self::again()`.
-- Fix `RS-TEST-FILETREE-18` for module-alias helper calls like `h::fixture_path()` and `h::any_rule()`.
+- Fix `g3rs-test/external-harnesses-use-assertions` for qualified calls to re-aliased owned assertions names such as `self::again()`.
+- Fix `g3rs-test/test-support-generic` for module-alias helper calls like `h::fixture_path()` and `h::any_rule()`.
 - Fix the new hooks/parser attack findings around helper-definition order and escaped-space-before-hash handling.

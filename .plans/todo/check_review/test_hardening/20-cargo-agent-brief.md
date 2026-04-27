@@ -85,11 +85,11 @@ Apply to:
 - standalone package roots
 
 Rules:
-- `RS-CARGO-CONFIG-01`
-- `RS-CARGO-CONFIG-02`
+- `g3rs-cargo/workspace-lints`
+- `g3rs-cargo/lint-levels`
 - `RS-CARGO-03`
-- `RS-CARGO-CONFIG-04`
-- `RS-CARGO-CONFIG-05`
+- `g3rs-cargo/priority-order`
+- `g3rs-cargo/resolver`
 - `RS-CARGO-15`
 
 ### Workspace-only rules
@@ -97,7 +97,7 @@ Rules:
 Apply only to owned workspace roots:
 - `RS-CARGO-04`
 - `RS-CARGO-06`
-- `RS-CARGO-CONFIG-06`
+- `g3rs-cargo/disallowed-macros-deny`
 - `RS-CARGO-09`
 - `RS-CARGO-10`
 
@@ -139,8 +139,8 @@ It does not own:
 - toolchain file content
 
 Specifically relevant:
-- `RS-CARGO-CONFIG-07` should require `clippy::disallowed_macros = "deny"` so `RS-CLIPPY-20` is not toothless
-- `RS-CARGO-15` overlaps intentionally with `RS-TOOLCHAIN-CONFIG-02` around MSRV/toolchain compatibility
+- `g3rs-cargo/approved-allow-inventory` should require `clippy::disallowed_macros = "deny"` so `RS-CLIPPY-20` is not toothless
+- `RS-CARGO-15` overlaps intentionally with `g3rs-toolchain/msrv-consistency` around MSRV/toolchain compatibility
 
 ## Known Clean Gaps
 
@@ -151,7 +151,7 @@ These are already accepted as real family work:
 - the family still uses old rule sidecars like `*_tests.rs`
 - rule/test architecture still needs conversion to rule-specific `*_tests/` directories
 - additional planned rules are not yet implemented:
-  - `RS-CARGO-CONFIG-07`
+  - `g3rs-cargo/approved-allow-inventory`
   - `RS-CARGO-12`
   - `RS-CARGO-13`
   - `RS-CARGO-14`
@@ -239,12 +239,12 @@ The pass is not done until:
 4. fix discovery/ownership model before trying to harden individual rules
 5. convert rule sidecars from `*_tests.rs` to `*_tests/`
 6. then harden the highest-signal rules first:
-   - `RS-CARGO-CONFIG-01`
+   - `g3rs-cargo/workspace-lints`
    - `RS-CARGO-04`
    - `RS-CARGO-06`
-   - `RS-CARGO-CONFIG-06`
+   - `g3rs-cargo/disallowed-macros-deny`
    - `RS-CARGO-10`
 7. if time allows, implement and harden:
-   - `RS-CARGO-CONFIG-07`
+   - `g3rs-cargo/approved-allow-inventory`
    - `RS-CARGO-12`
    - `RS-CARGO-13`

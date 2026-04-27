@@ -1,6 +1,6 @@
 Goal
 
-Make `RS-ARCH-FILETREE-07` enforce its intended contract: prevent giant file and directory piles anywhere inside a crate's module tree, not only at the crate root or `src/` root.
+Make `g3rs-arch/structural-split` enforce its intended contract: prevent giant file and directory piles anywhere inside a crate's module tree, not only at the crate root or `src/` root.
 
 Approach
 

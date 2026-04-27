@@ -5,7 +5,7 @@ Decisions made
 - Kept the real `types` crate because it owns the public ingestion error. Rejected deleting it because unlike the old wrapper crates, this one is a real boundary.
 - Marked the whole workspace unpublished with explicit `publish = false` instead of building release scaffolding for an internal package.
 - Renamed `ingest_tests` to `run_tests` and changed local calls to `crate::run::...`. Rejected keeping `ingest_tests` because the tests are about the runtime entry points in `run.rs`, not a missing `ingest.rs` module.
-- Moved final config and filetree proof into the shared assertions crate. Rejected local result-check helpers in `basic.rs` because `RS-TEST-SOURCE-07` was correctly surfacing them as split proof.
+- Moved final config and filetree proof into the shared assertions crate. Rejected local result-check helpers in `basic.rs` because `g3rs-test/real-proof-site` was correctly surfacing them as split proof.
 - Tightened weak state and error assertions so they prove specific payloads instead of wildcard matches.
 
 Key files for context

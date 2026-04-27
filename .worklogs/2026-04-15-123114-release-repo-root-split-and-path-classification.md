@@ -6,7 +6,7 @@ Decisions made
 - Kept the moved workflow rules live under `packages/rs`, not `legacy`, because they still belong to the active design and only need repo-root ingestion later.
 - Added `ingest_for_repo_root_checks` now as a stub that returns a clear not-implemented error. Rejected wiring fake repo-root behavior into the existing workspace-local release ingestion.
 - Fixed the path-dependency bug in ingestion, not in the rule. The rule now gets a truthful edge shape with `InWorkspace` vs `OutsideWorkspace`.
-- Changed `RS-RELEASE-CONFIG-19` behavior:
+- Changed `g3rs-release/no-path-deps-to-unpublishable` behavior:
   - inside-workspace unpublished path target -> error
   - outside-workspace path target with a version -> warning
   - outside-workspace path target without a version -> error

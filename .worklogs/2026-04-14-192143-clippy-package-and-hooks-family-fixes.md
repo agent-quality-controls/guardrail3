@@ -1,13 +1,13 @@
 # Summary
-Completed the agreed package-local fixes for `packages/rs/clippy/g3rs-clippy-config-checks` and the family-level fixes that were clearly rule bugs. `RS-ARCH-CONFIG-08` no longer forces an `all` feature, hooks now scope to the actual repo root without weakening package behavior, and the hooks/config command detection now follows the live `g3rs validate --path ...` CLI.
+Completed the agreed package-local fixes for `packages/rs/clippy/g3rs-clippy-config-checks` and the family-level fixes that were clearly rule bugs. `g3rs-arch/feature-contract` no longer forces an `all` feature, hooks now scope to the actual repo root without weakening package behavior, and the hooks/config command detection now follows the live `g3rs validate --path ...` CLI.
 
 # Decisions Made
-- Fixed `RS-ARCH-CONFIG-08` in the arch family instead of contorting package manifests around an overprescriptive `all` feature contract.
+- Fixed `g3rs-arch/feature-contract` in the arch family instead of contorting package manifests around an overprescriptive `all` feature contract.
 - Kept repo-global hooks semantics strict. The correct fix was test fixture repair plus a simpler repo-root activation rule based on the root `.git` boundary, not weakening hooks for nested package workspaces.
 - Fixed the hooks config binary checks at the family boundary because they were still parsing the dead `g3rs ... --staged` command shape.
 - Fixed `g3rs-clippy-config-checks` package-local issues that were clearly real: boundary-crossing deps, missing feature contract, missing facade gating, `#[path]` usage, and missing release metadata/files.
-- Did not touch the deferred findings the user explicitly left undecided: `RS-CODE-FILETREE-35`, `RS-ARCH-FILETREE-07`, `RS-CODE-SOURCE-31`, `RS-ARCH-SOURCE-04`, and the broader test-layout slice.
-- Left `RS-RELEASE-CONFIG-18` in place for `g3rs-clippy-config-checks` because the current failures are external publish-chain blockers, not local metadata omissions.
+- Did not touch the deferred findings the user explicitly left undecided: `RS-CODE-FILETREE-35`, `g3rs-arch/structural-split`, `g3rs-code/ast-31-public-struct-named-fields`, `g3rs-arch/mod-facade-only`, and the broader test-layout slice.
+- Left `g3rs-release/publish-dry-run` in place for `g3rs-clippy-config-checks` because the current failures are external publish-chain blockers, not local metadata omissions.
 
 # Key Files For Context
 - `.plans/2026-04-14-185207-clippy-package-and-family-fixes.md`
@@ -22,4 +22,4 @@ Completed the agreed package-local fixes for `packages/rs/clippy/g3rs-clippy-con
 
 # Next Steps
 - If continuing on `g3rs-clippy-config-checks`, the remaining non-test findings are the still-undecided ones: runtime crate size, `Finding` public fields, facade-only `mod.rs`, and release dry-run blockers caused by unpublished dependency chain.
-- If continuing on families, the next honest work is deciding whether `RS-ARCH-SOURCE-04` and the broader test layout rules should be narrowed or whether package workspaces must migrate away from the current sidecar `mod.rs` pattern.
+- If continuing on families, the next honest work is deciding whether `g3rs-arch/mod-facade-only` and the broader test layout rules should be narrowed or whether package workspaces must migrate away from the current sidecar `mod.rs` pattern.

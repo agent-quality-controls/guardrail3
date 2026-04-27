@@ -5,17 +5,17 @@ fn golden_setup_package_reports_owned_ids() {
     assertions::assert_runtime_check_exact_ids(
         &super::helpers::golden(),
         &[
-            "TS-ASTRO-SETUP-CONFIG-01",
-            "TS-ASTRO-SETUP-CONFIG-02",
-            "TS-ASTRO-SETUP-CONFIG-03",
-            "TS-ASTRO-SETUP-CONFIG-33",
-            "TS-ASTRO-SETUP-CONFIG-34",
-            "TS-ASTRO-SETUP-CONFIG-05",
-            "TS-ASTRO-SETUP-CONFIG-09",
-            "TS-ASTRO-SETUP-CONFIG-10",
-            "TS-ASTRO-SETUP-CONFIG-11",
-            "TS-ASTRO-SETUP-CONFIG-12",
-            "TS-ASTRO-SETUP-CONFIG-21",
+            "g3ts-astro-setup/astro-package-present",
+            "g3ts-astro-setup/astro-check-present",
+            "g3ts-astro-setup/astro-eslint-plugin-package-present",
+            "g3ts-astro-setup/lint-script",
+            "g3ts-astro-setup/syncpack-lint-script",
+            "g3ts-astro-setup/astro-eslint-plugin-wired",
+            "g3ts-astro-setup/syncpack-stack-pins",
+            "g3ts-astro-setup/syncpack-forbidden-deps",
+            "g3ts-astro-setup/site-url",
+            "g3ts-astro-setup/static-output",
+            "g3ts-astro-setup/required-integrations",
         ],
     );
 }
@@ -32,7 +32,7 @@ fn astro_plugin_wiring_rejects_missing_effective_package_identity() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-SETUP-CONFIG-05",
+        "g3ts-astro-setup/astro-eslint-plugin-wired",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -42,9 +42,7 @@ fn lint_script_must_run_eslint_fail_closed() {
     let mut input = super::helpers::golden();
     let package = super::helpers::parsed_package_mut(&mut input);
     package.script_names.retain(|name| name != "lint");
-    package
-        .script_bodies
-        .retain(|(name, _body)| name != "lint");
+    package.script_bodies.retain(|(name, _body)| name != "lint");
     package
         .script_commands
         .retain(|command| command.script_name != "lint");
@@ -54,7 +52,7 @@ fn lint_script_must_run_eslint_fail_closed() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-SETUP-CONFIG-33",
+        "g3ts-astro-setup/lint-script",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -72,7 +70,7 @@ fn lint_script_must_not_hide_eslint_failure() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-SETUP-CONFIG-33",
+        "g3ts-astro-setup/lint-script",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -94,7 +92,7 @@ fn syncpack_lint_script_must_run_syncpack_lint_fail_closed() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-SETUP-CONFIG-34",
+        "g3ts-astro-setup/syncpack-lint-script",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -112,7 +110,7 @@ fn syncpack_lint_script_must_not_hide_syncpack_failure() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-SETUP-CONFIG-34",
+        "g3ts-astro-setup/syncpack-lint-script",
         guardrail3_check_types::G3Severity::Error,
     );
 }

@@ -1,5 +1,5 @@
 Summary
-- Fixed RS-HOOKS-SOURCE-15 helper resolution so helper bodies are resolved by definition order, not name only.
+- Fixed g3rs-hooks/hook-rs-16-config-changes-trigger-validation helper resolution so helper bodies are resolved by definition order, not name only.
 - Added regression tests for a forward call before helper definition and for later redefinition overriding an earlier noop.
 
 Decisions made

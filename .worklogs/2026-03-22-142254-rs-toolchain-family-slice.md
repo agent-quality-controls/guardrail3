@@ -21,14 +21,14 @@ The old implementation split toolchain logic across `config_files.rs` and `toolc
   - Skip a family module and leave toolchain logic in a shared config file checker — rejected because it breaks the family-by-family migration model.
 
 ### Require `rust-toolchain.toml` specifically, not the legacy file
-- **Chose:** `RS-TOOLCHAIN-01` still errors when `rust-toolchain.toml` is missing, while `RS-TOOLCHAIN-04` handles the legacy `rust-toolchain` file as a migration warning.
+- **Chose:** `g3rs-toolchain/root-toolchain-config-exists` still errors when `rust-toolchain.toml` is missing, while `g3rs-toolchain/no-duplicate-toolchain-config` handles the legacy `rust-toolchain` file as a migration warning.
 - **Why:** This preserves the existing product direction: the TOML form is the intended canonical file because it can declare components explicitly.
 - **Alternatives considered:**
   - Treat legacy `rust-toolchain` as satisfying existence — rejected because it would weaken the migration goal and collapse two distinct invariants.
 
 ### Pull Cargo `rust-version` in as a fact, not as a separate traversal
 - **Chose:** `discover.rs` reads root Cargo metadata once and exposes `cargo_rust_version` in family facts.
-- **Why:** The `RS-TOOLCHAIN-CONFIG-02` rule needs that context, but the rule should not parse Cargo.toml on its own.
+- **Why:** The `g3rs-toolchain/msrv-consistency` rule needs that context, but the rule should not parse Cargo.toml on its own.
 - **Alternatives considered:**
   - Let the rule parse Cargo.toml directly — rejected because it violates the orchestrator/facts separation.
 
@@ -41,10 +41,10 @@ The family layout follows the same pattern established by `fmt` and `cargo`:
 - tests live in a sidecar `toolchain_tests.rs`
 
 This family currently implements:
-- `RS-TOOLCHAIN-01` rust-toolchain.toml existence
-- `RS-TOOLCHAIN-CONFIG-01` channel and required components
-- `RS-TOOLCHAIN-CONFIG-02` pinned toolchain vs Cargo MSRV consistency
-- `RS-TOOLCHAIN-04` legacy/duplicate toolchain file warnings
+- `g3rs-toolchain/root-toolchain-config-exists` rust-toolchain.toml existence
+- `g3rs-toolchain/channel-and-components` channel and required components
+- `g3rs-toolchain/msrv-consistency` pinned toolchain vs Cargo MSRV consistency
+- `g3rs-toolchain/no-duplicate-toolchain-config` legacy/duplicate toolchain file warnings
 
 The rules remain side-by-side with the old validator for now and are not yet wired into the top-level validate pipeline.
 
@@ -59,7 +59,7 @@ The rules remain side-by-side with the old validator for now and are not yet wir
 - `cargo test --lib checks::rs::fmt`
 
 ## Open Questions / Future Considerations
-- `RS-TOOLCHAIN-CONFIG-02` currently only compares numeric pinned channels like `1.84.0`; nonstandard strings are ignored.
+- `g3rs-toolchain/msrv-consistency` currently only compares numeric pinned channels like `1.84.0`; nonstandard strings are ignored.
 - The family does not yet model a more nuanced library/service distinction for MSRV messaging.
 - As with the other migrated families, this code is not yet wired into the old top-level validation path.
 

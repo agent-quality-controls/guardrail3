@@ -137,6 +137,6 @@ Stop hand-rolling dependency version semantics in G3TS. Make Astro package-polic
 - Keep package.json structural facts in `package-json-parser`, but do not grow npm SemVer/range policy there.
 - Revisit custom duplicate/version checks in package families after this slice; anything checking dependency policy should prefer Syncpack unless it is strictly about G3TS setup.
 - Pre-existing follow-up candidates:
-  - `TS-PACKAGE-CONFIG-08` hard-codes banned dependencies and scans local manifests directly; migrate that dependency policy to Syncpack contract enforcement.
-  - `TS-PACKAGE-CONFIG-06` raw-checks `scripts.preinstall` for `only-allow pnpm`; migrate that script invocation detection to `package-script-command-parser`.
-  - `TS-PACKAGE-CONFIG-04` hand-rolls `packageManager` pnpm version/range validation with string checks; delegate to `package-json-parser` backed by a real SemVer parser if the rule stays.
+  - `g3ts-package/local-banned-dependencies` hard-codes banned dependencies and scans local manifests directly; migrate that dependency policy to Syncpack contract enforcement.
+  - `g3ts-package/root-scripts` raw-checks `scripts.preinstall` for `only-allow pnpm`; migrate that script invocation detection to `package-script-command-parser`.
+  - `g3ts-package/root-package-manager` hand-rolls `packageManager` pnpm version/range validation with string checks; delegate to `package-json-parser` backed by a real SemVer parser if the rule stays.

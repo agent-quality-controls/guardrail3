@@ -1,6 +1,6 @@
 Goal
 
-Remove the last remaining `RS-CODE-SOURCE-04` warnings from the five parser package roots so the full package-root validate sweep returns `No findings.` everywhere.
+Remove the last remaining `g3rs-code/ast-04-item-level-allow-with-reason` warnings from the five parser package roots so the full package-root validate sweep returns `No findings.` everywhere.
 
 Approach
 
@@ -16,7 +16,7 @@ Approach
 
 Key decisions
 
-- Do not change `RS-CODE-SOURCE-04`. The rule is consistent with the repo: the clean parser packages already avoid the warning by using the attribute `reason =` form.
+- Do not change `g3rs-code/ast-04-item-level-allow-with-reason`. The rule is consistent with the repo: the clean parser packages already avoid the warning by using the attribute `reason =` form.
 - Do not add new waivers. The warning comes from an avoidable local source shape, so the architecturally correct fix is to normalize the source shape.
 
 Files to modify

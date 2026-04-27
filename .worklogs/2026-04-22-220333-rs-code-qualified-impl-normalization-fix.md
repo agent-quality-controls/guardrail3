@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed the `RS-CODE-SOURCE-31` follow-up false negative where nested public structs were still skipped if the inherent impl used `crate::...` or `self::...` qualification. The rule now normalizes impl self-type paths before comparing them to the qualified struct identity.
+Fixed the `g3rs-code/ast-31-public-struct-named-fields` follow-up false negative where nested public structs were still skipped if the inherent impl used `crate::...` or `self::...` qualification. The rule now normalizes impl self-type paths before comparing them to the qualified struct identity.
 
 ## Decisions made
 

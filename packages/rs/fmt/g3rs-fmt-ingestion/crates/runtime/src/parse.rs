@@ -16,10 +16,11 @@ pub(crate) fn parse_rustfmt_toml(
             path: abs_path.to_path_buf(),
             reason: err.to_string(),
         })?;
-    let parsed = rustfmt_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
-        path: abs_path.to_path_buf(),
-        reason: err.to_string(),
-    })?;
+    let parsed =
+        rustfmt_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+            path: abs_path.to_path_buf(),
+            reason: err.to_string(),
+        })?;
     Ok((parsed, explicit_rustfmt_keys(&content)))
 }
 

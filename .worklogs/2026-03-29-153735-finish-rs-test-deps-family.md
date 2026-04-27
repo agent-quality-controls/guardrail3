@@ -32,7 +32,7 @@ Unlike `garde`, the `deps` family already had a sibling assertions crate, so the
   - collapse everything into one family-level assertions module — rejected because it weakens one-rule/one-owned-proof traceability
 
 ### Keep cross-rule exactness assertions inside owned rule assertions
-- **Chose:** add exactness helpers to `RS-DEPS-01..04` assertions and a broad dependency-routing helper to `RS-DEPS-CONFIG-01`
+- **Chose:** add exactness helpers to `RS-DEPS-01..04` assertions and a broad dependency-routing helper to `g3rs-deps/dependencies-allowlisted`
 - **Why:** those tests intentionally reason about multiple rule IDs at once, but sidecars are not allowed to import sibling assertions modules or inspect result IDs directly.
 - **Alternatives considered:**
   - let sidecars import multiple sibling assertions modules — rejected because `RS-TEST-03` correctly forbids sibling assertions reach-through

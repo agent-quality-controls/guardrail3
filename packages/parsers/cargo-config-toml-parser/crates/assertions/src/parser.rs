@@ -12,12 +12,24 @@ use cargo_config_toml_parser_runtime::types::{
 };
 
 pub fn assert_core_fields_empty(cfg: &CargoConfigToml) {
-    assert!(cfg.paths.is_empty(), "paths should be empty for empty input");
-    assert!(cfg.include.is_empty(), "include should be empty for empty input");
-    assert!(cfg.alias.is_empty(), "alias should be empty for empty input");
+    assert!(
+        cfg.paths.is_empty(),
+        "paths should be empty for empty input"
+    );
+    assert!(
+        cfg.include.is_empty(),
+        "include should be empty for empty input"
+    );
+    assert!(
+        cfg.alias.is_empty(),
+        "alias should be empty for empty input"
+    );
     assert_eq!(cfg.build, None, "build should be None for empty input");
     assert!(cfg.env.is_empty(), "env should be empty for empty input");
-    assert!(cfg.target.is_empty(), "target should be empty for empty input");
+    assert!(
+        cfg.target.is_empty(),
+        "target should be empty for empty input"
+    );
 }
 
 pub fn assert_extra_empty(cfg: &CargoConfigToml) {
@@ -53,7 +65,10 @@ pub fn assert_detailed_env_value(
     };
     assert_eq!(detail.value, expected_value, "{key}.value mismatch");
     assert_eq!(detail.force, expected_force, "{key}.force mismatch");
-    assert_eq!(detail.relative, expected_relative, "{key}.relative mismatch");
+    assert_eq!(
+        detail.relative, expected_relative,
+        "{key}.relative mismatch"
+    );
     assert!(detail.extra.is_empty(), "{key}.extra should be empty");
 }
 
@@ -112,9 +127,20 @@ pub fn assert_tls_range(
     let Some(HttpSslVersion::Range(range)) = actual else {
         return;
     };
-    assert_eq!(range.min.as_deref(), expected_min, "http.ssl-version.min mismatch");
-    assert_eq!(range.max.as_deref(), expected_max, "http.ssl-version.max mismatch");
-    assert!(range.extra.is_empty(), "http.ssl-version.extra should be empty");
+    assert_eq!(
+        range.min.as_deref(),
+        expected_min,
+        "http.ssl-version.min mismatch"
+    );
+    assert_eq!(
+        range.max.as_deref(),
+        expected_max,
+        "http.ssl-version.max mismatch"
+    );
+    assert!(
+        range.extra.is_empty(),
+        "http.ssl-version.extra should be empty"
+    );
 }
 
 pub fn assert_string_list(actual: &[String], expected: &[&str], field_name: &str) {

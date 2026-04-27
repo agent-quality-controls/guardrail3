@@ -2,7 +2,7 @@ Goal
 - Fix shared `rs/code` fs-visitor false negatives and false positives around mixed `cfg(...)` test gating and grouped `std::{...}` matching.
 
 Approach
-- Add red regressions in `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21` sidecars for mixed `cfg(any(test, ...))` production paths that must still fire.
+- Add red regressions in `g3rs-code/ast-15-direct-fs-usage` and `g3rs-code/ast-21-fs-glob-import` sidecars for mixed `cfg(any(test, ...))` production paths that must still fire.
 - Add red false-positive regressions for grouped `std::{self as ...}` and grouped non-`fs` glob imports.
 - Fix the ownership point in the shared parse helpers and fs-visitor support:
   - compute test-only gating from whether a cfg predicate can be true with `test = false`
@@ -10,7 +10,7 @@ Approach
 - Verify with package tests and `g3rs validate`.
 
 Key decisions
-- Keep the fix in shared parse/fs-visitor helpers instead of patching rule-specific behavior, because both `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21` consume the same semantics.
+- Keep the fix in shared parse/fs-visitor helpers instead of patching rule-specific behavior, because both `g3rs-code/ast-15-direct-fs-usage` and `g3rs-code/ast-21-fs-glob-import` consume the same semantics.
 - Prove both sides of the fix: mixed cfg paths still fire, and non-`fs` grouped imports stay quiet.
 
 Files to modify

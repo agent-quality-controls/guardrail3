@@ -6,12 +6,12 @@ pub fn check(input: &G3RsArchSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for check_input in &input.lib_facade_checks {
-        crate::rs_arch_02_lib_facade_only::check(
+        crate::lib_facade_only::check(
             &check_input.krate,
             check_input.lib_surface.as_ref(),
             &mut results,
         );
-        crate::rs_arch_08a_feature_gated_exports::check(
+        crate::feature_gated_exports::check(
             &check_input.krate,
             check_input.lib_surface.as_ref(),
             &mut results,
@@ -19,11 +19,11 @@ pub fn check(input: &G3RsArchSourceChecksInput) -> Vec<G3CheckResult> {
     }
 
     for surface in &input.mod_facade_surfaces {
-        crate::rs_arch_04_mod_facade_only::check(surface, &mut results);
+        crate::mod_facade_only::check(surface, &mut results);
     }
 
     for site in &input.path_attr_sites {
-        crate::rs_arch_09_no_path_attr::check(site, &mut results);
+        crate::no_path_attr::check(site, &mut results);
     }
 
     results

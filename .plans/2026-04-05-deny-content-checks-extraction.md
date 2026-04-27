@@ -34,28 +34,28 @@ pub fn check(input: &G3RsDenyConfigChecksInput) -> Vec<G3CheckResult>;
 
 ### Moves into package
 
-- `RS-DENY-CONFIG-01`
-- `RS-DENY-CONFIG-02`
-- `RS-DENY-CONFIG-03`
-- `RS-DENY-CONFIG-04`
-- `RS-DENY-CONFIG-05`
-- `RS-DENY-CONFIG-07`
-- `RS-DENY-CONFIG-08`
-- `RS-DENY-CONFIG-09`
-- `RS-DENY-CONFIG-10`
-- `RS-DENY-CONFIG-11`
-- `RS-DENY-CONFIG-12`
-- `RS-DENY-CONFIG-13`
-- `RS-DENY-CONFIG-15`
-- `RS-DENY-CONFIG-16`
-- `RS-DENY-CONFIG-17`
-- `RS-DENY-CONFIG-18`
-- `RS-DENY-CONFIG-19`
-- `RS-DENY-CONFIG-20`
-- `RS-DENY-CONFIG-21`
-- `RS-DENY-CONFIG-24`
-- `RS-DENY-CONFIG-25`
-- `RS-DENY-CONFIG-26`
+- `g3rs-deny/deprecated-advisories`
+- `g3rs-deny/advisories-baseline`
+- `g3rs-deny/stricter-advisories-inventory`
+- `g3rs-deny/graph-all-features`
+- `g3rs-deny/graph-no-default-features`
+- `g3rs-deny/highlight-inventory`
+- `g3rs-deny/allow-wildcard-paths`
+- `g3rs-deny/wildcards-inventory`
+- `g3rs-deny/license-allow-baseline`
+- `g3rs-deny/confidence-threshold`
+- `g3rs-deny/copyleft-allowlist`
+- `g3rs-deny/unknown-sources-policy`
+- `g3rs-deny/allow-git-inventory`
+- `g3rs-deny/tokio-full-ban`
+- `g3rs-deny/extra-feature-bans-inventory`
+- `g3rs-deny/skip-hygiene`
+- `g3rs-deny/ignore-hygiene`
+- `g3rs-deny/duplicate-entries`
+- `g3rs-deny/unknown-keys`
+- `g3rs-deny/license-exceptions-inventory`
+- `g3rs-deny/allow-override-channel`
+- `g3rs-deny/extra-deny-bans-inventory`
 
 ### Deferred for parser / policy-context reasons
 
@@ -107,10 +107,10 @@ packages/g3rs-deny-config-checks/
 
 ## Rule Organization
 
-- `advisories/` owns `RS-DENY-CONFIG-01..08`
-- `bans/` owns `RS-DENY-CONFIG-07..13`, `21`, `22`, `27`
-- `licenses/` owns `RS-DENY-CONFIG-11..16`
-- `sources/` owns `RS-DENY-CONFIG-15..20`, `23`, `24`, `28`, `29`
+- `advisories/` owns `g3rs-deny/deprecated-advisories..08`
+- `bans/` owns `g3rs-deny/highlight-inventory..13`, `21`, `22`, `27`
+- `licenses/` owns `g3rs-deny/confidence-threshold..16`
+- `sources/` owns `g3rs-deny/allow-git-inventory..20`, `23`, `24`, `28`, `29`
 
 The runtime `check(&G3RsDenyConfigChecksInput)` entrypoint fans out into these
 areas. Internal rule functions should take direct params, not extra typed
@@ -125,7 +125,7 @@ receives an already parsed `DenyToml` from the app orchestrator.
 
 Completed:
 1. `g3rs-deny-config-checks` is scaffolded and compiles.
-2. The package owns `RS-DENY-CONFIG-01`, `05`, `06`, `07`, `08`, `10`, `11`, `12`,
+2. The package owns `g3rs-deny/deprecated-advisories`, `05`, `06`, `07`, `08`, `10`, `11`, `12`,
    `13`, `14`, `15`, `16`, `18`, `19`, `20`, `21`, `22`, `23`, `24`, `27`,
    `28`, and `29`.
 3. The app deny family delegates those rules to the package and keeps

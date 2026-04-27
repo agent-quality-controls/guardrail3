@@ -6,8 +6,8 @@ Move package-family dependency policy out of direct manifest validation and into
 
 Desired end state:
 
-- `TS-PACKAGE-CONFIG-08` proves Syncpack is installed, run fail-closed, and configured to ban the package-family dependency policy.
-- `TS-PACKAGE-CONFIG-06` proves `only-allow pnpm` through parsed command facts, not raw string matching.
+- `g3ts-package/local-banned-dependencies` proves Syncpack is installed, run fail-closed, and configured to ban the package-family dependency policy.
+- `g3ts-package/root-scripts` proves `only-allow pnpm` through parsed command facts, not raw string matching.
 - `package-script-command-parser` uses a dedicated shell parser library for command splitting and word extraction.
 - Package-family checks consume typed ingestion facts and do not parse shell scripts or Syncpack config themselves.
 
@@ -45,10 +45,10 @@ Desired end state:
 
 4. Update package checks.
 
-- Modify `TS-PACKAGE-CONFIG-06` to require `safely_runs_only_allow_pnpm`.
-- Modify `TS-PACKAGE-CONFIG-08` to require Syncpack setup/configuration instead of direct local manifest dependency scanning.
+- Modify `g3ts-package/root-scripts` to require `safely_runs_only_allow_pnpm`.
+- Modify `g3ts-package/local-banned-dependencies` to require Syncpack setup/configuration instead of direct local manifest dependency scanning.
 - Remove banned dependency lists and local dependency scanning helpers from package config checks.
-- Keep `TS-PACKAGE-CONFIG-04` unchanged unless verification shows an active bug. Package-manager semver parsing is not part of this requested cleanup.
+- Keep `g3ts-package/root-package-manager` unchanged unless verification shows an active bug. Package-manager semver parsing is not part of this requested cleanup.
 
 5. Update tests.
 
@@ -98,10 +98,10 @@ Desired end state:
 
 ## Adversarial Review Checklist
 
-- A root script with `echo only-allow pnpm` must not satisfy `TS-PACKAGE-CONFIG-06`.
-- A root script with `only-allow pnpm || true` must not satisfy `TS-PACKAGE-CONFIG-06`.
-- A root script with `echo syncpack lint` must not satisfy `TS-PACKAGE-CONFIG-08`.
-- A root script with `syncpack lint || true` must not satisfy `TS-PACKAGE-CONFIG-08`.
+- A root script with `echo only-allow pnpm` must not satisfy `g3ts-package/root-scripts`.
+- A root script with `only-allow pnpm || true` must not satisfy `g3ts-package/root-scripts`.
+- A root script with `echo syncpack lint` must not satisfy `g3ts-package/local-banned-dependencies`.
+- A root script with `syncpack lint || true` must not satisfy `g3ts-package/local-banned-dependencies`.
 - A local manifest with a banned dependency must be allowed by G3TS only if Syncpack is installed, run, and configured to ban that dependency.
 - Missing local `package.json` source coverage in `.syncpackrc` must fail even if banned groups exist.
 - Missing canonical banned groups must fail even if `syncpack lint` is wired.

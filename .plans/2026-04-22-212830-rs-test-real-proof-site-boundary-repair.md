@@ -1,10 +1,10 @@
 ## Goal
 
-Repair `RS-TEST-SOURCE-07` so the rule consumes ingestion-owned local proof-helper facts instead of rebuilding proof-helper state and guessing from proof-ish names or arbitrary `assertions` path segments.
+Repair `g3rs-test/real-proof-site` so the rule consumes ingestion-owned local proof-helper facts instead of rebuilding proof-helper state and guessing from proof-ish names or arbitrary `assertions` path segments.
 
 ## Approach
 
-- Add red tests in the `RS-TEST-SOURCE-07` rule suite proving the current rule is wrong when:
+- Add red tests in the `g3rs-test/real-proof-site` rule suite proving the current rule is wrong when:
   - a same-file local proof helper ends in a real assertion path but its name does not look proof-like
   - a local module or imported path contains `assertions` but is not the owned assertions surface
 - Move local proof-helper binding into `rs/test` ingestion and types so analyzed source files carry the exact local helper set needed by the rule.

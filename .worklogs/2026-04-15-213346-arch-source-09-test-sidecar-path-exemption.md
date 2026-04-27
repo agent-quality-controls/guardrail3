@@ -1,5 +1,5 @@
 Summary
-- Fixed a real `RS-ARCH-SOURCE-09` contradiction. The rule blanket-banned `#[path]`, but the chosen test shape for file modules is `x.rs` plus `#[cfg(test)] #[path = "x_tests/mod.rs"] mod x_tests;`.
+- Fixed a real `g3rs-arch/no-path-attr` contradiction. The rule blanket-banned `#[path]`, but the chosen test shape for file modules is `x.rs` plus `#[cfg(test)] #[path = "x_tests/mod.rs"] mod x_tests;`.
 
 Decisions made
 - Added only a narrow exemption:

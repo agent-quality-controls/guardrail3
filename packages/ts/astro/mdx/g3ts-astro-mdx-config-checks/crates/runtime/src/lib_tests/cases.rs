@@ -5,15 +5,32 @@ fn golden_mdx_package_reports_owned_ids() {
     assertions::assert_runtime_check_exact_ids(
         &super::helpers::golden(),
         &[
-            "TS-ASTRO-MDX-CONFIG-24",
-            "TS-ASTRO-MDX-CONFIG-29",
-            "TS-ASTRO-MDX-CONFIG-20",
-            "TS-ASTRO-MDX-CONFIG-30",
-            "TS-ASTRO-MDX-CONFIG-35",
-            "TS-ASTRO-MDX-CONFIG-36",
-            "TS-ASTRO-MDX-CONFIG-37",
-            "TS-ASTRO-MDX-CONFIG-38",
+            "g3ts-astro-mdx/strict-policy-paths",
+            "g3ts-astro-mdx/policy-helper-surfaces",
+            "g3ts-astro-mdx/mdx-eslint-plugin-package-present",
+            "g3ts-astro-mdx/mdx-eslint-lane-wired",
+            "g3ts-astro-mdx/mdx-component-map-rule",
+            "g3ts-astro-mdx/mdx-import-names",
+            "g3ts-astro-mdx/no-raw-ui-exports",
+            "g3ts-astro-mdx/mdx-component-wrapper-zod-parse",
+            "g3ts-astro-mdx/no-raw-mdx-images",
         ],
+    );
+}
+
+#[test]
+fn mdx_package_rejects_missing_dependency() {
+    let mut input = super::helpers::golden();
+    let package = &mut input.integration_contracts[0].package;
+    let g3ts_astro_mdx_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } = package else {
+        panic!("golden package should be parsed");
+    };
+    snapshot.dev_dependencies.clear();
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-mdx/mdx-eslint-plugin-package-present",
+        guardrail3_check_types::G3Severity::Error,
     );
 }
 
@@ -28,7 +45,7 @@ fn mdx_lane_rejects_missing_effective_package_identity() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-MDX-CONFIG-20",
+        "g3ts-astro-mdx/mdx-eslint-lane-wired",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -46,7 +63,7 @@ fn mdx_import_name_rule_is_required() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-MDX-CONFIG-35",
+        "g3ts-astro-mdx/mdx-import-names",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -64,7 +81,7 @@ fn mdx_component_map_raw_ui_export_rule_is_required() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-MDX-CONFIG-36",
+        "g3ts-astro-mdx/no-raw-ui-exports",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -82,7 +99,7 @@ fn mdx_component_wrapper_zod_parse_rule_is_required() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-MDX-CONFIG-37",
+        "g3ts-astro-mdx/mdx-component-wrapper-zod-parse",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -98,7 +115,7 @@ fn mdx_raw_image_rule_is_required() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-MDX-CONFIG-38",
+        "g3ts-astro-mdx/no-raw-mdx-images",
         guardrail3_check_types::G3Severity::Error,
     );
 }

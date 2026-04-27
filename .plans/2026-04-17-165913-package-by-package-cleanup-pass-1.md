@@ -6,8 +6,8 @@ Clean the next dirty package roots from the full validate sweep without changing
 
 Approach
 
-- Fix `RS-CODE-SOURCE-10` in `deny-config-checks` by reducing top-level import count in `crates/runtime/src/support/unknown_keys.rs` without changing package behavior.
-- Fix the two `RS-TEST-FILETREE-03` failures in `toolchain-config-checks` by making sidecar helpers call only their owned production module through `super::super::check`.
+- Fix `g3rs-code/ast-10-too-many-use-imports` in `deny-config-checks` by reducing top-level import count in `crates/runtime/src/support/unknown_keys.rs` without changing package behavior.
+- Fix the two `g3rs-test/runtime-assertions-split` failures in `toolchain-config-checks` by making sidecar helpers call only their owned production module through `super::super::check`.
 - Re-run package-local tests and validate for both package roots.
 - Stop immediately if a package-local fix runs into a real rule contradiction instead of more debt.
 

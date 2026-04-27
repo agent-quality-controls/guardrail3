@@ -48,7 +48,7 @@ The user wanted the Rust-side plan set to be trustworthy enough to use as the ac
   - Mark the whole family “unfinished” without writing the real contract — rejected because the point of this pass was to make the plan itself precise enough to build against.
 
 ### Record newly identified clean `cargo` hardening rules in the plan
-- **Chose:** Add planned `RS-CARGO-CONFIG-07..13` to capture the most concrete clean misses already surfaced by adversarial review:
+- **Chose:** Add planned `g3rs-cargo/approved-allow-inventory..13` to capture the most concrete clean misses already surfaced by adversarial review:
   - `clippy::disallowed_macros = "deny"` in the canonical lint baseline
   - surfacing explicit `allow` lints outside the approved baseline
   - forbidding member-local `allow` entries when a member uses `[lints] workspace = true`

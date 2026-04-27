@@ -4,12 +4,12 @@ Fix the `arch` config contradiction where rule 05 rejects dependencies to siblin
 
 Approach
 
-- Add a direct test that proves `RS-ARCH-CONFIG-05` wrongly fires on:
+- Add a direct test that proves `g3rs-arch/no-boundary-crossing` wrongly fires on:
   - `runtime -> shared types`
   - `assertions -> shared types`
 - Keep the current special test-only edges unchanged.
-- Change `RS-ARCH-CONFIG-05` so it stands down when the target crate is marked `shared = true`.
-- Leave `RS-ARCH-CONFIG-06` as the rule that decides:
+- Change `g3rs-arch/no-boundary-crossing` so it stands down when the target crate is marked `shared = true`.
+- Leave `g3rs-arch/shared-flag-required` as the rule that decides:
   - shared target -> allowed
   - non-shared target -> error
 - Re-run the arch package tests.

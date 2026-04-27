@@ -9,11 +9,11 @@ pub fn assert_inventory_hidden(output: &str) {
         "expected fmt family header in rendered output: {output}"
     );
     assert!(
-        output.contains("RS-FMT-CONFIG-02"),
+        output.contains("g3rs-fmt/rustfmt-extra-settings-inventory"),
         "expected visible warning result in rendered output: {output}"
     );
     assert!(
-        !output.contains("RS-FMT-CONFIG-01"),
+        !output.contains("g3rs-fmt/rustfmt-required-settings"),
         "expected inventory-only finding to stay hidden: {output}"
     );
 }
@@ -34,7 +34,7 @@ pub fn assert_no_findings(output: &str) {
 /// Panics if the warning title or its message line is missing.
 pub fn assert_includes_rule_message(output: &str) {
     assert!(
-        output.contains("[Warn] RS-DENY-CONFIG-27 deny.toml managed ban wrappers changed"),
+        output.contains("[Warn] g3rs-deny/wrappers deny.toml managed ban wrappers changed"),
         "expected deny warning title in rendered output: {output}"
     );
     assert!(

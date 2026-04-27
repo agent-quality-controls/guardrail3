@@ -28,58 +28,34 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     if input.kind == G3RsHookScriptKind::PreCommit {
-        crate::bootstrap::hook_shared_04_dispatcher_pattern::check(&dispatcher_input, &mut results);
-        crate::shell_safety::hook_shared_19_real_dispatcher_syntax_only::check(
-            &dispatcher_input,
-            &mut results,
-        );
+        crate::bootstrap::dispatcher_pattern::check(&dispatcher_input, &mut results);
+        crate::shell_safety::real_dispatcher_syntax_only::check(&dispatcher_input, &mut results);
 
-        crate::hook_rs_01_fmt_step_present::check(&rust_input, &mut results);
-        crate::hook_rs_02_clippy_step_present::check(&rust_input, &mut results);
-        crate::hook_rs_03_cargo_deny_step_present::check(&rust_input, &mut results);
-        crate::hook_rs_04_test_step_present::check(&rust_input, &mut results);
-        crate::hook_rs_05_cargo_machete_step_present::check(&rust_input, &mut results);
-        crate::hook_rs_07_duplication_tool_is_cargo_dupes::check(&rust_input, &mut results);
-        crate::hook_rs_08_guardrail_validate_staged_present::check(&rust_input, &mut results);
-        crate::hook_rs_09_clippy_denies_warnings::check(&rust_input, &mut results);
-        crate::hook_rs_10_test_uses_workspace::check(&rust_input, &mut results);
-        crate::hook_rs_11_gitleaks_step_present::check(&rust_input, &mut results);
-        crate::hook_rs_12_cargo_dupes_step_present::check(&rust_input, &mut results);
-        crate::hook_rs_13_cargo_dupes_excludes::check(&rust_input, &mut results);
-        crate::hook_rs_16_config_changes_trigger_validation::check(&rust_input, &mut results);
-        crate::hook_rs_17_shared_target_dir_present::check(&rust_input, &mut results);
+        crate::fmt_step_present::check(&rust_input, &mut results);
+        crate::clippy_step_present::check(&rust_input, &mut results);
+        crate::cargo_deny_step_present::check(&rust_input, &mut results);
+        crate::test_step_present::check(&rust_input, &mut results);
+        crate::cargo_machete_step_present::check(&rust_input, &mut results);
+        crate::duplication_tool_is_cargo_dupes::check(&rust_input, &mut results);
+        crate::guardrail_validate_staged_present::check(&rust_input, &mut results);
+        crate::clippy_denies_warnings::check(&rust_input, &mut results);
+        crate::test_uses_workspace::check(&rust_input, &mut results);
+        crate::gitleaks_step_present::check(&rust_input, &mut results);
+        crate::cargo_dupes_step_present::check(&rust_input, &mut results);
+        crate::cargo_dupes_excludes::check(&rust_input, &mut results);
+        crate::config_changes_trigger_validation::check(&rust_input, &mut results);
+        crate::shared_target_dir_present::check(&rust_input, &mut results);
     }
 
-    crate::shell_safety::hook_shared_10_shell_error_handling::check(
-        &executable_input,
-        &mut results,
-    );
-    crate::shell_safety::hook_shared_11_valid_shebang::check(&executable_input, &mut results);
-    crate::shell_safety::hook_shared_13_no_unconditional_exit_zero::check(
-        &executable_input,
-        &mut results,
-    );
-    crate::shell_safety::hook_shared_14_no_bypass_instructions::check(
-        &executable_input,
-        &mut results,
-    );
-    crate::workflow::hook_shared_15_merge_conflict_step_present::check(
-        &executable_input,
-        &mut results,
-    );
-    crate::workflow::hook_shared_16_file_size_step_present::check(&executable_input, &mut results);
-    crate::shell_safety::hook_shared_18_executable_command_context_only::check(
-        &executable_input,
-        &mut results,
-    );
-    crate::shell_safety::hook_shared_20_concrete_lockfile_command::check(
-        &executable_input,
-        &mut results,
-    );
-    crate::shell_safety::hook_shared_21_no_fail_open_wrappers::check(
-        &fail_open_input,
-        &mut results,
-    );
+    crate::shell_safety::shell_error_handling::check(&executable_input, &mut results);
+    crate::shell_safety::valid_shebang::check(&executable_input, &mut results);
+    crate::shell_safety::no_unconditional_exit_zero::check(&executable_input, &mut results);
+    crate::shell_safety::no_bypass_instructions::check(&executable_input, &mut results);
+    crate::workflow::merge_conflict_step_present::check(&executable_input, &mut results);
+    crate::workflow::file_size_step_present::check(&executable_input, &mut results);
+    crate::shell_safety::executable_command_context_only::check(&executable_input, &mut results);
+    crate::shell_safety::concrete_lockfile_command::check(&executable_input, &mut results);
+    crate::shell_safety::no_fail_open_wrappers::check(&fail_open_input, &mut results);
 
     crate::compat::finish(results)
 }

@@ -11,7 +11,7 @@ Approach
 
 Key decisions
 - No backward-compat root type aliases. Downstream callers move to `rustfmt_toml_parser::types::...`.
-- Treat any remaining `RS-CODE-SOURCE-04` centralized parser/fs warnings as intentional escape-hatch inventory, not package debt.
+- Treat any remaining `g3rs-code/ast-04-item-level-allow-with-reason` centralized parser/fs warnings as intentional escape-hatch inventory, not package debt.
 - Stop and surface the issue if the remaining blocker is a rule contradiction rather than package cleanup.
 
 Files to modify

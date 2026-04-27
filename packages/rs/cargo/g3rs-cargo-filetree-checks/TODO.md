@@ -1,5 +1,5 @@
 # g3rs-cargo-filetree-checks TODO
 
 - Own cargo filetree rules:
-  - `RS-CARGO-FILETREE-10`
-  - `RS-CARGO-FILETREE-14`
+  - `g3rs-cargo/missing-member-cargo`
+  - `g3rs-cargo/input-failures`

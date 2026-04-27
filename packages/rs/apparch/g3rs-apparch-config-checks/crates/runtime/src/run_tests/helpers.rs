@@ -57,9 +57,7 @@ pub(super) fn input() -> G3RsApparchConfigChecksInput {
             },
         ],
         patch_bypass_checks: Vec::<G3RsApparchPatchBypassChecksInput>::new(),
-        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput {
-            edges: Vec::new(),
-        },
+        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput { edges: Vec::new() },
     }
 }
 

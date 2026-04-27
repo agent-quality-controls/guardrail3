@@ -16,8 +16,8 @@ Finish the next concrete `deps` package gaps proved by the review:
    - unknown-key tolerance branches that should stay quiet
 2. Fix the hybrid-root normalization bug in ingestion at the root-membership set builder.
 3. Add `g3rs-deps-filetree-checks` with lane-scoped rule IDs:
-   - `RS-DEPS-FILETREE-09`
-   - `RS-DEPS-FILETREE-10`
+   - `g3rs-deps/cargo-lock-present`
+   - `g3rs-deps/gitignore-not-ignoring-cargo-lock`
 4. Implement `ingest_for_file_tree_checks(...)` with workspace-local semantics:
    - one pointed workspace root
    - root `Cargo.lock`

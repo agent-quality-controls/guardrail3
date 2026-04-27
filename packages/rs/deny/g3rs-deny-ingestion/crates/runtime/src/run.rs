@@ -1,7 +1,7 @@
 /// Public ingestion entry point.
 use g3rs_deny_types::{
-    G3RsDenySourceChecksInput, G3RsDenyConfigChecksInput, G3RsDenyFileTreeChecksInput,
-    G3RsDenyRustPolicyState,
+    G3RsDenyConfigChecksInput, G3RsDenyFileTreeChecksInput, G3RsDenyRustPolicyState,
+    G3RsDenySourceChecksInput,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -19,8 +19,7 @@ pub use g3rs_deny_ingestion_types::G3RsDenyIngestionError as IngestionError;
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsDenyConfigChecksInput, IngestionError> {
-    let entry = crate::select::select_deny_toml(crawl)
-        .ok_or(IngestionError::DenyTomlNotFound)?;
+    let entry = crate::select::select_deny_toml(crawl).ok_or(IngestionError::DenyTomlNotFound)?;
 
     if !entry.readable {
         return Err(IngestionError::Unreadable {
@@ -36,7 +35,9 @@ pub fn ingest_for_config_checks(
 }
 
 /// Stub source ingestion entry point for the deny family.
-pub fn ingest_for_source_checks(_crawl: &G3RsWorkspaceCrawl) -> Result<G3RsDenySourceChecksInput, IngestionError> {
+pub fn ingest_for_source_checks(
+    _crawl: &G3RsWorkspaceCrawl,
+) -> Result<G3RsDenySourceChecksInput, IngestionError> {
     Err(IngestionError::SourceIngestionNotImplemented)
 }
 
@@ -48,7 +49,9 @@ pub fn ingest_for_file_tree_checks(
         .iter()
         .map(|entry| entry.path.rel_path.clone())
         .collect::<Vec<_>>();
-    let selected_deny_rel_path = root_deny_entries.first().map(|entry| entry.path.rel_path.clone());
+    let selected_deny_rel_path = root_deny_entries
+        .first()
+        .map(|entry| entry.path.rel_path.clone());
     let mut input_failures = Vec::new();
 
     for entry in root_deny_entries {
@@ -63,22 +66,26 @@ pub fn ingest_for_file_tree_checks(
             ));
         } else if let Err(error) = crate::parse::parse_deny_toml(&entry.path.abs_path) {
             match error {
-                IngestionError::ParseFailed { reason, .. } => input_failures.push(crate::ingest::input_failure(
-                    "deny input failure",
-                    entry.path.rel_path.clone(),
-                    format!(
-                        "Failed to parse root deny config `{}` for deny checks: {reason}",
-                        entry.path.rel_path
-                    ),
-                )),
-                IngestionError::Unreadable { reason, .. } => input_failures.push(crate::ingest::input_failure(
-                    "deny input failure",
-                    entry.path.rel_path.clone(),
-                    format!(
-                        "Failed to read root deny config `{}` for deny checks: {reason}",
-                        entry.path.rel_path
-                    ),
-                )),
+                IngestionError::ParseFailed { reason, .. } => {
+                    input_failures.push(crate::ingest::input_failure(
+                        "deny input failure",
+                        entry.path.rel_path.clone(),
+                        format!(
+                            "Failed to parse root deny config `{}` for deny checks: {reason}",
+                            entry.path.rel_path
+                        ),
+                    ))
+                }
+                IngestionError::Unreadable { reason, .. } => {
+                    input_failures.push(crate::ingest::input_failure(
+                        "deny input failure",
+                        entry.path.rel_path.clone(),
+                        format!(
+                            "Failed to read root deny config `{}` for deny checks: {reason}",
+                            entry.path.rel_path
+                        ),
+                    ))
+                }
                 other => return Err(other),
             }
         }

@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-HOOKS-SOURCE-18` so same-line scoped control-flow forms like `if true; then exit 0; fi` are no longer misclassified as unconditional `exit 0` bypasses. The rule now skips pure same-line `if` and `case` scope lines before top-level exit scanning, while keeping tail forms like `fi && exit 0` and `esac && exit 0` visible.
+Fixed `g3rs-hooks/hook-shared-13-no-unconditional-exit-zero` so same-line scoped control-flow forms like `if true; then exit 0; fi` are no longer misclassified as unconditional `exit 0` bypasses. The rule now skips pure same-line `if` and `case` scope lines before top-level exit scanning, while keeping tail forms like `fi && exit 0` and `esac && exit 0` visible.
 
 ## Decisions made
 

@@ -6,8 +6,8 @@
 )]
 
 use deny_toml_parser_runtime::types::{
-    AdvisoryIgnoreEntry, AdvisoryScope, BanAllowEntry, BanBuildAllowBuildScriptEntry,
-    BanDenyEntry, BanSkipEntry, BanSkipTreeEntry, DenyToml, GitSpec, GraphTargetEntry, Value,
+    AdvisoryIgnoreEntry, AdvisoryScope, BanAllowEntry, BanBuildAllowBuildScriptEntry, BanDenyEntry,
+    BanSkipEntry, BanSkipTreeEntry, DenyToml, GitSpec, GraphTargetEntry, Value,
 };
 
 pub fn assert_empty_toml(cfg: &DenyToml) {
@@ -72,7 +72,10 @@ pub fn assert_graph_section(cfg: &DenyToml) {
 }
 
 pub fn assert_advisories_section(cfg: &DenyToml) {
-    let advisories = cfg.advisories.as_ref().expect("advisories should be present");
+    let advisories = cfg
+        .advisories
+        .as_ref()
+        .expect("advisories should be present");
     assert_eq!(advisories.db_path, Some("~/.cargo/advisory-dbs".into()));
     assert_eq!(
         advisories.db_urls,
@@ -351,9 +354,10 @@ pub fn assert_licenses_allowlist_and_exceptions(cfg: &DenyToml) {
         Some("upstream dual-license gap"),
     );
     assert_eq!(
-        licenses.exceptions.first().map(|entry| {
-            entry.allow.iter().map(String::as_str).collect::<Vec<_>>()
-        }),
+        licenses
+            .exceptions
+            .first()
+            .map(|entry| { entry.allow.iter().map(String::as_str).collect::<Vec<_>>() }),
         Some(vec!["OpenSSL"]),
     );
     assert_eq!(
@@ -384,7 +388,10 @@ pub fn assert_licenses_clarify_and_private(cfg: &DenyToml) {
         Some(&Value::String("manual".into()))
     );
 
-    let private = licenses.private.as_ref().expect("private config should be present");
+    let private = licenses
+        .private
+        .as_ref()
+        .expect("private config should be present");
     assert_eq!(private.ignore, Some(true));
     assert_eq!(private.registries, ["https://my-registry.example.com"]);
     assert_eq!(
@@ -405,7 +412,10 @@ pub fn assert_sources_and_output(cfg: &DenyToml) {
     );
     assert_eq!(sources.private, ["https://internal-host/repos"]);
     assert_eq!(sources.unused_allowed_source, Some("warn".into()));
-    let allow_org = sources.allow_org.as_ref().expect("allow-org should be present");
+    let allow_org = sources
+        .allow_org
+        .as_ref()
+        .expect("allow-org should be present");
     assert_eq!(allow_org.github, ["YourOrg"]);
     assert_eq!(allow_org.gitlab, ["gitlab-org"]);
     assert_eq!(allow_org.bitbucket, ["atlassian"]);

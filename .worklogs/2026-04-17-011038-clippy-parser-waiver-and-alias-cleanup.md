@@ -1,5 +1,5 @@
 Summary
-- Added exact waiver support for `RS-CLIPPY-CONFIG-01` so schema-mirror parser packages can keep the generated clippy baseline and suppress only the exact `max-struct-bools` key check.
+- Added exact waiver support for `g3rs-clippy/max-struct-bools` so schema-mirror parser packages can keep the generated clippy baseline and suppress only the exact `max-struct-bools` key check.
 - Finished the clean-shape rewrite for `packages/parsers/clippy-toml-parser`, verified it validates clean, and removed the last real `pub type` compatibility alias found in package code.
 
 Decisions made

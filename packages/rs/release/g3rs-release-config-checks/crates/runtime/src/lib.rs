@@ -5,34 +5,34 @@ use semver as _;
 
 #[cfg(test)]
 use g3rs_release_config_checks_assertions as _;
+mod accidentally_publishable;
+mod binary_release_workflow;
+mod binstall_metadata;
+mod categories_present;
+mod cliff_baseline;
+mod crate_inventory;
+mod description_present;
+mod docs_rs_metadata;
+mod include_exclude_inventory;
+mod input_failures;
+mod interdependent_version_consistency;
+mod keywords_present;
 #[cfg(test)]
 #[path = "lib_tests/mod.rs"] // reason: owned sidecar tests for file module.
 mod lib_tests;
-mod rs_release_config_00_publish_must_be_explicit;
-mod rs_release_config_01_description_present;
-mod rs_release_config_02_license_present;
-mod rs_release_config_03_repository_present;
-mod rs_release_config_04_keywords_present;
-mod rs_release_config_05_categories_present;
-mod rs_release_config_06_valid_semver;
-mod rs_release_config_07_docs_rs_metadata;
-mod rs_release_config_08_binstall_metadata;
-mod rs_release_config_09_accidentally_publishable;
-mod rs_release_config_10_release_plz_baseline;
-mod rs_release_config_11_cliff_baseline;
-mod rs_release_config_15_semver_checks_installed;
-mod rs_release_config_16_publish_status_inventory;
-mod rs_release_config_17_release_profile_inventory;
-mod rs_release_config_18_publish_dry_run;
-mod rs_release_config_19_no_path_deps_to_unpublishable;
-mod rs_release_config_20_interdependent_version_consistency;
-mod rs_release_config_21_crate_inventory;
-mod rs_release_config_22_include_exclude_inventory;
-mod rs_release_config_23_binary_release_workflow;
-mod rs_release_config_24_linux_release_target;
-mod rs_release_config_25_input_failures;
+mod license_present;
+mod linux_release_target;
+mod no_path_deps_to_unpublishable;
+mod publish_dry_run;
+mod publish_must_be_explicit;
+mod publish_status_inventory;
+mod release_plz_baseline;
+mod release_profile_inventory;
+mod repository_present;
 mod run;
+mod semver_checks_installed;
 mod support;
+mod valid_semver;
 
 #[cfg(feature = "checks")]
 pub use run::check;

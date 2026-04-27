@@ -56,7 +56,12 @@ impl<'source> Visit<'source> for InlineStdFsVisitor {
     fn visit_file(&mut self, file: &'source syn::File) {
         let std_aliases = self.std_aliases.clone();
         let fs_aliases = self.fs_aliases.clone();
-        extend_scope_aliases_from_file(file, self.in_test_context, &mut self.std_aliases, &mut self.fs_aliases);
+        extend_scope_aliases_from_file(
+            file,
+            self.in_test_context,
+            &mut self.std_aliases,
+            &mut self.fs_aliases,
+        );
         syn::visit::visit_file(self, file);
         self.std_aliases = std_aliases;
         self.fs_aliases = fs_aliases;
@@ -165,8 +170,7 @@ impl<'source> Visit<'source> for InlineStdFsVisitor {
     fn visit_expr_call(&mut self, expr_call: &'source syn::ExprCall) {
         if !self.in_test_context {
             if let syn::Expr::Path(expr_path) = &*expr_call.func {
-                if Self::path_is_std_fs_call(&expr_path.path, &self.std_aliases, &self.fs_aliases)
-                {
+                if Self::path_is_std_fs_call(&expr_path.path, &self.std_aliases, &self.fs_aliases) {
                     self.out.push(span_line(expr_path.path.span()));
                 }
             }

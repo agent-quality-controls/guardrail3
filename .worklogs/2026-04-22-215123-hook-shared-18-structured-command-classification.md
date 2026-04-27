@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-HOOKS-SOURCE-22` command classification so the rule uses structured `ResolvedCommand` argument shape instead of substring matching on raw shell text. Added a regression proving `cargo clippy-driver` no longer satisfies the `cargo clippy` requirement by accident.
+Fixed `g3rs-hooks/hook-shared-18-executable-command-context-only` command classification so the rule uses structured `ResolvedCommand` argument shape instead of substring matching on raw shell text. Added a regression proving `cargo clippy-driver` no longer satisfies the `cargo clippy` requirement by accident.
 
 ## Decisions made
 
@@ -18,5 +18,5 @@ Fixed `RS-HOOKS-SOURCE-22` command classification so the rule uses structured `R
 
 ## Next steps
 
-- Land the `RS-HOOKS-SOURCE-15` helper-trigger fix in the same package.
+- Land the `g3rs-hooks/hook-rs-16-config-changes-trigger-validation` helper-trigger fix in the same package.
 - Then return to the still-pending `hook_shared_13_no_unconditional_exit_zero` loop-scope bug.

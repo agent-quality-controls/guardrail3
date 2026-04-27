@@ -2,7 +2,7 @@
 
 ## Goal
 
-Bring the `code` family to an honest end state by reconciling the live app family with the extracted package family. The immediate target is to resolve the remaining app-only tail, remove dead-rule drift, and settle the `RS-CODE-SOURCE-24` vs `arch` ownership conflict from live code instead of comments.
+Bring the `code` family to an honest end state by reconciling the live app family with the extracted package family. The immediate target is to resolve the remaining app-only tail, remove dead-rule drift, and settle the `g3rs-code/ast-24-path-attr-with-reason` vs `arch` ownership conflict from live code instead of comments.
 
 ## Current live gap
 
@@ -16,10 +16,10 @@ App `code` still executes these rule IDs that are not cleanly represented in the
 There is also a live ownership conflict:
 
 - app code says `RS-CODE-24` moved to `RS-ARCH-09`
-- package code still implements `RS-CODE-SOURCE-24`
+- package code still implements `g3rs-code/ast-24-path-attr-with-reason`
 - the package implementation is not the same thing as `RS-ARCH-09`
-  - `RS-CODE-SOURCE-24` checks `#[path]` usage plus same-line `// reason:` quality and parent-directory escape
-  - `RS-ARCH-SOURCE-09` is the broader "no `#[path = ...]`" rule
+  - `g3rs-code/ast-24-path-attr-with-reason` checks `#[path]` usage plus same-line `// reason:` quality and parent-directory escape
+  - `g3rs-arch/no-path-attr` is the broader "no `#[path = ...]`" rule
 
 ## Approach
 
@@ -29,7 +29,7 @@ There is also a live ownership conflict:
    - cross-family ownership conflict to resolve
 2. Resolve `RS-CODE-24` ownership deliberately.
    - Read the live `arch` and `code` rule bodies side by side.
-   - Decide whether package `RS-CODE-SOURCE-24` stays in `code` or is retired because `arch` fully subsumes it.
+   - Decide whether package `g3rs-code/ast-24-path-attr-with-reason` stays in `code` or is retired because `arch` fully subsumes it.
    - Update package docs, app docs, and app runtime comments to match the real decision.
 3. Migrate `RS-CODE-35` into a package lane if it is still a live rule.
    - This is structural, so it belongs in a `code` file-tree lane if the rule survives.

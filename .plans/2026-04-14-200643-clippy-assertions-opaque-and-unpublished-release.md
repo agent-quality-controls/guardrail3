@@ -1,5 +1,5 @@
 # Goal
-Fix the two remaining decided issues in `packages/rs/clippy/g3rs-clippy-config-checks`: stop tripping `RS-CODE-SOURCE-31` by making the assertions helper DTO opaque, and stop tripping `RS-RELEASE-CONFIG-18` by marking the package workspace unpublished.
+Fix the two remaining decided issues in `packages/rs/clippy/g3rs-clippy-config-checks`: stop tripping `g3rs-code/ast-31-public-struct-named-fields` by making the assertions helper DTO opaque, and stop tripping `g3rs-release/publish-dry-run` by marking the package workspace unpublished.
 
 # Approach
 1. Add a focused regression in the assertions crate that exercises the public `Finding` API through the helper constructors and assertion functions, so the package still works after field visibility is tightened.
@@ -10,11 +10,11 @@ Fix the two remaining decided issues in `packages/rs/clippy/g3rs-clippy-config-c
 4. Verify with targeted package tests and CLI validation on `packages/rs/clippy/g3rs-clippy-config-checks`.
 
 # Key Decisions
-- Fix `RS-CODE-SOURCE-31` in the package rather than weakening the rule because this crate already has an explicit helper API and does not need field-bag access.
-- Use `publish = false` rather than changing release-family logic because `RS-RELEASE-CONFIG-09/18` already define that as the correct unpublished contract.
+- Fix `g3rs-code/ast-31-public-struct-named-fields` in the package rather than weakening the rule because this crate already has an explicit helper API and does not need field-bag access.
+- Use `publish = false` rather than changing release-family logic because `g3rs-release/accidentally-publishable/18` already define that as the correct unpublished contract.
 
 # Alternatives Considered
-- Relax `RS-CODE-SOURCE-31` for assertion-helper DTOs: rejected because this package already has a better opaque API shape.
+- Relax `g3rs-code/ast-31-public-struct-named-fields` for assertion-helper DTOs: rejected because this package already has a better opaque API shape.
 - Add a release-family exception for package workspaces: rejected because the family already supports unpublished crates via `publish = false`.
 
 # Files To Modify

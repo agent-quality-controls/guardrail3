@@ -2,8 +2,7 @@ use std::path::Path;
 
 use g3rs_clippy_types::{
     G3RsClippyCargoConfigState, G3RsClippyCargoMemberState, G3RsClippyCargoRootState,
-    G3RsClippyConfigState, G3RsClippyRustPolicyState,
-    G3RsClippyWaiver,
+    G3RsClippyConfigState, G3RsClippyRustPolicyState, G3RsClippyWaiver,
 };
 use glob::Pattern;
 
@@ -69,10 +68,11 @@ pub(crate) fn parse_waivers(abs_path: &Path) -> Result<Vec<G3RsClippyWaiver>, In
         path: abs_path.to_path_buf(),
         reason,
     })?;
-    let parsed = guardrail3_rs_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
-        path: abs_path.to_path_buf(),
-        reason: err.to_string(),
-    })?;
+    let parsed =
+        guardrail3_rs_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+            path: abs_path.to_path_buf(),
+            reason: err.to_string(),
+        })?;
 
     Ok(parsed
         .waivers
@@ -116,10 +116,7 @@ pub(crate) fn parse_cargo_config_state(
     }
 }
 
-pub(crate) fn parse_cargo_root_state(
-    rel_path: &str,
-    abs_path: &Path,
-) -> G3RsClippyCargoRootState {
+pub(crate) fn parse_cargo_root_state(rel_path: &str, abs_path: &Path) -> G3RsClippyCargoRootState {
     let content = match read_to_string(abs_path) {
         Ok(content) => content,
         Err(reason) => {
@@ -286,7 +283,10 @@ fn looks_like_glob(pattern: &str) -> bool {
 
 fn normalize_member_rel(pattern: &str) -> String {
     let trimmed = pattern.trim_matches('/');
-    let stripped = trimmed.strip_prefix("./").unwrap_or(trimmed).trim_matches('/');
+    let stripped = trimmed
+        .strip_prefix("./")
+        .unwrap_or(trimmed)
+        .trim_matches('/');
     if stripped == "." {
         String::new()
     } else {

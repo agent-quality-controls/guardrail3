@@ -1,7 +1,7 @@
+use clippy_toml_parser_types::clippy_toml::ClippyToml;
 use clippy_toml_parser_types::document::{
     ClippyBanEntry, ClippyBanSection, ClippyBoolSetting, ClippyTomlDocument, ClippyTomlParseState,
 };
-use clippy_toml_parser_types::clippy_toml::ClippyToml;
 use toml::Value;
 
 pub fn typed(document: &ClippyTomlDocument) -> Option<&ClippyToml> {
@@ -37,7 +37,10 @@ pub fn ban_section(document: &ClippyTomlDocument, key: &str) -> ClippyBanSection
     let Some(entries) = value.as_array() else {
         return ClippyBanSection {
             entries: Vec::new(),
-            malformed_messages: vec![format!("`{key}` must be an array, found {}.", value_kind(value))],
+            malformed_messages: vec![format!(
+                "`{key}` must be an array, found {}.",
+                value_kind(value)
+            )],
         };
     };
 

@@ -1,7 +1,7 @@
 Summary
 
 - Migrated the still-useful non-structural `hexarch` semantics into `apparch` instead of deleting them blind.
-- Added sneaky failing regressions first, then implemented `RS-APPARCH-CONFIG-05..09` and `RS-APPARCH-SOURCE-05` with package-owned types, ingestion, and rule-local tests.
+- Added sneaky failing regressions first, then implemented `g3rs-apparch/patch-replace-bypass..09` and `g3rs-apparch/types-public-surface` with package-owned types, ingestion, and rule-local tests.
 - Verified the widened `apparch` family through direct rule tests, end-to-end pipeline tests, and the new CLI app.
 
 Decisions made

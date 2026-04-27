@@ -1,5 +1,5 @@
 Goal
-- Make RS-TEST-SOURCE-07 recognize the full exported proof-helper surface of `define_result_assertions!` so shared assertions calls are not false-negative.
+- Make g3rs-test/real-proof-site recognize the full exported proof-helper surface of `define_result_assertions!` so shared assertions calls are not false-negative.
 
 Approach
 - Update the test-family parser in `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/parse/mod.rs`.

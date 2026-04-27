@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-CODE-SOURCE-31` so nested-module `use` bindings for a public struct are treated as inherent impls of the underlying type in shared crates.
+Fix `g3rs-code/ast-31-public-struct-named-fields` so nested-module `use` bindings for a public struct are treated as inherent impls of the underlying type in shared crates.
 
 ## Approach
 

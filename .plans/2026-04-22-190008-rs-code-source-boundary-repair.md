@@ -28,7 +28,7 @@ Move `rs/code` source-file parsing out of `g3rs-code-source-checks` and into `g3
 - Do not fan rules out into AST-derived mini inputs in this repair.
   - Reason: the confirmed defect is parse ownership, not per-rule AST projection.
 - Store parse failures on the source input instead of making ingestion drop the file.
-  - Reason: `RS-CODE-SOURCE-30` is a real rule and should still fire from ingestion-owned failure state.
+  - Reason: `g3rs-code/ast-30-input-failures` is a real rule and should still fire from ingestion-owned failure state.
 
 ## Alternatives considered
 

@@ -1,5 +1,5 @@
 Goal
-- Fix the RS-TEST-FILETREE-18 miss where a public helper in `test_support` can call a helper imported through `use self::helpers::*;` from a sibling module file and escape detection.
+- Fix the g3rs-test/test-support-generic miss where a public helper in `test_support` can call a helper imported through `use self::helpers::*;` from a sibling module file and escape detection.
 
 Approach
 - Add red regressions for sibling-module glob-imported canned and semantic helpers in `rs_test_18_test_support_generic/rule_tests/cases.rs`.

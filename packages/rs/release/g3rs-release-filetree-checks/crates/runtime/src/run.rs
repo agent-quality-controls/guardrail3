@@ -5,17 +5,17 @@ pub fn check(input: &G3RsReleaseFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for failure in &input.input_failures {
-        crate::rs_release_filetree_05_input_failures::check(failure, &mut results);
+        crate::input_failures::check(failure, &mut results);
     }
 
     if let Some(repo) = &input.repo {
-        crate::rs_release_filetree_01_license_file::check(repo, &mut results);
-        crate::rs_release_filetree_02_release_plz_exists::check(repo, &mut results);
-        crate::rs_release_filetree_03_cliff_exists::check(repo, &mut results);
+        crate::license_file::check(repo, &mut results);
+        crate::release_plz_exists::check(repo, &mut results);
+        crate::cliff_exists::check(repo, &mut results);
     }
 
     for readme in &input.readmes {
-        crate::rs_release_filetree_04_readme_exists::check(readme, &mut results);
+        crate::readme_exists::check(readme, &mut results);
     }
 
     results

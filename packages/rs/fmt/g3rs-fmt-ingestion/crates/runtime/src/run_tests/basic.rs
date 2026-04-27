@@ -14,7 +14,7 @@ const CARGO_CONTENT: &str = "[workspace]\nmembers = []\nresolver = \"2\"\n";
 const TOOLCHAIN_CONTENT: &str = "[toolchain]\nchannel = \"1.85.0\"\n";
 
 /// Realistic `rustfmt.toml` matching the actual repo config with all 8 policy
-/// settings that the checks package reads via RS-FMT-CONFIG-01.
+/// settings that the checks package reads via g3rs-fmt/rustfmt-required-settings.
 const REALISTIC_RUSTFMT: &str = "\
 edition = \"2024\"\n\
 style_edition = \"2024\"\n\
@@ -26,7 +26,7 @@ reorder_imports = true\n\
 reorder_modules = true\n";
 
 /// Realistic `Cargo.toml` with `[workspace.package]` section that the checks
-/// package reads for edition mismatch detection (RS-FMT-CONFIG-04).
+/// package reads for edition mismatch detection (g3rs-fmt/edition-mismatch).
 const REALISTIC_CARGO: &str = "\
 [workspace]\n\
 members = []\n\
@@ -39,7 +39,7 @@ publish = false\n";
 
 /// Realistic `rust-toolchain.toml` matching the actual repo pattern with
 /// components, which the checks package reads for nightly detection
-/// (RS-FMT-CONFIG-03).
+/// (g3rs-fmt/nightly-keys-on-stable).
 const REALISTIC_TOOLCHAIN: &str = "\
 [toolchain]\n\
 channel = \"stable\"\n\
@@ -135,7 +135,7 @@ fn invalid_root_rustfmt_toml_is_preserved_for_config_rule_reporting() {
 
     let crawl = crawl(root);
     let input = crate::run::ingest_for_config_checks(&crawl)
-        .expect("ingestion should preserve rustfmt parse failure for RS-FMT-CONFIG-01 reporting");
+        .expect("ingestion should preserve rustfmt parse failure for g3rs-fmt/rustfmt-required-settings reporting");
 
     assert_eq!(input.rustfmt_rel_path, "rustfmt.toml");
 }
@@ -490,14 +490,14 @@ fn malformed_rustfmt_plus_missing_cargo_preserves_both_states() {
             input.rustfmt_state,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError
         ),
-        "invalid rustfmt.toml should stay visible to RS-FMT-CONFIG-01"
+        "invalid rustfmt.toml should stay visible to g3rs-fmt/rustfmt-required-settings"
     );
     assert!(
         matches!(
             input.cargo_state,
             g3rs_fmt_types::G3RsFmtCargoState::Missing
         ),
-        "missing Cargo.toml should stay visible to RS-FMT-CONFIG-04"
+        "missing Cargo.toml should stay visible to g3rs-fmt/edition-mismatch"
     );
 }
 
@@ -547,7 +547,7 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
     assert_eq!(input.cargo_rel_path, "Cargo.toml");
     assert_eq!(input.toolchain_rel_path, "rust-toolchain.toml");
 
-    // Verify all 8 settings that RS-FMT-CONFIG-01 reads from rustfmt.toml.
+    // Verify all 8 settings that g3rs-fmt/rustfmt-required-settings reads from rustfmt.toml.
     let rustfmt = match &input.rustfmt_state {
         g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt,
         g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => {
@@ -598,7 +598,7 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
         "realistic rustfmt should have reorder_modules true"
     );
 
-    // Verify workspace.package.edition that RS-FMT-CONFIG-04 reads for
+    // Verify workspace.package.edition that g3rs-fmt/edition-mismatch reads for
     // edition mismatch detection.
     let cargo = match &input.cargo_state {
         g3rs_fmt_types::G3RsFmtCargoState::Parsed(cargo) => cargo,
@@ -614,7 +614,7 @@ fn ingests_realistic_configs_with_all_check_relevant_fields() {
         "realistic Cargo.toml workspace.package.edition should be 2024"
     );
 
-    // Verify toolchain channel and components that RS-FMT-CONFIG-03 reads for
+    // Verify toolchain channel and components that g3rs-fmt/nightly-keys-on-stable reads for
     // nightly key detection.
     let toolchain = match &input.toolchain_state {
         g3rs_fmt_types::G3RsFmtToolchainState::Parsed(toolchain) => toolchain,

@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-CODE-SOURCE-31` so shared-crate nested public structs with inherent impls still trigger the public-field rule instead of being skipped as plain data structs.
+Fix `g3rs-code/ast-31-public-struct-named-fields` so shared-crate nested public structs with inherent impls still trigger the public-field rule instead of being skipped as plain data structs.
 
 ## Approach
 

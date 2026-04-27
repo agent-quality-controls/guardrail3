@@ -58,10 +58,14 @@ publish = true
         }],
     });
 
-    run_assertions::assert_result_id_count(&results, "RS-RELEASE-CONFIG-00", 1);
-    run_assertions::assert_result_id_count(&results, "RS-RELEASE-CONFIG-15", 1);
-    run_assertions::assert_result_id_count(&results, "RS-RELEASE-CONFIG-19", 1);
-    run_assertions::assert_result_id_count(&results, "RS-RELEASE-CONFIG-25", 1);
+    run_assertions::assert_result_id_count(&results, "g3rs-release/publish-must-be-explicit", 1);
+    run_assertions::assert_result_id_count(&results, "g3rs-release/semver-checks-installed", 1);
+    run_assertions::assert_result_id_count(
+        &results,
+        "g3rs-release/no-path-deps-to-unpublishable",
+        1,
+    );
+    run_assertions::assert_result_id_count(&results, "g3rs-release/config-input-failures", 1);
 }
 
 #[test]
@@ -177,25 +181,25 @@ path = "src/main.rs"
 
     run_assertions::assert_contains_result(
         &results,
-        "RS-RELEASE-CONFIG-23",
+        "g3rs-release/binary-release-workflow",
         G3Severity::Info,
         "tool: binary release workflow present",
     );
     run_assertions::assert_contains_result(
         &results,
-        "RS-RELEASE-CONFIG-24",
+        "g3rs-release/linux-release-target",
         G3Severity::Info,
         "tool: linux release target present",
     );
     run_assertions::assert_contains_result(
         &results,
-        "RS-RELEASE-CONFIG-23",
+        "g3rs-release/binary-release-workflow",
         G3Severity::Info,
         "cli: no binary release workflow",
     );
     run_assertions::assert_contains_result(
         &results,
-        "RS-RELEASE-CONFIG-24",
+        "g3rs-release/linux-release-target",
         G3Severity::Info,
         "cli: no linux release target",
     );
@@ -307,13 +311,13 @@ path = "src/main.rs"
 
     run_assertions::assert_contains_result(
         &results,
-        "RS-RELEASE-CONFIG-23",
+        "g3rs-release/binary-release-workflow",
         G3Severity::Info,
         "cli: no binary release workflow",
     );
     run_assertions::assert_contains_result(
         &results,
-        "RS-RELEASE-CONFIG-24",
+        "g3rs-release/linux-release-target",
         G3Severity::Info,
         "cli: no linux release target",
     );
@@ -335,7 +339,7 @@ publish = true
 
     run_assertions::assert_contains_result(
         &results,
-        "RS-RELEASE-CONFIG-01",
+        "g3rs-release/description-present",
         G3Severity::Error,
         "demo: missing description",
     );
@@ -360,7 +364,7 @@ path = "src/lib.rs"
 
     run_assertions::assert_contains_result(
         &results,
-        "RS-RELEASE-CONFIG-07",
+        "g3rs-release/docs-rs-metadata",
         G3Severity::Warn,
         "demo: docs.rs metadata missing",
     );

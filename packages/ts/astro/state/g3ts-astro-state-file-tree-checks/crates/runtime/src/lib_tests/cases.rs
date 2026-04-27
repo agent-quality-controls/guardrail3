@@ -26,6 +26,9 @@ fn state_file_tree_package_reports_owned_ids_for_forbidden_state() {
 
     assertions::assert_runtime_check_exact_ids(
         &input,
-        &["TS-ASTRO-STATE-FILETREE-11", "TS-ASTRO-STATE-FILETREE-12"],
+        &[
+            "g3ts-astro-state/no-legacy-parallel-state",
+            "g3ts-astro-state/configured-forbidden-state",
+        ],
     );
 }

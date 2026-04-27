@@ -89,7 +89,16 @@ where
     };
 
     engine::dispatch_external_token(
-        next, cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
+        next,
+        cursor,
+        local,
+        root,
+        visiting,
+        state,
+        visitor,
+        line_no,
+        root_line_no,
+        options,
     )
 }
 
@@ -147,7 +156,15 @@ where
 
     if let Some(script) = script {
         return engine::line_visits_with_mode(
-            &script, local, root, visiting, state, visitor, line_no, root_line_no, options,
+            &script,
+            local,
+            root,
+            visiting,
+            state,
+            visitor,
+            line_no,
+            root_line_no,
+            options,
         );
     }
 
@@ -156,7 +173,16 @@ where
     };
 
     engine::dispatch_external_token(
-        next, cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
+        next,
+        cursor,
+        local,
+        root,
+        visiting,
+        state,
+        visitor,
+        line_no,
+        root_line_no,
+        options,
     )
 }
 
@@ -193,7 +219,16 @@ where
     };
 
     engine::dispatch_external_token(
-        next, cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
+        next,
+        cursor,
+        local,
+        root,
+        visiting,
+        state,
+        visitor,
+        line_no,
+        root_line_no,
+        options,
     )
 }
 
@@ -233,7 +268,16 @@ where
     };
 
     engine::dispatch_external_token(
-        next, cursor, local, root, visiting, state, visitor, line_no, root_line_no, options,
+        next,
+        cursor,
+        local,
+        root,
+        visiting,
+        state,
+        visitor,
+        line_no,
+        root_line_no,
+        options,
     )
 }
 

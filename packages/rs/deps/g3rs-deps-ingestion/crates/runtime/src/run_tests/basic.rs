@@ -1,5 +1,5 @@
-use g3rs_deps_types::G3RsDepsConfigInputScope;
 use g3rs_deps_ingestion_assertions::run as assertions;
+use g3rs_deps_types::G3RsDepsConfigInputScope;
 use g3rs_workspace_crawl::crawl;
 
 use crate::run::{ingest_for_config_checks, ingest_for_source_checks};
@@ -308,7 +308,9 @@ fn empty_allowlist_stays_present_while_missing_allowlist_stays_absent() {
         "empty allowlist should still be marked as present: {inputs:#?}"
     );
     assert!(
-        crate_inputs.iter().all(|input| input.allowed_deps.is_empty()),
+        crate_inputs
+            .iter()
+            .all(|input| input.allowed_deps.is_empty()),
         "empty allowlist should stay empty: {inputs:#?}"
     );
 
@@ -331,7 +333,9 @@ fn empty_allowlist_stays_present_while_missing_allowlist_stays_absent() {
         "missing allowlist should stay absent: {inputs:#?}"
     );
     assert!(
-        crate_inputs.iter().all(|input| input.allowed_deps.is_empty()),
+        crate_inputs
+            .iter()
+            .all(|input| input.allowed_deps.is_empty()),
         "missing allowlist should still have an empty vector payload: {inputs:#?}"
     );
 }

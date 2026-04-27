@@ -1,10 +1,10 @@
 Goal
-- Fix `RS-TEST-SOURCE-07` so it stops blaming early setup helpers like `git_init()` and only treats the actual final proof step as the proof decision.
+- Fix `g3rs-test/real-proof-site` so it stops blaming early setup helpers like `git_init()` and only treats the actual final proof step as the proof decision.
 
 Approach
 - Add a direct rule test that proves this bug: a test may call a local setup helper first and then call the shared assertions crate later, and that must pass.
 - Read the current parser and rule flow to find the narrowest correct place to fix it.
-- Change `RS-TEST-SOURCE-07` so local helper detection prefers the last local proof-like call instead of the first local helper-looking call.
+- Change `g3rs-test/real-proof-site` so local helper detection prefers the last local proof-like call instead of the first local helper-looking call.
 - Re-run the rule package tests and validate `packages/rs/code/g3rs-code-ingestion --family test` to confirm the false positive is gone.
 
 Key decisions

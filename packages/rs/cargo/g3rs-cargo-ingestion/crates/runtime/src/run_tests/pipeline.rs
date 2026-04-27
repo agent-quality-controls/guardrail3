@@ -71,14 +71,15 @@ fn config_pipeline_reports_old_app_allow_inventory_and_member_rules() {
             profile = "library"
 
             [[waivers]]
-            rule = "RS-CARGO-CONFIG-07"
+            rule = "g3rs-cargo/approved-allow-inventory"
             file = "Cargo.toml"
             selector = "clippy:module_name_repetitions"
             reason = "Temporary lint suppression while API cleanup lands."
         "#,
     );
 
-    let input = crate::run::ingest_for_config_checks(&crawl(root)).expect("ingestion should succeed");
+    let input =
+        crate::run::ingest_for_config_checks(&crawl(root)).expect("ingestion should succeed");
     let results = g3rs_cargo_config_checks::check(&input);
 
     assertions::assert_config_pipeline_old_app_allow_inventory_and_member_rules(&results);
@@ -124,7 +125,8 @@ fn config_pipeline_stands_down_allow_rules_when_guardrail3_rs_is_invalid() {
     );
     write(root.join("guardrail3-rs.toml"), "profile = [");
 
-    let input = crate::run::ingest_for_config_checks(&crawl(root)).expect("ingestion should succeed");
+    let input =
+        crate::run::ingest_for_config_checks(&crawl(root)).expect("ingestion should succeed");
     let results = g3rs_cargo_config_checks::check(&input);
 
     assertions::assert_config_pipeline_stands_down_allow_rules_when_guardrail3_rs_is_invalid(
@@ -148,7 +150,10 @@ fn filetree_pipeline_reports_guardrail3_rs_parse_failures_and_ignores_legacy_gua
     );
     write(root.join("crates/api/Cargo.toml"), "[package");
     write(root.join("guardrail3-rs.toml"), "profile = [");
-    write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
+    write(
+        root.join("guardrail3.toml"),
+        "[profile]\nname = \"library\"\n",
+    );
 
     let input = crate::run::ingest_for_file_tree_checks(&crawl(root))
         .expect("filetree ingestion should succeed with fail-closed inputs");

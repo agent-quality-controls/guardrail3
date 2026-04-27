@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-TEST-FILETREE-18` so `test_support` helper wrappers reached through `self::` are still classified as local canned or semantic helpers. The rule now treats local-boundary qualified call paths as local helper use, which closes the production-path miss without changing ingestion facts.
+Fixed `g3rs-test/test-support-generic` so `test_support` helper wrappers reached through `self::` are still classified as local canned or semantic helpers. The rule now treats local-boundary qualified call paths as local helper use, which closes the production-path miss without changing ingestion facts.
 
 ## Decisions made
 

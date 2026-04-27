@@ -25,8 +25,8 @@ Before extracting rule code, the package needed a stable contract saying what be
 
 ### Split Cargo Rules Into Content vs Structural Ownership
 - **Chose:** Keep these in the package:
-  - `RS-CARGO-CONFIG-01..09`
-  - `RS-CARGO-CONFIG-07..13`
+  - `g3rs-cargo/workspace-lints..09`
+  - `g3rs-cargo/approved-allow-inventory..13`
   - `RS-CARGO-15`
 - **Why:** These rules are fundamentally about the semantics of parsed Cargo manifests plus small normalized policy inputs such as profile/waiver context.
 - **Alternatives considered:**

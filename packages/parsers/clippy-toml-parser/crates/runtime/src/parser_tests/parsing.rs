@@ -7,11 +7,11 @@
 use clippy_toml_parser_runtime_assertions::parser as assertions;
 use helpers::{parse_fixture, parse_from_tempfile};
 
-use super::helpers;
 use super::super::{
     InherentImplLintScope, MatchLintBehaviour, PubUnderscoreFieldsBehaviour,
     SourceItemOrderingWithinModuleItemGroupings,
 };
+use super::helpers;
 
 #[test]
 fn empty_string_yields_empty_config() {
@@ -192,14 +192,8 @@ enforced-import-renames = [
         Some(true),
         "warn_on_all_wildcard_imports",
     );
-    assertions::assert_matches_for_let_else(
-        &cfg,
-        MatchLintBehaviour::Never,
-    );
-    assertions::assert_inherent_impl_lint_scope(
-        &cfg,
-        InherentImplLintScope::File,
-    );
+    assertions::assert_matches_for_let_else(&cfg, MatchLintBehaviour::Never);
+    assertions::assert_inherent_impl_lint_scope(&cfg, InherentImplLintScope::File);
     assertions::assert_pub_underscore_fields_behavior(
         &cfg,
         PubUnderscoreFieldsBehaviour::PubliclyExported,

@@ -1,5 +1,5 @@
 Goal
-- Fix helper resolution in RS-HOOKS-SOURCE-15 so config-trigger helpers are resolved by line order, not by name alone.
+- Fix helper resolution in g3rs-hooks/hook-rs-16-config-changes-trigger-validation so config-trigger helpers are resolved by line order, not by name alone.
 
 Approach
 - Add red tests in `rule_tests/golden.rs` that prove a forward call before helper definition does not count and that a later redefinition overrides an earlier noop helper.

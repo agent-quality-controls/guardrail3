@@ -3,12 +3,12 @@ use guardrail3_check_types::G3CheckResult;
 
 pub fn check(input: &G3TsJscpdChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
-    crate::ts_jscpd_config_01_root_exists::check(input, &mut results);
-    crate::ts_jscpd_config_02_root_parseable::check(input, &mut results);
-    crate::ts_jscpd_config_03_threshold_zero::check(input, &mut results);
-    crate::ts_jscpd_config_04_absolute_true::check(input, &mut results);
-    crate::ts_jscpd_config_05_required_ignores::check(input, &mut results);
-    crate::ts_jscpd_config_06_format_and_inventory::check(input, &mut results);
+    crate::root_exists::check(input, &mut results);
+    crate::root_parseable::check(input, &mut results);
+    crate::threshold_zero::check(input, &mut results);
+    crate::absolute_true::check(input, &mut results);
+    crate::required_ignores::check(input, &mut results);
+    crate::format_and_inventory::check(input, &mut results);
     results
 }
 

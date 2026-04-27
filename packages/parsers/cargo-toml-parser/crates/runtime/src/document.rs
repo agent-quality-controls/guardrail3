@@ -67,7 +67,11 @@ pub fn package_string_field<'a>(
 }
 
 pub fn lints_workspace_state(document: &CargoTomlDocument) -> CargoBoolFieldState<'_> {
-    match document.raw.get("lints").and_then(|value| value.get("workspace")) {
+    match document
+        .raw
+        .get("lints")
+        .and_then(|value| value.get("workspace"))
+    {
         None => CargoBoolFieldState::Missing,
         Some(value) => match value.as_bool() {
             Some(flag) => CargoBoolFieldState::Value(flag),
@@ -84,10 +88,16 @@ pub fn policy_lints<'a>(document: &'a CargoTomlDocument, family: &str) -> Option
             .as_ref()
             .and_then(|workspace| workspace.lints.as_ref())
             .and_then(|lints| lints.tools.get(family))
-            .or_else(|| cargo.lints.as_ref().and_then(|lints| lints.tools.get(family))),
-        CargoTomlDocumentKind::PackageRoot => {
-            cargo.lints.as_ref().and_then(|lints| lints.tools.get(family))
-        }
+            .or_else(|| {
+                cargo
+                    .lints
+                    .as_ref()
+                    .and_then(|lints| lints.tools.get(family))
+            }),
+        CargoTomlDocumentKind::PackageRoot => cargo
+            .lints
+            .as_ref()
+            .and_then(|lints| lints.tools.get(family)),
         CargoTomlDocumentKind::Other => None,
     }
 }
@@ -119,7 +129,11 @@ pub fn member_lints_state<'a>(
     document: &'a CargoTomlDocument,
     family: &str,
 ) -> CargoLintTableState<'a> {
-    lint_table_state(document.raw.get("lints"), family, member_lints(document, family))
+    lint_table_state(
+        document.raw.get("lints"),
+        family,
+        member_lints(document, family),
+    )
 }
 
 pub fn policy_allow_entries(document: &CargoTomlDocument, family: &str) -> Vec<String> {
@@ -169,7 +183,9 @@ fn explicit_allow_entries(lints: Option<&ToolLints>) -> Vec<String> {
     };
     let mut entries = lints
         .iter()
-        .filter_map(|(name, value)| (lint_level(Some(value)) == Some("allow")).then(|| name.clone()))
+        .filter_map(|(name, value)| {
+            (lint_level(Some(value)) == Some("allow")).then(|| name.clone())
+        })
         .collect::<Vec<_>>();
     entries.sort();
     entries

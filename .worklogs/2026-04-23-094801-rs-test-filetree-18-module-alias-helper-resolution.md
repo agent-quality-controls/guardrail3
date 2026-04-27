@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-TEST-FILETREE-18` so sibling helpers imported through a module alias are detected as local canned and semantic helpers.
+- Fixed `g3rs-test/test-support-generic` so sibling helpers imported through a module alias are detected as local canned and semantic helpers.
 - Split helper-discovery and alias-resolution code into an owned support module so the rule file stays under the code-size guardrail.
 
 Decisions made

@@ -97,7 +97,7 @@ That means the family had a semantic false green: it was validating a config sha
 ## Next Steps / Continuation Plan
 1. Continue the `RS-CLIPPY` attack pass on the remaining semantic candidates:
    - `RS-CLIPPY-16`
-   - `RS-CLIPPY-CONFIG-15`
+   - `g3rs-clippy/avoid-breaking-exported-api`
    - `RS-CLIPPY-19`
 2. Decide whether the Cargo lint baseline should explicitly deny `clippy::disallowed_macros` or whether the current Clippy default warning is sufficient for the project’s hardening bar.
 3. Once the deny workspace conflict is gone, rerun top-level `RS-TEST`/family validation for `clippy` from the app root to confirm the structural side remains green after the semantic hardening.

@@ -1,8 +1,8 @@
 Goal
-- Make RS-TEST-FILETREE-03 explain the package-vs-nested-assertions mistake directly.
+- Make g3rs-test/runtime-assertions-split explain the package-vs-nested-assertions mistake directly.
 
 Approach
-- Add targeted tests in the RS-TEST-FILETREE-03 rule tests for the approved missing-assertions message.
+- Add targeted tests in the g3rs-test/runtime-assertions-split rule tests for the approved missing-assertions message.
 - Check whether rule input already exposes enough structure to detect a nested `component/assertions/Cargo.toml` package separately.
 - Update the rule message text without changing unrelated behavior.
 - Run the targeted test workspace and confirm the new message appears.

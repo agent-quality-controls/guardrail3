@@ -39,7 +39,7 @@ While checking the runtime expectations, I also found that `allow-panic-in-tests
 
 ### Commit the `allow-panic-in-tests` domain constant export with this slice
 - **Chose:** Include the already-prepared domain module updates that add `ALLOW_PANIC_IN_TESTS` to the exported settings surface.
-- **Why:** Runtime `RS-CLIPPY-CONFIG-15` and local-baseline checks already depend on this managed key. Leaving the domain settings export behind would keep the generated baseline and runtime expectations out of sync.
+- **Why:** Runtime `g3rs-clippy/avoid-breaking-exported-api` and local-baseline checks already depend on this managed key. Leaving the domain settings export behind would keep the generated baseline and runtime expectations out of sync.
 - **Alternatives considered:**
   - Leave the domain-module staging for a later commit — rejected because this slice is about policy-context correctness, and the managed test-relaxation setting is part of that same contract.
 
@@ -67,7 +67,7 @@ While checking the runtime expectations, I also found that `allow-panic-in-tests
 ## Open Questions / Future Considerations
 - The typo-heuristic rule `RS-CLIPPY-19` still looks sound against the current Clippy config key set, but it remains heuristic and should be rechecked if the managed key set expands again.
 - The outer workspace is still blocked by unrelated `deny` work, so top-level `guardrail3 rs validate ...` remains deferred.
-- There may still be contract-noise overlap between `RS-CLIPPY-13` and the specific boolean rules, but no concrete detector bug was found in that overlap during this slice.
+- There may still be contract-noise overlap between `g3rs-clippy/local-policy-root` and the specific boolean rules, but no concrete detector bug was found in that overlap during this slice.
 
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs` — active policy-context parsing, validation, and profile/garde resolution
@@ -80,7 +80,7 @@ While checking the runtime expectations, I also found that `allow-panic-in-tests
 ## Next Steps / Continuation Plan
 1. Continue the adversarial `RS-CLIPPY` review with focus on remaining heuristic surfaces:
    - `RS-CLIPPY-19` against current upstream key inventory
-   - any overlap/noise between `RS-CLIPPY-13` and `RS-CLIPPY-16/17`
+   - any overlap/noise between `g3rs-clippy/local-policy-root` and `RS-CLIPPY-16/17`
 2. Keep using the nested clippy workspace for verification until the outer workspace is healthy again:
    - `cargo test --manifest-path apps/guardrail3/crates/app/rs/families/clippy/Cargo.toml -p guardrail3-app-rs-family-clippy --lib`
 3. After the `deny` migration stops breaking the top-level workspace, rerun family-level validator checks from `apps/guardrail3` and record the actual `RS-TEST` / `RS-CLIPPY` status there.

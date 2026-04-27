@@ -295,7 +295,7 @@ edition = \"2024\"\n",
 profile = \"library\"\n\
 \n\
 [[waivers]]\n\
-rule = \"RS-CODE-SOURCE-19\"\n\
+rule = \"g3rs-code/large-type-inventory\"\n\
 file = \"src/lib.rs\"\n\
 selector = \"struct:CargoConfigToml\"\n\
 reason = \"Schema mirror intentionally matches Cargo's top-level config surface.\"\n",
@@ -309,7 +309,7 @@ reason = \"Schema mirror intentionally matches Cargo's top-level config surface.
 
     assertions::assert_source_waiver(
         input,
-        "RS-CODE-SOURCE-19",
+        "g3rs-code/large-type-inventory",
         "src/lib.rs",
         "struct:CargoConfigToml",
         "Schema mirror intentionally matches Cargo's top-level config surface.",
@@ -335,7 +335,7 @@ resolver = \"2\"\n",
 profile = \"library\"\n\
 \n\
 [[waivers]]\n\
-rule = \"RS-CODE-SOURCE-19\"\n\
+rule = \"g3rs-code/large-type-inventory\"\n\
 file = \"crates/types/src/lib.rs\"\n\
 selector = \"struct:CargoConfigToml\"\n\
 reason = \"Schema mirror intentionally matches Cargo's top-level config surface.\"\n",
@@ -360,7 +360,7 @@ edition = \"2024\"\n",
 
     assertions::assert_source_waiver(
         input,
-        "RS-CODE-SOURCE-19",
+        "g3rs-code/large-type-inventory",
         "crates/types/src/lib.rs",
         "struct:CargoConfigToml",
         "Schema mirror intentionally matches Cargo's top-level config surface.",

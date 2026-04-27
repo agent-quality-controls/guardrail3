@@ -6,61 +6,35 @@ pub fn check(input: &G3RsReleaseConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     let repo = input.repo_checks.first();
     for failure in &input.input_failure_checks {
-        crate::rs_release_config_25_input_failures::check(failure, &mut results);
+        crate::input_failures::check(failure, &mut results);
     }
     for krate in &input.crate_checks {
-        crate::rs_release_config_00_publish_must_be_explicit::check(krate, &mut results);
-        crate::rs_release_config_01_description_present::check(krate, &mut results);
-        crate::rs_release_config_02_license_present::check(krate, &mut results);
-        crate::rs_release_config_03_repository_present::check(krate, &mut results);
-        crate::rs_release_config_04_keywords_present::check(krate, &mut results);
-        crate::rs_release_config_05_categories_present::check(krate, &mut results);
-        crate::rs_release_config_06_valid_semver::check(krate, &mut results);
-        crate::rs_release_config_07_docs_rs_metadata::check(krate, &mut results);
-        crate::rs_release_config_08_binstall_metadata::check(krate, &mut results);
-        crate::rs_release_config_09_accidentally_publishable::check(krate, &mut results);
-        crate::rs_release_config_18_publish_dry_run::check(krate, &mut results);
-        crate::rs_release_config_22_include_exclude_inventory::check(krate, &mut results);
-        crate::rs_release_config_23_binary_release_workflow::check(
-            repo,
-            &input.crate_checks,
-            krate,
-            &mut results,
-        );
-        crate::rs_release_config_24_linux_release_target::check(
-            repo,
-            &input.crate_checks,
-            krate,
-            &mut results,
-        );
+        crate::publish_must_be_explicit::check(krate, &mut results);
+        crate::description_present::check(krate, &mut results);
+        crate::license_present::check(krate, &mut results);
+        crate::repository_present::check(krate, &mut results);
+        crate::keywords_present::check(krate, &mut results);
+        crate::categories_present::check(krate, &mut results);
+        crate::valid_semver::check(krate, &mut results);
+        crate::docs_rs_metadata::check(krate, &mut results);
+        crate::binstall_metadata::check(krate, &mut results);
+        crate::accidentally_publishable::check(krate, &mut results);
+        crate::publish_dry_run::check(krate, &mut results);
+        crate::include_exclude_inventory::check(krate, &mut results);
+        crate::binary_release_workflow::check(repo, &input.crate_checks, krate, &mut results);
+        crate::linux_release_target::check(repo, &input.crate_checks, krate, &mut results);
     }
     for repo in &input.repo_checks {
-        crate::rs_release_config_10_release_plz_baseline::check(
-            repo,
-            &input.crate_checks,
-            &mut results,
-        );
-        crate::rs_release_config_11_cliff_baseline::check(repo, &input.crate_checks, &mut results);
-        crate::rs_release_config_15_semver_checks_installed::check(
-            repo,
-            &input.crate_checks,
-            &mut results,
-        );
-        crate::rs_release_config_16_publish_status_inventory::check(
-            repo,
-            &input.crate_checks,
-            &mut results,
-        );
-        crate::rs_release_config_17_release_profile_inventory::check(
-            repo,
-            &input.crate_checks,
-            &mut results,
-        );
-        crate::rs_release_config_21_crate_inventory::check(repo, &input.crate_checks, &mut results);
+        crate::release_plz_baseline::check(repo, &input.crate_checks, &mut results);
+        crate::cliff_baseline::check(repo, &input.crate_checks, &mut results);
+        crate::semver_checks_installed::check(repo, &input.crate_checks, &mut results);
+        crate::publish_status_inventory::check(repo, &input.crate_checks, &mut results);
+        crate::release_profile_inventory::check(repo, &input.crate_checks, &mut results);
+        crate::crate_inventory::check(repo, &input.crate_checks, &mut results);
     }
     for edge in &input.edge_checks {
-        crate::rs_release_config_19_no_path_deps_to_unpublishable::check(edge, &mut results);
-        crate::rs_release_config_20_interdependent_version_consistency::check(edge, &mut results);
+        crate::no_path_deps_to_unpublishable::check(edge, &mut results);
+        crate::interdependent_version_consistency::check(edge, &mut results);
     }
     results
 }

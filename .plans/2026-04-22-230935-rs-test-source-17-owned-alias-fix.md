@@ -1,5 +1,5 @@
 Goal
-- Fix RS-TEST-SOURCE-17 so owned-assertions aliases are still classified as owned assertions even when a same-file helper shares the same name.
+- Fix g3rs-test/external-harnesses-use-assertions so owned-assertions aliases are still classified as owned assertions even when a same-file helper shares the same name.
 
 Approach
 - Add a focused regression covering `fn assert_demo() { ... } use demo_assertions::assert_demo as run; #[test] fn harness() { run(); }`.

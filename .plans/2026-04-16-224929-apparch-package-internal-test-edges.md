@@ -4,7 +4,7 @@ Goal
 - Prove the bug first with rule tests and then verify the app validates further.
 
 Approach
-- Add failing tests for RS-APPARCH-CONFIG-02, 03, and 07 covering `component/crates/assertions -> component/crates/runtime` and the matching runtime dev-dep back to assertions.
+- Add failing tests for g3rs-apparch/logic-dependency-direction, 03, and 07 covering `component/crates/assertions -> component/crates/runtime` and the matching runtime dev-dep back to assertions.
 - Fix the overlap in `g3rs-apparch-config-checks` at the shared helper level so the same package-owner check is reused by all three rules.
 - Verify apparch rule tests, then rerun `apps/guardrail3-rs` validation to expose the next real package issue.
 

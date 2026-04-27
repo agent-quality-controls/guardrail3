@@ -1,6 +1,6 @@
 ## Goal
 
-Repair `RS-TEST-FILETREE-02` so the file-tree check consumes ingestion-owned sidecar ownership facts instead of reconstructing sidecar ownership from the whole analyzed file bag.
+Repair `g3rs-test/owned-sidecar-shape` so the file-tree check consumes ingestion-owned sidecar ownership facts instead of reconstructing sidecar ownership from the whole analyzed file bag.
 
 ## Approach
 

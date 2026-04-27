@@ -4,12 +4,12 @@ Runs the `test` family source checks on one root-scoped source bundle.
 
 Current rules:
 
-- `RS-TEST-SOURCE-01` inline `#[cfg(test)] mod ... { ... }`
-- `RS-TEST-SOURCE-04` `#[ignore]` reason quality
-- `RS-TEST-SOURCE-05` `#[should_panic(expected = ...)]`
-- `RS-TEST-SOURCE-06` tautological assertions
-- `RS-TEST-SOURCE-07` real proof site
-- `RS-TEST-SOURCE-08` weak wildcard `matches!`
-- `RS-TEST-SOURCE-10` source parse/input failures
-- `RS-TEST-SOURCE-16` assertions modules prove runtime
-- `RS-TEST-SOURCE-17` external harnesses use owned assertions
+- `g3rs-test/inline-test-bodies` inline `#[cfg(test)] mod ... { ... }`
+- `g3rs-test/ignore-reason` `#[ignore]` reason quality
+- `g3rs-test/should-panic-expected` `#[should_panic(expected = ...)]`
+- `g3rs-test/tautological-assertions` tautological assertions
+- `g3rs-test/real-proof-site` real proof site
+- `g3rs-test/weak-matches-assert` weak wildcard `matches!`
+- `g3rs-test/source-input-failures` source parse/input failures
+- `g3rs-test/assertions-modules-prove` assertions modules prove runtime
+- `g3rs-test/external-harnesses-use-assertions` external harnesses use owned assertions

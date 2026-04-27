@@ -1,6 +1,6 @@
 Summary
 - Fixed arch dependency counting so `target.'cfg(...)'.dependencies` and `target.'cfg(...)'.build-dependencies` are included in the production dependency total.
-- Added a regression proving a crate with 11 root dependencies plus 2 cfg-targeted production dependencies now trips `RS-ARCH-CONFIG-07`.
+- Added a regression proving a crate with 11 root dependencies plus 2 cfg-targeted production dependencies now trips `g3rs-arch/dependency-count-split`.
 
 Decisions made
 - Kept the fix in `packages/rs/arch/g3rs-arch-ingestion/crates/runtime/src/workspace/run.rs`.

@@ -1,5 +1,5 @@
 # Summary
-Changed `RS-DENY-CONFIG-27` so a narrow package-local wrapper exception on a managed banned crate warns instead of hard-failing. Also fixed the CLI report renderer so it prints the rule message text instead of hiding it behind the short title.
+Changed `g3rs-deny/wrappers` so a narrow package-local wrapper exception on a managed banned crate warns instead of hard-failing. Also fixed the CLI report renderer so it prints the rule message text instead of hiding it behind the short title.
 
 # Decisions Made
 - Softened only the narrow local-wrapper case. Rejected weakening malformed wrapper entries or the family baseline itself.

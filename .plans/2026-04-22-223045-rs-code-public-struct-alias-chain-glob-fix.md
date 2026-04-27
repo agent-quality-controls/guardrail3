@@ -1,6 +1,6 @@
 ## Goal
 
-Fix the remaining `RS-CODE-SOURCE-31` misses where local alias chains and same-file glob imports hide inherent impls on shared-crate structs.
+Fix the remaining `g3rs-code/ast-31-public-struct-named-fields` misses where local alias chains and same-file glob imports hide inherent impls on shared-crate structs.
 
 ## Approach
 

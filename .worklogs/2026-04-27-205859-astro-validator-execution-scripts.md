@@ -4,8 +4,8 @@ Added Astro setup checks that require strict Astro apps to expose fail-closed pa
 
 # Decisions Made
 
-- Added `TS-ASTRO-SETUP-CONFIG-33` for a safe `lint` script invoking `eslint`.
-- Added `TS-ASTRO-SETUP-CONFIG-34` for a safe `lint:packages` script invoking `syncpack lint`.
+- Added `g3ts-astro-setup/lint-script` for a safe `lint` script invoking `eslint`.
+- Added `g3ts-astro-setup/syncpack-lint-script` for a safe `lint:packages` script invoking `syncpack lint`.
 - Kept the implementation in Astro setup because this is the app-level execution contract for delegated Astro validation.
 - Reused parsed package-script facts from `package-script-command-parser`; rejected raw script substring checks.
 

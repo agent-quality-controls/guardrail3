@@ -5,7 +5,7 @@ use guardrail3_check_types::G3CheckResult;
 pub fn check(input: &G3TsAstroSetupFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     for app_root in &input.app_roots {
-        crate::ts_astro_filetree_01_astro_config_exists::check(app_root, &mut results);
+        crate::astro_config_exists::check(app_root, &mut results);
     }
     results
 }

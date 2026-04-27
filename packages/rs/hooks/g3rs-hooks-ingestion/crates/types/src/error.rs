@@ -2,14 +2,8 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 pub enum G3RsHooksIngestionError {
-    Unreadable {
-        path: PathBuf,
-        reason: String,
-    },
-    ParseFailed {
-        path: PathBuf,
-        reason: String,
-    },
+    Unreadable { path: PathBuf, reason: String },
+    ParseFailed { path: PathBuf, reason: String },
 }
 
 impl std::fmt::Display for G3RsHooksIngestionError {

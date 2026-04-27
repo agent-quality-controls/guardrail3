@@ -25,4 +25,4 @@ Key files for context
 Next steps
 - Commit this slice by itself.
 - Move to `packages/shared/guardrail3-check-types` and clean it package by package.
-- Keep treating `RS-CODE-SOURCE-04` centralized parser/fs warnings as visible escape-hatch inventory unless the user asks for code-family waiver support there too.
+- Keep treating `g3rs-code/ast-04-item-level-allow-with-reason` centralized parser/fs warnings as visible escape-hatch inventory unless the user asks for code-family waiver support there too.

@@ -34,4 +34,4 @@ Next steps
 
 - Add the next TS family packages: `ts/package`, `ts/npmrc`, and `ts/tsconfig`.
 - Decide whether `g3ts` should be installed globally now or kept repo-local until more families exist.
-- Start bringing `/Users/tartakovsky/Projects/websmasher/websmasher/apps/web` and `/Users/tartakovsky/Projects/websmasher/websmasher/apps/landing` into shape by fixing the current `TS-ESLINT-CONFIG-01` missing-config finding.
+- Start bringing `/Users/tartakovsky/Projects/websmasher/websmasher/apps/web` and `/Users/tartakovsky/Projects/websmasher/websmasher/apps/landing` into shape by fixing the current `g3ts-eslint/exists` missing-config finding.

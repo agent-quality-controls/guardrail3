@@ -10,7 +10,7 @@ Removed the active `clippy` family's dependency on archived app modules and swit
   - Rejected: inventing a new clippy-only policy schema.
 - Kept `guardrail3-rs.toml` optional for clippy.
   - Missing policy still falls back to the previous defaults.
-  - Parse and read failures still stand down the affected rules and surface through `RS-CLIPPY-CONFIG-19`.
+  - Parse and read failures still stand down the affected rules and surface through `g3rs-clippy/policy-context-parseable`.
 - Left the app untouched.
   - The bug was inside the family package, not the thin app.
 

@@ -38,7 +38,7 @@ pub struct G3ToolchainChecksInput {
 
 ## Rules that move (2)
 
-### RS-TOOLCHAIN-CONFIG-01: channel and components
+### g3rs-toolchain/channel-and-components: channel and components
 ```rust
 fn check_channel_and_components(
     parsed: &toml::Value,
@@ -49,7 +49,7 @@ fn check_channel_and_components(
 - Validates [toolchain].components contains clippy + rustfmt
 - Errors on nightly, beta, unsupported
 
-### RS-TOOLCHAIN-CONFIG-02: MSRV consistency
+### g3rs-toolchain/msrv-consistency: MSRV consistency
 ```rust
 fn check_msrv_consistency(
     parsed: &toml::Value,
@@ -64,12 +64,12 @@ fn check_msrv_consistency(
 
 ## Rules that stay in app (2)
 
-### RS-TOOLCHAIN-01: existence
+### g3rs-toolchain/root-toolchain-config-exists: existence
 Stays in app. The app checks whether rust-toolchain.toml was found at
 this root. If not, emits "missing" error. If yes, calls the content
 checks package.
 
-### RS-TOOLCHAIN-04: legacy file conflict
+### g3rs-toolchain/no-duplicate-toolchain-config: legacy file conflict
 Stays in app. Checks whether both rust-toolchain and rust-toolchain.toml
 exist. This is filetree/placement, not content validation.
 

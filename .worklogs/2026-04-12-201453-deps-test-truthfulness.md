@@ -4,7 +4,7 @@ Fixed the last deps review finding by making two config rule tests describe what
 
 ## Decisions made
 
-- Renamed the two `RS-DEPS-CONFIG-01` rule tests instead of trying to force ingestion semantics into the pure config rule suite.
+- Renamed the two `g3rs-deps/dependencies-allowlisted` rule tests instead of trying to force ingestion semantics into the pure config rule suite.
   - Why: path and `workspace = true` normalization belongs to deps ingestion, not to the pure config rule input contract.
 - Kept the underlying assertions unchanged.
   - Why: the rule behavior being tested was already valid; the problem was that the test names overstated what those fixtures proved.

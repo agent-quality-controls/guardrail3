@@ -157,7 +157,11 @@ pub fn assert_realistic_manifest(manifest: &CargoToml) {
         vec!["rlib".to_owned(), "cdylib".to_owned()],
         "lib.crate_type mismatch",
     );
-    assert_eq!(lib.filename.as_deref(), Some("demo-lib"), "lib.filename mismatch");
+    assert_eq!(
+        lib.filename.as_deref(),
+        Some("demo-lib"),
+        "lib.filename mismatch"
+    );
     assert_eq!(
         lib.doc_scrape_examples,
         Some(true),
@@ -175,7 +179,11 @@ pub fn assert_realistic_manifest(manifest: &CargoToml) {
         "bin.required-features mismatch",
     );
 
-    assert_simple_dep(manifest.dependencies.get("serde"), "1", "dependencies.serde");
+    assert_simple_dep(
+        manifest.dependencies.get("serde"),
+        "1",
+        "dependencies.serde",
+    );
     let detailed = manifest.dependencies.get("internal");
     assert!(
         matches!(detailed, Some(Dependency::Detailed(_))),
@@ -189,13 +197,21 @@ pub fn assert_realistic_manifest(manifest: &CargoToml) {
         Some("https://example.com/index"),
         "dependencies.internal.registry-index mismatch",
     );
-    assert_eq!(detailed.base.as_deref(), Some("workspace"), "dependencies.internal.base mismatch");
+    assert_eq!(
+        detailed.base.as_deref(),
+        Some("workspace"),
+        "dependencies.internal.base mismatch"
+    );
     assert_eq!(
         detailed.package.as_deref(),
         Some("internal-real"),
         "dependencies.internal.package mismatch",
     );
-    assert_eq!(detailed.optional, Some(true), "dependencies.internal.optional mismatch");
+    assert_eq!(
+        detailed.optional,
+        Some(true),
+        "dependencies.internal.optional mismatch"
+    );
     assert_eq!(
         detailed.default_features,
         Some(false),
@@ -206,7 +222,11 @@ pub fn assert_realistic_manifest(manifest: &CargoToml) {
         vec!["derive".to_owned()],
         "dependencies.internal.features mismatch",
     );
-    assert_eq!(detailed.public, Some(true), "dependencies.internal.public mismatch");
+    assert_eq!(
+        detailed.public,
+        Some(true),
+        "dependencies.internal.public mismatch"
+    );
     assert_eq!(
         detailed.artifact.as_ref(),
         Some(&StringOrVec::Vec(vec![
@@ -215,7 +235,11 @@ pub fn assert_realistic_manifest(manifest: &CargoToml) {
         ])),
         "dependencies.internal.artifact mismatch",
     );
-    assert_eq!(detailed.lib, Some(true), "dependencies.internal.lib mismatch");
+    assert_eq!(
+        detailed.lib,
+        Some(true),
+        "dependencies.internal.lib mismatch"
+    );
     assert_eq!(
         detailed.target.as_deref(),
         Some("x86_64-unknown-linux-gnu"),
@@ -295,13 +319,20 @@ pub fn assert_realistic_manifest(manifest: &CargoToml) {
         .get("rust")
         .and_then(|tool| tool.get("unexpected_cfgs"));
     assert!(
-        matches!(unexpected_cfgs, Some(cargo_toml_parser_runtime::types::LintValue::Detailed(_))),
+        matches!(
+            unexpected_cfgs,
+            Some(cargo_toml_parser_runtime::types::LintValue::Detailed(_))
+        ),
         "lints.rust.unexpected_cfgs should be detailed",
     );
-    let Some(cargo_toml_parser_runtime::types::LintValue::Detailed(detail)) = unexpected_cfgs else {
+    let Some(cargo_toml_parser_runtime::types::LintValue::Detailed(detail)) = unexpected_cfgs
+    else {
         return;
     };
-    assert_eq!(detail.level, "warn", "lints.rust.unexpected_cfgs.level mismatch");
+    assert_eq!(
+        detail.level, "warn",
+        "lints.rust.unexpected_cfgs.level mismatch"
+    );
     assert_eq!(
         detail.priority,
         Some(2),
@@ -332,7 +363,11 @@ pub fn assert_realistic_manifest(manifest: &CargoToml) {
     let Some(workspace) = workspace else {
         return;
     };
-    assert_eq!(workspace.members, vec!["crates/*".to_owned()], "workspace.members mismatch");
+    assert_eq!(
+        workspace.members,
+        vec!["crates/*".to_owned()],
+        "workspace.members mismatch"
+    );
     assert_eq!(
         workspace
             .metadata
@@ -426,7 +461,11 @@ pub fn assert_alternative_known_multi_shape_fields(manifest: &CargoToml) {
     let Some(package) = package else {
         return;
     };
-    assert_eq!(package.build, Some(PackageBuildValue::Auto(false)), "package.build mismatch");
+    assert_eq!(
+        package.build,
+        Some(PackageBuildValue::Auto(false)),
+        "package.build mismatch"
+    );
     assert_eq!(
         package.publish,
         Some(InheritableValue::Value(VecStringOrBool::Bool(false))),

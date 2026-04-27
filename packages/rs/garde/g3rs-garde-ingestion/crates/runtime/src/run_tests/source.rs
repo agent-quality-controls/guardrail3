@@ -73,8 +73,12 @@ mod tests {
         let input = ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
         let results = g3rs_garde_source_checks::check(&input);
 
-        assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "src/broken.rs");
-        assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-01", "src/input.rs");
+        assertions::assert_rule_present(&results, "g3rs-garde/input-failures", "src/broken.rs");
+        assertions::assert_rule_present(
+            &results,
+            "g3rs-garde/struct-derive-validate",
+            "src/input.rs",
+        );
     }
 
     #[test]
@@ -109,7 +113,7 @@ mod tests {
         );
         write(
             root.join("guardrail3-rs.toml"),
-            "profile = \"service\"\n\n[checks]\ngarde = true\n\n[[waivers]]\nrule = \"RS-GARDE-SOURCE-04\"\nfile = \"src/db.rs\"\nselector = \"qa@L4\"\nreason = \"Temporary SQLx row mapping until validated DTO extraction lands.\"\n",
+            "profile = \"service\"\n\n[checks]\ngarde = true\n\n[[waivers]]\nrule = \"g3rs-garde/query-as-inventory\"\nfile = \"src/db.rs\"\nselector = \"qa@L4\"\nreason = \"Temporary SQLx row mapping until validated DTO extraction lands.\"\n",
         );
         write(
             root.join("src/db.rs"),
@@ -120,8 +124,12 @@ mod tests {
         let input = ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
         let results = g3rs_garde_source_checks::check(&input);
 
-        assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-04", "src/db.rs");
-        assertions::assert_rule_absent(&results, "RS-GARDE-SOURCE-04", "sqlx query_as missing reason");
+        assertions::assert_rule_present(&results, "g3rs-garde/query-as-inventory", "src/db.rs");
+        assertions::assert_rule_absent(
+            &results,
+            "g3rs-garde/query-as-inventory",
+            "sqlx query_as missing reason",
+        );
     }
 
     #[test]
@@ -212,7 +220,7 @@ mod tests {
         let input = ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
         let results = g3rs_garde_source_checks::check(&input);
 
-        assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "src/lib.rs");
+        assertions::assert_rule_present(&results, "g3rs-garde/input-failures", "src/lib.rs");
     }
 
     #[test]
@@ -234,8 +242,12 @@ mod tests {
         let input = ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
         let results = g3rs_garde_source_checks::check(&input);
 
-        assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "guardrail3-rs.toml");
-        assertions::assert_rule_id_absent(&results, "RS-GARDE-SOURCE-04");
+        assertions::assert_rule_present(
+            &results,
+            "g3rs-garde/input-failures",
+            "guardrail3-rs.toml",
+        );
+        assertions::assert_rule_id_absent(&results, "g3rs-garde/query-as-inventory");
     }
 
     #[cfg(unix)]
@@ -255,7 +267,7 @@ mod tests {
         let input = ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
         let results = g3rs_garde_source_checks::check(&input);
 
-        assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "src/lib.rs");
+        assertions::assert_rule_present(&results, "g3rs-garde/input-failures", "src/lib.rs");
     }
 
     #[cfg(unix)]
@@ -279,8 +291,12 @@ mod tests {
         let input = ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
         let results = g3rs_garde_source_checks::check(&input);
 
-        assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-10", "guardrail3-rs.toml");
-        assertions::assert_rule_id_absent(&results, "RS-GARDE-SOURCE-04");
+        assertions::assert_rule_present(
+            &results,
+            "g3rs-garde/input-failures",
+            "guardrail3-rs.toml",
+        );
+        assertions::assert_rule_id_absent(&results, "g3rs-garde/query-as-inventory");
     }
 
     #[test]
@@ -323,7 +339,11 @@ mod tests {
         let input = ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
         let results = g3rs_garde_source_checks::check(&input);
 
-        assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-01", "src/input.rs");
+        assertions::assert_rule_present(
+            &results,
+            "g3rs-garde/struct-derive-validate",
+            "src/input.rs",
+        );
     }
 
     #[test]
@@ -348,7 +368,11 @@ mod tests {
         let input = ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
         let results = g3rs_garde_source_checks::check(&input);
 
-        assertions::assert_rule_present(&results, "RS-GARDE-SOURCE-02", "src/input.rs");
+        assertions::assert_rule_present(
+            &results,
+            "g3rs-garde/manual-deserialize-impl",
+            "src/input.rs",
+        );
     }
 
     #[test]

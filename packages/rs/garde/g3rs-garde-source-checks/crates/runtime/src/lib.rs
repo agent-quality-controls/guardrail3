@@ -1,12 +1,12 @@
-mod rs_garde_10_input_failures;
-mod rs_garde_ast_01_struct_derive_validate;
-mod rs_garde_ast_02_manual_deserialize_impl;
-mod rs_garde_ast_03_enum_derive_validate;
-mod rs_garde_ast_04_query_as_inventory;
-mod rs_garde_ast_05_field_level_constraints;
-mod rs_garde_ast_06_nested_validation_dive;
-mod rs_garde_ast_07_context_validation_surface;
+mod context_validation_surface;
+mod enum_derive_validate;
+mod field_level_constraints;
+mod input_failures;
+mod manual_deserialize_impl;
+mod nested_validation_dive;
+mod query_as_inventory;
 mod run;
+mod struct_derive_validate;
 mod support;
 
 #[cfg(feature = "checks")]

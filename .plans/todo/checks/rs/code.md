@@ -72,7 +72,7 @@ These rules are now implemented in the live family. Keep the sections below as t
 | RS-CODE-31 | Warn/Error | `pub struct` with named `pub` fields. Warn for 1-4 named public fields; error at 5+ named public fields. Public structs should not expose field bags as their default API shape. | Implemented |
 | RS-CODE-33 | Error | Public function or method returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. This covers public free functions, public trait methods, and public methods on public types. | Implemented |
 | RS-CODE-34 | Error | More than 6 type/const generic parameters on a `struct`, `enum`, `trait`, or `fn`. Lifetimes do not count. | Implemented |
-| RS-CODE-35 | Error | Per-crate source tree exceeds structural caps: module depth >6, sibling subdirectories >12, or sibling `.rs` files >20 in one Rust source directory. | Dropped - duplicate of `RS-ARCH-FILETREE-07` |
+| RS-CODE-35 | Error | Per-crate source tree exceeds structural caps: module depth >6, sibling subdirectories >12, or sibling `.rs` files >20 in one Rust source directory. | Dropped - duplicate of `g3rs-arch/structural-split` |
 | RS-CODE-36 | Error | One string-dispatch site has more than 10 string-literal branches. Applies to `match` and `if/else if` chains on the same expression. Test files exempt. | Implemented |
 
 ### RS-CODE-31 — Public fields on public structs
@@ -274,7 +274,7 @@ Should error:
 
 | Old ID | What | New location |
 |--------|------|-------------|
-| R49 | CLAUDE.md exists at project root | RS-DEPS-CONFIG-01 (belongs with tool/project checks, not code scan) |
+| R49 | CLAUDE.md exists at project root | g3rs-deps/dependencies-allowlisted (belongs with tool/project checks, not code scan) |
 
 ## Explicitly rejected audit findings
 

@@ -6,7 +6,7 @@ Approach
 - Add the missing workspace root policy files and `guardrail3-rs.toml`.
 - Make publish intent explicit, add the standard feature gates, and move lint policy to workspace scope.
 - Split `src/lib.rs` into a small gated facade plus `src/types.rs`.
-- Keep the shared transport structs public and rely on the existing shared-crate exception in `RS-CODE-SOURCE-31`.
+- Keep the shared transport structs public and rely on the existing shared-crate exception in `g3rs-code/ast-31-public-struct-named-fields`.
 
 Key decisions
 - Follow `g3rs-clippy-types` and `g3rs-fmt-types` as the package shape reference.

@@ -20,7 +20,10 @@ fn golden_content_file_tree_package_reports_owned_id() {
         velite_output_paths: Vec::new(),
     };
 
-    assertions::assert_runtime_check_exact_ids(&input, &["TS-ASTRO-CONTENT-FILETREE-02"]);
+    assertions::assert_runtime_check_exact_ids(
+        &input,
+        &["g3ts-astro-content/content-config-exists"],
+    );
 }
 
 #[test]
@@ -45,8 +48,8 @@ fn content_file_tree_reports_exact_velite_output_paths() {
     assertions::assert_runtime_check_exact_ids(
         &input,
         &[
-            "TS-ASTRO-CONTENT-FILETREE-02",
-            "TS-ASTRO-CONTENT-FILETREE-06",
+            "g3ts-astro-content/content-config-exists",
+            "g3ts-astro-content/no-velite-output",
         ],
     );
 }

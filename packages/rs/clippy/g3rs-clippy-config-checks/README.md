@@ -4,27 +4,27 @@ Extracted `clippy.toml`, `guardrail3-rs.toml`, and `.cargo/config*` config check
 
 Current scope:
 
-- `RS-CLIPPY-CONFIG-01`: `max-struct-bools`
-- `RS-CLIPPY-CONFIG-02`: `max-fn-params-bools`
-- `RS-CLIPPY-CONFIG-03`: `too-many-lines-threshold`
-- `RS-CLIPPY-CONFIG-04`: `too-many-arguments-threshold`
-- `RS-CLIPPY-CONFIG-05`: `excessive-nesting-threshold`
-- `RS-CLIPPY-CONFIG-06`: test relaxation exactness
-- `RS-CLIPPY-CONFIG-07`: `cognitive-complexity-threshold`
-- `RS-CLIPPY-CONFIG-08`: `type-complexity-threshold`
-- `RS-CLIPPY-CONFIG-09`: missing method bans
-- `RS-CLIPPY-CONFIG-10`: missing type bans
-- `RS-CLIPPY-CONFIG-11`: extra method bans
-- `RS-CLIPPY-CONFIG-12`: extra type bans
-- `RS-CLIPPY-CONFIG-13`: ban reason quality
-- `RS-CLIPPY-CONFIG-14`: library global-state bans
-- `RS-CLIPPY-CONFIG-15`: `avoid-breaking-exported-api`
-- `RS-CLIPPY-CONFIG-16`: duplicate bans
-- `RS-CLIPPY-CONFIG-17`: suspicious managed-key typos
-- `RS-CLIPPY-CONFIG-18`: macro bans
-- `RS-CLIPPY-CONFIG-19`: `guardrail3-rs.toml` rust-policy parseability
-- `RS-CLIPPY-CONFIG-20`: forbidden `CLIPPY_CONF_DIR` override surfaces
-- `RS-CLIPPY-CONFIG-21`: `clippy.toml` parseability
+- `g3rs-clippy/max-struct-bools`: `max-struct-bools`
+- `g3rs-clippy/max-fn-params-bools`: `max-fn-params-bools`
+- `g3rs-clippy/too-many-lines-threshold`: `too-many-lines-threshold`
+- `g3rs-clippy/too-many-arguments-threshold`: `too-many-arguments-threshold`
+- `g3rs-clippy/excessive-nesting-threshold`: `excessive-nesting-threshold`
+- `g3rs-clippy/test-relaxations`: test relaxation exactness
+- `g3rs-clippy/cognitive-complexity-threshold`: `cognitive-complexity-threshold`
+- `g3rs-clippy/type-complexity-threshold`: `type-complexity-threshold`
+- `g3rs-clippy/missing-method-ban`: missing method bans
+- `g3rs-clippy/missing-type-ban`: missing type bans
+- `g3rs-clippy/extra-method-ban`: extra method bans
+- `g3rs-clippy/extra-type-ban`: extra type bans
+- `g3rs-clippy/ban-reason-quality`: ban reason quality
+- `g3rs-clippy/library-global-state`: library global-state bans
+- `g3rs-clippy/avoid-breaking-exported-api`: `avoid-breaking-exported-api`
+- `g3rs-clippy/duplicate-bans`: duplicate bans
+- `g3rs-clippy/unknown-keys`: suspicious managed-key typos
+- `g3rs-clippy/macro-bans`: macro bans
+- `g3rs-clippy/policy-context-parseable`: `guardrail3-rs.toml` rust-policy parseability
+- `g3rs-clippy/forbid-clippy-conf-dir-override`: forbidden `CLIPPY_CONF_DIR` override surfaces
+- `g3rs-clippy/config-parseable`: `clippy.toml` parseability
 
 This package intentionally keeps the package model boundary:
 

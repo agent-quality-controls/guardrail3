@@ -75,7 +75,7 @@ Approach
      - one rule file
      - one rule-specific sidecar test module directory
      - owned assertions/helpers only
-   - Expect this to remove most `RS-TEST-*` and many `RS-ARCH-SOURCE-04/09` findings together.
+   - Expect this to remove most `RS-TEST-*` and many `g3rs-arch/mod-facade-only/09` findings together.
 
 5. Runtime structural split
    - Once test layout and facade layout are fixed, re-check whether `crates/runtime` still exceeds structural caps.

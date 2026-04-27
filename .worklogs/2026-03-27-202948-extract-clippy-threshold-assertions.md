@@ -16,13 +16,13 @@ After the workspace-baseline commit (`46011b0`), `clippy` was finally green unde
 - `RS-TEST-18`: `1`
 
 The easiest high-signal cluster was the threshold rules:
-- `RS-CLIPPY-CONFIG-01`
-- `RS-CLIPPY-CONFIG-02`
-- `RS-CLIPPY-CONFIG-08`
-- `RS-CLIPPY-CONFIG-09`
-- `RS-CLIPPY-CONFIG-10`
-- `RS-CLIPPY-CONFIG-19`
-- `RS-CLIPPY-CONFIG-20`
+- `g3rs-clippy/max-struct-bools`
+- `g3rs-clippy/max-fn-params-bools`
+- `g3rs-clippy/type-complexity-threshold`
+- `g3rs-clippy/missing-method-ban`
+- `g3rs-clippy/missing-type-ban`
+- `g3rs-clippy/policy-context-parseable`
+- `g3rs-clippy/forbid-clippy-conf-dir-override`
 
 These all followed the same test shape:
 - build a `ProjectTree`

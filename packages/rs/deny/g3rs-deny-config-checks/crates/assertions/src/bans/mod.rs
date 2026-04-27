@@ -1,7 +1,7 @@
-pub mod rs_deny_config_06_multiple_versions_floor;
-pub mod rs_deny_config_07_highlight_inventory;
-pub mod rs_deny_config_08_allow_wildcard_paths;
-pub mod rs_deny_config_09_wildcards_inventory;
-pub mod rs_deny_config_16_tokio_full_ban;
-pub mod rs_deny_config_17_extra_feature_bans_inventory;
-pub mod rs_deny_config_20_duplicate_entries;
+pub mod allow_wildcard_paths;
+pub mod duplicate_entries;
+pub mod extra_feature_bans_inventory;
+pub mod highlight_inventory;
+pub mod multiple_versions_floor;
+pub mod tokio_full_ban;
+pub mod wildcards_inventory;

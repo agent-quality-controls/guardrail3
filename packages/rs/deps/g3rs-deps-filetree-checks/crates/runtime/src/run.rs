@@ -4,8 +4,8 @@ use guardrail3_check_types::G3CheckResult;
 pub fn check(input: &G3RsDepsFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
-    crate::rs_deps_filetree_09_cargo_lock_present::check(input, &mut results);
-    crate::rs_deps_filetree_10_gitignore_not_ignoring_cargo_lock::check(input, &mut results);
+    crate::cargo_lock_present::check(input, &mut results);
+    crate::gitignore_not_ignoring_cargo_lock::check(input, &mut results);
 
     results
 }

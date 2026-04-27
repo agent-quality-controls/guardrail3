@@ -16,7 +16,7 @@ Aligned the live cargo family docs with the cargo implementation that actually e
     - deduplication
     - invalid member/exclude patterns degrading into ingestion failures
 - Documented the hard root-missing boundary.
-  - Reason: `CargoTomlNotFound` is a hard ingestion error before filetree input exists, so the filetree README should not imply every failure is represented inside `RS-CARGO-FILETREE-14`.
+  - Reason: `CargoTomlNotFound` is a hard ingestion error before filetree input exists, so the filetree README should not imply every failure is represented inside `g3rs-cargo/input-failures`.
 
 ## Key files for context
 

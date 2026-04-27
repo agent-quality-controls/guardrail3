@@ -11,8 +11,8 @@ Normalized package rule IDs across the lane-bearing Rust families so every packa
 - Renumbered the merged `hooks` package lane IDs from runtime order instead of trying to preserve the old `HOOK-RS` and `HOOK-SHARED` numbers.
   - Why: the old numbers collide inside the merged public family, so preserving them would violate the lane-scoped package contract.
 - Split `RS-TEST-10` into lane-specific package IDs after the bulk rename.
-  - `RS-TEST-SOURCE-10` now belongs to the source lane.
-  - `RS-TEST-FILETREE-10` now belongs to the file-tree lane.
+  - `g3rs-test/source-input-failures` now belongs to the source lane.
+  - `g3rs-test/filetree-input-failures` now belongs to the file-tree lane.
   - Why: one legacy ID existed in two package lanes, which is incompatible with the lane-scoped naming rule.
 - Left old app code untouched.
   - Why: this change was scoped to package rule identities and package-side references only.

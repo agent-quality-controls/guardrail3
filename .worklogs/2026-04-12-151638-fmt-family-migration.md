@@ -7,10 +7,10 @@ Completed the `fmt` family package migration. `fmt` now has package-owned config
 - Moved `RS-FMT-07` into `g3rs-fmt-config-checks`.
   - Why: it checks parsed rustfmt `ignore` content plus typed escape hatch metadata, so it belongs in config.
   - Rejected: keeping it app-side.
-- Added `g3rs-fmt-filetree-checks` for `RS-FMT-FILETREE-01`, `RS-FMT-FILETREE-05`, and `RS-FMT-FILETREE-08`.
+- Added `g3rs-fmt-filetree-checks` for `g3rs-fmt/exists`, `g3rs-fmt/per-crate-override`, and `g3rs-fmt/dual-file-conflict`.
   - Why: these rules inspect root presence and nested file placement, not config contents.
 - Changed `g3rs-fmt-ingestion` to preserve blocker states.
-  - Why: `RS-FMT-CONFIG-01`, `03`, and `04` need malformed or missing root inputs to stay visible as rule results.
+  - Why: `g3rs-fmt/settings`, `03`, and `04` need malformed or missing root inputs to stay visible as rule results.
   - Rejected: returning ingestion errors for malformed root rustfmt, missing Cargo, and missing toolchain.
 - Accepted root `.rustfmt.toml` when `rustfmt.toml` is absent.
   - Why: that matches the live app family behavior.

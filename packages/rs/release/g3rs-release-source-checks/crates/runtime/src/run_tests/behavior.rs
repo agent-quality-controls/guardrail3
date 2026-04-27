@@ -8,6 +8,9 @@ fn aggregates_quality_and_input_failures() {
 
     assertions::assert_result_ids(
         &results,
-        &["RS-RELEASE-SOURCE-02", "RS-RELEASE-SOURCE-01"],
+        &[
+            "g3rs-release/source-input-failures",
+            "g3rs-release/readme-quality",
+        ],
     );
 }

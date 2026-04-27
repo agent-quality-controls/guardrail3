@@ -1,6 +1,6 @@
 Summary
 - Cleaned up `rs/arch` ingestion after the facade-pairing repair by reducing the top-level import fan-in in `source.rs`.
-- This removes the live `RS-CODE-SOURCE-11` warning on the package without changing behavior.
+- This removes the live `g3rs-code/ast-11-many-use-imports` warning on the package without changing behavior.
 
 Decisions made
 - Replaced the wide `g3rs_arch_types::types::{...}` import list with a module alias.

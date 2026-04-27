@@ -1,6 +1,6 @@
 Summary
 
-Normalized `packages/parsers/release-plz-toml-parser` to the current sibling-crate parser package shape and removed the package-debt errors. The only remaining signals are the 2 intentional `RS-CODE-SOURCE-04` inventory warnings on the centralized fs and parser boundary allows.
+Normalized `packages/parsers/release-plz-toml-parser` to the current sibling-crate parser package shape and removed the package-debt errors. The only remaining signals are the 2 intentional `g3rs-code/ast-04-item-level-allow-with-reason` inventory warnings on the centralized fs and parser boundary allows.
 
 Decisions made
 

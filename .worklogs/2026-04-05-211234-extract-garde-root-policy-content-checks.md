@@ -19,7 +19,7 @@ There was also a bridge-specific risk: the new package can only operate on typed
 ## Decisions Made
 
 ### Extract only the garde root-policy slice
-- **Chose:** Move `RS-GARDE-CONFIG-01`, `RS-GARDE-CONFIG-02`, `RS-GARDE-CONFIG-03`, `RS-GARDE-CONFIG-04`, and `RS-GARDE-CONFIG-05` into `g3rs-garde-config-checks`.
+- **Chose:** Move `g3rs-garde/dependency-present`, `g3rs-garde/core-method-bans`, `g3rs-garde/extractor-type-bans`, `g3rs-garde/reqwest-json-ban`, and `g3rs-garde/additional-method-bans` into `g3rs-garde-config-checks`.
 - **Why:** Those rules operate on one root `Cargo.toml` and one covering `clippy.toml`, which fits the parsed-files-only package boundary cleanly.
 - **Alternatives considered:**
   - Moving the whole family — rejected because `RS-GARDE-AST-01`, `07`, `08`, `09`, `11`, `12`, `13`, and `14` currently depend on analyzed Rust source facts, not parsed config files.
@@ -29,13 +29,13 @@ There was also a bridge-specific risk: the new package can only operate on typed
 - **Chose:** Define two package inputs:
   - `G3RsGardeConfigDependencyCheckInput { cargo_rel_path, cargo }`
   - `G3RsGardeConfigClippyBanChecksInput { clippy_rel_path, clippy }`
-- **Why:** `RS-GARDE-CONFIG-01` only needs parsed `Cargo.toml`; `RS-GARDE-CONFIG-02/03/04/06` only need parsed `clippy.toml`. This keeps the package contracts honest and avoids a mixed bag input that pretends every rule needs both files.
+- **Why:** `g3rs-garde/dependency-present` only needs parsed `Cargo.toml`; `g3rs-garde/core-method-bans/03/04/06` only need parsed `clippy.toml`. This keeps the package contracts honest and avoids a mixed bag input that pretends every rule needs both files.
 - **Alternatives considered:**
   - One giant garde package input — rejected because it couples unrelated rule surfaces and widens the public contract without need.
   - Subset helper types carrying derived booleans or ban lists — rejected because content packages must receive parsed files, not app-computed policy fragments.
 
 ### Keep missing and typed-invalid covering clippy handling in the app
-- **Chose:** The app bridge only calls the package when `clippy_toml_parser::parse(...)` succeeds. Otherwise it falls back to the legacy app-side warning rules for `RS-GARDE-CONFIG-02/03/04/06`.
+- **Chose:** The app bridge only calls the package when `clippy_toml_parser::parse(...)` succeeds. Otherwise it falls back to the legacy app-side warning rules for `g3rs-garde/core-method-bans/03/04/06`.
 - **Why:** The package should never see malformed or absent inputs. The family still needs the pre-existing “cannot verify ...” warnings when the covering clippy config is missing or unparseable.
 - **Alternatives considered:**
   - Making the package own malformed-input warnings — rejected because malformed-input ownership belongs in the app/orchestrator boundary.
@@ -52,11 +52,11 @@ There was also a bridge-specific risk: the new package can only operate on typed
 The `garde` family is now split this way:
 
 - **Package `g3rs-garde-config-checks`:**
-  - `RS-GARDE-CONFIG-01`
-  - `RS-GARDE-CONFIG-02`
-  - `RS-GARDE-CONFIG-03`
-  - `RS-GARDE-CONFIG-04`
-  - `RS-GARDE-CONFIG-05`
+  - `g3rs-garde/dependency-present`
+  - `g3rs-garde/core-method-bans`
+  - `g3rs-garde/extractor-type-bans`
+  - `g3rs-garde/reqwest-json-ban`
+  - `g3rs-garde/additional-method-bans`
 - **App family remains owner of:**
   - garde applicability gating from routed policy and source adoption
   - missing / unparseable covering clippy handling for `02/03/04/06`
@@ -112,6 +112,6 @@ app garde family
 
 ## Next Steps / Continuation Plan
 1. Commit this garde root-policy extraction batch and keep `garde` recorded as a partial family extraction, not a full package migration.
-2. If more `garde` hardening is needed, add direct app-family bridge coverage for the package path of `RS-GARDE-CONFIG-01` and one additional clippy-ban rule beyond `RS-GARDE-CONFIG-02`.
+2. If more `garde` hardening is needed, add direct app-family bridge coverage for the package path of `g3rs-garde/dependency-present` and one additional clippy-ban rule beyond `g3rs-garde/core-method-bans`.
 3. When returning to extraction sequencing, read `apps/guardrail3/crates/app/rs/families/test` and decide whether `test` or a deeper `garde` AST extraction design is the cleaner next family.
 4. Do not move the AST/source garde rules until there is a parsed-file package boundary that does not require smuggling normalized analysis bundles into the package.

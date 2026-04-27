@@ -11,7 +11,7 @@ Decisions made
   - active when `garde` dependency is present
   - or `checks.garde = true` in `guardrail3-rs.toml`
 - Treated missing `guardrail3-rs.toml` as "no waivers", not as an ingestion error.
-  - Invalid or unreadable `guardrail3-rs.toml` still surfaces through `RS-GARDE-SOURCE-10` when the family is active.
+  - Invalid or unreadable `guardrail3-rs.toml` still surfaces through `g3rs-garde/input-failures` when the family is active.
 - Replaced deleted test-only `build_clippy_toml(...)` imports with package-owned clippy baseline helpers.
 
 Key files for context

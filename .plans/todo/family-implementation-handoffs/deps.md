@@ -13,7 +13,7 @@ Do **not** spend this lane cleaning wider repo dependency findings unless a resu
 
 Priority that was completed here:
 
-1. implement `RS-DEPS-CONFIG-05`
+1. implement `g3rs-deps/direct-dependency-cap`
 2. preserve existing family ownership boundaries
 3. prove it with exact regressions
 4. update the plan so `deps` is no longer inventory-incomplete
@@ -42,14 +42,14 @@ Planned contract:
 
 Explicit remaining family caveat:
 
-- target-specific dependency tables are still outside `RS-DEPS-CONFIG-01..07`
-- `RS-DEPS-CONFIG-05` explicitly owns target-specific direct-dependency counting
+- target-specific dependency tables are still outside `g3rs-deps/dependencies-allowlisted..07`
+- `g3rs-deps/direct-dependency-cap` explicitly owns target-specific direct-dependency counting
 
 ## Scope You Own
 
 This lane owned:
 
-- implementing `RS-DEPS-CONFIG-05`
+- implementing `g3rs-deps/direct-dependency-cap`
 - the minimal dependency inventory/fact extensions required for correct counting
 - exact threshold-edge regressions
 - plan cleanup in `deps.md`
@@ -58,11 +58,11 @@ You do **not** own:
 
 - release-family dependency policy
 - banned-crate lockfile policy beyond `RS-DEPS`
-- a broad rewrite of `RS-DEPS-CONFIG-01..11`
+- a broad rewrite of `g3rs-deps/dependencies-allowlisted..11`
 
 ## Main Rule To Implement
 
-### `RS-DEPS-CONFIG-05`
+### `g3rs-deps/direct-dependency-cap`
 
 - one finding per crate/root whose direct dependency count exceeds `25`
 - count unique direct dependency names
@@ -85,12 +85,12 @@ Stay inside the live family architecture:
 
 - `crates/runtime/src/facts.rs`
 - `crates/runtime/src/inputs.rs`
-- one rule file for `RS-DEPS-CONFIG-05`
+- one rule file for `g3rs-deps/direct-dependency-cap`
 - rule-specific sidecar tests
 
 Do not:
 
-- collapse the rule into `RS-DEPS-CONFIG-01..07`
+- collapse the rule into `g3rs-deps/dependencies-allowlisted..07`
 - broaden target-specific table policy silently
 - count non-owned/internal/workspace path dependencies just to reach the cap
 
@@ -99,7 +99,7 @@ Do not:
 Completed execution shape:
 
 1. dependency normalization was extended once in family facts instead of per-rule parsing
-2. `RS-DEPS-CONFIG-05` was added as a dedicated rule file
+2. `g3rs-deps/direct-dependency-cap` was added as a dedicated rule file
 3. regressions now cover:
    - exactly `25`
    - `26`
@@ -118,7 +118,7 @@ cargo run --quiet --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 -- rs
 
 ## Outcome
 
-- `RS-DEPS-CONFIG-05` is implemented
+- `g3rs-deps/direct-dependency-cap` is implemented
 - family tests pass
 - the detailed deps ledger no longer marks the rule planned
-- target-table ownership is explicit: counted for `RS-DEPS-CONFIG-05`, still out of scope for `RS-DEPS-CONFIG-01..07`
+- target-table ownership is explicit: counted for `g3rs-deps/direct-dependency-cap`, still out of scope for `g3rs-deps/dependencies-allowlisted..07`

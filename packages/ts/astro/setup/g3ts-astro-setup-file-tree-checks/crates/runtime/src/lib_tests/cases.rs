@@ -10,5 +10,5 @@ fn golden_setup_file_tree_package_reports_owned_id() {
         }],
     };
 
-    assertions::assert_runtime_check_exact_ids(&input, &["TS-ASTRO-SETUP-FILETREE-01"]);
+    assertions::assert_runtime_check_exact_ids(&input, &["g3ts-astro-setup/astro-config-exists"]);
 }

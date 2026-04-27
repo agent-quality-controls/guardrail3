@@ -18,7 +18,7 @@ Key files for context
 
 Next steps
 
-- Decide `RS-CODE-SOURCE-31` for shared types crates.
+- Decide `g3rs-code/ast-31-public-struct-named-fields` for shared types crates.
 - Current remaining findings are only the public-field signals on:
   - `G3RsClippyCargoConfigOverride`
   - `G3RsClippyConfigChecksInput`

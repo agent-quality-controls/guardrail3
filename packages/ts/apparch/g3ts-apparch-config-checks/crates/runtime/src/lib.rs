@@ -1,12 +1,12 @@
+mod app_no_direct_outbound;
+mod io_inbound_dependency_direction;
+mod io_outbound_dependency_direction;
+mod logic_dependency_direction;
+mod logic_purity;
 mod run;
 mod support;
-mod ts_apparch_config_01_types_dependency_direction;
-mod ts_apparch_config_02_logic_dependency_direction;
-mod ts_apparch_config_03_io_outbound_dependency_direction;
-mod ts_apparch_config_04_io_inbound_dependency_direction;
-mod ts_apparch_config_05_app_no_direct_outbound;
-mod ts_apparch_config_06_types_purity;
-mod ts_apparch_config_07_logic_purity;
+mod types_dependency_direction;
+mod types_purity;
 
 #[cfg(feature = "checks")]
 pub use run::check;

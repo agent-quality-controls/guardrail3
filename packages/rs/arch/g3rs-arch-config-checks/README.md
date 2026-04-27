@@ -4,7 +4,7 @@ Runs the `arch` family config checks.
 
 Current rules:
 
-- `RS-ARCH-CONFIG-05` no boundary-crossing crate dependencies
-- `RS-ARCH-CONFIG-06` non-child dependencies require `shared = true`
-- `RS-ARCH-CONFIG-07` dependency-count threshold forces a split
-- `RS-ARCH-CONFIG-08` facade-export feature contract is valid
+- `g3rs-arch/no-boundary-crossing` no boundary-crossing crate dependencies
+- `g3rs-arch/shared-flag-required` non-child dependencies require `shared = true`
+- `g3rs-arch/dependency-count-split` dependency-count threshold forces a split
+- `g3rs-arch/feature-contract` facade-export feature contract is valid

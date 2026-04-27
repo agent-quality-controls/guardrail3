@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-TEST-SOURCE-17` so external harness wrappers that call local assertion helpers via `super::assert_demo()` are promoted the same way as `self::` and `crate::` wrappers.
+Fix `g3rs-test/external-harnesses-use-assertions` so external harness wrappers that call local assertion helpers via `super::assert_demo()` are promoted the same way as `self::` and `crate::` wrappers.
 
 ## Approach
 

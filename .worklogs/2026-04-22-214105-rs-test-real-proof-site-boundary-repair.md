@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-TEST-SOURCE-07` so local proof-path detection no longer guesses from arbitrary `assertions` path segments inside the rule. The rule now consumes ingestion-owned same-file proof-helper facts, and the slice has red-first proof for both the missed local proof helper case and the false local `assertions` import case.
+Fixed `g3rs-test/real-proof-site` so local proof-path detection no longer guesses from arbitrary `assertions` path segments inside the rule. The rule now consumes ingestion-owned same-file proof-helper facts, and the slice has red-first proof for both the missed local proof helper case and the false local `assertions` import case.
 
 ## Decisions made
 

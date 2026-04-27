@@ -1,5 +1,5 @@
 # Summary
-Removed 2 unproven exception comments from `packages/rs/clippy/g3rs-clippy-config-checks/deny.toml` and tightened the config to match the actual package graph. This eliminated the `RS-CODE-CONFIG-07` warning noise and exposed the real deny-family findings that had been hidden behind the slack.
+Removed 2 unproven exception comments from `packages/rs/clippy/g3rs-clippy-config-checks/deny.toml` and tightened the config to match the actual package graph. This eliminated the `g3rs-code/exception-comment-inventory` warning noise and exposed the real deny-family findings that had been hidden behind the slack.
 
 # Decisions Made
 - Removed the `regex` wrapper carveout because `cargo-deny` reported all three wrappers as unused in this package. Rejected keeping the exception because no current package dependency requires it.
@@ -11,6 +11,6 @@ Removed 2 unproven exception comments from `packages/rs/clippy/g3rs-clippy-confi
 - `.worklogs/2026-04-14-201349-clippy-arch-mod-facade-reshaping.md`
 
 # Next Steps
-- `RS-DENY-CONFIG-02` now needs a decision on the intended `yanked` policy baseline for unpublished package workspaces.
-- `RS-DENY-CONFIG-27` now needs review of the managed ban-wrapper baseline, since the package no longer wants the old regex wrapper carveout.
+- `g3rs-deny/advisories-baseline` now needs a decision on the intended `yanked` policy baseline for unpublished package workspaces.
+- `g3rs-deny/wrappers` now needs review of the managed ban-wrapper baseline, since the package no longer wants the old regex wrapper carveout.
 - The package still has the previously ignored `test` family findings.

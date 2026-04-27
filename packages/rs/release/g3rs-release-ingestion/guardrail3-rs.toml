@@ -25,13 +25,13 @@ selector = "lint:clippy::multiple_crate_versions"
 reason = "This internal workspace package intentionally depends on parser crates and shared internal crates with overlapping transitive versions."
 
 [[waivers]]
-rule = "RS-ARCH-FILETREE-07"
+rule = "g3rs-arch/structural-split"
 file = "crates/runtime/Cargo.toml"
 selector = "structural-split"
 reason = "Runtime intentionally owns the release ingestion lane boundary and will be split internally by module."
 
 [[waivers]]
-rule = "RS-ARCH-FILETREE-07"
+rule = "g3rs-arch/structural-split"
 file = "crates/assertions/Cargo.toml"
 selector = "structural-split"
 reason = "Assertions crate intentionally keeps shared proof modules for the ingestion lane."

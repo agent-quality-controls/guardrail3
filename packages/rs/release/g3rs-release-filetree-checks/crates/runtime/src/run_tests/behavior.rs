@@ -41,11 +41,11 @@ fn aggregates_repo_readme_and_input_failures() {
     assertions::assert_result_ids(
         &results,
         &[
-            "RS-RELEASE-FILETREE-05",
-            "RS-RELEASE-FILETREE-01",
-            "RS-RELEASE-FILETREE-02",
-            "RS-RELEASE-FILETREE-03",
-            "RS-RELEASE-FILETREE-04",
+            "g3rs-release/filetree-input-failures",
+            "g3rs-release/license-file",
+            "g3rs-release/release-plz-exists",
+            "g3rs-release/cliff-exists",
+            "g3rs-release/readme-exists",
         ],
     );
 }

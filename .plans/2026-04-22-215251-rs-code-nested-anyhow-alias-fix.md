@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-CODE-SOURCE-33` so nested public modules that alias `anyhow` still trigger weak-public-error detection for `Result<_, anyhow::Error>` forms.
+Fix `g3rs-code/ast-33-public-weak-error-forms` so nested public modules that alias `anyhow` still trigger weak-public-error detection for `Result<_, anyhow::Error>` forms.
 
 ## Approach
 

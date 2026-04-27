@@ -1,5 +1,5 @@
+mod astro_config_exists;
 mod run;
-mod ts_astro_filetree_01_astro_config_exists;
 
 #[cfg(feature = "checks")]
 pub use run::check;

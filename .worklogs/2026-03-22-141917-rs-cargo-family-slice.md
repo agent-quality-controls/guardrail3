@@ -61,14 +61,14 @@ The `rs/cargo` family now demonstrates the core architecture that the rest of th
 - each rule file performs one local assertion over one typed input
 
 The first slice covers these rules:
-- `RS-CARGO-CONFIG-01` workspace lint completeness
-- `RS-CARGO-CONFIG-02` workspace lint levels and group priorities
+- `g3rs-cargo/workspace-lints` workspace lint completeness
+- `g3rs-cargo/lint-levels` workspace lint levels and group priorities
 - `RS-CARGO-03` approved allow inventory
 - `RS-CARGO-04` member `[lints] workspace = true`
-- `RS-CARGO-CONFIG-04` workspace edition / rust-version metadata
+- `g3rs-cargo/priority-order` workspace edition / rust-version metadata
 - `RS-CARGO-06` weakened member overrides
-- `RS-CARGO-CONFIG-05` specific-lint negative priority
-- `RS-CARGO-CONFIG-06` resolver enforcement
+- `g3rs-cargo/resolver` specific-lint negative priority
+- `g3rs-cargo/disallowed-macros-deny` resolver enforcement
 - `RS-CARGO-09` member edition drift
 
 This is enough to prove that `rs/cargo` can host both workspace rules and pair rules without collapsing back into a bag-of-files checker.
@@ -83,7 +83,7 @@ This is enough to prove that `rs/cargo` can host both workspace rules and pair r
 - `cargo test --lib checks::rs::fmt`
 
 ## Open Questions / Future Considerations
-- `RS-CARGO-CONFIG-01` still does not implement profile-aware extra Rust lints for library profile.
+- `g3rs-cargo/workspace-lints` still does not implement profile-aware extra Rust lints for library profile.
 - The family currently resolves `workspace.members` via direct paths and glob patterns, but does not yet model `exclude`.
 - There is still no dedicated set-diff rule using `WorkspaceMembersSetInput`; the input is present and tested, but the comparison rule itself remains future work.
 - This family is still side-by-side with the old validator and is not wired into the top-level validate pipeline yet.

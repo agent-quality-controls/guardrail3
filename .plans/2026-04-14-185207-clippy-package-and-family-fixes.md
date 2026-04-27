@@ -5,7 +5,7 @@ Goal
 
 Approach
 
-1. Fix `RS-ARCH-CONFIG-08`
+1. Fix `g3rs-arch/feature-contract`
    - Add failing tests proving crates with feature-gated facade exports do not need an `all` feature.
    - Keep the requirement for explicit feature contracts.
    - Remove the hardcoded `all` + `default = ["all"]` requirement from the rule.
@@ -14,15 +14,15 @@ Approach
    - Add failing ingestion tests proving nested package workspaces should not require repo-global `.githooks/pre-commit` or `core.hooksPath`.
    - Make hooks filetree coverage apply only at the Git repo root, not nested package workspaces.
 
-3. Fix `RS-CODE-SOURCE-24` in the clippy package
+3. Fix `g3rs-code/ast-24-path-attr-with-reason` in the clippy package
    - Keep the existing sidecar test directories.
    - Remove `#[path = "rule_tests/mod.rs"]` and switch rule files to normal `mod rule_tests;`.
    - This preserves the sidecar directory shape while removing the redirected module-resolution attribute.
 
 4. Fix package boundary/facade issues in the clippy package
-   - `RS-ARCH-CONFIG-05`
-   - `RS-ARCH-CONFIG-06`
-   - `RS-ARCH-SOURCE-02`
+   - `g3rs-arch/no-boundary-crossing`
+   - `g3rs-arch/shared-flag-required`
+   - `g3rs-arch/lib-facade-only`
    - Inspect the exact dependency graph in `crates/runtime` and `crates/assertions`.
    - Move or mark dependencies at the architecturally correct place instead of adding exemptions.
    - Make `crates/assertions/src/lib.rs` facade-only.
@@ -36,9 +36,9 @@ Approach
 
 Key decisions
 
-- Do not touch `RS-CODE-FILETREE-35` or `RS-ARCH-FILETREE-07` in this slice.
+- Do not touch `RS-CODE-FILETREE-35` or `g3rs-arch/structural-split` in this slice.
   - Those are intentionally deferred pending rule review.
-- Do not touch `RS-CODE-SOURCE-31` in this slice.
+- Do not touch `g3rs-code/ast-31-public-struct-named-fields` in this slice.
   - Test/assertion DTO surfaces are still undecided.
 - Ignore `test` family findings in this slice by user direction.
 - Keep sidecar directories; only remove `#[path]`.

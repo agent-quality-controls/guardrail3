@@ -1,6 +1,6 @@
+mod io_contracts_in_types;
 mod run;
-mod ts_apparch_source_01_types_public_surface;
-mod ts_apparch_source_02_io_contracts_in_types;
+mod types_public_surface;
 
 #[cfg(feature = "checks")]
 pub use run::check;

@@ -35,19 +35,19 @@ Purpose:
 
 Initial migrated rules:
 
-- `TS-ASTRO-CONFIG-01` -> `TS-ASTRO-SETUP-CONFIG-01`
-- `TS-ASTRO-CONFIG-02` -> `TS-ASTRO-SETUP-CONFIG-02`
-- `TS-ASTRO-CONFIG-03` -> `TS-ASTRO-SETUP-CONFIG-03`
-- `TS-ASTRO-CONFIG-05` -> `TS-ASTRO-SETUP-CONFIG-05`
-- `TS-ASTRO-CONFIG-09` -> `TS-ASTRO-SETUP-CONFIG-09`
-- `TS-ASTRO-CONFIG-10` -> `TS-ASTRO-SETUP-CONFIG-10`
-- `TS-ASTRO-CONFIG-11` -> `TS-ASTRO-SETUP-CONFIG-11`
-- `TS-ASTRO-CONFIG-12` -> `TS-ASTRO-SETUP-CONFIG-12`
-- `TS-ASTRO-CONFIG-21` -> `TS-ASTRO-SETUP-CONFIG-21`
+- `TS-ASTRO-CONFIG-01` -> `g3ts-astro-setup/astro-package-present`
+- `TS-ASTRO-CONFIG-02` -> `g3ts-astro-setup/astro-check-present`
+- `TS-ASTRO-CONFIG-03` -> `g3ts-astro-setup/astro-eslint-plugin-package-present`
+- `TS-ASTRO-CONFIG-05` -> `g3ts-astro-setup/astro-eslint-plugin-wired`
+- `TS-ASTRO-CONFIG-09` -> `g3ts-astro-setup/syncpack-stack-pins`
+- `TS-ASTRO-CONFIG-10` -> `g3ts-astro-setup/syncpack-forbidden-deps`
+- `TS-ASTRO-CONFIG-11` -> `g3ts-astro-setup/site-url`
+- `TS-ASTRO-CONFIG-12` -> `g3ts-astro-setup/static-output`
+- `TS-ASTRO-CONFIG-21` -> `g3ts-astro-setup/required-integrations`
 
 Initial file-tree rules:
 
-- `TS-ASTRO-FILETREE-01` -> `TS-ASTRO-SETUP-FILETREE-01`
+- `TS-ASTRO-FILETREE-01` -> `g3ts-astro-setup/astro-config-exists`
 - `TS-ASTRO-FILETREE-03` -> `TS-ASTRO-SETUP-FILETREE-03`
 - `TS-ASTRO-FILETREE-11` -> `TS-ASTRO-SETUP-FILETREE-11`
 - `TS-ASTRO-FILETREE-12` -> `TS-ASTRO-SETUP-FILETREE-12`
@@ -78,20 +78,20 @@ Purpose:
 
 Initial migrated rules:
 
-- `TS-ASTRO-CONFIG-18` -> `TS-ASTRO-CONTENT-CONFIG-18`
-- `TS-ASTRO-CONFIG-23` -> `TS-ASTRO-CONTENT-CONFIG-23`
-- `TS-ASTRO-CONFIG-24` -> `TS-ASTRO-CONTENT-CONFIG-24`
-- `TS-ASTRO-CONFIG-25` -> `TS-ASTRO-CONTENT-CONFIG-25`
-- `TS-ASTRO-CONFIG-26` -> `TS-ASTRO-CONTENT-CONFIG-26`
-- `TS-ASTRO-CONFIG-27` -> `TS-ASTRO-CONTENT-CONFIG-27`
-- `TS-ASTRO-CONFIG-28` -> `TS-ASTRO-CONTENT-CONFIG-28`
+- `TS-ASTRO-CONFIG-18` -> `g3ts-astro-content/content-adapter-rule`
+- `TS-ASTRO-CONFIG-23` -> `g3ts-astro-content/strict-content-policy`
+- `TS-ASTRO-CONFIG-24` -> `g3ts-astro-content/strict-policy-paths`
+- `TS-ASTRO-CONFIG-25` -> `g3ts-astro-content/route-scope-overlap`
+- `TS-ASTRO-CONFIG-26` -> `g3ts-astro-content/policy-eslint-coverage`
+- `TS-ASTRO-CONFIG-27` -> `g3ts-astro-content/content-adapter-exists`
+- `TS-ASTRO-CONFIG-28` -> `g3ts-astro-content/content-adapter-astro-content`
 
 Initial file-tree rules:
 
-- `TS-ASTRO-FILETREE-02` -> `TS-ASTRO-CONTENT-FILETREE-02`
-- `TS-ASTRO-FILETREE-04` -> `TS-ASTRO-CONTENT-FILETREE-04`
-- `TS-ASTRO-FILETREE-05` -> `TS-ASTRO-CONTENT-FILETREE-05`
-- `TS-ASTRO-FILETREE-06` -> `TS-ASTRO-CONTENT-FILETREE-06`
+- `TS-ASTRO-FILETREE-02` -> `g3ts-astro-content/content-config-exists`
+- `TS-ASTRO-FILETREE-04` -> `g3ts-astro-content/no-route-markdown-pages`
+- `TS-ASTRO-FILETREE-05` -> `g3ts-astro-content/no-velite-config`
+- `TS-ASTRO-FILETREE-06` -> `g3ts-astro-content/no-velite-output`
 
 New rules after mechanical split:
 
@@ -151,8 +151,8 @@ Purpose:
 
 Initial migrated rules:
 
-- `TS-ASTRO-CONFIG-20` -> `TS-ASTRO-MDX-CONFIG-20`
-- `TS-ASTRO-CONFIG-30` -> `TS-ASTRO-MDX-CONFIG-30`
+- `TS-ASTRO-CONFIG-20` -> `g3ts-astro-mdx/mdx-lane`
+- `TS-ASTRO-CONFIG-30` -> `g3ts-astro-mdx/mdx-component-map-rule`
 
 Setup dependency:
 
@@ -192,17 +192,17 @@ Purpose:
 
 Initial migrated rules:
 
-- `TS-ASTRO-CONFIG-13` -> `TS-ASTRO-SEO-CONFIG-13`
-- `TS-ASTRO-CONFIG-14` -> `TS-ASTRO-SEO-CONFIG-14`
-- `TS-ASTRO-CONFIG-15` -> `TS-ASTRO-SEO-CONFIG-15`
-- `TS-ASTRO-CONFIG-16` -> `TS-ASTRO-SEO-CONFIG-16`
-- `TS-ASTRO-CONFIG-17` -> `TS-ASTRO-SEO-CONFIG-17`
-- `TS-ASTRO-CONFIG-22` -> `TS-ASTRO-SEO-CONFIG-22`
+- `TS-ASTRO-CONFIG-13` -> `g3ts-astro-seo/nuasite-checks`
+- `TS-ASTRO-CONFIG-14` -> `g3ts-astro-seo/sitemap-integration`
+- `TS-ASTRO-CONFIG-15` -> `g3ts-astro-seo/robots-integration`
+- `TS-ASTRO-CONFIG-16` -> `g3ts-astro-seo/llms-txt`
+- `TS-ASTRO-CONFIG-17` -> `g3ts-astro-seo/seo-packages`
+- `TS-ASTRO-CONFIG-22` -> `g3ts-astro-seo/structured-data-check`
 - `TS-ASTRO-CONFIG-29` -> split:
   - MDX component-map presence moves to `TS-ASTRO-MDX-CONFIG-*`
   - metadata/json-LD helper presence moves to `TS-ASTRO-SEO-CONFIG-*`
-- `TS-ASTRO-CONFIG-31` -> `TS-ASTRO-SEO-CONFIG-31`
-- `TS-ASTRO-CONFIG-32` -> `TS-ASTRO-SEO-CONFIG-32`
+- `TS-ASTRO-CONFIG-31` -> `g3ts-astro-seo/metadata-helper-rule`
+- `TS-ASTRO-CONFIG-32` -> `g3ts-astro-seo/json-ld-helper-rule`
 
 Policy shape:
 

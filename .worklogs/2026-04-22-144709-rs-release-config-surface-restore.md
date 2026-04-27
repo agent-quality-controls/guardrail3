@@ -12,7 +12,7 @@ Restored `rs/release` config architecture to the intended shape: ingestion now p
   - rule interpretation moved out of ingestion for version satisfaction and publishability
 - Fixed the workflow-rule bug at the support boundary:
   - the binary release workflow matcher now accepts `softprops/action-gh-release@...` in addition to the rust binary upload action
-  - this repair fixed both `RS-RELEASE-CONFIG-23` and `RS-RELEASE-CONFIG-24`
+  - this repair fixed both `g3rs-release/binary-release-workflow` and `g3rs-release/linux-release-target`
 - Split `support` into a real facade plus sibling modules:
   - `support/mod.rs` is now facade-only
   - `support/basic.rs` holds parsed-config interpretation helpers

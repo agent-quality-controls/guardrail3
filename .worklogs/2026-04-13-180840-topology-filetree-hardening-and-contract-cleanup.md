@@ -6,10 +6,10 @@ Decisions made
 
 - Kept topology filetree-only.
   - Rejected keeping empty config/source types and `NotImplemented` ingestion entrypoints.
-- Tightened `RS-TOPOLOGY-FILETREE-12` to treat workspace membership as exact membership of real child packages only.
+- Tightened `g3rs-topology/declared-workspace-members-only` to treat workspace membership as exact membership of real child packages only.
   - Nested workspaces, hybrid descendants, and packages inside nested workspaces no longer suppress extra-member findings.
   - Still suppresses extra-member findings for unresolved descendants with parse/read failures so fail-closed `07` remains authoritative there.
-- Broadened `RS-TOPOLOGY-FILETREE-13` escape detection.
+- Broadened `g3rs-topology/member-paths-must-not-escape-root` escape detection.
   - Added Windows-drive and backslash-aware absolute path detection instead of only POSIX `/` and `..`.
 - Updated stale end-to-end expectations that had been codifying the old underreporting behavior.
 

@@ -23,5 +23,8 @@ pub fn assert_rule_absent(results: &[G3CheckResult], id: &str, title: &str) {
 }
 
 pub fn assert_rule_id_absent(results: &[G3CheckResult], id: &str) {
-    assert!(results.iter().all(|result| result.id() != id), "{results:#?}");
+    assert!(
+        results.iter().all(|result| result.id() != id),
+        "{results:#?}"
+    );
 }

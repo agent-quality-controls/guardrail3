@@ -6,13 +6,13 @@ Approach
 - multi-hop helper chaining through root-level helpers called from inside another helper body
 - later helper redefinition overriding an earlier noop at the call site
 - Add red regressions in the affected hook rules for the same surfaces where they are user-visible:
-- `RS-HOOKS-SOURCE-16` config-trigger helper chaining/redefinition
-- `RS-HOOKS-SOURCE-24` fail-open wrapper detection through helper chains/redefinitions
-- `RS-HOOKS-SOURCE-18` unconditional `exit 0` detection through helper chains/redefinitions
+- `g3rs-hooks/hook-shared-10-shell-error-handling` config-trigger helper chaining/redefinition
+- `g3rs-hooks/hook-shared-21-no-fail-open-wrappers` fail-open wrapper detection through helper chains/redefinitions
+- `g3rs-hooks/hook-shared-13-no-unconditional-exit-zero` unconditional `exit 0` detection through helper chains/redefinitions
 - Fix helper lookup at the owning boundary:
 - shared command-query engine should resolve the active helper definition for the actual call site, not the first matching definition
 - nested helper traversal should preserve the root call-site line number when consulting root-level helpers
-- If `RS-HOOKS-SOURCE-16` still duplicates the old bug in local support code, align its support helper resolution with the same shell-order semantics
+- If `g3rs-hooks/hook-shared-10-shell-error-handling` still duplicates the old bug in local support code, align its support helper resolution with the same shell-order semantics
 - Verify with targeted package tests, touched-package `g3rs validate`, worklog, and a standalone bug-fix commit.
 
 Key decisions

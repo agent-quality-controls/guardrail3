@@ -4,7 +4,7 @@
 **Scope:** `packages/g3rs-toolchain-config-checks/**`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/**`, `apps/guardrail3/Cargo.lock`
 
 ## Summary
-Created the extracted `g3rs-toolchain-config-checks` package for toolchain content validation and rewired the in-app toolchain family to delegate `RS-TOOLCHAIN-CONFIG-01` and `RS-TOOLCHAIN-CONFIG-02` into it. The app still owns discovery, placement, legacy-file behavior, and result aggregation; the package now owns pure content semantics for channel/components and MSRV consistency.
+Created the extracted `g3rs-toolchain-config-checks` package for toolchain content validation and rewired the in-app toolchain family to delegate `g3rs-toolchain/channel-and-components` and `g3rs-toolchain/msrv-consistency` into it. The app still owns discovery, placement, legacy-file behavior, and result aggregation; the package now owns pure content semantics for channel/components and MSRV consistency.
 
 ## Context & Problem
 The active extraction direction is to move family content validation into standalone packages under `packages/` while preserving the app as the orchestrator for discovery and filetree concerns. Toolchain is the smallest realistic proving ground because its content logic is relatively self-contained, but its app family already had strong routing/discovery behavior that should not be duplicated. The goal here was to scaffold a real extracted package in the same style as the parser packages, move only the content rules, and prove that the app can call the package without regressing the existing toolchain family behavior.
@@ -33,7 +33,7 @@ The active extraction direction is to move family content validation into standa
   - include profile now — rejected because the migrated rules do not use it yet, and adding unused contract surface would be premature coupling.
 
 ### Preserve App Ownership For Non-Content Semantics
-- **Chose:** leave `RS-TOOLCHAIN-01` and `RS-TOOLCHAIN-04` in the app family and bridge only `RS-TOOLCHAIN-CONFIG-01` and `RS-TOOLCHAIN-CONFIG-02`.
+- **Chose:** leave `g3rs-toolchain/root-toolchain-config-exists` and `g3rs-toolchain/no-duplicate-toolchain-config` in the app family and bridge only `g3rs-toolchain/channel-and-components` and `g3rs-toolchain/msrv-consistency`.
 - **Why:** existence, same-root legacy shadowing, and all route/discovery concerns are filetree semantics. The package should not rediscover files or decide ownership; it should only validate content handed to it.
 - **Alternatives considered:**
   - move the full family immediately — rejected because it would duplicate routing/discovery logic inside the package and violate the extraction boundary.
@@ -48,7 +48,7 @@ The active extraction direction is to move family content validation into standa
 
 ## Architectural Notes
 The new package boundary is:
-- package owns pure content semantics for `RS-TOOLCHAIN-CONFIG-01` and `RS-TOOLCHAIN-CONFIG-02`
+- package owns pure content semantics for `g3rs-toolchain/channel-and-components` and `g3rs-toolchain/msrv-consistency`
 - app owns route-bounded discovery, policy-root selection, parse-failure routing, and local non-content rules
 - bridge happens in `apps/guardrail3/.../toolchain/.../run.rs`
 

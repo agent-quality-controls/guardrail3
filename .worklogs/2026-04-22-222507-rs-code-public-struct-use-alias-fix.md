@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-CODE-SOURCE-31` so nested-module `use` bindings now count as inherent impls of the underlying struct in shared crates. The rule now resolves local `use` imports and aliases before matching impl self types, which covers both `use super::Input; impl Input` and `use super::Input as Alias; impl Alias`.
+Fixed `g3rs-code/ast-31-public-struct-named-fields` so nested-module `use` bindings now count as inherent impls of the underlying struct in shared crates. The rule now resolves local `use` imports and aliases before matching impl self types, which covers both `use super::Input; impl Input` and `use super::Input as Alias; impl Alias`.
 
 ## Decisions made
 

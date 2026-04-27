@@ -1,5 +1,5 @@
 Goal:
-Fix `RS-CODE-SOURCE-31` so repeated `super::` prefixes normalize to the correct enclosing module path when resolving inherent impl self types.
+Fix `g3rs-code/ast-31-public-struct-named-fields` so repeated `super::` prefixes normalize to the correct enclosing module path when resolving inherent impl self types.
 
 Approach:
 - Add a red-first regression in the shared rule tests using a nested module repro with `impl super::super::Input`.

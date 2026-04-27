@@ -22,7 +22,7 @@ The user explicitly called out that the package boundary must be parsed files on
   - Policy profile / waiver subset structs — rejected because they partialize external files instead of passing parsed files.
 
 ### Moved only single-file cargo rules into the package
-- **Chose:** move `RS-CARGO-CONFIG-01`, `02`, `05`, `07`, `08`, and `11`.
+- **Chose:** move `g3rs-cargo/workspace-lints`, `02`, `05`, `07`, `08`, and `11`.
 - **Why:** These are content checks on one `Cargo.toml` file and do not need workspace/member pairing or external policy files.
 - **Alternatives considered:**
   - Moving `RS-CARGO-04` too — rejected because it needs workspace/member relationship context and is not a pure single-file content check.

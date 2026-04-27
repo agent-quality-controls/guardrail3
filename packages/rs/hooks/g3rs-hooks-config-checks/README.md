@@ -4,6 +4,6 @@ Runs the `hooks` family config checks.
 
 Current rules:
 
-- `RS-HOOKS-CONFIG-06` required tool presence for the selected hook
-- `RS-HOOKS-CONFIG-14` guardrail binary availability
-- `RS-HOOKS-CONFIG-15` `cargo-dupes` availability
+- `g3rs-hooks/selected-hook-tool-present` required tool presence for the selected hook
+- `g3rs-hooks/guardrail-binary-available` guardrail binary availability
+- `g3rs-hooks/cargo-dupes-available` `cargo-dupes` availability

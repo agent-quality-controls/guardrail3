@@ -1,5 +1,5 @@
 Summary
-- Fixed RS-TEST-SOURCE-17 so external harness wrappers reached through `use self::... as ...` aliases are detected as direct assertion use.
+- Fixed g3rs-test/external-harnesses-use-assertions so external harness wrappers reached through `use self::... as ...` aliases are detected as direct assertion use.
 
 Decisions made
 - Kept the change in `rule.rs` at the helper-resolution boundary instead of changing parser facts.

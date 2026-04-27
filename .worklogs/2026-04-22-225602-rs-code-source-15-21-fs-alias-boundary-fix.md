@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed the shared `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21` alias-handling gap so `std::fs` aliases now resolve through the parser visitor boundary. The visitor now tracks both std-root aliases and std::fs subtree aliases, which covers direct-import, call, and glob detection for chained and reversed alias forms.
+Fixed the shared `g3rs-code/ast-15-direct-fs-usage` and `g3rs-code/ast-21-fs-glob-import` alias-handling gap so `std::fs` aliases now resolve through the parser visitor boundary. The visitor now tracks both std-root aliases and std::fs subtree aliases, which covers direct-import, call, and glob detection for chained and reversed alias forms.
 
 ## Decisions made
 
@@ -9,7 +9,7 @@ Fixed the shared `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21` alias-handling gap 
 - Added red regressions for direct import, call, and glob surfaces.
   - Why: each surface was affected by the same root cause and needed coverage.
 - Kept the change shared across all fs checks.
-  - Why: `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21` both depend on the same visitor-derived alias state.
+  - Why: `g3rs-code/ast-15-direct-fs-usage` and `g3rs-code/ast-21-fs-glob-import` both depend on the same visitor-derived alias state.
 
 ## Key files for context
 

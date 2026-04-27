@@ -4,8 +4,8 @@ Extracted toolchain filetree checks for guardrail3.
 
 Current scope:
 
-- `RS-TOOLCHAIN-FILETREE-01`: `rust-toolchain.toml` exists
-- `RS-TOOLCHAIN-FILETREE-04`: legacy `rust-toolchain` file is warned or rejected
+- `g3rs-toolchain/exists`: `rust-toolchain.toml` exists
+- `g3rs-toolchain/legacy-file`: legacy `rust-toolchain` file is warned or rejected
 
 This package:
 

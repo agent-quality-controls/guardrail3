@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-TEST-FILETREE-03` so assertions modules cannot hide runtime `check_test_tree()` calls behind local aliases such as `let run = rt::check_test_tree; run()`.
+Fix `g3rs-test/runtime-assertions-split` so assertions modules cannot hide runtime `check_test_tree()` calls behind local aliases such as `let run = rt::check_test_tree; run()`.
 
 ## Approach
 

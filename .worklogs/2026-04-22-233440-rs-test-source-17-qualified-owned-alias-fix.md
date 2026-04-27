@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-TEST-SOURCE-17` so qualified calls to re-aliased owned assertions names like `self::again()` inventory as owned assertions usage.
+- Fixed `g3rs-test/external-harnesses-use-assertions` so qualified calls to re-aliased owned assertions names like `self::again()` inventory as owned assertions usage.
 - The rule now reuses the owned-assertion alias map for both bare and `crate/self/super`-qualified alias paths.
 
 Decisions made
@@ -12,5 +12,5 @@ Key files for context
 - .plans/2026-04-22-233440-rs-test-source-17-qualified-owned-alias-fix.md
 
 Next steps
-- Fix `RS-TEST-FILETREE-18` for module-alias helper calls like `h::fixture_path()` and `h::any_rule()`.
+- Fix `g3rs-test/test-support-generic` for module-alias helper calls like `h::fixture_path()` and `h::any_rule()`.
 - Re-run the `rs/test` attack pass after that file-tree fix lands.

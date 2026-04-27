@@ -12,7 +12,8 @@ fn pipeline_reports_missing_deny_config() {
     git_init(root);
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
     assertions::assert_missing_deny_config(&results);
 }
@@ -26,7 +27,8 @@ fn pipeline_inventories_selected_root_deny_config() {
     write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
     assertions::assert_selected_root_deny_config(&results);
 }
@@ -39,10 +41,14 @@ fn pipeline_reports_same_root_conflicts() {
 
     write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
     write(root.join(".deny.toml"), "[advisories]\nyanked = \"warn\"\n");
-    write(root.join(".cargo/deny.toml"), "[advisories]\nyanked = \"warn\"\n");
+    write(
+        root.join(".cargo/deny.toml"),
+        "[advisories]\nyanked = \"warn\"\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
     assertions::assert_same_root_conflicts(&results);
 }
@@ -56,7 +62,8 @@ fn pipeline_reports_selected_deny_parse_failures() {
     write(root.join("deny.toml"), "[advisories");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
     assertions::assert_selected_deny_parse_failures(&results);
 }
@@ -71,7 +78,8 @@ fn pipeline_reports_rust_policy_parse_failures_without_hiding_selected_coverage(
     write(root.join("guardrail3-rs.toml"), "profile = \"invalid\"\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
     assertions::assert_rust_policy_parse_failures(&results);
 }
@@ -94,7 +102,8 @@ fn pipeline_reports_unreadable_selected_deny_file() {
     permissions.set_mode(0o000);
     fs::set_permissions(&deny_path, permissions).expect("chmod fixture unreadable");
 
-    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
     assertions::assert_unreadable_selected_deny_file(&results);
 }
@@ -118,7 +127,8 @@ fn pipeline_reports_unreadable_rust_policy() {
     permissions.set_mode(0o000);
     fs::set_permissions(&guardrail_path, permissions).expect("chmod fixture unreadable");
 
-    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
     assertions::assert_unreadable_rust_policy(&results);
 }
@@ -133,7 +143,8 @@ fn pipeline_reports_shadowed_root_parse_failures() {
     write(root.join(".deny.toml"), "[advisories");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
     assertions::assert_shadowed_root_parse_failures(&results);
 }
@@ -157,7 +168,8 @@ fn pipeline_reports_shadowed_root_unreadable_failures() {
     permissions.set_mode(0o000);
     fs::set_permissions(&dot_deny_path, permissions).expect("chmod fixture unreadable");
 
-    let input = crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
+    let input =
+        crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
     assertions::assert_shadowed_root_unreadable_failures(&results);
 }

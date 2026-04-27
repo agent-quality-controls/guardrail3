@@ -531,7 +531,7 @@ pub struct WorkspaceMembersSetInput<'a> {
 
 ### Fan-out strategy
 
-- `RS-CARGO-CONFIG-01`, `02`, `03`, `05`, `08` run once on `WorkspaceCargoInput`
+- `g3rs-cargo/workspace-lints`, `02`, `03`, `05`, `08` run once on `WorkspaceCargoInput`
 - `RS-CARGO-04`, `06`, `09` run once per `WorkspaceMemberInput`
 - any rule that compares membership sets runs once on `WorkspaceMembersSetInput`
 

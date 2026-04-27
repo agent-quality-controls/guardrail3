@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed the rs/code source-checks std alias scope bug by restoring alias state when leaving a module visit in `parse/fs_visitors.rs`. Added sibling-module regression coverage to the existing `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21` rule-test suites.
+Fixed the rs/code source-checks std alias scope bug by restoring alias state when leaving a module visit in `parse/fs_visitors.rs`. Added sibling-module regression coverage to the existing `g3rs-code/ast-15-direct-fs-usage` and `g3rs-code/ast-21-fs-glob-import` rule-test suites.
 
 ## Decisions made
 

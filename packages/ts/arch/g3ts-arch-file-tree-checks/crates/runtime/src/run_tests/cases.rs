@@ -16,7 +16,10 @@ fn filetree_checks_flag_structural_split() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_arch_file_tree_checks_assertions::run::assert_has_error(&results, "TS-ARCH-FILETREE-02");
+    g3ts_arch_file_tree_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-arch/structural-split",
+    );
 }
 
 #[test]
@@ -44,9 +47,12 @@ fn filetree_checks_require_each_declared_entrypoint_to_exist() {
     let results = crate::run::check(&input);
     g3ts_arch_file_tree_checks_assertions::run::assert_has_inventory(
         &results,
-        "TS-ARCH-FILETREE-01",
+        "g3ts-arch/declared-entrypoint-exists",
     );
-    g3ts_arch_file_tree_checks_assertions::run::assert_has_error(&results, "TS-ARCH-FILETREE-01");
+    g3ts_arch_file_tree_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-arch/declared-entrypoint-exists",
+    );
 }
 
 #[test]
@@ -62,5 +68,8 @@ fn filetree_checks_stay_quiet_at_exact_structural_thresholds() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_arch_file_tree_checks_assertions::run::assert_missing(&results, "TS-ARCH-FILETREE-02");
+    g3ts_arch_file_tree_checks_assertions::run::assert_missing(
+        &results,
+        "g3ts-arch/structural-split",
+    );
 }

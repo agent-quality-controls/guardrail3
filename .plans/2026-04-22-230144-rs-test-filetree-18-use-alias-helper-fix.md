@@ -1,5 +1,5 @@
 Goal
-- Fix `RS-TEST-FILETREE-18` so `test_support` no longer misses local helper wrappers reached through `use self::fixture_path as run;`.
+- Fix `g3rs-test/test-support-generic` so `test_support` no longer misses local helper wrappers reached through `use self::fixture_path as run;`.
 
 Approach
 - Add a red regression in `packages/rs/test/g3rs-test-file-tree-checks/crates/runtime/src/rs_test_18_test_support_generic/rule_tests/cases.rs` that proves a canned fixture helper wrapped through a `use` alias is missed today.

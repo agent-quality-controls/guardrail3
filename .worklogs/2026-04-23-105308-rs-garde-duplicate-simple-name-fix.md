@@ -1,6 +1,6 @@
 Summary
 - Fixed garde nested validation resolution so duplicate simple type names across files no longer overwrite each other in the exact-name map.
-- Added a regression proving a validated `Payload` in one file no longer causes an unrelated `Payload` in another file to trigger `RS-GARDE-SOURCE-06`.
+- Added a regression proving a validated `Payload` in one file no longer causes an unrelated `Payload` in another file to trigger `g3rs-garde/ast-06-nested-validation-dive`.
 
 Decisions made
 - Kept the fix in `packages/rs/garde/g3rs-garde-ingestion/crates/runtime/src/source_analysis/run.rs`.

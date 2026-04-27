@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed a real `RS-TEST-FILETREE-02` boundary bug. The owned-sidecar rule was rebuilding sidecar ownership from the whole analyzed file bag even though ingestion already prebound sidecar facts on each component, which let a lossy file bag produce a false "ad hoc cfg(test) module declaration" result.
+Fixed a real `g3rs-test/owned-sidecar-shape` boundary bug. The owned-sidecar rule was rebuilding sidecar ownership from the whole analyzed file bag even though ingestion already prebound sidecar facts on each component, which let a lossy file bag produce a false "ad hoc cfg(test) module declaration" result.
 
 ## Decisions made
 
@@ -9,7 +9,7 @@ Fixed a real `RS-TEST-FILETREE-02` boundary bug. The owned-sidecar rule was rebu
   - and the top-level `input.files` bag is intentionally lossy
   - the rule must not accuse `src/foo.rs` of an ad hoc sidecar declaration
 - Fixed the bug in the rule, not in fixtures:
-  - `RS-TEST-FILETREE-02` now validates owned sidecars from `component.sidecars`, `component.sidecar_files`, and `component.source_module_names`
+  - `g3rs-test/owned-sidecar-shape` now validates owned sidecars from `component.sidecars`, `component.sidecar_files`, and `component.source_module_names`
   - `#[cfg(test)] mod ...` declarations now check against prebound sidecar mod paths instead of reconstructing from `input.files`
 - Restored the independent direct scan for forbidden `src/**/tests/` trees:
   - that path is about raw layout detection, not sidecar ownership rebinding

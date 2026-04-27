@@ -4,8 +4,8 @@ Extracted clippy filetree checks for guardrail3.
 
 Current scope:
 
-- `RS-CLIPPY-FILETREE-01`: workspace root covered by `clippy.toml` or `.clippy.toml`
-- `RS-CLIPPY-FILETREE-02`: same-root `clippy.toml` / `.clippy.toml` conflict
+- `g3rs-clippy/coverage-exists`: workspace root covered by `clippy.toml` or `.clippy.toml`
+- `g3rs-clippy/same-root-conflict`: same-root `clippy.toml` / `.clippy.toml` conflict
 
 This package:
 

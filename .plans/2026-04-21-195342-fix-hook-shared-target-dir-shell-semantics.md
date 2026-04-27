@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-HOOKS-SOURCE-25` so it reasons about real shell execution semantics instead of whole-line text, and closes the concrete attack cases: same-line segment ordering, shell-wrapper payloads, fake echoed assignments, and wrapper functions.
+Fix `g3rs-hooks/hook-rs-17-shared-target-dir-present` so it reasons about real shell execution semantics instead of whole-line text, and closes the concrete attack cases: same-line segment ordering, shell-wrapper payloads, fake echoed assignments, and wrapper functions.
 
 ## Approach
 

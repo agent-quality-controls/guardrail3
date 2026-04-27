@@ -1,7 +1,7 @@
 #[cfg(test)]
-pub(super) use crate::types::DenyToml;
-#[cfg(test)]
 pub(super) use crate::Error;
+#[cfg(test)]
+pub(super) use crate::types::DenyToml;
 #[cfg(not(test))]
 use crate::types::DenyToml;
 

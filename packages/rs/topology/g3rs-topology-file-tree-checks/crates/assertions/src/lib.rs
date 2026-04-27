@@ -5,12 +5,12 @@ mod common;
 pub mod run;
 
 #[cfg(feature = "checks")]
-pub mod rs_topology_07_required_inputs_fail_closed;
+pub mod declared_workspace_members_only;
 #[cfg(feature = "checks")]
-pub mod rs_topology_11_no_nested_workspaces;
+pub mod member_paths_must_not_escape_root;
 #[cfg(feature = "checks")]
-pub mod rs_topology_12_declared_workspace_members_only;
+pub mod no_nested_workspaces;
 #[cfg(feature = "checks")]
-pub mod rs_topology_13_member_paths_must_not_escape_root;
+pub mod required_inputs_fail_closed;
 #[cfg(feature = "checks")]
-pub mod rs_topology_16_workspace_local_file_placement;
+pub mod workspace_local_file_placement;

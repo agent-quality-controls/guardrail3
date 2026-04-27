@@ -8,7 +8,7 @@ allowed_deps = [
 garde = false
 
 [[waivers]]
-rule = "RS-CODE-SOURCE-19"
+rule = "g3rs-code/large-type-inventory"
 file = "src/types.rs"
 selector = "struct:G3TsPackageRootSnapshot"
 reason = "Root package snapshot intentionally mirrors the full package.json policy surface used by package guardrails."

@@ -17,7 +17,7 @@ fn file_tree_ingestion_threads_structural_split_waivers_from_rust_policy() {
     write_file(
         &root,
         "guardrail3-rs.toml",
-        "[[waivers]]\nrule = \"RS-ARCH-FILETREE-07\"\nfile = \"crate_a/Cargo.toml\"\nselector = \"structural-split\"\nreason = \"Rule runtime crate intentionally aggregates one rule per file and is the package boundary by design.\"\n",
+        "[[waivers]]\nrule = \"g3rs-arch/structural-split\"\nfile = \"crate_a/Cargo.toml\"\nselector = \"structural-split\"\nreason = \"Rule runtime crate intentionally aggregates one rule per file and is the package boundary by design.\"\n",
     );
     make_dir(&root, "crate_a/src/deep/a/b/c");
     write_file(
@@ -30,7 +30,7 @@ fn file_tree_ingestion_threads_structural_split_waivers_from_rust_policy() {
     let input = file_tree_input(&root);
     assertions::assert_parsed_rust_policy(
         &input.rust_policy,
-        "RS-ARCH-FILETREE-07",
+        "g3rs-arch/structural-split",
         "crate_a/Cargo.toml",
         "structural-split",
     );
@@ -68,13 +68,13 @@ fn file_tree_pipeline_reports_missing_facade_and_complexity() {
     let results = file_tree_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-FILETREE-01",
+        "g3rs-arch/crate-has-facade",
         G3Severity::Error,
         Some("crate_a/Cargo.toml"),
     );
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-FILETREE-07",
+        "g3rs-arch/structural-split",
         G3Severity::Error,
         Some("crate_a/Cargo.toml"),
     );
@@ -105,7 +105,7 @@ fn file_tree_pipeline_reports_root_level_rs_pile_only() {
     let results = file_tree_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-FILETREE-07",
+        "g3rs-arch/structural-split",
         G3Severity::Error,
         Some("crate_a/Cargo.toml"),
     );
@@ -135,7 +135,7 @@ fn file_tree_pipeline_reports_depth_only() {
     let results = file_tree_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-FILETREE-07",
+        "g3rs-arch/structural-split",
         G3Severity::Error,
         Some("crate_a/Cargo.toml"),
     );
@@ -162,7 +162,7 @@ fn file_tree_pipeline_reports_missing_mod_rs() {
     let results = file_tree_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-FILETREE-03",
+        "g3rs-arch/mod-rs-required",
         G3Severity::Error,
         Some("crate_a/src/lib.rs"),
     );
@@ -235,7 +235,7 @@ fn file_tree_complexity_ignores_excluded_nested_crates_for_root_level_layouts() 
     );
 
     let results = file_tree_results(&root);
-    assertions::assert_missing_result(&results, "RS-ARCH-FILETREE-07");
+    assertions::assert_missing_result(&results, "g3rs-arch/structural-split");
 }
 
 #[test]
@@ -268,7 +268,7 @@ fn file_tree_pipeline_reports_nested_rs_file_piles() {
     let results = file_tree_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-FILETREE-07",
+        "g3rs-arch/structural-split",
         G3Severity::Error,
         Some("crate_a/Cargo.toml"),
     );
@@ -303,7 +303,7 @@ fn file_tree_pipeline_reports_nested_directory_piles() {
     let results = file_tree_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-FILETREE-07",
+        "g3rs-arch/structural-split",
         G3Severity::Error,
         Some("crate_a/Cargo.toml"),
     );
@@ -352,7 +352,7 @@ fn file_tree_pipeline_stays_quiet_at_recursive_exact_thresholds() {
     );
 
     let results = file_tree_results(&root);
-    assertions::assert_missing_result(&results, "RS-ARCH-FILETREE-07");
+    assertions::assert_missing_result(&results, "g3rs-arch/structural-split");
 }
 
 #[test]
@@ -382,7 +382,7 @@ fn file_tree_pipeline_ignores_src_tests_for_structural_split() {
     }
 
     let results = file_tree_results(&root);
-    assertions::assert_missing_result(&results, "RS-ARCH-FILETREE-07");
+    assertions::assert_missing_result(&results, "g3rs-arch/structural-split");
 }
 
 #[test]
@@ -420,7 +420,7 @@ fn file_tree_pipeline_measures_custom_root_lib_even_when_src_exists() {
     let results = file_tree_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-FILETREE-07",
+        "g3rs-arch/structural-split",
         G3Severity::Error,
         Some("crate_a/Cargo.toml"),
     );
@@ -453,7 +453,7 @@ fn file_tree_pipeline_ignores_incidental_src_for_custom_root_lib() {
     }
 
     let results = file_tree_results(&root);
-    assertions::assert_missing_result(&results, "RS-ARCH-FILETREE-07");
+    assertions::assert_missing_result(&results, "g3rs-arch/structural-split");
 }
 
 #[test]
@@ -514,7 +514,7 @@ fn file_tree_pipeline_reports_dense_nested_member_module_in_mixed_root_workspace
     let results = file_tree_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-FILETREE-07",
+        "g3rs-arch/structural-split",
         G3Severity::Error,
         Some("crates/runtime/Cargo.toml"),
     );

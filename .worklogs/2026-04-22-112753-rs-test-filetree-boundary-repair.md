@@ -11,7 +11,7 @@ Decisions made
 - Extended `G3RsTestFileTreeChecksInput` with analyzed files and ingestion-owned activation/package facts.
   - Why: file-tree runtime rules need parsed AST facts, test activation, and local package inventories. Those are family facts and belong on the input, not in check-local support code.
 - Fixed the shared ingestion parser to traverse macro argument expressions for all macros.
-  - Why: replacing the local file-tree parser exposed a real behavioral drift. Calls inside `vec![...]` and similar wrappers were no longer recorded, which broke `RS-TEST-FILETREE-18`.
+  - Why: replacing the local file-tree parser exposed a real behavioral drift. Calls inside `vec![...]` and similar wrappers were no longer recorded, which broke `g3rs-test/test-support-generic`.
   - Rejected: weakening the rule or restoring the deleted file-tree-local parser.
 - Switched file-tree runtime rule tests to use ingestion fixtures.
   - Why: tests still need realistic analyzed inputs after the runtime parse layer is removed.

@@ -44,8 +44,7 @@ pub fn parse_error_cargo_config(rel_path: &str, reason: &str) -> G3RsClippyCargo
 pub fn cargo_config(rel_path: &str, raw: &str) -> G3RsClippyCargoConfigState {
     G3RsClippyCargoConfigState::Parsed {
         rel_path: rel_path.to_owned(),
-        cargo_config: parse_cargo_config_toml(raw)
-            .expect("cargo config fixture should parse"),
+        cargo_config: parse_cargo_config_toml(raw).expect("cargo config fixture should parse"),
     }
 }
 

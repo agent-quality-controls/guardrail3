@@ -1,6 +1,6 @@
 # Summary
 
-Fixed two fmt package boundary problems after proving them with tests. The package now models unreadable root inputs distinctly from parse errors, and `RS-FMT-CONFIG-02` inventories explicit non-baseline rustfmt keys based on the actual TOML keys present instead of typed re-serialization defaults.
+Fixed two fmt package boundary problems after proving them with tests. The package now models unreadable root inputs distinctly from parse errors, and `g3rs-fmt/extra-settings` inventories explicit non-baseline rustfmt keys based on the actual TOML keys present instead of typed re-serialization defaults.
 
 ## Decisions made
 
@@ -9,7 +9,7 @@ Fixed two fmt package boundary problems after proving them with tests. The packa
 - Kept stale-read and unreadable root files fail-closed.
   - Why: the package model has a path/readability crawl snapshot, not cached file contents.
 - Moved explicit rustfmt key extraction into ingestion parsing.
-  - Why: `RS-FMT-CONFIG-02` needs the keys the user actually wrote, not defaults introduced by serializing the typed parser struct.
+  - Why: `g3rs-fmt/extra-settings` needs the keys the user actually wrote, not defaults introduced by serializing the typed parser struct.
 - Removed the empty `skip_macro_invocations` suppression.
   - Why: the rule is about non-baseline config surface, so explicit presence of the key must be inventoried even when the list is empty.
 

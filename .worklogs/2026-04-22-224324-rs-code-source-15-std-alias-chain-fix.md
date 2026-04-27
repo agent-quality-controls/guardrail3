@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-CODE-SOURCE-15` so chained std alias rebinding is detected at the parser visitor boundary. `use std as s; use s as t; t::fs::read_to_string(...)` now resolves through the visitor alias set, and the same fix covers the equivalent `extern crate std as s; use s as t; ...` form.
+Fixed `g3rs-code/ast-15-direct-fs-usage` so chained std alias rebinding is detected at the parser visitor boundary. `use std as s; use s as t; t::fs::read_to_string(...)` now resolves through the visitor alias set, and the same fix covers the equivalent `extern crate std as s; use s as t; ...` form.
 
 ## Decisions made
 

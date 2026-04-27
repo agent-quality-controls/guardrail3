@@ -5,13 +5,13 @@ pub fn check(input: &G3RsArchConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for node in &input.crates {
-        crate::rs_arch_07b_dependency_count_split::check(node, &input.rust_policy, &mut results);
-        crate::rs_arch_08b_feature_contract::check(node, &mut results);
+        crate::dependency_count_split::check(node, &input.rust_policy, &mut results);
+        crate::feature_contract::check(node, &mut results);
     }
 
     for edge in &input.dependency_edges {
-        crate::rs_arch_05_no_boundary_crossing::check(edge, &mut results);
-        crate::rs_arch_06_shared_flag_required::check(edge, &mut results);
+        crate::no_boundary_crossing::check(edge, &mut results);
+        crate::shared_flag_required::check(edge, &mut results);
     }
 
     results

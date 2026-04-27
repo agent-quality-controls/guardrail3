@@ -6,7 +6,7 @@ Approach
 - Add the missing package policy files and `guardrail3-rs.toml`, mark the package and member crates unpublished, and mirror the same parser-package release metadata used in the cleaned parser packages.
 - Convert the root and member facades to the current `types`-module pattern so import surfaces stay explicit without broad wildcard re-exports.
 - Fix the parser sidecar layout to the owned `parser_tests` shape, move final result checks into the shared assertions crate, and keep sidecar helpers limited to the owned parser module.
-- Re-run package tests and validation. If only schema-mirror inventory warnings remain, add narrow `RS-CODE-SOURCE-19` waivers only for the exact large schema structs.
+- Re-run package tests and validation. If only schema-mirror inventory warnings remain, add narrow `g3rs-code/ast-19-large-type-inventory` waivers only for the exact large schema structs.
 
 Key decisions
 - Preserve the existing public root names through explicit facade aliases only if the package is already consumed that way. Prefer `types::...` as the real schema home.

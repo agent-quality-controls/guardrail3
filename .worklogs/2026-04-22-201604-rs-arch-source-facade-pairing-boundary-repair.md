@@ -4,10 +4,10 @@ Summary
 
 Decisions made
 - Added `G3RsArchLibFacadeChecksInput` instead of keeping separate `crates` and `facade_surfaces` bags in `G3RsArchSourceChecksInput`.
-  - Why: `RS-ARCH-SOURCE-02` and `RS-ARCH-SOURCE-08` both want one atomic unit: one source crate plus its bound `lib.rs` surface, if any.
+  - Why: `g3rs-arch/lib-facade-only` and `g3rs-arch/feature-gated-exports` both want one atomic unit: one source crate plus its bound `lib.rs` surface, if any.
   - Rejected: leaving `run.rs` to rebuild `facade_map`, because that kept pairing logic in the check package.
 - Split source inputs into `lib_facade_checks` and `mod_facade_surfaces`.
-  - Why: `RS-ARCH-SOURCE-04` naturally operates on `mod.rs` surfaces only, so the source lane no longer needs to filter that in checks.
+  - Why: `g3rs-arch/mod-facade-only` naturally operates on `mod.rs` surfaces only, so the source lane no longer needs to filter that in checks.
 - Put the proof on `run.rs` with an owned `run_tests` sidecar.
   - Why: the validator correctly rejected the first `lib.rs` sidecar attempt because it escaped the owned module boundary to call `check`.
 

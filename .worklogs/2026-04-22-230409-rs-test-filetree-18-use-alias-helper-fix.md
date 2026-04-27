@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-TEST-FILETREE-18` so `test_support` now resolves local helper calls reached through `use self::... as ...` aliases.
+- Fixed `g3rs-test/test-support-generic` so `test_support` now resolves local helper calls reached through `use self::... as ...` aliases.
 - Added red regressions for both the canned fixture path and semantic-helper path, then verified the package runtime tests and `g3rs validate` for the touched package.
 
 Decisions made

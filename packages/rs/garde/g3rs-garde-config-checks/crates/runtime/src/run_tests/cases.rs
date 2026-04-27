@@ -1,9 +1,7 @@
 use cargo_toml_parser::parse as parse_cargo;
 use clippy_toml_parser::parse as parse_clippy;
 use g3rs_garde_config_checks_assertions::run as assertions;
-use g3rs_garde_types::{
-    G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
-};
+use g3rs_garde_types::{G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput};
 
 #[test]
 fn warns_when_clippy_config_is_missing_for_garde_root() {

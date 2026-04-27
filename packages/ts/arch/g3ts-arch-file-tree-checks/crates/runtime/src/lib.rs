@@ -1,6 +1,6 @@
+mod declared_entrypoint_exists;
 mod run;
-mod ts_arch_filetree_01_declared_entrypoint_exists;
-mod ts_arch_filetree_02_structural_split;
+mod structural_split;
 
 #[cfg(feature = "checks")]
 pub use run::check;

@@ -12,7 +12,7 @@ fn missing_config_reports_only_exists_error() {
     assertions::assert_exact(
         &results,
         &[assertions::error(
-            "TS-TSCONFIG-CONFIG-01",
+            "g3ts-tsconfig/exists",
             "tsconfig missing",
             "No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.",
             None,
@@ -27,12 +27,12 @@ fn parse_error_reports_exists_inventory_and_parse_error() {
 
     assertions::assert_exact_ids(
         &results,
-        &["TS-TSCONFIG-CONFIG-01", "TS-TSCONFIG-CONFIG-02"],
+        &["g3ts-tsconfig/exists", "g3ts-tsconfig/parseable"],
     );
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-TSCONFIG-CONFIG-02",
+            "g3ts-tsconfig/parseable",
             "tsconfig parse error",
             "Failed to parse `tsconfig.json` as tsconfig JSONC: synthetic parse failure",
             Some("tsconfig.json"),
@@ -48,17 +48,17 @@ fn golden_extends_config_reports_inventory_only() {
     assertions::assert_exact_ids(
         &results,
         &[
-            "TS-TSCONFIG-CONFIG-01",
-            "TS-TSCONFIG-CONFIG-02",
-            "TS-TSCONFIG-CONFIG-03",
-            "TS-TSCONFIG-CONFIG-04",
-            "TS-TSCONFIG-CONFIG-05",
+            "g3ts-tsconfig/exists",
+            "g3ts-tsconfig/parseable",
+            "g3ts-tsconfig/extends-chain-resolves",
+            "g3ts-tsconfig/extends-or-inline",
+            "g3ts-tsconfig/strict-baseline",
         ],
     );
     assertions::assert_contains(
         &results,
         &[assertions::info(
-            "TS-TSCONFIG-CONFIG-05",
+            "g3ts-tsconfig/strict-baseline",
             "strict tsconfig baseline enforced",
             "The effective tsconfig keeps the required 12 strict boolean flags.",
             Some("tsconfig.json"),
@@ -74,14 +74,14 @@ fn broken_chain_reports_extends_error_only() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-TSCONFIG-CONFIG-03",
+            "g3ts-tsconfig/extends-chain-resolves",
             "tsconfig extends chain broken",
             "Local `extends` entries could not be resolved cleanly: `../../tsconfig.base.json` resolved to missing path `/tmp/tsconfig.base.json`.",
             Some("tsconfig.json"),
             false,
         )],
     );
-    assertions::assert_no_findings_for_id(&results, "TS-TSCONFIG-CONFIG-05");
+    assertions::assert_no_findings_for_id(&results, "g3ts-tsconfig/strict-baseline");
 }
 
 #[test]
@@ -91,7 +91,7 @@ fn standalone_root_without_inline_baseline_reports_contract_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-TSCONFIG-CONFIG-04",
+            "g3ts-tsconfig/extends-or-inline",
             "standalone tsconfig misses inline strict baseline",
             "Root `tsconfig.json` does not use `extends`, so it must carry the strict baseline inline. Missing or invalid flags: noImplicitReturns, noUnusedLocals, noUnusedParameters, noUncheckedIndexedAccess, exactOptionalPropertyTypes, noPropertyAccessFromIndexSignature, noImplicitOverride, noFallthroughCasesInSwitch, forceConsistentCasingInFileNames, allowUnreachableCode, allowUnusedLabels.",
             Some("tsconfig.json"),
@@ -107,7 +107,7 @@ fn weak_effective_flags_report_baseline_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-TSCONFIG-CONFIG-05",
+            "g3ts-tsconfig/strict-baseline",
             "strict tsconfig baseline weakened",
             "The effective tsconfig does not keep the required strict baseline. Problems: noUnusedLocals=false (expected true).",
             Some("tsconfig.json"),
@@ -123,7 +123,7 @@ fn external_extends_report_explicit_baseline_blocker() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-TSCONFIG-CONFIG-05",
+            "g3ts-tsconfig/strict-baseline",
             "strict tsconfig baseline blocked by external extends",
             "The current wave cannot prove the strict baseline through external `extends` parents. Replace external inheritance with a local checked base or extend the local root directly.",
             Some("tsconfig.json"),
@@ -139,32 +139,32 @@ fn root_tsconfig_base_counts_as_root_surface() {
     assertions::assert_exact_ids(
         &results,
         &[
-            "TS-TSCONFIG-CONFIG-01",
-            "TS-TSCONFIG-CONFIG-02",
-            "TS-TSCONFIG-CONFIG-03",
-            "TS-TSCONFIG-CONFIG-04",
-            "TS-TSCONFIG-CONFIG-05",
+            "g3ts-tsconfig/exists",
+            "g3ts-tsconfig/parseable",
+            "g3ts-tsconfig/extends-chain-resolves",
+            "g3ts-tsconfig/extends-or-inline",
+            "g3ts-tsconfig/strict-baseline",
         ],
     );
     assertions::assert_contains(
         &results,
         &[
             assertions::info(
-                "TS-TSCONFIG-CONFIG-01",
+                "g3ts-tsconfig/exists",
                 "tsconfig exists",
                 "Found root TypeScript config `tsconfig.base.json`.",
                 Some("tsconfig.base.json"),
                 true,
             ),
             assertions::info(
-                "TS-TSCONFIG-CONFIG-04",
+                "g3ts-tsconfig/extends-or-inline",
                 "standalone tsconfig carries strict baseline inline",
                 "Root `tsconfig.base.json` does not use `extends`, but all strict baseline flags are present inline.",
                 Some("tsconfig.base.json"),
                 true,
             ),
             assertions::info(
-                "TS-TSCONFIG-CONFIG-05",
+                "g3ts-tsconfig/strict-baseline",
                 "strict tsconfig baseline enforced",
                 "The effective tsconfig keeps the required 12 strict boolean flags.",
                 Some("tsconfig.base.json"),

@@ -1,5 +1,5 @@
 Goal
-- Fix RS-RELEASE-CONFIG-18 so nested package validation does not fail with a fake "manifest path does not exist" error when the validate path is relative.
+- Fix g3rs-release/publish-dry-run so nested package validation does not fail with a fake "manifest path does not exist" error when the validate path is relative.
 
 Approach
 - Add a release ingestion regression test that crawls a nested package through a relative path and proves the dry-run failure is not allowed to be a fake missing-manifest error.

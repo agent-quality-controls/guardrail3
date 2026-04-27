@@ -4,25 +4,25 @@ Make the currently firing Rust hook findings on `websmasher` both correct and ac
 
 ## Approach
 
-1. Fix `RS-HOOKS-SOURCE-10` in `hook_rs_09_clippy_denies_warnings`.
+1. Fix `g3rs-hooks/hook-rs-09-clippy-denies-warnings` in `hook_rs_09_clippy_denies_warnings`.
    - Add a reproducing test for the real wrapped clippy command shape from `websmasher`.
    - Fix the rule at the evaluator boundary so it uses the parsed executable command surface correctly instead of missing the already-extracted cargo command.
-2. Fix `RS-HOOKS-SOURCE-18` in `hook_shared_13_no_unconditional_exit_zero`.
+2. Fix `g3rs-hooks/hook-shared-13-no-unconditional-exit-zero` in `hook_shared_13_no_unconditional_exit_zero`.
    - Add a reproducing test for the `if [ -z "$STAGED_FILES" ]; then ... exit 0 ... fi` no-op branch.
    - Narrow the rule so it does not flag that standard no-staged-files early-exit pattern as a failure-masking bypass.
 3. Rewrite the user-facing messages for the hook rules that currently fire on `websmasher`.
    - Rules:
-     - `RS-HOOKS-SOURCE-08`
-     - `RS-HOOKS-SOURCE-09`
-     - `RS-HOOKS-SOURCE-10`
-     - `RS-HOOKS-SOURCE-13`
-     - `RS-HOOKS-SOURCE-14`
-     - `RS-HOOKS-SOURCE-15`
-     - `RS-HOOKS-SOURCE-16`
-     - `RS-HOOKS-SOURCE-18`
-     - `RS-HOOKS-SOURCE-20`
-     - `RS-HOOKS-SOURCE-23`
-     - `RS-HOOKS-SOURCE-25`
+     - `g3rs-hooks/hook-rs-07-duplication-tool-is-cargo-dupes`
+     - `g3rs-hooks/hook-rs-08-guardrail-validate-staged-present`
+     - `g3rs-hooks/hook-rs-09-clippy-denies-warnings`
+     - `g3rs-hooks/hook-rs-12-cargo-dupes-step-present`
+     - `g3rs-hooks/hook-rs-13-cargo-dupes-excludes`
+     - `g3rs-hooks/hook-rs-16-config-changes-trigger-validation`
+     - `g3rs-hooks/hook-shared-10-shell-error-handling`
+     - `g3rs-hooks/hook-shared-13-no-unconditional-exit-zero`
+     - `g3rs-hooks/hook-shared-15-merge-conflict-step-present`
+     - `g3rs-hooks/hook-shared-20-concrete-lockfile-command`
+     - `g3rs-hooks/hook-rs-17-shared-target-dir-present`
    - Make the messages concrete:
      - name `.githooks/pre-commit`
      - name the exact command or config to add/change
@@ -35,7 +35,7 @@ Make the currently firing Rust hook findings on `websmasher` both correct and ac
 
 - Fix correctness before rewriting text.
   - Why: a clearer false positive is still a false positive.
-  - Rejected: message-only edits that leave `RS-HOOKS-SOURCE-10` and `RS-HOOKS-SOURCE-18` wrong.
+  - Rejected: message-only edits that leave `g3rs-hooks/hook-rs-09-clippy-denies-warnings` and `g3rs-hooks/hook-shared-13-no-unconditional-exit-zero` wrong.
 
 - Keep the message fixes local to the hook rules and hook assertion helpers.
   - Why: the problem is in rule phrasing, not in the shared result formatter.

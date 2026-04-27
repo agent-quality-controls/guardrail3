@@ -26,7 +26,7 @@ Make `packages/rs/clippy/g3rs-clippy-config-checks` clean under the `test` famil
 5. Re-run package tests and `guardrail3-rs validate --family test` until clean.
 
 # Key Decisions
-- Consult the old `legacy/.../test_support` crate only for the generic crate pattern. Reject any old semantic finding helpers there because current `RS-TEST-FILETREE-18` requires `test_support` to stay generic.
+- Consult the old `legacy/.../test_support` crate only for the generic crate pattern. Reject any old semantic finding helpers there because current `g3rs-test/test-support-generic` requires `test_support` to stay generic.
 - Keep semantic proof in the assertions crate even when local sidecar wrappers look shorter. Internal and external tests must use the same proof functions.
 - Fix the package rather than relaxing the `test` family. The validator output already points at the right package boundaries for this slice.
 

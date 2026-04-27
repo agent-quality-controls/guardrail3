@@ -120,8 +120,8 @@ Those notes should remain available only as historical/adversarial reference aft
   - either implement actual Rust-root/workspace-aware discovery
   - or narrow the plans to explicit repo-root-only semantics
 - Specific under-implemented points:
-  - `RS-TOOLCHAIN-CONFIG-02` claims library-specific behavior but toolchain facts currently carry no profile context
-  - `RS-FMT-CONFIG-03` and `RS-FMT-CONFIG-04` compare only against repo-root toolchain/Cargo metadata, which is too shallow for multi-root semantics
+  - `g3rs-toolchain/msrv-consistency` claims library-specific behavior but toolchain facts currently carry no profile context
+  - `g3rs-fmt/nightly-keys-on-stable` and `g3rs-fmt/edition-mismatch` compare only against repo-root toolchain/Cargo metadata, which is too shallow for multi-root semantics
 
 #### cargo/deps plans are stale, and both families still have real scope gaps
 
@@ -132,7 +132,7 @@ Those notes should remain available only as historical/adversarial reference aft
   - `target.*.dependencies`
   - `target.*.build-dependencies`
   - `target.*.dev-dependencies`
-- `RS-CARGO-CONFIG-04` implementation is broader than the plan text and the plan should either own or trim those additional warnings.
+- `g3rs-cargo/priority-order` implementation is broader than the plan text and the plan should either own or trim those additional warnings.
 - `RS-CARGO` still has an unrecorded fail-open on malformed `guardrail3.toml`:
   - profile-sensitive rules silently lose `profile_name` when config parsing fails
   - add explicit profile-input failure handling or stop depending on silently parsed config for those rules
@@ -142,7 +142,7 @@ Those notes should remain available only as historical/adversarial reference aft
 #### clippy/deny still have generator-checker drift
 
 - Per-crate `deny.toml` generation still appears to ignore effective per-root profile selection.
-- `RS-DENY-CONFIG-16` policy has since been tightened to match the stricter implementation: extra registries are forbidden, not merely inventoried.
+- `g3rs-deny/tokio-full-ban` policy has since been tightened to match the stricter implementation: extra registries are forbidden, not merely inventoried.
 - Clippy generation and validation still disagree on global-state bans for non-library pure/service contexts.
 - The canonical module registry still does not fully expose the deny profile surface needed by the active deny contract.
 
@@ -152,7 +152,7 @@ Those notes should remain available only as historical/adversarial reference aft
 - `rs/code` still depends on legacy `ast_helpers` for several suppression-related parsing paths, so migration closure is overstated.
 - `garde.md` still marks implemented rules as planned.
 - `garde.md` still overstates missing extractor-ban work that is already implemented.
-- `RS-GARDE-CONFIG-05` rule text overclaims wrapper enforcement; current implementation only validates clippy method-ban completeness.
+- `g3rs-garde/additional-method-bans` rule text overclaims wrapper enforcement; current implementation only validates clippy method-ban completeness.
 - `garde.md` used to carry live prose requirements with no explicit rule IDs.
   Current state after the garde hardening pass:
   - `RS-GARDE-AST-05` now owns field-level garde quality checks
@@ -237,7 +237,7 @@ Those notes should remain available only as historical/adversarial reference aft
 #### newly confirmed family-specific concrete bugs
 
 - `readme = false` is still not honored correctly by `rs/release` README checks and should be a top-level tracked release bug.
-- `RS-DENY-CONFIG-16` policy decision is now explicit: extra registries are forbidden.
+- `g3rs-deny/tokio-full-ban` policy decision is now explicit: extra registries are forbidden.
 
 ## Candidate future Rust rules extracted from `NEW_CHECKS.md`
 
@@ -330,7 +330,7 @@ These are Rust-only candidate guardrails that still look materially relevant aft
 #### deny still needs policy and parity cleanup
 
 - `deny.md` still marks the whole family as `Todo`; statuses need to reflect the implemented family.
-- Keep `RS-DENY-CONFIG-16` plan/code aligned on the stricter policy:
+- Keep `g3rs-deny/tokio-full-ban` plan/code aligned on the stricter policy:
   - forbid any non-crates.io registry
   - keep generator, checker, and docs exact about the accepted crates.io forms
 - Add a real generator-vs-checker parity test for deny baseline.

@@ -17,7 +17,7 @@ To convert all `rs/garde` rules to use rule-specific `*_tests/` directories, add
 ## Approach
 
 ### Step-by-step plan
-1.  **Audit Current State:** Explore `apps/guardrail3/crates/app/rs/checks/rs/garde/` to map existing rules (`RS-GARDE-CONFIG-01` to `RS-GARDE-10`) to their current sidecar test files (`*_tests.rs`).
+1.  **Audit Current State:** Explore `apps/guardrail3/crates/app/rs/checks/rs/garde/` to map existing rules (`g3rs-garde/dependency-present` to `RS-GARDE-10`) to their current sidecar test files (`*_tests.rs`).
 2.  **Audit Old Tests:** Map old legacy tests from `apps/guardrail3/tests/unit/test_garde_checks.rs` to current rule IDs and attack vectors.
 3.  **Convert Test Layout:** For each rule, create the `rs_garde_XX_..._tests/` directory structure.
     -   Move existing logic or seed logic into the new modular layout (`golden.rs`, attack vectors, `false_positives.rs`, `fail_closed.rs`, etc.).
@@ -26,7 +26,7 @@ To convert all `rs/garde` rules to use rule-specific `*_tests/` directories, add
     -   `RS-GARDE-AST-02` (Manual Deserialize impl)
     -   `RS-GARDE-AST-03` (Enum derive inventory)
     -   `RS-GARDE-10` (Input failures)
-5.  **Harden Remaining Rules:** Harden `RS-GARDE-CONFIG-01`, `02`, `03`, `04`, `06`, `09`.
+5.  **Harden Remaining Rules:** Harden `g3rs-garde/dependency-present`, `02`, `03`, `04`, `06`, `09`.
 6.  **Verify Assertions:** Ensure all tests assert exact rule ID, severity, target sets, and cover multi-root / fail-closed scenarios.
 7.  **Bug Fixes:** Address any semantic bugs uncovered during testing.
 8.  **Update Documentation:** Update `.plans/todo/checks/rs/garde.md` with closed/remaining gaps.

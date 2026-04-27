@@ -4,7 +4,7 @@
 **Scope:** `packages/g3rs-deps-config-checks`, `apps/guardrail3/crates/app/rs/families/deps`, `.plans/2026-04-04-142819-family-checks-packages.md`
 
 ## Summary
-Wired `g3rs-deps-config-checks` into the app `deps` family for `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12`. The package boundary was corrected to the repo’s actual current policy surface, using parsed workspace `Cargo.toml`, crate `Cargo.toml`, and legacy workspace `guardrail3.toml`, and the app now owns malformed-input signaling without duplicating `RS-DEPS-11`.
+Wired `g3rs-deps-config-checks` into the app `deps` family for `g3rs-deps/dependencies-allowlisted`, `06`, `07`, `08`, and `12`. The package boundary was corrected to the repo’s actual current policy surface, using parsed workspace `Cargo.toml`, crate `Cargo.toml`, and legacy workspace `guardrail3.toml`, and the app now owns malformed-input signaling without duplicating `RS-DEPS-11`.
 
 ## Context & Problem
 The extracted deps package had been built but not wired into the app family. The initial package draft also drifted from repo reality in two important ways:
@@ -38,7 +38,7 @@ When the bridge work started, the first compile failures were stale test helpers
   - Store a borrowed config in facts — rejected because the facts model is owned, cloneable runtime data.
 
 ### Remove dead app-side surfaces for moved deps rules
-- **Chose:** delete the old app runtime rule directories and assertion modules for `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12`.
+- **Chose:** delete the old app runtime rule directories and assertion modules for `g3rs-deps/dependencies-allowlisted`, `06`, `07`, `08`, and `12`.
 - **Why:** once the app family routes those rules through the package, leaving old rule files around creates false ownership and future confusion.
 - **Alternatives considered:**
   - Keep the old files as dormant historical references — rejected because this repo has already cleaned that pattern out in other extracted families.
@@ -63,11 +63,11 @@ deps app family
 ```
 
 The package owns:
-- `RS-DEPS-CONFIG-01`
-- `RS-DEPS-CONFIG-02`
-- `RS-DEPS-CONFIG-03`
-- `RS-DEPS-CONFIG-04`
-- `RS-DEPS-CONFIG-05`
+- `g3rs-deps/dependencies-allowlisted`
+- `g3rs-deps/build-dependencies-allowlisted`
+- `g3rs-deps/dev-dependencies-allowlisted`
+- `g3rs-deps/library-allowlist-present`
+- `g3rs-deps/direct-dependency-cap`
 
 The app keeps:
 - `RS-DEPS-01`

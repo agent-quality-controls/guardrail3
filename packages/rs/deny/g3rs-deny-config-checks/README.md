@@ -12,5 +12,5 @@ Current package status:
 - runtime crate exists and compiles
 - rule area modules are split into advisories, bans, licenses, and sources
 - migrated config rules:
-  - `RS-DENY-CONFIG-01..27` except filetree-owned `01` and `03`
+  - `g3rs-deny/deprecated-advisories..27` except filetree-owned `01` and `03`
 - no deny source lane currently exists

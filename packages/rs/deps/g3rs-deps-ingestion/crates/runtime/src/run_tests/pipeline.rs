@@ -51,8 +51,9 @@ fn pipeline_reports_workspace_tool_presence_in_deps_config_lane() {
     write_executable(tools_dir.join("gitleaks"), "#!/bin/sh\nexit 0\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = crate::run::ingest_for_config_checks_with_path(&crawl, Some(tools_dir.as_os_str()))
-        .expect("ingestion should succeed");
+    let inputs =
+        crate::run::ingest_for_config_checks_with_path(&crawl, Some(tools_dir.as_os_str()))
+            .expect("ingestion should succeed");
     let results = inputs
         .iter()
         .flat_map(g3rs_deps_config_checks::check)
@@ -82,8 +83,8 @@ fn pipeline_emits_one_workspace_tool_result_set_even_with_multiple_crates() {
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs =
-        crate::run::ingest_for_config_checks_with_path(&crawl, None).expect("ingestion should succeed");
+    let inputs = crate::run::ingest_for_config_checks_with_path(&crawl, None)
+        .expect("ingestion should succeed");
     let results = inputs
         .iter()
         .flat_map(g3rs_deps_config_checks::check)

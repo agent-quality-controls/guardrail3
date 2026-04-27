@@ -12,13 +12,13 @@ pub mod licenses;
 pub mod sources;
 
 #[cfg(feature = "checks")]
-pub mod rs_deny_config_23_ban_baseline_complete;
+pub mod allow_override_channel;
 #[cfg(feature = "checks")]
-pub mod rs_deny_config_25_allow_override_channel;
+pub mod ban_baseline_complete;
 #[cfg(feature = "checks")]
-pub mod rs_deny_config_26_extra_deny_bans_inventory;
+pub mod extra_deny_bans_inventory;
 #[cfg(feature = "checks")]
-pub mod rs_deny_config_27_wrappers;
+pub mod wrappers;
 
 #[cfg(feature = "checks")]
-pub mod rs_deny_config_24_license_exceptions_inventory;
+pub mod license_exceptions_inventory;

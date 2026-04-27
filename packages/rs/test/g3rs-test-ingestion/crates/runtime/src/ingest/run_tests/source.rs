@@ -52,10 +52,18 @@ fn pipeline_reports_simple_test_ast_findings() {
 
     let results = run_ast_pipeline(root);
 
-    assert_file_has_result(&results, "src/lib.rs", "RS-TEST-SOURCE-01");
-    assert_file_has_result(&results, "tests/quality.rs", "RS-TEST-SOURCE-04");
-    assert_file_has_result(&results, "tests/quality.rs", "RS-TEST-SOURCE-05");
-    assert_file_has_result(&results, "tests/quality.rs", "RS-TEST-SOURCE-08");
+    assert_file_has_result(&results, "src/lib.rs", "g3rs-test/inline-test-bodies");
+    assert_file_has_result(&results, "tests/quality.rs", "g3rs-test/ignore-reason");
+    assert_file_has_result(
+        &results,
+        "tests/quality.rs",
+        "g3rs-test/should-panic-expected",
+    );
+    assert_file_has_result(
+        &results,
+        "tests/quality.rs",
+        "g3rs-test/weak-matches-assert",
+    );
 }
 
 #[test]
@@ -97,13 +105,17 @@ fn pipeline_reports_assertions_boundary_rules() {
     assert_file_has_result(
         &results,
         "crates/assertions/src/lib.rs",
-        "RS-TEST-SOURCE-16",
+        "g3rs-test/assertions-modules-prove",
     );
-    assert_file_has_result(&results, "crates/runtime/tests/api.rs", "RS-TEST-SOURCE-17");
+    assert_file_has_result(
+        &results,
+        "crates/runtime/tests/api.rs",
+        "g3rs-test/external-harnesses-use-assertions",
+    );
     assert_file_has_result(
         &results,
         "crates/runtime/src/feature_tests/mod.rs",
-        "RS-TEST-SOURCE-16",
+        "g3rs-test/assertions-modules-prove",
     );
 }
 
@@ -124,7 +136,7 @@ fn pipeline_reports_malformed_owned_source_as_rs_test_10() {
 
     assert_result(
         &results,
-        "RS-TEST-SOURCE-10",
+        "g3rs-test/source-input-failures",
         "failed to read test input",
         Some("tests/broken.rs"),
     );
@@ -151,17 +163,17 @@ fn pipeline_reports_all_parse_failures_and_still_checks_valid_files() {
 
     assert_result(
         &results,
-        "RS-TEST-SOURCE-10",
+        "g3rs-test/source-input-failures",
         "failed to read test input",
         Some("tests/broken_a.rs"),
     );
     assert_result(
         &results,
-        "RS-TEST-SOURCE-10",
+        "g3rs-test/source-input-failures",
         "failed to read test input",
         Some("tests/broken_b.rs"),
     );
-    assert_file_has_result(&results, "tests/good.rs", "RS-TEST-SOURCE-04");
+    assert_file_has_result(&results, "tests/good.rs", "g3rs-test/ignore-reason");
 }
 
 #[test]

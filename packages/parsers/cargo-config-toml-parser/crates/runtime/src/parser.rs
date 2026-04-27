@@ -20,7 +20,9 @@ pub fn parse(input: &str) -> Result<CargoConfigToml, crate::error::Error> {
 ///
 /// Returns [`crate::error::Error::Io`] on read failure and
 /// [`crate::error::Error::Toml`] on parse failure.
-pub fn from_path(path: impl AsRef<std::path::Path>) -> Result<CargoConfigToml, crate::error::Error> {
+pub fn from_path(
+    path: impl AsRef<std::path::Path>,
+) -> Result<CargoConfigToml, crate::error::Error> {
     let content = crate::fs::read_to_string(path)?;
     parse(&content)
 }

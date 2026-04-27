@@ -13,17 +13,17 @@ Extracted 11 config-only rules from the release family into the g3rs pipeline. B
 4. **g3rs-release-config-ingestion** — selects Cargo.toml (required) + release-plz.toml + cliff.toml (optional). 7 tests.
 
 ## Check mapping (old → new)
-- RS-PUB-01 → RS-RELEASE-CONFIG-01 (description)
-- RS-PUB-02 → RS-RELEASE-CONFIG-02 (license)
-- RS-PUB-03 → RS-RELEASE-CONFIG-03 (repository)
-- RS-PUB-06 → RS-RELEASE-CONFIG-04 (keywords)
-- RS-PUB-07 → RS-RELEASE-CONFIG-05 (categories)
-- RS-PUB-08 → RS-RELEASE-CONFIG-06 (semver)
-- RS-PUB-13 → RS-RELEASE-CONFIG-07 (docs.rs metadata)
-- RS-BIN-03 → RS-RELEASE-CONFIG-08 (binstall metadata)
-- RS-RELEASE-11 → RS-RELEASE-CONFIG-09 (accidentally publishable)
-- RS-RELEASE-03 → RS-RELEASE-CONFIG-10 (release-plz baseline)
-- RS-RELEASE-04 → RS-RELEASE-CONFIG-11 (cliff baseline)
+- RS-PUB-01 → g3rs-release/description-present (description)
+- RS-PUB-02 → g3rs-release/license-present (license)
+- RS-PUB-03 → g3rs-release/repository-present (repository)
+- RS-PUB-06 → g3rs-release/keywords-present (keywords)
+- RS-PUB-07 → g3rs-release/categories-present (categories)
+- RS-PUB-08 → g3rs-release/valid-semver (semver)
+- RS-PUB-13 → g3rs-release/docs-rs-metadata (docs.rs metadata)
+- RS-BIN-03 → g3rs-release/binstall-metadata (binstall metadata)
+- RS-RELEASE-11 → g3rs-release/accidentally-publishable (accidentally publishable)
+- RS-RELEASE-03 → g3rs-release/release-plz-baseline (release-plz baseline)
+- RS-RELEASE-04 → g3rs-release/cliff-baseline (cliff baseline)
 
 ## Outstanding
 - g3rs-release-config-checks has 0 tests — check implementations need test coverage

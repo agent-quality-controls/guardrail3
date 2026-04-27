@@ -15,24 +15,24 @@ Current package boundary:
 
 Package-owned config rules:
 
-- `RS-CARGO-CONFIG-01`
-- `RS-CARGO-CONFIG-02`
-- `RS-CARGO-CONFIG-03`
-- `RS-CARGO-CONFIG-04`
-- `RS-CARGO-CONFIG-05`
-- `RS-CARGO-CONFIG-06`
-- `RS-CARGO-CONFIG-07`
-- `RS-CARGO-CONFIG-08`
-- `RS-CARGO-CONFIG-09`
-- `RS-CARGO-CONFIG-10`
-- `RS-CARGO-CONFIG-11`
-- `RS-CARGO-CONFIG-12`
-- `RS-CARGO-CONFIG-13`
+- `g3rs-cargo/workspace-lints`
+- `g3rs-cargo/lint-levels`
+- `g3rs-cargo/workspace-metadata`
+- `g3rs-cargo/priority-order`
+- `g3rs-cargo/resolver`
+- `g3rs-cargo/disallowed-macros-deny`
+- `g3rs-cargo/approved-allow-inventory`
+- `g3rs-cargo/workspace-lints-inherited`
+- `g3rs-cargo/no-weakened-overrides`
+- `g3rs-cargo/member-edition-drift`
+- `g3rs-cargo/unapproved-allow-entries`
+- `g3rs-cargo/member-local-allows-forbidden`
+- `g3rs-cargo/rust-version-policy`
 
 Still outside this package:
 
 - filetree rules:
-  - `RS-CARGO-FILETREE-10`
-  - `RS-CARGO-FILETREE-14`
+  - `g3rs-cargo/missing-member-cargo`
+  - `g3rs-cargo/input-failures`
 - source lane:
   - none

@@ -17,7 +17,7 @@ Decisions made
   - Why: each sidecar now belongs to a real production file and final proof lives in the shared assertions crate.
   - Rejected: keeping the orphaned `run_tests` tree, because it kept triggering real `code` and `test` findings.
 - Fixed the stale config pipeline expectation instead of changing the rule.
-  - Why: under current arch rules, direct child and root-level sibling path edges are `RS-ARCH-CONFIG-05` inventory, while the missing shared flag is the real `RS-ARCH-CONFIG-06` error.
+  - Why: under current arch rules, direct child and root-level sibling path edges are `g3rs-arch/no-boundary-crossing` inventory, while the missing shared flag is the real `g3rs-arch/shared-flag-required` error.
   - Rejected: changing arch rule behavior to satisfy one stale package test.
 
 Key files for context

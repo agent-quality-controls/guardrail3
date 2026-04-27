@@ -1,5 +1,5 @@
-mod rs_toolchain_config_01_channel_and_components;
-mod rs_toolchain_config_02_msrv_consistency;
+mod channel_and_components;
+mod msrv_consistency;
 mod run;
 
 #[cfg(feature = "checks")]

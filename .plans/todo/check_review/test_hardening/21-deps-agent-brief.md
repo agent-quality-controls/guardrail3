@@ -52,7 +52,7 @@ Use it as seed material only. Do not port it mechanically.
 
 Ownership split matters:
 - `RS-DEPS-01..04` are validation-root tool-availability checks
-- `RS-DEPS-CONFIG-01..08` are crate/package-owned allowlist checks
+- `g3rs-deps/dependencies-allowlisted..08` are crate/package-owned allowlist checks
 - `RS-DEPS-09..10` are Rust-root-owned lockfile checks
 - `RS-DEPS-11` owns fail-closed behavior across those scopes
 
@@ -73,7 +73,7 @@ Important scope points already frozen in the plan and implementation:
 - `workspace = true` dependencies are not auto-skipped
 - path dependencies are skipped only when they are workspace path dependencies
 - renamed dependencies must be checked against real package name when present
-- target-specific dependency tables are still an explicit live gap and are not yet part of `RS-DEPS-CONFIG-01..07`
+- target-specific dependency tables are still an explicit live gap and are not yet part of `g3rs-deps/dependencies-allowlisted..07`
 
 ## Fail-Closed Contract
 
@@ -88,7 +88,7 @@ Malformed inputs must not silently suppress dependency-policy findings.
 
 ## Known Plan-Level Additions
 
-`RS-DEPS-CONFIG-05` is planned but not implemented yet:
+`g3rs-deps/direct-dependency-cap` is planned but not implemented yet:
 - more than 25 unique direct dependency names on one crate
 
 Do not invent new semantics for it during this pass unless you are explicitly implementing it.
@@ -176,9 +176,9 @@ The pass is not done until:
 3. map old seed tests into current attack vectors
 4. verify the existing `*_tests/` directories actually match the rule/attack-vector standard
 5. harden the highest-risk rules first:
-   - `RS-DEPS-CONFIG-01`
-   - `RS-DEPS-CONFIG-02`
-   - `RS-DEPS-CONFIG-03`
+   - `g3rs-deps/dependencies-allowlisted`
+   - `g3rs-deps/build-dependencies-allowlisted`
+   - `g3rs-deps/dev-dependencies-allowlisted`
    - `RS-DEPS-09`
    - `RS-DEPS-10`
    - `RS-DEPS-11`

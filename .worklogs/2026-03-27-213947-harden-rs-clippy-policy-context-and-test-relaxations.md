@@ -11,7 +11,7 @@ While continuing the adversarial `rs/clippy` review, `HEAD` advanced to `01b87ad
 
 - fail-closed policy-context handling (`RS-CLIPPY-23`)
 - published-library workspace handling for `RS-CLIPPY-16`
-- `allow-panic-in-tests = false` enforcement inside `RS-CLIPPY-CONFIG-15`
+- `allow-panic-in-tests = false` enforcement inside `g3rs-clippy/avoid-breaking-exported-api`
 
 But the repo was left with two follow-up problems:
 

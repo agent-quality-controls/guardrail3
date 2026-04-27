@@ -1,5 +1,5 @@
 Goal
-- Fix `RS-TEST-FILETREE-03` so assertions modules that reach `check_test_tree()` through a chained import alias are still reported.
+- Fix `g3rs-test/runtime-assertions-split` so assertions modules that reach `check_test_tree()` through a chained import alias are still reported.
 
 Approach
 - Add a rule regression in `packages/rs/test/g3rs-test-file-tree-checks/crates/runtime/src/rs_test_03_runtime_assertions_split/rule_tests/cases.rs` for `use demo_runtime::{self as rt}; use self::rt as again; again::check_test_tree()`.

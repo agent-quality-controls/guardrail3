@@ -4,7 +4,7 @@
 **Scope:** `.plans/2026-04-04-142819-family-checks-packages.md`, `packages/g3rs-deps-config-checks`
 
 ## Summary
-Added the new `g3rs-deps-config-checks` package for the `deps` family content rules and then reshaped its internals to match the extracted-package architecture more closely. The package now owns `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12`, uses full parsed files as input, and follows the rule-directory plus sidecar-test pattern instead of the first flat-file draft.
+Added the new `g3rs-deps-config-checks` package for the `deps` family content rules and then reshaped its internals to match the extracted-package architecture more closely. The package now owns `g3rs-deps/dependencies-allowlisted`, `06`, `07`, `08`, and `12`, uses full parsed files as input, and follows the rule-directory plus sidecar-test pattern instead of the first flat-file draft.
 
 ## Context & Problem
 The next family in the extraction sequence was `deps`. The intended split was:
@@ -33,17 +33,17 @@ The user explicitly asked for an architecture check against the existing extract
   - workspace `Cargo.toml`
   - crate `Cargo.toml`
   - workspace `guardrail3-rs.toml`
-- **Why:** `RS-DEPS-CONFIG-01..08` need both the crate manifest and workspace manifest to resolve dependency identity correctly, and the user required that content packages receive parsed files rather than scoped helper subsets.
+- **Why:** `g3rs-deps/dependencies-allowlisted..08` need both the crate manifest and workspace manifest to resolve dependency identity correctly, and the user required that content packages receive parsed files rather than scoped helper subsets.
 - **Alternatives considered:**
   - One giant workspace bag with derived policy state — rejected because it smuggles orchestrator logic into the package.
   - One-file-only input — rejected because the dependency allowlist rules need workspace resolution for `workspace = true` and internal/external path classification.
 
 ### Limit the extracted rule set to pure content checks
-- **Chose:** move `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12` into the package, and keep `RS-DEPS-01..04`, `09`, `10`, and `11` in the app.
+- **Chose:** move `g3rs-deps/dependencies-allowlisted`, `06`, `07`, `08`, and `12` into the package, and keep `RS-DEPS-01..04`, `09`, `10`, and `11` in the app.
 - **Why:** tool-installation, lockfile presence, gitignore handling, and malformed-input reporting are not content checks.
 - **Alternatives considered:**
   - Move all deps rules together — rejected because it would collapse structural/orchestrator concerns into the package.
-  - Extract only `RS-DEPS-CONFIG-05` first — rejected because the workspace-level policy simplification now makes `05..08` viable without recreating the old crate-scoped legacy config model.
+  - Extract only `g3rs-deps/direct-dependency-cap` first — rejected because the workspace-level policy simplification now makes `05..08` viable without recreating the old crate-scoped legacy config model.
 
 ### Reshape the runtime crate to the rule-directory pattern
 - **Chose:** convert each deps rule from a flat file to a directory with `mod.rs`, `rule.rs`, and `tests/mod.rs`.
@@ -114,7 +114,7 @@ After the structural cleanup, the remaining validator findings are mostly either
 - `.worklogs/2026-04-05-165315-deny-content-package-tests.md` — recent package-local test-surface precedent
 
 ## Next Steps / Continuation Plan
-1. Wire the app `deps` family to parse the authoritative workspace manifest, crate manifest, and workspace `guardrail3-rs.toml`, then call `g3rs-deps-config-checks` for `RS-DEPS-CONFIG-01`, `06`, `07`, `08`, and `12`.
+1. Wire the app `deps` family to parse the authoritative workspace manifest, crate manifest, and workspace `guardrail3-rs.toml`, then call `g3rs-deps-config-checks` for `g3rs-deps/dependencies-allowlisted`, `06`, `07`, `08`, and `12`.
 2. Keep `RS-DEPS-01..04`, `09`, `10`, and `11` in the app and make the app own malformed-input reporting explicitly before package calls.
 3. After the app wiring is in place, add bridge smoke tests at the family layer similar to the clippy and cargo migrations.
 4. Revisit the skipped issues only after wiring:

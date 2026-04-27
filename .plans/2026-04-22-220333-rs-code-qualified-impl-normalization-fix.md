@@ -1,6 +1,6 @@
 ## Goal
 
-Fix the `RS-CODE-SOURCE-31` follow-up false negative so nested public structs with inherent impls are still detected when the impl uses `crate::...`, `self::...`, or `super::...` qualified type paths.
+Fix the `g3rs-code/ast-31-public-struct-named-fields` follow-up false negative so nested public structs with inherent impls are still detected when the impl uses `crate::...`, `self::...`, or `super::...` qualified type paths.
 
 ## Approach
 

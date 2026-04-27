@@ -17,4 +17,4 @@ Source ingestion:
 - requires root `Cargo.toml`
 - optionally parses root `guardrail3-rs.toml`
 - selects governed non-test Rust source files
-- leaves source and Rust-policy read/parse failures to `RS-GARDE-SOURCE-10`
+- leaves source and Rust-policy read/parse failures to `g3rs-garde/input-failures`

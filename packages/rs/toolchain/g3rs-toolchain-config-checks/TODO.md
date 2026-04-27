@@ -4,8 +4,8 @@
 
 ### Structural rules remain app-side
 
-- `RS-TOOLCHAIN-01` root config discovery / existence
-- `RS-TOOLCHAIN-04` placement / duplicate-surface checks
+- `g3rs-toolchain/root-toolchain-config-exists` root config discovery / existence
+- `g3rs-toolchain/no-duplicate-toolchain-config` placement / duplicate-surface checks
 
 Reason:
 - these are discovery and structural rules, not pure config checks over

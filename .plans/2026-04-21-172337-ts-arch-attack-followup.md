@@ -4,7 +4,7 @@ Close the `ts/arch` attack findings without widening scope.
 
 End state:
 
-- `TS-ARCH-FILETREE-02` depth and directory counting match the intended Rust-mirrored semantics for wave 1.
+- `g3ts-arch/structural-split` depth and directory counting match the intended Rust-mirrored semantics for wave 1.
 - source tests prove unreadable facade, parse-error facade, and `.tsx` facade handling.
 - `g3ts` CLI tests prove `--family arch` end to end.
 
@@ -16,8 +16,8 @@ End state:
      - deep tree over threshold fires
      - `src/tests`, `src/__tests__`, and `src/examples` do not count
    - Extend `g3ts-arch-source-checks` tests to prove:
-     - unreadable facade surfaces `TS-ARCH-SOURCE-01`
-     - parse-error facade surfaces `TS-ARCH-SOURCE-01`
+     - unreadable facade surfaces `g3ts-arch/facade-parseable`
+     - parse-error facade surfaces `g3ts-arch/facade-parseable`
      - `.tsx` parsed facade stays clean when valid
    - Extend `g3ts` CLI tests to prove:
      - CLI parses `--family arch`

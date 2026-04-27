@@ -1,5 +1,5 @@
 # Goal
-Remove the duplicate `RS-CODE-FILETREE-35` rule from the active `code` family and add exact crate-level waivers for `RS-ARCH-FILETREE-07` so intentionally large family runtime crates can be documented rather than forcing a global weakening.
+Remove the duplicate `RS-CODE-FILETREE-35` rule from the active `code` family and add exact crate-level waivers for `g3rs-arch/structural-split` so intentionally large family runtime crates can be documented rather than forcing a global weakening.
 
 # Approach
 1. Add failing proofs for both changes.
@@ -13,7 +13,7 @@ Remove the duplicate `RS-CODE-FILETREE-35` rule from the active `code` family an
 3. Add typed rust-policy state to the `arch` filetree boundary.
    - Extend `g3rs-arch-types` with a narrow rust-policy state for the filetree lane.
    - Parse `guardrail3-rs.toml` once in `g3rs-arch-ingestion` and thread the state into `G3RsArchFileTreeChecksInput`.
-4. Teach `RS-ARCH-FILETREE-07` to honor exact waivers.
+4. Teach `g3rs-arch/structural-split` to honor exact waivers.
    - Match on `rule`, `file`, and `selector`.
    - Stand down only for the exact crate.
    - Emit the normal error when no exact waiver matches.
@@ -21,12 +21,12 @@ Remove the duplicate `RS-CODE-FILETREE-35` rule from the active `code` family an
 
 # Key Decisions
 - Keep the structural split policy in `arch`, not `code`, because it is the stronger architectural rule and the user explicitly chose to drop the duplicate generic cap.
-- Add waiver support only to `RS-ARCH-FILETREE-07`, not a generic ignore system for the whole family.
+- Add waiver support only to `g3rs-arch/structural-split`, not a generic ignore system for the whole family.
 - Reuse existing `guardrail3-rs.toml` waiver schema instead of inventing a new file or selector format.
 
 # Alternatives Considered
 - Keep both rules and change severities: rejected because it still produces duplicate signal on the same condition.
-- Weaken `RS-ARCH-FILETREE-07` globally for runtime crates: rejected because the user wants an explicit exception, not a global carveout.
+- Weaken `g3rs-arch/structural-split` globally for runtime crates: rejected because the user wants an explicit exception, not a global carveout.
 - Add app-layer filtering for waivers: rejected because family applicability and waiver semantics belong inside the family packages.
 
 # Files To Modify

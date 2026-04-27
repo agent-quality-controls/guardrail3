@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed the remaining RS-CODE-SOURCE-31 miss where a same-file re-export alias was invisible to a child module that imported the parent with `use super::*`. The binding map now records re-export aliases before glob-based lookup consumes the module surface, so `impl Alias { ... }` on a glob-imported re-export is caught.
+Fixed the remaining g3rs-code/ast-31-public-struct-named-fields miss where a same-file re-export alias was invisible to a child module that imported the parent with `use super::*`. The binding map now records re-export aliases before glob-based lookup consumes the module surface, so `impl Alias { ... }` on a glob-imported re-export is caught.
 
 ## Decisions made
 

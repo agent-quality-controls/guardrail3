@@ -4,9 +4,9 @@ use guardrail3_check_types::G3CheckResult;
 pub fn check(input: &G3RsFmtFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
-    crate::rs_fmt_filetree_01_exists::check(input, &mut results);
-    crate::rs_fmt_filetree_05_per_crate_override::check(input, &mut results);
-    crate::rs_fmt_filetree_08_dual_file_conflict::check(input, &mut results);
+    crate::exists::check(input, &mut results);
+    crate::per_crate_override::check(input, &mut results);
+    crate::dual_file_conflict::check(input, &mut results);
 
     results
 }

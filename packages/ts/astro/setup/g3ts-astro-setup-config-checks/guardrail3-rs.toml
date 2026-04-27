@@ -9,7 +9,7 @@ allowed_deps = [
 ]
 
 [[waivers]]
-rule = "RS-ARCH-FILETREE-07"
+rule = "g3rs-arch/structural-split"
 file = "crates/runtime/Cargo.toml"
 selector = "structural-split"
 reason = "setup config keeps one rule per file at runtime root; further split would create artificial packages around tightly related setup assertions."
@@ -18,7 +18,7 @@ reason = "setup config keeps one rule per file at runtime root; further split wo
 garde = false
 
 [[waivers]]
-rule = "RS-CODE-SOURCE-04"
+rule = "g3rs-code/item-level-allow-with-reason"
 file = "crates/runtime/src/lib_tests/mod.rs"
 selector = "item-level-allow-with-reason"
 reason = "Config package tests reuse the golden Astro input builder; the allow is limited to the test module declaration and documents that unused helper cases are intentional."

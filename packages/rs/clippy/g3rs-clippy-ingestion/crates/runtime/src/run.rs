@@ -15,10 +15,8 @@ pub fn ingest_for_config_checks(
     let clippy = crate::parse::parse_clippy_state(&entry.path.abs_path);
     let (rust_policy, waivers) = match crate::select::select_root_guardrail3_rs_toml(crawl) {
         Some(entry) => {
-            let rust_policy = crate::parse::parse_rust_policy_state(
-                &entry.path.rel_path,
-                &entry.path.abs_path,
-            );
+            let rust_policy =
+                crate::parse::parse_rust_policy_state(&entry.path.rel_path, &entry.path.abs_path);
             let waivers = match &rust_policy {
                 G3RsClippyRustPolicyState::Parsed { .. } => {
                     crate::parse::parse_waivers(&entry.path.abs_path)?
@@ -32,7 +30,9 @@ pub fn ingest_for_config_checks(
         None => (G3RsClippyRustPolicyState::Missing, Vec::new()),
     };
     let cargo_root = match crate::select::select_root_cargo_toml(crawl) {
-        Some(entry) => crate::parse::parse_cargo_root_state(&entry.path.rel_path, &entry.path.abs_path),
+        Some(entry) => {
+            crate::parse::parse_cargo_root_state(&entry.path.rel_path, &entry.path.abs_path)
+        }
         None => G3RsClippyCargoRootState::Missing,
     };
     let cargo_workspace_members = match &cargo_root {
@@ -65,7 +65,9 @@ pub fn ingest_for_config_checks(
     };
     let cargo_configs = crate::select::collect_root_cargo_config_overrides(crawl)
         .into_iter()
-        .map(|entry| crate::parse::parse_cargo_config_state(&entry.path.rel_path, &entry.path.abs_path))
+        .map(|entry| {
+            crate::parse::parse_cargo_config_state(&entry.path.rel_path, &entry.path.abs_path)
+        })
         .collect();
 
     Ok(crate::ingest::assemble_config_input(
@@ -83,7 +85,9 @@ pub fn ingest_for_file_tree_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsClippyFileTreeChecksInput, IngestionError> {
     let root_configs = crate::select::collect_root_clippy_tomls(crawl);
-    let preferred = root_configs.first().map(|entry| entry.path.rel_path.clone());
+    let preferred = root_configs
+        .first()
+        .map(|entry| entry.path.rel_path.clone());
     let shadowed_same_root_configs = match preferred.as_deref() {
         Some(preferred_rel_path) => root_configs
             .into_iter()

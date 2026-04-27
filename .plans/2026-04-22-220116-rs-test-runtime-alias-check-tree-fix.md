@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-TEST-FILETREE-03` so assertions modules that import the runtime crate as `self as <alias>` still trip the "assertions module orchestrates family execution" check when they call `<alias>::check_test_tree(...)`.
+Fix `g3rs-test/runtime-assertions-split` so assertions modules that import the runtime crate as `self as <alias>` still trip the "assertions module orchestrates family execution" check when they call `<alias>::check_test_tree(...)`.
 
 ## Approach
 

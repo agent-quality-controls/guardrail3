@@ -8,8 +8,7 @@ fn typed_msrv(input: &g3rs_clippy_types::G3RsClippyConfigChecksInput) -> Option<
         G3RsClippyConfigState::Parsed(document) => {
             clippy_toml_parser::typed(document).and_then(|clippy| clippy.msrv.as_deref())
         }
-        G3RsClippyConfigState::Unreadable { .. }
-        | G3RsClippyConfigState::ParseError { .. } => None,
+        G3RsClippyConfigState::Unreadable { .. } | G3RsClippyConfigState::ParseError { .. } => None,
     }
 }
 
@@ -40,9 +39,7 @@ fn typed_cargo_root_rel_path(
     }
 }
 
-fn typed_cargo_member_rels(
-    input: &g3rs_clippy_types::G3RsClippyConfigChecksInput,
-) -> Vec<&str> {
+fn typed_cargo_member_rels(input: &g3rs_clippy_types::G3RsClippyConfigChecksInput) -> Vec<&str> {
     input
         .cargo_workspace_members
         .iter()
@@ -144,13 +141,15 @@ fn keeps_raw_parseable_but_typed_invalid_clippy_for_config_checks() {
         "config ingestion should preserve raw-parseable clippy.toml for parseability and section-shape checks instead of aborting on typed parse failure",
     );
     match input.clippy {
-        G3RsClippyConfigState::Parsed(document) => match clippy_toml_parser::parse_error_reason(&document) {
-            Some(reason) => assert!(
-                reason.contains("path"),
-                "typed parse error should preserve the parser reason: {reason}"
-            ),
-            None => panic!("expected typed parse error document"),
-        },
+        G3RsClippyConfigState::Parsed(document) => {
+            match clippy_toml_parser::parse_error_reason(&document) {
+                Some(reason) => assert!(
+                    reason.contains("path"),
+                    "typed parse error should preserve the parser reason: {reason}"
+                ),
+                None => panic!("expected typed parse error document"),
+            }
+        }
         other => panic!("expected raw-parseable typed-invalid clippy state, got {other:#?}"),
     }
 }
@@ -191,10 +190,7 @@ fn fails_when_clippy_toml_is_missing() {
     let result = crate::run::ingest_for_config_checks(&crawl);
 
     assert!(
-        matches!(
-            result,
-            Err(crate::run::IngestionError::ClippyTomlNotFound)
-        ),
+        matches!(result, Err(crate::run::IngestionError::ClippyTomlNotFound)),
         "ingestion should return ClippyTomlNotFound when no clippy config exists in the workspace"
     );
 }
@@ -223,20 +219,14 @@ fn keeps_typed_parse_error_state_for_unknown_fields() {
     let root = temp.path();
     git_init(root);
 
-    write(
-        root.join("clippy.toml"),
-        "totally_fake_field = true\n",
-    );
+    write(root.join("clippy.toml"), "totally_fake_field = true\n");
 
     let crawl = crawl(root);
     let result = crate::run::ingest_for_config_checks(&crawl);
 
     let input = result.expect("ingestion should preserve typed parse errors for unknown fields");
     assert!(
-        matches!(
-            input.clippy,
-            G3RsClippyConfigState::Parsed(_)
-        ),
+        matches!(input.clippy, G3RsClippyConfigState::Parsed(_)),
         "{input:#?}"
     );
 }
@@ -254,10 +244,7 @@ fn keeps_typed_parse_error_state_for_wrong_value_type() {
 
     let input = result.expect("ingestion should preserve typed parse errors for wrong value types");
     assert!(
-        matches!(
-            input.clippy,
-            G3RsClippyConfigState::Parsed(_)
-        ),
+        matches!(input.clippy, G3RsClippyConfigState::Parsed(_)),
         "{input:#?}"
     );
 }
@@ -290,19 +277,13 @@ fn nested_clippy_toml_is_not_selected() {
     let root = temp.path();
     git_init(root);
 
-    write(
-        root.join("subdir/clippy.toml"),
-        "msrv = \"1.85\"\n",
-    );
+    write(root.join("subdir/clippy.toml"), "msrv = \"1.85\"\n");
 
     let crawl = crawl(root);
     let result = crate::run::ingest_for_config_checks(&crawl);
 
     assert!(
-        matches!(
-            result,
-            Err(crate::run::IngestionError::ClippyTomlNotFound)
-        ),
+        matches!(result, Err(crate::run::IngestionError::ClippyTomlNotFound)),
         "ingestion should not select a clippy.toml in a subdirectory, only at the workspace root"
     );
 }
@@ -318,7 +299,7 @@ fn threads_guardrail3_waivers_into_config_input() {
         root.join("guardrail3-rs.toml"),
         "profile = \"library\"\n\
 [[waivers]]\n\
-rule = \"RS-CLIPPY-CONFIG-01\"\n\
+rule = \"g3rs-clippy/max-struct-bools\"\n\
 file = \"clippy.toml\"\n\
 selector = \"key:max-struct-bools\"\n\
 reason = \"schema mirror\"\n",
@@ -330,7 +311,7 @@ reason = \"schema mirror\"\n",
 
     g3rs_clippy_ingestion_assertions::run::assert_single_waiver(
         &input,
-        "RS-CLIPPY-CONFIG-01",
+        "g3rs-clippy/max-struct-bools",
         "clippy.toml",
         "key:max-struct-bools",
         "schema mirror",
@@ -345,7 +326,10 @@ fn malformed_root_cargo_toml_does_not_abort_clippy_config_ingestion() {
 
     write(root.join("Cargo.toml"), "[workspace]\nnot = [valid");
     write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
-    write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
+    write(
+        root.join("clippy.toml"),
+        "avoid-breaking-exported-api = true\n",
+    );
 
     let crawl = crawl(root);
     let input = crate::run::ingest_for_config_checks(&crawl)
@@ -378,13 +362,20 @@ edition = "2024"
 "#,
     );
     write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
-    write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
+    write(
+        root.join("clippy.toml"),
+        "avoid-breaking-exported-api = true\n",
+    );
 
     let crawl = crawl(root);
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("valid guardrail3-rs.toml should drive clippy library policy");
 
-    assert_eq!(typed_cargo_root_rel_path(&input), Some("Cargo.toml"), "{input:#?}");
+    assert_eq!(
+        typed_cargo_root_rel_path(&input),
+        Some("Cargo.toml"),
+        "{input:#?}"
+    );
 }
 
 #[test]
@@ -404,14 +395,24 @@ version = "0.1.0"
 edition = "2024"
 "#,
     );
-    write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
-    write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
+    write(
+        root.join("guardrail3.toml"),
+        "[profile]\nname = \"library\"\n",
+    );
+    write(
+        root.join("clippy.toml"),
+        "avoid-breaking-exported-api = true\n",
+    );
 
     let crawl = crawl(root);
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("legacy guardrail3.toml should no longer drive clippy policy");
 
-    assert_eq!(typed_cargo_root_rel_path(&input), Some("Cargo.toml"), "{input:#?}");
+    assert_eq!(
+        typed_cargo_root_rel_path(&input),
+        Some("Cargo.toml"),
+        "{input:#?}"
+    );
 }
 
 #[test]
@@ -460,13 +461,20 @@ publish = { workspace = true }
 "#,
     );
     write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
-    write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
+    write(
+        root.join("clippy.toml"),
+        "avoid-breaking-exported-api = true\n",
+    );
 
     let crawl = crawl(root);
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("workspace-inherited publishability should not abort clippy ingestion");
 
-    assert_eq!(typed_cargo_member_rels(&input), vec!["member"], "{input:#?}");
+    assert_eq!(
+        typed_cargo_member_rels(&input),
+        vec!["member"],
+        "{input:#?}"
+    );
 }
 
 #[test]
@@ -494,13 +502,20 @@ publish = { workspace = true }
 "#,
     );
     write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
-    write(root.join("clippy.toml"), "avoid-breaking-exported-api = true\n");
+    write(
+        root.join("clippy.toml"),
+        "avoid-breaking-exported-api = true\n",
+    );
 
     let crawl = crawl(root);
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("workspace-inherited publishability should not abort clippy ingestion");
 
-    assert_eq!(typed_cargo_member_rels(&input), vec!["member"], "{input:#?}");
+    assert_eq!(
+        typed_cargo_member_rels(&input),
+        vec!["member"],
+        "{input:#?}"
+    );
 }
 
 #[test]

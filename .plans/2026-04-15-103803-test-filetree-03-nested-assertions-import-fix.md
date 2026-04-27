@@ -1,5 +1,5 @@
 # Goal
-Fix `RS-TEST-FILETREE-03` so nested sidecars like `x/rule_tests` may call the exact shared assertions module path the same rule already requires: `assertions/x/rule.rs`.
+Fix `g3rs-test/runtime-assertions-split` so nested sidecars like `x/rule_tests` may call the exact shared assertions module path the same rule already requires: `assertions/x/rule.rs`.
 
 # Approach
 1. Add a direct failing rule test for the nested shape.
@@ -7,7 +7,7 @@ Fix `RS-TEST-FILETREE-03` so nested sidecars like `x/rule_tests` may call the ex
    - Shared assertions file: `crates/assertions/src/foo/rule.rs`
    - Import from sidecar: `use demo_assertions::foo::rule::assert_runtime;`
    - Expected result: no "sibling assertions module" error.
-2. Change only the path check in `RS-TEST-FILETREE-03`.
+2. Change only the path check in `g3rs-test/runtime-assertions-split`.
    - Compare the full expected assertions module path, not only the short owner name.
 3. Run the `g3rs-test-file-tree-checks` workspace tests.
 

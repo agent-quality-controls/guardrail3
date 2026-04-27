@@ -41,11 +41,13 @@ fn prefers_githooks_pre_commit_over_hooks_pre_commit() {
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].rel_path, ".githooks/pre-commit");
     assert_eq!(inputs[0].kind, G3RsHookScriptKind::PreCommit);
-    assert!(inputs[0]
-        .parsed
-        .source_lines
-        .iter()
-        .any(|line| line.raw.contains("cargo fmt --check")));
+    assert!(
+        inputs[0]
+            .parsed
+            .source_lines
+            .iter()
+            .any(|line| line.raw.contains("cargo fmt --check"))
+    );
     assert!(!inputs[0].has_modular_dir);
     assert!(!inputs[0].is_workspace_project);
 }
@@ -63,11 +65,13 @@ fn falls_back_to_hooks_pre_commit_when_githooks_script_is_absent() {
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].rel_path, "hooks/pre-commit");
     assert_eq!(inputs[0].kind, G3RsHookScriptKind::PreCommit);
-    assert!(inputs[0]
-        .parsed
-        .source_lines
-        .iter()
-        .any(|line| line.raw.contains("cargo test --workspace")));
+    assert!(
+        inputs[0]
+            .parsed
+            .source_lines
+            .iter()
+            .any(|line| line.raw.contains("cargo test --workspace"))
+    );
     assert!(!inputs[0].has_modular_dir);
     assert!(!inputs[0].is_workspace_project);
 }
@@ -80,7 +84,10 @@ fn honors_core_hooks_path_when_hooks_pre_commit_is_configured() {
 
     write_fixture(root.join(".githooks/pre-commit"), "cargo fmt --check\n");
     write_fixture(root.join("hooks/pre-commit"), "cargo test --workspace\n");
-    write_fixture(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo clippy -- -D warnings\n");
+    write_fixture(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "cargo clippy -- -D warnings\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
@@ -100,12 +107,16 @@ fn honors_normalized_core_hooks_path_variants() {
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
-    let file_tree = super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let file_tree =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
 
     assert_eq!(inputs.len(), 1);
     assert_eq!(inputs[0].rel_path, "hooks/pre-commit");
     assert_eq!(
-        file_tree.pre_commit.as_ref().map(|fact| fact.rel_path.as_str()),
+        file_tree
+            .pre_commit
+            .as_ref()
+            .map(|fact| fact.rel_path.as_str()),
         Some("hooks/pre-commit")
     );
     assert_eq!(file_tree.hooks_path, Some("./hooks/".to_owned()));
@@ -121,10 +132,12 @@ fn keeps_non_compat_hooks_path_outside_owned_hook_surface() {
     write_fixture(root.join("hooks/pre-commit"), "cargo test --workspace\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let source_inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
-    let config_input =
-        super::super::ingest_for_config_checks_with_path(&crawl, None).expect("ingestion should succeed");
-    let file_tree_input = super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let source_inputs =
+        super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let config_input = super::super::ingest_for_config_checks_with_path(&crawl, None)
+        .expect("ingestion should succeed");
+    let file_tree_input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
 
     assert!(source_inputs.is_empty());
     assert!(config_input.selected_hook.is_none());
@@ -137,10 +150,19 @@ fn prefers_githooks_pre_commit_and_includes_direct_modular_scripts() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
-    write_fixture(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "run-parts .githooks/pre-commit.d\n",
+    );
     write_fixture(root.join("hooks/pre-commit"), "echo fallback\n");
-    write_fixture(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo fmt --check\n");
-    write_fixture(root.join(".githooks/pre-commit.d/20-extra.sh"), "cargo test --workspace\n");
+    write_fixture(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "cargo fmt --check\n",
+    );
+    write_fixture(
+        root.join(".githooks/pre-commit.d/20-extra.sh"),
+        "cargo test --workspace\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
@@ -169,7 +191,10 @@ fn fallback_hook_does_not_activate_githooks_modular_scripts() {
     let root = repo_root(&temp_dir);
 
     write_fixture(root.join("hooks/pre-commit"), "cargo fmt --check\n");
-    write_fixture(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo test --workspace\n");
+    write_fixture(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "cargo test --workspace\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
@@ -184,8 +209,14 @@ fn ignores_nested_files_under_pre_commit_d() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
-    write_fixture(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
-    write_fixture(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo fmt --check\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "run-parts .githooks/pre-commit.d\n",
+    );
+    write_fixture(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "cargo fmt --check\n",
+    );
     write_fixture(
         root.join(".githooks/pre-commit.d/nested/20-hidden.sh"),
         "cargo test --workspace\n",
@@ -210,7 +241,10 @@ fn marks_inputs_as_workspace_projects_when_root_manifest_has_workspace_section()
     let root = repo_root(&temp_dir);
 
     write_fixture(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
-    write_fixture(root.join(".githooks/pre-commit"), "cargo test --workspace\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "cargo test --workspace\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
@@ -225,7 +259,10 @@ fn fails_closed_when_root_manifest_is_malformed_for_hooked_repo() {
     let root = repo_root(&temp_dir);
 
     write_fixture(root.join("Cargo.toml"), "[workspace\n");
-    write_fixture(root.join(".githooks/pre-commit"), "cargo test --workspace\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "cargo test --workspace\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let error = super::super::ingest_for_source_checks(&crawl).expect_err("should fail closed");
@@ -246,7 +283,8 @@ fn ignores_malformed_root_manifest_when_no_hook_exists() {
     write_fixture(root.join("Cargo.toml"), "[workspace\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should stay quiet");
+    let inputs =
+        super::super::ingest_for_source_checks(&crawl).expect("ingestion should stay quiet");
 
     assert!(inputs.is_empty());
 }
@@ -349,8 +387,11 @@ fn returns_unreadable_when_modular_script_cannot_be_read() {
     };
 
     fs::create_dir_all(root.join(".githooks")).expect("create githooks dir");
-    fs::write(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n")
-        .expect("write pre-commit fixture after crawl construction");
+    fs::write(
+        root.join(".githooks/pre-commit"),
+        "run-parts .githooks/pre-commit.d\n",
+    )
+    .expect("write pre-commit fixture after crawl construction");
 
     let error = super::super::ingest_for_source_checks(&crawl).expect_err("should fail closed");
     match error {
@@ -366,11 +407,16 @@ fn fails_closed_when_selected_modular_script_disappears_after_crawl() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
-    write_fixture(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
-    write_fixture(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo fmt --check\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "run-parts .githooks/pre-commit.d\n",
+    );
+    write_fixture(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "cargo fmt --check\n",
+    );
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    fs::remove_file(root.join(".githooks/pre-commit.d/10-rust.sh"))
-        .expect("remove modular script");
+    fs::remove_file(root.join(".githooks/pre-commit.d/10-rust.sh")).expect("remove modular script");
 
     let error = super::super::ingest_for_source_checks(&crawl).expect_err("should fail closed");
     match error {
@@ -387,7 +433,10 @@ fn fails_closed_when_root_manifest_disappears_after_crawl_for_hooked_repo() {
     let root = repo_root(&temp_dir);
 
     write_fixture(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
-    write_fixture(root.join(".githooks/pre-commit"), "cargo test --workspace\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "cargo test --workspace\n",
+    );
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     fs::remove_file(root.join("Cargo.toml")).expect("remove root manifest");
 
@@ -406,7 +455,10 @@ fn config_ingestion_selects_effective_hook_and_detects_installed_tools() {
     let root = repo_root(&temp_dir);
     let bin_dir = root.join("bin");
 
-    write_fixture(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "g3rs validate --path .\n",
+    );
     write_fixture(root.join("hooks/pre-commit"), "cargo fmt --check\n");
     write_fixture(bin_dir.join("g3rs"), "#!/usr/bin/env bash\n");
     write_fixture(bin_dir.join("gitleaks"), "#!/usr/bin/env bash\n");
@@ -417,21 +469,27 @@ fn config_ingestion_selects_effective_hook_and_detects_installed_tools() {
     }
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let path_env =
-        std::env::join_paths([bin_dir.as_path()]).expect("build PATH override for config ingestion");
-    let input = super::super::ingest_for_config_checks_with_path(&crawl, Some(path_env.as_os_str()))
-        .expect("ingestion should succeed");
+    let path_env = std::env::join_paths([bin_dir.as_path()])
+        .expect("build PATH override for config ingestion");
+    let input =
+        super::super::ingest_for_config_checks_with_path(&crawl, Some(path_env.as_os_str()))
+            .expect("ingestion should succeed");
 
     let selected_hook = input
         .selected_hook
         .expect("config ingestion should select the effective pre-commit hook");
     assert_eq!(selected_hook.rel_path, ".githooks/pre-commit");
-    assert!(selected_hook
-        .parsed
-        .source_lines
-        .iter()
-        .any(|line| line.raw.contains("g3rs validate --path")));
-    assert_eq!(input.installed_tools, vec!["g3rs".to_owned(), "gitleaks".to_owned()]);
+    assert!(
+        selected_hook
+            .parsed
+            .source_lines
+            .iter()
+            .any(|line| line.raw.contains("g3rs validate --path"))
+    );
+    assert_eq!(
+        input.installed_tools,
+        vec!["g3rs".to_owned(), "gitleaks".to_owned()]
+    );
 }
 
 #[test]
@@ -439,8 +497,8 @@ fn config_ingestion_fails_closed_when_selected_pre_commit_cannot_be_read() {
     let temp_dir = tempdir().expect("create temp dir");
     let crawl = unreadable_file_crawl(temp_dir.path());
 
-    let error =
-        super::super::ingest_for_config_checks_with_path(&crawl, None).expect_err("should fail closed");
+    let error = super::super::ingest_for_config_checks_with_path(&crawl, None)
+        .expect_err("should fail closed");
     match error {
         super::super::IngestionError::Unreadable { path, .. } => {
             assert_eq!(path, temp_dir.path().join(".githooks/pre-commit"));
@@ -454,12 +512,15 @@ fn config_ingestion_fails_closed_when_selected_pre_commit_disappears_after_crawl
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
-    write_fixture(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "g3rs validate --path .\n",
+    );
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     fs::remove_file(root.join(".githooks/pre-commit")).expect("remove selected hook");
 
-    let error =
-        super::super::ingest_for_config_checks_with_path(&crawl, None).expect_err("should fail closed");
+    let error = super::super::ingest_for_config_checks_with_path(&crawl, None)
+        .expect_err("should fail closed");
     match error {
         super::super::IngestionError::Unreadable { path, .. } => {
             assert_eq!(path, root.join(".githooks/pre-commit"));
@@ -474,15 +535,18 @@ fn config_ingestion_honors_core_hooks_path_and_path_qualified_tools() {
     let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "hooks");
 
-    write_fixture(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "g3rs validate --path .\n",
+    );
     write_fixture(
         root.join("hooks/pre-commit"),
         "/opt/bin/gitleaks protect --staged --no-banner\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input =
-        super::super::ingest_for_config_checks_with_path(&crawl, None).expect("ingestion should succeed");
+    let input = super::super::ingest_for_config_checks_with_path(&crawl, None)
+        .expect("ingestion should succeed");
 
     let selected_hook = input
         .selected_hook
@@ -495,11 +559,14 @@ fn config_ingestion_fails_closed_when_git_hooks_path_lookup_errors() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
-    write_fixture(root.join(".githooks/pre-commit"), "g3rs validate --path .\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "g3rs validate --path .\n",
+    );
     break_git_dir(root);
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let error =
-        super::super::ingest_for_config_checks_with_path(&crawl, None).expect_err("should fail closed");
+    let error = super::super::ingest_for_config_checks_with_path(&crawl, None)
+        .expect_err("should fail closed");
 
     match error {
         super::super::IngestionError::ParseFailed { path, .. } => {
@@ -526,8 +593,14 @@ fn file_tree_ingestion_collects_hook_layout_and_trust_surface() {
     let root = repo_root(&temp_dir);
     git_config_hooks_path(root, ".githooks");
 
-    write_fixture(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\nrun-parts .githooks/pre-commit.d\n");
-    write_fixture(root.join(".githooks/pre-commit.d/10-rust.sh"), "#!/usr/bin/env bash\ncargo fmt --check\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nrun-parts .githooks/pre-commit.d\n",
+    );
+    write_fixture(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "#!/usr/bin/env bash\ncargo fmt --check\n",
+    );
     write_fixture(
         root.join(".guardrail3/overrides/pre-commit.d/90-local.sh"),
         "#!/usr/bin/env bash\necho override\n",
@@ -540,7 +613,8 @@ fn file_tree_ingestion_collects_hook_layout_and_trust_surface() {
     }
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
 
     let pre_commit = input
         .pre_commit
@@ -551,11 +625,11 @@ fn file_tree_ingestion_collects_hook_layout_and_trust_surface() {
     assert_eq!(pre_commit.executable, Some(true));
     assert!(input.has_modular_dir);
     assert_eq!(input.modular_scripts.len(), 1);
-    assert_eq!(input.modular_scripts[0].rel_path, ".githooks/pre-commit.d/10-rust.sh");
     assert_eq!(
-        input.local_override_scripts,
-        vec!["90-local.sh".to_owned()]
+        input.modular_scripts[0].rel_path,
+        ".githooks/pre-commit.d/10-rust.sh"
     );
+    assert_eq!(input.local_override_scripts, vec!["90-local.sh".to_owned()]);
     assert_eq!(input.hooks_path, Some(".githooks".to_owned()));
     assert_eq!(input.trust_risks, vec![".husky/pre-commit".to_owned()]);
 }
@@ -566,17 +640,33 @@ fn file_tree_ingestion_collects_modular_layout_for_hooks_compat_path() {
     let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "hooks");
 
-    write_fixture(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\nrun-parts .githooks/pre-commit.d\n");
-    write_fixture(root.join(".githooks/pre-commit.d/10-rust.sh"), "#!/usr/bin/env bash\ncargo fmt --check\n");
-    write_fixture(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo test --workspace\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\nrun-parts .githooks/pre-commit.d\n",
+    );
+    write_fixture(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "#!/usr/bin/env bash\ncargo fmt --check\n",
+    );
+    write_fixture(
+        root.join("hooks/pre-commit"),
+        "#!/usr/bin/env bash\ncargo test --workspace\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
 
-    assert_eq!(input.pre_commit.as_ref().map(|fact| fact.rel_path.as_str()), Some("hooks/pre-commit"));
+    assert_eq!(
+        input.pre_commit.as_ref().map(|fact| fact.rel_path.as_str()),
+        Some("hooks/pre-commit")
+    );
     assert!(input.has_modular_dir);
     assert_eq!(input.modular_scripts.len(), 1);
-    assert_eq!(input.modular_scripts[0].rel_path, ".githooks/pre-commit.d/10-rust.sh");
+    assert_eq!(
+        input.modular_scripts[0].rel_path,
+        ".githooks/pre-commit.d/10-rust.sh"
+    );
 }
 
 #[test]
@@ -584,13 +674,23 @@ fn file_tree_ingestion_reports_git_hook_shadow_when_hooks_path_is_wrong() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
-    write_fixture(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
-    write_fixture(root.join(".git/hooks/pre-commit"), "#!/usr/bin/env bash\nexit 0\n");
+    write_fixture(
+        root.join("hooks/pre-commit"),
+        "#!/usr/bin/env bash\ncargo fmt --check\n",
+    );
+    write_fixture(
+        root.join(".git/hooks/pre-commit"),
+        "#!/usr/bin/env bash\nexit 0\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
 
-    assert_eq!(input.pre_commit.as_ref().map(|fact| fact.rel_path.as_str()), Some("hooks/pre-commit"));
+    assert_eq!(
+        input.pre_commit.as_ref().map(|fact| fact.rel_path.as_str()),
+        Some("hooks/pre-commit")
+    );
     assert_eq!(input.trust_risks, vec![".git/hooks/pre-commit".to_owned()]);
 }
 
@@ -600,13 +700,23 @@ fn file_tree_ingestion_does_not_report_git_hook_shadow_for_hooks_path_compat_mod
     let root = repo_root(&temp_dir);
     git_config_hooks_path(root, "hooks");
 
-    write_fixture(root.join("hooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
-    write_fixture(root.join(".git/hooks/pre-commit"), "#!/usr/bin/env bash\nexit 0\n");
+    write_fixture(
+        root.join("hooks/pre-commit"),
+        "#!/usr/bin/env bash\ncargo fmt --check\n",
+    );
+    write_fixture(
+        root.join(".git/hooks/pre-commit"),
+        "#!/usr/bin/env bash\nexit 0\n",
+    );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
+    let input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
 
-    assert_eq!(input.pre_commit.as_ref().map(|fact| fact.rel_path.as_str()), Some("hooks/pre-commit"));
+    assert_eq!(
+        input.pre_commit.as_ref().map(|fact| fact.rel_path.as_str()),
+        Some("hooks/pre-commit")
+    );
     assert!(input.trust_risks.is_empty());
 }
 
@@ -615,7 +725,10 @@ fn file_tree_ingestion_fails_closed_when_git_hooks_path_lookup_errors() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
-    write_fixture(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\ncargo fmt --check\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "#!/usr/bin/env bash\ncargo fmt --check\n",
+    );
     break_git_dir(root);
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let error = super::super::ingest_for_file_tree_checks(&crawl).expect_err("should fail closed");
@@ -665,11 +778,16 @@ fn file_tree_ingestion_fails_closed_when_selected_modular_script_disappears_afte
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
-    write_fixture(root.join(".githooks/pre-commit"), "run-parts .githooks/pre-commit.d\n");
-    write_fixture(root.join(".githooks/pre-commit.d/10-rust.sh"), "cargo fmt --check\n");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        "run-parts .githooks/pre-commit.d\n",
+    );
+    write_fixture(
+        root.join(".githooks/pre-commit.d/10-rust.sh"),
+        "cargo fmt --check\n",
+    );
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    fs::remove_file(root.join(".githooks/pre-commit.d/10-rust.sh"))
-        .expect("remove modular script");
+    fs::remove_file(root.join(".githooks/pre-commit.d/10-rust.sh")).expect("remove modular script");
 
     let error = super::super::ingest_for_file_tree_checks(&crawl).expect_err("should fail closed");
     match error {

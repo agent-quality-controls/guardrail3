@@ -29,7 +29,9 @@ fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
 fn make_unreadable(path: &Path) {
     use std::os::unix::fs::PermissionsExt;
 
-    let mut permissions = fs::metadata(path).expect("stat should succeed").permissions();
+    let mut permissions = fs::metadata(path)
+        .expect("stat should succeed")
+        .permissions();
     permissions.set_mode(0o000);
     fs::set_permissions(path, permissions).expect("chmod should succeed");
 }
@@ -120,7 +122,10 @@ fn member_may_inherit_workspace_edition() {
 
     assert_eq!(input.workspace_members.len(), 1);
     assert!(matches!(
-        cargo_toml_parser::document::package_string_field(&input.workspace_members[0].cargo, "edition"),
+        cargo_toml_parser::document::package_string_field(
+            &input.workspace_members[0].cargo,
+            "edition"
+        ),
         cargo_toml_parser::types::CargoStringFieldState::Inherit
     ));
 }
@@ -174,7 +179,7 @@ fn guardrail3_rs_toml_drives_profile_and_ignores_legacy_guardrail3_toml() {
     );
     write(
         root.join("guardrail3-rs.toml"),
-        "profile = \"library\"\n\n[[waivers]]\nrule = \"RS-CARGO-CONFIG-07\"\nfile = \"Cargo.toml\"\nselector = \"clippy:module_name_repetitions\"\nreason = \"Temporary lint suppression while API cleanup lands.\"\n",
+        "profile = \"library\"\n\n[[waivers]]\nrule = \"g3rs-cargo/approved-allow-inventory\"\nfile = \"Cargo.toml\"\nselector = \"clippy:module_name_repetitions\"\nreason = \"Temporary lint suppression while API cleanup lands.\"\n",
     );
     write(
         root.join("guardrail3.toml"),
@@ -185,10 +190,15 @@ fn guardrail3_rs_toml_drives_profile_and_ignores_legacy_guardrail3_toml() {
         .expect("config ingestion should succeed with rust-only policy");
 
     match &input.root.rust_policy {
-        g3rs_cargo_types::G3RsCargoRustPolicyState::Parsed { profile, waivers, .. } => {
-            assert_eq!(*profile, Some(guardrail3_rs_toml_parser::types::RustProfile::Library));
+        g3rs_cargo_types::G3RsCargoRustPolicyState::Parsed {
+            profile, waivers, ..
+        } => {
+            assert_eq!(
+                *profile,
+                Some(guardrail3_rs_toml_parser::types::RustProfile::Library)
+            );
             assert_eq!(waivers.len(), 1, "{waivers:#?}");
-            assert_eq!(waivers[0].rule, "RS-CARGO-CONFIG-07");
+            assert_eq!(waivers[0].rule, "g3rs-cargo/approved-allow-inventory");
             assert_eq!(waivers[0].selector, "clippy:module_name_repetitions");
         }
         other => panic!("expected parsed rust policy, got {other:#?}"),
@@ -268,7 +278,7 @@ fn invalid_guardrail3_rs_waiver_degrades_to_rust_policy_parse_error() {
             profile = "library"
 
             [[waivers]]
-            rule = "RS-CARGO-CONFIG-11"
+            rule = "g3rs-cargo/unapproved-allow-entries"
             file = "Cargo.toml"
             selector = "rust:warnings"
             reason = []
@@ -298,7 +308,10 @@ fn config_ingestion_fails_closed_on_invalid_workspace_members_shape() {
 
     let result = crate::run::ingest_for_config_checks(&crawl(root));
 
-    assert!(result.is_err(), "invalid workspace members must fail closed");
+    assert!(
+        result.is_err(),
+        "invalid workspace members must fail closed"
+    );
 }
 
 #[test]
@@ -411,7 +424,12 @@ fn config_ingestion_normalizes_root_member_dot_patterns() {
     let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("root member dot patterns should normalize to the root manifest");
 
-    assert_eq!(input.workspace_members.len(), 1, "{:#?}", input.workspace_members);
+    assert_eq!(
+        input.workspace_members.len(),
+        1,
+        "{:#?}",
+        input.workspace_members
+    );
     assert_eq!(input.workspace_members[0].member_rel, "");
     assert_eq!(input.workspace_members[0].cargo_rel_path, "Cargo.toml");
 }
@@ -446,7 +464,12 @@ fn config_ingestion_keeps_healthy_members_when_another_member_manifest_is_malfor
     let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("malformed sibling member should not abort config ingestion");
 
-    assert_eq!(input.workspace_members.len(), 1, "{:#?}", input.workspace_members);
+    assert_eq!(
+        input.workspace_members.len(),
+        1,
+        "{:#?}",
+        input.workspace_members
+    );
     assert_eq!(input.workspace_members[0].member_rel, "crates/api");
 }
 
@@ -468,7 +491,11 @@ fn config_ingestion_skips_missing_declared_member_manifest() {
     let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("missing declared member should be left to filetree checks");
 
-    assert!(input.workspace_members.is_empty(), "{:#?}", input.workspace_members);
+    assert!(
+        input.workspace_members.is_empty(),
+        "{:#?}",
+        input.workspace_members
+    );
 }
 
 #[test]
@@ -501,7 +528,9 @@ fn config_ingestion_preserves_invalid_lints_workspace_shape_per_member() {
         .expect("invalid [lints].workspace should remain member-scoped config state");
 
     assert_eq!(input.workspace_members.len(), 1);
-    assert!(match cargo_toml_parser::document::lints_workspace_state(&input.workspace_members[0].cargo) {
+    assert!(match cargo_toml_parser::document::lints_workspace_state(
+        &input.workspace_members[0].cargo
+    ) {
         cargo_toml_parser::types::CargoBoolFieldState::WrongType(toml::Value::String(value)) => {
             value == "yes"
         }
@@ -580,7 +609,12 @@ fn config_ingestion_keeps_healthy_members_when_another_member_has_invalid_lints_
     let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("invalid sibling member must not abort healthy config fan-out");
 
-    assert_eq!(input.workspace_members.len(), 2, "{:#?}", input.workspace_members);
+    assert_eq!(
+        input.workspace_members.len(),
+        2,
+        "{:#?}",
+        input.workspace_members
+    );
     assert!(
         input.workspace_members.iter().any(|member| {
             member.member_rel == "crates/api"
@@ -684,7 +718,12 @@ fn config_ingestion_skips_unreadable_member_manifest() {
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("unreadable sibling member must not abort healthy config fan-out");
 
-    assert_eq!(input.workspace_members.len(), 1, "{:#?}", input.workspace_members);
+    assert_eq!(
+        input.workspace_members.len(),
+        1,
+        "{:#?}",
+        input.workspace_members
+    );
     assert_eq!(input.workspace_members[0].member_rel, "crates/api");
 }
 

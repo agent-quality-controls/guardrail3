@@ -1,6 +1,6 @@
 ## Summary
 
-Repaired the remaining `RS-TEST-FILETREE-03` boundary defect in the `rs/test` file-tree lane. Ingestion now binds component-local file-tree facts once, and the runtime/assertions split rule consumes those facts directly instead of rebuilding cross-file lookup state from the top-level analyzed file bag.
+Repaired the remaining `g3rs-test/runtime-assertions-split` boundary defect in the `rs/test` file-tree lane. Ingestion now binds component-local file-tree facts once, and the runtime/assertions split rule consumes those facts directly instead of rebuilding cross-file lookup state from the top-level analyzed file bag.
 
 ## Decisions made
 
@@ -10,12 +10,12 @@ Repaired the remaining `RS-TEST-FILETREE-03` boundary defect in the `rs/test` fi
   - per-component `sidecar_files`
   - per-component `external_harness_files`
   - per-component `assertions_module_files`
-  - Why: `RS-TEST-FILETREE-03` was reconstructing this information locally from `input.files`.
+  - Why: `g3rs-test/runtime-assertions-split` was reconstructing this information locally from `input.files`.
 - Kept the top-level `files` bag for the other file-tree rules.
-  - Why: this repair is scoped to `RS-TEST-FILETREE-03`, not a full family-wide reshape.
+  - Why: this repair is scoped to `g3rs-test/runtime-assertions-split`, not a full family-wide reshape.
 - Added red-first proof that the rule was still trusting `input.files` over ingestion-owned path facts.
   - The failing case was a sidecar assertions-module path present in `existing_file_paths` but absent from `input.files`; the old rule still reported "sidecar missing owned assertions module".
-- Added a second proof that component-bound sidecar files now drive `RS-TEST-FILETREE-03` even if the sidecar file is removed from the top-level `files` bag.
+- Added a second proof that component-bound sidecar files now drive `g3rs-test/runtime-assertions-split` even if the sidecar file is removed from the top-level `files` bag.
 
 ## Key files for context
 
@@ -29,4 +29,4 @@ Repaired the remaining `RS-TEST-FILETREE-03` boundary defect in the `rs/test` fi
 ## Next steps
 
 - Continue the remaining Rust boundary audit from the smaller residual cases, not from config-document families like `rs/cargo`.
-- Keep `RS-TEST-FILETREE-03` on ingestion-owned component facts. Do not reintroduce check-local `parsed_by_path` or component-local rescans of `input.files`.
+- Keep `g3rs-test/runtime-assertions-split` on ingestion-owned component facts. Do not reintroduce check-local `parsed_by_path` or component-local rescans of `input.files`.

@@ -12,7 +12,7 @@ Decisions made
 - Marked the whole package unpublished.
   Why: the facade depends on internal sibling crates, so the package is not crates.io-ready without publishing internal implementation crates too.
   Rejected: pretending the package is publishable while `cargo publish --dry-run` fails on internal path dependencies.
-- Stopped before changing `RS-CODE-SOURCE-19`.
+- Stopped before changing `g3rs-code/ast-19-large-type-inventory`.
   Why: the only remaining finding is a warning on `CargoConfigToml` having 22 fields while it intentionally mirrors Cargo's top-level config schema. That is no longer clear package debt; it needs a rule or policy decision.
 
 Key files for context
@@ -27,6 +27,6 @@ Key files for context
 - `packages/parsers/cargo-config-toml-parser/crates/types/src/cargo_config_toml.rs`
 
 Next steps
-- Decide whether parser schema-mirror types should be exempt from `RS-CODE-SOURCE-19 large type inventory`.
+- Decide whether parser schema-mirror types should be exempt from `g3rs-code/ast-19-large-type-inventory large type inventory`.
 - If yes, add a narrow mechanism for that case and then re-run this package.
 - If no, redesign the Cargo config model so the top-level schema is split across smaller flattened structs and update parser callers to the new shape.

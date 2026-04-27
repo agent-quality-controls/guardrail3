@@ -9,25 +9,25 @@ pub fn check(input: &G3RsGardeSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for failure in &input.input_failures {
-        crate::rs_garde_10_input_failures::check(failure, &mut results);
+        crate::input_failures::check(failure, &mut results);
     }
     for target in &input.struct_targets {
-        crate::rs_garde_ast_01_struct_derive_validate::check(target, &mut results);
+        crate::struct_derive_validate::check(target, &mut results);
     }
     for target in &input.manual_deserialize_impls {
-        crate::rs_garde_ast_02_manual_deserialize_impl::check(target, &mut results);
+        crate::manual_deserialize_impl::check(target, &mut results);
     }
     for target in &input.enum_targets {
-        crate::rs_garde_ast_03_enum_derive_validate::check(target, &mut results);
+        crate::enum_derive_validate::check(target, &mut results);
     }
     for macro_use in &input.query_as_macros {
-        crate::rs_garde_ast_04_query_as_inventory::check(macro_use, &mut results);
+        crate::query_as_inventory::check(macro_use, &mut results);
     }
-    crate::rs_garde_ast_04_query_as_inventory::check_count(&input.query_as_macros, &mut results);
+    crate::query_as_inventory::check_count(&input.query_as_macros, &mut results);
     for field in &input.boundary_fields {
-        crate::rs_garde_ast_05_field_level_constraints::check(field, &mut results);
-        crate::rs_garde_ast_06_nested_validation_dive::check(field, &mut results);
-        crate::rs_garde_ast_07_context_validation_surface::check(field, &mut results);
+        crate::field_level_constraints::check(field, &mut results);
+        crate::nested_validation_dive::check(field, &mut results);
+        crate::context_validation_surface::check(field, &mut results);
     }
 
     results

@@ -12,7 +12,7 @@ fn missing_root_reports_only_exists_error() {
     assertions::assert_exact(
         &results,
         &[assertions::error(
-            "TS-JSCPD-CONFIG-01",
+            "g3ts-jscpd/root-exists",
             "root .jscpd.json missing",
             "No root `.jscpd.json` file was found. Add a root duplication-policy config.",
             None,
@@ -29,14 +29,14 @@ fn parse_error_reports_exists_inventory_and_parse_error() {
         &results,
         &[
             assertions::info(
-                "TS-JSCPD-CONFIG-01",
+                "g3ts-jscpd/root-exists",
                 "root .jscpd.json exists",
                 "Found root JSCpd config `.jscpd.json`.",
                 Some(".jscpd.json"),
                 true,
             ),
             assertions::error(
-                "TS-JSCPD-CONFIG-02",
+                "g3ts-jscpd/root-parseable",
                 "root .jscpd.json parse error",
                 "Failed to parse root `.jscpd.json`: synthetic parse failure",
                 Some(".jscpd.json"),
@@ -54,42 +54,42 @@ fn golden_root_reports_expected_inventory() {
         &results,
         &[
             assertions::info(
-                "TS-JSCPD-CONFIG-01",
+                "g3ts-jscpd/root-exists",
                 "root .jscpd.json exists",
                 "Found root JSCpd config `.jscpd.json`.",
                 Some(".jscpd.json"),
                 true,
             ),
             assertions::info(
-                "TS-JSCPD-CONFIG-02",
+                "g3ts-jscpd/root-parseable",
                 "root .jscpd.json parseable",
                 "`.jscpd.json` parsed successfully as jscpd JSON.",
                 Some(".jscpd.json"),
                 true,
             ),
             assertions::info(
-                "TS-JSCPD-CONFIG-03",
+                "g3ts-jscpd/threshold-zero",
                 "jscpd threshold set to zero",
                 "The root `.jscpd.json` enforces zero duplication tolerance with `threshold: 0`.",
                 Some(".jscpd.json"),
                 true,
             ),
             assertions::info(
-                "TS-JSCPD-CONFIG-04",
+                "g3ts-jscpd/absolute-true",
                 "jscpd absolute paths enabled",
                 "The root `.jscpd.json` sets `absolute: true`.",
                 Some(".jscpd.json"),
                 true,
             ),
             assertions::info(
-                "TS-JSCPD-CONFIG-05",
+                "g3ts-jscpd/required-ignores",
                 "jscpd required ignore patterns present",
                 "The root `.jscpd.json` includes the required ignore-pattern baseline.",
                 Some(".jscpd.json"),
                 true,
             ),
             assertions::info(
-                "TS-JSCPD-CONFIG-06",
+                "g3ts-jscpd/format-and-inventory",
                 "jscpd format includes typescript",
                 "The root `.jscpd.json` format list includes `typescript`.",
                 Some(".jscpd.json"),
@@ -106,7 +106,7 @@ fn weak_threshold_reports_threshold_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-JSCPD-CONFIG-03",
+            "g3ts-jscpd/threshold-zero",
             "jscpd threshold is not zero",
             "Root `.jscpd.json` sets `threshold` to `1`, but the current baseline requires `0`.",
             Some(".jscpd.json"),
@@ -122,7 +122,7 @@ fn missing_absolute_reports_absolute_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-JSCPD-CONFIG-04",
+            "g3ts-jscpd/absolute-true",
             "jscpd absolute field missing",
             "Root `.jscpd.json` must set `absolute: true`.",
             Some(".jscpd.json"),
@@ -138,7 +138,7 @@ fn missing_ignores_report_ignore_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-JSCPD-CONFIG-05",
+            "g3ts-jscpd/required-ignores",
             "jscpd required ignore patterns missing",
             "Root `.jscpd.json` is missing required ignore patterns: **/.next/**, **/dist/**, **/target/**, **/components/ui/**.",
             Some(".jscpd.json"),
@@ -154,7 +154,7 @@ fn missing_typescript_format_reports_format_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-JSCPD-CONFIG-06",
+            "g3ts-jscpd/format-and-inventory",
             "jscpd format misses typescript",
             "Root `.jscpd.json` must include `typescript` in `format`.",
             Some(".jscpd.json"),
@@ -170,7 +170,7 @@ fn extra_inventory_key_reports_inventory_finding() {
     assertions::assert_contains(
         &results,
         &[assertions::info(
-            "TS-JSCPD-CONFIG-06",
+            "g3ts-jscpd/format-and-inventory",
             "jscpd extra top-level key present",
             "Extra root `.jscpd.json` key `gitignore` is outside the current wave-1 baseline. Keep it only if intentional.",
             Some(".jscpd.json"),

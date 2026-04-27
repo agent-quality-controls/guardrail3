@@ -1,13 +1,13 @@
 ## Summary
 
-Fixed `RS-CODE-SOURCE-31` so multi-`super` inherent impl paths normalize correctly when checking shared public structs with named public fields. Added a red regression for `super::super::Input` and kept the broader glob-reexport alias regression as coverage on the same rule surface.
+Fixed `g3rs-code/ast-31-public-struct-named-fields` so multi-`super` inherent impl paths normalize correctly when checking shared public structs with named public fields. Added a red regression for `super::super::Input` and kept the broader glob-reexport alias regression as coverage on the same rule surface.
 
 ## Decisions made
 
 - Fixed the normalization in the rule-owned impl-path binding layer.
   - Why: the live bug was in inherent-impl path matching, not in public-struct discovery.
 - Kept the glob-reexport alias regression in the same sidecar test file.
-  - Why: it exercises the same `RS-CODE-SOURCE-31` name-resolution surface and stayed green under the real fix.
+  - Why: it exercises the same `g3rs-code/ast-31-public-struct-named-fields` name-resolution surface and stayed green under the real fix.
 - Removed stale batch plan files instead of carrying them forward.
   - Why: the repo should stay clean and only retain the plan/worklog artifacts that match landed work.
 

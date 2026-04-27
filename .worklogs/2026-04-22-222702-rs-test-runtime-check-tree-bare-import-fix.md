@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed the remaining `RS-TEST-FILETREE-03` gap where assertions modules could call runtime `check_test_tree()` through a bare import and escape detection. Added a red test for `use demo_runtime::check_test_tree; check_test_tree();` and fixed the helper import collector to record bare imports of `check_test_tree`.
+Fixed the remaining `g3rs-test/runtime-assertions-split` gap where assertions modules could call runtime `check_test_tree()` through a bare import and escape detection. Added a red test for `use demo_runtime::check_test_tree; check_test_tree();` and fixed the helper import collector to record bare imports of `check_test_tree`.
 
 ## Decisions made
 

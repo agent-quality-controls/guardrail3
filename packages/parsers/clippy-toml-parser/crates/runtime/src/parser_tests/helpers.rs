@@ -1,7 +1,7 @@
 use std::io::Write;
 
-use super::super::{from_path, parse};
 use super::super::ClippyToml;
+use super::super::{from_path, parse};
 
 pub(super) fn parse_fixture(input: &str) -> ClippyToml {
     parse(input).expect("should parse valid clippy.toml")

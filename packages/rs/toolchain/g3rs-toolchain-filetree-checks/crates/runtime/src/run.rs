@@ -4,8 +4,8 @@ use guardrail3_check_types::G3CheckResult;
 pub fn check(input: &G3RsToolchainFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
-    crate::rs_toolchain_filetree_01_exists::check(input, &mut results);
-    crate::rs_toolchain_filetree_04_legacy_file::check(input, &mut results);
+    crate::exists::check(input, &mut results);
+    crate::legacy_file::check(input, &mut results);
 
     results
 }

@@ -56,7 +56,7 @@ As of handoff time:
   - `inputs.rs`
   - `parse.rs`
   - `test_support.rs`
-  - rule files `RS-GARDE-CONFIG-01..13`
+  - rule files `g3rs-garde/dependency-present..13`
   - rule-specific sidecar dirs already exist for all live rules
 - size is medium:
   - about `90` Rust files
@@ -219,7 +219,7 @@ Use this approach:
 
 Attack these first:
 
-- `RS-GARDE-CONFIG-02/03/04/06`
+- `g3rs-garde/core-method-bans/03/04/06`
   - correct clippy-ban ownership and per-root covering-config lookup
   - false greens when garde is enabled but a local covering config is incomplete
   - false positives when garde is disabled

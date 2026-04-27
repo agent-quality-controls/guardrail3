@@ -62,9 +62,9 @@ Per owned root, the family must determine:
 Important verified semantics:
 - if the root config is package-driven by `[rust.packages]`, root garde gating must inherit `[rust.packages.checks]`
 - the root must not always fall back to the global default garde setting
-- otherwise `RS-GARDE-CONFIG-02..09` can fail open or overfire at the root
+- otherwise `g3rs-garde/core-method-bans..09` can fail open or overfire at the root
 
-Rules `RS-GARDE-CONFIG-02..09` are conditional:
+Rules `g3rs-garde/core-method-bans..09` are conditional:
 - if garde is absent for an owned root, those rules do not fire for that root
 
 This is product gating, not a fail-open loophole.
@@ -107,12 +107,12 @@ These remain active even though the family is implemented:
   - focused verification should keep using a stable family `CARGO_TARGET_DIR` such as `target/garde` to avoid lock fights with other agents
 
 - expanded extractor bans are no longer a live gap:
-  - the canonical clippy generator now emits the full RS-GARDE-CONFIG-03 extractor set
+  - the canonical clippy generator now emits the full g3rs-garde/extractor-type-bans extractor set
   - rule-local parity exists in `rs_garde_config_03_extractor_type_bans_tests/parity.rs`
   - generator/checker parity is also pinned by the clippy type-ban parity tests
 - expanded deserialization method bans are no longer a live gap:
-  - the canonical clippy generator now emits the RS-GARDE-CONFIG-05 method set as part of the managed garde method baseline
-  - `RS-GARDE-CONFIG-02/04/06` golden tests now read the canonical generated clippy baseline instead of hand-written method lists
+  - the canonical clippy generator now emits the g3rs-garde/additional-method-bans method set as part of the managed garde method baseline
+  - `g3rs-garde/core-method-bans/04/06` golden tests now read the canonical generated clippy baseline instead of hand-written method lists
   - clippy-side parity is pinned through `rs_clippy_04_missing_method_ban_tests/parity.rs`
 - source-level multi-root tests were corrected to the actual root model:
   - `RS-GARDE-AST-01/07/08/09` multi-root tests now use standalone package roots not enrolled in a workspace

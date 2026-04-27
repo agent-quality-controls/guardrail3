@@ -25,9 +25,9 @@ End state:
 2. Build the missing release filetree lane.
    - Add `packages/rs/release/g3rs-release-filetree-checks`
    - Migrate:
-     - `RS-RELEASE-FILETREE-01` - repo license material exists
-     - `RS-RELEASE-FILETREE-02` - root `release-plz.toml` exists
-     - `RS-RELEASE-FILETREE-04` - root `cliff.toml` exists
+     - `g3rs-release/license-file` - repo license material exists
+     - `g3rs-release/release-plz-exists` - root `release-plz.toml` exists
+     - `g3rs-release/readme-exists` - root `cliff.toml` exists
      - `RS-RELEASE-FILETREE-13` - crate README exists
      - filetree-side release input failures
    - Add failing tests before each fix and use exact result assertions.

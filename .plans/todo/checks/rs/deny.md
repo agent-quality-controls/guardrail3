@@ -55,32 +55,32 @@ Forbidden:
 | RS-DENY-01 | R8 | Error | Every Rust root is covered by an effective deny config | Implemented |
 | RS-DENY-02 | — | Error | deny config files may exist only at allowed roots | Implemented |
 | RS-DENY-03 | — | Error | Nested deny configs that shadow a parent root are forbidden | Implemented |
-| RS-DENY-CONFIG-01 | R9 | Warn | Deprecated `[advisories]` fields (`vulnerability`, `notice`, `unsound`) | Implemented |
-| RS-DENY-CONFIG-02 | R10 | Error | `[advisories]` must set `unmaintained = "workspace"` and `yanked = "warn"` | Implemented |
-| RS-DENY-CONFIG-03 | R11 | Info | Advisory settings stricter than baseline are inventoried | Implemented |
-| RS-DENY-CONFIG-04 | — | Error | `[graph].all-features = true` must be set | Implemented |
-| RS-DENY-CONFIG-05 | — | Error | `[graph].no-default-features = false` must be set | Implemented |
+| g3rs-deny/deprecated-advisories | R9 | Warn | Deprecated `[advisories]` fields (`vulnerability`, `notice`, `unsound`) | Implemented |
+| g3rs-deny/advisories-baseline | R10 | Error | `[advisories]` must set `unmaintained = "workspace"` and `yanked = "warn"` | Implemented |
+| g3rs-deny/stricter-advisories-inventory | R11 | Info | Advisory settings stricter than baseline are inventoried | Implemented |
+| g3rs-deny/graph-all-features | — | Error | `[graph].all-features = true` must be set | Implemented |
+| g3rs-deny/graph-no-default-features | — | Error | `[graph].no-default-features = false` must be set | Implemented |
 | RS-DENY-09 | R12 | Error | `[bans].deny` must contain the full canonical baseline ban set for the active profile | Implemented |
-| RS-DENY-CONFIG-07 | R12 | Warn | `[bans].multiple-versions` weaker than `"deny"` | Implemented |
-| RS-DENY-CONFIG-08 | R13 | Info | `[bans].highlight` setting inventoried when it differs from `"all"` | Implemented |
-| RS-DENY-CONFIG-09 | — | Error | `[bans].allow-wildcard-paths = true` must be set | Implemented |
-| RS-DENY-CONFIG-10 | — | Warn | `[bans].wildcards` missing / default-reliant / weaker-than-expected is inventoried | Implemented |
-| RS-DENY-CONFIG-11 | R14 | Error | `[licenses]` must contain the baseline allow list and `[licenses.private].ignore = true` | Implemented |
-| RS-DENY-CONFIG-12 | R15 | Warn/Info | `confidence-threshold` must be `0.8` or stricter; stricter values are inventoried | Implemented |
-| RS-DENY-CONFIG-13 | — | Warn | `[licenses].allow` must not include copyleft licenses | Implemented |
+| g3rs-deny/highlight-inventory | R12 | Warn | `[bans].multiple-versions` weaker than `"deny"` | Implemented |
+| g3rs-deny/allow-wildcard-paths | R13 | Info | `[bans].highlight` setting inventoried when it differs from `"all"` | Implemented |
+| g3rs-deny/wildcards-inventory | — | Error | `[bans].allow-wildcard-paths = true` must be set | Implemented |
+| g3rs-deny/license-allow-baseline | — | Warn | `[bans].wildcards` missing / default-reliant / weaker-than-expected is inventoried | Implemented |
+| g3rs-deny/confidence-threshold | R14 | Error | `[licenses]` must contain the baseline allow list and `[licenses.private].ignore = true` | Implemented |
+| g3rs-deny/copyleft-allowlist | R15 | Warn/Info | `confidence-threshold` must be `0.8` or stricter; stricter values are inventoried | Implemented |
+| g3rs-deny/unknown-sources-policy | — | Warn | `[licenses].allow` must not include copyleft licenses | Implemented |
 | RS-DENY-17 | — | Error/Info | `[licenses].exceptions` entries must be documented with reasons; valid entries are inventoried | Implemented |
-| RS-DENY-CONFIG-15 | R16 | Error | `[sources].unknown-registry = "deny"` and `unknown-git = "deny"` | Implemented |
-| RS-DENY-CONFIG-16 | R16 | Error | `[sources].allow-registry` must contain exactly one canonical crates.io sparse URL | Implemented |
-| RS-DENY-CONFIG-17 | — | Warn/Info | `[sources].allow-git` entries are warned and inventoried | Implemented |
-| RS-DENY-CONFIG-18 | R17 | Warn | `[[bans.features]]` must ban `tokio` feature `full` and keep the canonical tokio allow list | Implemented |
-| RS-DENY-CONFIG-19 | R18 | Info | Extra feature bans beyond tokio are inventoried | Implemented |
-| RS-DENY-CONFIG-20 | R19 | Error/Info | `[bans.skip]` entries must use documented table form with a string `reason`; valid entries inventory | Implemented |
-| RS-DENY-CONFIG-21 | R20 | Error/Info | `[advisories].ignore` entries must use documented table form with a string `reason`; valid entries inventory | Implemented |
+| g3rs-deny/allow-git-inventory | R16 | Error | `[sources].unknown-registry = "deny"` and `unknown-git = "deny"` | Implemented |
+| g3rs-deny/tokio-full-ban | R16 | Error | `[sources].allow-registry` must contain exactly one canonical crates.io sparse URL | Implemented |
+| g3rs-deny/extra-feature-bans-inventory | — | Warn/Info | `[sources].allow-git` entries are warned and inventoried | Implemented |
+| g3rs-deny/skip-hygiene | R17 | Warn | `[[bans.features]]` must ban `tokio` feature `full` and keep the canonical tokio allow list | Implemented |
+| g3rs-deny/ignore-hygiene | R18 | Info | Extra feature bans beyond tokio are inventoried | Implemented |
+| g3rs-deny/duplicate-entries | R19 | Error/Info | `[bans.skip]` entries must use documented table form with a string `reason`; valid entries inventory | Implemented |
+| g3rs-deny/unknown-keys | R20 | Error/Info | `[advisories].ignore` entries must use documented table form with a string `reason`; valid entries inventory | Implemented |
 | RS-DENY-25 | — | Error/Warn | `[bans].allow` is forbidden; overlap with deny baseline is an explicit error | Implemented |
 | RS-DENY-26 | — | Error | `[bans].deny` entries without `reason` are errors | Implemented |
-| RS-DENY-CONFIG-24 | — | Warn | Duplicate entries in `deny`, `skip`, `ignore`, or `[[bans.features]]` are warned | Implemented |
-| RS-DENY-CONFIG-25 | — | Warn | Unknown keys / unsupported schema in critical deny sections are warned | Implemented |
-| RS-DENY-CONFIG-26 | — | Warn | Advisory ignore accumulation over threshold `5` is warned | Implemented |
+| g3rs-deny/license-exceptions-inventory | — | Warn | Duplicate entries in `deny`, `skip`, `ignore`, or `[[bans.features]]` are warned | Implemented |
+| g3rs-deny/allow-override-channel | — | Warn | Unknown keys / unsupported schema in critical deny sections are warned | Implemented |
+| g3rs-deny/extra-deny-bans-inventory | — | Warn | Advisory ignore accumulation over threshold `5` is warned | Implemented |
 | RS-DENY-30 | — | Error/Info | Ban-entry `wrappers` must match canonical policy where managed; project-specific wrappers inventory otherwise | Implemented |
 
 ## Canonical baseline
@@ -162,7 +162,7 @@ This applies to all accepted filenames:
 - `.deny.toml`
 - `.cargo/deny.toml`
 
-### RS-DENY-CONFIG-04 / RS-DENY-CONFIG-05 — Graph coverage (Error)
+### g3rs-deny/graph-all-features / g3rs-deny/graph-no-default-features — Graph coverage (Error)
 
 Required:
 - `[graph]` exists
@@ -179,14 +179,14 @@ That expected set must be derived from the generator baseline, not duplicated ma
 
 For `library` profile, the baseline includes library-IO bans from the canonical module.
 
-### RS-DENY-CONFIG-07 — `multiple-versions` floor (Warn)
+### g3rs-deny/highlight-inventory — `multiple-versions` floor (Warn)
 
 `multiple-versions = "deny"` is the preferred hardening baseline.
 
 If the value is weaker, warn rather than error.
 This is a deliberate design choice: it behaves like a threshold/floor, not like a must-match invariant.
 
-### RS-DENY-CONFIG-09 / RS-DENY-CONFIG-10 — Wildcard policy
+### g3rs-deny/wildcards-inventory / g3rs-deny/license-allow-baseline — Wildcard policy
 
 Hard requirement:
 - `allow-wildcard-paths = true`
@@ -198,7 +198,7 @@ Inventory / warning:
 
 Do not treat stricter user values as hard failures.
 
-### RS-DENY-CONFIG-11 / RS-DENY-CONFIG-12 / RS-DENY-CONFIG-13 / RS-DENY-17 — License policy
+### g3rs-deny/confidence-threshold / g3rs-deny/copyleft-allowlist / g3rs-deny/unknown-sources-policy / RS-DENY-17 — License policy
 
 Guardrail-owned:
 - baseline allow list present
@@ -209,7 +209,7 @@ Warn / inventory:
 - copyleft licenses in allow list
 - license exceptions in `[licenses].exceptions`
 
-### RS-DENY-CONFIG-15 / RS-DENY-CONFIG-16 / RS-DENY-CONFIG-17 — Source policy
+### g3rs-deny/allow-git-inventory / g3rs-deny/tokio-full-ban / g3rs-deny/extra-feature-bans-inventory — Source policy
 
 Guardrail-owned:
 - `unknown-registry = "deny"`
@@ -224,7 +224,7 @@ The legacy GitHub crates.io index form is rejected to keep the policy exact.
 
 `allow-git` is not automatically forbidden by the plan, but it is risky enough to warn and inventory.
 
-### RS-DENY-CONFIG-18 / RS-DENY-CONFIG-19 — Feature-ban policy
+### g3rs-deny/skip-hygiene / g3rs-deny/ignore-hygiene — Feature-ban policy
 
 Guardrail-managed baseline:
 - `tokio` must ban `full`
@@ -232,7 +232,7 @@ Guardrail-managed baseline:
 
 Extra feature bans are inventoried.
 
-### RS-DENY-CONFIG-20 / RS-DENY-CONFIG-21 / RS-DENY-26 / RS-DENY-CONFIG-26 — Exception hygiene
+### g3rs-deny/duplicate-entries / g3rs-deny/unknown-keys / RS-DENY-26 / g3rs-deny/extra-deny-bans-inventory — Exception hygiene
 
 For `licenses.exceptions`, `skip`, and `ignore` entries:
 - malformed entry shape errors
@@ -253,7 +253,7 @@ Policy:
 - any overlap with the deny baseline is an explicit error
 - mixed-profile local roots must compare against the effective routed profile, not an implicit service fallback
 
-### RS-DENY-CONFIG-24 / RS-DENY-CONFIG-25 / RS-DENY-30 — Schema hardening
+### g3rs-deny/license-exceptions-inventory / g3rs-deny/allow-override-channel / RS-DENY-30 — Schema hardening
 
 Warn on:
 - duplicate deny / skip / ignore / feature-ban entries

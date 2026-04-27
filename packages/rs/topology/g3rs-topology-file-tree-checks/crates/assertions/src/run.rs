@@ -3,11 +3,11 @@ pub fn assert_precomputed_dispatch(results: &[guardrail3_check_types::G3CheckRes
     assert_eq!(
         ids,
         vec![
-            "RS-TOPOLOGY-FILETREE-07",
-            "RS-TOPOLOGY-FILETREE-11",
-            "RS-TOPOLOGY-FILETREE-12",
-            "RS-TOPOLOGY-FILETREE-13",
-            "RS-TOPOLOGY-FILETREE-16",
+            "g3rs-topology/required-inputs-fail-closed",
+            "g3rs-topology/no-nested-workspaces",
+            "g3rs-topology/declared-workspace-members-only",
+            "g3rs-topology/member-paths-must-not-escape-root",
+            "g3rs-topology/workspace-local-file-placement",
         ],
         "{results:#?}"
     );

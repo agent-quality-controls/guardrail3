@@ -5,11 +5,11 @@ pub fn check(input: &G3RsReleaseSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for failure in &input.input_failures {
-        crate::rs_release_source_02_input_failures::check(failure, &mut results);
+        crate::input_failures::check(failure, &mut results);
     }
 
     for readme in &input.readmes {
-        crate::rs_release_source_01_readme_quality::check(readme, &mut results);
+        crate::readme_quality::check(readme, &mut results);
     }
 
     results

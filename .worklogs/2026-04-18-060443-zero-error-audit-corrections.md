@@ -7,7 +7,7 @@ Corrected two adversarially found audit flaws before regenerating the authoritat
 - Kept `g3rs-topology-ingestion-types` narrow.
   - It now owns only `G3RsTopologyIngestionError`.
   - Rejected keeping topology data contract re-exports there because assertions can depend directly on `g3rs-topology-types` and do not need a package-local proxy.
-- Kept parser `RS-CODE-SOURCE-04` findings visible.
+- Kept parser `g3rs-code/ast-04-item-level-allow-with-reason` findings visible.
   - Rejected the attribute-form `reason = "..."` workaround because the current rule only inventories comment-style reasons and the workaround turned real warnings invisible.
 - Regenerated the full audit with the correct root set.
   - Included `packages/rs/*` roots such as `packages/rs/g3rs-workspace-crawl`, not just `packages/rs/*/*`.
@@ -33,5 +33,5 @@ Corrected two adversarially found audit flaws before regenerating the authoritat
 ## Next steps
 
 - Keep the five parser warning-only packages warning-only until a rule contradiction appears.
-- If parser escape hatches ever need to be expressed in attribute-form, extend the `RS-CODE-SOURCE-03` / `04` parser explicitly instead of relying on syntax the rule does not inventory today.
+- If parser escape hatches ever need to be expressed in attribute-form, extend the `g3rs-code/ast-03-item-level-allow-without-reason` / `04` parser explicitly instead of relying on syntax the rule does not inventory today.
 - Keep using the full root set from `.worklogs/2026-04-18-060133-zero-error-audit-report.txt` for future zero-error audits.

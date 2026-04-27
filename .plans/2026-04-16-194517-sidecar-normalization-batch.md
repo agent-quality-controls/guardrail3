@@ -2,7 +2,7 @@ Goal
 - Normalize the remaining stale internal test sidecars that still hang off `lib.rs` or facade `mod.rs` files.
 
 Approach
-- For packages where validation only reports `RS-TEST-FILETREE-02`, move `run_tests` off `lib.rs` onto `run.rs`.
+- For packages where validation only reports `g3rs-test/owned-sidecar-shape`, move `run_tests` off `lib.rs` onto `run.rs`.
 - For packages where nested facades still own `rule_tests`, move those sidecars onto `rule.rs`.
 - Update helper imports from `super::super::rule::check` to `super::super::check` where the sidecar move changes visibility paths.
 - Re-run package tests and package validation after each package.

@@ -1,11 +1,11 @@
 ## Summary
 
-Simplified `rs/arch` config checks by removing the redundant crate-map dependency from `RS-ARCH-CONFIG-06`. The rule now consumes only the dependency-edge fact it actually uses, and `run.rs` no longer rebuilds lookup state just to call that rule.
+Simplified `rs/arch` config checks by removing the redundant crate-map dependency from `g3rs-arch/shared-flag-required`. The rule now consumes only the dependency-edge fact it actually uses, and `run.rs` no longer rebuilds lookup state just to call that rule.
 
 ## Decisions Made
 
 - Kept the existing dependency-edge type.
-  - Why: it already carries every fact `RS-ARCH-CONFIG-06` reads: target resolution, crate-ness, direct-child status, and shared status.
+  - Why: it already carries every fact `g3rs-arch/shared-flag-required` reads: target resolution, crate-ness, direct-child status, and shared status.
   - Rejected: widening ingestion or types. This was a pure check-surface simplification.
 - Removed the extra lookup from both runtime dispatch and rule tests.
   - Why: the local crate map was not contributing any rule decision. It only re-proved target existence that the edge had already encoded.

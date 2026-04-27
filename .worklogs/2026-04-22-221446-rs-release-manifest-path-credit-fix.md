@@ -7,7 +7,7 @@ Fixed the `rs/release` workflow matcher so a manifest-path build for a non-publi
 - Switched the workflow shortcut from publishable-binary count to total binary-crate count.
   - Why: the old shortcut made any build line count as a match when only one publishable binary crate existed, even if the workflow explicitly targeted another binary crate.
 - Kept the fix in the shared workflow helper and the two release rule wrappers.
-  - Why: both `RS-RELEASE-CONFIG-23` and `RS-RELEASE-CONFIG-24` consume the same matcher, so the root fix belongs there.
+  - Why: both `g3rs-release/binary-release-workflow` and `g3rs-release/linux-release-target` consume the same matcher, so the root fix belongs there.
 - Added the regression in `run_tests/cases.rs`.
   - Why: it exercises the real rule dispatch path and fails on the exact mis-crediting behavior.
 - Ran `g3rs validate --path packages/rs/release/g3rs-release-config-checks --family release`.

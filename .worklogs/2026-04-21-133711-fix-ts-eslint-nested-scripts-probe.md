@@ -6,7 +6,7 @@ Fixed a real `ts/eslint` ingestion bug in fallback probe selection. On repo-root
 
 - Fixed the bug in probe selection, not in the ESLint rules.
   - Why: the root cause was that fallback probe selection only excluded `scripts/` at the workspace root.
-  - Rejected: weakening `TS-ESLINT-CONFIG-09`, because the rule itself was correct.
+  - Rejected: weakening `g3ts-eslint/type-safety-rules`, because the rule itself was correct.
 
 - Broadened the exclusion to all nested script trees.
   - Chosen logic:

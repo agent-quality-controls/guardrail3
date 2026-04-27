@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-HOOKS-SOURCE-25` so it follows real shell execution semantics instead of whole-line text. The rule now evaluates one reachable shell segment at a time, follows shell-wrapper payloads and function calls, and correctly handles same-line export/unset ordering, pipelines, background jobs, and command substitutions.
+Fixed `g3rs-hooks/hook-rs-17-shared-target-dir-present` so it follows real shell execution semantics instead of whole-line text. The rule now evaluates one reachable shell segment at a time, follows shell-wrapper payloads and function calls, and correctly handles same-line export/unset ordering, pipelines, background jobs, and command substitutions.
 
 ## Decisions made
 

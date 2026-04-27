@@ -5,7 +5,7 @@ Summary
 Decisions made
 - Deleted `crates/types` and used `g3rs-deps-types` directly because the local crate was only a thin wrapper and created fake boundary errors.
 - Marked the root and child crates `publish = false` because this is an internal checks workspace and the release burden was fake.
-- Kept the runtime and assertions crates as one-rule-per-module crates and documented that with `RS-ARCH-FILETREE-07` waivers.
+- Kept the runtime and assertions crates as one-rule-per-module crates and documented that with `g3rs-arch/structural-split` waivers.
 - Upgraded the local assertions macro surface to match the cleaned cargo package so sidecar tests could call shared assertions helpers instead of poking at `CheckResult`.
 
 Key files for context

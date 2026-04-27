@@ -2,8 +2,7 @@ use cargo_toml_parser::parse as parse_cargo_toml;
 use clippy_toml_parser::parse as parse_clippy_toml;
 use deny_toml_parser::parse as parse_deny_toml;
 use g3rs_code_types::{
-    G3RsCodeConfigChecksInput, G3RsCodeConfigFile, G3RsCodeConfigFileKind,
-    G3RsCodeExceptionComment,
+    G3RsCodeConfigChecksInput, G3RsCodeConfigFile, G3RsCodeConfigFileKind, G3RsCodeExceptionComment,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use guardrail3_rs_toml_parser::parse as parse_guardrail3_toml;
@@ -38,11 +37,12 @@ pub(crate) fn collect_config_files(
             });
         }
 
-        let content =
-            crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| IngestionError::Unreadable {
+        let content = crate::fs::read_to_string(&entry.path.abs_path).map_err(|err| {
+            IngestionError::Unreadable {
                 path: entry.path.abs_path.clone(),
                 reason: err.to_string(),
-            })?;
+            }
+        })?;
 
         exception_comments.extend(extract_exception_comments(&entry.path.rel_path, &content));
 
@@ -71,9 +71,11 @@ fn parse_config_file_kind(
 
     let kind = match file_name {
         "guardrail3-rs.toml" => Some(G3RsCodeConfigFileKind::Guardrail3RsToml {
-            guardrail3: parse_guardrail3_toml(content).map_err(|err| IngestionError::ParseFailed {
-                path: abs_path.to_path_buf(),
-                reason: err.to_string(),
+            guardrail3: parse_guardrail3_toml(content).map_err(|err| {
+                IngestionError::ParseFailed {
+                    path: abs_path.to_path_buf(),
+                    reason: err.to_string(),
+                }
             })?,
         }),
         "clippy.toml" | ".clippy.toml" => Some(G3RsCodeConfigFileKind::ClippyToml {
