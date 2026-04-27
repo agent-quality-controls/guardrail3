@@ -23,6 +23,14 @@ pub fn assert_missing(results: &[guardrail3_check_types::G3CheckResult], id: &st
     );
 }
 
+pub fn assert_exact_ids(results: &[guardrail3_check_types::G3CheckResult], expected: &[&str]) {
+    let actual = results
+        .iter()
+        .map(guardrail3_check_types::G3CheckResult::id)
+        .collect::<Vec<_>>();
+    assert_eq!(actual, expected, "exact finding id order mismatch");
+}
+
 pub fn assert_error_files(
     results: &[guardrail3_check_types::G3CheckResult],
     id: &str,

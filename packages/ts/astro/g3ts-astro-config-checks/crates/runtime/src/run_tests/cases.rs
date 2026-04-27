@@ -40,228 +40,103 @@ const ASTRO_SEO_BAN_REASON: &str = "`astro-seo` is forbidden because `astro-seo@
 fn golden_config_reports_expected_inventory() {
     let input = golden();
     let results = super::super::check(&input);
-    let pins_message = format!(
-        "`.syncpackrc` pins the required Syncpack package policy: {}.",
-        crate::support::required_syncpack_pins_message(&input.integration_contracts[0])
-    );
-    let bans_message = format!(
-        "`.syncpackrc` bans forbidden Astro deps through Syncpack: {}.",
-        crate::support::forbidden_syncpack_deps_message(&input.integration_contracts[0])
-    );
 
-    assertions::assert_exact(
+    assertions::assert_exact_ids(
         &results,
         &[
-            assertions::info(
-                "TS-ASTRO-CONFIG-01",
-                "astro package present",
-                "`package.json` includes `astro`.",
-                Some("package.json"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-02",
-                "astro check present",
-                "`package.json` installs `@astrojs/check` and safely invokes `astro check` in the app script surface.",
-                Some("package.json"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-03",
-                "astro ESLint plugin package present",
-                "`package.json` includes `eslint-plugin-astro`.",
-                Some("package.json"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-05",
-                "astro ESLint plugin wired",
-                "`eslint.config.mjs` activates `astro` for the required Astro source probe.",
-                Some("eslint.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-06",
-                "astro pipeline ESLint plugin package present",
-                "`package.json` includes `g3ts-eslint-plugin-astro-pipeline`.",
-                Some("package.json"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-07",
-                PIPELINE_CONTENT_INFO_TITLE,
-                PIPELINE_CONTENT_INFO_MJS,
-                Some("eslint.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-09",
-                "Syncpack pins the required Astro stack",
-                &pins_message,
-                Some(".syncpackrc"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-10",
-                "Syncpack bans forbidden Astro deps",
-                &bans_message,
-                Some(".syncpackrc"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-11",
-                "Astro config has HTTPS site URL",
-                "`astro.config.mjs` sets an absolute HTTPS `site` URL.",
-                Some("astro.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-12",
-                "Astro config uses static output",
-                "`astro.config.mjs` sets `output: \"static\"`.",
-                Some("astro.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-13",
-                "Nuasite rendered-output checks are installed and wired",
-                "`astro.config.mjs` wires `checks()` from `@nuasite/checks` with fail-closed options and the package scripts safely run `astro build`.",
-                Some("astro.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-14",
-                "Astro sitemap integration is installed and wired",
-                "`astro.config.mjs` wires default `sitemap()` from `@astrojs/sitemap` and has an HTTPS `site`.",
-                Some("astro.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-15",
-                "Astro robots integration is installed and wired",
-                "`astro.config.mjs` wires default `robots()` from `astro-robots` and has an HTTPS `site`.",
-                Some("astro.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-16",
-                "LLMs discovery file exists",
-                "Found `public/llms.txt`.",
-                Some("public/llms.txt"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-17",
-                "Astro JSON-LD type package is present",
-                "`package.json` lists `schema-dts` for typed JSON-LD data.",
-                Some("package.json"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-18",
-                "Astro content adapter route rule is effective",
-                "`eslint.config.mjs` enforces `astro-pipeline/require-approved-content-adapter-in-routes` from `g3ts-eslint-plugin-astro-pipeline` with route coverage, endpoint coverage, and `approvedContentAdapterModules` exactly matching `[ts.astro.content].adapters` on Astro, TS, and TSX source probes.",
-                Some("eslint.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-19",
-                "Inline public-copy ESLint rule is effective",
-                "`eslint.config.mjs` enforces `i18next/no-literal-string` with the exact strict Astro public-copy options on Astro, TS, and TSX source probes.",
-                Some("eslint.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-20",
-                "MDX ESLint lane is wired",
-                "`eslint.config.mjs` activates plugin `mdx` and `mdx/remark` at error severity for the MDX content probe.",
-                Some("eslint.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-21",
-                "Required Astro integrations are present",
-                "`astro.config.mjs` wires React, MDX, sitemap, robots, and Nuasite checks integrations from the approved packages.",
-                Some("astro.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-22",
-                "JSON-LD presence check is delegated to Nuasite",
-                "`astro.config.mjs` wires `structuredDataPresentCheck` imported from `g3ts-astro-nuasite-checks` through `checks({ customChecks: [...] })`.",
-                Some("astro.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-23",
-                "Astro strict content policy is configured",
-                "`guardrail3-ts.toml` sets `[ts.astro] profile = \"strict-static-content\"`, declares non-empty `[ts.astro.routes].content`, `[ts.astro.content].root`, `[ts.astro.content].adapters`, `[ts.astro.mdx].component_maps`, `[ts.astro.seo].metadata_helpers`, and `[ts.astro.seo].json_ld_helpers`, and forbids `.next/**`, `.velite/**`, and `.contentlayer/**` in `[ts.astro.state].forbidden`.",
-                Some("guardrail3-ts.toml"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-24",
-                "Astro strict content policy paths are structurally valid",
-                "`guardrail3-ts.toml` uses app-relative nested Astro policy paths without parent traversal in `[ts.astro.routes]`, `[ts.astro.content]`, `[ts.astro.mdx]`, `[ts.astro.seo]`, and `[ts.astro.state]`.",
-                Some("guardrail3-ts.toml"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-25",
-                "Astro content and non-content route scopes are disjoint",
-                "`guardrail3-ts.toml` classifies discovered route pages without overlap between `[ts.astro.routes].content` and `[ts.astro.routes].non_content`.",
-                Some("guardrail3-ts.toml"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-26",
-                "Astro ESLint route coverage matches strict content policy",
-                "`guardrail3-ts.toml` and `eslint.config.mjs` agree on content route, non-content route, and endpoint coverage for the required Astro pipeline rules.",
-                Some("eslint.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-27",
-                "Astro content adapter source exists",
-                "`guardrail3-ts.toml` resolves `[ts.astro.content].adapters = [\"src/lib/content\"]` to adapter source files: `src/lib/content/index.ts`.",
-                Some("guardrail3-ts.toml"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-28",
-                "Astro content adapter sources import Astro content collections",
-                "`guardrail3-ts.toml` resolves `[ts.astro.content].adapters` to adapter source files that import `astro:content` at runtime: `src/lib/content/index.ts`.",
-                Some("guardrail3-ts.toml"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-29",
-                "Astro strict content policy declares approved helper surfaces",
-                "`guardrail3-ts.toml` declares non-empty app-relative `[ts.astro.mdx].component_maps`, `[ts.astro.seo].metadata_helpers`, and `[ts.astro.seo].json_ld_helpers`, and those helper surfaces do not overlap `[ts.astro.content].root`.",
-                Some("guardrail3-ts.toml"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-30",
-                "Astro MDX component-map rule is effective",
-                "`eslint.config.mjs` enforces `astro-pipeline/mdx-component-imports-from-approved-map` from `g3ts-eslint-plugin-astro-pipeline` on the MDX content lane with non-empty `mdxContentGlobs` and `approvedMdxComponentModules`.",
-                Some("eslint.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-31",
-                "Astro metadata helper rule is effective",
-                "`eslint.config.mjs` enforces `astro-pipeline/require-approved-metadata-helper-in-routes` from `g3ts-eslint-plugin-astro-pipeline` on Astro, TS, and TSX lanes with route coverage, endpoint coverage, non-empty `approvedMetadataHelperModules`, and non-empty `approvedContentAdapterModules`.",
-                Some("eslint.config.mjs"),
-                true,
-            ),
-            assertions::info(
-                "TS-ASTRO-CONFIG-32",
-                "Astro JSON-LD helper rule is effective",
-                "`eslint.config.mjs` enforces `astro-pipeline/require-approved-json-ld-helper-in-routes` from `g3ts-eslint-plugin-astro-pipeline` on Astro, TS, and TSX lanes with route coverage, endpoint coverage, and non-empty `approvedJsonLdHelperModules`.",
-                Some("eslint.config.mjs"),
-                true,
-            ),
+            "TS-ASTRO-SETUP-CONFIG-01",
+            "TS-ASTRO-SETUP-CONFIG-02",
+            "TS-ASTRO-SETUP-CONFIG-03",
+            "TS-ASTRO-SETUP-CONFIG-05",
+            "TS-ASTRO-SETUP-CONFIG-06",
+            "TS-ASTRO-SETUP-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-09",
+            "TS-ASTRO-SETUP-CONFIG-10",
+            "TS-ASTRO-SETUP-CONFIG-11",
+            "TS-ASTRO-SETUP-CONFIG-12",
+            "TS-ASTRO-SETUP-CONFIG-21",
+            "TS-ASTRO-CONTENT-CONFIG-18",
+            "TS-ASTRO-CONTENT-CONFIG-19",
+            "TS-ASTRO-CONTENT-CONFIG-23",
+            "TS-ASTRO-CONTENT-CONFIG-24",
+            "TS-ASTRO-CONTENT-CONFIG-25",
+            "TS-ASTRO-CONTENT-CONFIG-26",
+            "TS-ASTRO-CONTENT-CONFIG-27",
+            "TS-ASTRO-CONTENT-CONFIG-28",
+            "TS-ASTRO-MDX-CONFIG-24",
+            "TS-ASTRO-MDX-CONFIG-29",
+            "TS-ASTRO-MDX-CONFIG-20",
+            "TS-ASTRO-MDX-CONFIG-30",
+            "TS-ASTRO-SEO-CONFIG-13",
+            "TS-ASTRO-SEO-CONFIG-14",
+            "TS-ASTRO-SEO-CONFIG-15",
+            "TS-ASTRO-SEO-CONFIG-16",
+            "TS-ASTRO-SEO-CONFIG-17",
+            "TS-ASTRO-SEO-CONFIG-22",
+            "TS-ASTRO-SEO-CONFIG-24",
+            "TS-ASTRO-SEO-CONFIG-29",
+            "TS-ASTRO-SEO-CONFIG-31",
+            "TS-ASTRO-SEO-CONFIG-32",
+        ],
+    );
+    assertions::assert_all_inventory(&results);
+}
+
+#[test]
+fn child_config_entrypoints_report_exact_ids_in_order() {
+    let input = golden();
+
+    assertions::assert_exact_ids(
+        &super::super::check_setup(&input),
+        &[
+            "TS-ASTRO-SETUP-CONFIG-01",
+            "TS-ASTRO-SETUP-CONFIG-02",
+            "TS-ASTRO-SETUP-CONFIG-03",
+            "TS-ASTRO-SETUP-CONFIG-05",
+            "TS-ASTRO-SETUP-CONFIG-06",
+            "TS-ASTRO-SETUP-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-09",
+            "TS-ASTRO-SETUP-CONFIG-10",
+            "TS-ASTRO-SETUP-CONFIG-11",
+            "TS-ASTRO-SETUP-CONFIG-12",
+            "TS-ASTRO-SETUP-CONFIG-21",
+        ],
+    );
+    assertions::assert_exact_ids(
+        &super::super::check_content(&input),
+        &[
+            "TS-ASTRO-CONTENT-CONFIG-18",
+            "TS-ASTRO-CONTENT-CONFIG-19",
+            "TS-ASTRO-CONTENT-CONFIG-23",
+            "TS-ASTRO-CONTENT-CONFIG-24",
+            "TS-ASTRO-CONTENT-CONFIG-25",
+            "TS-ASTRO-CONTENT-CONFIG-26",
+            "TS-ASTRO-CONTENT-CONFIG-27",
+            "TS-ASTRO-CONTENT-CONFIG-28",
+        ],
+    );
+    assertions::assert_exact_ids(
+        &super::super::check_mdx(&input),
+        &[
+            "TS-ASTRO-MDX-CONFIG-24",
+            "TS-ASTRO-MDX-CONFIG-29",
+            "TS-ASTRO-MDX-CONFIG-20",
+            "TS-ASTRO-MDX-CONFIG-30",
+        ],
+    );
+    assertions::assert_exact_ids(
+        &super::super::check_seo(&input),
+        &[
+            "TS-ASTRO-SEO-CONFIG-13",
+            "TS-ASTRO-SEO-CONFIG-14",
+            "TS-ASTRO-SEO-CONFIG-15",
+            "TS-ASTRO-SEO-CONFIG-16",
+            "TS-ASTRO-SEO-CONFIG-17",
+            "TS-ASTRO-SEO-CONFIG-22",
+            "TS-ASTRO-SEO-CONFIG-24",
+            "TS-ASTRO-SEO-CONFIG-29",
+            "TS-ASTRO-SEO-CONFIG-31",
+            "TS-ASTRO-SEO-CONFIG-32",
         ],
     );
 }
@@ -277,7 +152,7 @@ fn strict_content_policy_rule_rejects_missing_policy() {
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-23",
+        "TS-ASTRO-CONTENT-CONFIG-23",
         "Astro strict content policy is missing or incomplete",
     );
 }
@@ -296,7 +171,7 @@ fn strict_content_policy_rule_rejects_old_route_class_policy() {
 
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-23",
+        "TS-ASTRO-CONTENT-CONFIG-23",
         "old `*_globs` route-class fields are not supported",
     );
 }
@@ -312,34 +187,28 @@ fn strict_content_policy_path_rule_rejects_absolute_parent_and_backslash_paths()
     snapshot.content_routes = vec!["/src/pages/**/*.astro".to_owned()];
     snapshot.non_content_routes = vec!["../src/pages/404.astro".to_owned()];
     snapshot.endpoints = vec!["src\\pages\\api.ts".to_owned()];
-    snapshot.forbidden_state = vec![".next/**".to_owned(), "../.velite/**".to_owned()];
 
     let results = super::super::check(&input);
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-24",
+        "TS-ASTRO-CONTENT-CONFIG-24",
         "Astro strict content policy paths are invalid",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-24",
+        "TS-ASTRO-CONTENT-CONFIG-24",
         "[ts.astro.routes].content",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-24",
+        "TS-ASTRO-CONTENT-CONFIG-24",
         "[ts.astro.routes].non_content",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-24",
+        "TS-ASTRO-CONTENT-CONFIG-24",
         "[ts.astro.routes].endpoints",
-    );
-    assertions::assert_id_message_contains(
-        &results,
-        "TS-ASTRO-CONFIG-24",
-        "[ts.astro.state].forbidden",
     );
 }
 
@@ -358,7 +227,7 @@ fn strict_content_policy_path_rule_rejects_glob_dirs_and_overlapping_roots() {
 
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-24",
+        "TS-ASTRO-CONTENT-CONFIG-24",
         "[ts.astro.content].root overlaps [ts.astro.content].adapters",
     );
 
@@ -373,7 +242,7 @@ fn strict_content_policy_path_rule_rejects_glob_dirs_and_overlapping_roots() {
 
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-24",
+        "TS-ASTRO-CONTENT-CONFIG-24",
         "[ts.astro.content].adapters",
     );
 }
@@ -395,33 +264,18 @@ fn strict_content_policy_path_rule_rejects_helper_surfaces_under_content_root() 
 
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-24",
+        "TS-ASTRO-CONTENT-CONFIG-24",
         "[ts.astro.content].root overlaps [ts.astro.mdx].component_maps",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-24",
+        "TS-ASTRO-CONTENT-CONFIG-24",
         "[ts.astro.content].root overlaps [ts.astro.seo].metadata_helpers",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-24",
+        "TS-ASTRO-CONTENT-CONFIG-24",
         "[ts.astro.content].root overlaps [ts.astro.seo].json_ld_helpers",
-    );
-    assertions::assert_id_message_contains(
-        &results,
-        "TS-ASTRO-CONFIG-29",
-        "[ts.astro.mdx].component_maps overlaps [ts.astro.content].root",
-    );
-    assertions::assert_id_message_contains(
-        &results,
-        "TS-ASTRO-CONFIG-29",
-        "[ts.astro.seo].metadata_helpers overlaps [ts.astro.content].root",
-    );
-    assertions::assert_id_message_contains(
-        &results,
-        "TS-ASTRO-CONFIG-29",
-        "[ts.astro.seo].json_ld_helpers overlaps [ts.astro.content].root",
     );
 }
 
@@ -443,10 +297,14 @@ fn strict_content_policy_route_scope_rule_rejects_discovered_overlap() {
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-25",
+        "TS-ASTRO-CONTENT-CONFIG-25",
         "Astro content and non-content route scopes overlap",
     );
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-25", "src/pages/404.astro");
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONTENT-CONFIG-25",
+        "src/pages/404.astro",
+    );
 }
 
 #[test]
@@ -463,7 +321,7 @@ fn strict_content_policy_route_scope_rule_rejects_invalid_globs() {
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-25",
+        "TS-ASTRO-CONTENT-CONFIG-25",
         "Astro route scope policy contains an invalid glob",
     );
 }
@@ -486,12 +344,12 @@ fn strict_content_policy_eslint_coverage_rule_rejects_non_content_route_coverage
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-26",
+        "TS-ASTRO-CONTENT-CONFIG-26",
         "Astro ESLint route coverage does not match strict content policy",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-26",
+        "TS-ASTRO-CONTENT-CONFIG-26",
         "exclude `[ts.astro.routes].non_content`",
     );
 }
@@ -511,7 +369,7 @@ fn strict_content_policy_eslint_coverage_rule_rejects_missing_content_route_cove
 
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-26",
+        "TS-ASTRO-CONTENT-CONFIG-26",
         "Astro lane `astro-pipeline/",
     );
 }
@@ -528,10 +386,14 @@ fn strict_content_policy_adapter_rule_rejects_missing_adapter_source() {
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-27",
+        "TS-ASTRO-CONTENT-CONFIG-27",
         "Astro content adapter source is missing",
     );
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-27", "src/lib/content");
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONTENT-CONFIG-27",
+        "src/lib/content",
+    );
 }
 
 #[test]
@@ -567,12 +429,12 @@ fn strict_content_policy_adapter_rule_rejects_missing_second_adapter_source() {
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-27",
+        "TS-ASTRO-CONTENT-CONFIG-27",
         "Astro content adapter source is missing",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-27",
+        "TS-ASTRO-CONTENT-CONFIG-27",
         "src/lib/secondary-content",
     );
 }
@@ -594,12 +456,12 @@ fn strict_content_policy_adapter_rule_rejects_partial_eslint_adapter_modules() {
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-18",
+        "TS-ASTRO-CONTENT-CONFIG-18",
         "Astro content adapter route rule is not effective",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-18",
+        "TS-ASTRO-CONTENT-CONFIG-18",
         "approvedContentAdapterModules",
     );
 }
@@ -616,16 +478,20 @@ fn strict_content_policy_adapter_rule_rejects_adapter_source_without_astro_conte
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-28",
+        "TS-ASTRO-CONTENT-CONFIG-28",
         "Astro content adapter source does not use Astro content collections",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-28",
+        "TS-ASTRO-CONTENT-CONFIG-28",
         "src/lib/content/index.ts",
     );
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-28", "astro:content");
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-28", "Type-only imports");
+    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONTENT-CONFIG-28", "astro:content");
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONTENT-CONFIG-28",
+        "Type-only imports",
+    );
 }
 
 #[test]
@@ -644,22 +510,27 @@ fn strict_content_policy_helper_surface_rule_rejects_missing_policy_fields() {
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-29",
-        "Astro strict content policy is missing approved helper surfaces",
+        "TS-ASTRO-MDX-CONFIG-29",
+        "Astro strict content policy is missing approved MDX component-map surfaces",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-29",
+        "TS-ASTRO-MDX-CONFIG-29",
         "[ts.astro.mdx].component_maps",
     );
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-SEO-CONFIG-29",
+        "Astro strict content policy is missing approved SEO helper surfaces",
+    );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-29",
+        "TS-ASTRO-SEO-CONFIG-29",
         "[ts.astro.seo].metadata_helpers",
     );
     assertions::assert_id_message_contains(
         &results,
-        "TS-ASTRO-CONFIG-29",
+        "TS-ASTRO-SEO-CONFIG-29",
         "[ts.astro.seo].json_ld_helpers",
     );
 }
@@ -684,17 +555,17 @@ fn strict_content_policy_helper_rules_reject_missing_source_files() {
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-30",
+        "TS-ASTRO-MDX-CONFIG-30",
         "Astro MDX component-map sources are missing",
     );
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-31",
+        "TS-ASTRO-SEO-CONFIG-31",
         "Astro metadata helper sources are missing",
     );
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-32",
+        "TS-ASTRO-SEO-CONFIG-32",
         "Astro JSON-LD helper sources are missing",
     );
 }
@@ -722,17 +593,17 @@ fn strict_content_policy_helper_rules_reject_missing_eslint_enforcement() {
 
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-30",
+        "TS-ASTRO-MDX-CONFIG-30",
         "Astro MDX component-map rule is not effective",
     );
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-31",
+        "TS-ASTRO-SEO-CONFIG-31",
         "Astro metadata helper rule is not effective",
     );
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-32",
+        "TS-ASTRO-SEO-CONFIG-32",
         "Astro JSON-LD helper rule is not effective",
     );
 }
@@ -751,7 +622,7 @@ fn astro_config_site_url_rule_rejects_missing_or_non_https_site() {
         let results = super::super::check(&input);
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-11",
+            "TS-ASTRO-SETUP-CONFIG-11",
             "Astro config is missing an absolute HTTPS `site` URL",
         );
     }
@@ -771,7 +642,7 @@ fn astro_static_output_rule_rejects_missing_or_server_output() {
         let results = super::super::check(&input);
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-12",
+            "TS-ASTRO-SETUP-CONFIG-12",
             "Astro public content app must use explicit static output",
         );
     }
@@ -792,7 +663,7 @@ fn astro_check_rule_requires_package_and_safe_script() {
     let results = super::super::check(&input);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-02",
+        "TS-ASTRO-SETUP-CONFIG-02",
         "Astro app typecheck contract is missing",
     );
 }
@@ -809,7 +680,7 @@ fn nuasite_rule_rejects_unsafe_build_and_fail_open_options() {
     let results = super::super::check(&unsafe_build);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-13",
+        "TS-ASTRO-SEO-CONFIG-13",
         "Nuasite rendered-output checks are not installed and wired",
     );
 
@@ -837,13 +708,13 @@ fn nuasite_rule_rejects_unsafe_build_and_fail_open_options() {
         let results = super::super::check(&input);
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-13",
+            "TS-ASTRO-SEO-CONFIG-13",
             "Nuasite rendered-output checks are not installed and wired",
         );
         if key == "customChecks" {
             assertions::assert_has_error_title(
                 &results,
-                "TS-ASTRO-CONFIG-22",
+                "TS-ASTRO-SEO-CONFIG-22",
                 "JSON-LD presence check is not delegated to Nuasite",
             );
         }
@@ -865,13 +736,13 @@ fn nuasite_rule_rejects_missing_required_options_and_duplicate_keys() {
         let results = super::super::check(&input);
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-13",
+            "TS-ASTRO-SEO-CONFIG-13",
             "Nuasite rendered-output checks are not installed and wired",
         );
         if key == "customChecks" {
             assertions::assert_has_error_title(
                 &results,
-                "TS-ASTRO-CONFIG-22",
+                "TS-ASTRO-SEO-CONFIG-22",
                 "JSON-LD presence check is not delegated to Nuasite",
             );
         }
@@ -886,7 +757,7 @@ fn nuasite_rule_rejects_missing_required_options_and_duplicate_keys() {
     let results = super::super::check(&duplicate);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-13",
+        "TS-ASTRO-SEO-CONFIG-13",
         "Nuasite rendered-output checks are not installed and wired",
     );
 
@@ -895,7 +766,7 @@ fn nuasite_rule_rejects_missing_required_options_and_duplicate_keys() {
     let results = super::super::check(&unknown);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-13",
+        "TS-ASTRO-SEO-CONFIG-13",
         "Nuasite rendered-output checks are not installed and wired",
     );
 }
@@ -918,17 +789,17 @@ fn astro_generation_rules_reject_missing_integration_surfaces() {
     let results = super::super::check(&input);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-14",
+        "TS-ASTRO-SEO-CONFIG-14",
         "Astro sitemap integration is not installed and wired",
     );
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-15",
+        "TS-ASTRO-SEO-CONFIG-15",
         "Astro robots integration is not installed and wired",
     );
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-21",
+        "TS-ASTRO-SETUP-CONFIG-21",
         "Required Astro integrations are missing",
     );
 }
@@ -961,20 +832,20 @@ fn astro_generation_rules_reject_non_exact_integration_calls() {
         let results = super::super::check(&input);
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-21",
+            "TS-ASTRO-SETUP-CONFIG-21",
             "Required Astro integrations are missing",
         );
         if module == "@astrojs/sitemap" {
             assertions::assert_has_error_title(
                 &results,
-                "TS-ASTRO-CONFIG-14",
+                "TS-ASTRO-SEO-CONFIG-14",
                 "Astro sitemap integration is not installed and wired",
             );
         }
         if module == "astro-robots" {
             assertions::assert_has_error_title(
                 &results,
-                "TS-ASTRO-CONFIG-15",
+                "TS-ASTRO-SEO-CONFIG-15",
                 "Astro robots integration is not installed and wired",
             );
         }
@@ -1005,7 +876,7 @@ fn required_integrations_rule_rejects_wrapped_or_wrong_import_shapes() {
         let results = super::super::check(&input);
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-21",
+            "TS-ASTRO-SETUP-CONFIG-21",
             "Required Astro integrations are missing",
         );
     }
@@ -1020,7 +891,7 @@ fn required_integrations_rule_rejects_wrapped_or_wrong_import_shapes() {
     let results = super::super::check(&wrapped);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-21",
+        "TS-ASTRO-SETUP-CONFIG-21",
         "Required Astro integrations are missing",
     );
 }
@@ -1041,7 +912,7 @@ fn required_integrations_rule_rejects_missing_react_mdx_or_nuasite_integrations(
         let results = super::super::check(&input);
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-21",
+            "TS-ASTRO-SETUP-CONFIG-21",
             "Required Astro integrations are missing",
         );
     }
@@ -1069,7 +940,7 @@ fn required_integrations_rule_rejects_nuasite_call_without_options_object() {
     let results = super::super::check(&input);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-21",
+        "TS-ASTRO-SETUP-CONFIG-21",
         "Required Astro integrations are missing",
     );
 }
@@ -1090,15 +961,15 @@ fn content_discovery_and_seo_package_rules_reject_missing_surfaces() {
     let results = super::super::check(&input);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-16",
+        "TS-ASTRO-SEO-CONFIG-16",
         "Astro public content app is missing `public/llms.txt`",
     );
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-17",
+        "TS-ASTRO-SEO-CONFIG-17",
         "Astro JSON-LD type package is missing",
     );
-    assertions::assert_no_id_message_contains(&results, "TS-ASTRO-CONFIG-17", "`astro-seo`");
+    assertions::assert_no_id_message_contains(&results, "TS-ASTRO-SEO-CONFIG-17", "`astro-seo`");
 }
 
 #[test]
@@ -1106,7 +977,7 @@ fn seo_package_rule_does_not_require_bare_astro_seo_package() {
     let input = golden();
     let results = super::super::check(&input);
 
-    assertions::assert_no_id_message_contains(&results, "TS-ASTRO-CONFIG-17", "`astro-seo`");
+    assertions::assert_no_id_message_contains(&results, "TS-ASTRO-SEO-CONFIG-17", "`astro-seo`");
 }
 
 #[test]
@@ -1128,7 +999,7 @@ fn mdx_lane_rule_rejects_ignored_or_missing_mdx_probe() {
     let results = super::super::check(&input);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-20",
+        "TS-ASTRO-MDX-CONFIG-20",
         "MDX ESLint lane is not wired",
     );
 }
@@ -1141,7 +1012,7 @@ fn structured_data_rule_rejects_local_or_missing_custom_check() {
         let results = super::super::check(&input);
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-22",
+            "TS-ASTRO-SEO-CONFIG-22",
             "JSON-LD presence check is not delegated to Nuasite",
         );
     }
@@ -1159,12 +1030,12 @@ fn structured_data_rule_rejects_wrong_custom_check_identity_or_shape() {
         let results = super::super::check(&input);
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-22",
+            "TS-ASTRO-SEO-CONFIG-22",
             "JSON-LD presence check is not delegated to Nuasite",
         );
         assertions::assert_has_error_title(
             &results,
-            "TS-ASTRO-CONFIG-13",
+            "TS-ASTRO-SEO-CONFIG-13",
             "Nuasite rendered-output checks are not installed and wired",
         );
     }
@@ -1178,7 +1049,7 @@ fn structured_data_rule_rejects_wrong_custom_check_identity_or_shape() {
     let results = super::super::check(&non_array);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-22",
+        "TS-ASTRO-SEO-CONFIG-22",
         "JSON-LD presence check is not delegated to Nuasite",
     );
 }
@@ -1203,12 +1074,12 @@ fn pipeline_rules_reject_local_plugin_registered_under_astro_pipeline_namespace(
     let results = super::super::check(&input);
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-07",
+        "TS-ASTRO-SETUP-CONFIG-07",
         "Astro ESLint lanes are not enforcing the required content rules",
     );
     assertions::assert_has_error_title(
         &results,
-        "TS-ASTRO-CONFIG-18",
+        "TS-ASTRO-CONTENT-CONFIG-18",
         "Astro content adapter route rule is not effective",
     );
 }
@@ -1228,10 +1099,14 @@ fn delegated_eslint_rules_accept_effective_public_namespaces_without_package_ide
     let results = super::super::check(&input);
     assertions::assert_has_info_title(
         &results,
-        "TS-ASTRO-CONFIG-19",
+        "TS-ASTRO-CONTENT-CONFIG-19",
         "Inline public-copy ESLint rule is effective",
     );
-    assertions::assert_has_info_title(&results, "TS-ASTRO-CONFIG-20", "MDX ESLint lane is wired");
+    assertions::assert_has_info_title(
+        &results,
+        "TS-ASTRO-MDX-CONFIG-20",
+        "MDX ESLint lane is wired",
+    );
 }
 
 #[test]
@@ -1244,7 +1119,11 @@ fn astro_eslint_rule_accepts_effective_namespace_without_package_identity() {
     let _ = snapshot.astro_source_plugin_package_names.remove("astro");
 
     let results = super::super::check(&input);
-    assertions::assert_has_info_title(&results, "TS-ASTRO-CONFIG-05", "astro ESLint plugin wired");
+    assertions::assert_has_info_title(
+        &results,
+        "TS-ASTRO-SETUP-CONFIG-05",
+        "astro ESLint plugin wired",
+    );
 }
 
 #[test]
@@ -1260,12 +1139,12 @@ fn syncpack_policy_rules_do_not_own_safe_syncpack_lint_script() {
     let results = super::super::check(&input);
     assertions::assert_has_info_title(
         &results,
-        "TS-ASTRO-CONFIG-09",
+        "TS-ASTRO-SETUP-CONFIG-09",
         "Syncpack pins the required Astro stack",
     );
     assertions::assert_has_info_title(
         &results,
-        "TS-ASTRO-CONFIG-10",
+        "TS-ASTRO-SETUP-CONFIG-10",
         "Syncpack bans forbidden Astro deps",
     );
 }
@@ -1287,14 +1166,14 @@ fn missing_syncpack_config_reports_stack_pin_and_ban_errors() {
         &results,
         &[
             assertions::error(
-                "TS-ASTRO-CONFIG-09",
+                "TS-ASTRO-SETUP-CONFIG-09",
                 "Syncpack does not pin the required Astro stack",
                 &pins_message,
                 Some(".syncpackrc"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-10",
+                "TS-ASTRO-SETUP-CONFIG-10",
                 "Syncpack does not ban forbidden Astro deps",
                 &bans_message,
                 Some(".syncpackrc"),
@@ -1327,14 +1206,14 @@ fn unavailable_syncpack_config_reports_unreadable_and_parse_error_reasons() {
             &results,
             &[
                 assertions::error(
-                    "TS-ASTRO-CONFIG-09",
+                    "TS-ASTRO-SETUP-CONFIG-09",
                     "Syncpack does not pin the required Astro stack",
                     &pins_message,
                     Some(".syncpackrc"),
                     false,
                 ),
                 assertions::error(
-                    "TS-ASTRO-CONFIG-10",
+                    "TS-ASTRO-SETUP-CONFIG-10",
                     "Syncpack does not ban forbidden Astro deps",
                     &bans_message,
                     Some(".syncpackrc"),
@@ -1354,14 +1233,14 @@ fn syncpack_source_must_cover_the_app_package_manifest() {
         &results,
         &[
             assertions::error(
-                "TS-ASTRO-CONFIG-09",
+                "TS-ASTRO-SETUP-CONFIG-09",
                 "Syncpack does not pin the required Astro stack",
                 "`.syncpackrc` does not include exact `source` entry `package.json` for `package.json`, so `syncpack lint` cannot prove package policy for this Astro app.",
                 Some(".syncpackrc"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-10",
+                "TS-ASTRO-SETUP-CONFIG-10",
                 "Syncpack does not ban forbidden Astro deps",
                 &format!(
                     "`.syncpackrc` does not include exact `source` entry `package.json` for `package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app. {ASTRO_SEO_BAN_REASON}"
@@ -1382,14 +1261,14 @@ fn root_syncpack_source_package_json_does_not_cover_nested_app_manifest() {
         &results,
         &[
             assertions::error(
-                "TS-ASTRO-CONFIG-09",
+                "TS-ASTRO-SETUP-CONFIG-09",
                 "Syncpack does not pin the required Astro stack",
                 "`.syncpackrc` does not include exact `source` entry `package.json` for `apps/landing/package.json`, so `syncpack lint` cannot prove package policy for this Astro app.",
                 Some(".syncpackrc"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-10",
+                "TS-ASTRO-SETUP-CONFIG-10",
                 "Syncpack does not ban forbidden Astro deps",
                 &format!(
                     "`.syncpackrc` does not include exact `source` entry `package.json` for `apps/landing/package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app. {ASTRO_SEO_BAN_REASON}"
@@ -1410,14 +1289,14 @@ fn root_syncpack_source_exact_path_does_not_cover_nested_app_manifest() {
         &results,
         &[
             assertions::error(
-                "TS-ASTRO-CONFIG-09",
+                "TS-ASTRO-SETUP-CONFIG-09",
                 "Syncpack does not pin the required Astro stack",
                 "`.syncpackrc` does not include exact `source` entry `package.json` for `apps/landing/package.json`, so `syncpack lint` cannot prove package policy for this Astro app.",
                 Some(".syncpackrc"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-10",
+                "TS-ASTRO-SETUP-CONFIG-10",
                 "Syncpack does not ban forbidden Astro deps",
                 &format!(
                     "`.syncpackrc` does not include exact `source` entry `package.json` for `apps/landing/package.json`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app. {ASTRO_SEO_BAN_REASON}"
@@ -1446,14 +1325,14 @@ fn app_local_syncpack_source_package_json_covers_nested_app_manifest() {
         &results,
         &[
             assertions::info(
-                "TS-ASTRO-CONFIG-09",
+                "TS-ASTRO-SETUP-CONFIG-09",
                 "Syncpack pins the required Astro stack",
                 &pins_message,
                 Some("apps/landing/.syncpackrc"),
                 true,
             ),
             assertions::info(
-                "TS-ASTRO-CONFIG-10",
+                "TS-ASTRO-SETUP-CONFIG-10",
                 "Syncpack bans forbidden Astro deps",
                 &bans_message,
                 Some("apps/landing/.syncpackrc"),
@@ -1471,7 +1350,7 @@ fn missing_syncpack_stack_pin_reports_policy_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-09",
+            "TS-ASTRO-SETUP-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
             "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
@@ -1488,7 +1367,7 @@ fn wrong_syncpack_stack_pin_reports_policy_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-09",
+            "TS-ASTRO-SETUP-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
             "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
@@ -1505,7 +1384,7 @@ fn wrong_astro_pipeline_syncpack_stack_pin_reports_policy_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-09",
+            "TS-ASTRO-SETUP-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
             "`.syncpackrc` is missing required Syncpack pinned versionGroups: `g3ts-eslint-plugin-astro-pipeline` -> `0.1.6`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
@@ -1522,7 +1401,7 @@ fn shadowed_syncpack_stack_pin_reports_policy_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-09",
+            "TS-ASTRO-SETUP-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
             "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
@@ -1539,7 +1418,7 @@ fn package_scoped_away_syncpack_stack_pin_reports_policy_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-09",
+            "TS-ASTRO-SETUP-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
             "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
@@ -1556,7 +1435,7 @@ fn specifier_scoped_syncpack_stack_pin_reports_policy_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-09",
+            "TS-ASTRO-SETUP-CONFIG-09",
             "Syncpack does not pin the required Astro stack",
             "`.syncpackrc` is missing required Syncpack pinned versionGroups: `astro` -> `6.1.9`. Add exactly one canonical versionGroup per listed package, with exact `dependencies`, `dependencyTypes` containing exactly `prod` and `dev`, no `packages`, no `specifierTypes`, and the listed `pinVersion`.",
             Some(".syncpackrc"),
@@ -1573,7 +1452,7 @@ fn syncpack_catch_all_forbidden_ban_does_not_satisfy_canonical_contract() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-10",
+            "TS-ASTRO-SETUP-CONFIG-10",
             "Syncpack does not ban forbidden Astro deps",
             "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`, `velite`, `@astrojs/node`, `eslint-plugin-astro-pipeline`, `@codemint/astro-meta`, `astro-seo`, `astro-seo-meta`, `astro-seo-schema`, `contentlayer`, `next-contentlayer`, `@contentlayer/core`, `@contentlayer/source-files`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`. `astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.",
             Some(".syncpackrc"),
@@ -1603,14 +1482,14 @@ fn noncanonical_syncpack_forbidden_bans_report_policy_error() {
         assertions::assert_contains(
             &results,
             &[assertions::error(
-                "TS-ASTRO-CONFIG-10",
+                "TS-ASTRO-SETUP-CONFIG-10",
                 "Syncpack does not ban forbidden Astro deps",
                 "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
                 Some(".syncpackrc"),
                 false,
             )],
         );
-        assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-10", "`next`");
+        assertions::assert_id_message_contains(&results, "TS-ASTRO-SETUP-CONFIG-10", "`next`");
     }
 }
 
@@ -1622,7 +1501,7 @@ fn missing_syncpack_forbidden_ban_reports_policy_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-10",
+            "TS-ASTRO-SETUP-CONFIG-10",
             "Syncpack does not ban forbidden Astro deps",
             "`.syncpackrc` is missing Syncpack banned versionGroups for: `next`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
             Some(".syncpackrc"),
@@ -1639,7 +1518,7 @@ fn missing_astro_seo_syncpack_ban_explains_approved_seo_path() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-10",
+            "TS-ASTRO-SETUP-CONFIG-10",
             "Syncpack does not ban forbidden Astro deps",
             "`.syncpackrc` is missing Syncpack banned versionGroups for: `astro-seo`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`. `astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.",
             Some(".syncpackrc"),
@@ -1656,7 +1535,7 @@ fn missing_contentlayer_syncpack_ban_reports_policy_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-10",
+            "TS-ASTRO-SETUP-CONFIG-10",
             "Syncpack does not ban forbidden Astro deps",
             "`.syncpackrc` is missing Syncpack banned versionGroups for: `contentlayer`. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.",
             Some(".syncpackrc"),
@@ -1678,7 +1557,7 @@ fn all_contentlayer_syncpack_bans_are_required() {
 
         assertions::assert_id_message_contains(
             &results,
-            "TS-ASTRO-CONFIG-10",
+            "TS-ASTRO-SETUP-CONFIG-10",
             &format!("`{dependency}`"),
         );
     }
@@ -1690,7 +1569,11 @@ fn contentlayer_syncpack_bans_are_not_required_for_non_content_astro_apps() {
     input.integration_contracts[0].content_mode = G3TsAstroContentMode::None;
     let results = super::super::check(&input);
 
-    assertions::assert_no_id_message_contains(&results, "TS-ASTRO-CONFIG-10", "`contentlayer`");
+    assertions::assert_no_id_message_contains(
+        &results,
+        "TS-ASTRO-SETUP-CONFIG-10",
+        "`contentlayer`",
+    );
 }
 
 #[test]
@@ -1706,7 +1589,7 @@ fn direct_velite_package_is_not_scanned_when_syncpack_ban_contract_is_valid() {
     assertions::assert_contains(
         &results,
         &[assertions::info(
-            "TS-ASTRO-CONFIG-10",
+            "TS-ASTRO-SETUP-CONFIG-10",
             "Syncpack bans forbidden Astro deps",
             &bans_message,
             Some(".syncpackrc"),
@@ -1723,7 +1606,7 @@ fn missing_astro_check_reports_only_that_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-02",
+            "TS-ASTRO-SETUP-CONFIG-02",
             "Astro app typecheck contract is missing",
             "`package.json` violates the Astro typecheck contract: no app script safely invokes `astro check`. Install `@astrojs/check` and add a script that safely runs `astro check`. Text like `echo astro check`, `astro check || true`, or unsupported shell syntax does not satisfy this rule.",
             Some("package.json"),
@@ -1740,7 +1623,7 @@ fn quoted_astro_check_text_does_not_satisfy_the_script_contract() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-02",
+            "TS-ASTRO-SETUP-CONFIG-02",
             "Astro app typecheck contract is missing",
             "`package.json` violates the Astro typecheck contract: no app script safely invokes `astro check`. Install `@astrojs/check` and add a script that safely runs `astro check`. Text like `echo astro check`, `astro check || true`, or unsupported shell syntax does not satisfy this rule.",
             Some("package.json"),
@@ -1757,7 +1640,7 @@ fn wrapper_forms_satisfy_the_astro_check_contract() {
     assertions::assert_contains(
         &results,
         &[assertions::info(
-            "TS-ASTRO-CONFIG-02",
+            "TS-ASTRO-SETUP-CONFIG-02",
             "astro check present",
             "`package.json` installs `@astrojs/check` and safely invokes `astro check` in the app script surface.",
             Some("package.json"),
@@ -1775,21 +1658,21 @@ fn missing_required_packages_report_package_contract_errors() {
         &results,
         &[
             assertions::error(
-                "TS-ASTRO-CONFIG-01",
+                "TS-ASTRO-SETUP-CONFIG-01",
                 "Astro app package is missing `astro`",
                 "`package.json` does not list `astro` in dependencies or devDependencies. Add `astro` to `package.json`. Without that dependency entry, this app can drift away from the Astro framework contract without the package surface showing it.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-03",
+                "TS-ASTRO-SETUP-CONFIG-03",
                 "Astro app package is missing `eslint-plugin-astro`",
                 "`package.json` does not list `eslint-plugin-astro` in dependencies or devDependencies. Add `eslint-plugin-astro` to `package.json`. Astro source files need the Astro ESLint plugin so Astro-specific lint rules can run.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-06",
+                "TS-ASTRO-SETUP-CONFIG-06",
                 "Astro app package is missing `g3ts-eslint-plugin-astro-pipeline`",
                 "`package.json` does not list `g3ts-eslint-plugin-astro-pipeline` in dependencies or devDependencies. Add `g3ts-eslint-plugin-astro-pipeline` to `package.json`. Astro source-pipeline rules must come from the shared ESLint plugin so route bypasses fail in lint.",
                 Some("package.json"),
@@ -1807,7 +1690,7 @@ fn missing_pipeline_wiring_reports_wiring_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-05",
+            "TS-ASTRO-SETUP-CONFIG-05",
             "Astro ESLint source probe is not wired to `eslint-plugin-astro`",
             "`eslint.config.mjs` does not activate `astro` from `eslint-plugin-astro` on the required Astro source probe. Add the `astro` plugin from `eslint-plugin-astro` to the Astro file lane in `eslint.config.mjs`. Astro files must run through the Astro plugin so framework lint rules actually execute.",
             Some("eslint.config.mjs"),
@@ -1824,7 +1707,7 @@ fn missing_pipeline_wiring_reports_pipeline_wiring_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
@@ -1841,7 +1724,7 @@ fn missing_pipeline_rule_enforcement_reports_effectiveness_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
@@ -1858,7 +1741,7 @@ fn missing_pipeline_scope_options_reports_effectiveness_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
@@ -1875,7 +1758,7 @@ fn missing_content_data_module_scope_options_reports_effectiveness_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
@@ -1892,7 +1775,7 @@ fn missing_content_source_scope_options_reports_effectiveness_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
@@ -1909,7 +1792,7 @@ fn missing_inline_public_content_rule_reports_effectiveness_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-19",
+            "TS-ASTRO-CONTENT-CONFIG-19",
             "Inline public-copy ESLint rule is not effective",
             "`eslint.config.mjs` must activate plugin `i18next` and rule `i18next/no-literal-string` at `error` on Astro, TS, and TSX source probes with the exact strict options from the Astro delegation plan. Missing probes, ignored probes, broad allowlists, or changed messages fail this contract.",
             Some("eslint.config.mjs"),
@@ -1926,7 +1809,7 @@ fn route_only_pipeline_wiring_still_fails_the_source_lane_contract() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
@@ -1943,7 +1826,7 @@ fn endpoint_only_scope_options_satisfy_pipeline_effectiveness() {
     assertions::assert_contains(
         &results,
         &[assertions::info(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_INFO_TITLE,
             PIPELINE_CONTENT_INFO_MJS,
             Some("eslint.config.mjs"),
@@ -1960,7 +1843,7 @@ fn endpoint_only_scope_options_fail_when_route_coverage_is_missing() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
@@ -1977,7 +1860,7 @@ fn missing_pipeline_effectiveness_in_one_lane_still_fails_the_contract() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
@@ -1994,7 +1877,7 @@ fn missing_pipeline_effectiveness_in_the_astro_lane_still_fails_the_contract() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
@@ -2011,12 +1894,50 @@ fn missing_pipeline_effectiveness_in_the_ts_lane_still_fails_the_contract() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-ASTRO-CONFIG-07",
+            "TS-ASTRO-SETUP-CONFIG-07",
             PIPELINE_CONTENT_ERROR_TITLE,
             PIPELINE_CONTENT_ERROR_MJS,
             Some("eslint.config.mjs"),
             false,
         )],
+    );
+}
+
+#[test]
+fn astro_child_config_checks_do_not_own_other_child_policy_surfaces() {
+    let mut input = golden();
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.mdx_component_maps.clear();
+    snapshot.metadata_helpers.clear();
+    snapshot.json_ld_helpers.clear();
+
+    let content_results = super::super::check_content(&input);
+    let mdx_results = super::super::check_mdx(&input);
+    let seo_results = super::super::check_seo(&input);
+
+    assertions::assert_no_id_message_contains(
+        &content_results,
+        "TS-ASTRO-CONTENT-CONFIG-23",
+        "[ts.astro.mdx]",
+    );
+    assertions::assert_no_id_message_contains(
+        &content_results,
+        "TS-ASTRO-CONTENT-CONFIG-23",
+        "[ts.astro.seo]",
+    );
+    assertions::assert_has_error_title(
+        &mdx_results,
+        "TS-ASTRO-MDX-CONFIG-29",
+        "Astro strict content policy is missing approved MDX component-map surfaces",
+    );
+    assertions::assert_has_error_title(
+        &seo_results,
+        "TS-ASTRO-SEO-CONFIG-29",
+        "Astro strict content policy is missing approved SEO helper surfaces",
     );
 }
 
@@ -2029,42 +1950,42 @@ fn missing_package_eslint_and_astro_config_surfaces_fail_closed() {
         &results,
         &[
             assertions::error(
-                "TS-ASTRO-CONFIG-01",
+                "TS-ASTRO-SETUP-CONFIG-01",
                 "Astro app package is missing `astro`",
                 "`package.json` does not list `astro` in dependencies or devDependencies. Add `astro` to `package.json`. Without that dependency entry, this app can drift away from the Astro framework contract without the package surface showing it.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-02",
+                "TS-ASTRO-SETUP-CONFIG-02",
                 "Astro app typecheck contract is missing",
                 "`package.json` violates the Astro typecheck contract: `@astrojs/check` is missing and no app script safely invokes `astro check`. Install `@astrojs/check` and add a script that safely runs `astro check`. Text like `echo astro check`, `astro check || true`, or unsupported shell syntax does not satisfy this rule.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-03",
+                "TS-ASTRO-SETUP-CONFIG-03",
                 "Astro app package is missing `eslint-plugin-astro`",
                 "`package.json` does not list `eslint-plugin-astro` in dependencies or devDependencies. Add `eslint-plugin-astro` to `package.json`. Astro source files need the Astro ESLint plugin so Astro-specific lint rules can run.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-05",
+                "TS-ASTRO-SETUP-CONFIG-05",
                 "Astro ESLint source probe is not wired to `eslint-plugin-astro`",
                 "`eslint.config.*` does not activate `astro` from `eslint-plugin-astro` on the required Astro source probe. Add the `astro` plugin from `eslint-plugin-astro` to the Astro file lane in `eslint.config.*`. Astro files must run through the Astro plugin so framework lint rules actually execute.",
                 Some("eslint.config.*"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-06",
+                "TS-ASTRO-SETUP-CONFIG-06",
                 "Astro app package is missing `g3ts-eslint-plugin-astro-pipeline`",
                 "`package.json` does not list `g3ts-eslint-plugin-astro-pipeline` in dependencies or devDependencies. Add `g3ts-eslint-plugin-astro-pipeline` to `package.json`. Astro source-pipeline rules must come from the shared ESLint plugin so route bypasses fail in lint.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-ASTRO-CONFIG-07",
+                "TS-ASTRO-SETUP-CONFIG-07",
                 PIPELINE_CONTENT_ERROR_TITLE,
                 PIPELINE_CONTENT_ERROR_GLOB,
                 Some("eslint.config.*"),

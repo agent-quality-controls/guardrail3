@@ -10,6 +10,12 @@ mod ts_astro_filetree_12_configured_forbidden_state;
 
 #[cfg(feature = "checks")]
 pub use run::check;
+#[cfg(feature = "checks")]
+pub use run::check_content;
+#[cfg(feature = "checks")]
+pub use run::check_setup;
+#[cfg(feature = "checks")]
+pub use run::check_state;
 
 #[cfg(test)]
 use g3ts_astro_file_tree_checks_assertions as _;
