@@ -520,40 +520,58 @@ name = "g3ts-arch-types"
 version = "0.1.0"
 
 [[package]]
-name = "g3ts-astro-config-checks"
-version = "0.1.0"
-dependencies = [
- "g3ts-astro-config-checks-runtime",
- "g3ts-astro-config-checks-types",
-]
-
-[[package]]
-name = "g3ts-astro-config-checks-runtime"
+name = "g3ts-astro-check-support"
 version = "0.1.0"
 dependencies = [
  "g3ts-astro-types",
- "globset",
  "guardrail3-check-types",
  "url",
 ]
 
 [[package]]
-name = "g3ts-astro-config-checks-types"
+name = "g3ts-astro-checks"
 version = "0.1.0"
 dependencies = [
+ "g3rs-workspace-crawl",
+ "g3ts-astro-content-config-checks",
+ "g3ts-astro-content-file-tree-checks",
+ "g3ts-astro-ingestion",
+ "g3ts-astro-mdx-config-checks",
+ "g3ts-astro-seo-config-checks",
+ "g3ts-astro-setup-config-checks",
+ "g3ts-astro-setup-file-tree-checks",
+ "g3ts-astro-state-file-tree-checks",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-content-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-content-config-checks-runtime",
  "g3ts-astro-types",
 ]
 
 [[package]]
-name = "g3ts-astro-file-tree-checks"
+name = "g3ts-astro-content-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3ts-astro-file-tree-checks-runtime",
+ "g3ts-astro-check-support",
+ "g3ts-astro-types",
+ "globset",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-content-file-tree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-content-file-tree-checks-runtime",
  "g3ts-astro-types",
 ]
 
 [[package]]
-name = "g3ts-astro-file-tree-checks-runtime"
+name = "g3ts-astro-content-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3ts-astro-types",
@@ -581,6 +599,89 @@ dependencies = [
  "package-script-command-parser",
  "serde_json",
  "syncpack-config-parser",
+]
+
+[[package]]
+name = "g3ts-astro-mdx-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-mdx-config-checks-runtime",
+ "g3ts-astro-types",
+]
+
+[[package]]
+name = "g3ts-astro-mdx-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-check-support",
+ "g3ts-astro-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-seo-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-seo-config-checks-runtime",
+ "g3ts-astro-types",
+]
+
+[[package]]
+name = "g3ts-astro-seo-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-check-support",
+ "g3ts-astro-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-setup-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-setup-config-checks-runtime",
+ "g3ts-astro-types",
+]
+
+[[package]]
+name = "g3ts-astro-setup-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-check-support",
+ "g3ts-astro-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-setup-file-tree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-setup-file-tree-checks-runtime",
+ "g3ts-astro-types",
+]
+
+[[package]]
+name = "g3ts-astro-setup-file-tree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-state-file-tree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-state-file-tree-checks-runtime",
+ "g3ts-astro-types",
+]
+
+[[package]]
+name = "g3ts-astro-state-file-tree-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-types",
+ "guardrail3-check-types",
 ]
 
 [[package]]
@@ -922,9 +1023,7 @@ dependencies = [
  "g3ts-arch-file-tree-checks",
  "g3ts-arch-ingestion",
  "g3ts-arch-source-checks",
- "g3ts-astro-config-checks",
- "g3ts-astro-file-tree-checks",
- "g3ts-astro-ingestion",
+ "g3ts-astro-checks",
  "guardrail3-ts-app-types",
 ]
 

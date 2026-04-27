@@ -7,9 +7,7 @@ publish = false
 [dependencies]
 guardrail3-ts-app-types = { path = "../../types/app-types" }
 g3-workspace-crawl.workspace = true
-g3ts-astro-config-checks.workspace = true
-g3ts-astro-file-tree-checks.workspace = true
-g3ts-astro-ingestion.workspace = true
+g3ts-astro-checks.workspace = true
 g3ts-arch-config-checks.workspace = true
 g3ts-arch-file-tree-checks.workspace = true
 g3ts-arch-ingestion.workspace = true

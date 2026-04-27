@@ -1,0 +1,10 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-astro-types",
+  "guardrail3-check-types",
+  "url",
+]
+
+[checks]
+garde = false

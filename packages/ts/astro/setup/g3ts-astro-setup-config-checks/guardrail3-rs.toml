@@ -1,0 +1,24 @@
+profile = "library"
+
+allowed_deps = [
+  "package-script-command-parser",
+  "g3ts-astro-setup-config-checks-assertions",
+  "g3ts-astro-check-support",
+  "g3ts-astro-types",
+  "guardrail3-check-types",
+]
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "setup config keeps one rule per file at runtime root; further split would create artificial packages around tightly related setup assertions."
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-04"
+file = "crates/runtime/src/lib_tests/mod.rs"
+selector = "item-level-allow-with-reason"
+reason = "Config package tests reuse the golden Astro input builder; the allow is limited to the test module declaration and documents that unused helper cases are intentional."

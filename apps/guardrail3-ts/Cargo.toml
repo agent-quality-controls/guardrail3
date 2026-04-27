@@ -21,9 +21,15 @@ version = "0.1.0"
 clap = { version = "4.5", features = ["derive"] }
 guardrail3-check-types = { path = "../../packages/shared/guardrail3-check-types" }
 g3-workspace-crawl = { path = "../../packages/rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
-g3ts-astro-config-checks = { path = "../../packages/ts/astro/g3ts-astro-config-checks" }
-g3ts-astro-file-tree-checks = { path = "../../packages/ts/astro/g3ts-astro-file-tree-checks" }
+g3ts-astro-checks = { path = "../../packages/ts/astro/g3ts-astro-checks" }
+g3ts-astro-content-config-checks = { path = "../../packages/ts/astro/content/g3ts-astro-content-config-checks" }
+g3ts-astro-content-file-tree-checks = { path = "../../packages/ts/astro/content/g3ts-astro-content-file-tree-checks" }
 g3ts-astro-ingestion = { path = "../../packages/ts/astro/g3ts-astro-ingestion" }
+g3ts-astro-mdx-config-checks = { path = "../../packages/ts/astro/mdx/g3ts-astro-mdx-config-checks" }
+g3ts-astro-seo-config-checks = { path = "../../packages/ts/astro/seo/g3ts-astro-seo-config-checks" }
+g3ts-astro-setup-config-checks = { path = "../../packages/ts/astro/setup/g3ts-astro-setup-config-checks" }
+g3ts-astro-setup-file-tree-checks = { path = "../../packages/ts/astro/setup/g3ts-astro-setup-file-tree-checks" }
+g3ts-astro-state-file-tree-checks = { path = "../../packages/ts/astro/state/g3ts-astro-state-file-tree-checks" }
 g3ts-eslint-config-checks = { path = "../../packages/ts/eslint/g3ts-eslint-config-checks" }
 g3ts-eslint-ingestion = { path = "../../packages/ts/eslint/g3ts-eslint-ingestion" }
 g3ts-tsconfig-config-checks = { path = "../../packages/ts/tsconfig/g3ts-tsconfig-config-checks" }
