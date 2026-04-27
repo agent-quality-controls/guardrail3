@@ -4,7 +4,11 @@ use guardrail3_ts_app_types::{SUPPORTED_FAMILIES, SupportedFamily, ValidateReque
 pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
     match family {
         SupportedFamily::Eslint => "eslint",
-        SupportedFamily::Astro => "astro",
+        SupportedFamily::AstroSetup => "astro-setup",
+        SupportedFamily::AstroContent => "astro-content",
+        SupportedFamily::AstroMdx => "astro-mdx",
+        SupportedFamily::AstroSeo => "astro-seo",
+        SupportedFamily::AstroState => "astro-state",
         SupportedFamily::Arch => "arch",
         SupportedFamily::Apparch => "apparch",
         SupportedFamily::Tsconfig => "tsconfig",

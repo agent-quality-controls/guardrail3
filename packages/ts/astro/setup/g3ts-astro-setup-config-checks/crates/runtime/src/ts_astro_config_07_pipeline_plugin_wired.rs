@@ -1,4 +1,4 @@
-use g3ts_astro_types::G3TsAstroConfigChecksInput;
+use g3ts_astro_types::G3TsAstroEslintPluginContractInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SETUP-CONFIG-07";
@@ -32,8 +32,8 @@ const CONTENT_SOURCE_REQUIRED_RULES: [&str; 3] = [
     "astro-pipeline/no-authored-content-imports",
 ];
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.eslint_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroEslintPluginContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         let rel_path = g3ts_astro_check_support::eslint::eslint_rel_path(contract);
         let has_pipeline_rules =
             g3ts_astro_check_support::eslint::eslint_required_lanes_have_effective_pipeline_rules(

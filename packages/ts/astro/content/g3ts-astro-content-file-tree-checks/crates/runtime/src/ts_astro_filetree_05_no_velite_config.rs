@@ -1,9 +1,9 @@
-use g3ts_astro_types::G3TsAstroFileTreeChecksInput;
+use g3ts_astro_types::G3TsAstroContentFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "TS-ASTRO-CONTENT-FILETREE-05";
 
-pub(crate) fn check(input: &G3TsAstroFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroContentFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     for app_root in &input.app_roots {
         if let Some(rel_path) = &app_root.velite_config_rel_path {
             results.push(G3CheckResult::new(

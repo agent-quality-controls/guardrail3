@@ -1,10 +1,10 @@
-use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceState};
+use g3ts_astro_types::{G3TsAstroSetupIntegrationContractInput, G3TsAstroConfigSurfaceState};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SETUP-CONFIG-12";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroSetupIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         match &contract.astro_config {
             G3TsAstroConfigSurfaceState::Parsed { snapshot }
                 if g3ts_astro_check_support::core::astro_config_is_static(contract) =>

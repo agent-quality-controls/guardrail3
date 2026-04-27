@@ -1,11 +1,11 @@
-use g3ts_astro_types::G3TsAstroConfigChecksInput;
+use g3ts_astro_types::G3TsAstroSeoConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SEO-CONFIG-31";
 const PLUGIN_PACKAGE_NAME: &str = "g3ts-eslint-plugin-astro-pipeline";
 const RULE_NAME: &str = "astro-pipeline/require-approved-metadata-helper-in-routes";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroSeoConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     for contract in &input.integration_contracts {
         let policy_rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
         let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
@@ -13,7 +13,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
         };
 
         if !contract
-            .approved_surface_sources
+            .seo_sources
             .missing_metadata_helpers
             .is_empty()
         {
@@ -23,7 +23,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                 format!(
                     "`{}` declares `[ts.astro.seo].metadata_helpers = [{}]`, but G3TS found no source files at those app-relative paths. Configure the approved metadata helper modules routes may use.",
                     policy.rel_path,
-                    contract.approved_surface_sources.missing_metadata_helpers.join(", ")
+                    contract.seo_sources.missing_metadata_helpers.join(", ")
                 ),
                 policy_rel_path,
             ));

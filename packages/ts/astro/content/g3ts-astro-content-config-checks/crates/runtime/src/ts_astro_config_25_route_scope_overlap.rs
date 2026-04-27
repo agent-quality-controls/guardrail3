@@ -1,11 +1,11 @@
-use g3ts_astro_types::G3TsAstroConfigChecksInput;
+use g3ts_astro_types::G3TsAstroContentIntegrationContractInput;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-CONTENT-CONFIG-25";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroContentIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         let rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
         let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
             continue;

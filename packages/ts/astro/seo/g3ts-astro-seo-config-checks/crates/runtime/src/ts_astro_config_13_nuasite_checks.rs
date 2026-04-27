@@ -1,11 +1,11 @@
-use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceState};
+use g3ts_astro_types::{G3TsAstroSeoIntegrationContractInput, G3TsAstroConfigSurfaceState};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SEO-CONFIG-13";
 const DEPENDENCY_NAME: &str = "@nuasite/checks";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroSeoIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         let rel_path = g3ts_astro_check_support::core::astro_config_rel_path(contract);
         let has_package =
             g3ts_astro_check_support::core::package_has_dependency(contract, DEPENDENCY_NAME);

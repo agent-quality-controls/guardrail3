@@ -16,17 +16,5 @@ allowed_deps = [
   "url",
 ]
 
-[[waivers]]
-rule = "RS-CODE-SOURCE-09"
-file = "src/ingestion.rs"
-selector = "effective-code-lines"
-reason = "Shared Astro ingestion support preserves the existing parser-normalizer while public ingestion ownership moves to setup, content, mdx, seo, and state packages."
-
-[[waivers]]
-rule = "RS-CODE-SOURCE-10"
-file = "src/ingestion.rs"
-selector = "top-level-use-imports"
-reason = "Shared Astro ingestion support imports every parsed fact surface used by the per-area ingestion packages."
-
 [checks]
 garde = false

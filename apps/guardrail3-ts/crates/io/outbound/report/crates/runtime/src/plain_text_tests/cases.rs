@@ -84,7 +84,7 @@ fn renderer_includes_rule_message() {
 fn renderer_uses_astro_family_header() {
     let report = ValidateReport {
         runs: vec![FamilyRun {
-            family: SupportedFamily::Astro,
+            family: SupportedFamily::AstroSetup,
             results: vec![G3CheckResult::new(
                 "TS-ASTRO-FILETREE-01".to_owned(),
                 G3Severity::Error,
@@ -99,7 +99,7 @@ fn renderer_uses_astro_family_header() {
     let output = super::super::render_report(&report, false);
 
     assert!(
-        output.contains("== astro =="),
+        output.contains("== astro-setup =="),
         "expected astro family heading, got: {output}"
     );
 }

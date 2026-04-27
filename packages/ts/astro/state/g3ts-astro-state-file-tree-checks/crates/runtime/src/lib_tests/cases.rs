@@ -1,5 +1,5 @@
 use g3ts_astro_state_file_tree_checks_assertions::run as assertions;
-use g3ts_astro_types::{G3TsAstroAppRootInput, G3TsAstroFileTreeChecksInput};
+use g3ts_astro_types::{G3TsAstroAppRootInput, G3TsAstroStateFileTreeChecksInput};
 
 #[test]
 fn state_file_tree_package_reports_owned_ids_for_forbidden_state() {
@@ -13,11 +13,9 @@ fn state_file_tree_package_reports_owned_ids_for_forbidden_state() {
         legacy_generated_state_rel_paths: vec![".next/server/app/page.js".to_owned()],
         forbidden_state_rel_paths: vec![".velite/landing.js".to_owned()],
     };
-    let input = G3TsAstroFileTreeChecksInput {
-        app_roots: vec![app_root.clone()],
+    let input = G3TsAstroStateFileTreeChecksInput {
         build_collection_roots: vec![app_root],
         live_collection_roots: Vec::new(),
-        route_markdown_pages: Vec::new(),
     };
 
     assertions::assert_runtime_check_exact_ids(

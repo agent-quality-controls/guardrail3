@@ -1,4 +1,4 @@
-use g3ts_astro_types::G3TsAstroConfigChecksInput;
+use g3ts_astro_types::G3TsAstroContentConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-CONTENT-CONFIG-19";
@@ -6,7 +6,7 @@ const DEPENDENCY_NAME: &str = "eslint-plugin-i18next";
 const PLUGIN_NAME: &str = "i18next";
 const RULE_NAME: &str = "i18next/no-literal-string";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroContentConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     for contract in &input.integration_contracts {
         let rel_path = g3ts_astro_check_support::core::package_rel_path(contract);
         if !g3ts_astro_check_support::core::package_has_dependency(contract, DEPENDENCY_NAME) {

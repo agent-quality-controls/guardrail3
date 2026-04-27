@@ -1,9 +1,9 @@
-use g3ts_astro_types::{G3TsAstroAppRootInput, G3TsAstroFileTreeChecksInput};
+use g3ts_astro_types::{G3TsAstroAppRootInput, G3TsAstroStateFileTreeChecksInput};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "TS-ASTRO-STATE-FILETREE-11";
 
-pub(crate) fn check(input: &G3TsAstroFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroStateFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     for app_root in strict_content_roots(input) {
         for rel_path in &app_root.legacy_generated_state_rel_paths {
             results.push(G3CheckResult::new(
@@ -22,7 +22,7 @@ pub(crate) fn check(input: &G3TsAstroFileTreeChecksInput, results: &mut Vec<G3Ch
 }
 
 fn strict_content_roots(
-    input: &G3TsAstroFileTreeChecksInput,
+    input: &G3TsAstroStateFileTreeChecksInput,
 ) -> impl Iterator<Item = &G3TsAstroAppRootInput> {
     input
         .build_collection_roots

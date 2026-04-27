@@ -209,7 +209,7 @@ pub(crate) fn route_markdown_pages(
         .collect()
 }
 
-pub(crate) fn route_page_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
+pub fn route_page_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
     let pages_prefix = scoped_rel_path(app_root_rel_path, "src/pages/");
 
     crawl
@@ -225,7 +225,7 @@ pub(crate) fn route_page_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str
         .collect()
 }
 
-pub(crate) fn endpoint_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
+pub fn endpoint_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
     let pages_prefix = scoped_rel_path(app_root_rel_path, "src/pages/");
 
     crawl
