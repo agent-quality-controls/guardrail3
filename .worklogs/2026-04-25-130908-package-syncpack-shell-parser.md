@@ -6,9 +6,9 @@ Moved package-family banned dependency enforcement out of direct manifest scanni
 
 ## Decisions Made
 
-- `TS-PACKAGE-CONFIG-08` now enforces that package-manager roots list `syncpack`, run `syncpack lint` fail-closed, and provide `.syncpackrc` with exact `source` coverage and canonical banned `versionGroups`.
+- `g3ts-package/local-banned-dependencies` now enforces that package-manager roots list `syncpack`, run `syncpack lint` fail-closed, and provide `.syncpackrc` with exact `source` coverage and canonical banned `versionGroups`.
 - Package-family banned dependency names now live in package ingestion as Syncpack policy facts, not in config checks as direct local manifest scans.
-- `TS-PACKAGE-CONFIG-06` now requires parsed `only-allow pnpm` execution in `scripts.preinstall`; echoed text and fail-open shell forms do not satisfy it.
+- `g3ts-package/root-scripts` now requires parsed `only-allow pnpm` execution in `scripts.preinstall`; echoed text and fail-open shell forms do not satisfy it.
 - `package-script-command-parser` uses `tree-sitter-bash` with the existing `tree-sitter` 0.25 line to avoid native linker conflicts with the rest of G3TS.
 - Syncpack wildcard dependency policy uses `embla-carousel*`; Syncpack docs confirm `versionGroups.dependencies` accepts exact names and glob patterns.
 - Adversarial self-review found an initial `only-allow pnpm | tee log` bypass because unsupported syntax was only fail-closed for `eslint`, `astro`, and `syncpack`; fixed by treating `only-allow` as a guarded tool too.

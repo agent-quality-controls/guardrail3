@@ -1,9 +1,9 @@
-mod rs_test_02_owned_sidecar_shape;
-mod rs_test_03_runtime_assertions_split;
-mod rs_test_10_input_failures;
-mod rs_test_18_test_support_generic;
+mod input_failures;
+mod owned_sidecar_shape;
 mod run;
+mod runtime_assertions_split;
 mod support;
+mod test_support_generic;
 
 #[cfg(feature = "checks")]
 pub use run::check;

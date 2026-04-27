@@ -26,7 +26,7 @@ Reach an authoritative `guardrail3-rs validate` state with zero errors across th
 ## Key decisions
 
 - Do not change rules unless a contradiction appears. The current issues are package-state and reporting integrity problems, not rule contradictions.
-- Treat parser `RS-CODE-SOURCE-04` findings as visible warnings, not something to suppress.
+- Treat parser `g3rs-code/ast-04-item-level-allow-with-reason` findings as visible warnings, not something to suppress.
 - Treat the stored prior full report as invalid proof because it omitted `packages/rs/*` roots.
 
 ## Files to modify

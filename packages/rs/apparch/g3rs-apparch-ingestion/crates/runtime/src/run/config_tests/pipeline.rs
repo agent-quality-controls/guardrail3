@@ -41,7 +41,7 @@ db-outbound = { path = "../../io/outbound/db", package = "db-outbound" }
 
     assertions::assert_has_result(
         &results,
-        "RS-APPARCH-CONFIG-02",
+        "g3rs-apparch/logic-dependency-direction",
         G3Severity::Error,
         Some("logic/service/Cargo.toml"),
     );
@@ -85,7 +85,12 @@ serde = "1"
 
     let results = check_config(&super::helpers::config_input(root.path()));
 
-    assertions::assert_has_result(&results, "RS-APPARCH-CONFIG-05", G3Severity::Error, None);
+    assertions::assert_has_result(
+        &results,
+        "g3rs-apparch/patch-replace-bypass",
+        G3Severity::Error,
+        None,
+    );
 }
 
 #[test]
@@ -121,7 +126,12 @@ serde = "1"
 
     let results = check_config(&super::helpers::config_input(root.path()));
 
-    assertions::assert_has_result(&results, "RS-APPARCH-CONFIG-05", G3Severity::Error, None);
+    assertions::assert_has_result(
+        &results,
+        "g3rs-apparch/patch-replace-bypass",
+        G3Severity::Error,
+        None,
+    );
 }
 
 #[test]
@@ -167,7 +177,12 @@ types-a = { path = "../a", package = "types-a" }
 
     let results = check_config(&super::helpers::config_input(root.path()));
 
-    assertions::assert_has_result(&results, "RS-APPARCH-CONFIG-06", G3Severity::Error, None);
+    assertions::assert_has_result(
+        &results,
+        "g3rs-apparch/same-layer-cycles",
+        G3Severity::Error,
+        None,
+    );
 }
 
 #[test]
@@ -202,7 +217,12 @@ db-outbound = { path = "../../io/outbound/db", package = "db-outbound" }
 
     let results = check_config(&super::helpers::config_input(root.path()));
 
-    assertions::assert_has_result(&results, "RS-APPARCH-CONFIG-07", G3Severity::Warn, None);
+    assertions::assert_has_result(
+        &results,
+        "g3rs-apparch/dev-dependency-direction",
+        G3Severity::Warn,
+        None,
+    );
 }
 
 #[test]
@@ -237,7 +257,7 @@ types-a = { path = "../a", package = "types-a" }
 
     let results = check_config(&super::helpers::config_input(root.path()));
 
-    assertions::assert_no_result_id(&results, "RS-APPARCH-CONFIG-06");
+    assertions::assert_no_result_id(&results, "g3rs-apparch/same-layer-cycles");
 }
 
 #[test]
@@ -272,6 +292,16 @@ reqwest = "0.12"
 
     let results = check_config(&super::helpers::config_input(root.path()));
 
-    assertions::assert_has_result(&results, "RS-APPARCH-CONFIG-08", G3Severity::Error, None);
-    assertions::assert_has_result(&results, "RS-APPARCH-CONFIG-09", G3Severity::Error, None);
+    assertions::assert_has_result(
+        &results,
+        "g3rs-apparch/types-purity",
+        G3Severity::Error,
+        None,
+    );
+    assertions::assert_has_result(
+        &results,
+        "g3rs-apparch/logic-purity",
+        G3Severity::Error,
+        None,
+    );
 }

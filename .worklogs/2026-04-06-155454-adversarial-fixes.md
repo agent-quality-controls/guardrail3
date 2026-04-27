@@ -16,9 +16,9 @@ Ran adversarial test attacks on all three g3rs packages. Fixed 3 check bugs, 1 e
 - Added: empty Cargo.toml, nested Cargo.toml exclusion, ignored-but-recovered Cargo.toml, workspace+package combined
 
 ## g3rs-cargo-config-checks (3 new tests + 3 bug fixes)
-- RS-CARGO-CONFIG-06: accept "forbid" as valid (was rejecting it as "weakened")
-- RS-CARGO-CONFIG-02: guard priority check for missing lints (was producing misleading "wrong priority" for nonexistent lints)
-- RS-CARGO-CONFIG-02: added level validation for EXPECTED_CLIPPY_REQUIRED_ALLOW (was only checking presence, not level)
+- g3rs-cargo/disallowed-macros-deny: accept "forbid" as valid (was rejecting it as "weakened")
+- g3rs-cargo/lint-levels: guard priority check for missing lints (was producing misleading "wrong priority" for nonexistent lints)
+- g3rs-cargo/lint-levels: added level validation for EXPECTED_CLIPPY_REQUIRED_ALLOW (was only checking presence, not level)
 - Added: forbid acceptance test, standalone package root test, missing-lint-no-priority-error test
 
 ## Key Files

@@ -4,5 +4,5 @@ Runs the `code` family config checks.
 
 Current rules:
 
-- `RS-CODE-CONFIG-07` EXCEPTION comment inventory
-- `RS-CODE-CONFIG-12` workspace `unsafe_code` lint level
+- `g3rs-code/exception-comment-inventory` EXCEPTION comment inventory
+- `g3rs-code/unsafe-code-lint` workspace `unsafe_code` lint level

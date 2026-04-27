@@ -6,7 +6,7 @@ Approach
 - Extend `hook-shell-parser` function types to carry a parsed body snapshot alongside the raw body text.
 - Add a parser test that proves a parsed function body exposes nested executable lines without reparsing in assertions.
 - Rewire parser assertions and command-query traversal to use the stored parsed body.
-- Rewire `RS-HOOKS-SOURCE-18` and `RS-HOOKS-SOURCE-24` to recurse through parser-owned nested bodies instead of calling `parse_script(&function.body)` locally.
+- Rewire `g3rs-hooks/hook-shared-13-no-unconditional-exit-zero` and `g3rs-hooks/hook-shared-21-no-fail-open-wrappers` to recurse through parser-owned nested bodies instead of calling `parse_script(&function.body)` locally.
 - Verify parser and hooks packages, then write worklog and commit as a stand-alone bug fix.
 
 Key decisions

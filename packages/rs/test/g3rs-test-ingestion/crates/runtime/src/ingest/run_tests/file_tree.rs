@@ -228,7 +228,8 @@ fn ingest_for_file_tree_checks_keeps_valid_analyzed_files_when_one_source_file_f
         .collect::<Vec<_>>();
     assert!(rendered_failures.iter().any(|failure| {
         failure.contains("crates/runtime/src/broken.rs")
-            && failure.contains("Failed to parse Rust source file for test-family file-tree analysis")
+            && failure
+                .contains("Failed to parse Rust source file for test-family file-tree analysis")
     }));
 }
 
@@ -334,16 +335,16 @@ fn file_tree_pipeline_reports_structural_test_findings() {
 
     let results = run_file_tree_pipeline(root);
 
-    assert_file_has_result(&results, "src/tests", "RS-TEST-FILETREE-02");
+    assert_file_has_result(&results, "src/tests", "g3rs-test/owned-sidecar-shape");
     assert_result(
         &results,
-        "RS-TEST-FILETREE-03",
+        "g3rs-test/runtime-assertions-split",
         "assertions crate missing",
         Some("crates/assertions/Cargo.toml"),
     );
     assert_result(
         &results,
-        "RS-TEST-FILETREE-18",
+        "g3rs-test/test-support-generic",
         "test_support imports local component crate",
         Some("test_support/src/lib.rs"),
     );
@@ -399,7 +400,7 @@ fn file_tree_pipeline_reports_input_failures_as_rs_test_10() {
 
     assert_result(
         &results,
-        "RS-TEST-FILETREE-10",
+        "g3rs-test/filetree-input-failures",
         "failed to read test input",
         Some("crates/runtime/tests/broken.rs"),
     );
@@ -441,7 +442,7 @@ fn file_tree_pipeline_reports_nested_ad_hoc_src_tests_tree() {
 
     assert_result(
         &results,
-        "RS-TEST-FILETREE-02",
+        "g3rs-test/owned-sidecar-shape",
         "ad hoc src/tests tree",
         Some("crates/runtime/src/foo/tests"),
     );

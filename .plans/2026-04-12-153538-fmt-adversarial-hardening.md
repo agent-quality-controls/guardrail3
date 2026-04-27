@@ -6,10 +6,10 @@ Prove whether the recent `fmt` package migration changed rule behavior, instead 
 
 - Add the highest-signal missing tests first in the `fmt` packages.
   - Config rule branches:
-    - `RS-FMT-CONFIG-03` quiet when no nightly-only keys exist
-    - `RS-FMT-CONFIG-04` `[package].edition` fallback
-    - `RS-FMT-CONFIG-04` quiet when rustfmt `edition` is absent
-    - `RS-FMT-CONFIG-02` `skip_macro_invocations` empty vs non-empty branch
+    - `g3rs-fmt/nightly-keys-on-stable` quiet when no nightly-only keys exist
+    - `g3rs-fmt/edition-mismatch` `[package].edition` fallback
+    - `g3rs-fmt/edition-mismatch` quiet when rustfmt `edition` is absent
+    - `g3rs-fmt/extra-settings` `skip_macro_invocations` empty vs non-empty branch
   - Config pipeline:
     - only root `.rustfmt.toml` exists and config rules still run on it
     - malformed Cargo/toolchain does not suppress unrelated config findings

@@ -55,7 +55,7 @@ pub fn rustfmt_input(
 
 pub fn waiver(reason: &str) -> G3RsFmtWaiver {
     G3RsFmtWaiver {
-        rule: "RS-FMT-CONFIG-07".to_owned(),
+        rule: "g3rs-fmt/ignore-escape-hatch".to_owned(),
         file: "rustfmt.toml".to_owned(),
         selector: "ignore".to_owned(),
         reason: reason.to_owned(),

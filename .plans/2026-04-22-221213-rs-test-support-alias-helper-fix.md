@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-TEST-FILETREE-18` so `test_support` cannot hide canned helper or semantic helper usage behind a local call alias such as `let run = fixture_path; run()`.
+Fix `g3rs-test/test-support-generic` so `test_support` cannot hide canned helper or semantic helper usage behind a local call alias such as `let run = fixture_path; run()`.
 
 ## Approach
 

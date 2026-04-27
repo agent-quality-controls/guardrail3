@@ -45,9 +45,9 @@ fn findings(results: &[G3CheckResult]) -> Vec<Finding> {
 }
 
 fn has_result(results: &[G3CheckResult], id: &str, title: &str, file: Option<&str>) -> bool {
-    results.iter().any(|result| {
-        result.id() == id && result.title() == title && result.file() == file
-    })
+    results
+        .iter()
+        .any(|result| result.id() == id && result.title() == title && result.file() == file)
 }
 
 pub fn assert_missing_guardrail3_rs(err: &IngestionError) {
@@ -102,7 +102,7 @@ pub fn assert_pipeline_missing_dependency_allowlist_for_library(results: &[G3Che
     assert!(
         has_result(
             results,
-            "RS-DEPS-CONFIG-04",
+            "g3rs-deps/library-allowlist-present",
             "dependency allowlist missing",
             Some("crates/core/Cargo.toml"),
         ),
@@ -115,7 +115,7 @@ pub fn assert_pipeline_workspace_tool_presence(results: &[G3CheckResult]) {
         findings(results),
         vec![
             Finding {
-                id: "RS-DEPS-CONFIG-06".to_owned(),
+                id: "g3rs-deps/cargo-deny-installed".to_owned(),
                 severity: G3Severity::Info,
                 title: "cargo-deny installed".to_owned(),
                 message: "`cargo-deny` is available on PATH.".to_owned(),
@@ -123,7 +123,7 @@ pub fn assert_pipeline_workspace_tool_presence(results: &[G3CheckResult]) {
                 inventory: true,
             },
             Finding {
-                id: "RS-DEPS-CONFIG-07".to_owned(),
+                id: "g3rs-deps/cargo-machete-installed".to_owned(),
                 severity: G3Severity::Info,
                 title: "cargo-machete installed".to_owned(),
                 message: "`cargo-machete` is available on PATH.".to_owned(),
@@ -131,15 +131,17 @@ pub fn assert_pipeline_workspace_tool_presence(results: &[G3CheckResult]) {
                 inventory: true,
             },
             Finding {
-                id: "RS-DEPS-CONFIG-08".to_owned(),
+                id: "g3rs-deps/cargo-dupes-installed".to_owned(),
                 severity: G3Severity::Warn,
                 title: "cargo-dupes missing".to_owned(),
-                message: "`cargo-dupes` was not found on PATH. Install with `cargo install cargo-dupes`.".to_owned(),
+                message:
+                    "`cargo-dupes` was not found on PATH. Install with `cargo install cargo-dupes`."
+                        .to_owned(),
                 file: Some("Cargo.toml".to_owned()),
                 inventory: false,
             },
             Finding {
-                id: "RS-DEPS-CONFIG-09".to_owned(),
+                id: "g3rs-deps/gitleaks-installed".to_owned(),
                 severity: G3Severity::Info,
                 title: "gitleaks installed".to_owned(),
                 message: "`gitleaks` is available on PATH.".to_owned(),
@@ -155,7 +157,7 @@ pub fn assert_pipeline_workspace_tool_absence(results: &[G3CheckResult]) {
         findings(results),
         vec![
             Finding {
-                id: "RS-DEPS-CONFIG-06".to_owned(),
+                id: "g3rs-deps/cargo-deny-installed".to_owned(),
                 severity: G3Severity::Error,
                 title: "cargo-deny missing".to_owned(),
                 message: "`cargo-deny` was not found on PATH. Install with `cargo install cargo-deny`.".to_owned(),
@@ -163,7 +165,7 @@ pub fn assert_pipeline_workspace_tool_absence(results: &[G3CheckResult]) {
                 inventory: false,
             },
             Finding {
-                id: "RS-DEPS-CONFIG-07".to_owned(),
+                id: "g3rs-deps/cargo-machete-installed".to_owned(),
                 severity: G3Severity::Error,
                 title: "cargo-machete missing".to_owned(),
                 message: "`cargo-machete` was not found on PATH. Install with `cargo install cargo-machete`.".to_owned(),
@@ -171,7 +173,7 @@ pub fn assert_pipeline_workspace_tool_absence(results: &[G3CheckResult]) {
                 inventory: false,
             },
             Finding {
-                id: "RS-DEPS-CONFIG-08".to_owned(),
+                id: "g3rs-deps/cargo-dupes-installed".to_owned(),
                 severity: G3Severity::Warn,
                 title: "cargo-dupes missing".to_owned(),
                 message: "`cargo-dupes` was not found on PATH. Install with `cargo install cargo-dupes`.".to_owned(),
@@ -179,7 +181,7 @@ pub fn assert_pipeline_workspace_tool_absence(results: &[G3CheckResult]) {
                 inventory: false,
             },
             Finding {
-                id: "RS-DEPS-CONFIG-09".to_owned(),
+                id: "g3rs-deps/gitleaks-installed".to_owned(),
                 severity: G3Severity::Error,
                 title: "gitleaks missing".to_owned(),
                 message: "`gitleaks` was not found on PATH. Install with `brew install gitleaks` or download from GitHub.".to_owned(),
@@ -195,7 +197,7 @@ pub fn assert_filetree_missing_lockfile_for_service(results: &[G3CheckResult]) {
         findings(results),
         vec![
             Finding {
-                id: "RS-DEPS-FILETREE-09".to_owned(),
+                id: "g3rs-deps/cargo-lock-present".to_owned(),
                 severity: G3Severity::Error,
                 title: "Cargo.lock missing".to_owned(),
                 message:
@@ -205,7 +207,7 @@ pub fn assert_filetree_missing_lockfile_for_service(results: &[G3CheckResult]) {
                 inventory: false,
             },
             Finding {
-                id: "RS-DEPS-FILETREE-10".to_owned(),
+                id: "g3rs-deps/gitignore-not-ignoring-cargo-lock".to_owned(),
                 severity: G3Severity::Info,
                 title: "Cargo.lock tracked by git".to_owned(),
                 message: "No relevant `.gitignore` masks `Cargo.lock` at the workspace root."
@@ -222,7 +224,7 @@ pub fn assert_filetree_missing_lockfile_for_library(results: &[G3CheckResult]) {
         findings(results),
         vec![
             Finding {
-                id: "RS-DEPS-FILETREE-09".to_owned(),
+                id: "g3rs-deps/cargo-lock-present".to_owned(),
                 severity: G3Severity::Info,
                 title: "Cargo.lock missing".to_owned(),
                 message: "Library-profile workspace is missing `Cargo.lock`.".to_owned(),
@@ -230,7 +232,7 @@ pub fn assert_filetree_missing_lockfile_for_library(results: &[G3CheckResult]) {
                 inventory: false,
             },
             Finding {
-                id: "RS-DEPS-FILETREE-10".to_owned(),
+                id: "g3rs-deps/gitignore-not-ignoring-cargo-lock".to_owned(),
                 severity: G3Severity::Info,
                 title: "Cargo.lock tracked by git".to_owned(),
                 message: "No relevant `.gitignore` masks `Cargo.lock` at the workspace root."
@@ -247,7 +249,7 @@ pub fn assert_filetree_ignored_lockfile(results: &[G3CheckResult]) {
         findings(results),
         vec![
             Finding {
-                id: "RS-DEPS-FILETREE-09".to_owned(),
+                id: "g3rs-deps/cargo-lock-present".to_owned(),
                 severity: G3Severity::Info,
                 title: "Cargo.lock committed".to_owned(),
                 message: "Workspace root has `Cargo.lock` committed.".to_owned(),
@@ -255,7 +257,7 @@ pub fn assert_filetree_ignored_lockfile(results: &[G3CheckResult]) {
                 inventory: true,
             },
             Finding {
-                id: "RS-DEPS-FILETREE-10".to_owned(),
+                id: "g3rs-deps/gitignore-not-ignoring-cargo-lock".to_owned(),
                 severity: G3Severity::Error,
                 title: "Cargo.lock ignored in gitignore".to_owned(),
                 message: "`.gitignore` ignores `Cargo.lock`. Remove the line ignoring `Cargo.lock` from this `.gitignore`.".to_owned(),
@@ -271,7 +273,7 @@ pub fn assert_filetree_unignored_lockfile(results: &[G3CheckResult]) {
         findings(results),
         vec![
             Finding {
-                id: "RS-DEPS-FILETREE-09".to_owned(),
+                id: "g3rs-deps/cargo-lock-present".to_owned(),
                 severity: G3Severity::Info,
                 title: "Cargo.lock committed".to_owned(),
                 message: "Workspace root has `Cargo.lock` committed.".to_owned(),
@@ -279,7 +281,7 @@ pub fn assert_filetree_unignored_lockfile(results: &[G3CheckResult]) {
                 inventory: true,
             },
             Finding {
-                id: "RS-DEPS-FILETREE-10".to_owned(),
+                id: "g3rs-deps/gitignore-not-ignoring-cargo-lock".to_owned(),
                 severity: G3Severity::Info,
                 title: "Cargo.lock tracked by git".to_owned(),
                 message: "No relevant `.gitignore` masks `Cargo.lock` at the workspace root."

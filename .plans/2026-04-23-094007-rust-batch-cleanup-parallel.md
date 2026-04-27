@@ -2,7 +2,7 @@ Goal
 - Drive the current Rust cleanup batch to a clean repo state with no known unresolved production-path bugs from the active attack surface.
 
 Approach
-- Fix `RS-TEST-FILETREE-18` module-alias helper resolution in `rs/test`.
+- Fix `g3rs-test/test-support-generic` module-alias helper resolution in `rs/test`.
 - Run adversarial reviews in parallel on `rs/test`, `rs/code`, and hooks/parser against the latest committed state.
 - For every concrete finding, add a red regression, fix it at the parser/support/rule boundary that owns the semantics, verify with package tests and `g3rs validate`, and commit as a standalone bug fix with a worklog.
 - Repeat until attack agents return no concrete findings and `git status --short` is clean.

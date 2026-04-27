@@ -1,8 +1,6 @@
 /// Assemble the checks input from selected and parsed data.
 use cargo_toml_parser::types::CargoToml;
-use g3rs_garde_types::{
-    G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
-};
+use g3rs_garde_types::{G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput};
 
 /// Build the checks input from parsed config files.
 pub(crate) fn assemble(

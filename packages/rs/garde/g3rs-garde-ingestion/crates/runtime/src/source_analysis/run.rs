@@ -207,7 +207,7 @@ pub(crate) fn analyze_source_files(
                     waivers
                         .iter()
                         .find(|waiver| {
-                            waiver.rule == "RS-GARDE-SOURCE-04"
+                            waiver.rule == "g3rs-garde/query-as-inventory"
                                 && waiver.file == parsed_file.rel_path
                                 && waiver.selector == selector
                         })

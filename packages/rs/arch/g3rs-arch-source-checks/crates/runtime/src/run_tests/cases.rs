@@ -37,5 +37,5 @@ fn run_dispatches_prebound_lib_facade_inputs() {
 
     let results = crate::run::check(&input);
 
-    assertions::assert_has_finding_id(&results, "RS-ARCH-SOURCE-02");
+    assertions::assert_has_finding_id(&results, "g3rs-arch/lib-facade-only");
 }

@@ -9,7 +9,7 @@ allowed_deps = [
 ]
 
 [[waivers]]
-rule = "RS-ARCH-FILETREE-07"
+rule = "g3rs-arch/structural-split"
 file = "crates/assertions/Cargo.toml"
 selector = "structural-split"
 reason = "Assertions crate intentionally keeps one shared proof module per tested ingestion surface."

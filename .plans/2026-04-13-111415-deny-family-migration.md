@@ -10,15 +10,15 @@ Finish the deny family under the package model:
 ## Approach
 
 1. Add failing tests for the concrete deny package bugs and gaps
-   - `RS-DENY-CONFIG-21` missing unknown-key coverage for typed nested tables
-   - `RS-DENY-CONFIG-03` behavior/name mismatch around `unmaintained`
+   - `g3rs-deny/unknown-keys` missing unknown-key coverage for typed nested tables
+   - `g3rs-deny/stricter-advisories-inventory` behavior/name mismatch around `unmaintained`
    - missing tests for malformed skip/ignore entries, tokio allow-list drift, unreadable selected deny file
 2. Migrate remaining config rules from old app code into `g3rs-deny-config-checks`
-   - `RS-DENY-CONFIG-23` package successor for old `RS-DENY-09`
-   - `RS-DENY-CONFIG-24` package successor for old `RS-DENY-17`
-   - `RS-DENY-CONFIG-25` package successor for old `RS-DENY-25`
-   - `RS-DENY-CONFIG-26` package successor for old `RS-DENY-26`
-   - `RS-DENY-CONFIG-27` package successor for old `RS-DENY-30`
+   - `g3rs-deny/ban-baseline-complete` package successor for old `RS-DENY-09`
+   - `g3rs-deny/license-exceptions-inventory` package successor for old `RS-DENY-17`
+   - `g3rs-deny/allow-override-channel` package successor for old `RS-DENY-25`
+   - `g3rs-deny/extra-deny-bans-inventory` package successor for old `RS-DENY-26`
+   - `g3rs-deny/wrappers` package successor for old `RS-DENY-30`
 3. Build deny filetree lane
    - add `g3rs-deny-filetree-checks`
    - extend `g3rs-deny-types`

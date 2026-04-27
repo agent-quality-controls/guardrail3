@@ -341,7 +341,10 @@ fn collect_file_path_attr_sites(
             let syn::Item::Mod(module) = item else {
                 return None;
             };
-            let path_attr = module.attrs.iter().find(|attr| attr.path().is_ident("path"))?;
+            let path_attr = module
+                .attrs
+                .iter()
+                .find(|attr| attr.path().is_ident("path"))?;
             Some(arch_types::G3RsArchPathAttrSite {
                 rel_path: rel_path.to_owned(),
                 line: span_line(path_attr.span()),

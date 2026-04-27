@@ -7,7 +7,7 @@ pub fn check(input: &G3RsTestSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for input_failure in &input.input_failures {
-        crate::rs_test_10_input_failures::check(
+        crate::input_failures::check(
             &input.root_rel_dir,
             &input_failure.rel_path,
             &input_failure.message,
@@ -20,7 +20,7 @@ pub fn check(input: &G3RsTestSourceChecksInput) -> Vec<G3CheckResult> {
 
         if matches!(file.kind, G3RsTestFileKind::AssertionsModule) {
             let empty = BTreeSet::new();
-            crate::rs_test_16_assertions_modules_prove::check(
+            crate::assertions_modules_prove::check(
                 &crate::support::AssertionsModuleInput::new(
                     file,
                     if file.proof_bearing_exported_functions.is_empty() {
@@ -35,14 +35,14 @@ pub fn check(input: &G3RsTestSourceChecksInput) -> Vec<G3CheckResult> {
 
         if matches!(file.kind, G3RsTestFileKind::Source) {
             for module in &file.parsed.cfg_test_modules {
-                crate::rs_test_01_inline_test_bodies::check(
+                crate::inline_test_bodies::check(
                     &crate::support::CfgTestModuleInput::new(file, module),
                     &mut results,
                 );
             }
         }
 
-        crate::rs_test_04_ignore_reason::check(&file_input, &mut results);
+        crate::ignore_reason::check(&file_input, &mut results);
 
         for function in &file.parsed.test_functions {
             let function_input = crate::support::TestFunctionInput::new(
@@ -55,18 +55,15 @@ pub fn check(input: &G3RsTestSourceChecksInput) -> Vec<G3CheckResult> {
                 },
             );
 
-            crate::rs_test_16_assertions_modules_prove::check_sidecar_semantic_proof(
+            crate::assertions_modules_prove::check_sidecar_semantic_proof(
                 &function_input,
                 &mut results,
             );
-            crate::rs_test_05_should_panic_expected::check(&function_input, &mut results);
-            crate::rs_test_06_tautological_assertions::check(&function_input, &mut results);
-            crate::rs_test_07_real_proof_site::check(&function_input, &mut results);
-            crate::rs_test_08_weak_matches_assert::check(&function_input, &mut results);
-            crate::rs_test_17_external_harnesses_use_assertions::check(
-                &function_input,
-                &mut results,
-            );
+            crate::should_panic_expected::check(&function_input, &mut results);
+            crate::tautological_assertions::check(&function_input, &mut results);
+            crate::real_proof_site::check(&function_input, &mut results);
+            crate::weak_matches_assert::check(&function_input, &mut results);
+            crate::external_harnesses_use_assertions::check(&function_input, &mut results);
         }
     }
 

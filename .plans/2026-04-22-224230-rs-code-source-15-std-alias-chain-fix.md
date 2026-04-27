@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-CODE-SOURCE-15` so chained std alias rebinding like `use std as s; use s as t; t::fs::read_to_string(...)` is detected at the parser visitor boundary.
+Fix `g3rs-code/ast-15-direct-fs-usage` so chained std alias rebinding like `use std as s; use s as t; t::fs::read_to_string(...)` is detected at the parser visitor boundary.
 
 ## Approach
 

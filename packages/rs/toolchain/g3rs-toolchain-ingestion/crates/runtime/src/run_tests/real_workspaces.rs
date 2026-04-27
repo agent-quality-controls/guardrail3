@@ -1,5 +1,7 @@
 /// Integration tests against real workspaces in the guardrail3 repository.
-use super::helpers::{collect_package_dirs, crawl, is_supported_channel, package_dir, packages_dir};
+use super::helpers::{
+    collect_package_dirs, crawl, is_supported_channel, package_dir, packages_dir,
+};
 
 /// Real workspace with `[package]` containing `rust-version = "1.85"`.
 #[test]

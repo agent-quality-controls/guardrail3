@@ -3,7 +3,7 @@ use g3rs_toolchain_filetree_checks_assertions::run as assertions;
 use super::helpers::run_check;
 
 #[test]
-fn modern_only_emits_only_filetree_01_inventory() {
+fn modern_only_emits_only_modern_toolchain_inventory() {
     assertions::assert_modern_only(&run_check(Some("rust-toolchain.toml"), None));
 }
 

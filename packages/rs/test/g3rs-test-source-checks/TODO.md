@@ -1,2 +1,2 @@
 - add broader parity smoke tests against the legacy `test` source family
-- design the deferred mixed lane for `RS-TEST-FILETREE-02`, `03`, `10`, and `18`
+- design the deferred mixed lane for `g3rs-test/owned-sidecar-shape`, `03`, `10`, and `18`

@@ -8,7 +8,7 @@ Round 2 adversarial attack found that the round 1 required-allow fix was a no-op
 
 ## Decisions Made
 
-### RS-CARGO-CONFIG-02: catch any level deviation, not just weakening
+### g3rs-cargo/lint-levels: catch any level deviation, not just weakening
 - **Chose:** Changed `check_expected` predicate from `actual != expected && is_weaker(expected, actual)` to just `actual != expected`. The error title changed from "weakens policy" to "deviates from policy" with a direction indicator ("weaker" or "different").
 - **Why:** `is_weaker("allow", X)` is always false because `level_rank("allow") = 0` and nothing ranks below 0. The round 1 fix added iteration over required-allow lints but the predicate never triggered. Any deviation from expected level is a policy violation regardless of direction.
 

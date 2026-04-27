@@ -24,7 +24,7 @@ The package tests already covered some workspace and path behavior, but the loca
 - **Chose:** When a local path dependency points to a Cargo package under the workspace root that is not declared in `[workspace].members`, the content package stands down and the app keeps `RS-DEPS-11` as the sole owner.
 - **Why:** That situation is an input trust-boundary failure, not a normal allowlist decision. The content package should not emit its own dependency-policy result on top of the structural failure.
 - **Alternatives considered:**
-  - Emitting both `RS-DEPS-CONFIG-01` and `RS-DEPS-11` — rejected because it duplicates ownership and weakens the fail-closed boundary.
+  - Emitting both `g3rs-deps/dependencies-allowlisted` and `RS-DEPS-11` — rejected because it duplicates ownership and weakens the fail-closed boundary.
   - Moving the structural error into the content package — rejected because malformed / unreadable / structurally illegal inputs belong in the app orchestrator.
 
 ### Family bridge coverage should match observable scope
@@ -39,7 +39,7 @@ The final shape remains consistent with the current extraction rule:
 - `g3rs-deps-config-checks` owns pure content checks over parsed files
 - the package contract grew only by adding more parsed files that are actually needed for one local assertion
 
-This batch does not migrate any new rule IDs. It hardens the existing `RS-DEPS-CONFIG-01/06/07/08/12` package path and keeps `RS-DEPS-11` as the structural fail-closed rule.
+This batch does not migrate any new rule IDs. It hardens the existing `g3rs-deps/dependencies-allowlisted/06/07/08/12` package path and keeps `RS-DEPS-11` as the structural fail-closed rule.
 
 ## Information Sources
 - Existing deps family resolution logic in `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/facts/dependency_entries.rs`
@@ -60,6 +60,6 @@ This batch does not migrate any new rule IDs. It hardens the existing `RS-DEPS-C
 - `.worklogs/2026-04-05-200711-wire-deps-content-checks.md` — prior deps package wiring worklog
 
 ## Next Steps / Continuation Plan
-1. If more deps parity hardening is needed, add bridge coverage for `RS-DEPS-CONFIG-02`, `RS-DEPS-CONFIG-03`, and `RS-DEPS-CONFIG-05` through the family run path, not just package tests.
+1. If more deps parity hardening is needed, add bridge coverage for `g3rs-deps/build-dependencies-allowlisted`, `g3rs-deps/dev-dependencies-allowlisted`, and `g3rs-deps/direct-dependency-cap` through the family run path, not just package tests.
 2. When returning to extraction sequencing, move on to the next planned content-check family (`garde`) unless the user explicitly wants more deps cleanup first.
 3. If nested-root deps validation becomes important, decide whether the family view should include sibling manifests outside the selected root before adding any new assertions around that case.

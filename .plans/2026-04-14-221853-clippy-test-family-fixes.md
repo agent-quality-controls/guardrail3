@@ -3,8 +3,8 @@ Make `packages/rs/clippy/g3rs-clippy-config-checks` clean under the `test` famil
 
 # Approach
 1. Fix weak `test` rule messages before package changes.
-   - Rewrite `RS-TEST-SOURCE-07` so it says the exact missing proof problem instead of `real proof site`.
-   - Audit the live `RS-TEST-FILETREE-02`, `RS-TEST-FILETREE-03`, and `RS-TEST-SOURCE-16` messages against the message format plan and tighten the vague ones.
+   - Rewrite `g3rs-test/real-proof-site` so it says the exact missing proof problem instead of `real proof site`.
+   - Audit the live `g3rs-test/owned-sidecar-shape`, `g3rs-test/runtime-assertions-split`, and `g3rs-test/assertions-modules-prove` messages against the message format plan and tighten the vague ones.
 2. Fix the package wiring first.
    - Add the missing sibling dependencies between `crates/runtime` and `crates/assertions`.
    - Stop `crates/assertions` from reaching local private code.
@@ -18,7 +18,7 @@ Make `packages/rs/clippy/g3rs-clippy-config-checks` clean under the `test` famil
 5. Re-run `guardrail3-rs validate --family test` on the package and close the remaining gaps.
 
 # Key Decisions
-- Keep `RS-TEST-SOURCE-07` broad. It should catch both tests with no proof step and tests that route proof through local sidecar code.
+- Keep `g3rs-test/real-proof-site` broad. It should catch both tests with no proof step and tests that route proof through local sidecar code.
 - Do not guess exact destination files in rule messages when the rule does not know them.
 - Keep the shared assertions crate as the single proof layer for both internal sidecars and external harnesses.
 

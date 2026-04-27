@@ -1,5 +1,5 @@
-mod rs_cargo_filetree_10_missing_member_cargo;
-mod rs_cargo_filetree_14_input_failures;
+mod input_failures;
+mod missing_member_cargo;
 mod run;
 
 #[cfg(feature = "checks")]

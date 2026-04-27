@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-CODE-SOURCE-33` so nested public modules no longer hide `anyhow` aliases from weak-public-error detection. The public-surface visitor now carries `anyhow` alias bindings by module scope instead of using only one file-root binding bag.
+Fixed `g3rs-code/ast-33-public-weak-error-forms` so nested public modules no longer hide `anyhow` aliases from weak-public-error detection. The public-surface visitor now carries `anyhow` alias bindings by module scope instead of using only one file-root binding bag.
 
 ## Decisions made
 

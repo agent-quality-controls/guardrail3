@@ -26,9 +26,7 @@ pub enum G3RsGardeIngestionError {
 impl std::fmt::Display for G3RsGardeIngestionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CargoTomlNotFound => {
-                f.write_str("no Cargo.toml found at the workspace root")
-            }
+            Self::CargoTomlNotFound => f.write_str("no Cargo.toml found at the workspace root"),
             Self::FileTreeIngestionNotImplemented => {
                 f.write_str("garde file-tree ingestion is not implemented yet")
             }

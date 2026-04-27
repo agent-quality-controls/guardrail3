@@ -7,7 +7,7 @@ Ran an adversarial fmt hardening pass by adding tests first and fixing only the 
 - Treated deleted-after-crawl root files as the same rule-owned blocker class as unreadable files.
   - Why: the package model already preserves missing/parse/blocker states inside rule inputs, and a stale crawl should not crash config ingestion for `rustfmt.toml` only.
 - Corrected the bad pipeline expectation instead of changing code.
-  - Why: `RS-FMT-CONFIG-04` only applies when rustfmt `edition` exists. The failing test was asserting behavior the rule does not claim.
+  - Why: `g3rs-fmt/edition-mismatch` only applies when rustfmt `edition` exists. The failing test was asserting behavior the rule does not claim.
 - Added more branch and boundary tests after the first bug fix without changing logic again.
   - Why: the convergence agents found unpinned branches, not more proved bugs.
 

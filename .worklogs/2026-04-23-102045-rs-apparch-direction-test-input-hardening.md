@@ -1,5 +1,5 @@
 Summary
-- Hardened the `RS-APPARCH-CONFIG-01/02/03/07` direction-rule sidecars so they now feed the rules their real crate-local dependency input instead of rebuilding full config bags in test helpers.
+- Hardened the `g3rs-apparch/types-dependency-direction/02/03/07` direction-rule sidecars so they now feed the rules their real crate-local dependency input instead of rebuilding full config bags in test helpers.
 - Tightened the assertions to prove the forbidden target crate and, for the dev-direction rule, the dependency kind label.
 
 Decisions made

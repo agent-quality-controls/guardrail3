@@ -70,8 +70,8 @@ Required inputs include:
 Malformed required inputs must not silently suppress findings.
 
 Ownership split:
-- `RS-FMT-CONFIG-01` owns parse failures of the root rustfmt config
-- `RS-FMT-CONFIG-03` and `RS-FMT-CONFIG-04` own the secondary-file failures they need
+- `g3rs-fmt/settings` owns parse failures of the root rustfmt config
+- `g3rs-fmt/nightly-keys-on-stable` and `g3rs-fmt/edition-mismatch` own the secondary-file failures they need
 
 ## Known Live Gaps
 
@@ -153,9 +153,9 @@ The pass is not done until:
 2. audit `mod.rs` / `facts.rs` / `inputs.rs` for root-only ownership
 3. audit the existing `rs_fmt_*_tests/` directories for missing attack vectors and exact-result gaps
 4. harden the highest-risk rules first:
-   - `RS-FMT-CONFIG-01`
-   - `RS-FMT-CONFIG-03`
+   - `g3rs-fmt/settings`
+   - `g3rs-fmt/nightly-keys-on-stable`
    - `RS-FMT-05`
-   - `RS-FMT-CONFIG-04`
+   - `g3rs-fmt/edition-mismatch`
    - `RS-FMT-08`
 5. finish parse-failure and exact-severity coverage before stopping

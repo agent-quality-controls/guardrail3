@@ -70,9 +70,21 @@ pub fn assert_changelog_fields(
         .changelog
         .as_ref()
         .expect("changelog section should be present");
-    assert_eq!(changelog.header.as_deref(), header, "changelog header mismatch");
-    assert_eq!(changelog.footer.as_deref(), footer, "changelog footer mismatch");
-    assert_eq!(changelog.body.is_some(), has_body, "changelog body presence mismatch");
+    assert_eq!(
+        changelog.header.as_deref(),
+        header,
+        "changelog header mismatch"
+    );
+    assert_eq!(
+        changelog.footer.as_deref(),
+        footer,
+        "changelog footer mismatch"
+    );
+    assert_eq!(
+        changelog.body.is_some(),
+        has_body,
+        "changelog body presence mismatch"
+    );
 }
 
 /// Assert that an unknown top-level key was preserved in `extra`.

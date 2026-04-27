@@ -1,5 +1,5 @@
 # Summary
-Fixed a contradiction in `RS-TEST-FILETREE-03`. The rule already required nested shared assertions files like `assertions/x/rule.rs`, but it still rejected sidecars that imported that same nested path.
+Fixed a contradiction in `g3rs-test/runtime-assertions-split`. The rule already required nested shared assertions files like `assertions/x/rule.rs`, but it still rejected sidecars that imported that same nested path.
 
 # Decisions Made
 - Fixed the rule instead of bending the package around it. Rejected a package-only workaround because the bug lived in the rule's path check.

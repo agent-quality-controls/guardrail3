@@ -1,1 +1,1 @@
-- Maintain `RS-FMT-FILETREE-01`, `RS-FMT-FILETREE-05`, and `RS-FMT-FILETREE-08`.
+- Maintain `g3rs-fmt/rustfmt-config-exists`, `g3rs-fmt/per-crate-override`, and `g3rs-fmt/dual-file-conflict`.

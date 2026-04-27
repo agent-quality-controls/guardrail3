@@ -218,7 +218,8 @@ fn resolves_plugin_package_identity_from_namespace_wrapped_astro_plugin() {
     )
     .expect("fake astro plugin package manifest should be written");
     fs::write(
-        root.path().join("node_modules/eslint-plugin-astro/index.js"),
+        root.path()
+            .join("node_modules/eslint-plugin-astro/index.js"),
         r#"module.exports = {
   meta: { name: "eslint-plugin-astro" },
   rules: {
@@ -384,7 +385,8 @@ export default [{
     )
     .expect("fake astro plugin package manifest should be written");
     fs::write(
-        root.path().join("node_modules/eslint-plugin-astro/index.js"),
+        root.path()
+            .join("node_modules/eslint-plugin-astro/index.js"),
         r#"module.exports = {
   meta: { name: "eslint-plugin-astro" },
   rules: {

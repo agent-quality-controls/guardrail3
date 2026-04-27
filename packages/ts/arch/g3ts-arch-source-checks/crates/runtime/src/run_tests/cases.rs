@@ -23,8 +23,11 @@ fn source_checks_flag_body_items_and_broad_reexports() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_arch_source_checks_assertions::run::assert_has_error(&results, "TS-ARCH-SOURCE-02");
-    g3ts_arch_source_checks_assertions::run::assert_has_error(&results, "TS-ARCH-SOURCE-03");
+    g3ts_arch_source_checks_assertions::run::assert_has_error(&results, "g3ts-arch/facade-only");
+    g3ts_arch_source_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-arch/no-broad-reexport",
+    );
 }
 
 #[test]
@@ -39,7 +42,7 @@ fn source_checks_flag_unreadable_facade() {
     let results = crate::run::check(&input);
     g3ts_arch_source_checks_assertions::run::assert_has_finding(
         &results,
-        "TS-ARCH-SOURCE-01",
+        "g3ts-arch/facade-parseable",
         false,
         "facade file unreadable",
         "Facade file `src/index.ts` is unreadable: permission denied.",
@@ -60,7 +63,7 @@ fn source_checks_flag_parse_error_facade() {
     let results = crate::run::check(&input);
     g3ts_arch_source_checks_assertions::run::assert_has_finding(
         &results,
-        "TS-ARCH-SOURCE-01",
+        "g3ts-arch/facade-parseable",
         false,
         "facade file parse failed",
         "Facade file `src/index.tsx` could not be parsed: syntax error.",
@@ -84,13 +87,19 @@ fn source_checks_accept_clean_tsx_facade() {
     let results = crate::run::check(&input);
     g3ts_arch_source_checks_assertions::run::assert_has_finding(
         &results,
-        "TS-ARCH-SOURCE-01",
+        "g3ts-arch/facade-parseable",
         true,
         "facade file parseable",
         "Facade file `src/index.tsx` parsed successfully.",
         Some("src/index.tsx"),
         None,
     );
-    g3ts_arch_source_checks_assertions::run::assert_has_inventory(&results, "TS-ARCH-SOURCE-02");
-    g3ts_arch_source_checks_assertions::run::assert_has_inventory(&results, "TS-ARCH-SOURCE-03");
+    g3ts_arch_source_checks_assertions::run::assert_has_inventory(
+        &results,
+        "g3ts-arch/facade-only",
+    );
+    g3ts_arch_source_checks_assertions::run::assert_has_inventory(
+        &results,
+        "g3ts-arch/no-broad-reexport",
+    );
 }

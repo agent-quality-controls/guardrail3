@@ -5,11 +5,11 @@ Correct the `fmt` package boundary so it distinguishes unreadable root inputs fr
 # Approach
 
 - Add failing tests first for:
-  - `RS-FMT-CONFIG-01` reporting unreadable rustfmt distinctly from parse error
-  - `RS-FMT-CONFIG-03` reporting unreadable toolchain distinctly from parse error
-  - `RS-FMT-CONFIG-04` reporting unreadable Cargo distinctly from parse error
+  - `g3rs-fmt/settings` reporting unreadable rustfmt distinctly from parse error
+  - `g3rs-fmt/nightly-keys-on-stable` reporting unreadable toolchain distinctly from parse error
+  - `g3rs-fmt/edition-mismatch` reporting unreadable Cargo distinctly from parse error
   - ingestion preserving unreadable states instead of collapsing them into `ParseError`
-  - `RS-FMT-CONFIG-02` inventorying `skip_macro_invocations = []`
+  - `g3rs-fmt/extra-settings` inventorying `skip_macro_invocations = []`
 - Then change the typed package boundary:
   - add `Unreadable` variants to `G3RsFmtRustfmtConfigState`, `G3RsFmtCargoState`, and `G3RsFmtToolchainState`
   - map unreadable and stale-read failures into `Unreadable`, not `ParseError`

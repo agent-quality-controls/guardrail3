@@ -34,12 +34,12 @@ It must never generate:
 - checker family: `RS-TOOLCHAIN`
 
 The generated result must satisfy:
-- `RS-TOOLCHAIN-01`
-- `RS-TOOLCHAIN-CONFIG-01`
-- `RS-TOOLCHAIN-04`
+- `g3rs-toolchain/root-toolchain-config-exists`
+- `g3rs-toolchain/channel-and-components`
+- `g3rs-toolchain/no-duplicate-toolchain-config`
 
 It also participates in:
-- `RS-TOOLCHAIN-CONFIG-02`
+- `g3rs-toolchain/msrv-consistency`
 
 ## Parity contract
 

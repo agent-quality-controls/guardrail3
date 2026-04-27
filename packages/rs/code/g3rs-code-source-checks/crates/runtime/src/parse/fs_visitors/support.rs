@@ -83,9 +83,7 @@ pub(super) fn use_tree_is_std_fs_glob(
                 _ => false,
             }
         }
-        syn::UseTree::Path(fs_path)
-            if fs_aliases.contains(fs_path.ident.to_string().as_str()) =>
-        {
+        syn::UseTree::Path(fs_path) if fs_aliases.contains(fs_path.ident.to_string().as_str()) => {
             fs_subtree_contains_glob(&fs_path.tree)
         }
         syn::UseTree::Group(group) => group
@@ -144,14 +142,12 @@ pub(super) fn collect_std_aliases(
 ) {
     match tree {
         syn::UseTree::Rename(rename)
-            if rename.ident == "std"
-                || std_aliases.contains(rename.ident.to_string().as_str()) =>
+            if rename.ident == "std" || std_aliases.contains(rename.ident.to_string().as_str()) =>
         {
             let _ = std_aliases.insert(rename.rename.to_string());
         }
         syn::UseTree::Rename(rename)
-            if rename.ident == "fs"
-                || fs_aliases.contains(rename.ident.to_string().as_str()) =>
+            if rename.ident == "fs" || fs_aliases.contains(rename.ident.to_string().as_str()) =>
         {
             let _ = fs_aliases.insert(rename.rename.to_string());
         }
@@ -259,8 +255,7 @@ fn collect_std_aliases_under_std(
             let _ = std_aliases.insert(rename.rename.to_string());
         }
         syn::UseTree::Rename(rename)
-            if rename.ident == "fs"
-                || fs_aliases.contains(rename.ident.to_string().as_str()) =>
+            if rename.ident == "fs" || fs_aliases.contains(rename.ident.to_string().as_str()) =>
         {
             let _ = fs_aliases.insert(rename.rename.to_string());
         }

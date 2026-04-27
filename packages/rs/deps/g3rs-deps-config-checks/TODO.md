@@ -2,7 +2,7 @@
 
 ## Current Ownership
 
-- `RS-DEPS-CONFIG-06..09` own workspace-scoped tool presence for:
+- `g3rs-deps/cargo-deny-installed..09` own workspace-scoped tool presence for:
   - `cargo-deny`
   - `cargo-machete`
   - `cargo-dupes`

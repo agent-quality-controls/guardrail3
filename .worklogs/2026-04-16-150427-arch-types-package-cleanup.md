@@ -5,7 +5,7 @@ Normalized `packages/rs/arch/g3rs-arch-types` into the current shared `*-types` 
 Decisions made
 
 - Kept the root fix in the package, not in the code rule.
-  - Why: `RS-CODE-SOURCE-19` and `RS-CODE-SOURCE-11` were flagging real package shape issues, not a bad rule.
+  - Why: `g3rs-code/ast-19-large-type-inventory` and `g3rs-code/ast-11-many-use-imports` were flagging real package shape issues, not a bad rule.
   - Rejected: waiving the large shared record or the crowded lib facade.
 - Split `G3RsArchCrateNode` into nested transport records:
   - `G3RsArchFeatureContract`

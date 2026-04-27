@@ -172,43 +172,43 @@ The generator and checker must match exactly.
 - **Why:** An uncovered Rust unit silently falls back to clippy defaults.
 - **Status:** Implemented
 
-### RS-CLIPPY-CONFIG-01: max-struct-bools threshold
+### g3rs-clippy/max-struct-bools: max-struct-bools threshold
 - **Old ID:** R2
 - **Severity:** Error
 - **What:** `max-struct-bools` must be set (expected: 3)
 - **Status:** Implemented
 
-### RS-CLIPPY-CONFIG-02: max-fn-params-bools threshold
+### g3rs-clippy/max-fn-params-bools: max-fn-params-bools threshold
 - **Old ID:** R3
 - **Severity:** Error
 - **What:** `max-fn-params-bools` must be set (expected: 3)
 - **Status:** Implemented
 
-### RS-CLIPPY-CONFIG-08: too_many_lines threshold
+### g3rs-clippy/type-complexity-threshold: too_many_lines threshold
 - **Old ID:** NEW
 - **Severity:** Error
 - **What:** `too-many-lines-threshold` must be set (expected: 75). Controls clippy's `too_many_lines` lint for function length.
 - **Status:** Implemented
 
-### RS-CLIPPY-CONFIG-09: too_many_arguments threshold
+### g3rs-clippy/missing-method-ban: too_many_arguments threshold
 - **Old ID:** NEW
 - **Severity:** Error
 - **What:** `too-many-arguments-threshold` must be set (expected: 7). Controls clippy's `too_many_arguments` lint.
 - **Status:** Implemented
 
-### RS-CLIPPY-CONFIG-10: excessive_nesting threshold
+### g3rs-clippy/missing-type-ban: excessive_nesting threshold
 - **Old ID:** NEW
 - **Severity:** Error
 - **What:** `excessive-nesting-threshold` must be set (expected: 4). Controls clippy's nesting depth lint.
 - **Status:** Implemented
 
-### RS-CLIPPY-CONFIG-19: cognitive_complexity threshold
+### g3rs-clippy/policy-context-parseable: cognitive_complexity threshold
 - **Old ID:** R3 (was overloaded with other thresholds)
 - **Severity:** Error
 - **What:** `cognitive-complexity-threshold` must equal expected value (15). Controls clippy's cognitive complexity lint.
 - **Status:** Implemented
 
-### RS-CLIPPY-CONFIG-20: type_complexity threshold
+### g3rs-clippy/forbid-clippy-conf-dir-override: type_complexity threshold
 - **Old ID:** R3 (was overloaded)
 - **Severity:** Error
 - **What:** `type-complexity-threshold` must equal expected value (75). Controls clippy's type complexity lint.
@@ -233,7 +233,7 @@ The generator and checker must match exactly.
 - **Note:** `std::any::Any` stays in the base set because `Box<dyn Any>` erases type safety and bypasses strongly-typed boundaries.
 - **Status:** Implemented
 
-### RS-CLIPPY-06: extra method ban (inventory)
+### g3rs-clippy/package-native-policy: extra method ban (inventory)
 - **Old ID:** R6
 - **Severity:** Info
 - **What:** Inventory method bans not in the expected baseline (user additions). When no user additions exist and the section is parseable, emit a positive clean-inventory result.
@@ -255,7 +255,7 @@ The generator and checker must match exactly.
 - **Scope:** Covers methods, types, AND macros (RS-CLIPPY-20 checks macro presence, this checks reason quality across all sections).
 - **Status:** Implemented
 
-### RS-CLIPPY-15: trivial/placeholder reason text
+### g3rs-clippy/no-op-placeholder: trivial/placeholder reason text
 - **Old ID:** NEW (from audit)
 - **Severity:** Warn
 - **What:** Reason field must not be empty, a known placeholder ("TODO", "FIXME", "fix later", "TBD", "...", "reason"), or under 10 characters. Reason exists but communicates nothing.
@@ -276,7 +276,7 @@ The generator and checker must match exactly.
 - **What fails:** duplicate same-root sibling configs after precedence resolution
 - **Status:** Implemented
 
-### RS-CLIPPY-13: allowed local policy roots must contain the full baseline
+### g3rs-clippy/local-policy-root: allowed local policy roots must contain the full baseline
 - **Old ID:** NEW (from audit — HIGH)
 - **Severity:** Error
 - **What:** Any allowed local policy root below the validation root (`clippy.toml` at workspace root / standalone package root) must contain the full profile-resolved guardrail baseline for:
@@ -306,7 +306,7 @@ The generator and checker must match exactly.
 
 ## Config hygiene
 
-### RS-CLIPPY-CONFIG-15: test relaxation policy
+### g3rs-clippy/avoid-breaking-exported-api: test relaxation policy
 - **Old ID:** NEW (from audit)
 - **Severity:** Warn/Error
 - **What:** test-only Clippy relaxations must match the managed policy exactly:
@@ -327,7 +327,7 @@ The generator and checker must match exactly.
 ### RS-CLIPPY-20: disallowed-macros validation
 - **Old ID:** NEW (from audit)
 - **Severity:** Error
-- **What:** `disallowed-macros` section must contain expected macro bans (println!, eprintln!, dbg!, todo!, unimplemented!). Reason quality is owned separately by `RS-CLIPPY-08` and `RS-CLIPPY-15`.
+- **What:** `disallowed-macros` section must contain expected macro bans (println!, eprintln!, dbg!, todo!, unimplemented!). Reason quality is owned separately by `RS-CLIPPY-08` and `g3rs-clippy/no-op-placeholder`.
 - **Status:** Implemented
 
 ### RS-CLIPPY-23: policy context is parseable

@@ -5,15 +5,15 @@ fn golden_content_package_reports_owned_ids() {
     assertions::assert_runtime_check_exact_ids(
         &super::helpers::golden(),
         &[
-            "TS-ASTRO-CONTENT-CONFIG-17",
-            "TS-ASTRO-CONTENT-CONFIG-18",
-            "TS-ASTRO-CONTENT-CONFIG-19",
-            "TS-ASTRO-CONTENT-CONFIG-23",
-            "TS-ASTRO-CONTENT-CONFIG-24",
-            "TS-ASTRO-CONTENT-CONFIG-25",
-            "TS-ASTRO-CONTENT-CONFIG-26",
-            "TS-ASTRO-CONTENT-CONFIG-27",
-            "TS-ASTRO-CONTENT-CONFIG-28",
+            "g3ts-astro-content/pipeline-plugin-package-present",
+            "g3ts-astro-content/content-adapter-rule",
+            "g3ts-astro-content/inline-copy-rule",
+            "g3ts-astro-content/strict-content-policy",
+            "g3ts-astro-content/strict-policy-paths",
+            "g3ts-astro-content/route-scope-overlap",
+            "g3ts-astro-content/policy-eslint-coverage",
+            "g3ts-astro-content/content-adapter-exists",
+            "g3ts-astro-content/content-adapter-astro-content",
         ],
     );
 }
@@ -33,7 +33,7 @@ fn content_adapter_rule_accepts_equivalent_recursive_file_globs() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-CONTENT-CONFIG-18",
+        "g3ts-astro-content/content-adapter-rule",
         guardrail3_check_types::G3Severity::Info,
     );
 }
@@ -53,7 +53,7 @@ fn content_adapter_rule_rejects_unrelated_recursive_file_globs() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-CONTENT-CONFIG-18",
+        "g3ts-astro-content/content-adapter-rule",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -72,7 +72,7 @@ fn content_adapter_rule_rejects_missing_tsx_lane_coverage() {
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "TS-ASTRO-CONTENT-CONFIG-18",
+        "g3ts-astro-content/content-adapter-rule",
         guardrail3_check_types::G3Severity::Error,
     );
 }

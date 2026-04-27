@@ -4,7 +4,7 @@ Summary
 
 Decisions made
 - Removed `crates/types` and used `g3rs-code-types` directly because the local crate was only a wrapper.
-- Kept one-rule-per-module layout in runtime and assertions, then added `RS-ARCH-FILETREE-07` waivers for those two crates because the structure is intentional.
+- Kept one-rule-per-module layout in runtime and assertions, then added `g3rs-arch/structural-split` waivers for those two crates because the structure is intentional.
 - Split `parse/attrs` into `attrs/mod.rs`, `attrs/policies.rs`, and `attrs/public_surface.rs` because the right fix for the size warning was a real module split, not a waiver.
 - Turned rule-sidecar helper logic into local `#[cfg(test)]` functions inside each rule file and removed `rule_tests/helpers.rs` files so sidecars stay focused on cases.
 

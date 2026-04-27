@@ -1,12 +1,12 @@
 Goal
-- Make RS-TEST-SOURCE-07 detect the real proof step instead of blaming harmless setup helpers.
+- Make g3rs-test/real-proof-site detect the real proof step instead of blaming harmless setup helpers.
 - Keep tests that end in shared assertions clean.
 - Keep tests that hide result checks in local helpers failing.
 
 Approach
 - Add a failing rule test for a test function that calls local setup helpers first and shared assertions last.
 - Extend the parser to keep function call order for test functions.
-- Update RS-TEST-SOURCE-07 to inspect the last relevant proof-like call instead of the first local call.
+- Update g3rs-test/real-proof-site to inspect the last relevant proof-like call instead of the first local call.
 - Keep shared assertions wrapper calls valid.
 - Re-run rule tests, the full test-source package tests, and then the clippy ingestion package validation.
 

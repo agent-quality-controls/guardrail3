@@ -39,11 +39,11 @@ The family needed one final pass to align its facts model and rule semantics bef
 - **Alternatives considered:**
   - Keep detailed rules root-only and use one summary rule for local roots — rejected because it would hide the concrete missing pieces inside local policy roots.
 
-### Keep RS-CLIPPY-13 as the explicit self-contained local-root guard
-- **Chose:** Use `RS-CLIPPY-13` as a focused summary check for non-root local policy roots while still running the detailed rule set on all allowed configs.
+### Keep g3rs-clippy/local-policy-root as the explicit self-contained local-root guard
+- **Chose:** Use `g3rs-clippy/local-policy-root` as a focused summary check for non-root local policy roots while still running the detailed rule set on all allowed configs.
 - **Why:** The summary rule captures the architectural invariant (“local policy roots replace inherited policy”) while the detailed rules explain exactly what is missing or wrong.
 - **Alternatives considered:**
-  - Drop `RS-CLIPPY-13` as redundant — rejected because it encodes a real higher-level guarantee from the plan.
+  - Drop `g3rs-clippy/local-policy-root` as redundant — rejected because it encodes a real higher-level guarantee from the plan.
 
 ### Promote macro-baseline failures to errors
 - **Chose:** `RS-CLIPPY-20` now errors when a required macro ban is missing.

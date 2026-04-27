@@ -1,5 +1,5 @@
 # Summary
-Fixed `RS-HOOKS-SOURCE-22` so executable-command classification no longer accepts lookalike commands through `command_text().contains(...)`. The rule now uses structured command context for the supported families, and the regression test covers a `cargo clippy-driver` false negative.
+Fixed `g3rs-hooks/hook-shared-18-executable-command-context-only` so executable-command classification no longer accepts lookalike commands through `command_text().contains(...)`. The rule now uses structured command context for the supported families, and the regression test covers a `cargo clippy-driver` false negative.
 
 # Decisions made
 - Kept the fix inside the rule slice and its sidecar tests.

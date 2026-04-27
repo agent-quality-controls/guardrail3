@@ -13,7 +13,7 @@ Decisions made
   - `runtime -> shared types`
   - `assertions -> shared types`
 - Left the next blocker untouched:
-  - `RS-ARCH-CONFIG-07` still enforces the direct-dependency-count cap.
+  - `g3rs-arch/dependency-count-split` still enforces the direct-dependency-count cap.
 
 Key files for context
 
@@ -24,7 +24,7 @@ Key files for context
 
 Next steps
 
-- Decide `RS-ARCH-CONFIG-07` for ingestion runtimes:
+- Decide `g3rs-arch/dependency-count-split` for ingestion runtimes:
   - keep the hard cap
   - or allow/waive orchestrator-heavy runtimes
 - After that, continue cleaning `packages/rs/fmt/g3rs-fmt-ingestion`.

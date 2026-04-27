@@ -5,7 +5,7 @@ Goal
 
 Approach
 
-- Add failing rule tests for `RS-CARGO-CONFIG-07`, `11`, and `12` covering unreadable and parse-error rust policy state.
+- Add failing rule tests for `g3rs-cargo/approved-allow-inventory`, `11`, and `12` covering unreadable and parse-error rust policy state.
 - Fix the rules in `packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src` at the rule boundary using existing typed rust-policy validity, not by changing test fixtures or app behavior.
 - Add one ingestion pipeline regression in `packages/rs/cargo/g3rs-cargo-ingestion/crates/runtime/src/ingest_tests/pipeline.rs` proving malformed `guardrail3-rs.toml` does not cascade into missing-waiver findings from those allow rules.
 - Re-run cargo package tests and `git diff --check`.

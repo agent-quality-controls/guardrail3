@@ -1,5 +1,5 @@
 Summary
-- Fixed the RS-TEST-FILETREE-18 gap where `test_support` could miss helpers imported from sibling module files via `use self::helpers::*;`.
+- Fixed the g3rs-test/test-support-generic gap where `test_support` could miss helpers imported from sibling module files via `use self::helpers::*;`.
 - Added red regressions for both canned fixture helpers and semantic result helpers, then wired sibling analyzed files into the rule input so the rule can resolve glob imports without tree crawling.
 
 Decisions made

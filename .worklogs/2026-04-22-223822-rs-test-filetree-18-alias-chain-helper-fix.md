@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-TEST-FILETREE-18` so local canned and semantic helpers in `test_support` still count when they are reached through an alias chain like `let run = fixture_path; let again = run; again()`. The rule now follows local-call aliases recursively instead of stopping after one hop.
+Fixed `g3rs-test/test-support-generic` so local canned and semantic helpers in `test_support` still count when they are reached through an alias chain like `let run = fixture_path; let again = run; again()`. The rule now follows local-call aliases recursively instead of stopping after one hop.
 
 ## Decisions made
 

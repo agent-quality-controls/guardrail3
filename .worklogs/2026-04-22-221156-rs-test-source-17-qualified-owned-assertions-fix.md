@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed the `RS-TEST-SOURCE-17` false positive where `demo_assertions::assert_demo()` was treated as a local proof helper when the file also defined a local `assert_demo()`.
+Fixed the `g3rs-test/external-harnesses-use-assertions` false positive where `demo_assertions::assert_demo()` was treated as a local proof helper when the file also defined a local `assert_demo()`.
 
 ## Decisions made
 

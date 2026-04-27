@@ -3,7 +3,7 @@ Tightened the active `deny` family baseline so it no longer encodes the stale `y
 
 # Decisions Made
 - Fixed the family baseline rather than reverting the package. The stale defaults lived in `baseline.rs`, shared deny fixtures, and rule-local expectations.
-- Tightened `RS-DENY-CONFIG-27` at the rule level too. Rejected the old behavior that downgraded added wrappers on managed bans with an empty wrapper baseline to inventory; a managed ban now has an exact wrapper contract, including the empty-set case.
+- Tightened `g3rs-deny/wrappers` at the rule level too. Rejected the old behavior that downgraded added wrappers on managed bans with an empty wrapper baseline to inventory; a managed ban now has an exact wrapper contract, including the empty-set case.
 - Kept the change narrow. Rejected touching unrelated deny defaults or the still-deferred `test` family findings on the clippy package.
 
 # Key Files For Context

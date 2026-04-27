@@ -12,7 +12,7 @@ Approach
 - Add direct failing rule tests for:
   - local unpublished path dependency with a version
   - outside-workspace path dependency with a version
-- Update `RS-RELEASE-CONFIG-19` to:
+- Update `g3rs-release/no-path-deps-to-unpublishable` to:
   - error for inside-workspace unpublished target
   - warn for outside-workspace path dependency with a version
   - error for outside-workspace path dependency with no version

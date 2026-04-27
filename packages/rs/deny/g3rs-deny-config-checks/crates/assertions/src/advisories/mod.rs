@@ -1,5 +1,5 @@
-pub mod rs_deny_config_01_deprecated_advisories;
-pub mod rs_deny_config_02_advisories_baseline;
-pub mod rs_deny_config_03_stricter_advisories_inventory;
-pub mod rs_deny_config_04_graph_all_features;
-pub mod rs_deny_config_05_graph_no_default_features;
+pub mod advisories_baseline;
+pub mod deprecated_advisories;
+pub mod graph_all_features;
+pub mod graph_no_default_features;
+pub mod stricter_advisories_inventory;

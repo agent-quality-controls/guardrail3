@@ -1,6 +1,6 @@
 Summary
-- Added the missing direct-`all` export branch proof for `RS-ARCH-SOURCE-08`.
-- Added the missing fail-closed policy tests for `RS-APPARCH-CONFIG-08` and `RS-APPARCH-CONFIG-09`.
+- Added the missing direct-`all` export branch proof for `g3rs-arch/feature-gated-exports`.
+- Added the missing fail-closed policy tests for `g3rs-apparch/types-purity` and `g3rs-apparch/logic-purity`.
 
 Decisions made
 - Kept this as test-only coverage.

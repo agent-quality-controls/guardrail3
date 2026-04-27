@@ -2,6 +2,6 @@
 use g3rs_code_config_checks_runtime as _;
 
 #[cfg(feature = "checks")]
-pub mod rs_code_config_07_exception_comment_inventory;
+pub mod exception_comment_inventory;
 #[cfg(feature = "checks")]
-pub mod rs_code_config_12_unsafe_code_lint;
+pub mod unsafe_code_lint;

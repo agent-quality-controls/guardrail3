@@ -8,14 +8,14 @@ pub fn check(input: &G3RsTestConfigChecksInput) -> Vec<G3CheckResult> {
         || input.mutation_hook_active;
 
     if input.has_tests {
-        crate::nextest::rs_test_config_09_nextest_timeouts::check(input, &mut results);
+        crate::nextest::nextest_timeouts::check(input, &mut results);
     }
     if mutation_active {
-        crate::mutants::rs_test_config_11_cargo_mutants_installed::check(input, &mut results);
-        crate::mutants::rs_test_config_12_mutants_toml_exists::check(input, &mut results);
-        crate::mutants::rs_test_config_13_mutants_profile_present::check(input, &mut results);
-        crate::mutants::rs_test_config_14_mutation_hook_present::check(input, &mut results);
-        crate::mutants::rs_test_config_15_mutants_config_sane::check(input, &mut results);
+        crate::mutants::cargo_mutants_installed::check(input, &mut results);
+        crate::mutants::mutants_toml_exists::check(input, &mut results);
+        crate::mutants::mutants_profile_present::check(input, &mut results);
+        crate::mutants::mutation_hook_present::check(input, &mut results);
+        crate::mutants::mutants_config_sane::check(input, &mut results);
     }
 
     results

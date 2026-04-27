@@ -1,14 +1,14 @@
 Summary
 
 - Fixed the `rs/test` source-check false negative for owned assertions imported through package-root aliases like `use demo_assertions::{self as da}; da::assert_demo()`.
-- Added red regressions for both `RS-TEST-SOURCE-07` and `RS-TEST-SOURCE-17`, then normalized grouped `self as` imports back to the assertions package root before owned-assertion matching.
+- Added red regressions for both `g3rs-test/real-proof-site` and `g3rs-test/external-harnesses-use-assertions`, then normalized grouped `self as` imports back to the assertions package root before owned-assertion matching.
 
 Decisions made
 
 - Fixed the bug in shared source-check support instead of changing the parser.
   - Why: ingestion is accurately preserving the syntactic `self` import segment; the missing step was semantic normalization for owned-assertion resolution.
-- Reused `RS-TEST-SOURCE-07`'s owned-assertion proof path as the production fix surface.
-  - Why: `RS-TEST-SOURCE-17` already delegates owned-assertion detection through `has_owned_assertion_proof`, so fixing the shared semantic boundary removes the false negative for both rules without duplicating logic.
+- Reused `g3rs-test/real-proof-site`'s owned-assertion proof path as the production fix surface.
+  - Why: `g3rs-test/external-harnesses-use-assertions` already delegates owned-assertion detection through `has_owned_assertion_proof`, so fixing the shared semantic boundary removes the false negative for both rules without duplicating logic.
 - Limited the change to the requested source-check package files plus the plan/worklog.
   - Why: there were unrelated in-progress edits elsewhere in the tree.
 

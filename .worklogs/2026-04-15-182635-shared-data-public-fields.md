@@ -1,6 +1,6 @@
 Summary
 
-Fixed `RS-CODE-SOURCE-31` so it no longer punishes plain shared transport structs for using public fields. Finished `packages/rs/clippy/g3rs-clippy-types` after that rule fix by removing its last inherent method and re-validating the package.
+Fixed `g3rs-code/ast-31-public-struct-named-fields` so it no longer punishes plain shared transport structs for using public fields. Finished `packages/rs/clippy/g3rs-clippy-types` after that rule fix by removing its last inherent method and re-validating the package.
 
 Decisions made
 

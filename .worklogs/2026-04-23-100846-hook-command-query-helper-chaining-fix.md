@@ -7,7 +7,7 @@ Decisions made
   - Why: helper chaining and redefinition are parser/runtime concerns, and multiple hook rules depend on the same traversal semantics.
 - Added a context-aware line query API instead of teaching each hook rule to re-implement shared command traversal.
   - Why: nested helper-body checks in hook rules need access to both the local parsed body and the root helper inventory.
-- Kept `RS-HOOKS-SOURCE-16` trigger recursion in hook support, but aligned it to the same "latest visible definition" rule.
+- Kept `g3rs-hooks/hook-shared-10-shell-error-handling` trigger recursion in hook support, but aligned it to the same "latest visible definition" rule.
   - Why: that rule matches trigger-like text, not just resolved commands, so it still owns its text-side recursion.
 - Fixed shell-safety absolute line reporting at the same time.
   - Why: once nested helper chains can jump back to root helpers, line mapping must distinguish local-function vs root-function lookups or reports drift.

@@ -1,6 +1,6 @@
 Summary
 
-The recursive `RS-ARCH-FILETREE-07` logic was already correct in source. The miss on `packages/ts/eslint/g3ts-eslint-config-checks` came from using a stale installed `g3rs` binary from before the arch fixes. I added a mixed root-package workspace regression to arch ingestion and reinstalled `g3rs` from current source so the installed CLI now matches the repo state.
+The recursive `g3rs-arch/structural-split` logic was already correct in source. The miss on `packages/ts/eslint/g3ts-eslint-config-checks` came from using a stale installed `g3rs` binary from before the arch fixes. I added a mixed root-package workspace regression to arch ingestion and reinstalled `g3rs` from current source so the installed CLI now matches the repo state.
 
 Decisions made
 
@@ -8,7 +8,7 @@ Decisions made
   - It proves the exact package shape that caused confusion: a root package that is also a workspace, with a member runtime crate containing a dense nested module folder.
   - This is worth keeping even though the source logic did not need another code change.
 - Did not change arch logic again.
-  - The current source already reports `RS-ARCH-FILETREE-07` on the TS ESLint runtime crate.
+  - The current source already reports `g3rs-arch/structural-split` on the TS ESLint runtime crate.
   - The actual bug was environmental drift between installed CLI and current source.
 - Reinstalled the `g3rs` binary from the current repo path.
   - Reason: the user explicitly uses the installed command, so source-only correctness was not enough.

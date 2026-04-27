@@ -17,7 +17,7 @@ That left the package tests mostly green in isolation while the real validator b
 ## Decisions Made
 
 ### Extract only the typed-content `clippy` slice
-- **Chose:** Create `g3rs-clippy-config-checks` for rules `RS-CLIPPY-CONFIG-01`, `03`, `09`, `10`, `11`, `17`, `21`, and `22`, and keep structural/parse-policy ownership in the app family.
+- **Chose:** Create `g3rs-clippy-config-checks` for rules `g3rs-clippy/max-struct-bools`, `03`, `09`, `10`, `11`, `17`, `21`, and `22`, and keep structural/parse-policy ownership in the app family.
 - **Why:** These rules operate on valid parsed `clippy.toml` content and fit the content-package boundary cleanly. Coverage, same-root precedence, cargo-config override handling, and typed parse rejection remain orchestrator concerns.
 - **Alternatives considered:**
   - Move more `clippy` rules immediately — rejected because `RS-CLIPPY-24` still depends on cargo config discovery and `RS-CLIPPY-25` must own typed parse failure.

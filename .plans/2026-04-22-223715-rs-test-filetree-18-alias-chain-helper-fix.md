@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-TEST-FILETREE-18` so alias chains in `test_support` still resolve to local canned or semantic helpers, including cases like `let run = fixture_path; let again = run; again()`.
+Fix `g3rs-test/test-support-generic` so alias chains in `test_support` still resolve to local canned or semantic helpers, including cases like `let run = fixture_path; let again = run; again()`.
 
 ## Approach
 

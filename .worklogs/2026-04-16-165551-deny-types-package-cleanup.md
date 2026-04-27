@@ -8,7 +8,7 @@ Decisions made
   - Why: this package is just the shared deny type surface, so it does not need child crates to satisfy the current package rules.
   - Rejected: inventing runtime or assertions crates for a pure shared types package.
 - Kept the public fields on the transport structs.
-  - Why: this package is exactly the shared plain-record case that the current `RS-CODE-SOURCE-31` exception path is meant to allow.
+  - Why: this package is exactly the shared plain-record case that the current `g3rs-code/ast-31-public-struct-named-fields` exception path is meant to allow.
   - Rejected: adding constructors and getters to plain transport records.
 - Added the documented `module_name_repetitions` waiver.
   - Why: the family-prefixed shared type names are intentional and already follow the established `*-types` pattern.

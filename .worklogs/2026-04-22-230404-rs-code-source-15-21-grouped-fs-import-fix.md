@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed the grouped `std::fs` survivor for `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21`. The parser visitor now resolves grouped `UseTree` nodes recursively, so grouped `self` imports and grouped `*` imports are detected even when they are reached through `std` aliases or `std::fs` aliases.
+Fixed the grouped `std::fs` survivor for `g3rs-code/ast-15-direct-fs-usage` and `g3rs-code/ast-21-fs-glob-import`. The parser visitor now resolves grouped `UseTree` nodes recursively, so grouped `self` imports and grouped `*` imports are detected even when they are reached through `std` aliases or `std::fs` aliases.
 
 ## Decisions made
 

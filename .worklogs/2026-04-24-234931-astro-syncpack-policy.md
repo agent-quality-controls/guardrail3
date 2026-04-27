@@ -48,6 +48,6 @@ Replaced the rejected hand-rolled Astro dependency floor validation with Syncpac
 
 ## Next Steps
 
-- Move pre-existing `TS-PACKAGE-CONFIG-08` banned dependency policy to Syncpack.
-- Replace pre-existing `TS-PACKAGE-CONFIG-06` substring script detection with package-script command facts.
+- Move pre-existing `g3ts-package/local-banned-dependencies` banned dependency policy to Syncpack.
+- Replace pre-existing `g3ts-package/root-scripts` substring script detection with package-script command facts.
 - Rebuild package script/shell parsing on a real shell parser or consolidate it with `hook-shell-parser`.

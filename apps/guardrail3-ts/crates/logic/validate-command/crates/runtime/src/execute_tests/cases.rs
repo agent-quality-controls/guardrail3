@@ -33,7 +33,7 @@ impl FamilyRunner for StubFamilyRunner {
         let results = match family {
             SupportedFamily::Eslint => vec![
                 G3CheckResult::new(
-                    "TS-ESLINT-CONFIG-01".to_owned(),
+                    "g3ts-eslint/exists".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -42,7 +42,7 @@ impl FamilyRunner for StubFamilyRunner {
                 )
                 .into_inventory(),
                 G3CheckResult::new(
-                    "TS-ESLINT-CONFIG-02".to_owned(),
+                    "g3ts-eslint/parseable".to_owned(),
                     G3Severity::Warn,
                     "warn".to_owned(),
                     "warn".to_owned(),
@@ -50,14 +50,22 @@ impl FamilyRunner for StubFamilyRunner {
                     None,
                 ),
             ],
-            SupportedFamily::AstroSetup => astro_inventory("TS-ASTRO-SETUP-CONFIG-01"),
-            SupportedFamily::AstroContent => astro_inventory("TS-ASTRO-CONTENT-CONFIG-17"),
-            SupportedFamily::AstroMdx => astro_inventory("TS-ASTRO-MDX-CONFIG-20"),
-            SupportedFamily::AstroSeo => astro_inventory("TS-ASTRO-SEO-CONFIG-13"),
-            SupportedFamily::AstroState => astro_inventory("TS-ASTRO-STATE-FILETREE-11"),
+            SupportedFamily::AstroSetup => {
+                astro_inventory("g3ts-astro-setup/astro-package-present")
+            }
+            SupportedFamily::AstroContent => {
+                astro_inventory("g3ts-astro-content/pipeline-plugin-package-present")
+            }
+            SupportedFamily::AstroMdx => {
+                astro_inventory("g3ts-astro-mdx/mdx-eslint-plugin-package-present")
+            }
+            SupportedFamily::AstroSeo => astro_inventory("g3ts-astro-seo/nuasite-checks"),
+            SupportedFamily::AstroState => {
+                astro_inventory("g3ts-astro-state/no-legacy-parallel-state")
+            }
             SupportedFamily::Arch => vec![
                 G3CheckResult::new(
-                    "TS-ARCH-CONFIG-01".to_owned(),
+                    "g3ts-arch/root-manifest-exists".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -68,7 +76,7 @@ impl FamilyRunner for StubFamilyRunner {
             ],
             SupportedFamily::Apparch => vec![
                 G3CheckResult::new(
-                    "TS-APPARCH-CONFIG-01".to_owned(),
+                    "g3ts-apparch/types-dependency-direction".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -79,7 +87,7 @@ impl FamilyRunner for StubFamilyRunner {
             ],
             SupportedFamily::Tsconfig => vec![
                 G3CheckResult::new(
-                    "TS-TSCONFIG-CONFIG-01".to_owned(),
+                    "g3ts-tsconfig/exists".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -90,7 +98,7 @@ impl FamilyRunner for StubFamilyRunner {
             ],
             SupportedFamily::Package => vec![
                 G3CheckResult::new(
-                    "TS-PACKAGE-CONFIG-01".to_owned(),
+                    "g3ts-package/root-exists".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -101,7 +109,7 @@ impl FamilyRunner for StubFamilyRunner {
             ],
             SupportedFamily::Npmrc => vec![
                 G3CheckResult::new(
-                    "TS-NPMRC-CONFIG-01".to_owned(),
+                    "g3ts-npmrc/root-exists".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -112,7 +120,7 @@ impl FamilyRunner for StubFamilyRunner {
             ],
             SupportedFamily::Jscpd => vec![
                 G3CheckResult::new(
-                    "TS-JSCPD-CONFIG-01".to_owned(),
+                    "g3ts-jscpd/root-exists".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -349,7 +357,7 @@ fn execute_does_not_print_clean_output_when_only_hidden_inventory_survives_an_er
             family: SupportedFamily::Eslint,
             results: vec![
                 G3CheckResult::new(
-                    "TS-ESLINT-CONFIG-01".to_owned(),
+                    "g3ts-eslint/exists".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -372,7 +380,7 @@ fn execute_keeps_visible_findings_on_stdout_when_an_error_also_happens() {
         runs: vec![FamilyRun {
             family: SupportedFamily::Eslint,
             results: vec![G3CheckResult::new(
-                "TS-ESLINT-CONFIG-02".to_owned(),
+                "g3ts-eslint/parseable".to_owned(),
                 G3Severity::Warn,
                 "warn".to_owned(),
                 "warn".to_owned(),

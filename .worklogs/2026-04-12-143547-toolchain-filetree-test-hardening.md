@@ -9,7 +9,7 @@ Ran a multi-agent `test-attack` pass on the new toolchain filetree lane and hard
 - Ignored the old app runtime ownership finding.
   - Why: under the current model the old app is inventory only, not a runtime we preserve.
 - Added aggregate runtime tests in `run_tests/` instead of overloading the per-rule sidecars.
-  - Why: the gap was interaction between `RS-TOOLCHAIN-FILETREE-01` and `04`, not the individual rule bodies.
+  - Why: the gap was interaction between `g3rs-toolchain/exists` and `04`, not the individual rule bodies.
 - Treated malformed, unreadable, and deleted-after-crawl root files as valid filetree presence.
   - Why: the filetree lane is path-based and parse-free by design.
 - Added a final convergence attack agent after the new tests passed.

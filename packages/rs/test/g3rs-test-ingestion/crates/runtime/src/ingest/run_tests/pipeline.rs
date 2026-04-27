@@ -60,11 +60,19 @@ tokio = { version = \"1\", features = [\"macros\"] }\n",
     );
 
     let results = run_config_pipeline(root, false);
-    assert_file_has_result(&results, ".config/nextest.toml", "RS-TEST-CONFIG-09");
-    assert_file_has_result(&results, "Cargo.toml", "RS-TEST-CONFIG-11");
-    assert_file_has_result(&results, ".cargo/mutants.toml", "RS-TEST-CONFIG-12");
-    assert_file_has_result(&results, "Cargo.toml", "RS-TEST-CONFIG-13");
-    assert_file_has_result(&results, "Cargo.toml", "RS-TEST-CONFIG-14");
+    assert_file_has_result(
+        &results,
+        ".config/nextest.toml",
+        "g3rs-test/nextest-timeouts",
+    );
+    assert_file_has_result(&results, "Cargo.toml", "g3rs-test/cargo-mutants-installed");
+    assert_file_has_result(
+        &results,
+        ".cargo/mutants.toml",
+        "g3rs-test/mutants-toml-exists",
+    );
+    assert_file_has_result(&results, "Cargo.toml", "g3rs-test/mutants-profile-present");
+    assert_file_has_result(&results, "Cargo.toml", "g3rs-test/mutation-hook-present");
 }
 
 #[test]
@@ -105,10 +113,26 @@ tokio = { version = \"1\", features = [\"macros\"] }\n",
     );
 
     let results = run_config_pipeline(root, true);
-    assert_file_has_result(&results, ".config/nextest.toml", "RS-TEST-CONFIG-09");
-    assert_file_has_result(&results, "Cargo.toml", "RS-TEST-CONFIG-11");
-    assert_file_has_result(&results, ".cargo/mutants.toml", "RS-TEST-CONFIG-12");
-    assert_file_has_result(&results, "Cargo.toml", "RS-TEST-CONFIG-13");
-    assert_file_has_result(&results, ".githooks/pre-commit", "RS-TEST-CONFIG-14");
-    assert_file_has_result(&results, ".cargo/mutants.toml", "RS-TEST-CONFIG-15");
+    assert_file_has_result(
+        &results,
+        ".config/nextest.toml",
+        "g3rs-test/nextest-timeouts",
+    );
+    assert_file_has_result(&results, "Cargo.toml", "g3rs-test/cargo-mutants-installed");
+    assert_file_has_result(
+        &results,
+        ".cargo/mutants.toml",
+        "g3rs-test/mutants-toml-exists",
+    );
+    assert_file_has_result(&results, "Cargo.toml", "g3rs-test/mutants-profile-present");
+    assert_file_has_result(
+        &results,
+        ".githooks/pre-commit",
+        "g3rs-test/mutation-hook-present",
+    );
+    assert_file_has_result(
+        &results,
+        ".cargo/mutants.toml",
+        "g3rs-test/mutants-config-sane",
+    );
 }

@@ -4,7 +4,7 @@ Removed the last five parser-package warning pairs by normalizing their centrali
 
 Decisions made
 
-- Did not change `RS-CODE-SOURCE-04`. The clean parser packages already showed the intended shape: centralized parser/fs allows should use the attribute `reason =` form, not the comment-style `// reason:` form.
+- Did not change `g3rs-code/ast-04-item-level-allow-with-reason`. The clean parser packages already showed the intended shape: centralized parser/fs allows should use the attribute `reason =` form, not the comment-style `// reason:` form.
 - Kept parser behavior unchanged. The only source edits were attribute normalization on the centralized boundary modules.
 - Reused the existing full-sweep report path `.worklogs/2026-04-18-005459-full-validate-report.txt` and overwrote it with the final clean sweep so there is one canonical report for the completed state.
 

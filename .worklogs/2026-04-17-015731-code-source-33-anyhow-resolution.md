@@ -1,5 +1,5 @@
 # Summary
-Fixed `RS-CODE-SOURCE-33` so it only flags `anyhow::Error` when the return type actually resolves to `anyhow`. Bare typed errors like a local `Error` enum or `crate::error::Error` no longer false-positive.
+Fixed `g3rs-code/ast-33-public-weak-error-forms` so it only flags `anyhow::Error` when the return type actually resolves to `anyhow`. Bare typed errors like a local `Error` enum or `crate::error::Error` no longer false-positive.
 
 # Decisions made
 - Added import-aware `anyhow` binding collection in the code-source parser instead of dropping bare `Error` detection entirely.

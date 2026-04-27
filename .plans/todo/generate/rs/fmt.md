@@ -44,8 +44,8 @@ It must never generate:
 
 The generated result must satisfy:
 - `RS-FMT-01`
-- `RS-FMT-CONFIG-01`
-- `RS-FMT-CONFIG-02`
+- `g3rs-fmt/settings`
+- `g3rs-fmt/extra-settings`
 
 And must not create findings for:
 - `RS-FMT-05`

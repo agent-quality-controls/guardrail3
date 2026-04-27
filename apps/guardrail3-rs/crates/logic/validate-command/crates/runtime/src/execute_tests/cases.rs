@@ -33,7 +33,7 @@ impl FamilyRunner for StubFamilyRunner {
         Ok(match family {
             SupportedFamily::Fmt => vec![
                 G3CheckResult::new(
-                    "RS-FMT-CONFIG-01".to_owned(),
+                    "g3rs-fmt/rustfmt-required-settings".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -42,7 +42,7 @@ impl FamilyRunner for StubFamilyRunner {
                 )
                 .into_inventory(),
                 G3CheckResult::new(
-                    "RS-FMT-CONFIG-02".to_owned(),
+                    "g3rs-fmt/rustfmt-extra-settings-inventory".to_owned(),
                     G3Severity::Warn,
                     "warn".to_owned(),
                     "warn".to_owned(),
@@ -51,7 +51,7 @@ impl FamilyRunner for StubFamilyRunner {
                 ),
             ],
             SupportedFamily::Deny => vec![G3CheckResult::new(
-                "RS-DENY-CONFIG-01".to_owned(),
+                "g3rs-deny/deprecated-advisories".to_owned(),
                 G3Severity::Error,
                 "error".to_owned(),
                 "error".to_owned(),
@@ -139,7 +139,7 @@ impl FamilyRunner for ErroringFamilyRunner {
     ) -> Result<Vec<G3CheckResult>, FamilyRunError> {
         match family {
             SupportedFamily::Fmt => Ok(vec![G3CheckResult::new(
-                "RS-FMT-CONFIG-02".to_owned(),
+                "g3rs-fmt/rustfmt-extra-settings-inventory".to_owned(),
                 G3Severity::Warn,
                 "warn".to_owned(),
                 "warn".to_owned(),

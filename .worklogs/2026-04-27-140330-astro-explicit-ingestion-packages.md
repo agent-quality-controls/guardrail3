@@ -6,8 +6,8 @@ Decisions made
 
 - Deleted `packages/ts/astro/g3ts-astro-checks` because it hid the actual Astro package graph behind one aggregate check package.
 - Added `g3ts-astro-setup-ingestion`, `g3ts-astro-content-ingestion`, `g3ts-astro-mdx-ingestion`, `g3ts-astro-seo-ingestion`, and `g3ts-astro-state-ingestion`.
-- Kept app runner dependencies explicit and added a local `RS-ARCH-CONFIG-07` waiver for `family-runner-structure`; this is better than hiding Astro dependencies behind an aggregate package.
-- Added Rust arch config waiver support for `RS-ARCH-CONFIG-07` with selector `dependency-count`, including a regression test.
+- Kept app runner dependencies explicit and added a local `g3rs-arch/dependency-count-split` waiver for `family-runner-structure`; this is better than hiding Astro dependencies behind an aggregate package.
+- Added Rust arch config waiver support for `g3rs-arch/dependency-count-split` with selector `dependency-count`, including a regression test.
 - Removed direct app references to the old shared Astro ingestion and the deleted aggregate Astro checks package.
 
 Key files for context

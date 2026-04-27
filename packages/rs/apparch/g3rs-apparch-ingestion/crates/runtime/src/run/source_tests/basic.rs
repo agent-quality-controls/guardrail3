@@ -6,7 +6,10 @@ fn root_without_workspace_fails() {
         "[package]\nname = \"standalone\"\nversion = \"0.1.0\"\n",
     );
 
-    assert!(super::super::ingest_for_source_checks(&super::helpers::crawl_workspace(root.path())).is_err());
+    assert!(
+        super::super::ingest_for_source_checks(&super::helpers::crawl_workspace(root.path()))
+            .is_err()
+    );
 }
 
 #[test]
@@ -20,7 +23,10 @@ fn source_ingest_collects_public_traits_from_nested_modules() {
         root.path().join("io/outbound/db/Cargo.toml"),
         "[package]\nname = \"db-outbound\"\nversion = \"0.1.0\"\n",
     );
-    super::helpers::write(root.path().join("io/outbound/db/src/lib.rs"), "pub mod adapter;\n");
+    super::helpers::write(
+        root.path().join("io/outbound/db/src/lib.rs"),
+        "pub mod adapter;\n",
+    );
     super::helpers::write(
         root.path().join("io/outbound/db/src/adapter.rs"),
         "pub trait DbTrait {}\n#[cfg(test)] pub trait HiddenTrait {}\n",
@@ -34,7 +40,10 @@ fn source_ingest_collects_public_traits_from_nested_modules() {
         input.io_traits_checks[0].public_traits[0].rel_path,
         "io/outbound/db/src/adapter.rs"
     );
-    assert_eq!(input.io_traits_checks[0].public_traits[0].item_name, "DbTrait");
+    assert_eq!(
+        input.io_traits_checks[0].public_traits[0].item_name,
+        "DbTrait"
+    );
 }
 
 #[test]
@@ -48,7 +57,10 @@ fn source_ingest_ignores_public_trait_in_private_child_module() {
         root.path().join("io/outbound/db/Cargo.toml"),
         "[package]\nname = \"db-outbound\"\nversion = \"0.1.0\"\n",
     );
-    super::helpers::write(root.path().join("io/outbound/db/src/lib.rs"), "mod adapter;\n");
+    super::helpers::write(
+        root.path().join("io/outbound/db/src/lib.rs"),
+        "mod adapter;\n",
+    );
     super::helpers::write(
         root.path().join("io/outbound/db/src/adapter.rs"),
         "pub trait HiddenPort {}\n",
@@ -158,8 +170,14 @@ name = "worker"
 path = "src/custom_bin.rs"
 "#,
     );
-    super::helpers::write(root.path().join("io/outbound/db/src/custom_bin.rs"), "fn main() {}\n");
-    super::helpers::write(root.path().join("io/outbound/db/src/lib.rs"), "pub trait LibTrait {}\n");
+    super::helpers::write(
+        root.path().join("io/outbound/db/src/custom_bin.rs"),
+        "fn main() {}\n",
+    );
+    super::helpers::write(
+        root.path().join("io/outbound/db/src/lib.rs"),
+        "pub trait LibTrait {}\n",
+    );
 
     let input = super::helpers::source_input(root.path());
 
@@ -182,9 +200,15 @@ fn source_ingest_missing_declared_module_fails_closed() {
         root.path().join("io/outbound/db/Cargo.toml"),
         "[package]\nname = \"db-outbound\"\nversion = \"0.1.0\"\n",
     );
-    super::helpers::write(root.path().join("io/outbound/db/src/lib.rs"), "pub mod adapter;\n");
+    super::helpers::write(
+        root.path().join("io/outbound/db/src/lib.rs"),
+        "pub mod adapter;\n",
+    );
 
-    assert!(super::super::ingest_for_source_checks(&super::helpers::crawl_workspace(root.path())).is_err());
+    assert!(
+        super::super::ingest_for_source_checks(&super::helpers::crawl_workspace(root.path()))
+            .is_err()
+    );
 }
 
 #[test]
@@ -198,7 +222,10 @@ fn source_ingest_ignores_file_level_cfg_test_module() {
         root.path().join("io/outbound/db/Cargo.toml"),
         "[package]\nname = \"db-outbound\"\nversion = \"0.1.0\"\n",
     );
-    super::helpers::write(root.path().join("io/outbound/db/src/lib.rs"), "pub mod adapter;\n");
+    super::helpers::write(
+        root.path().join("io/outbound/db/src/lib.rs"),
+        "pub mod adapter;\n",
+    );
     super::helpers::write(
         root.path().join("io/outbound/db/src/adapter.rs"),
         "#![cfg(test)]\npub trait TestOnlyTrait {}\n",
@@ -206,14 +233,18 @@ fn source_ingest_ignores_file_level_cfg_test_module() {
 
     let input = super::helpers::source_input(root.path());
 
-    assert!(input
-        .io_traits_checks
-        .iter()
-        .all(|check| check.public_traits.is_empty()));
-    assert!(input
-        .types_public_surface_checks
-        .iter()
-        .all(|check| check.public_behavior_items.is_empty()));
+    assert!(
+        input
+            .io_traits_checks
+            .iter()
+            .all(|check| check.public_traits.is_empty())
+    );
+    assert!(
+        input
+            .types_public_surface_checks
+            .iter()
+            .all(|check| check.public_behavior_items.is_empty())
+    );
 }
 
 fn contains_io_trait(

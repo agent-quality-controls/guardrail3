@@ -1,10 +1,10 @@
 Goal
-- Let RS-TEST-FILETREE-03 distinguish "expected assertions crate missing" from "wrong nested assertions package found".
+- Let g3rs-test/runtime-assertions-split distinguish "expected assertions crate missing" from "wrong nested assertions package found".
 
 Approach
 - Extend test ingestion component facts with an optional nested assertions manifest path.
 - Add a regression test in test ingestion that proves the nested `component/assertions/Cargo.toml` path is discovered.
-- Add a regression test in RS-TEST-FILETREE-03 for the approved wrong-shape message.
+- Add a regression test in g3rs-test/runtime-assertions-split for the approved wrong-shape message.
 - Update the rule to emit the wrong-shape case before the generic missing-assertions case.
 - Run the affected workspaces.
 

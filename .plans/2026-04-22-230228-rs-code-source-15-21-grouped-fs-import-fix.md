@@ -1,6 +1,6 @@
 ## Goal
 
-Fix the remaining grouped `std::fs` import survivor for `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21`, including grouped alias-backed forms where the same alias graph causes the miss.
+Fix the remaining grouped `std::fs` import survivor for `g3rs-code/ast-15-direct-fs-usage` and `g3rs-code/ast-21-fs-glob-import`, including grouped alias-backed forms where the same alias graph causes the miss.
 
 ## Approach
 

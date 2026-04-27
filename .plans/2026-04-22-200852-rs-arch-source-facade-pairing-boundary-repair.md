@@ -13,11 +13,11 @@ Approach
 Key decisions
 
 - Keep `mod.rs` facade checks on the plain facade-surface lane.
-  - Reason: `RS-ARCH-SOURCE-04` is already naturally one-surface-at-a-time and does not need crate pairing.
+  - Reason: `g3rs-arch/mod-facade-only` is already naturally one-surface-at-a-time and does not need crate pairing.
 - Keep `path_attr_sites` unchanged.
   - Reason: that lane was already repaired and does not share this defect.
 - Prebind only `crate + optional lib facade`, not a larger crate-plus-all-surfaces bag.
-  - Reason: `RS-ARCH-SOURCE-02` and `RS-ARCH-SOURCE-08` each need exactly that local assertion unit.
+  - Reason: `g3rs-arch/lib-facade-only` and `g3rs-arch/feature-gated-exports` each need exactly that local assertion unit.
 
 Files to modify
 

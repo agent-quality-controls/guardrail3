@@ -5,8 +5,8 @@ Fix the two real topology filetree bugs and remove the fake config/source public
 Approach
 
 1. Add failing rule tests for:
-   - `RS-TOPOLOGY-FILETREE-12` wrongly accepting a member that only matches a nested workspace path
-   - `RS-TOPOLOGY-FILETREE-13` missing non-POSIX absolute path forms
+   - `g3rs-topology/declared-workspace-members-only` wrongly accepting a member that only matches a nested workspace path
+   - `g3rs-topology/member-paths-must-not-escape-root` missing non-POSIX absolute path forms
 2. Fix the member-pattern logic in `support.rs` so `ExtraWorkspaceMember` is suppressed only for real child packages, not arbitrary descendant roots.
 3. Broaden the escape predicate in `support.rs` so absolute path forms are classified as escapes, not ordinary extra members.
 4. Remove fake config/source lane types from `g3rs-topology-types`.

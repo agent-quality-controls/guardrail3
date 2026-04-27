@@ -1,13 +1,13 @@
 Summary
 
-Replaced the `code` family config public boundary with parsed config-file variants and typed exception-comment facts. Removed raw config file content from the public `code` config input while preserving `RS-CODE-CONFIG-07` and `RS-CODE-CONFIG-12`.
+Replaced the `code` family config public boundary with parsed config-file variants and typed exception-comment facts. Removed raw config file content from the public `code` config input while preserving `g3rs-code/exception-comment-inventory` and `g3rs-code/unsafe-code-lint`.
 
 Decisions made
 
 - Kept parser work in ingestion. Rules no longer receive raw config file strings.
 - Split the `code` config surface into:
   - parsed config files for semantic config rules
-  - typed exception-comment facts for `RS-CODE-CONFIG-07`
+  - typed exception-comment facts for `g3rs-code/exception-comment-inventory`
 - Rejected keeping a `Text` fallback variant. That would keep the public boundary weak.
 - Kept legacy bare `rust-toolchain` out of the parsed config file set because there is no parser-backed representation for it in the repo. It still contributes exception-comment facts during ingestion.
 - Tightened tests to use valid TOML comments (`#`) for TOML-backed files instead of relying on the old raw-text loophole for `//`.

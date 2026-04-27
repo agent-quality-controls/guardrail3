@@ -5,7 +5,7 @@ Summary
 Decisions made
 - Kept the chosen file-module sidecar contract as `#[path = "x_tests/mod.rs"] mod x_tests;` because plain Rust resolution cannot reach sibling `x_tests/` directories without the path redirect.
 - Deleted `crates/types` and used `g3rs-apparch-types` directly because the local crate was only a wrapper and created fake boundary noise.
-- Added `RS-ARCH-FILETREE-07` waivers for runtime and assertions because both crates intentionally keep one apparch rule or proof module per file.
+- Added `g3rs-arch/structural-split` waivers for runtime and assertions because both crates intentionally keep one apparch rule or proof module per file.
 - Removed the copied `module_name_repetitions = "allow"` because the clean sibling package does not need it and the warning was package slack, not a rule problem.
 
 Key files for context

@@ -1,5 +1,5 @@
 Summary
-- Fixed RS-TEST-SOURCE-17 so imported owned-assertions aliases are no longer misclassified as local helpers when a same-file helper has the same name.
+- Fixed g3rs-test/external-harnesses-use-assertions so imported owned-assertions aliases are no longer misclassified as local helpers when a same-file helper has the same name.
 
 Decisions made
 - Narrowed imported helper promotion to local-bound aliases only, which preserves the earlier `self::` wrapper fix while excluding `demo_assertions::...` aliases from the local-helper path.

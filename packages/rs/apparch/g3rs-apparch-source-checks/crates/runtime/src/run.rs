@@ -6,13 +6,10 @@ pub fn check(input: &G3RsApparchSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for io_traits_check in &input.io_traits_checks {
-        crate::rs_apparch_source_04_io_traits_in_types::check(io_traits_check, &mut results);
+        crate::io_traits_in_types::check(io_traits_check, &mut results);
     }
     for types_public_surface_check in &input.types_public_surface_checks {
-        crate::rs_apparch_source_05_types_public_surface::check(
-            types_public_surface_check,
-            &mut results,
-        );
+        crate::types_public_surface::check(types_public_surface_check, &mut results);
     }
 
     results

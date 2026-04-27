@@ -1,7 +1,7 @@
 use std::io::Write;
 
-use super::super::{from_path, parse};
 use super::super::{DenyToml, Error};
+use super::super::{from_path, parse};
 
 pub(super) fn parse_fixture(input: &str) -> DenyToml {
     parse(input).expect("should parse valid deny.toml")

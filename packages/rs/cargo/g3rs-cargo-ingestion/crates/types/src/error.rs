@@ -35,9 +35,7 @@ pub enum G3RsCargoIngestionError {
 impl std::fmt::Display for G3RsCargoIngestionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CargoTomlNotFound => {
-                f.write_str("no Cargo.toml found at the workspace root")
-            }
+            Self::CargoTomlNotFound => f.write_str("no Cargo.toml found at the workspace root"),
             Self::SourceIngestionNotImplemented => {
                 f.write_str("Cargo source ingestion is not implemented yet")
             }

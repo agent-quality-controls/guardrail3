@@ -5,13 +5,13 @@ Fixed the remaining non-hexarch gaps from the repo-wide family audit. Clippy no 
 Decisions made
 
 - Kept the clippy typed-invalid behavior unchanged after proving it was not a real bug.
-  - Added a regression showing raw-parseable but typed-invalid `clippy.toml` still reaches `RS-CLIPPY-CONFIG-21`.
+  - Added a regression showing raw-parseable but typed-invalid `clippy.toml` still reaches `g3rs-clippy/config-parseable`.
   - Rejected: changing clippy config behavior based on a false audit claim.
 - Removed the clippy source-lane stub instead of preserving it for symmetry.
   - The package only implements config and filetree lanes, so the public contract now says that directly.
 - Fixed release root validation at the public ingestion boundary.
   - Rejected: letting a non-workspace root flow into lane inputs and trying to express that misuse as ordinary input failures.
-- Treated `RS-CODE-SOURCE-24` as an intentional divergence.
+- Treated `g3rs-code/ast-24-path-attr-with-reason` as an intentional divergence.
   - The session decision was to keep it in code, so the package README now documents that explicitly instead of pretending the old app comment still governs package ownership.
 
 Key files for context

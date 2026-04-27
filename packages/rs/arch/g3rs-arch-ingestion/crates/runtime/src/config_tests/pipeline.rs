@@ -37,19 +37,19 @@ fn config_pipeline_reports_missing_shared_and_feature_contract_rules() {
     let results = config_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-CONFIG-05",
+        "g3rs-arch/no-boundary-crossing",
         G3Severity::Info,
         Some("pkg/Cargo.toml"),
     );
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-CONFIG-06",
+        "g3rs-arch/shared-flag-required",
         G3Severity::Error,
         Some("pkg/Cargo.toml"),
     );
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-CONFIG-08",
+        "g3rs-arch/feature-contract",
         G3Severity::Error,
         Some("pkg/Cargo.toml"),
     );
@@ -144,7 +144,7 @@ fn split_rule_pipeline_routes_dependency_threshold_to_config_only() {
     let results = config_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-CONFIG-07",
+        "g3rs-arch/dependency-count-split",
         G3Severity::Error,
         Some("crate_a/Cargo.toml"),
     );
@@ -162,7 +162,7 @@ fn split_rule_allows_explicit_dependency_count_waiver() {
     write_file(
         &root,
         "guardrail3-rs.toml",
-        "profile = \"service\"\n\n[[waivers]]\nrule = \"RS-ARCH-CONFIG-07\"\nfile = \"crate_a/Cargo.toml\"\nselector = \"dependency-count\"\nreason = \"This runner explicitly composes independent check packages; hiding them behind an aggregate facade is worse architecture.\"\n",
+        "profile = \"service\"\n\n[[waivers]]\nrule = \"g3rs-arch/dependency-count-split\"\nfile = \"crate_a/Cargo.toml\"\nselector = \"dependency-count\"\nreason = \"This runner explicitly composes independent check packages; hiding them behind an aggregate facade is worse architecture.\"\n",
     );
     make_dir(&root, "crate_a/src");
     write_file(
@@ -173,7 +173,7 @@ fn split_rule_allows_explicit_dependency_count_waiver() {
     write_file(&root, "crate_a/src/lib.rs", "pub mod api;\n");
 
     let results = config_results(&root);
-    assertions::assert_missing_result(&results, "RS-ARCH-CONFIG-07");
+    assertions::assert_missing_result(&results, "g3rs-arch/dependency-count-split");
 }
 
 #[test]
@@ -199,7 +199,7 @@ fn split_rule_ignores_dev_dependencies_in_hard_config_cap() {
 
     assert_eq!(config_crate.production_dependency_count, 12);
     assert_eq!(config_crate.dev_dependency_count, 2);
-    assertions::assert_missing_result(&results, "RS-ARCH-CONFIG-07");
+    assertions::assert_missing_result(&results, "g3rs-arch/dependency-count-split");
 }
 
 #[test]
@@ -226,7 +226,7 @@ fn split_rule_counts_cfg_target_dependencies_in_production_cap() {
     assert_eq!(config_crate.production_dependency_count, 13);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-CONFIG-07",
+        "g3rs-arch/dependency-count-split",
         G3Severity::Error,
         Some("crate_a/Cargo.toml"),
     );

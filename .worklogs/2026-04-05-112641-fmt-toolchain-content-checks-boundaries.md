@@ -4,7 +4,7 @@
 **Scope:** `packages/g3rs-fmt-config-checks/**`, `packages/g3rs-toolchain-config-checks/**`, `apps/guardrail3/crates/app/rs/families/fmt/crates/runtime/**`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/runtime/**`, `apps/guardrail3/crates/app/rs/families/toolchain/crates/assertions/src/rs_toolchain_01_exists.rs`, `apps/guardrail3/Cargo.lock`, `packages/g3rs-toolchain-config-checks/Cargo.lock`
 
 ## Summary
-Extracted `fmt` content validation into the new `g3rs-fmt-config-checks` package and rewired the app `fmt` family to call it for `RS-FMT-CONFIG-01`, `RS-FMT-CONFIG-02`, `RS-FMT-CONFIG-03`, and `RS-FMT-CONFIG-04`. Corrected the previously extracted `g3rs-toolchain-config-checks` boundary so the package receives full parsed files instead of scoped Cargo state, and normalized both packages so internal rule functions take direct parameters rather than internal `*Input` structs.
+Extracted `fmt` content validation into the new `g3rs-fmt-config-checks` package and rewired the app `fmt` family to call it for `g3rs-fmt/settings`, `g3rs-fmt/extra-settings`, `g3rs-fmt/nightly-keys-on-stable`, and `g3rs-fmt/edition-mismatch`. Corrected the previously extracted `g3rs-toolchain-config-checks` boundary so the package receives full parsed files instead of scoped Cargo state, and normalized both packages so internal rule functions take direct parameters rather than internal `*Input` structs.
 
 ## Context & Problem
 The family-extraction direction is to move content-only validation into standalone packages under `packages/` while keeping the app as the orchestrator for discovery, authoritative-file selection, missing/parse blockers, and filetree semantics. Toolchain had already been extracted once, but that first cut still passed scoped `cargo_rust_version` state into the package, which violated the agreed rule that content-check packages receive parsed files, not derived substate. Separately, `fmt` needed its first real extraction pass using the new parser packages and the same content-only boundary.
@@ -21,7 +21,7 @@ During the same discussion, the internal rule layering was clarified too: a pack
   - Pass only scalar facts like edition/channel — rejected because the user explicitly wanted packages to receive the parsed files they need, not scoped substate.
 
 ### Keep `fmt` Filetree And Waiver Semantics In The App
-- **Chose:** extract only `RS-FMT-CONFIG-01`, `RS-FMT-CONFIG-02`, `RS-FMT-CONFIG-03`, and `RS-FMT-CONFIG-04`; keep `RS-FMT-01`, `RS-FMT-05`, `RS-FMT-07`, and `RS-FMT-08` in the app.
+- **Chose:** extract only `g3rs-fmt/settings`, `g3rs-fmt/extra-settings`, `g3rs-fmt/nightly-keys-on-stable`, and `g3rs-fmt/edition-mismatch`; keep `RS-FMT-01`, `RS-FMT-05`, `RS-FMT-07`, and `RS-FMT-08` in the app.
 - **Why:** existence, override placement, dual-config conflicts, and `guardrail3.toml` waiver matching are orchestrator/filetree concerns rather than pure config-content checks.
 - **Alternatives considered:**
   - Move `RS-FMT-07` immediately too — rejected because it depends on app-side guardrail waiver loading, not just `rustfmt.toml` semantics.
@@ -35,10 +35,10 @@ During the same discussion, the internal rule layering was clarified too: a pack
   - Push Cargo parse failures into the package — rejected because content packages are not supposed to own missing/malformed-file routing.
 
 ### Split Toolchain Public Checker Inputs By Rule Ownership
-- **Chose:** expose `G3RsToolchainConfigChannelComponentsInput` for `RS-TOOLCHAIN-CONFIG-01` and `G3RsToolchainConfigMsrvConsistencyInput` for `RS-TOOLCHAIN-CONFIG-02`, instead of one aggregate package input.
+- **Chose:** expose `G3RsToolchainConfigChannelComponentsInput` for `g3rs-toolchain/channel-and-components` and `G3RsToolchainConfigMsrvConsistencyInput` for `g3rs-toolchain/msrv-consistency`, instead of one aggregate package input.
 - **Why:** the two extracted toolchain rules do not actually need the same file set. Splitting the public checker inputs keeps the package contract honest without reintroducing discovery logic.
 - **Alternatives considered:**
-  - Keep a single aggregate `G3ToolchainContentChecksInput` — rejected because it forced unnecessary Cargo coupling into `RS-TOOLCHAIN-CONFIG-01`.
+  - Keep a single aggregate `G3ToolchainContentChecksInput` — rejected because it forced unnecessary Cargo coupling into `g3rs-toolchain/channel-and-components`.
   - Recreate the old in-app `ToolchainRootInput` in the package — rejected because it mixed filetree and content semantics again.
 
 ### Remove Internal Rule-Specific Input Structs
@@ -49,7 +49,7 @@ During the same discussion, the internal rule layering was clarified too: a pack
   - Inline all package input field access directly inside each rule with no helper layer at all — partially rejected; shared helper functions like `cargo_edition()` and `rustfmt_table()` still remain where they genuinely reduce duplication.
 
 ### Preserve Toolchain Family Behavior For Invalid Root Cargo Files
-- **Chose:** keep root detection in the app even when `Cargo.toml` is semantically invalid, and continue surfacing the `RS-TOOLCHAIN-CONFIG-02` blocker rather than dropping the root entirely.
+- **Chose:** keep root detection in the app even when `Cargo.toml` is semantically invalid, and continue surfacing the `g3rs-toolchain/msrv-consistency` blocker rather than dropping the root entirely.
 - **Why:** the first typed-parser rewrite accidentally lost the invalid-root case because the family stopped seeing the root as a workspace. That was a regression in routing semantics, not a package-boundary improvement.
 - **Alternatives considered:**
   - Let invalid Cargo manifests silently remove the root from toolchain evaluation — rejected because it suppresses a real blocking error.
@@ -70,8 +70,8 @@ The extraction pattern is now sharper:
 
 For `fmt`, the app bridge now constructs `G3RsFmtConfigChecksInput` only when all required parsed files are available. For `toolchain`, the app bridge calls the package in two pieces:
 
-- `RS-TOOLCHAIN-CONFIG-01` gets parsed `RustToolchainToml`
-- `RS-TOOLCHAIN-CONFIG-02` gets parsed `RustToolchainToml` plus parsed `CargoToml`
+- `g3rs-toolchain/channel-and-components` gets parsed `RustToolchainToml`
+- `g3rs-toolchain/msrv-consistency` gets parsed `RustToolchainToml` plus parsed `CargoToml`
 
 This avoids a false “single aggregate input everywhere” rule while still keeping package APIs typed and explicit.
 

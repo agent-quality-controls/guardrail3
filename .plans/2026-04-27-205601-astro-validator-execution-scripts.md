@@ -5,11 +5,11 @@ Make strict Astro apps prove that delegated validators are actually executable t
 # Approach
 
 - Add setup config checks for validator execution:
-  - `TS-ASTRO-SETUP-CONFIG-33`: `package.json` must contain a safe `lint` script that invokes `eslint`.
-  - `TS-ASTRO-SETUP-CONFIG-34`: `package.json` must contain a safe `lint:packages` script that invokes `syncpack lint`.
+  - `g3ts-astro-setup/lint-script`: `package.json` must contain a safe `lint` script that invokes `eslint`.
+  - `g3ts-astro-setup/syncpack-lint-script`: `package.json` must contain a safe `lint:packages` script that invokes `syncpack lint`.
 - Keep the existing execution contracts:
-  - `TS-ASTRO-SETUP-CONFIG-02` already requires a safe `astro check` invocation.
-  - `TS-ASTRO-SEO-CONFIG-13` already requires a safe `build` script invoking `astro build`, which executes Nuasite during Astro build.
+  - `g3ts-astro-setup/astro-check-present` already requires a safe `astro check` invocation.
+  - `g3ts-astro-seo/nuasite-checks` already requires a safe `build` script invoking `astro build`, which executes Nuasite during Astro build.
 - Use existing parsed package-script facts from `package-script-command-parser`.
 - Do not inspect raw script strings.
 - Add tests that first prove missing scripts fail, unsafe `|| true` scripts fail, and valid scripts pass.

@@ -20,7 +20,10 @@ fn source_checks_flag_exported_function_in_types() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_apparch_source_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-SOURCE-01");
+    g3ts_apparch_source_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-apparch/types-public-surface",
+    );
 }
 
 #[test]
@@ -40,7 +43,10 @@ fn source_checks_flag_exported_interface_in_io() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_apparch_source_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-SOURCE-02");
+    g3ts_apparch_source_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-apparch/io-contracts-in-types",
+    );
 }
 
 #[test]
@@ -60,7 +66,10 @@ fn source_checks_flag_exported_class_in_types() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_apparch_source_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-SOURCE-01");
+    g3ts_apparch_source_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-apparch/types-public-surface",
+    );
 }
 
 #[test]
@@ -80,5 +89,8 @@ fn source_checks_flag_exported_interface_in_io_inbound() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_apparch_source_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-SOURCE-02");
+    g3ts_apparch_source_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-apparch/io-contracts-in-types",
+    );
 }

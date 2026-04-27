@@ -1,11 +1,11 @@
 Goal
 
-Harden the `RS-APPARCH-CONFIG-06` test surface so it proves exact member attribution, tests the clean acyclic branch, and stops recreating ingestion behavior inside rule-test helpers.
+Harden the `g3rs-apparch/same-layer-cycles` test surface so it proves exact member attribution, tests the clean acyclic branch, and stops recreating ingestion behavior inside rule-test helpers.
 
 Approach
 
 - Rewrite the `rs_apparch_config_06_same_layer_cycles` helper to construct the post-ingestion input directly from prebound same-layer edges, not from raw crate and dependency bags.
-- Tighten the assertions crate for `RS-APPARCH-CONFIG-06` so tests can prove exact member display in error messages and exact inventory text in the clean branch.
+- Tighten the assertions crate for `g3rs-apparch/same-layer-cycles` so tests can prove exact member display in error messages and exact inventory text in the clean branch.
 - Update the rule tests to:
   - assert exact cycle members for the error path
   - assert exact self-loop attribution

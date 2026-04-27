@@ -1,15 +1,15 @@
 mod advisories;
+mod allow_override_channel;
+mod ban_baseline_complete;
 mod bans;
 mod baseline;
+mod extra_deny_bans_inventory;
+mod license_exceptions_inventory;
 mod licenses;
-mod rs_deny_config_23_ban_baseline_complete;
-mod rs_deny_config_24_license_exceptions_inventory;
-mod rs_deny_config_25_allow_override_channel;
-mod rs_deny_config_26_extra_deny_bans_inventory;
-mod rs_deny_config_27_wrappers;
 mod run;
 mod sources;
 mod support;
+mod wrappers;
 
 #[cfg(test)]
 use g3rs_deny_config_checks_assertions as _;

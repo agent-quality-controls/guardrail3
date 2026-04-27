@@ -1,6 +1,6 @@
 Summary
 
-Closed the attack findings against the recursive `RS-ARCH-FILETREE-07` fix. Arch ingestion now measures structural complexity from the actual active code roots, ignores inactive `src` trees for custom root-level libs, ignores `tests/examples/benches/target` during recursive structural counting, and pins those behaviors with new pipeline regressions.
+Closed the attack findings against the recursive `g3rs-arch/structural-split` fix. Arch ingestion now measures structural complexity from the actual active code roots, ignores inactive `src` trees for custom root-level libs, ignores `tests/examples/benches/target` during recursive structural counting, and pins those behaviors with new pipeline regressions.
 
 Decisions made
 

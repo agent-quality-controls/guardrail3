@@ -10,7 +10,7 @@ Continued the adversarial `RS-CLIPPY` hardening pass instead of repo cleanup. Th
 The current task was to keep attacking the `clippy` family itself, not to reduce repo findings. Earlier work had already fixed root-policy coverage, type-ban ownership overlap, and macro-ban path correctness, but the family still had two architectural holes:
 
 1. `guardrail3.toml` parse failures influenced active Clippy profile/garde policy, yet there was no dedicated rule surfacing that failure. Rules like `16` and `17` could quietly degrade to default policy assumptions instead of producing a clear policy-context failure.
-2. `read_policy_map()` applied `rust.packages` only to the validation root and standalone package roots. Package workspace roots under `packages/*` still inherited the default profile instead of the package policy, which created a false-green path for library-only checks such as `RS-CLIPPY-14` and local-baseline checks such as `RS-CLIPPY-13`.
+2. `read_policy_map()` applied `rust.packages` only to the validation root and standalone package roots. Package workspace roots under `packages/*` still inherited the default profile instead of the package policy, which created a false-green path for library-only checks such as `RS-CLIPPY-14` and local-baseline checks such as `g3rs-clippy/local-policy-root`.
 
 This work had to stay inside the nested `clippy` workspace because the outer `apps/guardrail3` workspace is still temporarily broken by the unrelated in-flight `deny` migration.
 
@@ -43,7 +43,7 @@ This work had to stay inside the nested `clippy` workspace because the outer `ap
   - parse failure of the `clippy.toml` being checked
   - parse failure of active `guardrail3.toml` policy context
 - `RS-CLIPPY-23` owns the second class so profile-aware rules do not need to duplicate it.
-- Package workspace roots now inherit `rust.packages` consistently, which keeps `RS-CLIPPY-13`, `14`, and `16` aligned on the same resolved profile/garde context.
+- Package workspace roots now inherit `rust.packages` consistently, which keeps `g3rs-clippy/local-policy-root`, `14`, and `16` aligned on the same resolved profile/garde context.
 
 ## Information Sources
 - Family contract:
@@ -66,7 +66,7 @@ This work had to stay inside the nested `clippy` workspace because the outer `ap
 ## Open Questions / Future Considerations
 - The outer workspace is still broken by unrelated `deny` work, so top-level `guardrail3 rs validate ... --family test` for `clippy` still cannot be rerun from `apps/guardrail3`.
 - `RS-CLIPPY-19` currently looks safe against the live Clippy key set, but it still depends on edit-distance heuristics. If the managed key set grows, parity against real Clippy top-level keys should be rechecked.
-- There may still be rule-overlap noise between `RS-CLIPPY-13` and per-key rules (`16/17`) on incomplete local policy roots, but that is a contract question rather than a discovered detector bug.
+- There may still be rule-overlap noise between `g3rs-clippy/local-policy-root` and per-key rules (`16/17`) on incomplete local policy roots, but that is a contract question rather than a discovered detector bug.
 
 ## Key Files for Context
 - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs` — profile/garde resolution, package-workspace handling, and policy-context parse facts
@@ -80,7 +80,7 @@ This work had to stay inside the nested `clippy` workspace because the outer `ap
 ## Next Steps / Continuation Plan
 1. Once this checkpoint is committed, continue the adversarial pass on the remaining `RS-CLIPPY` rule surface, with emphasis on:
    - `RS-CLIPPY-19` typo heuristics against real Clippy keys
-   - overlap/noise between `RS-CLIPPY-13` and `RS-CLIPPY-16/17`
+   - overlap/noise between `g3rs-clippy/local-policy-root` and `RS-CLIPPY-16/17`
    - any remaining fail-open path on malformed active policy context
 2. Keep the work inside the nested `clippy` workspace until the outer workspace is healthy again. Use:
    - `cargo test --manifest-path apps/guardrail3/crates/app/rs/families/clippy/Cargo.toml -p guardrail3-app-rs-family-clippy --lib`

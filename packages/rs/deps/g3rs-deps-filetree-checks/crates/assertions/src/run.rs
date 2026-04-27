@@ -3,7 +3,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 pub fn assert_combined_missing_and_ignored(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-DEPS-FILETREE-09"
+            result.id() == "g3rs-deps/cargo-lock-present"
                 && result.severity() == G3Severity::Error
                 && result.title() == "Cargo.lock missing"
                 && result.message()
@@ -15,7 +15,7 @@ pub fn assert_combined_missing_and_ignored(results: &[G3CheckResult]) {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-DEPS-FILETREE-10"
+            result.id() == "g3rs-deps/gitignore-not-ignoring-cargo-lock"
                 && result.severity() == G3Severity::Error
                 && result.title() == "Cargo.lock ignored in gitignore"
                 && result.message()

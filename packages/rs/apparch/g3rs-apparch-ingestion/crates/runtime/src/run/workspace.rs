@@ -83,12 +83,12 @@ pub(super) fn collect_workspace_crates(
             continue;
         }
         let cargo_rel_path = CrawlView::join_rel(&rel_dir, "Cargo.toml");
-        let entry = view
-            .entry(&cargo_rel_path)
-            .ok_or_else(|| G3RsApparchIngestionError::NormalizationFailed {
+        let entry = view.entry(&cargo_rel_path).ok_or_else(|| {
+            G3RsApparchIngestionError::NormalizationFailed {
                 path: std::path::PathBuf::from(cargo_rel_path.clone()),
                 reason: "workspace member pattern did not resolve to a Cargo.toml".to_owned(),
-            })?;
+            }
+        })?;
         if !entry.readable {
             return Err(G3RsApparchIngestionError::Unreadable {
                 path: entry.path.abs_path.clone(),
@@ -152,7 +152,10 @@ fn resolve_member_dirs(
     let mut resolved = BTreeSet::new();
     for member in &workspace.members {
         for rel_dir in resolve_member_pattern(view, member)? {
-            if !exclude_patterns.iter().any(|pattern| pattern.matches(&rel_dir)) {
+            if !exclude_patterns
+                .iter()
+                .any(|pattern| pattern.matches(&rel_dir))
+            {
                 let _ = resolved.insert(rel_dir);
             }
         }
@@ -176,9 +179,11 @@ fn resolve_member_pattern(
 
     let has_glob = member.contains('*') || member.contains('?') || member.contains('[');
     if has_glob {
-        let glob = Pattern::new(&member).map_err(|error| G3RsApparchIngestionError::NormalizationFailed {
-            path: std::path::PathBuf::from("Cargo.toml"),
-            reason: format!("invalid workspace member pattern `{member}`: {error}"),
+        let glob = Pattern::new(&member).map_err(|error| {
+            G3RsApparchIngestionError::NormalizationFailed {
+                path: std::path::PathBuf::from("Cargo.toml"),
+                reason: format!("invalid workspace member pattern `{member}`: {error}"),
+            }
         })?;
         let matches = view
             .all_dir_rels()
@@ -189,7 +194,9 @@ fn resolve_member_pattern(
         if matches.is_empty() {
             return Err(G3RsApparchIngestionError::NormalizationFailed {
                 path: std::path::PathBuf::from("Cargo.toml"),
-                reason: format!("workspace member pattern `{member}` did not resolve to any Cargo.toml"),
+                reason: format!(
+                    "workspace member pattern `{member}` did not resolve to any Cargo.toml"
+                ),
             });
         }
         return Ok(matches);
@@ -232,5 +239,7 @@ fn contains_segment(path: &str, segment: &str) -> bool {
 
 fn contains_segment_pair(path: &str, first: &str, second: &str) -> bool {
     let parts = path.split('/').collect::<Vec<_>>();
-    parts.windows(2).any(|window| window[0] == first && window[1] == second)
+    parts
+        .windows(2)
+        .any(|window| window[0] == first && window[1] == second)
 }

@@ -1,16 +1,16 @@
 Goal
 
-Repair the remaining `rs/test` file-tree boundary defect in `RS-TEST-FILETREE-03`. The rule should consume ingestion-owned component file-tree facts instead of rebuilding cross-file lookup state from the top-level analyzed file bag.
+Repair the remaining `rs/test` file-tree boundary defect in `g3rs-test/runtime-assertions-split`. The rule should consume ingestion-owned component file-tree facts instead of rebuilding cross-file lookup state from the top-level analyzed file bag.
 
 Approach
 
-- Extend the file-tree family types with prebound component facts needed by `RS-TEST-FILETREE-03`:
+- Extend the file-tree family types with prebound component facts needed by `g3rs-test/runtime-assertions-split`:
   - source module names
   - sidecar files
   - external harness files
   - assertions module files
   - top-level existing file paths for sidecar assertions-module presence checks
-- Add a red rule test that proves `RS-TEST-FILETREE-03` still depends on `input.files` instead of the prebound component facts.
+- Add a red rule test that proves `g3rs-test/runtime-assertions-split` still depends on `input.files` instead of the prebound component facts.
 - Build those new facts in `g3rs-test-ingestion` during file-tree input construction.
 - Rewrite `rs_test_03_runtime_assertions_split/violations.rs` and its helpers to consume the prebound component facts directly.
 - Update fixtures, package tests, and run `g3rs validate` on the touched packages.
@@ -18,7 +18,7 @@ Approach
 Key decisions
 
 - Keep the top-level `files` bag for the other file-tree rules.
-  - Reason: this repair is scoped to `RS-TEST-FILETREE-03`, not a full file-tree family reshape.
+  - Reason: this repair is scoped to `g3rs-test/runtime-assertions-split`, not a full file-tree family reshape.
 - Bind component-local file groups in ingestion instead of adding another generic map to the check package.
   - Reason: the defect is local rebinding from a bag. Replacing one local index with another would not improve the boundary.
 - Keep the non-component harness scan in the rule.

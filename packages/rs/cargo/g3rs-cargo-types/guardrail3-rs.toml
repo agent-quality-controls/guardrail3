@@ -10,7 +10,7 @@ allowed_deps = [
 garde = false
 
 [[waivers]]
-rule = "RS-CARGO-CONFIG-07"
+rule = "g3rs-cargo/approved-allow-inventory"
 file = "Cargo.toml"
 selector = "clippy:module_name_repetitions"
 reason = "Shared cargo type names intentionally repeat the family and rule context."

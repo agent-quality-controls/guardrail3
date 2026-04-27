@@ -30,7 +30,10 @@ pub(super) fn git_config_hooks_path(path: &Path, hooks_path: &str) {
         .current_dir(path)
         .status()
         .expect("run `git config core.hooksPath` for test repository");
-    assert!(status.success(), "git config core.hooksPath must exit successfully");
+    assert!(
+        status.success(),
+        "git config core.hooksPath must exit successfully"
+    );
 }
 
 pub(super) fn break_git_dir(path: &Path) {

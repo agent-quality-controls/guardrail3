@@ -54,7 +54,7 @@ pub struct G3RsClippyConfigChecksInput {
 pub fn check(input: &G3RsClippyConfigChecksInput) -> Vec<G3CheckResult>
 ```
 
-Initial rules in package: RS-CLIPPY-CONFIG-01, 03, 09, 10, 11, 17, 21, 22
+Initial rules in package: g3rs-clippy/max-struct-bools, 03, 09, 10, 11, 17, 21, 22
 Rules in app: RS-CLIPPY-01, 04, 05, 06, 07, 08, 12, 13, 14, 15, 16, 18, 19,
 20, 23, 24, 25
 
@@ -78,7 +78,7 @@ pub struct G3RsDenyConfigChecksInput {
 pub fn check(input: &G3RsDenyConfigChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-DENY-CONFIG-01, 05, 06, 07, 08, 10, 11, 12, 13, 14, 15, 16,
+Rules in package: g3rs-deny/deprecated-advisories, 05, 06, 07, 08, 10, 11, 12, 13, 14, 15, 16,
 18, 19, 20, 21, 22, 23, 24, 27, 28, 29
 Rules in app: RS-DENY-01, RS-DENY-03, RS-DENY-09, RS-DENY-17, RS-DENY-25,
 RS-DENY-26, RS-DENY-30
@@ -100,7 +100,7 @@ pub struct G3RsCargoConfigChecksInput {
 pub fn check(input: &G3RsCargoConfigChecksInput) -> Vec<G3CheckResult>
 ```
 
-Single-file rules in package: RS-CARGO-CONFIG-01, 02, 05, 07, 08, 11
+Single-file rules in package: g3rs-cargo/workspace-lints, 02, 05, 07, 08, 11
 Rules in app for now: RS-CARGO-03, 04, 06, 09, 10, 12, 13, 14, 15
 
 Package boundary:
@@ -130,7 +130,7 @@ pub struct G3RsFmtConfigChecksInput {
 pub fn check(input: &G3RsFmtConfigChecksInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-FMT-CONFIG-01, RS-FMT-CONFIG-02, RS-FMT-CONFIG-03, RS-FMT-CONFIG-04
+Rules in package: g3rs-fmt/settings, g3rs-fmt/extra-settings, g3rs-fmt/nightly-keys-on-stable, g3rs-fmt/edition-mismatch
 Rules in app: RS-FMT-01, RS-FMT-05, RS-FMT-07, RS-FMT-08
 
 Note: the package does not discover or choose files. The app/orchestrator
@@ -167,8 +167,8 @@ pub fn check_msrv_consistency(
 ) -> Vec<G3CheckResult>;
 ```
 
-Rules in package: RS-TOOLCHAIN-CONFIG-01, RS-TOOLCHAIN-CONFIG-02
-Rules in app: RS-TOOLCHAIN-01, RS-TOOLCHAIN-04
+Rules in package: g3rs-toolchain/channel-and-components, g3rs-toolchain/msrv-consistency
+Rules in app: g3rs-toolchain/root-toolchain-config-exists, g3rs-toolchain/no-duplicate-toolchain-config
 
 ### Garde
 ```rust
@@ -208,7 +208,7 @@ pub struct G3RsGardeSourceChecksInput {
 pub fn check(input: &G3RsGardeSourceChecksInput) -> Vec<G3CheckResult>;
 ```
 
-Rules in `g3rs-garde-config-checks`: RS-GARDE-CONFIG-01, RS-GARDE-CONFIG-02, RS-GARDE-CONFIG-03, RS-GARDE-CONFIG-04, RS-GARDE-CONFIG-05
+Rules in `g3rs-garde-config-checks`: g3rs-garde/dependency-present, g3rs-garde/core-method-bans, g3rs-garde/extractor-type-bans, g3rs-garde/reqwest-json-ban, g3rs-garde/additional-method-bans
 Rules in `g3rs-garde-source-checks`: RS-GARDE-AST-01, RS-GARDE-AST-02, RS-GARDE-AST-03, RS-GARDE-AST-04, RS-GARDE-AST-05, RS-GARDE-AST-06, RS-GARDE-AST-07, RS-GARDE-AST-08
 Rules in app: RS-GARDE-10
 
@@ -216,7 +216,7 @@ Current bridge note:
 
 - app still owns garde applicability gating from policy and source adoption
 - app still owns missing / unparseable covering clippy handling for
-  `RS-GARDE-CONFIG-02/03/04/06`
+  `g3rs-garde/core-method-bans/03/04/06`
 - app still owns malformed-input reporting through `RS-GARDE-10`
 - `g3rs-garde-config-checks` owns the typed parsed-file path for root-policy checks
 - `g3rs-garde-source-checks` owns the governed Rust source-file path and required
@@ -248,14 +248,14 @@ pub fn check_policy(input: &G3RsDepsConfigPolicyChecksInput) -> Vec<G3CheckResul
 pub fn check_direct_dependency_cap(input: &G3RsDepsConfigDirectDependencyCapInput) -> Vec<G3CheckResult>
 ```
 
-Rules in package: RS-DEPS-CONFIG-01, 06, 07, 08, 12
+Rules in package: g3rs-deps/dependencies-allowlisted, 06, 07, 08, 12
 Rules in app: RS-DEPS-01, 02, 03, 04, 09, 10, 11
 
 Package boundary:
 
 - receives full parsed files only
 - each input represents one crate policy opportunity inside one workspace
-- `workspace_cargo` exists because `RS-DEPS-CONFIG-01..07` may need workspace
+- `workspace_cargo` exists because `g3rs-deps/dependencies-allowlisted..07` may need workspace
   dependency resolution such as `workspace = true`
 - current wired policy file is legacy `guardrail3.toml`
 - package does not own tool presence, lockfile discovery, `.gitignore`

@@ -27,7 +27,7 @@ We also discovered one concrete contract gap while implementing: the current `gu
 
 ### Add explicit `allowlist_present`
 - **Chose:** Carry `allowlist_present: bool` in `G3RsDepsConfigChecksInput`.
-- **Why:** `RS-DEPS-CONFIG-04` needs to distinguish “no allowlist configured” from “allowlist configured but empty”, and the current parser does not preserve that distinction by itself.
+- **Why:** `g3rs-deps/library-allowlist-present` needs to distinguish “no allowlist configured” from “allowlist configured but empty”, and the current parser does not preserve that distinction by itself.
 - **Alternatives considered:**
   - Infer presence from `allowed_deps.is_empty()` — rejected because it is wrong for explicit empty lists.
   - Change the parser package first — rejected for this step because the ingestion package can recover presence from raw TOML without widening the current parser scope.

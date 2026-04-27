@@ -35,8 +35,8 @@ The ongoing adversarial review of `RS-CLIPPY-12/13/18/20` focused on concrete se
 - Local tool probe using `cargo clippy` in a temporary crate with both `clippy.toml` and `.clippy.toml` present; Clippy explicitly reported that `.clippy.toml` was used and `clippy.toml` ignored.
 
 ## Open Questions / Future Considerations
-- `collect_cargo_roots()` in clippy facts still treats malformed routed `Cargo.toml` files as “not a workspace / not a package,” which can misclassify `RS-CLIPPY-12` and suppress `RS-CLIPPY-13`.
-- `RS-CLIPPY-13` still suppresses a broken local `clippy.toml` when `guardrail3.toml` policy context is also malformed.
+- `collect_cargo_roots()` in clippy facts still treats malformed routed `Cargo.toml` files as “not a workspace / not a package,” which can misclassify `RS-CLIPPY-12` and suppress `g3rs-clippy/local-policy-root`.
+- `g3rs-clippy/local-policy-root` still suppresses a broken local `clippy.toml` when `guardrail3.toml` policy context is also malformed.
 - `RS-CLIPPY-18` and `RS-CLIPPY-20` still want extra regression coverage for mixed duplicate entry forms and short-name macro bans.
 
 ## Key Files for Context
@@ -48,5 +48,5 @@ The ongoing adversarial review of `RS-CLIPPY-12/13/18/20` focused on concrete se
 
 ## Next Steps / Continuation Plan
 1. Revisit `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs` and decide how malformed routed `Cargo.toml` files should fail closed for `RS-CLIPPY-12/13`.
-2. Add a dual-failure regression for `RS-CLIPPY-13` where both `guardrail3.toml` policy context and local `clippy.toml` are malformed, then decide whether both errors should surface.
+2. Add a dual-failure regression for `g3rs-clippy/local-policy-root` where both `guardrail3.toml` policy context and local `clippy.toml` are malformed, then decide whether both errors should surface.
 3. Add missing regression coverage for `RS-CLIPPY-18` mixed string/table duplicates and `RS-CLIPPY-20` short-name macro bans.

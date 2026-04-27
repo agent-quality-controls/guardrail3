@@ -39,15 +39,13 @@ fn run_dispatches_prebound_dependency_and_purity_inputs() {
             rust_policy: G3RsApparchRustPolicyState::Missing,
         }],
         patch_bypass_checks: Vec::<G3RsApparchPatchBypassChecksInput>::new(),
-        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput {
-            edges: Vec::new(),
-        },
+        same_layer_cycles_check: G3RsApparchSameLayerCyclesChecksInput { edges: Vec::new() },
     };
 
     let results = crate::run::check(&input);
 
-    assertions::assert_has_finding_id(&results, "RS-APPARCH-CONFIG-01");
-    assertions::assert_has_finding_id(&results, "RS-APPARCH-CONFIG-08");
+    assertions::assert_has_finding_id(&results, "g3rs-apparch/types-dependency-direction");
+    assertions::assert_has_finding_id(&results, "g3rs-apparch/types-purity");
 }
 
 #[test]
@@ -74,7 +72,7 @@ fn run_dispatches_prebound_same_layer_cycle_nodes() {
 
     let results = crate::run::check(&input);
 
-    assertions::assert_has_finding_id(&results, "RS-APPARCH-CONFIG-06");
+    assertions::assert_has_finding_id(&results, "g3rs-apparch/same-layer-cycles");
 }
 
 fn fixture_crate(rel_dir: &str, layer: G3RsApparchLayer) -> G3RsApparchCrate {

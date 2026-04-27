@@ -10,7 +10,7 @@ Added family-level smoke tests that prove migrated clippy rules are actually bei
 After extracting the first `clippy` content slice into `g3rs-clippy-config-checks`, the package had direct tests and the app family passed overall, but there was still a trust gap:
 
 - nothing at the app-family layer explicitly proved that `run.rs` was calling the package correctly for a migrated rule
-- the old app-side rule directories for `RS-CLIPPY-CONFIG-01`, `03`, `09`, `10`, `11`, `17`, `21`, and `22` were still present on disk even though `lib.rs` no longer referenced them
+- the old app-side rule directories for `g3rs-clippy/max-struct-bools`, `03`, `09`, `10`, `11`, `17`, `21`, and `22` were still present on disk even though `lib.rs` no longer referenced them
 
 That left two risks:
 - the family bridge could regress silently while package tests still passed

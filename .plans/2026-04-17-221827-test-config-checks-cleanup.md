@@ -20,7 +20,7 @@ Approach
   - create matching shared assertions modules for each rule
 
 Key decisions
-- Fix the runtime complexity by grouping rules into domain submodules instead of waiving `RS-ARCH-FILETREE-07`.
+- Fix the runtime complexity by grouping rules into domain submodules instead of waiving `g3rs-arch/structural-split`.
 - Keep the cleanup package-local. Do not change any rules unless the grouped shape exposes a real contradiction.
 
 Files to modify

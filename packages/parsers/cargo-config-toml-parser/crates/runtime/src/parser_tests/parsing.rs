@@ -1,5 +1,5 @@
-use helpers::{parse_fixture, parse_from_tempfile};
 use cargo_config_toml_parser_runtime_assertions::parser as assertions;
+use helpers::{parse_fixture, parse_from_tempfile};
 
 use super::helpers;
 
@@ -45,7 +45,10 @@ include = ["shared.txt"]
 }
 
 #[test]
-#[allow(clippy::too_many_lines, reason = "one realistic fixture is the clearest way to prove section coverage")]
+#[allow(
+    clippy::too_many_lines,
+    reason = "one realistic fixture is the clearest way to prove section coverage"
+)]
 fn realistic_config_parses_known_sections() {
     let cfg = parse_fixture(
         r#"
@@ -116,14 +119,20 @@ width = 80
     );
 
     assertions::assert_string_list(&cfg.paths, &["vendor/crates"], "paths");
-    assertions::assert_command_list(cfg.alias.get("xtask"), &["run", "-p", "xtask", "--"], "alias.xtask");
+    assertions::assert_command_list(
+        cfg.alias.get("xtask"),
+        &["run", "-p", "xtask", "--"],
+        "alias.xtask",
+    );
     assertions::assert_target_selector_list(
         cfg.build.as_ref().and_then(|build| build.target.as_ref()),
         &["x86_64-unknown-linux-gnu", "wasm32-unknown-unknown"],
         "build.target",
     );
     assertions::assert_command_list(
-        cfg.build.as_ref().and_then(|build| build.rustflags.as_ref()),
+        cfg.build
+            .as_ref()
+            .and_then(|build| build.rustflags.as_ref()),
         &["-Dwarnings"],
         "build.rustflags",
     );

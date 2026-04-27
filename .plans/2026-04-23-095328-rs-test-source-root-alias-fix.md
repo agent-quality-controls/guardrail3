@@ -2,7 +2,7 @@ Goal
 
 - Fix the `rs/test` source-check false negative for owned assertions imported through a package-root alias such as `use demo_assertions::{self as da}; da::assert_demo()`.
 - Prove the bug with red regressions first.
-- Normalize `self as` package-root imports at the owned-assertion resolution boundary so both `RS-TEST-SOURCE-07` and `RS-TEST-SOURCE-17` classify the call correctly.
+- Normalize `self as` package-root imports at the owned-assertion resolution boundary so both `g3rs-test/real-proof-site` and `g3rs-test/external-harnesses-use-assertions` classify the call correctly.
 
 Approach
 

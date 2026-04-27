@@ -15,13 +15,13 @@ allowed_deps = [
 garde = false
 
 [[waivers]]
-rule = "RS-ARCH-FILETREE-07"
+rule = "g3rs-arch/structural-split"
 file = "crates/runtime/Cargo.toml"
 selector = "structural-split"
 reason = "Runtime crate intentionally keeps one source rule per module and owns the garde AST analysis surface."
 
 [[waivers]]
-rule = "RS-ARCH-FILETREE-07"
+rule = "g3rs-arch/structural-split"
 file = "crates/assertions/Cargo.toml"
 selector = "structural-split"
 reason = "Assertions crate intentionally keeps one shared proof module per source rule so internal and external tests use the same proof surface."

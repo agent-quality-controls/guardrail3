@@ -5,6 +5,6 @@ use guardrail3_check_types as _;
 mod common;
 
 #[cfg(feature = "checks")]
-pub mod rs_toolchain_config_01_channel_and_components;
+pub mod channel_and_components;
 #[cfg(feature = "checks")]
-pub mod rs_toolchain_config_02_msrv_consistency;
+pub mod msrv_consistency;

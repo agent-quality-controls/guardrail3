@@ -1,5 +1,5 @@
 # Goal
-Make RS-ARCH-CONFIG-07 judge only production coupling. Dev-dependencies should not trip the hard crate-split error.
+Make g3rs-arch/dependency-count-split judge only production coupling. Dev-dependencies should not trip the hard crate-split error.
 
 # Approach
 - Add tests that prove a crate with 12 production deps and extra dev-deps stays clean, while 13 production deps still errors.

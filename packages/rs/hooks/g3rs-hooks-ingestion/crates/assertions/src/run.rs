@@ -80,9 +80,9 @@ pub fn assert_present(
 ) {
     let findings = findings(results, id);
     assert!(
-        findings
-            .iter()
-            .any(|finding| finding.title == title && finding.file == file && finding.inventory == inventory),
+        findings.iter().any(|finding| finding.title == title
+            && finding.file == file
+            && finding.inventory == inventory),
         "{findings:#?}"
     );
 }

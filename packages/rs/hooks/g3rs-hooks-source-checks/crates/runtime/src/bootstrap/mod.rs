@@ -1,1 +1,1 @@
-pub(crate) mod hook_shared_04_dispatcher_pattern;
+pub(crate) mod dispatcher_pattern;

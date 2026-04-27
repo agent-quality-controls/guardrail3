@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-TEST-SOURCE-07` so it no longer treats same-file setup helpers like `git_init()` as proof helpers just because they contain an assertion. The rule now keeps blaming real local proof helpers like `assert_results()`, but setup helpers fall back to the correct "no shared proof step" result.
+- Fixed `g3rs-test/real-proof-site` so it no longer treats same-file setup helpers like `git_init()` as proof helpers just because they contain an assertion. The rule now keeps blaming real local proof helpers like `assert_results()`, but setup helpers fall back to the correct "no shared proof step" result.
 
 Decisions made
 - Fixed the rule, not `g3rs-code-ingestion`. The package was correct to use a local setup helper before its final proof.

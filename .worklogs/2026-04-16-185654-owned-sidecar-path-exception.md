@@ -9,7 +9,7 @@ Decisions made
 - Allowed only the exact file-owned sidecar pattern.
   - Why: flat file modules need a narrow bridge to reach `x_tests/mod.rs`, and this is the chosen repo shape.
   - Rejected: `mod tests;` with `#[path = "rule_tests/mod.rs"]`, because ownership is hidden in the path string instead of the module name.
-- Tightened `RS-TEST-FILETREE-02` to derive the expected sidecar from the source file name.
+- Tightened `g3rs-test/owned-sidecar-shape` to derive the expected sidecar from the source file name.
   - Why: the old rule wrongly treated any `*_tests` name as acceptable for `lib.rs`, which let the wrong module name look valid.
   - Rejected: keeping the old "any *_tests is fine" logic.
 

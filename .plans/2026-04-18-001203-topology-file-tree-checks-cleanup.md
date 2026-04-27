@@ -7,7 +7,7 @@ Approach
 - Convert each rule into an owned directory with `mod.rs`, `rule.rs`, and `rule_tests/`, delete the generic `test_support`, and move result proofs into one shared assertions module per rule.
 
 Key Decisions
-- Keep the runtime crate aggregated and waive `RS-ARCH-FILETREE-07` narrowly, matching the other cleaned file-tree packages.
+- Keep the runtime crate aggregated and waive `g3rs-arch/structural-split` narrowly, matching the other cleaned file-tree packages.
 - Use the standard shared assertions macro surface rather than keeping the ad hoc public `ExpectedRuleResult` struct with public fields.
 
 Files To Modify

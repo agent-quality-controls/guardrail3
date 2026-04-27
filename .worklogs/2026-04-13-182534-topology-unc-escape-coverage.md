@@ -1,6 +1,6 @@
 Summary
 
-Added the missing topology attack coverage for UNC and backslash-absolute workspace member paths. This closes the remaining `RS-TOPOLOGY-FILETREE-13` branch gap without changing runtime logic.
+Added the missing topology attack coverage for UNC and backslash-absolute workspace member paths. This closes the remaining `g3rs-topology/member-paths-must-not-escape-root` branch gap without changing runtime logic.
 
 Decisions made
 

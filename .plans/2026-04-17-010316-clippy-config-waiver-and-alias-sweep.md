@@ -5,7 +5,7 @@ Goal
 
 Approach
 - Read the clippy config ingestion/check pipeline to find the architecturally correct place to thread package waivers into config rule inputs.
-- Add a failing test first that proves a package waiver for `RS-CLIPPY-CONFIG-01` on `max-struct-bools` is currently ignored.
+- Add a failing test first that proves a package waiver for `g3rs-clippy/max-struct-bools` on `max-struct-bools` is currently ignored.
 - Thread waivers through clippy ingestion/types/checks and implement exact-match suppression in the `max-struct-bools` rule only.
 - Restore `packages/parsers/clippy-toml-parser/clippy.toml` to the repo baseline and add a package waiver entry instead of raising the baseline.
 - Sweep packages/app for root alias shims like `pub type X = types::X`, `pub use ...::types::*`, or root parser schema reexports kept only for compatibility, and remove any found if the clean facade can expose `types` instead.

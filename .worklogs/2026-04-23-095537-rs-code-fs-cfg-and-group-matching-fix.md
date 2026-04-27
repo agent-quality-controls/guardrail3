@@ -3,7 +3,7 @@ Summary
 - Fixed attributed `use` diagnostics to report the actual import line instead of the preceding `#[cfg(...)]` line.
 
 Decisions made
-- Kept the fix in shared parse/fs-visitor helpers because both `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21` rely on the same cfg and grouped-import semantics.
+- Kept the fix in shared parse/fs-visitor helpers because both `g3rs-code/ast-15-direct-fs-usage` and `g3rs-code/ast-21-fs-glob-import` rely on the same cfg and grouped-import semantics.
 - Replaced the old "mentions test anywhere" gating with a `cfg` evaluator that asks whether the predicate can be true when `test = false`.
 - Tightened grouped `std::{...}` matching so only `fs` subtrees count. `self as ...` and bare grouped globs no longer masquerade as `std::fs`.
 

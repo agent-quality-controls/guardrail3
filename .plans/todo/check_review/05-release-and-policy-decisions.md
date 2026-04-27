@@ -21,13 +21,13 @@
   - implement actual Rust-root/workspace-aware discovery
   - or narrow those plans to explicit repo-root-only semantics
 - keep the specific under-implementation notes visible while making that decision:
-  - `RS-TOOLCHAIN-CONFIG-02` profile-context gap
-  - `RS-FMT-CONFIG-03` repo-root toolchain shallowness
-  - `RS-FMT-CONFIG-04` repo-root Cargo metadata shallowness
+  - `g3rs-toolchain/msrv-consistency` profile-context gap
+  - `g3rs-fmt/nightly-keys-on-stable` repo-root toolchain shallowness
+  - `g3rs-fmt/edition-mismatch` repo-root Cargo metadata shallowness
 
 ## deny policy decision
 
-- `RS-DENY-CONFIG-16` needs an explicit policy decision:
+- `g3rs-deny/tokio-full-ban` needs an explicit policy decision:
   - allow extra registries if crates.io is present
   - or forbid any non-crates.io registry and tighten the plan to match the current rule
 

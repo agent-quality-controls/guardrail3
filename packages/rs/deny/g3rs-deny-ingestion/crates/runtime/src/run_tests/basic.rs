@@ -90,8 +90,7 @@ fn prefers_deny_toml_over_dot_variant() {
     let crawl = crawl(root);
     let result = crate::run::ingest_for_config_checks(&crawl);
 
-    let input =
-        result.expect("ingestion should succeed when both deny.toml and .deny.toml exist");
+    let input = result.expect("ingestion should succeed when both deny.toml and .deny.toml exist");
     assert_eq!(
         input.deny_rel_path, "deny.toml",
         "deny.toml should be preferred over .deny.toml when both exist"
@@ -207,10 +206,7 @@ fn nested_deny_toml_is_not_selected() {
     let root = temp.path();
     git_init(root);
 
-    write(
-        root.join("deny.toml"),
-        "[advisories]\ndb-path = \"root\"\n",
-    );
+    write(root.join("deny.toml"), "[advisories]\ndb-path = \"root\"\n");
     write(
         root.join("packages/foo/deny.toml"),
         "[advisories]\ndb-path = \"nested\"\n",
@@ -276,7 +272,10 @@ fn legacy_guardrail3_toml_is_ignored() {
     git_init(root);
 
     write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
-    write(root.join("guardrail3.toml"), "[profile]\nname = \"library\"\n");
+    write(
+        root.join("guardrail3.toml"),
+        "[profile]\nname = \"library\"\n",
+    );
 
     let crawl = crawl(root);
     let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");

@@ -18,8 +18,8 @@ This package is responsible for:
 
 Current package rules:
 
-- `RS-GARDE-CONFIG-01`
-- `RS-GARDE-CONFIG-02`
-- `RS-GARDE-CONFIG-03`
-- `RS-GARDE-CONFIG-04`
-- `RS-GARDE-CONFIG-05`
+- `g3rs-garde/dependency-present`
+- `g3rs-garde/core-method-bans`
+- `g3rs-garde/extractor-type-bans`
+- `g3rs-garde/reqwest-json-ban`
+- `g3rs-garde/additional-method-bans`

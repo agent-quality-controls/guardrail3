@@ -32,29 +32,29 @@ Approach
 
 Rules to add
 
-- `RS-APPARCH-CONFIG-05`
+- `g3rs-apparch/patch-replace-bypass`
   - internal `[patch.*]` / `[replace]` bypass requires an explicit waiver in `guardrail3-rs.toml`
   - missing waiver is `Error`
   - weak waiver reason is `Error`
   - documented bypass is `Warn`
-- `RS-APPARCH-CONFIG-06`
+- `g3rs-apparch/same-layer-cycles`
   - same-layer non-dev workspace-internal dependency cycle is `Error`
-- `RS-APPARCH-CONFIG-07`
+- `g3rs-apparch/dev-dependency-direction`
   - forbidden `dev-dependencies` direction is `Warn`
   - target-specific dev edges also count
-- `RS-APPARCH-CONFIG-08`
+- `g3rs-apparch/types-purity`
   - `types/*` purity allowlist
   - allowed:
     - workspace-internal `types/*`
     - built-in pure externals
     - `allowed_deps` from `guardrail3-rs.toml`
-- `RS-APPARCH-CONFIG-09`
+- `g3rs-apparch/logic-purity`
   - `logic/*` purity allowlist
   - allowed:
     - workspace-internal `types/*`
     - built-in pure externals
     - `allowed_deps` from `guardrail3-rs.toml`
-- `RS-APPARCH-SOURCE-05`
+- `g3rs-apparch/types-public-surface`
   - `types/*` public surface must stay contract/data-oriented
   - public free functions and public inherent methods on concrete types are findings
 

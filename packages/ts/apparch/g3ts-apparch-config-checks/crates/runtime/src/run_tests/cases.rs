@@ -27,7 +27,10 @@ fn config_checks_flag_types_importing_logic() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_apparch_config_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-CONFIG-01");
+    g3ts_apparch_config_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-apparch/types-dependency-direction",
+    );
 }
 
 #[test]
@@ -56,7 +59,7 @@ fn config_checks_allow_logic_importing_types() {
     let results = crate::run::check(&input);
     g3ts_apparch_config_checks_assertions::run::assert_has_inventory(
         &results,
-        "TS-APPARCH-CONFIG-02",
+        "g3ts-apparch/logic-dependency-direction",
     );
 }
 
@@ -84,7 +87,10 @@ fn config_checks_flag_app_dynamic_importing_outbound() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_apparch_config_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-CONFIG-05");
+    g3ts_apparch_config_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-apparch/app-no-direct-outbound",
+    );
 }
 
 #[test]
@@ -104,7 +110,10 @@ fn config_checks_flag_types_importing_next_runtime() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_apparch_config_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-CONFIG-06");
+    g3ts_apparch_config_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-apparch/types-purity",
+    );
 }
 
 #[test]
@@ -124,7 +133,10 @@ fn config_checks_flag_logic_importing_react_runtime() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_apparch_config_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-CONFIG-07");
+    g3ts_apparch_config_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-apparch/logic-purity",
+    );
 }
 
 #[test]
@@ -144,7 +156,10 @@ fn config_checks_flag_logic_importing_react_runtime_subpath() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_apparch_config_checks_assertions::run::assert_has_error(&results, "TS-APPARCH-CONFIG-07");
+    g3ts_apparch_config_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-apparch/logic-purity",
+    );
 }
 
 #[test]
@@ -166,6 +181,6 @@ fn config_checks_allow_logic_importing_non_framework_external() {
     let results = crate::run::check(&input);
     g3ts_apparch_config_checks_assertions::run::assert_has_inventory(
         &results,
-        "TS-APPARCH-CONFIG-07",
+        "g3ts-apparch/logic-purity",
     );
 }

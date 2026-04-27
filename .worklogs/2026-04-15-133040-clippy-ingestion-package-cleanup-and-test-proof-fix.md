@@ -1,11 +1,11 @@
 Summary
 - Cleaned `packages/rs/clippy/g3rs-clippy-ingestion` until full validation returned `No findings.`
-- Fixed a real `RS-TEST-SOURCE-07` bug so setup helpers are not mistaken for proof helpers, while shared assertion wrappers over other assertions crates still count as real proof.
+- Fixed a real `g3rs-test/real-proof-site` bug so setup helpers are not mistaken for proof helpers, while shared assertion wrappers over other assertions crates still count as real proof.
 
 Decisions made
 - Removed the local `types` crate instead of widening arch rules. It only held the ingestion error enum, so the clean fix was to move that enum into runtime and delete the extra crate.
 - Kept the ingestion assertions crate as a shared proof wrapper over the config-check and filetree-check assertions crates. That shape matches the test design better than duplicating proof logic locally.
-- Fixed `RS-TEST-SOURCE-07` in the rule, not in the package. The bad behavior was in the rule: it treated any local helper call as proof and did not recognize wrappers over another assertions crate.
+- Fixed `g3rs-test/real-proof-site` in the rule, not in the package. The bad behavior was in the rule: it treated any local helper call as proof and did not recognize wrappers over another assertions crate.
 - Fixed the package deps errors by allowlisting the new shared-proof dependencies instead of hiding them. Those deps are real and intentional.
 
 Key files for context

@@ -24,18 +24,24 @@ version = "0.1.0"
 db-outbound = { path = "../../io/outbound/db", package = "db-outbound" }
 "#,
     );
-    super::helpers::write(root.path().join("logic/service/src/lib.rs"), "pub fn orchestrate() {}\n");
+    super::helpers::write(
+        root.path().join("logic/service/src/lib.rs"),
+        "pub fn orchestrate() {}\n",
+    );
     super::helpers::write(
         root.path().join("io/outbound/db/Cargo.toml"),
         "[package]\nname = \"db-outbound\"\nversion = \"0.1.0\"\n",
     );
-    super::helpers::write(root.path().join("io/outbound/db/src/lib.rs"), "pub trait DbTrait {}\n");
+    super::helpers::write(
+        root.path().join("io/outbound/db/src/lib.rs"),
+        "pub trait DbTrait {}\n",
+    );
 
     let results = check_source(&super::helpers::source_input(root.path()));
 
     assertions::assert_has_result(
         &results,
-        "RS-APPARCH-SOURCE-04",
+        "g3rs-apparch/io-traits-in-types",
         G3Severity::Error,
         Some("io/outbound/db/src/lib.rs"),
     );
@@ -67,7 +73,12 @@ pub fn choose_retry_strategy() {}
 
     let results = check_source(&super::helpers::source_input(root.path()));
 
-    assertions::assert_has_result(&results, "RS-APPARCH-SOURCE-05", G3Severity::Error, None);
+    assertions::assert_has_result(
+        &results,
+        "g3rs-apparch/types-public-surface",
+        G3Severity::Error,
+        None,
+    );
 }
 
 #[test]
@@ -103,7 +114,10 @@ impl super::OrderDto {
         .find(|check| check.krate.cargo_rel_path == "types/contracts/Cargo.toml")
         .expect("types crate should be present in source checks input");
 
-    assert!(types_check.public_behavior_items.is_empty(), "{types_check:#?}");
+    assert!(
+        types_check.public_behavior_items.is_empty(),
+        "{types_check:#?}"
+    );
 }
 
 #[test]
@@ -133,7 +147,11 @@ fn types_public_behavior_reexported_from_private_child_module_is_reported() {
         .find(|check| check.krate.cargo_rel_path == "types/contracts/Cargo.toml")
         .expect("types crate should be present in source checks input");
 
-    assert_eq!(types_check.public_behavior_items.len(), 1, "{types_check:#?}");
+    assert_eq!(
+        types_check.public_behavior_items.len(),
+        1,
+        "{types_check:#?}"
+    );
     assert_eq!(
         types_check.public_behavior_items[0].rel_path,
         "types/contracts/src/internal.rs"

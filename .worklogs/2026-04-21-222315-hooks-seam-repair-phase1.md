@@ -8,9 +8,9 @@ Decisions made
 - Added a parser-side stateful visitor API instead of adding more hook-local helpers.
   - Why: the shell parser already owned command resolution. Extending that API keeps shell semantics in one place and stops rule packages from drifting into mini interpreters.
   - Rejected: adding another hook-local shared support layer. That would only centralize duplication inside the wrong package.
-- Rewrote `RS-HOOKS-SOURCE-09` and `RS-HOOKS-SOURCE-25` to use the parser visitor with explicit environment state.
+- Rewrote `g3rs-hooks/hook-rs-08-guardrail-validate-staged-present` and `g3rs-hooks/hook-rs-17-shared-target-dir-present` to use the parser visitor with explicit environment state.
   - Why: these two rules had already produced real false positives from local shell interpretation.
-- Rewrote `RS-HOOKS-SOURCE-03` through `07` to match `ResolvedCommand` instead of tokenizing `line.command_text`.
+- Rewrote `g3rs-hooks/hook-rs-01-fmt-step-present` through `07` to match `ResolvedCommand` instead of tokenizing `line.command_text`.
   - Why: these were simpler versions of the same boundary leak. The parser already resolves wrappers, path-qualified commands, and env-prefixed invocations.
 - Deleted `hook_rs_12_cargo_dupes_step_present/support.rs`.
   - Why: it was dead code and contained a second unused shell parser. Keeping it would preserve exactly the complexity this repair is trying to remove.

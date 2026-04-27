@@ -14,8 +14,8 @@ fn ingests_with_both_cargo_and_clippy() {
     let crawl = super::helpers::crawl(root);
     let result = super::ingest_for_config_checks(&crawl);
 
-    let input = result
-        .expect("ingestion should succeed when both Cargo.toml and clippy.toml are present");
+    let input =
+        result.expect("ingestion should succeed when both Cargo.toml and clippy.toml are present");
     assert_eq!(
         input.cargo_rel_path, "Cargo.toml",
         "cargo_rel_path should reference the root Cargo.toml"
@@ -72,8 +72,8 @@ fn clippy_is_missing_without_clippy_config() {
     let crawl = super::helpers::crawl(root);
     let result = super::ingest_for_config_checks(&crawl);
 
-    let input = result
-        .expect("ingestion should succeed even without clippy config (it is optional)");
+    let input =
+        result.expect("ingestion should succeed even without clippy config (it is optional)");
     assert_eq!(input.applicability, G3RsGardeApplicability::Active);
     assert_eq!(
         input.cargo_rel_path, "Cargo.toml",

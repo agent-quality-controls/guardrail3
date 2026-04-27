@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-TEST-FILETREE-18` sibling-module alias collisions so `h::fixture_path(...)` and `h::any_rule(...)` are only treated as disallowed helpers when alias `h` actually targets a sibling module exporting those helper names.
+- Fixed `g3rs-test/test-support-generic` sibling-module alias collisions so `h::fixture_path(...)` and `h::any_rule(...)` are only treated as disallowed helpers when alias `h` actually targets a sibling module exporting those helper names.
 - Added red regressions proving the false positive when a glob-imported sibling exposes the same helper name as a different sibling module aliased as `h`.
 
 Decisions made

@@ -42,13 +42,13 @@ fn nested_workspace_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-11"),
+        assertions::count(&results, "g3rs-topology/no-nested-workspaces"),
         1,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-11",
+        "g3rs-topology/no-nested-workspaces",
         "Nested workspace `crates/api/nested` is forbidden",
         Some("crates/api/nested/Cargo.toml"),
         false,
@@ -85,13 +85,13 @@ fn excluded_nested_workspace_still_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-11"),
+        assertions::count(&results, "g3rs-topology/no-nested-workspaces"),
         1,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-11",
+        "g3rs-topology/no-nested-workspaces",
         "Nested workspace `crates/api/nested` is forbidden",
         Some("crates/api/nested/Cargo.toml"),
         false,
@@ -127,13 +127,13 @@ fn unreferenced_nested_workspace_still_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-11"),
+        assertions::count(&results, "g3rs-topology/no-nested-workspaces"),
         1,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-11",
+        "g3rs-topology/no-nested-workspaces",
         "Nested workspace `crates/stray` is forbidden",
         Some("crates/stray/Cargo.toml"),
         false,
@@ -170,20 +170,20 @@ fn exact_membership_fires_end_to_end() {
     let results = run_results(root.path());
 
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        assertions::count(&results, "g3rs-topology/declared-workspace-members-only"),
         2,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-12",
+        "g3rs-topology/declared-workspace-members-only",
         "Workspace `.` has extra member `crates/ghost`",
         Some("Cargo.toml"),
         false,
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-12",
+        "g3rs-topology/declared-workspace-members-only",
         "Workspace child `crates/extra` must be declared explicitly",
         Some("crates/extra/Cargo.toml"),
         false,
@@ -220,18 +220,18 @@ fn nested_workspace_still_fires_membership_rule_end_to_end() {
     let results = run_results(root.path());
 
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-11"),
+        assertions::count(&results, "g3rs-topology/no-nested-workspaces"),
         1,
         "{results:#?}"
     );
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        assertions::count(&results, "g3rs-topology/declared-workspace-members-only"),
         1,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-12",
+        "g3rs-topology/declared-workspace-members-only",
         "Workspace `.` has extra member `crates/nested`",
         Some("Cargo.toml"),
         false,
@@ -259,7 +259,7 @@ fn dot_slash_member_path_stays_quiet_end_to_end() {
     let results = run_results(root.path());
 
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        assertions::count(&results, "g3rs-topology/declared-workspace-members-only"),
         0,
         "{results:#?}"
     );
@@ -285,13 +285,13 @@ fn escaping_member_path_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-13"),
+        assertions::count(&results, "g3rs-topology/member-paths-must-not-escape-root"),
         1,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-13",
+        "g3rs-topology/member-paths-must-not-escape-root",
         "Workspace `.` uses escaping member path `../shared`",
         Some("Cargo.toml"),
         false,
@@ -309,13 +309,13 @@ fn absolute_member_path_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-13"),
+        assertions::count(&results, "g3rs-topology/member-paths-must-not-escape-root"),
         1,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-13",
+        "g3rs-topology/member-paths-must-not-escape-root",
         "Workspace `.` uses escaping member path `/tmp/shared`",
         Some("Cargo.toml"),
         false,
@@ -346,20 +346,20 @@ fn illegal_family_file_placement_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        assertions::count(&results, "g3rs-topology/workspace-local-file-placement"),
         2,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-16",
+        "g3rs-topology/workspace-local-file-placement",
         "`clippy` file `crates/api/clippy.toml` is illegally placed",
         Some("crates/api/clippy.toml"),
         false,
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-16",
+        "g3rs-topology/workspace-local-file-placement",
         "`garde` file `crates/api/clippy.toml` is illegally placed",
         Some("crates/api/clippy.toml"),
         false,
@@ -392,20 +392,20 @@ fn member_cargo_sidecar_illegal_placement_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        assertions::count(&results, "g3rs-topology/workspace-local-file-placement"),
         2,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-16",
+        "g3rs-topology/workspace-local-file-placement",
         "`clippy` file `crates/api/.cargo/config.toml` is illegally placed",
         Some("crates/api/.cargo/config.toml"),
         false,
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-16",
+        "g3rs-topology/workspace-local-file-placement",
         "`garde` file `crates/api/.cargo/config.toml` is illegally placed",
         Some("crates/api/.cargo/config.toml"),
         false,
@@ -434,20 +434,20 @@ fn illegal_root_nested_family_file_placement_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        assertions::count(&results, "g3rs-topology/workspace-local-file-placement"),
         2,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-16",
+        "g3rs-topology/workspace-local-file-placement",
         "`clippy` file `nested/clippy.toml` is illegally placed",
         Some("nested/clippy.toml"),
         false,
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-16",
+        "g3rs-topology/workspace-local-file-placement",
         "`garde` file `nested/clippy.toml` is illegally placed",
         Some("nested/clippy.toml"),
         false,
@@ -478,13 +478,13 @@ fn illegal_child_root_fmt_file_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        assertions::count(&results, "g3rs-topology/workspace-local-file-placement"),
         1,
         "{results:#?}"
     );
     assertions::assert_message_contains(
         &results,
-        "RS-TOPOLOGY-FILETREE-16",
+        "g3rs-topology/workspace-local-file-placement",
         "`fmt` file `crates/api/rustfmt.toml` is illegally placed",
         Some("crates/api/rustfmt.toml"),
         false,
@@ -516,13 +516,13 @@ fn member_fmt_file_fires_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-16"),
+        assertions::count(&results, "g3rs-topology/workspace-local-file-placement"),
         1,
         "{results:#?}"
     );
     assertions::assert_message_contains(
         &results,
-        "RS-TOPOLOGY-FILETREE-16",
+        "g3rs-topology/workspace-local-file-placement",
         "`fmt` file `crates/api/rustfmt.toml` is illegally placed",
         Some("crates/api/rustfmt.toml"),
         false,
@@ -612,18 +612,18 @@ fn descendant_manifest_failure_fails_closed_end_to_end() {
 
     let results = run_results(root.path());
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-07"),
+        assertions::count(&results, "g3rs-topology/required-inputs-fail-closed"),
         1,
         "{results:#?}"
     );
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        assertions::count(&results, "g3rs-topology/declared-workspace-members-only"),
         0,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-07",
+        "g3rs-topology/required-inputs-fail-closed",
         "Rust topology required input failed closed",
         Some("bad/Cargo.toml"),
         false,
@@ -657,18 +657,18 @@ fn unreadable_descendant_manifest_fails_closed_end_to_end() {
     restore_readable(&bad_manifest);
 
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-07"),
+        assertions::count(&results, "g3rs-topology/required-inputs-fail-closed"),
         1,
         "{results:#?}"
     );
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        assertions::count(&results, "g3rs-topology/declared-workspace-members-only"),
         0,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-07",
+        "g3rs-topology/required-inputs-fail-closed",
         "Rust topology required input failed closed",
         Some("bad/Cargo.toml"),
         false,
@@ -704,18 +704,18 @@ fn stale_read_descendant_manifest_fails_closed_end_to_end() {
     let results = check(&input);
 
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-07"),
+        assertions::count(&results, "g3rs-topology/required-inputs-fail-closed"),
         1,
         "{results:#?}"
     );
     assert_eq!(
-        assertions::count(&results, "RS-TOPOLOGY-FILETREE-12"),
+        assertions::count(&results, "g3rs-topology/declared-workspace-members-only"),
         0,
         "{results:#?}"
     );
     assertions::assert_present(
         &results,
-        "RS-TOPOLOGY-FILETREE-07",
+        "g3rs-topology/required-inputs-fail-closed",
         "Rust topology required input failed closed",
         Some("bad/Cargo.toml"),
         false,

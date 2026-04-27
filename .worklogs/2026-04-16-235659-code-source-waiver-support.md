@@ -1,20 +1,20 @@
 Summary
-- Added real code-family waiver support for source checks and used it to stand down `RS-CODE-SOURCE-19` in `packages/parsers/cargo-config-toml-parser`.
+- Added real code-family waiver support for source checks and used it to stand down `g3rs-code/ast-19-large-type-inventory` in `packages/parsers/cargo-config-toml-parser`.
 - The parser package now validates clean, and the code-family tests cover both direct package waivers and package-root waivers for member crates.
 
 Decisions made
 - Added a typed code-family waiver model instead of passing raw parser waiver structs into rules.
   Why: rules should see a small typed input, not parser-specific config objects.
-  Rejected: reading `guardrail3-rs.toml` directly inside `RS-CODE-SOURCE-19`.
+  Rejected: reading `guardrail3-rs.toml` directly inside `g3rs-code/ast-19-large-type-inventory`.
 - Threaded waivers through source ingestion, not config checks.
   Why: the bug was that source rules had no waiver channel at all.
-  Rejected: adding a special one-off escape hatch only for `RS-CODE-SOURCE-19`.
+  Rejected: adding a special one-off escape hatch only for `g3rs-code/ast-19-large-type-inventory`.
 - Resolved waivers from the nearest ancestor `guardrail3-rs.toml`, not only the member crate directory.
   Why: package roots own policy for sibling member crates in the current package layout.
   Rejected: looking only beside each member `Cargo.toml`, which failed for package-root policy files like `packages/parsers/cargo-config-toml-parser/guardrail3-rs.toml`.
 - Used exact selector matching with `struct:<Name>` / `enum:<Name>`.
   Why: it keeps waiver scope narrow and explicit.
-  Rejected: broad file-level suppression of all `RS-CODE-SOURCE-19` findings.
+  Rejected: broad file-level suppression of all `g3rs-code/ast-19-large-type-inventory` findings.
 
 Key files for context
 - `packages/rs/code/g3rs-code-types/src/types.rs`

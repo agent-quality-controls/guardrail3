@@ -32,65 +32,65 @@ These are not "slices" inside a flat crate. They are separate package folders wi
 
 Astro setup config:
 
-- `TS-ASTRO-SETUP-CONFIG-01`
-- `TS-ASTRO-SETUP-CONFIG-02`
-- `TS-ASTRO-SETUP-CONFIG-03`
-- `TS-ASTRO-SETUP-CONFIG-05`
+- `g3ts-astro-setup/astro-package-present`
+- `g3ts-astro-setup/astro-check-present`
+- `g3ts-astro-setup/astro-eslint-plugin-package-present`
+- `g3ts-astro-setup/astro-eslint-plugin-wired`
 - `TS-ASTRO-SETUP-CONFIG-06`
 - `TS-ASTRO-SETUP-CONFIG-07`
-- `TS-ASTRO-SETUP-CONFIG-09`
-- `TS-ASTRO-SETUP-CONFIG-10`
-- `TS-ASTRO-SETUP-CONFIG-11`
-- `TS-ASTRO-SETUP-CONFIG-12`
-- `TS-ASTRO-SETUP-CONFIG-21`
+- `g3ts-astro-setup/syncpack-stack-pins`
+- `g3ts-astro-setup/syncpack-forbidden-deps`
+- `g3ts-astro-setup/site-url`
+- `g3ts-astro-setup/static-output`
+- `g3ts-astro-setup/required-integrations`
 
 Astro setup file-tree:
 
-- `TS-ASTRO-SETUP-FILETREE-01`
+- `g3ts-astro-setup/astro-config-exists`
 - `TS-ASTRO-SETUP-FILETREE-03`
 
 Astro content config:
 
-- `TS-ASTRO-CONTENT-CONFIG-18`
-- `TS-ASTRO-CONTENT-CONFIG-19`
-- `TS-ASTRO-CONTENT-CONFIG-23`
-- `TS-ASTRO-CONTENT-CONFIG-24`
-- `TS-ASTRO-CONTENT-CONFIG-25`
-- `TS-ASTRO-CONTENT-CONFIG-26`
-- `TS-ASTRO-CONTENT-CONFIG-27`
-- `TS-ASTRO-CONTENT-CONFIG-28`
+- `g3ts-astro-content/content-adapter-rule`
+- `g3ts-astro-content/inline-copy-rule`
+- `g3ts-astro-content/strict-content-policy`
+- `g3ts-astro-content/strict-policy-paths`
+- `g3ts-astro-content/route-scope-overlap`
+- `g3ts-astro-content/policy-eslint-coverage`
+- `g3ts-astro-content/content-adapter-exists`
+- `g3ts-astro-content/content-adapter-astro-content`
 
 Astro content file-tree:
 
-- `TS-ASTRO-CONTENT-FILETREE-02`
-- `TS-ASTRO-CONTENT-FILETREE-04`
-- `TS-ASTRO-CONTENT-FILETREE-05`
-- `TS-ASTRO-CONTENT-FILETREE-06`
+- `g3ts-astro-content/content-config-exists`
+- `g3ts-astro-content/no-route-markdown-pages`
+- `g3ts-astro-content/no-velite-config`
+- `g3ts-astro-content/no-velite-output`
 
 Astro MDX config:
 
-- `TS-ASTRO-MDX-CONFIG-20`
-- `TS-ASTRO-MDX-CONFIG-24`
-- `TS-ASTRO-MDX-CONFIG-29`
-- `TS-ASTRO-MDX-CONFIG-30`
+- `g3ts-astro-mdx/mdx-lane`
+- `g3ts-astro-mdx/strict-policy-paths`
+- `g3ts-astro-mdx/policy-helper-surfaces`
+- `g3ts-astro-mdx/mdx-component-map-rule`
 
 Astro SEO config:
 
-- `TS-ASTRO-SEO-CONFIG-13`
-- `TS-ASTRO-SEO-CONFIG-14`
-- `TS-ASTRO-SEO-CONFIG-15`
-- `TS-ASTRO-SEO-CONFIG-16`
-- `TS-ASTRO-SEO-CONFIG-17`
-- `TS-ASTRO-SEO-CONFIG-22`
-- `TS-ASTRO-SEO-CONFIG-24`
-- `TS-ASTRO-SEO-CONFIG-29`
-- `TS-ASTRO-SEO-CONFIG-31`
-- `TS-ASTRO-SEO-CONFIG-32`
+- `g3ts-astro-seo/nuasite-checks`
+- `g3ts-astro-seo/sitemap-integration`
+- `g3ts-astro-seo/robots-integration`
+- `g3ts-astro-seo/llms-txt`
+- `g3ts-astro-seo/seo-packages`
+- `g3ts-astro-seo/structured-data-check`
+- `g3ts-astro-seo/strict-policy-paths`
+- `g3ts-astro-seo/policy-helper-surfaces`
+- `g3ts-astro-seo/metadata-helper-rule`
+- `g3ts-astro-seo/json-ld-helper-rule`
 
 Astro state file-tree:
 
-- `TS-ASTRO-STATE-FILETREE-11`
-- `TS-ASTRO-STATE-FILETREE-12`
+- `g3ts-astro-state/no-legacy-parallel-state`
+- `g3ts-astro-state/configured-forbidden-state`
 
 # Files To Modify
 

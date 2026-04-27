@@ -47,13 +47,13 @@ The main architectural constraint was the already agreed split:
 
 ## Architectural Notes
 - `g3rs-deny-config-checks` now owns:
-  - `RS-DENY-CONFIG-01`, `05`, `06`, `07`, `08`
-  - `RS-DENY-CONFIG-07`, `11`, `12`, `13`
-  - `RS-DENY-CONFIG-11`, `15`, `16`
-  - `RS-DENY-CONFIG-15`, `19`, `20`
-  - `RS-DENY-CONFIG-18`, `22`
-  - `RS-DENY-CONFIG-20`, `24`
-  - `RS-DENY-CONFIG-24`, `28`, `29`
+  - `g3rs-deny/deprecated-advisories`, `05`, `06`, `07`, `08`
+  - `g3rs-deny/highlight-inventory`, `11`, `12`, `13`
+  - `g3rs-deny/confidence-threshold`, `15`, `16`
+  - `g3rs-deny/allow-git-inventory`, `19`, `20`
+  - `g3rs-deny/skip-hygiene`, `22`
+  - `g3rs-deny/duplicate-entries`, `24`
+  - `g3rs-deny/license-exceptions-inventory`, `28`, `29`
 - The app deny family still owns:
   - `RS-DENY-01`, `03`
   - `RS-DENY-09`

@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-TEST-SOURCE-17` so external harness wrappers that call local assertion helpers via `super::assert_demo()` are now promoted into `local_assertion_helpers`. The rule now treats `super` the same as `self` and `crate` in the recursive promotion loop, so a test function that calls such a wrapper is flagged as direct assertion use.
+Fixed `g3rs-test/external-harnesses-use-assertions` so external harness wrappers that call local assertion helpers via `super::assert_demo()` are now promoted into `local_assertion_helpers`. The rule now treats `super` the same as `self` and `crate` in the recursive promotion loop, so a test function that calls such a wrapper is flagged as direct assertion use.
 
 ## Decisions made
 

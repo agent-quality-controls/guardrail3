@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-CODE-SOURCE-31` so a nested public struct with an inherent impl written as `super::Type` is still recognized in shared crates.
+Fix `g3rs-code/ast-31-public-struct-named-fields` so a nested public struct with an inherent impl written as `super::Type` is still recognized in shared crates.
 
 ## Approach
 

@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-CODE-SOURCE-31` so shared-crate nested public structs with inherent impls are no longer skipped. The rule now matches inherent impls by qualified type path instead of a bare struct name from the file root.
+Fixed `g3rs-code/ast-31-public-struct-named-fields` so shared-crate nested public structs with inherent impls are no longer skipped. The rule now matches inherent impls by qualified type path instead of a bare struct name from the file root.
 
 ## Decisions made
 
@@ -18,5 +18,5 @@ Fixed `RS-CODE-SOURCE-31` so shared-crate nested public structs with inherent im
 
 ## Next steps
 
-- Fix the newly confirmed `RS-TEST-FILETREE-03` nested runtime-alias false negative.
+- Fix the newly confirmed `g3rs-test/runtime-assertions-split` nested runtime-alias false negative.
 - Then fix the `hook_shared_13` false positive for loop prefixes like `time while ...`.

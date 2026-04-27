@@ -1,6 +1,6 @@
 Summary
 
-Fixed `RS-ARCH-FILETREE-07` so it catches oversized module folders anywhere inside a crate, not only at the crate root. Added failing pipeline tests for nested `.rs` file piles and nested directory piles, then changed arch ingestion to compute recursive maximum sibling counts and threaded those corrected facts into the pure rule.
+Fixed `g3rs-arch/structural-split` so it catches oversized module folders anywhere inside a crate, not only at the crate root. Added failing pipeline tests for nested `.rs` file piles and nested directory piles, then changed arch ingestion to compute recursive maximum sibling counts and threaded those corrected facts into the pure rule.
 
 Decisions made
 

@@ -1,5 +1,5 @@
 Summary:
-Fixed RS-CODE-SOURCE-31 so re-export aliases imported with `use super::Alias` normalize to the concrete public struct target, and verified the same boundary also handles the reversed alias-import order regression.
+Fixed g3rs-code/ast-31-public-struct-named-fields so re-export aliases imported with `use super::Alias` normalize to the concrete public struct target, and verified the same boundary also handles the reversed alias-import order regression.
 
 Decisions made:
 - Kept the fix in `rule.rs` at the binding/normalization boundary instead of special-casing the final qualified-name comparison.
@@ -13,4 +13,4 @@ Key files for context:
 
 Next steps:
 - Stage only the rule, test, plan, and worklog files for this fix.
-- Commit as a standalone RS-CODE-SOURCE-31 bug fix.
+- Commit as a standalone g3rs-code/ast-31-public-struct-named-fields bug fix.

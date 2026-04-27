@@ -1,6 +1,6 @@
 ## Goal
 
-Fix the `RS-CODE-SOURCE-15` and `RS-CODE-SOURCE-21` fs alias handling bug so valid Rust forms like `use std::fs as fs2;`, `use std as s; use s::fs;`, `fs2::read_to_string(...)`, and `use fs2::*;` are all detected at the parser visitor boundary.
+Fix the `g3rs-code/ast-15-direct-fs-usage` and `g3rs-code/ast-21-fs-glob-import` fs alias handling bug so valid Rust forms like `use std::fs as fs2;`, `use std as s; use s::fs;`, `fs2::read_to_string(...)`, and `use fs2::*;` are all detected at the parser visitor boundary.
 
 ## Approach
 

@@ -5,7 +5,7 @@ Summary
 Decisions made
 - Fixed the bug at component normalization time, because the old normalization was already accepting `component/assertions` as expected and hiding the real problem from downstream rules.
 - Reused the same package-style expectation for both source and file-tree ingestion so the test family stays internally consistent.
-- Kept the wrong-shape message in RS-TEST-FILETREE-03, but made ingestion feed it the right expected path: `component/crates/assertions/Cargo.toml`.
+- Kept the wrong-shape message in g3rs-test/runtime-assertions-split, but made ingestion feed it the right expected path: `component/crates/assertions/Cargo.toml`.
 
 Key files for context
 - packages/rs/test/g3rs-test-ingestion/crates/runtime/src/components.rs
@@ -17,4 +17,4 @@ Key files for context
 
 Next steps
 - Reshape `apps/guardrail3-rs` components that now fail with the new message into `component/crates/runtime` and `component/crates/assertions`, or remove the separate assertions crate if the component should stay single-crate.
-- Then rerun full app validation and fix the remaining real test issues, starting with the RS-TEST-SOURCE-07 proof-step failures already surfaced by the new structure check.
+- Then rerun full app validation and fix the remaining real test issues, starting with the g3rs-test/real-proof-site proof-step failures already surfaced by the new structure check.

@@ -7,7 +7,7 @@ Decisions made
 
 - Fixed the bug in the cargo config rules, not ingestion.
   - Reason: ingestion already preserved invalid rust-policy state correctly; the bug was that rules treated invalid state like an empty waiver set.
-- Made `RS-CARGO-CONFIG-07`, `11`, and `12` stand down on unreadable and parse-error rust policy.
+- Made `g3rs-cargo/approved-allow-inventory`, `11`, and `12` stand down on unreadable and parse-error rust policy.
   - Rejected: synthesizing special placeholder waiver data or changing missing-policy semantics.
 - Added one pipeline proof instead of duplicating end-to-end coverage for every rule.
   - Reason: rule-local tests now pin the per-rule behavior; the pipeline test only needs to prove the config lane does not pile on those findings.

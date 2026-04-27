@@ -135,8 +135,7 @@ pub fn assert_first_detailed_method(
         "ban replacement mismatch",
     );
     assert_eq!(
-        detail.allow_invalid,
-        allow_invalid,
+        detail.allow_invalid, allow_invalid,
         "ban allow-invalid mismatch",
     );
 }
@@ -155,8 +154,7 @@ pub fn assert_first_detailed_field(
     assert_eq!(detail.path, path, "field path mismatch");
     assert_eq!(detail.reason.as_deref(), reason, "field reason mismatch");
     assert_eq!(
-        detail.allow_invalid,
-        allow_invalid,
+        detail.allow_invalid, allow_invalid,
         "field allow-invalid mismatch",
     );
 }

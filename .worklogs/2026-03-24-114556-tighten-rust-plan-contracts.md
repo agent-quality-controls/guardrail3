@@ -43,7 +43,7 @@ The common defects were:
   - Rely on current code or agent memory for scope — rejected because that is exactly the kind of ambiguity the user wants eliminated.
 
 ### Freeze the remaining obvious toolchain/fmt contract details
-- **Chose:** Tighten `toolchain.md` around channel semantics (`beta`, pinned-nightly, stable, pinned stable) and update the MSRV cross-reference to the split cargo rule. Tighten `fmt.md` so `RS-FMT-CONFIG-01` names its exact owned settings and clarifies where parse failures surface today.
+- **Chose:** Tighten `toolchain.md` around channel semantics (`beta`, pinned-nightly, stable, pinned stable) and update the MSRV cross-reference to the split cargo rule. Tighten `fmt.md` so `g3rs-fmt/settings` names its exact owned settings and clarifies where parse failures surface today.
 - **Why:** Those plans were no longer missing whole sections, but they still had enough ambiguity around severity/trigger semantics to weaken verification.
 - **Alternatives considered:**
   - Leave the smaller config families “thin” because they are simple — rejected because thin plans are still unreliable if they leave key semantics implicit.
@@ -105,7 +105,7 @@ The common defects were:
 - `.plans/todo/checks/rs/deps.md` — now explicitly documents per-crate vs per-root ownership and validation-root policy ownership
 - `.plans/todo/checks/rs/test.md` — now explicitly documents multi-root discovery and shared validation-root inputs
 - `.plans/todo/checks/rs/toolchain.md` — now freezes the remaining channel/MSRV semantics more tightly
-- `.plans/todo/checks/rs/fmt.md` — now freezes the exact `RS-FMT-CONFIG-01` owned setting surface
+- `.plans/todo/checks/rs/fmt.md` — now freezes the exact `g3rs-fmt/settings` owned setting surface
 - `.plans/todo/checks/rs/garde.md` — now clarifies severity-pair semantics for later verification
 - `.plans/todo/checks/rs/libarch.md` — upgraded from design note toward a true family contract
 - `.worklogs/2026-03-24-082050-reconcile-rust-plan-contracts.md` — earlier Rust plan reconciliation pass that set up this follow-up

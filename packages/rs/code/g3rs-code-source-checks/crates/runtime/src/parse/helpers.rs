@@ -108,7 +108,9 @@ fn cfg_meta_eval_without_test(meta: &syn::Meta) -> CfgEvalWithoutTest {
                 syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
             )
             .map(|items| CfgEvalWithoutTest {
-                can_be_true: items.iter().all(|item| cfg_meta_eval_without_test(item).can_be_true),
+                can_be_true: items
+                    .iter()
+                    .all(|item| cfg_meta_eval_without_test(item).can_be_true),
                 can_be_false: items
                     .iter()
                     .any(|item| cfg_meta_eval_without_test(item).can_be_false),

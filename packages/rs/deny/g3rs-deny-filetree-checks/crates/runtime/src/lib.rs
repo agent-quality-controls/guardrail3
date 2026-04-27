@@ -1,6 +1,6 @@
-mod rs_deny_filetree_01_coverage;
-mod rs_deny_filetree_03_shadowing;
+mod coverage;
 mod run;
+mod shadowing;
 
 #[cfg(feature = "checks")]
 pub use run::check;

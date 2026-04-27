@@ -4,8 +4,8 @@
 
 Migrate the remaining live toolchain rules into package-owned filetree checks:
 
-- `RS-TOOLCHAIN-FILETREE-01` - `rust-toolchain.toml` exists
-- `RS-TOOLCHAIN-FILETREE-04` - legacy `rust-toolchain` file is warned/error when present
+- `g3rs-toolchain/exists` - `rust-toolchain.toml` exists
+- `g3rs-toolchain/legacy-file` - legacy `rust-toolchain` file is warned/error when present
 
 The result should be a real `g3rs-toolchain-filetree-checks` package plus a real
 `g3rs-toolchain-ingestion::ingest_for_file_tree_checks(...)` entry point.
@@ -39,7 +39,7 @@ The result should be a real `g3rs-toolchain-filetree-checks` package plus a real
   - The package model validates one pointed workspace root, so the filetree lane
     should only examine root toolchain files.
 - No parse dependency for filetree.
-  - `RS-TOOLCHAIN-FILETREE-01` and `04` should still report even if the file
+  - `g3rs-toolchain/exists` and `04` should still report even if the file
     contents are malformed.
 
 ## Alternatives considered

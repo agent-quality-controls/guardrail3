@@ -196,9 +196,8 @@ fn ignored_but_recovered_toolchain_toml_is_ingested() {
     );
 
     let crawl = crawl(root);
-    let output = super::ingest_for_config_checks(&crawl).expect(
-        "ingestion should succeed for a gitignored rust-toolchain.toml recovered by crawl",
-    );
+    let output = super::ingest_for_config_checks(&crawl)
+        .expect("ingestion should succeed for a gitignored rust-toolchain.toml recovered by crawl");
 
     assert_eq!(output.toolchain_rel_path, "rust-toolchain.toml");
     assert!(output.cargo_toml.is_none());
@@ -359,10 +358,7 @@ fn error_display_parse_failed() {
 #[test]
 fn error_implements_std_error() {
     let error: &dyn std::error::Error = &super::IngestionError::ToolchainTomlNotFound;
-    assert!(
-        error.to_string().contains("rust-toolchain.toml"),
-        "{error}"
-    );
+    assert!(error.to_string().contains("rust-toolchain.toml"), "{error}");
 }
 
 // ---------------------------------------------------------------------------
@@ -372,8 +368,8 @@ fn error_implements_std_error() {
 #[test]
 fn unreadable_toolchain_toml_returns_error() {
     use g3rs_workspace_crawl::{
-        G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind,
-        G3RsWorkspaceIgnoreState, G3RsWorkspacePath,
+        G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
+        G3RsWorkspacePath,
     };
 
     let crawl = G3RsWorkspaceCrawl {
@@ -408,8 +404,8 @@ fn unreadable_toolchain_toml_returns_error() {
 #[test]
 fn unreadable_cargo_toml_returns_error() {
     use g3rs_workspace_crawl::{
-        G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind,
-        G3RsWorkspaceIgnoreState, G3RsWorkspacePath,
+        G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
+        G3RsWorkspacePath,
     };
 
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -505,8 +501,7 @@ fn cargo_deleted_after_crawl_returns_unreadable() {
     write(root.join("Cargo.toml"), "[workspace]\nresolver = \"2\"\n");
 
     let crawl = crawl(root);
-    fs::remove_file(root.join("Cargo.toml"))
-        .expect("should delete Cargo.toml for TOCTOU test");
+    fs::remove_file(root.join("Cargo.toml")).expect("should delete Cargo.toml for TOCTOU test");
 
     let err = super::ingest_for_config_checks(&crawl)
         .expect_err("ingestion should fail closed when Cargo.toml vanishes after crawl");

@@ -28,13 +28,13 @@ fn source_pipeline_reports_lib_body_logic_and_path_attr() {
     let results = source_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-SOURCE-02",
+        "g3rs-arch/lib-facade-only",
         G3Severity::Error,
         Some("crate_a/src/lib.rs"),
     );
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-SOURCE-09",
+        "g3rs-arch/no-path-attr",
         G3Severity::Error,
         Some("crate_a/src/lib.rs"),
     );
@@ -60,11 +60,11 @@ fn source_pipeline_reports_only_source_half_of_feature_gating_rule() {
     let results = source_results(&root);
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-SOURCE-08",
+        "g3rs-arch/feature-gated-exports",
         G3Severity::Error,
         Some("crate_a/src/lib.rs"),
     );
-    assertions::assert_missing_result(&results, "RS-ARCH-CONFIG-08");
+    assertions::assert_missing_result(&results, "g3rs-arch/feature-contract");
 }
 
 #[test]
@@ -97,12 +97,12 @@ fn source_pipeline_allows_mod_dispatcher_with_restricted_use() {
     let results = source_results(&root);
     assertions::assert_missing_result_with_severity(
         &results,
-        "RS-ARCH-SOURCE-04",
+        "g3rs-arch/mod-facade-only",
         G3Severity::Error,
     );
     assertions::assert_has_result(
         &results,
-        "RS-ARCH-SOURCE-04",
+        "g3rs-arch/mod-facade-only",
         G3Severity::Info,
         Some("crate_a/src/api/mod.rs"),
     );

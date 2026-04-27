@@ -14,7 +14,7 @@ The user also reaffirmed the testing bar for family owners: the family must stil
 ## Decisions Made
 
 ### Tighten exact policy ownership instead of accepting close-enough config
-- **Chose:** `RS-DENY-CONFIG-11` now errors on extra globally allowed licenses, not just missing expected ones.
+- **Chose:** `g3rs-deny/confidence-threshold` now errors on extra globally allowed licenses, not just missing expected ones.
 - **Why:** `[licenses].allow` is an allow-list, and the documented escape hatch for exceptions is `[[licenses.exceptions]]`. Allowing silent extras weakens the policy surface.
 - **Alternatives considered:**
   - Only check for missing expected licenses — rejected because it permits unreviewed global broadening.
@@ -28,24 +28,24 @@ The user also reaffirmed the testing bar for family owners: the family must stil
   - Remove `rust.packages` handling from deny entirely — rejected because current policy still allows package-level fallback until the workspace-only model lands.
 
 ### Evaluate all managed tokio feature-ban entries, not just the first one
-- **Chose:** `RS-DENY-CONFIG-18` now checks every `tokio` feature-ban entry and warns if any managed `tokio` entry drifts.
+- **Chose:** `g3rs-deny/skip-hygiene` now checks every `tokio` feature-ban entry and warns if any managed `tokio` entry drifts.
 - **Why:** duplicate `tokio` entries could previously hide a noncanonical second entry behind a canonical first entry.
 - **Alternatives considered:**
-  - Let `RS-DENY-CONFIG-24` own the problem alone — rejected because duplicate detection should not be the only guard against semantic drift.
+  - Let `g3rs-deny/license-exceptions-inventory` own the problem alone — rejected because duplicate detection should not be the only guard against semantic drift.
   - Emit one warning per bad duplicate — rejected because that would create noisy repetition; one semantic warning plus duplicate reporting is enough.
 
 ### Normalize duplicate skip identity semantically
-- **Chose:** `RS-DENY-CONFIG-24` now keys skip duplicates by normalized crate-plus-version identity when version exists, ignores malformed skip/ignore entries, and trims advisory IDs.
+- **Chose:** `g3rs-deny/license-exceptions-inventory` now keys skip duplicates by normalized crate-plus-version identity when version exists, ignores malformed skip/ignore entries, and trims advisory IDs.
 - **Why:** same-crate different-version skip entries are distinct exceptions and should not warn as duplicates. Malformed entries should not collapse into fake duplicate buckets.
 - **Alternatives considered:**
   - Keep name-only duplicate keys — rejected because it creates false positives for valid version-distinct exceptions.
   - Treat all malformed entries as a single duplicate identity — rejected because it invents noise from broken input that other rules should own.
 
 ### Turn blank exception/source strings into hard errors
-- **Chose:** `RS-DENY-17` now rejects blank crate identifiers and blank license names inside exception allow-lists; `RS-DENY-CONFIG-17` now errors on blank `allow-git` entries.
+- **Chose:** `RS-DENY-17` now rejects blank crate identifiers and blank license names inside exception allow-lists; `g3rs-deny/extra-feature-bans-inventory` now errors on blank `allow-git` entries.
 - **Why:** these are malformed escape hatches. Inventory is only useful when the exception/source entry is real and reviewable.
 - **Alternatives considered:**
-  - Leave blank strings to `RS-DENY-CONFIG-25` schema warnings — rejected because the data shape is technically string-typed but still semantically unusable.
+  - Leave blank strings to `g3rs-deny/allow-override-channel` schema warnings — rejected because the data shape is technically string-typed but still semantically unusable.
   - Ignore blank strings silently — rejected because that fails open.
 
 ### Prove profile-sensitive ownership end-to-end
@@ -77,7 +77,7 @@ The upcoming repo move toward workspace-only Rust roots should still be enforced
   - `cargo run --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 --no-default-features --features family-deny -- rs validate apps/guardrail3 --family deny --format json`
 
 ## Open Questions / Future Considerations
-- `RS-DENY-CONFIG-19` still likely duplicates inventory for repeated extra feature-ban entries; that is policy noise, not a correctness blocker, and was left for a later pass.
+- `g3rs-deny/ignore-hygiene` still likely duplicates inventory for repeated extra feature-ban entries; that is policy noise, not a correctness blocker, and was left for a later pass.
 - `RS-DENY-30` likely has similar duplicate-inventory noise for wrapper-bearing duplicate bans.
 - The repo still reports `apps/guardrail3/crates/app/rs/validate` as a standalone package root under the current cargo/placement model. That is a cargo/workspace-shape issue, not a deny bug.
 
@@ -92,6 +92,6 @@ The upcoming repo move toward workspace-only Rust roots should still be enforced
 - `.worklogs/2026-03-30-205737-deny-family-hardening.md` — first deny hardening pass that this work builds on
 
 ## Next Steps / Continuation Plan
-1. Run one more adversarial pass on the remaining duplicate/inventory-only rules, especially `RS-DENY-CONFIG-19` and `RS-DENY-30`, and decide whether duplicate inventory should collapse to one logical item plus one duplicate warning.
+1. Run one more adversarial pass on the remaining duplicate/inventory-only rules, especially `g3rs-deny/ignore-hygiene` and `RS-DENY-30`, and decide whether duplicate inventory should collapse to one logical item plus one duplicate warning.
 2. If the repo moves to the workspace-only Rust-root model, coordinate the structural enforcement in cargo/placement and then narrow deny’s allowed-root model accordingly.
 3. When the cargo/workspace family is ready, revisit the remaining standalone package root reported under `apps/guardrail3` and remove that structural noise from isolated deny runs.

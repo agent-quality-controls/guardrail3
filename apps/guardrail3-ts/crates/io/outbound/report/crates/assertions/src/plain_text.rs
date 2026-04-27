@@ -9,11 +9,11 @@ pub fn assert_inventory_hidden(output: &str) {
         "expected eslint family header in rendered output: {output}"
     );
     assert!(
-        output.contains("TS-ESLINT-CONFIG-02"),
+        output.contains("g3ts-eslint/parseable"),
         "expected visible warning result in rendered output: {output}"
     );
     assert!(
-        !output.contains("TS-ESLINT-CONFIG-01"),
+        !output.contains("g3ts-eslint/exists"),
         "expected inventory-only finding to stay hidden: {output}"
     );
 }
@@ -35,7 +35,7 @@ pub fn assert_no_findings(output: &str) {
 pub fn assert_includes_rule_message(output: &str) {
     assert!(
         output.contains(
-            "[Warn] TS-ESLINT-CONFIG-09 eslint.config.mjs typed lint configuration drifted"
+            "[Warn] g3ts-eslint/type-safety-rules eslint.config.mjs typed lint configuration drifted"
         ),
         "expected eslint warning title in rendered output: {output}"
     );

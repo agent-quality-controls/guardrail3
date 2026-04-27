@@ -6,25 +6,19 @@ pub fn check(input: &G3RsApparchConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for crate_check in &input.crate_dependency_checks {
-        crate::rs_apparch_config_01_types_dependency_direction::check(crate_check, &mut results);
-        crate::rs_apparch_config_02_logic_dependency_direction::check(crate_check, &mut results);
-        crate::rs_apparch_config_03_io_outbound_dependency_direction::check(
-            crate_check,
-            &mut results,
-        );
-        crate::rs_apparch_config_07_dev_dependency_direction::check(crate_check, &mut results);
+        crate::types_dependency_direction::check(crate_check, &mut results);
+        crate::logic_dependency_direction::check(crate_check, &mut results);
+        crate::io_outbound_dependency_direction::check(crate_check, &mut results);
+        crate::dev_dependency_direction::check(crate_check, &mut results);
     }
     for purity_check in &input.crate_purity_checks {
-        crate::rs_apparch_config_08_types_purity::check(purity_check, &mut results);
-        crate::rs_apparch_config_09_logic_purity::check(purity_check, &mut results);
+        crate::types_purity::check(purity_check, &mut results);
+        crate::logic_purity::check(purity_check, &mut results);
     }
     for patch_check in &input.patch_bypass_checks {
-        crate::rs_apparch_config_05_patch_replace_bypass::check(patch_check, &mut results);
+        crate::patch_replace_bypass::check(patch_check, &mut results);
     }
-    crate::rs_apparch_config_06_same_layer_cycles::check(
-        &input.same_layer_cycles_check,
-        &mut results,
-    );
+    crate::same_layer_cycles::check(&input.same_layer_cycles_check, &mut results);
 
     results
 }

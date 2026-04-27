@@ -1,16 +1,16 @@
 ## Summary
 
-Fixed the Rust hook source-check messages so they state the file, the concrete command or change to make, and the reason. Also fixed two false positives in the hooks family before rewriting the messages: `RS-HOOKS-SOURCE-10` now recognizes deny-warnings clippy inside wrapped `cd && cargo clippy ...` commands, and `RS-HOOKS-SOURCE-18` now only flags unconditional `exit 0` paths instead of standard guarded early-success branches.
+Fixed the Rust hook source-check messages so they state the file, the concrete command or change to make, and the reason. Also fixed two false positives in the hooks family before rewriting the messages: `g3rs-hooks/hook-rs-09-clippy-denies-warnings` now recognizes deny-warnings clippy inside wrapped `cd && cargo clippy ...` commands, and `g3rs-hooks/hook-shared-13-no-unconditional-exit-zero` now only flags unconditional `exit 0` paths instead of standard guarded early-success branches.
 
 ## Decisions Made
 
 - Fixed rule correctness before touching wording.
-  - `RS-HOOKS-SOURCE-10` was a real false positive because the rule evaluated `line.raw` instead of the parser's extracted `command_text`.
-  - `RS-HOOKS-SOURCE-18` was a real false positive because it treated any executable `exit 0` as unconditional after parser control context had already been erased.
+  - `g3rs-hooks/hook-rs-09-clippy-denies-warnings` was a real false positive because the rule evaluated `line.raw` instead of the parser's extracted `command_text`.
+  - `g3rs-hooks/hook-shared-13-no-unconditional-exit-zero` was a real false positive because it treated any executable `exit 0` as unconditional after parser control context had already been erased.
 - Split `hook_rs_16_config_changes_trigger_validation` support logic into a sidecar `support.rs`.
-  - The message rewrite pushed the rule file over the `RS-CODE-SOURCE-09` size threshold.
+  - The message rewrite pushed the rule file over the `g3rs-code/ast-09-too-many-effective-code-lines` size threshold.
   - Moving the trigger-analysis helpers out kept the rule file small without weakening the rule.
-- Made `RS-HOOKS-SOURCE-15` report the exact missing config filenames.
+- Made `g3rs-hooks/hook-rs-16-config-changes-trigger-validation` report the exact missing config filenames.
   - The old boolean-only message was too vague to fix from output alone.
 - Synced the installed `g3rs` binary after the code changes.
   - Earlier in this session, stale local binaries already caused confusion.

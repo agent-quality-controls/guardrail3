@@ -179,23 +179,18 @@ pub(crate) fn has_matching_waiver(
     selector: &str,
 ) -> bool {
     input.waivers.iter().any(|waiver| {
-        waiver.rule == rule
-            && waiver.file == input.clippy_rel_path
-            && waiver.selector == selector
+        waiver.rule == rule && waiver.file == input.clippy_rel_path && waiver.selector == selector
     })
 }
 
 pub(crate) fn typed_clippy(input: &G3RsClippyConfigChecksInput) -> Option<&ClippyToml> {
     match &input.clippy {
         G3RsClippyConfigState::Parsed(document) => clippy_toml_parser::typed(document),
-        G3RsClippyConfigState::Unreadable { .. }
-        | G3RsClippyConfigState::ParseError { .. } => None,
+        G3RsClippyConfigState::Unreadable { .. } | G3RsClippyConfigState::ParseError { .. } => None,
     }
 }
 
-pub(crate) fn clippy_document(
-    input: &G3RsClippyConfigChecksInput,
-) -> Option<&ClippyTomlDocument> {
+pub(crate) fn clippy_document(input: &G3RsClippyConfigChecksInput) -> Option<&ClippyTomlDocument> {
     match &input.clippy {
         G3RsClippyConfigState::Parsed(document) => Some(document),
         G3RsClippyConfigState::Unreadable { .. } | G3RsClippyConfigState::ParseError { .. } => None,
@@ -260,7 +255,10 @@ pub(crate) fn rust_policy_rel_path(input: &G3RsClippyConfigChecksInput) -> Optio
 }
 
 pub(crate) fn published_library_policy(input: &G3RsClippyConfigChecksInput) -> bool {
-    let G3RsClippyCargoRootState::Parsed { cargo: root_cargo, .. } = &input.cargo_root else {
+    let G3RsClippyCargoRootState::Parsed {
+        cargo: root_cargo, ..
+    } = &input.cargo_root
+    else {
         return false;
     };
     let Some(root_typed) = cargo_toml_parser::document::typed(root_cargo) else {
@@ -280,7 +278,9 @@ pub(crate) fn published_library_policy(input: &G3RsClippyConfigChecksInput) -> b
         .cargo_workspace_members
         .iter()
         .filter_map(|member| match member {
-            G3RsClippyCargoMemberState::Parsed { cargo, .. } => cargo_toml_parser::document::typed(cargo),
+            G3RsClippyCargoMemberState::Parsed { cargo, .. } => {
+                cargo_toml_parser::document::typed(cargo)
+            }
             G3RsClippyCargoMemberState::Unreadable { .. }
             | G3RsClippyCargoMemberState::ParseError { .. } => None,
         })
@@ -353,10 +353,7 @@ pub(crate) fn expected_method_bans(garde_enabled: bool) -> Vec<&'static str> {
     bans
 }
 
-pub(crate) fn parse_ban_section(
-    document: &ClippyTomlDocument,
-    key: &str,
-) -> BanSectionFacts {
+pub(crate) fn parse_ban_section(document: &ClippyTomlDocument, key: &str) -> BanSectionFacts {
     let ParserBanSection {
         entries,
         malformed_messages,
@@ -380,10 +377,7 @@ pub(crate) fn parse_ban_section(
     }
 }
 
-pub(crate) fn bool_setting<'a>(
-    document: &'a ClippyTomlDocument,
-    key: &str,
-) -> BoolSetting<'a> {
+pub(crate) fn bool_setting<'a>(document: &'a ClippyTomlDocument, key: &str) -> BoolSetting<'a> {
     match clippy_toml_parser::bool_setting(document, key) {
         ParserBoolSetting::Missing => BoolSetting::Missing,
         ParserBoolSetting::WrongType(value) => BoolSetting::WrongType(value),

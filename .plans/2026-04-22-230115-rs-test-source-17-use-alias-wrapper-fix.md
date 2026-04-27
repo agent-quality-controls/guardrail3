@@ -1,5 +1,5 @@
 Goal
-- Fix RS-TEST-SOURCE-17 so external harness wrappers reached through `use ... as ...` aliases still count as local assertion wrappers and are reported as direct assertion use.
+- Fix g3rs-test/external-harnesses-use-assertions so external harness wrappers reached through `use ... as ...` aliases still count as local assertion wrappers and are reported as direct assertion use.
 
 Approach
 - Add a focused red regression in `rule_tests/cases.rs` for `fn assert_demo() { assert_eq!(1, 1); } use self::assert_demo as run; #[test] fn harness() { run(); }`.

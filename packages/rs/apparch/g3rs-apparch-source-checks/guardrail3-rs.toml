@@ -11,13 +11,13 @@ allowed_deps = [
 garde = false
 
 [[waivers]]
-rule = "RS-ARCH-FILETREE-07"
+rule = "g3rs-arch/structural-split"
 file = "crates/runtime/Cargo.toml"
 selector = "structural-split"
 reason = "Runtime crate intentionally keeps one apparch source rule per module."
 
 [[waivers]]
-rule = "RS-ARCH-FILETREE-07"
+rule = "g3rs-arch/structural-split"
 file = "crates/assertions/Cargo.toml"
 selector = "structural-split"
 reason = "Assertions crate intentionally keeps one shared proof module per apparch source rule."

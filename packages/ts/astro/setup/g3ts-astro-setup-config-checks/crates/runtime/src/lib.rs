@@ -1,16 +1,16 @@
+mod astro_check_present;
+mod astro_eslint_plugin_package_present;
+mod astro_eslint_plugin_wired;
+mod astro_package_present;
+mod lint_script;
+mod required_integrations;
 mod run;
+mod site_url;
+mod static_output;
 mod support;
-mod ts_astro_config_01_astro_package_present;
-mod ts_astro_config_02_astro_check_present;
-mod ts_astro_config_03_astro_eslint_plugin_package_present;
-mod ts_astro_config_05_astro_eslint_plugin_wired;
-mod ts_astro_config_09_syncpack_stack_pins;
-mod ts_astro_config_10_syncpack_forbidden_deps;
-mod ts_astro_config_11_site_url;
-mod ts_astro_config_12_static_output;
-mod ts_astro_config_21_required_integrations;
-mod ts_astro_config_33_lint_script;
-mod ts_astro_config_34_syncpack_lint_script;
+mod syncpack_forbidden_deps;
+mod syncpack_lint_script;
+mod syncpack_stack_pins;
 
 #[cfg(feature = "checks")]
 pub use run::check;

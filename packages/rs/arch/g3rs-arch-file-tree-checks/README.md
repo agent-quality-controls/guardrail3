@@ -4,6 +4,6 @@ Runs the `arch` family file-tree checks.
 
 Current rules:
 
-- `RS-ARCH-FILETREE-01` crate has facade entry point
-- `RS-ARCH-FILETREE-03` module directories require `mod.rs`
-- `RS-ARCH-FILETREE-07` structural complexity forces a split
+- `g3rs-arch/crate-has-facade` crate has facade entry point
+- `g3rs-arch/mod-rs-required` module directories require `mod.rs`
+- `g3rs-arch/structural-split` structural complexity forces a split

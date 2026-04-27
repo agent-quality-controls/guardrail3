@@ -1,5 +1,5 @@
 Goal
-- Fix `RS-TEST-SOURCE-07` and `RS-TEST-SOURCE-17` so owned assertions remain recognized through root-alias local import chains like `use demo_assertions::{self as da}; use self::da::assert_demo as prove;`.
+- Fix `g3rs-test/real-proof-site` and `g3rs-test/external-harnesses-use-assertions` so owned assertions remain recognized through root-alias local import chains like `use demo_assertions::{self as da}; use self::da::assert_demo as prove;`.
 
 Approach
 - Add the red regressions in both rule sidecar test suites.

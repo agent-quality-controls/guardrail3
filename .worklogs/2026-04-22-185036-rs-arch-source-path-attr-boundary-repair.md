@@ -1,11 +1,11 @@
 ## Summary
 
-Repaired the remaining `rs/arch` source-boundary defect by moving `#[path]` analysis for `RS-ARCH-SOURCE-09` into ingestion. The source lane now carries explicit `path_attr_sites` instead of raw Rust source file bags for that rule.
+Repaired the remaining `rs/arch` source-boundary defect by moving `#[path]` analysis for `g3rs-arch/no-path-attr` into ingestion. The source lane now carries explicit `path_attr_sites` instead of raw Rust source file bags for that rule.
 
 ## Decisions Made
 
 - Removed `source_files` from `G3RsArchSourceChecksInput`.
-  - Why: once `RS-ARCH-SOURCE-09` moved to ingestion, no source rule still needed raw file content.
+  - Why: once `g3rs-arch/no-path-attr` moved to ingestion, no source rule still needed raw file content.
   - Rejected: keeping the raw file bag and only changing the rule. That would leave an oversized source input around for no owner.
 - Added ingestion-owned `G3RsArchPathAttrSite`.
   - Why: the rule needs one local fact per `#[path]` use, plus enough context to apply the test-sidecar exemption.

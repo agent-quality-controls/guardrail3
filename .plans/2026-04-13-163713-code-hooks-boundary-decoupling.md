@@ -23,7 +23,7 @@ Decouple the remaining weak `code` and `hooks` package boundaries:
 
 ## Key Decisions
 
-- Keep `RS-CODE-CONFIG-07` in config.
+- Keep `g3rs-code/exception-comment-inventory` in config.
   - Reason: it inventories comments in config files, so the lane is correct; the old flaw was the input contract, not the lane.
 - Use file-based `code` config inputs instead of tiny derived facts.
   - Reason: the user asked for config-like inputs rather than precomputed extraction.

@@ -35,7 +35,7 @@
   - field-level garde quality checks
   - `#[garde(dive)]`
   - context-driven validation
-- `RS-GARDE-CONFIG-05` rule text overclaims wrapper enforcement; current implementation only validates clippy method-ban completeness.
+- `g3rs-garde/additional-method-bans` rule text overclaims wrapper enforcement; current implementation only validates clippy method-ban completeness.
 - `RS-GARDE-AST-04` plan text should explicitly mention both `query_as!` and `query_as_unchecked!`.
 - `code.md` still contains stale cross-checker action items already implemented (`std::process::abort`, `std::any::Any`, `unreachable_pub`, `lazy_static`).
 

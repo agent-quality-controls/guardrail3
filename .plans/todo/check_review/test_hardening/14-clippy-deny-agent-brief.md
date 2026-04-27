@@ -69,56 +69,56 @@ Already migrated to rule-specific `*_tests/` directories:
 - all `RS-CLIPPY-*` rules (`01` through `22`)
 - all `RS-DENY-*` rules (`01` through `30`)
 - `RS-CLIPPY-12`
-- `RS-CLIPPY-13`
+- `g3rs-clippy/local-policy-root`
 - `RS-CLIPPY-14`
 - `RS-CLIPPY-19`
 - `RS-CLIPPY-01`
-- `RS-CLIPPY-CONFIG-01`
-- `RS-CLIPPY-CONFIG-02`
+- `g3rs-clippy/max-struct-bools`
+- `g3rs-clippy/max-fn-params-bools`
 - `RS-CLIPPY-04`
 - `RS-CLIPPY-05`
-- `RS-CLIPPY-06`
+- `g3rs-clippy/package-native-policy`
 - `RS-CLIPPY-07`
 - `RS-CLIPPY-08`
-- `RS-CLIPPY-CONFIG-08`
-- `RS-CLIPPY-CONFIG-09`
-- `RS-CLIPPY-CONFIG-10`
-- `RS-CLIPPY-15`
+- `g3rs-clippy/type-complexity-threshold`
+- `g3rs-clippy/missing-method-ban`
+- `g3rs-clippy/missing-type-ban`
+- `g3rs-clippy/no-op-placeholder`
 - `RS-CLIPPY-16`
-- `RS-CLIPPY-CONFIG-15`
+- `g3rs-clippy/avoid-breaking-exported-api`
 - `RS-CLIPPY-18`
 - `RS-CLIPPY-20`
-- `RS-CLIPPY-CONFIG-19`
-- `RS-CLIPPY-CONFIG-20`
+- `g3rs-clippy/policy-context-parseable`
+- `g3rs-clippy/forbid-clippy-conf-dir-override`
 - `RS-DENY-02`
 - `RS-DENY-03`
 - `RS-DENY-01`
-- `RS-DENY-CONFIG-01`
-- `RS-DENY-CONFIG-02`
-- `RS-DENY-CONFIG-03`
-- `RS-DENY-CONFIG-04`
-- `RS-DENY-CONFIG-05`
-- `RS-DENY-CONFIG-07`
-- `RS-DENY-CONFIG-08`
-- `RS-DENY-CONFIG-09`
-- `RS-DENY-CONFIG-10`
-- `RS-DENY-CONFIG-12`
-- `RS-DENY-CONFIG-13`
+- `g3rs-deny/deprecated-advisories`
+- `g3rs-deny/advisories-baseline`
+- `g3rs-deny/stricter-advisories-inventory`
+- `g3rs-deny/graph-all-features`
+- `g3rs-deny/graph-no-default-features`
+- `g3rs-deny/highlight-inventory`
+- `g3rs-deny/allow-wildcard-paths`
+- `g3rs-deny/wildcards-inventory`
+- `g3rs-deny/license-allow-baseline`
+- `g3rs-deny/copyleft-allowlist`
+- `g3rs-deny/unknown-sources-policy`
 - `RS-DENY-17`
-- `RS-DENY-CONFIG-18`
-- `RS-DENY-CONFIG-19`
+- `g3rs-deny/skip-hygiene`
+- `g3rs-deny/ignore-hygiene`
 - `RS-DENY-25`
 - `RS-DENY-26`
-- `RS-DENY-CONFIG-24`
+- `g3rs-deny/license-exceptions-inventory`
 - `RS-DENY-09`
-- `RS-DENY-CONFIG-11`
-- `RS-DENY-CONFIG-15`
-- `RS-DENY-CONFIG-17`
-- `RS-DENY-CONFIG-16`
-- `RS-DENY-CONFIG-20`
-- `RS-DENY-CONFIG-21`
-- `RS-DENY-CONFIG-25`
-- `RS-DENY-CONFIG-26`
+- `g3rs-deny/confidence-threshold`
+- `g3rs-deny/allow-git-inventory`
+- `g3rs-deny/extra-feature-bans-inventory`
+- `g3rs-deny/tokio-full-ban`
+- `g3rs-deny/duplicate-entries`
+- `g3rs-deny/unknown-keys`
+- `g3rs-deny/allow-override-channel`
+- `g3rs-deny/extra-deny-bans-inventory`
 - `RS-DENY-30`
 
 What those migrations now prove in business terms:
@@ -132,13 +132,13 @@ What those migrations now prove in business terms:
   - a nearer allowed local config only takes ownership of its own root instead of spilling to siblings or ancestors
   - uncovered roots error exactly on the roots that lack an allowed covering config
   - non-Rust roots in the shared multi-root fixture stay out of clippy coverage results
-- clippy threshold coverage now proves for `RS-CLIPPY-CONFIG-01` and `RS-CLIPPY-CONFIG-02`:
+- clippy threshold coverage now proves for `g3rs-clippy/max-struct-bools` and `g3rs-clippy/max-fn-params-bools`:
   - generated threshold baselines inventory cleanly
   - wrong values error
   - missing values error
   - malformed `clippy.toml` still errors through the rule-local parse-error branch
   - the same managed threshold baseline is now verified at local policy roots too
-- clippy threshold coverage now also proves for `RS-CLIPPY-CONFIG-08`, `10`, `11`, `21`, and `22`:
+- clippy threshold coverage now also proves for `g3rs-clippy/type-complexity-threshold`, `10`, `11`, `21`, and `22`:
   - generated threshold baselines inventory cleanly
   - wrong values error
   - missing values error
@@ -164,7 +164,7 @@ What those migrations now prove in business terms:
 - clippy rule-local parity is now explicitly pinned for:
   - `RS-CLIPPY-04`
   - `RS-CLIPPY-05`
-  - `RS-CLIPPY-06`
+  - `g3rs-clippy/package-native-policy`
   - `RS-CLIPPY-07`
   - `RS-CLIPPY-14`
   - `RS-CLIPPY-20`
@@ -177,9 +177,9 @@ What those migrations now prove in business terms:
   - placeholder or trivial reasons warn across methods, types, and macros
 - clippy heuristic parity is now explicitly pinned for:
   - `RS-CLIPPY-08`
-  - `RS-CLIPPY-15`
+  - `g3rs-clippy/no-op-placeholder`
   - `RS-CLIPPY-16`
-  - `RS-CLIPPY-CONFIG-15`
+  - `g3rs-clippy/avoid-breaking-exported-api`
   - `RS-CLIPPY-18`
   - `RS-CLIPPY-19`
   - those suites now prove the generator emits reasoned table entries, substantive reasons, expected managed booleans, duplicate-free ban sections, and only managed top-level keys
@@ -343,7 +343,7 @@ Current targeted verification for this lane now passes, including:
 - generation still uses wrong effective-profile logic in mixed setups
 - no strong generator-vs-checker parity test
 - canonical deny fixture has drifted before
-- `RS-DENY-CONFIG-16` still needs explicit policy resolution if not already settled during the pass
+- `g3rs-deny/tokio-full-ban` still needs explicit policy resolution if not already settled during the pass
 
 ## Required attack classes
 
@@ -380,7 +380,7 @@ This is complete for both clippy and deny at the structural migration level.
 
 None for deny at the moment.
 
-`RS-DENY-CONFIG-24` breadth is now cargo-verified too:
+`g3rs-deny/license-exceptions-inventory` breadth is now cargo-verified too:
 - distinct-near-duplicate non-hit coverage passes
 - same-identity-different-shape duplicate coverage for skip and advisory-ignore entries passes
 

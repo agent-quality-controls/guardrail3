@@ -1,5 +1,5 @@
 Goal
-- Confirm whether `RS-TEST-FILETREE-18` falsely flags module-alias calls when the alias points at a different module that happens to expose the same function name as a disallowed helper elsewhere in the file.
+- Confirm whether `g3rs-test/test-support-generic` falsely flags module-alias calls when the alias points at a different module that happens to expose the same function name as a disallowed helper elsewhere in the file.
 
 Approach
 - Add a focused regression in `packages/rs/test/g3rs-test-file-tree-checks/crates/runtime/src/rs_test_18_test_support_generic/rule_tests/cases.rs` where:

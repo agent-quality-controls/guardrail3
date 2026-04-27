@@ -1,6 +1,6 @@
 ## Summary
 
-Repaired the remaining `rs/apparch` config-boundary defect in `RS-APPARCH-CONFIG-06`. Ingestion now binds the same-layer node set explicitly, and the rule consumes node paths plus prebound crate metadata instead of reconstructing a crate index from edge payloads.
+Repaired the remaining `rs/apparch` config-boundary defect in `g3rs-apparch/same-layer-cycles`. Ingestion now binds the same-layer node set explicitly, and the rule consumes node paths plus prebound crate metadata instead of reconstructing a crate index from edge payloads.
 
 ## Decisions Made
 

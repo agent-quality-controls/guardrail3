@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-HOOKS-SOURCE-15` so config-trigger coverage respects source order instead of treating trigger and validation as interchangeable co-presence.
+- Fixed `g3rs-hooks/hook-rs-16-config-changes-trigger-validation` so config-trigger coverage respects source order instead of treating trigger and validation as interchangeable co-presence.
 - Added a regression proving validation before the trigger check in one branch stays a warning.
 
 Decisions made

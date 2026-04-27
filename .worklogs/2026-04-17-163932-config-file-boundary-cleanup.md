@@ -23,4 +23,4 @@ Key files for context
 Next steps
 
 - Apply the same typed-file handoff rule to `guardrail3-rs.toml` once that family exists instead of adding more family-specific slices.
-- Decide whether the remaining parser-package `RS-CODE-SOURCE-04` warnings should stay visible or get exact waiver support.
+- Decide whether the remaining parser-package `g3rs-code/ast-04-item-level-allow-with-reason` warnings should stay visible or get exact waiver support.

@@ -228,7 +228,7 @@ No family README should claim ownership or scope that production no longer has.
 Status:
 
 - production incomplete
-- docs/spec claim `RS-TOOLCHAIN-01..07`
+- docs/spec claim `g3rs-toolchain/root-toolchain-config-exists..07`
 - live runtime only has `01..04`
 
 Required fixes:

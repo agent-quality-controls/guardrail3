@@ -1,10 +1,10 @@
 Summary
-- Fixed `RS-TEST-SOURCE-17` so external harnesses that call owned assertions through a local alias chain inventory correctly instead of false-firing as direct local assertions.
+- Fixed `g3rs-test/external-harnesses-use-assertions` so external harnesses that call owned assertions through a local alias chain inventory correctly instead of false-firing as direct local assertions.
 - The rule now distinguishes local helper aliases from aliases that still resolve back into the owned assertions crate.
 
 Decisions made
 - Fixed the resolution logic in the rule instead of adding a narrow exception for one alias shape.
-- Kept the change local to `RS-TEST-SOURCE-17` because the bug was in how this rule classified imported alias chains.
+- Kept the change local to `g3rs-test/external-harnesses-use-assertions` because the bug was in how this rule classified imported alias chains.
 
 Key files for context
 - packages/rs/test/g3rs-test-source-checks/crates/runtime/src/rs_test_17_external_harnesses_use_assertions/rule.rs
@@ -13,4 +13,4 @@ Key files for context
 
 Next steps
 - Finish the hook parser bug fixes already in progress: function-tail brace parsing and escaped-hash comment handling.
-- Finish the `RS-HOOKS-SOURCE-15` discarded-trigger fix.
+- Finish the `g3rs-hooks/hook-rs-16-config-changes-trigger-validation` discarded-trigger fix.

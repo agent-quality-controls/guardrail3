@@ -1,6 +1,6 @@
 Summary
 
-Normalized `packages/parsers/mutants-toml-parser` to the current sibling-crate package shape and removed all package-debt findings. The only remaining signals are the 2 intentional `RS-CODE-SOURCE-04` inventory warnings on the centralized fs and parser boundary allows.
+Normalized `packages/parsers/mutants-toml-parser` to the current sibling-crate package shape and removed all package-debt findings. The only remaining signals are the 2 intentional `g3rs-code/ast-04-item-level-allow-with-reason` inventory warnings on the centralized fs and parser boundary allows.
 
 Decisions made
 
@@ -29,6 +29,6 @@ Key files for context
 
 Next steps
 
-- Commit this slice with the remaining 2 intentional `RS-CODE-SOURCE-04` warnings.
+- Commit this slice with the remaining 2 intentional `g3rs-code/ast-04-item-level-allow-with-reason` warnings.
 - Continue to the next parser package root.
 - Stop only if the next remaining issue is a real rule defect rather than package debt.

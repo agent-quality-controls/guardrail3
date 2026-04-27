@@ -237,12 +237,10 @@ fn command_mentions_crate(
         return true;
     }
 
-    args.windows(2).any(|window| {
-        match window {
-            ["-p" | "--package", value] => *value == crate_name,
-            ["--manifest-path", value] => manifest_path_matches(value, cargo_rel_path),
-            _ => false,
-        }
+    args.windows(2).any(|window| match window {
+        ["-p" | "--package", value] => *value == crate_name,
+        ["--manifest-path", value] => manifest_path_matches(value, cargo_rel_path),
+        _ => false,
     }) || args
         .windows(2)
         .any(|window| matches!(window, ["--bin", value] if binary_target_names.contains(*value)))

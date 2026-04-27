@@ -1,6 +1,6 @@
 ## Summary
 
-Added a regression and fix for `RS-CODE-SOURCE-31` so nested public structs are still recognized when their inherent impl uses `super::Type`. The rule now normalizes self-type paths before comparing them to the struct's qualified name.
+Added a regression and fix for `g3rs-code/ast-31-public-struct-named-fields` so nested public structs are still recognized when their inherent impl uses `super::Type`. The rule now normalizes self-type paths before comparing them to the struct's qualified name.
 
 ## Decisions made
 

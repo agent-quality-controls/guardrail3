@@ -4,7 +4,7 @@ Summary
 
 Decisions made
 - Treated missing `publish` as "not release-eligible" in release ingestion. This matches the agreed policy better than Cargo's default and keeps the failure specific.
-- Added a new explicit rule, `RS-RELEASE-CONFIG-00`, instead of overloading the existing release rules. That keeps the message short and precise.
+- Added a new explicit rule, `g3rs-release/publish-must-be-explicit`, instead of overloading the existing release rules. That keeps the message short and precise.
 - Gated release dependency rules on the source crate being publishable, not just the target edge shape.
 - Gated workspace-root release file and repo release setup checks on `publishable_count > 0`.
 - Kept the publishable fixture shortcut only in direct rule test helpers. Real ingestion tests now write `publish = true` explicitly where they mean a published crate.

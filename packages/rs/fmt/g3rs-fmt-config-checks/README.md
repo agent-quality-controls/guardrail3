@@ -10,11 +10,11 @@ This package validates typed root config content only.
 
 Current scope:
 
-- `RS-FMT-CONFIG-01`: baseline rustfmt settings
-- `RS-FMT-CONFIG-02`: extra setting inventory
-- `RS-FMT-CONFIG-03`: nightly-only rustfmt keys on stable toolchains, including missing and parse blockers
-- `RS-FMT-CONFIG-04`: rustfmt/Cargo edition consistency, including missing and parse blockers
-- `RS-FMT-CONFIG-07`: documented rustfmt `ignore` waivers
+- `g3rs-fmt/rustfmt-required-settings`: baseline rustfmt settings
+- `g3rs-fmt/rustfmt-extra-settings-inventory`: extra setting inventory
+- `g3rs-fmt/nightly-keys-on-stable`: nightly-only rustfmt keys on stable toolchains, including missing and parse blockers
+- `g3rs-fmt/edition-mismatch`: rustfmt/Cargo edition consistency, including missing and parse blockers
+- `g3rs-fmt/ignore-escape-hatch`: documented rustfmt `ignore` waivers
 
 Ingestion remains responsible for:
 
@@ -22,4 +22,4 @@ Ingestion remains responsible for:
 - parsing root config files into typed or blocker states
 - extracting Rust-policy waiver entries from `guardrail3-rs.toml`
 
-`RS-FMT-FILETREE-01`, `RS-FMT-FILETREE-05`, and `RS-FMT-FILETREE-08` live in `g3rs-fmt-filetree-checks`.
+`g3rs-fmt/rustfmt-config-exists`, `g3rs-fmt/per-crate-override`, and `g3rs-fmt/dual-file-conflict` live in `g3rs-fmt-filetree-checks`.

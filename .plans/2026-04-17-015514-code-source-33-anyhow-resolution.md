@@ -1,5 +1,5 @@
 # Goal
-Fix `RS-CODE-SOURCE-33` so it flags public `Result<_, anyhow::Error>` only when the error type actually resolves to `anyhow`, and does not false-positive on local typed errors named `Error`.
+Fix `g3rs-code/ast-33-public-weak-error-forms` so it flags public `Result<_, anyhow::Error>` only when the error type actually resolves to `anyhow`, and does not false-positive on local typed errors named `Error`.
 
 # Approach
 - Add rule tests that prove the current bug and cover the broader resolution cases.

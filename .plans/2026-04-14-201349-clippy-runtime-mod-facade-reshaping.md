@@ -1,15 +1,15 @@
 # Goal
-Make `packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src` satisfy `RS-ARCH-SOURCE-04` by turning every offending `mod.rs` into a pure dispatcher without weakening the rule.
+Make `packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src` satisfy `g3rs-arch/mod-facade-only` by turning every offending `mod.rs` into a pure dispatcher without weakening the rule.
 
 # Approach
-- Prove the current package still fails `RS-ARCH-SOURCE-04` with the CLI validator before editing.
+- Prove the current package still fails `g3rs-arch/mod-facade-only` with the CLI validator before editing.
 - Read the runtime tree and identify every `mod.rs` that contains inline test bodies or inline helper modules.
 - For rule directories `rs_clippy_config_01..08`, keep the sidecar directory pattern but move inline `assertions` modules out of `rule_tests/mod.rs` into sibling `assertions.rs` files, leaving `mod.rs` as declarations only.
 - For test-only directories `rs_clippy_config_09..21`, move inline `#[test]` bodies out of `mod.rs` into sibling files, leaving `mod.rs` as declarations only.
-- Re-run the package validator and crate tests to prove `RS-ARCH-SOURCE-04` is gone while keeping behavior intact.
+- Re-run the package validator and crate tests to prove `g3rs-arch/mod-facade-only` is gone while keeping behavior intact.
 
 # Key Decisions
-- Keep `RS-ARCH-SOURCE-04`. The package changes, not the rule.
+- Keep `g3rs-arch/mod-facade-only`. The package changes, not the rule.
 - Keep the sidecar directory layout. Remove inline bodies, not the pattern.
 - Do not touch the broader `test` family slice. Only remove the `arch` facade violations.
 

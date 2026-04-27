@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-TEST-SOURCE-07` and `RS-TEST-SOURCE-17` so owned assertions are preserved through local import chains rooted in a crate alias.
+- Fixed `g3rs-test/real-proof-site` and `g3rs-test/external-harnesses-use-assertions` so owned assertions are preserved through local import chains rooted in a crate alias.
 - Added regressions for `use demo_assertions::{self as da}; use self::da::assert_demo as prove;`.
 
 Decisions made

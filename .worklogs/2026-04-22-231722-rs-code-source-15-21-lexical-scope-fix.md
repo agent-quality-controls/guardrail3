@@ -18,7 +18,7 @@ Key files for context
 - packages/rs/code/g3rs-code-source-checks/crates/runtime/src/rs_code_ast_21_fs_glob_import/rule_tests/direct.rs
 
 Next steps
-- Fix the `rs/test` `RS-TEST-SOURCE-17` alias-chain false positive: owned assertions alias -> local alias -> harness call.
+- Fix the `rs/test` `g3rs-test/external-harnesses-use-assertions` alias-chain false positive: owned assertions alias -> local alias -> harness call.
 - Fix the hook parser function-tail bug caused by `rsplit_once('}')` misreading braces in strings/comments.
 - Fix the hook parser `\#` handling so escaped hash does not truncate executable text.
-- Tighten `RS-HOOKS-SOURCE-15` so discarded trigger-like comparisons do not count as guarded coverage.
+- Tighten `g3rs-hooks/hook-rs-16-config-changes-trigger-validation` so discarded trigger-like comparisons do not count as guarded coverage.

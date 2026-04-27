@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-TEST-FILETREE-03` so assertions modules cannot hide runtime orchestration behind a bare imported `check_test_tree`.
+Fix `g3rs-test/runtime-assertions-split` so assertions modules cannot hide runtime orchestration behind a bare imported `check_test_tree`.
 
 ## Approach
 

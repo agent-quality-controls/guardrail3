@@ -21,8 +21,8 @@ fn run_dispatches_prebound_parsed_source() {
 
     let results = crate::run::check(&input);
 
-    assertions::assert_has_finding_id(&results, "RS-CODE-SOURCE-01");
-    assertions::assert_missing_finding_id(&results, "RS-CODE-SOURCE-30");
+    assertions::assert_has_finding_id(&results, "g3rs-code/crate-level-allow");
+    assertions::assert_missing_finding_id(&results, "g3rs-code/input-failures");
 }
 
 #[test]
@@ -44,5 +44,5 @@ fn run_dispatches_prebound_parse_failure() {
 
     let results = crate::run::check(&input);
 
-    assertions::assert_has_finding_id(&results, "RS-CODE-SOURCE-30");
+    assertions::assert_has_finding_id(&results, "g3rs-code/input-failures");
 }

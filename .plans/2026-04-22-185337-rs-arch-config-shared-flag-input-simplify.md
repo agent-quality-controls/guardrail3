@@ -1,11 +1,11 @@
 ## Goal
 
-Remove the last redundant lookup dependency from `rs/arch` config checks. `RS-ARCH-CONFIG-06` should consume only the dependency-edge fact it actually uses, instead of requiring `run.rs` and the rule tests to rebuild a crate map.
+Remove the last redundant lookup dependency from `rs/arch` config checks. `g3rs-arch/shared-flag-required` should consume only the dependency-edge fact it actually uses, instead of requiring `run.rs` and the rule tests to rebuild a crate map.
 
 ## Approach
 
-1. Remove the crate-map parameter from `RS-ARCH-CONFIG-06`.
-2. Simplify `g3rs-arch-config-checks` `run.rs` so it dispatches `RS-ARCH-CONFIG-06` directly on each edge.
+1. Remove the crate-map parameter from `g3rs-arch/shared-flag-required`.
+2. Simplify `g3rs-arch-config-checks` `run.rs` so it dispatches `g3rs-arch/shared-flag-required` directly on each edge.
 3. Rewrite the rule test helper to pass only an edge.
 4. Run the `rs/arch` config package tests and validator to prove nothing else depended on the removed lookup.
 

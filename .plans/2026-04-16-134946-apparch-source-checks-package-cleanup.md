@@ -9,7 +9,7 @@ Approach
 - Re-run tests and validate, then stop only if another rule is genuinely contradictory or outdated.
 
 Key decisions
-- Do not change the rule set unless rereading the rule proves a contradiction. The current `RS-TEST-FILETREE-02` complaint is package debt because the source files still declare `mod tests` instead of `mod x_tests`.
+- Do not change the rule set unless rereading the rule proves a contradiction. The current `g3rs-test/owned-sidecar-shape` complaint is package debt because the source files still declare `mod tests` instead of `mod x_tests`.
 - Treat this as the same cleanup shape as `g3rs-apparch-config-checks`, unless a package-specific rule exposes a real bug.
 
 Files to modify

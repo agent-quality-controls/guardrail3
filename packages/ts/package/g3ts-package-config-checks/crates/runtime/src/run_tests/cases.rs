@@ -13,7 +13,7 @@ fn missing_root_reports_only_exists_error() {
     assertions::assert_exact(
         &results,
         &[assertions::error(
-            "TS-PACKAGE-CONFIG-01",
+            "g3ts-package/root-exists",
             "root package.json missing",
             "No root `package.json` file was found. Add a root workspace manifest.",
             None,
@@ -26,11 +26,14 @@ fn missing_root_reports_only_exists_error() {
 fn root_parse_error_reports_exists_inventory_and_parse_error() {
     let results = super::super::check(&root_parse_error());
 
-    assertions::assert_exact_ids(&results, &["TS-PACKAGE-CONFIG-01", "TS-PACKAGE-CONFIG-02"]);
+    assertions::assert_exact_ids(
+        &results,
+        &["g3ts-package/root-exists", "g3ts-package/root-parseable"],
+    );
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-PACKAGE-CONFIG-02",
+            "g3ts-package/root-parseable",
             "root package.json parse error",
             "Failed to parse root `package.json`: synthetic parse failure",
             Some("package.json"),
@@ -46,20 +49,20 @@ fn golden_root_reports_inventory_only() {
     assertions::assert_exact_ids(
         &results,
         &[
-            "TS-PACKAGE-CONFIG-01",
-            "TS-PACKAGE-CONFIG-02",
-            "TS-PACKAGE-CONFIG-03",
-            "TS-PACKAGE-CONFIG-04",
-            "TS-PACKAGE-CONFIG-05",
-            "TS-PACKAGE-CONFIG-06",
-            "TS-PACKAGE-CONFIG-07",
-            "TS-PACKAGE-CONFIG-08",
+            "g3ts-package/root-exists",
+            "g3ts-package/root-parseable",
+            "g3ts-package/root-private",
+            "g3ts-package/root-package-manager",
+            "g3ts-package/root-engines",
+            "g3ts-package/root-scripts",
+            "g3ts-package/root-pnpm",
+            "g3ts-package/local-banned-dependencies",
         ],
     );
     assertions::assert_contains(
         &results,
         &[assertions::info(
-            "TS-PACKAGE-CONFIG-08",
+            "g3ts-package/local-banned-dependencies",
             "Syncpack bans forbidden package dependencies",
             "`package.json` lists `syncpack`, runs `syncpack lint` fail-closed, and `.syncpackrc` bans forbidden package deps through Syncpack: `axios`.",
             Some("package.json"),
@@ -76,35 +79,35 @@ fn weak_root_reports_root_policy_errors() {
         &results,
         &[
             assertions::error(
-                "TS-PACKAGE-CONFIG-03",
+                "g3ts-package/root-private",
                 "root package.json is publishable",
                 "The root package manifest must set `private: true`.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-PACKAGE-CONFIG-04",
+                "g3ts-package/root-package-manager",
                 "root packageManager missing or not pinned to pnpm",
                 "The root package manifest must set a pinned `packageManager` such as `pnpm@10.32.0`.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-PACKAGE-CONFIG-05",
+                "g3ts-package/root-engines",
                 "root engines are incomplete",
                 "The root package manifest must declare engines.pnpm.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-PACKAGE-CONFIG-06",
+                "g3ts-package/root-scripts",
                 "root package scripts are incomplete",
                 "The root package manifest script baseline is broken: scripts.preinstall must run `only-allow pnpm` in a supported fail-closed command position; scripts.prepare is missing; scripts.lint is missing.",
                 Some("package.json"),
                 false,
             ),
             assertions::error(
-                "TS-PACKAGE-CONFIG-07",
+                "g3ts-package/root-pnpm",
                 "root pnpm policy is incomplete",
                 "The root package manifest must declare pnpm.overrides and pnpm.onlyBuiltDependencies.",
                 Some("package.json"),
@@ -121,7 +124,7 @@ fn fake_only_allow_text_does_not_satisfy_preinstall_guard() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-PACKAGE-CONFIG-06",
+            "g3ts-package/root-scripts",
             "root package scripts are incomplete",
             "The root package manifest script baseline is broken: scripts.preinstall must run `only-allow pnpm` in a supported fail-closed command position.",
             Some("package.json"),
@@ -137,7 +140,7 @@ fn syncpack_fail_open_script_does_not_satisfy_dependency_policy() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-PACKAGE-CONFIG-08",
+            "g3ts-package/local-banned-dependencies",
             "Syncpack package policy validator is not installed and wired",
             "`package.json` invokes `syncpack lint`, but not in a supported fail-closed root script position. Remove fail-open `||` chains and unsupported shell syntax so Syncpack failure cannot be hidden.",
             Some("package.json"),
@@ -153,7 +156,7 @@ fn missing_syncpack_config_reports_validator_contract_error() {
     assertions::assert_contains(
         &results,
         &[assertions::error(
-            "TS-PACKAGE-CONFIG-08",
+            "g3ts-package/local-banned-dependencies",
             "Syncpack does not ban forbidden package dependencies",
             "`.syncpackrc` is missing, so the package family cannot prove Syncpack bans forbidden package deps for `package.json`. Add a parseable `.syncpackrc` with exact `source` entries and canonical `isBanned: true` versionGroups for `axios`.",
             Some(".syncpackrc"),
@@ -170,14 +173,14 @@ fn missing_syncpack_source_and_bans_report_validator_contract_errors() {
         &results,
         &[
             assertions::error(
-                "TS-PACKAGE-CONFIG-08",
+                "g3ts-package/local-banned-dependencies",
                 "Syncpack does not cover package manifests",
                 "`.syncpackrc` is missing exact `source` entries for package manifests: `apps/web/package.json`. Add the listed paths so `syncpack lint` can reject forbidden dependencies everywhere the package family applies.",
                 Some(".syncpackrc"),
                 false,
             ),
             assertions::error(
-                "TS-PACKAGE-CONFIG-08",
+                "g3ts-package/local-banned-dependencies",
                 "Syncpack does not ban forbidden package dependencies",
                 "`.syncpackrc` is missing Syncpack banned versionGroups for: `axios`. Add one canonical banned versionGroup per listed dependency before any repo-specific groups, with exact `dependencies`, `dependencyTypes: [\"prod\", \"dev\", \"optional\", \"peer\"]`, `isBanned: true`, and no `packages` or `specifierTypes`.",
                 Some(".syncpackrc"),
@@ -194,7 +197,7 @@ fn local_only_root_skips_workspace_root_rules() {
     assertions::assert_exact(
         &results,
         &[assertions::info(
-            "TS-PACKAGE-CONFIG-08",
+            "g3ts-package/local-banned-dependencies",
             "Syncpack dependency policy is not required",
             "No pnpm package-manager root was detected, so the package-family Syncpack dependency policy is not applied.",
             Some("package.json"),
@@ -210,20 +213,20 @@ fn pg_dependency_is_not_treated_as_generic_banned_manifest_policy() {
     assertions::assert_exact_ids(
         &results,
         &[
-            "TS-PACKAGE-CONFIG-01",
-            "TS-PACKAGE-CONFIG-02",
-            "TS-PACKAGE-CONFIG-03",
-            "TS-PACKAGE-CONFIG-04",
-            "TS-PACKAGE-CONFIG-05",
-            "TS-PACKAGE-CONFIG-06",
-            "TS-PACKAGE-CONFIG-07",
-            "TS-PACKAGE-CONFIG-08",
+            "g3ts-package/root-exists",
+            "g3ts-package/root-parseable",
+            "g3ts-package/root-private",
+            "g3ts-package/root-package-manager",
+            "g3ts-package/root-engines",
+            "g3ts-package/root-scripts",
+            "g3ts-package/root-pnpm",
+            "g3ts-package/local-banned-dependencies",
         ],
     );
     assertions::assert_contains(
         &results,
         &[assertions::info(
-            "TS-PACKAGE-CONFIG-08",
+            "g3ts-package/local-banned-dependencies",
             "Syncpack bans forbidden package dependencies",
             "`package.json` lists `syncpack`, runs `syncpack lint` fail-closed, and `.syncpackrc` bans forbidden package deps through Syncpack: `axios`.",
             Some("package.json"),

@@ -10,19 +10,19 @@ allowed_deps = [
 garde = false
 
 [[waivers]]
-rule = "RS-CARGO-CONFIG-07"
+rule = "g3rs-cargo/approved-allow-inventory"
 file = "Cargo.toml"
 selector = "clippy:module_name_repetitions"
 reason = "Shared release type names intentionally repeat the family context."
 
 [[waivers]]
-rule = "RS-CODE-SOURCE-19"
+rule = "g3rs-code/large-type-inventory"
 file = "src/types.rs"
 selector = "struct:G3RsReleaseConfigCrate"
 reason = "Release config facts intentionally mirror the full normalized crate inventory."
 
 [[waivers]]
-rule = "RS-CODE-SOURCE-19"
+rule = "g3rs-code/large-type-inventory"
 file = "src/types.rs"
 selector = "struct:G3RsReleaseConfigRepo"
 reason = "Release repo facts intentionally mirror the full normalized repo release inventory."

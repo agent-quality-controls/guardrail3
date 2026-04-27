@@ -16,19 +16,19 @@ There was also a structural testing gap: most tests instantiated `ToolchainRootI
 
 ## Decisions Made
 
-### Treat missing or non-table `[toolchain]` as an explicit `RS-TOOLCHAIN-CONFIG-01` input failure
+### Treat missing or non-table `[toolchain]` as an explicit `g3rs-toolchain/channel-and-components` input failure
 - **Chose:** Add dedicated errors for missing `[toolchain]` and non-table `toolchain = ...` shapes.
 - **Why:** A present but structurally invalid root toolchain file is not the same as “policy keys absent”; it is malformed active input and should fail closed.
 - **Alternatives considered:**
   - Keep emitting “channel missing” and “components missing” warnings — rejected because that weakens malformed active input into a softer policy nudge.
-  - Push this into `RS-TOOLCHAIN-01` instead — rejected because the file does exist; the structural content failure belongs with the channel/components rule.
+  - Push this into `g3rs-toolchain/root-toolchain-config-exists` instead — rejected because the file does exist; the structural content failure belongs with the channel/components rule.
 
 ### Distinguish invalid `rust-version` type from missing `rust-version`
-- **Chose:** Track `cargo_rust_version_invalid` through facts and inputs, and let `RS-TOOLCHAIN-CONFIG-02` emit a dedicated error when the field exists but is not a string.
+- **Chose:** Track `cargo_rust_version_invalid` through facts and inputs, and let `g3rs-toolchain/msrv-consistency` emit a dedicated error when the field exists but is not a string.
 - **Why:** Missing metadata and malformed metadata are different states. The rule should not blur them because malformed declared MSRV is strictly worse than absent declared MSRV.
 - **Alternatives considered:**
   - Keep treating both as “not declared” inventory — rejected because it hides an active manifest bug.
-  - Infer invalidity only inside `RS-TOOLCHAIN-CONFIG-02` from the final string parse — rejected because the type information is lost once discovery collapses non-string values to `None`.
+  - Infer invalidity only inside `g3rs-toolchain/msrv-consistency` from the final string parse — rejected because the type information is lost once discovery collapses non-string values to `None`.
 
 ### Add family-level `ProjectTree` smoke tests
 - **Chose:** Add a tiny `ProjectTree` builder and `crate::check(...)` entrypoint helper in `rs_toolchain_01_exists.rs`, then use that harness for a few cross-rule adversarial cases.

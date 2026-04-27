@@ -155,24 +155,24 @@ Why:
 
 Add Astro MDX config checks:
 
-## `TS-ASTRO-MDX-CONFIG-35`
+## `g3ts-astro-mdx/mdx-import-names`
 
 - Requires ESLint MDX lane to enforce `astro-pipeline/mdx-imports-only-approved-components` at error severity.
 - Requires non-empty `approvedMdxComponentModules`.
 - Requires non-empty `approvedMdxComponentNames`.
 - Applies to MDX content probe.
 
-## `TS-ASTRO-MDX-CONFIG-36`
+## `g3ts-astro-mdx/no-raw-ui-exports`
 
 - Requires approved component-map lane to enforce `astro-pipeline/mdx-component-map-no-raw-ui-exports` at error severity.
 - Requires the probe target to be one configured `[ts.astro.mdx].component_maps` source.
 
-## `TS-ASTRO-MDX-CONFIG-37`
+## `g3ts-astro-mdx/mdx-component-wrapper-zod-parse`
 
 - Requires approved component-map lane to enforce `astro-pipeline/mdx-component-wrapper-requires-zod-parse` at error severity.
 - Requires the rule options to include non-empty `approvedMdxComponentNames` and non-empty `mdxPropsParserName`.
 
-## `TS-ASTRO-MDX-CONFIG-38`
+## `g3ts-astro-mdx/no-raw-mdx-images`
 
 - Requires ESLint MDX lane to enforce `astro-pipeline/no-raw-mdx-images` at error severity.
 - Requires non-empty `approvedMdxImageComponents`.
@@ -181,9 +181,9 @@ Add Astro MDX config checks:
 
 Existing checks already cover the execution path:
 
-- `TS-ASTRO-SETUP-CONFIG-02` requires `astro check`.
-- `TS-ASTRO-SETUP-CONFIG-33` requires `eslint`.
-- `TS-ASTRO-SEO-CONFIG-13` requires `astro build` with Nuasite.
+- `g3ts-astro-setup/astro-check-present` requires `astro check`.
+- `g3ts-astro-setup/lint-script` requires `eslint`.
+- `g3ts-astro-seo/nuasite-checks` requires `astro build` with Nuasite.
 
 The new MDX validation depends on `astro build` rendering every static MDX page. If an MDX article passes malformed props into an `Article*` wrapper, Zod throws during render and `astro build` fails.
 

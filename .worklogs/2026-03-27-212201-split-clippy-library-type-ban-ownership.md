@@ -26,7 +26,7 @@ That overlap makes the rule inventory noisier and weakens ownership clarity. It 
   - Remove `RS-CLIPPY-14` and let `05` own everything — rejected because the plan intentionally split the library-profile concern into its own rule.
 
 ### Keep profile-aware expectations for other consumers
-- **Chose:** Preserve `expected_type_bans(profile_name, garde_enabled)` for rules that really need the profile-expanded set (`RS-CLIPPY-07`, `RS-CLIPPY-13`, etc.), while adding the narrower helper for `RS-CLIPPY-05`.
+- **Chose:** Preserve `expected_type_bans(profile_name, garde_enabled)` for rules that really need the profile-expanded set (`RS-CLIPPY-07`, `g3rs-clippy/local-policy-root`, etc.), while adding the narrower helper for `RS-CLIPPY-05`.
 - **Why:** The family still needs profile-expanded sets for baseline-completeness and “extra ban” logic. Only the base missing-type rule needed narrowing.
 - **Alternatives considered:**
   - Rename everything and refactor all callers in one big pass — rejected because the concrete bug was isolated and did not justify broader churn.
@@ -41,7 +41,7 @@ That overlap makes the rule inventory noisier and weakens ownership clarity. It 
 - `RS-CLIPPY-05` now owns the base required type-ban surface only.
 - `RS-CLIPPY-14` remains the sole owner of library-only global-state type bans.
 - `RS-CLIPPY-07` still uses the profile-expanded set so library-only bans do not get mislabeled as “extra” in library roots.
-- `RS-CLIPPY-13` still uses the profile-expanded set so local library policy roots must remain self-contained.
+- `g3rs-clippy/local-policy-root` still uses the profile-expanded set so local library policy roots must remain self-contained.
 
 This is the cleaner rule split:
 - generic baseline presence in `05`
@@ -58,8 +58,8 @@ This is the cleaner rule split:
 
 ## Open Questions / Future Considerations
 - There may be similar ownership overlap elsewhere in the family, especially between:
-  - `RS-CLIPPY-08` vs `RS-CLIPPY-15` for missing-vs-trivial reason quality
-  - `RS-CLIPPY-13` vs the per-rule threshold/bool checks for local policy roots
+  - `RS-CLIPPY-08` vs `g3rs-clippy/no-op-placeholder` for missing-vs-trivial reason quality
+  - `g3rs-clippy/local-policy-root` vs the per-rule threshold/bool checks for local policy roots
 - The next attack pass should keep looking for duplicated responsibility, not just parser holes.
 
 ## Key Files for Context
@@ -73,7 +73,7 @@ This is the cleaner rule split:
 ## Next Steps / Continuation Plan
 1. Continue the `RS-CLIPPY` attack pass on remaining policy rules:
    - `RS-CLIPPY-16`
-   - `RS-CLIPPY-CONFIG-15`
+   - `g3rs-clippy/avoid-breaking-exported-api`
    - `RS-CLIPPY-19`
    - `RS-CLIPPY-20`
 2. Look specifically for:

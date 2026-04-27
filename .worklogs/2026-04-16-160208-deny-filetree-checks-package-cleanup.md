@@ -9,7 +9,7 @@ Decisions made
   - Rejected: keeping the wrapper and waiving its findings.
 - Added a real `crates/test_support` crate and moved the old runtime-local `test_support.rs` there.
   - Why: sidecars must not import sibling local modules from runtime.
-  - Rejected: leaving `test_support.rs` in runtime and patching around `RS-TEST-FILETREE-03`.
+  - Rejected: leaving `test_support.rs` in runtime and patching around `g3rs-test/runtime-assertions-split`.
 - Kept the approved file-module sidecar shape with:
   - `#[path = "..._tests/mod.rs"]`
   - owned sidecar module names such as `run_tests`

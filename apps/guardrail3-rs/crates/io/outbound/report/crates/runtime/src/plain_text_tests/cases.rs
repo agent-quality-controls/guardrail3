@@ -9,7 +9,7 @@ fn renderer_hides_inventory_by_default() {
             family: SupportedFamily::Fmt,
             results: vec![
                 G3CheckResult::new(
-                    "RS-FMT-CONFIG-01".to_owned(),
+                    "g3rs-fmt/rustfmt-required-settings".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -18,7 +18,7 @@ fn renderer_hides_inventory_by_default() {
                 )
                 .into_inventory(),
                 G3CheckResult::new(
-                    "RS-FMT-CONFIG-02".to_owned(),
+                    "g3rs-fmt/rustfmt-extra-settings-inventory".to_owned(),
                     G3Severity::Warn,
                     "warn".to_owned(),
                     "warn".to_owned(),
@@ -41,7 +41,7 @@ fn renderer_reports_no_findings_when_all_results_are_hidden() {
             family: SupportedFamily::Fmt,
             results: vec![
                 G3CheckResult::new(
-                    "RS-FMT-CONFIG-01".to_owned(),
+                    "g3rs-fmt/rustfmt-required-settings".to_owned(),
                     G3Severity::Info,
                     "inventory".to_owned(),
                     "inventory".to_owned(),
@@ -64,7 +64,7 @@ fn renderer_includes_rule_message() {
         runs: vec![FamilyRun {
             family: SupportedFamily::Deny,
             results: vec![G3CheckResult::new(
-                "RS-DENY-CONFIG-27".to_owned(),
+                "g3rs-deny/wrappers".to_owned(),
                 G3Severity::Warn,
                 "managed ban wrappers changed".to_owned(),
                 "`deny.toml` ban `regex` adds local wrappers `tree-sitter`.".to_owned(),

@@ -12,22 +12,22 @@ All of these read parsed `[package]` fields from Cargo.toml. They currently use 
 
 | Old ID | New ID | What it checks |
 |--------|--------|----------------|
-| RS-PUB-01 | RS-RELEASE-CONFIG-01 | `[package].description` present |
-| RS-PUB-02 | RS-RELEASE-CONFIG-02 | `[package].license` or `license-file` present |
-| RS-PUB-03 | RS-RELEASE-CONFIG-03 | `[package].repository` present |
-| RS-PUB-06 | RS-RELEASE-CONFIG-04 | `[package].keywords` present (1-5 entries) |
-| RS-PUB-07 | RS-RELEASE-CONFIG-05 | `[package].categories` present |
-| RS-PUB-08 | RS-RELEASE-CONFIG-06 | `[package].version` is valid semver |
-| RS-PUB-13 | RS-RELEASE-CONFIG-07 | `[package.metadata.docs.rs]` present (libraries only) |
-| RS-BIN-03 | RS-RELEASE-CONFIG-08 | `[package.metadata.binstall]` present (binaries only) |
-| RS-RELEASE-11 | RS-RELEASE-CONFIG-09 | Accidentally publishable (no `publish = false` but missing description+license+repo) |
+| RS-PUB-01 | g3rs-release/description-present | `[package].description` present |
+| RS-PUB-02 | g3rs-release/license-present | `[package].license` or `license-file` present |
+| RS-PUB-03 | g3rs-release/repository-present | `[package].repository` present |
+| RS-PUB-06 | g3rs-release/keywords-present | `[package].keywords` present (1-5 entries) |
+| RS-PUB-07 | g3rs-release/categories-present | `[package].categories` present |
+| RS-PUB-08 | g3rs-release/valid-semver | `[package].version` is valid semver |
+| RS-PUB-13 | g3rs-release/docs-rs-metadata | `[package.metadata.docs.rs]` present (libraries only) |
+| RS-BIN-03 | g3rs-release/binstall-metadata | `[package.metadata.binstall]` present (binaries only) |
+| RS-RELEASE-11 | g3rs-release/accidentally-publishable | Accidentally publishable (no `publish = false` but missing description+license+repo) |
 
 ### Per-repo checks (need release-plz.toml and cliff.toml)
 
 | Old ID | New ID | What it checks |
 |--------|--------|----------------|
-| RS-RELEASE-03 | RS-RELEASE-CONFIG-10 | release-plz.toml baseline (workspace section, changelog_config, git_release_enable) |
-| RS-RELEASE-04 | RS-RELEASE-CONFIG-11 | cliff.toml baseline (git section, conventional_commits, commit_parsers) |
+| RS-RELEASE-03 | g3rs-release/release-plz-baseline | release-plz.toml baseline (workspace section, changelog_config, git_release_enable) |
+| RS-RELEASE-04 | g3rs-release/cliff-baseline | cliff.toml baseline (git section, conventional_commits, commit_parsers) |
 
 ### NOT extracting (mixed with filetree/tool)
 
@@ -94,42 +94,42 @@ packages/g3rs-release-config-checks/
 
 ## Check logic (what each rule reads from CargoToml)
 
-### RS-RELEASE-CONFIG-01: description present
+### g3rs-release/description-present: description present
 ```rust
 cargo.package.as_ref().and_then(|p| p.description.as_ref()).is_some()
 ```
 
-### RS-RELEASE-CONFIG-02: license present
+### g3rs-release/license-present: license present
 ```rust
 cargo.package.as_ref().map_or(false, |p| {
     p.license.is_some() || p.license_file.is_some()
 })
 ```
 
-### RS-RELEASE-CONFIG-03: repository present
+### g3rs-release/repository-present: repository present
 ```rust
 cargo.package.as_ref().and_then(|p| p.repository.as_ref()).is_some()
 ```
 
-### RS-RELEASE-CONFIG-04: keywords (1-5)
+### g3rs-release/keywords-present: keywords (1-5)
 ```rust
 cargo.package.as_ref().and_then(|p| p.keywords.as_ref()).map(|k| k.len())
 // Error if None or 0 or >5
 ```
 
-### RS-RELEASE-CONFIG-05: categories present
+### g3rs-release/categories-present: categories present
 ```rust
 cargo.package.as_ref().and_then(|p| p.categories.as_ref()).map(|c| c.len())
 // Error if None or 0
 ```
 
-### RS-RELEASE-CONFIG-06: valid semver
+### g3rs-release/valid-semver: valid semver
 ```rust
 // Check [package].version is valid semver
 // Handle workspace inheritance (version.workspace = true → skip, it's valid)
 ```
 
-### RS-RELEASE-CONFIG-07: docs.rs metadata (libraries only)
+### g3rs-release/docs-rs-metadata: docs.rs metadata (libraries only)
 ```rust
 // Only check if crate has [lib] section
 cargo.package.as_ref()
@@ -138,7 +138,7 @@ cargo.package.as_ref()
     .is_some()
 ```
 
-### RS-RELEASE-CONFIG-08: binstall metadata (binaries only)
+### g3rs-release/binstall-metadata: binstall metadata (binaries only)
 ```rust
 // Only check if crate has [[bin]] entries
 cargo.package.as_ref()
@@ -147,7 +147,7 @@ cargo.package.as_ref()
     .is_some()
 ```
 
-### RS-RELEASE-CONFIG-09: accidentally publishable
+### g3rs-release/accidentally-publishable: accidentally publishable
 ```rust
 // Warn if publish != false AND missing all of: description, license, repository
 let publishable = cargo.package.as_ref()
@@ -155,7 +155,7 @@ let publishable = cargo.package.as_ref()
 // If publishable && !description && !license && !repository → error
 ```
 
-### RS-RELEASE-CONFIG-10: release-plz.toml baseline
+### g3rs-release/release-plz-baseline: release-plz.toml baseline
 ```rust
 // If input.release_plz is Some(value):
 // Check value["workspace"] exists
@@ -163,7 +163,7 @@ let publishable = cargo.package.as_ref()
 // Check value["workspace"]["git_release_enable"] == true
 ```
 
-### RS-RELEASE-CONFIG-11: cliff.toml baseline
+### g3rs-release/cliff-baseline: cliff.toml baseline
 ```rust
 // If input.cliff is Some(value):
 // Check value["git"]["conventional_commits"] == true

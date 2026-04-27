@@ -28,4 +28,4 @@ Next steps
 
 - Commit this package cleanup as a standalone topology-ingestion change.
 - Rerun the full package-root validate sweep, including warnings, to confirm whether only the parser warning-only packages remain.
-- If parser warning-only packages still remain, clean those last `RS-CODE-SOURCE-04` escape-hatch warnings so every package root is fully clean under all families.
+- If parser warning-only packages still remain, clean those last `g3rs-code/ast-04-item-level-allow-with-reason` escape-hatch warnings so every package root is fully clean under all families.

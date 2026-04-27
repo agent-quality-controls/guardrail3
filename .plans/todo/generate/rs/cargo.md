@@ -54,13 +54,13 @@ The generator must:
 - checker family: `RS-CARGO`
 
 The generated result must satisfy:
-- `RS-CARGO-CONFIG-01`
-- `RS-CARGO-CONFIG-02`
+- `g3rs-cargo/workspace-lints`
+- `g3rs-cargo/lint-levels`
 - `RS-CARGO-03`
-- `RS-CARGO-CONFIG-04`
-- `RS-CARGO-CONFIG-05`
-- `RS-CARGO-CONFIG-06`
-- `RS-CARGO-CONFIG-07`
+- `g3rs-cargo/priority-order`
+- `g3rs-cargo/resolver`
+- `g3rs-cargo/disallowed-macros-deny`
+- `g3rs-cargo/approved-allow-inventory`
 - `RS-CARGO-12`
 - `RS-CARGO-13`
 - `RS-CARGO-15`

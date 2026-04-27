@@ -1,8 +1,8 @@
-mod rs_deny_config_01_deprecated_advisories;
-mod rs_deny_config_02_advisories_baseline;
-mod rs_deny_config_03_stricter_advisories_inventory;
-mod rs_deny_config_04_graph_all_features;
-mod rs_deny_config_05_graph_no_default_features;
+mod advisories_baseline;
+mod deprecated_advisories;
+mod graph_all_features;
+mod graph_no_default_features;
 mod run;
+mod stricter_advisories_inventory;
 
 pub(crate) use run::check;

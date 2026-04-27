@@ -1,7 +1,7 @@
 Goal
 - Fix the app packages so test rules pass without changing rules.
 - Reshape `cli`, `report`, and `validate-command` from single-crate packages with nested `assertions/` into package-style layouts with sibling member crates under `crates/`.
-- Move remaining app sidecar proof into shared assertions crates so RS-TEST-SOURCE-07 stops firing.
+- Move remaining app sidecar proof into shared assertions crates so g3rs-test/real-proof-site stops firing.
 
 Approach
 - Read current manifests and source/tests for `cli`, `report`, and `validate-command`.

@@ -1,5 +1,5 @@
 # Summary
-RS-ARCH-CONFIG-07 was counting dev-dependencies as if they were production coupling. I split arch dependency counts into production and dev counts, then made the hard split rule use only production dependencies.
+g3rs-arch/dependency-count-split was counting dev-dependencies as if they were production coupling. I split arch dependency counts into production and dev counts, then made the hard split rule use only production dependencies.
 
 # Decisions made
 - Count `[dependencies]` and `[build-dependencies]` as production coupling because they affect the real crate boundary.

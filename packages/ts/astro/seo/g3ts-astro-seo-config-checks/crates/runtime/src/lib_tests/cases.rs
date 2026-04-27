@@ -5,16 +5,16 @@ fn golden_seo_package_reports_owned_ids() {
     assertions::assert_runtime_check_exact_ids(
         &super::helpers::golden(),
         &[
-            "TS-ASTRO-SEO-CONFIG-13",
-            "TS-ASTRO-SEO-CONFIG-14",
-            "TS-ASTRO-SEO-CONFIG-15",
-            "TS-ASTRO-SEO-CONFIG-16",
-            "TS-ASTRO-SEO-CONFIG-17",
-            "TS-ASTRO-SEO-CONFIG-22",
-            "TS-ASTRO-SEO-CONFIG-24",
-            "TS-ASTRO-SEO-CONFIG-29",
-            "TS-ASTRO-SEO-CONFIG-31",
-            "TS-ASTRO-SEO-CONFIG-32",
+            "g3ts-astro-seo/nuasite-checks",
+            "g3ts-astro-seo/sitemap-integration",
+            "g3ts-astro-seo/robots-integration",
+            "g3ts-astro-seo/llms-txt",
+            "g3ts-astro-seo/seo-packages",
+            "g3ts-astro-seo/structured-data-check",
+            "g3ts-astro-seo/strict-policy-paths",
+            "g3ts-astro-seo/policy-helper-surfaces",
+            "g3ts-astro-seo/metadata-helper-rule",
+            "g3ts-astro-seo/json-ld-helper-rule",
         ],
     );
 }

@@ -6,7 +6,7 @@ Finished the current deps package gaps after proving them with failing tests. Th
 
 - Fixed hybrid-root membership at the workspace-member-set builder.
   - Why: the bug was introduced before dependency normalization, so the correct fix was to include the hybrid root in the member directory set instead of adding a special case in dependency resolution.
-- Added `g3rs-deps-filetree-checks` for `RS-DEPS-FILETREE-09` and `RS-DEPS-FILETREE-10`.
+- Added `g3rs-deps-filetree-checks` for `g3rs-deps/cargo-lock-present` and `g3rs-deps/gitignore-not-ignoring-cargo-lock`.
   - Why: these checks belong to a separate filetree lane, not to config checks or ingestion glue.
 - Kept deps fail-closed ownership in package ingestion.
   - Why: unreadable, malformed, and normalization-blocking inputs are boundary failures that should stop bad deps inputs before they reach the pure checks.

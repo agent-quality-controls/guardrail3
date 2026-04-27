@@ -4,7 +4,7 @@ Runs the `arch` family source checks.
 
 Current rules:
 
-- `RS-ARCH-SOURCE-02` lib.rs must be facade-only
-- `RS-ARCH-SOURCE-04` mod.rs must be facade-only
-- `RS-ARCH-SOURCE-08` facade exports must be feature-gated
-- `RS-ARCH-SOURCE-09` no `#[path = ...]`
+- `g3rs-arch/lib-facade-only` lib.rs must be facade-only
+- `g3rs-arch/mod-facade-only` mod.rs must be facade-only
+- `g3rs-arch/feature-gated-exports` facade exports must be feature-gated
+- `g3rs-arch/no-path-attr` no `#[path = ...]`

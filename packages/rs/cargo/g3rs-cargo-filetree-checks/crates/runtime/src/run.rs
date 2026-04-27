@@ -5,9 +5,9 @@ pub fn check(input: &G3RsCargoFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for missing in &input.missing_members {
-        crate::rs_cargo_filetree_10_missing_member_cargo::check(missing, &mut results);
+        crate::missing_member_cargo::check(missing, &mut results);
     }
-    crate::rs_cargo_filetree_10_missing_member_cargo::check_inventory(
+    crate::missing_member_cargo::check_inventory(
         input.root.kind,
         &input.root.cargo_rel_path,
         input.root.members_parse_error,
@@ -16,9 +16,9 @@ pub fn check(input: &G3RsCargoFileTreeChecksInput) -> Vec<G3CheckResult> {
     );
 
     for failure in &input.input_failures {
-        crate::rs_cargo_filetree_14_input_failures::check(failure, &mut results);
+        crate::input_failures::check(failure, &mut results);
     }
-    crate::rs_cargo_filetree_14_input_failures::check_inventory(
+    crate::input_failures::check_inventory(
         input.root.kind,
         &input.root.cargo_rel_path,
         input.root.rust_policy_rel_path.as_deref(),

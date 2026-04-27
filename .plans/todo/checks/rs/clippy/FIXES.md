@@ -42,7 +42,7 @@ Primary implementation roots:
 
 - thresholds distinguish missing from malformed non-integer values
 - `RS-CLIPPY-16` distinguishes missing from non-bool `avoid-breaking-exported-api`
-- `RS-CLIPPY-CONFIG-15` distinguishes missing from wrong-type managed test-relaxation keys
+- `g3rs-clippy/avoid-breaking-exported-api` distinguishes missing from wrong-type managed test-relaxation keys
 
 ### 6. `RS-CLIPPY-04/05` completeness proofs are exact
 
@@ -76,12 +76,12 @@ Primary implementation roots:
 - threshold rules no longer fan out duplicate parse errors for one malformed config
 - parseability is owned once at family orchestration time
 
-### 11. `RS-CLIPPY-13` defers malformed policy-context ownership to `RS-CLIPPY-23`
+### 11. `g3rs-clippy/local-policy-root` defers malformed policy-context ownership to `RS-CLIPPY-23`
 
 - local-policy-root baseline checks do not invent a second malformed-policy owner
 - sidecars prove that malformed policy context is single-owned by `RS-CLIPPY-23`
 
-### 12. `RS-CLIPPY-06/07` emit positive clean inventory
+### 12. `g3rs-clippy/package-native-policy/07` emit positive clean inventory
 
 - the extra-ban inventory rules now emit explicit clean-path info results when the managed section is parseable and contains no extras
 - broken inputs still short-circuit to the owning malformed-input rule instead of inventing clean inventory

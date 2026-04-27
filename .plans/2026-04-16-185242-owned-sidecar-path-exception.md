@@ -8,8 +8,8 @@ Goal
 
 Approach
 - Add rule tests first for the allowed shape and close nearby rejects.
-- Update `RS-ARCH-SOURCE-09` so it exempts only the exact owned sidecar path pattern.
-- Update `RS-TEST-FILETREE-02` so it recognizes the same exact owned sidecar declaration.
+- Update `g3rs-arch/no-path-attr` so it exempts only the exact owned sidecar path pattern.
+- Update `g3rs-test/owned-sidecar-shape` so it recognizes the same exact owned sidecar declaration.
 - Rerun the two rule workspaces, then rerun the package that exposed the contradiction.
 
 Key decisions

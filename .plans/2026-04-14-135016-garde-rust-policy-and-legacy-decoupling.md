@@ -8,8 +8,8 @@ Approach
 
 - Add proving tests first in `g3rs-garde-ingestion` and `g3rs-garde-source-checks`:
   - `guardrail3-rs.toml` missing does not block active garde checks.
-  - malformed or unreadable `guardrail3-rs.toml` surfaces through `RS-GARDE-SOURCE-10`.
-  - `RS-GARDE-SOURCE-04` reads waivers from `guardrail3-rs.toml`.
+  - malformed or unreadable `guardrail3-rs.toml` surfaces through `g3rs-garde/input-failures`.
+  - `g3rs-garde/ast-04-query-as-inventory` reads waivers from `guardrail3-rs.toml`.
   - `RS-GARDE-SOURCE-08` no longer exists in routing or tests.
   - config tests no longer depend on deleted `guardrail3-domain-modules`.
 - Replace old config selection in `g3rs-garde-ingestion`:

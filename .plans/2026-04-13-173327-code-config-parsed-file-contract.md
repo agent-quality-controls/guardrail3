@@ -1,6 +1,6 @@
 Goal
 
-Replace the `code` config public input contract with parsed config-file variants only. Remove raw config-file content from the public boundary while preserving `RS-CODE-CONFIG-07` exception-comment inventory and `RS-CODE-CONFIG-12` Cargo lint checks.
+Replace the `code` config public input contract with parsed config-file variants only. Remove raw config-file content from the public boundary while preserving `g3rs-code/exception-comment-inventory` exception-comment inventory and `g3rs-code/unsafe-code-lint` Cargo lint checks.
 
 Approach
 
@@ -12,12 +12,12 @@ Approach
    - `CargoToml`
    - `RustfmtToml`
    - `RustToolchainToml`
-3. Add a typed `G3RsCodeExceptionComment` input surface so `RS-CODE-CONFIG-07` can consume extracted comment facts instead of raw file strings.
+3. Add a typed `G3RsCodeExceptionComment` input surface so `g3rs-code/exception-comment-inventory` can consume extracted comment facts instead of raw file strings.
 4. Update `g3rs-code-ingestion` to parse supported config files once and to extract exception comments during ingestion.
 5. Decide how to handle legacy bare `rust-toolchain`:
    - do not keep it as raw text in the public contract
    - either exclude it from `code` config inputs or introduce a typed legacy representation if one already exists locally
-6. Update `RS-CODE-CONFIG-07` and `RS-CODE-CONFIG-12` to consume the new typed boundary.
+6. Update `g3rs-code/exception-comment-inventory` and `g3rs-code/unsafe-code-lint` to consume the new typed boundary.
 7. Add tests that fail under the old contract:
    - config input no longer carries raw file content
    - exception comment inventory still works across supported parsed config files

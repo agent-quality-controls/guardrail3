@@ -78,7 +78,7 @@ fn run_command_uses_real_eslint_wiring_for_missing_config() {
         &output.stdout,
         &output.stderr,
         output.exit_code,
-        "== eslint ==\n[Error] TS-ESLINT-CONFIG-01 - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] TS-TSCONFIG-CONFIG-01 - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] TS-JSCPD-CONFIG-01 - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n",
+        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n",
         "",
         1,
     );
@@ -114,7 +114,7 @@ fn run_command_normalizes_relative_validate_path_before_crawling() {
         &output.stdout,
         &output.stderr,
         output.exit_code,
-        "== eslint ==\n[Error] TS-ESLINT-CONFIG-01 - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] TS-TSCONFIG-CONFIG-01 - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] TS-JSCPD-CONFIG-01 - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n",
+        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n",
         "",
         1,
     );
@@ -139,7 +139,7 @@ fn run_command_uses_real_arch_wiring_for_missing_entrypoint() {
         &output.stdout,
         &output.stderr,
         output.exit_code,
-        "== arch ==\n[Error] TS-ARCH-CONFIG-03 package.json declared facade entrypoint is not canonical\n  Declared facade entrypoint `src/public.ts` is not canonical. Use `src/index.ts`, `src/index.tsx`, `index.ts`, or `index.tsx`.\n[Error] TS-ARCH-FILETREE-01 package.json declared facade entrypoint missing\n  Declared facade entrypoint `src/public.ts` does not exist. Create the facade file or fix the manifest.\n",
+        "== arch ==\n[Error] g3ts-arch/declared-entrypoints-canonical package.json declared facade entrypoint is not canonical\n  Declared facade entrypoint `src/public.ts` is not canonical. Use `src/index.ts`, `src/index.tsx`, `index.ts`, or `index.tsx`.\n[Error] g3ts-arch/declared-entrypoint-exists package.json declared facade entrypoint missing\n  Declared facade entrypoint `src/public.ts` does not exist. Create the facade file or fix the manifest.\n",
         "",
         1,
     );
@@ -175,7 +175,7 @@ fn run_command_uses_real_apparch_wiring_for_forbidden_types_dependency() {
         &output.stdout,
         &output.stderr,
         output.exit_code,
-        "== apparch ==\n[Error] TS-APPARCH-CONFIG-01 src/types/user.ts types layer imports forbidden app layer\n  `src/types/user.ts` in `types` imports `src/logic/format_user.ts` in `logic`. Keep `types` passive and move behavior or framework coupling outward.\n",
+        "== apparch ==\n[Error] g3ts-apparch/types-dependency-direction src/types/user.ts types layer imports forbidden app layer\n  `src/types/user.ts` in `types` imports `src/logic/format_user.ts` in `logic`. Keep `types` passive and move behavior or framework coupling outward.\n",
         "",
         1,
     );
@@ -215,12 +215,11 @@ fn run_command_uses_structure_runner_for_astro_family() {
     );
     let mut last_index = 0;
     for prefix in [
-        "TS-ASTRO-SETUP-CONFIG-",
-        "TS-ASTRO-SETUP-FILETREE-",
-        "TS-ASTRO-CONTENT-CONFIG-",
-        "TS-ASTRO-MDX-CONFIG-",
-        "TS-ASTRO-SEO-CONFIG-",
-        "TS-ASTRO-STATE-FILETREE-",
+        "g3ts-astro-setup/",
+        "g3ts-astro-content/",
+        "g3ts-astro-mdx/",
+        "g3ts-astro-seo/",
+        "g3ts-astro-state/",
     ] {
         let relative_index = output.stdout[last_index..]
             .find(prefix)

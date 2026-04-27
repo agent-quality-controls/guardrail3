@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed `RS-TEST-SOURCE-17` so local assertion helpers reached through `self::helper()` or `crate::helper()` now promote wrapper functions into `local_assertion_helpers`. External harnesses that call those wrappers are now classified as direct assertion use instead of slipping through as clean.
+Fixed `g3rs-test/external-harnesses-use-assertions` so local assertion helpers reached through `self::helper()` or `crate::helper()` now promote wrapper functions into `local_assertion_helpers`. External harnesses that call those wrappers are now classified as direct assertion use instead of slipping through as clean.
 
 ## Decisions made
 

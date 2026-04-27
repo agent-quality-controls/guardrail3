@@ -13,7 +13,7 @@ Approach
 
 Key decisions
 
-- Keep the centralized parser/fs allows visible as `RS-CODE-SOURCE-04` warnings if that is the only signal left.
+- Keep the centralized parser/fs allows visible as `g3rs-code/ast-04-item-level-allow-with-reason` warnings if that is the only signal left.
 - Keep the types crate passive. If a type-surface rule remains after the split, prefer exact waivers or schema-faithful restructuring over compatibility shims.
 - Use the same clean parser shape already established in the other cleaned parser packages.
 

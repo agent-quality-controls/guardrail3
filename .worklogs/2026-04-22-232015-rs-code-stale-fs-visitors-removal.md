@@ -12,5 +12,5 @@ Key files for context
 - .worklogs/2026-04-22-231722-rs-code-source-15-21-lexical-scope-fix.md
 
 Next steps
-- Land the `RS-TEST-SOURCE-17` owned-assertions alias-chain fix from the active agent.
+- Land the `g3rs-test/external-harnesses-use-assertions` owned-assertions alias-chain fix from the active agent.
 - Land the two active parser/hooks bug fixes: function-tail brace parsing and escaped-hash comment parsing.

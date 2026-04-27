@@ -29,7 +29,7 @@ That matched the handoff snapshot exactly: unit tests were green, `RS-ARCH` was 
 
 ### Self-host the family with a root `rust-toolchain.toml`
 - **Chose:** Add `apps/guardrail3/crates/app/rs/families/toolchain/rust-toolchain.toml` with `stable` plus `clippy` and `rustfmt`.
-- **Why:** Without an owned root toolchain file, the family can never validate itself under `RS-TOOLCHAIN-01` or `RS-TOOLCHAIN-CONFIG-01`.
+- **Why:** Without an owned root toolchain file, the family can never validate itself under `g3rs-toolchain/root-toolchain-config-exists` or `g3rs-toolchain/channel-and-components`.
 - **Alternatives considered:**
   - Leave the family root without a toolchain file and accept a permanent self-failure — rejected because that makes the family non-self-hosting.
   - Suppress self-validation for this family — rejected because it would undercut the point of stabilization.
@@ -49,15 +49,15 @@ That matched the handoff snapshot exactly: unit tests were green, `RS-ARCH` was 
   - Add a single generic helper only — rejected because the project trend is one reusable assertion module per rule owner.
 
 ### Fail closed on malformed active toolchain inputs
-- **Chose:** Make `RS-TOOLCHAIN-CONFIG-01` error on non-string `channel` values and invalid `components` shapes, rather than degrading those cases into missing-channel or missing-component signals.
+- **Chose:** Make `g3rs-toolchain/channel-and-components` error on non-string `channel` values and invalid `components` shapes, rather than degrading those cases into missing-channel or missing-component signals.
 - **Why:** Malformed active inputs should not weaken enforcement; the plan explicitly calls out malformed required inputs as fail-closed surfaces.
 - **Alternatives considered:**
   - Treat those as warnings — rejected because malformed active config is not merely incomplete policy, it is unreliable input.
   - Ignore invalid entries and inventory what still parses — rejected because that silently weakens the family.
 
-### Fail closed when `RS-TOOLCHAIN-CONFIG-02` cannot trust root `Cargo.toml`
+### Fail closed when `g3rs-toolchain/msrv-consistency` cannot trust root `Cargo.toml`
 - **Chose:** Track root `Cargo.toml` presence explicitly and error when the file is missing or malformed for pinned-toolchain MSRV comparison; also error on invalid `rust-version` values.
-- **Why:** `RS-TOOLCHAIN-CONFIG-02` exists to compare pinned stable toolchain against declared MSRV. If root `Cargo.toml` is missing or unreadable, inventing an “MSRV not declared” inventory result is misleading.
+- **Why:** `g3rs-toolchain/msrv-consistency` exists to compare pinned stable toolchain against declared MSRV. If root `Cargo.toml` is missing or unreadable, inventing an “MSRV not declared” inventory result is misleading.
 - **Alternatives considered:**
   - Keep treating missing root `Cargo.toml` as “no rust-version declared” — rejected because it turns broken input into a benign informational state.
   - Skip the rule entirely on missing/malformed Cargo input — rejected because that is exactly the fail-open hole the handoff warned against.
@@ -95,8 +95,8 @@ The family now self-hosts both the structural family pattern and the root toolch
   - `.worklogs/2026-03-27-192800-inventory-inline-unused-crate-deps-exemptions.md`
 
 ## Open Questions / Future Considerations
-- The handoff’s “expected final state” said `RS-TOOLCHAIN` should be `0 errors, 0 warnings, 0 info`, but under the current rule contract and `--inventory`, a valid self-hosted family necessarily emits info inventory for `RS-TOOLCHAIN-01` and the positive `RS-TOOLCHAIN-CONFIG-01` checks. That success criterion should probably be restated as `0 errors, 0 warnings`.
-- `RS-TOOLCHAIN-CONFIG-02` still intentionally does nothing for unpinned `stable` because the rule only compares pinned stable toolchain vs MSRV. If the project later wants stronger stable/MSRV guarantees, that would be a policy expansion rather than a detector bug fix.
+- The handoff’s “expected final state” said `RS-TOOLCHAIN` should be `0 errors, 0 warnings, 0 info`, but under the current rule contract and `--inventory`, a valid self-hosted family necessarily emits info inventory for `g3rs-toolchain/root-toolchain-config-exists` and the positive `g3rs-toolchain/channel-and-components` checks. That success criterion should probably be restated as `0 errors, 0 warnings`.
+- `g3rs-toolchain/msrv-consistency` still intentionally does nothing for unpinned `stable` because the rule only compares pinned stable toolchain vs MSRV. If the project later wants stronger stable/MSRV guarantees, that would be a policy expansion rather than a detector bug fix.
 - There is still no test that drives the full family through `crate::check(...)` with a synthetic `ProjectTree`; the current sidecars are rule-local. That matches family conventions, but a narrow top-level smoke test could still be useful.
 
 ## Key Files for Context

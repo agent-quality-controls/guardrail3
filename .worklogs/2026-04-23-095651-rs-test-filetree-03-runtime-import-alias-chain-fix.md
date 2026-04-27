@@ -1,5 +1,5 @@
 Summary
-- Fixed `RS-TEST-FILETREE-03` so assertions modules that reach `check_test_tree()` through chained import aliases are still reported.
+- Fixed `g3rs-test/runtime-assertions-split` so assertions modules that reach `check_test_tree()` through chained import aliases are still reported.
 - Added a red regression for `use demo_runtime::{self as rt}; use self::rt as again; again::check_test_tree()` and verified the package workspace plus `g3rs validate`.
 
 Decisions made

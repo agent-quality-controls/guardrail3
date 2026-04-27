@@ -4,7 +4,7 @@ Runs the `test` family structural file-tree checks on one root-scoped test bundl
 
 Current rules:
 
-- `RS-TEST-FILETREE-02` owned sidecar shape only
-- `RS-TEST-FILETREE-03` runtime/assertions split and boundary enforcement
-- `RS-TEST-FILETREE-10` required structural inputs fail closed
-- `RS-TEST-FILETREE-18` `test_support` stays generic
+- `g3rs-test/owned-sidecar-shape` owned sidecar shape only
+- `g3rs-test/runtime-assertions-split` runtime/assertions split and boundary enforcement
+- `g3rs-test/filetree-input-failures` required structural inputs fail closed
+- `g3rs-test/test-support-generic` `test_support` stays generic

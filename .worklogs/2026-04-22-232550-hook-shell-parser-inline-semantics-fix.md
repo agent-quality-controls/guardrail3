@@ -16,5 +16,5 @@ Key files for context
 - .plans/2026-04-22-232054-hook-shell-escaped-hash-parser-fix.md
 
 Next steps
-- Finish and commit the `RS-HOOKS-SOURCE-15` discarded-trigger gating fix.
+- Finish and commit the `g3rs-hooks/hook-rs-16-config-changes-trigger-validation` discarded-trigger gating fix.
 - Run another attack pass on hooks/parser after that commit lands.

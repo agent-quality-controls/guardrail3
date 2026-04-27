@@ -1,5 +1,5 @@
 ## Goal
-Fix RS-HOOKS-SOURCE-15 so a discarded trigger-like comparison line inside a branch does not count as guarded config-change coverage.
+Fix g3rs-hooks/hook-rs-16-config-changes-trigger-validation so a discarded trigger-like comparison line inside a branch does not count as guarded config-change coverage.
 
 ## Approach
 1. Add a red regression in `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/hook_rs_16_config_changes_trigger_validation/rule_tests/golden.rs` for a branch that runs a trigger-like comparison and validation on the same line with the comparison result discarded.

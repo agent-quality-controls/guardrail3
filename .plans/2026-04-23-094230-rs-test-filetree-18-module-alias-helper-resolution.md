@@ -1,5 +1,5 @@
 Goal:
-Fix RS-TEST-FILETREE-18 so module-alias helper calls like `h::fixture_path()` and `h::any_rule()` resolve to local helpers instead of being treated as generic public helpers.
+Fix g3rs-test/test-support-generic so module-alias helper calls like `h::fixture_path()` and `h::any_rule()` resolve to local helpers instead of being treated as generic public helpers.
 
 Approach:
 - Add red-first regressions in `rule_tests/cases.rs` using valid nested-module Rust with `use self::helpers as h;`.

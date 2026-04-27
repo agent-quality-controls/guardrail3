@@ -1,5 +1,5 @@
 Summary
-- Fixed a real `RS-TEST-SOURCE-07` false positive. The rule knew only part of the `define_result_assertions!` helper surface, so tests calling shared helpers like `assert_has_info` were misreported as having no shared proof step.
+- Fixed a real `g3rs-test/real-proof-site` false positive. The rule knew only part of the `define_result_assertions!` helper surface, so tests calling shared helpers like `assert_has_info` were misreported as having no shared proof step.
 
 Decisions made
 - Kept the known-macro contract approach. Rejected cargo-package rewrites because the bug was in the stale rule-side helper surface.

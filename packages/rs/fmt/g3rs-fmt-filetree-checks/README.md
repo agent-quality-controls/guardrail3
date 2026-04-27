@@ -4,6 +4,6 @@ Filetree checks for the `fmt` family.
 
 Current scope:
 
-- `RS-FMT-FILETREE-01`: root rustfmt config exists
-- `RS-FMT-FILETREE-05`: nested rustfmt configs are forbidden
-- `RS-FMT-FILETREE-08`: `rustfmt.toml` and `.rustfmt.toml` conflict in the same directory
+- `g3rs-fmt/rustfmt-config-exists`: root rustfmt config exists
+- `g3rs-fmt/per-crate-override`: nested rustfmt configs are forbidden
+- `g3rs-fmt/dual-file-conflict`: `rustfmt.toml` and `.rustfmt.toml` conflict in the same directory

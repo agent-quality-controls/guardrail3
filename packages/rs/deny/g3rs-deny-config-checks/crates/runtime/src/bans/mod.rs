@@ -1,10 +1,10 @@
-mod rs_deny_config_06_multiple_versions_floor;
-mod rs_deny_config_07_highlight_inventory;
-mod rs_deny_config_08_allow_wildcard_paths;
-mod rs_deny_config_09_wildcards_inventory;
-mod rs_deny_config_16_tokio_full_ban;
-mod rs_deny_config_17_extra_feature_bans_inventory;
-mod rs_deny_config_20_duplicate_entries;
+mod allow_wildcard_paths;
+mod duplicate_entries;
+mod extra_feature_bans_inventory;
+mod highlight_inventory;
+mod multiple_versions_floor;
 mod run;
+mod tokio_full_ban;
+mod wildcards_inventory;
 
 pub(crate) use run::check;

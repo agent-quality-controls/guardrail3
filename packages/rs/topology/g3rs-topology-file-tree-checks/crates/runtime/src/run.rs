@@ -5,23 +5,23 @@ pub fn check(input: &G3RsTopologyFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     for failure in &input.input_failures {
-        crate::rs_topology_07_required_inputs_fail_closed::check(failure, &mut results);
+        crate::required_inputs_fail_closed::check(failure, &mut results);
     }
 
     for input in &input.nested_workspaces {
-        crate::rs_topology_11_no_nested_workspaces::check(input, &mut results);
+        crate::no_nested_workspaces::check(input, &mut results);
     }
 
     for input in &input.membership_issues {
-        crate::rs_topology_12_declared_workspace_members_only::check(input, &mut results);
+        crate::declared_workspace_members_only::check(input, &mut results);
     }
 
     for input in &input.escaping_member_paths {
-        crate::rs_topology_13_member_paths_must_not_escape_root::check(input, &mut results);
+        crate::member_paths_must_not_escape_root::check(input, &mut results);
     }
 
     for file in &input.illegal_family_files {
-        crate::rs_topology_16_workspace_local_file_placement::check(file, &mut results);
+        crate::workspace_local_file_placement::check(file, &mut results);
     }
 
     results

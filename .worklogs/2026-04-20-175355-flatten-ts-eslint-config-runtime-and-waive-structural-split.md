@@ -1,6 +1,6 @@
 Summary
 
-Flattened `g3ts-eslint-config-checks` runtime rules back to the crate root and added the standard `RS-ARCH-FILETREE-07` structural-split waiver for the runtime crate. The package now matches the existing rule-package pattern used elsewhere in guardrail3 and validates clean again.
+Flattened `g3ts-eslint-config-checks` runtime rules back to the crate root and added the standard `g3rs-arch/structural-split` structural-split waiver for the runtime crate. The package now matches the existing rule-package pattern used elsewhere in guardrail3 and validates clean again.
 
 Decisions made
 

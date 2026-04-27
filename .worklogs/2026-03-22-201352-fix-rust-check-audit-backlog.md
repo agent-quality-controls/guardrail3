@@ -8,9 +8,9 @@ This pass fixed the concrete audit findings left after the structural normalizat
 
 ## Context & Problem
 After `0ae75db`, the file layout was clean, but the adversarial audits still found real semantic bugs and test shortcuts:
-- `RS-DENY-CONFIG-20` and `RS-DENY-CONFIG-21` were inventorying malformed or reasonless exception entries as though they were valid.
+- `g3rs-deny/duplicate-entries` and `g3rs-deny/unknown-keys` were inventorying malformed or reasonless exception entries as though they were valid.
 - `RS-DENY-30` ignored project-specific wrappers for non-canonical bans and treated canonical empty-wrapper additions too loosely.
-- `RS-DENY-CONFIG-25` missed unknown keys inside nested escape-hatch tables.
+- `g3rs-deny/allow-override-channel` missed unknown keys inside nested escape-hatch tables.
 - `RS-DENY-26` only covered one ban-entry shape.
 - `RS-CLIPPY-*` threshold rules were still thin wrappers around one shared helper predicate in `clippy_support.rs`.
 - Many tests still asserted only “some result with this ID exists”, or used noisy shared fixtures, or routed through the family orchestrator rather than the specific rule surface.
@@ -42,11 +42,11 @@ The user explicitly asked to fix everything, not just high-severity issues, and 
   - Add a new rule ID — rejected because this is still a placement/shadowing concern and fits `RS-CLIPPY-12`.
 
 ### Align deny feature-ban enforcement with the generator baseline
-- **Chose:** Make `RS-DENY-CONFIG-18` enforce both `deny = ["full"]` and the canonical tokio `allow = [...]` set, and update the plan docs to match.
+- **Chose:** Make `g3rs-deny/skip-hygiene` enforce both `deny = ["full"]` and the canonical tokio `allow = [...]` set, and update the plan docs to match.
 - **Why:** The generator already treats the tokio feature policy as a concrete baseline. Ignoring the allow-list side left a drift hole between generator and checker.
 - **Alternatives considered:**
   - Keep only `full` as enforced and leave `allow` user-owned — rejected because the canonical generator already hardens the allow-list.
-  - Split the allow-list into a separate new rule — rejected for now because the current plan can cleanly carry the whole tokio feature policy in `RS-DENY-CONFIG-18`.
+  - Split the allow-list into a separate new rule — rejected for now because the current plan can cleanly carry the whole tokio feature policy in `g3rs-deny/skip-hygiene`.
 
 ### Replace deny generator-coupled fixtures with a handwritten adversarial baseline
 - **Chose:** Rewrite `canonical_deny_toml_service()` in deny test support as a hand-written baseline string instead of calling `build_deny_toml(...)`.
@@ -117,7 +117,7 @@ The user explicitly asked to fix everything, not just high-severity issues, and 
 ## Next Steps / Continuation Plan
 1. Continue the remaining medium-severity test-rigor cleanup by family, starting with the current audit list:
    - `fmt` / `toolchain`: move remaining rule tests off `super::super::check` and onto rule-local inputs
-   - `cargo`: isolate `RS-CARGO-CONFIG-02`, `04`, `06`, `07`, `10` tests from the family orchestrator
+   - `cargo`: isolate `g3rs-cargo/lint-levels`, `04`, `06`, `07`, `10` tests from the family orchestrator
    - `clippy`: isolate `RS-CLIPPY-04`, `05`, `06`, `07`, `08`, `13`, `14`, `20` tests from the family orchestrator
    - `deny`: add rule-local config inputs in test support and migrate the remaining config-rule tests off the family orchestrator
 2. After that sweep, re-run the adversarial agents specifically against test quality and structural shortcuts, not just semantics.

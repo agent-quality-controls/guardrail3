@@ -5,11 +5,11 @@ Completed the deny family package migration. Added the missing deny filetree lan
 ## Decisions made
 
 - Split deny ownership into package lanes only:
-  - `RS-DENY-FILETREE-01` and `RS-DENY-FILETREE-03` in `g3rs-deny-filetree-checks`
+  - `g3rs-deny/coverage` and `g3rs-deny/shadowing` in `g3rs-deny-filetree-checks`
   - remaining deny config semantics in `g3rs-deny-config-checks`
   - no deny source lane
 - Treated profile-sensitive deny rules as gated by trusted policy context.
-  - `RS-DENY-CONFIG-23` and `RS-DENY-CONFIG-25` now stand down completely when `policy_context_valid == false`
+  - `g3rs-deny/ban-baseline-complete` and `g3rs-deny/allow-override-channel` now stand down completely when `policy_context_valid == false`
   - rejected partial pre-gate enforcement because the deny family contract explicitly says these rules must stand down without trusted profile context
 - Kept deny filetree coverage independent from selected-file parse or read failures.
   - selected coverage remains visible

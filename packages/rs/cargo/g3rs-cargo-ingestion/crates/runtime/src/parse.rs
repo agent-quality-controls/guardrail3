@@ -8,16 +8,16 @@ use crate::run::IngestionError;
 
 /// Read the file at `abs_path` and parse it as a `Cargo.toml` document.
 pub(crate) fn parse_root_cargo_toml(abs_path: &Path) -> Result<CargoTomlDocument, IngestionError> {
-    let content = crate::fs::read_to_string(abs_path).map_err(|err| {
-        IngestionError::Unreadable {
+    let content =
+        crate::fs::read_to_string(abs_path).map_err(|err| IngestionError::Unreadable {
             path: abs_path.to_path_buf(),
             reason: err.to_string(),
-        }
-    })?;
-    let document = cargo_toml_parser::parse_document(&content).map_err(|err| IngestionError::ParseFailed {
-        path: abs_path.to_path_buf(),
-        reason: err.to_string(),
-    })?;
+        })?;
+    let document =
+        cargo_toml_parser::parse_document(&content).map_err(|err| IngestionError::ParseFailed {
+            path: abs_path.to_path_buf(),
+            reason: err.to_string(),
+        })?;
     if let Some(reason) = cargo_toml_parser::document::parse_error_reason(&document) {
         return Err(IngestionError::ParseFailed {
             path: abs_path.to_path_buf(),
@@ -27,13 +27,14 @@ pub(crate) fn parse_root_cargo_toml(abs_path: &Path) -> Result<CargoTomlDocument
     Ok(document)
 }
 
-pub(crate) fn parse_member_cargo_toml(abs_path: &Path) -> Result<CargoTomlDocument, IngestionError> {
-    let content = crate::fs::read_to_string(abs_path).map_err(|err| {
-        IngestionError::Unreadable {
+pub(crate) fn parse_member_cargo_toml(
+    abs_path: &Path,
+) -> Result<CargoTomlDocument, IngestionError> {
+    let content =
+        crate::fs::read_to_string(abs_path).map_err(|err| IngestionError::Unreadable {
             path: abs_path.to_path_buf(),
             reason: err.to_string(),
-        }
-    })?;
+        })?;
     cargo_toml_parser::parse_document(&content).map_err(|err| IngestionError::ParseFailed {
         path: abs_path.to_path_buf(),
         reason: err.to_string(),
@@ -41,22 +42,18 @@ pub(crate) fn parse_member_cargo_toml(abs_path: &Path) -> Result<CargoTomlDocume
 }
 
 pub(crate) fn parse_raw_toml(abs_path: &Path) -> Result<toml::Value, IngestionError> {
-    let content = crate::fs::read_to_string(abs_path).map_err(|err| {
-        IngestionError::Unreadable {
+    let content =
+        crate::fs::read_to_string(abs_path).map_err(|err| IngestionError::Unreadable {
             path: abs_path.to_path_buf(),
             reason: err.to_string(),
-        }
-    })?;
+        })?;
     toml::from_str(&content).map_err(|err| IngestionError::ParseFailed {
         path: abs_path.to_path_buf(),
         reason: err.to_string(),
     })
 }
 
-pub(crate) fn parse_rust_policy_state(
-    rel_path: &str,
-    abs_path: &Path,
-) -> G3RsCargoRustPolicyState {
+pub(crate) fn parse_rust_policy_state(rel_path: &str, abs_path: &Path) -> G3RsCargoRustPolicyState {
     let content = match crate::fs::read_to_string(abs_path) {
         Ok(content) => content,
         Err(err) => {

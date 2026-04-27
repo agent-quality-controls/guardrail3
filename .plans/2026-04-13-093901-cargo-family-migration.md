@@ -24,8 +24,8 @@ Finish the `cargo` family under the package model by fixing the existing hybrid-
     - member-local allows forbidden
 - Build `g3rs-cargo-filetree-checks`.
   - Migrate:
-    - `RS-CARGO-FILETREE-10` - declared workspace member missing `Cargo.toml`
-    - `RS-CARGO-FILETREE-14` - cargo-family input failures fail closed
+    - `g3rs-cargo/missing-member-cargo` - declared workspace member missing `Cargo.toml`
+    - `g3rs-cargo/input-failures` - cargo-family input failures fail closed
 - Re-run cargo family tests and adversarial review until no concrete gap remains.
 - Update cargo package README/TODO files to match the migrated family surface.
 

@@ -5,12 +5,8 @@ use guardrail3_rs_toml_parser::types::RustProfile;
 
 #[derive(Debug, Clone)]
 pub enum G3RsClippyConfigState {
-    Unreadable {
-        reason: String,
-    },
-    ParseError {
-        reason: String,
-    },
+    Unreadable { reason: String },
+    ParseError { reason: String },
     Parsed(ClippyTomlDocument),
 }
 

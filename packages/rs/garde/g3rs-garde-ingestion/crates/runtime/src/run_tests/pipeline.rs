@@ -43,8 +43,14 @@ fn pipeline_keeps_ban_rules_quiet_when_garde_is_missing() {
     let temp = super::helpers::new_root();
     let root = temp.path();
 
-    super::helpers::write(root.join("Cargo.toml"), "[workspace]\nmembers = []\nversion = \"0.1.0\"\n");
-    super::helpers::write(root.join("clippy.toml"), "disallowed-methods = []\ndisallowed-types = []\n");
+    super::helpers::write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = []\nversion = \"0.1.0\"\n",
+    );
+    super::helpers::write(
+        root.join("clippy.toml"),
+        "disallowed-methods = []\ndisallowed-types = []\n",
+    );
 
     let crawl = super::helpers::crawl(root);
     let input = super::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
@@ -84,11 +90,13 @@ fn pipeline_marks_family_inactive_when_no_garde_dependency_and_no_guardrail_toml
 
     let crawl = super::helpers::crawl(root);
 
-    let config_input = super::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
+    let config_input =
+        super::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
     let config_results = g3rs_garde_config_checks::check(&config_input);
     assertions::assert_no_results(&config_results);
 
-    let source_input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    let source_input =
+        super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let source_results = g3rs_garde_source_checks::check(&source_input);
     assertions::assert_no_results(&source_results);
 }
@@ -115,5 +123,9 @@ fn pipeline_does_not_false_positive_on_duplicate_simple_type_names() {
     let input = super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     let results = g3rs_garde_source_checks::check(&input);
 
-    assertions::assert_rule_absent(&results, "RS-GARDE-SOURCE-06", "nested dive false positive");
+    assertions::assert_rule_absent(
+        &results,
+        "g3rs-garde/nested-validation-dive",
+        "nested dive false positive",
+    );
 }

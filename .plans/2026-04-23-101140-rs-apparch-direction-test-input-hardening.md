@@ -2,7 +2,7 @@ Goal
 - Stop the apparch direction-rule sidecars from rebuilding bound dependencies out of raw edge bags, and tighten their assertions so they prove the forbidden target that each rule reports.
 
 Approach
-- Replace the helper inputs for `RS-APPARCH-CONFIG-01`, `02`, `03`, and `07` with direct `G3RsApparchCrateDependencyChecksInput` builders.
+- Replace the helper inputs for `g3rs-apparch/types-dependency-direction`, `02`, `03`, and `07` with direct `G3RsApparchCrateDependencyChecksInput` builders.
 - Add or adjust test cases so the rules are exercised through the same input shape they receive in production.
 - Strengthen the assertions crates to require the exact forbidden target crate in error output, not only a generic title fragment.
 - Verify the touched apparch config-checks package with `cargo test` and `g3rs validate`.

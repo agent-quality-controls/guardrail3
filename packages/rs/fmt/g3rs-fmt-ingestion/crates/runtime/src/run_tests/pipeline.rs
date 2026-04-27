@@ -46,7 +46,7 @@ fn pipeline_reports_nightly_key_blocker_when_toolchain_is_missing() {
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect(
-        "ingestion should preserve missing toolchain for RS-FMT-CONFIG-03 blocker reporting",
+        "ingestion should preserve missing toolchain for g3rs-fmt/nightly-keys-on-stable blocker reporting",
     );
     let results = g3rs_fmt_config_checks::check(&input);
 
@@ -67,7 +67,7 @@ fn pipeline_reports_edition_blocker_when_cargo_is_missing() {
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect(
-        "ingestion should preserve missing Cargo.toml for RS-FMT-CONFIG-04 blocker reporting",
+        "ingestion should preserve missing Cargo.toml for g3rs-fmt/edition-mismatch blocker reporting",
     );
     let results = g3rs_fmt_config_checks::check(&input);
 
@@ -91,8 +91,9 @@ fn pipeline_reports_rustfmt_parse_error_via_config_rule() {
     write(root.join("rustfmt.toml"), "edition = [\n");
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
-    let input = crate::run::ingest_for_config_checks(&crawl)
-        .expect("ingestion should preserve rustfmt parse failures for RS-FMT-CONFIG-01");
+    let input = crate::run::ingest_for_config_checks(&crawl).expect(
+        "ingestion should preserve rustfmt parse failures for g3rs-fmt/rustfmt-required-settings",
+    );
     let results = g3rs_fmt_config_checks::check(&input);
 
     assertions::assert_rustfmt_parse_error(&results);
@@ -115,7 +116,7 @@ fn pipeline_reports_rustfmt_ignore_waiver_from_guardrail3_rs_toml() {
     write(root.join("rustfmt.toml"), "ignore = [\"generated/**\"]\n");
     write(
         root.join("guardrail3-rs.toml"),
-        "[[waivers]]\nrule = \"RS-FMT-CONFIG-07\"\nfile = \"rustfmt.toml\"\nselector = \"ignore\"\nreason = \"Generated code rewrites break formatter stability.\"\n",
+        "[[waivers]]\nrule = \"g3rs-fmt/ignore-escape-hatch\"\nfile = \"rustfmt.toml\"\nselector = \"ignore\"\nreason = \"Generated code rewrites break formatter stability.\"\n",
     );
     write(
         root.join("guardrail3.toml"),

@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed the remaining RS-HOOKS-SOURCE-18 misses in `hook_shared_13_no_unconditional_exit_zero`: same-line function-definition tails, same-line loop-terminator tails, forward function calls, and shell wrapper execution paths. Added red-first regressions in the rule-specific golden tests and kept the change inside the hook source-check slice plus plan/worklog artifacts.
+Fixed the remaining g3rs-hooks/hook-shared-13-no-unconditional-exit-zero misses in `hook_shared_13_no_unconditional_exit_zero`: same-line function-definition tails, same-line loop-terminator tails, forward function calls, and shell wrapper execution paths. Added red-first regressions in the rule-specific golden tests and kept the change inside the hook source-check slice plus plan/worklog artifacts.
 
 ## Decisions made
 

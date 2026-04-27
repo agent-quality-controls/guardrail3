@@ -1,5 +1,5 @@
 Summary:
-Fixed the `RS-CODE-SOURCE-31` multi-`super` normalization gap so nested inherited impl paths like `super::super::Input` resolve to the correct public struct. Added a red-first regression with a deeper public nested-module repro, then verified the focused tests and package validate path.
+Fixed the `g3rs-code/ast-31-public-struct-named-fields` multi-`super` normalization gap so nested inherited impl paths like `super::super::Input` resolve to the correct public struct. Added a red-first regression with a deeper public nested-module repro, then verified the focused tests and package validate path.
 
 Decisions made:
 - Kept the normalization fix in `rs_code_ast_31_public_struct_named_fields/rule.rs` because that is where impl self types are normalized for the shared-struct check.

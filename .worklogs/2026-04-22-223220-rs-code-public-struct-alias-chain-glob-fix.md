@@ -1,11 +1,11 @@
 ## Summary
 
-Fixed the remaining `RS-CODE-SOURCE-31` misses where local alias chains and same-file glob imports could hide inherent impls on shared-crate structs. Added red tests for alias chaining and for both `use super::*` and `use crate::api::*` forms, then extended the rule to build per-module same-file struct bindings and reuse them for local `use` resolution.
+Fixed the remaining `g3rs-code/ast-31-public-struct-named-fields` misses where local alias chains and same-file glob imports could hide inherent impls on shared-crate structs. Added red tests for alias chaining and for both `use super::*` and `use crate::api::*` forms, then extended the rule to build per-module same-file struct bindings and reuse them for local `use` resolution.
 
 ## Decisions made
 
 - Kept the fix inside the rule matcher.
-  - Why: this is still one-file source name resolution owned by `RS-CODE-SOURCE-31`.
+  - Why: this is still one-file source name resolution owned by `g3rs-code/ast-31-public-struct-named-fields`.
 - Built same-file struct bindings per module scope.
   - Why: glob imports need a concrete source of bindable names; string heuristics were not enough.
 - Resolved later aliases through already-collected local bindings.

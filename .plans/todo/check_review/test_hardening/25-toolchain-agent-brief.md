@@ -149,7 +149,7 @@ The pass is not done until:
 2. audit `discover.rs` / `facts.rs` / `inputs.rs` for root-only ownership
 3. convert all `rs_toolchain_*_tests.rs` files to `*_tests/`
 4. harden the highest-risk rules first:
-   - `RS-TOOLCHAIN-CONFIG-01`
-   - `RS-TOOLCHAIN-CONFIG-02`
-   - `RS-TOOLCHAIN-04`
+   - `g3rs-toolchain/channel-and-components`
+   - `g3rs-toolchain/msrv-consistency`
+   - `g3rs-toolchain/no-duplicate-toolchain-config`
 5. finish malformed-input and exact-severity coverage before stopping

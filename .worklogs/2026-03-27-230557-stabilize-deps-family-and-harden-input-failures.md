@@ -82,7 +82,7 @@ The concrete detector fixes covered in this batch include:
 
 ## Open Questions / Future Considerations
 - The outer app workspace still has unrelated family drift elsewhere, so the reliable checkpoint remains the nested family workspace test command rather than repo-wide Cargo entrypoints.
-- `target.*.{dependencies,build-dependencies,dev-dependencies}` are still an explicit remaining gap in `RS-DEPS-CONFIG-01..07`; this commit does not change that contract.
+- `target.*.{dependencies,build-dependencies,dev-dependencies}` are still an explicit remaining gap in `g3rs-deps/dependencies-allowlisted..07`; this commit does not change that contract.
 - The shared manifest files still have unrelated unstaged `garde` work in the working tree. This commit stages only the `deps` wiring in those files.
 
 ## Key Files for Context

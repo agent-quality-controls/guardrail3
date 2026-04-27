@@ -1,11 +1,11 @@
 Summary
 
-- Fixed the `RS-TEST-SOURCE-16` helper-wrapper gap so sidecars that reach semantic result assertions through local owned wrappers are still reported.
+- Fixed the `g3rs-test/assertions-modules-prove` helper-wrapper gap so sidecars that reach semantic result assertions through local owned wrappers are still reported.
 - Added red regressions for direct `self::helper(...)`, `use self::helper as run; run(...)`, and wrapper-function variants before changing the rule.
 
 Decisions made
 
-- Kept the fix in `RS-TEST-SOURCE-16` rule logic instead of changing ingestion.
+- Kept the fix in `g3rs-test/assertions-modules-prove` rule logic instead of changing ingestion.
   - Why: the parser already exposed the required `call_paths`, `imports`, and `local_call_aliases`; the miss was incomplete local-helper traversal in the rule.
 - Expanded both surfaces that matter:
   - direct test-call detection in `owns_sidecar_semantic_proof(...)`

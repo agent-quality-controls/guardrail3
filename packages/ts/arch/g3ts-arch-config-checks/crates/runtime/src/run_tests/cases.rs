@@ -18,5 +18,8 @@ fn config_checks_flag_noncanonical_entrypoint() {
     };
 
     let results = crate::run::check(&input);
-    g3ts_arch_config_checks_assertions::run::assert_has_error(&results, "TS-ARCH-CONFIG-03");
+    g3ts_arch_config_checks_assertions::run::assert_has_error(
+        &results,
+        "g3ts-arch/declared-entrypoints-canonical",
+    );
 }

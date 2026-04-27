@@ -1,6 +1,6 @@
 Goal
 
-Make `RS-ARCH-FILETREE-07` fire on the real package shape it currently misses: a package root that is both a Rust crate and a small workspace, with a member runtime crate containing an oversized nested module folder.
+Make `g3rs-arch/structural-split` fire on the real package shape it currently misses: a package root that is both a Rust crate and a small workspace, with a member runtime crate containing an oversized nested module folder.
 
 Approach
 
@@ -9,7 +9,7 @@ Approach
     - root package plus workspace members
     - `crates/runtime/src/full_config`
     - more than 10 sibling `.rs` files inside that nested module folder
-  - Assert `RS-ARCH-FILETREE-07` fires on `crates/runtime/Cargo.toml`.
+  - Assert `g3rs-arch/structural-split` fires on `crates/runtime/Cargo.toml`.
 - Read the arch ingestion structure root and traversal code again after the test fails.
   - Focus on the interaction between root-package workspaces and member crate traversal.
   - Fix ingestion, not the pure rule, unless the new test proves the facts are correct and the rule is wrong.
@@ -25,7 +25,7 @@ Key decisions
   - The user-observed failure is in end-to-end validation of a package root.
   - The correct first proof is a file-tree ingestion pipeline test with the same workspace shape.
 - Keep the fix in arch ingestion if possible.
-  - `RS-ARCH-FILETREE-07` already compares aggregate facts against thresholds.
+  - `g3rs-arch/structural-split` already compares aggregate facts against thresholds.
   - The likely gap is still in how those facts are gathered for mixed root-package workspaces.
 
 Files to modify

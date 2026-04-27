@@ -1,11 +1,11 @@
 Goal
-- Close the remaining known missing branch coverage in `RS-ARCH-SOURCE-08` and `RS-APPARCH-CONFIG-08/09`.
+- Close the remaining known missing branch coverage in `g3rs-arch/feature-gated-exports` and `g3rs-apparch/types-purity/09`.
 
 Approach
-- Add a source-rule test for `RS-ARCH-SOURCE-08` where exports are gated directly on `all`.
+- Add a source-rule test for `g3rs-arch/feature-gated-exports` where exports are gated directly on `all`.
 - Add the missing fail-closed policy tests:
-  - `RS-APPARCH-CONFIG-08` with `Unreadable`
-  - `RS-APPARCH-CONFIG-09` with `ParseError`
+  - `g3rs-apparch/types-purity` with `Unreadable`
+  - `g3rs-apparch/logic-purity` with `ParseError`
 - Re-run the touched packages and `g3rs validate`.
 
 Key decisions

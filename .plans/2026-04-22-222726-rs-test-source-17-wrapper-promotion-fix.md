@@ -1,6 +1,6 @@
 ## Goal
 
-Fix `RS-TEST-SOURCE-17` so a local assertion helper called through `self::helper()` or `crate::helper()` still promotes its wrapper function into `local_assertion_helpers`, preventing external harnesses that call the wrapper from being misclassified as clean.
+Fix `g3rs-test/external-harnesses-use-assertions` so a local assertion helper called through `self::helper()` or `crate::helper()` still promotes its wrapper function into `local_assertion_helpers`, preventing external harnesses that call the wrapper from being misclassified as clean.
 
 ## Approach
 

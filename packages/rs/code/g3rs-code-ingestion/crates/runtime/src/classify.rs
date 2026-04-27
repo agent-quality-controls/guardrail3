@@ -219,7 +219,9 @@ fn manifest_guardrail3_waivers(
     crawl: &G3RsWorkspaceCrawl,
     manifest_rel_path: &str,
 ) -> Result<Vec<G3RsCodeWaiver>, IngestionError> {
-    let Some(config_rel_path) = nearest_guardrail3_rel_path(crawl, &manifest_dir_rel(manifest_rel_path)) else {
+    let Some(config_rel_path) =
+        nearest_guardrail3_rel_path(crawl, &manifest_dir_rel(manifest_rel_path))
+    else {
         return Ok(Vec::new());
     };
     let Some(config_entry) = g3rs_workspace_crawl::entry(crawl, &config_rel_path) else {
@@ -232,11 +234,12 @@ fn manifest_guardrail3_waivers(
         });
     }
 
-    let content =
-        crate::fs::read_to_string(&config_entry.path.abs_path).map_err(|err| IngestionError::Unreadable {
+    let content = crate::fs::read_to_string(&config_entry.path.abs_path).map_err(|err| {
+        IngestionError::Unreadable {
             path: config_entry.path.abs_path.clone(),
             reason: err.to_string(),
-        })?;
+        }
+    })?;
     let parsed = parse_guardrail3_toml(&content).map_err(|err| IngestionError::ParseFailed {
         path: config_entry.path.abs_path.clone(),
         reason: err.to_string(),

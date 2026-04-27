@@ -1,6 +1,6 @@
 ## Summary
 
-Fixed a real `RS-HOOKS-SOURCE-15` false positive in Rust hook trigger coverage. The rule was reparsing matching branch text and direct trigger lines in isolation, which dropped helper-function resolution from the full shell script and incorrectly reported missing Rust config triggers.
+Fixed a real `g3rs-hooks/hook-rs-16-config-changes-trigger-validation` false positive in Rust hook trigger coverage. The rule was reparsing matching branch text and direct trigger lines in isolation, which dropped helper-function resolution from the full shell script and incorrectly reported missing Rust config triggers.
 
 ## Decisions made
 
