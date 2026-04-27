@@ -1,0 +1,10 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-astro-content-file-tree-checks-assertions",
+  "g3ts-astro-types",
+  "guardrail3-check-types",
+]
+
+[checks]
+garde = false

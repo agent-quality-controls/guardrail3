@@ -1,0 +1,19 @@
+profile = "library"
+
+allowed_deps = [
+  "package-script-command-parser",
+  "g3ts-astro-content-config-checks-assertions",
+  "g3ts-astro-check-support",
+  "g3ts-astro-types",
+  "globset",
+  "guardrail3-check-types",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-04"
+file = "crates/runtime/src/lib_tests/mod.rs"
+selector = "item-level-allow-with-reason"
+reason = "Config package tests reuse the golden Astro input builder; the allow is limited to the test module declaration and documents that unused helper cases are intentional."

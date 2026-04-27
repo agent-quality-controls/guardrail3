@@ -1,0 +1,24 @@
+profile = "library"
+
+allowed_deps = [
+  "package-script-command-parser",
+  "g3ts-astro-seo-config-checks-assertions",
+  "g3ts-astro-check-support",
+  "g3ts-astro-types",
+  "guardrail3-check-types",
+]
+
+[[waivers]]
+rule = "RS-ARCH-FILETREE-07"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "SEO config keeps one rule per file at runtime root; the package boundary is already SEO-specific and splitting the rule files again would be artificial."
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-04"
+file = "crates/runtime/src/lib_tests/mod.rs"
+selector = "item-level-allow-with-reason"
+reason = "Config package tests reuse the golden Astro input builder; the allow is limited to the test module declaration and documents that unused helper cases are intentional."

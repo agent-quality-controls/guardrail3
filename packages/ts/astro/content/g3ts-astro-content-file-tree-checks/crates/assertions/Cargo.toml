@@ -1,0 +1,17 @@
+[package]
+name = "g3ts-astro-content-file-tree-checks-assertions"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-check-types = { path = "../../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+g3ts-astro-types = { path = "../../../../g3ts-astro-types", version = "0.1.0" }
+g3ts_astro_content_file_tree_checks_runtime = { package = "g3ts-astro-content-file-tree-checks-runtime", path = "../runtime" }
+
+[features]
+default = ["api"]
+api = []
+
+[lints]
+workspace = true

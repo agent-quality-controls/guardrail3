@@ -1,0 +1,34 @@
+[package]
+name = "g3ts-astro-content-file-tree-checks-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3ts Astro content-file-tree checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["guardrail3", "typescript", "astro", "setup", "checks"]
+categories = ["development-tools"]
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+publish = false
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[lints]
+workspace = true
+
+[package.metadata.guardrail3]
+shared = true
+
+[package.metadata.docs.rs]
+all-features = true
+
+[dependencies]
+g3ts-astro-types = { path = "../../../../g3ts-astro-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+
+[dev-dependencies]
+g3ts-astro-content-file-tree-checks-assertions = { path = "../assertions" }
