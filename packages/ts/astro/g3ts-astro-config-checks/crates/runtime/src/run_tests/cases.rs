@@ -160,7 +160,7 @@ fn golden_config_reports_expected_inventory() {
             assertions::info(
                 "TS-ASTRO-CONFIG-18",
                 "Astro content adapter route rule is effective",
-                "`eslint.config.mjs` enforces `astro-pipeline/require-approved-content-adapter-in-routes` from `g3ts-eslint-plugin-astro-pipeline` with route coverage, endpoint coverage, and non-empty `approvedContentAdapterModules` on Astro, TS, and TSX source probes.",
+                "`eslint.config.mjs` enforces `astro-pipeline/require-approved-content-adapter-in-routes` from `g3ts-eslint-plugin-astro-pipeline` with route coverage, endpoint coverage, and `approvedContentAdapterModules` exactly matching `[ts.astro.content].adapters` on Astro, TS, and TSX source probes.",
                 Some("eslint.config.mjs"),
                 true,
             ),
@@ -195,21 +195,21 @@ fn golden_config_reports_expected_inventory() {
             assertions::info(
                 "TS-ASTRO-CONFIG-23",
                 "Astro strict content policy is configured",
-                "`guardrail3-ts.toml` sets `[ts.astro] profile = \"strict-local-content\"`, declares non-empty `content_routes`, `content_root`, `content_adapter`, `mdx_component_maps`, `metadata_helpers`, and `json_ld_helpers`, and forbids `.next/**`, `.velite/**`, and `.contentlayer/**` generated state.",
+                "`guardrail3-ts.toml` sets `[ts.astro] profile = \"strict-static-content\"`, declares non-empty `[ts.astro.routes].content`, `[ts.astro.content].root`, `[ts.astro.content].adapters`, `[ts.astro.mdx].component_maps`, `[ts.astro.seo].metadata_helpers`, and `[ts.astro.seo].json_ld_helpers`, and forbids `.next/**`, `.velite/**`, and `.contentlayer/**` in `[ts.astro.state].forbidden`.",
                 Some("guardrail3-ts.toml"),
                 true,
             ),
             assertions::info(
                 "TS-ASTRO-CONFIG-24",
                 "Astro strict content policy paths are structurally valid",
-                "`guardrail3-ts.toml` uses app-relative `content_routes`, `non_content_routes`, `endpoints`, `content_root`, `content_adapter`, `mdx_component_maps`, `metadata_helpers`, `json_ld_helpers`, and `forbidden_state` values without parent traversal.",
+                "`guardrail3-ts.toml` uses app-relative nested Astro policy paths without parent traversal in `[ts.astro.routes]`, `[ts.astro.content]`, `[ts.astro.mdx]`, `[ts.astro.seo]`, and `[ts.astro.state]`.",
                 Some("guardrail3-ts.toml"),
                 true,
             ),
             assertions::info(
                 "TS-ASTRO-CONFIG-25",
                 "Astro content and non-content route scopes are disjoint",
-                "`guardrail3-ts.toml` classifies discovered route pages without overlap between `content_routes` and `non_content_routes`.",
+                "`guardrail3-ts.toml` classifies discovered route pages without overlap between `[ts.astro.routes].content` and `[ts.astro.routes].non_content`.",
                 Some("guardrail3-ts.toml"),
                 true,
             ),
@@ -223,21 +223,21 @@ fn golden_config_reports_expected_inventory() {
             assertions::info(
                 "TS-ASTRO-CONFIG-27",
                 "Astro content adapter source exists",
-                "`guardrail3-ts.toml` resolves `content_adapter = \"src/lib/content\"` to adapter source files: `src/lib/content/index.ts`.",
+                "`guardrail3-ts.toml` resolves `[ts.astro.content].adapters = [\"src/lib/content\"]` to adapter source files: `src/lib/content/index.ts`.",
                 Some("guardrail3-ts.toml"),
                 true,
             ),
             assertions::info(
                 "TS-ASTRO-CONFIG-28",
                 "Astro content adapter sources import Astro content collections",
-                "`guardrail3-ts.toml` resolves `content_adapter` to adapter source files that import `astro:content` at runtime: `src/lib/content/index.ts`.",
+                "`guardrail3-ts.toml` resolves `[ts.astro.content].adapters` to adapter source files that import `astro:content` at runtime: `src/lib/content/index.ts`.",
                 Some("guardrail3-ts.toml"),
                 true,
             ),
             assertions::info(
                 "TS-ASTRO-CONFIG-29",
                 "Astro strict content policy declares approved helper surfaces",
-                "`guardrail3-ts.toml` declares non-empty app-relative `mdx_component_maps`, `metadata_helpers`, and `json_ld_helpers` in `[ts.astro]`, and those helper surfaces do not overlap `content_root`.",
+                "`guardrail3-ts.toml` declares non-empty app-relative `[ts.astro.mdx].component_maps`, `[ts.astro.seo].metadata_helpers`, and `[ts.astro.seo].json_ld_helpers`, and those helper surfaces do not overlap `[ts.astro.content].root`.",
                 Some("guardrail3-ts.toml"),
                 true,
             ),
@@ -321,10 +321,26 @@ fn strict_content_policy_path_rule_rejects_absolute_parent_and_backslash_paths()
         "TS-ASTRO-CONFIG-24",
         "Astro strict content policy paths are invalid",
     );
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "content_routes");
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "non_content_routes");
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "endpoints");
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "forbidden_state");
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-24",
+        "[ts.astro.routes].content",
+    );
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-24",
+        "[ts.astro.routes].non_content",
+    );
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-24",
+        "[ts.astro.routes].endpoints",
+    );
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-24",
+        "[ts.astro.state].forbidden",
+    );
 }
 
 #[test]
@@ -336,14 +352,14 @@ fn strict_content_policy_path_rule_rejects_glob_dirs_and_overlapping_roots() {
         panic!("golden astro policy should be parsed");
     };
     snapshot.content_root = Some("src/content".to_owned());
-    snapshot.content_adapter = Some("src/content/adapters".to_owned());
+    snapshot.content_adapters = vec!["src/content/adapters".to_owned()];
 
     let results = super::super::check(&input);
 
     assertions::assert_id_message_contains(
         &results,
         "TS-ASTRO-CONFIG-24",
-        "content_root overlaps content_adapter",
+        "[ts.astro.content].root overlaps [ts.astro.content].adapters",
     );
 
     let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
@@ -351,11 +367,15 @@ fn strict_content_policy_path_rule_rejects_glob_dirs_and_overlapping_roots() {
     else {
         panic!("golden astro policy should be parsed");
     };
-    snapshot.content_adapter = Some("src/lib/content/**".to_owned());
+    snapshot.content_adapters = vec!["src/lib/content/**".to_owned()];
 
     let results = super::super::check(&input);
 
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-24", "content_adapter");
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-24",
+        "[ts.astro.content].adapters",
+    );
 }
 
 #[test]
@@ -376,32 +396,32 @@ fn strict_content_policy_path_rule_rejects_helper_surfaces_under_content_root() 
     assertions::assert_id_message_contains(
         &results,
         "TS-ASTRO-CONFIG-24",
-        "content_root overlaps mdx_component_maps",
+        "[ts.astro.content].root overlaps [ts.astro.mdx].component_maps",
     );
     assertions::assert_id_message_contains(
         &results,
         "TS-ASTRO-CONFIG-24",
-        "content_root overlaps metadata_helpers",
+        "[ts.astro.content].root overlaps [ts.astro.seo].metadata_helpers",
     );
     assertions::assert_id_message_contains(
         &results,
         "TS-ASTRO-CONFIG-24",
-        "content_root overlaps json_ld_helpers",
+        "[ts.astro.content].root overlaps [ts.astro.seo].json_ld_helpers",
     );
     assertions::assert_id_message_contains(
         &results,
         "TS-ASTRO-CONFIG-29",
-        "mdx_component_maps overlaps content_root",
+        "[ts.astro.mdx].component_maps overlaps [ts.astro.content].root",
     );
     assertions::assert_id_message_contains(
         &results,
         "TS-ASTRO-CONFIG-29",
-        "metadata_helpers overlaps content_root",
+        "[ts.astro.seo].metadata_helpers overlaps [ts.astro.content].root",
     );
     assertions::assert_id_message_contains(
         &results,
         "TS-ASTRO-CONFIG-29",
-        "json_ld_helpers overlaps content_root",
+        "[ts.astro.seo].json_ld_helpers overlaps [ts.astro.content].root",
     );
 }
 
@@ -472,7 +492,7 @@ fn strict_content_policy_eslint_coverage_rule_rejects_non_content_route_coverage
     assertions::assert_id_message_contains(
         &results,
         "TS-ASTRO-CONFIG-26",
-        "exclude `[ts.astro].non_content_routes`",
+        "exclude `[ts.astro.routes].non_content`",
     );
 }
 
@@ -500,7 +520,8 @@ fn strict_content_policy_eslint_coverage_rule_rejects_missing_content_route_cove
 fn strict_content_policy_adapter_rule_rejects_missing_adapter_source() {
     let mut input = golden();
     input.integration_contracts[0]
-        .approved_surface_sources.content_adapter
+        .approved_surface_sources
+        .content_adapter
         .clear();
 
     let results = super::super::check(&input);
@@ -514,10 +535,81 @@ fn strict_content_policy_adapter_rule_rejects_missing_adapter_source() {
 }
 
 #[test]
+fn strict_content_policy_adapter_rule_rejects_missing_second_adapter_source() {
+    let mut input = golden();
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.content_adapters = vec![
+        "src/lib/content".to_owned(),
+        "src/lib/secondary-content".to_owned(),
+    ];
+    let G3TsAstroEslintSurfaceState::Parsed { snapshot } = &mut input.eslint_contracts[0].config
+    else {
+        panic!("golden eslint surface should be parsed");
+    };
+    snapshot.astro_source_effective_content_adapter_modules = vec![
+        "src/lib/content/**/*".to_owned(),
+        "src/lib/secondary-content/**/*".to_owned(),
+    ];
+    snapshot.ts_source_effective_content_adapter_modules = vec![
+        "src/lib/content/**/*".to_owned(),
+        "src/lib/secondary-content/**/*".to_owned(),
+    ];
+    snapshot.tsx_source_effective_content_adapter_modules = vec![
+        "src/lib/content/**/*".to_owned(),
+        "src/lib/secondary-content/**/*".to_owned(),
+    ];
+
+    let results = super::super::check(&input);
+
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-CONFIG-27",
+        "Astro content adapter source is missing",
+    );
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-27",
+        "src/lib/secondary-content",
+    );
+}
+
+#[test]
+fn strict_content_policy_adapter_rule_rejects_partial_eslint_adapter_modules() {
+    let mut input = golden();
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        panic!("golden astro policy should be parsed");
+    };
+    snapshot.content_adapters = vec![
+        "src/lib/content".to_owned(),
+        "src/lib/secondary-content".to_owned(),
+    ];
+
+    let results = super::super::check(&input);
+
+    assertions::assert_has_error_title(
+        &results,
+        "TS-ASTRO-CONFIG-18",
+        "Astro content adapter route rule is not effective",
+    );
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-18",
+        "approvedContentAdapterModules",
+    );
+}
+
+#[test]
 fn strict_content_policy_adapter_rule_rejects_adapter_source_without_astro_content_import() {
     let mut input = golden();
     input.integration_contracts[0]
-        .approved_surface_sources.content_adapter_astro_content
+        .approved_surface_sources
+        .content_adapter_astro_content
         .clear();
 
     let results = super::super::check(&input);
@@ -555,9 +647,21 @@ fn strict_content_policy_helper_surface_rule_rejects_missing_policy_fields() {
         "TS-ASTRO-CONFIG-29",
         "Astro strict content policy is missing approved helper surfaces",
     );
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-29", "mdx_component_maps");
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-29", "metadata_helpers");
-    assertions::assert_id_message_contains(&results, "TS-ASTRO-CONFIG-29", "json_ld_helpers");
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-29",
+        "[ts.astro.mdx].component_maps",
+    );
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-29",
+        "[ts.astro.seo].metadata_helpers",
+    );
+    assertions::assert_id_message_contains(
+        &results,
+        "TS-ASTRO-CONFIG-29",
+        "[ts.astro.seo].json_ld_helpers",
+    );
 }
 
 #[test]

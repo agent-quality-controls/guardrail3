@@ -9,9 +9,9 @@ pub(crate) fn check(input: &G3TsAstroFileTreeChecksInput, results: &mut Vec<G3Ch
             results.push(G3CheckResult::new(
                 ID.to_owned(),
                 G3Severity::Error,
-                "Astro app contains state forbidden by `[ts.astro].forbidden_state`".to_owned(),
+                "Astro app contains state forbidden by `[ts.astro.state].forbidden`".to_owned(),
                 format!(
-                    "Astro content app `{}` contains `{rel_path}`, which matches its configured `[ts.astro].forbidden_state` policy. Remove the generated or legacy state so agents cannot bypass the Astro content pipeline.",
+                    "Astro content app `{}` contains `{rel_path}`, which matches its configured `[ts.astro.state].forbidden` policy. Remove the generated or legacy state so agents cannot bypass the Astro content pipeline.",
                     app_root.app_root_rel_path
                 ),
                 Some(rel_path.clone()),

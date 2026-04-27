@@ -18,8 +18,11 @@ pub(super) fn fake_astro_workspace() -> TempDir {
         .expect("content directory should be created");
     std::fs::create_dir_all(root.path().join("node_modules/eslint"))
         .expect("fake eslint module directory should be created");
-    std::fs::create_dir_all(root.path().join("node_modules/g3ts-eslint-plugin-astro-pipeline"))
-        .expect("fake astro pipeline eslint module directory should be created");
+    std::fs::create_dir_all(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-astro-pipeline"),
+    )
+    .expect("fake astro pipeline eslint module directory should be created");
 
     std::fs::write(
         root.path().join("package.json"),
@@ -85,16 +88,30 @@ pub(super) fn fake_astro_workspace() -> TempDir {
         root.path().join("guardrail3-ts.toml"),
         r#"
 [ts.astro]
-profile = "strict-local-content"
-content_routes = ["src/pages/**/*.astro"]
-non_content_routes = ["src/pages/404.astro"]
+profile = "strict-static-content"
+
+[ts.astro.routes]
+content = ["src/pages/**/*.astro"]
+non_content = ["src/pages/404.astro"]
 endpoints = ["src/pages/**/*.ts"]
-content_root = "src/content"
-content_adapter = "src/lib/content"
-mdx_component_maps = ["src/components/mdx"]
+
+[ts.astro.content]
+root = "src/content"
+adapters = ["src/lib/content"]
+required_collections = ["landing"]
+
+[ts.astro.content.collection_fields]
+landing = ["title", "description"]
+
+[ts.astro.mdx]
+component_maps = ["src/components/mdx"]
+
+[ts.astro.seo]
 metadata_helpers = ["src/lib/metadata"]
 json_ld_helpers = ["src/lib/json-ld"]
-forbidden_state = [".next/**", ".velite/**", ".contentlayer/**"]
+
+[ts.astro.state]
+forbidden = [".next/**", ".velite/**", ".contentlayer/**"]
 "#,
     )
     .expect("guardrail config should be written");
@@ -136,8 +153,11 @@ forbidden_state = [".next/**", ".velite/**", ".contentlayer/**"]
     .expect("json ld helper source should be written");
     std::fs::write(root.path().join("src/pages/about.mdx"), "# about\n")
         .expect("route markdown page should be written");
-    std::fs::write(root.path().join("src/content/posts/example.mdx"), "# example\n")
-        .expect("content markdown page should be written");
+    std::fs::write(
+        root.path().join("src/content/posts/example.mdx"),
+        "# example\n",
+    )
+    .expect("content markdown page should be written");
     std::fs::write(
         root.path().join("node_modules/eslint/package.json"),
         "{\n  \"name\": \"eslint\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
@@ -157,7 +177,7 @@ class ESLint {
     return false;
   }
 
-      async calculateConfigForFile(_filePath) {
+  async calculateConfigForFile(_filePath) {
     const isTsx = String(_filePath).endsWith('.tsx');
     return {
       plugins: {

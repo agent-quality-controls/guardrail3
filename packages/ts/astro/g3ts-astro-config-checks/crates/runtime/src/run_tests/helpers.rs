@@ -1,14 +1,14 @@
 use g3ts_astro_types::{
     G3TsAstroApprovedSurfaceSourcePaths, G3TsAstroCallSnapshot, G3TsAstroConfigChecksInput,
-    G3TsAstroConfigSurfaceSnapshot,
-    G3TsAstroConfigSurfaceState, G3TsAstroContentMode, G3TsAstroEslintPluginContractInput,
-    G3TsAstroEslintSurfaceSnapshot, G3TsAstroEslintSurfaceState, G3TsAstroIntegrationContractInput,
-    G3TsAstroIntegrationSnapshot, G3TsAstroOutputMode, G3TsAstroPackageScriptCommand,
-    G3TsAstroPackageScriptCommandSeparator, G3TsAstroPackageScriptParseBlocker,
-    G3TsAstroPackageScriptToolInvocation, G3TsAstroPackageSurfaceSnapshot,
-    G3TsAstroPackageSurfaceState, G3TsAstroPipelineRuleScopeSnapshot, G3TsAstroPolicySnapshot,
-    G3TsAstroPolicySurfaceState, G3TsAstroStaticObjectProperty, G3TsAstroStaticValue,
-    G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
+    G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState, G3TsAstroContentMode,
+    G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
+    G3TsAstroEslintSurfaceState, G3TsAstroIntegrationContractInput, G3TsAstroIntegrationSnapshot,
+    G3TsAstroOutputMode, G3TsAstroPackageScriptCommand, G3TsAstroPackageScriptCommandSeparator,
+    G3TsAstroPackageScriptParseBlocker, G3TsAstroPackageScriptToolInvocation,
+    G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState,
+    G3TsAstroPipelineRuleScopeSnapshot, G3TsAstroPolicySnapshot, G3TsAstroPolicySurfaceState,
+    G3TsAstroStaticObjectProperty, G3TsAstroStaticValue, G3TsAstroSyncpackConfigSnapshot,
+    G3TsAstroSyncpackConfigState, G3TsAstroSyncpackRequiredPin,
 };
 use package_script_command_parser::types::{
     PackageScriptCommand, PackageScriptCommandSeparator, PackageScriptParseFact,
@@ -735,12 +735,14 @@ fn astro_policy() -> G3TsAstroPolicySurfaceState {
     G3TsAstroPolicySurfaceState::Parsed {
         snapshot: G3TsAstroPolicySnapshot {
             rel_path: "guardrail3-ts.toml".to_owned(),
-            profile: Some("strict-local-content".to_owned()),
+            profile: Some("strict-static-content".to_owned()),
             content_routes: vec!["src/pages/**/*.astro".to_owned()],
             non_content_routes: vec!["src/pages/404.astro".to_owned()],
             endpoints: vec!["src/pages/**/*.ts".to_owned()],
             content_root: Some("src/content".to_owned()),
-            content_adapter: Some("src/lib/content".to_owned()),
+            content_adapters: vec!["src/lib/content".to_owned()],
+            required_collections: Vec::new(),
+            collection_fields: BTreeMap::new(),
             mdx_component_maps: vec!["src/components/mdx".to_owned()],
             metadata_helpers: vec!["src/lib/metadata".to_owned()],
             json_ld_helpers: vec!["src/lib/json-ld".to_owned()],
@@ -1394,6 +1396,15 @@ fn parsed_eslint_with_pipeline_contract(
             tsx_source_effective_route_scoped_pipeline_rules: pipeline_contract
                 .tsx
                 .effective_route_scoped_rules(),
+            astro_source_effective_content_adapter_modules: pipeline_contract
+                .astro
+                .effective_content_adapter_modules(),
+            ts_source_effective_content_adapter_modules: pipeline_contract
+                .ts
+                .effective_content_adapter_modules(),
+            tsx_source_effective_content_adapter_modules: pipeline_contract
+                .tsx
+                .effective_content_adapter_modules(),
             astro_source_route_scoped_pipeline_rule_scopes: pipeline_contract
                 .astro
                 .route_scoped_rule_scopes(),
@@ -1685,6 +1696,14 @@ impl PipelineLaneState {
                 endpoint_globs: endpoint_globs.clone(),
             })
             .collect()
+    }
+
+    fn effective_content_adapter_modules(self) -> Vec<String> {
+        if !self.has_required_rules || matches!(self.scope_kind, ScopeKind::None) {
+            return Vec::new();
+        }
+
+        vec!["src/lib/content/**/*".to_owned()]
     }
 
     fn effective_content_data_rules(self) -> Vec<String> {

@@ -120,6 +120,50 @@ pub fn assert_ts_astro_extra_string(astro: &TsAstroPolicyConfig, key: &str, expe
     );
 }
 
+pub fn assert_ts_astro_routes_extra_string(astro: &TsAstroPolicyConfig, key: &str, expected: &str) {
+    assert_eq!(
+        astro.routes.extra.get(key).and_then(Value::as_str),
+        Some(expected),
+        "ts.astro.routes extra value mismatch",
+    );
+}
+
+pub fn assert_ts_astro_content_extra_string(
+    astro: &TsAstroPolicyConfig,
+    key: &str,
+    expected: &str,
+) {
+    assert_eq!(
+        astro.content.extra.get(key).and_then(Value::as_str),
+        Some(expected),
+        "ts.astro.content extra value mismatch",
+    );
+}
+
+pub fn assert_ts_astro_mdx_extra_string(astro: &TsAstroPolicyConfig, key: &str, expected: &str) {
+    assert_eq!(
+        astro.mdx.extra.get(key).and_then(Value::as_str),
+        Some(expected),
+        "ts.astro.mdx extra value mismatch",
+    );
+}
+
+pub fn assert_ts_astro_seo_extra_string(astro: &TsAstroPolicyConfig, key: &str, expected: &str) {
+    assert_eq!(
+        astro.seo.extra.get(key).and_then(Value::as_str),
+        Some(expected),
+        "ts.astro.seo extra value mismatch",
+    );
+}
+
+pub fn assert_ts_astro_state_extra_string(astro: &TsAstroPolicyConfig, key: &str, expected: &str) {
+    assert_eq!(
+        astro.state.extra.get(key).and_then(Value::as_str),
+        Some(expected),
+        "ts.astro.state extra value mismatch",
+    );
+}
+
 pub fn assert_waiver(
     waiver: Option<&WaiverConfig>,
     expected_rule: &str,

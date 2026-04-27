@@ -21,7 +21,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                 ID,
                 "Astro metadata helper sources are missing",
                 format!(
-                    "`{}` declares `metadata_helpers = [{}]`, but G3TS found no source files at those app-relative paths. Configure the approved metadata helper modules routes may use.",
+                    "`{}` declares `[ts.astro.seo].metadata_helpers = [{}]`, but G3TS found no source files at those app-relative paths. Configure the approved metadata helper modules routes may use.",
                     policy.rel_path,
                     contract.approved_surface_sources.missing_metadata_helpers.join(", ")
                 ),
@@ -37,9 +37,13 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             continue;
         };
 
-        if [&eslint.astro_source_effective_metadata_helper_rules, &eslint.ts_source_effective_metadata_helper_rules, &eslint.tsx_source_effective_metadata_helper_rules]
-            .iter()
-            .all(|rules| rules.iter().any(|rule| rule == RULE_NAME))
+        if [
+            &eslint.astro_source_effective_metadata_helper_rules,
+            &eslint.ts_source_effective_metadata_helper_rules,
+            &eslint.tsx_source_effective_metadata_helper_rules,
+        ]
+        .iter()
+        .all(|rules| rules.iter().any(|rule| rule == RULE_NAME))
         {
             if let Some(rel_path) = rel_path {
                 results.push(crate::support::info(

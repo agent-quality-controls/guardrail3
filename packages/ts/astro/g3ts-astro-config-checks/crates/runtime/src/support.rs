@@ -309,6 +309,27 @@ pub(crate) fn eslint_required_lanes_have_effective_pipeline_rules(
 }
 
 #[must_use]
+pub(crate) fn eslint_required_lanes_have_content_adapter_modules(
+    contract: &G3TsAstroEslintPluginContractInput,
+    expected_policy_adapters: &[String],
+) -> bool {
+    let expected_modules = expected_module_globs(expected_policy_adapters);
+    !expected_modules.is_empty()
+        && parsed_eslint_surface(contract).is_some_and(|snapshot| {
+            string_arrays_match_as_sets(
+                &snapshot.astro_source_effective_content_adapter_modules,
+                &expected_modules,
+            ) && string_arrays_match_as_sets(
+                &snapshot.ts_source_effective_content_adapter_modules,
+                &expected_modules,
+            ) && string_arrays_match_as_sets(
+                &snapshot.tsx_source_effective_content_adapter_modules,
+                &expected_modules,
+            )
+        })
+}
+
+#[must_use]
 pub(crate) fn eslint_required_lanes_have_inline_public_content_rule(
     contract: &G3TsAstroEslintPluginContractInput,
     plugin_name: &str,
@@ -519,4 +540,45 @@ fn lane_has_plugin_and_rules(
                 .as_ref()
                 .is_none_or(|effective_rules| effective_rules.contains(*required_rule))
         })
+}
+
+fn expected_module_globs(source_paths: &[String]) -> Vec<String> {
+    let mut globs = source_paths
+        .iter()
+        .map(|source_path| {
+            let source_path = source_path.trim_end_matches('/');
+            if is_source_module_file(source_path) {
+                normalize_glob(source_path)
+            } else {
+                format!("{}/**/*", normalize_glob(source_path))
+            }
+        })
+        .collect::<Vec<_>>();
+    globs.sort();
+    globs.dedup();
+    globs
+}
+
+fn is_source_module_file(path: &str) -> bool {
+    path.ends_with(".ts")
+        || path.ends_with(".tsx")
+        || path.ends_with(".mts")
+        || path.ends_with(".cts")
+        || path.ends_with(".js")
+        || path.ends_with(".jsx")
+        || path.ends_with(".mjs")
+        || path.ends_with(".cjs")
+        || path.ends_with(".astro")
+}
+
+fn normalize_glob(value: &str) -> String {
+    value
+        .trim_start_matches("./")
+        .trim_end_matches('/')
+        .to_owned()
+}
+
+fn string_arrays_match_as_sets(left: &[String], right: &[String]) -> bool {
+    std::collections::BTreeSet::from_iter(left.iter().map(|value| normalize_glob(value)))
+        == std::collections::BTreeSet::from_iter(right.iter().map(|value| normalize_glob(value)))
 }
