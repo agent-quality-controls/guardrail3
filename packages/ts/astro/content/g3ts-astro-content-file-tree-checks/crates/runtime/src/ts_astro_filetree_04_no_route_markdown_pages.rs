@@ -1,9 +1,9 @@
-use g3ts_astro_types::G3TsAstroFileTreeChecksInput;
+use g3ts_astro_types::G3TsAstroContentFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "TS-ASTRO-CONTENT-FILETREE-04";
 
-pub(crate) fn check(input: &G3TsAstroFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroContentFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     if input.build_collection_roots.is_empty() && input.live_collection_roots.is_empty() {
         return;
     }

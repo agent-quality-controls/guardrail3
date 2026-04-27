@@ -1,4 +1,4 @@
-use g3ts_astro_types::G3TsAstroConfigChecksInput;
+use g3ts_astro_types::G3TsAstroContentConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-CONTENT-CONFIG-18";
@@ -6,7 +6,7 @@ const PLUGIN_NAME: &str = "astro-pipeline";
 const PLUGIN_PACKAGE_NAME: &str = "g3ts-eslint-plugin-astro-pipeline";
 const RULE_NAME: &str = "astro-pipeline/require-approved-content-adapter-in-routes";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroContentConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     for contract in &input.integration_contracts {
         let eslint_contract = input.eslint_contracts.iter().find(|eslint_contract| {
             eslint_contract.app_root_rel_path == contract.app_root_rel_path

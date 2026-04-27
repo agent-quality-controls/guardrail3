@@ -262,14 +262,7 @@ name = "g3rs-workspace-crawl-types"
 version = "0.1.0"
 
 [[package]]
-name = "g3ts-astro-ingestion"
-version = "0.1.0"
-dependencies = [
- "g3ts-astro-ingestion-runtime",
-]
-
-[[package]]
-name = "g3ts-astro-ingestion-runtime"
+name = "g3ts-astro-check-support"
 version = "0.1.0"
 dependencies = [
  "astro-config-parser",
@@ -277,11 +270,13 @@ dependencies = [
  "g3rs-workspace-crawl",
  "g3ts-astro-types",
  "globset",
+ "guardrail3-check-types",
  "guardrail3-rs-toml-parser",
  "package-json-parser",
  "package-script-command-parser",
  "serde_json",
  "syncpack-config-parser",
+ "url",
 ]
 
 [[package]]
@@ -289,7 +284,7 @@ name = "g3ts-astro-mdx-ingestion"
 version = "0.1.0"
 dependencies = [
  "g3rs-workspace-crawl",
- "g3ts-astro-ingestion",
+ "g3ts-astro-check-support",
  "g3ts-astro-types",
 ]
 
@@ -309,6 +304,10 @@ dependencies = [
  "regex-automata",
  "regex-syntax",
 ]
+
+[[package]]
+name = "guardrail3-check-types"
+version = "0.1.0"
 
 [[package]]
 name = "guardrail3-rs-toml-parser"

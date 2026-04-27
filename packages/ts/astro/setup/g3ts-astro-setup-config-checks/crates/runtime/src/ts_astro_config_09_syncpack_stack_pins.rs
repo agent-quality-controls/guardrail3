@@ -1,12 +1,12 @@
 use g3ts_astro_types::{
-    G3TsAstroConfigChecksInput, G3TsAstroIntegrationContractInput, G3TsAstroSyncpackConfigState,
+    G3TsAstroSetupIntegrationContractInput, G3TsAstroSyncpackConfigState,
 };
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SETUP-CONFIG-09";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroSetupIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         match &contract.syncpack_config {
             G3TsAstroSyncpackConfigState::Parsed { snapshot } => {
                 let package_path =
@@ -74,7 +74,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 }
 
 fn push_unavailable_error(
-    contract: &G3TsAstroIntegrationContractInput,
+    contract: &G3TsAstroSetupIntegrationContractInput,
     rel_path: &str,
     reason: &str,
     results: &mut Vec<G3CheckResult>,

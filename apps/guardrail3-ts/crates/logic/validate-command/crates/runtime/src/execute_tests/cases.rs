@@ -50,7 +50,7 @@ impl FamilyRunner for StubFamilyRunner {
                     None,
                 ),
             ],
-            SupportedFamily::Astro => vec![
+            SupportedFamily::AstroSetup | SupportedFamily::AstroContent | SupportedFamily::AstroMdx | SupportedFamily::AstroSeo | SupportedFamily::AstroState => vec![
                 G3CheckResult::new(
                     "TS-ASTRO-CONFIG-01".to_owned(),
                     G3Severity::Info,
@@ -261,7 +261,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=8 inventory=false",
+        "runs=12 inventory=false",
         "",
         0,
     );
@@ -280,7 +280,7 @@ impl FamilyRunner for ErroringFamilyRunner {
             SupportedFamily::Eslint => Err(FamilyRunError {
                 message: "eslint runner exploded".to_owned(),
             }),
-            SupportedFamily::Astro => Err(FamilyRunError {
+            SupportedFamily::AstroSetup | SupportedFamily::AstroContent | SupportedFamily::AstroMdx | SupportedFamily::AstroSeo | SupportedFamily::AstroState => Err(FamilyRunError {
                 message: "astro runner exploded".to_owned(),
             }),
             SupportedFamily::Arch => Err(FamilyRunError {

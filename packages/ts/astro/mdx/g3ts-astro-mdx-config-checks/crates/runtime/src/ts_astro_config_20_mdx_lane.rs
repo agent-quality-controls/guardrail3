@@ -1,4 +1,4 @@
-use g3ts_astro_types::G3TsAstroConfigChecksInput;
+use g3ts_astro_types::G3TsAstroMdxConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-MDX-CONFIG-20";
@@ -6,7 +6,7 @@ const DEPENDENCY_NAME: &str = "eslint-plugin-mdx";
 const PLUGIN_NAME: &str = "mdx";
 const RULE_NAME: &str = "mdx/remark";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroMdxConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     for contract in &input.integration_contracts {
         let rel_path = g3ts_astro_check_support::core::package_rel_path(contract);
         if !g3ts_astro_check_support::core::package_has_dependency(contract, DEPENDENCY_NAME) {

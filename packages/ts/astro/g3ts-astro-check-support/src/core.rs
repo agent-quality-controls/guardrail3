@@ -1,18 +1,107 @@
 use crate::support_nuasite;
 use g3ts_astro_types::{
     G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState,
+    G3TsAstroContentIntegrationContractInput,
     G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
-    G3TsAstroEslintSurfaceState, G3TsAstroIntegrationContractInput, G3TsAstroOutputMode,
+    G3TsAstroEslintSurfaceState, G3TsAstroMdxIntegrationContractInput, G3TsAstroOutputMode,
     G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState, G3TsAstroPolicySnapshot,
-    G3TsAstroPolicySurfaceState, G3TsAstroStaticValue,
+    G3TsAstroPolicySurfaceState, G3TsAstroSeoIntegrationContractInput,
+    G3TsAstroSetupIntegrationContractInput, G3TsAstroStaticValue,
+    G3TsAstroSyncpackRequiredPin,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+pub trait G3TsAstroPackageContract {
+    fn package(&self) -> &G3TsAstroPackageSurfaceState;
+}
+
+pub trait G3TsAstroSyncpackPinsContract {
+    fn required_syncpack_pins(&self) -> &[G3TsAstroSyncpackRequiredPin];
+}
+
+pub trait G3TsAstroForbiddenDepsContract {
+    fn forbidden_syncpack_deps(&self) -> &[String];
+}
+
+pub trait G3TsAstroConfigContract {
+    fn astro_config(&self) -> &G3TsAstroConfigSurfaceState;
+}
+
+pub trait G3TsAstroPolicyContract {
+    fn astro_policy(&self) -> &G3TsAstroPolicySurfaceState;
+}
+
+impl G3TsAstroPackageContract for G3TsAstroSetupIntegrationContractInput {
+    fn package(&self) -> &G3TsAstroPackageSurfaceState {
+        &self.package
+    }
+}
+
+impl G3TsAstroPackageContract for G3TsAstroContentIntegrationContractInput {
+    fn package(&self) -> &G3TsAstroPackageSurfaceState {
+        &self.package
+    }
+}
+
+impl G3TsAstroPackageContract for G3TsAstroMdxIntegrationContractInput {
+    fn package(&self) -> &G3TsAstroPackageSurfaceState {
+        &self.package
+    }
+}
+
+impl G3TsAstroPackageContract for G3TsAstroSeoIntegrationContractInput {
+    fn package(&self) -> &G3TsAstroPackageSurfaceState {
+        &self.package
+    }
+}
+
+impl G3TsAstroSyncpackPinsContract for G3TsAstroSetupIntegrationContractInput {
+    fn required_syncpack_pins(&self) -> &[G3TsAstroSyncpackRequiredPin] {
+        &self.required_syncpack_pins
+    }
+}
+
+impl G3TsAstroForbiddenDepsContract for G3TsAstroSetupIntegrationContractInput {
+    fn forbidden_syncpack_deps(&self) -> &[String] {
+        &self.forbidden_syncpack_deps
+    }
+}
+
+impl G3TsAstroConfigContract for G3TsAstroSetupIntegrationContractInput {
+    fn astro_config(&self) -> &G3TsAstroConfigSurfaceState {
+        &self.astro_config
+    }
+}
+
+impl G3TsAstroConfigContract for G3TsAstroSeoIntegrationContractInput {
+    fn astro_config(&self) -> &G3TsAstroConfigSurfaceState {
+        &self.astro_config
+    }
+}
+
+impl G3TsAstroPolicyContract for G3TsAstroContentIntegrationContractInput {
+    fn astro_policy(&self) -> &G3TsAstroPolicySurfaceState {
+        &self.astro_policy
+    }
+}
+
+impl G3TsAstroPolicyContract for G3TsAstroMdxIntegrationContractInput {
+    fn astro_policy(&self) -> &G3TsAstroPolicySurfaceState {
+        &self.astro_policy
+    }
+}
+
+impl G3TsAstroPolicyContract for G3TsAstroSeoIntegrationContractInput {
+    fn astro_policy(&self) -> &G3TsAstroPolicySurfaceState {
+        &self.astro_policy
+    }
+}
+
 #[must_use]
-pub fn parsed_package(
-    contract: &G3TsAstroIntegrationContractInput,
+pub fn parsed_package<T: G3TsAstroPackageContract>(
+    contract: &T,
 ) -> Option<&G3TsAstroPackageSurfaceSnapshot> {
-    match &contract.package {
+    match contract.package() {
         G3TsAstroPackageSurfaceState::Parsed { snapshot } => Some(snapshot),
         G3TsAstroPackageSurfaceState::Missing { .. }
         | G3TsAstroPackageSurfaceState::Unreadable { .. }
@@ -21,8 +110,8 @@ pub fn parsed_package(
 }
 
 #[must_use]
-pub fn package_rel_path(contract: &G3TsAstroIntegrationContractInput) -> Option<&str> {
-    match &contract.package {
+pub fn package_rel_path<T: G3TsAstroPackageContract>(contract: &T) -> Option<&str> {
+    match contract.package() {
         G3TsAstroPackageSurfaceState::Missing { rel_path }
         | G3TsAstroPackageSurfaceState::Unreadable { rel_path, .. }
         | G3TsAstroPackageSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
@@ -32,7 +121,7 @@ pub fn package_rel_path(contract: &G3TsAstroIntegrationContractInput) -> Option<
 
 #[must_use]
 pub fn package_has_dependency(
-    contract: &G3TsAstroIntegrationContractInput,
+    contract: &impl G3TsAstroPackageContract,
     dependency_name: &str,
 ) -> bool {
     parsed_package(contract).is_some_and(|snapshot| {
@@ -45,12 +134,12 @@ pub fn package_has_dependency(
 }
 
 #[must_use]
-pub fn package_safely_runs_astro_check(contract: &G3TsAstroIntegrationContractInput) -> bool {
+pub fn package_safely_runs_astro_check(contract: &impl G3TsAstroPackageContract) -> bool {
     parsed_package(contract).is_some_and(|snapshot| snapshot.safely_runs_astro_check)
 }
 
 #[must_use]
-pub fn package_safely_runs_astro_build(contract: &G3TsAstroIntegrationContractInput) -> bool {
+pub fn package_safely_runs_astro_build(contract: &impl G3TsAstroPackageContract) -> bool {
     parsed_package(contract).is_some_and(|snapshot| snapshot.safely_runs_astro_build)
 }
 
@@ -65,9 +154,9 @@ pub fn expected_syncpack_source_entry(
 }
 
 #[must_use]
-pub fn required_syncpack_pins_message(contract: &G3TsAstroIntegrationContractInput) -> String {
+pub fn required_syncpack_pins_message(contract: &impl G3TsAstroSyncpackPinsContract) -> String {
     contract
-        .required_syncpack_pins
+        .required_syncpack_pins()
         .iter()
         .map(|pin| format!("`{}` -> `{}`", pin.dependency, pin.version))
         .collect::<Vec<_>>()
@@ -76,9 +165,9 @@ pub fn required_syncpack_pins_message(contract: &G3TsAstroIntegrationContractInp
 
 #[must_use]
 #[cfg(test)]
-pub fn forbidden_syncpack_deps_message(contract: &G3TsAstroIntegrationContractInput) -> String {
+pub fn forbidden_syncpack_deps_message(contract: &impl G3TsAstroForbiddenDepsContract) -> String {
     contract
-        .forbidden_syncpack_deps
+        .forbidden_syncpack_deps()
         .iter()
         .map(|dependency| format!("`{dependency}`"))
         .collect::<Vec<_>>()
@@ -99,9 +188,9 @@ pub fn parsed_eslint_surface(
 
 #[must_use]
 pub fn parsed_astro_config(
-    contract: &G3TsAstroIntegrationContractInput,
+    contract: &impl G3TsAstroConfigContract,
 ) -> Option<&G3TsAstroConfigSurfaceSnapshot> {
-    match &contract.astro_config {
+    match contract.astro_config() {
         G3TsAstroConfigSurfaceState::Parsed { snapshot } => Some(snapshot),
         G3TsAstroConfigSurfaceState::Missing { .. }
         | G3TsAstroConfigSurfaceState::Unreadable { .. }
@@ -111,9 +200,9 @@ pub fn parsed_astro_config(
 
 #[must_use]
 pub fn parsed_astro_policy(
-    contract: &G3TsAstroIntegrationContractInput,
+    contract: &impl G3TsAstroPolicyContract,
 ) -> Option<&G3TsAstroPolicySnapshot> {
-    match &contract.astro_policy {
+    match contract.astro_policy() {
         G3TsAstroPolicySurfaceState::Parsed { snapshot } => Some(snapshot),
         G3TsAstroPolicySurfaceState::Missing { .. }
         | G3TsAstroPolicySurfaceState::Unreadable { .. }
@@ -123,8 +212,8 @@ pub fn parsed_astro_policy(
 }
 
 #[must_use]
-pub fn astro_policy_rel_path(contract: &G3TsAstroIntegrationContractInput) -> Option<&str> {
-    match &contract.astro_policy {
+pub fn astro_policy_rel_path(contract: &impl G3TsAstroPolicyContract) -> Option<&str> {
+    match contract.astro_policy() {
         G3TsAstroPolicySurfaceState::Missing { rel_path }
         | G3TsAstroPolicySurfaceState::Unreadable { rel_path, .. }
         | G3TsAstroPolicySurfaceState::ParseError { rel_path, .. }
@@ -134,8 +223,8 @@ pub fn astro_policy_rel_path(contract: &G3TsAstroIntegrationContractInput) -> Op
 }
 
 #[must_use]
-pub fn astro_config_rel_path(contract: &G3TsAstroIntegrationContractInput) -> Option<&str> {
-    match &contract.astro_config {
+pub fn astro_config_rel_path(contract: &impl G3TsAstroConfigContract) -> Option<&str> {
+    match contract.astro_config() {
         G3TsAstroConfigSurfaceState::Missing { rel_path }
         | G3TsAstroConfigSurfaceState::Unreadable { rel_path, .. }
         | G3TsAstroConfigSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
@@ -144,7 +233,7 @@ pub fn astro_config_rel_path(contract: &G3TsAstroIntegrationContractInput) -> Op
 }
 
 #[must_use]
-pub fn astro_config_is_static(contract: &G3TsAstroIntegrationContractInput) -> bool {
+pub fn astro_config_is_static(contract: &impl G3TsAstroConfigContract) -> bool {
     parsed_astro_config(contract)
         .is_some_and(|snapshot| snapshot.output == Some(G3TsAstroOutputMode::Static))
 }

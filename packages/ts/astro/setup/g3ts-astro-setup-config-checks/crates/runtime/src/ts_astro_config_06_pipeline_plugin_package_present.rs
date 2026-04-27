@@ -1,11 +1,11 @@
-use g3ts_astro_types::G3TsAstroConfigChecksInput;
+use g3ts_astro_types::G3TsAstroSetupIntegrationContractInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SETUP-CONFIG-06";
 const DEPENDENCY_NAME: &str = "g3ts-eslint-plugin-astro-pipeline";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroSetupIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         let rel_path = g3ts_astro_check_support::core::package_rel_path(contract);
         if g3ts_astro_check_support::core::package_has_dependency(contract, DEPENDENCY_NAME) {
             if let Some(rel_path) = rel_path {

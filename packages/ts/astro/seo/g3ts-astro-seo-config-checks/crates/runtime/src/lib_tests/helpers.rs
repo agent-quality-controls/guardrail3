@@ -1,8 +1,7 @@
 use g3ts_astro_types::{
-    G3TsAstroApprovedSurfaceSourcePaths, G3TsAstroCallSnapshot, G3TsAstroConfigChecksInput,
-    G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState, G3TsAstroContentMode,
-    G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
-    G3TsAstroEslintSurfaceState, G3TsAstroIntegrationContractInput, G3TsAstroIntegrationSnapshot,
+    G3TsAstroSeoApprovedSourcePaths, G3TsAstroCallSnapshot, G3TsAstroSeoConfigChecksInput,
+    G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState,     G3TsAstroEslintPluginContractInput, G3TsAstroEslintSurfaceSnapshot,
+    G3TsAstroEslintSurfaceState, G3TsAstroSeoIntegrationContractInput, G3TsAstroIntegrationSnapshot,
     G3TsAstroOutputMode, G3TsAstroPackageScriptCommand, G3TsAstroPackageScriptCommandSeparator,
     G3TsAstroPackageScriptParseBlocker, G3TsAstroPackageScriptToolInvocation,
     G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState,
@@ -42,8 +41,8 @@ struct TestSyncpackVersionGroup {
     is_ignored: bool,
 }
 
-pub(super) fn golden() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn golden() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -51,8 +50,8 @@ pub(super) fn golden() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn missing_astro_check() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_astro_check() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             false, true, true, true, false, true, true,
         ))],
@@ -60,8 +59,8 @@ pub(super) fn missing_astro_check() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn fake_astro_check_text_only() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn fake_astro_check_text_only() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package_with_script(
             "echo astro check && syncpack lint && eslint .",
             true,
@@ -74,8 +73,8 @@ pub(super) fn fake_astro_check_text_only() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn astro_check_wrapper_forms() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn astro_check_wrapper_forms() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package_with_script(
             "npm exec -- astro check && npx --yes astro check && syncpack lint",
             true,
@@ -88,8 +87,8 @@ pub(super) fn astro_check_wrapper_forms() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn missing_required_packages() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_required_packages() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, false, false, false, false, true, true,
         ))],
@@ -97,8 +96,8 @@ pub(super) fn missing_required_packages() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn missing_astro_plugin_wiring() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_astro_plugin_wiring() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -106,8 +105,8 @@ pub(super) fn missing_astro_plugin_wiring() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn missing_pipeline_wiring() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_pipeline_wiring() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -115,8 +114,8 @@ pub(super) fn missing_pipeline_wiring() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn missing_pipeline_rule_enforcement() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_pipeline_rule_enforcement() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -124,8 +123,8 @@ pub(super) fn missing_pipeline_rule_enforcement() -> G3TsAstroConfigChecksInput 
     }
 }
 
-pub(super) fn missing_pipeline_scope_options() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_pipeline_scope_options() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -140,8 +139,8 @@ pub(super) fn missing_pipeline_scope_options() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn endpoint_only_pipeline_scope_options() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn endpoint_only_pipeline_scope_options() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -156,8 +155,8 @@ pub(super) fn endpoint_only_pipeline_scope_options() -> G3TsAstroConfigChecksInp
     }
 }
 
-pub(super) fn endpoint_only_pipeline_scope_without_route_coverage() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn endpoint_only_pipeline_scope_without_route_coverage() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -172,8 +171,8 @@ pub(super) fn endpoint_only_pipeline_scope_without_route_coverage() -> G3TsAstro
     }
 }
 
-pub(super) fn missing_content_data_module_scope_options() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_content_data_module_scope_options() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -188,8 +187,8 @@ pub(super) fn missing_content_data_module_scope_options() -> G3TsAstroConfigChec
     }
 }
 
-pub(super) fn missing_content_source_scope_options() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_content_source_scope_options() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -204,8 +203,8 @@ pub(super) fn missing_content_source_scope_options() -> G3TsAstroConfigChecksInp
     }
 }
 
-pub(super) fn missing_inline_public_content_rule() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_inline_public_content_rule() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -221,8 +220,8 @@ pub(super) fn missing_inline_public_content_rule() -> G3TsAstroConfigChecksInput
     }
 }
 
-pub(super) fn route_only_pipeline_wiring() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn route_only_pipeline_wiring() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -237,8 +236,8 @@ pub(super) fn route_only_pipeline_wiring() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn tsx_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn tsx_lane_missing_pipeline_effectiveness() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -253,8 +252,8 @@ pub(super) fn tsx_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecks
     }
 }
 
-pub(super) fn astro_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn astro_lane_missing_pipeline_effectiveness() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -269,8 +268,8 @@ pub(super) fn astro_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChec
     }
 }
 
-pub(super) fn ts_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn ts_lane_missing_pipeline_effectiveness() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, false, true, true,
         ))],
@@ -285,8 +284,8 @@ pub(super) fn ts_lane_missing_pipeline_effectiveness() -> G3TsAstroConfigChecksI
     }
 }
 
-pub(super) fn missing_syncpack_config() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_syncpack_config() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             G3TsAstroSyncpackConfigState::Missing {
@@ -297,8 +296,8 @@ pub(super) fn missing_syncpack_config() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn unreadable_syncpack_config() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn unreadable_syncpack_config() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             G3TsAstroSyncpackConfigState::Unreadable {
@@ -310,8 +309,8 @@ pub(super) fn unreadable_syncpack_config() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn malformed_syncpack_config() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn malformed_syncpack_config() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             G3TsAstroSyncpackConfigState::ParseError {
@@ -323,8 +322,8 @@ pub(super) fn malformed_syncpack_config() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn syncpack_source_excludes_package() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_source_excludes_package() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_source_and_groups(
@@ -336,9 +335,9 @@ pub(super) fn syncpack_source_excludes_package() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn root_syncpack_package_source_does_not_cover_nested_app() -> G3TsAstroConfigChecksInput
+pub(super) fn root_syncpack_package_source_does_not_cover_nested_app() -> G3TsAstroSeoConfigChecksInput
 {
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_for_app_with_syncpack(
             "apps/landing",
             nested_parsed_package(),
@@ -354,8 +353,8 @@ pub(super) fn root_syncpack_package_source_does_not_cover_nested_app() -> G3TsAs
     }
 }
 
-pub(super) fn root_syncpack_exact_source_covers_nested_app() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn root_syncpack_exact_source_covers_nested_app() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_for_app_with_syncpack(
             "apps/landing",
             nested_parsed_package(),
@@ -371,8 +370,8 @@ pub(super) fn root_syncpack_exact_source_covers_nested_app() -> G3TsAstroConfigC
     }
 }
 
-pub(super) fn local_syncpack_package_source_covers_nested_app() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn local_syncpack_package_source_covers_nested_app() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_for_app_with_syncpack(
             "apps/landing",
             nested_parsed_package(),
@@ -388,7 +387,7 @@ pub(super) fn local_syncpack_package_source_covers_nested_app() -> G3TsAstroConf
     }
 }
 
-pub(super) fn syncpack_missing_stack_pin() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_missing_stack_pin() -> G3TsAstroSeoConfigChecksInput {
     let mut groups = required_syncpack_version_groups();
     groups.retain(|group| {
         !group
@@ -397,7 +396,7 @@ pub(super) fn syncpack_missing_stack_pin() -> G3TsAstroConfigChecksInput {
             .any(|dependency| dependency == "astro")
     });
 
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_groups(groups),
@@ -406,18 +405,18 @@ pub(super) fn syncpack_missing_stack_pin() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn syncpack_wrong_stack_pin() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_wrong_stack_pin() -> G3TsAstroSeoConfigChecksInput {
     syncpack_wrong_pin_for_dependency("astro", "6.1.8")
 }
 
-pub(super) fn syncpack_wrong_astro_pipeline_stack_pin() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_wrong_astro_pipeline_stack_pin() -> G3TsAstroSeoConfigChecksInput {
     syncpack_wrong_pin_for_dependency("g3ts-eslint-plugin-astro-pipeline", "0.1.4")
 }
 
 fn syncpack_wrong_pin_for_dependency(
     dependency_name: &str,
     wrong_version: &str,
-) -> G3TsAstroConfigChecksInput {
+) -> G3TsAstroSeoConfigChecksInput {
     let mut groups = required_syncpack_version_groups();
     for group in &mut groups {
         if group
@@ -429,7 +428,7 @@ fn syncpack_wrong_pin_for_dependency(
         }
     }
 
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_groups(groups),
@@ -438,7 +437,7 @@ fn syncpack_wrong_pin_for_dependency(
     }
 }
 
-pub(super) fn syncpack_shadowed_stack_pin() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_shadowed_stack_pin() -> G3TsAstroSeoConfigChecksInput {
     let mut groups = required_syncpack_version_groups();
     groups.insert(
         0,
@@ -453,7 +452,7 @@ pub(super) fn syncpack_shadowed_stack_pin() -> G3TsAstroConfigChecksInput {
         },
     );
 
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_groups(groups),
@@ -462,7 +461,7 @@ pub(super) fn syncpack_shadowed_stack_pin() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn syncpack_scoped_away_stack_pin() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_scoped_away_stack_pin() -> G3TsAstroSeoConfigChecksInput {
     let mut groups = required_syncpack_version_groups();
     for group in &mut groups {
         if group
@@ -474,7 +473,7 @@ pub(super) fn syncpack_scoped_away_stack_pin() -> G3TsAstroConfigChecksInput {
         }
     }
 
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_groups(groups),
@@ -483,7 +482,7 @@ pub(super) fn syncpack_scoped_away_stack_pin() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn syncpack_specifier_scoped_stack_pin() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_specifier_scoped_stack_pin() -> G3TsAstroSeoConfigChecksInput {
     let mut groups = required_syncpack_version_groups();
     for group in &mut groups {
         if group
@@ -495,7 +494,7 @@ pub(super) fn syncpack_specifier_scoped_stack_pin() -> G3TsAstroConfigChecksInpu
         }
     }
 
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_groups(groups),
@@ -504,7 +503,7 @@ pub(super) fn syncpack_specifier_scoped_stack_pin() -> G3TsAstroConfigChecksInpu
     }
 }
 
-pub(super) fn syncpack_catch_all_forbidden_ban() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_catch_all_forbidden_ban() -> G3TsAstroSeoConfigChecksInput {
     let mut groups = required_syncpack_version_groups()
         .into_iter()
         .filter(|group| !group.is_banned)
@@ -519,7 +518,7 @@ pub(super) fn syncpack_catch_all_forbidden_ban() -> G3TsAstroConfigChecksInput {
         is_ignored: false,
     });
 
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_groups(groups),
@@ -528,7 +527,7 @@ pub(super) fn syncpack_catch_all_forbidden_ban() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn syncpack_shadowed_forbidden_ban() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_shadowed_forbidden_ban() -> G3TsAstroSeoConfigChecksInput {
     let mut groups = required_syncpack_version_groups();
     let next_ban_index = groups
         .iter()
@@ -560,7 +559,7 @@ pub(super) fn syncpack_shadowed_forbidden_ban() -> G3TsAstroConfigChecksInput {
     );
     groups.push(canonical_next_ban);
 
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_groups(groups),
@@ -569,31 +568,31 @@ pub(super) fn syncpack_shadowed_forbidden_ban() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn syncpack_scoped_away_forbidden_ban() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_scoped_away_forbidden_ban() -> G3TsAstroSeoConfigChecksInput {
     syncpack_mutated_next_ban(|group| {
         group.packages = vec!["other-package".to_owned()];
     })
 }
 
-pub(super) fn syncpack_specifier_scoped_forbidden_ban() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_specifier_scoped_forbidden_ban() -> G3TsAstroSeoConfigChecksInput {
     syncpack_mutated_next_ban(|group| {
         group.specifier_types = vec!["!exact".to_owned()];
     })
 }
 
-pub(super) fn syncpack_wrong_forbidden_ban_dependency_types() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_wrong_forbidden_ban_dependency_types() -> G3TsAstroSeoConfigChecksInput {
     syncpack_mutated_next_ban(|group| {
         group.dependency_types = vec!["prod".to_owned(), "dev".to_owned()];
     })
 }
 
-pub(super) fn syncpack_ignored_forbidden_ban() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_ignored_forbidden_ban() -> G3TsAstroSeoConfigChecksInput {
     syncpack_mutated_next_ban(|group| {
         group.is_ignored = true;
     })
 }
 
-pub(super) fn syncpack_pinned_forbidden_ban() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_pinned_forbidden_ban() -> G3TsAstroSeoConfigChecksInput {
     syncpack_mutated_next_ban(|group| {
         group.pin_version = Some("0.0.0".to_owned());
     })
@@ -601,7 +600,7 @@ pub(super) fn syncpack_pinned_forbidden_ban() -> G3TsAstroConfigChecksInput {
 
 fn syncpack_mutated_next_ban(
     mut mutate: impl FnMut(&mut TestSyncpackVersionGroup),
-) -> G3TsAstroConfigChecksInput {
+) -> G3TsAstroSeoConfigChecksInput {
     let mut groups = required_syncpack_version_groups();
     for group in &mut groups {
         if group.is_banned
@@ -614,7 +613,7 @@ fn syncpack_mutated_next_ban(
         }
     }
 
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_groups(groups),
@@ -623,8 +622,8 @@ fn syncpack_mutated_next_ban(
     }
 }
 
-pub(super) fn velite_package_with_syncpack_ban() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn velite_package_with_syncpack_ban() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract(parsed_package(
             true, true, true, true, true, true, true,
         ))],
@@ -632,25 +631,25 @@ pub(super) fn velite_package_with_syncpack_ban() -> G3TsAstroConfigChecksInput {
     }
 }
 
-pub(super) fn syncpack_missing_forbidden_ban() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_missing_forbidden_ban() -> G3TsAstroSeoConfigChecksInput {
     syncpack_missing_forbidden_ban_for("next")
 }
 
-pub(super) fn syncpack_missing_astro_seo_ban() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_missing_astro_seo_ban() -> G3TsAstroSeoConfigChecksInput {
     syncpack_missing_forbidden_ban_for("astro-seo")
 }
 
-pub(super) fn syncpack_missing_contentlayer_ban() -> G3TsAstroConfigChecksInput {
+pub(super) fn syncpack_missing_contentlayer_ban() -> G3TsAstroSeoConfigChecksInput {
     syncpack_missing_forbidden_ban_for("contentlayer")
 }
 
 pub(super) fn syncpack_missing_forbidden_ban_named(
     forbidden_dependency: &str,
-) -> G3TsAstroConfigChecksInput {
+) -> G3TsAstroSeoConfigChecksInput {
     syncpack_missing_forbidden_ban_for(forbidden_dependency)
 }
 
-fn syncpack_missing_forbidden_ban_for(forbidden_dependency: &str) -> G3TsAstroConfigChecksInput {
+fn syncpack_missing_forbidden_ban_for(forbidden_dependency: &str) -> G3TsAstroSeoConfigChecksInput {
     let groups = required_syncpack_version_groups()
         .into_iter()
         .map(|mut group| {
@@ -663,7 +662,7 @@ fn syncpack_missing_forbidden_ban_for(forbidden_dependency: &str) -> G3TsAstroCo
         })
         .collect();
 
-    G3TsAstroConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             parsed_package(true, true, true, true, false, true, true),
             syncpack_config_with_groups(groups),
@@ -672,8 +671,8 @@ fn syncpack_missing_forbidden_ban_for(forbidden_dependency: &str) -> G3TsAstroCo
     }
 }
 
-pub(super) fn missing_package_eslint_and_astro_config_surfaces() -> G3TsAstroConfigChecksInput {
-    G3TsAstroConfigChecksInput {
+pub(super) fn missing_package_eslint_and_astro_config_surfaces() -> G3TsAstroSeoConfigChecksInput {
+    G3TsAstroSeoConfigChecksInput {
         integration_contracts: vec![integration_contract_with_syncpack(
             G3TsAstroPackageSurfaceState::Missing {
                 rel_path: "package.json".to_owned(),
@@ -690,44 +689,34 @@ pub(super) fn missing_package_eslint_and_astro_config_surfaces() -> G3TsAstroCon
 
 fn integration_contract(
     package: G3TsAstroPackageSurfaceState,
-) -> G3TsAstroIntegrationContractInput {
+) -> G3TsAstroSeoIntegrationContractInput {
     integration_contract_with_syncpack(package, syncpack_config())
 }
 
 fn integration_contract_with_syncpack(
     package: G3TsAstroPackageSurfaceState,
-    syncpack_config: G3TsAstroSyncpackConfigState,
-) -> G3TsAstroIntegrationContractInput {
-    integration_contract_for_app_with_syncpack(".", package, syncpack_config)
+    _syncpack_config: G3TsAstroSyncpackConfigState,
+) -> G3TsAstroSeoIntegrationContractInput {
+    integration_contract_for_app_with_syncpack(".", package, _syncpack_config)
 }
 
 fn integration_contract_for_app_with_syncpack(
     app_root_rel_path: &str,
     package: G3TsAstroPackageSurfaceState,
-    syncpack_config: G3TsAstroSyncpackConfigState,
-) -> G3TsAstroIntegrationContractInput {
-    G3TsAstroIntegrationContractInput {
+    _syncpack_config: G3TsAstroSyncpackConfigState,
+) -> G3TsAstroSeoIntegrationContractInput {
+    G3TsAstroSeoIntegrationContractInput {
         app_root_rel_path: app_root_rel_path.to_owned(),
-        content_mode: G3TsAstroContentMode::BuildCollections,
-        route_page_paths: vec!["src/pages/index.astro".to_owned()],
-        endpoint_paths: vec!["src/pages/rss.ts".to_owned()],
-        approved_surface_sources: G3TsAstroApprovedSurfaceSourcePaths {
-            content_adapter: vec!["src/lib/content/index.ts".to_owned()],
-            content_adapter_astro_content: vec!["src/lib/content/index.ts".to_owned()],
-            mdx_component_maps: vec!["src/components/mdx/index.tsx".to_owned()],
-            missing_mdx_component_maps: Vec::new(),
+        seo_sources: G3TsAstroSeoApprovedSourcePaths {
             metadata_helpers: vec!["src/lib/metadata/index.ts".to_owned()],
             missing_metadata_helpers: Vec::new(),
             json_ld_helpers: vec!["src/lib/json-ld/index.ts".to_owned()],
             missing_json_ld_helpers: Vec::new(),
         },
         package,
-        syncpack_config,
         astro_policy: astro_policy(),
         astro_config: astro_config(),
         llms_txt_rel_path: Some("public/llms.txt".to_owned()),
-        required_syncpack_pins: required_syncpack_pins(),
-        forbidden_syncpack_deps: forbidden_syncpack_deps(),
     }
 }
 

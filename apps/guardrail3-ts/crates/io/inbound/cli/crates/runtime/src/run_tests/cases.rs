@@ -205,7 +205,11 @@ fn run_command_uses_structure_runner_for_astro_family() {
     });
 
     assert!(
-        output.stdout.contains("== astro =="),
+        output.stdout.contains("== astro-setup ==")
+            && output.stdout.contains("== astro-content ==")
+            && output.stdout.contains("== astro-mdx ==")
+            && output.stdout.contains("== astro-seo ==")
+            && output.stdout.contains("== astro-state =="),
         "expected astro findings on stdout, got: {:?}",
         output
     );

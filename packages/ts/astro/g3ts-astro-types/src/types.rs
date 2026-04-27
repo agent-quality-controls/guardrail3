@@ -215,28 +215,26 @@ pub enum G3TsAstroConfigSurfaceState {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct G3TsAstroIntegrationContractInput {
-    pub app_root_rel_path: String,
-    pub content_mode: G3TsAstroContentMode,
-    pub route_page_paths: Vec<String>,
-    pub endpoint_paths: Vec<String>,
-    pub approved_surface_sources: G3TsAstroApprovedSurfaceSourcePaths,
-    pub package: G3TsAstroPackageSurfaceState,
-    pub syncpack_config: G3TsAstroSyncpackConfigState,
-    pub astro_policy: G3TsAstroPolicySurfaceState,
-    pub astro_config: G3TsAstroConfigSurfaceState,
-    pub llms_txt_rel_path: Option<String>,
-    pub required_syncpack_pins: Vec<G3TsAstroSyncpackRequiredPin>,
-    pub forbidden_syncpack_deps: Vec<String>,
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroContentAdapterSourcePaths {
+    pub content_adapter: Vec<String>,
+    pub content_adapter_astro_content: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3TsAstroApprovedSurfaceSourcePaths {
-    pub content_adapter: Vec<String>,
-    pub content_adapter_astro_content: Vec<String>,
+pub struct G3TsAstroPolicyModuleSourcePaths {
+    pub source_paths: Vec<String>,
+    pub missing_policy_paths: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroMdxApprovedSourcePaths {
     pub mdx_component_maps: Vec<String>,
     pub missing_mdx_component_maps: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroSeoApprovedSourcePaths {
     pub metadata_helpers: Vec<String>,
     pub missing_metadata_helpers: Vec<String>,
     pub json_ld_helpers: Vec<String>,
@@ -329,15 +327,84 @@ pub struct G3TsAstroEslintPluginContractInput {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct G3TsAstroConfigChecksInput {
-    pub integration_contracts: Vec<G3TsAstroIntegrationContractInput>,
+pub struct G3TsAstroSetupIntegrationContractInput {
+    pub app_root_rel_path: String,
+    pub content_mode: G3TsAstroContentMode,
+    pub package: G3TsAstroPackageSurfaceState,
+    pub syncpack_config: G3TsAstroSyncpackConfigState,
+    pub astro_config: G3TsAstroConfigSurfaceState,
+    pub required_syncpack_pins: Vec<G3TsAstroSyncpackRequiredPin>,
+    pub forbidden_syncpack_deps: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroContentIntegrationContractInput {
+    pub app_root_rel_path: String,
+    pub route_page_paths: Vec<String>,
+    pub endpoint_paths: Vec<String>,
+    pub content_adapter_sources: G3TsAstroContentAdapterSourcePaths,
+    pub package: G3TsAstroPackageSurfaceState,
+    pub astro_policy: G3TsAstroPolicySurfaceState,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroMdxIntegrationContractInput {
+    pub app_root_rel_path: String,
+    pub mdx_sources: G3TsAstroMdxApprovedSourcePaths,
+    pub package: G3TsAstroPackageSurfaceState,
+    pub astro_policy: G3TsAstroPolicySurfaceState,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroSeoIntegrationContractInput {
+    pub app_root_rel_path: String,
+    pub seo_sources: G3TsAstroSeoApprovedSourcePaths,
+    pub package: G3TsAstroPackageSurfaceState,
+    pub astro_config: G3TsAstroConfigSurfaceState,
+    pub astro_policy: G3TsAstroPolicySurfaceState,
+    pub llms_txt_rel_path: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroSetupConfigChecksInput {
+    pub integration_contracts: Vec<G3TsAstroSetupIntegrationContractInput>,
+    pub eslint_contracts: Vec<G3TsAstroEslintPluginContractInput>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroContentConfigChecksInput {
+    pub integration_contracts: Vec<G3TsAstroContentIntegrationContractInput>,
+    pub eslint_contracts: Vec<G3TsAstroEslintPluginContractInput>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroMdxConfigChecksInput {
+    pub integration_contracts: Vec<G3TsAstroMdxIntegrationContractInput>,
+    pub eslint_contracts: Vec<G3TsAstroEslintPluginContractInput>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct G3TsAstroSeoConfigChecksInput {
+    pub integration_contracts: Vec<G3TsAstroSeoIntegrationContractInput>,
     pub eslint_contracts: Vec<G3TsAstroEslintPluginContractInput>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3TsAstroFileTreeChecksInput {
+pub struct G3TsAstroSetupFileTreeChecksInput {
+    pub app_roots: Vec<G3TsAstroAppRootInput>,
+    pub live_collection_roots: Vec<G3TsAstroAppRootInput>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroContentFileTreeChecksInput {
     pub app_roots: Vec<G3TsAstroAppRootInput>,
     pub build_collection_roots: Vec<G3TsAstroAppRootInput>,
     pub live_collection_roots: Vec<G3TsAstroAppRootInput>,
     pub route_markdown_pages: Vec<G3TsAstroRouteMarkdownPageInput>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroStateFileTreeChecksInput {
+    pub build_collection_roots: Vec<G3TsAstroAppRootInput>,
+    pub live_collection_roots: Vec<G3TsAstroAppRootInput>,
 }

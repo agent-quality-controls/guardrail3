@@ -1,10 +1,10 @@
-use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroPolicySurfaceState};
+use g3ts_astro_types::{G3TsAstroContentIntegrationContractInput, G3TsAstroPolicySurfaceState};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-CONTENT-CONFIG-27";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroContentIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         let G3TsAstroPolicySurfaceState::Parsed { snapshot: policy } = &contract.astro_policy
         else {
             continue;
@@ -15,7 +15,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 
         let missing_adapters = missing_adapter_roots(
             &policy.content_adapters,
-            &contract.approved_surface_sources.content_adapter,
+            &contract.content_adapter_sources.content_adapter,
         );
 
         if missing_adapters.is_empty() {
@@ -26,7 +26,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                     "`{}` resolves `[ts.astro.content].adapters = [{}]` to adapter source files: {}.",
                     policy.rel_path,
                     format_quoted_paths(&policy.content_adapters),
-                    format_paths(&contract.approved_surface_sources.content_adapter)
+                    format_paths(&contract.content_adapter_sources.content_adapter)
                 ),
                 &policy.rel_path,
             ));

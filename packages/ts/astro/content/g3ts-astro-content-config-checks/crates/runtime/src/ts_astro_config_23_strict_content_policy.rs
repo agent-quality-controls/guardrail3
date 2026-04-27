@@ -1,11 +1,11 @@
-use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroPolicySnapshot};
+use g3ts_astro_types::{G3TsAstroContentIntegrationContractInput, G3TsAstroPolicySnapshot};
 use guardrail3_check_types::G3CheckResult;
 
 const CONTENT_ID: &str = "TS-ASTRO-CONTENT-CONFIG-23";
 const PROFILE: &str = "strict-static-content";
 
-pub(crate) fn check_content(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check_content(contracts: &[G3TsAstroContentIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         let rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
         if g3ts_astro_check_support::core::parsed_astro_policy(contract)
             .is_some_and(policy_content_is_strict)

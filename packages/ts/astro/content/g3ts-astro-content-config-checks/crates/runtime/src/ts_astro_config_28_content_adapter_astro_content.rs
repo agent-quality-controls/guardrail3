@@ -1,29 +1,29 @@
 use std::collections::BTreeSet;
 
-use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroPolicySurfaceState};
+use g3ts_astro_types::{G3TsAstroContentIntegrationContractInput, G3TsAstroPolicySurfaceState};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-CONTENT-CONFIG-28";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroContentIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         let G3TsAstroPolicySurfaceState::Parsed { snapshot: policy } = &contract.astro_policy
         else {
             continue;
         };
 
-        if contract.approved_surface_sources.content_adapter.is_empty() {
+        if contract.content_adapter_sources.content_adapter.is_empty() {
             continue;
         }
 
         let astro_content_sources: BTreeSet<&str> = contract
-            .approved_surface_sources
+            .content_adapter_sources
             .content_adapter_astro_content
             .iter()
             .map(String::as_str)
             .collect();
         let adapter_sources: Vec<&str> = contract
-            .approved_surface_sources
+            .content_adapter_sources
             .content_adapter
             .iter()
             .map(String::as_str)

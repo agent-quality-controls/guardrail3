@@ -14,8 +14,12 @@ pub fn run(
         SupportedFamily::Eslint => Ok(g3ts_eslint_config_checks::check(
             &g3ts_eslint_ingestion::ingest_for_config_checks(crawl),
         )),
-        SupportedFamily::Astro => Err(FamilyRunError {
-            message: "config group does not handle Astro".to_owned(),
+        SupportedFamily::AstroSetup
+        | SupportedFamily::AstroContent
+        | SupportedFamily::AstroMdx
+        | SupportedFamily::AstroSeo
+        | SupportedFamily::AstroState => Err(FamilyRunError {
+            message: "config group does not handle Astro structure families".to_owned(),
         }),
         SupportedFamily::Arch => Err(FamilyRunError {
             message: "config group does not handle Arch".to_owned(),

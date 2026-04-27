@@ -27,7 +27,11 @@ fn selected_families_default_to_all_supported_families_when_filter_is_empty() {
         &super::super::selected_families(&request),
         &[
             SupportedFamily::Eslint,
-            SupportedFamily::Astro,
+            SupportedFamily::AstroSetup,
+            SupportedFamily::AstroContent,
+            SupportedFamily::AstroMdx,
+            SupportedFamily::AstroSeo,
+            SupportedFamily::AstroState,
             SupportedFamily::Arch,
             SupportedFamily::Apparch,
             SupportedFamily::Tsconfig,
@@ -59,7 +63,7 @@ fn selected_families_keep_canonical_order_with_arch_in_mixed_filter() {
         families: vec![
             SupportedFamily::Jscpd,
             SupportedFamily::Arch,
-            SupportedFamily::Astro,
+            SupportedFamily::AstroSetup,
             SupportedFamily::Eslint,
         ],
         include_inventory: false,
@@ -69,7 +73,7 @@ fn selected_families_keep_canonical_order_with_arch_in_mixed_filter() {
         &super::super::selected_families(&request),
         &[
             SupportedFamily::Eslint,
-            SupportedFamily::Astro,
+            SupportedFamily::AstroSetup,
             SupportedFamily::Arch,
             SupportedFamily::Jscpd,
         ],
@@ -83,7 +87,7 @@ fn selected_families_keep_canonical_order_with_astro_in_mixed_filter() {
         families: vec![
             SupportedFamily::Jscpd,
             SupportedFamily::Arch,
-            SupportedFamily::Astro,
+            SupportedFamily::AstroSetup,
         ],
         include_inventory: false,
     };
@@ -91,7 +95,7 @@ fn selected_families_keep_canonical_order_with_astro_in_mixed_filter() {
     assertions::assert_selected_families(
         &super::super::selected_families(&request),
         &[
-            SupportedFamily::Astro,
+            SupportedFamily::AstroSetup,
             SupportedFamily::Arch,
             SupportedFamily::Jscpd,
         ],

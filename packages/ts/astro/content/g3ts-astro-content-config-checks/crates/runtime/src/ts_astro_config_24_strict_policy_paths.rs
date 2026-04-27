@@ -1,12 +1,12 @@
-use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroPolicySnapshot};
+use g3ts_astro_types::{G3TsAstroContentIntegrationContractInput, G3TsAstroPolicySnapshot};
 use guardrail3_check_types::G3CheckResult;
 use std::path::{Component, Path};
 
 const CONTENT_ID: &str = "TS-ASTRO-CONTENT-CONFIG-24";
 
-pub(crate) fn check_content(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check_content(contracts: &[G3TsAstroContentIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
     check_policy_paths(
-        input,
+        contracts,
         "Astro strict content policy paths are structurally valid",
         "Astro strict content policy paths are invalid",
         "`{}` uses app-relative nested Astro content policy paths without parent traversal in `[ts.astro.routes]` and `[ts.astro.content]`.",
@@ -18,7 +18,7 @@ pub(crate) fn check_content(input: &G3TsAstroConfigChecksInput, results: &mut Ve
 }
 
 fn check_policy_paths(
-    input: &G3TsAstroConfigChecksInput,
+    contracts: &[G3TsAstroContentIntegrationContractInput],
     info_title: &str,
     error_title: &str,
     info_message: &str,
@@ -27,7 +27,7 @@ fn check_policy_paths(
     id: &str,
     results: &mut Vec<G3CheckResult>,
 ) {
-    for contract in &input.integration_contracts {
+    for contract in contracts {
         let rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
         let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
             continue;

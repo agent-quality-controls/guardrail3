@@ -5,7 +5,7 @@ use guardrail3_ts_app_types::{
 };
 use guardrail3_ts_validate_command::execute;
 
-use crate::Command;
+use crate::{Command, FamilyArg};
 
 /// CLI-local adapter that dispatches families into the bounded runner groups.
 #[derive(Debug, Default)]
@@ -19,14 +19,24 @@ impl FamilyRunner for CliFamilyRunner {
     ) -> Result<FamilyResults, FamilyRunError> {
         match family {
             SupportedFamily::Eslint
-            | SupportedFamily::Astro
+            | SupportedFamily::AstroSetup
+            | SupportedFamily::AstroContent
+            | SupportedFamily::AstroMdx
+            | SupportedFamily::AstroSeo
+            | SupportedFamily::AstroState
             | SupportedFamily::Arch
             | SupportedFamily::Apparch
             | SupportedFamily::Tsconfig
             | SupportedFamily::Package
             | SupportedFamily::Npmrc
             | SupportedFamily::Jscpd => match family {
-                SupportedFamily::Astro | SupportedFamily::Arch | SupportedFamily::Apparch => {
+                SupportedFamily::AstroSetup
+                | SupportedFamily::AstroContent
+                | SupportedFamily::AstroMdx
+                | SupportedFamily::AstroSeo
+                | SupportedFamily::AstroState
+                | SupportedFamily::Arch
+                | SupportedFamily::Apparch => {
                     guardrail3_ts_family_runner_structure::run(family, crawl)
                 }
                 SupportedFamily::Eslint
@@ -65,7 +75,7 @@ pub fn run_command(
         } => {
             let request = ValidateRequest {
                 workspace_root: path,
-                families: family.into_iter().map(Into::into).collect(),
+                families: family.into_iter().flat_map(FamilyArg::expand).collect(),
                 include_inventory: inventory,
             };
             match execute(&request, crawler, family_runner, renderer) {

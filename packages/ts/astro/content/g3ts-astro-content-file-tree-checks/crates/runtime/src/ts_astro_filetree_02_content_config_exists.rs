@@ -1,9 +1,9 @@
-use g3ts_astro_types::G3TsAstroFileTreeChecksInput;
+use g3ts_astro_types::G3TsAstroContentFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 const ID: &str = "TS-ASTRO-CONTENT-FILETREE-02";
 
-pub(crate) fn check(input: &G3TsAstroFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroContentFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     for root in &input.build_collection_roots {
         if let Some(rel_path) = &root.content_config_rel_path {
             results.push(

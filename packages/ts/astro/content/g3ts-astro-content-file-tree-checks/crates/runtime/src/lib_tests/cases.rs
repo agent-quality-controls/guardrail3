@@ -1,5 +1,5 @@
 use g3ts_astro_content_file_tree_checks_assertions::run as assertions;
-use g3ts_astro_types::{G3TsAstroAppRootInput, G3TsAstroFileTreeChecksInput};
+use g3ts_astro_types::{G3TsAstroAppRootInput, G3TsAstroContentFileTreeChecksInput};
 
 #[test]
 fn golden_content_file_tree_package_reports_owned_id() {
@@ -13,7 +13,7 @@ fn golden_content_file_tree_package_reports_owned_id() {
         legacy_generated_state_rel_paths: Vec::new(),
         forbidden_state_rel_paths: Vec::new(),
     };
-    let input = G3TsAstroFileTreeChecksInput {
+    let input = G3TsAstroContentFileTreeChecksInput {
         app_roots: vec![app_root.clone()],
         build_collection_roots: vec![app_root],
         live_collection_roots: Vec::new(),

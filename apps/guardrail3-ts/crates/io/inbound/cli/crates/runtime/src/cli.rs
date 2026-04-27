@@ -35,6 +35,11 @@ pub enum Command {
 pub enum FamilyArg {
     Eslint,
     Astro,
+    AstroSetup,
+    AstroContent,
+    AstroMdx,
+    AstroSeo,
+    AstroState,
     Arch,
     Apparch,
     Tsconfig,
@@ -43,17 +48,29 @@ pub enum FamilyArg {
     Jscpd,
 }
 
-impl From<FamilyArg> for SupportedFamily {
-    fn from(value: FamilyArg) -> Self {
-        match value {
-            FamilyArg::Eslint => Self::Eslint,
-            FamilyArg::Astro => Self::Astro,
-            FamilyArg::Arch => Self::Arch,
-            FamilyArg::Apparch => Self::Apparch,
-            FamilyArg::Tsconfig => Self::Tsconfig,
-            FamilyArg::Package => Self::Package,
-            FamilyArg::Npmrc => Self::Npmrc,
-            FamilyArg::Jscpd => Self::Jscpd,
+impl FamilyArg {
+    #[must_use]
+    pub fn expand(self) -> Vec<SupportedFamily> {
+        match self {
+            FamilyArg::Eslint => vec![SupportedFamily::Eslint],
+            FamilyArg::Astro => vec![
+                SupportedFamily::AstroSetup,
+                SupportedFamily::AstroContent,
+                SupportedFamily::AstroMdx,
+                SupportedFamily::AstroSeo,
+                SupportedFamily::AstroState,
+            ],
+            FamilyArg::AstroSetup => vec![SupportedFamily::AstroSetup],
+            FamilyArg::AstroContent => vec![SupportedFamily::AstroContent],
+            FamilyArg::AstroMdx => vec![SupportedFamily::AstroMdx],
+            FamilyArg::AstroSeo => vec![SupportedFamily::AstroSeo],
+            FamilyArg::AstroState => vec![SupportedFamily::AstroState],
+            FamilyArg::Arch => vec![SupportedFamily::Arch],
+            FamilyArg::Apparch => vec![SupportedFamily::Apparch],
+            FamilyArg::Tsconfig => vec![SupportedFamily::Tsconfig],
+            FamilyArg::Package => vec![SupportedFamily::Package],
+            FamilyArg::Npmrc => vec![SupportedFamily::Npmrc],
+            FamilyArg::Jscpd => vec![SupportedFamily::Jscpd],
         }
     }
 }

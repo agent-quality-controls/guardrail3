@@ -1,5 +1,5 @@
 use g3ts_astro_types::{
-    G3TsAstroConfigChecksInput, G3TsAstroIntegrationContractInput,
+    G3TsAstroContentConfigChecksInput, G3TsAstroContentIntegrationContractInput,
     G3TsAstroPipelineRuleScopeSnapshot, G3TsAstroPolicySnapshot,
 };
 use globset::{Glob, GlobSet, GlobSetBuilder};
@@ -17,7 +17,7 @@ const ROUTE_SCOPED_PIPELINE_RULES: [&str; 8] = [
     "astro-pipeline/no-velite-imports",
 ];
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroContentConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     for contract in &input.integration_contracts {
         let policy_rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
         let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
@@ -75,7 +75,7 @@ struct PolicyCoverage {
 }
 
 fn policy_coverage(
-    contract: &G3TsAstroIntegrationContractInput,
+    contract: &G3TsAstroContentIntegrationContractInput,
     policy: &G3TsAstroPolicySnapshot,
 ) -> PolicyCoverage {
     let content_globs = glob_set(&policy.content_routes).ok();

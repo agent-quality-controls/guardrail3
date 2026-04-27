@@ -1,4 +1,4 @@
-use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroConfigSurfaceState};
+use g3ts_astro_types::{G3TsAstroSetupIntegrationContractInput, G3TsAstroConfigSurfaceState};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SETUP-CONFIG-21";
@@ -10,8 +10,8 @@ const REQUIRED_PACKAGES: [&str; 5] = [
     "@nuasite/checks",
 ];
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroSetupIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         let rel_path = g3ts_astro_check_support::core::astro_config_rel_path(contract);
         let missing_packages = REQUIRED_PACKAGES
             .into_iter()

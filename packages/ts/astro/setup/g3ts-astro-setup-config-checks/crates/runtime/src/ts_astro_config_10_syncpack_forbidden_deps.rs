@@ -1,5 +1,5 @@
 use g3ts_astro_types::{
-    G3TsAstroConfigChecksInput, G3TsAstroContentMode, G3TsAstroIntegrationContractInput,
+    G3TsAstroSetupIntegrationContractInput, G3TsAstroContentMode,
     G3TsAstroSyncpackConfigState,
 };
 use guardrail3_check_types::G3CheckResult;
@@ -7,8 +7,8 @@ use guardrail3_check_types::G3CheckResult;
 const ID: &str = "TS-ASTRO-SETUP-CONFIG-10";
 const ASTRO_SEO_BAN_REASON: &str = "`astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroSetupIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         match &contract.syncpack_config {
             G3TsAstroSyncpackConfigState::Parsed { snapshot } => {
                 let package_path =
@@ -86,7 +86,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 }
 
 fn push_unavailable_error(
-    contract: &G3TsAstroIntegrationContractInput,
+    contract: &G3TsAstroSetupIntegrationContractInput,
     rel_path: &str,
     reason: &str,
     results: &mut Vec<G3CheckResult>,
@@ -104,7 +104,7 @@ fn push_unavailable_error(
     ));
 }
 
-fn active_forbidden_deps(contract: &G3TsAstroIntegrationContractInput) -> Vec<&str> {
+fn active_forbidden_deps(contract: &G3TsAstroSetupIntegrationContractInput) -> Vec<&str> {
     contract
         .forbidden_syncpack_deps
         .iter()

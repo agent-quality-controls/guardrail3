@@ -1,10 +1,10 @@
-use g3ts_astro_types::G3TsAstroConfigChecksInput;
+use g3ts_astro_types::G3TsAstroSeoIntegrationContractInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SEO-CONFIG-16";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
-    for contract in &input.integration_contracts {
+pub(crate) fn check(contracts: &[G3TsAstroSeoIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
+    for contract in contracts {
         if let Some(rel_path) = &contract.llms_txt_rel_path {
             results.push(g3ts_astro_check_support::core::info(
                 ID,

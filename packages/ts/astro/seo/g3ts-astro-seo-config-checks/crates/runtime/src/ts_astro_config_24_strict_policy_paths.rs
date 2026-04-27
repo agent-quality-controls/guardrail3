@@ -1,12 +1,12 @@
-use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroPolicySnapshot};
+use g3ts_astro_types::{G3TsAstroSeoIntegrationContractInput, G3TsAstroPolicySnapshot};
 use guardrail3_check_types::G3CheckResult;
 use std::path::{Component, Path};
 
 const SEO_ID: &str = "TS-ASTRO-SEO-CONFIG-24";
 
-pub(crate) fn check_seo(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check_seo(contracts: &[G3TsAstroSeoIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
     check_policy_paths(
-        input,
+        contracts,
         "Astro SEO policy paths are structurally valid",
         "Astro SEO policy paths are invalid",
         "`{}` uses app-relative `[ts.astro.seo]` helper paths without parent traversal.",
@@ -18,7 +18,7 @@ pub(crate) fn check_seo(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3
 }
 
 fn check_policy_paths(
-    input: &G3TsAstroConfigChecksInput,
+    contracts: &[G3TsAstroSeoIntegrationContractInput],
     info_title: &str,
     error_title: &str,
     info_message: &str,
@@ -27,7 +27,7 @@ fn check_policy_paths(
     id: &str,
     results: &mut Vec<G3CheckResult>,
 ) {
-    for contract in &input.integration_contracts {
+    for contract in contracts {
         let rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
         let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
             continue;

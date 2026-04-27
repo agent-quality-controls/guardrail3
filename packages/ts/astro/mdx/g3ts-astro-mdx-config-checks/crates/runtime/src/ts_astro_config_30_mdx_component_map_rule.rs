@@ -1,11 +1,11 @@
-use g3ts_astro_types::G3TsAstroConfigChecksInput;
+use g3ts_astro_types::G3TsAstroMdxConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-MDX-CONFIG-30";
 const PLUGIN_PACKAGE_NAME: &str = "g3ts-eslint-plugin-astro-pipeline";
 const RULE_NAME: &str = "astro-pipeline/mdx-component-imports-from-approved-map";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(input: &G3TsAstroMdxConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     for contract in &input.integration_contracts {
         let policy_rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
         let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
@@ -13,7 +13,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
         };
 
         if !contract
-            .approved_surface_sources
+            .mdx_sources
             .missing_mdx_component_maps
             .is_empty()
         {
@@ -23,7 +23,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                 format!(
                     "`{}` declares `[ts.astro.mdx].component_maps = [{}]`, but G3TS found no source files at those app-relative paths. Configure the approved MDX component-map modules that MDX files may import.",
                     policy.rel_path,
-                    contract.approved_surface_sources.missing_mdx_component_maps.join(", ")
+                    contract.mdx_sources.missing_mdx_component_maps.join(", ")
                 ),
                 policy_rel_path,
             ));
