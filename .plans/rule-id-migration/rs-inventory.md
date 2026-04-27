@@ -22,27 +22,27 @@ This inventory records active old numeric IDs and their new semantic replacement
   - definition: `packages/rs/apparch/g3rs-apparch-source-checks/crates/runtime/src/io_traits_in_types.rs`
 - `RS-APPARCH-SOURCE-05` -> `g3rs-apparch/types-public-surface`
   - definition: `packages/rs/apparch/g3rs-apparch-source-checks/crates/runtime/src/types_public_surface.rs`
-- `RS-ARCH-05` -> `g3rs-arch/no-boundary-crossing`
+- `RS-ARCH-CONFIG-05` -> `g3rs-arch/no-boundary-crossing`
   - definition: `packages/rs/arch/g3rs-arch-config-checks/crates/runtime/src/no_boundary_crossing.rs`
-- `RS-ARCH-06` -> `g3rs-arch/shared-flag-required`
+- `RS-ARCH-CONFIG-06` -> `g3rs-arch/shared-flag-required`
   - definition: `packages/rs/arch/g3rs-arch-config-checks/crates/runtime/src/shared_flag_required.rs`
-- `RS-ARCH-07B` -> `g3rs-arch/dependency-count-split`
+- `RS-ARCH-CONFIG-07` -> `g3rs-arch/dependency-count-split`
   - definition: `packages/rs/arch/g3rs-arch-config-checks/crates/runtime/src/dependency_count_split.rs`
-- `RS-ARCH-08B` -> `g3rs-arch/feature-contract`
+- `RS-ARCH-CONFIG-08` -> `g3rs-arch/feature-contract`
   - definition: `packages/rs/arch/g3rs-arch-config-checks/crates/runtime/src/feature_contract.rs`
-- `RS-ARCH-01` -> `g3rs-arch/crate-has-facade`
+- `RS-ARCH-FILETREE-01` -> `g3rs-arch/crate-has-facade`
   - definition: `packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/crate_has_facade.rs`
-- `RS-ARCH-03` -> `g3rs-arch/mod-rs-required`
+- `RS-ARCH-FILETREE-03` -> `g3rs-arch/mod-rs-required`
   - definition: `packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/mod_rs_required.rs`
-- `RS-ARCH-07A` -> `g3rs-arch/structural-split`
+- `RS-ARCH-FILETREE-07` -> `g3rs-arch/structural-split`
   - definition: `packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/structural_split.rs`
-- `RS-ARCH-02` -> `g3rs-arch/lib-facade-only`
+- `RS-ARCH-SOURCE-02` -> `g3rs-arch/lib-facade-only`
   - definition: `packages/rs/arch/g3rs-arch-source-checks/crates/runtime/src/lib_facade_only.rs`
-- `RS-ARCH-04` -> `g3rs-arch/mod-facade-only`
+- `RS-ARCH-SOURCE-04` -> `g3rs-arch/mod-facade-only`
   - definition: `packages/rs/arch/g3rs-arch-source-checks/crates/runtime/src/mod_facade_only.rs`
-- `RS-ARCH-08A` -> `g3rs-arch/feature-gated-exports`
+- `RS-ARCH-SOURCE-08` -> `g3rs-arch/feature-gated-exports`
   - definition: `packages/rs/arch/g3rs-arch-source-checks/crates/runtime/src/feature_gated_exports.rs`
-- `RS-ARCH-09` -> `g3rs-arch/no-path-attr`
+- `RS-ARCH-SOURCE-09` -> `g3rs-arch/no-path-attr`
   - definition: `packages/rs/arch/g3rs-arch-source-checks/crates/runtime/src/no_path_attr.rs`
 - `RS-CARGO-CONFIG-01` -> `g3rs-cargo/workspace-lints`
   - definition: `packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule.rs`
@@ -124,61 +124,61 @@ This inventory records active old numeric IDs and their new semantic replacement
   - definition: `packages/rs/code/g3rs-code-config-checks/crates/runtime/src/exception_comment_inventory/rule.rs`
 - `RS-CODE-CONFIG-12` -> `g3rs-code/unsafe-code-lint`
   - definition: `packages/rs/code/g3rs-code-config-checks/crates/runtime/src/unsafe_code_lint/rule.rs`
-- `RS-CODE-AST-01` -> `g3rs-code/crate-level-allow`
+- `RS-CODE-SOURCE-01` -> `g3rs-code/crate-level-allow`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/crate_level_allow/rule.rs`
-- `RS-CODE-AST-02` -> `g3rs-code/unused-crate-dependencies-allow`
+- `RS-CODE-SOURCE-02` -> `g3rs-code/unused-crate-dependencies-allow`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/unused_crate_dependencies_allow/rule.rs`
-- `RS-CODE-AST-03` -> `g3rs-code/item-level-allow-without-reason`
+- `RS-CODE-SOURCE-03` -> `g3rs-code/item-level-allow-without-reason`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/item_level_allow_without_reason/rule.rs`
-- `RS-CODE-AST-04` -> `g3rs-code/item-level-allow-with-reason`
+- `RS-CODE-SOURCE-04` -> `g3rs-code/item-level-allow-with-reason`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/item_level_allow_with_reason/rule.rs`
-- `RS-CODE-AST-05` -> `g3rs-code/garde-skip-without-comment`
+- `RS-CODE-SOURCE-05` -> `g3rs-code/garde-skip-without-comment`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/garde_skip_without_comment/rule.rs`
-- `RS-CODE-AST-06` -> `g3rs-code/garde-skip-with-comment`
+- `RS-CODE-SOURCE-06` -> `g3rs-code/garde-skip-with-comment`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/garde_skip_with_comment/rule.rs`
-- `RS-CODE-AST-08` -> `g3rs-code/cfg-attr-allow-inventory`
+- `RS-CODE-SOURCE-08` -> `g3rs-code/cfg-attr-allow-inventory`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/cfg_attr_allow_inventory/rule.rs`
-- `RS-CODE-AST-09` -> `g3rs-code/too-many-effective-code-lines`
+- `RS-CODE-SOURCE-09` -> `g3rs-code/too-many-effective-code-lines`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/too_many_effective_code_lines/rule.rs`
-- `RS-CODE-AST-10` -> `g3rs-code/too-many-use-imports`
+- `RS-CODE-SOURCE-10` -> `g3rs-code/too-many-use-imports`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/too_many_use_imports/rule.rs`
-- `RS-CODE-AST-11` -> `g3rs-code/many-use-imports`
+- `RS-CODE-SOURCE-11` -> `g3rs-code/many-use-imports`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/many_use_imports/rule.rs`
-- `RS-CODE-AST-13` -> `g3rs-code/todo-macros`
+- `RS-CODE-SOURCE-13` -> `g3rs-code/todo-macros`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/todo_macros/rule.rs`
-- `RS-CODE-AST-15` -> `g3rs-code/direct-fs-usage`
+- `RS-CODE-SOURCE-15` -> `g3rs-code/direct-fs-usage`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/direct_fs_usage/rule.rs`
-- `RS-CODE-AST-16` -> `g3rs-code/panic-macro`
+- `RS-CODE-SOURCE-16` -> `g3rs-code/panic-macro`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/panic_macro/rule.rs`
-- `RS-CODE-AST-17` -> `g3rs-code/impl-allow-blast-radius`
+- `RS-CODE-SOURCE-17` -> `g3rs-code/impl-allow-blast-radius`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/impl_allow_blast_radius/rule.rs`
-- `RS-CODE-AST-18` -> `g3rs-code/always-true-cfg-attr-bypass`
+- `RS-CODE-SOURCE-18` -> `g3rs-code/always-true-cfg-attr-bypass`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/always_true_cfg_attr_bypass/rule.rs`
-- `RS-CODE-AST-19` -> `g3rs-code/large-type-inventory`
+- `RS-CODE-SOURCE-19` -> `g3rs-code/large-type-inventory`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/large_type_inventory/rule.rs`
-- `RS-CODE-AST-20` -> `g3rs-code/extern-allow`
+- `RS-CODE-SOURCE-20` -> `g3rs-code/extern-allow`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/extern_allow/rule.rs`
-- `RS-CODE-AST-21` -> `g3rs-code/fs-glob-import`
+- `RS-CODE-SOURCE-21` -> `g3rs-code/fs-glob-import`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/fs_glob_import/rule.rs`
-- `RS-CODE-AST-22` -> `g3rs-code/deny-forbid-without-reason`
+- `RS-CODE-SOURCE-22` -> `g3rs-code/deny-forbid-without-reason`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/deny_forbid_without_reason/rule.rs`
-- `RS-CODE-AST-23` -> `g3rs-code/include-bypass`
+- `RS-CODE-SOURCE-23` -> `g3rs-code/include-bypass`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/include_bypass/rule.rs`
-- `RS-CODE-AST-24` -> `g3rs-code/path-attr-with-reason`
+- `RS-CODE-SOURCE-24` -> `g3rs-code/path-attr-with-reason`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/path_attr_with_reason/rule.rs`
-- `RS-CODE-AST-29` -> `g3rs-code/large-trait-surface`
+- `RS-CODE-SOURCE-29` -> `g3rs-code/large-trait-surface`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/large_trait_surface/rule.rs`
-- `RS-CODE-AST-30` -> `g3rs-code/input-failures`
+- `RS-CODE-SOURCE-30` -> `g3rs-code/input-failures`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/input_failures/rule.rs`
-- `RS-CODE-AST-31` -> `g3rs-code/public-struct-named-fields`
+- `RS-CODE-SOURCE-31` -> `g3rs-code/public-struct-named-fields`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/public_struct_named_fields/rule.rs`
-- `RS-CODE-AST-32` -> `g3rs-code/test-expect-message-quality`
+- `RS-CODE-SOURCE-32` -> `g3rs-code/test-expect-message-quality`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/test_expect_message_quality/rule.rs`
-- `RS-CODE-AST-33` -> `g3rs-code/public-weak-error-forms`
+- `RS-CODE-SOURCE-33` -> `g3rs-code/public-weak-error-forms`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/public_weak_error_forms/rule.rs`
-- `RS-CODE-AST-34` -> `g3rs-code/generic-parameter-cap`
+- `RS-CODE-SOURCE-34` -> `g3rs-code/generic-parameter-cap`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/generic_parameter_cap/rule.rs`
-- `RS-CODE-AST-36` -> `g3rs-code/string-dispatch-cap`
+- `RS-CODE-SOURCE-36` -> `g3rs-code/string-dispatch-cap`
   - definition: `packages/rs/code/g3rs-code-source-checks/crates/runtime/src/string_dispatch_cap/rule.rs`
 - `RS-DENY-CONFIG-01` -> `g3rs-deny/deprecated-advisories`
   - definition: `packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/deprecated_advisories/rule.rs`
@@ -286,97 +286,99 @@ This inventory records active old numeric IDs and their new semantic replacement
   - definition: `packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/reqwest_json_ban/rule.rs`
 - `RS-GARDE-CONFIG-05` -> `g3rs-garde/additional-method-bans`
   - definition: `packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/additional_method_bans/rule.rs`
-- `RS-GARDE-AST-01` -> `g3rs-garde/struct-derive-validate`
+- `RS-GARDE-SOURCE-01` -> `g3rs-garde/struct-derive-validate`
   - definition: `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/struct_derive_validate/rule.rs`
-- `RS-GARDE-AST-02` -> `g3rs-garde/manual-deserialize-impl`
+- `RS-GARDE-SOURCE-02` -> `g3rs-garde/manual-deserialize-impl`
   - definition: `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/manual_deserialize_impl/rule.rs`
-- `RS-GARDE-AST-03` -> `g3rs-garde/enum-derive-validate`
+- `RS-GARDE-SOURCE-03` -> `g3rs-garde/enum-derive-validate`
   - definition: `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/enum_derive_validate/rule.rs`
-- `RS-GARDE-AST-04` -> `g3rs-garde/query-as-inventory`
-  - definition: `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/query_as_inventory/rule.rs`
-- `RS-GARDE-AST-05` -> `g3rs-garde/field-level-constraints`
+- `RS-GARDE-SOURCE-04` -> `g3rs-garde/query-as-inventory`
+  - definition: `packages/rs/garde/g3rs-garde-ingestion/crates/runtime/src/source_analysis/run.rs`
+- `RS-GARDE-SOURCE-05` -> `g3rs-garde/field-level-constraints`
   - definition: `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/field_level_constraints/rule.rs`
-- `RS-GARDE-AST-06` -> `g3rs-garde/nested-validation-dive`
+- `RS-GARDE-SOURCE-06` -> `g3rs-garde/nested-validation-dive`
   - definition: `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/nested_validation_dive/rule.rs`
-- `RS-GARDE-AST-07` -> `g3rs-garde/context-validation-surface`
+- `RS-GARDE-SOURCE-07` -> `g3rs-garde/context-validation-surface`
   - definition: `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/context_validation_surface/rule.rs`
-- `RS-GARDE-10` -> `g3rs-garde/input-failures`
+- `RS-GARDE-SOURCE-10` -> `g3rs-garde/input-failures`
   - definition: `packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/input_failures/rule.rs`
-- `RS-HOOKS-CONFIG-06 [g3rs-hooks/required-tools-installed]` -> `g3rs-hooks/required-tools-installed`
+- `RS-HOOKS-CONFIG-01` -> `g3rs-hooks/required-tools-installed`
   - definition: `packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/required_tools_installed/rule.rs`
+- `RS-HOOKS-CONFIG-02` -> `g3rs-hooks/guardrail-binary-available`
+  - definition: `packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/guardrail_binary_available/rule.rs`
+- `RS-HOOKS-CONFIG-03` -> `g3rs-hooks/cargo-dupes-installed`
+  - definition: `packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/cargo_dupes_installed/rule.rs`
 - `RS-HOOKS-CONFIG-14` -> `g3rs-hooks/guardrail-binary-available`
   - definition: `packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/guardrail_binary_available/rule.rs`
-- `RS-HOOKS-CONFIG-15 [g3rs-hooks/cargo-dupes-installed]` -> `g3rs-hooks/cargo-dupes-installed`
-  - definition: `packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/cargo_dupes_installed/rule.rs`
-- `RS-HOOKS-SHARED-01` -> `g3rs-hooks/pre-commit-exists`
+- `RS-HOOKS-FILETREE-01` -> `g3rs-hooks/pre-commit-exists`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/pre_commit_exists/rule.rs`
-- `RS-HOOKS-SHARED-02` -> `g3rs-hooks/hooks-path-configured`
+- `RS-HOOKS-FILETREE-02` -> `g3rs-hooks/hooks-path-configured`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/hooks_path_configured/rule.rs`
-- `RS-HOOKS-SHARED-03` -> `g3rs-hooks/modular-directory-inventory`
+- `RS-HOOKS-FILETREE-03` -> `g3rs-hooks/modular-directory-inventory`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/modular_directory_inventory/rule.rs`
-- `RS-HOOKS-SHARED-07` -> `g3rs-hooks/modular-scripts-inventory`
+- `RS-HOOKS-FILETREE-04` -> `g3rs-hooks/modular-scripts-inventory`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/modular_scripts_inventory/rule.rs`
-- `RS-HOOKS-SHARED-09` -> `g3rs-hooks/local-override-inventory`
+- `RS-HOOKS-FILETREE-05` -> `g3rs-hooks/local-override-inventory`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/local_override_inventory/rule.rs`
-- `RS-HOOKS-SHARED-12` -> `g3rs-hooks/modular-scripts-executable`
+- `RS-HOOKS-FILETREE-06` -> `g3rs-hooks/modular-scripts-executable`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/modular_scripts_executable/rule.rs`
-- `RS-HOOKS-SHARED-17` -> `g3rs-hooks/execution-trust`
+- `RS-HOOKS-FILETREE-07` -> `g3rs-hooks/execution-trust`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/execution_trust/rule.rs`
-- `RS-HOOKS-SHARED-05` -> `g3rs-hooks/pre-commit-executable`
+- `RS-HOOKS-FILETREE-08` -> `g3rs-hooks/pre-commit-executable`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/pre_commit_executable/rule.rs`
-- `RS-HOOKS-SHARED-06` -> `g3rs-hooks/script-stats-inventory`
+- `RS-HOOKS-FILETREE-09` -> `g3rs-hooks/script-stats-inventory`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/script_stats_inventory/rule.rs`
-- `RS-HOOKS-SHARED-08` -> `g3rs-hooks/pre-commit-file-size-inventory`
+- `RS-HOOKS-FILETREE-10` -> `g3rs-hooks/pre-commit-file-size-inventory`
   - definition: `packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/pre_commit_file_size_inventory/rule.rs`
-- `RS-HOOKS-SHARED-04` -> `g3rs-hooks/dispatcher-pattern`
+- `RS-HOOKS-SOURCE-01` -> `g3rs-hooks/dispatcher-pattern`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/bootstrap/dispatcher_pattern/rule.rs`
-- `RS-HOOKS-SHARED-19` -> `g3rs-hooks/real-dispatcher-syntax-only`
+- `RS-HOOKS-SOURCE-02` -> `g3rs-hooks/real-dispatcher-syntax-only`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/real_dispatcher_syntax_only/rule.rs`
-- `RS-HOOKS-SOURCE-01` -> `g3rs-hooks/fmt-step-present`
+- `RS-HOOKS-SOURCE-03` -> `g3rs-hooks/fmt-step-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/fmt_step_present/rule.rs`
-- `RS-HOOKS-SOURCE-02` -> `g3rs-hooks/clippy-step-present`
+- `RS-HOOKS-SOURCE-04` -> `g3rs-hooks/clippy-step-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_step_present/rule.rs`
-- `RS-HOOKS-SOURCE-03` -> `g3rs-hooks/cargo-deny-step-present`
+- `RS-HOOKS-SOURCE-05` -> `g3rs-hooks/cargo-deny-step-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_deny_step_present/rule.rs`
-- `RS-HOOKS-SOURCE-04` -> `g3rs-hooks/test-step-present`
+- `RS-HOOKS-SOURCE-06` -> `g3rs-hooks/test-step-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/test_step_present/rule.rs`
-- `RS-HOOKS-SOURCE-05` -> `g3rs-hooks/cargo-machete-step-present`
+- `RS-HOOKS-SOURCE-07` -> `g3rs-hooks/cargo-machete-step-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_machete_step_present/rule.rs`
-- `RS-HOOKS-SOURCE-06` -> `g3rs-hooks/duplication-tool-is-cargo-dupes`
+- `RS-HOOKS-SOURCE-08` -> `g3rs-hooks/duplication-tool-is-cargo-dupes`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/duplication_tool_is_cargo_dupes/rule.rs`
-- `RS-HOOKS-SOURCE-07` -> `g3rs-hooks/guardrail-validate-staged-present`
+- `RS-HOOKS-SOURCE-09` -> `g3rs-hooks/guardrail-validate-staged-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/guardrail_validate_staged_present/rule.rs`
-- `RS-HOOKS-SOURCE-09` -> `g3rs-hooks/clippy-denies-warnings`
+- `RS-HOOKS-SOURCE-10` -> `g3rs-hooks/clippy-denies-warnings`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule.rs`
-- `RS-HOOKS-SOURCE-10` -> `g3rs-hooks/test-uses-workspace`
+- `RS-HOOKS-SOURCE-11` -> `g3rs-hooks/test-uses-workspace`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/test_uses_workspace/rule.rs`
-- `RS-HOOKS-SOURCE-11` -> `g3rs-hooks/gitleaks-step-present`
+- `RS-HOOKS-SOURCE-12` -> `g3rs-hooks/gitleaks-step-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule.rs`
-- `RS-HOOKS-SOURCE-12` -> `g3rs-hooks/cargo-dupes-step-present`
+- `RS-HOOKS-SOURCE-13` -> `g3rs-hooks/cargo-dupes-step-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_step_present/rule.rs`
-- `RS-HOOKS-SOURCE-13` -> `g3rs-hooks/cargo-dupes-excludes`
+- `RS-HOOKS-SOURCE-14` -> `g3rs-hooks/cargo-dupes-excludes`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule.rs`
-- `RS-HOOKS-SOURCE-16` -> `g3rs-hooks/config-changes-trigger-validation`
+- `RS-HOOKS-SOURCE-15` -> `g3rs-hooks/config-changes-trigger-validation`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/config_changes_trigger_validation/rule.rs`
-- `RS-HOOKS-SHARED-10` -> `g3rs-hooks/shell-error-handling`
+- `RS-HOOKS-SOURCE-16` -> `g3rs-hooks/shell-error-handling`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/shell_error_handling/rule.rs`
-- `RS-HOOKS-SHARED-11` -> `g3rs-hooks/valid-shebang`
+- `RS-HOOKS-SOURCE-17` -> `g3rs-hooks/valid-shebang`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/valid_shebang/rule.rs`
-- `RS-HOOKS-SHARED-13` -> `g3rs-hooks/no-unconditional-exit-zero`
+- `RS-HOOKS-SOURCE-18` -> `g3rs-hooks/no-unconditional-exit-zero`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/no_unconditional_exit_zero/rule.rs`
-- `RS-HOOKS-SHARED-14` -> `g3rs-hooks/no-bypass-instructions`
+- `RS-HOOKS-SOURCE-19` -> `g3rs-hooks/no-bypass-instructions`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/no_bypass_instructions/rule.rs`
-- `RS-HOOKS-SHARED-15` -> `g3rs-hooks/merge-conflict-step-present`
+- `RS-HOOKS-SOURCE-20` -> `g3rs-hooks/merge-conflict-step-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/merge_conflict_step_present/rule.rs`
-- `RS-HOOKS-SHARED-16` -> `g3rs-hooks/file-size-step-present`
+- `RS-HOOKS-SOURCE-21` -> `g3rs-hooks/file-size-step-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/file_size_step_present/rule.rs`
-- `RS-HOOKS-SHARED-18` -> `g3rs-hooks/executable-command-context-only`
+- `RS-HOOKS-SOURCE-22` -> `g3rs-hooks/executable-command-context-only`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/executable_command_context_only/rule.rs`
-- `RS-HOOKS-SHARED-20` -> `g3rs-hooks/concrete-lockfile-command`
+- `RS-HOOKS-SOURCE-23` -> `g3rs-hooks/concrete-lockfile-command`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/concrete_lockfile_command/rule.rs`
-- `RS-HOOKS-SHARED-21` -> `g3rs-hooks/no-fail-open-wrappers`
+- `RS-HOOKS-SOURCE-24` -> `g3rs-hooks/no-fail-open-wrappers`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/no_fail_open_wrappers/rule.rs`
-- `RS-HOOKS-SOURCE-17` -> `g3rs-hooks/shared-target-dir-present`
+- `RS-HOOKS-SOURCE-25` -> `g3rs-hooks/shared-target-dir-present`
   - definition: `packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shared_target_dir_present/rule.rs`
 - `RS-RELEASE-CONFIG-00` -> `g3rs-release/publish-must-be-explicit`
   - definition: `packages/rs/release/g3rs-release-config-checks/crates/runtime/src/publish_must_be_explicit.rs`
@@ -409,7 +411,7 @@ This inventory records active old numeric IDs and their new semantic replacement
 - `RS-RELEASE-CONFIG-17` -> `g3rs-release/release-profile-inventory`
   - definition: `packages/rs/release/g3rs-release-config-checks/crates/runtime/src/release_profile_inventory.rs`
 - `RS-RELEASE-CONFIG-18` -> `g3rs-release/publish-dry-run`
-  - definition: `packages/rs/release/g3rs-release-repo-root-checks/crates/runtime/src/publish_dry_run_workflow/rule.rs`
+  - definition: `packages/rs/release/g3rs-release-config-checks/crates/runtime/src/publish_dry_run.rs`
 - `RS-RELEASE-CONFIG-19` -> `g3rs-release/no-path-deps-to-unpublishable`
   - definition: `packages/rs/release/g3rs-release-config-checks/crates/runtime/src/no_path_deps_to_unpublishable.rs`
 - `RS-RELEASE-CONFIG-20` -> `g3rs-release/interdependent-version-consistency`
@@ -456,31 +458,31 @@ This inventory records active old numeric IDs and their new semantic replacement
   - definition: `packages/rs/test/g3rs-test-config-checks/crates/runtime/src/mutants/mutation_hook_present/rule.rs`
 - `RS-TEST-CONFIG-15` -> `g3rs-test/mutants-config-sane`
   - definition: `packages/rs/test/g3rs-test-config-checks/crates/runtime/src/mutants/mutants_config_sane/rule.rs`
-- `RS-TEST-02` -> `g3rs-test/owned-sidecar-shape`
+- `RS-TEST-FILETREE-02` -> `g3rs-test/owned-sidecar-shape`
   - definition: `packages/rs/test/g3rs-test-file-tree-checks/crates/runtime/src/owned_sidecar_shape/rule.rs`
-- `RS-TEST-03` -> `g3rs-test/runtime-assertions-split`
+- `RS-TEST-FILETREE-03` -> `g3rs-test/runtime-assertions-split`
   - definition: `packages/rs/test/g3rs-test-file-tree-checks/crates/runtime/src/runtime_assertions_split/rule.rs`
-- `RS-TEST-10 [g3rs-test/filetree-input-failures]` -> `g3rs-test/filetree-input-failures`
-  - definition: `packages/rs/test/g3rs-test-file-tree-checks/crates/runtime/src/input_failures/rule.rs`
-- `RS-TEST-18` -> `g3rs-test/test-support-generic`
-  - definition: `packages/rs/test/g3rs-test-file-tree-checks/crates/runtime/src/test_support_generic/rule.rs`
-- `RS-TEST-01` -> `g3rs-test/inline-test-bodies`
-  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/inline_test_bodies/rule.rs`
-- `RS-TEST-04` -> `g3rs-test/ignore-reason`
-  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/ignore_reason/rule.rs`
-- `RS-TEST-05` -> `g3rs-test/should-panic-expected`
-  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/should_panic_expected/rule.rs`
-- `RS-TEST-06` -> `g3rs-test/tautological-assertions`
-  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/tautological_assertions/rule.rs`
-- `RS-TEST-07` -> `g3rs-test/real-proof-site`
-  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/real_proof_site/rule.rs`
-- `RS-TEST-08` -> `g3rs-test/weak-matches-assert`
-  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/weak_matches_assert/rule.rs`
-- `RS-TEST-10 [g3rs-test/source-input-failures]` -> `g3rs-test/source-input-failures`
+- `RS-TEST-FILETREE-10` -> `g3rs-test/source-input-failures`
   - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/input_failures/rule.rs`
-- `RS-TEST-16` -> `g3rs-test/assertions-modules-prove`
+- `RS-TEST-FILETREE-18` -> `g3rs-test/test-support-generic`
+  - definition: `packages/rs/test/g3rs-test-file-tree-checks/crates/runtime/src/test_support_generic/rule.rs`
+- `RS-TEST-SOURCE-01` -> `g3rs-test/inline-test-bodies`
+  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/inline_test_bodies/rule.rs`
+- `RS-TEST-SOURCE-04` -> `g3rs-test/ignore-reason`
+  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/ignore_reason/rule.rs`
+- `RS-TEST-SOURCE-05` -> `g3rs-test/should-panic-expected`
+  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/should_panic_expected/rule.rs`
+- `RS-TEST-SOURCE-06` -> `g3rs-test/tautological-assertions`
+  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/tautological_assertions/rule.rs`
+- `RS-TEST-SOURCE-07` -> `g3rs-test/real-proof-site`
+  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/real_proof_site/rule.rs`
+- `RS-TEST-SOURCE-08` -> `g3rs-test/weak-matches-assert`
+  - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/weak_matches_assert/rule.rs`
+- `RS-TEST-SOURCE-10` -> `g3rs-test/filetree-input-failures`
+  - definition: `packages/rs/test/g3rs-test-file-tree-checks/crates/runtime/src/input_failures/rule.rs`
+- `RS-TEST-SOURCE-16` -> `g3rs-test/assertions-modules-prove`
   - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/assertions_modules_prove/rule.rs`
-- `RS-TEST-17` -> `g3rs-test/external-harnesses-use-assertions`
+- `RS-TEST-SOURCE-17` -> `g3rs-test/external-harnesses-use-assertions`
   - definition: `packages/rs/test/g3rs-test-source-checks/crates/runtime/src/external_harnesses_use_assertions/rule.rs`
 - `RS-TOOLCHAIN-CONFIG-01` -> `g3rs-toolchain/channel-and-components`
   - definition: `packages/rs/toolchain/g3rs-toolchain-config-checks/crates/runtime/src/channel_and_components/rule.rs`
@@ -490,13 +492,13 @@ This inventory records active old numeric IDs and their new semantic replacement
   - definition: `packages/rs/toolchain/g3rs-toolchain-filetree-checks/crates/runtime/src/exists.rs`
 - `RS-TOOLCHAIN-FILETREE-04` -> `g3rs-toolchain/legacy-file`
   - definition: `packages/rs/toolchain/g3rs-toolchain-filetree-checks/crates/runtime/src/legacy_file.rs`
-- `RS-TOPOLOGY-07` -> `g3rs-topology/required-inputs-fail-closed`
+- `RS-TOPOLOGY-FILETREE-07` -> `g3rs-topology/required-inputs-fail-closed`
   - definition: `packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/required_inputs_fail_closed/rule.rs`
-- `RS-TOPOLOGY-11` -> `g3rs-topology/no-nested-workspaces`
+- `RS-TOPOLOGY-FILETREE-11` -> `g3rs-topology/no-nested-workspaces`
   - definition: `packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/no_nested_workspaces/rule.rs`
-- `RS-TOPOLOGY-12` -> `g3rs-topology/declared-workspace-members-only`
+- `RS-TOPOLOGY-FILETREE-12` -> `g3rs-topology/declared-workspace-members-only`
   - definition: `packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/declared_workspace_members_only/rule.rs`
-- `RS-TOPOLOGY-13` -> `g3rs-topology/member-paths-must-not-escape-root`
+- `RS-TOPOLOGY-FILETREE-13` -> `g3rs-topology/member-paths-must-not-escape-root`
   - definition: `packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/member_paths_must_not_escape_root/rule.rs`
-- `RS-TOPOLOGY-16` -> `g3rs-topology/workspace-local-file-placement`
+- `RS-TOPOLOGY-FILETREE-16` -> `g3rs-topology/workspace-local-file-placement`
   - definition: `packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/workspace_local_file_placement/rule.rs`

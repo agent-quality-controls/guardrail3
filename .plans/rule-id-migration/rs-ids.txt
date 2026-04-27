@@ -151,6 +151,7 @@ g3rs-garde/input-failures
 g3rs-hooks/required-tools-installed
 g3rs-hooks/guardrail-binary-available
 g3rs-hooks/cargo-dupes-installed
+g3rs-hooks/guardrail-binary-available
 g3rs-hooks/pre-commit-exists
 g3rs-hooks/hooks-path-configured
 g3rs-hooks/modular-directory-inventory
@@ -227,7 +228,7 @@ g3rs-test/mutation-hook-present
 g3rs-test/mutants-config-sane
 g3rs-test/owned-sidecar-shape
 g3rs-test/runtime-assertions-split
-g3rs-test/filetree-input-failures
+g3rs-test/source-input-failures
 g3rs-test/test-support-generic
 g3rs-test/inline-test-bodies
 g3rs-test/ignore-reason
@@ -235,7 +236,7 @@ g3rs-test/should-panic-expected
 g3rs-test/tautological-assertions
 g3rs-test/real-proof-site
 g3rs-test/weak-matches-assert
-g3rs-test/source-input-failures
+g3rs-test/filetree-input-failures
 g3rs-test/assertions-modules-prove
 g3rs-test/external-harnesses-use-assertions
 g3rs-toolchain/channel-and-components

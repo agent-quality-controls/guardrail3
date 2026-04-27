@@ -29,7 +29,6 @@ g3ts-astro-content/live-config-exists
 g3ts-astro-content/no-route-markdown-pages
 g3ts-astro-content/no-velite-config
 g3ts-astro-content/no-velite-output
-g3ts-astro-mdx/mdx-eslint-plugin-package-present
 g3ts-astro-mdx/mdx-eslint-lane-wired
 g3ts-astro-mdx/strict-policy-paths
 g3ts-astro-mdx/policy-helper-surfaces

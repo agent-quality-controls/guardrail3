@@ -36,99 +36,97 @@ This inventory records active old numeric IDs and their new semantic replacement
   - definition: `packages/ts/arch/g3ts-arch-source-checks/crates/runtime/src/facade_only.rs`
 - `TS-ARCH-SOURCE-03` -> `g3ts-arch/no-broad-reexport`
   - definition: `packages/ts/arch/g3ts-arch-source-checks/crates/runtime/src/no_broad_reexport.rs`
-- `TS-ASTRO-CONFIG-17 [g3ts-astro-content/pipeline-plugin-package-present]` -> `g3ts-astro-content/pipeline-plugin-package-present`
+- `TS-ASTRO-CONTENT-CONFIG-17` -> `g3ts-astro-content/pipeline-plugin-package-present`
   - definition: `packages/ts/astro/content/g3ts-astro-content-config-checks/crates/runtime/src/pipeline_plugin_package_present.rs`
-- `TS-ASTRO-CONFIG-18` -> `g3ts-astro-content/content-adapter-rule`
+- `TS-ASTRO-CONTENT-CONFIG-18` -> `g3ts-astro-content/content-adapter-rule`
   - definition: `packages/ts/astro/content/g3ts-astro-content-config-checks/crates/runtime/src/content_adapter_rule.rs`
-- `TS-ASTRO-CONFIG-19` -> `g3ts-astro-content/inline-copy-rule`
+- `TS-ASTRO-CONTENT-CONFIG-19` -> `g3ts-astro-content/inline-copy-rule`
   - definition: `packages/ts/astro/content/g3ts-astro-content-config-checks/crates/runtime/src/inline_copy_rule.rs`
-- `TS-ASTRO-CONFIG-23` -> `g3ts-astro-content/strict-content-policy`
+- `TS-ASTRO-CONTENT-CONFIG-23` -> `g3ts-astro-content/strict-content-policy`
   - definition: `packages/ts/astro/content/g3ts-astro-content-config-checks/crates/runtime/src/strict_content_policy.rs`
-- `TS-ASTRO-CONFIG-24 [g3ts-astro-content/strict-policy-paths]` -> `g3ts-astro-content/strict-policy-paths`
+- `TS-ASTRO-CONTENT-CONFIG-24` -> `g3ts-astro-content/strict-policy-paths`
   - definition: `packages/ts/astro/content/g3ts-astro-content-config-checks/crates/runtime/src/strict_policy_paths.rs`
-- `TS-ASTRO-CONFIG-25` -> `g3ts-astro-content/route-scope-overlap`
+- `TS-ASTRO-CONTENT-CONFIG-25` -> `g3ts-astro-content/route-scope-overlap`
   - definition: `packages/ts/astro/content/g3ts-astro-content-config-checks/crates/runtime/src/route_scope_overlap.rs`
-- `TS-ASTRO-CONFIG-26` -> `g3ts-astro-content/policy-eslint-coverage`
+- `TS-ASTRO-CONTENT-CONFIG-26` -> `g3ts-astro-content/policy-eslint-coverage`
   - definition: `packages/ts/astro/content/g3ts-astro-content-config-checks/crates/runtime/src/policy_eslint_coverage.rs`
-- `TS-ASTRO-CONFIG-27` -> `g3ts-astro-content/content-adapter-exists`
+- `TS-ASTRO-CONTENT-CONFIG-27` -> `g3ts-astro-content/content-adapter-exists`
   - definition: `packages/ts/astro/content/g3ts-astro-content-config-checks/crates/runtime/src/content_adapter_exists.rs`
-- `TS-ASTRO-CONFIG-28` -> `g3ts-astro-content/content-adapter-astro-content`
+- `TS-ASTRO-CONTENT-CONFIG-28` -> `g3ts-astro-content/content-adapter-astro-content`
   - definition: `packages/ts/astro/content/g3ts-astro-content-config-checks/crates/runtime/src/content_adapter_astro_content.rs`
-- `TS-ASTRO-FILETREE-02` -> `g3ts-astro-content/content-config-exists`
+- `TS-ASTRO-CONTENT-FILETREE-02` -> `g3ts-astro-content/content-config-exists`
   - definition: `packages/ts/astro/content/g3ts-astro-content-file-tree-checks/crates/runtime/src/content_config_exists.rs`
-- `TS-ASTRO-FILETREE-03` -> `g3ts-astro-content/live-config-exists`
+- `TS-ASTRO-CONTENT-FILETREE-03` -> `g3ts-astro-content/live-config-exists`
   - definition: `packages/ts/astro/content/g3ts-astro-content-file-tree-checks/crates/runtime/src/live_config_exists.rs`
-- `TS-ASTRO-FILETREE-04` -> `g3ts-astro-content/no-route-markdown-pages`
+- `TS-ASTRO-CONTENT-FILETREE-04` -> `g3ts-astro-content/no-route-markdown-pages`
   - definition: `packages/ts/astro/content/g3ts-astro-content-file-tree-checks/crates/runtime/src/no_route_markdown_pages.rs`
-- `TS-ASTRO-FILETREE-05` -> `g3ts-astro-content/no-velite-config`
+- `TS-ASTRO-CONTENT-FILETREE-05` -> `g3ts-astro-content/no-velite-config`
   - definition: `packages/ts/astro/content/g3ts-astro-content-file-tree-checks/crates/runtime/src/no_velite_config.rs`
-- `TS-ASTRO-FILETREE-06` -> `g3ts-astro-content/no-velite-output`
+- `TS-ASTRO-CONTENT-FILETREE-06` -> `g3ts-astro-content/no-velite-output`
   - definition: `packages/ts/astro/content/g3ts-astro-content-file-tree-checks/crates/runtime/src/no_velite_output.rs`
-- `TS-ASTRO-CONFIG-20 package presence assertion` -> `g3ts-astro-mdx/mdx-eslint-plugin-package-present`
+- `TS-ASTRO-MDX-CONFIG-20` -> `g3ts-astro-mdx/mdx-eslint-lane-wired`
   - definition: `packages/ts/astro/mdx/g3ts-astro-mdx-config-checks/crates/runtime/src/mdx_lane.rs`
-- `TS-ASTRO-CONFIG-20 lane wiring assertion` -> `g3ts-astro-mdx/mdx-eslint-lane-wired`
-  - definition: `packages/ts/astro/mdx/g3ts-astro-mdx-config-checks/crates/runtime/src/mdx_lane.rs`
-- `TS-ASTRO-CONFIG-24 [g3ts-astro-mdx/strict-policy-paths]` -> `g3ts-astro-mdx/strict-policy-paths`
+- `TS-ASTRO-MDX-CONFIG-24` -> `g3ts-astro-mdx/strict-policy-paths`
   - definition: `packages/ts/astro/mdx/g3ts-astro-mdx-config-checks/crates/runtime/src/strict_policy_paths.rs`
-- `TS-ASTRO-CONFIG-29 [g3ts-astro-mdx/policy-helper-surfaces]` -> `g3ts-astro-mdx/policy-helper-surfaces`
+- `TS-ASTRO-MDX-CONFIG-29` -> `g3ts-astro-mdx/policy-helper-surfaces`
   - definition: `packages/ts/astro/mdx/g3ts-astro-mdx-config-checks/crates/runtime/src/policy_helper_surfaces.rs`
-- `TS-ASTRO-CONFIG-30` -> `g3ts-astro-mdx/mdx-component-map-rule`
+- `TS-ASTRO-MDX-CONFIG-30` -> `g3ts-astro-mdx/mdx-component-map-rule`
   - definition: `packages/ts/astro/mdx/g3ts-astro-mdx-config-checks/crates/runtime/src/mdx_component_map_rule.rs`
-- `TS-ASTRO-CONFIG-35` -> `g3ts-astro-mdx/mdx-import-names`
+- `TS-ASTRO-MDX-CONFIG-35` -> `g3ts-astro-mdx/mdx-import-names`
   - definition: `packages/ts/astro/mdx/g3ts-astro-mdx-config-checks/crates/runtime/src/strict_component_rules/mdx_import_names.rs`
-- `TS-ASTRO-CONFIG-36` -> `g3ts-astro-mdx/no-raw-ui-exports`
+- `TS-ASTRO-MDX-CONFIG-36` -> `g3ts-astro-mdx/no-raw-ui-exports`
   - definition: `packages/ts/astro/mdx/g3ts-astro-mdx-config-checks/crates/runtime/src/strict_component_rules/no_raw_ui_exports.rs`
-- `TS-ASTRO-CONFIG-37` -> `g3ts-astro-mdx/mdx-component-wrapper-zod-parse`
+- `TS-ASTRO-MDX-CONFIG-37` -> `g3ts-astro-mdx/mdx-component-wrapper-zod-parse`
   - definition: `packages/ts/astro/mdx/g3ts-astro-mdx-config-checks/crates/runtime/src/strict_component_rules/mdx_component_wrapper_zod_parse.rs`
-- `TS-ASTRO-CONFIG-38` -> `g3ts-astro-mdx/no-raw-mdx-images`
+- `TS-ASTRO-MDX-CONFIG-38` -> `g3ts-astro-mdx/no-raw-mdx-images`
   - definition: `packages/ts/astro/mdx/g3ts-astro-mdx-config-checks/crates/runtime/src/strict_component_rules/no_raw_mdx_images.rs`
-- `TS-ASTRO-CONFIG-13` -> `g3ts-astro-seo/nuasite-checks`
+- `TS-ASTRO-SEO-CONFIG-13` -> `g3ts-astro-seo/nuasite-checks`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/nuasite_checks.rs`
-- `TS-ASTRO-CONFIG-14` -> `g3ts-astro-seo/sitemap-integration`
+- `TS-ASTRO-SEO-CONFIG-14` -> `g3ts-astro-seo/sitemap-integration`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/sitemap_integration.rs`
-- `TS-ASTRO-CONFIG-15` -> `g3ts-astro-seo/robots-integration`
+- `TS-ASTRO-SEO-CONFIG-15` -> `g3ts-astro-seo/robots-integration`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/robots_integration.rs`
-- `TS-ASTRO-CONFIG-16` -> `g3ts-astro-seo/llms-txt`
+- `TS-ASTRO-SEO-CONFIG-16` -> `g3ts-astro-seo/llms-txt`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/llms_txt.rs`
-- `TS-ASTRO-CONFIG-17 [g3ts-astro-seo/seo-packages]` -> `g3ts-astro-seo/seo-packages`
+- `TS-ASTRO-SEO-CONFIG-17` -> `g3ts-astro-seo/seo-packages`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/seo_packages.rs`
-- `TS-ASTRO-CONFIG-22` -> `g3ts-astro-seo/structured-data-check`
+- `TS-ASTRO-SEO-CONFIG-22` -> `g3ts-astro-seo/structured-data-check`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/structured_data_check.rs`
-- `TS-ASTRO-CONFIG-24 [g3ts-astro-seo/strict-policy-paths]` -> `g3ts-astro-seo/strict-policy-paths`
+- `TS-ASTRO-SEO-CONFIG-24` -> `g3ts-astro-seo/strict-policy-paths`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/strict_policy_paths.rs`
-- `TS-ASTRO-CONFIG-29 [g3ts-astro-seo/policy-helper-surfaces]` -> `g3ts-astro-seo/policy-helper-surfaces`
+- `TS-ASTRO-SEO-CONFIG-29` -> `g3ts-astro-seo/policy-helper-surfaces`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/policy_helper_surfaces.rs`
-- `TS-ASTRO-CONFIG-31` -> `g3ts-astro-seo/metadata-helper-rule`
+- `TS-ASTRO-SEO-CONFIG-31` -> `g3ts-astro-seo/metadata-helper-rule`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/metadata_helper_rule.rs`
-- `TS-ASTRO-CONFIG-32` -> `g3ts-astro-seo/json-ld-helper-rule`
+- `TS-ASTRO-SEO-CONFIG-32` -> `g3ts-astro-seo/json-ld-helper-rule`
   - definition: `packages/ts/astro/seo/g3ts-astro-seo-config-checks/crates/runtime/src/json_ld_helper_rule.rs`
-- `TS-ASTRO-CONFIG-01` -> `g3ts-astro-setup/astro-package-present`
+- `TS-ASTRO-SETUP-CONFIG-01` -> `g3ts-astro-setup/astro-package-present`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/astro_package_present.rs`
-- `TS-ASTRO-CONFIG-02` -> `g3ts-astro-setup/astro-check-present`
+- `TS-ASTRO-SETUP-CONFIG-02` -> `g3ts-astro-setup/astro-check-present`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/astro_check_present.rs`
-- `TS-ASTRO-CONFIG-03` -> `g3ts-astro-setup/astro-eslint-plugin-package-present`
+- `TS-ASTRO-SETUP-CONFIG-03` -> `g3ts-astro-setup/astro-eslint-plugin-package-present`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/astro_eslint_plugin_package_present.rs`
-- `TS-ASTRO-CONFIG-05` -> `g3ts-astro-setup/astro-eslint-plugin-wired`
+- `TS-ASTRO-SETUP-CONFIG-05` -> `g3ts-astro-setup/astro-eslint-plugin-wired`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/astro_eslint_plugin_wired.rs`
-- `TS-ASTRO-CONFIG-09` -> `g3ts-astro-setup/syncpack-stack-pins`
+- `TS-ASTRO-SETUP-CONFIG-09` -> `g3ts-astro-setup/syncpack-stack-pins`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/syncpack_stack_pins.rs`
-- `TS-ASTRO-CONFIG-10` -> `g3ts-astro-setup/syncpack-forbidden-deps`
+- `TS-ASTRO-SETUP-CONFIG-10` -> `g3ts-astro-setup/syncpack-forbidden-deps`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/syncpack_forbidden_deps.rs`
-- `TS-ASTRO-CONFIG-11` -> `g3ts-astro-setup/site-url`
+- `TS-ASTRO-SETUP-CONFIG-11` -> `g3ts-astro-setup/site-url`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/site_url.rs`
-- `TS-ASTRO-CONFIG-12` -> `g3ts-astro-setup/static-output`
+- `TS-ASTRO-SETUP-CONFIG-12` -> `g3ts-astro-setup/static-output`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/static_output.rs`
-- `TS-ASTRO-CONFIG-21` -> `g3ts-astro-setup/required-integrations`
+- `TS-ASTRO-SETUP-CONFIG-21` -> `g3ts-astro-setup/required-integrations`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/required_integrations.rs`
-- `TS-ASTRO-CONFIG-33` -> `g3ts-astro-setup/lint-script`
+- `TS-ASTRO-SETUP-CONFIG-33` -> `g3ts-astro-setup/lint-script`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/lint_script.rs`
-- `TS-ASTRO-CONFIG-34` -> `g3ts-astro-setup/syncpack-lint-script`
+- `TS-ASTRO-SETUP-CONFIG-34` -> `g3ts-astro-setup/syncpack-lint-script`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-config-checks/crates/runtime/src/syncpack_lint_script.rs`
-- `TS-ASTRO-FILETREE-01` -> `g3ts-astro-setup/astro-config-exists`
+- `TS-ASTRO-SETUP-FILETREE-01` -> `g3ts-astro-setup/astro-config-exists`
   - definition: `packages/ts/astro/setup/g3ts-astro-setup-file-tree-checks/crates/runtime/src/astro_config_exists.rs`
-- `TS-ASTRO-FILETREE-11` -> `g3ts-astro-state/no-legacy-parallel-state`
+- `TS-ASTRO-STATE-FILETREE-11` -> `g3ts-astro-state/no-legacy-parallel-state`
   - definition: `packages/ts/astro/state/g3ts-astro-state-file-tree-checks/crates/runtime/src/no_legacy_parallel_state.rs`
-- `TS-ASTRO-FILETREE-12` -> `g3ts-astro-state/configured-forbidden-state`
+- `TS-ASTRO-STATE-FILETREE-12` -> `g3ts-astro-state/configured-forbidden-state`
   - definition: `packages/ts/astro/state/g3ts-astro-state-file-tree-checks/crates/runtime/src/configured_forbidden_state.rs`
 - `TS-ESLINT-CONFIG-01` -> `g3ts-eslint/exists`
   - definition: `packages/ts/eslint/g3ts-eslint-config-checks/crates/runtime/src/exists.rs`
