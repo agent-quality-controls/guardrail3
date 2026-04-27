@@ -188,6 +188,267 @@ module.exports = { ESLint };
 }
 
 #[test]
+fn resolves_plugin_package_identity_from_namespace_wrapped_astro_plugin() {
+    let root = TempDir::new().expect("tempdir should be created");
+    fs::create_dir_all(root.path().join("src/pages"))
+        .expect("astro source directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint"))
+        .expect("fake eslint module directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint-plugin-astro"))
+        .expect("fake astro plugin module directory should be created");
+    fs::write(
+        root.path().join("eslint.config.mjs"),
+        "import * as astro from \"eslint-plugin-astro\";\nexport default [{ plugins: { astro } }];\n",
+    )
+    .expect("eslint config should be written");
+    fs::write(
+        root.path().join("src/pages/index.astro"),
+        "---\n---\n<html></html>\n",
+    )
+    .expect("astro source should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/package.json"),
+        "{\n  \"name\": \"eslint\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake eslint package manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/eslint-plugin-astro/package.json"),
+        "{\n  \"name\": \"eslint-plugin-astro\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake astro plugin package manifest should be written");
+    fs::write(
+        root.path().join("node_modules/eslint-plugin-astro/index.js"),
+        r#"module.exports = {
+  meta: { name: "eslint-plugin-astro" },
+  rules: {
+    "valid-compile": {
+      meta: {
+        docs: { description: "real package rule" },
+        schema: []
+      },
+      create() { return {}; }
+    }
+  }
+};
+"#,
+    )
+    .expect("fake astro plugin module should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"const astroDefault = require("eslint-plugin-astro");
+const astro = { ...astroDefault, default: astroDefault };
+
+class ESLint {
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    return {
+      plugins: { astro },
+      rules: { "astro/valid-compile": "error" },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint module should be written");
+
+    let snapshot = crate::parser::parse(
+        root.path(),
+        "eslint.config.mjs",
+        &[probe(EslintProbeKind::AstroSource, "src/pages/index.astro")],
+    )
+    .expect("parse should resolve namespace-wrapped astro plugin package identity");
+
+    assertions::assert_plugin_package_name(
+        &snapshot,
+        EslintProbeKind::AstroSource,
+        "astro",
+        "eslint-plugin-astro",
+    );
+}
+
+#[test]
+fn resolves_plugin_package_identity_from_namespace_wrapped_mdx_plugin() {
+    let root = TempDir::new().expect("tempdir should be created");
+    fs::create_dir_all(root.path().join("content/posts"))
+        .expect("content directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint"))
+        .expect("fake eslint module directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint-plugin-mdx"))
+        .expect("fake mdx plugin module directory should be created");
+    fs::write(
+        root.path().join("eslint.config.mjs"),
+        "import * as mdx from \"eslint-plugin-mdx\";\nexport default [{ plugins: { ...mdx.configs.flat.plugins } }];\n",
+    )
+    .expect("eslint config should be written");
+    fs::write(root.path().join("content/posts/post.mdx"), "# Post\n")
+        .expect("mdx content should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/package.json"),
+        "{\n  \"name\": \"eslint\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake eslint package manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/eslint-plugin-mdx/package.json"),
+        "{\n  \"name\": \"eslint-plugin-mdx\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake mdx plugin package manifest should be written");
+    fs::write(
+        root.path().join("node_modules/eslint-plugin-mdx/index.js"),
+        "module.exports = { meta: { name: \"eslint-plugin-mdx\" }, rules: { remark: {} } };\n",
+    )
+    .expect("fake mdx plugin module should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"const mdxDefault = require("eslint-plugin-mdx");
+const mdx = { ...mdxDefault, default: mdxDefault };
+
+class ESLint {
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    return {
+      plugins: { mdx },
+      rules: { "mdx/remark": "error" },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint module should be written");
+
+    let snapshot = crate::parser::parse(
+        root.path(),
+        "eslint.config.mjs",
+        &[probe(EslintProbeKind::MdxContent, "content/posts/post.mdx")],
+    )
+    .expect("parse should resolve namespace-wrapped mdx plugin package identity");
+
+    assertions::assert_plugin_package_name(
+        &snapshot,
+        EslintProbeKind::MdxContent,
+        "mdx",
+        "eslint-plugin-mdx",
+    );
+}
+
+#[test]
+fn rejects_spoofed_astro_plugin_when_imported_binding_is_only_object_key() {
+    let root = TempDir::new().expect("tempdir should be created");
+    fs::create_dir_all(root.path().join("src/pages"))
+        .expect("astro source directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint"))
+        .expect("fake eslint module directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint-plugin-astro"))
+        .expect("fake astro plugin module directory should be created");
+    fs::write(
+        root.path().join("eslint.config.mjs"),
+        r#"import astro from "eslint-plugin-astro";
+
+const fakeAstro = {
+  meta: { name: "eslint-plugin-astro" },
+  rules: { "valid-compile": {} }
+};
+
+export default [{
+  plugins: { astro: fakeAstro },
+  rules: { "astro/valid-compile": "error" }
+}];
+"#,
+    )
+    .expect("eslint config should be written");
+    fs::write(
+        root.path().join("src/pages/index.astro"),
+        "---\n---\n<html></html>\n",
+    )
+    .expect("astro source should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/package.json"),
+        "{\n  \"name\": \"eslint\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake eslint package manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/eslint-plugin-astro/package.json"),
+        "{\n  \"name\": \"eslint-plugin-astro\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake astro plugin package manifest should be written");
+    fs::write(
+        root.path().join("node_modules/eslint-plugin-astro/index.js"),
+        r#"module.exports = {
+  meta: { name: "eslint-plugin-astro" },
+  rules: {
+    "valid-compile": {
+      meta: {
+        docs: { description: "real package rule" },
+        schema: []
+      },
+      create() { return {}; }
+    }
+  }
+};
+"#,
+    )
+    .expect("fake astro plugin package should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"const fakeAstro = {
+  meta: { name: "eslint-plugin-astro" },
+  rules: { "valid-compile": {} }
+};
+
+class ESLint {
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    return {
+      plugins: { astro: fakeAstro },
+      rules: { "astro/valid-compile": "error" },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint module should be written");
+
+    let snapshot = crate::parser::parse(
+        root.path(),
+        "eslint.config.mjs",
+        &[probe(EslintProbeKind::AstroSource, "src/pages/index.astro")],
+    )
+    .expect("parse should not trust imported binding used only as an object key");
+    let probe = snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == EslintProbeKind::AstroSource)
+        .expect("astro probe should exist");
+
+    assert!(
+        !probe
+            .plugin_package_names
+            .get("astro")
+            .is_some_and(|package_names| package_names
+                .iter()
+                .any(|name| name == "eslint-plugin-astro")),
+        "object-key import reference must not prove package identity: {probe:?}"
+    );
+}
+
+#[test]
 fn rejects_spoofed_plugin_package_identity_with_matching_shape() {
     let root = TempDir::new().expect("tempdir should be created");
     fs::create_dir_all(root.path().join("src")).expect("src directory should be created");
@@ -200,7 +461,9 @@ fn rejects_spoofed_plugin_package_identity_with_matching_shape() {
     .expect("fake astro pipeline plugin module directory should be created");
     fs::write(
         root.path().join("eslint.config.mjs"),
-        r#"const noopRule = { create() { return {}; } };
+        r#"import astroPipeline from "g3ts-eslint-plugin-astro-pipeline";
+
+const noopRule = { create() { return {}; } };
 const fakeAstroPipeline = {
   meta: { name: "g3ts-eslint-plugin-astro-pipeline" },
   rules: {
@@ -209,10 +472,10 @@ const fakeAstroPipeline = {
     "no-authored-content-imports": noopRule,
     "no-content-data-modules-in-routes": noopRule,
     "no-direct-astro-content-in-routes": noopRule,
-    "no-runtime-mdx-eval": noopRule,
-    "no-side-loader-imports": noopRule,
-    "no-velite-imports": noopRule,
-    "require-approved-content-adapter-in-routes": noopRule
+            "no-runtime-mdx-eval": noopRule,
+            "no-side-loader-imports": noopRule,
+            "no-velite-imports": noopRule,
+            "require-approved-content-adapter-in-routes": noopRule
   }
 };
 
@@ -243,15 +506,15 @@ export default [{ plugins: { "astro-pipeline": fakeAstroPipeline } }];
 module.exports = {
   meta: { name: "g3ts-eslint-plugin-astro-pipeline" },
   rules: {
-    "no-authored-content-fs-read": noopRule,
-    "no-authored-content-glob": noopRule,
-    "no-authored-content-imports": noopRule,
-    "no-content-data-modules-in-routes": noopRule,
-    "no-direct-astro-content-in-routes": noopRule,
-    "no-runtime-mdx-eval": noopRule,
-    "no-side-loader-imports": noopRule,
-    "no-velite-imports": noopRule,
-    "require-approved-content-adapter-in-routes": noopRule
+    "no-authored-content-fs-read": { ...noopRule, meta: { docs: { description: "package rule" } } },
+    "no-authored-content-glob": { ...noopRule, meta: { docs: { description: "package rule" } } },
+    "no-authored-content-imports": { ...noopRule, meta: { docs: { description: "package rule" } } },
+    "no-content-data-modules-in-routes": { ...noopRule, meta: { docs: { description: "package rule" } } },
+    "no-direct-astro-content-in-routes": { ...noopRule, meta: { docs: { description: "package rule" } } },
+    "no-runtime-mdx-eval": { ...noopRule, meta: { docs: { description: "package rule" } } },
+    "no-side-loader-imports": { ...noopRule, meta: { docs: { description: "package rule" } } },
+    "no-velite-imports": { ...noopRule, meta: { docs: { description: "package rule" } } },
+    "require-approved-content-adapter-in-routes": { ...noopRule, meta: { docs: { description: "package rule" } } }
   }
 };
 "#,

@@ -23,7 +23,7 @@ pub(crate) fn check(
             results.push(crate::support::info(
                 ID,
                 "Astro content adapter route rule is effective",
-                format!("`{rel_path}` enforces `{RULE_NAME}` from `{PLUGIN_PACKAGE_NAME}` with route coverage, endpoint coverage, and `approvedContentAdapterModules` exactly matching `[ts.astro.content].adapters` on Astro, TS, and TSX source probes."),
+                format!("`{rel_path}` enforces `{RULE_NAME}` from `{PLUGIN_PACKAGE_NAME}` with route coverage, endpoint coverage, and `approvedContentAdapterModules` matching `[ts.astro.content].adapters` as equivalent recursive file globs on Astro, TS, and TSX source probes."),
                 rel_path,
             ));
         }
@@ -34,7 +34,7 @@ pub(crate) fn check(
         ID,
         "Astro content adapter route rule is not effective",
         format!(
-            "`{}` must import `{PLUGIN_PACKAGE_NAME}`, register it as `{PLUGIN_NAME}`, and activate rule `{RULE_NAME}` at `error` on Astro, TS, and TSX source probes with `routeGlobs`, `endpointGlobs`, and `approvedContentAdapterModules` exactly matching `[ts.astro.content].adapters`. Public page routes must import an approved content adapter instead of reading content directly.",
+            "`{}` must import `{PLUGIN_PACKAGE_NAME}`, register it as `{PLUGIN_NAME}`, and activate rule `{RULE_NAME}` at `error` on Astro, TS, and TSX source probes with `routeGlobs`, `endpointGlobs`, and `approvedContentAdapterModules` covering `[ts.astro.content].adapters` as recursive file globs. Directory policy entries like `src/content` may be represented in ESLint as `src/content/**` or `src/content/**/*`. Public page routes must import an approved content adapter instead of reading content directly.",
             rel_path.unwrap_or("eslint.config.*")
         ),
         rel_path,
@@ -123,19 +123,33 @@ fn expected_module_globs(configured_paths: &[String]) -> Vec<String> {
         .iter()
         .map(|configured_path| configured_path.trim())
         .filter(|configured_path| !configured_path.is_empty())
-        .map(|configured_path| {
-            let trimmed = configured_path.trim_end_matches('/');
-            if trimmed.ends_with("/**") || trimmed.contains('*') {
-                trimmed.to_owned()
-            } else {
-                format!("{trimmed}/**")
-            }
-        })
+        .map(canonical_recursive_module_glob)
         .collect()
 }
 
 fn string_arrays_match_as_sets(left: &[String], right: &[String]) -> bool {
-    let left: BTreeSet<&str> = left.iter().map(String::as_str).collect();
-    let right: BTreeSet<&str> = right.iter().map(String::as_str).collect();
+    let left: BTreeSet<String> = left
+        .iter()
+        .map(|value| canonical_recursive_module_glob(value))
+        .collect();
+    let right: BTreeSet<String> = right
+        .iter()
+        .map(|value| canonical_recursive_module_glob(value))
+        .collect();
     left == right
+}
+
+fn canonical_recursive_module_glob(value: &str) -> String {
+    let trimmed = value.trim().trim_end_matches('/');
+    if let Some(prefix) = trimmed.strip_suffix("/**/*") {
+        return format!("{prefix}/**");
+    }
+    if let Some(prefix) = trimmed.strip_suffix("/**") {
+        return format!("{prefix}/**");
+    }
+    if trimmed.contains('*') {
+        trimmed.to_owned()
+    } else {
+        format!("{trimmed}/**")
+    }
 }

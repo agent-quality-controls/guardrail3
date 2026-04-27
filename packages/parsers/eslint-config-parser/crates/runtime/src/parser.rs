@@ -90,15 +90,46 @@ function candidatePluginPackageNames(namespace, plugin) {
 }
 
 function packageModuleExportsPlugin(module, plugin) {
+  const pluginCandidates = pluginObjectCandidates(plugin);
+  return exportedPluginCandidates(module).some((moduleCandidate) =>
+    pluginCandidates.some((pluginCandidate) => moduleCandidate === pluginCandidate)
+  );
+}
+
+function packageModuleFingerprintMatchesPlugin(module, plugin) {
+  const effectiveFingerprint = pluginFingerprint(plugin);
   return exportedPluginCandidates(module).some((candidate) =>
-    candidate === plugin
+    pluginFingerprint(candidate) === effectiveFingerprint
   );
 }
 
 function exportedPluginCandidates(module) {
-  return [module?.default, module?.['module.exports'], ...Object.values(module ?? {})].filter(
+  return pluginObjectCandidates(module);
+}
+
+function pluginObjectCandidates(value) {
+  return [value, value?.default, value?.['module.exports'], ...Object.values(value ?? {})].filter(
     (value) => value && typeof value === 'object'
   );
+}
+
+function pluginFingerprint(plugin) {
+  return JSON.stringify({
+    metaName: plugin?.meta?.name ?? null,
+    rules: Object.fromEntries(
+      Object.entries(plugin?.rules ?? {})
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([ruleName, rule]) => [
+          ruleName,
+          {
+            meta: rule?.meta ?? null,
+            keys: Object.keys(rule ?? {}).sort(),
+          },
+        ])
+    ),
+    processorNames: Object.keys(plugin?.processors ?? {}).sort(),
+    configNames: Object.keys(plugin?.configs ?? {}).sort(),
+  });
 }
 
 async function normalizePluginPackageNames(plugins, require) {
@@ -114,7 +145,10 @@ async function normalizePluginPackageNames(plugins, require) {
       try {
         const resolved = require.resolve(packageName);
         const module = await import(pathToFileURL(resolved).href);
-        if (packageModuleExportsPlugin(module, plugin)) {
+        if (
+          packageModuleExportsPlugin(module, plugin) ||
+          packageModuleFingerprintMatchesPlugin(module, plugin)
+        ) {
           matches.add(packageName);
         }
       } catch {
