@@ -17,12 +17,14 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
         }
 
         let astro_content_sources: BTreeSet<&str> = contract
-            .approved_surface_sources.content_adapter_astro_content
+            .approved_surface_sources
+            .content_adapter_astro_content
             .iter()
             .map(String::as_str)
             .collect();
         let adapter_sources: Vec<&str> = contract
-            .approved_surface_sources.content_adapter
+            .approved_surface_sources
+            .content_adapter
             .iter()
             .map(String::as_str)
             .collect();
@@ -37,7 +39,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                 ID,
                 "Astro content adapter sources import Astro content collections",
                 format!(
-                    "`{}` resolves `content_adapter` to adapter source files that import `astro:content` at runtime: {}.",
+                    "`{}` resolves `[ts.astro.content].adapters` to adapter source files that import `astro:content` at runtime: {}.",
                     policy.rel_path,
                     format_paths(&adapter_sources)
                 ),
@@ -50,7 +52,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             ID,
             "Astro content adapter source does not use Astro content collections",
             format!(
-                "`{}` resolves `content_adapter` to source files that do not import `astro:content` at runtime: {}. Move non-adapter helpers outside `content_adapter`, or make each adapter source read validated Astro content through a runtime import such as `import {{ getEntry }} from \"astro:content\"`. Type-only imports do not satisfy this rule.",
+                "`{}` resolves `[ts.astro.content].adapters` to source files that do not import `astro:content` at runtime: {}. Move non-adapter helpers outside `[ts.astro.content].adapters`, or make each adapter source read validated Astro content through a runtime import such as `import {{ getEntry }} from \"astro:content\"`. Type-only imports do not satisfy this rule.",
                 policy.rel_path,
                 format_paths(&missing)
             ),

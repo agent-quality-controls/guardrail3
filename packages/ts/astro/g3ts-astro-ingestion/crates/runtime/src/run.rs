@@ -173,7 +173,7 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroConfigChec
                 let astro_policy = ingest_astro_policy_surface(crawl, app_root_rel_path);
                 G3TsAstroEslintPluginContractInput {
                     app_root_rel_path: app_root_rel_path.clone(),
-                config: ingest_eslint_surface(crawl, app_root_rel_path, &astro_policy),
+                    config: ingest_eslint_surface(crawl, app_root_rel_path, &astro_policy),
                 }
             })
             .collect(),
@@ -494,12 +494,19 @@ fn content_adapter_source_paths(
     let G3TsAstroPolicySurfaceState::Parsed { snapshot } = astro_policy else {
         return Vec::new();
     };
-    let Some(content_adapter) = snapshot.content_adapter.as_deref() else {
-        return Vec::new();
-    };
+    let scoped_adapters: Vec<(String, String)> = snapshot
+        .content_adapters
+        .iter()
+        .map(|adapter| {
+            let scoped_adapter = scoped_rel_path(app_root_rel_path, adapter.trim_end_matches('/'));
+            let scoped_adapter_prefix = format!("{scoped_adapter}/");
+            (scoped_adapter, scoped_adapter_prefix)
+        })
+        .collect();
 
-    let scoped_adapter = scoped_rel_path(app_root_rel_path, content_adapter.trim_end_matches('/'));
-    let scoped_adapter_prefix = format!("{scoped_adapter}/");
+    if scoped_adapters.is_empty() {
+        return Vec::new();
+    }
 
     crawl
         .entries
@@ -508,8 +515,12 @@ fn content_adapter_source_paths(
             entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
                 && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
                 && is_adapter_source_file(&entry.path.rel_path)
-                && (entry.path.rel_path == scoped_adapter
-                    || entry.path.rel_path.starts_with(&scoped_adapter_prefix))
+                && scoped_adapters
+                    .iter()
+                    .any(|(scoped_adapter, scoped_adapter_prefix)| {
+                        entry.path.rel_path == *scoped_adapter
+                            || entry.path.rel_path.starts_with(scoped_adapter_prefix)
+                    })
         })
         .map(|entry| app_relative_path(&entry.path.rel_path, app_root_rel_path))
         .collect()
@@ -521,7 +532,7 @@ fn content_adapter_policy_paths(astro_policy: &G3TsAstroPolicySurfaceState) -> V
     };
 
     snapshot
-        .content_adapter
+        .content_adapters
         .iter()
         .map(|path| path.to_owned())
         .collect()
@@ -1044,15 +1055,17 @@ fn ingest_astro_policy_surface(
         snapshot: G3TsAstroPolicySnapshot {
             rel_path: entry.path.rel_path.clone(),
             profile: astro.profile,
-            content_routes: astro.content_routes,
-            non_content_routes: astro.non_content_routes,
-            endpoints: astro.endpoints,
-            content_root: astro.content_root,
-            content_adapter: astro.content_adapter,
-            mdx_component_maps: astro.mdx_component_maps,
-            metadata_helpers: astro.metadata_helpers,
-            json_ld_helpers: astro.json_ld_helpers,
-            forbidden_state: astro.forbidden_state,
+            content_routes: astro.routes.content,
+            non_content_routes: astro.routes.non_content,
+            endpoints: astro.routes.endpoints,
+            content_root: astro.content.root,
+            content_adapters: astro.content.adapters,
+            required_collections: astro.content.required_collections,
+            collection_fields: astro.content.collection_fields,
+            mdx_component_maps: astro.mdx.component_maps,
+            metadata_helpers: astro.seo.metadata_helpers,
+            json_ld_helpers: astro.seo.json_ld_helpers,
+            forbidden_state: astro.state.forbidden,
         },
     }
 }
@@ -1258,6 +1271,15 @@ fn ingest_eslint_surface(
                 &route_page_paths,
                 &endpoint_paths,
             ),
+            astro_source_effective_content_adapter_modules: effective_content_adapter_modules(
+                astro_source_probe,
+            ),
+            ts_source_effective_content_adapter_modules: effective_content_adapter_modules(
+                ts_source_probe,
+            ),
+            tsx_source_effective_content_adapter_modules: effective_content_adapter_modules(
+                tsx_source_probe,
+            ),
             astro_source_route_scoped_pipeline_rule_scopes: route_scoped_pipeline_rule_scopes(
                 astro_source_probe,
             ),
@@ -1454,11 +1476,34 @@ fn effective_route_scoped_pipeline_rules(
                         endpoint_paths,
                     )
                     && (**rule_name != CONTENT_ADAPTER_PIPELINE_RULE
-                        || rule_setting_has_approved_content_adapter_scope(setting))
+                        || !string_array_option(setting, "approvedContentAdapterModules")
+                            .is_empty())
             })
         })
         .map(|rule_name| (*rule_name).to_owned())
         .collect()
+}
+
+fn effective_content_adapter_modules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+) -> Vec<String> {
+    let Some(probe) = probe else {
+        return Vec::new();
+    };
+
+    probe
+        .rules
+        .get(CONTENT_ADAPTER_PIPELINE_RULE)
+        .map_or_else(Vec::new, |setting| {
+            if rule_setting_is_error(setting)
+                && probe_has_pipeline_plugin_package(probe)
+                && !string_array_option(setting, "approvedContentAdapterModules").is_empty()
+            {
+                string_array_option(setting, "approvedContentAdapterModules")
+            } else {
+                Vec::new()
+            }
+        })
 }
 
 fn effective_content_data_pipeline_rules(
@@ -1622,9 +1667,9 @@ fn effective_route_helper_rules(
                 route_page_paths,
                 endpoint_paths,
             )
-            && required_module_options
-                .iter()
-                .all(|(key, expected)| rule_setting_has_expected_module_globs(setting, key, expected))
+            && required_module_options.iter().all(|(key, expected)| {
+                rule_setting_has_expected_module_globs(setting, key, expected)
+            })
         {
             vec![rule_name.to_owned()]
         } else {
@@ -1697,7 +1742,8 @@ fn rule_setting_has_expected_module_globs(
     expected_sources: &[String],
 ) -> bool {
     let expected = expected_module_globs(expected_sources);
-    !expected.is_empty() && string_arrays_match_as_sets(&string_array_option(setting, key), &expected)
+    !expected.is_empty()
+        && string_arrays_match_as_sets(&string_array_option(setting, key), &expected)
 }
 
 fn expected_module_globs(source_paths: &[String]) -> Vec<String> {
@@ -1720,14 +1766,6 @@ fn expected_module_globs(source_paths: &[String]) -> Vec<String> {
 fn string_arrays_match_as_sets(left: &[String], right: &[String]) -> bool {
     BTreeSet::from_iter(left.iter().map(|value| normalize_glob(value)))
         == BTreeSet::from_iter(right.iter().map(|value| normalize_glob(value)))
-}
-
-fn rule_setting_has_approved_content_adapter_scope(
-    setting: &eslint_config_parser::types::EslintRuleSetting,
-) -> bool {
-    first_option_object(setting).is_some_and(|object| {
-        has_non_empty_string_array_option(object.get("approvedContentAdapterModules"))
-    })
 }
 
 fn rule_setting_has_inline_public_content_policy(

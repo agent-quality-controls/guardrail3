@@ -71,23 +71,72 @@ pub struct TsPolicyConfig {
 pub struct TsAstroPolicyConfig {
     pub profile: Option<String>,
     #[serde(default)]
-    pub content_routes: Vec<String>,
+    pub routes: TsAstroRoutesPolicyConfig,
     #[serde(default)]
-    pub non_content_routes: Vec<String>,
+    pub content: TsAstroContentPolicyConfig,
+    #[serde(default)]
+    pub mdx: TsAstroMdxPolicyConfig,
+    #[serde(default)]
+    pub seo: TsAstroSeoPolicyConfig,
+    #[serde(default)]
+    pub state: TsAstroStatePolicyConfig,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct TsAstroRoutesPolicyConfig {
+    #[serde(default)]
+    pub content: Vec<String>,
+    #[serde(default)]
+    pub non_content: Vec<String>,
     #[serde(default)]
     pub endpoints: Vec<String>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct TsAstroContentPolicyConfig {
     #[serde(default)]
-    pub content_root: Option<String>,
+    pub root: Option<String>,
     #[serde(default)]
-    pub content_adapter: Option<String>,
+    pub adapters: Vec<String>,
     #[serde(default)]
-    pub mdx_component_maps: Vec<String>,
+    pub required_collections: Vec<String>,
+    #[serde(default)]
+    pub collection_fields: BTreeMap<String, Vec<String>>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct TsAstroMdxPolicyConfig {
+    #[serde(default)]
+    pub component_maps: Vec<String>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct TsAstroSeoPolicyConfig {
     #[serde(default)]
     pub metadata_helpers: Vec<String>,
     #[serde(default)]
     pub json_ld_helpers: Vec<String>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct TsAstroStatePolicyConfig {
     #[serde(default)]
-    pub forbidden_state: Vec<String>,
+    pub forbidden: Vec<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }

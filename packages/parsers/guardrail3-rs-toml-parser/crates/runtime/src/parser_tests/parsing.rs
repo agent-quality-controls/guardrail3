@@ -49,17 +49,37 @@ future_check = "preserve-me"
 future_ts_key = "preserve-ts"
 
 [ts.astro]
-profile = "strict-local-content"
-content_routes = ["src/pages/**/*.astro"]
-non_content_routes = ["src/pages/404.astro"]
+profile = "strict-static-content"
+future_astro_key = "preserve-astro"
+
+[ts.astro.routes]
+content = ["src/pages/**/*.astro"]
+non_content = ["src/pages/404.astro"]
 endpoints = ["src/pages/**/*.ts"]
-content_root = "src/content"
-content_adapter = "src/lib/content"
-mdx_component_maps = ["src/components/mdx"]
+future_routes_key = "preserve-routes"
+
+[ts.astro.content]
+root = "src/content"
+adapters = ["src/lib/content", "src/lib/secondary-content"]
+required_collections = ["landing", "blog"]
+future_content_key = "preserve-content"
+
+[ts.astro.content.collection_fields]
+landing = ["title", "description", "sections"]
+blog = ["title", "description", "status", "publishedAt"]
+
+[ts.astro.mdx]
+component_maps = ["src/components/mdx"]
+future_mdx_key = "preserve-mdx"
+
+[ts.astro.seo]
 metadata_helpers = ["src/lib/metadata"]
 json_ld_helpers = ["src/lib/json-ld"]
-forbidden_state = [".next/**", ".velite/**", ".contentlayer/**"]
-future_astro_key = "preserve-astro"
+future_seo_key = "preserve-seo"
+
+[ts.astro.state]
+forbidden = [".next/**", ".velite/**", ".contentlayer/**"]
+future_state_key = "preserve-state"
 
 [[waivers]]
 rule = "RS-CARGO-12"
@@ -84,52 +104,89 @@ reviewer = "guardrail-team"
     assertions::assert_check_extra_string(cfg.checks.as_ref(), "future_check", "preserve-me");
     assertions::assert_ts_extra_string(cfg.ts.as_ref(), "future_ts_key", "preserve-ts");
     let astro = assertions::assert_ts_astro_policy(cfg.ts.as_ref());
-    assertions::assert_ts_astro_profile(astro, Some("strict-local-content"));
+    assertions::assert_ts_astro_profile(astro, Some("strict-static-content"));
     assertions::assert_string_list(
-        &astro.content_routes,
+        &astro.routes.content,
         &["src/pages/**/*.astro"],
-        "ts.astro.content_routes",
+        "ts.astro.routes.content",
     );
     assertions::assert_string_list(
-        &astro.non_content_routes,
+        &astro.routes.non_content,
         &["src/pages/404.astro"],
-        "ts.astro.non_content_routes",
+        "ts.astro.routes.non_content",
     );
     assertions::assert_string_list(
-        &astro.endpoints,
+        &astro.routes.endpoints,
         &["src/pages/**/*.ts"],
-        "ts.astro.endpoints",
+        "ts.astro.routes.endpoints",
     );
     assert_eq!(
-        astro.content_root.as_deref(),
+        astro.content.root.as_deref(),
         Some("src/content"),
-        "ts.astro.content_root mismatch"
+        "ts.astro.content.root mismatch"
     );
+    assertions::assert_string_list(
+        &astro.content.adapters,
+        &["src/lib/content", "src/lib/secondary-content"],
+        "ts.astro.content.adapters",
+    );
+    assertions::assert_string_list(
+        &astro.content.required_collections,
+        &["landing", "blog"],
+        "ts.astro.content.required_collections",
+    );
+    assertions::assert_string_list(
+        astro
+            .content
+            .collection_fields
+            .get("landing")
+            .expect("landing collection fields should parse"),
+        &["title", "description", "sections"],
+        "ts.astro.content.collection_fields.landing",
+    );
+    assertions::assert_string_list(
+        astro
+            .content
+            .collection_fields
+            .get("blog")
+            .expect("blog collection fields should parse"),
+        &["title", "description", "status", "publishedAt"],
+        "ts.astro.content.collection_fields.blog",
+    );
+    assertions::assert_ts_astro_content_extra_string(
+        astro,
+        "future_content_key",
+        "preserve-content",
+    );
+    assertions::assert_ts_astro_routes_extra_string(astro, "future_routes_key", "preserve-routes");
     assert_eq!(
-        astro.content_adapter.as_deref(),
+        astro.content.adapters.first().map(String::as_str),
         Some("src/lib/content"),
-        "ts.astro.content_adapter mismatch"
+        "ts.astro.content.adapters first value mismatch"
     );
     assertions::assert_string_list(
-        &astro.mdx_component_maps,
+        &astro.mdx.component_maps,
         &["src/components/mdx"],
-        "ts.astro.mdx_component_maps",
+        "ts.astro.mdx.component_maps",
     );
+    assertions::assert_ts_astro_mdx_extra_string(astro, "future_mdx_key", "preserve-mdx");
     assertions::assert_string_list(
-        &astro.metadata_helpers,
+        &astro.seo.metadata_helpers,
         &["src/lib/metadata"],
-        "ts.astro.metadata_helpers",
+        "ts.astro.seo.metadata_helpers",
     );
     assertions::assert_string_list(
-        &astro.json_ld_helpers,
+        &astro.seo.json_ld_helpers,
         &["src/lib/json-ld"],
-        "ts.astro.json_ld_helpers",
+        "ts.astro.seo.json_ld_helpers",
     );
+    assertions::assert_ts_astro_seo_extra_string(astro, "future_seo_key", "preserve-seo");
     assertions::assert_string_list(
-        &astro.forbidden_state,
+        &astro.state.forbidden,
         &[".next/**", ".velite/**", ".contentlayer/**"],
-        "ts.astro.forbidden_state",
+        "ts.astro.state.forbidden",
     );
+    assertions::assert_ts_astro_state_extra_string(astro, "future_state_key", "preserve-state");
     assertions::assert_ts_astro_extra_string(astro, "future_astro_key", "preserve-astro");
     assertions::assert_waiver(
         cfg.waivers.first(),
@@ -173,39 +230,105 @@ fn empty_ts_astro_policy_defaults_lists_to_empty() {
     let cfg = parse_fixture(
         r#"
 [ts.astro]
-profile = "strict-local-content"
+profile = "strict-static-content"
 "#,
     );
 
     let astro = assertions::assert_ts_astro_policy(cfg.ts.as_ref());
-    assertions::assert_ts_astro_profile(astro, Some("strict-local-content"));
-    assertions::assert_string_list(&astro.content_routes, &[], "ts.astro.content_routes");
+    assertions::assert_ts_astro_profile(astro, Some("strict-static-content"));
+    assertions::assert_string_list(&astro.routes.content, &[], "ts.astro.routes.content");
     assertions::assert_string_list(
-        &astro.non_content_routes,
+        &astro.routes.non_content,
         &[],
-        "ts.astro.non_content_routes",
+        "ts.astro.routes.non_content",
     );
-    assertions::assert_string_list(&astro.endpoints, &[], "ts.astro.endpoints");
+    assertions::assert_string_list(&astro.routes.endpoints, &[], "ts.astro.routes.endpoints");
     assert_eq!(
-        astro.content_root, None,
-        "ts.astro.content_root should be None"
+        astro.content.root, None,
+        "ts.astro.content.root should be None"
     );
+    assertions::assert_string_list(&astro.content.adapters, &[], "ts.astro.content.adapters");
+    assertions::assert_string_list(
+        &astro.content.required_collections,
+        &[],
+        "ts.astro.content.required_collections",
+    );
+    assert!(
+        astro.content.collection_fields.is_empty(),
+        "ts.astro.content.collection_fields should be empty"
+    );
+    assertions::assert_string_list(
+        &astro.mdx.component_maps,
+        &[],
+        "ts.astro.mdx.component_maps",
+    );
+    assertions::assert_string_list(
+        &astro.seo.metadata_helpers,
+        &[],
+        "ts.astro.seo.metadata_helpers",
+    );
+    assertions::assert_string_list(
+        &astro.seo.json_ld_helpers,
+        &[],
+        "ts.astro.seo.json_ld_helpers",
+    );
+    assertions::assert_string_list(&astro.state.forbidden, &[], "ts.astro.state.forbidden");
+}
+
+#[test]
+fn old_flat_ts_astro_policy_fields_are_ignored_extras() {
+    let cfg = parse_fixture(
+        r#"
+[ts.astro]
+profile = "strict-static-content"
+content_routes = ["src/pages/**/*.astro"]
+non_content_routes = ["src/pages/404.astro"]
+endpoints = ["src/pages/**/*.ts"]
+content_root = "src/content"
+content_adapter = "src/lib/content"
+mdx_component_maps = ["src/components/mdx"]
+metadata_helpers = ["src/lib/metadata"]
+json_ld_helpers = ["src/lib/json-ld"]
+forbidden_state = [".next/**", ".velite/**", ".contentlayer/**"]
+"#,
+    );
+
+    let astro = assertions::assert_ts_astro_policy(cfg.ts.as_ref());
+    assertions::assert_ts_astro_profile(astro, Some("strict-static-content"));
+    assertions::assert_string_list(&astro.routes.content, &[], "ts.astro.routes.content");
+    assertions::assert_string_list(
+        &astro.routes.non_content,
+        &[],
+        "ts.astro.routes.non_content",
+    );
+    assertions::assert_string_list(&astro.routes.endpoints, &[], "ts.astro.routes.endpoints");
     assert_eq!(
-        astro.content_adapter, None,
-        "ts.astro.content_adapter should be None"
+        astro.content.root, None,
+        "old flat content_root must not populate ts.astro.content.root"
+    );
+    assertions::assert_string_list(&astro.content.adapters, &[], "ts.astro.content.adapters");
+    assertions::assert_string_list(
+        &astro.mdx.component_maps,
+        &[],
+        "ts.astro.mdx.component_maps",
     );
     assertions::assert_string_list(
-        &astro.mdx_component_maps,
+        &astro.seo.metadata_helpers,
         &[],
-        "ts.astro.mdx_component_maps",
+        "ts.astro.seo.metadata_helpers",
     );
     assertions::assert_string_list(
-        &astro.metadata_helpers,
+        &astro.seo.json_ld_helpers,
         &[],
-        "ts.astro.metadata_helpers",
+        "ts.astro.seo.json_ld_helpers",
     );
-    assertions::assert_string_list(&astro.json_ld_helpers, &[], "ts.astro.json_ld_helpers");
-    assertions::assert_string_list(&astro.forbidden_state, &[], "ts.astro.forbidden_state");
+    assertions::assert_string_list(&astro.state.forbidden, &[], "ts.astro.state.forbidden");
+    assert!(
+        astro.extra.contains_key("content_routes")
+            && astro.extra.contains_key("content_adapter")
+            && astro.extra.contains_key("forbidden_state"),
+        "old flat ts.astro fields should be preserved only as extras"
+    );
 }
 
 #[test]
@@ -300,7 +423,8 @@ fn parse_error_on_wrong_ts_astro_field_type() {
     let err = parse_error(
         r#"
 [ts.astro]
-content_routes = "src/pages/**/*.astro"
+[ts.astro.routes]
+content = "src/pages/**/*.astro"
 "#,
     );
 

@@ -17,7 +17,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                 ID,
                 "Astro strict content policy declares approved helper surfaces",
                 format!(
-                    "`{}` declares non-empty app-relative `mdx_component_maps`, `metadata_helpers`, and `json_ld_helpers` in `[ts.astro]`, and those helper surfaces do not overlap `content_root`.",
+                    "`{}` declares non-empty app-relative `[ts.astro.mdx].component_maps`, `[ts.astro.seo].metadata_helpers`, and `[ts.astro.seo].json_ld_helpers`, and those helper surfaces do not overlap `[ts.astro.content].root`.",
                     policy.rel_path
                 ),
                 &policy.rel_path,
@@ -29,7 +29,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             ID,
             "Astro strict content policy is missing approved helper surfaces",
             format!(
-                "`{}` must declare non-empty app-relative `[ts.astro].mdx_component_maps`, `[ts.astro].metadata_helpers`, and `[ts.astro].json_ld_helpers` that do not overlap `content_root`. Violations: {}. These are approved module surfaces, not hardcoded required filenames.",
+                "`{}` must declare non-empty app-relative `[ts.astro.mdx].component_maps`, `[ts.astro.seo].metadata_helpers`, and `[ts.astro.seo].json_ld_helpers` that do not overlap `[ts.astro.content].root`. Violations: {}. These are approved module surfaces, not hardcoded required filenames.",
                 rel_path.unwrap_or("guardrail3-ts.toml"),
                 violations.join(", ")
             ),
@@ -41,19 +41,19 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 fn helper_surface_violations(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
     let mut violations = Vec::new();
     collect_helper_surface_violations(
-        "mdx_component_maps",
+        "[ts.astro.mdx].component_maps",
         &policy.mdx_component_maps,
         &policy.content_root,
         &mut violations,
     );
     collect_helper_surface_violations(
-        "metadata_helpers",
+        "[ts.astro.seo].metadata_helpers",
         &policy.metadata_helpers,
         &policy.content_root,
         &mut violations,
     );
     collect_helper_surface_violations(
-        "json_ld_helpers",
+        "[ts.astro.seo].json_ld_helpers",
         &policy.json_ld_helpers,
         &policy.content_root,
         &mut violations,
@@ -81,7 +81,9 @@ fn collect_helper_surface_violations(
             .as_deref()
             .is_some_and(|root| dirs_overlap(root, value))
         {
-            violations.push(format!("{field} overlaps content_root at `{value}`"));
+            violations.push(format!(
+                "{field} overlaps [ts.astro.content].root at `{value}`"
+            ));
         }
     }
 }

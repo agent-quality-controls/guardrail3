@@ -32,7 +32,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
                 ID,
                 "Astro content and non-content route scopes are disjoint",
                 format!(
-                    "`{}` classifies discovered route pages without overlap between `content_routes` and `non_content_routes`.",
+                    "`{}` classifies discovered route pages without overlap between `[ts.astro.routes].content` and `[ts.astro.routes].non_content`.",
                     policy.rel_path
                 ),
                 &policy.rel_path,
@@ -44,7 +44,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             ID,
             "Astro content and non-content route scopes overlap",
             format!(
-                "`{}` matches these discovered route pages as both content and non-content: {}. Adjust `[ts.astro].content_routes` or `[ts.astro].non_content_routes` so each route has exactly one policy role.",
+                "`{}` matches these discovered route pages as both content and non-content: {}. Adjust `[ts.astro.routes].content` or `[ts.astro.routes].non_content` so each route has exactly one policy role.",
                 rel_path.unwrap_or("guardrail3-ts.toml"),
                 format_paths(&overlapping_routes)
             ),
@@ -66,7 +66,7 @@ fn invalid_glob_error(rel_path: Option<&str>) -> G3CheckResult {
         ID,
         "Astro route scope policy contains an invalid glob",
         format!(
-            "`{}` contains a `content_routes` or `non_content_routes` entry that `globset` cannot compile. Use valid app-relative glob syntax.",
+            "`{}` contains a `[ts.astro.routes].content` or `[ts.astro.routes].non_content` entry that `globset` cannot compile. Use valid app-relative glob syntax.",
             rel_path.unwrap_or("guardrail3-ts.toml")
         ),
         rel_path,

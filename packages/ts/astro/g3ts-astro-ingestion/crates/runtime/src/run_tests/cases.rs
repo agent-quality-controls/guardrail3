@@ -160,7 +160,7 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
         G3TsAstroPolicySurfaceState::Parsed { snapshot } => {
             assert_eq!(
                 snapshot.profile.as_deref(),
-                Some("strict-local-content"),
+                Some("strict-static-content"),
                 "strict Astro policy profile missing: {snapshot:?}"
             );
             assert_eq!(
@@ -174,9 +174,19 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                 "content root policy mismatch: {snapshot:?}"
             );
             assert_eq!(
-                snapshot.content_adapter.as_deref(),
-                Some("src/lib/content"),
+                snapshot.content_adapters,
+                vec!["src/lib/content".to_owned()],
                 "content adapter policy mismatch: {snapshot:?}"
+            );
+            assert_eq!(
+                snapshot.required_collections,
+                vec!["landing".to_owned()],
+                "required collection policy mismatch: {snapshot:?}"
+            );
+            assert_eq!(
+                snapshot.collection_fields.get("landing"),
+                Some(&vec!["title".to_owned(), "description".to_owned()]),
+                "collection field policy mismatch: {snapshot:?}"
             );
             assert_eq!(
                 integration.approved_surface_sources.content_adapter,
@@ -184,7 +194,9 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                 "content adapter source path mismatch: {integration:?}"
             );
             assert_eq!(
-                integration.approved_surface_sources.content_adapter_astro_content,
+                integration
+                    .approved_surface_sources
+                    .content_adapter_astro_content,
                 vec!["src/lib/content/index.ts".to_owned()],
                 "astro:content adapter source path mismatch: {integration:?}"
             );
@@ -278,6 +290,11 @@ fn config_ingestion_collects_package_and_eslint_contracts_for_astro_roots() {
                     .iter()
                     .any(|rule| rule == "astro-pipeline/require-approved-content-adapter-in-routes"),
                 "approved content adapter option missing: {snapshot:?}"
+            );
+            assert_eq!(
+                snapshot.ts_source_effective_content_adapter_modules,
+                vec!["src/lib/content/**/*".to_owned()],
+                "approved content adapter modules mismatch: {snapshot:?}"
             );
             assert!(
                 snapshot
@@ -475,7 +492,9 @@ fn config_ingestion_rejects_helper_rules_with_eslint_options_outside_policy_sour
                     "{case_name} must make MDX component-map rule ineffective: {snapshot:?}"
                 ),
                 "metadata" => assert!(
-                    snapshot.ts_source_effective_metadata_helper_rules.is_empty(),
+                    snapshot
+                        .ts_source_effective_metadata_helper_rules
+                        .is_empty(),
                     "{case_name} must make metadata helper rule ineffective: {snapshot:?}"
                 ),
                 "json-ld" => assert!(
@@ -539,7 +558,9 @@ fn config_ingestion_rejects_helper_rules_missing_one_configured_policy_surface()
     match &input.eslint_contracts[0].config {
         G3TsAstroEslintSurfaceState::Parsed { snapshot } => {
             assert!(
-                snapshot.ts_source_effective_metadata_helper_rules.is_empty(),
+                snapshot
+                    .ts_source_effective_metadata_helper_rules
+                    .is_empty(),
                 "omitting one configured metadata helper surface from ESLint options must make the rule ineffective: {snapshot:?}"
             );
         }
@@ -624,7 +645,8 @@ fn config_ingestion_rejects_adapter_source_without_runtime_astro_content_import(
     );
     assert!(
         integration
-            .approved_surface_sources.content_adapter_astro_content
+            .approved_surface_sources
+            .content_adapter_astro_content
             .is_empty(),
         "adapter source without runtime astro:content import must not be accepted: {integration:?}"
     );
@@ -656,7 +678,8 @@ fn config_ingestion_rejects_adapter_source_with_type_only_astro_content_import()
 
     assert!(
         input.integration_contracts[0]
-            .approved_surface_sources.content_adapter_astro_content
+            .approved_surface_sources
+            .content_adapter_astro_content
             .is_empty(),
         "type-only astro:content import must not satisfy adapter runtime contract: {input:?}"
     );
@@ -2367,6 +2390,73 @@ fn plain_astro_app_without_content_still_requires_pipeline_linting() {
 
     assert_eq!(integration.content_mode, G3TsAstroContentMode::None);
     assert_eq!(eslint.app_root_rel_path, ".");
+}
+
+#[test]
+fn config_ingestion_preserves_multiple_configured_content_adapters() {
+    let root = super::helpers::fake_astro_workspace();
+    let guardrail_config = std::fs::read_to_string(root.path().join("guardrail3-ts.toml"))
+        .expect("guardrail config should be readable")
+        .replace(
+            r#"adapters = ["src/lib/content"]"#,
+            r#"adapters = ["src/lib/content", "src/lib/secondary-content"]"#,
+        );
+    std::fs::write(root.path().join("guardrail3-ts.toml"), guardrail_config)
+        .expect("guardrail config should be rewritten");
+    std::fs::create_dir_all(root.path().join("src/lib/secondary-content"))
+        .expect("secondary adapter directory should be created");
+    std::fs::write(
+        root.path().join("src/lib/secondary-content/index.ts"),
+        "import { getCollection } from \"astro:content\";\nexport const getSecondaryContent = () => getCollection;\n",
+    )
+    .expect("secondary adapter source should be written");
+    let crawl = super::helpers::crawl_with_entries(
+        &root,
+        &[
+            "package.json",
+            "astro.config.mjs",
+            "src/content.config.ts",
+            ".syncpackrc",
+            "guardrail3-ts.toml",
+            "eslint.config.mjs",
+            "src/pages/index.astro",
+            "src/lib/content/index.ts",
+            "src/lib/secondary-content/index.ts",
+        ],
+    );
+
+    let input = super::super::ingest_for_config_checks(&crawl);
+    let integration = &input.integration_contracts[0];
+    let G3TsAstroPolicySurfaceState::Parsed { snapshot } = &integration.astro_policy else {
+        panic!("astro policy should be parsed");
+    };
+
+    assert_eq!(
+        snapshot.content_adapters,
+        vec![
+            "src/lib/content".to_owned(),
+            "src/lib/secondary-content".to_owned(),
+        ],
+        "all configured content adapters should be preserved: {snapshot:?}"
+    );
+    assert_eq!(
+        integration.approved_surface_sources.content_adapter,
+        vec![
+            "src/lib/content/index.ts".to_owned(),
+            "src/lib/secondary-content/index.ts".to_owned(),
+        ],
+        "all configured content adapter source paths should be discovered: {integration:?}"
+    );
+    assert_eq!(
+        integration
+            .approved_surface_sources
+            .content_adapter_astro_content,
+        vec![
+            "src/lib/content/index.ts".to_owned(),
+            "src/lib/secondary-content/index.ts".to_owned(),
+        ],
+        "all configured content adapters should be checked for runtime astro:content imports: {integration:?}"
+    );
 }
 
 #[test]

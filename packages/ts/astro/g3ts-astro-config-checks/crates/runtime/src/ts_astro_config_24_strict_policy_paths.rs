@@ -16,10 +16,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             results.push(crate::support::info(
                     ID,
                     "Astro strict content policy paths are structurally valid",
-                    format!(
-                    "`{}` uses app-relative `content_routes`, `non_content_routes`, `endpoints`, `content_root`, `content_adapter`, `mdx_component_maps`, `metadata_helpers`, `json_ld_helpers`, and `forbidden_state` values without parent traversal.",
-                    policy.rel_path
-                ),
+                    format!("`{}` uses app-relative nested Astro policy paths without parent traversal in `[ts.astro.routes]`, `[ts.astro.content]`, `[ts.astro.mdx]`, `[ts.astro.seo]`, and `[ts.astro.state]`.", policy.rel_path),
                 &policy.rel_path,
             ));
             continue;
@@ -29,7 +26,7 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
             ID,
             "Astro strict content policy paths are invalid",
             format!(
-                "`{}` has invalid `[ts.astro]` paths: {}. Use app-relative values only, do not use absolute paths, `..`, or backslashes, and keep `content_root` separate from `content_adapter`.",
+                "`{}` has invalid nested Astro policy paths: {}. Use app-relative values only, do not use absolute paths, `..`, or backslashes, and keep `[ts.astro.content].root` separate from `[ts.astro.content].adapters` and helper surfaces.",
                 rel_path.unwrap_or("guardrail3-ts.toml"),
                 errors.join("; ")
             ),
@@ -40,41 +37,73 @@ pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3Chec
 
 fn invalid_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
     let mut errors = Vec::new();
-    collect_invalid_list("content_routes", &policy.content_routes, &mut errors);
     collect_invalid_list(
-        "non_content_routes",
+        "[ts.astro.routes].content",
+        &policy.content_routes,
+        &mut errors,
+    );
+    collect_invalid_list(
+        "[ts.astro.routes].non_content",
         &policy.non_content_routes,
         &mut errors,
     );
-    collect_invalid_list("endpoints", &policy.endpoints, &mut errors);
-    collect_invalid_helper_list("mdx_component_maps", &policy.mdx_component_maps, &mut errors);
-    collect_invalid_helper_list("metadata_helpers", &policy.metadata_helpers, &mut errors);
-    collect_invalid_helper_list("json_ld_helpers", &policy.json_ld_helpers, &mut errors);
-    collect_invalid_list("forbidden_state", &policy.forbidden_state, &mut errors);
-    collect_invalid_optional_dir("content_root", &policy.content_root, &mut errors);
-    collect_invalid_optional_dir("content_adapter", &policy.content_adapter, &mut errors);
+    collect_invalid_list(
+        "[ts.astro.routes].endpoints",
+        &policy.endpoints,
+        &mut errors,
+    );
+    collect_invalid_helper_list(
+        "[ts.astro.mdx].component_maps",
+        &policy.mdx_component_maps,
+        &mut errors,
+    );
+    collect_invalid_helper_list(
+        "[ts.astro.seo].metadata_helpers",
+        &policy.metadata_helpers,
+        &mut errors,
+    );
+    collect_invalid_helper_list(
+        "[ts.astro.seo].json_ld_helpers",
+        &policy.json_ld_helpers,
+        &mut errors,
+    );
+    collect_invalid_list(
+        "[ts.astro.state].forbidden",
+        &policy.forbidden_state,
+        &mut errors,
+    );
+    collect_invalid_optional_dir("[ts.astro.content].root", &policy.content_root, &mut errors);
+    collect_invalid_helper_list(
+        "[ts.astro.content].adapters",
+        &policy.content_adapters,
+        &mut errors,
+    );
 
-    if let (Some(content_root), Some(content_adapter)) = (&policy.content_root, &policy.content_adapter) {
-        if dirs_overlap(content_root, content_adapter) {
-            errors.push("content_root overlaps content_adapter".to_owned());
+    if let Some(content_root) = &policy.content_root {
+        for content_adapter in &policy.content_adapters {
+            if dirs_overlap(content_root, content_adapter) {
+                errors.push(format!(
+                    "[ts.astro.content].root overlaps [ts.astro.content].adapters `{content_adapter}`"
+                ));
+            }
         }
     }
 
     if let Some(content_root) = &policy.content_root {
         collect_content_root_overlaps(
-            "mdx_component_maps",
+            "[ts.astro.mdx].component_maps",
             content_root,
             &policy.mdx_component_maps,
             &mut errors,
         );
         collect_content_root_overlaps(
-            "metadata_helpers",
+            "[ts.astro.seo].metadata_helpers",
             content_root,
             &policy.metadata_helpers,
             &mut errors,
         );
         collect_content_root_overlaps(
-            "json_ld_helpers",
+            "[ts.astro.seo].json_ld_helpers",
             content_root,
             &policy.json_ld_helpers,
             &mut errors,
@@ -118,7 +147,9 @@ fn collect_content_root_overlaps(
 ) {
     for value in values {
         if dirs_overlap(content_root, value) {
-            errors.push(format!("content_root overlaps {field} `{value}`"));
+            errors.push(format!(
+                "[ts.astro.content].root overlaps {field} `{value}`"
+            ));
         }
     }
 }
