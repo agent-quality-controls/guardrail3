@@ -43,6 +43,14 @@ pub(crate) fn package_safely_runs_astro_check(package: &G3TsAstroPackageSurfaceS
     package_safely_runs_tool(package, None, "astro", "check")
 }
 
+pub(crate) fn package_safely_runs_eslint(package: &G3TsAstroPackageSurfaceState) -> bool {
+    package_safely_runs_executable(package, Some("lint"), "eslint")
+}
+
+pub(crate) fn package_safely_runs_syncpack_lint(package: &G3TsAstroPackageSurfaceState) -> bool {
+    package_safely_runs_tool(package, Some("lint:packages"), "syncpack", "lint")
+}
+
 pub(crate) fn package_safely_runs_tool(
     package: &G3TsAstroPackageSurfaceState,
     script_name: Option<&str>,
@@ -58,6 +66,27 @@ pub(crate) fn package_safely_runs_tool(
             && snapshot.script_parse_blockers.is_empty()
             && snapshot.script_tool_invocations.iter().any(|invocation| {
                 invocation_targets_tool(invocation, executable, first_arg)
+                    && script_name.is_none_or(|expected| invocation.script_name == expected)
+                    && invocation.preceded_by != Some(G3TsAstroPackageScriptCommandSeparator::Or)
+                    && invocation.followed_by != Some(G3TsAstroPackageScriptCommandSeparator::Or)
+            })
+    })
+}
+
+fn package_safely_runs_executable(
+    package: &G3TsAstroPackageSurfaceState,
+    script_name: Option<&str>,
+    executable: &str,
+) -> bool {
+    parsed_package(package).is_some_and(|snapshot| {
+        let commands_are_safe = snapshot
+            .script_commands
+            .iter()
+            .all(|command| command.preceded_by != Some(G3TsAstroPackageScriptCommandSeparator::Or));
+        commands_are_safe
+            && snapshot.script_parse_blockers.is_empty()
+            && snapshot.script_tool_invocations.iter().any(|invocation| {
+                invocation.executable == executable
                     && script_name.is_none_or(|expected| invocation.script_name == expected)
                     && invocation.preceded_by != Some(G3TsAstroPackageScriptCommandSeparator::Or)
                     && invocation.followed_by != Some(G3TsAstroPackageScriptCommandSeparator::Or)

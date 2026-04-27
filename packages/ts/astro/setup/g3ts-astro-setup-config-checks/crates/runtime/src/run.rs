@@ -11,6 +11,8 @@ pub fn check(input: &G3TsAstroSetupConfigChecksInput) -> Vec<G3CheckResult> {
             contract,
             &mut results,
         );
+        crate::ts_astro_config_33_lint_script::check(contract, &mut results);
+        crate::ts_astro_config_34_syncpack_lint_script::check(contract, &mut results);
     }
     for contract in &input.eslint_contracts {
         crate::ts_astro_config_05_astro_eslint_plugin_wired::check(contract, &mut results);

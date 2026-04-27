@@ -36,33 +36,90 @@ fn package() -> G3TsAstroPackageSurfaceState {
                 "astro".to_owned(),
                 "@astrojs/check".to_owned(),
                 "eslint-plugin-astro".to_owned(),
+                "syncpack".to_owned(),
                 "@astrojs/react".to_owned(),
                 "@astrojs/mdx".to_owned(),
                 "@astrojs/sitemap".to_owned(),
                 "astro-robots".to_owned(),
                 "@nuasite/checks".to_owned(),
             ],
-            script_names: vec!["check".to_owned()],
-            script_bodies: vec![("check".to_owned(), "astro check".to_owned())],
-            script_commands: vec![G3TsAstroPackageScriptCommand {
-                script_name: "check".to_owned(),
-                invocation: "astro check".to_owned(),
-                executable: "astro".to_owned(),
-                args: vec!["check".to_owned()],
-                preceded_by: None,
-            }],
-            script_tool_invocations: vec![G3TsAstroPackageScriptToolInvocation {
-                script_name: "check".to_owned(),
-                command_index: 0,
-                invocation: "astro check".to_owned(),
-                executable: "astro".to_owned(),
-                args: vec!["check".to_owned()],
-                preceded_by: None,
-                followed_by: None,
-            }],
+            script_names: vec![
+                "check".to_owned(),
+                "lint".to_owned(),
+                "lint:packages".to_owned(),
+            ],
+            script_bodies: vec![
+                ("check".to_owned(), "astro check".to_owned()),
+                ("lint".to_owned(), "eslint --max-warnings 0 .".to_owned()),
+                ("lint:packages".to_owned(), "syncpack lint".to_owned()),
+            ],
+            script_commands: vec![
+                G3TsAstroPackageScriptCommand {
+                    script_name: "check".to_owned(),
+                    invocation: "astro check".to_owned(),
+                    executable: "astro".to_owned(),
+                    args: vec!["check".to_owned()],
+                    preceded_by: None,
+                },
+                G3TsAstroPackageScriptCommand {
+                    script_name: "lint".to_owned(),
+                    invocation: "eslint --max-warnings 0 .".to_owned(),
+                    executable: "eslint".to_owned(),
+                    args: vec!["--max-warnings".to_owned(), "0".to_owned(), ".".to_owned()],
+                    preceded_by: None,
+                },
+                G3TsAstroPackageScriptCommand {
+                    script_name: "lint:packages".to_owned(),
+                    invocation: "syncpack lint".to_owned(),
+                    executable: "syncpack".to_owned(),
+                    args: vec!["lint".to_owned()],
+                    preceded_by: None,
+                },
+            ],
+            script_tool_invocations: vec![
+                G3TsAstroPackageScriptToolInvocation {
+                    script_name: "check".to_owned(),
+                    command_index: 0,
+                    invocation: "astro check".to_owned(),
+                    executable: "astro".to_owned(),
+                    args: vec!["check".to_owned()],
+                    preceded_by: None,
+                    followed_by: None,
+                },
+                G3TsAstroPackageScriptToolInvocation {
+                    script_name: "lint".to_owned(),
+                    command_index: 0,
+                    invocation: "eslint --max-warnings 0 .".to_owned(),
+                    executable: "eslint".to_owned(),
+                    args: vec!["--max-warnings".to_owned(), "0".to_owned(), ".".to_owned()],
+                    preceded_by: None,
+                    followed_by: None,
+                },
+                G3TsAstroPackageScriptToolInvocation {
+                    script_name: "lint:packages".to_owned(),
+                    command_index: 0,
+                    invocation: "syncpack lint".to_owned(),
+                    executable: "syncpack".to_owned(),
+                    args: vec!["lint".to_owned()],
+                    preceded_by: None,
+                    followed_by: None,
+                },
+            ],
             script_parse_blockers: Vec::new(),
         },
     }
+}
+
+pub(super) fn parsed_package_mut(
+    input: &mut G3TsAstroSetupConfigChecksInput,
+) -> &mut G3TsAstroPackageSurfaceSnapshot {
+    let G3TsAstroPackageSurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].package
+    else {
+        panic!("golden package should be parsed");
+    };
+
+    snapshot
 }
 
 fn syncpack_config() -> G3TsAstroSyncpackConfigState {
