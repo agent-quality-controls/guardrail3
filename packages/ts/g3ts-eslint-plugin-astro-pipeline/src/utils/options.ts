@@ -11,6 +11,11 @@ export interface AstroPipelineOptions {
   approvedJsonLdHelperModules?: string[];
   approvedLoaderModules?: string[];
   approvedMdxComponentModules?: string[];
+  approvedMdxComponentNames?: string[];
+  allowedMdxComponentMapExports?: string[];
+  approvedMdxImageComponents?: string[];
+  mdxPropsParserName?: string[];
+  rawUiModuleGlobs?: string[];
   approvedGeneratedArtifactRoots?: string[];
   authoredContentGlobs?: string[];
   specContentGlobs?: string[];
@@ -29,6 +34,11 @@ export interface ResolvedAstroPipelineOptions {
   approvedJsonLdHelperModules: string[];
   approvedLoaderModules: string[];
   approvedMdxComponentModules: string[];
+  approvedMdxComponentNames: string[];
+  allowedMdxComponentMapExports: string[];
+  approvedMdxImageComponents: string[];
+  mdxPropsParserName: string[];
+  rawUiModuleGlobs: string[];
   approvedGeneratedArtifactRoots: string[];
   authoredContentGlobs: string[];
   specContentGlobs: string[];
@@ -47,6 +57,11 @@ const ARRAY_OPTION_KEYS = [
   "approvedJsonLdHelperModules",
   "approvedLoaderModules",
   "approvedMdxComponentModules",
+  "approvedMdxComponentNames",
+  "allowedMdxComponentMapExports",
+  "approvedMdxImageComponents",
+  "mdxPropsParserName",
+  "rawUiModuleGlobs",
   "approvedGeneratedArtifactRoots",
   "authoredContentGlobs",
   "specContentGlobs"
@@ -97,6 +112,17 @@ export function resolveOptions(
     approvedMdxComponentModules: normalizeStringArray(
       source.approvedMdxComponentModules
     ),
+    approvedMdxComponentNames: normalizeStringArray(
+      source.approvedMdxComponentNames
+    ),
+    allowedMdxComponentMapExports: normalizeStringArray(
+      source.allowedMdxComponentMapExports
+    ),
+    approvedMdxImageComponents: normalizeStringArray(
+      source.approvedMdxImageComponents
+    ),
+    mdxPropsParserName: normalizeStringArray(source.mdxPropsParserName),
+    rawUiModuleGlobs: normalizeStringArray(source.rawUiModuleGlobs),
     approvedGeneratedArtifactRoots: normalizeStringArray(
       source.approvedGeneratedArtifactRoots
     ),

@@ -24,6 +24,11 @@ export const baseOptions: AstroPipelineOptions = {
   approvedJsonLdHelperModules: ["src/lib/json-ld/**/*.{ts,tsx,js,jsx}"],
   approvedLoaderModules: ["src/lib/content/**/*.{ts,tsx,js,jsx}"],
   approvedMdxComponentModules: ["src/components/mdx/**/*.{ts,tsx,js,jsx}"],
+  approvedMdxComponentNames: ["Callout", "Figure", "ArticleImage", "FAQ"],
+  allowedMdxComponentMapExports: ["mdxComponents"],
+  approvedMdxImageComponents: ["ArticleImage"],
+  mdxPropsParserName: ["parseMdxComponentProps"],
+  rawUiModuleGlobs: ["@project/ui", "src/ui/**/*.{ts,tsx,js,jsx,astro}"],
   approvedGeneratedArtifactRoots: ["src/generated/**"],
   authoredContentGlobs: ["src/content/**"],
   specContentGlobs: ["specs/**"]

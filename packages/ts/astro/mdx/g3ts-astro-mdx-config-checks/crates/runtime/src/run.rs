@@ -21,6 +21,22 @@ pub fn check(input: &G3TsAstroMdxConfigChecksInput) -> Vec<G3CheckResult> {
             eslint_contract,
             &mut results,
         );
+        crate::strict_component_rules::ts_astro_config_35_mdx_import_names::check_eslint(
+            eslint_contract,
+            &mut results,
+        );
+        crate::strict_component_rules::ts_astro_config_36_no_raw_ui_exports::check_eslint(
+            eslint_contract,
+            &mut results,
+        );
+        crate::strict_component_rules::ts_astro_config_37_mdx_component_wrapper_zod_parse::check_eslint(
+            eslint_contract,
+            &mut results,
+        );
+        crate::strict_component_rules::ts_astro_config_38_no_raw_mdx_images::check_eslint(
+            eslint_contract,
+            &mut results,
+        );
     }
     results
 }

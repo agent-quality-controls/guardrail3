@@ -23,7 +23,7 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 18] = [
     ("@types/react-dom", "19.2.3"),
     ("typescript", "5.9.3"),
     ("eslint-plugin-astro", "1.7.0"),
-    ("g3ts-eslint-plugin-astro-pipeline", "0.1.6"),
+    ("g3ts-eslint-plugin-astro-pipeline", "0.1.8"),
     ("eslint-plugin-i18next", "6.1.4"),
     ("eslint-plugin-mdx", "3.7.0"),
 ];

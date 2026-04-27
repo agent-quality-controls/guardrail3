@@ -10,6 +10,10 @@ use std::collections::BTreeSet;
 
 const MDX_COMPONENT_MAP_PIPELINE_RULE: &str =
     "astro-pipeline/mdx-component-imports-from-approved-map";
+const MDX_NAMED_COMPONENT_IMPORT_RULE: &str = "astro-pipeline/mdx-imports-only-approved-components";
+const MDX_NO_RAW_IMAGE_RULE: &str = "astro-pipeline/no-raw-mdx-images";
+const MDX_NO_RAW_UI_EXPORT_RULE: &str = "astro-pipeline/mdx-component-map-no-raw-ui-exports";
+const MDX_WRAPPER_ZOD_PARSE_RULE: &str = "astro-pipeline/mdx-component-wrapper-requires-zod-parse";
 const SOURCE_MODULE_EXTENSIONS: [&str; 9] = [
     ".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".astro",
 ];
@@ -33,6 +37,10 @@ pub(crate) fn ingest_mdx_eslint_surface(
         &snapshot,
         eslint_config_parser::types::EslintProbeKind::MdxContent,
     );
+    let component_map_probe = active_probe(
+        &snapshot,
+        eslint_config_parser::types::EslintProbeKind::TsxSource,
+    );
     let mdx_paths = mdx_content_paths(crawl, app_root_rel_path, astro_policy);
     let component_maps = mdx_component_map_policy_paths(astro_policy);
 
@@ -48,6 +56,25 @@ pub(crate) fn ingest_mdx_eslint_surface(
                 &mdx_paths,
                 &component_maps,
             ),
+            mdx_content_effective_named_component_import_rules:
+                effective_mdx_named_component_import_rules(mdx_probe, &mdx_paths, &component_maps),
+            mdx_content_effective_no_raw_image_rules: effective_mdx_no_raw_image_rules(
+                mdx_probe, &mdx_paths,
+            ),
+            component_map_probe_present: component_map_probe.is_some(),
+            component_map_plugin_package_names: plugin_package_names(component_map_probe),
+            component_map_error_rules: active_error_rules(component_map_probe),
+            component_map_effective_no_raw_ui_export_rules:
+                effective_component_map_no_raw_ui_export_rules(component_map_probe, &component_maps),
+            component_map_effective_wrapper_zod_parse_rules:
+                effective_component_map_wrapper_zod_parse_rules(
+                    component_map_probe,
+                    &component_maps,
+                ),
+            component_map_probe_ignored: probe_ignored(
+                &snapshot,
+                eslint_config_parser::types::EslintProbeKind::TsxSource,
+            ),
             mdx_content_probe_ignored: probe_ignored(
                 &snapshot,
                 eslint_config_parser::types::EslintProbeKind::MdxContent,
@@ -61,18 +88,35 @@ fn probe_targets(
     app_root_rel_path: &str,
     astro_policy: &G3TsAstroMdxPolicySurfaceState,
 ) -> Vec<eslint_config_parser::types::EslintProbeTarget> {
-    vec![eslint_config_parser::types::EslintProbeTarget {
-        probe: eslint_config_parser::types::EslintProbeKind::MdxContent,
-        rel_path: mdx_content_paths(crawl, app_root_rel_path, astro_policy)
-            .into_iter()
-            .next()
-            .unwrap_or_else(|| {
-                g3ts_astro_check_support::surfaces::scoped_rel_path(
-                    app_root_rel_path,
-                    "content/__g3ts_probe__.mdx",
-                )
-            }),
-    }]
+    vec![
+        eslint_config_parser::types::EslintProbeTarget {
+            probe: eslint_config_parser::types::EslintProbeKind::MdxContent,
+            rel_path: mdx_content_paths(crawl, app_root_rel_path, astro_policy)
+                .into_iter()
+                .next()
+                .unwrap_or_else(|| {
+                    g3ts_astro_check_support::surfaces::scoped_rel_path(
+                        app_root_rel_path,
+                        "content/__g3ts_probe__.mdx",
+                    )
+                }),
+        },
+        eslint_config_parser::types::EslintProbeTarget {
+            probe: eslint_config_parser::types::EslintProbeKind::TsxSource,
+            rel_path: mdx_component_map_policy_paths(astro_policy)
+                .into_iter()
+                .next()
+                .map(|path| {
+                    g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, &path)
+                })
+                .unwrap_or_else(|| {
+                    g3ts_astro_check_support::surfaces::scoped_rel_path(
+                        app_root_rel_path,
+                        "src/mdx-components.tsx",
+                    )
+                }),
+        },
+    ]
 }
 
 fn map_raw_state(raw: G3TsAstroRawEslintConfigState) -> G3TsAstroMdxEslintSurfaceState {
@@ -174,6 +218,115 @@ fn effective_mdx_component_map_rules(
                 Vec::new()
             }
         })
+}
+
+fn effective_mdx_named_component_import_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    mdx_content_paths: &[String],
+    approved_mdx_component_modules: &[String],
+) -> Vec<String> {
+    effective_rule_with_options(
+        probe,
+        MDX_NAMED_COMPONENT_IMPORT_RULE,
+        &[
+            (
+                "mdxContentGlobs",
+                OptionCheck::GlobsCover(mdx_content_paths),
+            ),
+            (
+                "approvedMdxComponentModules",
+                OptionCheck::ExpectedModules(approved_mdx_component_modules),
+            ),
+            ("approvedMdxComponentNames", OptionCheck::NonEmpty),
+        ],
+    )
+}
+
+fn effective_mdx_no_raw_image_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    mdx_content_paths: &[String],
+) -> Vec<String> {
+    effective_rule_with_options(
+        probe,
+        MDX_NO_RAW_IMAGE_RULE,
+        &[
+            (
+                "mdxContentGlobs",
+                OptionCheck::GlobsCover(mdx_content_paths),
+            ),
+            ("approvedMdxImageComponents", OptionCheck::NonEmpty),
+        ],
+    )
+}
+
+fn effective_component_map_no_raw_ui_export_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    approved_mdx_component_modules: &[String],
+) -> Vec<String> {
+    effective_rule_with_options(
+        probe,
+        MDX_NO_RAW_UI_EXPORT_RULE,
+        &[
+            (
+                "approvedMdxComponentModules",
+                OptionCheck::ExpectedModules(approved_mdx_component_modules),
+            ),
+            ("rawUiModuleGlobs", OptionCheck::NonEmpty),
+        ],
+    )
+}
+
+fn effective_component_map_wrapper_zod_parse_rules(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    approved_mdx_component_modules: &[String],
+) -> Vec<String> {
+    effective_rule_with_options(
+        probe,
+        MDX_WRAPPER_ZOD_PARSE_RULE,
+        &[
+            (
+                "approvedMdxComponentModules",
+                OptionCheck::ExpectedModules(approved_mdx_component_modules),
+            ),
+            ("approvedMdxComponentNames", OptionCheck::NonEmpty),
+            ("mdxPropsParserName", OptionCheck::NonEmpty),
+        ],
+    )
+}
+
+enum OptionCheck<'a> {
+    ExpectedModules(&'a [String]),
+    GlobsCover(&'a [String]),
+    NonEmpty,
+}
+
+fn effective_rule_with_options(
+    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
+    rule_name: &str,
+    checks: &[(&str, OptionCheck<'_>)],
+) -> Vec<String> {
+    let Some(probe) = probe else {
+        return Vec::new();
+    };
+
+    probe.rules.get(rule_name).map_or_else(Vec::new, |setting| {
+        let checks_pass = checks.iter().all(|(key, check)| match check {
+            OptionCheck::ExpectedModules(paths) => {
+                rule_setting_has_expected_module_globs(setting, key, paths)
+            }
+            OptionCheck::GlobsCover(paths) => {
+                rule_setting_has_option_globs_coverage(setting, key, paths)
+            }
+            OptionCheck::NonEmpty => rule_setting_option_globs_are_valid(setting, key),
+        });
+
+        if rule_setting_is_error(setting) && probe_has_pipeline_plugin_package(probe) && checks_pass
+        {
+            vec![rule_name.to_owned()]
+        } else {
+            Vec::new()
+        }
+    })
 }
 
 fn mdx_content_paths(

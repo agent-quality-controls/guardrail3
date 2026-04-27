@@ -8,11 +8,15 @@ import { baseOptions, createFixtureProject, createRuleTester } from "./rule-test
 
 const plannedRuleNames = [
   "mdx-component-imports-from-approved-map",
+  "mdx-component-map-no-raw-ui-exports",
+  "mdx-component-wrapper-requires-zod-parse",
+  "mdx-imports-only-approved-components",
   "no-authored-content-fs-read",
   "no-authored-content-glob",
   "no-authored-content-imports",
   "no-content-data-modules-in-routes",
   "no-direct-astro-content-in-routes",
+  "no-raw-mdx-images",
   "no-runtime-mdx-eval",
   "no-side-loader-imports",
   "no-velite-imports",
@@ -24,12 +28,16 @@ const plannedRuleNames = [
 test("recommended config exports all implemented rules at error", () => {
   assert.deepEqual(Object.keys(plugin.rules).sort(), plannedRuleNames);
   assert.deepEqual(plugin.configs.recommended.rules, {
+    "astro-pipeline/mdx-component-map-no-raw-ui-exports": "error",
+    "astro-pipeline/mdx-component-imports-from-approved-map": "error",
+    "astro-pipeline/mdx-component-wrapper-requires-zod-parse": "error",
+    "astro-pipeline/mdx-imports-only-approved-components": "error",
     "astro-pipeline/no-authored-content-fs-read": "error",
     "astro-pipeline/no-authored-content-glob": "error",
     "astro-pipeline/no-authored-content-imports": "error",
     "astro-pipeline/no-content-data-modules-in-routes": "error",
     "astro-pipeline/no-direct-astro-content-in-routes": "error",
-    "astro-pipeline/mdx-component-imports-from-approved-map": "error",
+    "astro-pipeline/no-raw-mdx-images": "error",
     "astro-pipeline/no-runtime-mdx-eval": "error",
     "astro-pipeline/require-approved-content-adapter-in-routes": "error",
     "astro-pipeline/require-approved-json-ld-helper-in-routes": "error",
