@@ -34,3 +34,11 @@ mod ts_astro_config_32_json_ld_helper_rule;
 
 #[cfg(feature = "checks")]
 pub use run::check;
+#[cfg(feature = "checks")]
+pub use run::check_content;
+#[cfg(feature = "checks")]
+pub use run::check_mdx;
+#[cfg(feature = "checks")]
+pub use run::check_seo;
+#[cfg(feature = "checks")]
+pub use run::check_setup;

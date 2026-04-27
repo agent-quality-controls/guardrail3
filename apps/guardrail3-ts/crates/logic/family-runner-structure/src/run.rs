@@ -16,8 +16,13 @@ pub fn run(
             let file_tree_input = g3ts_astro_ingestion::ingest_for_file_tree_checks(crawl);
 
             let mut results = Vec::new();
-            results.extend(g3ts_astro_config_checks::check(&config_input));
-            results.extend(g3ts_astro_file_tree_checks::check(&file_tree_input));
+            results.extend(g3ts_astro_config_checks::check_setup(&config_input));
+            results.extend(g3ts_astro_file_tree_checks::check_setup(&file_tree_input));
+            results.extend(g3ts_astro_config_checks::check_content(&config_input));
+            results.extend(g3ts_astro_file_tree_checks::check_content(&file_tree_input));
+            results.extend(g3ts_astro_config_checks::check_mdx(&config_input));
+            results.extend(g3ts_astro_config_checks::check_seo(&config_input));
+            results.extend(g3ts_astro_file_tree_checks::check_state(&file_tree_input));
             Ok(results)
         }
         SupportedFamily::Arch => {

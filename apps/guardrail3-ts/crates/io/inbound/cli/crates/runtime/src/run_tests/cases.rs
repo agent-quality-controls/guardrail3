@@ -189,6 +189,14 @@ fn run_command_uses_structure_runner_for_astro_family() {
         "{\n  \"dependencies\": {\n    \"astro\": \"5.0.0\"\n  }\n}\n",
     )
     .expect("write temporary workspace package.json for astro wiring");
+    std::fs::create_dir_all(tempdir.path().join("src"))
+        .expect("create temporary Astro src directory");
+    std::fs::write(tempdir.path().join("src/content.config.ts"), "")
+        .expect("write temporary Astro content config");
+    std::fs::create_dir_all(tempdir.path().join(".next/server/app"))
+        .expect("create temporary forbidden generated state directory");
+    std::fs::write(tempdir.path().join(".next/server/app/page.js"), "")
+        .expect("write temporary forbidden generated state file");
 
     let output = super::super::run_command_with_defaults(super::super::Command::Validate {
         path: tempdir.path().to_path_buf(),
@@ -201,4 +209,18 @@ fn run_command_uses_structure_runner_for_astro_family() {
         "expected astro findings on stdout, got: {:?}",
         output
     );
+    let mut last_index = 0;
+    for prefix in [
+        "TS-ASTRO-SETUP-CONFIG-",
+        "TS-ASTRO-SETUP-FILETREE-",
+        "TS-ASTRO-CONTENT-CONFIG-",
+        "TS-ASTRO-MDX-CONFIG-",
+        "TS-ASTRO-SEO-CONFIG-",
+        "TS-ASTRO-STATE-FILETREE-",
+    ] {
+        let relative_index = output.stdout[last_index..]
+            .find(prefix)
+            .unwrap_or_else(|| panic!("expected `{prefix}` after byte {last_index}: {output:?}"));
+        last_index += relative_index;
+    }
 }

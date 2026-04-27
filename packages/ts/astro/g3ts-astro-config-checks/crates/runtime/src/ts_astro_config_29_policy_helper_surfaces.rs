@@ -2,60 +2,96 @@ use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroPolicySnapshot};
 use guardrail3_check_types::G3CheckResult;
 use std::path::{Component, Path};
 
-const ID: &str = "TS-ASTRO-CONFIG-29";
+const MDX_ID: &str = "TS-ASTRO-MDX-CONFIG-29";
+const SEO_ID: &str = "TS-ASTRO-SEO-CONFIG-29";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check_mdx(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+    check_helper_surfaces(
+        input,
+        "Astro strict content policy declares approved MDX component-map surfaces",
+        "Astro strict content policy is missing approved MDX component-map surfaces",
+        "`{}` declares non-empty app-relative `[ts.astro.mdx].component_maps`.",
+        "`{}` must declare non-empty app-relative `[ts.astro.mdx].component_maps`. Violations: {}. These are approved module surfaces, not hardcoded required filenames.",
+        mdx_helper_surface_violations,
+        MDX_ID,
+        results,
+    );
+}
+
+pub(crate) fn check_seo(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+    check_helper_surfaces(
+        input,
+        "Astro strict content policy declares approved SEO helper surfaces",
+        "Astro strict content policy is missing approved SEO helper surfaces",
+        "`{}` declares non-empty app-relative `[ts.astro.seo].metadata_helpers` and `[ts.astro.seo].json_ld_helpers`.",
+        "`{}` must declare non-empty app-relative `[ts.astro.seo].metadata_helpers` and `[ts.astro.seo].json_ld_helpers`. Violations: {}. These are approved module surfaces, not hardcoded required filenames.",
+        seo_helper_surface_violations,
+        SEO_ID,
+        results,
+    );
+}
+
+fn check_helper_surfaces(
+    input: &G3TsAstroConfigChecksInput,
+    info_title: &str,
+    error_title: &str,
+    info_message: &str,
+    error_message: &str,
+    violations_for_policy: fn(&G3TsAstroPolicySnapshot) -> Vec<String>,
+    id: &str,
+    results: &mut Vec<G3CheckResult>,
+) {
     for contract in &input.integration_contracts {
         let rel_path = crate::support::astro_policy_rel_path(contract);
         let Some(policy) = crate::support::parsed_astro_policy(contract) else {
             continue;
         };
 
-        let violations = helper_surface_violations(policy);
+        let violations = violations_for_policy(policy);
         if violations.is_empty() {
             results.push(crate::support::info(
-                ID,
-                "Astro strict content policy declares approved helper surfaces",
-                format!(
-                    "`{}` declares non-empty app-relative `[ts.astro.mdx].component_maps`, `[ts.astro.seo].metadata_helpers`, and `[ts.astro.seo].json_ld_helpers`, and those helper surfaces do not overlap `[ts.astro.content].root`.",
-                    policy.rel_path
-                ),
+                id,
+                info_title,
+                info_message.replacen("{}", &policy.rel_path, 1),
                 &policy.rel_path,
             ));
             continue;
         }
 
         results.push(crate::support::error(
-            ID,
-            "Astro strict content policy is missing approved helper surfaces",
-            format!(
-                "`{}` must declare non-empty app-relative `[ts.astro.mdx].component_maps`, `[ts.astro.seo].metadata_helpers`, and `[ts.astro.seo].json_ld_helpers` that do not overlap `[ts.astro.content].root`. Violations: {}. These are approved module surfaces, not hardcoded required filenames.",
-                rel_path.unwrap_or("guardrail3-ts.toml"),
-                violations.join(", ")
-            ),
+            id,
+            error_title,
+            error_message
+                .replacen("{}", rel_path.unwrap_or("guardrail3-ts.toml"), 1)
+                .replacen("{}", &violations.join(", "), 1),
             rel_path,
         ));
     }
 }
 
-fn helper_surface_violations(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
+fn mdx_helper_surface_violations(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
     let mut violations = Vec::new();
     collect_helper_surface_violations(
         "[ts.astro.mdx].component_maps",
         &policy.mdx_component_maps,
-        &policy.content_root,
+        &None,
         &mut violations,
     );
+    violations
+}
+
+fn seo_helper_surface_violations(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
+    let mut violations = Vec::new();
     collect_helper_surface_violations(
         "[ts.astro.seo].metadata_helpers",
         &policy.metadata_helpers,
-        &policy.content_root,
+        &None,
         &mut violations,
     );
     collect_helper_surface_violations(
         "[ts.astro.seo].json_ld_helpers",
         &policy.json_ld_helpers,
-        &policy.content_root,
+        &None,
         &mut violations,
     );
     violations

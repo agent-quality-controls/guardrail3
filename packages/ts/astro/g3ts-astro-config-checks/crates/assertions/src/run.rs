@@ -52,6 +52,13 @@ pub fn assert_exact_ids(results: &[G3CheckResult], expected: &[&str]) {
     assert_eq!(actual, expected, "exact finding id order mismatch");
 }
 
+pub fn assert_all_inventory(results: &[G3CheckResult]) {
+    assert!(
+        results.iter().all(G3CheckResult::inventory),
+        "expected all findings to be inventory, got: {results:?}",
+    );
+}
+
 pub fn assert_no_findings_for_id(results: &[G3CheckResult], id: &str) {
     let matching = results
         .iter()

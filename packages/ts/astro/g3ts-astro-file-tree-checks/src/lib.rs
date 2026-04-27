@@ -1,4 +1,10 @@
 #[cfg(feature = "api")]
 pub use g3ts_astro_file_tree_checks_runtime::check;
 #[cfg(feature = "api")]
+pub use g3ts_astro_file_tree_checks_runtime::check_content;
+#[cfg(feature = "api")]
+pub use g3ts_astro_file_tree_checks_runtime::check_setup;
+#[cfg(feature = "api")]
+pub use g3ts_astro_file_tree_checks_runtime::check_state;
+#[cfg(feature = "api")]
 pub use g3ts_astro_types::G3TsAstroFileTreeChecksInput;

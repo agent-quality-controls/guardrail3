@@ -2,40 +2,100 @@ use g3ts_astro_types::{G3TsAstroConfigChecksInput, G3TsAstroPolicySnapshot};
 use guardrail3_check_types::G3CheckResult;
 use std::path::{Component, Path};
 
-const ID: &str = "TS-ASTRO-CONFIG-24";
+const CONTENT_ID: &str = "TS-ASTRO-CONTENT-CONFIG-24";
+const MDX_ID: &str = "TS-ASTRO-MDX-CONFIG-24";
+const SEO_ID: &str = "TS-ASTRO-SEO-CONFIG-24";
 
-pub(crate) fn check(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check_content(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+    check_policy_paths(
+        input,
+        "Astro strict content policy paths are structurally valid",
+        "Astro strict content policy paths are invalid",
+        "`{}` uses app-relative nested Astro content policy paths without parent traversal in `[ts.astro.routes]` and `[ts.astro.content]`.",
+        "`{}` has invalid nested Astro content policy paths: {}. Use app-relative values only, do not use absolute paths, `..`, or backslashes, and keep `[ts.astro.content].root` separate from `[ts.astro.content].adapters`.",
+        invalid_content_policy_entries,
+        CONTENT_ID,
+        results,
+    );
+}
+
+pub(crate) fn check_mdx(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+    check_policy_paths(
+        input,
+        "Astro MDX policy paths are structurally valid",
+        "Astro MDX policy paths are invalid",
+        "`{}` uses app-relative `[ts.astro.mdx].component_maps` paths without parent traversal.",
+        "`{}` has invalid Astro MDX policy paths: {}. Use app-relative values only, do not use absolute paths, `..`, backslashes, or glob metacharacters.",
+        invalid_mdx_policy_entries,
+        MDX_ID,
+        results,
+    );
+}
+
+pub(crate) fn check_seo(input: &G3TsAstroConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+    check_policy_paths(
+        input,
+        "Astro SEO policy paths are structurally valid",
+        "Astro SEO policy paths are invalid",
+        "`{}` uses app-relative `[ts.astro.seo]` helper paths without parent traversal.",
+        "`{}` has invalid Astro SEO policy paths: {}. Use app-relative values only, do not use absolute paths, `..`, backslashes, or glob metacharacters.",
+        invalid_seo_policy_entries,
+        SEO_ID,
+        results,
+    );
+}
+
+fn check_policy_paths(
+    input: &G3TsAstroConfigChecksInput,
+    info_title: &str,
+    error_title: &str,
+    info_message: &str,
+    error_message: &str,
+    invalid_entries: fn(&G3TsAstroPolicySnapshot) -> Vec<String>,
+    id: &str,
+    results: &mut Vec<G3CheckResult>,
+) {
     for contract in &input.integration_contracts {
         let rel_path = crate::support::astro_policy_rel_path(contract);
         let Some(policy) = crate::support::parsed_astro_policy(contract) else {
             continue;
         };
 
-        let errors = invalid_policy_entries(policy);
+        let errors = invalid_entries(policy);
         if errors.is_empty() {
             results.push(crate::support::info(
-                    ID,
-                    "Astro strict content policy paths are structurally valid",
-                    format!("`{}` uses app-relative nested Astro policy paths without parent traversal in `[ts.astro.routes]`, `[ts.astro.content]`, `[ts.astro.mdx]`, `[ts.astro.seo]`, and `[ts.astro.state]`.", policy.rel_path),
+                id,
+                info_title,
+                format_message(info_message, &policy.rel_path, None),
                 &policy.rel_path,
             ));
             continue;
         }
 
         results.push(crate::support::error(
-            ID,
-            "Astro strict content policy paths are invalid",
-            format!(
-                "`{}` has invalid nested Astro policy paths: {}. Use app-relative values only, do not use absolute paths, `..`, or backslashes, and keep `[ts.astro.content].root` separate from `[ts.astro.content].adapters` and helper surfaces.",
+            id,
+            error_title,
+            format_message(
+                error_message,
                 rel_path.unwrap_or("guardrail3-ts.toml"),
-                errors.join("; ")
+                Some(&errors.join("; ")),
             ),
             rel_path,
         ));
     }
 }
 
-fn invalid_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
+fn format_message(template: &str, rel_path: &str, errors: Option<&str>) -> String {
+    if let Some(errors) = errors {
+        template
+            .replacen("{}", rel_path, 1)
+            .replacen("{}", errors, 1)
+    } else {
+        template.replacen("{}", rel_path, 1)
+    }
+}
+
+fn invalid_content_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
     let mut errors = Vec::new();
     collect_invalid_list(
         "[ts.astro.routes].content",
@@ -50,26 +110,6 @@ fn invalid_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
     collect_invalid_list(
         "[ts.astro.routes].endpoints",
         &policy.endpoints,
-        &mut errors,
-    );
-    collect_invalid_helper_list(
-        "[ts.astro.mdx].component_maps",
-        &policy.mdx_component_maps,
-        &mut errors,
-    );
-    collect_invalid_helper_list(
-        "[ts.astro.seo].metadata_helpers",
-        &policy.metadata_helpers,
-        &mut errors,
-    );
-    collect_invalid_helper_list(
-        "[ts.astro.seo].json_ld_helpers",
-        &policy.json_ld_helpers,
-        &mut errors,
-    );
-    collect_invalid_list(
-        "[ts.astro.state].forbidden",
-        &policy.forbidden_state,
         &mut errors,
     );
     collect_invalid_optional_dir("[ts.astro.content].root", &policy.content_root, &mut errors);
@@ -87,9 +127,6 @@ fn invalid_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
                 ));
             }
         }
-    }
-
-    if let Some(content_root) = &policy.content_root {
         collect_content_root_overlaps(
             "[ts.astro.mdx].component_maps",
             content_root,
@@ -109,7 +146,31 @@ fn invalid_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
             &mut errors,
         );
     }
+    errors
+}
 
+fn invalid_mdx_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
+    let mut errors = Vec::new();
+    collect_invalid_helper_list(
+        "[ts.astro.mdx].component_maps",
+        &policy.mdx_component_maps,
+        &mut errors,
+    );
+    errors
+}
+
+fn invalid_seo_policy_entries(policy: &G3TsAstroPolicySnapshot) -> Vec<String> {
+    let mut errors = Vec::new();
+    collect_invalid_helper_list(
+        "[ts.astro.seo].metadata_helpers",
+        &policy.metadata_helpers,
+        &mut errors,
+    );
+    collect_invalid_helper_list(
+        "[ts.astro.seo].json_ld_helpers",
+        &policy.json_ld_helpers,
+        &mut errors,
+    );
     errors
 }
 
