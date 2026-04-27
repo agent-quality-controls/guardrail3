@@ -228,3 +228,128 @@ fn run_command_uses_structure_runner_for_astro_family() {
         last_index += relative_index;
     }
 }
+
+#[test]
+fn astro_split_has_no_aggregate_artifacts_or_non_ingestion_support_deps() {
+    let repo_root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .ancestors()
+        .nth(8)
+        .expect("runtime crate should stay under repo root");
+    let scan_roots = [
+        repo_root.join("apps/guardrail3-ts"),
+        repo_root.join("packages/ts/astro"),
+    ];
+    let forbidden = [
+        ["g3ts", "astro", "types"].join("-"),
+        ["g3ts", "astro", "ingestion"].join("-"),
+        ["g3ts", "astro", "checks"].join("-"),
+        ["g3ts", "astro", "config", "checks"].join("-"),
+        ["g3ts", "astro", "file", "tree", "checks"].join("-"),
+        ["g3ts", "astro", "shared", "types"].join("-"),
+        ["g3ts", "astro", "types"].join("_"),
+        ["g3ts", "astro", "ingestion"].join("_"),
+        ["g3ts", "astro", "checks"].join("_"),
+        ["g3ts", "astro", "config", "checks"].join("_"),
+        ["g3ts", "astro", "file", "tree", "checks"].join("_"),
+        ["g3ts", "astro", "shared", "types"].join("_"),
+    ];
+
+    let mut violations = Vec::new();
+    for root in scan_roots {
+        collect_forbidden_astro_artifacts(&root, &forbidden, &mut violations);
+    }
+
+    assert!(
+        violations.is_empty(),
+        "aggregate Astro artifacts must not reappear:\n{}",
+        violations.join("\n")
+    );
+
+    let mut support_dep_violations = Vec::new();
+    collect_non_ingestion_check_support_dependencies(
+        &repo_root.join("packages/ts/astro"),
+        &mut support_dep_violations,
+    );
+    collect_non_ingestion_check_support_dependencies(
+        &repo_root.join("apps/guardrail3-ts"),
+        &mut support_dep_violations,
+    );
+    assert!(
+        support_dep_violations.is_empty(),
+        "only Astro ingestion packages may depend on g3ts-astro-check-support:\n{}",
+        support_dep_violations.join("\n")
+    );
+}
+
+fn collect_forbidden_astro_artifacts(
+    root: &std::path::Path,
+    forbidden: &[String],
+    violations: &mut Vec<String>,
+) {
+    for entry in std::fs::read_dir(root).expect("scan root should be readable") {
+        let entry = entry.expect("scan entry should be readable");
+        let path = entry.path();
+        if ignored_scan_path(&path) {
+            continue;
+        }
+        if path.is_dir() {
+            collect_forbidden_astro_artifacts(&path, forbidden, violations);
+            continue;
+        }
+        let Some(path_text) = path.to_str() else {
+            continue;
+        };
+        if forbidden
+            .iter()
+            .any(|artifact| path_text.contains(artifact))
+        {
+            violations.push(path_text.to_owned());
+            continue;
+        }
+        let Ok(text) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        for artifact in forbidden {
+            if text.contains(artifact) {
+                violations.push(format!("{path_text}: contains {artifact}"));
+            }
+        }
+    }
+}
+
+fn collect_non_ingestion_check_support_dependencies(
+    root: &std::path::Path,
+    violations: &mut Vec<String>,
+) {
+    for entry in std::fs::read_dir(root).expect("scan root should be readable") {
+        let entry = entry.expect("scan entry should be readable");
+        let path = entry.path();
+        if ignored_scan_path(&path) {
+            continue;
+        }
+        if path.is_dir() {
+            collect_non_ingestion_check_support_dependencies(&path, violations);
+            continue;
+        }
+        if path.file_name().and_then(|name| name.to_str()) != Some("Cargo.toml") {
+            continue;
+        }
+        let path_text = path.to_string_lossy();
+        if path_text.contains("g3ts-astro-check-support/Cargo.toml")
+            || path_text.contains("-ingestion/Cargo.toml")
+        {
+            continue;
+        }
+        let text = std::fs::read_to_string(&path).expect("Cargo.toml should be readable");
+        if text.contains(&["g3ts", "astro", "check", "support"].join("-")) {
+            violations.push(path_text.into_owned());
+        }
+    }
+}
+
+fn ignored_scan_path(path: &std::path::Path) -> bool {
+    path.components().any(|component| {
+        let name = component.as_os_str();
+        name == "target" || name == ".git"
+    })
+}

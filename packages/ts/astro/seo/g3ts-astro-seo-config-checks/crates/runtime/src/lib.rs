@@ -1,4 +1,6 @@
+mod nuasite_options;
 mod run;
+mod support;
 mod ts_astro_config_13_nuasite_checks;
 mod ts_astro_config_14_sitemap_integration;
 mod ts_astro_config_15_robots_integration;

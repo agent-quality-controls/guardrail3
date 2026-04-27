@@ -1,34 +1,36 @@
-use g3ts_astro_types::G3TsAstroContentIntegrationContractInput;
+use g3ts_astro_content_types::G3TsAstroContentIntegrationContractInput;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-CONTENT-CONFIG-25";
 
-pub(crate) fn check(contracts: &[G3TsAstroContentIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
-    for contract in contracts {
-        let rel_path = g3ts_astro_check_support::core::astro_policy_rel_path(contract);
-        let Some(policy) = g3ts_astro_check_support::core::parsed_astro_policy(contract) else {
-            continue;
-        };
+pub(crate) fn check(
+    contract: &G3TsAstroContentIntegrationContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let rel_path = crate::support::content_policy_rel_path(&contract.astro_policy);
+    let Some(policy) = crate::support::parsed_content_policy(&contract.astro_policy) else {
+        return;
+    };
 
-        let Ok(content_routes) = glob_set(&policy.content_routes) else {
-            results.push(invalid_glob_error(rel_path));
-            continue;
-        };
-        let Ok(non_content_routes) = glob_set(&policy.non_content_routes) else {
-            results.push(invalid_glob_error(rel_path));
-            continue;
-        };
+    let Ok(content_routes) = glob_set(&policy.content_routes) else {
+        results.push(invalid_glob_error(rel_path));
+        return;
+    };
+    let Ok(non_content_routes) = glob_set(&policy.non_content_routes) else {
+        results.push(invalid_glob_error(rel_path));
+        return;
+    };
 
-        let overlapping_routes = contract
-            .route_page_paths
-            .iter()
-            .filter(|path| content_routes.is_match(path) && non_content_routes.is_match(path))
-            .cloned()
-            .collect::<Vec<_>>();
+    let overlapping_routes = contract
+        .route_page_paths
+        .iter()
+        .filter(|path| content_routes.is_match(path) && non_content_routes.is_match(path))
+        .cloned()
+        .collect::<Vec<_>>();
 
-        if overlapping_routes.is_empty() {
-            results.push(g3ts_astro_check_support::core::info(
+    if overlapping_routes.is_empty() {
+        results.push(crate::support::info(
                 ID,
                 "Astro content and non-content route scopes are disjoint",
                 format!(
@@ -37,10 +39,10 @@ pub(crate) fn check(contracts: &[G3TsAstroContentIntegrationContractInput], resu
                 ),
                 &policy.rel_path,
             ));
-            continue;
-        }
+        return;
+    }
 
-        results.push(g3ts_astro_check_support::core::error(
+    results.push(crate::support::error(
             ID,
             "Astro content and non-content route scopes overlap",
             format!(
@@ -50,7 +52,6 @@ pub(crate) fn check(contracts: &[G3TsAstroContentIntegrationContractInput], resu
             ),
             rel_path,
         ));
-    }
 }
 
 fn glob_set(patterns: &[String]) -> Result<GlobSet, globset::Error> {
@@ -62,7 +63,7 @@ fn glob_set(patterns: &[String]) -> Result<GlobSet, globset::Error> {
 }
 
 fn invalid_glob_error(rel_path: Option<&str>) -> G3CheckResult {
-    g3ts_astro_check_support::core::error(
+    crate::support::error(
         ID,
         "Astro route scope policy contains an invalid glob",
         format!(

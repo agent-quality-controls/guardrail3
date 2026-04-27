@@ -1,0 +1,28 @@
+profile = "library"
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroPackageSurfaceSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroPackageScriptCommand"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroPackageScriptToolInvocation"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "RS-CODE-SOURCE-31"
+file = "src/types.rs"
+selector = "struct:G3TsAstroMdxEslintSurfaceSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."

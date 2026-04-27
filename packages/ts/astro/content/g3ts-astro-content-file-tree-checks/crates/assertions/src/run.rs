@@ -1,5 +1,5 @@
 pub fn assert_runtime_check_exact_ids(
-    input: &g3ts_astro_types::G3TsAstroContentFileTreeChecksInput,
+    input: &g3ts_astro_content_types::G3TsAstroContentFileTreeChecksInput,
     expected: &[&str],
 ) {
     let results = g3ts_astro_content_file_tree_checks_runtime::check(input);

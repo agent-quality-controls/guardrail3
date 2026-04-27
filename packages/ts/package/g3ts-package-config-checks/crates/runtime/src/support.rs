@@ -1,6 +1,4 @@
-use g3ts_package_types::{
-    G3TsPackageChecksInput, G3TsPackageRootSnapshot, G3TsPackageRootState,
-};
+use g3ts_package_types::{G3TsPackageChecksInput, G3TsPackageRootSnapshot, G3TsPackageRootState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[must_use]

@@ -13,9 +13,15 @@ readme = "README.md"
 include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
+eslint-config-parser = { path = "../../../../parsers/eslint-config-parser", version = "0.1.0", features = ["api"] }
 g3-workspace-crawl = { path = "../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
 g3ts-astro-check-support = { path = "../../g3ts-astro-check-support", version = "0.1.0" }
-g3ts-astro-types = { path = "../../g3ts-astro-types", version = "0.1.0" }
+g3ts-astro-mdx-types = { path = "../g3ts-astro-mdx-types", version = "0.1.0" }
+globset = "0.4"
+guardrail3-rs-toml-parser = { path = "../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0", features = ["api"] }
+package-json-parser = { path = "../../../../parsers/package-json-parser", version = "0.1.0", features = ["api"] }
+package-script-command-parser = { path = "../../../../parsers/package-script-command-parser", version = "0.1.0", features = ["api"] }
+serde_json = "1"
 
 [features]
 default = ["api"]

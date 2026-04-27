@@ -2,7 +2,7 @@ profile = "library"
 
 allowed_deps = [
   "g3ts-astro-state-file-tree-checks-assertions",
-  "g3ts-astro-types",
+  "g3ts-astro-state-types",
   "guardrail3-check-types",
 ]
 

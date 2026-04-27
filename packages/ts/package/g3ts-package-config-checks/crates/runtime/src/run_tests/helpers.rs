@@ -209,7 +209,10 @@ fn web_local(dependencies: &[&str], dev_dependencies: &[&str]) -> G3TsPackageLoc
     G3TsPackageLocalState::Parsed {
         snapshot: G3TsPackageLocalSnapshot {
             rel_path: "apps/web/package.json".to_owned(),
-            dependencies: dependencies.iter().map(|value| (*value).to_owned()).collect(),
+            dependencies: dependencies
+                .iter()
+                .map(|value| (*value).to_owned())
+                .collect(),
             dev_dependencies: dev_dependencies
                 .iter()
                 .map(|value| (*value).to_owned())

@@ -1,4 +1,5 @@
 mod run;
+mod support;
 mod ts_astro_config_20_mdx_lane;
 mod ts_astro_config_24_strict_policy_paths;
 mod ts_astro_config_29_policy_helper_surfaces;

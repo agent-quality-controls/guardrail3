@@ -1,25 +1,27 @@
-use g3ts_astro_types::G3TsAstroSeoIntegrationContractInput;
+use g3ts_astro_seo_types::G3TsAstroSeoIntegrationContractInput;
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SEO-CONFIG-17";
 const REQUIRED_DEP: &str = "schema-dts";
 
-pub(crate) fn check(contracts: &[G3TsAstroSeoIntegrationContractInput], results: &mut Vec<G3CheckResult>) {
-    for contract in contracts {
-        let rel_path = g3ts_astro_check_support::core::package_rel_path(contract);
-        if g3ts_astro_check_support::core::package_has_dependency(contract, REQUIRED_DEP) {
-            if let Some(rel_path) = rel_path {
-                results.push(g3ts_astro_check_support::core::info(
-                    ID,
-                    "Astro JSON-LD type package is present",
-                    format!("`{rel_path}` lists `schema-dts` for typed JSON-LD data."),
-                    rel_path,
-                ));
-            }
-            continue;
+pub(crate) fn check(
+    contract: &G3TsAstroSeoIntegrationContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let rel_path = crate::support::package_rel_path(&contract.package);
+    if crate::support::package_has_dependency(&contract.package, REQUIRED_DEP) {
+        if let Some(rel_path) = rel_path {
+            results.push(crate::support::info(
+                ID,
+                "Astro JSON-LD type package is present",
+                format!("`{rel_path}` lists `schema-dts` for typed JSON-LD data."),
+                rel_path,
+            ));
         }
+        return;
+    }
 
-        results.push(g3ts_astro_check_support::core::error(
+    results.push(crate::support::error(
             ID,
             "Astro JSON-LD type package is missing",
             format!(
@@ -27,5 +29,4 @@ pub(crate) fn check(contracts: &[G3TsAstroSeoIntegrationContractInput], results:
             ),
             rel_path,
         ));
-    }
 }

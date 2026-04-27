@@ -86,7 +86,7 @@ fn renderer_uses_astro_family_header() {
         runs: vec![FamilyRun {
             family: SupportedFamily::AstroSetup,
             results: vec![G3CheckResult::new(
-                "TS-ASTRO-FILETREE-01".to_owned(),
+                "TS-ASTRO-SETUP-FILETREE-01".to_owned(),
                 G3Severity::Error,
                 "astro config missing".to_owned(),
                 "Add `astro.config.*` to the app root.".to_owned(),

@@ -3,9 +3,9 @@ profile = "library"
 allowed_deps = [
   "package-script-command-parser",
   "g3ts-astro-setup-config-checks-assertions",
-  "g3ts-astro-check-support",
-  "g3ts-astro-types",
+  "g3ts-astro-setup-types",
   "guardrail3-check-types",
+  "url",
 ]
 
 [[waivers]]

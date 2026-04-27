@@ -1,8 +1,8 @@
 use package_script_command_parser_runtime_assertions::parser::{
-    ExpectedEslintInvocation, ExpectedToolInvocation, assert_command, assert_command_count,
-    assert_eslint_invocation, assert_no_eslint_invocation, assert_parse_error_document,
-    assert_parsed_document, assert_state_reason_contains, assert_tool_invocation,
-    assert_unsupported_document, PackageScriptCommandSeparator,
+    ExpectedEslintInvocation, ExpectedToolInvocation, PackageScriptCommandSeparator,
+    assert_command, assert_command_count, assert_eslint_invocation, assert_no_eslint_invocation,
+    assert_parse_error_document, assert_parsed_document, assert_state_reason_contains,
+    assert_tool_invocation, assert_unsupported_document,
 };
 
 #[test]
@@ -215,8 +215,8 @@ fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
         .expect("script command fact should parse");
     let unsafe_newline_chain = super::super::parse("check", "astro check\ntrue")
         .expect("script command fact should parse");
-    let unsafe_background_build = super::super::parse("build", "astro build &")
-        .expect("script command fact should parse");
+    let unsafe_background_build =
+        super::super::parse("build", "astro build &").expect("script command fact should parse");
     let unsafe_duplicate_surface = super::super::parse("test", "syncpack lint || true")
         .expect("script command fact should parse");
     let fake_only_allow = super::super::parse("preinstall", "echo only-allow pnpm")
@@ -282,8 +282,8 @@ fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
 
 #[test]
 fn safe_tool_invocation_query_ignores_unrelated_unsupported_scripts() {
-    let safe_typecheck = super::super::parse("typecheck", "astro check")
-        .expect("script command fact should parse");
+    let safe_typecheck =
+        super::super::parse("typecheck", "astro check").expect("script command fact should parse");
     let unsupported_start = super::super::parse("start", "astro dev --host 0.0.0.0 | cat")
         .expect("script command fact should parse");
     let unsupported_other_tool = super::super::parse("assets", "syncpack lint | tee log")
@@ -301,8 +301,8 @@ fn safe_tool_invocation_query_ignores_unrelated_unsupported_scripts() {
 
 #[test]
 fn safe_tool_invocation_query_rejects_unsupported_target_script() {
-    let safe_typecheck = super::super::parse("typecheck", "astro check")
-        .expect("script command fact should parse");
+    let safe_typecheck =
+        super::super::parse("typecheck", "astro check").expect("script command fact should parse");
     let unsupported_nested_target = super::super::parse("start", "echo $(astro check)")
         .expect("script command fact should parse");
 

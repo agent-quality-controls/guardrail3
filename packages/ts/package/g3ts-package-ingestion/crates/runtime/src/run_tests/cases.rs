@@ -187,8 +187,5 @@ fn parses_syncpack_config_policy_facts() {
         &input,
         &["apps/web/package.json"],
     );
-    g3ts_package_ingestion_assertions::run::assert_syncpack_missing_forbidden_ban(
-        &input,
-        "axios",
-    );
+    g3ts_package_ingestion_assertions::run::assert_syncpack_missing_forbidden_ban(&input, "axios");
 }

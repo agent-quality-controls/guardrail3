@@ -1,4 +1,8 @@
 #[cfg(feature = "api")]
+mod policy;
+#[cfg(feature = "api")]
+mod roots;
+#[cfg(feature = "api")]
 mod run;
 
 #[cfg(feature = "api")]
