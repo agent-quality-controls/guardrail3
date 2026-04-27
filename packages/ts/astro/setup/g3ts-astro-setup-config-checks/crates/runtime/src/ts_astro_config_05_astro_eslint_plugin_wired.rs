@@ -4,7 +4,9 @@ use g3ts_astro_setup_types::{
 use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "TS-ASTRO-SETUP-CONFIG-05";
+const DEPENDENCY_NAME: &str = "eslint-plugin-astro";
 const PLUGIN_NAME: &str = "astro";
+const RULE_NAME: &str = "astro/valid-compile";
 
 pub(crate) fn check(
     contract: &G3TsAstroSetupEslintPluginContractInput,
@@ -65,9 +67,9 @@ fn astro_source_has_plugin(
         && snapshot
             .astro_source_plugin_package_names
             .get(plugin_name)
-            .is_some_and(|packages| {
-                packages
-                    .iter()
-                    .any(|package| package == "eslint-plugin-astro")
-            })
+            .is_some_and(|packages| packages.iter().any(|package| package == DEPENDENCY_NAME))
+        && snapshot
+            .astro_source_error_rules
+            .iter()
+            .any(|rule| rule == RULE_NAME)
 }
