@@ -65,18 +65,34 @@ fn package_safely_runs_tool(
     first_arg: &str,
 ) -> bool {
     parsed_package(package).is_some_and(|snapshot| {
-        let commands_are_safe = snapshot
-            .script_commands
-            .iter()
-            .all(|command| command.preceded_by != Some(G3TsAstroPackageScriptCommandSeparator::Or));
-        commands_are_safe
-            && snapshot.script_parse_blockers.is_empty()
-            && snapshot.script_tool_invocations.iter().any(|invocation| {
-                invocation_targets_tool(invocation, executable, first_arg)
-                    && script_name.is_none_or(|expected| invocation.script_name == expected)
-                    && invocation.preceded_by != Some(G3TsAstroPackageScriptCommandSeparator::Or)
-                    && invocation.followed_by != Some(G3TsAstroPackageScriptCommandSeparator::Or)
-            })
+        snapshot.script_tool_invocations.iter().any(|invocation| {
+            invocation_targets_tool(invocation, executable, first_arg)
+                && script_name.is_none_or(|expected| invocation.script_name == expected)
+                && script_has_no_parse_blocker(snapshot, &invocation.script_name)
+                && script_commands_are_fail_closed(snapshot, &invocation.script_name)
+                && invocation.preceded_by != Some(G3TsAstroPackageScriptCommandSeparator::Or)
+                && invocation.followed_by != Some(G3TsAstroPackageScriptCommandSeparator::Or)
+        })
+    })
+}
+
+fn script_has_no_parse_blocker(
+    snapshot: &G3TsAstroPackageSurfaceSnapshot,
+    script_name: &str,
+) -> bool {
+    snapshot
+        .script_parse_blockers
+        .iter()
+        .all(|blocker| blocker.script_name != script_name)
+}
+
+fn script_commands_are_fail_closed(
+    snapshot: &G3TsAstroPackageSurfaceSnapshot,
+    script_name: &str,
+) -> bool {
+    snapshot.script_commands.iter().all(|command| {
+        command.script_name != script_name
+            || command.preceded_by != Some(G3TsAstroPackageScriptCommandSeparator::Or)
     })
 }
 

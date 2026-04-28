@@ -117,6 +117,7 @@ pub struct G3TsAstroMdxEslintSurfaceSnapshot {
     pub mdx_content_effective_named_component_import_rules: Vec<String>,
     pub mdx_content_effective_no_raw_image_rules: Vec<String>,
     pub component_map_probe_present: bool,
+    pub component_map_plugins: Vec<String>,
     pub component_map_plugin_package_names: BTreeMap<String, Vec<String>>,
     pub component_map_error_rules: Vec<String>,
     pub component_map_warn_or_error_rules: Vec<String>,

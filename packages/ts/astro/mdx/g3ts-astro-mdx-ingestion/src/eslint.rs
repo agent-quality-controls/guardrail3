@@ -69,6 +69,7 @@ pub(crate) fn ingest_mdx_eslint_surface(
                 mdx_probe, &mdx_paths,
             ),
             component_map_probe_present: component_map_probe.is_some(),
+            component_map_plugins: plugins(component_map_probe),
             component_map_plugin_package_names: plugin_package_names(component_map_probe),
             component_map_error_rules: crate::eslint_suppression::active_error_rules(
                 component_map_probe,

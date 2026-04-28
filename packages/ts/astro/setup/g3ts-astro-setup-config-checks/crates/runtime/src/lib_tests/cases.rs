@@ -77,7 +77,7 @@ fn unused_eslint_disables_must_fail_closed_on_source_lanes() {
 }
 
 #[test]
-fn eslint_disable_descriptions_rejects_wrong_plugin_package_identity() {
+fn eslint_disable_descriptions_accepts_namespace_when_package_identity_is_unavailable() {
     let mut input = super::helpers::golden();
     let config = &mut input.eslint_contracts[0].config;
     let g3ts_astro_setup_types::G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } = config
@@ -85,6 +85,25 @@ fn eslint_disable_descriptions_rejects_wrong_plugin_package_identity() {
         panic!("golden setup eslint config should be parsed");
     };
     snapshot.ts_source_plugin_package_names.clear();
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-setup/eslint-disable-descriptions-required",
+        guardrail3_check_types::G3Severity::Info,
+    );
+}
+
+#[test]
+fn eslint_disable_descriptions_rejects_missing_plugin_namespace() {
+    let mut input = super::helpers::golden();
+    let config = &mut input.eslint_contracts[0].config;
+    let g3ts_astro_setup_types::G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } = config
+    else {
+        panic!("golden setup eslint config should be parsed");
+    };
+    snapshot
+        .ts_source_plugins
+        .retain(|plugin| plugin != "@eslint-community/eslint-comments");
 
     assertions::assert_runtime_check_id_severity(
         &input,
@@ -159,6 +178,44 @@ fn validate_script_must_not_have_parse_blockers() {
         &input,
         "g3ts-astro-setup/validate-script",
         guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn unrelated_start_script_parse_blocker_does_not_break_validation_tools() {
+    let mut input = super::helpers::golden();
+    let package = super::helpers::parsed_package_mut(&mut input);
+    package.script_names.push("start".to_owned());
+    package.script_bodies.push((
+        "start".to_owned(),
+        "astro preview --port ${PORT:-3001}".to_owned(),
+    ));
+    package.script_parse_blockers.push(
+        g3ts_astro_setup_types::G3TsAstroPackageScriptParseBlocker {
+            script_name: "start".to_owned(),
+            reason: "script command contains invalid shell syntax".to_owned(),
+        },
+    );
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-setup/astro-check-present",
+        guardrail3_check_types::G3Severity::Info,
+    );
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-setup/lint-script",
+        guardrail3_check_types::G3Severity::Info,
+    );
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-setup/syncpack-lint-script",
+        guardrail3_check_types::G3Severity::Info,
+    );
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-setup/validate-script",
+        guardrail3_check_types::G3Severity::Info,
     );
 }
 

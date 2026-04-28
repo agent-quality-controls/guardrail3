@@ -58,7 +58,10 @@ fn eslint_config() -> G3TsAstroMdxEslintSurfaceState {
         snapshot: G3TsAstroMdxEslintSurfaceSnapshot {
             rel_path: "eslint.config.mjs".to_owned(),
             mdx_content_probe_present: true,
-            mdx_content_plugins: vec!["mdx".to_owned()],
+            mdx_content_plugins: vec![
+                "mdx".to_owned(),
+                "@eslint-community/eslint-comments".to_owned(),
+            ],
             mdx_content_plugin_package_names: BTreeMap::from([
                 ("mdx".to_owned(), vec!["eslint-plugin-mdx".to_owned()]),
                 (
@@ -97,6 +100,10 @@ fn eslint_config() -> G3TsAstroMdxEslintSurfaceState {
                 "astro-pipeline/no-raw-mdx-images".to_owned(),
             ],
             component_map_probe_present: true,
+            component_map_plugins: vec![
+                "astro-pipeline".to_owned(),
+                "@eslint-community/eslint-comments".to_owned(),
+            ],
             component_map_plugin_package_names: BTreeMap::from([
                 (
                     "astro-pipeline".to_owned(),

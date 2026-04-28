@@ -6,6 +6,18 @@ allowed_deps = []
 garde = false
 
 [[waivers]]
+rule = "g3rs-code/many-use-imports"
+file = "src/lib.rs"
+selector = "top-level-use-imports"
+reason = "Type package facade explicitly re-exports the public DTO contract; splitting the facade would hide package ownership instead of reducing coupling."
+
+[[waivers]]
+rule = "g3rs-code/large-type-inventory"
+file = "src/types.rs"
+selector = "struct:G3TsAstroMdxEslintSurfaceSnapshot"
+reason = "The ESLint surface snapshot is a typed DTO carrying one effective-config probe contract across ingestion and check crates; splitting it would duplicate the same ESLint fact boundary."
+
+[[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
 file = "src/types.rs"
 selector = "struct:G3TsAstroPackageSurfaceSnapshot"
@@ -69,4 +81,10 @@ reason = "Type package exposes typed DTOs consumed by separate ingestion and che
 rule = "g3rs-code/public-struct-named-fields"
 file = "src/types.rs"
 selector = "struct:G3TsAstroMdxConfigChecksInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsAstroMdxEslintDirectiveInput"
 reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."

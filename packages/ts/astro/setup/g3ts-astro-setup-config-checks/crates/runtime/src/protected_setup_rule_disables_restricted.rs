@@ -5,9 +5,17 @@ use guardrail3_check_types::G3CheckResult;
 
 const ID: &str = "g3ts-astro-setup/protected-setup-rule-disables-restricted";
 const RESTRICT_RULE: &str = "@eslint-community/eslint-comments/no-restricted-disable";
-const ASTRO_SOURCE_PROTECTED_RULES: [&str; 2] =
-    ["astro/valid-compile", "@eslint-community/eslint-comments/*"];
-const TS_SOURCE_PROTECTED_RULES: [&str; 1] = ["@eslint-community/eslint-comments/*"];
+const ASTRO_SOURCE_PROTECTED_RULES: [&str; 4] = [
+    "astro/valid-compile",
+    "@eslint-community/eslint-comments/no-restricted-disable",
+    "@eslint-community/eslint-comments/no-unused-disable",
+    "@eslint-community/eslint-comments/require-description",
+];
+const TS_SOURCE_PROTECTED_RULES: [&str; 3] = [
+    "@eslint-community/eslint-comments/no-restricted-disable",
+    "@eslint-community/eslint-comments/no-unused-disable",
+    "@eslint-community/eslint-comments/require-description",
+];
 
 pub(crate) fn check(
     contract: &G3TsAstroSetupEslintPluginContractInput,
@@ -49,7 +57,7 @@ pub(crate) fn check(
         ID,
         "Astro setup delegated-rule disables are not restricted",
         format!(
-            "`{}` must enable `{RESTRICT_RULE}` at `warn` or `error` on Astro, TS, and TSX source lanes. Astro source must protect `astro/valid-compile` and all `@eslint-community/eslint-comments/*` rules; TS and TSX source must protect all `@eslint-community/eslint-comments/*` rules.",
+            "`{}` must enable `{RESTRICT_RULE}` at `warn` or `error` on Astro, TS, and TSX source lanes. Astro source must protect `astro/valid-compile`; Astro, TS, and TSX source must protect eslint-comments `require-description`, `no-unused-disable`, and `no-restricted-disable`.",
             snapshot.rel_path
         ),
         Some(&snapshot.rel_path),
