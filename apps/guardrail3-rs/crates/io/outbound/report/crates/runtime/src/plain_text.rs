@@ -1,4 +1,4 @@
-use guardrail3_rs_app_types::{ReportRenderer, SupportedFamily, ValidateReport};
+use guardrail3_rs_app_types::{ReportRenderer, ValidateReport};
 
 #[derive(Debug, Default)]
 pub struct PlainTextReportRenderer;
@@ -32,7 +32,7 @@ pub(crate) fn render_report(report: &ValidateReport, include_inventory: bool) ->
         if family_lines.is_empty() {
             continue;
         }
-        lines.push(format!("== {} ==", family_cli_name(run.family)));
+        lines.push(format!("== {} ==", run.family.cli_name()));
         lines.extend(family_lines);
     }
 
@@ -41,26 +41,6 @@ pub(crate) fn render_report(report: &ValidateReport, include_inventory: bool) ->
     }
 
     format!("{}\n", lines.join("\n"))
-}
-
-/// Returns the stable CLI name for one supported family.
-const fn family_cli_name(family: SupportedFamily) -> &'static str {
-    match family {
-        SupportedFamily::Topology => "topology",
-        SupportedFamily::Toolchain => "toolchain",
-        SupportedFamily::Fmt => "fmt",
-        SupportedFamily::Cargo => "cargo",
-        SupportedFamily::Clippy => "clippy",
-        SupportedFamily::Deny => "deny",
-        SupportedFamily::Code => "code",
-        SupportedFamily::Arch => "arch",
-        SupportedFamily::Deps => "deps",
-        SupportedFamily::Garde => "garde",
-        SupportedFamily::Test => "test",
-        SupportedFamily::Release => "release",
-        SupportedFamily::Hooks => "hooks",
-        SupportedFamily::Apparch => "apparch",
-    }
 }
 
 #[cfg(test)]

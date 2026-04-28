@@ -70,6 +70,7 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
         rel_path: ".githooks/pre-commit",
         parsed: &parsed,
         is_workspace_project: true,
+        requirements: &[],
     };
     let mut results = Vec::new();
     check(&input, &mut results);

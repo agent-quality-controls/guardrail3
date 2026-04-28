@@ -1,0 +1,21 @@
+[package]
+name = "g3rs-garde-hook-contract-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+description = "Runtime hook contract for g3rs garde family"
+publish = false
+readme = "README.md"
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-hooks-contract-types = { path = "../../../../hooks/g3rs-hooks-contract-types", version = "0.1.0" }

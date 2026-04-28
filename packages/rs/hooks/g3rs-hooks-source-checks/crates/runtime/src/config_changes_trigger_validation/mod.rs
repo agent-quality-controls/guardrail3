@@ -1,4 +1,4 @@
 mod rule;
-mod support;
+pub(crate) mod support;
 
 pub(crate) use rule::check;

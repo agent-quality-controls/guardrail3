@@ -211,6 +211,7 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
     let input = FailOpenWrapperInput {
         rel_path: ".githooks/pre-commit",
         parsed: &parsed,
+        requirements: &[],
     };
     let mut results = Vec::new();
     check(&input, &mut results);

@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 
-# Rust workspace root — override with GUARDRAIL3_RUST_WORKSPACE env var
-RUST_WORKSPACE="${GUARDRAIL3_RUST_WORKSPACE:-.}"
+# Rust workspace root - override with GUARDRAIL3_RUST_WORKSPACE env var
+RUST_WORKSPACE="${GUARDRAIL3_RUST_WORKSPACE:-apps/guardrail3-rs}"
+REPO_ROOT=$(git rev-parse --show-toplevel)
+export CARGO_TARGET_DIR="$REPO_ROOT/.cargo-target"
 
 # Collect staged files once
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
@@ -89,14 +91,15 @@ fi
 TS_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.(ts|tsx|mjs)$' || true)
 RUST_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.(rs)$' || true)
 CARGO_CHANGED=$(echo "$STAGED_FILES" | grep -cE '(Cargo\.toml|Cargo\.lock)$' || true)
+RUST_CONFIG_CHANGED=$(echo "$STAGED_FILES" | grep -cE '(^|/)(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml|release-plz\.toml|cliff\.toml|\.cargo/config|\.cargo/config\.toml)$' || true)
 CSS_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.css$' || true)
 
 # --- Guardrail validation (AST-based, replaces grep-based tamper detection) ---
-if command -v guardrail3 &> /dev/null; then
-    if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
-        echo "Running guardrail3 Rust validation..."
-        if ! guardrail3 rs validate --staged .; then
-            echo "guardrail3 Rust validation failed. Fix issues before committing."
+if command -v g3rs &> /dev/null; then
+    if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ] || echo "$STAGED_FILES" | grep -qE '(^|/)(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
+        echo "Running g3rs validation..."
+        if ! g3rs validate --path "$REPO_ROOT" --family hooks; then
+            echo "g3rs validation failed. Fix issues before committing."
             exit 1
         fi
     fi
@@ -108,8 +111,8 @@ if command -v guardrail3 &> /dev/null; then
         fi
     fi
 else
-    echo "WARNING: guardrail3 not installed. Skipping guardrail validation."
-    echo "Install: cargo install guardrail3"
+    echo "WARNING: g3rs not installed. Skipping guardrail validation."
+    echo "Install the local guardrail3 Rust CLI before committing Rust changes."
 fi
 
 # --- TypeScript checks (only if TS files changed) ---
@@ -170,7 +173,7 @@ if [ "$CSS_CHANGED" -gt 0 ]; then
 fi
 
 # --- Rust checks (only if Rust or Cargo files changed) ---
-if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
+if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ] || [ "$RUST_CONFIG_CHANGED" -gt 0 ]; then
     echo "Running Rust format check..."
     if ! (cd "$RUST_WORKSPACE" && cargo fmt --all -- --check); then
         echo "Rust formatting check failed. Run 'cd "$RUST_WORKSPACE" && cargo fmt --all' to fix."
@@ -214,7 +217,7 @@ if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
         echo "ERROR: cargo-mutants not installed. Install: cargo install cargo-mutants"
         exit 1
     fi
-    if ! (cd "$RUST_WORKSPACE" && cargo mutants --check); then
+    if ! (cd "$RUST_WORKSPACE" && cargo mutants --check --in-place); then
         echo "cargo-mutants check failed. Fix mutation-test setup before committing."
         exit 1
     fi

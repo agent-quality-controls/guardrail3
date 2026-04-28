@@ -63,6 +63,27 @@ where
     }
 
     if let Some(script) = split_string {
+        if !cursor.remaining().is_empty()
+            && let Some((name, value)) = assignment_parts(&script)
+        {
+            state.apply_assignment(name, value);
+            let Some(next) = cursor.next() else {
+                return false;
+            };
+            return engine::dispatch_external_token(
+                next,
+                cursor,
+                local,
+                root,
+                visiting,
+                state,
+                visitor,
+                line_no,
+                root_line_no,
+                options,
+            );
+        }
+
         let mut split_tokens =
             if !cursor.remaining().is_empty() && lex::looks_like_env_assignment(&script) {
                 vec![script]
@@ -155,8 +176,9 @@ where
     }
 
     if let Some(script) = script {
+        let script = unquote_shell_word(&script);
         return engine::line_visits_with_mode(
-            &script,
+            script,
             local,
             root,
             visiting,
@@ -288,4 +310,29 @@ fn shell_cluster_uses_next_script(flag: &str) -> bool {
 
     let short = &flag[1..];
     short.contains('c')
+}
+
+fn assignment_parts(token: &str) -> Option<(&str, &str)> {
+    let token = unquote_shell_word(token);
+    let (name, value) = token.split_once('=')?;
+    let mut chars = name.chars();
+    let first = chars.next()?;
+    if !(first.is_ascii_alphabetic() || first == '_') {
+        return None;
+    }
+    chars
+        .all(|ch| ch.is_ascii_alphanumeric() || ch == '_')
+        .then_some((name, value))
+}
+
+fn unquote_shell_word(token: &str) -> &str {
+    token
+        .strip_prefix('\'')
+        .and_then(|value| value.strip_suffix('\''))
+        .or_else(|| {
+            token
+                .strip_prefix('"')
+                .and_then(|value| value.strip_suffix('"'))
+        })
+        .unwrap_or(token)
 }

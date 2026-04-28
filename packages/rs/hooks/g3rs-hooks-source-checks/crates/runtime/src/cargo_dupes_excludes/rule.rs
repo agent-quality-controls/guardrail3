@@ -37,7 +37,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
-fn script_contains_cargo_dupes_with_exclude_tests(parsed: &ParsedShellScript) -> bool {
+pub(crate) fn script_contains_cargo_dupes_with_exclude_tests(parsed: &ParsedShellScript) -> bool {
     any_resolved_command_relaxed(parsed, cargo_dupes_with_exclude_tests)
         && !any_resolved_command_relaxed(parsed, cargo_dupes_without_exclude_tests)
 }
@@ -185,6 +185,7 @@ pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResu
         rel_path: ".githooks/pre-commit",
         parsed: &parsed,
         is_workspace_project: true,
+        requirements: &[],
     };
     let mut results = Vec::new();
     check(&input, &mut results);

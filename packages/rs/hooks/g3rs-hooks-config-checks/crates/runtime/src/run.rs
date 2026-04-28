@@ -13,6 +13,12 @@ pub fn check(input: &G3RsHooksConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
     crate::required_tools_installed::check(selected_hook, &input.installed_tools, &mut results);
+    crate::contract_required_tools_installed::check(
+        selected_hook,
+        &input.installed_tools,
+        &input.requirements,
+        &mut results,
+    );
     crate::guardrail_binary_available::check(selected_hook, &input.installed_tools, &mut results);
     crate::cargo_dupes_installed::check(selected_hook, &input.installed_tools, &mut results);
 

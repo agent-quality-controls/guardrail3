@@ -337,6 +337,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-apparch-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-apparch-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-apparch-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+]
+
+[[package]]
 name = "g3rs-apparch-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -408,6 +422,20 @@ version = "0.1.0"
 dependencies = [
  "g3rs-arch-types",
  "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-arch-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-arch-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-arch-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
 ]
 
 [[package]]
@@ -490,6 +518,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-cargo-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-cargo-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-cargo-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+]
+
+[[package]]
 name = "g3rs-cargo-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -566,6 +608,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-clippy-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-clippy-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-clippy-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+]
+
+[[package]]
 name = "g3rs-clippy-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -627,6 +683,20 @@ version = "0.1.0"
 dependencies = [
  "g3rs-code-types",
  "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-code-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-code-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-code-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
 ]
 
 [[package]]
@@ -728,6 +798,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-deny-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deny-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-deny-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+]
+
+[[package]]
 name = "g3rs-deny-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -790,6 +874,20 @@ dependencies = [
  "g3rs-deps-types",
  "guardrail3-check-types",
  "guardrail3-rs-toml-parser",
+]
+
+[[package]]
+name = "g3rs-deps-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-deps-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-deps-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
 ]
 
 [[package]]
@@ -868,6 +966,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-fmt-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-fmt-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-fmt-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+]
+
+[[package]]
 name = "g3rs-fmt-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -925,6 +1037,20 @@ name = "g3rs-garde-config-checks-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-garde-types",
+]
+
+[[package]]
+name = "g3rs-garde-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-garde-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-garde-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
 ]
 
 [[package]]
@@ -999,6 +1125,7 @@ dependencies = [
 name = "g3rs-hooks-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "g3rs-hooks-contract-types",
  "g3rs-hooks-types",
  "guardrail3-check-types",
  "hook-shell-parser",
@@ -1010,6 +1137,10 @@ version = "0.1.0"
 dependencies = [
  "g3rs-hooks-types",
 ]
+
+[[package]]
+name = "g3rs-hooks-contract-types"
+version = "0.1.0"
 
 [[package]]
 name = "g3rs-hooks-file-tree-checks"
@@ -1071,6 +1202,7 @@ dependencies = [
 name = "g3rs-hooks-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "g3rs-hooks-contract-types",
  "g3rs-hooks-types",
  "guardrail3-check-types",
  "hook-shell-parser",
@@ -1087,6 +1219,7 @@ dependencies = [
 name = "g3rs-hooks-types"
 version = "0.1.0"
 dependencies = [
+ "g3rs-hooks-contract-types",
  "hook-shell-parser",
 ]
 
@@ -1139,6 +1272,20 @@ name = "g3rs-release-filetree-checks-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-release-types",
+]
+
+[[package]]
+name = "g3rs-release-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-release-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
 ]
 
 [[package]]
@@ -1246,6 +1393,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-test-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-test-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-test-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+]
+
+[[package]]
 name = "g3rs-test-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -1344,6 +1505,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-toolchain-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toolchain-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-toolchain-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+]
+
+[[package]]
 name = "g3rs-toolchain-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -1395,6 +1570,20 @@ name = "g3rs-topology-file-tree-checks-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-topology-types",
+]
+
+[[package]]
+name = "g3rs-topology-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3rs-topology-hook-contract-runtime",
+]
+
+[[package]]
+name = "g3rs-topology-hook-contract-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
 ]
 
 [[package]]
@@ -1548,14 +1737,28 @@ dependencies = [
 name = "guardrail3-rs-family-runner-process"
 version = "0.1.0"
 dependencies = [
+ "g3rs-apparch-hook-contract",
+ "g3rs-arch-hook-contract",
+ "g3rs-cargo-hook-contract",
+ "g3rs-clippy-hook-contract",
+ "g3rs-code-hook-contract",
+ "g3rs-deny-hook-contract",
+ "g3rs-deps-hook-contract",
+ "g3rs-fmt-hook-contract",
+ "g3rs-garde-hook-contract",
  "g3rs-hooks-config-checks",
+ "g3rs-hooks-contract-types",
  "g3rs-hooks-file-tree-checks",
  "g3rs-hooks-ingestion",
  "g3rs-hooks-source-checks",
  "g3rs-release-config-checks",
  "g3rs-release-filetree-checks",
+ "g3rs-release-hook-contract",
  "g3rs-release-ingestion",
  "g3rs-release-source-checks",
+ "g3rs-test-hook-contract",
+ "g3rs-toolchain-hook-contract",
+ "g3rs-topology-hook-contract",
  "g3rs-workspace-crawl",
  "guardrail3-rs-app-types",
 ]

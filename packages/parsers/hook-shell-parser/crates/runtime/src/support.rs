@@ -187,7 +187,7 @@ pub(super) fn extract_command_segment(line: &str) -> String {
     {
         return relevant
             .iter()
-            .map(|segment| segment.text.as_str())
+            .map(|segment| strip_leading_negation(&segment.text))
             .collect::<Vec<_>>()
             .join(" | ");
     }
@@ -197,13 +197,21 @@ pub(super) fn extract_command_segment(line: &str) -> String {
         .rev()
         .find(|segment| matches!(segment.operator_before, Some("&&")))
     {
-        return last_and.text.clone();
+        return strip_leading_negation(&last_and.text).to_owned();
     }
 
     relevant
         .first()
-        .map(|segment| segment.text.clone())
+        .map(|segment| strip_leading_negation(&segment.text).to_owned())
         .unwrap_or_default()
+}
+
+fn strip_leading_negation(command_text: &str) -> &str {
+    command_text
+        .trim_start()
+        .strip_prefix('!')
+        .map(str::trim_start)
+        .unwrap_or(command_text)
 }
 
 fn heredoc_delimiter(line: &str) -> Option<HeredocTerminator> {

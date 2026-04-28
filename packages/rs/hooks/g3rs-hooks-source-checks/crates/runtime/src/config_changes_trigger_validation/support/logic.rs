@@ -20,9 +20,13 @@ const CONFIG_NEEDLES: [&str; 8] = [
 ];
 
 pub(crate) fn missing_config_needles(parsed: &ParsedShellScript) -> Vec<&'static str> {
+    missing_needles(parsed, &CONFIG_NEEDLES)
+}
+
+fn missing_needles<'a>(parsed: &ParsedShellScript, needles: &[&'a str]) -> Vec<&'a str> {
     let blocks = conditional_blocks(parsed);
 
-    CONFIG_NEEDLES
+    needles
         .iter()
         .copied()
         .filter(|needle| {
@@ -366,7 +370,9 @@ fn adjust_depth(depth: usize, trimmed: &str) -> usize {
 
 fn content_has_direct_trigger_line_for_needle(parsed: &ParsedShellScript, needle: &str) -> bool {
     parsed.executable_lines.iter().any(|line| {
-        line_reaches_config_trigger(parsed, &line.raw, line.line_no, needle)
+        let trimmed = line.raw.trim();
+        !starts_conditional_block(trimmed)
+            && line_reaches_config_trigger(parsed, &line.raw, line.line_no, needle)
             && (line_contains_guardrail_step(parsed, &line.raw, line.line_no)
                 || line_contains_path_qualified_guardrail_step(parsed, &line.raw, line.line_no))
     })

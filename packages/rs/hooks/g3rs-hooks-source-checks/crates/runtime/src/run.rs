@@ -10,6 +10,7 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
         rel_path: &input.rel_path,
         parsed: &input.parsed,
         is_workspace_project: input.is_workspace_project,
+        requirements: &input.requirements,
     };
     let executable_input = crate::inputs::ExecutableCommandContextInput {
         rel_path: &input.rel_path,
@@ -24,6 +25,7 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
     let fail_open_input = crate::inputs::FailOpenWrapperInput {
         rel_path: &input.rel_path,
         parsed: &input.parsed,
+        requirements: &input.requirements,
     };
     let mut results = Vec::new();
 
@@ -44,7 +46,9 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
         crate::cargo_dupes_step_present::check(&rust_input, &mut results);
         crate::cargo_dupes_excludes::check(&rust_input, &mut results);
         crate::config_changes_trigger_validation::check(&rust_input, &mut results);
+        crate::contract_trigger_coverage::rule::check(&rust_input, &mut results);
         crate::shared_target_dir_present::check(&rust_input, &mut results);
+        crate::required_contract_command_present::rule::check(&rust_input, &mut results);
     }
 
     crate::shell_safety::shell_error_handling::check(&executable_input, &mut results);
@@ -56,6 +60,7 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
     crate::shell_safety::executable_command_context_only::check(&executable_input, &mut results);
     crate::shell_safety::concrete_lockfile_command::check(&executable_input, &mut results);
     crate::shell_safety::no_fail_open_wrappers::check(&fail_open_input, &mut results);
+    crate::contract_critical_command_not_fail_open::rule::check(&fail_open_input, &mut results);
 
     crate::compat::finish(results)
 }

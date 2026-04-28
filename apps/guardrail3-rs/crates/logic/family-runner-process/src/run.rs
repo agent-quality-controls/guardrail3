@@ -1,3 +1,4 @@
+use g3rs_hooks_contract_types::G3HookRequirement;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use guardrail3_rs_app_types::{FamilyResults, FamilyRunError, SupportedFamily};
 
@@ -12,7 +13,8 @@ pub fn run(
 ) -> Result<FamilyResults, FamilyRunError> {
     match family {
         SupportedFamily::Hooks => {
-            let config_input =
+            let requirements = rust_hook_requirements();
+            let mut config_input =
                 g3rs_hooks_ingestion::ingest_for_config_checks(crawl).map_err(|error| {
                     FamilyRunError {
                         message: format!("{error:?}"),
@@ -24,12 +26,17 @@ pub fn run(
                         message: format!("{error:?}"),
                     }
                 })?;
-            let source_inputs =
+            let mut source_inputs =
                 g3rs_hooks_ingestion::ingest_for_source_checks(crawl).map_err(|error| {
                     FamilyRunError {
                         message: format!("{error:?}"),
                     }
                 })?;
+
+            config_input.requirements.clone_from(&requirements);
+            for input in &mut source_inputs {
+                input.requirements.clone_from(&requirements);
+            }
 
             let mut results = Vec::new();
             results.extend(g3rs_hooks_config_checks::check(&config_input));
@@ -81,3 +88,29 @@ pub fn run(
         }),
     }
 }
+
+/// Collects Rust family hook requirements from each family-owned hook contract package.
+pub(crate) fn rust_hook_requirements() -> Vec<G3HookRequirement> {
+    [
+        g3rs_topology_hook_contract::hook_contract(),
+        g3rs_toolchain_hook_contract::hook_contract(),
+        g3rs_fmt_hook_contract::hook_contract(),
+        g3rs_cargo_hook_contract::hook_contract(),
+        g3rs_clippy_hook_contract::hook_contract(),
+        g3rs_deny_hook_contract::hook_contract(),
+        g3rs_code_hook_contract::hook_contract(),
+        g3rs_arch_hook_contract::hook_contract(),
+        g3rs_deps_hook_contract::hook_contract(),
+        g3rs_garde_hook_contract::hook_contract(),
+        g3rs_test_hook_contract::hook_contract(),
+        g3rs_release_hook_contract::hook_contract(),
+        g3rs_apparch_hook_contract::hook_contract(),
+    ]
+    .into_iter()
+    .flatten()
+    .collect()
+}
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"]
+mod tests;
