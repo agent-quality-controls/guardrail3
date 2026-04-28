@@ -1,7 +1,7 @@
 /// Family names supported by the app CLI.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SupportedFamily {
-    /// ESLint checks.
+    /// `ESLint` checks.
     Eslint,
     /// Astro setup checks.
     AstroSetup,
@@ -25,10 +25,12 @@ pub enum SupportedFamily {
     Npmrc,
     /// .jscpd.json checks.
     Jscpd,
+    /// Git hook contract checks.
+    Hooks,
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 12] = [
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 13] = [
     SupportedFamily::Eslint,
     SupportedFamily::AstroSetup,
     SupportedFamily::AstroContent,
@@ -41,4 +43,5 @@ pub const SUPPORTED_FAMILIES: [SupportedFamily; 12] = [
     SupportedFamily::Package,
     SupportedFamily::Npmrc,
     SupportedFamily::Jscpd,
+    SupportedFamily::Hooks,
 ];

@@ -1,0 +1,14 @@
+[package]
+name = "g3ts-astro-content-hook-contract"
+version = "0.1.0"
+edition = "2024"
+description = "Astro content hook contract for G3TS"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+g3ts-hooks-contract-types = { path = "../../../hooks/g3ts-hooks-contract-types" }
+
+[features]
+default = ["api"]
+api = []

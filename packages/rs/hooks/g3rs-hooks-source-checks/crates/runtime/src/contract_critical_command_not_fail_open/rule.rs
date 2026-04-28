@@ -24,7 +24,7 @@ pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckR
     ) {
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
-            G3Severity::Warn,
+            G3Severity::Error,
             "contract-critical hook command is fail-open".to_owned(),
             format!(
                 "Critical hook command `{}` is softened by a fail-open wrapper. Critical commands come from family hook contracts; do not hide failures with `|| true`, `|| echo ...`, or equivalent wrappers.",

@@ -1,0 +1,15 @@
+[package]
+name = "g3ts-hooks-types"
+version = "0.1.0"
+edition = "2024"
+description = "TypeScript hook check input types for guardrail3"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+g3ts-hooks-contract-types = { path = "../g3ts-hooks-contract-types" }
+hook-shell-parser = { path = "../../../parsers/hook-shell-parser", features = ["api"] }
+
+[features]
+default = ["api"]
+api = []

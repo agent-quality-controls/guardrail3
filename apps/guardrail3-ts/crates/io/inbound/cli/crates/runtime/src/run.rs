@@ -29,7 +29,9 @@ impl FamilyRunner for CliFamilyRunner {
             | SupportedFamily::Tsconfig
             | SupportedFamily::Package
             | SupportedFamily::Npmrc
-            | SupportedFamily::Jscpd => match family {
+            | SupportedFamily::Jscpd
+            | SupportedFamily::Hooks => match family {
+                SupportedFamily::Hooks => guardrail3_ts_family_runner_hooks::run(family, crawl),
                 SupportedFamily::AstroSetup
                 | SupportedFamily::AstroContent
                 | SupportedFamily::AstroMdx

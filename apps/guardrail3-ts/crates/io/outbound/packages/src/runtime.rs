@@ -16,6 +16,11 @@ impl WorkspaceCrawler for PackageRuntime {
     }
 }
 
+/// Resolves a CLI path into an absolute workspace root.
+///
+/// # Errors
+///
+/// Returns a message when the current directory cannot be read.
 fn absolute_root(root: &Path) -> Result<std::path::PathBuf, String> {
     if root.is_absolute() {
         return Ok(root.to_path_buf());

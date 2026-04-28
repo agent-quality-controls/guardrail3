@@ -2,6 +2,7 @@
 members = [
     "crates/types/app-types",
     "crates/logic/family-runner-config",
+    "crates/logic/family-runner-hooks",
     "crates/logic/family-runner-structure",
     "crates/logic/validate-command/crates/assertions",
     "crates/logic/validate-command/crates/runtime",
@@ -23,13 +24,17 @@ guardrail3-check-types = { path = "../../packages/shared/guardrail3-check-types"
 g3-workspace-crawl = { path = "../../packages/rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
 g3ts-astro-content-config-checks = { path = "../../packages/ts/astro/content/g3ts-astro-content-config-checks" }
 g3ts-astro-content-file-tree-checks = { path = "../../packages/ts/astro/content/g3ts-astro-content-file-tree-checks" }
+g3ts-astro-content-hook-contract = { path = "../../packages/ts/astro/content/g3ts-astro-content-hook-contract" }
 g3ts-astro-content-ingestion = { path = "../../packages/ts/astro/content/g3ts-astro-content-ingestion" }
 g3ts-astro-mdx-config-checks = { path = "../../packages/ts/astro/mdx/g3ts-astro-mdx-config-checks" }
+g3ts-astro-mdx-hook-contract = { path = "../../packages/ts/astro/mdx/g3ts-astro-mdx-hook-contract" }
 g3ts-astro-mdx-ingestion = { path = "../../packages/ts/astro/mdx/g3ts-astro-mdx-ingestion" }
 g3ts-astro-seo-config-checks = { path = "../../packages/ts/astro/seo/g3ts-astro-seo-config-checks" }
+g3ts-astro-seo-hook-contract = { path = "../../packages/ts/astro/seo/g3ts-astro-seo-hook-contract" }
 g3ts-astro-seo-ingestion = { path = "../../packages/ts/astro/seo/g3ts-astro-seo-ingestion" }
 g3ts-astro-setup-config-checks = { path = "../../packages/ts/astro/setup/g3ts-astro-setup-config-checks" }
 g3ts-astro-setup-file-tree-checks = { path = "../../packages/ts/astro/setup/g3ts-astro-setup-file-tree-checks" }
+g3ts-astro-setup-hook-contract = { path = "../../packages/ts/astro/setup/g3ts-astro-setup-hook-contract" }
 g3ts-astro-setup-ingestion = { path = "../../packages/ts/astro/setup/g3ts-astro-setup-ingestion" }
 g3ts-astro-state-file-tree-checks = { path = "../../packages/ts/astro/state/g3ts-astro-state-file-tree-checks" }
 g3ts-astro-state-ingestion = { path = "../../packages/ts/astro/state/g3ts-astro-state-ingestion" }
@@ -43,6 +48,12 @@ g3ts-npmrc-config-checks = { path = "../../packages/ts/npmrc/g3ts-npmrc-config-c
 g3ts-npmrc-ingestion = { path = "../../packages/ts/npmrc/g3ts-npmrc-ingestion" }
 g3ts-jscpd-config-checks = { path = "../../packages/ts/jscpd/g3ts-jscpd-config-checks" }
 g3ts-jscpd-ingestion = { path = "../../packages/ts/jscpd/g3ts-jscpd-ingestion" }
+g3ts-hooks-config-checks = { path = "../../packages/ts/hooks/g3ts-hooks-config-checks" }
+g3ts-hooks-contract-types = { path = "../../packages/ts/hooks/g3ts-hooks-contract-types" }
+g3ts-hooks-file-tree-checks = { path = "../../packages/ts/hooks/g3ts-hooks-file-tree-checks" }
+g3ts-hooks-ingestion = { path = "../../packages/ts/hooks/g3ts-hooks-ingestion" }
+g3ts-hooks-source-checks = { path = "../../packages/ts/hooks/g3ts-hooks-source-checks" }
+g3ts-hooks-types = { path = "../../packages/ts/hooks/g3ts-hooks-types" }
 g3ts-arch-config-checks = { path = "../../packages/ts/arch/g3ts-arch-config-checks" }
 g3ts-arch-file-tree-checks = { path = "../../packages/ts/arch/g3ts-arch-file-tree-checks" }
 g3ts-arch-ingestion = { path = "../../packages/ts/arch/g3ts-arch-ingestion" }

@@ -38,6 +38,7 @@ fn selected_families_default_to_all_supported_families_when_filter_is_empty() {
             SupportedFamily::Package,
             SupportedFamily::Npmrc,
             SupportedFamily::Jscpd,
+            SupportedFamily::Hooks,
         ],
     );
 }

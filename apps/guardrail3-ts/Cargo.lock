@@ -406,6 +406,7 @@ dependencies = [
  "guardrail3-ts-app-types",
  "guardrail3-ts-assertions",
  "guardrail3-ts-family-runner-config",
+ "guardrail3-ts-family-runner-hooks",
  "guardrail3-ts-family-runner-structure",
  "guardrail3-ts-packages",
  "guardrail3-ts-report",
@@ -579,6 +580,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3ts-astro-content-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
+]
+
+[[package]]
 name = "g3ts-astro-content-ingestion"
 version = "0.1.0"
 dependencies = [
@@ -612,6 +620,13 @@ version = "0.1.0"
 dependencies = [
  "g3ts-astro-mdx-types",
  "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-mdx-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
 ]
 
 [[package]]
@@ -649,6 +664,13 @@ dependencies = [
  "g3ts-astro-seo-types",
  "guardrail3-check-types",
  "url",
+]
+
+[[package]]
+name = "g3ts-astro-seo-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
 ]
 
 [[package]]
@@ -703,6 +725,13 @@ version = "0.1.0"
 dependencies = [
  "g3ts-astro-setup-types",
  "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-setup-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
 ]
 
 [[package]]
@@ -802,6 +831,54 @@ version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
  "serde_json",
+]
+
+[[package]]
+name = "g3ts-hooks-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-types",
+ "guardrail3-check-types",
+ "hook-shell-parser",
+]
+
+[[package]]
+name = "g3ts-hooks-contract-types"
+version = "0.1.0"
+
+[[package]]
+name = "g3ts-hooks-file-tree-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-hooks-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3rs-workspace-crawl",
+ "g3ts-hooks-types",
+ "hook-shell-parser",
+]
+
+[[package]]
+name = "g3ts-hooks-source-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
+ "g3ts-hooks-types",
+ "guardrail3-check-types",
+ "hook-shell-parser",
+]
+
+[[package]]
+name = "g3ts-hooks-types"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
+ "hook-shell-parser",
 ]
 
 [[package]]
@@ -1079,6 +1156,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-ts-family-runner-hooks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-workspace-crawl",
+ "g3ts-astro-content-hook-contract",
+ "g3ts-astro-mdx-hook-contract",
+ "g3ts-astro-seo-hook-contract",
+ "g3ts-astro-setup-hook-contract",
+ "g3ts-hooks-config-checks",
+ "g3ts-hooks-contract-types",
+ "g3ts-hooks-file-tree-checks",
+ "g3ts-hooks-ingestion",
+ "g3ts-hooks-source-checks",
+ "guardrail3-ts-app-types",
+]
+
+[[package]]
 name = "guardrail3-ts-family-runner-structure"
 version = "0.1.0"
 dependencies = [
@@ -1178,6 +1272,26 @@ name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
+
+[[package]]
+name = "hook-shell-parser"
+version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-runtime",
+]
+
+[[package]]
+name = "hook-shell-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "hook-shell-parser-types",
+ "tree-sitter",
+ "tree-sitter-bash",
+]
+
+[[package]]
+name = "hook-shell-parser-types"
+version = "0.1.0"
 
 [[package]]
 name = "hstr"

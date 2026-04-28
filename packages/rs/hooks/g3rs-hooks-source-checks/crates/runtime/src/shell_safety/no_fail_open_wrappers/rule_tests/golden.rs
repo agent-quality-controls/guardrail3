@@ -8,7 +8,7 @@ fn reports_fail_open_wrapper_on_critical_command() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("critical hook command is fail-open"),
             line: Some(1),
             inventory: Some(false),
@@ -23,7 +23,7 @@ fn reports_fail_open_wrapper_on_env_wrapped_critical_command() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("critical hook command is fail-open"),
             line: Some(1),
             inventory: Some(false),
@@ -38,7 +38,7 @@ fn reports_fail_open_wrapper_on_path_qualified_critical_command() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("critical hook command is fail-open"),
             line: Some(1),
             inventory: Some(false),
@@ -53,7 +53,7 @@ fn reports_fail_open_wrapper_with_echo_softener() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("critical hook command is fail-open"),
             line: Some(1),
             inventory: Some(false),
@@ -68,7 +68,7 @@ fn reports_fail_open_wrapper_on_called_function_that_runs_critical_command() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("critical hook command is fail-open"),
             line: Some(4),
             inventory: Some(false),
@@ -85,7 +85,7 @@ fn reports_fail_open_wrapper_on_multi_hop_called_function_chain() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("critical hook command is fail-open"),
             line: Some(7),
             inventory: Some(false),
@@ -102,7 +102,7 @@ fn reports_fail_open_wrapper_when_chained_helper_uses_later_redefinition() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("critical hook command is fail-open"),
             line: Some(10),
             inventory: Some(false),
@@ -130,7 +130,7 @@ fn reports_fail_open_wrapper_inside_called_function_body() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("critical hook command is fail-open"),
             line: Some(2),
             inventory: Some(false),
@@ -147,7 +147,7 @@ fn reports_called_function_line_not_earlier_duplicate_text() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("critical hook command is fail-open"),
             line: Some(5),
             inventory: Some(false),
