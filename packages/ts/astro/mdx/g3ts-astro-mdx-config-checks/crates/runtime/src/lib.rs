@@ -1,3 +1,4 @@
+mod eslint_suppression;
 mod mdx_component_map_rule;
 mod mdx_lane;
 mod policy_helper_surfaces;

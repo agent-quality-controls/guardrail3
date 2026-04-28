@@ -1,6 +1,8 @@
 #[cfg(feature = "api")]
 mod eslint;
 #[cfg(feature = "api")]
+mod eslint_directives;
+#[cfg(feature = "api")]
 mod package;
 #[cfg(feature = "api")]
 mod policy;

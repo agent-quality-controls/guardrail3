@@ -29,6 +29,7 @@ pub(super) fn golden() -> G3TsAstroSeoConfigChecksInput {
         }],
         missing_metadata_helper_sources: Vec::new(),
         missing_json_ld_helper_sources: Vec::new(),
+        eslint_directives: Vec::new(),
     }
 }
 
@@ -223,8 +224,29 @@ fn eslint_config() -> G3TsAstroSeoEslintSurfaceState {
             tsx_source_effective_json_ld_helper_rules: vec![
                 "astro-pipeline/require-approved-json-ld-helper-in-routes".to_owned(),
             ],
+            astro_source_warn_or_error_rules: seo_warn_or_error_rules(),
+            ts_source_warn_or_error_rules: seo_warn_or_error_rules(),
+            tsx_source_warn_or_error_rules: seo_warn_or_error_rules(),
+            astro_source_restricted_disable_patterns: seo_restricted_disable_patterns(),
+            ts_source_restricted_disable_patterns: seo_restricted_disable_patterns(),
+            tsx_source_restricted_disable_patterns: seo_restricted_disable_patterns(),
         },
     }
+}
+
+fn seo_warn_or_error_rules() -> Vec<String> {
+    vec![
+        "astro-pipeline/require-approved-metadata-helper-in-routes".to_owned(),
+        "astro-pipeline/require-approved-json-ld-helper-in-routes".to_owned(),
+        "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
+    ]
+}
+
+fn seo_restricted_disable_patterns() -> Vec<String> {
+    vec![
+        "astro-pipeline/require-approved-metadata-helper-in-routes".to_owned(),
+        "astro-pipeline/require-approved-json-ld-helper-in-routes".to_owned(),
+    ]
 }
 
 fn integration(

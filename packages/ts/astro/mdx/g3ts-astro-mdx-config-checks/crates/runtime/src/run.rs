@@ -31,6 +31,16 @@ pub fn check(input: &G3TsAstroMdxConfigChecksInput) -> Vec<G3CheckResult> {
             eslint_contract,
             &mut results,
         );
+        crate::eslint_suppression::disable_descriptions_required::check(
+            eslint_contract,
+            &mut results,
+        );
+        crate::eslint_suppression::unused_disables_fail::check(eslint_contract, &mut results);
+        crate::eslint_suppression::protected_rule_disables_restricted::check(
+            eslint_contract,
+            &mut results,
+        );
     }
+    crate::eslint_suppression::disable_inventory::check_all(&input.eslint_directives, &mut results);
     results
 }

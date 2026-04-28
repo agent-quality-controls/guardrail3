@@ -62,6 +62,12 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroSeoConfigC
             .collect(),
         missing_metadata_helper_sources,
         missing_json_ld_helper_sources,
+        eslint_directives: app_roots
+            .iter()
+            .flat_map(|app_root_rel_path| {
+                crate::eslint_directives::eslint_directives(crawl, app_root_rel_path)
+            })
+            .collect(),
     }
 }
 

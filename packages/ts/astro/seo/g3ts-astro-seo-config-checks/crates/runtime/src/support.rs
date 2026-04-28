@@ -178,3 +178,15 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: Option<&str>) 
         None,
     )
 }
+
+pub(crate) fn warning(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
+    G3CheckResult::new(
+        id.to_owned(),
+        G3Severity::Warn,
+        title.to_owned(),
+        message,
+        file.map(str::to_owned),
+        None,
+    )
+    .into_inventory()
+}

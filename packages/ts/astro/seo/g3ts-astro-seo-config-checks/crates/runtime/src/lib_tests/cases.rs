@@ -24,7 +24,108 @@ fn golden_seo_package_reports_owned_ids() {
             "g3ts-astro-seo/policy-helper-surfaces",
             "g3ts-astro-seo/metadata-helper-rule",
             "g3ts-astro-seo/json-ld-helper-rule",
+            "g3ts-astro-seo/protected-seo-rule-disables-restricted",
+            "g3ts-astro-seo/eslint-disable-inventory",
         ],
+    );
+}
+
+#[test]
+fn protected_seo_rule_disables_must_cover_json_ld_rule() {
+    let mut input = super::helpers::golden();
+    let config = &mut input.eslint_contracts[0].config;
+    let g3ts_astro_seo_types::G3TsAstroSeoEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden seo eslint config should be parsed");
+    };
+    snapshot
+        .tsx_source_restricted_disable_patterns
+        .retain(|rule| rule != "astro-pipeline/require-approved-json-ld-helper-in-routes");
+
+    assertions::assert_runtime_error_id(
+        &input,
+        "g3ts-astro-seo/protected-seo-rule-disables-restricted",
+    );
+}
+
+#[test]
+fn protected_seo_rule_disables_requires_restrict_rule() {
+    let mut input = super::helpers::golden();
+    let config = &mut input.eslint_contracts[0].config;
+    let g3ts_astro_seo_types::G3TsAstroSeoEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden seo eslint config should be parsed");
+    };
+    snapshot
+        .ts_source_warn_or_error_rules
+        .retain(|rule| rule != "@eslint-community/eslint-comments/no-restricted-disable");
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-seo/protected-seo-rule-disables-restricted",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn protected_seo_rule_disables_accept_pipeline_wildcard() {
+    let mut input = super::helpers::golden();
+    let config = &mut input.eslint_contracts[0].config;
+    let g3ts_astro_seo_types::G3TsAstroSeoEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden seo eslint config should be parsed");
+    };
+    snapshot.astro_source_restricted_disable_patterns = vec!["astro-pipeline/*".to_owned()];
+    snapshot.ts_source_restricted_disable_patterns = vec!["astro-pipeline/*".to_owned()];
+    snapshot.tsx_source_restricted_disable_patterns = vec!["astro-pipeline/*".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-seo/protected-seo-rule-disables-restricted",
+        guardrail3_check_types::G3Severity::Info,
+    );
+}
+
+#[test]
+fn eslint_disable_inventory_warns_when_seo_source_contains_disable() {
+    let mut input = super::helpers::golden();
+    input
+        .eslint_directives
+        .push(g3ts_astro_seo_types::G3TsAstroSeoEslintDirectiveInput {
+            rel_path: "src/pages/index.astro".to_owned(),
+            directive_kind: "DisableNextLine".to_owned(),
+            disabled_rules: vec![
+                "astro-pipeline/require-approved-metadata-helper-in-routes".to_owned(),
+            ],
+            all_rules: false,
+            line: 20,
+            target_line: Some(21),
+            parse_error: None,
+        });
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-seo/eslint-disable-inventory",
+        guardrail3_check_types::G3Severity::Warn,
+    );
+}
+
+#[test]
+fn eslint_disable_inventory_fails_closed_on_seo_parse_error() {
+    let mut input = super::helpers::golden();
+    input
+        .eslint_directives
+        .push(g3ts_astro_seo_types::G3TsAstroSeoEslintDirectiveInput {
+            rel_path: "src/pages/index.astro".to_owned(),
+            directive_kind: "ParseError".to_owned(),
+            disabled_rules: Vec::new(),
+            all_rules: false,
+            line: 0,
+            target_line: None,
+            parse_error: Some("ambiguous directive syntax".to_owned()),
+        });
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-seo/eslint-disable-inventory",
+        guardrail3_check_types::G3Severity::Error,
     );
 }
 
@@ -306,6 +407,8 @@ fn strict_ai_readable_passes_when_llms_package_integration_and_script_are_presen
             "g3ts-astro-seo/policy-helper-surfaces",
             "g3ts-astro-seo/metadata-helper-rule",
             "g3ts-astro-seo/json-ld-helper-rule",
+            "g3ts-astro-seo/protected-seo-rule-disables-restricted",
+            "g3ts-astro-seo/eslint-disable-inventory",
         ],
     );
 }
@@ -430,6 +533,8 @@ fn golden_expected_ids() -> &'static [&'static str] {
         "g3ts-astro-seo/policy-helper-surfaces",
         "g3ts-astro-seo/metadata-helper-rule",
         "g3ts-astro-seo/json-ld-helper-rule",
+        "g3ts-astro-seo/protected-seo-rule-disables-restricted",
+        "g3ts-astro-seo/eslint-disable-inventory",
     ]
 }
 

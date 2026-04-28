@@ -26,6 +26,20 @@ pub fn assert_runtime_error_id(
     );
 }
 
+pub fn assert_runtime_check_id_severity(
+    input: &g3ts_astro_seo_types::G3TsAstroSeoConfigChecksInput,
+    expected_id: &str,
+    expected_severity: guardrail3_check_types::G3Severity,
+) {
+    let results = g3ts_astro_seo_config_checks_runtime::check(input);
+    assert!(
+        results
+            .iter()
+            .any(|result| { result.id() == expected_id && result.severity() == expected_severity }),
+        "expected {expected_severity:?} for {expected_id}, got {results:#?}"
+    );
+}
+
 pub fn assert_exact_ids(results: &[guardrail3_check_types::G3CheckResult], expected: &[&str]) {
     let actual = results
         .iter()

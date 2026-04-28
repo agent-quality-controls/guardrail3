@@ -1,7 +1,7 @@
 use eslint_directive_parser_runtime_assertions::parser::{
-    assert_ambiguous_document, assert_directive, assert_directive_count, assert_parse_error_document,
-    assert_parsed_document, assert_state_reason_contains, assert_unsupported_document,
-    EslintDirectiveKind, EslintDisabledRuleSet,
+    EslintDirectiveKind, EslintDisabledRuleSet, assert_ambiguous_document, assert_directive,
+    assert_directive_count, assert_parse_error_document, assert_parsed_document,
+    assert_state_reason_contains, assert_unsupported_document,
 };
 
 #[test]
@@ -49,9 +49,7 @@ eslint-enable astro-pipeline/no-inline-public-content
         EslintDirectiveKind::Disable,
         6,
         None,
-        &EslintDisabledRuleSet::Rules(vec![
-            "astro-pipeline/no-inline-public-content".to_owned(),
-        ]),
+        &EslintDisabledRuleSet::Rules(vec!["astro-pipeline/no-inline-public-content".to_owned()]),
     );
     assert_directive(
         &document,
@@ -59,9 +57,7 @@ eslint-enable astro-pipeline/no-inline-public-content
         EslintDirectiveKind::Enable,
         9,
         None,
-        &EslintDisabledRuleSet::Rules(vec![
-            "astro-pipeline/no-inline-public-content".to_owned(),
-        ]),
+        &EslintDisabledRuleSet::Rules(vec!["astro-pipeline/no-inline-public-content".to_owned()]),
     );
 }
 
@@ -122,9 +118,7 @@ fn parses_directives_inside_template_expression_comments() {
         EslintDirectiveKind::Disable,
         1,
         None,
-        &EslintDisabledRuleSet::Rules(vec![
-            "astro-pipeline/no-inline-public-content".to_owned(),
-        ]),
+        &EslintDisabledRuleSet::Rules(vec!["astro-pipeline/no-inline-public-content".to_owned()]),
     );
 }
 
@@ -175,9 +169,7 @@ fn multiline_disable_next_line_targets_after_comment_end() {
         EslintDirectiveKind::DisableNextLine,
         2,
         Some(4),
-        &EslintDisabledRuleSet::Rules(vec![
-            "astro-pipeline/no-inline-public-content".to_owned(),
-        ]),
+        &EslintDisabledRuleSet::Rules(vec!["astro-pipeline/no-inline-public-content".to_owned()]),
     );
 }
 
@@ -196,9 +188,7 @@ fn astro_template_text_is_not_scanned_as_line_comment() {
         EslintDirectiveKind::Disable,
         5,
         None,
-        &EslintDisabledRuleSet::Rules(vec![
-            "astro-pipeline/no-inline-public-content".to_owned(),
-        ]),
+        &EslintDisabledRuleSet::Rules(vec!["astro-pipeline/no-inline-public-content".to_owned()]),
     );
 }
 

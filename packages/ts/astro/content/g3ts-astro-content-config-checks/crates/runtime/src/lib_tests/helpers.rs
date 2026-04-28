@@ -35,6 +35,7 @@ pub(super) fn golden() -> G3TsAstroContentConfigChecksInput {
             astro_policy,
             eslint_config,
         }],
+        eslint_directives: Vec::new(),
         adapter_root_contracts: vec![G3TsAstroContentAdapterRootInput {
             policy_rel_path: "guardrail3-ts.toml".to_owned(),
             configured_adapter: "src/lib/content".to_owned(),
@@ -120,9 +121,44 @@ fn eslint_config() -> G3TsAstroContentEslintSurfaceState {
             tsx_source_effective_inline_public_content_rules: vec![
                 "i18next/no-literal-string".to_owned(),
             ],
+            astro_source_warn_or_error_rules: warn_or_error_rules(),
+            ts_source_warn_or_error_rules: warn_or_error_rules(),
+            tsx_source_warn_or_error_rules: warn_or_error_rules(),
+            astro_source_restricted_disable_patterns: restricted_disable_patterns(),
+            ts_source_restricted_disable_patterns: restricted_disable_patterns(),
+            tsx_source_restricted_disable_patterns: restricted_disable_patterns(),
             astro_source_probe_ignored: false,
             ts_source_probe_ignored: false,
             tsx_source_probe_ignored: false,
         },
     }
+}
+
+fn warn_or_error_rules() -> Vec<String> {
+    vec![
+        "astro-pipeline/no-authored-content-fs-read".to_owned(),
+        "astro-pipeline/no-authored-content-glob".to_owned(),
+        "astro-pipeline/no-authored-content-imports".to_owned(),
+        "astro-pipeline/no-content-data-modules-in-routes".to_owned(),
+        "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
+        "astro-pipeline/require-approved-content-adapter-in-routes".to_owned(),
+        "astro-pipeline/no-side-loader-imports".to_owned(),
+        "astro-pipeline/no-velite-imports".to_owned(),
+        "i18next/no-literal-string".to_owned(),
+        "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
+    ]
+}
+
+fn restricted_disable_patterns() -> Vec<String> {
+    vec![
+        "astro-pipeline/no-authored-content-fs-read".to_owned(),
+        "astro-pipeline/no-authored-content-glob".to_owned(),
+        "astro-pipeline/no-authored-content-imports".to_owned(),
+        "astro-pipeline/no-content-data-modules-in-routes".to_owned(),
+        "astro-pipeline/no-direct-astro-content-in-routes".to_owned(),
+        "astro-pipeline/require-approved-content-adapter-in-routes".to_owned(),
+        "astro-pipeline/no-side-loader-imports".to_owned(),
+        "astro-pipeline/no-velite-imports".to_owned(),
+        "i18next/no-literal-string".to_owned(),
+    ]
 }

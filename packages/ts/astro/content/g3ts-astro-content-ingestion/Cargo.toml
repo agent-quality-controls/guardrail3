@@ -14,6 +14,7 @@ include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [dependencies]
 astro-config-parser = { path = "../../../../parsers/astro-config-parser", version = "0.1.0", features = ["api"] }
+eslint-directive-parser = { path = "../../../../parsers/eslint-directive-parser", version = "0.1.0", features = ["api"] }
 eslint-config-parser = { path = "../../../../parsers/eslint-config-parser", version = "0.1.0", features = ["api"] }
 g3-workspace-crawl = { path = "../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
 g3ts-astro-check-support = { path = "../../g3ts-astro-check-support", version = "0.1.0" }

@@ -110,12 +110,18 @@ pub struct G3TsAstroMdxEslintSurfaceSnapshot {
     pub mdx_content_plugins: Vec<String>,
     pub mdx_content_plugin_package_names: BTreeMap<String, Vec<String>>,
     pub mdx_content_error_rules: Vec<String>,
+    pub mdx_content_warn_or_error_rules: Vec<String>,
+    pub mdx_content_restricted_disable_patterns: Vec<String>,
+    pub mdx_content_unused_disable_fail_closed: bool,
     pub mdx_content_effective_mdx_component_map_rules: Vec<String>,
     pub mdx_content_effective_named_component_import_rules: Vec<String>,
     pub mdx_content_effective_no_raw_image_rules: Vec<String>,
     pub component_map_probe_present: bool,
     pub component_map_plugin_package_names: BTreeMap<String, Vec<String>>,
     pub component_map_error_rules: Vec<String>,
+    pub component_map_warn_or_error_rules: Vec<String>,
+    pub component_map_restricted_disable_patterns: Vec<String>,
+    pub component_map_unused_disable_fail_closed: bool,
     pub component_map_effective_no_raw_ui_export_rules: Vec<String>,
     pub component_map_effective_wrapper_zod_parse_rules: Vec<String>,
     pub component_map_probe_ignored: bool,
@@ -146,6 +152,17 @@ pub struct G3TsAstroMdxEslintPluginContractInput {
     pub config: G3TsAstroMdxEslintSurfaceState,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroMdxEslintDirectiveInput {
+    pub rel_path: String,
+    pub directive_kind: String,
+    pub disabled_rules: Vec<String>,
+    pub all_rules: bool,
+    pub line: u32,
+    pub target_line: Option<u32>,
+    pub parse_error: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct G3TsAstroMdxIntegrationContractInput {
     pub app_root_rel_path: String,
@@ -159,4 +176,5 @@ pub struct G3TsAstroMdxConfigChecksInput {
     pub integration_contracts: Vec<G3TsAstroMdxIntegrationContractInput>,
     pub eslint_contracts: Vec<G3TsAstroMdxEslintPluginContractInput>,
     pub missing_component_map_sources: Vec<G3TsAstroMdxMissingComponentMapInput>,
+    pub eslint_directives: Vec<G3TsAstroMdxEslintDirectiveInput>,
 }
