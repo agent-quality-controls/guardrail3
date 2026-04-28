@@ -1,6 +1,7 @@
 profile = "library"
 
 allowed_deps = [
+  "g3rs-hooks-contract-types",
   "g3rs-hooks-types",
   "hook-shell-parser",
   "guardrail3-check-types",

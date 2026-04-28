@@ -211,12 +211,13 @@ pub(super) fn collect_use_bindings(
     tree: &syn::UseTree,
     prefix: &mut Vec<String>,
     line: usize,
+    is_public: bool,
     out: &mut Vec<UseBinding>,
 ) {
     match tree {
         syn::UseTree::Path(path) => {
             prefix.push(path.ident.to_string());
-            collect_use_bindings(&path.tree, prefix, line, out);
+            collect_use_bindings(&path.tree, prefix, line, is_public, out);
             let _ = prefix.pop();
         }
         syn::UseTree::Name(name) => {
@@ -226,6 +227,7 @@ pub(super) fn collect_use_bindings(
                 line,
                 path_segments,
                 local_name: Some(name.ident.to_string()),
+                is_public,
             });
         }
         syn::UseTree::Rename(rename) => {
@@ -235,6 +237,7 @@ pub(super) fn collect_use_bindings(
                 line,
                 path_segments,
                 local_name: Some(rename.rename.to_string()),
+                is_public,
             });
         }
         syn::UseTree::Glob(_) => {
@@ -242,11 +245,12 @@ pub(super) fn collect_use_bindings(
                 line,
                 path_segments: prefix.clone(),
                 local_name: None,
+                is_public,
             });
         }
         syn::UseTree::Group(group) => {
             for item in &group.items {
-                collect_use_bindings(item, prefix, line, out);
+                collect_use_bindings(item, prefix, line, is_public, out);
             }
         }
     }

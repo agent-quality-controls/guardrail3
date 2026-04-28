@@ -11,7 +11,7 @@ guardrail3-rs-app-types = { path = "../../../../../types/app-types" }
 guardrail3-rs-family-runner-style = { path = "../../../../../logic/family-runner-style" }
 guardrail3-rs-family-runner-policy = { path = "../../../../../logic/family-runner-policy" }
 guardrail3-rs-family-runner-quality = { path = "../../../../../logic/family-runner-quality" }
-guardrail3-rs-family-runner-process = { path = "../../../../../logic/family-runner-process" }
+guardrail3-rs-family-runner-process = { path = "../../../../../logic/family-runner-process/crates/runtime" }
 guardrail3-rs-family-runner-test = { path = "../../../../../logic/family-runner-test" }
 guardrail3-rs-family-runner-structure = { path = "../../../../../logic/family-runner-structure" }
 guardrail3-rs-validate-command = { path = "../../../../../logic/validate-command/crates/runtime" }

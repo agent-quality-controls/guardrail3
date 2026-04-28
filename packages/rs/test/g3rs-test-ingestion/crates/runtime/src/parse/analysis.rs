@@ -256,6 +256,7 @@ impl<'source> Visit<'source> for TestVisitor {
             &item.tree,
             &mut Vec::new(),
             helpers::span_line(item.span()),
+            matches!(item.vis, syn::Visibility::Public(_)),
             &mut self.out.imports,
         );
         syn::visit::visit_item_use(self, item);
@@ -266,6 +267,7 @@ impl<'source> Visit<'source> for TestVisitor {
             line: helpers::span_line(item.span()),
             path_segments: vec![item.ident.to_string()],
             local_name: item.rename.as_ref().map(|(_, ident)| ident.to_string()),
+            is_public: matches!(item.vis, syn::Visibility::Public(_)),
         });
         syn::visit::visit_item_extern_crate(self, item);
     }

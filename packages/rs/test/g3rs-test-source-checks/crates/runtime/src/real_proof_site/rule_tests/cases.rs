@@ -258,6 +258,40 @@ fn inventories_owned_assertions_proof_via_alias_import() {
 }
 
 #[test]
+fn inventories_owned_assertions_proof_via_public_facade_reexport() {
+    let results = assertions::check(&assertions::input(
+        vec![
+            assertions::file(
+                "assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo_assertions"),
+                "mod contract;\npub use contract::assert_demo;\n",
+            ),
+            assertions::file(
+                "assertions/src/contract.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo_assertions"),
+                "pub fn assert_demo() { assert_eq!(1, 1); }\n",
+            ),
+            assertions::file(
+                "tests/facade.rs",
+                G3RsTestFileKind::ExternalHarness,
+                Some("demo_assertions"),
+                "#[test]\nfn facade() { demo_assertions::assert_demo(); }\n",
+            ),
+        ],
+        Some("demo_assertions"),
+    ));
+
+    assertions::assert_has_inventory(
+        &results,
+        "g3rs-test/real-proof-site",
+        "test uses shared proof",
+        "tests/facade.rs",
+    );
+}
+
+#[test]
 fn inventories_owned_assertions_proof_via_root_aliased_local_import_chain() {
     let results = assertions::check(&assertions::input(
         vec![

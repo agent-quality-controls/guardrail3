@@ -240,6 +240,10 @@ fn fail_open_wrapper_from_command(command_text: &str) -> Option<FailOpenWrapper>
         "true" => Some(FailOpenWrapper::True),
         ":" => Some(FailOpenWrapper::NoOp),
         "echo" => Some(FailOpenWrapper::Echo(command_text.to_owned())),
+        "printf" => Some(FailOpenWrapper::Printf(command_text.to_owned())),
+        "exit" if words.get(1).is_some_and(|argument| argument == "0") => {
+            Some(FailOpenWrapper::ExitZero)
+        }
         _ => None,
     }
 }

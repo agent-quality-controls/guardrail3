@@ -1,0 +1,44 @@
+[package]
+name = "guardrail3-rs-family-runner-process"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-rs-app-types = { path = "../../../../types/app-types" }
+g3rs-workspace-crawl.workspace = true
+g3rs-apparch-hook-contract.workspace = true
+g3rs-arch-hook-contract.workspace = true
+g3rs-cargo-hook-contract.workspace = true
+g3rs-clippy-hook-contract.workspace = true
+g3rs-code-hook-contract.workspace = true
+g3rs-deny-hook-contract.workspace = true
+g3rs-deps-hook-contract.workspace = true
+g3rs-fmt-hook-contract.workspace = true
+g3rs-garde-hook-contract.workspace = true
+g3rs-hooks-config-checks.workspace = true
+g3rs-hooks-contract-types.workspace = true
+g3rs-hooks-file-tree-checks.workspace = true
+g3rs-hooks-ingestion.workspace = true
+g3rs-hooks-source-checks.workspace = true
+g3rs-release-hook-contract.workspace = true
+g3rs-release-config-checks.workspace = true
+g3rs-release-filetree-checks.workspace = true
+g3rs-release-ingestion.workspace = true
+g3rs-release-source-checks.workspace = true
+g3rs-test-hook-contract.workspace = true
+g3rs-toolchain-hook-contract.workspace = true
+g3rs-topology-hook-contract.workspace = true
+
+[features]
+default = ["api"]
+api = []
+
+[dev-dependencies]
+guardrail3-rs-family-runner-process-assertions = { path = "../assertions" }
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

@@ -1,2 +1,27 @@
 [rs]
 profile = "library"
+
+allowed_deps = [
+  "g3rs-hooks-contract-types",
+]
+
+[checks]
+hooks = false
+
+[[waivers]]
+rule = "g3rs-test/runtime-assertions-split"
+file = "crates/assertions/Cargo.toml"
+selector = "runtime-assertions-split"
+reason = "Hook-contract packages contain one pure contract function; duplicating the same proof through a sibling assertions crate would add ceremony without isolating another behavior."
+
+[[waivers]]
+rule = "g3rs-test/runtime-assertions-split"
+file = "crates/runtime/Cargo.toml"
+selector = "runtime-assertions-split"
+reason = "Hook-contract packages contain one pure contract function; the owned sidecar directly proves that contract instead of routing through an empty assertions crate."
+
+[[waivers]]
+rule = "g3rs-test/runtime-assertions-split"
+file = "crates/runtime/src/lib_tests/contract.rs"
+selector = "runtime-assertions-split"
+reason = "The sidecar tests the runtime facade's single public contract function directly; there is no separate assertion surface to share."

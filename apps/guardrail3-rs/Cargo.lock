@@ -1761,6 +1761,16 @@ dependencies = [
  "g3rs-topology-hook-contract",
  "g3rs-workspace-crawl",
  "guardrail3-rs-app-types",
+ "guardrail3-rs-family-runner-process-assertions",
+]
+
+[[package]]
+name = "guardrail3-rs-family-runner-process-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+ "guardrail3-check-types",
+ "guardrail3-rs-family-runner-process",
 ]
 
 [[package]]

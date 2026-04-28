@@ -1,4 +1,5 @@
 use g3rs_hooks_contract_types::{G3HookCriticalCommand, G3HookRequirement, G3HookTriggerPattern};
+use guardrail3_check_types::G3Severity;
 
 use crate::contract_critical_command_not_fail_open::rule::run_case;
 
@@ -12,7 +13,12 @@ fn contract_binary_critical_command_cannot_fail_open() {
     );
 
     assert!(
-        results.iter().any(|result| !result.inventory()),
+        results.iter().any(|result| {
+            !result.inventory()
+                && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
+                && result.severity() == G3Severity::Warn
+                && result.title() == "contract-critical hook command is fail-open"
+        }),
         "fail-open contract-critical binary command should be reported"
     );
 }
@@ -90,6 +96,52 @@ fn negated_if_with_failure_exit_is_not_fail_open() {
     assert!(
         results.is_empty(),
         "negated if branch with explicit non-zero exit should not be reported"
+    );
+}
+
+#[test]
+fn or_exit_zero_is_fail_open() {
+    let results = run_case("#!/bin/sh\ng3rs validate --path . || exit 0\n", Vec::new());
+
+    assert!(
+        results.iter().any(|result| {
+            !result.inventory()
+                && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
+                && result.severity() == G3Severity::Warn
+        }),
+        "critical command followed by `|| exit 0` should be reported"
+    );
+}
+
+#[test]
+fn or_printf_is_fail_open() {
+    let results = run_case(
+        "#!/bin/sh\ncargo clippy -- -D warnings || printf 'ignored\\n'\n",
+        vec![requirement(G3HookCriticalCommand::CargoSubcommand(
+            "clippy".to_owned(),
+        ))],
+    );
+
+    assert!(
+        results.iter().any(|result| {
+            !result.inventory()
+                && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
+                && result.severity() == G3Severity::Warn
+        }),
+        "critical command followed by `|| printf` should be reported"
+    );
+}
+
+#[test]
+fn negated_if_with_failure_helper_is_not_fail_open() {
+    let results = run_case(
+        "#!/bin/sh\ndie() { exit 1; }\nif ! g3rs validate --path .; then die; fi\n",
+        Vec::new(),
+    );
+
+    assert!(
+        results.is_empty(),
+        "negated if branch calling a helper that exits non-zero should not be reported"
     );
 }
 

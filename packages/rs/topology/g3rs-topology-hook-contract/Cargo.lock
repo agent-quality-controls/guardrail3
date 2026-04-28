@@ -16,12 +16,17 @@ dependencies = [
 [[package]]
 name = "g3rs-topology-hook-contract-assertions"
 version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+ "g3rs-topology-hook-contract-runtime",
+]
 
 [[package]]
 name = "g3rs-topology-hook-contract-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-hooks-contract-types",
+ "g3rs-topology-hook-contract-assertions",
 ]
 
 [[package]]

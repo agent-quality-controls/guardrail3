@@ -109,7 +109,7 @@ fn negated_if_failure_branch_is_softened(script: &ParsedShellScript, line_no: us
     let Some(branch) = negated_if_failure_branch(script, line_no) else {
         return false;
     };
-    !branch_has_failure_terminator(&branch)
+    !branch_has_failure_terminator(&branch, script, line_no)
 }
 
 fn negated_if_failure_branch(script: &ParsedShellScript, line_no: usize) -> Option<String> {
@@ -183,13 +183,33 @@ fn split_control_token<'a>(text: &'a str, token: &str) -> Option<(&'a str, &'a s
     None
 }
 
-fn branch_has_failure_terminator(branch: &str) -> bool {
+fn branch_has_failure_terminator(
+    branch: &str,
+    root: &ParsedShellScript,
+    visible_root_line_no: usize,
+) -> bool {
     let parsed = hook_shell_parser::parse_script(branch);
     parsed.executable_lines.iter().any(|line| {
         matches!(line.command_name.as_str(), "false")
             || (matches!(line.command_name.as_str(), "exit" | "return")
                 && command_second_word_is_nonzero(line.command_text.as_str()))
+            || called_function_terminates_failure(root, &line.command_name, visible_root_line_no)
     })
+}
+
+fn called_function_terminates_failure(
+    parsed: &ParsedShellScript,
+    command_name: &str,
+    line_no: usize,
+) -> bool {
+    parsed
+        .functions
+        .iter()
+        .rev()
+        .find(|function| function.name == command_name && function.line_no <= line_no)
+        .is_some_and(|function| {
+            branch_has_failure_terminator(&function.body, parsed, function.line_no)
+        })
 }
 
 fn command_second_word_is_nonzero(command_text: &str) -> bool {

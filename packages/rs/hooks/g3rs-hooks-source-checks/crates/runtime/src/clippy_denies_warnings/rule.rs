@@ -39,7 +39,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
-fn script_contains_clippy_deny(parsed: &ParsedShellScript) -> bool {
+pub(crate) fn script_contains_clippy_deny(parsed: &ParsedShellScript) -> bool {
     let mut found = false;
     visit_resolved_commands_with_env(
         parsed,

@@ -3,6 +3,8 @@ pub enum FailOpenWrapper {
     True,
     NoOp,
     Echo(String),
+    Printf(String),
+    ExitZero,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

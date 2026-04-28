@@ -23,6 +23,9 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
 }
 
 pub(crate) fn script_contains_guardrail_step(parsed: &ParsedShellScript) -> bool {
+    if script_defines_alias(parsed, "g3rs") {
+        return false;
+    }
     any_resolved_command(parsed, is_guardrail_validate_path_command)
 }
 
@@ -114,22 +117,8 @@ fn parse_validate_args(args: &[String]) -> bool {
             index += 2;
             continue;
         }
-        if let Some(value) = arg.strip_prefix("--family=") {
-            if value.is_empty() {
-                return false;
-            }
-            index += 1;
-            continue;
-        }
-        if arg == "--family" {
-            let Some(value) = args.get(index + 1).map(String::as_str) else {
-                return false;
-            };
-            if value.starts_with('-') {
-                return false;
-            }
-            index += 2;
-            continue;
+        if arg.starts_with("--family=") || arg == "--family" {
+            return false;
         }
         if arg == "--inventory" {
             index += 1;
@@ -177,6 +166,14 @@ fn push_presence_result(
 
 fn is_help_or_version_flag(token: &str) -> bool {
     matches!(token, "-h" | "--help" | "-V" | "--version")
+}
+
+fn script_defines_alias(parsed: &ParsedShellScript, command_name: &str) -> bool {
+    parsed.source_lines.iter().any(|line| {
+        let trimmed = line.raw.trim_start();
+        trimmed.starts_with(&format!("alias {command_name}="))
+            || trimmed.starts_with(&format!("alias {command_name} ="))
+    })
 }
 
 #[cfg(test)]

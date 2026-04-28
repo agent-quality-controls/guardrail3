@@ -98,7 +98,7 @@ CSS_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.css$' || true)
 if command -v g3rs &> /dev/null; then
     if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ] || [ "$RUST_CONFIG_CHANGED" -gt 0 ]; then
         echo "Running g3rs validation..."
-        if ! g3rs validate --path "$REPO_ROOT" --family hooks; then
+        if ! g3rs validate --path "$REPO_ROOT/apps/guardrail3-rs"; then
             echo "g3rs validation failed. Fix issues before committing."
             exit 1
         fi
