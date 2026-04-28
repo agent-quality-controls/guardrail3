@@ -12,5 +12,5 @@ pub use types::{
     G3TsAstroSeoEslintSurfaceState, G3TsAstroSeoIntegrationContractInput,
     G3TsAstroSeoMissingJsonLdHelperInput, G3TsAstroSeoMissingMetadataHelperInput,
     G3TsAstroSeoPolicySnapshot, G3TsAstroSeoPolicySurfaceState, G3TsAstroStaticObjectProperty,
-    G3TsAstroStaticValue,
+    G3TsAstroStaticValue, G3TsAstroTrailingSlashPolicy,
 };

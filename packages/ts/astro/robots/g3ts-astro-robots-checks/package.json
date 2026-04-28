@@ -1,0 +1,60 @@
+{
+  "name": "g3ts-astro-robots-checks",
+  "version": "0.1.2",
+  "description": "Post-build robots.txt artifact checker for strict G3TS Astro sites.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/websmasher/guardrail3.git",
+    "directory": "packages/ts/astro/robots/g3ts-astro-robots-checks"
+  },
+  "homepage": "https://github.com/websmasher/guardrail3/tree/main/packages/ts/astro/robots/g3ts-astro-robots-checks",
+  "bugs": {
+    "url": "https://github.com/websmasher/guardrail3/issues"
+  },
+  "keywords": [
+    "astro",
+    "robots",
+    "sitemap",
+    "guardrails",
+    "g3ts"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "bin": {
+    "g3ts-astro-robots-checks": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "prepack": "npm run clean && npm run build",
+    "prepublishOnly": "npm test",
+    "pretest": "npm run build",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "robots-parser": "3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3"
+  }
+}

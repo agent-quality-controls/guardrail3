@@ -1,6 +1,6 @@
 use astro_config_parser_runtime_assertions::parser as assertions;
 use astro_config_parser_runtime_assertions::parser::{
-    AstroConfigParseState, AstroOutputMode, AstroStaticValue,
+    AstroConfigParseState, AstroOutputMode, AstroStaticValue, AstroTrailingSlashPolicy,
 };
 
 #[test]
@@ -9,7 +9,7 @@ fn parses_define_config_module_with_integrations() {
     let rel_path = "astro.config.mjs";
     std::fs::write(
         root.path().join(rel_path),
-        "import { defineConfig } from 'astro/config';\nimport react from '@astrojs/react';\nimport checks from '@nuasite/checks';\nexport default defineConfig({ site: 'https://example.com', output: 'static', integrations: [checks(), react()] });\n",
+        "import { defineConfig } from 'astro/config';\nimport react from '@astrojs/react';\nimport checks from '@nuasite/checks';\nexport default defineConfig({ site: 'https://example.com', output: 'static', outDir: 'public-build', trailingSlash: 'always', integrations: [checks(), react()] });\n",
     )
     .expect("config should be written");
 
@@ -21,6 +21,8 @@ fn parses_define_config_module_with_integrations() {
         &document,
         Some("https://example.com"),
         Some(AstroOutputMode::Static),
+        Some("public-build"),
+        Some(AstroTrailingSlashPolicy::Always),
         &["@astrojs/react", "@nuasite/checks"],
         None,
     );
@@ -44,6 +46,8 @@ fn parses_function_config_and_cjs_export() {
         &document,
         None,
         Some(AstroOutputMode::Server),
+        None,
+        None,
         &[],
         Some("@astrojs/node"),
     );
@@ -63,7 +67,7 @@ fn parses_identifier_bound_integrations_array() {
         assertions::parse_document(root.path(), rel_path).expect("astro config should parse");
 
     assertions::assert_parsed_document(&document);
-    assertions::assert_snapshot(&document, None, None, &["@astrojs/mdx"], None);
+    assertions::assert_snapshot(&document, None, None, None, None, &["@astrojs/mdx"], None);
 }
 
 #[test]
@@ -80,7 +84,7 @@ fn bare_imported_identifier_does_not_count_as_wired_integration() {
         assertions::parse_document(root.path(), rel_path).expect("astro config should parse");
 
     assertions::assert_parsed_document(&document);
-    assertions::assert_snapshot(&document, None, None, &[], None);
+    assertions::assert_snapshot(&document, None, None, None, None, &[], None);
 }
 
 #[test]
@@ -99,6 +103,8 @@ fn spread_integrations_resolve_when_they_point_to_array_literals() {
     assertions::assert_parsed_document(&document);
     assertions::assert_snapshot(
         &document,
+        None,
+        None,
         None,
         None,
         &["@astrojs/mdx", "@astrojs/react"],

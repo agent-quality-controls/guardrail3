@@ -13,19 +13,19 @@ allowed_deps = [
 garde = false
 
 [[waivers]]
-rule = "RS-CODE-SOURCE-09"
+rule = "g3rs-code/too-many-effective-code-lines"
 file = "crates/runtime/src/parser.rs"
 selector = "effective-code-lines"
 reason = "Package script parser is a tree-sitter shell reducer; splitting it safely requires a dedicated parser-module extraction."
 
 [[waivers]]
-rule = "RS-CODE-SOURCE-31"
+rule = "g3rs-code/public-struct-named-fields"
 file = "crates/assertions/src/parser.rs"
 selector = "struct:ExpectedEslintInvocation"
 reason = "Assertion fixture structs are declarative expected values used only by the assertions crate API."
 
 [[waivers]]
-rule = "RS-CODE-SOURCE-31"
+rule = "g3rs-code/public-struct-named-fields"
 file = "crates/assertions/src/parser.rs"
 selector = "struct:ExpectedToolInvocation"
 reason = "Assertion fixture structs are declarative expected values used only by the assertions crate API."

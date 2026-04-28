@@ -5,10 +5,16 @@ use guardrail3_check_types::G3CheckResult;
 pub fn check(input: &G3TsAstroSeoConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     for contract in &input.integration_contracts {
+        crate::canonical_site_config::check(contract, &mut results);
+        crate::static_output_config::check(contract, &mut results);
+        crate::trailing_slash_policy::check(contract, &mut results);
         crate::nuasite_checks::check(contract, &mut results);
         crate::sitemap_integration::check(contract, &mut results);
         crate::robots_integration::check(contract, &mut results);
-        crate::llms_txt::check(contract, &mut results);
+        crate::llms_integration_present::check(contract, &mut results);
+        crate::crawler_checker_packages::check(contract, &mut results);
+        crate::artifact_validate_scripts::check(contract, &mut results);
+        crate::broad_crawler_generator::check(contract, &mut results);
         crate::seo_packages::check(contract, &mut results);
         crate::structured_data_check::check(contract, &mut results);
         crate::strict_policy_paths::check_seo(contract, &mut results);

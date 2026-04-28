@@ -128,6 +128,12 @@ pub struct TsAstroSeoPolicyConfig {
     pub metadata_helpers: Vec<String>,
     #[serde(default)]
     pub json_ld_helpers: Vec<String>,
+    #[serde(default)]
+    pub strict_ai_readable: bool,
+    #[serde(default)]
+    pub llms_required_sections: Vec<String>,
+    #[serde(default)]
+    pub llms_required_links: Vec<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }

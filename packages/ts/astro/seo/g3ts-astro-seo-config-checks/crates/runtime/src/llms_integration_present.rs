@@ -1,0 +1,43 @@
+use g3ts_astro_seo_types::{G3TsAstroConfigSurfaceState, G3TsAstroSeoIntegrationContractInput};
+use guardrail3_check_types::G3CheckResult;
+
+const ID: &str = "g3ts-astro-seo/llms-integration-present";
+const DEPENDENCY_NAME: &str = "g3ts-astro-llms";
+
+pub(crate) fn check(
+    contract: &G3TsAstroSeoIntegrationContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if !crate::support::strict_ai_readable_enabled(&contract.astro_policy) {
+        return;
+    }
+
+    let rel_path = crate::support::astro_config_rel_path(&contract.astro_config);
+    let has_wiring = match &contract.astro_config {
+        G3TsAstroConfigSurfaceState::Parsed { snapshot } => {
+            crate::support::astro_config_has_integration(snapshot, DEPENDENCY_NAME)
+        }
+        G3TsAstroConfigSurfaceState::Missing { .. }
+        | G3TsAstroConfigSurfaceState::Unreadable { .. }
+        | G3TsAstroConfigSurfaceState::ParseError { .. } => false,
+    };
+
+    if has_wiring {
+        if let Some(rel_path) = rel_path {
+            results.push(crate::support::info(
+                ID,
+                "Astro llms integration is wired",
+                format!("`{rel_path}` wires `{DEPENDENCY_NAME}` for strict AI-readable output."),
+                rel_path,
+            ));
+        }
+        return;
+    }
+
+    results.push(crate::support::error(
+        ID,
+        "Astro llms integration is not wired",
+        format!("Strict AI-readable policy requires `{DEPENDENCY_NAME}` as an Astro integration."),
+        rel_path,
+    ));
+}

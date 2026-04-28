@@ -39,6 +39,21 @@ pub(crate) fn package_has_dependency(
     })
 }
 
+pub(crate) fn package_mentions_dependency(
+    package: &G3TsAstroPackageSurfaceState,
+    dependency_name: &str,
+) -> bool {
+    parsed_package(package).is_some_and(|snapshot| {
+        snapshot
+            .dependencies
+            .iter()
+            .chain(snapshot.dev_dependencies.iter())
+            .chain(snapshot.optional_dependencies.iter())
+            .chain(snapshot.peer_dependencies.iter())
+            .any(|dependency| dependency == dependency_name)
+    })
+}
+
 pub(crate) fn package_safely_runs_astro_build(package: &G3TsAstroPackageSurfaceState) -> bool {
     package_safely_runs_tool(package, Some("build"), "astro", "build")
 }
@@ -127,22 +142,18 @@ pub(crate) fn astro_config_site_is_https(snapshot: &G3TsAstroConfigSurfaceSnapsh
     })
 }
 
-pub(crate) fn astro_config_has_zero_arg_integration(
+pub(crate) fn astro_config_has_integration(
     snapshot: &G3TsAstroConfigSurfaceSnapshot,
     module: &str,
-    accepted_imported_names: &[Option<&str>],
 ) -> bool {
-    snapshot.integrations.iter().any(|integration| {
-        integration.source_module.as_deref() == Some(module)
-            && integration.call.is_some()
-            && integration
-                .call
-                .as_ref()
-                .is_some_and(|call| call.first_arg.is_none())
-            && accepted_imported_names
-                .iter()
-                .any(|expected| integration.imported_name.as_deref() == *expected)
-    })
+    snapshot
+        .integrations
+        .iter()
+        .any(|integration| integration.source_module.as_deref() == Some(module))
+}
+
+pub(crate) fn strict_ai_readable_enabled(policy: &G3TsAstroSeoPolicySurfaceState) -> bool {
+    parsed_seo_policy(policy).is_some_and(|snapshot| snapshot.strict_ai_readable)
 }
 
 pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {

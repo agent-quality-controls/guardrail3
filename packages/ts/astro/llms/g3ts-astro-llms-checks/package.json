@@ -1,0 +1,61 @@
+{
+  "name": "g3ts-astro-llms-checks",
+  "version": "0.1.1",
+  "description": "Post-build llms.txt checks for strict Astro content sites.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/websmasher/guardrail3.git",
+    "directory": "packages/ts/astro/llms/g3ts-astro-llms-checks"
+  },
+  "homepage": "https://github.com/websmasher/guardrail3/tree/main/packages/ts/astro/llms/g3ts-astro-llms-checks",
+  "bugs": {
+    "url": "https://github.com/websmasher/guardrail3/issues"
+  },
+  "keywords": [
+    "astro",
+    "llms.txt",
+    "guardrails",
+    "g3ts"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "g3ts-astro-llms-checks": "dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "prepack": "npm run clean && npm run build",
+    "prepublishOnly": "npm test",
+    "pretest": "npm run build",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@types/mdast": "4.0.4",
+    "mdast-util-from-markdown": "2.0.3",
+    "parse-llms-txt": "0.0.10"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3"
+  }
+}

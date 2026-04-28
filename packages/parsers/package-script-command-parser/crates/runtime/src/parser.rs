@@ -641,6 +641,17 @@ fn normalized_package_manager_tool(
                 args.iter().skip(command_idx + 1).cloned().collect(),
             ));
         }
+        if arg == "run" || arg == "run-script" {
+            let script_idx = if args.get(idx + 1).is_some_and(|next| next == "--") {
+                idx + 2
+            } else {
+                idx + 1
+            };
+            return Some((
+                "package-script".to_owned(),
+                args.iter().skip(script_idx).cloned().collect(),
+            ));
+        }
         if mode.allows_direct_tool() && !arg.starts_with('-') {
             return Some((
                 executable_name(arg),
@@ -729,13 +740,24 @@ fn script_name_is_guardrail_related(script_name: &str) -> bool {
     let normalized = script_name.to_ascii_lowercase();
     if matches!(
         normalized.as_str(),
-        "check" | "precheck" | "postcheck" | "lint" | "prelint" | "postlint"
+        "check"
+            | "precheck"
+            | "postcheck"
+            | "lint"
+            | "prelint"
+            | "postlint"
+            | "validate"
+            | "prevalidate"
+            | "postvalidate"
     ) {
         return true;
     }
-    normalized
-        .split([':', '-', '_', '.', '/'])
-        .any(|token| matches!(token, "check" | "lint" | "eslint" | "astro" | "syncpack"))
+    normalized.split([':', '-', '_', '.', '/']).any(|token| {
+        matches!(
+            token,
+            "check" | "lint" | "validate" | "eslint" | "astro" | "syncpack"
+        )
+    })
 }
 
 #[cfg(test)]

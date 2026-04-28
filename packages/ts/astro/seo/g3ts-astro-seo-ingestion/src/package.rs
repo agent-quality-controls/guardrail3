@@ -65,6 +65,8 @@ pub(crate) fn ingest_package_surface(
             package_name: typed.name.clone(),
             dependencies: typed.dependencies.clone(),
             dev_dependencies: typed.dev_dependencies.clone(),
+            optional_dependencies: typed.optional_dependencies.clone(),
+            peer_dependencies: typed.peer_dependencies.clone(),
             script_names: typed.scripts.keys().cloned().collect(),
             script_bodies: typed
                 .scripts

@@ -33,7 +33,6 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroSeoConfigC
                     app_root_rel_path,
                 ),
                 astro_policy: astro_policy.clone(),
-                llms_txt_rel_path: crate::policy::select_llms_txt(crawl, app_root_rel_path),
             },
         )
         .collect::<Vec<_>>();

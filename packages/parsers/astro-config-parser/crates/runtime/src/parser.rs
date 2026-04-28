@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use astro_config_parser_types::document::{
     AstroAdapterSnapshot, AstroCallSnapshot, AstroConfigDocument, AstroConfigFileKind,
     AstroConfigParseState, AstroConfigSelectedFile, AstroConfigSnapshot, AstroIntegrationSnapshot,
-    AstroOutputMode, AstroStaticObjectProperty, AstroStaticValue,
+    AstroOutputMode, AstroStaticObjectProperty, AstroStaticValue, AstroTrailingSlashPolicy,
 };
 use swc_common::{FileName, SourceMap, sync::Lrc};
 use swc_ecma_ast::{
@@ -184,6 +184,8 @@ fn normalize_snapshot(
         selected_config: selected_config.clone(),
         site: property_string(config_object, "site", &state)?,
         output: property_output(config_object, &state)?,
+        out_dir: property_string(config_object, "outDir", &state)?,
+        trailing_slash: property_trailing_slash(config_object, &state)?,
         integrations: property_integrations(config_object, &state)?,
         adapter: property_adapter(config_object, &state)?,
     })
@@ -797,6 +799,26 @@ fn property_output(
         "server" => Ok(Some(AstroOutputMode::Server)),
         _ => Err(format!(
             "Astro config property `output` must be `static` or `server`, got `{value}`"
+        )),
+    }
+}
+
+fn property_trailing_slash(
+    object: &ObjectLit,
+    state: &AnalysisState,
+) -> Result<Option<AstroTrailingSlashPolicy>, String> {
+    let Some(expr) = find_property_value(object, "trailingSlash", state)? else {
+        return Ok(None);
+    };
+    let value = resolve_string_expr(expr, state, 0).ok_or_else(|| {
+        "Astro config property `trailingSlash` must resolve to a string literal".to_owned()
+    })?;
+    match value.as_str() {
+        "always" => Ok(Some(AstroTrailingSlashPolicy::Always)),
+        "never" => Ok(Some(AstroTrailingSlashPolicy::Never)),
+        "ignore" => Ok(Some(AstroTrailingSlashPolicy::Ignore)),
+        _ => Err(format!(
+            "Astro config property `trailingSlash` must be `always`, `never`, or `ignore`, got `{value}`"
         )),
     }
 }

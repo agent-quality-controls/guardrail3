@@ -75,6 +75,9 @@ future_mdx_key = "preserve-mdx"
 [ts.astro.seo]
 metadata_helpers = ["src/lib/metadata"]
 json_ld_helpers = ["src/lib/json-ld"]
+strict_ai_readable = true
+llms_required_sections = ["Docs", "Policies"]
+llms_required_links = ["https://example.com/docs/"]
 future_seo_key = "preserve-seo"
 
 [ts.astro.state]
@@ -180,6 +183,9 @@ reviewer = "guardrail-team"
         &["src/lib/json-ld"],
         "ts.astro.seo.json_ld_helpers",
     );
+    assertions::assert_ts_astro_seo_strict_ai_readable(astro, true);
+    assertions::assert_ts_astro_seo_llms_required_sections(astro, &["Docs", "Policies"]);
+    assertions::assert_ts_astro_seo_llms_required_links(astro, &["https://example.com/docs/"]);
     assertions::assert_ts_astro_seo_extra_string(astro, "future_seo_key", "preserve-seo");
     assertions::assert_string_list(
         &astro.state.forbidden,
@@ -272,6 +278,9 @@ profile = "strict-static-content"
         &[],
         "ts.astro.seo.json_ld_helpers",
     );
+    assertions::assert_ts_astro_seo_strict_ai_readable(astro, false);
+    assertions::assert_ts_astro_seo_llms_required_sections(astro, &[]);
+    assertions::assert_ts_astro_seo_llms_required_links(astro, &[]);
     assertions::assert_string_list(&astro.state.forbidden, &[], "ts.astro.state.forbidden");
 }
 
