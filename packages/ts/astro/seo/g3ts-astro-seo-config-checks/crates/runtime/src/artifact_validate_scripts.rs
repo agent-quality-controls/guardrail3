@@ -96,7 +96,7 @@ fn validate_runs_build_before_checker(
     site: &str,
     output_dir: &str,
 ) -> bool {
-    snapshot.script_parse_blockers.is_empty()
+    !script_graph_has_parse_blocker(snapshot, "validate", 0)
         && validate_commands_fail_closed(snapshot)
         && script_has_checker_after_build(
             snapshot,
@@ -107,6 +107,27 @@ fn validate_runs_build_before_checker(
             output_dir,
             0,
         )
+}
+
+fn script_graph_has_parse_blocker(
+    snapshot: &G3TsAstroPackageSurfaceSnapshot,
+    script_name: &str,
+    depth: usize,
+) -> bool {
+    if depth >= 3 {
+        return false;
+    }
+    snapshot
+        .script_parse_blockers
+        .iter()
+        .any(|blocker| blocker.script_name == script_name)
+        || snapshot
+            .script_tool_invocations
+            .iter()
+            .filter(|invocation| invocation.script_name == script_name)
+            .filter(|invocation| invocation.executable == "package-script")
+            .filter_map(|invocation| invocation.args.first())
+            .any(|child_script| script_graph_has_parse_blocker(snapshot, child_script, depth + 1))
 }
 
 fn invocation_resolves_to_checker(

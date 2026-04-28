@@ -197,6 +197,41 @@ fn mdx_disable_descriptions_must_be_error_on_mdx_lanes() {
 }
 
 #[test]
+fn mdx_disable_descriptions_accepts_namespace_when_package_identity_is_unavailable() {
+    let mut input = super::helpers::golden();
+    let config = &mut input.eslint_contracts[0].config;
+    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden mdx eslint config should be parsed");
+    };
+    snapshot.mdx_content_plugin_package_names.clear();
+    snapshot.component_map_plugin_package_names.clear();
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-mdx/eslint-disable-descriptions-required",
+        guardrail3_check_types::G3Severity::Info,
+    );
+}
+
+#[test]
+fn mdx_disable_descriptions_rejects_missing_plugin_namespace() {
+    let mut input = super::helpers::golden();
+    let config = &mut input.eslint_contracts[0].config;
+    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden mdx eslint config should be parsed");
+    };
+    snapshot
+        .component_map_plugins
+        .retain(|plugin| plugin != "@eslint-community/eslint-comments");
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-mdx/eslint-disable-descriptions-required",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
 fn mdx_unused_disables_must_fail_closed_on_mdx_lanes() {
     let mut input = super::helpers::golden();
     let config = &mut input.eslint_contracts[0].config;

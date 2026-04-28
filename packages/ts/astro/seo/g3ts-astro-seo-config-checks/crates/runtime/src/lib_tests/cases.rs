@@ -422,6 +422,42 @@ fn validate_script_accepts_safe_nested_package_scripts() {
 }
 
 #[test]
+fn unrelated_start_script_parse_blocker_does_not_break_artifact_validate_order() {
+    let mut input = super::helpers::golden();
+    if let g3ts_astro_seo_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].package
+    {
+        snapshot.script_names.push("start".to_owned());
+        snapshot.script_bodies.push((
+            "start".to_owned(),
+            "astro preview --port ${PORT:-3001}".to_owned(),
+        ));
+        snapshot.script_parse_blockers.push(
+            g3ts_astro_seo_types::G3TsAstroPackageScriptParseBlocker {
+                script_name: "start".to_owned(),
+                reason: "script command contains invalid shell syntax".to_owned(),
+            },
+        );
+    }
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-seo/nuasite-checks",
+        guardrail3_check_types::G3Severity::Info,
+    );
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-seo/sitemap-checks-validate-script",
+        guardrail3_check_types::G3Severity::Info,
+    );
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-seo/robots-checks-validate-script",
+        guardrail3_check_types::G3Severity::Info,
+    );
+}
+
+#[test]
 fn validate_script_accepts_child_script_that_builds_then_checks_artifacts() {
     let mut input = super::helpers::golden();
     replace_validate_with_single_nested_artifact_script(&mut input);
