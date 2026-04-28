@@ -2,6 +2,7 @@ use crate::compat::{G3CheckResult, G3Severity};
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use crate::inputs::ExecutableCommandContextInput;
+use crate::support::{args_have_help_or_version, cargo_subcommand_tail};
 
 const ID: &str = "g3rs-hooks/concrete-lockfile-command";
 
@@ -12,7 +13,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
                 ID.to_owned(),
                 G3Severity::Info,
                 "`.githooks/pre-commit` runs a concrete lockfile integrity command".to_owned(),
-                "`.githooks/pre-commit` executes a real install verification command such as `pnpm install --frozen-lockfile`.".to_owned(),
+                "`.githooks/pre-commit` executes a real Cargo lockfile verification command such as `cargo metadata --locked`.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -26,7 +27,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
         ID.to_owned(),
         G3Severity::Warn,
         "missing concrete lockfile integrity command in `.githooks/pre-commit`".to_owned(),
-        "Add an executable install verification step such as `pnpm install --frozen-lockfile` to `.githooks/pre-commit` when manifest or lockfile inputs change. Mentioning lockfiles in text or grepping filenames does not prove the lockfile still resolves.".to_owned(),
+        "Add an executable Cargo lockfile verification step such as `cargo metadata --locked` to `.githooks/pre-commit` when manifest or lockfile inputs change. Mentioning lockfiles in text or grepping filenames does not prove the lockfile still resolves.".to_owned(),
         Some(input.rel_path.to_owned()),
         None,
         false,
@@ -38,12 +39,9 @@ fn has_concrete_lockfile_command(parsed: &hook_shell_parser::types::ParsedShellS
 }
 
 fn is_concrete_lockfile_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "pnpm"
-        && matches!(
-            command.args().first().map(String::as_str),
-            Some("install" | "i")
-        )
-        && command.args().iter().any(|arg| arg == "--frozen-lockfile")
+    cargo_subcommand_tail(command, "metadata").is_some_and(|args| {
+        !args_have_help_or_version(args) && args.iter().any(|arg| arg == "--locked")
+    })
 }
 
 #[cfg(test)]

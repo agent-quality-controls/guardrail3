@@ -1,7 +1,26 @@
 use g3rs_hooks_types::{G3RsHookScriptKind, G3RsHooksSourceChecksInput};
 use guardrail3_check_types::G3CheckResult;
+use hook_shell_parser::parse_script;
 
 pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
+    check_single(input, true)
+}
+
+pub fn check_all(inputs: &[G3RsHooksSourceChecksInput]) -> Vec<G3CheckResult> {
+    let mut results = inputs
+        .iter()
+        .flat_map(|input| check_single(input, false))
+        .collect::<Vec<_>>();
+
+    check_required_contracts_across_selected_surface(inputs, &mut results);
+
+    results
+}
+
+fn check_single(
+    input: &G3RsHooksSourceChecksInput,
+    include_required_contracts: bool,
+) -> Vec<G3CheckResult> {
     let kind = match input.kind {
         G3RsHookScriptKind::PreCommit => crate::facts::HookScriptKind::PreCommit,
         G3RsHookScriptKind::Modular => crate::facts::HookScriptKind::Modular,
@@ -48,7 +67,9 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
         crate::config_changes_trigger_validation::check(&rust_input, &mut results);
         crate::contract_trigger_coverage::rule::check(&rust_input, &mut results);
         crate::shared_target_dir_present::check(&rust_input, &mut results);
-        crate::required_contract_command_present::rule::check(&rust_input, &mut results);
+        if include_required_contracts {
+            crate::required_contract_command_present::rule::check(&rust_input, &mut results);
+        }
     }
 
     crate::shell_safety::shell_error_handling::check(&executable_input, &mut results);
@@ -64,3 +85,36 @@ pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
 
     crate::compat::finish(results)
 }
+
+fn check_required_contracts_across_selected_surface(
+    inputs: &[G3RsHooksSourceChecksInput],
+    results: &mut Vec<G3CheckResult>,
+) {
+    let Some(pre_commit) = inputs
+        .iter()
+        .find(|input| input.kind == G3RsHookScriptKind::PreCommit)
+    else {
+        return;
+    };
+    let mut content = String::new();
+    for input in inputs {
+        for line in &input.parsed.source_lines {
+            content.push_str(line.raw.as_str());
+            content.push('\n');
+        }
+    }
+    let parsed = parse_script(&content);
+    let input = crate::inputs::RustHookCommandInput {
+        rel_path: pre_commit.rel_path.as_str(),
+        parsed: &parsed,
+        is_workspace_project: pre_commit.is_workspace_project,
+        requirements: &pre_commit.requirements,
+    };
+    let mut contract_results = Vec::new();
+    crate::required_contract_command_present::rule::check(&input, &mut contract_results);
+    results.extend(crate::compat::finish(contract_results));
+}
+
+#[cfg(test)]
+#[path = "run_tests/mod.rs"]
+mod tests;

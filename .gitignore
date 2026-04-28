@@ -1,5 +1,7 @@
 target/
 .cargo-target/
+mutants.out/
+mutants.out.old/
 node_modules/
 /legacy/
 .claude/

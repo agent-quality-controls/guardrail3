@@ -76,6 +76,18 @@ fn first_fail_open_critical_command(
         {
             return Some((absolute_line_no, line.command_text.to_owned()));
         }
+        if negated_if_failure_branch_is_softened(local, line.line_no)
+            && any_resolved_command_on_line_in_context(
+                local,
+                root,
+                &line.raw,
+                line.line_no,
+                visible_root_line_no,
+                |command| command_matches_critical(command, critical),
+            )
+        {
+            return Some((absolute_line_no, line.command_text.to_owned()));
+        }
         if let Some(found) = called_function_fail_open(
             local,
             root,
@@ -91,6 +103,101 @@ fn first_fail_open_critical_command(
     }
 
     None
+}
+
+fn negated_if_failure_branch_is_softened(script: &ParsedShellScript, line_no: usize) -> bool {
+    let Some(branch) = negated_if_failure_branch(script, line_no) else {
+        return false;
+    };
+    !branch_has_failure_terminator(&branch)
+}
+
+fn negated_if_failure_branch(script: &ParsedShellScript, line_no: usize) -> Option<String> {
+    let start = script
+        .source_lines
+        .iter()
+        .find(|line| line.line_no == line_no)?;
+    if !starts_negated_if(start.raw.as_str()) {
+        return None;
+    }
+
+    let mut branch = String::new();
+    let mut found_then = false;
+    for line in script
+        .source_lines
+        .iter()
+        .filter(|line| line.line_no >= line_no)
+    {
+        let mut text = line.raw.as_str();
+        if !found_then {
+            let Some((_, after_then)) = text.split_once("then") else {
+                continue;
+            };
+            found_then = true;
+            text = after_then;
+        }
+
+        if let Some((before_else, _)) = split_control_token(text, "else") {
+            branch.push_str(before_else);
+            break;
+        }
+        if let Some((before_elif, _)) = split_control_token(text, "elif") {
+            branch.push_str(before_elif);
+            break;
+        }
+        if let Some((before_fi, _)) = split_control_token(text, "fi") {
+            branch.push_str(before_fi);
+            break;
+        }
+
+        branch.push_str(text);
+        branch.push('\n');
+    }
+
+    found_then.then_some(branch)
+}
+
+fn starts_negated_if(raw: &str) -> bool {
+    let trimmed = raw.trim_start();
+    trimmed
+        .strip_prefix("if")
+        .is_some_and(|tail| tail.trim_start().starts_with('!'))
+}
+
+fn split_control_token<'a>(text: &'a str, token: &str) -> Option<(&'a str, &'a str)> {
+    for (index, _) in text.match_indices(token) {
+        let before = &text[..index];
+        let after = &text[index + token.len()..];
+        let before_ok = before
+            .chars()
+            .last()
+            .is_none_or(|ch| ch.is_whitespace() || ch == ';');
+        let after_ok = after
+            .chars()
+            .next()
+            .is_none_or(|ch| ch.is_whitespace() || ch == ';');
+        if before_ok && after_ok {
+            return Some((before, after));
+        }
+    }
+    None
+}
+
+fn branch_has_failure_terminator(branch: &str) -> bool {
+    let parsed = hook_shell_parser::parse_script(branch);
+    parsed.executable_lines.iter().any(|line| {
+        matches!(line.command_name.as_str(), "false")
+            || (matches!(line.command_name.as_str(), "exit" | "return")
+                && command_second_word_is_nonzero(line.command_text.as_str()))
+    })
+}
+
+fn command_second_word_is_nonzero(command_text: &str) -> bool {
+    command_text
+        .split_whitespace()
+        .nth(1)
+        .and_then(|value| value.trim_end_matches(';').parse::<u8>().ok())
+        .is_some_and(|value| value != 0)
 }
 
 fn called_function_fail_open(

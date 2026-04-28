@@ -68,6 +68,32 @@ fn universal_gitleaks_cannot_fail_open_without_contract_requirements() {
 }
 
 #[test]
+fn negated_if_without_failure_exit_is_fail_open() {
+    let results = run_case(
+        "#!/bin/sh\nif ! g3rs validate --path .; then echo skip; fi\n",
+        Vec::new(),
+    );
+
+    assert!(
+        results.iter().any(|result| !result.inventory()),
+        "negated if branch that only echoes should be reported as fail-open"
+    );
+}
+
+#[test]
+fn negated_if_with_failure_exit_is_not_fail_open() {
+    let results = run_case(
+        "#!/bin/sh\nif ! g3rs validate --path .; then\n    echo failed\n    exit 1\nfi\n",
+        Vec::new(),
+    );
+
+    assert!(
+        results.is_empty(),
+        "negated if branch with explicit non-zero exit should not be reported"
+    );
+}
+
+#[test]
 fn called_function_with_contract_critical_fail_open_is_reported() {
     let results = run_case(
         r#"#!/bin/sh

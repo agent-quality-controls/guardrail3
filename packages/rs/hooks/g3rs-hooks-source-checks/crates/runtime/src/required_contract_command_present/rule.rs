@@ -70,11 +70,6 @@ fn command_requirement_present(
     input: &RustHookCommandInput<'_>,
     requirement: G3HookCommandRequirement,
 ) -> bool {
-    if requirement == G3HookCommandRequirement::CargoDupesExcludeTests {
-        return crate::cargo_dupes_excludes::script_contains_cargo_dupes_with_exclude_tests(
-            input.parsed,
-        );
-    }
     let predicate = |command: &ResolvedCommand| command_satisfies_requirement(command, requirement);
     if matches!(
         requirement,
@@ -201,29 +196,15 @@ fn parse_validate_args(args: &[String]) -> bool {
             let Some(value) = args.get(index + 1).map(String::as_str) else {
                 return false;
             };
-            if value.starts_with('-') {
+            if value.is_empty() || value.starts_with('-') {
                 return false;
             }
             saw_path = true;
             index += 2;
             continue;
         }
-        if let Some(value) = arg.strip_prefix("--family=") {
-            if value.is_empty() {
-                return false;
-            }
-            index += 1;
-            continue;
-        }
-        if arg == "--family" {
-            let Some(value) = args.get(index + 1).map(String::as_str) else {
-                return false;
-            };
-            if value.starts_with('-') {
-                return false;
-            }
-            index += 2;
-            continue;
+        if arg.starts_with("--family=") || arg == "--family" {
+            return false;
         }
         if arg == "--inventory" {
             index += 1;
@@ -235,12 +216,9 @@ fn parse_validate_args(args: &[String]) -> bool {
 }
 
 fn concrete_lockfile_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "pnpm"
-        && matches!(
-            command.args().first().map(String::as_str),
-            Some("install" | "i")
-        )
-        && command.args().iter().any(|arg| arg == "--frozen-lockfile")
+    cargo_subcommand_tail(command, "metadata").is_some_and(|args| {
+        !args_have_help_or_version(args) && args.iter().any(|arg| arg == "--locked")
+    })
 }
 
 fn is_help_or_version_flag(token: &str) -> bool {
@@ -252,7 +230,7 @@ fn requirement_label(requirement: G3HookCommandRequirement) -> &'static str {
         G3HookCommandRequirement::CargoFmtCheck => "cargo fmt --check",
         G3HookCommandRequirement::CargoClippyDenyWarnings => "cargo clippy -D warnings",
         G3HookCommandRequirement::CargoDenyCheck => "cargo deny check",
-        G3HookCommandRequirement::ConcreteLockfileCommand => "pnpm install --frozen-lockfile",
+        G3HookCommandRequirement::ConcreteLockfileCommand => "cargo metadata --locked",
         G3HookCommandRequirement::CargoTest => "cargo test",
         G3HookCommandRequirement::CargoMachete => "cargo machete",
         G3HookCommandRequirement::CargoDupes => "cargo dupes",

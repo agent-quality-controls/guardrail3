@@ -96,7 +96,7 @@ CSS_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.css$' || true)
 
 # --- Guardrail validation (AST-based, replaces grep-based tamper detection) ---
 if command -v g3rs &> /dev/null; then
-    if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ] || echo "$STAGED_FILES" | grep -qE '(^|/)(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
+    if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ] || [ "$RUST_CONFIG_CHANGED" -gt 0 ]; then
         echo "Running g3rs validation..."
         if ! g3rs validate --path "$REPO_ROOT" --family hooks; then
             echo "g3rs validation failed. Fix issues before committing."
@@ -174,6 +174,12 @@ fi
 
 # --- Rust checks (only if Rust or Cargo files changed) ---
 if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ] || [ "$RUST_CONFIG_CHANGED" -gt 0 ]; then
+    echo "Checking Cargo lockfile integrity..."
+    if ! (cd "$RUST_WORKSPACE" && cargo metadata --locked --format-version 1 > /dev/null); then
+        echo "Cargo.lock is out of sync. Run 'cd \"$RUST_WORKSPACE\" && cargo metadata --format-version 1' and commit the lockfile."
+        exit 1
+    fi
+
     echo "Running Rust format check..."
     if ! (cd "$RUST_WORKSPACE" && cargo fmt --all -- --check); then
         echo "Rust formatting check failed. Run 'cd "$RUST_WORKSPACE" && cargo fmt --all' to fix."
