@@ -64,6 +64,35 @@ fn orphan_modular_hook_script_does_not_satisfy_pre_commit_contract_surface() {
     );
 }
 
+#[test]
+fn sourcing_one_modular_script_does_not_dispatch_entire_directory() {
+    let inputs = vec![
+        input(
+            ".githooks/pre-commit",
+            G3RsHookScriptKind::PreCommit,
+            "#!/bin/sh\nsource .githooks/pre-commit.d/bootstrap\n",
+            vec![requirement(G3HookCommandRequirement::G3RsValidatePath)],
+        ),
+        input(
+            ".githooks/pre-commit.d/rust",
+            G3RsHookScriptKind::Modular,
+            "#!/bin/sh\ng3rs validate --path .\n",
+            Vec::new(),
+        ),
+    ];
+
+    let results = check_all(&inputs);
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "g3rs-hooks/required-contract-command-present"
+                && !result.inventory()
+                && result.message().contains("Owner families: test")
+        }),
+        "sourcing one modular file must not make undispatched modular files satisfy contracts"
+    );
+}
+
 fn input(
     rel_path: &str,
     kind: G3RsHookScriptKind,

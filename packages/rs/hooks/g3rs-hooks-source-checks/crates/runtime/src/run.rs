@@ -128,10 +128,26 @@ fn script_content(input: &G3RsHooksSourceChecksInput) -> String {
 
 fn pre_commit_dispatches_modular_scripts(input: &G3RsHooksSourceChecksInput) -> bool {
     input.parsed.executable_lines.iter().any(|line| {
-        line.is_dispatcher_syntax
-            && (line.raw.contains(".githooks/pre-commit.d")
-                || line.command_text.contains(".githooks/pre-commit.d"))
+        line.is_dispatcher_syntax && dispatcher_invokes_modular_directory(&line.command_text)
     })
+}
+
+fn dispatcher_invokes_modular_directory(command_text: &str) -> bool {
+    let words = hook_shell_parser::command_query::shell_words(command_text);
+    let Some(command) = words.first().map(String::as_str) else {
+        return false;
+    };
+    match command {
+        "run-parts" => words
+            .iter()
+            .skip(1)
+            .any(|word| word.trim_end_matches('/') == ".githooks/pre-commit.d"),
+        "." | "source" => words
+            .iter()
+            .skip(1)
+            .any(|word| word == ".githooks/pre-commit.d"),
+        _ => false,
+    }
 }
 
 #[cfg(test)]

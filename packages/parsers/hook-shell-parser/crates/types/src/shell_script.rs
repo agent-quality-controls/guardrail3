@@ -5,6 +5,8 @@ pub enum FailOpenWrapper {
     Echo(String),
     Printf(String),
     ExitZero,
+    ReturnZero,
+    CommandSubstitutionAssignment(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

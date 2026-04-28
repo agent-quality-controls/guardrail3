@@ -91,6 +91,7 @@ fn detects_fail_open_wrappers() {
         r#"guardrail3 rs validate --staged . || true
 cargo test --workspace || :
 gitleaks protect --staged --no-banner || echo "warning"
+cargo clippy --workspace || return 0
 "#,
     );
 
@@ -108,7 +109,34 @@ gitleaks protect --staged --no-banner || echo "warning"
                 ),
                 CommandExpectation::new("cargo", None, None, Some(ExpectedFailOpen::NoOp), None),
                 CommandExpectation::new("gitleaks", None, None, Some(ExpectedFailOpen::Echo), None),
+                CommandExpectation::new(
+                    "cargo",
+                    None,
+                    None,
+                    Some(ExpectedFailOpen::ReturnZero),
+                    None,
+                ),
             ],
+            &[],
+        ),
+    );
+}
+
+#[test]
+fn marks_export_command_substitution_as_fail_open_wrapper() {
+    let parsed = parse_script("export STATUS=$(g3rs validate --path .)\n");
+
+    assert_script_matches(
+        &parsed,
+        ScriptExpectation::new(
+            None,
+            &[CommandExpectation::new(
+                "g3rs",
+                Some("g3rs validate --path ."),
+                None,
+                Some(ExpectedFailOpen::CommandSubstitutionAssignment),
+                None,
+            )],
             &[],
         ),
     );

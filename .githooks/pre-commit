@@ -94,15 +94,25 @@ CARGO_CHANGED=$(echo "$STAGED_FILES" | grep -cE '(Cargo\.toml|Cargo\.lock)$' || 
 RUST_CONFIG_CHANGED=$(echo "$STAGED_FILES" | grep -cE '(^|/)(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml|release-plz\.toml|cliff\.toml|\.cargo/config|\.cargo/config\.toml)$' || true)
 CSS_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.css$' || true)
 
+RUST_GUARDRAIL_CHANGED=$((RUST_CHANGED + CARGO_CHANGED + RUST_CONFIG_CHANGED))
+
 # --- Guardrail validation (AST-based, replaces grep-based tamper detection) ---
-if command -v g3rs &> /dev/null; then
-    if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ] || [ "$RUST_CONFIG_CHANGED" -gt 0 ]; then
-        echo "Running g3rs validation..."
-        if ! g3rs validate --path "$REPO_ROOT/apps/guardrail3-rs"; then
-            echo "g3rs validation failed. Fix issues before committing."
-            exit 1
-        fi
+if [ "$RUST_GUARDRAIL_CHANGED" -gt 0 ]; then
+    if ! command -v g3rs &> /dev/null; then
+        echo "g3rs is required for Rust guardrail validation."
+        echo "Install the local guardrail3 Rust CLI before committing Rust changes."
+        exit 1
     fi
+
+    echo "Running g3rs validation..."
+    if ! g3rs validate --path "$REPO_ROOT/apps/guardrail3-rs"; then
+        echo "g3rs validation failed. Fix issues before committing."
+        exit 1
+    fi
+
+fi
+
+if command -v g3rs &> /dev/null; then
     if [ "$TS_CHANGED" -gt 0 ]; then
         echo "Running guardrail3 TypeScript validation..."
         if ! guardrail3 ts validate --staged .; then
@@ -110,9 +120,6 @@ if command -v g3rs &> /dev/null; then
             exit 1
         fi
     fi
-else
-    echo "WARNING: g3rs not installed. Skipping guardrail validation."
-    echo "Install the local guardrail3 Rust CLI before committing Rust changes."
 fi
 
 # --- TypeScript checks (only if TS files changed) ---

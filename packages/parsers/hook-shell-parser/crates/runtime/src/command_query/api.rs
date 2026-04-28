@@ -171,6 +171,11 @@ pub fn visit_resolved_commands_with_env<S>(
     engine::visit_resolved_commands_with_env(parsed, initial_state, options, visitor);
 }
 
+#[must_use]
+pub fn shell_words(command_text: &str) -> Vec<String> {
+    crate::shell_ast::shell_words(command_text)
+}
+
 #[cfg(test)]
 pub(super) use crate::parse_script as parse_script_for_tests;
 

@@ -254,6 +254,36 @@ fn cargo_alias_shadow_does_not_satisfy_cargo_contract() {
 }
 
 #[test]
+fn multi_alias_line_shadow_does_not_satisfy_cargo_contract() {
+    let results = run_case(
+        "#!/bin/sh\nalias foo=bar cargo='echo skipped'\ncargo fmt --check\n",
+        vec![requirement(G3HookCommandRequirement::CargoFmtCheck)],
+    );
+
+    assert_missing(&results, "cargo fmt --check", "test");
+}
+
+#[test]
+fn alias_after_real_command_does_not_invalidate_prior_command() {
+    let results = run_case(
+        "#!/bin/sh\ncargo fmt --check\nalias cargo='echo skipped'\n",
+        vec![requirement(G3HookCommandRequirement::CargoFmtCheck)],
+    );
+
+    assert_single_inventory(&results, "cargo fmt --check", "test");
+}
+
+#[test]
+fn path_qualified_cargo_is_not_shadowed_by_alias() {
+    let results = run_case(
+        "#!/bin/sh\nalias cargo='echo skipped'\n/usr/bin/cargo fmt --check\n",
+        vec![requirement(G3HookCommandRequirement::CargoFmtCheck)],
+    );
+
+    assert_single_inventory(&results, "cargo fmt --check", "test");
+}
+
+#[test]
 fn pnpm_frozen_lockfile_does_not_satisfy_rust_lockfile_contract() {
     let results = run_case(
         "#!/bin/sh\npnpm install --frozen-lockfile\n",
