@@ -65,6 +65,7 @@ fn highest_severity(report: &ValidateReport, include_inventory: bool) -> Option<
         })
 }
 
+/// Renders stdout only when the visible report should be printed.
 fn render_stdout(
     report: &ValidateReport,
     include_inventory: bool,

@@ -9,6 +9,7 @@ mod deps {
     use g3ts as _;
     use guardrail3_ts_app_types as _;
     use guardrail3_ts_family_runner_config as _;
+    use guardrail3_ts_family_runner_hooks as _;
     use guardrail3_ts_family_runner_structure as _;
     use guardrail3_ts_packages as _;
     use guardrail3_ts_report as _;

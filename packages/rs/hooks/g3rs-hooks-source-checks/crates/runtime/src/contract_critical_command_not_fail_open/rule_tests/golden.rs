@@ -16,7 +16,7 @@ fn contract_binary_critical_command_cannot_fail_open() {
         results.iter().any(|result| {
             !result.inventory()
                 && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
-                && result.severity() == G3Severity::Warn
+                && result.severity() == G3Severity::Error
                 && result.title() == "contract-critical hook command is fail-open"
         }),
         "fail-open contract-critical binary command should be reported"
@@ -107,7 +107,7 @@ fn or_exit_zero_is_fail_open() {
         results.iter().any(|result| {
             !result.inventory()
                 && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
-                && result.severity() == G3Severity::Warn
+                && result.severity() == G3Severity::Error
         }),
         "critical command followed by `|| exit 0` should be reported"
     );
@@ -126,7 +126,7 @@ fn or_printf_is_fail_open() {
         results.iter().any(|result| {
             !result.inventory()
                 && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
-                && result.severity() == G3Severity::Warn
+                && result.severity() == G3Severity::Error
         }),
         "critical command followed by `|| printf` should be reported"
     );
@@ -143,7 +143,7 @@ fn or_return_zero_is_fail_open() {
         results.iter().any(|result| {
             !result.inventory()
                 && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
-                && result.severity() == G3Severity::Warn
+                && result.severity() == G3Severity::Error
         }),
         "critical command followed by `|| return 0` should be reported"
     );

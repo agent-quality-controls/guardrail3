@@ -78,7 +78,7 @@ fn run_command_uses_real_eslint_wiring_for_missing_config() {
         &output.stdout,
         &output.stderr,
         output.exit_code,
-        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n",
+        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n== hooks ==\n[Error] g3ts-hooks/pre-commit-exists - pre-commit hook is missing\n  TypeScript projects must have a selected pre-commit hook. Configure `git config core.hooksPath .githooks` and create `.githooks/pre-commit`.\n[Error] g3ts-hooks/hooks-path-configured - git hooks path is not .githooks\n  Git must use the repo-owned hook directory: run `git config core.hooksPath .githooks`. Other hook locations can bypass G3TS without changing repo files.\n",
         "",
         1,
     );
@@ -114,7 +114,7 @@ fn run_command_normalizes_relative_validate_path_before_crawling() {
         &output.stdout,
         &output.stderr,
         output.exit_code,
-        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n",
+        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n== hooks ==\n[Error] g3ts-hooks/pre-commit-exists - pre-commit hook is missing\n  TypeScript projects must have a selected pre-commit hook. Configure `git config core.hooksPath .githooks` and create `.githooks/pre-commit`.\n[Error] g3ts-hooks/hooks-path-configured - git hooks path is not .githooks\n  Git must use the repo-owned hook directory: run `git config core.hooksPath .githooks`. Other hook locations can bypass G3TS without changing repo files.\n",
         "",
         1,
     );

@@ -1,0 +1,11 @@
+[package]
+name = "g3ts-hooks-contract-types"
+version = "0.1.0"
+edition = "2024"
+description = "TypeScript hook contract types for guardrail3"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[features]
+default = ["api"]
+api = []

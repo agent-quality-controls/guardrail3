@@ -108,7 +108,8 @@ pub fn run(
         | SupportedFamily::Tsconfig
         | SupportedFamily::Package
         | SupportedFamily::Npmrc
-        | SupportedFamily::Jscpd => Err(FamilyRunError {
+        | SupportedFamily::Jscpd
+        | SupportedFamily::Hooks => Err(FamilyRunError {
             message: format!("structure group does not handle {family:?}"),
         }),
     }

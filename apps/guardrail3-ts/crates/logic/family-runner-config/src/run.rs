@@ -39,5 +39,8 @@ pub fn run(
         SupportedFamily::Jscpd => Ok(g3ts_jscpd_config_checks::check(
             &g3ts_jscpd_ingestion::ingest_for_config_checks(crawl),
         )),
+        SupportedFamily::Hooks => Err(FamilyRunError {
+            message: "config group does not handle hooks".to_owned(),
+        }),
     }
 }

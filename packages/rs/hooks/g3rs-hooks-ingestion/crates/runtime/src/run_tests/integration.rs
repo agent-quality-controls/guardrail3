@@ -49,14 +49,14 @@ fn integration_reports_hook_breakage_when_rust_hook_is_misconfigured() {
     assertions::assert_present(
         &results,
         "g3rs-hooks/guardrail-validate-staged-present",
-        "Rust guardrail validate step missing",
+        "missing `g3rs validate --path ...` command in `.githooks/pre-commit`",
         Some(".githooks/pre-commit"),
         false,
     );
     assertions::assert_present(
         &results,
         "g3rs-hooks/config-changes-trigger-validation",
-        "Rust config-change trigger coverage incomplete",
+        "incomplete Rust guardrail config trigger coverage in `.githooks/pre-commit`",
         Some(".githooks/pre-commit"),
         false,
     );
@@ -82,7 +82,7 @@ fn integration_aligns_hook_validation_step_with_source_family_breakage() {
     assertions::assert_present(
         &hook_results,
         "g3rs-hooks/guardrail-validate-staged-present",
-        "Rust guardrail validate step present",
+        "`.githooks/pre-commit` runs `g3rs validate --path ...`",
         Some(".githooks/pre-commit"),
         true,
     );
@@ -113,7 +113,7 @@ fn integration_aligns_hook_config_trigger_with_config_family_breakage() {
     assertions::assert_present(
         &hook_results,
         "g3rs-hooks/config-changes-trigger-validation",
-        "Rust config changes trigger hook validation",
+        "`.githooks/pre-commit` triggers Rust validation on guardrail config changes",
         Some(".githooks/pre-commit"),
         true,
     );

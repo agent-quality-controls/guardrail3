@@ -12,10 +12,10 @@ pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckR
     {
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
-            G3Severity::Warn,
+            G3Severity::Error,
             "critical hook command is fail-open".to_owned(),
             format!(
-                "Critical hook command `{}` is softened by a fail-open wrapper.",
+                "Critical hook command `{}` is softened by a fail-open wrapper. Remove the wrapper so the hook fails closed.",
                 command_text
             ),
             Some(input.rel_path.to_owned()),

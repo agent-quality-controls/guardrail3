@@ -1,0 +1,16 @@
+[package]
+name = "g3ts-hooks-ingestion"
+version = "0.1.0"
+edition = "2024"
+description = "TypeScript hook ingestion for guardrail3"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+g3-workspace-crawl = { path = "../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
+g3ts-hooks-types = { path = "../g3ts-hooks-types" }
+hook-shell-parser = { path = "../../../parsers/hook-shell-parser", features = ["api"] }
+
+[features]
+default = ["api"]
+api = []

@@ -182,7 +182,7 @@ fn pipeline_reports_rs_config_trigger_for_guardrail3_rs_toml() {
     assert_result_present(
         &results,
         "g3rs-hooks/config-changes-trigger-validation",
-        "Rust config changes trigger hook validation",
+        "`.githooks/pre-commit` triggers Rust validation on guardrail config changes",
         Some(".githooks/pre-commit"),
         true,
     );
@@ -213,7 +213,7 @@ fn pipeline_reports_top_level_g3rs_validate_step_inventory() {
     assert_result_present(
         &results,
         "g3rs-hooks/guardrail-validate-staged-present",
-        "Rust guardrail validate step present",
+        "`.githooks/pre-commit` runs `g3rs validate --path ...`",
         Some(".githooks/pre-commit"),
         true,
     );
@@ -228,7 +228,7 @@ fn pipeline_stays_clean_for_valid_githooks_setup() {
     fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
     write_fixture(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\nset -e\nrun-parts .githooks/pre-commit.d\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ngitleaks protect --staged --no-banner\ncargo dupes check --exclude-tests\ng3rs validate --path .\npnpm install --frozen-lockfile\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs validate --path .\nfi\n",
+        "#!/usr/bin/env bash\nset -e\nREPO_ROOT=$(git rev-parse --show-toplevel)\nexport CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\"\nrun-parts .githooks/pre-commit.d\ncargo metadata --locked\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ngitleaks protect --staged --no-banner\ncargo dupes check --exclude-tests\ng3rs validate --path .\npnpm install --frozen-lockfile\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs validate --path .\nfi\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -278,20 +278,20 @@ fn pipeline_reports_inventory_for_valid_rust_hook_steps() {
         ),
         (
             "g3rs-hooks/duplication-tool-is-cargo-dupes",
-            "cargo-dupes selected for Rust duplication checks",
+            "`.githooks/pre-commit` uses `cargo dupes` for Rust dependency duplication",
         ),
         (
             "g3rs-hooks/clippy-denies-warnings",
-            "cargo clippy denies warnings",
+            "`.githooks/pre-commit` runs clippy in deny-warnings mode",
         ),
         ("g3rs-hooks/gitleaks-step-present", "gitleaks step present"),
         (
             "g3rs-hooks/cargo-dupes-step-present",
-            "cargo dupes step present",
+            "`.githooks/pre-commit` runs `cargo dupes`",
         ),
         (
             "g3rs-hooks/cargo-dupes-excludes",
-            "cargo-dupes excludes tests",
+            "`.githooks/pre-commit` runs `cargo dupes --exclude-tests`",
         ),
     ] {
         assert_eq!(
@@ -327,7 +327,7 @@ fn pipeline_reports_inventory_for_command_substitution_and_binary_aliases() {
         ),
         (
             "g3rs-hooks/guardrail-validate-staged-present",
-            "Rust guardrail validate step present",
+            "`.githooks/pre-commit` runs `g3rs validate --path ...`",
         ),
     ] {
         assert_eq!(
@@ -364,7 +364,7 @@ fn pipeline_reports_inventory_for_called_function_commands() {
     assert_result_present(
         &results,
         "g3rs-hooks/guardrail-validate-staged-present",
-        "Rust guardrail validate step present",
+        "`.githooks/pre-commit` runs `g3rs validate --path ...`",
         Some(".githooks/pre-commit"),
         true,
     );
@@ -394,7 +394,7 @@ fn pipeline_reports_inventory_for_executed_subshell_commands() {
         ),
         (
             "g3rs-hooks/guardrail-validate-staged-present",
-            "Rust guardrail validate step present",
+            "`.githooks/pre-commit` runs `g3rs validate --path ...`",
         ),
     ] {
         assert_eq!(
@@ -413,7 +413,7 @@ fn pipeline_reports_inventory_for_valid_shell_hook_steps() {
 
     write_fixture(
         root.join(".githooks/pre-commit"),
-        "#!/usr/bin/env bash\nset -e\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\npnpm install --frozen-lockfile\n",
+        "#!/usr/bin/env bash\nset -e\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\ncargo metadata --locked\n",
     );
 
     let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
@@ -426,7 +426,7 @@ fn pipeline_reports_inventory_for_valid_shell_hook_steps() {
     for (rule_id, title) in [
         (
             "g3rs-hooks/merge-conflict-step-present",
-            "merge-conflict check step present",
+            "`.githooks/pre-commit` scans for merge-conflict markers",
         ),
         (
             "g3rs-hooks/file-size-step-present",
@@ -434,7 +434,7 @@ fn pipeline_reports_inventory_for_valid_shell_hook_steps() {
         ),
         (
             "g3rs-hooks/concrete-lockfile-command",
-            "concrete lockfile integrity command present",
+            "`.githooks/pre-commit` runs a concrete lockfile integrity command",
         ),
     ] {
         assert_eq!(
@@ -1199,7 +1199,7 @@ fn pipeline_source_reports_shell_safety_inventory_for_valid_hook() {
     for (rule_id, title) in [
         (
             "g3rs-hooks/shell-error-handling",
-            "shell error handling present",
+            "`.githooks/pre-commit` enables fail-closed shell options",
         ),
         ("g3rs-hooks/valid-shebang", "valid hook shebang present"),
     ] {
@@ -1232,11 +1232,11 @@ fn pipeline_source_reports_inventory_for_normalized_wrapped_commands() {
     for (rule_id, title) in [
         (
             "g3rs-hooks/guardrail-validate-staged-present",
-            "Rust guardrail validate step present",
+            "`.githooks/pre-commit` runs `g3rs validate --path ...`",
         ),
         (
             "g3rs-hooks/clippy-denies-warnings",
-            "cargo clippy denies warnings",
+            "`.githooks/pre-commit` runs clippy in deny-warnings mode",
         ),
     ] {
         assert_eq!(
@@ -1279,32 +1279,32 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
         ),
         (
             "g3rs-hooks/duplication-tool-is-cargo-dupes",
-            "Rust duplication tool missing",
+            "missing `cargo dupes --exclude-tests` command in `.githooks/pre-commit`",
         ),
         (
             "g3rs-hooks/clippy-denies-warnings",
-            "cargo clippy deny-warnings step missing",
+            "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`",
         ),
         ("g3rs-hooks/gitleaks-step-present", "gitleaks step missing"),
         (
             "g3rs-hooks/cargo-dupes-step-present",
-            "cargo dupes step missing",
+            "missing executable `cargo dupes` command in `.githooks/pre-commit`",
         ),
         (
             "g3rs-hooks/cargo-dupes-excludes",
-            "cargo dupes step does not exclude tests",
+            "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`",
         ),
         (
             "g3rs-hooks/config-changes-trigger-validation",
-            "Rust config-change trigger coverage incomplete",
+            "incomplete Rust guardrail config trigger coverage in `.githooks/pre-commit`",
         ),
         (
             "g3rs-hooks/shell-error-handling",
-            "shell error handling missing",
+            "missing fail-closed shell options in `.githooks/pre-commit`",
         ),
         (
             "g3rs-hooks/merge-conflict-step-present",
-            "merge-conflict check step missing",
+            "missing merge-conflict marker scan in `.githooks/pre-commit`",
         ),
         (
             "g3rs-hooks/file-size-step-present",
@@ -1312,7 +1312,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
         ),
         (
             "g3rs-hooks/concrete-lockfile-command",
-            "concrete lockfile integrity command missing",
+            "missing concrete lockfile integrity command in `.githooks/pre-commit`",
         ),
     ] {
         assert_result_present(
@@ -1326,7 +1326,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     assert_result_present(
         &results,
         "g3rs-hooks/no-unconditional-exit-zero",
-        "no unconditional exit 0 bypass",
+        "no unconditional `exit 0` bypass in `.githooks/pre-commit`",
         Some(".githooks/pre-commit"),
         true,
     );
