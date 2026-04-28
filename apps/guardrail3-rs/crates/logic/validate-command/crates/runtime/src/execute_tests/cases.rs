@@ -10,6 +10,8 @@ use guardrail3_rs_validate_command_assertions::execute as assertions;
 
 use crate::execute;
 
+use super::fs;
+
 #[derive(Debug)]
 struct StubCrawler;
 
@@ -58,7 +60,18 @@ impl FamilyRunner for StubFamilyRunner {
                 Some("deny.toml".to_owned()),
                 None,
             )],
-            _ => Vec::new(),
+            SupportedFamily::Topology
+            | SupportedFamily::Toolchain
+            | SupportedFamily::Cargo
+            | SupportedFamily::Clippy
+            | SupportedFamily::Code
+            | SupportedFamily::Arch
+            | SupportedFamily::Deps
+            | SupportedFamily::Garde
+            | SupportedFamily::Test
+            | SupportedFamily::Release
+            | SupportedFamily::Hooks
+            | SupportedFamily::Apparch => Vec::new(),
         })
     }
 }
@@ -75,11 +88,10 @@ impl ReportRenderer for StubRenderer {
 #[test]
 fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
-    std::fs::write(
-        tempdir.path().join("Cargo.toml"),
+    fs::write(
+        &tempdir.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
-    )
-    .expect("write temporary workspace Cargo.toml");
+    );
 
     let request = ValidateRequest {
         workspace_root: tempdir.path().to_path_buf(),
@@ -103,11 +115,10 @@ fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
 #[test]
 fn execute_defaults_to_all_families_and_errors_on_non_inventory_error() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
-    std::fs::write(
-        tempdir.path().join("Cargo.toml"),
+    fs::write(
+        &tempdir.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
-    )
-    .expect("write temporary workspace Cargo.toml");
+    );
 
     let request = ValidateRequest {
         workspace_root: tempdir.path().to_path_buf(),
@@ -149,7 +160,18 @@ impl FamilyRunner for ErroringFamilyRunner {
             SupportedFamily::Deny => Err(FamilyRunError {
                 message: "deny runner exploded".to_owned(),
             }),
-            _ => Ok(Vec::new()),
+            SupportedFamily::Topology
+            | SupportedFamily::Toolchain
+            | SupportedFamily::Cargo
+            | SupportedFamily::Clippy
+            | SupportedFamily::Code
+            | SupportedFamily::Arch
+            | SupportedFamily::Deps
+            | SupportedFamily::Garde
+            | SupportedFamily::Test
+            | SupportedFamily::Release
+            | SupportedFamily::Hooks
+            | SupportedFamily::Apparch => Ok(Vec::new()),
         }
     }
 }
@@ -157,11 +179,10 @@ impl FamilyRunner for ErroringFamilyRunner {
 #[test]
 fn execute_keeps_successful_family_results_when_one_family_errors() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
-    std::fs::write(
-        tempdir.path().join("Cargo.toml"),
+    fs::write(
+        &tempdir.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
-    )
-    .expect("write temporary workspace Cargo.toml");
+    );
 
     let request = ValidateRequest {
         workspace_root: tempdir.path().to_path_buf(),

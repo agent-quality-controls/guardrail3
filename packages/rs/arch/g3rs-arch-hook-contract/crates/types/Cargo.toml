@@ -1,0 +1,18 @@
+[package]
+name = "g3rs-arch-hook-contract-types"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+description = "types crate for g3rs-arch-hook-contract"
+publish = false
+readme = "README.md"
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[lints]
+workspace = true

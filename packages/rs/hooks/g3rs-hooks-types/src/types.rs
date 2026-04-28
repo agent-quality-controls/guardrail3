@@ -1,3 +1,4 @@
+use g3rs_hooks_contract_types::G3HookRequirement;
 use hook_shell_parser::types::ParsedShellScript;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -11,6 +12,7 @@ pub struct G3RsHooksConfigChecksInput {
     pub active: bool,
     pub selected_hook: Option<G3RsHooksSelectedHookConfigFact>,
     pub installed_tools: Vec<String>,
+    pub requirements: Vec<G3HookRequirement>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -26,6 +28,7 @@ pub struct G3RsHooksSourceChecksInput {
     pub parsed: ParsedShellScript,
     pub has_modular_dir: bool,
     pub is_workspace_project: bool,
+    pub requirements: Vec<G3HookRequirement>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

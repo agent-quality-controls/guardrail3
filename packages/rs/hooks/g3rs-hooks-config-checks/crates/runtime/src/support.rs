@@ -20,6 +20,12 @@ pub(crate) fn hook_uses_path_qualified_required_tool(
             &selected_hook.parsed,
             is_path_qualified_cargo_machete_command,
         ),
+        "cargo-dupes" => {
+            any_resolved_command(&selected_hook.parsed, is_path_qualified_cargo_dupes_command)
+        }
+        "g3rs" => any_resolved_command(&selected_hook.parsed, |command| {
+            command.path_qualified() && is_g3rs_validate_staged_command(command)
+        }),
         _ => false,
     }
 }
@@ -108,6 +114,15 @@ fn is_path_qualified_cargo_machete_command(command: &ResolvedCommand) -> bool {
             .any(|arg| is_help_or_version_flag(arg))
 }
 
+fn is_path_qualified_cargo_dupes_command(command: &ResolvedCommand) -> bool {
+    command.path_qualified()
+        && command.command_name() == "cargo-dupes"
+        && !command
+            .args()
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg))
+}
+
 fn parse_validate_args(args: &[String]) -> bool {
     let mut saw_path = false;
     let mut index = 0usize;
@@ -117,7 +132,7 @@ fn parse_validate_args(args: &[String]) -> bool {
             return false;
         }
         if let Some(path) = arg.strip_prefix("--path=") {
-            if path.is_empty() {
+            if path.is_empty() || path.starts_with('-') {
                 return false;
             }
             saw_path = true;

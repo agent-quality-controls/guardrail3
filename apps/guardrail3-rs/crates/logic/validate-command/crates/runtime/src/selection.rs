@@ -2,22 +2,7 @@ use guardrail3_rs_app_types::{SUPPORTED_FAMILIES, SupportedFamily, ValidateReque
 
 #[must_use]
 pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
-    match family {
-        SupportedFamily::Topology => "topology",
-        SupportedFamily::Toolchain => "toolchain",
-        SupportedFamily::Fmt => "fmt",
-        SupportedFamily::Cargo => "cargo",
-        SupportedFamily::Clippy => "clippy",
-        SupportedFamily::Deny => "deny",
-        SupportedFamily::Code => "code",
-        SupportedFamily::Arch => "arch",
-        SupportedFamily::Deps => "deps",
-        SupportedFamily::Garde => "garde",
-        SupportedFamily::Test => "test",
-        SupportedFamily::Release => "release",
-        SupportedFamily::Hooks => "hooks",
-        SupportedFamily::Apparch => "apparch",
-    }
+    family.cli_name()
 }
 
 #[must_use]

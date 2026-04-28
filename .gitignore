@@ -1,4 +1,5 @@
 target/
+.cargo-target/
 node_modules/
 /legacy/
 .claude/

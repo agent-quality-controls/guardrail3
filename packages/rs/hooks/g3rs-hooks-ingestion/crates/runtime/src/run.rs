@@ -50,6 +50,7 @@ pub fn ingest_for_source_checks(
         parsed: parse_script(&content),
         has_modular_dir: selected.has_modular_dir,
         is_workspace_project,
+        requirements: Vec::new(),
     });
 
     if !selected.has_modular_dir {
@@ -75,6 +76,7 @@ pub fn ingest_for_source_checks(
             parsed: parse_script(&content),
             has_modular_dir: selected.has_modular_dir,
             is_workspace_project,
+            requirements: Vec::new(),
         });
     }
 
@@ -135,6 +137,7 @@ pub(crate) fn ingest_for_config_checks_with_path(
             active,
             selected_hook: None,
             installed_tools: Vec::new(),
+            requirements: Vec::new(),
         });
     }
 
@@ -146,6 +149,7 @@ pub(crate) fn ingest_for_config_checks_with_path(
             .map(read_selected_hook_config_fact)
             .transpose()?,
         installed_tools: discover_installed_tools(path_env),
+        requirements: Vec::new(),
     })
 }
 

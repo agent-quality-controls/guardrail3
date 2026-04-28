@@ -142,6 +142,7 @@ pub(crate) fn run_case_with_workspace(
         rel_path: ".githooks/pre-commit",
         parsed: &parsed,
         is_workspace_project,
+        requirements: &[],
     };
     let mut results = Vec::new();
     check(&input, &mut results);

@@ -27,63 +27,78 @@ guardrail3-check-types = { path = "../../packages/shared/guardrail3-check-types"
 g3rs-workspace-crawl = { path = "../../packages/rs/g3rs-workspace-crawl", features = ["api"] }
 
 g3rs-apparch-config-checks = { path = "../../packages/rs/apparch/g3rs-apparch-config-checks" }
+g3rs-apparch-hook-contract = { path = "../../packages/rs/apparch/g3rs-apparch-hook-contract" }
 g3rs-apparch-ingestion = { path = "../../packages/rs/apparch/g3rs-apparch-ingestion" }
 g3rs-apparch-source-checks = { path = "../../packages/rs/apparch/g3rs-apparch-source-checks" }
 
 g3rs-arch-config-checks = { path = "../../packages/rs/arch/g3rs-arch-config-checks", features = ["api"] }
 g3rs-arch-file-tree-checks = { path = "../../packages/rs/arch/g3rs-arch-file-tree-checks", features = ["api"] }
+g3rs-arch-hook-contract = { path = "../../packages/rs/arch/g3rs-arch-hook-contract" }
 g3rs-arch-ingestion = { path = "../../packages/rs/arch/g3rs-arch-ingestion", features = ["api"] }
 g3rs-arch-source-checks = { path = "../../packages/rs/arch/g3rs-arch-source-checks", features = ["api"] }
 
 g3rs-cargo-config-checks = { path = "../../packages/rs/cargo/g3rs-cargo-config-checks", features = ["api"] }
 g3rs-cargo-filetree-checks = { path = "../../packages/rs/cargo/g3rs-cargo-filetree-checks", features = ["api"] }
+g3rs-cargo-hook-contract = { path = "../../packages/rs/cargo/g3rs-cargo-hook-contract" }
 g3rs-cargo-ingestion = { path = "../../packages/rs/cargo/g3rs-cargo-ingestion", features = ["api"] }
 
 g3rs-clippy-config-checks = { path = "../../packages/rs/clippy/g3rs-clippy-config-checks", features = ["api"] }
 g3rs-clippy-filetree-checks = { path = "../../packages/rs/clippy/g3rs-clippy-filetree-checks", features = ["api"] }
+g3rs-clippy-hook-contract = { path = "../../packages/rs/clippy/g3rs-clippy-hook-contract" }
 g3rs-clippy-ingestion = { path = "../../packages/rs/clippy/g3rs-clippy-ingestion", features = ["api"] }
 
 g3rs-code-config-checks = { path = "../../packages/rs/code/g3rs-code-config-checks", features = ["api"] }
 g3rs-code-file-tree-checks = { path = "../../packages/rs/code/g3rs-code-file-tree-checks", features = ["api"] }
+g3rs-code-hook-contract = { path = "../../packages/rs/code/g3rs-code-hook-contract" }
 g3rs-code-ingestion = { path = "../../packages/rs/code/g3rs-code-ingestion", features = ["api"] }
 g3rs-code-source-checks = { path = "../../packages/rs/code/g3rs-code-source-checks", features = ["api"] }
 
 g3rs-deps-config-checks = { path = "../../packages/rs/deps/g3rs-deps-config-checks", features = ["api"] }
 g3rs-deps-filetree-checks = { path = "../../packages/rs/deps/g3rs-deps-filetree-checks", features = ["api"] }
+g3rs-deps-hook-contract = { path = "../../packages/rs/deps/g3rs-deps-hook-contract" }
 g3rs-deps-ingestion = { path = "../../packages/rs/deps/g3rs-deps-ingestion", features = ["api"] }
 
 g3rs-deny-config-checks = { path = "../../packages/rs/deny/g3rs-deny-config-checks", features = ["api"] }
 g3rs-deny-filetree-checks = { path = "../../packages/rs/deny/g3rs-deny-filetree-checks", features = ["api"] }
+g3rs-deny-hook-contract = { path = "../../packages/rs/deny/g3rs-deny-hook-contract" }
 g3rs-deny-ingestion = { path = "../../packages/rs/deny/g3rs-deny-ingestion", features = ["api"] }
 
 g3rs-fmt-config-checks = { path = "../../packages/rs/fmt/g3rs-fmt-config-checks", features = ["api"] }
 g3rs-fmt-filetree-checks = { path = "../../packages/rs/fmt/g3rs-fmt-filetree-checks", features = ["api"] }
+g3rs-fmt-hook-contract = { path = "../../packages/rs/fmt/g3rs-fmt-hook-contract" }
 g3rs-fmt-ingestion = { path = "../../packages/rs/fmt/g3rs-fmt-ingestion", features = ["api"] }
 
 g3rs-garde-config-checks = { path = "../../packages/rs/garde/g3rs-garde-config-checks", features = ["api"] }
+g3rs-garde-hook-contract = { path = "../../packages/rs/garde/g3rs-garde-hook-contract" }
 g3rs-garde-ingestion = { path = "../../packages/rs/garde/g3rs-garde-ingestion", features = ["api"] }
 g3rs-garde-source-checks = { path = "../../packages/rs/garde/g3rs-garde-source-checks", features = ["api"] }
 
 g3rs-hooks-config-checks = { path = "../../packages/rs/hooks/g3rs-hooks-config-checks", features = ["api"] }
+g3rs-hooks-contract-types = { path = "../../packages/rs/hooks/g3rs-hooks-contract-types", features = ["api"] }
 g3rs-hooks-file-tree-checks = { path = "../../packages/rs/hooks/g3rs-hooks-file-tree-checks", features = ["api"] }
 g3rs-hooks-ingestion = { path = "../../packages/rs/hooks/g3rs-hooks-ingestion", features = ["api"] }
 g3rs-hooks-source-checks = { path = "../../packages/rs/hooks/g3rs-hooks-source-checks", features = ["api"] }
+g3rs-hooks-types = { path = "../../packages/rs/hooks/g3rs-hooks-types", features = ["api"] }
 
 g3rs-release-config-checks = { path = "../../packages/rs/release/g3rs-release-config-checks", features = ["api"] }
 g3rs-release-filetree-checks = { path = "../../packages/rs/release/g3rs-release-filetree-checks", features = ["api"] }
+g3rs-release-hook-contract = { path = "../../packages/rs/release/g3rs-release-hook-contract" }
 g3rs-release-ingestion = { path = "../../packages/rs/release/g3rs-release-ingestion", features = ["api"] }
 g3rs-release-source-checks = { path = "../../packages/rs/release/g3rs-release-source-checks", features = ["api"] }
 
 g3rs-test-config-checks = { path = "../../packages/rs/test/g3rs-test-config-checks", features = ["api"] }
 g3rs-test-file-tree-checks = { path = "../../packages/rs/test/g3rs-test-file-tree-checks", features = ["api"] }
+g3rs-test-hook-contract = { path = "../../packages/rs/test/g3rs-test-hook-contract" }
 g3rs-test-ingestion = { path = "../../packages/rs/test/g3rs-test-ingestion", features = ["api"] }
 g3rs-test-source-checks = { path = "../../packages/rs/test/g3rs-test-source-checks", features = ["api"] }
 
 g3rs-toolchain-config-checks = { path = "../../packages/rs/toolchain/g3rs-toolchain-config-checks", features = ["api"] }
 g3rs-toolchain-filetree-checks = { path = "../../packages/rs/toolchain/g3rs-toolchain-filetree-checks", features = ["api"] }
+g3rs-toolchain-hook-contract = { path = "../../packages/rs/toolchain/g3rs-toolchain-hook-contract" }
 g3rs-toolchain-ingestion = { path = "../../packages/rs/toolchain/g3rs-toolchain-ingestion", features = ["api"] }
 
 g3rs-topology-file-tree-checks = { path = "../../packages/rs/topology/g3rs-topology-file-tree-checks", features = ["api"] }
+g3rs-topology-hook-contract = { path = "../../packages/rs/topology/g3rs-topology-hook-contract" }
 g3rs-topology-ingestion = { path = "../../packages/rs/topology/g3rs-topology-ingestion", features = ["api"] }
 
 [workspace.lints.rust]

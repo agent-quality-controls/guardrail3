@@ -137,7 +137,7 @@ where
 {
     let segments = lex::split_command_segments(raw);
     if segments.is_empty() {
-        return segment_visits(
+        let outcome = segment_visits(
             lex::shell_words(raw),
             local,
             root,
@@ -149,6 +149,28 @@ where
             options,
         )
         .stopped;
+        if outcome {
+            return true;
+        }
+
+        for substitution in lex::extract_command_substitutions(raw) {
+            let mut substitution_state = state.clone();
+            if line_visits_with_mode(
+                &substitution,
+                local,
+                root,
+                visiting,
+                &mut substitution_state,
+                visitor,
+                line_no,
+                root_line_no,
+                options,
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     let mut prefix_status = None;

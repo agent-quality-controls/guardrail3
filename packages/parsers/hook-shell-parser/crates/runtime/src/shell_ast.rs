@@ -45,7 +45,12 @@ pub(super) fn command_segments(input: &str) -> Vec<ShellCommandSegment> {
         .iter()
         .enumerate()
         .filter_map(|(index, node)| {
-            let text = node_text(input, *node)?.trim().to_owned();
+            let start_byte = leading_negation_start(input, node.start_byte());
+            let text = input
+                .get(start_byte..node.end_byte())
+                .or_else(|| node_text(input, *node))?
+                .trim()
+                .to_owned();
             let operator_before = index
                 .checked_sub(1)
                 .and_then(|previous_index| nodes.get(previous_index))
@@ -188,10 +193,45 @@ fn collect_executable_nodes<'tree>(node: Node<'tree>, out: &mut Vec<Node<'tree>>
     }
 }
 
+fn leading_negation_start(input: &str, command_start: usize) -> usize {
+    let prefix = input.get(..command_start).unwrap_or_default();
+    let mut cursor = prefix.len();
+    let mut saw_negation = false;
+
+    loop {
+        while cursor > 0 {
+            let Some((previous_index, previous_char)) = prefix[..cursor].char_indices().next_back()
+            else {
+                break;
+            };
+            if !previous_char.is_whitespace() {
+                break;
+            }
+            cursor = previous_index;
+        }
+
+        let Some((previous_index, previous_char)) = prefix[..cursor].char_indices().next_back()
+        else {
+            break;
+        };
+        if previous_char != '!' {
+            break;
+        }
+
+        saw_negation = true;
+        cursor = previous_index;
+    }
+
+    if saw_negation { cursor } else { command_start }
+}
+
 fn command_words(input: &str, node: Node<'_>) -> Vec<String> {
     let mut words = Vec::new();
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
+        if child.kind() == "!" {
+            continue;
+        }
         if child.kind().contains("redirect") {
             continue;
         }
