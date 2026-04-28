@@ -148,6 +148,29 @@ pub fn assert_ts_astro_mdx_extra_string(astro: &TsAstroPolicyConfig, key: &str, 
     );
 }
 
+pub fn assert_ts_astro_seo_strict_ai_readable(astro: &TsAstroPolicyConfig, expected: bool) {
+    assert_eq!(
+        astro.seo.strict_ai_readable, expected,
+        "ts.astro.seo.strict_ai_readable mismatch"
+    );
+}
+
+pub fn assert_ts_astro_seo_llms_required_sections(astro: &TsAstroPolicyConfig, expected: &[&str]) {
+    assert_string_list(
+        &astro.seo.llms_required_sections,
+        expected,
+        "ts.astro.seo.llms_required_sections",
+    );
+}
+
+pub fn assert_ts_astro_seo_llms_required_links(astro: &TsAstroPolicyConfig, expected: &[&str]) {
+    assert_string_list(
+        &astro.seo.llms_required_links,
+        expected,
+        "ts.astro.seo.llms_required_links",
+    );
+}
+
 pub fn assert_ts_astro_seo_extra_string(astro: &TsAstroPolicyConfig, key: &str, expected: &str) {
     assert_eq!(
         astro.seo.extra.get(key).and_then(Value::as_str),

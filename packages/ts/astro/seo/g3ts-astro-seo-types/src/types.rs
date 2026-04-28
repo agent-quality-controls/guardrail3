@@ -4,6 +4,8 @@ pub struct G3TsAstroPackageSurfaceSnapshot {
     pub package_name: Option<String>,
     pub dependencies: Vec<String>,
     pub dev_dependencies: Vec<String>,
+    pub optional_dependencies: Vec<String>,
+    pub peer_dependencies: Vec<String>,
     pub script_names: Vec<String>,
     pub script_bodies: Vec<(String, String)>,
     pub script_commands: Vec<G3TsAstroPackageScriptCommand>,
@@ -66,6 +68,8 @@ pub struct G3TsAstroConfigSurfaceSnapshot {
     pub rel_path: String,
     pub site: Option<String>,
     pub output: Option<G3TsAstroOutputMode>,
+    pub out_dir: Option<String>,
+    pub trailing_slash: Option<G3TsAstroTrailingSlashPolicy>,
     pub integrations: Vec<G3TsAstroIntegrationSnapshot>,
     pub adapter: Option<G3TsAstroIntegrationSnapshot>,
 }
@@ -74,6 +78,13 @@ pub struct G3TsAstroConfigSurfaceSnapshot {
 pub enum G3TsAstroOutputMode {
     Static,
     Server,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum G3TsAstroTrailingSlashPolicy {
+    Always,
+    Never,
+    Ignore,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -133,6 +144,9 @@ pub struct G3TsAstroSeoPolicySnapshot {
     pub rel_path: String,
     pub metadata_helpers: Vec<String>,
     pub json_ld_helpers: Vec<String>,
+    pub strict_ai_readable: bool,
+    pub llms_required_sections: Vec<String>,
+    pub llms_required_links: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -221,7 +235,6 @@ pub struct G3TsAstroSeoIntegrationContractInput {
     pub package: G3TsAstroPackageSurfaceState,
     pub astro_config: G3TsAstroConfigSurfaceState,
     pub astro_policy: G3TsAstroSeoPolicySurfaceState,
-    pub llms_txt_rel_path: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

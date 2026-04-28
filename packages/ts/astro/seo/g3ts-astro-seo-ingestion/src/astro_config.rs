@@ -2,7 +2,7 @@ use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_astro_seo_types::{
     G3TsAstroCallSnapshot, G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState,
     G3TsAstroIntegrationSnapshot, G3TsAstroOutputMode, G3TsAstroStaticObjectProperty,
-    G3TsAstroStaticValue,
+    G3TsAstroStaticValue, G3TsAstroTrailingSlashPolicy,
 };
 
 pub(crate) fn ingest_astro_config_surface(
@@ -56,6 +56,8 @@ pub(crate) fn ingest_astro_config_surface(
             rel_path: typed.selected_config.rel_path.clone(),
             site: typed.site.clone(),
             output: typed.output.map(astro_output_mode),
+            out_dir: typed.out_dir.clone(),
+            trailing_slash: typed.trailing_slash.map(astro_trailing_slash_policy),
             integrations: typed.integrations.iter().map(astro_integration).collect(),
             adapter: typed.adapter.as_ref().map(astro_adapter_as_integration),
         },
@@ -66,6 +68,22 @@ fn astro_output_mode(value: astro_config_parser::types::AstroOutputMode) -> G3Ts
     match value {
         astro_config_parser::types::AstroOutputMode::Static => G3TsAstroOutputMode::Static,
         astro_config_parser::types::AstroOutputMode::Server => G3TsAstroOutputMode::Server,
+    }
+}
+
+fn astro_trailing_slash_policy(
+    value: astro_config_parser::types::AstroTrailingSlashPolicy,
+) -> G3TsAstroTrailingSlashPolicy {
+    match value {
+        astro_config_parser::types::AstroTrailingSlashPolicy::Always => {
+            G3TsAstroTrailingSlashPolicy::Always
+        }
+        astro_config_parser::types::AstroTrailingSlashPolicy::Never => {
+            G3TsAstroTrailingSlashPolicy::Never
+        }
+        astro_config_parser::types::AstroTrailingSlashPolicy::Ignore => {
+            G3TsAstroTrailingSlashPolicy::Ignore
+        }
     }
 }
 

@@ -18,6 +18,8 @@ pub struct AstroConfigSnapshot {
     pub selected_config: AstroConfigSelectedFile,
     pub site: Option<String>,
     pub output: Option<AstroOutputMode>,
+    pub out_dir: Option<String>,
+    pub trailing_slash: Option<AstroTrailingSlashPolicy>,
     pub integrations: Vec<AstroIntegrationSnapshot>,
     pub adapter: Option<AstroAdapterSnapshot>,
 }
@@ -42,6 +44,13 @@ pub enum AstroConfigFileKind {
 pub enum AstroOutputMode {
     Static,
     Server,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub enum AstroTrailingSlashPolicy {
+    Always,
+    Never,
+    Ignore,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]

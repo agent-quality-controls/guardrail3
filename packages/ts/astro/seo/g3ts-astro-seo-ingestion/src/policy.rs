@@ -51,14 +51,11 @@ pub(crate) fn ingest_seo_policy_surface(
             rel_path: entry.path.rel_path.clone(),
             metadata_helpers: astro.seo.metadata_helpers,
             json_ld_helpers: astro.seo.json_ld_helpers,
+            strict_ai_readable: astro.seo.strict_ai_readable,
+            llms_required_sections: astro.seo.llms_required_sections,
+            llms_required_links: astro.seo.llms_required_links,
         },
     }
-}
-
-pub(crate) fn select_llms_txt(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<String> {
-    let rel_path =
-        g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, "public/llms.txt");
-    exact_included_file(crawl, &rel_path).map(|entry| entry.path.rel_path.clone())
 }
 
 fn exact_included_file<'crawl>(

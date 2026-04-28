@@ -200,6 +200,69 @@ fn normalizes_non_eslint_package_runner_invocations() {
 }
 
 #[test]
+fn normalizes_package_manager_run_invocations_as_script_references() {
+    let document = super::super::parse_document(
+        "validate",
+        "npm run -- build && pnpm run -- check:sitemap && yarn run check:robots && npm run build -- --flag",
+    )
+    .expect("script command document should parse");
+
+    assert_no_eslint_invocation(&document);
+    assert_tool_invocation(
+        &document,
+        0,
+        ExpectedToolInvocation {
+            script_name: "validate",
+            command_index: 0,
+            invocation: "npm run -- build",
+            executable: "package-script",
+            args: &["build"],
+            preceded_by: None,
+            followed_by: Some(PackageScriptCommandSeparator::And),
+        },
+    );
+    assert_tool_invocation(
+        &document,
+        1,
+        ExpectedToolInvocation {
+            script_name: "validate",
+            command_index: 1,
+            invocation: "pnpm run -- check:sitemap",
+            executable: "package-script",
+            args: &["check:sitemap"],
+            preceded_by: Some(PackageScriptCommandSeparator::And),
+            followed_by: Some(PackageScriptCommandSeparator::And),
+        },
+    );
+    assert_tool_invocation(
+        &document,
+        2,
+        ExpectedToolInvocation {
+            script_name: "validate",
+            command_index: 2,
+            invocation: "yarn run check:robots",
+            executable: "package-script",
+            args: &["check:robots"],
+            preceded_by: Some(PackageScriptCommandSeparator::And),
+            followed_by: Some(PackageScriptCommandSeparator::And),
+        },
+    );
+    assert_tool_invocation(
+        &document,
+        3,
+        ExpectedToolInvocation {
+            script_name: "validate",
+            command_index: 3,
+            invocation: "npm run build -- --flag",
+            executable: "package-script",
+            args: &["build", "--", "--flag"],
+            preceded_by: Some(PackageScriptCommandSeparator::And),
+            followed_by: None,
+        },
+    );
+}
+
+#[test]
 fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
     let safe = super::super::parse("check", "astro check && syncpack lint")
         .expect("script command fact should parse");
@@ -589,6 +652,18 @@ fn unsupported_guardrail_script_without_eslint_fails_closed() {
         .expect("script command parser should produce a document");
 
     assert_unsupported_document(&document);
+}
+
+#[test]
+fn unsupported_artifact_checker_script_fails_closed() {
+    let document = super::super::parse_document(
+        "check:sitemap",
+        "g3ts-astro-sitemap-checks --site https://example.com --output-dir dist | tee sitemap.log",
+    )
+    .expect("script command parser should produce a document");
+
+    assert_unsupported_document(&document);
+    assert_state_reason_contains(&document, "unsupported");
 }
 
 #[test]

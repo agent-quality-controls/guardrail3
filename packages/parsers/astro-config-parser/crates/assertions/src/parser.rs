@@ -1,5 +1,5 @@
 pub use astro_config_parser_runtime::types::{
-    AstroConfigParseState, AstroOutputMode, AstroStaticValue,
+    AstroConfigParseState, AstroOutputMode, AstroStaticValue, AstroTrailingSlashPolicy,
 };
 
 use astro_config_parser_runtime::types::AstroConfigDocument;
@@ -37,6 +37,8 @@ pub fn assert_snapshot(
     document: &AstroConfigDocument,
     expected_site: Option<&str>,
     expected_output: Option<AstroOutputMode>,
+    expected_out_dir: Option<&str>,
+    expected_trailing_slash: Option<AstroTrailingSlashPolicy>,
     expected_integrations: &[&str],
     expected_adapter: Option<&str>,
 ) {
@@ -50,6 +52,8 @@ pub fn assert_snapshot(
 
     assert_eq!(snapshot.site.as_deref(), expected_site);
     assert_eq!(snapshot.output, expected_output);
+    assert_eq!(snapshot.out_dir.as_deref(), expected_out_dir);
+    assert_eq!(snapshot.trailing_slash, expected_trailing_slash);
     assert_eq!(
         snapshot
             .integrations
