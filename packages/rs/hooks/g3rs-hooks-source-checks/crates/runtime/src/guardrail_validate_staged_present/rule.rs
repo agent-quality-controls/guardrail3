@@ -32,6 +32,7 @@ pub(crate) fn line_contains_guardrail_step(
     line_no: usize,
 ) -> bool {
     any_resolved_command_on_line(parsed, raw, line_no, &is_guardrail_validate_path_command)
+        || extracted_line_command_matches(parsed, raw, line_no, is_guardrail_validate_path_command)
 }
 
 pub(crate) fn line_contains_path_qualified_guardrail_step(
@@ -44,7 +45,23 @@ pub(crate) fn line_contains_path_qualified_guardrail_step(
         raw,
         line_no,
         &is_path_qualified_guardrail_validate_path_command,
+    ) || extracted_line_command_matches(
+        parsed,
+        raw,
+        line_no,
+        is_path_qualified_guardrail_validate_path_command,
     )
+}
+
+fn extracted_line_command_matches(
+    _parsed: &ParsedShellScript,
+    raw: &str,
+    line_no: usize,
+    predicate: impl Fn(&ResolvedCommand) -> bool,
+) -> bool {
+    let _ = line_no;
+    let extracted = hook_shell_parser::parse_script(raw);
+    any_resolved_command(&extracted, &predicate)
 }
 
 fn is_path_qualified_guardrail_validate_path_command(command: &ResolvedCommand) -> bool {
@@ -90,7 +107,7 @@ fn parse_validate_args(args: &[String]) -> bool {
             let Some(value) = args.get(index + 1).map(String::as_str) else {
                 return false;
             };
-            if value.starts_with('-') {
+            if value.is_empty() || value.starts_with('-') {
                 return false;
             }
             saw_path = true;

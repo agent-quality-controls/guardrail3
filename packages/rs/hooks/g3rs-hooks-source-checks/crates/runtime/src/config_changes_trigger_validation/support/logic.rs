@@ -112,6 +112,18 @@ fn branch_has_trigger_before_validation(
     block: &NumberedBlock,
     needle: &str,
 ) -> bool {
+    if block.lines.len() == 1 {
+        let expanded = expand_inline_if_block(&block.lines[0].raw);
+        if expanded != block.lines[0].raw {
+            return if_branches(&expanded_single_line_block(
+                block.lines[0].line_no,
+                &expanded,
+            ))
+            .into_iter()
+            .any(|branch| branch_has_trigger_before_validation(parsed, &branch, needle));
+        }
+    }
+
     let header_span_len = trigger_header_span_len(block);
     let mut saw_trigger = false;
 
@@ -136,11 +148,30 @@ fn branch_has_trigger_before_validation(
 fn branch_covers_needle(parsed: &ParsedShellScript, branch: &NumberedBlock, needle: &str) -> bool {
     let (direct_branch, nested_blocks) = partition_branch(branch);
     branch_has_trigger_before_validation(parsed, &direct_branch, needle)
+        || (branch_has_trigger(parsed, &direct_branch, needle)
+            && nested_blocks
+                .iter()
+                .any(|nested_block| block_contains_validation(parsed, nested_block)))
         || nested_blocks.into_iter().any(|nested_block| {
             block_branches(&nested_block)
                 .into_iter()
                 .any(|nested_branch| branch_covers_needle(parsed, &nested_branch, needle))
         })
+}
+
+fn branch_has_trigger(parsed: &ParsedShellScript, branch: &NumberedBlock, needle: &str) -> bool {
+    let header_span_len = trigger_header_span_len(branch);
+    branch.lines.iter().enumerate().any(|(index, line)| {
+        line_reaches_config_trigger(parsed, &line.raw, line.line_no, needle)
+            && (index < header_span_len || !is_discarded_direct_trigger_line(&line.raw, needle))
+    })
+}
+
+fn block_contains_validation(parsed: &ParsedShellScript, block: &NumberedBlock) -> bool {
+    block.lines.iter().any(|line| {
+        line_contains_guardrail_step(parsed, &line.raw, line.line_no)
+            || line_contains_path_qualified_guardrail_step(parsed, &line.raw, line.line_no)
+    })
 }
 
 fn block_branches(block: &NumberedBlock) -> Vec<NumberedBlock> {
@@ -372,10 +403,15 @@ fn content_has_direct_trigger_line_for_needle(parsed: &ParsedShellScript, needle
     parsed.executable_lines.iter().any(|line| {
         let trimmed = line.raw.trim();
         !starts_conditional_block(trimmed)
+            && !contains_inline_else_marker(trimmed)
             && line_reaches_config_trigger(parsed, &line.raw, line.line_no, needle)
             && (line_contains_guardrail_step(parsed, &line.raw, line.line_no)
                 || line_contains_path_qualified_guardrail_step(parsed, &line.raw, line.line_no))
     })
+}
+
+fn contains_inline_else_marker(line: &str) -> bool {
+    line.contains(" else ") || line.contains("; else") || line.contains(";else")
 }
 
 fn expanded_single_line_block(line_no: usize, expanded: &str) -> NumberedBlock {

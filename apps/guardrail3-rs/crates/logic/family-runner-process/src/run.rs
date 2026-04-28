@@ -41,11 +41,7 @@ pub fn run(
             let mut results = Vec::new();
             results.extend(g3rs_hooks_config_checks::check(&config_input));
             results.extend(g3rs_hooks_file_tree_checks::check(&filetree_input));
-            results.extend(
-                source_inputs
-                    .iter()
-                    .flat_map(g3rs_hooks_source_checks::check),
-            );
+            results.extend(g3rs_hooks_source_checks::check_all(&source_inputs));
             Ok(results)
         }
         SupportedFamily::Release => {

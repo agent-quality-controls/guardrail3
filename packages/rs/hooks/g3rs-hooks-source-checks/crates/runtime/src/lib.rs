@@ -25,4 +25,4 @@ mod test_uses_workspace;
 mod workflow;
 
 #[cfg(feature = "checks")]
-pub use run::check;
+pub use run::{check, check_all};

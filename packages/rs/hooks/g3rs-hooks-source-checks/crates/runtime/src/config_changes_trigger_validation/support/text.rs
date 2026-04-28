@@ -61,6 +61,9 @@ fn line_reaches_config_trigger_inner(
     if direct_trigger_line(raw, needle) {
         return true;
     }
+    if line_references_trigger_variable(root, raw, needle) {
+        return true;
+    }
 
     if looks_like_case_pattern_line(raw.trim()) && mentions_config_exact(raw, needle) {
         return true;
@@ -130,6 +133,31 @@ fn direct_trigger_line(line: &str, needle: &str) -> bool {
         && !trimmed.is_empty()
         && mentions_config_exact(line, needle)
         && is_trigger_like_line(trimmed)
+}
+
+fn line_references_trigger_variable(parsed: &ParsedShellScript, line: &str, needle: &str) -> bool {
+    parsed
+        .source_lines
+        .iter()
+        .filter_map(|source| trigger_variable_name(source.raw.as_str(), needle))
+        .any(|name| line.contains(&format!("${name}")) || line.contains(&format!("${{{name}}}")))
+}
+
+fn trigger_variable_name<'a>(line: &'a str, needle: &str) -> Option<&'a str> {
+    if !direct_trigger_line(line, needle) {
+        return None;
+    }
+    let trimmed = line.trim_start();
+    let (name, _) = trimmed.split_once('=')?;
+    (!name.is_empty()
+        && name
+            .chars()
+            .all(|ch| ch == '_' || ch.is_ascii_alphanumeric())
+        && name
+            .chars()
+            .next()
+            .is_some_and(|ch| ch == '_' || ch.is_ascii_alphabetic()))
+    .then_some(name)
 }
 
 fn regex_escaped_literal(needle: &str) -> String {
