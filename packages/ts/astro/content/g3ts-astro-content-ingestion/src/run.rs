@@ -76,6 +76,12 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroContentCon
                 },
             )
             .collect(),
+        eslint_directives: app_roots
+            .iter()
+            .flat_map(|app_root_rel_path| {
+                crate::eslint_directives::eslint_directives(crawl, app_root_rel_path)
+            })
+            .collect(),
         adapter_root_contracts,
         adapter_source_contracts,
     }

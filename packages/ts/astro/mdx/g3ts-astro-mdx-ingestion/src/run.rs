@@ -53,6 +53,12 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroMdxConfigC
             )
             .collect(),
         missing_component_map_sources,
+        eslint_directives: policies
+            .iter()
+            .flat_map(|(app_root_rel_path, astro_policy)| {
+                crate::eslint_directives::eslint_directives(crawl, app_root_rel_path, astro_policy)
+            })
+            .collect(),
     }
 }
 

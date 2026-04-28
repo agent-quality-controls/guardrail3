@@ -86,6 +86,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "eslint-directive-parser"
+version = "0.1.0"
+dependencies = [
+ "eslint-directive-parser-runtime",
+]
+
+[[package]]
+name = "eslint-directive-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "eslint-directive-parser-types",
+]
+
+[[package]]
+name = "eslint-directive-parser-types"
+version = "0.1.0"
+
+[[package]]
 name = "find-msvc-tools"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -125,6 +143,7 @@ name = "g3ts-astro-mdx-ingestion"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
+ "eslint-directive-parser",
  "g3rs-workspace-crawl",
  "g3ts-astro-check-support",
  "g3ts-astro-mdx-types",

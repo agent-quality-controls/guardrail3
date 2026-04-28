@@ -29,6 +29,8 @@ pub fn check(input: &G3TsAstroSeoConfigChecksInput) -> Vec<G3CheckResult> {
     for eslint_contract in &input.eslint_contracts {
         crate::metadata_helper_rule::check_eslint(eslint_contract, &mut results);
         crate::json_ld_helper_rule::check_eslint(eslint_contract, &mut results);
+        crate::protected_rule_disables_restricted::check(eslint_contract, &mut results);
     }
+    crate::eslint_disable_inventory::check_all(&input.eslint_directives, &mut results);
     results
 }

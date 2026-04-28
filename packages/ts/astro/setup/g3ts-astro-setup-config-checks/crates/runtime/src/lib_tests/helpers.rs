@@ -42,18 +42,34 @@ fn package() -> G3TsAstroPackageSurfaceState {
                 "@astrojs/sitemap".to_owned(),
                 "astro-robots".to_owned(),
                 "@nuasite/checks".to_owned(),
+                "@eslint-community/eslint-plugin-eslint-comments".to_owned(),
             ],
             script_names: vec![
+                "build".to_owned(),
                 "check".to_owned(),
                 "lint".to_owned(),
                 "lint:packages".to_owned(),
+                "validate".to_owned(),
             ],
             script_bodies: vec![
+                ("build".to_owned(), "astro build".to_owned()),
                 ("check".to_owned(), "astro check".to_owned()),
                 ("lint".to_owned(), "eslint --max-warnings 0 .".to_owned()),
                 ("lint:packages".to_owned(), "syncpack lint".to_owned()),
+                (
+                    "validate".to_owned(),
+                    "pnpm run lint && pnpm run lint:packages && pnpm run check && pnpm run build"
+                        .to_owned(),
+                ),
             ],
             script_commands: vec![
+                G3TsAstroPackageScriptCommand {
+                    script_name: "build".to_owned(),
+                    invocation: "astro build".to_owned(),
+                    executable: "astro".to_owned(),
+                    args: vec!["build".to_owned()],
+                    preceded_by: None,
+                },
                 G3TsAstroPackageScriptCommand {
                     script_name: "check".to_owned(),
                     invocation: "astro check".to_owned(),
@@ -74,10 +90,53 @@ fn package() -> G3TsAstroPackageSurfaceState {
                     executable: "syncpack".to_owned(),
                     args: vec!["lint".to_owned()],
                     preceded_by: None,
+                },
+                G3TsAstroPackageScriptCommand {
+                    script_name: "validate".to_owned(),
+                    invocation: "pnpm run lint".to_owned(),
+                    executable: "pnpm".to_owned(),
+                    args: vec!["run".to_owned(), "lint".to_owned()],
+                    preceded_by: None,
+                },
+                G3TsAstroPackageScriptCommand {
+                    script_name: "validate".to_owned(),
+                    invocation: "pnpm run lint:packages".to_owned(),
+                    executable: "pnpm".to_owned(),
+                    args: vec!["run".to_owned(), "lint:packages".to_owned()],
+                    preceded_by: Some(
+                        g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And,
+                    ),
+                },
+                G3TsAstroPackageScriptCommand {
+                    script_name: "validate".to_owned(),
+                    invocation: "pnpm run check".to_owned(),
+                    executable: "pnpm".to_owned(),
+                    args: vec!["run".to_owned(), "check".to_owned()],
+                    preceded_by: Some(
+                        g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And,
+                    ),
+                },
+                G3TsAstroPackageScriptCommand {
+                    script_name: "validate".to_owned(),
+                    invocation: "pnpm run build".to_owned(),
+                    executable: "pnpm".to_owned(),
+                    args: vec!["run".to_owned(), "build".to_owned()],
+                    preceded_by: Some(
+                        g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And,
+                    ),
                 },
             ],
             script_tool_invocations: vec![
                 G3TsAstroPackageScriptToolInvocation {
+                    script_name: "build".to_owned(),
+                    command_index: 0,
+                    invocation: "astro build".to_owned(),
+                    executable: "astro".to_owned(),
+                    args: vec!["build".to_owned()],
+                    preceded_by: None,
+                    followed_by: None,
+                },
+                G3TsAstroPackageScriptToolInvocation {
                     script_name: "check".to_owned(),
                     command_index: 0,
                     invocation: "astro check".to_owned(),
@@ -102,6 +161,54 @@ fn package() -> G3TsAstroPackageSurfaceState {
                     executable: "syncpack".to_owned(),
                     args: vec!["lint".to_owned()],
                     preceded_by: None,
+                    followed_by: None,
+                },
+                G3TsAstroPackageScriptToolInvocation {
+                    script_name: "validate".to_owned(),
+                    command_index: 0,
+                    invocation: "pnpm run lint".to_owned(),
+                    executable: "package-script".to_owned(),
+                    args: vec!["lint".to_owned()],
+                    preceded_by: None,
+                    followed_by: Some(
+                        g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And,
+                    ),
+                },
+                G3TsAstroPackageScriptToolInvocation {
+                    script_name: "validate".to_owned(),
+                    command_index: 1,
+                    invocation: "pnpm run lint:packages".to_owned(),
+                    executable: "package-script".to_owned(),
+                    args: vec!["lint:packages".to_owned()],
+                    preceded_by: Some(
+                        g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And,
+                    ),
+                    followed_by: Some(
+                        g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And,
+                    ),
+                },
+                G3TsAstroPackageScriptToolInvocation {
+                    script_name: "validate".to_owned(),
+                    command_index: 2,
+                    invocation: "pnpm run check".to_owned(),
+                    executable: "package-script".to_owned(),
+                    args: vec!["check".to_owned()],
+                    preceded_by: Some(
+                        g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And,
+                    ),
+                    followed_by: Some(
+                        g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And,
+                    ),
+                },
+                G3TsAstroPackageScriptToolInvocation {
+                    script_name: "validate".to_owned(),
+                    command_index: 3,
+                    invocation: "pnpm run build".to_owned(),
+                    executable: "package-script".to_owned(),
+                    args: vec!["build".to_owned()],
+                    preceded_by: Some(
+                        g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And,
+                    ),
                     followed_by: None,
                 },
             ],
@@ -161,21 +268,72 @@ fn eslint_config() -> G3TsAstroSetupEslintSurfaceState {
             astro_source_probe_present: true,
             ts_source_probe_present: true,
             tsx_source_probe_present: true,
-            astro_source_plugins: vec!["astro".to_owned()],
-            ts_source_plugins: Vec::new(),
-            tsx_source_plugins: Vec::new(),
+            astro_source_plugins: vec![
+                "astro".to_owned(),
+                "@eslint-community/eslint-comments".to_owned(),
+            ],
+            ts_source_plugins: vec!["@eslint-community/eslint-comments".to_owned()],
+            tsx_source_plugins: vec!["@eslint-community/eslint-comments".to_owned()],
             astro_source_plugin_meta_names: BTreeMap::new(),
             ts_source_plugin_meta_names: BTreeMap::new(),
             tsx_source_plugin_meta_names: BTreeMap::new(),
-            astro_source_plugin_package_names: BTreeMap::from([(
-                "astro".to_owned(),
-                vec!["eslint-plugin-astro".to_owned()],
+            astro_source_plugin_package_names: BTreeMap::from([
+                ("astro".to_owned(), vec!["eslint-plugin-astro".to_owned()]),
+                (
+                    "@eslint-community/eslint-comments".to_owned(),
+                    vec!["@eslint-community/eslint-plugin-eslint-comments".to_owned()],
+                ),
+            ]),
+            ts_source_plugin_package_names: BTreeMap::from([(
+                "@eslint-community/eslint-comments".to_owned(),
+                vec!["@eslint-community/eslint-plugin-eslint-comments".to_owned()],
             )]),
-            ts_source_plugin_package_names: BTreeMap::new(),
-            tsx_source_plugin_package_names: BTreeMap::new(),
-            astro_source_error_rules: vec!["astro/valid-compile".to_owned()],
-            ts_source_error_rules: Vec::new(),
-            tsx_source_error_rules: Vec::new(),
+            tsx_source_plugin_package_names: BTreeMap::from([(
+                "@eslint-community/eslint-comments".to_owned(),
+                vec!["@eslint-community/eslint-plugin-eslint-comments".to_owned()],
+            )]),
+            astro_source_error_rules: vec![
+                "astro/valid-compile".to_owned(),
+                "@eslint-community/eslint-comments/require-description".to_owned(),
+                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+            ],
+            ts_source_error_rules: vec![
+                "@eslint-community/eslint-comments/require-description".to_owned(),
+                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+            ],
+            tsx_source_error_rules: vec![
+                "@eslint-community/eslint-comments/require-description".to_owned(),
+                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+            ],
+            astro_source_warn_or_error_rules: vec![
+                "astro/valid-compile".to_owned(),
+                "@eslint-community/eslint-comments/require-description".to_owned(),
+                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+                "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
+            ],
+            ts_source_warn_or_error_rules: vec![
+                "@eslint-community/eslint-comments/require-description".to_owned(),
+                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+                "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
+            ],
+            tsx_source_warn_or_error_rules: vec![
+                "@eslint-community/eslint-comments/require-description".to_owned(),
+                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+                "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
+            ],
+            astro_source_restricted_disable_patterns: vec![
+                "astro/valid-compile".to_owned(),
+                "@eslint-community/eslint-comments/*".to_owned(),
+            ],
+            ts_source_restricted_disable_patterns: vec![
+                "@eslint-community/eslint-comments/*".to_owned(),
+            ],
+            tsx_source_restricted_disable_patterns: vec![
+                "@eslint-community/eslint-comments/*".to_owned(),
+            ],
+            astro_source_unused_disable_fail_closed: true,
+            ts_source_unused_disable_fail_closed: true,
+            tsx_source_unused_disable_fail_closed: true,
             astro_source_probe_ignored: false,
             ts_source_probe_ignored: false,
             tsx_source_probe_ignored: false,

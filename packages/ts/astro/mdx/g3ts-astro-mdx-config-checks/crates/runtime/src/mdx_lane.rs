@@ -15,17 +15,27 @@ pub(crate) fn check_package(
     results: &mut Vec<G3CheckResult>,
 ) {
     let rel_path = crate::support::package_rel_path(&contract.package);
-    if !crate::support::package_has_dependency(&contract.package, DEPENDENCY_NAME) {
-        results.push(crate::support::error(
-            PACKAGE_ID,
-            "MDX ESLint plugin package is missing",
-            format!(
-                "`{}` must list `{DEPENDENCY_NAME}` in dependencies or devDependencies. Bare `eslint-mdx` is not the app contract because G3TS requires the `mdx` plugin namespace and `{RULE_NAME}` rule.",
-                rel_path.unwrap_or("package.json")
-            ),
-            rel_path,
-        ));
+    if crate::support::package_has_dependency(&contract.package, DEPENDENCY_NAME) {
+        if let Some(rel_path) = rel_path {
+            results.push(crate::support::info(
+                PACKAGE_ID,
+                "MDX ESLint plugin package is installed",
+                format!("`{rel_path}` lists `{DEPENDENCY_NAME}`. Astro MDX apps need this package so `.mdx` files run through the `mdx` ESLint plugin namespace."),
+                rel_path,
+            ));
+        }
+        return;
     }
+
+    results.push(crate::support::error(
+        PACKAGE_ID,
+        "MDX ESLint plugin package is missing",
+        format!(
+            "`{}` must list `{DEPENDENCY_NAME}` in dependencies or devDependencies. Bare `eslint-mdx` is not the app contract because G3TS requires the `mdx` plugin namespace and `{RULE_NAME}` rule.",
+            rel_path.unwrap_or("package.json")
+        ),
+        rel_path,
+    ));
 }
 
 pub(crate) fn check_eslint(

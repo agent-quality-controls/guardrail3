@@ -17,10 +17,18 @@ pub struct EslintDirectiveFileState {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EslintDirectiveParseState {
-    Parsed { findings: Vec<EslintDirectiveFinding> },
-    Unsupported { reason: String },
-    ParseError { reason: String },
-    Ambiguous { reason: String },
+    Parsed {
+        findings: Vec<EslintDirectiveFinding>,
+    },
+    Unsupported {
+        reason: String,
+    },
+    ParseError {
+        reason: String,
+    },
+    Ambiguous {
+        reason: String,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

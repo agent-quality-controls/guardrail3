@@ -50,7 +50,14 @@ pub(crate) fn ingest_mdx_eslint_surface(
             mdx_content_probe_present: mdx_probe.is_some(),
             mdx_content_plugins: plugins(mdx_probe),
             mdx_content_plugin_package_names: plugin_package_names(mdx_probe),
-            mdx_content_error_rules: active_error_rules(mdx_probe),
+            mdx_content_error_rules: crate::eslint_suppression::active_error_rules(mdx_probe),
+            mdx_content_warn_or_error_rules: crate::eslint_suppression::active_warn_or_error_rules(
+                mdx_probe,
+            ),
+            mdx_content_restricted_disable_patterns:
+                crate::eslint_suppression::restricted_disable_patterns(mdx_probe),
+            mdx_content_unused_disable_fail_closed:
+                crate::eslint_suppression::unused_disable_fail_closed(mdx_probe),
             mdx_content_effective_mdx_component_map_rules: effective_mdx_component_map_rules(
                 mdx_probe,
                 &mdx_paths,
@@ -63,7 +70,15 @@ pub(crate) fn ingest_mdx_eslint_surface(
             ),
             component_map_probe_present: component_map_probe.is_some(),
             component_map_plugin_package_names: plugin_package_names(component_map_probe),
-            component_map_error_rules: active_error_rules(component_map_probe),
+            component_map_error_rules: crate::eslint_suppression::active_error_rules(
+                component_map_probe,
+            ),
+            component_map_warn_or_error_rules:
+                crate::eslint_suppression::active_warn_or_error_rules(component_map_probe),
+            component_map_restricted_disable_patterns:
+                crate::eslint_suppression::restricted_disable_patterns(component_map_probe),
+            component_map_unused_disable_fail_closed:
+                crate::eslint_suppression::unused_disable_fail_closed(component_map_probe),
             component_map_effective_no_raw_ui_export_rules:
                 effective_component_map_no_raw_ui_export_rules(component_map_probe, &component_maps),
             component_map_effective_wrapper_zod_parse_rules:
@@ -169,21 +184,6 @@ fn plugin_package_names(
 ) -> std::collections::BTreeMap<String, Vec<String>> {
     probe.map_or_else(std::collections::BTreeMap::new, |probe| {
         probe.plugin_package_names.clone()
-    })
-}
-
-fn active_error_rules(
-    probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
-) -> Vec<String> {
-    probe.map_or_else(Vec::new, |probe| {
-        probe
-            .rules
-            .iter()
-            .filter_map(|(rule_name, setting)| {
-                (setting.severity == eslint_config_parser::types::EslintRuleSeverity::Error)
-                    .then_some(rule_name.clone())
-            })
-            .collect()
     })
 }
 

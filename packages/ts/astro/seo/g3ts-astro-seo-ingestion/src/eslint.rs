@@ -90,6 +90,21 @@ pub(crate) fn ingest_seo_eslint_surface(
                 &endpoint_paths,
                 &json_ld_helpers,
             ),
+            astro_source_warn_or_error_rules: crate::eslint_suppression::active_warn_or_error_rules(
+                astro,
+            ),
+            ts_source_warn_or_error_rules: crate::eslint_suppression::active_warn_or_error_rules(
+                ts,
+            ),
+            tsx_source_warn_or_error_rules: crate::eslint_suppression::active_warn_or_error_rules(
+                tsx,
+            ),
+            astro_source_restricted_disable_patterns:
+                crate::eslint_suppression::restricted_disable_patterns(astro),
+            ts_source_restricted_disable_patterns:
+                crate::eslint_suppression::restricted_disable_patterns(ts),
+            tsx_source_restricted_disable_patterns:
+                crate::eslint_suppression::restricted_disable_patterns(tsx),
         },
     }
 }

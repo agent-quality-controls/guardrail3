@@ -5,13 +5,9 @@
     reason = "assertion helpers are panic-based proof sites for parser tests"
 )]
 
-pub use eslint_directive_parser_runtime::types::{
-    EslintDirectiveKind, EslintDisabledRuleSet,
-};
+pub use eslint_directive_parser_runtime::types::{EslintDirectiveKind, EslintDisabledRuleSet};
 
-use eslint_directive_parser_runtime::types::{
-    EslintDirectiveDocument, EslintDirectiveParseState,
-};
+use eslint_directive_parser_runtime::types::{EslintDirectiveDocument, EslintDirectiveParseState};
 
 pub fn assert_parsed_document(document: &EslintDirectiveDocument) {
     assert!(

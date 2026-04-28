@@ -202,6 +202,12 @@ pub struct G3TsAstroSeoEslintSurfaceSnapshot {
     pub astro_source_effective_json_ld_helper_rules: Vec<String>,
     pub ts_source_effective_json_ld_helper_rules: Vec<String>,
     pub tsx_source_effective_json_ld_helper_rules: Vec<String>,
+    pub astro_source_warn_or_error_rules: Vec<String>,
+    pub ts_source_warn_or_error_rules: Vec<String>,
+    pub tsx_source_warn_or_error_rules: Vec<String>,
+    pub astro_source_restricted_disable_patterns: Vec<String>,
+    pub ts_source_restricted_disable_patterns: Vec<String>,
+    pub tsx_source_restricted_disable_patterns: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -228,6 +234,17 @@ pub struct G3TsAstroSeoEslintPluginContractInput {
     pub config: G3TsAstroSeoEslintSurfaceState,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroSeoEslintDirectiveInput {
+    pub rel_path: String,
+    pub directive_kind: String,
+    pub disabled_rules: Vec<String>,
+    pub all_rules: bool,
+    pub line: u32,
+    pub target_line: Option<u32>,
+    pub parse_error: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct G3TsAstroSeoIntegrationContractInput {
     pub app_root_rel_path: String,
@@ -243,4 +260,5 @@ pub struct G3TsAstroSeoConfigChecksInput {
     pub eslint_contracts: Vec<G3TsAstroSeoEslintPluginContractInput>,
     pub missing_metadata_helper_sources: Vec<G3TsAstroSeoMissingMetadataHelperInput>,
     pub missing_json_ld_helper_sources: Vec<G3TsAstroSeoMissingJsonLdHelperInput>,
+    pub eslint_directives: Vec<G3TsAstroSeoEslintDirectiveInput>,
 }

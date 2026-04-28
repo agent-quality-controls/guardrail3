@@ -171,6 +171,12 @@ pub struct G3TsAstroContentEslintSurfaceSnapshot {
     pub astro_source_effective_inline_public_content_rules: Vec<String>,
     pub ts_source_effective_inline_public_content_rules: Vec<String>,
     pub tsx_source_effective_inline_public_content_rules: Vec<String>,
+    pub astro_source_warn_or_error_rules: Vec<String>,
+    pub ts_source_warn_or_error_rules: Vec<String>,
+    pub tsx_source_warn_or_error_rules: Vec<String>,
+    pub astro_source_restricted_disable_patterns: Vec<String>,
+    pub ts_source_restricted_disable_patterns: Vec<String>,
+    pub tsx_source_restricted_disable_patterns: Vec<String>,
     pub astro_source_probe_ignored: bool,
     pub ts_source_probe_ignored: bool,
     pub tsx_source_probe_ignored: bool,
@@ -200,6 +206,17 @@ pub struct G3TsAstroContentEslintPluginContractInput {
     pub config: G3TsAstroContentEslintSurfaceState,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsAstroContentEslintDirectiveInput {
+    pub rel_path: String,
+    pub directive_kind: String,
+    pub disabled_rules: Vec<String>,
+    pub all_rules: bool,
+    pub line: u32,
+    pub target_line: Option<u32>,
+    pub parse_error: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct G3TsAstroContentPolicyEslintContractInput {
     pub app_root_rel_path: String,
@@ -224,6 +241,7 @@ pub struct G3TsAstroContentConfigChecksInput {
     pub integration_contracts: Vec<G3TsAstroContentIntegrationContractInput>,
     pub eslint_contracts: Vec<G3TsAstroContentEslintPluginContractInput>,
     pub policy_eslint_contracts: Vec<G3TsAstroContentPolicyEslintContractInput>,
+    pub eslint_directives: Vec<G3TsAstroContentEslintDirectiveInput>,
     pub adapter_root_contracts: Vec<G3TsAstroContentAdapterRootInput>,
     pub adapter_source_contracts: Vec<G3TsAstroContentAdapterSourceInput>,
 }

@@ -13,6 +13,7 @@ pub fn check(input: &G3TsAstroContentConfigChecksInput) -> Vec<G3CheckResult> {
     }
     for eslint_contract in &input.eslint_contracts {
         crate::inline_copy_rule::check_eslint(eslint_contract, &mut results);
+        crate::protected_rule_disables_restricted::check(eslint_contract, &mut results);
     }
     for contract in &input.integration_contracts {
         crate::strict_content_policy::check_content(contract, &mut results);
@@ -28,5 +29,6 @@ pub fn check(input: &G3TsAstroContentConfigChecksInput) -> Vec<G3CheckResult> {
     for contract in &input.adapter_source_contracts {
         crate::content_adapter_astro_content::check(contract, &mut results);
     }
+    crate::eslint_disable_inventory::check_all(&input.eslint_directives, &mut results);
     results
 }

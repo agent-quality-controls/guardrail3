@@ -1,16 +1,13 @@
 use eslint_directive_parser_types::document::{
-    EslintDirectiveDocument, EslintDirectiveFileState, EslintDirectiveFinding,
-    EslintDirectiveKind, EslintDirectiveParseState, EslintDisabledRuleSet,
+    EslintDirectiveDocument, EslintDirectiveFileState, EslintDirectiveFinding, EslintDirectiveKind,
+    EslintDirectiveParseState, EslintDisabledRuleSet,
 };
 
 #[allow(
     clippy::disallowed_methods,
     reason = "parser.rs IS the centralized ESLint directive parser"
 )]
-pub fn parse(
-    input: &str,
-    rel_path: &str,
-) -> Result<EslintDirectiveFileState, crate::error::Error> {
+pub fn parse(input: &str, rel_path: &str) -> Result<EslintDirectiveFileState, crate::error::Error> {
     Ok(normalize_file_state(input, rel_path))
 }
 
@@ -168,9 +165,13 @@ fn parse_supported_source(input: &str, rel_path: &str) -> EslintDirectiveParseSt
     while idx < bytes.len() {
         if starts_with(bytes, idx, b"//") && !is_escaped(bytes, idx) {
             let end = find_line_end(bytes, idx);
-            if let Err(reason) =
-                collect_directive_text(&input[idx + 2..end], rel_path, line, line + 1, &mut findings)
-            {
+            if let Err(reason) = collect_directive_text(
+                &input[idx + 2..end],
+                rel_path,
+                line,
+                line + 1,
+                &mut findings,
+            ) {
                 return EslintDirectiveParseState::ParseError { reason };
             }
             idx = end;
@@ -315,8 +316,9 @@ fn skip_template(
                     } => {
                         findings.extend(expression_findings.into_iter().map(|mut finding| {
                             finding.line += base_line + lines - 1;
-                            finding.target_line =
-                                finding.target_line.map(|target| target + base_line + lines - 1);
+                            finding.target_line = finding
+                                .target_line
+                                .map(|target| target + base_line + lines - 1);
                             finding
                         }));
                     }
@@ -351,7 +353,8 @@ fn find_template_expression_end(bytes: &[u8], mut idx: usize) -> Result<(usize, 
                 idx = next_idx;
             }
             b'`' => {
-                let Some((next_idx, extra_lines)) = skip_template_without_expression(bytes, idx + 1)
+                let Some((next_idx, extra_lines)) =
+                    skip_template_without_expression(bytes, idx + 1)
                 else {
                     return Err("unterminated template literal".to_owned());
                 };
@@ -428,7 +431,10 @@ fn collect_directive_line(
 ) -> Result<(), String> {
     let text = normalize_comment_line(text);
     for (marker, kind) in [
-        ("eslint-disable-next-line", EslintDirectiveKind::DisableNextLine),
+        (
+            "eslint-disable-next-line",
+            EslintDirectiveKind::DisableNextLine,
+        ),
         ("eslint-disable-line", EslintDirectiveKind::DisableLine),
         ("eslint-disable", EslintDirectiveKind::Disable),
         ("eslint-enable", EslintDirectiveKind::Enable),
@@ -470,7 +476,9 @@ fn normalize_comment_line(text: &str) -> &str {
 }
 
 fn parse_disabled_rules(rest: &str) -> Result<EslintDisabledRuleSet, String> {
-    let rules_text = rest.split_once("--").map_or(rest, |(rules, _description)| rules);
+    let rules_text = rest
+        .split_once("--")
+        .map_or(rest, |(rules, _description)| rules);
     let rules_text = rules_text.trim();
     if rules_text.is_empty() {
         return Ok(EslintDisabledRuleSet::AllRules);
@@ -484,7 +492,9 @@ fn parse_disabled_rules(rest: &str) -> Result<EslintDisabledRuleSet, String> {
 }
 
 fn parse_inline_config_rules(rest: &str) -> Result<EslintDisabledRuleSet, String> {
-    let config_text = rest.split_once("--").map_or(rest, |(rules, _description)| rules);
+    let config_text = rest
+        .split_once("--")
+        .map_or(rest, |(rules, _description)| rules);
     let config_text = config_text.trim();
     if config_text.is_empty() {
         return Err("malformed ESLint inline config directive".to_owned());
