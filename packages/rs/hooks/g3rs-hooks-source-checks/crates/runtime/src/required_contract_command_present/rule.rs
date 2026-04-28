@@ -70,11 +70,19 @@ fn command_requirement_present(
     input: &RustHookCommandInput<'_>,
     requirement: G3HookCommandRequirement,
 ) -> bool {
+    if aliases_shadow_requirement(input.parsed, requirement) {
+        return false;
+    }
+    if requirement == G3HookCommandRequirement::CargoClippyDenyWarnings {
+        return crate::clippy_denies_warnings::script_contains_clippy_deny(input.parsed);
+    }
+    if requirement == G3HookCommandRequirement::CargoDupesExcludeTests {
+        return crate::cargo_dupes_excludes::script_contains_cargo_dupes_with_exclude_tests(
+            input.parsed,
+        );
+    }
     let predicate = |command: &ResolvedCommand| command_satisfies_requirement(command, requirement);
-    if matches!(
-        requirement,
-        G3HookCommandRequirement::CargoDupes | G3HookCommandRequirement::CargoDupesExcludeTests
-    ) {
+    if matches!(requirement, G3HookCommandRequirement::CargoDupes) {
         return any_resolved_command_relaxed(input.parsed, predicate);
     }
     any_resolved_command(input.parsed, predicate)
@@ -98,10 +106,7 @@ fn command_satisfies_requirement(
         G3HookCommandRequirement::CargoDupes => {
             cargo_dupes_command(command).is_some_and(|args| !args_have_help_or_version(args))
         }
-        G3HookCommandRequirement::CargoDupesExcludeTests => cargo_dupes_command(command)
-            .is_some_and(|args| {
-                !args_have_help_or_version(args) && args.iter().any(|arg| arg == "--exclude-tests")
-            }),
+        G3HookCommandRequirement::CargoDupesExcludeTests => false,
         G3HookCommandRequirement::Gitleaks => binary_command(command, "gitleaks"),
         G3HookCommandRequirement::G3RsValidatePath => g3rs_validate_path(command),
     }
@@ -216,8 +221,52 @@ fn parse_validate_args(args: &[String]) -> bool {
 }
 
 fn concrete_lockfile_command(command: &ResolvedCommand) -> bool {
-    cargo_subcommand_tail(command, "metadata").is_some_and(|args| {
-        !args_have_help_or_version(args) && args.iter().any(|arg| arg == "--locked")
+    cargo_subcommand_tail(command, "metadata").is_some_and(lockfile_args_are_concrete)
+        || cargo_subcommand_tail(command, "update").is_some_and(lockfile_args_are_concrete)
+}
+
+fn lockfile_args_are_concrete(args: &[String]) -> bool {
+    !args_have_help_or_version(args)
+        && args.iter().any(|arg| arg == "--locked")
+        && !args
+            .iter()
+            .any(|arg| arg == "--manifest-path" || arg.starts_with("--manifest-path="))
+}
+
+fn aliases_shadow_requirement(
+    parsed: &hook_shell_parser::types::ParsedShellScript,
+    requirement: G3HookCommandRequirement,
+) -> bool {
+    alias_shadowed_commands(requirement)
+        .iter()
+        .any(|command| script_defines_alias(parsed, command))
+}
+
+fn alias_shadowed_commands(requirement: G3HookCommandRequirement) -> &'static [&'static str] {
+    match requirement {
+        G3HookCommandRequirement::CargoFmtCheck
+        | G3HookCommandRequirement::CargoClippyDenyWarnings
+        | G3HookCommandRequirement::CargoDenyCheck
+        | G3HookCommandRequirement::ConcreteLockfileCommand
+        | G3HookCommandRequirement::CargoTest
+        | G3HookCommandRequirement::CargoMachete
+        | G3HookCommandRequirement::CargoDupes
+        | G3HookCommandRequirement::CargoDupesExcludeTests => {
+            &["cargo", "cargo-deny", "cargo-machete", "cargo-dupes"]
+        }
+        G3HookCommandRequirement::Gitleaks => &["gitleaks"],
+        G3HookCommandRequirement::G3RsValidatePath => &["g3rs"],
+    }
+}
+
+fn script_defines_alias(
+    parsed: &hook_shell_parser::types::ParsedShellScript,
+    command_name: &str,
+) -> bool {
+    parsed.source_lines.iter().any(|line| {
+        let trimmed = line.raw.trim_start();
+        trimmed.starts_with(&format!("alias {command_name}="))
+            || trimmed.starts_with(&format!("alias {command_name} ="))
     })
 }
 

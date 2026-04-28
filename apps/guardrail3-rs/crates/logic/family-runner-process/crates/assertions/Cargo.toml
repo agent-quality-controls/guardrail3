@@ -1,0 +1,20 @@
+[package]
+name = "guardrail3-rs-family-runner-process-assertions"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[features]
+default = ["checks"]
+checks = []
+
+[dependencies]
+guardrail3-rs-family-runner-process = { path = "../runtime" }
+g3rs-hooks-contract-types.workspace = true
+guardrail3-check-types.workspace = true
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

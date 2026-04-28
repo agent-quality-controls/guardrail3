@@ -16,3 +16,7 @@ api = []
 
 [lints]
 workspace = true
+
+[dependencies]
+g3rs_arch_hook_contract_runtime = { package = "g3rs-arch-hook-contract-runtime", path = "../runtime" }
+g3rs-hooks-contract-types = { path = "../../../../hooks/g3rs-hooks-contract-types", version = "0.1.0" }

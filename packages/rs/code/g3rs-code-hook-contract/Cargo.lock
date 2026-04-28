@@ -12,11 +12,16 @@ dependencies = [
 [[package]]
 name = "g3rs-code-hook-contract-assertions"
 version = "0.1.0"
+dependencies = [
+ "g3rs-code-hook-contract-runtime",
+ "g3rs-hooks-contract-types",
+]
 
 [[package]]
 name = "g3rs-code-hook-contract-runtime"
 version = "0.1.0"
 dependencies = [
+ "g3rs-code-hook-contract-assertions",
  "g3rs-hooks-contract-types",
 ]
 

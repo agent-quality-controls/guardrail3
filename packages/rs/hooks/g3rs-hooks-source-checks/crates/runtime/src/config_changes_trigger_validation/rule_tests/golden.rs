@@ -58,7 +58,7 @@ CARGO_CHANGED=$(echo "$STAGED_FILES" | grep -cE '(Cargo\.toml|Cargo\.lock)$' || 
 RUST_CONFIG_CHANGED=$(echo "$STAGED_FILES" | grep -cE '(^|/)(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml|release-plz\.toml|cliff\.toml|\.cargo/config|\.cargo/config\.toml)$' || true)
 if command -v g3rs &> /dev/null; then
     if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ] || [ "$RUST_CONFIG_CHANGED" -gt 0 ]; then
-        if ! g3rs validate --path "$REPO_ROOT" --family hooks; then
+        if ! g3rs validate --path "$REPO_ROOT/apps/guardrail3-rs"; then
             exit 1
         fi
     fi
@@ -66,6 +66,17 @@ fi
 "#;
     let results = run_case(content);
     assertions::assert_present(&results);
+}
+
+#[test]
+fn warns_when_config_trigger_runs_only_hooks_family_validation() {
+    let content = r#"
+if echo "$STAGED_FILES" | grep -qE '(^|/)(guardrail3-rs\.toml|clippy\.toml|\.clippy\.toml|deny\.toml|\.deny\.toml|rustfmt\.toml|\.rustfmt\.toml|rust-toolchain\.toml)$'; then
+    g3rs validate --path . --family hooks
+fi
+"#;
+    let results = run_case(content);
+    assertions::assert_missing(&results);
 }
 
 #[test]

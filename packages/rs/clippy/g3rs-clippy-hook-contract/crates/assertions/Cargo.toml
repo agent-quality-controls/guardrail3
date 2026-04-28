@@ -16,3 +16,7 @@ api = []
 
 [lints]
 workspace = true
+
+[dependencies]
+g3rs_clippy_hook_contract_runtime = { package = "g3rs-clippy-hook-contract-runtime", path = "../runtime" }
+g3rs-hooks-contract-types = { path = "../../../../hooks/g3rs-hooks-contract-types", version = "0.1.0" }

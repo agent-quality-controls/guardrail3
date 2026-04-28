@@ -16,12 +16,17 @@ dependencies = [
 [[package]]
 name = "g3rs-release-hook-contract-assertions"
 version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+ "g3rs-release-hook-contract-runtime",
+]
 
 [[package]]
 name = "g3rs-release-hook-contract-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-hooks-contract-types",
+ "g3rs-release-hook-contract-assertions",
 ]
 
 [[package]]

@@ -184,6 +184,11 @@ fn collect_assertions_proof_catalog(
                         changed |= proof_bearing_names.insert(qualified_name);
                     }
                 }
+                changed |= collect_public_assertion_reexports(
+                    file,
+                    &package_name,
+                    &mut proof_bearing_names,
+                );
             }
             if !changed {
                 break;
@@ -210,6 +215,56 @@ fn collect_assertions_proof_catalog(
     }
 
     (proof_bearing_by_file, proof_bearing_by_package)
+}
+
+fn collect_public_assertion_reexports(
+    file: &G3RsTestAnalyzedSourceFile,
+    package_name: &str,
+    proof_bearing_names: &mut BTreeSet<String>,
+) -> bool {
+    let module_prefix = assertions_module_prefix(&file.rel_path);
+    let mut changed = false;
+    for binding in file
+        .parsed
+        .imports
+        .iter()
+        .filter(|binding| binding.is_public)
+    {
+        let Some(local_name) = binding.local_name.as_ref() else {
+            continue;
+        };
+        let reexported_path =
+            public_reexport_target_path(&binding.path_segments, package_name, &module_prefix);
+        if proof_bearing_names.contains(&reexported_path) {
+            changed |=
+                proof_bearing_names.insert(qualified_assertion_name(&module_prefix, local_name));
+        }
+    }
+    changed
+}
+
+fn public_reexport_target_path(
+    path_segments: &[String],
+    package_name: &str,
+    module_prefix: &[String],
+) -> String {
+    let target_segments = match path_segments.first().map(String::as_str) {
+        Some("crate") => path_segments[1..].to_vec(),
+        Some("self") => {
+            let mut segments = module_prefix.to_vec();
+            segments.extend(path_segments[1..].iter().cloned());
+            segments
+        }
+        Some("super") => {
+            let mut segments = parent_module_prefix(module_prefix);
+            segments.extend(path_segments[1..].iter().cloned());
+            segments
+        }
+        Some(first) if first == package_name => path_segments[1..].to_vec(),
+        Some(_) => path_segments.to_vec(),
+        None => Vec::new(),
+    };
+    target_segments.join("::")
 }
 
 fn exported_assertion_function_calls_proof(

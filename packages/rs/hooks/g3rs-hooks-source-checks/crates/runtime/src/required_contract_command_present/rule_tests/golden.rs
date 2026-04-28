@@ -26,6 +26,30 @@ fn cargo_clippy_deny_warnings_satisfies_contract() {
 }
 
 #[test]
+fn rustflags_deny_warnings_clippy_satisfies_contract() {
+    let results = run_case(
+        "#!/bin/sh\nRUSTFLAGS='-D warnings' cargo clippy --all-targets\n",
+        vec![requirement(
+            G3HookCommandRequirement::CargoClippyDenyWarnings,
+        )],
+    );
+
+    assert_single_inventory(&results, "cargo clippy -D warnings", "test");
+}
+
+#[test]
+fn clippy_later_allow_warnings_does_not_satisfy_contract() {
+    let results = run_case(
+        "#!/bin/sh\ncargo clippy --all-targets -- -D warnings -A warnings\n",
+        vec![requirement(
+            G3HookCommandRequirement::CargoClippyDenyWarnings,
+        )],
+    );
+
+    assert_missing(&results, "cargo clippy -D warnings", "test");
+}
+
+#[test]
 fn cargo_deny_check_satisfies_contract() {
     let results = run_case(
         "#!/bin/sh\ncargo deny check\n",
@@ -170,7 +194,7 @@ fn env_wrapped_cargo_dupes_exclude_tests_satisfies_contract() {
 }
 
 #[test]
-fn valid_excluding_cargo_dupes_satisfies_contract_even_with_other_dupes_command() {
+fn mixed_non_excluding_cargo_dupes_does_not_satisfy_exclude_tests_contract() {
     let results = run_case(
         "#!/bin/sh\ncargo dupes check\ncargo dupes check --exclude-tests\n",
         vec![requirement(
@@ -178,7 +202,7 @@ fn valid_excluding_cargo_dupes_satisfies_contract_even_with_other_dupes_command(
         )],
     );
 
-    assert_single_inventory(&results, "cargo dupes --exclude-tests", "test");
+    assert_missing(&results, "cargo dupes --exclude-tests", "test");
 }
 
 #[test]
@@ -191,6 +215,42 @@ fn cargo_metadata_locked_satisfies_concrete_lockfile_contract() {
     );
 
     assert_single_inventory(&results, "cargo metadata --locked", "test");
+}
+
+#[test]
+fn cargo_update_locked_satisfies_concrete_lockfile_contract() {
+    let results = run_case(
+        "#!/bin/sh\ncargo update --locked --workspace\n",
+        vec![requirement(
+            G3HookCommandRequirement::ConcreteLockfileCommand,
+        )],
+    );
+
+    assert_single_inventory(&results, "cargo metadata --locked", "test");
+}
+
+#[test]
+fn cargo_metadata_locked_for_other_manifest_does_not_satisfy_contract() {
+    let results = run_case(
+        "#!/bin/sh\ncargo metadata --locked --manifest-path /tmp/other/Cargo.toml\n",
+        vec![requirement(
+            G3HookCommandRequirement::ConcreteLockfileCommand,
+        )],
+    );
+
+    assert_missing(&results, "cargo metadata --locked", "test");
+}
+
+#[test]
+fn cargo_alias_shadow_does_not_satisfy_cargo_contract() {
+    let results = run_case(
+        "#!/bin/sh\nshopt -s expand_aliases\nalias cargo='echo skipped'\ncargo clippy --workspace --all-targets -- -D warnings\n",
+        vec![requirement(
+            G3HookCommandRequirement::CargoClippyDenyWarnings,
+        )],
+    );
+
+    assert_missing(&results, "cargo clippy -D warnings", "test");
 }
 
 #[test]

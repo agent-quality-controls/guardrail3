@@ -96,11 +96,13 @@ fn check_required_contracts_across_selected_surface(
     else {
         return;
     };
-    let mut content = String::new();
-    for input in inputs {
-        for line in &input.parsed.source_lines {
-            content.push_str(line.raw.as_str());
-            content.push('\n');
+    let mut content = script_content(pre_commit);
+    if pre_commit_dispatches_modular_scripts(pre_commit) {
+        for input in inputs.iter().filter(|input| {
+            input.kind == G3RsHookScriptKind::Modular
+                && input.rel_path.starts_with(".githooks/pre-commit.d/")
+        }) {
+            content.push_str(script_content(input).as_str());
         }
     }
     let parsed = parse_script(&content);
@@ -113,6 +115,23 @@ fn check_required_contracts_across_selected_surface(
     let mut contract_results = Vec::new();
     crate::required_contract_command_present::rule::check(&input, &mut contract_results);
     results.extend(crate::compat::finish(contract_results));
+}
+
+fn script_content(input: &G3RsHooksSourceChecksInput) -> String {
+    let mut content = String::new();
+    for line in &input.parsed.source_lines {
+        content.push_str(line.raw.as_str());
+        content.push('\n');
+    }
+    content
+}
+
+fn pre_commit_dispatches_modular_scripts(input: &G3RsHooksSourceChecksInput) -> bool {
+    input.parsed.executable_lines.iter().any(|line| {
+        line.is_dispatcher_syntax
+            && (line.raw.contains(".githooks/pre-commit.d")
+                || line.command_text.contains(".githooks/pre-commit.d"))
+    })
 }
 
 #[cfg(test)]

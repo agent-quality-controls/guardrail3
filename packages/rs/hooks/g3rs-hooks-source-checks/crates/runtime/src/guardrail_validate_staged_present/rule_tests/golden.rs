@@ -170,7 +170,7 @@ fn warns_when_dead_global_flag_appears_after_validate() {
 
 #[test]
 fn passes_when_guardrail_validation_uses_real_optional_flags() {
-    let results = run_case("g3rs validate --path . --family fmt --inventory\n");
+    let results = run_case("g3rs validate --path . --inventory\n");
     assertions::assert_present(&results);
 }
 

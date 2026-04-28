@@ -199,6 +199,7 @@ pub struct UseBinding {
     pub line: usize,
     pub path_segments: Vec<String>,
     pub local_name: Option<String>,
+    pub is_public: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

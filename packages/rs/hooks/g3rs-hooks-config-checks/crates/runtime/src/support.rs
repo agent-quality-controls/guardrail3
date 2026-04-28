@@ -143,7 +143,7 @@ fn parse_validate_args(args: &[String]) -> bool {
             let Some(value) = args.get(index + 1).map(String::as_str) else {
                 return false;
             };
-            if value.starts_with('-') {
+            if value.is_empty() || value.starts_with('-') {
                 return false;
             }
             saw_path = true;
