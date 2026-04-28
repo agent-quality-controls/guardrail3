@@ -6,6 +6,8 @@ pub enum ExpectedFailOpen {
     True,
     NoOp,
     Echo,
+    ReturnZero,
+    CommandSubstitutionAssignment,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -150,6 +152,22 @@ pub fn assert_script_matches(parsed: &ParsedShellScript, expected: ScriptExpecta
                     assert!(
                         matches!(actual_fail_open, Some(FailOpenWrapper::Echo(_))),
                         "expected || echo wrapper at index {index}",
+                    );
+                }
+                ExpectedFailOpen::ReturnZero => {
+                    assert_eq!(
+                        actual_fail_open,
+                        Some(&FailOpenWrapper::ReturnZero),
+                        "expected || return 0 wrapper at index {index}",
+                    );
+                }
+                ExpectedFailOpen::CommandSubstitutionAssignment => {
+                    assert!(
+                        matches!(
+                            actual_fail_open,
+                            Some(FailOpenWrapper::CommandSubstitutionAssignment(_))
+                        ),
+                        "expected command-substitution assignment wrapper at index {index}",
                     );
                 }
             }

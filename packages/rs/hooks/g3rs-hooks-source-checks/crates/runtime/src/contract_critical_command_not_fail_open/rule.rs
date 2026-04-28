@@ -88,6 +88,9 @@ fn first_fail_open_critical_command(
         {
             return Some((absolute_line_no, line.command_text.to_owned()));
         }
+        if positive_availability_guard_is_softened(local, line.line_no, critical) {
+            return Some((absolute_line_no, line.command_text.to_owned()));
+        }
         if let Some(found) = called_function_fail_open(
             local,
             root,
@@ -103,6 +106,85 @@ fn first_fail_open_critical_command(
     }
 
     None
+}
+
+fn positive_availability_guard_is_softened(
+    script: &ParsedShellScript,
+    line_no: usize,
+    critical: &[G3HookCriticalCommand],
+) -> bool {
+    let Some(tool) = positive_availability_guard_tool(script, line_no) else {
+        return false;
+    };
+    if !tool_matches_critical(tool.as_str(), critical) {
+        return false;
+    }
+    let else_branch = positive_if_else_branch(script, line_no).unwrap_or_default();
+    !branch_has_failure_terminator(&else_branch, script, line_no)
+}
+
+fn positive_availability_guard_tool(script: &ParsedShellScript, line_no: usize) -> Option<String> {
+    let raw = script
+        .source_lines
+        .iter()
+        .find(|line| line.line_no == line_no)?
+        .raw
+        .as_str();
+    let trimmed = raw.trim_start();
+    if !trimmed.starts_with("if ") || !trimmed.contains("then") {
+        return None;
+    }
+    let words = hook_shell_parser::command_query::shell_words(trimmed.strip_prefix("if ")?.trim());
+    if words.first().is_some_and(|word| word == "command")
+        && words.get(1).is_some_and(|word| word == "-v")
+    {
+        return words.get(2).cloned();
+    }
+    None
+}
+
+fn positive_if_else_branch(script: &ParsedShellScript, line_no: usize) -> Option<String> {
+    let mut found_then = false;
+    let mut found_else = false;
+    let mut branch = String::new();
+    for line in script
+        .source_lines
+        .iter()
+        .filter(|line| line.line_no >= line_no)
+    {
+        let mut text = line.raw.as_str();
+        if !found_then {
+            let Some((_, after_then)) = text.split_once("then") else {
+                continue;
+            };
+            found_then = true;
+            text = after_then;
+        }
+        if !found_else {
+            if let Some((_, after_else)) = split_control_token(text, "else") {
+                found_else = true;
+                text = after_else;
+            } else if split_control_token(text, "fi").is_some() {
+                return None;
+            } else {
+                continue;
+            }
+        }
+        if let Some((before_fi, _)) = split_control_token(text, "fi") {
+            branch.push_str(before_fi);
+            return Some(branch);
+        }
+        branch.push_str(text);
+        branch.push('\n');
+    }
+    found_else.then_some(branch)
+}
+
+fn tool_matches_critical(tool: &str, critical: &[G3HookCriticalCommand]) -> bool {
+    critical.iter().any(|expected| match expected {
+        G3HookCriticalCommand::Binary(binary) => binary == tool,
+        G3HookCriticalCommand::CargoSubcommand(_) => tool == "cargo",
+    })
 }
 
 fn negated_if_failure_branch_is_softened(script: &ParsedShellScript, line_no: usize) -> bool {

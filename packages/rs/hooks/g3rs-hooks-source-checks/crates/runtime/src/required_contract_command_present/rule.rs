@@ -5,7 +5,7 @@ use crate::inputs::RustHookCommandInput;
 use crate::support::{args_have_help_or_version, cargo_subcommand_tail};
 use g3rs_hooks_contract_types::G3HookCommandRequirement;
 use hook_shell_parser::command_query::{
-    ResolvedCommand, any_resolved_command, any_resolved_command_relaxed,
+    ResolvedCommand, any_resolved_command, any_resolved_command_relaxed, shell_words,
 };
 
 const ID: &str = "g3rs-hooks/required-contract-command-present";
@@ -70,18 +70,20 @@ fn command_requirement_present(
     input: &RustHookCommandInput<'_>,
     requirement: G3HookCommandRequirement,
 ) -> bool {
-    if aliases_shadow_requirement(input.parsed, requirement) {
-        return false;
-    }
     if requirement == G3HookCommandRequirement::CargoClippyDenyWarnings {
-        return crate::clippy_denies_warnings::script_contains_clippy_deny(input.parsed);
+        return !aliases_shadow_requirement(input.parsed, requirement)
+            && crate::clippy_denies_warnings::script_contains_clippy_deny(input.parsed);
     }
     if requirement == G3HookCommandRequirement::CargoDupesExcludeTests {
-        return crate::cargo_dupes_excludes::script_contains_cargo_dupes_with_exclude_tests(
-            input.parsed,
-        );
+        return !aliases_shadow_requirement(input.parsed, requirement)
+            && crate::cargo_dupes_excludes::script_contains_cargo_dupes_with_exclude_tests(
+                input.parsed,
+            );
     }
-    let predicate = |command: &ResolvedCommand| command_satisfies_requirement(command, requirement);
+    let predicate = |command: &ResolvedCommand| {
+        command_satisfies_requirement(command, requirement)
+            && !command_is_shadowed_by_alias(input.parsed, requirement, command)
+    };
     if matches!(requirement, G3HookCommandRequirement::CargoDupes) {
         return any_resolved_command_relaxed(input.parsed, predicate);
     }
@@ -242,6 +244,21 @@ fn aliases_shadow_requirement(
         .any(|command| script_defines_alias(parsed, command))
 }
 
+fn command_is_shadowed_by_alias(
+    parsed: &hook_shell_parser::types::ParsedShellScript,
+    requirement: G3HookCommandRequirement,
+    command: &ResolvedCommand,
+) -> bool {
+    if command.path_qualified() || command.command_text().trim_start().starts_with("command ") {
+        return false;
+    }
+    alias_shadowed_commands(requirement).iter().any(|name| {
+        *name == command.command_name()
+            && first_alias_definition_line(parsed, name)
+                .is_some_and(|line_no| line_no <= command.line_no())
+    })
+}
+
 fn alias_shadowed_commands(requirement: G3HookCommandRequirement) -> &'static [&'static str] {
     match requirement {
         G3HookCommandRequirement::CargoFmtCheck
@@ -263,11 +280,25 @@ fn script_defines_alias(
     parsed: &hook_shell_parser::types::ParsedShellScript,
     command_name: &str,
 ) -> bool {
-    parsed.source_lines.iter().any(|line| {
-        let trimmed = line.raw.trim_start();
-        trimmed.starts_with(&format!("alias {command_name}="))
-            || trimmed.starts_with(&format!("alias {command_name} ="))
+    first_alias_definition_line(parsed, command_name).is_some()
+}
+
+fn first_alias_definition_line(
+    parsed: &hook_shell_parser::types::ParsedShellScript,
+    command_name: &str,
+) -> Option<usize> {
+    parsed.source_lines.iter().find_map(|line| {
+        alias_line_defines_command(line.raw.as_str(), command_name).then_some(line.line_no)
     })
+}
+
+fn alias_line_defines_command(raw: &str, command_name: &str) -> bool {
+    let words = shell_words(raw);
+    words.first().is_some_and(|word| word == "alias")
+        && words.iter().skip(1).any(|word| {
+            word.split_once('=')
+                .is_some_and(|(alias_name, _)| alias_name == command_name)
+        })
 }
 
 fn is_help_or_version_flag(token: &str) -> bool {

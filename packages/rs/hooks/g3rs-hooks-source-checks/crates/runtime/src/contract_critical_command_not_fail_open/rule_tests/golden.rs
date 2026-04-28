@@ -133,6 +133,62 @@ fn or_printf_is_fail_open() {
 }
 
 #[test]
+fn or_return_zero_is_fail_open() {
+    let results = run_case(
+        "#!/bin/sh\nrun() { g3rs validate --path . || return 0; }\nrun\n",
+        Vec::new(),
+    );
+
+    assert!(
+        results.iter().any(|result| {
+            !result.inventory()
+                && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
+                && result.severity() == G3Severity::Warn
+        }),
+        "critical command followed by `|| return 0` should be reported"
+    );
+}
+
+#[test]
+fn exported_command_substitution_is_fail_open() {
+    let results = run_case(
+        "#!/bin/sh\nexport STATUS=$(g3rs validate --path .)\n",
+        Vec::new(),
+    );
+
+    assert!(
+        results.iter().any(|result| !result.inventory()),
+        "critical command inside exported command substitution should be reported"
+    );
+}
+
+#[test]
+fn positive_availability_guard_without_failing_else_is_fail_open() {
+    let results = run_case(
+        "#!/bin/sh\nif command -v g3rs >/dev/null; then\n    g3rs validate --path .\nelse\n    echo missing\nfi\n",
+        Vec::new(),
+    );
+
+    assert!(
+        results.iter().any(|result| !result.inventory()),
+        "critical tool availability guard with non-failing else should be reported"
+    );
+}
+
+#[test]
+fn positive_availability_guard_with_failing_else_is_not_fail_open() {
+    let results = run_case(
+        "#!/bin/sh\nif command -v g3rs >/dev/null; then\n    g3rs validate --path .\nelse\n    echo missing\n    exit 1\nfi\n",
+        Vec::new(),
+    );
+
+    assert!(
+        results.is_empty(),
+        "critical tool availability guard with failing else should not be reported"
+    );
+}
+
+#[test]
 fn negated_if_with_failure_helper_is_not_fail_open() {
     let results = run_case(
         "#!/bin/sh\ndie() { exit 1; }\nif ! g3rs validate --path .; then die; fi\n",

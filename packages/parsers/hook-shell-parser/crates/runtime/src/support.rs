@@ -1,5 +1,5 @@
 use crate::shell_ast::{self, HeredocTerminator};
-use crate::types::{ExecutableLine, FailOpenWrapper};
+use crate::types::ExecutableLine;
 
 pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, String)> {
     let mut logical_lines = Vec::new();
@@ -67,7 +67,8 @@ pub(super) fn parse_executable_line(raw: &str, line_no: usize) -> Option<Executa
         return None;
     }
     if let Some(inner_command) = assignment_command_substitution(trimmed) {
-        let softened_by = detect_fail_open_wrapper(&inner_command);
+        let softened_by = crate::fail_open::command_substitution_assignment_wrapper(trimmed)
+            .or_else(|| crate::fail_open::detect_fail_open_wrapper(&inner_command));
         let command_text = extract_command_segment(&inner_command);
         let command_name = leading_command_name(&command_text)?;
 
@@ -85,7 +86,7 @@ pub(super) fn parse_executable_line(raw: &str, line_no: usize) -> Option<Executa
         return None;
     }
 
-    let softened_by = detect_fail_open_wrapper(trimmed);
+    let softened_by = crate::fail_open::detect_fail_open_wrapper(trimmed);
     let command_text = extract_command_segment(trimmed);
     let command_name = leading_command_name(&command_text)?;
 
@@ -105,7 +106,7 @@ pub(super) fn parse_executable_segments(raw: &str, line_no: usize) -> Vec<Execut
         .into_iter()
         .filter(|segment| {
             !matches!(segment.operator_before, Some("||"))
-                || !is_fail_open_wrapper_command(&segment.text)
+                || !crate::fail_open::is_fail_open_wrapper_command(&segment.text)
         })
         .filter_map(|segment| parse_executable_line(&segment.text, line_no))
         .collect()
@@ -174,7 +175,7 @@ pub(super) fn extract_command_segment(line: &str) -> String {
         .iter()
         .take_while(|segment| {
             !matches!(segment.operator_before, Some("||"))
-                || !is_fail_open_wrapper_command(&segment.text)
+                || !crate::fail_open::is_fail_open_wrapper_command(&segment.text)
         })
         .collect::<Vec<_>>();
     if relevant.is_empty() {
@@ -224,32 +225,6 @@ pub(super) fn strip_inline_comment(line: &str) -> &str {
 
 fn leading_command_name(command_text: &str) -> Option<String> {
     shell_ast::leading_command_name(command_text)
-}
-
-fn detect_fail_open_wrapper(line: &str) -> Option<FailOpenWrapper> {
-    shell_ast::command_segments(line)
-        .into_iter()
-        .find(|segment| matches!(segment.operator_before, Some("||")))
-        .and_then(|segment| fail_open_wrapper_from_command(&segment.text))
-}
-
-fn fail_open_wrapper_from_command(command_text: &str) -> Option<FailOpenWrapper> {
-    let words = shell_ast::shell_words(command_text);
-    let command = words.first()?;
-    match command.as_str() {
-        "true" => Some(FailOpenWrapper::True),
-        ":" => Some(FailOpenWrapper::NoOp),
-        "echo" => Some(FailOpenWrapper::Echo(command_text.to_owned())),
-        "printf" => Some(FailOpenWrapper::Printf(command_text.to_owned())),
-        "exit" if words.get(1).is_some_and(|argument| argument == "0") => {
-            Some(FailOpenWrapper::ExitZero)
-        }
-        _ => None,
-    }
-}
-
-fn is_fail_open_wrapper_command(command_text: &str) -> bool {
-    fail_open_wrapper_from_command(command_text).is_some()
 }
 
 fn is_dispatcher_command(command_name: &str) -> bool {
