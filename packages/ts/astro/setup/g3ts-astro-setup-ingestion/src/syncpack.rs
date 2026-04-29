@@ -15,7 +15,7 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 23] = [
     ("@astrojs/sitemap", "3.7.2"),
     ("astro-robots", "2.3.1"),
     ("@nuasite/checks", "0.36.1"),
-    ("g3ts-astro-nuasite-checks", "0.1.0"),
+    ("g3ts-astro-nuasite-checks", "0.1.1"),
     ("g3ts-astro-sitemap-auditor", "0.1.5"),
     ("g3ts-astro-robots-auditor", "0.1.4"),
     ("g3ts-astro-llms-auditor", "0.1.5"),

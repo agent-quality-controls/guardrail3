@@ -1,6 +1,6 @@
 {
   "name": "g3ts-astro-nuasite-checks",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "G3TS-owned custom checks for @nuasite/checks in Astro content sites.",
   "repository": {
     "type": "git",
@@ -48,10 +48,10 @@
     "node": ">=20"
   },
   "peerDependencies": {
-    "@nuasite/checks": "0.18.0"
+    "@nuasite/checks": "0.36.1"
   },
   "devDependencies": {
-    "@nuasite/checks": "0.18.0",
+    "@nuasite/checks": "0.36.1",
     "@types/node": "^24.9.1",
     "tsx": "^4.20.6",
     "typescript": "5.9.3"
