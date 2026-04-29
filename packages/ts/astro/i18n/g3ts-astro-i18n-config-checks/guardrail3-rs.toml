@@ -1,0 +1,23 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-astro-i18n-config-checks-assertions",
+  "g3ts-astro-i18n-config-checks-runtime",
+  "g3ts-astro-i18n-types",
+  "guardrail3-check-types",
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "g3rs-code/item-level-allow-with-reason"
+file = "crates/runtime/src/lib_tests/mod.rs"
+selector = "item-level-allow-with-reason"
+reason = "Config package tests reuse the golden Astro i18n input builder; the allow is limited to the test module declaration and documents that unused helper cases are intentional."
+
+[[waivers]]
+rule = "g3rs-arch/structural-split"
+file = "crates/runtime/Cargo.toml"
+selector = "structural-split"
+reason = "Astro i18n config keeps one rule group per file at runtime root; extracting artificial crates would split one cohesive i18n-policy assertion package."

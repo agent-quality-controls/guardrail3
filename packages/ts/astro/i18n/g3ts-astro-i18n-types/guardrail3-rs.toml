@@ -1,0 +1,42 @@
+profile = "library"
+
+allowed_deps = []
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsAstroPackageSurfaceSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsAstroI18nPolicySnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsAstroI18nEslintSurfaceSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsAstroI18nIntegrationContractInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsAstroI18nEslintPluginContractInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsAstroI18nConfigChecksInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."

@@ -1,0 +1,17 @@
+[package]
+name = "g3ts-astro-i18n-config-checks-assertions"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+guardrail3-check-types = { path = "../../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+g3ts-astro-i18n-config-checks-runtime = { path = "../runtime", version = "0.1.0" }
+g3ts-astro-i18n-types = { path = "../../../g3ts-astro-i18n-types", version = "0.1.0" }
+
+[features]
+default = ["api"]
+api = []
+
+[lints]
+workspace = true

@@ -80,6 +80,8 @@ pub struct TsAstroPolicyConfig {
     pub seo: TsAstroSeoPolicyConfig,
     #[serde(default)]
     pub state: TsAstroStatePolicyConfig,
+    #[serde(default)]
+    pub i18n: TsAstroI18nPolicyConfig,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }
@@ -143,6 +145,43 @@ pub struct TsAstroSeoPolicyConfig {
 pub struct TsAstroStatePolicyConfig {
     #[serde(default)]
     pub forbidden: Vec<String>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct TsAstroI18nPolicyConfig {
+    #[serde(default)]
+    pub locales: Vec<String>,
+    #[serde(default)]
+    pub default_locale: Option<String>,
+    #[serde(default)]
+    pub require_locale_prefix_for_content_routes: bool,
+    #[serde(default)]
+    pub allowed_unprefixed_routes: Vec<String>,
+    #[serde(default)]
+    pub content_route_prefixes: Vec<String>,
+    #[serde(default)]
+    pub approved_internal_link_helpers: Vec<String>,
+    #[serde(default)]
+    pub approved_localized_link_components: Vec<String>,
+    #[serde(default)]
+    pub approved_date_format_helpers: Vec<String>,
+    #[serde(default)]
+    pub approved_number_format_helpers: Vec<String>,
+    #[serde(default)]
+    pub content_image_components: Vec<String>,
+    #[serde(default)]
+    pub content_image_key_props: Vec<String>,
+    #[serde(default)]
+    pub banned_image_source_props: Vec<String>,
+    #[serde(default)]
+    pub banned_image_alt_props: Vec<String>,
+    #[serde(default)]
+    pub public_source_globs: Vec<String>,
+    #[serde(default)]
+    pub helper_source_globs: Vec<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }

@@ -17,6 +17,7 @@ pub fn run(
         SupportedFamily::AstroSetup
         | SupportedFamily::AstroContent
         | SupportedFamily::AstroMdx
+        | SupportedFamily::AstroI18n
         | SupportedFamily::AstroSeo
         | SupportedFamily::AstroState => Err(FamilyRunError {
             message: "config group does not handle Astro structure families".to_owned(),

@@ -7,6 +7,7 @@ pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
         SupportedFamily::AstroSetup => "astro-setup",
         SupportedFamily::AstroContent => "astro-content",
         SupportedFamily::AstroMdx => "astro-mdx",
+        SupportedFamily::AstroI18n => "astro-i18n",
         SupportedFamily::AstroSeo => "astro-seo",
         SupportedFamily::AstroState => "astro-state",
         SupportedFamily::Arch => "arch",

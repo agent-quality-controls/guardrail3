@@ -42,6 +42,12 @@ pub fn run(
             results.extend(g3ts_astro_mdx_config_checks::check(&mdx_config_input));
             Ok(results)
         }
+        SupportedFamily::AstroI18n => {
+            let i18n_config_input = g3ts_astro_i18n_ingestion::ingest_for_config_checks(crawl);
+            let mut results = Vec::new();
+            results.extend(g3ts_astro_i18n_config_checks::check(&i18n_config_input));
+            Ok(results)
+        }
         SupportedFamily::AstroSeo => {
             let seo_config_input = g3ts_astro_seo_ingestion::ingest_for_config_checks(crawl);
             let mut results = Vec::new();
