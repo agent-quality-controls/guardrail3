@@ -80,8 +80,7 @@ pub struct TsAstroPolicyConfig {
     pub seo: TsAstroSeoPolicyConfig,
     #[serde(default)]
     pub state: TsAstroStatePolicyConfig,
-    #[serde(default)]
-    pub i18n: TsAstroI18nPolicyConfig,
+    pub i18n: Option<TsAstroI18nPolicyConfig>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }
@@ -162,6 +161,8 @@ pub struct TsAstroI18nPolicyConfig {
     pub allowed_unprefixed_routes: Vec<String>,
     #[serde(default)]
     pub content_route_prefixes: Vec<String>,
+    #[serde(default)]
+    pub checked_internal_link_helpers: Vec<String>,
     #[serde(default)]
     pub approved_internal_link_helpers: Vec<String>,
     #[serde(default)]

@@ -11,6 +11,12 @@ pub fn hook_contract() -> Vec<G3TsHookRequirement> {
         trigger_patterns: vec![
             G3TsHookTriggerPattern::Glob("eslint.config.*".to_owned()),
             G3TsHookTriggerPattern::Glob("guardrail3-ts.toml".to_owned()),
+            G3TsHookTriggerPattern::Glob("package.json".to_owned()),
+            G3TsHookTriggerPattern::Glob("package-lock.json".to_owned()),
+            G3TsHookTriggerPattern::Glob("pnpm-lock.yaml".to_owned()),
+            G3TsHookTriggerPattern::Glob(".syncpackrc".to_owned()),
+            G3TsHookTriggerPattern::Glob(".syncpackrc.*".to_owned()),
+            G3TsHookTriggerPattern::Glob("syncpack.config.*".to_owned()),
             G3TsHookTriggerPattern::Glob("src/**/*.astro".to_owned()),
             G3TsHookTriggerPattern::Glob("src/**/*.ts".to_owned()),
             G3TsHookTriggerPattern::Glob("src/**/*.tsx".to_owned()),

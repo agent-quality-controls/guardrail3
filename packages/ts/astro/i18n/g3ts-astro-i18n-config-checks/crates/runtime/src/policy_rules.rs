@@ -13,7 +13,7 @@ pub(crate) fn check(contract: &G3TsAstroI18nIntegrationContractInput, results: &
             STRICT_ID,
             "Astro i18n strict policy is missing",
             format!(
-                "`{}` must define `[ts.astro.i18n]` with explicit `locales`, `public_source_globs`, content route prefixes, approved helpers, and content image policy. G3TS does not invent i18n defaults.",
+                "`{}` must define `[ts.astro.i18n]` with explicit `locales`, `public_source_globs`, content route prefixes, checked link helpers, approved helpers, and content image policy. G3TS does not invent i18n defaults.",
                 rel_path.unwrap_or("guardrail3-ts.toml")
             ),
             rel_path,
@@ -59,6 +59,9 @@ fn missing_fields(policy: &G3TsAstroI18nPolicySnapshot) -> Vec<&'static str> {
     }
     if policy.require_locale_prefix_for_content_routes && policy.content_route_prefixes.is_empty() {
         missing.push("content_route_prefixes");
+    }
+    if policy.checked_internal_link_helpers.is_empty() {
+        missing.push("checked_internal_link_helpers");
     }
     if policy.approved_internal_link_helpers.is_empty() {
         missing.push("approved_internal_link_helpers");

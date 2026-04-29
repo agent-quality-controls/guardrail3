@@ -47,15 +47,11 @@ pub(crate) fn ingest_i18n_policy_surface(
         };
     };
 
-    let i18n = astro.i18n;
-    if i18n.locales.is_empty()
-        && i18n.public_source_globs.is_empty()
-        && i18n.content_route_prefixes.is_empty()
-    {
+    let Some(i18n) = astro.i18n else {
         return G3TsAstroI18nPolicySurfaceState::MissingI18nPolicy {
             rel_path: entry.path.rel_path.clone(),
         };
-    }
+    };
 
     G3TsAstroI18nPolicySurfaceState::Parsed {
         snapshot: G3TsAstroI18nPolicySnapshot {
@@ -65,6 +61,7 @@ pub(crate) fn ingest_i18n_policy_surface(
             require_locale_prefix_for_content_routes: i18n.require_locale_prefix_for_content_routes,
             allowed_unprefixed_routes: i18n.allowed_unprefixed_routes,
             content_route_prefixes: i18n.content_route_prefixes,
+            checked_internal_link_helpers: i18n.checked_internal_link_helpers,
             approved_internal_link_helpers: i18n.approved_internal_link_helpers,
             approved_localized_link_components: i18n.approved_localized_link_components,
             approved_date_format_helpers: i18n.approved_date_format_helpers,

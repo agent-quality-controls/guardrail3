@@ -77,7 +77,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
           }
 
           const value = staticStringFromJsxAttribute(attribute);
-          if (value !== null && value.trim().length > 0) {
+          if (value !== null) {
             context.report({
               node: attribute,
               messageId: "inlineAlt",

@@ -33,6 +33,7 @@ pub struct G3TsAstroI18nPolicySnapshot {
     pub require_locale_prefix_for_content_routes: bool,
     pub allowed_unprefixed_routes: Vec<String>,
     pub content_route_prefixes: Vec<String>,
+    pub checked_internal_link_helpers: Vec<String>,
     pub approved_internal_link_helpers: Vec<String>,
     pub approved_localized_link_components: Vec<String>,
     pub approved_date_format_helpers: Vec<String>,

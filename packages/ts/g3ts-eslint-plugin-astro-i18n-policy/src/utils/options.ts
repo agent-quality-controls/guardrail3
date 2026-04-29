@@ -6,6 +6,7 @@ export interface AstroI18nPolicyOptions {
   requireLocalePrefixForContentRoutes?: boolean;
   allowedUnprefixedRoutes?: string[];
   contentRoutePrefixes?: string[];
+  checkedInternalLinkHelpers?: string[];
   approvedInternalLinkHelpers?: string[];
   approvedLocalizedLinkComponents?: string[];
   contentImageComponents?: string[];
@@ -20,6 +21,7 @@ export interface ResolvedAstroI18nPolicyOptions {
   requireLocalePrefixForContentRoutes: boolean;
   allowedUnprefixedRoutes: string[];
   contentRoutePrefixes: string[];
+  checkedInternalLinkHelpers: string[];
   approvedInternalLinkHelpers: string[];
   approvedLocalizedLinkComponents: string[];
   contentImageComponents: string[];
@@ -45,6 +47,7 @@ export const astroI18nPolicyOptionsSchema: JSONSchema4[] = [
       requireLocalePrefixForContentRoutes: { type: "boolean" },
       allowedUnprefixedRoutes: stringArraySchema,
       contentRoutePrefixes: stringArraySchema,
+      checkedInternalLinkHelpers: stringArraySchema,
       approvedInternalLinkHelpers: stringArraySchema,
       approvedLocalizedLinkComponents: stringArraySchema,
       contentImageComponents: stringArraySchema,
@@ -67,6 +70,9 @@ export function resolveOptions(
       source.requireLocalePrefixForContentRoutes === true,
     allowedUnprefixedRoutes: normalizeRouteArray(source.allowedUnprefixedRoutes),
     contentRoutePrefixes: normalizeRouteArray(source.contentRoutePrefixes),
+    checkedInternalLinkHelpers: normalizeStringArray(
+      source.checkedInternalLinkHelpers
+    ),
     approvedInternalLinkHelpers: normalizeStringArray(
       source.approvedInternalLinkHelpers
     ),

@@ -44,9 +44,13 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     const missing = missingRequiredOptions(options, [
       "locales",
       "contentRoutePrefixes",
+      "checkedInternalLinkHelpers",
       "approvedInternalLinkHelpers",
       "approvedLocalizedLinkComponents"
     ]);
+    if (context.options[0]?.requireLocalePrefixForContentRoutes === undefined) {
+      missing.push("requireLocalePrefixForContentRoutes");
+    }
 
     if (missing.length > 0) {
       return {
@@ -62,6 +66,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
 
     const allowedComponents = new Set(options.approvedLocalizedLinkComponents);
     const approvedHelpers = new Set(options.approvedInternalLinkHelpers);
+    const checkedHelpers = new Set(options.checkedInternalLinkHelpers);
 
     function reportIfUnlocalized(node: TSESTree.Node, rawValue: string): void {
       if (!requiresLocalePrefix(rawValue)) {
@@ -142,7 +147,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
       CallExpression(node): void {
         const helperName = calleeName(node.callee);
 
-        if (!helperName || approvedHelpers.has(helperName)) {
+        if (!helperName || approvedHelpers.has(helperName) || !checkedHelpers.has(helperName)) {
           return;
         }
 
