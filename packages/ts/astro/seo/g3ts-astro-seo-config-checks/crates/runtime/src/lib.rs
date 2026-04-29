@@ -1,7 +1,5 @@
-mod artifact_validate_scripts;
 mod broad_crawler_generator;
 mod canonical_site_config;
-mod crawler_checker_packages;
 mod eslint_disable_inventory;
 mod json_ld_helper_rule;
 mod llms_integration_present;
@@ -13,6 +11,7 @@ mod protected_rule_disables_restricted;
 mod robots_integration;
 mod run;
 mod seo_packages;
+mod site_artifact_packages;
 mod sitemap_integration;
 mod static_output_config;
 mod strict_policy_paths;

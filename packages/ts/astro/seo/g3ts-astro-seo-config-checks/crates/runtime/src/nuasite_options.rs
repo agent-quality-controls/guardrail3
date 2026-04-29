@@ -55,11 +55,9 @@ fn checks_options_are_fail_closed(value: &G3TsAstroStaticValue) -> bool {
     }
 
     object_has_only_allowed_keys(properties)
-        && property_string(properties, "mode") == Some("full")
         && property_bool(properties, "failOnError") == Some(true)
         && property_bool(properties, "failOnWarning") == Some(true)
         && property_bool(properties, "reportJson") == Some(true)
-        && property_bool(properties, "ai") == Some(false)
         && overrides_absent_or_empty(properties)
         && validator_lane_not_disabled(properties, "seo")
         && validator_lane_not_disabled(properties, "geo")
@@ -127,16 +125,6 @@ fn object_has_only_allowed_keys(properties: &[G3TsAstroStaticObjectProperty]) ->
     properties
         .iter()
         .all(|property| ALLOWED_OPTION_KEYS.contains(&property.key.as_str()))
-}
-
-fn property_string<'a>(
-    properties: &'a [G3TsAstroStaticObjectProperty],
-    key: &str,
-) -> Option<&'a str> {
-    match property_value(properties, key) {
-        Some(G3TsAstroStaticValue::String(value)) => Some(value),
-        _ => None,
-    }
 }
 
 fn property_bool(properties: &[G3TsAstroStaticObjectProperty], key: &str) -> Option<bool> {

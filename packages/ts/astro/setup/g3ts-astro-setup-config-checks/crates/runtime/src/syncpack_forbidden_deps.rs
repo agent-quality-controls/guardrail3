@@ -15,6 +15,19 @@ pub(crate) fn check(
             let package_path =
                 crate::support::package_rel_path(&contract.package).unwrap_or("package.json");
             let active_forbidden_deps = active_forbidden_deps(contract);
+            let listed_forbidden_deps = listed_forbidden_deps(contract, &active_forbidden_deps);
+            if !listed_forbidden_deps.is_empty() {
+                results.push(crate::support::error(
+                    ID,
+                    "Forbidden Astro deps are installed",
+                    format!(
+                        "`{package_path}` still lists forbidden Astro deps: {}. Remove them and remove any old Syncpack pin groups for those dependency names; Syncpack bans prevent future additions but an existing direct dependency is already a violation.{}",
+                        active_forbidden_deps_message(&listed_forbidden_deps),
+                        forbidden_dependency_explanation_from_strs(&listed_forbidden_deps)
+                    ),
+                    Some(package_path),
+                ));
+            }
             if !snapshot.source_covers_package_manifest {
                 let expected_source = crate::support::expected_syncpack_source_entry(
                     &snapshot.rel_path,
@@ -43,7 +56,10 @@ pub(crate) fn check(
                 .cloned()
                 .collect::<Vec<_>>();
 
-            if missing_forbidden_bans.is_empty() && snapshot.source_covers_package_manifest {
+            if missing_forbidden_bans.is_empty()
+                && snapshot.source_covers_package_manifest
+                && listed_forbidden_deps.is_empty()
+            {
                 results.push(crate::support::info(
                     ID,
                     "Syncpack bans forbidden Astro deps",
@@ -62,7 +78,7 @@ pub(crate) fn check(
                         ID,
                         "Syncpack does not ban forbidden Astro deps",
                         format!(
-                            "`{}` is missing Syncpack banned versionGroups for: {}. Add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.{}",
+                            "`{}` is missing Syncpack banned versionGroups for: {}. Remove any old pinned versionGroups for those dependencies, then add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.{}",
                             snapshot.rel_path,
                             missing_forbidden_bans
                                 .iter()
@@ -112,6 +128,29 @@ fn active_forbidden_deps(contract: &G3TsAstroSetupIntegrationContractInput) -> V
         .collect()
 }
 
+fn listed_forbidden_deps<'a>(
+    contract: &'a G3TsAstroSetupIntegrationContractInput,
+    active_forbidden_deps: &[&'a str],
+) -> Vec<&'a str> {
+    let Some(package) = crate::support::parsed_package(&contract.package) else {
+        return Vec::new();
+    };
+
+    active_forbidden_deps
+        .iter()
+        .copied()
+        .filter(|dependency| {
+            package
+                .dependencies
+                .iter()
+                .chain(package.dev_dependencies.iter())
+                .chain(package.optional_dependencies.iter())
+                .chain(package.peer_dependencies.iter())
+                .any(|listed| listed == dependency)
+        })
+        .collect()
+}
+
 fn active_forbidden_deps_message(dependencies: &[&str]) -> String {
     dependencies
         .iter()
@@ -125,6 +164,14 @@ fn forbidden_dependency_explanation(missing_forbidden_bans: &[String]) -> String
         .iter()
         .any(|dependency| dependency == "astro-seo")
     {
+        format!(" {ASTRO_SEO_BAN_REASON}")
+    } else {
+        String::new()
+    }
+}
+
+fn forbidden_dependency_explanation_from_strs(dependencies: &[&str]) -> String {
+    if dependencies.contains(&"astro-seo") {
         format!(" {ASTRO_SEO_BAN_REASON}")
     } else {
         String::new()

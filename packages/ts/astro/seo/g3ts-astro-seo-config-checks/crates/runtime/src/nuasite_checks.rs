@@ -37,7 +37,7 @@ pub(crate) fn check(
             ID,
             "Nuasite rendered-output checks are not installed and wired",
             format!(
-                "This Astro app must list `{DEPENDENCY_NAME}`, safely run `astro build`, set `output: \"static\"`, and wire `checks()` from `{DEPENDENCY_NAME}` with `mode: \"full\"`, `failOnError: true`, `failOnWarning: true`, `reportJson: true`, `ai: false`, no disabled validator lanes, and `customChecks: [structuredDataPresentCheck]`. Missing pieces: {}.",
+                "This Astro app must list `{DEPENDENCY_NAME}`, safely run `astro build`, set `output: \"static\"`, and wire `checks()` from `{DEPENDENCY_NAME}` with `failOnError: true`, `failOnWarning: true`, `reportJson: true`, no disabled `seo`, `performance`, `accessibility`, or `geo` lanes, and `customChecks: [structuredDataPresentCheck]`. Missing pieces: {}.",
                 missing_parts(has_package, has_build_script, has_static_output, has_checks).join(", ")
             ),
             rel_path,

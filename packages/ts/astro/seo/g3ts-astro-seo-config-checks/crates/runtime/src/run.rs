@@ -12,8 +12,7 @@ pub fn check(input: &G3TsAstroSeoConfigChecksInput) -> Vec<G3CheckResult> {
         crate::sitemap_integration::check(contract, &mut results);
         crate::robots_integration::check(contract, &mut results);
         crate::llms_integration_present::check(contract, &mut results);
-        crate::crawler_checker_packages::check(contract, &mut results);
-        crate::artifact_validate_scripts::check(contract, &mut results);
+        crate::site_artifact_packages::check(contract, &mut results);
         crate::broad_crawler_generator::check(contract, &mut results);
         crate::seo_packages::check(contract, &mut results);
         crate::structured_data_check::check(contract, &mut results);

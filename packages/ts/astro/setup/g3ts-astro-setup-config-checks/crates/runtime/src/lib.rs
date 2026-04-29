@@ -4,6 +4,7 @@ mod astro_eslint_plugin_wired;
 mod astro_package_present;
 mod eslint_comments_plugin_package_present;
 mod eslint_disable_descriptions_required;
+mod forbidden_script_targets;
 mod lint_script;
 mod protected_setup_rule_disables_restricted;
 mod required_integrations;
