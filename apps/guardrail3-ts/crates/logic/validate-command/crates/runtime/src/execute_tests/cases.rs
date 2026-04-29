@@ -62,6 +62,9 @@ impl FamilyRunner for StubFamilyRunner {
             SupportedFamily::AstroI18n => {
                 astro_inventory("g3ts-astro-i18n/strict-policy-configured")
             }
+            SupportedFamily::AstroMedia => {
+                astro_inventory("g3ts-astro-media/strict-policy-configured")
+            }
             SupportedFamily::AstroSeo => astro_inventory("g3ts-astro-seo/nuasite-checks"),
             SupportedFamily::AstroState => {
                 astro_inventory("g3ts-astro-state/no-legacy-parallel-state")
@@ -291,7 +294,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=14 inventory=false",
+        "runs=15 inventory=false",
         "",
         0,
     );
@@ -314,6 +317,7 @@ impl FamilyRunner for ErroringFamilyRunner {
             | SupportedFamily::AstroContent
             | SupportedFamily::AstroMdx
             | SupportedFamily::AstroI18n
+            | SupportedFamily::AstroMedia
             | SupportedFamily::AstroSeo
             | SupportedFamily::AstroState => Err(FamilyRunError {
                 message: "astro runner exploded".to_owned(),

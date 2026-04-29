@@ -32,6 +32,9 @@ g3ts-astro-mdx-ingestion = { path = "../../packages/ts/astro/mdx/g3ts-astro-mdx-
 g3ts-astro-i18n-config-checks = { path = "../../packages/ts/astro/i18n/g3ts-astro-i18n-config-checks" }
 g3ts-astro-i18n-hook-contract = { path = "../../packages/ts/astro/i18n/g3ts-astro-i18n-hook-contract" }
 g3ts-astro-i18n-ingestion = { path = "../../packages/ts/astro/i18n/g3ts-astro-i18n-ingestion" }
+g3ts-astro-media-config-checks = { path = "../../packages/ts/astro/media/g3ts-astro-media-config-checks" }
+g3ts-astro-media-hook-contract = { path = "../../packages/ts/astro/media/g3ts-astro-media-hook-contract" }
+g3ts-astro-media-ingestion = { path = "../../packages/ts/astro/media/g3ts-astro-media-ingestion" }
 g3ts-astro-seo-config-checks = { path = "../../packages/ts/astro/seo/g3ts-astro-seo-config-checks" }
 g3ts-astro-seo-hook-contract = { path = "../../packages/ts/astro/seo/g3ts-astro-seo-hook-contract" }
 g3ts-astro-seo-ingestion = { path = "../../packages/ts/astro/seo/g3ts-astro-seo-ingestion" }

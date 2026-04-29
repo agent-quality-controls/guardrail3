@@ -31,6 +31,7 @@ fn selected_families_default_to_all_supported_families_when_filter_is_empty() {
             SupportedFamily::AstroContent,
             SupportedFamily::AstroMdx,
             SupportedFamily::AstroI18n,
+            SupportedFamily::AstroMedia,
             SupportedFamily::AstroSeo,
             SupportedFamily::AstroState,
             SupportedFamily::Arch,

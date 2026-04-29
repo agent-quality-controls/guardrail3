@@ -1,0 +1,8 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-hooks-contract-types",
+]
+
+[checks]
+garde = false

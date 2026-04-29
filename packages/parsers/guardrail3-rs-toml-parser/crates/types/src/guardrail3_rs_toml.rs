@@ -81,6 +81,7 @@ pub struct TsAstroPolicyConfig {
     #[serde(default)]
     pub state: TsAstroStatePolicyConfig,
     pub i18n: Option<TsAstroI18nPolicyConfig>,
+    pub media: Option<TsAstroMediaPolicyConfig>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }
@@ -183,6 +184,41 @@ pub struct TsAstroI18nPolicyConfig {
     pub public_source_globs: Vec<String>,
     #[serde(default)]
     pub helper_source_globs: Vec<String>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct TsAstroMediaPolicyConfig {
+    #[serde(default)]
+    pub favicon: String,
+    #[serde(default)]
+    pub app_icons: Vec<String>,
+    #[serde(default)]
+    pub default_social_image: String,
+    #[serde(default)]
+    pub allow_svg_icons: bool,
+    #[serde(default)]
+    pub public_source_globs: Vec<String>,
+    #[serde(default)]
+    pub media_helper_modules: Vec<String>,
+    #[serde(default)]
+    pub approved_media_helpers: Vec<String>,
+    #[serde(default)]
+    pub content_image_components: Vec<String>,
+    #[serde(default)]
+    pub content_image_key_props: Vec<String>,
+    #[serde(default)]
+    pub banned_image_source_props: Vec<String>,
+    #[serde(default)]
+    pub banned_image_alt_props: Vec<String>,
+    #[serde(default)]
+    pub allowed_public_image_paths: Vec<String>,
+    #[serde(default)]
+    pub checked_image_extensions: Vec<String>,
+    #[serde(default)]
+    pub metadata_image_property_names: Vec<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }

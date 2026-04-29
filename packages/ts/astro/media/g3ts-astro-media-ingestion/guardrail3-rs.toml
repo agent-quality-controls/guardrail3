@@ -1,0 +1,17 @@
+profile = "library"
+
+allowed_deps = [
+  "astro-config-parser",
+  "eslint-config-parser",
+  "g3-workspace-crawl",
+  "g3rs-workspace-crawl",
+  "g3ts-astro-check-support",
+  "g3ts-astro-media-types",
+  "guardrail3-rs-toml-parser",
+  "package-json-parser",
+  "package-script-command-parser",
+  "serde_json",
+]
+
+[checks]
+garde = false
