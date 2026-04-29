@@ -54,3 +54,94 @@ fn missing_policy_rule_fails() {
         guardrail3_check_types::G3Severity::Error,
     );
 }
+
+#[test]
+fn missing_i18next_rule_fails() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_i18n_types::G3TsAstroI18nEslintSurfaceState::Parsed { snapshot } =
+        &mut input.eslint_contracts[0].config
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot
+        .public_error_rules
+        .retain(|rule| rule != "i18next/no-literal-string");
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-i18n/i18next-plugin-wired",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn warning_level_formatting_bans_do_not_pass() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_i18n_types::G3TsAstroI18nEslintSurfaceState::Parsed { snapshot } =
+        &mut input.eslint_contracts[0].config
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.public_no_restricted_syntax_selectors.clear();
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-i18n/raw-date-number-formatting-bans",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn helper_lane_must_not_inherit_raw_formatting_bans() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_i18n_types::G3TsAstroI18nEslintSurfaceState::Parsed { snapshot } =
+        &mut input.eslint_contracts[0].config
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.helper_no_restricted_syntax_selectors = vec![
+        "CallExpression[callee.property.name='toLocaleDateString']".to_owned(),
+    ];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-i18n/raw-date-number-formatting-bans",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn warning_level_disable_restriction_does_not_pass() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_i18n_types::G3TsAstroI18nEslintSurfaceState::Parsed { snapshot } =
+        &mut input.eslint_contracts[0].config
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.public_restricted_disable_patterns.clear();
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-i18n/protected-i18n-rule-disables-restricted",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn missing_delegated_package_fails() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_i18n_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].package
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot
+        .dev_dependencies
+        .retain(|package| package != "g3ts-eslint-plugin-astro-i18n-policy");
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-i18n/i18n-policy-plugin-package-present",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}

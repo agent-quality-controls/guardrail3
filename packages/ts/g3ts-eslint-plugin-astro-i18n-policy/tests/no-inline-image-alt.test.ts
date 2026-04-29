@@ -31,6 +31,16 @@ describe("no-inline-image-alt", () => {
         errors: [{ messageId: "inlineAlt" }]
       },
       {
+        code: `<ArticleImage image="hero" alt="" />`,
+        options: [baseOptions],
+        errors: [{ messageId: "inlineAlt" }]
+      },
+      {
+        code: `<ArticleImage image="hero" alt="   " />`,
+        options: [baseOptions],
+        errors: [{ messageId: "inlineAlt" }]
+      },
+      {
         code: `<ArticleImage image="hero" alt="English text" />`,
         options: [{}],
         errors: [{ messageId: "missingConfig" }]

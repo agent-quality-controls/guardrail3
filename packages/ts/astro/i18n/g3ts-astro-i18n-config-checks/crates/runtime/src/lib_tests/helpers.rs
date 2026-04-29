@@ -46,6 +46,7 @@ fn policy() -> G3TsAstroI18nPolicySurfaceState {
             require_locale_prefix_for_content_routes: true,
             allowed_unprefixed_routes: vec!["/".to_owned()],
             content_route_prefixes: vec!["/blog".to_owned()],
+            checked_internal_link_helpers: vec!["buildPath".to_owned()],
             approved_internal_link_helpers: vec!["localizedHref".to_owned()],
             approved_localized_link_components: vec!["LocalizedLink".to_owned()],
             approved_date_format_helpers: vec!["src/i18n/format-date.ts".to_owned()],

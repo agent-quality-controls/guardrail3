@@ -27,6 +27,14 @@ describe("no-unlocalized-internal-hrefs", () => {
         options: [baseOptions]
       },
       {
+        code: `const label = t("/blog/foo");`,
+        options: [baseOptions]
+      },
+      {
+        code: `console.log("/blog/foo");`,
+        options: [baseOptions]
+      },
+      {
         code: `<a href="/fr/guides/setup">Guide</a>`,
         languageOptions: astroLanguageOptions,
         options: [baseOptions]
@@ -50,7 +58,12 @@ describe("no-unlocalized-internal-hrefs", () => {
       },
       {
         code: `<a href="/blog/foo">Post</a>`,
-        options: [{}],
+        options: [
+          {
+            ...baseOptions,
+            requireLocalePrefixForContentRoutes: undefined
+          }
+        ],
         errors: [{ messageId: "missingConfig" }]
       }
     ]

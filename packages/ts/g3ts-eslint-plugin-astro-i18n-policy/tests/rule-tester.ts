@@ -10,6 +10,7 @@ export const baseOptions: AstroI18nPolicyOptions = {
   requireLocalePrefixForContentRoutes: true,
   allowedUnprefixedRoutes: ["/", "/robots.txt", "/llms.txt", "/sitemap-index.xml"],
   contentRoutePrefixes: ["/blog", "/guides"],
+  checkedInternalLinkHelpers: ["buildPath"],
   approvedInternalLinkHelpers: ["localizedHref", "buildLocalizedPath"],
   approvedLocalizedLinkComponents: ["LocalizedLink"],
   contentImageComponents: ["ArticleImage", "ContentImage"],

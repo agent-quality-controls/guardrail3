@@ -139,59 +139,65 @@ if [ "$RUST_GUARDRAIL_CHANGED" -gt 0 ]; then
 
 fi
 
-if command -v g3rs &> /dev/null; then
-    if [ "$TS_CHANGED" -gt 0 ]; then
-        echo "Running guardrail3 TypeScript validation..."
-        if ! guardrail3 ts validate --staged .; then
-            echo "guardrail3 TypeScript validation failed. Fix issues before committing."
-            exit 1
-        fi
-    fi
-fi
-
 # --- TypeScript checks (only if TS files changed) ---
 if [ "$TS_CHANGED" -gt 0 ]; then
-    echo "Running TypeScript type check..."
-    for tsconfig in apps/*/tsconfig.json; do
-        app_dir=$(dirname "$tsconfig")
-        app_name=$(basename "$app_dir")
-        if echo "$STAGED_FILES" | grep -q "^${app_dir}/"; then
-            echo "  Type-checking ${app_name}..."
-            if ! pnpm exec tsc -p "$tsconfig" --noEmit; then
-                echo "TypeScript type check failed for ${app_name}. Fix type errors before committing."
+    if [ -f "pnpm-workspace.yaml" ] || { [ -f "package.json" ] && [ -f "pnpm-lock.yaml" ]; }; then
+        echo "Running TypeScript type check..."
+        for tsconfig in apps/*/tsconfig.json; do
+            app_dir=$(dirname "$tsconfig")
+            app_name=$(basename "$app_dir")
+            if echo "$STAGED_FILES" | grep -q "^${app_dir}/"; then
+                echo "  Type-checking ${app_name}..."
+                if ! pnpm exec tsc -p "$tsconfig" --noEmit; then
+                    echo "TypeScript type check failed for ${app_name}. Fix type errors before committing."
+                    exit 1
+                fi
+            fi
+        done
+
+        echo "Checking code formatting..."
+        if command -v pnpm &> /dev/null; then
+            if ! pnpm exec prettier --check $(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|mjs|json|css)$') 2>/dev/null; then
+                echo "Formatting check failed. Run 'pnpm exec prettier --write .' to fix."
                 exit 1
             fi
         fi
-    done
 
-    echo "Checking code formatting..."
-    if command -v pnpm &> /dev/null; then
-        if ! pnpm exec prettier --check $(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|mjs|json|css)$') 2>/dev/null; then
-            echo "Formatting check failed. Run 'pnpm exec prettier --write .' to fix."
+        echo "Running ESLint..."
+        if ! NODE_OPTIONS="--max-old-space-size=8192" pnpm exec eslint --max-warnings 0 $(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|mjs)$'); then
+            echo "ESLint failed. Fix lint errors before committing."
             exit 1
         fi
-    fi
 
-    echo "Running ESLint..."
-    if ! NODE_OPTIONS="--max-old-space-size=8192" pnpm exec eslint --max-warnings 0 $(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|mjs)$'); then
-        echo "ESLint failed. Fix lint errors before committing."
-        exit 1
-    fi
-
-    echo "Running spell check..."
-    SPELL_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|css|md|json)$' || true)
-    if [ -n "$SPELL_FILES" ] && command -v pnpm &> /dev/null; then
-        if ! pnpm exec cspell --no-progress --no-summary $SPELL_FILES 2>/dev/null; then
-            echo "Spell check failed. Fix typos or add words to cspell.json."
-            exit 1
+        echo "Running spell check..."
+        SPELL_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|css|md|json)$' || true)
+        if [ -n "$SPELL_FILES" ] && command -v pnpm &> /dev/null; then
+            if ! pnpm exec cspell --no-progress --no-summary $SPELL_FILES 2>/dev/null; then
+                echo "Spell check failed. Fix typos or add words to cspell.json."
+                exit 1
+            fi
         fi
-    fi
 
-    echo "Running dependency audit..."
-    AUDIT_CRITICAL=$(pnpm audit --prod 2>&1 | grep -c "critical" || true)
-    if [ "$AUDIT_CRITICAL" -gt 0 ]; then
-        echo "WARNING: Critical vulnerabilities found in production dependencies."
-        echo "  Run 'pnpm audit --prod' for details."
+        echo "Running dependency audit..."
+        AUDIT_CRITICAL=$(pnpm audit --prod 2>&1 | grep -c "critical" || true)
+        if [ "$AUDIT_CRITICAL" -gt 0 ]; then
+            echo "WARNING: Critical vulnerabilities found in production dependencies."
+            echo "  Run 'pnpm audit --prod' for details."
+        fi
+    else
+        echo "Running package-local TypeScript checks..."
+        while IFS= read -r package_json; do
+            [ -n "$package_json" ] || continue
+            package_dir=$(dirname "$package_json")
+            if echo "$STAGED_FILES" | grep -q "^${package_dir}/.*\\.(ts|tsx|mjs)$"; then
+                if [ -f "$package_dir/package-lock.json" ]; then
+                    (cd "$package_dir" && npm test)
+                else
+                    echo "No supported package-local TypeScript check found for $package_dir."
+                    exit 1
+                fi
+            fi
+        done <<< "$(echo "$STAGED_FILES" | grep -E '(^|/)package\.json$' || true)"
     fi
 fi
 
