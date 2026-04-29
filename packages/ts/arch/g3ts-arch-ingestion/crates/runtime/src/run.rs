@@ -31,7 +31,6 @@ pub fn ingest_for_file_tree_checks(
     Ok(G3TsArchFileTreeChecksInput {
         existing_entrypoints: crate::file_tree::existing_entrypoints(crawl, &manifest),
         manifest,
-        source_tree: crate::file_tree::source_tree(crawl),
     })
 }
 

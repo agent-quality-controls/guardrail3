@@ -1,26 +1,7 @@
 use g3ts_arch_types::{
     G3TsArchDeclaredEntryPoint, G3TsArchEntryPointSource, G3TsArchFileTreeChecksInput,
-    G3TsArchManifestSnapshot, G3TsArchManifestState, G3TsArchSourceTree,
+    G3TsArchManifestSnapshot, G3TsArchManifestState,
 };
-
-#[test]
-fn filetree_checks_flag_structural_split() {
-    let input = G3TsArchFileTreeChecksInput {
-        existing_entrypoints: Vec::new(),
-        manifest: G3TsArchManifestState::Missing,
-        source_tree: Some(G3TsArchSourceTree {
-            max_depth: 5,
-            max_sibling_dir_count: 2,
-            max_sibling_code_file_count: 3,
-        }),
-    };
-
-    let results = crate::run::check(&input);
-    g3ts_arch_file_tree_checks_assertions::run::assert_has_error(
-        &results,
-        "g3ts-arch/structural-split",
-    );
-}
 
 #[test]
 fn filetree_checks_require_each_declared_entrypoint_to_exist() {
@@ -41,7 +22,6 @@ fn filetree_checks_require_each_declared_entrypoint_to_exist() {
                 ],
             },
         },
-        source_tree: None,
     };
 
     let results = crate::run::check(&input);
@@ -52,24 +32,5 @@ fn filetree_checks_require_each_declared_entrypoint_to_exist() {
     g3ts_arch_file_tree_checks_assertions::run::assert_has_error(
         &results,
         "g3ts-arch/declared-entrypoint-exists",
-    );
-}
-
-#[test]
-fn filetree_checks_stay_quiet_at_exact_structural_thresholds() {
-    let input = G3TsArchFileTreeChecksInput {
-        existing_entrypoints: Vec::new(),
-        manifest: G3TsArchManifestState::Missing,
-        source_tree: Some(G3TsArchSourceTree {
-            max_depth: 3,
-            max_sibling_dir_count: 4,
-            max_sibling_code_file_count: 10,
-        }),
-    };
-
-    let results = crate::run::check(&input);
-    g3ts_arch_file_tree_checks_assertions::run::assert_missing(
-        &results,
-        "g3ts-arch/structural-split",
     );
 }
