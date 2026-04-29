@@ -32,6 +32,7 @@ pub fn run(
         | SupportedFamily::AstroSetup
         | SupportedFamily::AstroContent
         | SupportedFamily::AstroMdx
+        | SupportedFamily::AstroI18n
         | SupportedFamily::AstroSeo
         | SupportedFamily::AstroState
         | SupportedFamily::Arch
@@ -51,6 +52,7 @@ fn hook_contracts() -> Vec<G3TsHookRequirement> {
     requirements.extend(g3ts_astro_setup_hook_contract::hook_contract());
     requirements.extend(g3ts_astro_content_hook_contract::hook_contract());
     requirements.extend(g3ts_astro_mdx_hook_contract::hook_contract());
+    requirements.extend(g3ts_astro_i18n_hook_contract::hook_contract());
     requirements.extend(g3ts_astro_seo_hook_contract::hook_contract());
     requirements
 }

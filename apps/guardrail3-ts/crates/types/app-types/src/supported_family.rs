@@ -9,6 +9,8 @@ pub enum SupportedFamily {
     AstroContent,
     /// Astro MDX checks.
     AstroMdx,
+    /// Astro i18n checks.
+    AstroI18n,
     /// Astro SEO checks.
     AstroSeo,
     /// Astro generated-state checks.
@@ -30,11 +32,12 @@ pub enum SupportedFamily {
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 13] = [
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 14] = [
     SupportedFamily::Eslint,
     SupportedFamily::AstroSetup,
     SupportedFamily::AstroContent,
     SupportedFamily::AstroMdx,
+    SupportedFamily::AstroI18n,
     SupportedFamily::AstroSeo,
     SupportedFamily::AstroState,
     SupportedFamily::Arch,

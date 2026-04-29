@@ -607,6 +607,46 @@ name = "g3ts-astro-content-types"
 version = "0.1.0"
 
 [[package]]
+name = "g3ts-astro-i18n-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-i18n-config-checks-runtime",
+ "g3ts-astro-i18n-types",
+]
+
+[[package]]
+name = "g3ts-astro-i18n-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-astro-i18n-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-astro-i18n-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
+]
+
+[[package]]
+name = "g3ts-astro-i18n-ingestion"
+version = "0.1.0"
+dependencies = [
+ "eslint-config-parser",
+ "g3rs-workspace-crawl",
+ "g3ts-astro-check-support",
+ "g3ts-astro-i18n-types",
+ "guardrail3-rs-toml-parser",
+ "package-json-parser",
+ "serde_json",
+]
+
+[[package]]
+name = "g3ts-astro-i18n-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3ts-astro-mdx-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -1161,6 +1201,7 @@ version = "0.1.0"
 dependencies = [
  "g3rs-workspace-crawl",
  "g3ts-astro-content-hook-contract",
+ "g3ts-astro-i18n-hook-contract",
  "g3ts-astro-mdx-hook-contract",
  "g3ts-astro-seo-hook-contract",
  "g3ts-astro-setup-hook-contract",
@@ -1187,6 +1228,8 @@ dependencies = [
  "g3ts-astro-content-config-checks",
  "g3ts-astro-content-file-tree-checks",
  "g3ts-astro-content-ingestion",
+ "g3ts-astro-i18n-config-checks",
+ "g3ts-astro-i18n-ingestion",
  "g3ts-astro-mdx-config-checks",
  "g3ts-astro-mdx-ingestion",
  "g3ts-astro-seo-config-checks",

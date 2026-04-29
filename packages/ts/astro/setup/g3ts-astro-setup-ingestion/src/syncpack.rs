@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
 const SYNCPACK_CONFIG_REL_PATH: &str = ".syncpackrc";
-const REQUIRED_SYNCPACK_PINS: [(&str, &str); 23] = [
+const REQUIRED_SYNCPACK_PINS: [(&str, &str); 24] = [
     ("astro", "6.1.9"),
     ("@astrojs/react", "5.0.4"),
     ("@astrojs/mdx", "5.0.4"),
@@ -28,6 +28,7 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 23] = [
     ("typescript", "5.9.3"),
     ("eslint-plugin-astro", "1.7.0"),
     ("g3ts-eslint-plugin-astro-pipeline", "0.1.8"),
+    ("g3ts-eslint-plugin-astro-i18n-policy", "0.1.0"),
     ("eslint-plugin-i18next", "6.1.4"),
     ("eslint-plugin-mdx", "3.7.0"),
     ("@eslint-community/eslint-plugin-eslint-comments", "4.7.1"),
