@@ -94,9 +94,9 @@ test("published package surface matches the G3TS Nuasite helper contract", async
   }
 
   assert.equal(packageJson.name, "g3ts-astro-nuasite-checks");
-  assert.equal(packageJson.version, "0.1.0");
+  assert.equal(packageJson.version, "0.1.1");
   assert.deepEqual(packageJson.dependencies ?? {}, {});
-  assert.equal(packageJson.peerDependencies?.["@nuasite/checks"], "0.18.0");
+  assert.equal(packageJson.peerDependencies?.["@nuasite/checks"], "0.36.1");
   assert.deepEqual([...runtimePackages], []);
 });
 
@@ -114,7 +114,7 @@ test("published package contains only dist and package metadata", async () => {
   const filePaths = packResult.files.map((file) => file.path).sort();
 
   assert.equal(packResult.name, "g3ts-astro-nuasite-checks");
-  assert.equal(packResult.version, "0.1.0");
+  assert.equal(packResult.version, "0.1.1");
   assert.deepEqual(
     filePaths.filter((filePath) => !isAllowedPublishedPath(filePath)),
     [],
