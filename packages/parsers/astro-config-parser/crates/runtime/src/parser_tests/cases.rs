@@ -71,6 +71,73 @@ fn parses_identifier_bound_integrations_array() {
 }
 
 #[test]
+fn parses_same_file_const_strings_and_static_templates() {
+    let root = tempfile::tempdir().expect("tempdir should be created");
+    let rel_path = "astro.config.mjs";
+    std::fs::write(
+        root.path().join(rel_path),
+        "import { defineConfig } from 'astro/config';\nimport robotsAudit from 'g3ts-astro-robots-auditor';\nconst siteUrl = 'https://example.com';\nconst sitemapIndexUrl = `${siteUrl}/sitemap-index.xml`;\nexport default defineConfig({ site: siteUrl, output: 'static', trailingSlash: 'always', integrations: [robotsAudit({ site: siteUrl, sitemapUrls: [sitemapIndexUrl] })] });\n",
+    )
+    .expect("config should be written");
+
+    let document =
+        assertions::parse_document(root.path(), rel_path).expect("astro config should parse");
+
+    assertions::assert_parsed_document(&document);
+    assertions::assert_snapshot(
+        &document,
+        Some("https://example.com"),
+        Some(AstroOutputMode::Static),
+        None,
+        Some(AstroTrailingSlashPolicy::Always),
+        &["g3ts-astro-robots-auditor"],
+        None,
+    );
+
+    let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
+        panic!("expected parsed document, got {document:?}");
+    };
+    let options = snapshot
+        .integrations
+        .first()
+        .and_then(|integration| integration.call.as_ref())
+        .and_then(|call| call.first_arg.as_ref())
+        .expect("integration options should be preserved");
+    let AstroStaticValue::Object(properties) = options else {
+        panic!("expected object options, got {options:?}");
+    };
+    let sitemap_urls = properties
+        .iter()
+        .find(|property| property.key == "sitemapUrls")
+        .expect("sitemapUrls should be present");
+    let AstroStaticValue::Array(values) = &sitemap_urls.value else {
+        panic!("expected sitemapUrls array, got {:?}", sitemap_urls.value);
+    };
+    assert_eq!(
+        values.first(),
+        Some(&AstroStaticValue::String(
+            "https://example.com/sitemap-index.xml".to_owned()
+        ))
+    );
+}
+
+#[test]
+fn dynamic_template_static_values_are_invalid() {
+    let root = tempfile::tempdir().expect("tempdir should be created");
+    let rel_path = "astro.config.mjs";
+    std::fs::write(
+        root.path().join(rel_path),
+        "import robotsAudit from 'g3ts-astro-robots-auditor';\nconst siteUrl = getSiteUrl();\nconst sitemapIndexUrl = `${siteUrl}/sitemap-index.xml`;\nexport default { integrations: [robotsAudit({ sitemapUrls: [sitemapIndexUrl] })] };\n",
+    )
+    .expect("config should be written");
+
+    let document = assertions::parse_document(root.path(), rel_path)
+        .expect("astro config document should exist");
+
+    assertions::assert_invalid_document(&document, "must resolve to static values");
+}
+
+#[test]
 fn bare_imported_identifier_does_not_count_as_wired_integration() {
     let root = tempfile::tempdir().expect("tempdir should be created");
     let rel_path = "astro.config.mjs";
