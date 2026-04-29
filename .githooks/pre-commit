@@ -81,10 +81,37 @@ fi
 PKG_CHANGED=$(echo "$STAGED_FILES" | grep -cE 'package\.json$' || true)
 if [ "$PKG_CHANGED" -gt 0 ]; then
     echo "Checking lockfile integrity..."
-    if ! pnpm install --frozen-lockfile 2>/dev/null; then
-        echo "pnpm-lock.yaml is out of sync with package.json. Run 'pnpm install' first."
+    while IFS= read -r package_json; do
+        [ -n "$package_json" ] || continue
+        package_dir=$(dirname "$package_json")
+
+        if [ -f "$package_dir/package-lock.json" ]; then
+            if ! (cd "$package_dir" && npm install --package-lock-only --ignore-scripts --dry-run >/dev/null); then
+                echo "$package_dir/package-lock.json is out of sync with package.json. Run 'cd \"$package_dir\" && npm install --package-lock-only'."
+                exit 1
+            fi
+            continue
+        fi
+
+        if [ -f "$package_dir/pnpm-lock.yaml" ]; then
+            if ! (cd "$package_dir" && pnpm install --frozen-lockfile >/dev/null); then
+                echo "$package_dir/pnpm-lock.yaml is out of sync with package.json. Run 'cd \"$package_dir\" && pnpm install'."
+                exit 1
+            fi
+            continue
+        fi
+
+        if [ "$package_dir" = "." ] && { [ -f "pnpm-lock.yaml" ] || [ -f "pnpm-workspace.yaml" ]; }; then
+            if ! pnpm install --frozen-lockfile >/dev/null; then
+                echo "pnpm-lock.yaml is out of sync with package.json. Run 'pnpm install' first."
+                exit 1
+            fi
+            continue
+        fi
+
+        echo "No supported lockfile found for $package_json. Add package-lock.json or pnpm-lock.yaml."
         exit 1
-    fi
+    done <<< "$(echo "$STAGED_FILES" | grep -E '(^|/)package\.json$' || true)"
 fi
 
 # --- Detect which stacks changed ---
