@@ -1,6 +1,5 @@
 mod declared_entrypoint_exists;
 mod run;
-mod structural_split;
 
 #[cfg(feature = "checks")]
 pub use run::check;

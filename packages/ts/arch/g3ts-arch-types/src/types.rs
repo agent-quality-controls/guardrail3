@@ -30,17 +30,9 @@ pub struct G3TsArchConfigChecksInput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3TsArchSourceTree {
-    pub max_depth: usize,
-    pub max_sibling_dir_count: usize,
-    pub max_sibling_code_file_count: usize,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsArchFileTreeChecksInput {
     pub manifest: G3TsArchManifestState,
     pub existing_entrypoints: Vec<String>,
-    pub source_tree: Option<G3TsArchSourceTree>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
