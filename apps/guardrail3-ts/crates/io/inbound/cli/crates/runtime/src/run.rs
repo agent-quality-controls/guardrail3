@@ -23,6 +23,7 @@ impl FamilyRunner for CliFamilyRunner {
             | SupportedFamily::AstroContent
             | SupportedFamily::AstroMdx
             | SupportedFamily::AstroI18n
+            | SupportedFamily::AstroMedia
             | SupportedFamily::AstroSeo
             | SupportedFamily::AstroState
             | SupportedFamily::Arch
@@ -37,6 +38,7 @@ impl FamilyRunner for CliFamilyRunner {
                 | SupportedFamily::AstroContent
                 | SupportedFamily::AstroMdx
                 | SupportedFamily::AstroI18n
+                | SupportedFamily::AstroMedia
                 | SupportedFamily::AstroSeo
                 | SupportedFamily::AstroState
                 | SupportedFamily::Arch

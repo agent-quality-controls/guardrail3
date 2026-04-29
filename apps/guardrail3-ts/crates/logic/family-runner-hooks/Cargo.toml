@@ -8,6 +8,7 @@ publish = false
 g3-workspace-crawl.workspace = true
 g3ts-astro-content-hook-contract.workspace = true
 g3ts-astro-i18n-hook-contract.workspace = true
+g3ts-astro-media-hook-contract.workspace = true
 g3ts-astro-mdx-hook-contract.workspace = true
 g3ts-astro-seo-hook-contract.workspace = true
 g3ts-astro-setup-hook-contract.workspace = true

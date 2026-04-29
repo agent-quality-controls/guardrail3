@@ -11,6 +11,9 @@ allowed_deps = [
   "g3ts-astro-i18n-config-checks",
   "g3ts-astro-i18n-hook-contract",
   "g3ts-astro-i18n-ingestion",
+  "g3ts-astro-media-config-checks",
+  "g3ts-astro-media-hook-contract",
+  "g3ts-astro-media-ingestion",
   "g3ts-astro-mdx-config-checks",
   "g3ts-astro-mdx-hook-contract",
   "g3ts-astro-mdx-ingestion",
@@ -65,3 +68,9 @@ rule = "g3rs-arch/dependency-count-split"
 file = "crates/logic/family-runner-structure/Cargo.toml"
 selector = "dependency-count"
 reason = "The TS structure runner intentionally composes explicit structure-family packages. Astro setup, content, MDX, SEO, and state dependencies stay visible here instead of being hidden behind an aggregate Astro facade."
+
+[[waivers]]
+rule = "g3rs-arch/dependency-count-split"
+file = "crates/logic/family-runner-hooks/Cargo.toml"
+selector = "dependency-count"
+reason = "The TS hooks runner intentionally composes explicit hook contracts from each owning family. Hook requirements stay visible here instead of being hidden behind an aggregate Astro facade."

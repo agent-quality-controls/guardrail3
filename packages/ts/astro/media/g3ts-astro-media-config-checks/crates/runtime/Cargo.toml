@@ -1,0 +1,24 @@
+[package]
+name = "g3ts-astro-media-config-checks-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for g3ts Astro media config checks"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+publish = false
+
+[features]
+default = ["all"]
+all = ["checks"]
+checks = []
+
+[lints]
+workspace = true
+
+[dependencies]
+g3ts-astro-media-types = { path = "../../../g3ts-astro-media-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+
+[dev-dependencies]
+g3ts-astro-media-config-checks-assertions = { path = "../assertions" }

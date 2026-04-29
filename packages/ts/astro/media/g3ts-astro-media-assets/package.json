@@ -1,0 +1,58 @@
+{
+  "name": "g3ts-astro-media-assets",
+  "version": "0.1.0",
+  "description": "Astro integration that fails builds when required public media assets are missing or forbidden.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/websmasher/guardrail3.git",
+    "directory": "packages/ts/astro/media/g3ts-astro-media-assets"
+  },
+  "homepage": "https://github.com/websmasher/guardrail3/tree/main/packages/ts/astro/media/g3ts-astro-media-assets",
+  "bugs": {
+    "url": "https://github.com/websmasher/guardrail3/issues"
+  },
+  "keywords": [
+    "astro",
+    "integration",
+    "media",
+    "favicon",
+    "guardrails"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "prepack": "npm run clean && npm run build",
+    "prepublishOnly": "npm test",
+    "pretest": "npm run build",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "astro": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "astro": "^6.1.9",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3"
+  }
+}
