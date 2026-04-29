@@ -14,12 +14,12 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 23] = [
     ("@astrojs/check", "0.9.8"),
     ("@astrojs/sitemap", "3.7.2"),
     ("astro-robots", "2.3.1"),
-    ("@nuasite/checks", "0.18.0"),
+    ("@nuasite/checks", "0.36.1"),
     ("g3ts-astro-nuasite-checks", "0.1.0"),
-    ("g3ts-astro-sitemap-checks", "0.1.2"),
-    ("g3ts-astro-robots-checks", "0.1.2"),
-    ("g3ts-astro-llms-checks", "0.1.1"),
-    ("g3ts-astro-llms", "0.1.1"),
+    ("g3ts-astro-sitemap-auditor", "0.1.5"),
+    ("g3ts-astro-robots-auditor", "0.1.4"),
+    ("g3ts-astro-llms-auditor", "0.1.5"),
+    ("g3ts-astro-llms-generator", "0.1.2"),
     ("schema-dts", "2.0.0"),
     ("react", "19.2.5"),
     ("react-dom", "19.2.5"),
@@ -32,7 +32,7 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 23] = [
     ("eslint-plugin-mdx", "3.7.0"),
     ("@eslint-community/eslint-plugin-eslint-comments", "4.7.1"),
 ];
-const FORBIDDEN_SYNCPACK_DEPS: [&str; 12] = [
+const FORBIDDEN_SYNCPACK_DEPS: [&str; 16] = [
     "next",
     "velite",
     "@astrojs/node",
@@ -45,6 +45,10 @@ const FORBIDDEN_SYNCPACK_DEPS: [&str; 12] = [
     "next-contentlayer",
     "@contentlayer/core",
     "@contentlayer/source-files",
+    "g3ts-astro-sitemap-checks",
+    "g3ts-astro-robots-checks",
+    "g3ts-astro-llms-checks",
+    "g3ts-astro-llms",
 ];
 const PIN_DEPENDENCY_TYPES: [&str; 2] = ["prod", "dev"];
 const BAN_DEPENDENCY_TYPES: [&str; 4] = ["prod", "dev", "optional", "peer"];

@@ -655,10 +655,10 @@ fn unsupported_guardrail_script_without_eslint_fails_closed() {
 }
 
 #[test]
-fn unsupported_artifact_checker_script_fails_closed() {
+fn unsupported_non_lint_tool_pipe_fails_closed() {
     let document = super::super::parse_document(
-        "check:sitemap",
-        "g3ts-astro-sitemap-checks --site https://example.com --output-dir dist | tee sitemap.log",
+        "check:artifact",
+        "unknown-artifact-tool --site https://example.com --output-dir dist | tee artifact.log",
     )
     .expect("script command parser should produce a document");
 

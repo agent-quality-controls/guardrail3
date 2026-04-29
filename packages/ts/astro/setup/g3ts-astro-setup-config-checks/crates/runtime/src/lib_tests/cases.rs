@@ -12,6 +12,7 @@ fn golden_setup_package_reports_owned_ids() {
             "g3ts-astro-setup/lint-script",
             "g3ts-astro-setup/syncpack-lint-script",
             "g3ts-astro-setup/validate-script",
+            "g3ts-astro-setup/forbidden-script-targets",
             "g3ts-astro-setup/astro-eslint-plugin-wired",
             "g3ts-astro-setup/eslint-disable-descriptions-required",
             "g3ts-astro-setup/unused-eslint-disables-fail",
@@ -23,6 +24,89 @@ fn golden_setup_package_reports_owned_ids() {
             "g3ts-astro-setup/required-integrations",
         ],
     );
+}
+
+#[test]
+fn removed_checker_cli_script_targets_fail() {
+    let mut input = super::helpers::golden();
+    let package = super::helpers::parsed_package_mut(&mut input);
+    package.script_tool_invocations.push(
+        g3ts_astro_setup_types::G3TsAstroPackageScriptToolInvocation {
+            script_name: "validate".to_owned(),
+            command_index: 4,
+            invocation: "g3ts-astro-sitemap-checks --site https://example.com".to_owned(),
+            executable: "g3ts-astro-sitemap-checks".to_owned(),
+            args: vec!["--site".to_owned(), "https://example.com".to_owned()],
+            preceded_by: Some(g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And),
+            followed_by: None,
+        },
+    );
+    package.script_all_tool_invocations.push(
+        g3ts_astro_setup_types::G3TsAstroPackageScriptToolInvocation {
+            script_name: "validate".to_owned(),
+            command_index: 4,
+            invocation: "g3ts-astro-sitemap-checks --site https://example.com".to_owned(),
+            executable: "g3ts-astro-sitemap-checks".to_owned(),
+            args: vec!["--site".to_owned(), "https://example.com".to_owned()],
+            preceded_by: Some(g3ts_astro_setup_types::G3TsAstroPackageScriptCommandSeparator::And),
+            followed_by: None,
+        },
+    );
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-setup/forbidden-script-targets",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn removed_checker_cli_nested_script_targets_fail() {
+    let mut input = super::helpers::golden();
+    let package = super::helpers::parsed_package_mut(&mut input);
+    package.script_all_tool_invocations.push(
+        g3ts_astro_setup_types::G3TsAstroPackageScriptToolInvocation {
+            script_name: "validate".to_owned(),
+            command_index: 4,
+            invocation: "g3ts-astro-sitemap-checks".to_owned(),
+            executable: "g3ts-astro-sitemap-checks".to_owned(),
+            args: vec![],
+            preceded_by: None,
+            followed_by: None,
+        },
+    );
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-setup/forbidden-script-targets",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn forbidden_deps_fail_from_optional_and_peer_dependencies() {
+    for dependency_field in ["optional", "peer"] {
+        let mut input = super::helpers::golden();
+        input.integration_contracts[0]
+            .forbidden_syncpack_deps
+            .push("g3ts-astro-sitemap-checks".to_owned());
+        let package = super::helpers::parsed_package_mut(&mut input);
+        match dependency_field {
+            "optional" => package
+                .optional_dependencies
+                .push("g3ts-astro-sitemap-checks".to_owned()),
+            "peer" => package
+                .peer_dependencies
+                .push("g3ts-astro-sitemap-checks".to_owned()),
+            _ => unreachable!(),
+        }
+
+        assertions::assert_runtime_check_id_severity(
+            &input,
+            "g3ts-astro-setup/syncpack-forbidden-deps",
+            guardrail3_check_types::G3Severity::Error,
+        );
+    }
 }
 
 #[test]

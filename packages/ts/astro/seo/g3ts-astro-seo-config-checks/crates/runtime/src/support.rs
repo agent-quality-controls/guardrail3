@@ -2,7 +2,7 @@ use g3ts_astro_seo_types::{
     G3TsAstroConfigSurfaceSnapshot, G3TsAstroConfigSurfaceState, G3TsAstroOutputMode,
     G3TsAstroPackageScriptCommandSeparator, G3TsAstroPackageScriptToolInvocation,
     G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState, G3TsAstroSeoPolicySnapshot,
-    G3TsAstroSeoPolicySurfaceState,
+    G3TsAstroSeoPolicySurfaceState, G3TsAstroStaticObjectProperty, G3TsAstroStaticValue,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
@@ -166,6 +166,78 @@ pub(crate) fn astro_config_has_integration(
         .integrations
         .iter()
         .any(|integration| integration.source_module.as_deref() == Some(module))
+}
+
+pub(crate) fn astro_config_integration_first_arg<'a>(
+    snapshot: &'a G3TsAstroConfigSurfaceSnapshot,
+    module: &str,
+) -> Option<&'a G3TsAstroStaticValue> {
+    snapshot
+        .integrations
+        .iter()
+        .find(|integration| integration.source_module.as_deref() == Some(module))
+        .and_then(|integration| integration.call.as_ref())
+        .and_then(|call| call.first_arg.as_ref())
+}
+
+pub(crate) fn object_properties(
+    value: &G3TsAstroStaticValue,
+) -> Option<&[G3TsAstroStaticObjectProperty]> {
+    match value {
+        G3TsAstroStaticValue::Object(properties) => Some(properties),
+        G3TsAstroStaticValue::Bool(_)
+        | G3TsAstroStaticValue::Number(_)
+        | G3TsAstroStaticValue::String(_)
+        | G3TsAstroStaticValue::Null
+        | G3TsAstroStaticValue::Array(_)
+        | G3TsAstroStaticValue::ImportedIdentifier { .. } => None,
+    }
+}
+
+pub(crate) fn object_has_duplicate_keys(properties: &[G3TsAstroStaticObjectProperty]) -> bool {
+    let mut seen = std::collections::BTreeSet::new();
+    properties
+        .iter()
+        .any(|property| !seen.insert(property.key.as_str()))
+}
+
+pub(crate) fn object_has_only_allowed_keys(
+    properties: &[G3TsAstroStaticObjectProperty],
+    allowed: &[&str],
+) -> bool {
+    properties
+        .iter()
+        .all(|property| allowed.contains(&property.key.as_str()))
+}
+
+pub(crate) fn property_value<'a>(
+    properties: &'a [G3TsAstroStaticObjectProperty],
+    key: &str,
+) -> Option<&'a G3TsAstroStaticValue> {
+    properties
+        .iter()
+        .find(|property| property.key == key)
+        .map(|property| &property.value)
+}
+
+pub(crate) fn property_string<'a>(
+    properties: &'a [G3TsAstroStaticObjectProperty],
+    key: &str,
+) -> Option<&'a str> {
+    match property_value(properties, key) {
+        Some(G3TsAstroStaticValue::String(value)) => Some(value),
+        _ => None,
+    }
+}
+
+pub(crate) fn property_array<'a>(
+    properties: &'a [G3TsAstroStaticObjectProperty],
+    key: &str,
+) -> Option<&'a [G3TsAstroStaticValue]> {
+    match property_value(properties, key) {
+        Some(G3TsAstroStaticValue::Array(values)) => Some(values),
+        _ => None,
+    }
 }
 
 pub(crate) fn strict_ai_readable_enabled(policy: &G3TsAstroSeoPolicySurfaceState) -> bool {

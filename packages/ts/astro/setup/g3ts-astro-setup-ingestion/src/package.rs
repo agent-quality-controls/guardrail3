@@ -65,6 +65,8 @@ pub(crate) fn ingest_package_surface(
             package_name: typed.name.clone(),
             dependencies: typed.dependencies.clone(),
             dev_dependencies: typed.dev_dependencies.clone(),
+            optional_dependencies: typed.optional_dependencies.clone(),
+            peer_dependencies: typed.peer_dependencies.clone(),
             script_names: typed.scripts.keys().cloned().collect(),
             script_bodies: typed
                 .scripts
@@ -75,6 +77,10 @@ pub(crate) fn ingest_package_surface(
             script_tool_invocations: script_facts
                 .iter()
                 .flat_map(script_tool_invocations)
+                .collect(),
+            script_all_tool_invocations: script_facts
+                .iter()
+                .flat_map(script_all_tool_invocations)
                 .collect(),
             script_parse_blockers: script_facts
                 .iter()
@@ -132,6 +138,15 @@ fn script_tool_invocations(
     fact: &PackageScriptParseFact,
 ) -> Vec<G3TsAstroPackageScriptToolInvocation> {
     fact.tool_invocations
+        .iter()
+        .map(script_tool_invocation)
+        .collect()
+}
+
+fn script_all_tool_invocations(
+    fact: &PackageScriptParseFact,
+) -> Vec<G3TsAstroPackageScriptToolInvocation> {
+    fact.all_tool_invocations
         .iter()
         .map(script_tool_invocation)
         .collect()

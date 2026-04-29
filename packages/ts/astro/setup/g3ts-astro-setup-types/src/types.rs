@@ -6,10 +6,13 @@ pub struct G3TsAstroPackageSurfaceSnapshot {
     pub package_name: Option<String>,
     pub dependencies: Vec<String>,
     pub dev_dependencies: Vec<String>,
+    pub optional_dependencies: Vec<String>,
+    pub peer_dependencies: Vec<String>,
     pub script_names: Vec<String>,
     pub script_bodies: Vec<(String, String)>,
     pub script_commands: Vec<G3TsAstroPackageScriptCommand>,
     pub script_tool_invocations: Vec<G3TsAstroPackageScriptToolInvocation>,
+    pub script_all_tool_invocations: Vec<G3TsAstroPackageScriptToolInvocation>,
     pub script_parse_blockers: Vec<G3TsAstroPackageScriptParseBlocker>,
 }
 

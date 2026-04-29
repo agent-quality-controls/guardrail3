@@ -28,10 +28,18 @@ Current G3TS npm packages:
 
 - `packages/ts/g3ts-eslint-plugin-astro-pipeline`
 - `packages/ts/g3ts-astro-nuasite-checks`
+- `packages/ts/astro/sitemap/g3ts-astro-sitemap-auditor`
+- `packages/ts/astro/robots/g3ts-astro-robots-auditor`
+- `packages/ts/astro/llms/g3ts-astro-llms-auditor`
+- `packages/ts/astro/integrations/g3ts-astro-llms-generator`
 
 Verify publication with:
 
 ```sh
 npm view g3ts-eslint-plugin-astro-pipeline version --registry=https://registry.npmjs.org/
 npm view g3ts-astro-nuasite-checks version --registry=https://registry.npmjs.org/
+npm view g3ts-astro-sitemap-auditor version --registry=https://registry.npmjs.org/
+npm view g3ts-astro-robots-auditor version --registry=https://registry.npmjs.org/
+npm view g3ts-astro-llms-auditor version --registry=https://registry.npmjs.org/
+npm view g3ts-astro-llms-generator version --registry=https://registry.npmjs.org/
 ```
