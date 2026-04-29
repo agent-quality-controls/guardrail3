@@ -1054,11 +1054,9 @@ fn static_value(
             value.value.to_string_lossy().into_owned(),
         )),
         Expr::Lit(Lit::Null(_)) => Ok(AstroStaticValue::Null),
-        Expr::Tpl(template) if template.exprs.is_empty() && template.quasis.len() == 1 => template
-            .quasis
-            .first()
-            .map(|quasi| AstroStaticValue::String(quasi.raw.to_string()))
-            .ok_or_else(|| "Astro config static template literal is empty".to_owned()),
+        Expr::Tpl(_) => resolve_string_expr(expr, state, depth + 1)
+            .map(AstroStaticValue::String)
+            .ok_or_else(|| "Astro integration options must resolve to static values".to_owned()),
         Expr::Array(array) => {
             let mut values = Vec::new();
             for element in &array.elems {
@@ -1152,13 +1150,30 @@ fn resolve_string_expr(expr: &Expr, state: &AnalysisState, depth: usize) -> Opti
     }
     match strip_wrappers(expr) {
         Expr::Lit(Lit::Str(value)) => Some(value.value.to_string_lossy().into_owned()),
-        Expr::Tpl(template) if template.exprs.is_empty() && template.quasis.len() == 1 => {
-            template.quasis.first().map(|quasi| quasi.raw.to_string())
-        }
+        Expr::Tpl(template) => resolve_template_string(template, state, depth + 1),
         Expr::Ident(ident) => const_binding(state, ident.sym.as_ref())
             .and_then(|binding| resolve_string_expr(binding, state, depth + 1)),
         _ => None,
     }
+}
+
+fn resolve_template_string(
+    template: &swc_ecma_ast::Tpl,
+    state: &AnalysisState,
+    depth: usize,
+) -> Option<String> {
+    if template.quasis.len() != template.exprs.len() + 1 {
+        return None;
+    }
+
+    let mut value = String::new();
+    for (index, quasi) in template.quasis.iter().enumerate() {
+        value.push_str(quasi.raw.as_ref());
+        if let Some(expr) = template.exprs.get(index) {
+            value.push_str(&resolve_string_expr(expr, state, depth + 1)?);
+        }
+    }
+    Some(value)
 }
 
 fn find_property_value<'a>(
