@@ -80,7 +80,7 @@ fn package() -> G3TsStylePackageSurfaceState {
                 "stylelint-config-standard".to_owned(),
                 "stylelint-config-tailwindcss".to_owned(),
                 "@double-great/stylelint-a11y".to_owned(),
-                "eslint-plugin-tailwind-ban".to_owned(),
+                "g3ts-eslint-plugin-style-policy".to_owned(),
             ],
             script_names: vec!["lint:css".to_owned()],
             script_tool_invocations: vec![G3TsStylePackageScriptToolInvocation {
@@ -135,12 +135,12 @@ fn eslint_config() -> G3TsStyleEslintSurfaceState {
             rel_path: "eslint.config.mjs".to_owned(),
             source_probe_present: true,
             source_probe_ignored: false,
-            source_plugins: vec!["tailwind-ban".to_owned()],
+            source_plugins: vec!["style-policy".to_owned()],
             source_plugin_package_names: BTreeMap::from([(
-                "tailwind-ban".to_owned(),
-                vec!["eslint-plugin-tailwind-ban".to_owned()],
+                "style-policy".to_owned(),
+                vec!["g3ts-eslint-plugin-style-policy".to_owned()],
             )]),
-            tailwind_rule_effective: true,
+            style_policy_rule_effective: true,
         },
     }
 }

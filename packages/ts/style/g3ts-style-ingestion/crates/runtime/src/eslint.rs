@@ -61,15 +61,12 @@ pub(crate) fn ingest_eslint_config(
         .iter()
         .flat_map(|probe| probe.plugin_package_names.clone())
         .collect();
-    let tailwind_rule_effective = snapshot.probes.iter().all(|probe| {
-        let Some(rule) = probe.rules.get("tailwind-ban/no-deny-tailwind-tokens") else {
+    let style_policy_rule_effective = snapshot.probes.iter().all(|probe| {
+        let Some(rule) = probe.rules.get("style-policy/no-denied-class-tokens") else {
             return false;
         };
         rule.severity == eslint_config_parser::types::EslintRuleSeverity::Error
-            && rule
-                .options
-                .iter()
-                .any(option_has_non_empty_denylist)
+            && rule.options.iter().any(option_has_non_empty_denylist)
     });
 
     G3TsStyleEslintSurfaceState::Parsed {
@@ -79,7 +76,7 @@ pub(crate) fn ingest_eslint_config(
             source_probe_ignored,
             source_plugins,
             source_plugin_package_names,
-            tailwind_rule_effective,
+            style_policy_rule_effective,
         },
     }
 }
