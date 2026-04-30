@@ -12,6 +12,9 @@ publish = false
 g3ts-style-types = { path = "../../../g3ts-style-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
+[dev-dependencies]
+g3ts-style-config-checks-assertions = { path = "../assertions" }
+
 [features]
 default = ["api"]
 api = []
