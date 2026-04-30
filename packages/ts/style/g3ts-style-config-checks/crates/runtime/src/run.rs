@@ -32,6 +32,7 @@ pub fn check(input: &G3TsStyleConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     for contract in &input.contracts {
         check_policy(contract, &mut results);
+        check_policy_paths(contract, &mut results);
         check_packages(contract, &mut results);
         check_stylelint(contract, &mut results);
         check_css_lint_script(contract, &mut results);
@@ -44,10 +45,7 @@ fn check_policy(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResu
     let rel_path = policy_rel_path(&contract.policy);
     match &contract.policy {
         G3TsStylePolicySurfaceState::Parsed { snapshot }
-            if !snapshot.source_globs.is_empty()
-                && !snapshot.stylelint_css_globs.is_empty()
-                && snapshot.source_globs.iter().all(|glob| valid_rel_path(glob))
-                && snapshot.stylelint_css_globs.iter().all(|glob| valid_rel_path(glob)) =>
+            if !snapshot.source_globs.is_empty() && !snapshot.stylelint_css_globs.is_empty() =>
         {
             results.push(info(
                 "g3ts-style/strict-policy-configured",
@@ -60,11 +58,41 @@ fn check_policy(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResu
             "g3ts-style/strict-policy-configured",
             "Style policy is not configured",
             format!(
-                "`{}` must define `[ts.style]` with non-empty `source_globs` and `stylelint_css_globs`; paths must be relative and must not contain `..`.",
+                "`{}` must define `[ts.style]` with non-empty `source_globs` and `stylelint_css_globs`.",
                 rel_path.unwrap_or("guardrail3-ts.toml")
             ),
             rel_path,
         )),
+    }
+}
+
+fn check_policy_paths(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResult>) {
+    let rel_path = policy_rel_path(&contract.policy);
+    let Some(snapshot) = parsed_policy(&contract.policy) else {
+        return;
+    };
+    let invalid = invalid_policy_paths(snapshot);
+    if invalid.is_empty() {
+        results.push(info(
+            "g3ts-style/policy-paths-valid",
+            "Style policy paths are valid",
+            format!(
+                "`{}` uses app-relative `[ts.style]` source and CSS globs without parent traversal or external URLs.",
+                rel_path.unwrap_or("guardrail3-ts.toml")
+            ),
+            rel_path,
+        ));
+    } else {
+        results.push(error(
+            "g3ts-style/policy-paths-valid",
+            "Style policy paths are invalid",
+            format!(
+                "`{}` has invalid `[ts.style]` path values: {}. Values must be non-empty app-relative globs without `..` and must not be external URLs.",
+                rel_path.unwrap_or("guardrail3-ts.toml"),
+                invalid.join(", ")
+            ),
+            rel_path,
+        ));
     }
 }
 
@@ -272,7 +300,26 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
 fn valid_rel_path(path: &str) -> bool {
     !path.trim().is_empty()
         && !path.starts_with('/')
+        && !path.contains("://")
         && !path.split('/').any(|segment| segment == "..")
+}
+
+fn invalid_policy_paths(
+    snapshot: &g3ts_style_types::G3TsStylePolicySnapshot,
+) -> Vec<String> {
+    snapshot
+        .source_globs
+        .iter()
+        .filter(|path| !valid_rel_path(path))
+        .map(|path| format!("source_globs=`{path}`"))
+        .chain(
+            snapshot
+                .stylelint_css_globs
+                .iter()
+                .filter(|path| !valid_rel_path(path))
+                .map(|path| format!("stylelint_css_globs=`{path}`")),
+        )
+        .collect()
 }
 
 fn parsed_package(
@@ -304,6 +351,19 @@ fn policy_rel_path(policy: &G3TsStylePolicySurfaceState) -> Option<&str> {
         | G3TsStylePolicySurfaceState::MissingTsPolicy { rel_path }
         | G3TsStylePolicySurfaceState::MissingStylePolicy { rel_path } => Some(rel_path),
         G3TsStylePolicySurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+    }
+}
+
+fn parsed_policy(
+    policy: &G3TsStylePolicySurfaceState,
+) -> Option<&g3ts_style_types::G3TsStylePolicySnapshot> {
+    match policy {
+        G3TsStylePolicySurfaceState::Parsed { snapshot } => Some(snapshot),
+        G3TsStylePolicySurfaceState::Missing { .. }
+        | G3TsStylePolicySurfaceState::Unreadable { .. }
+        | G3TsStylePolicySurfaceState::ParseError { .. }
+        | G3TsStylePolicySurfaceState::MissingTsPolicy { .. }
+        | G3TsStylePolicySurfaceState::MissingStylePolicy { .. } => None,
     }
 }
 

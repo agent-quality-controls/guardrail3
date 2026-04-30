@@ -5,4 +5,7 @@ use g3ts_style_config_checks_runtime as _;
 mod run;
 
 #[cfg(feature = "api")]
-pub use run::{assert_runtime_check_exact_ids, assert_runtime_check_id_severity};
+pub use run::{
+    assert_runtime_check_exact_ids, assert_runtime_check_id_severity,
+    assert_runtime_check_message_contains,
+};

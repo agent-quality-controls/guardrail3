@@ -26,3 +26,20 @@ pub fn assert_runtime_check_id_severity(
         "finding `{id}` severity mismatch"
     );
 }
+
+pub fn assert_runtime_check_message_contains(
+    input: &g3ts_style_types::G3TsStyleConfigChecksInput,
+    id: &str,
+    expected: &str,
+) {
+    let results = g3ts_style_config_checks_runtime::check(input);
+    let Some(result) = results.iter().find(|result| result.id() == id) else {
+        assert!(false, "expected finding `{id}` to exist");
+        return;
+    };
+    assert!(
+        result.message().contains(expected),
+        "finding `{id}` message should contain `{expected}`, actual: `{}`",
+        result.message()
+    );
+}
