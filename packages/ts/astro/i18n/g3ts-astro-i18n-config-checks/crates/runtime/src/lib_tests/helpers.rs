@@ -4,8 +4,7 @@ use g3ts_astro_i18n_types::{
     G3TsAstroI18nConfigChecksInput, G3TsAstroI18nEslintPluginContractInput,
     G3TsAstroI18nEslintSurfaceSnapshot, G3TsAstroI18nEslintSurfaceState,
     G3TsAstroI18nIntegrationContractInput, G3TsAstroI18nPolicySnapshot,
-    G3TsAstroI18nPolicySurfaceState, G3TsAstroPackageSurfaceSnapshot,
-    G3TsAstroPackageSurfaceState,
+    G3TsAstroI18nPolicySurfaceState, G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState,
 };
 
 pub(super) fn golden() -> G3TsAstroI18nConfigChecksInput {
@@ -51,10 +50,6 @@ fn policy() -> G3TsAstroI18nPolicySurfaceState {
             approved_localized_link_components: vec!["LocalizedLink".to_owned()],
             approved_date_format_helpers: vec!["src/i18n/format-date.ts".to_owned()],
             approved_number_format_helpers: vec!["src/i18n/format-number.ts".to_owned()],
-            content_image_components: vec!["ArticleImage".to_owned()],
-            content_image_key_props: vec!["image".to_owned()],
-            banned_image_source_props: vec!["src".to_owned()],
-            banned_image_alt_props: vec!["alt".to_owned()],
             public_source_globs: vec!["src/**/*.{astro,ts,tsx}".to_owned()],
             helper_source_globs: vec!["src/i18n/**/*.ts".to_owned()],
         },
@@ -92,8 +87,6 @@ fn eslint_config() -> G3TsAstroI18nEslintSurfaceState {
             ],
             public_i18n_policy_rules: vec![
                 "astro-i18n-policy/no-unlocalized-internal-hrefs".to_owned(),
-                "astro-i18n-policy/no-inline-image-alt".to_owned(),
-                "astro-i18n-policy/require-content-image-key".to_owned(),
             ],
             public_no_restricted_syntax_selectors: vec![
                 "CallExpression[callee.property.name='toLocaleDateString']".to_owned(),

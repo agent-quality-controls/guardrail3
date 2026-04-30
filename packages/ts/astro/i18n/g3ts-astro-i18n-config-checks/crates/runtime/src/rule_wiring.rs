@@ -6,14 +6,10 @@ use guardrail3_check_types::G3CheckResult;
 const I18NEXT_ID: &str = "g3ts-astro-i18n/i18next-plugin-wired";
 const POLICY_ID: &str = "g3ts-astro-i18n/i18n-policy-plugin-wired";
 const LINK_RULE_ID: &str = "g3ts-astro-i18n/no-unlocalized-internal-hrefs-rule";
-const ALT_RULE_ID: &str = "g3ts-astro-i18n/no-inline-image-alt-rule";
-const IMAGE_KEY_RULE_ID: &str = "g3ts-astro-i18n/require-content-image-key-rule";
 const FORMAT_ID: &str = "g3ts-astro-i18n/raw-date-number-formatting-bans";
 const DISABLE_ID: &str = "g3ts-astro-i18n/protected-i18n-rule-disables-restricted";
 const I18NEXT_RULE: &str = "i18next/no-literal-string";
 const LINK_RULE: &str = "astro-i18n-policy/no-unlocalized-internal-hrefs";
-const ALT_RULE: &str = "astro-i18n-policy/no-inline-image-alt";
-const IMAGE_KEY_RULE: &str = "astro-i18n-policy/require-content-image-key";
 const REQUIRED_SELECTORS: [&str; 4] = [
     "CallExpression[callee.property.name='toLocaleDateString']",
     "CallExpression[callee.property.name='toLocaleString']",
@@ -26,25 +22,39 @@ const PROTECTED_DISABLES: [&str; 3] = [
     "no-restricted-syntax",
 ];
 
-pub(crate) fn check(contract: &G3TsAstroI18nEslintPluginContractInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(
+    contract: &G3TsAstroI18nEslintPluginContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
     check_i18next(contract, results);
     check_policy_plugin(contract, results);
     check_rule(contract, results, LINK_RULE_ID, LINK_RULE);
-    check_rule(contract, results, ALT_RULE_ID, ALT_RULE);
-    check_rule(contract, results, IMAGE_KEY_RULE_ID, IMAGE_KEY_RULE);
     check_formatting_bans(contract, results);
     check_disable_protection(contract, results);
 }
 
-fn check_i18next(contract: &G3TsAstroI18nEslintPluginContractInput, results: &mut Vec<G3CheckResult>) {
+fn check_i18next(
+    contract: &G3TsAstroI18nEslintPluginContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
     let rel_path = crate::support::eslint_rel_path(&contract.config);
     if public_config(contract).is_some_and(|snapshot| {
-        snapshot.public_plugins.iter().any(|plugin| plugin == "i18next")
+        snapshot
+            .public_plugins
+            .iter()
+            .any(|plugin| plugin == "i18next")
             && snapshot
                 .public_plugin_package_names
                 .get("i18next")
-                .is_some_and(|packages| packages.iter().any(|package| package == "eslint-plugin-i18next"))
-            && snapshot.public_error_rules.iter().any(|rule| rule == I18NEXT_RULE)
+                .is_some_and(|packages| {
+                    packages
+                        .iter()
+                        .any(|package| package == "eslint-plugin-i18next")
+                })
+            && snapshot
+                .public_error_rules
+                .iter()
+                .any(|rule| rule == I18NEXT_RULE)
     }) {
         if let Some(rel_path) = rel_path {
             results.push(crate::support::info(
@@ -68,14 +78,24 @@ fn check_i18next(contract: &G3TsAstroI18nEslintPluginContractInput, results: &mu
     ));
 }
 
-fn check_policy_plugin(contract: &G3TsAstroI18nEslintPluginContractInput, results: &mut Vec<G3CheckResult>) {
+fn check_policy_plugin(
+    contract: &G3TsAstroI18nEslintPluginContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
     let rel_path = crate::support::eslint_rel_path(&contract.config);
     if public_config(contract).is_some_and(|snapshot| {
-        snapshot.public_plugins.iter().any(|plugin| plugin == "astro-i18n-policy")
+        snapshot
+            .public_plugins
+            .iter()
+            .any(|plugin| plugin == "astro-i18n-policy")
             && snapshot
                 .public_plugin_package_names
                 .get("astro-i18n-policy")
-                .is_some_and(|packages| packages.iter().any(|package| package == "g3ts-eslint-plugin-astro-i18n-policy"))
+                .is_some_and(|packages| {
+                    packages
+                        .iter()
+                        .any(|package| package == "g3ts-eslint-plugin-astro-i18n-policy")
+                })
     }) {
         if let Some(rel_path) = rel_path {
             results.push(crate::support::info(
@@ -116,7 +136,9 @@ fn check_rule(
             results.push(crate::support::info(
                 id,
                 "Astro i18n policy rule is effective",
-                format!("`{rel_path}` activates `{rule_name}` at error severity with explicit options."),
+                format!(
+                    "`{rel_path}` activates `{rule_name}` at error severity with explicit options."
+                ),
                 rel_path,
             ));
         }
@@ -127,7 +149,7 @@ fn check_rule(
         id,
         "Astro i18n policy rule is not effective",
         format!(
-            "`{}` must activate `{rule_name}` at `error` with explicit options matching `[ts.astro.i18n]`.",
+            "`{}` must activate `{rule_name}` at `error` with explicit options matching `[ts.astro.i18n]`: `locales`, `defaultLocale` only when `default_locale` is configured, `requireLocalePrefixForContentRoutes`, `allowedUnprefixedRoutes`, `contentRoutePrefixes`, `checkedInternalLinkHelpers`, `approvedInternalLinkHelpers`, and `approvedLocalizedLinkComponents`.",
             rel_path.unwrap_or("eslint.config.*")
         ),
         rel_path,
@@ -140,13 +162,19 @@ fn check_formatting_bans(
 ) {
     let rel_path = crate::support::eslint_rel_path(&contract.config);
     if public_config(contract).is_some_and(|snapshot| {
-        REQUIRED_SELECTORS
-            .iter()
-            .all(|selector| snapshot.public_no_restricted_syntax_selectors.iter().any(|candidate| candidate == selector))
-            && !snapshot
-                .helper_no_restricted_syntax_selectors
+        REQUIRED_SELECTORS.iter().all(|selector| {
+            snapshot
+                .public_no_restricted_syntax_selectors
                 .iter()
-                .any(|selector| REQUIRED_SELECTORS.iter().any(|required| required == selector))
+                .any(|candidate| candidate == selector)
+        }) && !snapshot
+            .helper_no_restricted_syntax_selectors
+            .iter()
+            .any(|selector| {
+                REQUIRED_SELECTORS
+                    .iter()
+                    .any(|required| required == selector)
+            })
     }) {
         if let Some(rel_path) = rel_path {
             results.push(crate::support::info(
@@ -176,9 +204,12 @@ fn check_disable_protection(
 ) {
     let rel_path = crate::support::eslint_rel_path(&contract.config);
     if public_config(contract).is_some_and(|snapshot| {
-        PROTECTED_DISABLES
-            .iter()
-            .all(|pattern| snapshot.public_restricted_disable_patterns.iter().any(|candidate| candidate == pattern))
+        PROTECTED_DISABLES.iter().all(|pattern| {
+            snapshot
+                .public_restricted_disable_patterns
+                .iter()
+                .any(|candidate| candidate == pattern)
+        })
     }) {
         if let Some(rel_path) = rel_path {
             results.push(crate::support::info(

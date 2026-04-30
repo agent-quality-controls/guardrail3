@@ -101,7 +101,7 @@ fn policy() -> G3TsAstroMediaPolicySurfaceState {
             favicon: "/favicon.svg".to_owned(),
             app_icons: vec!["/apple-touch-icon.png".to_owned()],
             default_social_image: "/og/default.png".to_owned(),
-            allow_svg_icons: true,
+            allow_svg_icons: Some(true),
             public_source_globs: vec!["src/**/*.{astro,ts,tsx}".to_owned()],
             media_helper_modules: vec!["src/media/images.ts".to_owned()],
             approved_media_helpers: vec!["imageMetadata".to_owned()],
@@ -112,6 +112,7 @@ fn policy() -> G3TsAstroMediaPolicySurfaceState {
             allowed_public_image_paths: vec!["/favicon.svg".to_owned()],
             checked_image_extensions: vec![".jpg".to_owned(), ".png".to_owned(), ".svg".to_owned()],
             metadata_image_property_names: vec!["image".to_owned(), "ogImage".to_owned()],
+            extra_fields: Vec::new(),
         },
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "g3ts-eslint-plugin-astro-i18n-policy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Astro source-policy ESLint rules for i18n guardrails.",
   "repository": {
     "type": "git",

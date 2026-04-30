@@ -1,7 +1,6 @@
 use g3ts_astro_i18n_types::{
-    G3TsAstroI18nEslintSurfaceState, G3TsAstroI18nPolicySnapshot,
-    G3TsAstroI18nPolicySurfaceState, G3TsAstroPackageSurfaceSnapshot,
-    G3TsAstroPackageSurfaceState,
+    G3TsAstroI18nEslintSurfaceState, G3TsAstroI18nPolicySnapshot, G3TsAstroI18nPolicySurfaceState,
+    G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 

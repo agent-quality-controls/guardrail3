@@ -27,6 +27,66 @@ describe("require-content-image-key", () => {
         errors: [{ messageId: "missingImageKey" }, { messageId: "bannedSourceProp" }]
       },
       {
+        code: `<ArticleImage image />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image={undefined} />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image={true} />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image={false} />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image={null} />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image={0} />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image={{}} />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image={[]} />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image="" />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image={"   "} />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: "<ArticleImage image={``} />",
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
+        code: `<ArticleImage image={" " + ""} />`,
+        options: [baseOptions],
+        errors: [{ messageId: "missingImageKey" }, { messageId: "invalidImageKey" }]
+      },
+      {
         code: `<ArticleImage image="hero" url="/hero.jpg" />`,
         options: [baseOptions],
         errors: [{ messageId: "bannedSourceProp" }]

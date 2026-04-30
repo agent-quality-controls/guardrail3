@@ -122,6 +122,10 @@ fn rule_options_match_policy(
     options: &serde_json::Value,
     policy: &g3ts_astro_media_types::G3TsAstroMediaPolicySnapshot,
 ) -> bool {
+    if !all_policy_options_match(options, policy) {
+        return false;
+    }
+
     match rule {
         "astro-media-policy/no-raw-public-image-paths" => {
             string_array_option_matches(
@@ -181,6 +185,73 @@ fn rule_options_match_policy(
     }
 }
 
+fn all_policy_options_match(
+    options: &serde_json::Value,
+    policy: &g3ts_astro_media_types::G3TsAstroMediaPolicySnapshot,
+) -> bool {
+    let Some(object) = options.as_object() else {
+        return false;
+    };
+    let allowed_keys = [
+        "publicSourceGlobs",
+        "mediaHelperModules",
+        "approvedMediaHelpers",
+        "contentImageComponents",
+        "contentImageKeyProps",
+        "bannedImageSourceProps",
+        "bannedImageAltProps",
+        "allowedPublicImagePaths",
+        "checkedImageExtensions",
+        "metadataImagePropertyNames",
+    ];
+
+    object
+        .keys()
+        .all(|key| allowed_keys.iter().any(|allowed| allowed == key))
+        && string_array_option_matches(options, "publicSourceGlobs", &policy.public_source_globs)
+        && string_array_option_matches(options, "mediaHelperModules", &policy.media_helper_modules)
+        && string_array_option_matches(
+            options,
+            "approvedMediaHelpers",
+            &policy.approved_media_helpers,
+        )
+        && string_array_option_matches(
+            options,
+            "contentImageComponents",
+            &policy.content_image_components,
+        )
+        && string_array_option_matches(
+            options,
+            "contentImageKeyProps",
+            &policy.content_image_key_props,
+        )
+        && string_array_option_matches(
+            options,
+            "bannedImageSourceProps",
+            &policy.banned_image_source_props,
+        )
+        && string_array_option_matches(
+            options,
+            "bannedImageAltProps",
+            &policy.banned_image_alt_props,
+        )
+        && string_array_option_matches(
+            options,
+            "allowedPublicImagePaths",
+            &policy.allowed_public_image_paths,
+        )
+        && string_array_option_matches(
+            options,
+            "checkedImageExtensions",
+            &policy.checked_image_extensions,
+        )
+        && string_array_option_matches(
+            options,
+            "metadataImagePropertyNames",
+            &policy.metadata_image_property_names,
+        )
+}
+
 fn string_array_option_matches(
     options: &serde_json::Value,
     key: &str,
@@ -189,12 +260,9 @@ fn string_array_option_matches(
     let Some(actual) = options.get(key).and_then(serde_json::Value::as_array) else {
         return false;
     };
-    let actual = actual
-        .iter()
-        .filter_map(serde_json::Value::as_str)
-        .map(str::trim)
-        .filter(|value| !value.is_empty())
-        .collect::<std::collections::BTreeSet<_>>();
+    let Some(actual) = normalized_string_set(actual) else {
+        return false;
+    };
     let expected = expected
         .iter()
         .map(String::as_str)
@@ -203,6 +271,18 @@ fn string_array_option_matches(
         .collect::<std::collections::BTreeSet<_>>();
 
     actual == expected
+}
+
+fn normalized_string_set(values: &[serde_json::Value]) -> Option<std::collections::BTreeSet<&str>> {
+    values
+        .iter()
+        .map(|value| {
+            value
+                .as_str()
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+        })
+        .collect::<Option<std::collections::BTreeSet<_>>>()
 }
 
 fn restricted_disable_patterns(

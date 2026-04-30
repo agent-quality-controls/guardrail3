@@ -55,6 +55,125 @@ fn missing_assets_integration_fails() {
 }
 
 #[test]
+fn invalid_output_asset_path_fails() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.favicon = "favicon.svg".to_owned();
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-media/policy-paths-valid",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn invalid_app_relative_source_glob_fails() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.public_source_globs = vec!["/src/**/*.astro".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-media/policy-paths-valid",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn external_media_helper_module_fails() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.media_helper_modules = vec!["https://example.com/media.ts".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-media/policy-paths-valid",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn whitespace_only_policy_arrays_fail() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.approved_media_helpers = vec![" ".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-media/strict-policy-configured",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn missing_allow_svg_icons_fails() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.allow_svg_icons = None;
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-media/strict-policy-configured",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn missing_allowed_public_image_paths_fails() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.allowed_public_image_paths = Vec::new();
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-media/strict-policy-configured",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
+fn unknown_media_policy_fields_fail() {
+    let mut input = super::helpers::golden();
+    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
+        &mut input.integration_contracts[0].astro_policy
+    else {
+        unreachable!("test fixture must be parsed")
+    };
+    snapshot.extra_fields = vec!["allow_raw_public_images".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-astro-media/strict-policy-configured",
+        guardrail3_check_types::G3Severity::Error,
+    );
+}
+
+#[test]
 fn missing_policy_rule_fails() {
     let mut input = super::helpers::golden();
     let g3ts_astro_media_types::G3TsAstroMediaEslintSurfaceState::Parsed { snapshot } =

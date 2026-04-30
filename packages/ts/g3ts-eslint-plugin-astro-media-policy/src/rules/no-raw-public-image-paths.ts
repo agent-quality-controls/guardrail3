@@ -2,6 +2,7 @@ import { AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/utils";
 import type { TSESTree } from "@typescript-eslint/utils";
 
 import {
+  hasLocalBindingBefore,
   staticStringFromExpression,
   staticStringFromJsxAttribute
 } from "../utils/ast.js";
@@ -9,6 +10,7 @@ import {
   astroMediaPolicyOptionsSchema,
   missingRequiredOptions,
   normalizePublicPath,
+  publicPathWithoutSearchOrHash,
   resolveOptions,
   type RuleOptionsTuple
 } from "../utils/options.js";
@@ -40,7 +42,9 @@ export default createRule<RuleOptionsTuple, MessageIds>({
   create(context) {
     const options = resolveOptions(context.options[0]);
     const missing = missingRequiredOptions(options, [
+      "mediaHelperModules",
       "approvedMediaHelpers",
+      "allowedPublicImagePaths",
       "checkedImageExtensions"
     ]);
 
@@ -61,13 +65,16 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     );
     const checkedExtensions = new Set(options.checkedImageExtensions);
     const approvedHelpers = new Set(options.approvedMediaHelpers);
+    const mediaHelperModules = new Set(options.mediaHelperModules);
+    const importedApprovedHelpers = new Set<string>();
 
     function shouldReport(value: string): boolean {
       const path = normalizePublicPath(value);
+      const pathForExtension = publicPathWithoutSearchOrHash(value);
 
       return (
         value.trim().startsWith("/") &&
-        hasCheckedExtension(path, checkedExtensions) &&
+        hasCheckedExtension(pathForExtension, checkedExtensions) &&
         !allowed.has(path)
       );
     }
@@ -81,11 +88,35 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     }
 
     return {
+      ImportDeclaration(node): void {
+        if (
+          typeof node.source.value !== "string" ||
+          !mediaHelperModules.has(node.source.value)
+        ) {
+          return;
+        }
+
+        for (const specifier of node.specifiers) {
+          if (
+            specifier.type === AST_NODE_TYPES.ImportSpecifier &&
+            specifier.imported.type === AST_NODE_TYPES.Identifier &&
+            approvedHelpers.has(specifier.imported.name)
+          ) {
+            importedApprovedHelpers.add(specifier.local.name);
+          }
+          if (
+            specifier.type === AST_NODE_TYPES.ImportDefaultSpecifier &&
+            approvedHelpers.has("default")
+          ) {
+            importedApprovedHelpers.add(specifier.local.name);
+          }
+        }
+      },
       Literal(node): void {
         if (
           typeof node.value !== "string" ||
           isImportOrExportSource(node) ||
-          isApprovedHelperArgument(node, approvedHelpers)
+          isApprovedHelperArgument(context, node, importedApprovedHelpers)
         ) {
           return;
         }
@@ -94,12 +125,15 @@ export default createRule<RuleOptionsTuple, MessageIds>({
         }
       },
       TemplateLiteral(node): void {
-        if (isApprovedHelperArgument(node, approvedHelpers)) {
+        if (isApprovedHelperArgument(context, node, importedApprovedHelpers)) {
           return;
         }
         const value = staticStringFromExpression(node);
         if (value !== null && shouldReport(value)) {
           report(node, value);
+        }
+        if (value === null && shouldReportTemplate(node, checkedExtensions)) {
+          report(node, context.sourceCode.getText(node));
         }
       },
       JSXAttribute(node): void {
@@ -118,6 +152,18 @@ function hasCheckedExtension(path: string, extensions: Set<string>): boolean {
   return [...extensions].some((extension) => lower.endsWith(extension));
 }
 
+function shouldReportTemplate(
+  node: TSESTree.TemplateLiteral,
+  extensions: Set<string>
+): boolean {
+  const first = node.quasis[0]?.value.raw.trim() ?? "";
+  const combined = publicPathWithoutSearchOrHash(
+    node.quasis.map((quasi) => quasi.value.raw).join("")
+  );
+
+  return first.startsWith("/") && hasCheckedExtension(combined, extensions);
+}
+
 function isImportOrExportSource(node: TSESTree.Literal): boolean {
   const parent = node.parent;
 
@@ -130,6 +176,7 @@ function isImportOrExportSource(node: TSESTree.Literal): boolean {
 }
 
 function isApprovedHelperArgument(
+  context: Parameters<Parameters<typeof createRule>[0]["create"]>[0],
   node: TSESTree.Node,
   approvedHelpers: Set<string>
 ): boolean {
@@ -140,18 +187,16 @@ function isApprovedHelperArgument(
 
   const name = calleeName(parent.callee);
 
-  return name !== null && approvedHelpers.has(name);
+  return (
+    name !== null &&
+    approvedHelpers.has(name) &&
+    !hasLocalBindingBefore(context, parent.callee, name)
+  );
 }
 
 function calleeName(callee: TSESTree.CallExpression["callee"]): string | null {
   if (callee.type === AST_NODE_TYPES.Identifier) {
     return callee.name;
-  }
-  if (callee.type === AST_NODE_TYPES.MemberExpression) {
-    const property = callee.property;
-    if (!callee.computed && property.type === AST_NODE_TYPES.Identifier) {
-      return property.name;
-    }
   }
 
   return null;

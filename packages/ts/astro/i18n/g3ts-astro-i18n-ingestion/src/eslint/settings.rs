@@ -1,10 +1,6 @@
 use g3ts_astro_i18n_types::G3TsAstroI18nPolicySurfaceState;
 
-const POLICY_RULES: [&str; 3] = [
-    "astro-i18n-policy/no-unlocalized-internal-hrefs",
-    "astro-i18n-policy/no-inline-image-alt",
-    "astro-i18n-policy/require-content-image-key",
-];
+const POLICY_RULES: [&str; 1] = ["astro-i18n-policy/no-unlocalized-internal-hrefs"];
 const NO_RESTRICTED_SYNTAX: &str = "no-restricted-syntax";
 
 pub(crate) fn common_plugins(
@@ -141,7 +137,21 @@ fn rule_options_match_policy(
 ) -> bool {
     match rule {
         "astro-i18n-policy/no-unlocalized-internal-hrefs" => {
-            string_array_option_matches(options, "locales", &policy.locales)
+            let mut expected_keys = vec![
+                "locales",
+                "requireLocalePrefixForContentRoutes",
+                "allowedUnprefixedRoutes",
+                "contentRoutePrefixes",
+                "checkedInternalLinkHelpers",
+                "approvedInternalLinkHelpers",
+                "approvedLocalizedLinkComponents",
+            ];
+            if policy.default_locale.is_some() {
+                expected_keys.push("defaultLocale");
+            }
+
+            exact_option_keys_match(options, &expected_keys)
+                && string_array_option_matches(options, "locales", &policy.locales)
                 && optional_string_option_matches(options, "defaultLocale", &policy.default_locale)
                 && bool_option_matches(
                     options,
@@ -174,34 +184,25 @@ fn rule_options_match_policy(
                     &policy.approved_localized_link_components,
                 )
         }
-        "astro-i18n-policy/no-inline-image-alt" => {
-            string_array_option_matches(
-                options,
-                "contentImageComponents",
-                &policy.content_image_components,
-            ) && string_array_option_matches(
-                options,
-                "bannedImageAltProps",
-                &policy.banned_image_alt_props,
-            )
-        }
-        "astro-i18n-policy/require-content-image-key" => {
-            string_array_option_matches(
-                options,
-                "contentImageComponents",
-                &policy.content_image_components,
-            ) && string_array_option_matches(
-                options,
-                "contentImageKeyProps",
-                &policy.content_image_key_props,
-            ) && string_array_option_matches(
-                options,
-                "bannedImageSourceProps",
-                &policy.banned_image_source_props,
-            )
-        }
         _ => false,
     }
+}
+
+fn exact_option_keys_match(options: &serde_json::Value, expected: &[&str]) -> bool {
+    let Some(object) = options.as_object() else {
+        return false;
+    };
+
+    let actual = object
+        .keys()
+        .map(String::as_str)
+        .collect::<std::collections::BTreeSet<_>>();
+    let expected = expected
+        .iter()
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>();
+
+    actual == expected
 }
 
 fn string_array_option_matches(
@@ -212,12 +213,9 @@ fn string_array_option_matches(
     let Some(actual) = options.get(key).and_then(serde_json::Value::as_array) else {
         return false;
     };
-    let actual = actual
-        .iter()
-        .filter_map(serde_json::Value::as_str)
-        .map(str::trim)
-        .filter(|value| !value.is_empty())
-        .collect::<std::collections::BTreeSet<_>>();
+    let Some(actual) = normalized_string_set(actual) else {
+        return false;
+    };
     let expected = expected
         .iter()
         .map(String::as_str)
@@ -226,6 +224,18 @@ fn string_array_option_matches(
         .collect::<std::collections::BTreeSet<_>>();
 
     actual == expected
+}
+
+fn normalized_string_set(values: &[serde_json::Value]) -> Option<std::collections::BTreeSet<&str>> {
+    values
+        .iter()
+        .map(|value| {
+            value
+                .as_str()
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+        })
+        .collect::<Option<std::collections::BTreeSet<_>>>()
 }
 
 fn optional_string_option_matches(

@@ -1,6 +1,7 @@
 import type { JSONSchema4 } from "@typescript-eslint/utils/json-schema";
 
 export interface AstroMediaPolicyOptions {
+  publicSourceGlobs?: string[];
   mediaHelperModules?: string[];
   approvedMediaHelpers?: string[];
   contentImageComponents?: string[];
@@ -13,6 +14,7 @@ export interface AstroMediaPolicyOptions {
 }
 
 export interface ResolvedAstroMediaPolicyOptions {
+  publicSourceGlobs: string[];
   mediaHelperModules: string[];
   approvedMediaHelpers: string[];
   contentImageComponents: string[];
@@ -37,6 +39,7 @@ export const astroMediaPolicyOptionsSchema: JSONSchema4[] = [
     additionalProperties: false,
     properties: {
       mediaHelperModules: stringArraySchema,
+      publicSourceGlobs: stringArraySchema,
       approvedMediaHelpers: stringArraySchema,
       contentImageComponents: stringArraySchema,
       contentImageKeyProps: stringArraySchema,
@@ -56,6 +59,7 @@ export function resolveOptions(
 
   return {
     mediaHelperModules: normalizeStringArray(source.mediaHelperModules),
+    publicSourceGlobs: normalizeStringArray(source.publicSourceGlobs),
     approvedMediaHelpers: normalizeStringArray(source.approvedMediaHelpers),
     contentImageComponents: normalizeStringArray(source.contentImageComponents),
     contentImageKeyProps: normalizeStringArray(source.contentImageKeyProps),
@@ -91,6 +95,10 @@ export function normalizePublicPath(value: string): string {
   const prefixed = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 
   return prefixed.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
+}
+
+export function publicPathWithoutSearchOrHash(value: string): string {
+  return normalizePublicPath(value).split(/[?#]/, 1)[0] ?? "/";
 }
 
 function normalizeExtension(value: string): string {

@@ -22,10 +22,10 @@ pub(crate) fn check(
     }
 
     results.push(crate::support::error(
-        ID,
-        "Astro media assets integration is not wired",
-        format!(
-            "`{}` must add `g3tsAstroMediaAssets(...)` from `{PACKAGE_NAME}` to Astro integrations. Its `favicon`, `appIcons`, `defaultSocialImage`, and `allowSvgIcons` options must exactly match `[ts.astro.media]`.",
+            ID,
+            "Astro media assets integration is not wired",
+            format!(
+            "`{}` must add `g3tsAstroMediaAssets(...)` from `{PACKAGE_NAME}` to Astro integrations. Its `favicon`, `appIcons`, `defaultSocialImage`, and `allowSvgIcons` options must exactly match `[ts.astro.media]`. `favicon`, `appIcons`, and `defaultSocialImage` are root-relative public output paths like `/favicon.svg`; they are not app-relative source paths.",
             rel_path.unwrap_or("astro.config.*")
         ),
         rel_path,
@@ -53,8 +53,9 @@ fn integration_matches_policy(contract: &G3TsAstroMediaIntegrationContractInput)
     ) && crate::support::property_string(properties, "favicon") == Some(policy.favicon.as_str())
         && crate::support::property_string(properties, "defaultSocialImage")
             == Some(policy.default_social_image.as_str())
-        && crate::support::property_bool(properties, "allowSvgIcons")
-            == Some(policy.allow_svg_icons)
+        && policy.allow_svg_icons.is_some_and(|expected| {
+            crate::support::property_bool(properties, "allowSvgIcons") == Some(expected)
+        })
         && crate::support::property_string_array(properties, "appIcons")
             .is_some_and(|actual| actual == policy.app_icons)
 }

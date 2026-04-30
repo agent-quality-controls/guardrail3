@@ -1,4 +1,4 @@
-import { access } from "node:fs/promises";
+import { stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -35,7 +35,8 @@ export default function g3tsAstroMediaAssets(
 export async function checkMediaAssets(
   options: G3TsAstroMediaAssetsCheckOptions
 ): Promise<void> {
-  const normalized = normalizeOptions(options);
+  const errors: string[] = [];
+  const normalized = normalizeOptions(options, errors);
   const assetPaths = [
     normalized.favicon,
     ...normalized.appIcons,
@@ -44,78 +45,156 @@ export async function checkMediaAssets(
 
   for (const assetPath of assetPaths) {
     if (!normalized.allowSvgIcons && assetPath.toLowerCase().endsWith(".svg")) {
-      throw new Error(
+      errors.push(
         `g3ts-astro-media-assets: SVG media asset is not allowed by allowSvgIcons=false: ${assetPath}`
       );
+      continue;
     }
 
-    await assertAssetExists(normalized.outputDir, assetPath);
+    await assertAssetExists(normalized.outputDir, assetPath, errors);
+  }
+
+  if (errors.length > 0) {
+    throw new Error(errors.join("\n"));
   }
 }
 
 function normalizeOptions(
-  options: G3TsAstroMediaAssetsCheckOptions
+  options: G3TsAstroMediaAssetsCheckOptions,
+  errors: string[]
 ): Required<G3TsAstroMediaAssetsCheckOptions> {
+  const rawOptions = options as Partial<G3TsAstroMediaAssetsCheckOptions>;
+
   return {
-    outputDir: normalizeOutputDir(options.outputDir),
-    favicon: normalizePublicPath(options.favicon, "favicon"),
-    appIcons: normalizePublicPathArray(options.appIcons, "appIcons"),
+    outputDir: normalizeOutputDir(rawOptions.outputDir, errors),
+    favicon: normalizePublicPath(rawOptions.favicon, "favicon", errors),
+    appIcons: normalizePublicPathArray(rawOptions.appIcons, "appIcons", errors),
     defaultSocialImage: normalizePublicPath(
-      options.defaultSocialImage,
-      "defaultSocialImage"
+      rawOptions.defaultSocialImage,
+      "defaultSocialImage",
+      errors
     ),
-    allowSvgIcons: options.allowSvgIcons
+    allowSvgIcons: normalizeBoolean(rawOptions.allowSvgIcons, "allowSvgIcons", errors)
   };
 }
 
-function normalizeOutputDir(outputDir: string): string {
+function normalizeOutputDir(outputDir: unknown, errors: string[]): string {
+  if (typeof outputDir !== "string") {
+    errors.push("g3ts-astro-media-assets: outputDir must be a string.");
+
+    return "";
+  }
+
   const normalized = outputDir.trim();
   if (!normalized) {
-    throw new Error("g3ts-astro-media-assets: outputDir must be non-empty.");
+    errors.push("g3ts-astro-media-assets: outputDir must be non-empty.");
   }
 
   return normalized;
 }
 
-function normalizePublicPath(value: string, field: string): string {
+function normalizePublicPath(
+  value: unknown,
+  field: string,
+  errors: string[]
+): string {
+  if (typeof value !== "string") {
+    errors.push(`g3ts-astro-media-assets: ${field} must be a string.`);
+
+    return "";
+  }
+
   const normalized = value.trim();
   if (!normalized) {
-    throw new Error(`g3ts-astro-media-assets: ${field} must be non-empty.`);
+    errors.push(`g3ts-astro-media-assets: ${field} must be non-empty.`);
+
+    return "";
   }
   if (/^[a-z][a-z0-9+.-]*:/i.test(normalized) || normalized.startsWith("//")) {
-    throw new Error(
+    errors.push(
       `g3ts-astro-media-assets: ${field} must be a root-relative public path, not ${normalized}.`
     );
+
+    return "";
   }
   if (!normalized.startsWith("/")) {
-    throw new Error(
+    errors.push(
       `g3ts-astro-media-assets: ${field} must start with "/": ${normalized}.`
     );
+
+    return "";
   }
-  if (normalized.split("/").includes("..")) {
-    throw new Error(
+  if (containsTraversal(normalized)) {
+    errors.push(
       `g3ts-astro-media-assets: ${field} must not traverse with "..": ${normalized}.`
     );
+
+    return "";
   }
 
   return normalized.replace(/\/+/g, "/");
 }
 
-function normalizePublicPathArray(values: string[], field: string): string[] {
+function normalizePublicPathArray(
+  values: unknown,
+  field: string,
+  errors: string[]
+): string[] {
   if (!Array.isArray(values) || values.length === 0) {
-    throw new Error(`g3ts-astro-media-assets: ${field} must be non-empty.`);
+    errors.push(`g3ts-astro-media-assets: ${field} must be a non-empty array.`);
+
+    return [];
   }
 
-  return values.map((value, index) => normalizePublicPath(value, `${field}[${index}]`));
+  return values.map((value, index) =>
+    normalizePublicPath(value, `${field}[${index}]`, errors)
+  );
 }
 
-async function assertAssetExists(outputDir: string, assetPath: string): Promise<void> {
+function normalizeBoolean(value: unknown, field: string, errors: string[]): boolean {
+  if (typeof value !== "boolean") {
+    errors.push(`g3ts-astro-media-assets: ${field} must be a boolean.`);
+  }
+
+  return value === true;
+}
+
+function containsTraversal(value: string): boolean {
+  const lower = value.toLowerCase();
+  if (value.includes("\\") || lower.includes("%2f") || lower.includes("%5c")) {
+    return true;
+  }
+
+  try {
+    return decodeURIComponent(value).split("/").includes("..");
+  } catch {
+    return true;
+  }
+}
+
+async function assertAssetExists(
+  outputDir: string,
+  assetPath: string,
+  errors: string[]
+): Promise<void> {
+  if (!outputDir || !assetPath) {
+    return;
+  }
+
   const relativePath = assetPath.replace(/^\/+/, "");
   const fullPath = path.join(outputDir, relativePath);
 
-  await access(fullPath).catch(() => {
-    throw new Error(
+  const fileStat = await stat(fullPath).catch(() => null);
+  if (!fileStat) {
+    errors.push(
       `g3ts-astro-media-assets: required media asset ${assetPath} was not found in built output ${outputDir}.`
     );
-  });
+    return;
+  }
+
+  if (!fileStat.isFile()) {
+    errors.push(
+      `g3ts-astro-media-assets: required media asset ${assetPath} exists in built output ${outputDir}, but it is not a file.`
+    );
+  }
 }

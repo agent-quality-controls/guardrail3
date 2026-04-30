@@ -19,7 +19,15 @@ describe("no-raw-public-image-paths", () => {
         options: [baseOptions]
       },
       {
-        code: `const hero = imageMetadata("/hero.jpg");`,
+        code: `const copy = "/blog/hero?ref=image";`,
+        options: [baseOptions]
+      },
+      {
+        code: `import { imageMetadata } from "src/media/images.ts"; const hero = imageMetadata("/hero.jpg");`,
+        options: [baseOptions]
+      },
+      {
+        code: `import { imageMetadata as img } from "src/media/images.ts"; const hero = img("/hero.jpg");`,
         options: [baseOptions]
       }
     ],
@@ -43,6 +51,51 @@ describe("no-raw-public-image-paths", () => {
         code: `const hero = "/hero.jpg";`,
         options: [{}],
         errors: [{ messageId: "missingConfig" }]
+      },
+      {
+        code: `const hero = tracking.imageMetadata("/hero.jpg");`,
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: `const hero = "/hero.jpg?v=1";`,
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: "const hero = `/images/${slug}.jpg`;",
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: "const hero = `/images/${slug}.jpg?v=1`;",
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: "const hero = `/images/${slug}.jpg?w=${width}`;",
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: `const hero = makeImage("/hero.jpg");`,
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: `function imageMetadata(value) { return value; } const hero = imageMetadata("/hero.jpg");`,
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: `import { imageMetadata } from "src/media/images.ts"; { const imageMetadata = (value) => value; const hero = imageMetadata("/hero.jpg"); }`,
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: `import { imageMetadata } from "src/media/images.ts"; const hero = imageMetadata("/hero.jpg"); function imageMetadata(value) { return value; }`,
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
       }
     ]
   });

@@ -16,7 +16,7 @@ pub(crate) fn check(
             STRICT_ID,
             "Astro media strict policy is missing",
             format!(
-                "`{}` must define `[ts.astro.media]` with explicit favicon, app icon, default social image, source globs, helper modules, content image component policy, and checked image extensions. G3TS does not invent media defaults.",
+                "`{}` must define `[ts.astro.media]` with explicit `favicon`, `app_icons`, `default_social_image`, `allow_svg_icons`, `public_source_globs`, `media_helper_modules`, `approved_media_helpers`, `content_image_components`, `content_image_key_props`, `banned_image_source_props`, `banned_image_alt_props`, `allowed_public_image_paths`, `checked_image_extensions`, and `metadata_image_property_names`. G3TS does not invent media defaults.",
                 rel_path.unwrap_or("guardrail3-ts.toml")
             ),
             rel_path,
@@ -30,7 +30,7 @@ pub(crate) fn check(
 
 fn check_required_fields(policy: &G3TsAstroMediaPolicySnapshot, results: &mut Vec<G3CheckResult>) {
     let missing = missing_fields(policy);
-    if missing.is_empty() {
+    if missing.is_empty() && policy.extra_fields.is_empty() {
         results.push(crate::support::info(
             STRICT_ID,
             "Astro media strict policy is configured",
@@ -40,6 +40,23 @@ fn check_required_fields(policy: &G3TsAstroMediaPolicySnapshot, results: &mut Ve
             ),
             &policy.rel_path,
         ));
+        return;
+    }
+
+    if !policy.extra_fields.is_empty() {
+        results.push(crate::support::error(
+            STRICT_ID,
+            "Astro media strict policy has unknown fields",
+            format!(
+                "`{}` contains unknown `[ts.astro.media]` fields: {}. Delete them or move them to the family that owns them; media policy accepts only the documented media keys.",
+                policy.rel_path,
+                policy.extra_fields.join(", ")
+            ),
+            Some(&policy.rel_path),
+        ));
+    }
+
+    if missing.is_empty() {
         return;
     }
 
@@ -60,53 +77,83 @@ fn missing_fields(policy: &G3TsAstroMediaPolicySnapshot) -> Vec<&'static str> {
     if policy.favicon.trim().is_empty() {
         missing.push("favicon");
     }
-    if policy.app_icons.is_empty() {
+    if has_empty_value(&policy.app_icons) {
         missing.push("app_icons");
     }
     if policy.default_social_image.trim().is_empty() {
         missing.push("default_social_image");
     }
-    if policy.public_source_globs.is_empty() {
+    if policy.allow_svg_icons.is_none() {
+        missing.push("allow_svg_icons");
+    }
+    if has_empty_value(&policy.public_source_globs) {
         missing.push("public_source_globs");
     }
-    if policy.media_helper_modules.is_empty() {
+    if has_empty_value(&policy.media_helper_modules) {
         missing.push("media_helper_modules");
     }
-    if policy.approved_media_helpers.is_empty() {
+    if has_empty_value(&policy.approved_media_helpers) {
         missing.push("approved_media_helpers");
     }
-    if policy.content_image_components.is_empty() {
+    if has_empty_value(&policy.content_image_components) {
         missing.push("content_image_components");
     }
-    if policy.content_image_key_props.is_empty() {
+    if has_empty_value(&policy.content_image_key_props) {
         missing.push("content_image_key_props");
     }
-    if policy.banned_image_source_props.is_empty() {
+    if has_empty_value(&policy.banned_image_source_props) {
         missing.push("banned_image_source_props");
     }
-    if policy.banned_image_alt_props.is_empty() {
+    if has_empty_value(&policy.banned_image_alt_props) {
         missing.push("banned_image_alt_props");
     }
-    if policy.checked_image_extensions.is_empty() {
+    if has_empty_value(&policy.allowed_public_image_paths) {
+        missing.push("allowed_public_image_paths");
+    }
+    if has_empty_value(&policy.checked_image_extensions) {
         missing.push("checked_image_extensions");
     }
-    if policy.metadata_image_property_names.is_empty() {
+    if has_empty_value(&policy.metadata_image_property_names) {
         missing.push("metadata_image_property_names");
     }
     missing
+}
+
+fn has_empty_value(values: &[String]) -> bool {
+    values.is_empty() || values.iter().any(|value| value.trim().is_empty())
 }
 
 fn check_paths(policy: &G3TsAstroMediaPolicySnapshot, results: &mut Vec<G3CheckResult>) {
     let invalid = policy
         .app_icons
         .iter()
-        .chain(std::iter::once(&policy.favicon))
-        .chain(std::iter::once(&policy.default_social_image))
-        .chain(policy.public_source_globs.iter())
-        .chain(policy.media_helper_modules.iter())
-        .chain(policy.allowed_public_image_paths.iter())
-        .filter(|path| invalid_path(path))
-        .cloned()
+        .map(|path| ("app_icons", path))
+        .chain(std::iter::once(("favicon", &policy.favicon)))
+        .chain(std::iter::once((
+            "default_social_image",
+            &policy.default_social_image,
+        )))
+        .chain(
+            policy
+                .allowed_public_image_paths
+                .iter()
+                .map(|path| ("allowed_public_image_paths", path)),
+        )
+        .filter(|(_, path)| invalid_output_asset_path(path))
+        .chain(
+            policy
+                .public_source_globs
+                .iter()
+                .map(|path| ("public_source_globs", path))
+                .chain(
+                    policy
+                        .media_helper_modules
+                        .iter()
+                        .map(|path| ("media_helper_modules", path)),
+                )
+                .filter(|(_, path)| invalid_app_relative_path(path)),
+        )
+        .map(|(field, path)| format!("{field}={path}"))
         .collect::<Vec<_>>();
 
     if invalid.is_empty() {
@@ -123,7 +170,7 @@ fn check_paths(policy: &G3TsAstroMediaPolicySnapshot, results: &mut Vec<G3CheckR
         PATHS_ID,
         "Astro media policy path is invalid",
         format!(
-            "`{}` contains invalid media paths/globs: {}. Paths must be app-relative, non-empty, and must not traverse with `..`.",
+            "`{}` contains invalid media paths/globs: {}. `favicon`, `app_icons`, `default_social_image`, and `allowed_public_image_paths` must be root-relative public output paths like `/favicon.svg`; `public_source_globs` and `media_helper_modules` must be app-relative paths/globs like `src/media`. No value may be empty, external, use backslashes, encoded separators, or `..` traversal.",
             policy.rel_path,
             invalid.join(", ")
         ),
@@ -131,6 +178,38 @@ fn check_paths(policy: &G3TsAstroMediaPolicySnapshot, results: &mut Vec<G3CheckR
     ));
 }
 
-fn invalid_path(path: &str) -> bool {
-    path.trim().is_empty() || path.split('/').any(|part| part == "..")
+fn invalid_output_asset_path(path: &str) -> bool {
+    let trimmed = path.trim();
+    invalid_common_path(trimmed)
+        || !trimmed.starts_with('/')
+        || trimmed.starts_with("//")
+        || external_url(trimmed)
+}
+
+fn invalid_app_relative_path(path: &str) -> bool {
+    let trimmed = path.trim();
+    invalid_common_path(trimmed) || trimmed.starts_with('/') || external_url(trimmed)
+}
+
+fn invalid_common_path(path: &str) -> bool {
+    path.is_empty()
+        || path.contains('\\')
+        || path.to_ascii_lowercase().contains("%2f")
+        || path.to_ascii_lowercase().contains("%5c")
+        || has_encoded_parent_segment(path)
+        || path.split('/').any(|part| part == "..")
+}
+
+fn has_encoded_parent_segment(path: &str) -> bool {
+    path.split('/').any(|part| {
+        let lower = part.to_ascii_lowercase();
+        lower == "%2e%2e" || lower == "%2e." || lower == ".%2e"
+    })
+}
+
+fn external_url(path: &str) -> bool {
+    path.contains("://")
+        || path.split_once(':').is_some_and(|(scheme, _)| {
+            !scheme.is_empty() && scheme.chars().all(|c| c.is_ascii_alphabetic())
+        })
 }

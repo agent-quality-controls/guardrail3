@@ -173,14 +173,6 @@ pub struct TsAstroI18nPolicyConfig {
     #[serde(default)]
     pub approved_number_format_helpers: Vec<String>,
     #[serde(default)]
-    pub content_image_components: Vec<String>,
-    #[serde(default)]
-    pub content_image_key_props: Vec<String>,
-    #[serde(default)]
-    pub banned_image_source_props: Vec<String>,
-    #[serde(default)]
-    pub banned_image_alt_props: Vec<String>,
-    #[serde(default)]
     pub public_source_globs: Vec<String>,
     #[serde(default)]
     pub helper_source_globs: Vec<String>,
@@ -198,7 +190,7 @@ pub struct TsAstroMediaPolicyConfig {
     #[serde(default)]
     pub default_social_image: String,
     #[serde(default)]
-    pub allow_svg_icons: bool,
+    pub allow_svg_icons: Option<bool>,
     #[serde(default)]
     pub public_source_globs: Vec<String>,
     #[serde(default)]
