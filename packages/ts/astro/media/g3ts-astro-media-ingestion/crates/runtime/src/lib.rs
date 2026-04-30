@@ -1,0 +1,18 @@
+#[cfg(feature = "api")]
+mod astro_config;
+#[cfg(feature = "api")]
+mod eslint;
+#[cfg(feature = "api")]
+mod package;
+#[cfg(feature = "api")]
+mod policy;
+#[cfg(feature = "api")]
+mod roots;
+#[cfg(feature = "api")]
+mod run;
+
+#[cfg(feature = "api")]
+pub use run::ingest_for_config_checks;
+
+#[cfg(test)]
+use g3ts_astro_media_ingestion_assertions as _;

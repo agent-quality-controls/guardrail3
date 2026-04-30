@@ -29,6 +29,25 @@ describe("no-raw-public-image-paths", () => {
       {
         code: `import { imageMetadata as img } from "src/media/images.ts"; const hero = img("/hero.jpg");`,
         options: [baseOptions]
+      },
+      {
+        code: `import { imageMetadata } from "../media/images"; const hero = imageMetadata("/hero.jpg");`,
+        filename: "/repo/src/pages/index.tsx",
+        options: [baseOptions]
+      },
+      {
+        code: `import { imageMetadata } from "../lib/media-assets"; const hero = imageMetadata("/hero.jpg");`,
+        filename: "/repo/src/pages/index.tsx",
+        options: [{ ...baseOptions, mediaHelperModules: ["src/lib/media-assets"] }]
+      },
+      {
+        code: `import { imageMetadata } from "../lib/media-assets.ts"; const hero = imageMetadata("/hero.jpg");`,
+        filename: "/repo/src/pages/index.tsx",
+        options: [{ ...baseOptions, mediaHelperModules: ["src/lib/media-assets"] }]
+      },
+      {
+        code: `import { imageMetadata } from "@/media/images"; const hero = imageMetadata("/hero.jpg");`,
+        options: [{ ...baseOptions, mediaHelperModules: ["@/media/images"] }]
       }
     ],
     invalid: [
@@ -94,6 +113,23 @@ describe("no-raw-public-image-paths", () => {
       },
       {
         code: `import { imageMetadata } from "src/media/images.ts"; const hero = imageMetadata("/hero.jpg"); function imageMetadata(value) { return value; }`,
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: `import { imageMetadata } from "@/media/images"; const hero = imageMetadata("/hero.jpg");`,
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: `import { imageMetadata } from "../../tmp/src/media/images"; const hero = imageMetadata("/hero.jpg");`,
+        filename: "/repo/src/pages/index.tsx",
+        options: [baseOptions],
+        errors: [{ messageId: "rawPublicImagePath" }]
+      },
+      {
+        code: `import { imageMetadata } from "../../../media/images"; const hero = imageMetadata("/hero.jpg");`,
+        filename: "/repo/src/app/src/pages/index.tsx",
         options: [baseOptions],
         errors: [{ messageId: "rawPublicImagePath" }]
       }

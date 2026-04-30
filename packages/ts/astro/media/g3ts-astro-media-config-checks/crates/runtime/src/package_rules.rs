@@ -7,7 +7,7 @@ const ESLINT_COMMENTS_ID: &str = "g3ts-astro-media/eslint-comments-plugin-packag
 const ASSETS_PACKAGE: &str = "g3ts-astro-media-assets";
 const ASSETS_VERSION: &str = "0.1.2";
 const POLICY_PACKAGE: &str = "g3ts-eslint-plugin-astro-media-policy";
-const POLICY_VERSION: &str = "0.1.8";
+const POLICY_VERSION: &str = "0.1.10";
 const ESLINT_COMMENTS_PACKAGE: &str = "@eslint-community/eslint-plugin-eslint-comments";
 const ESLINT_COMMENTS_VERSION: &str = "4.7.1";
 

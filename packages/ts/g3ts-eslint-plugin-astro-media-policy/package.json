@@ -1,6 +1,6 @@
 {
   "name": "g3ts-eslint-plugin-astro-media-policy",
-  "version": "0.1.8",
+  "version": "0.1.10",
   "description": "Astro source-policy ESLint rules for media guardrails.",
   "repository": {
     "type": "git",

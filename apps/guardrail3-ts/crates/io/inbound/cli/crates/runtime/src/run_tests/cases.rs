@@ -336,6 +336,7 @@ fn collect_non_ingestion_check_support_dependencies(
         let path_text = path.to_string_lossy();
         if path_text.contains("g3ts-astro-check-support/Cargo.toml")
             || path_text.contains("-ingestion/Cargo.toml")
+            || path_text.contains("-ingestion/crates/runtime/Cargo.toml")
         {
             continue;
         }

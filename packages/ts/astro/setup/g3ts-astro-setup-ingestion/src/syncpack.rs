@@ -29,7 +29,7 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 26] = [
     ("eslint-plugin-astro", "1.7.0"),
     ("g3ts-eslint-plugin-astro-pipeline", "0.1.8"),
     ("g3ts-eslint-plugin-astro-i18n-policy", "0.1.2"),
-    ("g3ts-eslint-plugin-astro-media-policy", "0.1.8"),
+    ("g3ts-eslint-plugin-astro-media-policy", "0.1.10"),
     ("g3ts-astro-media-assets", "0.1.2"),
     ("eslint-plugin-i18next", "6.1.4"),
     ("eslint-plugin-mdx", "3.7.0"),

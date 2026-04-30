@@ -15,6 +15,25 @@ describe("require-approved-media-helper", () => {
         options: [baseOptions]
       },
       {
+        code: `import { imageMetadata } from "../media/images"; const metadata = { image: imageMetadata("hero") };`,
+        filename: "/repo/src/pages/index.tsx",
+        options: [baseOptions]
+      },
+      {
+        code: `import { imageMetadata } from "../lib/media-assets"; const metadata = { image: imageMetadata("hero") };`,
+        filename: "/repo/src/pages/index.tsx",
+        options: [{ ...baseOptions, mediaHelperModules: ["src/lib/media-assets"] }]
+      },
+      {
+        code: `import { imageMetadata } from "../lib/media-assets.ts"; const metadata = { image: imageMetadata("hero") };`,
+        filename: "/repo/src/pages/index.tsx",
+        options: [{ ...baseOptions, mediaHelperModules: ["src/lib/media-assets"] }]
+      },
+      {
+        code: `import { imageMetadata } from "@/media/images"; const metadata = { image: imageMetadata("hero") };`,
+        options: [{ ...baseOptions, mediaHelperModules: ["@/media/images"] }]
+      },
+      {
         code: `const metadata = { title: "/hero.jpg" };`,
         options: [baseOptions]
       },
@@ -95,6 +114,23 @@ describe("require-approved-media-helper", () => {
       },
       {
         code: `import { imageMetadata } from "src/media/images.ts"; const metadata = { image: imageMetadata("hero") }; function imageMetadata(value) { return value; }`,
+        options: [baseOptions],
+        errors: [{ messageId: "unapprovedMetadataHelper" }]
+      },
+      {
+        code: `import { imageMetadata } from "@/media/images"; const metadata = { image: imageMetadata("hero") };`,
+        options: [baseOptions],
+        errors: [{ messageId: "unapprovedMetadataHelper" }]
+      },
+      {
+        code: `import { imageMetadata } from "../../tmp/src/media/images"; const metadata = { image: imageMetadata("hero") };`,
+        filename: "/repo/src/pages/index.tsx",
+        options: [baseOptions],
+        errors: [{ messageId: "unapprovedMetadataHelper" }]
+      },
+      {
+        code: `import { imageMetadata } from "../../../media/images"; const metadata = { image: imageMetadata("hero") };`,
+        filename: "/repo/src/app/src/pages/index.tsx",
         options: [baseOptions],
         errors: [{ messageId: "unapprovedMetadataHelper" }]
       }

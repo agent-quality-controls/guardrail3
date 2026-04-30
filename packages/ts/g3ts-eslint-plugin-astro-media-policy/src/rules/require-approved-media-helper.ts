@@ -5,6 +5,10 @@ import {
   hasLocalBindingBefore,
 } from "../utils/ast.js";
 import {
+  importMatchesConfiguredModule,
+  normalizeConfiguredModules
+} from "../utils/module-identity.js";
+import {
   astroMediaPolicyOptionsSchema,
   missingRequiredOptions,
   normalizePublicPath,
@@ -63,7 +67,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     const metadataProps = new Set(options.metadataImagePropertyNames);
     const helpers = options.approvedMediaHelpers.join(", ");
     const approvedHelpers = new Set(options.approvedMediaHelpers);
-    const mediaHelperModules = new Set(options.mediaHelperModules);
+    const mediaHelperModules = normalizeConfiguredModules(options.mediaHelperModules);
     const checkedExtensions = new Set(options.checkedImageExtensions);
     const importedApprovedHelpers = new Map<string, string>();
 
@@ -71,7 +75,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
       ImportDeclaration(node): void {
         if (
           typeof node.source.value !== "string" ||
-          !mediaHelperModules.has(node.source.value)
+          !importMatchesConfiguredModule(node.source.value, context, mediaHelperModules)
         ) {
           return;
         }

@@ -716,6 +716,13 @@ dependencies = [
 name = "g3ts-astro-media-ingestion"
 version = "0.1.0"
 dependencies = [
+ "g3ts-astro-media-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-astro-media-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
  "astro-config-parser",
  "eslint-config-parser",
  "g3rs-workspace-crawl",
