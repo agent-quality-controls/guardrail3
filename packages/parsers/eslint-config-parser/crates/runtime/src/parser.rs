@@ -142,16 +142,13 @@ async function normalizePluginPackageNames(plugins, require) {
     const plugin = plugins[namespace];
     const matches = new Set();
     for (const packageName of candidatePluginPackageNames(namespace, plugin)) {
-      try {
-        const resolved = require.resolve(packageName);
-        const module = await import(pathToFileURL(resolved).href);
+      for (const module of await importCandidatePluginPackage(packageName, require)) {
         if (
           packageModuleExportsPlugin(module, plugin) ||
           packageModuleFingerprintMatchesPlugin(module, plugin)
         ) {
           matches.add(packageName);
         }
-      } catch {
       }
     }
     if (matches.size > 0) {
@@ -159,6 +156,22 @@ async function normalizePluginPackageNames(plugins, require) {
     }
   }
   return packageNames;
+}
+
+async function importCandidatePluginPackage(packageName, require) {
+  const modules = [];
+  try {
+    const resolved = require.resolve(packageName);
+    modules.push(await import(pathToFileURL(resolved).href));
+  } catch {
+  }
+
+  try {
+    modules.push(await import(packageName));
+  } catch {
+  }
+
+  return modules;
 }
 
 const workspaceRoot = process.env.G3_WORKSPACE_ROOT;
@@ -277,6 +290,12 @@ fn evaluate(
         .arg("--input-type=module")
         .arg("--eval")
         .arg(NODE_HELPER)
+        .current_dir(
+            workspace_root
+                .join(config_rel_path)
+                .parent()
+                .unwrap_or(workspace_root),
+        )
         .env("G3_WORKSPACE_ROOT", workspace_root)
         .env("G3_CONFIG_REL_PATH", config_rel_path)
         .env("G3_PROBES_JSON", probes_json)
