@@ -62,6 +62,20 @@ pub struct RustChecksConfig {
 #[non_exhaustive]
 pub struct TsPolicyConfig {
     pub astro: Option<TsAstroPolicyConfig>,
+    pub style: Option<TsStylePolicyConfig>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct TsStylePolicyConfig {
+    #[serde(default)]
+    pub source_globs: Vec<String>,
+    #[serde(default)]
+    pub tailwind_denylist: Vec<String>,
+    #[serde(default)]
+    pub stylelint_css_globs: Vec<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }

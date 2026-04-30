@@ -29,6 +29,9 @@ pub fn run(
         SupportedFamily::Apparch => Err(FamilyRunError {
             message: "config group does not handle Apparch".to_owned(),
         }),
+        SupportedFamily::Style => Ok(g3ts_style_config_checks::check(
+            &g3ts_style_ingestion::ingest_for_config_checks(crawl),
+        )),
         SupportedFamily::Tsconfig => Ok(g3ts_tsconfig_config_checks::check(
             &g3ts_tsconfig_ingestion::ingest_for_config_checks(crawl),
         )),

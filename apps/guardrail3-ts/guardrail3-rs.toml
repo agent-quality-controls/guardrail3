@@ -43,6 +43,9 @@ allowed_deps = [
   "g3ts-npmrc-ingestion",
   "g3ts-jscpd-config-checks",
   "g3ts-jscpd-ingestion",
+  "g3ts-style-config-checks",
+  "g3ts-style-hook-contract",
+  "g3ts-style-ingestion",
   "g3ts-hooks-config-checks",
   "g3ts-hooks-contract-types",
   "g3ts-hooks-file-tree-checks",
@@ -62,6 +65,12 @@ allowed_deps = [
   "guardrail3-ts-validate-command-assertions",
   "tempfile",
 ]
+
+[[waivers]]
+rule = "g3rs-arch/dependency-count-split"
+file = "crates/logic/family-runner-config/Cargo.toml"
+selector = "dependency-count"
+reason = "The TS config runner intentionally composes explicit config-family packages. Keeping family packages visible here is clearer than hiding them behind an aggregate facade."
 
 [[waivers]]
 rule = "g3rs-arch/dependency-count-split"

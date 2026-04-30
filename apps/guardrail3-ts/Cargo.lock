@@ -1111,6 +1111,53 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3ts-style-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-style-config-checks-runtime",
+]
+
+[[package]]
+name = "g3ts-style-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-style-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-style-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
+]
+
+[[package]]
+name = "g3ts-style-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3ts-style-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-style-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "eslint-config-parser",
+ "g3rs-workspace-crawl",
+ "g3ts-style-types",
+ "guardrail3-rs-toml-parser",
+ "package-json-parser",
+ "package-script-command-parser",
+ "serde_json",
+ "stylelint-config-parser",
+]
+
+[[package]]
+name = "g3ts-style-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3ts-tsconfig-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -1239,6 +1286,8 @@ dependencies = [
  "g3ts-npmrc-ingestion",
  "g3ts-package-config-checks",
  "g3ts-package-ingestion",
+ "g3ts-style-config-checks",
+ "g3ts-style-ingestion",
  "g3ts-tsconfig-config-checks",
  "g3ts-tsconfig-ingestion",
  "guardrail3-ts-app-types",
@@ -1260,6 +1309,7 @@ dependencies = [
  "g3ts-hooks-file-tree-checks",
  "g3ts-hooks-ingestion",
  "g3ts-hooks-source-checks",
+ "g3ts-style-hook-contract",
  "guardrail3-ts-app-types",
 ]
 
@@ -2079,6 +2129,29 @@ name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
+
+[[package]]
+name = "stylelint-config-parser"
+version = "0.1.0"
+dependencies = [
+ "stylelint-config-parser-runtime",
+]
+
+[[package]]
+name = "stylelint-config-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "stylelint-config-parser-types",
+]
+
+[[package]]
+name = "stylelint-config-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "swc_atoms"

@@ -1,0 +1,12 @@
+profile = "library"
+
+allowed_deps = [
+  "serde",
+  "serde_json",
+  "stylelint-config-parser-runtime",
+  "stylelint-config-parser-runtime-assertions",
+  "stylelint-config-parser-types",
+]
+
+[checks]
+garde = false

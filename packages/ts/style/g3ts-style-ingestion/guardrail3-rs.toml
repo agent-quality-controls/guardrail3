@@ -1,0 +1,17 @@
+profile = "library"
+
+allowed_deps = [
+  "eslint-config-parser",
+  "g3rs-workspace-crawl",
+  "g3ts-style-ingestion-runtime",
+  "g3ts-style-ingestion-assertions",
+  "g3ts-style-types",
+  "guardrail3-rs-toml-parser",
+  "package-json-parser",
+  "package-script-command-parser",
+  "serde_json",
+  "stylelint-config-parser",
+]
+
+[checks]
+garde = false

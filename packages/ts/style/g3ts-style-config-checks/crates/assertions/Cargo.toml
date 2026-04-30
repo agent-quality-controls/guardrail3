@@ -1,0 +1,18 @@
+[package]
+name = "g3ts-style-config-checks-assertions"
+version.workspace = true
+edition.workspace = true
+description = "Test assertions for guardrail3 TypeScript style config checks"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+
+[features]
+default = ["api"]
+api = []
+
+[lints]
+workspace = true

@@ -1,0 +1,28 @@
+[package]
+name = "stylelint-config-parser-runtime"
+version.workspace = true
+edition.workspace = true
+description = "Parser implementation for Stylelint config facade packages"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+keywords = ["stylelint", "typescript", "parser", "lint", "guardrail3"]
+categories = ["development-tools", "parser-implementations"]
+publish = false
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[dependencies]
+stylelint-config-parser-types = { path = "../types", version = "0.1.0" }
+serde_json = "1"
+
+[package.metadata.docs.rs]
+all-features = true

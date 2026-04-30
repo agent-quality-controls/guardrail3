@@ -135,6 +135,17 @@ impl FamilyRunner for StubFamilyRunner {
                 )
                 .into_inventory(),
             ],
+            SupportedFamily::Style => vec![
+                G3CheckResult::new(
+                    "g3ts-style/strict-policy-configured".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some("guardrail3-ts.toml".to_owned()),
+                    None,
+                )
+                .into_inventory(),
+            ],
             SupportedFamily::Hooks => vec![
                 G3CheckResult::new(
                     "g3ts-hooks/pre-commit-exists".to_owned(),
@@ -294,7 +305,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=15 inventory=false",
+        "runs=16 inventory=false",
         "",
         0,
     );
@@ -339,6 +350,9 @@ impl FamilyRunner for ErroringFamilyRunner {
             }),
             SupportedFamily::Jscpd => Err(FamilyRunError {
                 message: "jscpd runner exploded".to_owned(),
+            }),
+            SupportedFamily::Style => Err(FamilyRunError {
+                message: "style runner exploded".to_owned(),
             }),
             SupportedFamily::Hooks => Err(FamilyRunError {
                 message: "hooks runner exploded".to_owned(),

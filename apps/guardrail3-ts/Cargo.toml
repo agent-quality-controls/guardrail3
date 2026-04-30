@@ -54,6 +54,9 @@ g3ts-npmrc-config-checks = { path = "../../packages/ts/npmrc/g3ts-npmrc-config-c
 g3ts-npmrc-ingestion = { path = "../../packages/ts/npmrc/g3ts-npmrc-ingestion" }
 g3ts-jscpd-config-checks = { path = "../../packages/ts/jscpd/g3ts-jscpd-config-checks" }
 g3ts-jscpd-ingestion = { path = "../../packages/ts/jscpd/g3ts-jscpd-ingestion" }
+g3ts-style-config-checks = { path = "../../packages/ts/style/g3ts-style-config-checks" }
+g3ts-style-hook-contract = { path = "../../packages/ts/style/g3ts-style-hook-contract" }
+g3ts-style-ingestion = { path = "../../packages/ts/style/g3ts-style-ingestion" }
 g3ts-hooks-config-checks = { path = "../../packages/ts/hooks/g3ts-hooks-config-checks" }
 g3ts-hooks-contract-types = { path = "../../packages/ts/hooks/g3ts-hooks-contract-types" }
 g3ts-hooks-file-tree-checks = { path = "../../packages/ts/hooks/g3ts-hooks-file-tree-checks" }

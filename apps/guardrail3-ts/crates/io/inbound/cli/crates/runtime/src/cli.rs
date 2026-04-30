@@ -48,6 +48,7 @@ pub enum FamilyArg {
     Package,
     Npmrc,
     Jscpd,
+    Style,
     Hooks,
 }
 
@@ -78,6 +79,7 @@ impl FamilyArg {
             FamilyArg::Package => vec![SupportedFamily::Package],
             FamilyArg::Npmrc => vec![SupportedFamily::Npmrc],
             FamilyArg::Jscpd => vec![SupportedFamily::Jscpd],
+            FamilyArg::Style => vec![SupportedFamily::Style],
             FamilyArg::Hooks => vec![SupportedFamily::Hooks],
         }
     }
