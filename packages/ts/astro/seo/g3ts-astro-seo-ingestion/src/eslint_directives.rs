@@ -60,29 +60,29 @@ fn file_directives(
                 finding.disabled_rules,
                 eslint_directive_parser::types::EslintDisabledRuleSet::AllRules
             );
-            G3TsAstroSeoEslintDirectiveInput {
-                rel_path: finding.rel_path,
-                directive_kind: format!("{:?}", finding.directive_kind),
-                disabled_rules: disabled_rules(finding.disabled_rules),
+            G3TsAstroSeoEslintDirectiveInput::new(
+                finding.rel_path,
+                format!("{:?}", finding.directive_kind),
+                disabled_rules(finding.disabled_rules),
                 all_rules,
-                line: finding.line,
-                target_line: finding.target_line,
-                parse_error: None,
-            }
+                finding.line,
+                finding.target_line,
+                None,
+            )
         })
         .collect()
 }
 
 fn parse_error(rel_path: &str, reason: String) -> G3TsAstroSeoEslintDirectiveInput {
-    G3TsAstroSeoEslintDirectiveInput {
-        rel_path: rel_path.to_owned(),
-        directive_kind: "ParseError".to_owned(),
-        disabled_rules: Vec::new(),
-        all_rules: false,
-        line: 0,
-        target_line: None,
-        parse_error: Some(reason),
-    }
+    G3TsAstroSeoEslintDirectiveInput::new(
+        rel_path.to_owned(),
+        "ParseError".to_owned(),
+        Vec::new(),
+        false,
+        0,
+        None,
+        Some(reason),
+    )
 }
 
 fn disabled_rules(rules: eslint_directive_parser::types::EslintDisabledRuleSet) -> Vec<String> {

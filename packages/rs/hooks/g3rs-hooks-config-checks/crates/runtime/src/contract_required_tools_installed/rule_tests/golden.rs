@@ -1,9 +1,9 @@
+use g3rs_hooks_config_checks_assertions::contract_required_tools_installed::rule as assertions;
 use g3rs_hooks_contract_types::{
     G3HookCommandRequirement, G3HookCriticalCommand, G3HookRequirement,
 };
-use guardrail3_check_types::G3Severity;
 
-use crate::contract_required_tools_installed::rule::run_case;
+use super::super::run_case;
 
 #[test]
 fn reports_missing_contract_derived_tool() {
@@ -13,7 +13,14 @@ fn reports_missing_contract_derived_tool() {
         vec![requirement(G3HookCommandRequirement::CargoDenyCheck)],
     );
 
-    assert_contains_missing(&results, "cargo-deny");
+    assertions::assert_contains(
+        &results,
+        assertions::error(
+            "cargo-deny missing for hook contract",
+            "cargo-deny is required by a family hook contract but is not available on PATH or via a path-qualified command.",
+            ".githooks/pre-commit",
+        ),
+    );
 }
 
 #[test]
@@ -28,7 +35,7 @@ fn accepts_installed_contract_derived_tool() {
         vec![requirement(G3HookCommandRequirement::CargoDenyCheck)],
     );
 
-    assert_all_inventory(&results);
+    assertions::assert_all_inventory(&results);
 }
 
 #[test]
@@ -39,8 +46,22 @@ fn reports_universal_g3rs_and_gitleaks_tools() {
         vec![requirement(G3HookCommandRequirement::CargoTest)],
     );
 
-    assert_contains_missing(&results, "g3rs");
-    assert_contains_missing(&results, "gitleaks");
+    assertions::assert_contains(
+        &results,
+        assertions::error(
+            "g3rs missing for hook contract",
+            "g3rs is required by a family hook contract but is not available on PATH or via a path-qualified command.",
+            ".githooks/pre-commit",
+        ),
+    );
+    assertions::assert_contains(
+        &results,
+        assertions::error(
+            "gitleaks missing for hook contract",
+            "gitleaks is required by a family hook contract but is not available on PATH or via a path-qualified command.",
+            ".githooks/pre-commit",
+        ),
+    );
 }
 
 #[test]
@@ -55,8 +76,22 @@ fn reports_machete_and_dupes_contract_tools() {
         ],
     );
 
-    assert_contains_missing(&results, "cargo-machete");
-    assert_contains_missing(&results, "cargo-dupes");
+    assertions::assert_contains(
+        &results,
+        assertions::error(
+            "cargo-machete missing for hook contract",
+            "cargo-machete is required by a family hook contract but is not available on PATH or via a path-qualified command.",
+            ".githooks/pre-commit",
+        ),
+    );
+    assertions::assert_contains(
+        &results,
+        assertions::error(
+            "cargo-dupes missing for hook contract",
+            "cargo-dupes is required by a family hook contract but is not available on PATH or via a path-qualified command.",
+            ".githooks/pre-commit",
+        ),
+    );
 }
 
 #[test]
@@ -67,7 +102,7 @@ fn path_qualified_tool_satisfies_contract() {
         vec![requirement(G3HookCommandRequirement::CargoDenyCheck)],
     );
 
-    assert_all_inventory(&results);
+    assertions::assert_all_inventory(&results);
 }
 
 #[test]
@@ -78,7 +113,7 @@ fn path_qualified_universal_g3rs_satisfies_contract() {
         vec![requirement(G3HookCommandRequirement::CargoTest)],
     );
 
-    assert_all_inventory(&results);
+    assertions::assert_all_inventory(&results);
 }
 
 #[test]
@@ -89,7 +124,7 @@ fn path_qualified_gitleaks_satisfies_contract() {
         vec![requirement(G3HookCommandRequirement::CargoTest)],
     );
 
-    assert_all_inventory(&results);
+    assertions::assert_all_inventory(&results);
 }
 
 #[test]
@@ -104,7 +139,7 @@ fn path_qualified_machete_and_dupes_satisfy_contract() {
         ],
     );
 
-    assert_all_inventory(&results);
+    assertions::assert_all_inventory(&results);
 }
 
 #[test]
@@ -115,7 +150,14 @@ fn g3rs_empty_path_does_not_satisfy_installed_tool_contract() {
         vec![requirement(G3HookCommandRequirement::CargoTest)],
     );
 
-    assert_contains_missing(&results, "g3rs");
+    assertions::assert_contains(
+        &results,
+        assertions::error(
+            "g3rs missing for hook contract",
+            "g3rs is required by a family hook contract but is not available on PATH or via a path-qualified command.",
+            ".githooks/pre-commit",
+        ),
+    );
 }
 
 #[test]
@@ -128,7 +170,14 @@ fn critical_commands_add_required_tools() {
         )],
     );
 
-    assert_contains_missing(&results, "cargo-machete");
+    assertions::assert_contains(
+        &results,
+        assertions::error(
+            "cargo-machete missing for hook contract",
+            "cargo-machete is required by a family hook contract but is not available on PATH or via a path-qualified command.",
+            ".githooks/pre-commit",
+        ),
+    );
 }
 
 fn requirement(command: G3HookCommandRequirement) -> G3HookRequirement {
@@ -149,28 +198,4 @@ fn critical_requirement(command: G3HookCriticalCommand) -> G3HookRequirement {
         required_commands: Vec::new(),
         critical_commands: vec![command],
     }
-}
-
-fn assert_contains_missing(results: &[guardrail3_check_types::G3CheckResult], tool: &str) {
-    assert!(
-        results.iter().any(|result| {
-            !result.inventory()
-                && result.id() == "g3rs-hooks/contract-required-tools-installed"
-                && result.severity() == G3Severity::Error
-                && result.title() == format!("{tool} missing for hook contract")
-        }),
-        "missing {tool} should be reported; got {results:?}"
-    );
-}
-
-fn assert_all_inventory(results: &[guardrail3_check_types::G3CheckResult]) {
-    assert!(!results.is_empty(), "expected contract tool findings");
-    assert!(
-        results.iter().all(|result| {
-            result.inventory()
-                && result.id() == "g3rs-hooks/contract-required-tools-installed"
-                && result.severity() == G3Severity::Error
-        }),
-        "all installed-tool findings should be inventory; got {results:?}"
-    );
 }

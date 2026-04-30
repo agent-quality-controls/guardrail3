@@ -41,10 +41,8 @@ pub(crate) fn run_check_with_workspace(
     cargo_toml: &str,
     workspace_cargo_toml: Option<&str>,
 ) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let input = crate::lib_tests::test_support::config_input_for_publishable_crate(
-        cargo_toml,
-        workspace_cargo_toml,
-    );
+    let input =
+        crate::test_support::config_input_for_publishable_crate(cargo_toml, workspace_cargo_toml);
     let mut results = Vec::new();
     crate::description_present::check(&input.crate_checks[0], &mut results);
     results

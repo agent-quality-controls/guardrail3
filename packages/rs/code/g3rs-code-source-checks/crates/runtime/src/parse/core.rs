@@ -4,11 +4,20 @@ pub(crate) fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
 }
 
 pub(crate) fn count_top_level_use_imports(source: &syn::File) -> usize {
+    let facade_only = source.items.iter().all(|item| match item {
+        syn::Item::Use(item_use) => matches!(item_use.vis, syn::Visibility::Public(_)),
+        syn::Item::Mod(_) => true,
+        _ => false,
+    });
     source
         .items
         .iter()
         .filter_map(|item| match item {
-            syn::Item::Use(item_use) => Some(count_use_tree_imports(&item_use.tree)),
+            syn::Item::Use(item_use)
+                if !facade_only || !matches!(item_use.vis, syn::Visibility::Public(_)) =>
+            {
+                Some(count_use_tree_imports(&item_use.tree))
+            }
             _ => None,
         })
         .sum()

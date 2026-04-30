@@ -23,15 +23,15 @@ pub(crate) fn check_all(
 }
 
 fn check(directive: &G3TsAstroSeoEslintDirectiveInput, results: &mut Vec<G3CheckResult>) {
-    if let Some(reason) = &directive.parse_error {
+    if let Some(reason) = directive.parse_error() {
         results.push(crate::support::error(
             ID,
             "SEO ESLint disable inventory cannot be parsed",
             format!(
                 "`{}` could not be parsed for ESLint disable directives: {reason}. G3TS fails closed because hidden disables would bypass delegated Astro SEO rules.",
-                directive.rel_path
+                directive.rel_path()
             ),
-            Some(&directive.rel_path),
+            Some(directive.rel_path()),
         ));
         return;
     }
@@ -41,18 +41,18 @@ fn check(directive: &G3TsAstroSeoEslintDirectiveInput, results: &mut Vec<G3Check
         "SEO source contains an ESLint disable directive",
         format!(
             "`{}` line {} contains `{}` for {}. ESLint disables are allowed only as visible escape hatches; keep the directive described and avoid disabling protected SEO rules.",
-            directive.rel_path,
-            directive.line,
-            directive.directive_kind,
+            directive.rel_path(),
+            directive.line(),
+            directive.directive_kind(),
             disabled_rules(directive),
         ),
-        Some(&directive.rel_path),
+        Some(directive.rel_path()),
     ));
 }
 
 fn disabled_rules(directive: &G3TsAstroSeoEslintDirectiveInput) -> String {
-    if directive.all_rules {
+    if directive.all_rules() {
         return "all rules".to_owned();
     }
-    directive.disabled_rules.join(", ")
+    directive.disabled_rules().join(", ")
 }

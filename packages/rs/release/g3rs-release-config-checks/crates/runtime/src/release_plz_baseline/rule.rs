@@ -105,7 +105,7 @@ mod rule_tests;
 
 #[cfg(test)]
 pub(crate) fn run_check(release_plz_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let input = crate::lib_tests::test_support::config_input_for_repo(Some(release_plz_toml), None);
+    let input = crate::test_support::config_input_for_repo(Some(release_plz_toml), None);
     let mut results = Vec::new();
     crate::release_plz_baseline::check(&input.repo_checks[0], &input.crate_checks, &mut results);
     results

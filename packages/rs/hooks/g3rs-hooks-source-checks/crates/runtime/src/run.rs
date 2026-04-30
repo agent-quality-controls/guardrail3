@@ -151,5 +151,5 @@ fn dispatcher_invokes_modular_directory(command_text: &str) -> bool {
 }
 
 #[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod tests;
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for run module.
+mod run_tests;
