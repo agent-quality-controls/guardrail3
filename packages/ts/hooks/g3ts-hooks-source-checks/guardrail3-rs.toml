@@ -1,0 +1,16 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-hooks-contract-types",
+  "g3ts-hooks-source-checks-assertions",
+  "g3ts-hooks-source-checks-runtime",
+  "g3ts-hooks-types",
+  "guardrail3-check-types",
+  "hook-shell-parser",
+]
+
+[[waivers]]
+rule = "g3rs-arch/structural-split"
+file = "Cargo.toml"
+selector = "structural-split"
+reason = "Hook source checks intentionally split shell command semantics across focused modules inside one package."

@@ -1,0 +1,4 @@
+profile = "library"
+
+allowed_deps = []
+

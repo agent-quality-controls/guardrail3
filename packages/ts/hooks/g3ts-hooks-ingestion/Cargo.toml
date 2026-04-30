@@ -2,15 +2,86 @@
 name = "g3ts-hooks-ingestion"
 version = "0.1.0"
 edition = "2024"
-description = "TypeScript hook ingestion for guardrail3"
+description = "Facade crate for TypeScript hook ingestion for guardrail3"
 license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
 publish = false
 
 [dependencies]
-g3-workspace-crawl = { path = "../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
-g3ts-hooks-types = { path = "../g3ts-hooks-types" }
-hook-shell-parser = { path = "../../../parsers/hook-shell-parser", features = ["api"] }
+g3ts-hooks-ingestion-runtime = { path = "crates/runtime", version = "0.1.0", optional = true }
 
 [features]
 default = ["api"]
-api = []
+api = ["dep:g3ts-hooks-ingestion-runtime"]
+
+[lints]
+workspace = true
+
+[workspace]
+members = ["crates/runtime", "crates/assertions"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+
+[workspace.lints.rust]
+warnings = "deny"
+unsafe_code = "forbid"
+dead_code = "deny"
+unused_results = "deny"
+unused_crate_dependencies = "deny"
+missing_debug_implementations = "deny"
+unreachable_pub = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+cargo = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+unimplemented = "deny"
+todo = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+disallowed_methods = "deny"
+disallowed_macros = "deny"
+disallowed_types = "deny"
+indexing_slicing = "deny"
+string_slice = "deny"
+arithmetic_side_effects = "deny"
+shadow_unrelated = "deny"
+missing_assert_message = "deny"
+partial_pub_fields = "deny"
+str_to_string = "deny"
+implicit_clone = "deny"
+as_conversions = "deny"
+float_cmp = "deny"
+lossy_float_literal = "deny"
+wildcard_enum_match_arm = "deny"
+rest_pat_in_fully_bound_structs = "deny"
+large_stack_arrays = "deny"
+needless_pass_by_value = "deny"
+redundant_else = "deny"
+large_futures = "deny"
+semicolon_if_nothing_returned = "deny"
+redundant_closure_for_method_calls = "deny"
+map_unwrap_or = "deny"
+verbose_file_reads = "deny"
+missing_docs_in_private_items = "deny"
+module_name_repetitions = "deny"
+must_use_candidate = "deny"
+option_if_let_else = "deny"
+empty_line_after_doc_comments = "deny"
+single_match_else = "deny"
+ref_option_ref = "deny"
+trivially_copy_pass_by_ref = "deny"
+multiple_crate_versions = "deny"
+redundant_pub_crate = "allow"

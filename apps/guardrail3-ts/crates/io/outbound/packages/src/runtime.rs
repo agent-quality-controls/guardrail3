@@ -10,7 +10,7 @@ impl WorkspaceCrawler for PackageRuntime {
     fn crawl(&self, root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError> {
         let root = absolute_root(root).map_err(|error| WorkspaceCrawlError { message: error })?;
 
-        g3_workspace_crawl::crawl(&root).map_err(|error| WorkspaceCrawlError {
+        g3_workspace_crawl::crawl_any_root(&root).map_err(|error| WorkspaceCrawlError {
             message: format!("{error:?}"),
         })
     }

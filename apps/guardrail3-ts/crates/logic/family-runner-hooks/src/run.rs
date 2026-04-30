@@ -15,11 +15,11 @@ pub fn run(
         SupportedFamily::Hooks => {
             let requirements = hook_contracts();
             let mut config_input = g3ts_hooks_ingestion::ingest_for_config_checks(crawl);
-            config_input.requirements.clone_from(&requirements);
+            config_input.replace_requirements(requirements.clone());
             let file_tree_input = g3ts_hooks_ingestion::ingest_for_file_tree_checks(crawl);
             let mut source_inputs = g3ts_hooks_ingestion::ingest_for_source_checks(crawl);
             for input in &mut source_inputs {
-                input.requirements.clone_from(&requirements);
+                input.replace_requirements(requirements.clone());
             }
 
             let mut results = Vec::new();

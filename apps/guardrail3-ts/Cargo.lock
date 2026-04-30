@@ -947,6 +947,13 @@ dependencies = [
 name = "g3ts-hooks-ingestion"
 version = "0.1.0"
 dependencies = [
+ "g3ts-hooks-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-hooks-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
  "g3rs-workspace-crawl",
  "g3ts-hooks-types",
  "hook-shell-parser",
@@ -954,6 +961,13 @@ dependencies = [
 
 [[package]]
 name = "g3ts-hooks-source-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-source-checks-runtime",
+]
+
+[[package]]
+name = "g3ts-hooks-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3ts-hooks-contract-types",

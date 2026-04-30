@@ -48,6 +48,21 @@ fn rejects_non_workspace_root_even_when_nested_rust_workspaces_exist() {
 }
 
 #[test]
+fn crawl_any_root_accepts_non_rust_project_roots() {
+    let temp_dir = tempdir().expect("create temporary TypeScript app root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("package.json"), "{}\n");
+    write(root.join("src/index.ts"), "export {};\n");
+
+    let crawl = crate::run::crawl_any_root(root).expect("crawl any project root should succeed");
+
+    assertions::assert_crawl_entry_exists(&crawl, "package.json");
+    assertions::assert_crawl_entry_exists(&crawl, "src/index.ts");
+}
+
+#[test]
 fn entries_are_sorted_by_rel_path() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

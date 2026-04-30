@@ -1,7 +1,8 @@
 use g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState;
 
 #[cfg(test)]
-#[path = "targets_tests/mod.rs"] // reason: keep private target-generation tests in the owned sidecar directory.
+#[path = "targets_tests/mod.rs"]
+// reason: keep private target-generation tests in the owned sidecar directory.
 mod targets_tests;
 
 pub(crate) fn probe_targets(
