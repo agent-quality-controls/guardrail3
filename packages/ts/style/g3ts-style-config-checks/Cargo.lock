@@ -12,11 +12,17 @@ dependencies = [
 [[package]]
 name = "g3ts-style-config-checks-assertions"
 version = "0.1.0"
+dependencies = [
+ "g3ts-style-config-checks-runtime",
+ "g3ts-style-types",
+ "guardrail3-check-types",
+]
 
 [[package]]
 name = "g3ts-style-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "g3ts-style-config-checks-assertions",
  "g3ts-style-types",
  "guardrail3-check-types",
 ]
