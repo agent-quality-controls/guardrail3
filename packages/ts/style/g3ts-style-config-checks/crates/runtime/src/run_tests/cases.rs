@@ -13,7 +13,7 @@ fn golden_style_package_reports_owned_ids() {
             "g3ts-style/stylelint-config-stack",
             "g3ts-style/stylelint-a11y-rules",
             "g3ts-style/css-lint-script",
-            "g3ts-style/tailwind-ban-eslint-rule",
+            "g3ts-style/style-policy-eslint-rule",
         ],
     );
 }
@@ -106,8 +106,7 @@ fn policy_paths_reject_empty_css_glob_value() {
 #[test]
 fn policy_paths_reject_absolute_source_glob() {
     let mut input = super::helpers::golden();
-    super::helpers::parsed_policy_mut(&mut input).source_globs =
-        vec!["/src/**/*.tsx".to_owned()];
+    super::helpers::parsed_policy_mut(&mut input).source_globs = vec!["/src/**/*.tsx".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
         &input,
@@ -283,7 +282,10 @@ fn policy_paths_reject_encoded_traversal_and_separators() {
 fn policy_paths_report_multiple_invalid_values() {
     let mut input = super::helpers::golden();
     let policy = super::helpers::parsed_policy_mut(&mut input);
-    policy.source_globs = vec!["/src/**/*.tsx".to_owned(), "data:text/css,body{}".to_owned()];
+    policy.source_globs = vec![
+        "/src/**/*.tsx".to_owned(),
+        "data:text/css,body{}".to_owned(),
+    ];
     policy.stylelint_css_globs = vec!["../shared/**/*.css".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
@@ -394,13 +396,13 @@ fn css_lint_script_must_not_fail_open() {
 }
 
 #[test]
-fn tailwind_ban_rule_must_be_effective_at_error_with_non_empty_eslint_denylist() {
+fn style_policy_rule_must_be_effective_at_error_with_non_empty_eslint_denylist() {
     let mut input = super::helpers::golden();
-    super::helpers::parsed_eslint_mut(&mut input).tailwind_rule_effective = false;
+    super::helpers::parsed_eslint_mut(&mut input).style_policy_rule_effective = false;
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "g3ts-style/tailwind-ban-eslint-rule",
+        "g3ts-style/style-policy-eslint-rule",
         G3Severity::Error,
     );
 }

@@ -9,7 +9,7 @@ const REQUIRED_PACKAGES: [&str; 5] = [
     "stylelint-config-standard",
     "stylelint-config-tailwindcss",
     "@double-great/stylelint-a11y",
-    "eslint-plugin-tailwind-ban",
+    "g3ts-eslint-plugin-style-policy",
 ];
 const REQUIRED_EXTENDS: [&str; 2] = ["stylelint-config-standard", "stylelint-config-tailwindcss"];
 const REQUIRED_PLUGINS: [&str; 1] = ["@double-great/stylelint-a11y"];
@@ -258,38 +258,38 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
     let rel_path = eslint_rel_path(&contract.eslint_config);
     let Some(snapshot) = parsed_eslint(&contract.eslint_config) else {
         results.push(error(
-            "g3ts-style/tailwind-ban-eslint-rule",
-            "Tailwind ban ESLint rule is not effective",
-            format!("`{}` must activate `tailwind-ban/no-deny-tailwind-tokens` at `error` with a non-empty ESLint-owned `denyList`.", rel_path.unwrap_or("eslint.config.*")),
+            "g3ts-style/style-policy-eslint-rule",
+            "Style policy ESLint rule is not effective",
+            format!("`{}` must activate `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`.", rel_path.unwrap_or("eslint.config.*")),
             rel_path,
         ));
         return;
     };
     let plugin_ok = snapshot
         .source_plugin_package_names
-        .get("tailwind-ban")
+        .get("style-policy")
         .is_some_and(|packages| {
             packages
                 .iter()
-                .any(|package| package == "eslint-plugin-tailwind-ban")
+                .any(|package| package == "g3ts-eslint-plugin-style-policy")
         });
     if snapshot.source_probe_present
         && !snapshot.source_probe_ignored
         && plugin_ok
-        && snapshot.tailwind_rule_effective
+        && snapshot.style_policy_rule_effective
     {
         results.push(info(
-            "g3ts-style/tailwind-ban-eslint-rule",
-            "Tailwind ban ESLint rule is effective",
-            format!("`{}` activates `tailwind-ban/no-deny-tailwind-tokens` at `error` with a non-empty ESLint-owned denyList.", snapshot.rel_path),
+            "g3ts-style/style-policy-eslint-rule",
+            "Style policy ESLint rule is effective",
+            format!("`{}` activates `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned denyList.", snapshot.rel_path),
             Some(&snapshot.rel_path),
         ));
     } else {
         results.push(error(
-            "g3ts-style/tailwind-ban-eslint-rule",
-            "Tailwind ban ESLint rule is not effective",
+            "g3ts-style/style-policy-eslint-rule",
+            "Style policy ESLint rule is not effective",
             format!(
-                "`{}` must activate plugin namespace `tailwind-ban` from `eslint-plugin-tailwind-ban` and rule `tailwind-ban/no-deny-tailwind-tokens` at `error` with a non-empty ESLint-owned `denyList` on every `[ts.style].source_globs` probe.",
+                "`{}` must activate plugin namespace `style-policy` from `g3ts-eslint-plugin-style-policy` and rule `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList` on every `[ts.style].source_globs` probe.",
                 snapshot.rel_path
             ),
             Some(&snapshot.rel_path),
@@ -321,13 +321,14 @@ fn has_encoded_parent_segment(path: &str) -> bool {
 fn external_url(path: &str) -> bool {
     path.contains("://")
         || path.split_once(':').is_some_and(|(scheme, _)| {
-            !scheme.is_empty() && scheme.chars().all(|character| character.is_ascii_alphabetic())
+            !scheme.is_empty()
+                && scheme
+                    .chars()
+                    .all(|character| character.is_ascii_alphabetic())
         })
 }
 
-fn invalid_policy_paths(
-    snapshot: &g3ts_style_types::G3TsStylePolicySnapshot,
-) -> Vec<String> {
+fn invalid_policy_paths(snapshot: &g3ts_style_types::G3TsStylePolicySnapshot) -> Vec<String> {
     snapshot
         .source_globs
         .iter()

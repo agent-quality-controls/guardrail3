@@ -32,7 +32,7 @@ fn package_manifest_has_style_surface(entry: &g3_workspace_crawl::G3RsWorkspaceE
         .any(|dependency| {
             matches!(
                 dependency.as_str(),
-                "tailwindcss" | "stylelint" | "eslint-plugin-tailwind-ban"
+                "tailwindcss" | "stylelint" | "g3ts-eslint-plugin-style-policy"
             )
         })
 }

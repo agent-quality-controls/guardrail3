@@ -1,0 +1,68 @@
+{
+  "name": "g3ts-eslint-plugin-style-policy",
+  "version": "0.1.1",
+  "description": "Strict style source-policy ESLint rules for G3TS.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/websmasher/guardrail3.git",
+    "directory": "packages/ts/g3ts-eslint-plugin-style-policy"
+  },
+  "homepage": "https://github.com/websmasher/guardrail3/tree/main/packages/ts/g3ts-eslint-plugin-style-policy",
+  "bugs": {
+    "url": "https://github.com/websmasher/guardrail3/issues"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "style",
+    "tailwind",
+    "guardrails"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./configs/recommended": {
+      "types": "./dist/configs/recommended.d.ts",
+      "default": "./dist/configs/recommended.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "prepack": "npm run clean && npm run build",
+    "prepublishOnly": "npm test",
+    "pretest": "npm run build",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": ">=4.8.4 <6.1.0"
+  },
+  "dependencies": {
+    "@typescript-eslint/parser": "^8.59.0",
+    "@typescript-eslint/utils": "^8.59.0",
+    "astro-eslint-parser": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "eslint": "^9.39.1",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3"
+  }
+}
