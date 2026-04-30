@@ -41,6 +41,25 @@ fn strict_policy_requires_source_globs() {
 }
 
 #[test]
+fn strict_policy_requires_stylelint_css_globs() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_policy_mut(&mut input)
+        .stylelint_css_globs
+        .clear();
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/strict-policy-configured",
+        G3Severity::Error,
+    );
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Info,
+    );
+}
+
+#[test]
 fn policy_paths_reject_empty_source_glob_value() {
     let mut input = super::helpers::golden();
     super::helpers::parsed_policy_mut(&mut input).source_globs = vec![String::new()];
@@ -59,6 +78,28 @@ fn policy_paths_reject_empty_source_glob_value() {
         &input,
         "g3ts-style/policy-paths-valid",
         "source_globs=``",
+    );
+}
+
+#[test]
+fn policy_paths_reject_empty_css_glob_value() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_policy_mut(&mut input).stylelint_css_globs = vec![String::new()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/strict-policy-configured",
+        G3Severity::Info,
+    );
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Error,
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        "stylelint_css_globs=``",
     );
 }
 
@@ -86,6 +127,42 @@ fn policy_paths_reject_absolute_source_glob() {
 }
 
 #[test]
+fn policy_paths_reject_absolute_css_glob() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_policy_mut(&mut input).stylelint_css_globs =
+        vec!["/src/**/*.css".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Error,
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        "stylelint_css_globs=`/src/**/*.css`",
+    );
+}
+
+#[test]
+fn policy_paths_reject_parent_traversal_source_glob() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_policy_mut(&mut input).source_globs =
+        vec!["../shared/**/*.tsx".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Error,
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        "source_globs=`../shared/**/*.tsx`",
+    );
+}
+
+#[test]
 fn policy_paths_reject_parent_traversal_css_glob() {
     let mut input = super::helpers::golden();
     super::helpers::parsed_policy_mut(&mut input).stylelint_css_globs =
@@ -104,6 +181,24 @@ fn policy_paths_reject_parent_traversal_css_glob() {
 }
 
 #[test]
+fn policy_paths_reject_external_url_source_glob() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_policy_mut(&mut input).source_globs =
+        vec!["https://example.com/source.tsx".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Error,
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        "source_globs=`https://example.com/source.tsx`",
+    );
+}
+
+#[test]
 fn policy_paths_reject_external_url_css_glob() {
     let mut input = super::helpers::golden();
     super::helpers::parsed_policy_mut(&mut input).stylelint_css_globs =
@@ -118,6 +213,98 @@ fn policy_paths_reject_external_url_css_glob() {
         &input,
         "g3ts-style/policy-paths-valid",
         "stylelint_css_globs=`https://example.com/styles.css`",
+    );
+}
+
+#[test]
+fn policy_paths_reject_scheme_without_slashes() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_policy_mut(&mut input).source_globs =
+        vec!["data:text/css,body{}".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn policy_paths_reject_windows_absolute_path() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_policy_mut(&mut input).source_globs =
+        vec!["C:\\repo\\src\\page.tsx".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn policy_paths_reject_backslash_traversal() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_policy_mut(&mut input).stylelint_css_globs =
+        vec!["..\\shared\\style.css".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn policy_paths_reject_encoded_traversal_and_separators() {
+    let mut input = super::helpers::golden();
+    let policy = super::helpers::parsed_policy_mut(&mut input);
+    policy.source_globs = vec!["src/%2e%2e/secret.tsx".to_owned()];
+    policy.stylelint_css_globs = vec!["src%2f..%2fsecret.css".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Error,
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        "source_globs=`src/%2e%2e/secret.tsx`",
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        "stylelint_css_globs=`src%2f..%2fsecret.css`",
+    );
+}
+
+#[test]
+fn policy_paths_report_multiple_invalid_values() {
+    let mut input = super::helpers::golden();
+    let policy = super::helpers::parsed_policy_mut(&mut input);
+    policy.source_globs = vec!["/src/**/*.tsx".to_owned(), "data:text/css,body{}".to_owned()];
+    policy.stylelint_css_globs = vec!["../shared/**/*.css".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        G3Severity::Error,
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        "source_globs=`/src/**/*.tsx`",
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        "source_globs=`data:text/css,body{}`",
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/policy-paths-valid",
+        "stylelint_css_globs=`../shared/**/*.css`",
     );
 }
 
