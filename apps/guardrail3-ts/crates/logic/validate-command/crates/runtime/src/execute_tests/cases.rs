@@ -15,7 +15,7 @@ struct StubCrawler;
 
 impl WorkspaceCrawler for StubCrawler {
     fn crawl(&self, root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError> {
-        g3_workspace_crawl::crawl(root).map_err(|error| WorkspaceCrawlError {
+        g3_workspace_crawl::crawl_any_root(root).map_err(|error| WorkspaceCrawlError {
             message: format!("{error:?}"),
         })
     }

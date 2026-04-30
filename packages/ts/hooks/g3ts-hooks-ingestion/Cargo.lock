@@ -97,7 +97,23 @@ version = "0.1.0"
 name = "g3ts-hooks-ingestion"
 version = "0.1.0"
 dependencies = [
+ "g3ts-hooks-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-hooks-ingestion-assertions"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-ingestion-runtime",
+ "g3ts-hooks-types",
+]
+
+[[package]]
+name = "g3ts-hooks-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
  "g3rs-workspace-crawl",
+ "g3ts-hooks-ingestion-assertions",
  "g3ts-hooks-types",
  "hook-shell-parser",
 ]

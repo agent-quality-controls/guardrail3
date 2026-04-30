@@ -89,9 +89,7 @@ fn eslint_disable_inventory_warns_when_seo_source_contains_disable() {
         .push(g3ts_astro_seo_types::G3TsAstroSeoEslintDirectiveInput::new(
             "src/pages/index.astro".to_owned(),
             "DisableNextLine".to_owned(),
-            vec![
-                "astro-pipeline/require-approved-metadata-helper-in-routes".to_owned(),
-            ],
+            vec!["astro-pipeline/require-approved-metadata-helper-in-routes".to_owned()],
             false,
             20,
             Some(21),

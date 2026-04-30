@@ -5,14 +5,14 @@ use g3ts_hooks_contract_types::{
 
 #[must_use]
 pub fn hook_contract() -> Vec<G3TsHookRequirement> {
-    vec![G3TsHookRequirement {
-        id: "g3ts-astro-mdx/hook-contract".to_owned(),
-        owner_family: "astro-mdx".to_owned(),
-        trigger_patterns: vec![
+    vec![G3TsHookRequirement::new(
+        "g3ts-astro-mdx/hook-contract".to_owned(),
+        "astro-mdx".to_owned(),
+        vec![
             G3TsHookTriggerPattern::Glob("**/*.mdx".to_owned()),
             G3TsHookTriggerPattern::Glob("src/mdx-components.*".to_owned()),
         ],
-        required_commands: vec![G3TsHookCommandRequirement::AppValidateScript],
-        critical_commands: vec![G3TsHookCriticalCommand::Binary("pnpm".to_owned())],
-    }]
+        vec![G3TsHookCommandRequirement::AppValidateScript],
+        vec![G3TsHookCriticalCommand::Binary("pnpm".to_owned())],
+    )]
 }

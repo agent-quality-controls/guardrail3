@@ -1,0 +1,20 @@
+[package]
+name = "g3ts-hooks-source-checks-assertions"
+version.workspace = true
+edition.workspace = true
+description = "Test assertions for TypeScript hook source checks for guardrail3"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+g3ts-hooks-source-checks-runtime = { path = "../runtime", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0", features = ["types"] }
+
+[features]
+default = ["api"]
+api = []
+
+[lints]
+workspace = true

@@ -247,8 +247,7 @@ fn collect_local_import_static_values(
         else {
             continue;
         };
-        let Ok(imported_state) =
-            imported_module_state(workspace_root, &import_rel_path, depth + 1)
+        let Ok(imported_state) = imported_module_state(workspace_root, &import_rel_path, depth + 1)
         else {
             continue;
         };
@@ -286,7 +285,9 @@ fn resolve_local_module_rel_path(
     from_rel_path: &str,
     source_module: &str,
 ) -> Option<String> {
-    let from_dir = Path::new(from_rel_path).parent().unwrap_or_else(|| Path::new(""));
+    let from_dir = Path::new(from_rel_path)
+        .parent()
+        .unwrap_or_else(|| Path::new(""));
     let base_path = workspace_root.join(from_dir).join(source_module);
     let mut candidates = Vec::new();
     if base_path.extension().is_some() {
@@ -1329,10 +1330,12 @@ fn resolve_string_expr(expr: &Expr, state: &AnalysisState, depth: usize) -> Opti
         Expr::Tpl(template) => resolve_template_string(template, state, depth + 1),
         Expr::Ident(ident) => const_binding(state, ident.sym.as_ref())
             .and_then(|binding| resolve_string_expr(binding, state, depth + 1))
-            .or_else(|| match state.imported_static_values.get(ident.sym.as_ref()) {
-                Some(AstroStaticValue::String(value)) => Some(value.clone()),
-                _ => None,
-            }),
+            .or_else(
+                || match state.imported_static_values.get(ident.sym.as_ref()) {
+                    Some(AstroStaticValue::String(value)) => Some(value.clone()),
+                    _ => None,
+                },
+            ),
         Expr::Member(_) => match static_value(expr, state, depth + 1).ok()? {
             AstroStaticValue::String(value) => Some(value),
             _ => None,

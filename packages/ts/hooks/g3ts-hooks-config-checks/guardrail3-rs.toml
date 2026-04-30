@@ -1,0 +1,8 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-hooks-types",
+  "guardrail3-check-types",
+  "hook-shell-parser",
+]
+

@@ -1,0 +1,15 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-workspace-crawl",
+  "g3ts-hooks-ingestion-assertions",
+  "g3ts-hooks-ingestion-runtime",
+  "g3ts-hooks-types",
+  "hook-shell-parser",
+]
+
+[[waivers]]
+rule = "g3rs-clippy/disallowed-methods"
+file = "crates/runtime/src/process.rs"
+selector = "std::process::Command::new"
+reason = "Hook ingestion must query Git for the effective hook root and core.hooksPath; this is an IO boundary for hook discovery."

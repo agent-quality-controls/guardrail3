@@ -12,18 +12,34 @@ use crate::run::G3RsWorkspaceCrawlError;
 pub(crate) fn crawl_workspace(
     workspace_root: &Path,
 ) -> Result<G3RsWorkspaceCrawl, G3RsWorkspaceCrawlError> {
+    crawl_root(workspace_root, true)
+}
+
+pub(crate) fn crawl_any_root(
+    workspace_root: &Path,
+) -> Result<G3RsWorkspaceCrawl, G3RsWorkspaceCrawlError> {
+    crawl_root(workspace_root, false)
+}
+
+fn crawl_root(
+    workspace_root: &Path,
+    require_workspace_manifest: bool,
+) -> Result<G3RsWorkspaceCrawl, G3RsWorkspaceCrawlError> {
     if !workspace_root.is_dir() {
         return Err(G3RsWorkspaceCrawlError::InvalidRoot(
             workspace_root.to_path_buf(),
         ));
     }
-    if !workspace_root.join("Cargo.toml").is_file() {
+    if require_workspace_manifest && !workspace_root.join("Cargo.toml").is_file() {
         return Err(G3RsWorkspaceCrawlError::MissingWorkspaceManifest(
             workspace_root.to_path_buf(),
         ));
     }
 
-    let root_abs_path = workspace_root.to_path_buf();
+    let root_abs_path = workspace_root
+        .canonicalize()
+        .unwrap_or_else(|_| workspace_root.to_path_buf());
+    let workspace_root = root_abs_path.as_path();
     let mut entries = Vec::<G3RsWorkspaceEntry>::new();
     let mut included_paths = HashSet::<PathBuf>::new();
 

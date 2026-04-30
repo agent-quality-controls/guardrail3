@@ -33,6 +33,13 @@ pub fn crawl(workspace_root: &Path) -> Result<G3RsWorkspaceCrawl, G3RsWorkspaceC
     crate::crawl::crawl_workspace(workspace_root)
 }
 
+/// Crawl one explicit non-Rust project root into a neutral filesystem snapshot.
+pub fn crawl_any_root(
+    workspace_root: &Path,
+) -> Result<G3RsWorkspaceCrawl, G3RsWorkspaceCrawlError> {
+    crate::crawl::crawl_any_root(workspace_root)
+}
+
 #[cfg(test)]
 #[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
 mod run_tests;
