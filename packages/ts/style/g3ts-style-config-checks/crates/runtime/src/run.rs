@@ -298,10 +298,31 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
 }
 
 fn valid_rel_path(path: &str) -> bool {
-    !path.trim().is_empty()
-        && !path.starts_with('/')
-        && !path.contains("://")
-        && !path.split('/').any(|segment| segment == "..")
+    let trimmed = path.trim();
+    !invalid_common_path(trimmed) && !trimmed.starts_with('/') && !external_url(trimmed)
+}
+
+fn invalid_common_path(path: &str) -> bool {
+    path.is_empty()
+        || path.contains('\\')
+        || path.to_ascii_lowercase().contains("%2f")
+        || path.to_ascii_lowercase().contains("%5c")
+        || has_encoded_parent_segment(path)
+        || path.split('/').any(|segment| segment == "..")
+}
+
+fn has_encoded_parent_segment(path: &str) -> bool {
+    path.split('/').any(|segment| {
+        let lower = segment.to_ascii_lowercase();
+        lower == "%2e%2e" || lower == "%2e." || lower == ".%2e"
+    })
+}
+
+fn external_url(path: &str) -> bool {
+    path.contains("://")
+        || path.split_once(':').is_some_and(|(scheme, _)| {
+            !scheme.is_empty() && scheme.chars().all(|character| character.is_ascii_alphabetic())
+        })
 }
 
 fn invalid_policy_paths(
