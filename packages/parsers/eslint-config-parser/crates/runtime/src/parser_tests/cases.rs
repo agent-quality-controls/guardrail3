@@ -344,6 +344,88 @@ module.exports = { ESLint };
 }
 
 #[test]
+fn resolves_plugin_package_identity_from_esm_only_import_export() {
+    let root = TempDir::new().expect("tempdir should be created");
+    fs::create_dir_all(root.path().join("src")).expect("src directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint"))
+        .expect("fake eslint module directory should be created");
+    fs::create_dir_all(root.path().join("node_modules/eslint-plugin-tailwind-ban"))
+        .expect("fake tailwind ban plugin module directory should be created");
+    fs::write(
+        root.path().join("eslint.config.mjs"),
+        "import tailwindBan from \"eslint-plugin-tailwind-ban\";\nexport default [{ plugins: { \"tailwind-ban\": tailwindBan } }];\n",
+    )
+    .expect("eslint config should be written");
+    fs::write(
+        root.path().join("src/index.tsx"),
+        "export function Page() { return <main className=\"text-black\" />; }\n",
+    )
+    .expect("tsx source should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/package.json"),
+        "{\n  \"name\": \"eslint\",\n  \"version\": \"0.0.0-test\",\n  \"main\": \"index.js\"\n}\n",
+    )
+    .expect("fake eslint package manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/eslint-plugin-tailwind-ban/package.json"),
+        "{\n  \"name\": \"eslint-plugin-tailwind-ban\",\n  \"version\": \"0.0.0-test\",\n  \"type\": \"module\",\n  \"exports\": {\n    \".\": {\n      \"import\": \"./index.js\"\n    }\n  }\n}\n",
+    )
+    .expect("fake tailwind ban package manifest should be written");
+    fs::write(
+        root.path()
+            .join("node_modules/eslint-plugin-tailwind-ban/index.js"),
+        r#"const rule = {
+  meta: { docs: { description: "deny configured Tailwind tokens" }, schema: [] },
+  create() { return {}; }
+};
+
+export default {
+  meta: { name: "eslint-plugin-tailwind-ban" },
+  rules: { "no-deny-tailwind-tokens": rule },
+};
+"#,
+    )
+    .expect("fake tailwind ban plugin module should be written");
+    fs::write(
+        root.path().join("node_modules/eslint/index.js"),
+        r#"class ESLint {
+  async isPathIgnored(_filePath) {
+    return false;
+  }
+
+  async calculateConfigForFile(_filePath) {
+    const tailwindBan = (await import("eslint-plugin-tailwind-ban")).default;
+    return {
+      plugins: { "tailwind-ban": tailwindBan },
+      rules: {
+        "tailwind-ban/no-deny-tailwind-tokens": ["error", { denyList: ["text-black"] }],
+      },
+    };
+  }
+}
+
+module.exports = { ESLint };
+"#,
+    )
+    .expect("fake eslint module should be written");
+
+    let snapshot = crate::parser::parse(
+        root.path(),
+        "eslint.config.mjs",
+        &[probe(EslintProbeKind::TsxSource, "src/index.tsx")],
+    )
+    .expect("parse should resolve ESM-only plugin package identity");
+
+    assertions::assert_plugin_package_name(
+        &snapshot,
+        EslintProbeKind::TsxSource,
+        "tailwind-ban",
+        "eslint-plugin-tailwind-ban",
+    );
+}
+
+#[test]
 fn rejects_spoofed_astro_plugin_when_imported_binding_is_only_object_key() {
     let root = TempDir::new().expect("tempdir should be created");
     fs::create_dir_all(root.path().join("src/pages"))
