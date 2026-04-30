@@ -9,7 +9,7 @@ pub struct PackageRuntime;
 impl WorkspaceCrawler for PackageRuntime {
     fn crawl(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError> {
         g3rs_workspace_crawl::crawl(root).map_err(|error| WorkspaceCrawlError {
-            message: format!("{error:?}"),
+            message: error.to_string(),
         })
     }
 }

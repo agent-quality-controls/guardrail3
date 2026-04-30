@@ -17,6 +17,11 @@ pub(crate) fn crawl_workspace(
             workspace_root.to_path_buf(),
         ));
     }
+    if !workspace_root.join("Cargo.toml").is_file() {
+        return Err(G3RsWorkspaceCrawlError::MissingWorkspaceManifest(
+            workspace_root.to_path_buf(),
+        ));
+    }
 
     let root_abs_path = workspace_root.to_path_buf();
     let mut entries = Vec::<G3RsWorkspaceEntry>::new();

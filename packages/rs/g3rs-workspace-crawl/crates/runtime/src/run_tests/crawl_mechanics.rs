@@ -20,11 +20,39 @@ fn write(path: impl AsRef<Path>, content: &str) {
     fs::write(path, content).expect("write fixture file");
 }
 
+fn write_root_manifest(root: &Path) {
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+}
+
+#[test]
+fn rejects_non_workspace_root_even_when_nested_rust_workspaces_exist() {
+    let temp_dir = tempdir().expect("create temporary repository root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("apps/service/Cargo.toml"),
+        "[package]\nname = \"service\"\n",
+    );
+    write(root.join("apps/service/src/lib.rs"), "");
+
+    let error = crate::run::crawl(root).expect_err("repo root without Cargo.toml should fail");
+
+    assert!(
+        matches!(
+            error,
+            crate::run::G3RsWorkspaceCrawlError::MissingWorkspaceManifest(_)
+        ),
+        "expected missing root Cargo.toml error, got {error:?}",
+    );
+}
+
 #[test]
 fn entries_are_sorted_by_rel_path() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join("z.rs"), "// z");
     write(root.join("a.rs"), "// a");
@@ -41,7 +69,7 @@ fn entries_are_sorted_by_rel_path() {
 
     assert_eq!(
         rel_paths,
-        vec!["a.rs", "m", "m/b.rs", "z.rs"],
+        vec!["Cargo.toml", "a.rs", "m", "m/b.rs", "z.rs"],
         "crawl entries should be sorted by rel_path in lexicographic order"
     );
 }
@@ -54,6 +82,7 @@ fn symlinks_are_skipped() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join("real.txt"), "real content");
     symlink(root.join("real.txt"), root.join("link.txt"))
@@ -73,6 +102,7 @@ fn unreadable_file_has_readable_false() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join("secret.txt"), "classified");
     write(root.join("normal.txt"), "public");
