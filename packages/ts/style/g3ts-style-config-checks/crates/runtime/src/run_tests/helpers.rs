@@ -29,6 +29,15 @@ pub(super) fn parsed_package_mut(
     snapshot
 }
 
+pub(super) fn parsed_policy_mut(
+    input: &mut G3TsStyleConfigChecksInput,
+) -> &mut G3TsStylePolicySnapshot {
+    let G3TsStylePolicySurfaceState::Parsed { snapshot } = &mut input.contracts[0].policy else {
+        panic!("golden policy should be parsed");
+    };
+    snapshot
+}
+
 pub(super) fn parsed_stylelint_mut(
     input: &mut G3TsStyleConfigChecksInput,
 ) -> &mut G3TsStylelintConfigSnapshot {
