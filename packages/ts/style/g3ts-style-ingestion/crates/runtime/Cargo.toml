@@ -18,6 +18,9 @@ package-script-command-parser = { path = "../../../../../parsers/package-script-
 serde_json = "1"
 stylelint-config-parser = { path = "../../../../../parsers/stylelint-config-parser", version = "0.1.0" }
 
+[dev-dependencies]
+g3ts-style-ingestion-assertions = { path = "../assertions" }
+
 [features]
 default = ["api"]
 api = []

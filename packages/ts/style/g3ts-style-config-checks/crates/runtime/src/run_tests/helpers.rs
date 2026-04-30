@@ -55,7 +55,6 @@ fn policy() -> G3TsStylePolicySurfaceState {
         snapshot: G3TsStylePolicySnapshot {
             rel_path: "guardrail3-ts.toml".to_owned(),
             source_globs: vec!["src/**/*.tsx".to_owned()],
-            tailwind_denylist: vec!["text-slate-500".to_owned(), "prose".to_owned()],
             stylelint_css_globs: vec!["src/**/*.css".to_owned()],
             extra_fields: Vec::new(),
         },

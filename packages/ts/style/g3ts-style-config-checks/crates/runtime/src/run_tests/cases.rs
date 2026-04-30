@@ -120,7 +120,7 @@ fn css_lint_script_must_not_fail_open() {
 }
 
 #[test]
-fn tailwind_ban_rule_must_be_effective_at_error_with_matching_denylist() {
+fn tailwind_ban_rule_must_be_effective_at_error_with_non_empty_eslint_denylist() {
     let mut input = super::helpers::golden();
     super::helpers::parsed_eslint_mut(&mut input).tailwind_rule_effective = false;
 

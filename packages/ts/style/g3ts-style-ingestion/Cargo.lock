@@ -122,6 +122,9 @@ dependencies = [
 [[package]]
 name = "g3ts-style-ingestion-assertions"
 version = "0.1.0"
+dependencies = [
+ "g3ts-style-ingestion-runtime",
+]
 
 [[package]]
 name = "g3ts-style-ingestion-runtime"
@@ -129,6 +132,7 @@ version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
  "g3rs-workspace-crawl",
+ "g3ts-style-ingestion-assertions",
  "g3ts-style-types",
  "guardrail3-rs-toml-parser",
  "package-json-parser",

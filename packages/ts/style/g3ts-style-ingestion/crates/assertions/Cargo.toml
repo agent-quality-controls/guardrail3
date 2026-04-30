@@ -9,6 +9,7 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+g3ts_style_ingestion_runtime = { package = "g3ts-style-ingestion-runtime", path = "../runtime" }
 
 [features]
 default = ["api"]
