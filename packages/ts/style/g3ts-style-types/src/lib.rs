@@ -4,7 +4,6 @@ use std::collections::BTreeMap;
 pub struct G3TsStylePolicySnapshot {
     pub rel_path: String,
     pub source_globs: Vec<String>,
-    pub tailwind_denylist: Vec<String>,
     pub stylelint_css_globs: Vec<String>,
     pub extra_fields: Vec<String>,
 }

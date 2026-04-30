@@ -73,8 +73,6 @@ pub struct TsStylePolicyConfig {
     #[serde(default)]
     pub source_globs: Vec<String>,
     #[serde(default)]
-    pub tailwind_denylist: Vec<String>,
-    #[serde(default)]
     pub stylelint_css_globs: Vec<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,

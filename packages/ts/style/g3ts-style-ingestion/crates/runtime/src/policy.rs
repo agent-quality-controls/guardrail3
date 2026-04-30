@@ -48,7 +48,6 @@ pub(crate) fn ingest_policy(
         snapshot: G3TsStylePolicySnapshot {
             rel_path: entry.path.rel_path.clone(),
             source_globs: style.source_globs,
-            tailwind_denylist: style.tailwind_denylist,
             stylelint_css_globs: style.stylelint_css_globs,
             extra_fields: style.extra.keys().cloned().collect(),
         },

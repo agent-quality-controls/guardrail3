@@ -45,16 +45,14 @@ fn check_policy(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResu
     match &contract.policy {
         G3TsStylePolicySurfaceState::Parsed { snapshot }
             if !snapshot.source_globs.is_empty()
-                && !snapshot.tailwind_denylist.is_empty()
                 && !snapshot.stylelint_css_globs.is_empty()
                 && snapshot.source_globs.iter().all(|glob| valid_rel_path(glob))
-                && snapshot.stylelint_css_globs.iter().all(|glob| valid_rel_path(glob))
-                && snapshot.tailwind_denylist.iter().all(|item| !item.trim().is_empty()) =>
+                && snapshot.stylelint_css_globs.iter().all(|glob| valid_rel_path(glob)) =>
         {
             results.push(info(
                 "g3ts-style/strict-policy-configured",
                 "Style policy is configured",
-                format!("`{}` defines `[ts.style]` with source lanes, Tailwind denylist, and Stylelint CSS lanes.", rel_path.unwrap_or("guardrail3-ts.toml")),
+                format!("`{}` defines `[ts.style]` with source lanes and Stylelint CSS lanes.", rel_path.unwrap_or("guardrail3-ts.toml")),
                 rel_path,
             ));
         }
@@ -62,7 +60,7 @@ fn check_policy(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResu
             "g3ts-style/strict-policy-configured",
             "Style policy is not configured",
             format!(
-                "`{}` must define `[ts.style]` with non-empty `source_globs`, `tailwind_denylist`, and `stylelint_css_globs`; paths must be relative and must not contain `..`.",
+                "`{}` must define `[ts.style]` with non-empty `source_globs` and `stylelint_css_globs`; paths must be relative and must not contain `..`.",
                 rel_path.unwrap_or("guardrail3-ts.toml")
             ),
             rel_path,
@@ -234,7 +232,7 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
         results.push(error(
             "g3ts-style/tailwind-ban-eslint-rule",
             "Tailwind ban ESLint rule is not effective",
-            format!("`{}` must activate `tailwind-ban/no-deny-tailwind-tokens` at `error` with `denyList` exactly matching `[ts.style].tailwind_denylist`.", rel_path.unwrap_or("eslint.config.*")),
+            format!("`{}` must activate `tailwind-ban/no-deny-tailwind-tokens` at `error` with a non-empty ESLint-owned `denyList`.", rel_path.unwrap_or("eslint.config.*")),
             rel_path,
         ));
         return;
@@ -255,7 +253,7 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
         results.push(info(
             "g3ts-style/tailwind-ban-eslint-rule",
             "Tailwind ban ESLint rule is effective",
-            format!("`{}` activates `tailwind-ban/no-deny-tailwind-tokens` at `error` with the configured denylist.", snapshot.rel_path),
+            format!("`{}` activates `tailwind-ban/no-deny-tailwind-tokens` at `error` with a non-empty ESLint-owned denyList.", snapshot.rel_path),
             Some(&snapshot.rel_path),
         ));
     } else {
@@ -263,7 +261,7 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
             "g3ts-style/tailwind-ban-eslint-rule",
             "Tailwind ban ESLint rule is not effective",
             format!(
-                "`{}` must activate plugin namespace `tailwind-ban` from `eslint-plugin-tailwind-ban` and rule `tailwind-ban/no-deny-tailwind-tokens` at `error` with `denyList` exactly matching `[ts.style].tailwind_denylist` on every `[ts.style].source_globs` probe.",
+                "`{}` must activate plugin namespace `tailwind-ban` from `eslint-plugin-tailwind-ban` and rule `tailwind-ban/no-deny-tailwind-tokens` at `error` with a non-empty ESLint-owned `denyList` on every `[ts.style].source_globs` probe.",
                 snapshot.rel_path
             ),
             Some(&snapshot.rel_path),

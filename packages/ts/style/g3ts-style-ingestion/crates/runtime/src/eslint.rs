@@ -69,7 +69,7 @@ pub(crate) fn ingest_eslint_config(
             && rule
                 .options
                 .iter()
-                .any(|option| option_has_denylist(option, policy))
+                .any(option_has_non_empty_denylist)
     });
 
     G3TsStyleEslintSurfaceState::Parsed {
@@ -84,19 +84,13 @@ pub(crate) fn ingest_eslint_config(
     }
 }
 
-fn option_has_denylist(option: &serde_json::Value, policy: &G3TsStylePolicySurfaceState) -> bool {
-    let G3TsStylePolicySurfaceState::Parsed { snapshot } = policy else {
-        return false;
-    };
+fn option_has_non_empty_denylist(option: &serde_json::Value) -> bool {
     let Some(denylist) = option.get("denyList").and_then(serde_json::Value::as_array) else {
         return false;
     };
-    let actual = denylist
+    denylist
         .iter()
-        .filter_map(serde_json::Value::as_str)
-        .map(str::to_owned)
-        .collect::<Vec<_>>();
-    actual == snapshot.tailwind_denylist
+        .any(|item| item.as_str().is_some_and(|value| !value.trim().is_empty()))
 }
 
 fn probe_targets(
@@ -218,6 +212,11 @@ fn nearest_config(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<S
             })
     })
 }
+
+#[cfg(test)]
+#[path = "eslint_tests/mod.rs"]
+// reason: keep private ESLint style ingestion tests in the owned sidecar directory.
+mod eslint_tests;
 
 fn ancestors(app_root_rel_path: &str) -> Vec<String> {
     let mut ancestors = Vec::new();
