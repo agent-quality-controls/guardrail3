@@ -9,26 +9,26 @@ fn reports_inventory_for_owned_sidecar_shape() {
     let results = assertions::check(&input(
         vec![
             file(
-                "src/lib.rs",
+                "src/run.rs",
                 G3RsTestFileKind::Source,
                 Some(""),
-                Some("lib"),
+                Some("run"),
                 None,
-                "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n",
+                "#[cfg(test)]\n#[path = \"run_tests/mod.rs\"]\nmod run_tests;\n",
             ),
             file(
-                "src/lib_tests/mod.rs",
+                "src/run_tests/mod.rs",
                 G3RsTestFileKind::InternalSidecarMod,
                 Some(""),
-                Some("lib"),
+                Some("run"),
                 None,
                 "#[test]\nfn keeps_shape() { assert!(true); }\n",
             ),
         ],
         vec![with_sidecar(
             component("", "", Some("demo_runtime"), false, None),
-            "src/lib_tests/mod.rs",
-            "assertions/src/lib.rs",
+            "src/run_tests/mod.rs",
+            "assertions/src/run.rs",
         )],
     ));
 
@@ -117,12 +117,58 @@ fn reports_missing_path_bridge_even_when_sidecar_exists() {
     let results = assertions::check(&input(
         vec![
             file(
+                "src/run.rs",
+                G3RsTestFileKind::Source,
+                Some(""),
+                Some("run"),
+                None,
+                "#[cfg(test)]\nmod run_tests;\n",
+            ),
+            file(
+                "src/run_tests/mod.rs",
+                G3RsTestFileKind::InternalSidecarMod,
+                Some(""),
+                Some("run"),
+                None,
+                "#[test]\nfn keeps_shape() { assert!(true); }\n",
+            ),
+        ],
+        vec![with_sidecar(
+            component("", "", Some("demo_runtime"), false, None),
+            "src/run_tests/mod.rs",
+            "assertions/src/run.rs",
+        )],
+    ));
+
+    assertions::assert_has_result(
+        &results,
+        "g3rs-test/owned-sidecar-shape",
+        G3Severity::Error,
+        "ad hoc cfg(test) module declaration",
+        "src/run.rs",
+        Some(1),
+    );
+
+    assertions::assert_message(
+        &results,
+        "g3rs-test/owned-sidecar-shape",
+        "ad hoc cfg(test) module declaration",
+        "src/run.rs",
+        "File `src/run.rs` declares `#[cfg(test)] mod run_tests;` without the owned sidecar declaration `#[path = \"run_tests/mod.rs\"] mod run_tests;`. Use that exact file-owned sidecar shape, so this module's internal tests live in one sidecar directory.",
+    );
+}
+
+#[test]
+fn reports_facade_lib_owned_sidecar_even_with_exact_lib_tests_shape() {
+    let results = assertions::check(&input(
+        vec![
+            file(
                 "src/lib.rs",
                 G3RsTestFileKind::Source,
                 Some(""),
                 Some("lib"),
                 None,
-                "#[cfg(test)]\nmod lib_tests;\n",
+                "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n",
             ),
             file(
                 "src/lib_tests/mod.rs",
@@ -154,7 +200,7 @@ fn reports_missing_path_bridge_even_when_sidecar_exists() {
         "g3rs-test/owned-sidecar-shape",
         "ad hoc cfg(test) module declaration",
         "src/lib.rs",
-        "File `src/lib.rs` declares `#[cfg(test)] mod lib_tests;` without the owned sidecar declaration `#[path = \"lib_tests/mod.rs\"] mod lib_tests;`. Use that exact file-owned sidecar shape, so this module's internal tests live in one sidecar directory.",
+        "Facade file `src/lib.rs` must not declare internal test sidecars. Move the tests onto a real sibling `x.rs` file and use `#[path = \"x_tests/mod.rs\"] mod x_tests;` there.",
     );
 }
 

@@ -299,7 +299,7 @@ fn cfg_test_decl_is_owned_sidecar(
 fn owned_sidecar_contract(file_rel_path: &str) -> Option<(String, String)> {
     let file_name = file_rel_path.rsplit('/').next()?;
     let stem = file_name.strip_suffix(".rs")?;
-    if stem == "mod" || stem.is_empty() {
+    if stem == "lib" || stem == "mod" || stem.is_empty() {
         return None;
     }
     let module_name = format!("{stem}_tests");
