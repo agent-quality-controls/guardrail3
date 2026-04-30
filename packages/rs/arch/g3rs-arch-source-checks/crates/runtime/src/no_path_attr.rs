@@ -41,7 +41,7 @@ fn is_test_sidecar_exempt(site: &G3RsArchPathAttrSite, path_value: &str) -> bool
 fn owned_sidecar_module_name(file_rel_path: &str) -> Option<String> {
     let file_name = file_rel_path.rsplit('/').next()?;
     let stem = file_name.strip_suffix(".rs")?;
-    if stem == "mod" || stem.is_empty() {
+    if stem == "lib" || stem == "mod" || stem.is_empty() {
         return None;
     }
     Some(format!("{stem}_tests"))

@@ -16,6 +16,19 @@ fn cfg_test_sidecar_path_is_allowed() {
 }
 
 #[test]
+fn facade_lib_test_sidecar_path_still_fires() {
+    let results = run_rule(&site(
+        "crate_a/src/lib.rs",
+        2,
+        "lib_tests",
+        Some("lib_tests/mod.rs"),
+        true,
+    ));
+
+    assertions::assert_path_attr_error(&results, "crate_a/src/lib.rs");
+}
+
+#[test]
 fn generic_tests_name_with_sidecar_path_still_fires() {
     let results = run_rule(&site(
         "crate_a/src/rule.rs",
