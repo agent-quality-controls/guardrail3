@@ -44,7 +44,7 @@ pub fn parse_document(
             "kind": selected_config.kind,
         }
     });
-    let typed = match normalize_snapshot(&program, &selected_config) {
+    let typed = match normalize_snapshot(&program, &selected_config, workspace_root.as_ref()) {
         Ok(snapshot) => AstroConfigParseState::Parsed(snapshot),
         Err(reason) => AstroConfigParseState::Invalid(reason),
     };
@@ -167,9 +167,11 @@ fn parse_program(
 fn normalize_snapshot(
     program: &swc_ecma_ast::Program,
     selected_config: &AstroConfigSelectedFile,
+    workspace_root: &Path,
 ) -> Result<AstroConfigSnapshot, String> {
     let mut state = AnalysisState::default();
     collect_state(program, &mut state);
+    collect_local_import_static_values(workspace_root, &selected_config.rel_path, &mut state, 0);
 
     let export_expr = state
         .module_exports
@@ -196,6 +198,8 @@ struct AnalysisState {
     import_bindings: BTreeMap<String, ImportBinding>,
     const_bindings: BTreeMap<String, Expr>,
     const_aliases: BTreeMap<String, BTreeSet<String>>,
+    exported_const_names: BTreeMap<String, String>,
+    imported_static_values: BTreeMap<String, AstroStaticValue>,
     mutated_bindings: BTreeSet<String>,
     module_exports: Vec<Expr>,
 }
@@ -219,6 +223,91 @@ fn collect_state(program: &swc_ecma_ast::Program, state: &mut AnalysisState) {
         swc_ecma_ast::Program::Module(module) => collect_module_state(module, state),
         swc_ecma_ast::Program::Script(script) => collect_script_state(script, state),
     }
+}
+
+fn collect_local_import_static_values(
+    workspace_root: &Path,
+    module_rel_path: &str,
+    state: &mut AnalysisState,
+    depth: usize,
+) {
+    if depth > 8 {
+        return;
+    }
+
+    for (local_name, binding) in state.import_bindings.clone() {
+        if binding.kind != ImportBindingKind::Named || !binding.source_module.starts_with('.') {
+            continue;
+        }
+        let Some(imported_name) = binding.imported_name.as_deref() else {
+            continue;
+        };
+        let Some(import_rel_path) =
+            resolve_local_module_rel_path(workspace_root, module_rel_path, &binding.source_module)
+        else {
+            continue;
+        };
+        let Ok(imported_state) =
+            imported_module_state(workspace_root, &import_rel_path, depth + 1)
+        else {
+            continue;
+        };
+        let Some(local_export_name) = imported_state.exported_const_names.get(imported_name) else {
+            continue;
+        };
+        let Some(expr) = const_binding(&imported_state, local_export_name) else {
+            continue;
+        };
+        let Ok(value) = static_value(expr, &imported_state, 0) else {
+            continue;
+        };
+        let _ = state.imported_static_values.insert(local_name, value);
+    }
+}
+
+fn imported_module_state(
+    workspace_root: &Path,
+    module_rel_path: &str,
+    depth: usize,
+) -> Result<AnalysisState, crate::error::Error> {
+    let abs_path = workspace_root.join(module_rel_path);
+    let source = crate::fs::read_to_string(&abs_path)?;
+    let kind = file_kind(module_rel_path)?;
+    let program = parse_program(&abs_path, &source, kind)?;
+    let mut state = AnalysisState::default();
+    collect_state(&program, &mut state);
+    collect_local_import_static_values(workspace_root, module_rel_path, &mut state, depth);
+
+    Ok(state)
+}
+
+fn resolve_local_module_rel_path(
+    workspace_root: &Path,
+    from_rel_path: &str,
+    source_module: &str,
+) -> Option<String> {
+    let from_dir = Path::new(from_rel_path).parent().unwrap_or_else(|| Path::new(""));
+    let base_path = workspace_root.join(from_dir).join(source_module);
+    let mut candidates = Vec::new();
+    if base_path.extension().is_some() {
+        candidates.push(base_path);
+    } else {
+        for extension in ["ts", "mts", "js", "mjs", "cts", "cjs"] {
+            candidates.push(base_path.with_extension(extension));
+        }
+    }
+
+    candidates.into_iter().find_map(|candidate| {
+        candidate
+            .is_file()
+            .then(|| candidate.strip_prefix(workspace_root).ok())
+            .flatten()
+            .and_then(path_to_rel_string)
+    })
+}
+
+fn path_to_rel_string(path: &Path) -> Option<String> {
+    Some(path.to_str()?.replace(std::path::MAIN_SEPARATOR, "/"))
 }
 
 fn collect_module_state(module: &Module, state: &mut AnalysisState) {
@@ -269,6 +358,21 @@ fn collect_module_state(module: &Module, state: &mut AnalysisState) {
             ModuleItem::ModuleDecl(ModuleDecl::ExportDefaultExpr(default_expr)) => {
                 collect_expression_mutations(&default_expr.expr, state);
                 state.module_exports.push((*default_expr.expr).clone());
+            }
+            ModuleItem::ModuleDecl(ModuleDecl::ExportDecl(export_decl)) => {
+                if let Decl::Var(var_decl) = &export_decl.decl {
+                    if var_decl.kind == VarDeclKind::Const {
+                        collect_var_decl(var_decl, state);
+                        collect_exported_var_decl(var_decl, state);
+                    } else {
+                        collect_var_decl_mutations(var_decl, state);
+                    }
+                }
+            }
+            ModuleItem::ModuleDecl(ModuleDecl::ExportNamed(export_decl))
+                if export_decl.src.is_none() =>
+            {
+                collect_named_exports(export_decl, state);
             }
             ModuleItem::Stmt(stmt) => collect_statement_state(stmt, state),
             _ => {}
@@ -363,6 +467,33 @@ fn collect_for_init_state(init: &VarDeclOrExpr, state: &mut AnalysisState) {
 fn collect_var_decl(var_decl: &VarDecl, state: &mut AnalysisState) {
     for declarator in &var_decl.decls {
         collect_var_declarator(declarator, state);
+    }
+}
+
+fn collect_exported_var_decl(var_decl: &VarDecl, state: &mut AnalysisState) {
+    for declarator in &var_decl.decls {
+        let Pat::Ident(BindingIdent { id, .. }) = &declarator.name else {
+            continue;
+        };
+        let name = id.sym.to_string();
+        let _ = state.exported_const_names.insert(name.clone(), name);
+    }
+}
+
+fn collect_named_exports(export_decl: &swc_ecma_ast::NamedExport, state: &mut AnalysisState) {
+    for specifier in &export_decl.specifiers {
+        let swc_ecma_ast::ExportSpecifier::Named(named) = specifier else {
+            continue;
+        };
+        let export_name = named
+            .exported
+            .as_ref()
+            .map(module_export_name)
+            .unwrap_or_else(|| module_export_name(&named.orig));
+        let local_name = module_export_name(&named.orig);
+        if const_binding(state, &local_name).is_some() {
+            let _ = state.exported_const_names.insert(export_name, local_name);
+        }
     }
 }
 
@@ -1044,7 +1175,9 @@ fn static_value(
     depth: usize,
 ) -> Result<AstroStaticValue, String> {
     if depth > 16 {
-        return Err("Astro config static value exceeded supported nesting depth".to_owned());
+        return Ok(unsupported_static_value(
+            "Astro config static value exceeded supported nesting depth",
+        ));
     }
 
     match strip_wrappers(expr) {
@@ -1054,9 +1187,11 @@ fn static_value(
             value.value.to_string_lossy().into_owned(),
         )),
         Expr::Lit(Lit::Null(_)) => Ok(AstroStaticValue::Null),
-        Expr::Tpl(_) => resolve_string_expr(expr, state, depth + 1)
+        Expr::Tpl(_) => Ok(resolve_string_expr(expr, state, depth + 1)
             .map(AstroStaticValue::String)
-            .ok_or_else(|| "Astro integration options must resolve to static values".to_owned()),
+            .unwrap_or_else(|| {
+                unsupported_static_value("Astro template value is not statically resolvable")
+            })),
         Expr::Array(array) => {
             let mut values = Vec::new();
             for element in &array.elems {
@@ -1120,8 +1255,41 @@ fn static_value(
             Ok(AstroStaticValue::Object(properties))
         }
         Expr::Ident(ident) => static_identifier_value(ident.sym.as_ref(), state, depth + 1),
-        _ => Err("Astro integration options must resolve to static values".to_owned()),
+        Expr::Member(member) => static_member_value(member, state, depth + 1),
+        _ => Ok(unsupported_static_value(
+            "Astro integration options must resolve to static values",
+        )),
     }
+}
+
+fn unsupported_static_value(reason: &str) -> AstroStaticValue {
+    AstroStaticValue::UnsupportedExpression {
+        reason: reason.to_owned(),
+    }
+}
+
+fn static_member_value(
+    member: &swc_ecma_ast::MemberExpr,
+    state: &AnalysisState,
+    depth: usize,
+) -> Result<AstroStaticValue, String> {
+    let property_name = static_member_property_name(&member.prop)?;
+    let object = static_value(&member.obj, state, depth + 1)?;
+    let AstroStaticValue::Object(properties) = object else {
+        return Ok(unsupported_static_value(
+            "Astro config static member object must resolve to an object",
+        ));
+    };
+
+    Ok(properties
+        .into_iter()
+        .find(|property| property.key == property_name)
+        .map(|property| property.value)
+        .unwrap_or_else(|| {
+            unsupported_static_value(&format!(
+                "Astro config static member object has no `{property_name}` property"
+            ))
+        }))
 }
 
 fn static_identifier_value(
@@ -1133,7 +1301,11 @@ fn static_identifier_value(
         return static_value(binding, state, depth + 1);
     }
 
-    state
+    if let Some(value) = state.imported_static_values.get(name) {
+        return Ok(value.clone());
+    }
+
+    Ok(state
         .import_bindings
         .get(name)
         .map(|binding| AstroStaticValue::ImportedIdentifier {
@@ -1141,7 +1313,11 @@ fn static_identifier_value(
             source_module: Some(binding.source_module.clone()),
             imported_name: binding.imported_name.clone(),
         })
-        .ok_or_else(|| format!("Astro config static identifier `{name}` is unresolved"))
+        .unwrap_or_else(|| {
+            unsupported_static_value(&format!(
+                "Astro config static identifier `{name}` is unresolved"
+            ))
+        }))
 }
 
 fn resolve_string_expr(expr: &Expr, state: &AnalysisState, depth: usize) -> Option<String> {
@@ -1152,7 +1328,15 @@ fn resolve_string_expr(expr: &Expr, state: &AnalysisState, depth: usize) -> Opti
         Expr::Lit(Lit::Str(value)) => Some(value.value.to_string_lossy().into_owned()),
         Expr::Tpl(template) => resolve_template_string(template, state, depth + 1),
         Expr::Ident(ident) => const_binding(state, ident.sym.as_ref())
-            .and_then(|binding| resolve_string_expr(binding, state, depth + 1)),
+            .and_then(|binding| resolve_string_expr(binding, state, depth + 1))
+            .or_else(|| match state.imported_static_values.get(ident.sym.as_ref()) {
+                Some(AstroStaticValue::String(value)) => Some(value.clone()),
+                _ => None,
+            }),
+        Expr::Member(_) => match static_value(expr, state, depth + 1).ok()? {
+            AstroStaticValue::String(value) => Some(value),
+            _ => None,
+        },
         _ => None,
     }
 }
@@ -1243,6 +1427,16 @@ fn member_property_name(prop: &MemberProp) -> Option<String> {
             Expr::Lit(Lit::Str(value)) => Some(value.value.to_string_lossy().into_owned()),
             _ => None,
         },
+    }
+}
+
+fn static_member_property_name(prop: &MemberProp) -> Result<String, String> {
+    match prop {
+        MemberProp::Ident(ident) => Ok(ident.sym.to_string()),
+        MemberProp::PrivateName(private) => Ok(private.name.to_string()),
+        MemberProp::Computed(_) => {
+            Err("Astro config static member properties must not be computed".to_owned())
+        }
     }
 }
 

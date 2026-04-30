@@ -190,7 +190,8 @@ pub(crate) fn object_properties(
         | G3TsAstroStaticValue::String(_)
         | G3TsAstroStaticValue::Null
         | G3TsAstroStaticValue::Array(_)
-        | G3TsAstroStaticValue::ImportedIdentifier { .. } => None,
+        | G3TsAstroStaticValue::ImportedIdentifier { .. }
+        | G3TsAstroStaticValue::UnsupportedExpression { .. } => None,
     }
 }
 

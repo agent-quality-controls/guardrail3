@@ -1,5 +1,9 @@
 use g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState;
 
+#[cfg(test)]
+#[path = "targets_tests/mod.rs"] // reason: keep private target-generation tests in the owned sidecar directory.
+mod targets_tests;
+
 pub(crate) fn probe_targets(
     app_root_rel_path: &str,
     astro_policy: &G3TsAstroMediaPolicySurfaceState,
@@ -53,6 +57,10 @@ fn probe_targets_from_glob(
     app_root_rel_path: &str,
     glob: &str,
 ) -> Vec<eslint_config_parser::types::EslintProbeTarget> {
+    if !has_glob_meta(glob) {
+        return literal_probe_targets(app_root_rel_path, glob);
+    }
+
     extensions_from_glob(glob)
         .into_iter()
         .filter_map(|extension| {
@@ -66,7 +74,37 @@ fn probe_targets_from_glob(
         .collect()
 }
 
+fn literal_probe_targets(
+    app_root_rel_path: &str,
+    rel_path: &str,
+) -> Vec<eslint_config_parser::types::EslintProbeTarget> {
+    if let Some(extension) = source_file_extension(rel_path) {
+        let Some(kind) = probe_kind_for_extension(extension) else {
+            return Vec::new();
+        };
+
+        return vec![target(app_root_rel_path, rel_path, kind)];
+    }
+
+    ["astro", "ts", "tsx", "mdx"]
+        .into_iter()
+        .filter_map(|extension| {
+            Some(target(
+                app_root_rel_path,
+                &format!("{rel_path}/__g3ts_media_probe__.{extension}"),
+                probe_kind_for_extension(extension)?,
+            ))
+        })
+        .collect()
+}
+
+fn has_glob_meta(glob: &str) -> bool {
+    glob.chars()
+        .any(|character| matches!(character, '*' | '?' | '[' | ']' | '{' | '}'))
+}
+
 fn extensions_from_glob(glob: &str) -> Vec<&'static str> {
+    let glob = glob_after_first_meta(glob);
     let mut extensions = Vec::new();
     if glob.contains(".astro") || glob.contains("{astro") || glob.contains(",astro") {
         extensions.push("astro");
@@ -86,6 +124,11 @@ fn extensions_from_glob(glob: &str) -> Vec<&'static str> {
         extensions.push("ts");
     }
     extensions
+}
+
+fn glob_after_first_meta(glob: &str) -> &str {
+    glob.find(|character| matches!(character, '*' | '?' | '[' | '{'))
+        .map_or(glob, |index| &glob[index..])
 }
 
 fn probe_kind_for_extension(
@@ -115,15 +158,57 @@ fn target(
 }
 
 fn probe_from_glob(glob: &str, extension: &str) -> Option<String> {
-    let prefix = glob
-        .split('*')
-        .next()
-        .map(str::trim)
-        .filter(|prefix| !prefix.is_empty())?
-        .trim_end_matches('/')
-        .to_owned();
+    let prefix = glob_prefix(glob)?;
+    let prefix = glob_prefix_directory(prefix, glob_after_first_meta(glob))?;
 
     Some(format!("{prefix}/__g3ts_media_probe__.{extension}"))
+}
+
+fn glob_prefix(glob: &str) -> Option<&str> {
+    glob.split(|character| matches!(character, '*' | '?' | '[' | '{'))
+        .next()
+        .map(str::trim)
+        .filter(|prefix| !prefix.is_empty())
+}
+
+fn glob_prefix_directory(prefix: &str, glob_suffix: &str) -> Option<String> {
+    let had_trailing_slash = prefix.ends_with('/');
+    let prefix = prefix.trim_end_matches('/');
+    if source_file_extension(prefix).is_some() && suffix_declares_extension(glob_suffix) {
+        return None;
+    }
+    if had_trailing_slash {
+        return Some(prefix.to_owned());
+    }
+    if source_file_extension(prefix).is_some() {
+        if suffix_declares_extension(glob_suffix) {
+            return None;
+        }
+
+        return std::path::Path::new(prefix)
+            .parent()
+            .and_then(std::path::Path::to_str)
+            .filter(|parent| !parent.is_empty())
+            .map(str::to_owned);
+    }
+
+    std::path::Path::new(prefix)
+        .parent()
+        .and_then(std::path::Path::to_str)
+        .filter(|parent| !parent.is_empty())
+        .map(str::to_owned)
+        .or_else(|| Some(prefix.to_owned()))
+}
+
+fn suffix_declares_extension(glob_suffix: &str) -> bool {
+    [".astro", ".ts", ".tsx", ".mdx"]
+        .into_iter()
+        .any(|extension| glob_suffix.contains(extension))
+}
+
+fn source_file_extension(rel_path: &str) -> Option<&str> {
+    let extension = rel_path.rsplit_once('.').map(|(_, extension)| extension)?;
+    probe_kind_for_extension(extension).map(|_| extension)
 }
 
 fn dedupe_targets(

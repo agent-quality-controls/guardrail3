@@ -134,5 +134,10 @@ fn astro_static_value(
             source_module: source_module.clone(),
             imported_name: imported_name.clone(),
         },
+        astro_config_parser::types::AstroStaticValue::UnsupportedExpression { reason } => {
+            G3TsAstroStaticValue::UnsupportedExpression {
+                reason: reason.clone(),
+            }
+        }
     }
 }

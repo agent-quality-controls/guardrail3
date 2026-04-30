@@ -7,6 +7,10 @@ import {
   staticStringFromJsxAttribute
 } from "../utils/ast.js";
 import {
+  importMatchesConfiguredModule,
+  normalizeConfiguredModules
+} from "../utils/module-identity.js";
+import {
   astroMediaPolicyOptionsSchema,
   missingRequiredOptions,
   normalizePublicPath,
@@ -65,7 +69,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     );
     const checkedExtensions = new Set(options.checkedImageExtensions);
     const approvedHelpers = new Set(options.approvedMediaHelpers);
-    const mediaHelperModules = new Set(options.mediaHelperModules);
+    const mediaHelperModules = normalizeConfiguredModules(options.mediaHelperModules);
     const importedApprovedHelpers = new Set<string>();
 
     function shouldReport(value: string): boolean {
@@ -91,7 +95,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
       ImportDeclaration(node): void {
         if (
           typeof node.source.value !== "string" ||
-          !mediaHelperModules.has(node.source.value)
+          !importMatchesConfiguredModule(node.source.value, context, mediaHelperModules)
         ) {
           return;
         }

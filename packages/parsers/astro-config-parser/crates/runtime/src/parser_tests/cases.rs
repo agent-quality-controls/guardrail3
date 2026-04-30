@@ -122,7 +122,202 @@ fn parses_same_file_const_strings_and_static_templates() {
 }
 
 #[test]
-fn dynamic_template_static_values_are_invalid() {
+fn parses_imported_static_media_config_constants() {
+    let root = tempfile::tempdir().expect("tempdir should be created");
+    std::fs::create_dir_all(root.path().join("src/lib")).expect("lib dir should be created");
+    std::fs::write(
+        root.path().join("src/lib/media-assets.ts"),
+        "export const publicMedia = { favicon: '/favicon.ico', defaultSocialImage: '/social/default.webp' };\n",
+    )
+    .expect("media constants should be written");
+    std::fs::write(
+        root.path().join("astro.config.mjs"),
+        "import { defineConfig } from 'astro/config';\nimport mediaAssets from 'g3ts-astro-media-assets';\nimport { publicMedia } from './src/lib/media-assets';\nexport default defineConfig({ integrations: [mediaAssets({ favicon: publicMedia.favicon, defaultSocialImage: publicMedia.defaultSocialImage })] });\n",
+    )
+    .expect("config should be written");
+
+    let document = assertions::parse_document(root.path(), "astro.config.mjs")
+        .expect("astro config should parse");
+
+    assertions::assert_parsed_document(&document);
+    let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
+        panic!("expected parsed document, got {document:?}");
+    };
+    let options = snapshot
+        .integrations
+        .first()
+        .and_then(|integration| integration.call.as_ref())
+        .and_then(|call| call.first_arg.as_ref())
+        .expect("integration options should be preserved");
+    let AstroStaticValue::Object(properties) = options else {
+        panic!("expected object options, got {options:?}");
+    };
+    let favicon = properties
+        .iter()
+        .find(|property| property.key == "favicon")
+        .expect("favicon should be present");
+    assert_eq!(
+        favicon.value,
+        AstroStaticValue::String("/favicon.ico".to_owned())
+    );
+}
+
+#[test]
+fn parses_same_file_exported_static_media_config_constants() {
+    let root = tempfile::tempdir().expect("tempdir should be created");
+    let rel_path = "astro.config.mjs";
+    std::fs::write(
+        root.path().join(rel_path),
+        "import mediaAssets from 'g3ts-astro-media-assets';\nexport const favicon = '/favicon.ico';\nexport default { integrations: [mediaAssets({ favicon })] };\n",
+    )
+    .expect("config should be written");
+
+    let document = assertions::parse_document(root.path(), rel_path)
+        .expect("astro config document should exist");
+
+    assertions::assert_parsed_document(&document);
+    let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
+        panic!("expected parsed document, got {document:?}");
+    };
+    let options = snapshot
+        .integrations
+        .first()
+        .and_then(|integration| integration.call.as_ref())
+        .and_then(|call| call.first_arg.as_ref())
+        .expect("integration options should be preserved");
+    let AstroStaticValue::Object(properties) = options else {
+        panic!("expected object options, got {options:?}");
+    };
+    let favicon = properties
+        .iter()
+        .find(|property| property.key == "favicon")
+        .expect("favicon should be present");
+    assert_eq!(
+        favicon.value,
+        AstroStaticValue::String("/favicon.ico".to_owned())
+    );
+}
+
+#[test]
+fn parses_same_file_static_object_member_values() {
+    let root = tempfile::tempdir().expect("tempdir should be created");
+    let rel_path = "astro.config.mjs";
+    std::fs::write(
+        root.path().join(rel_path),
+        "import mediaAssets from 'g3ts-astro-media-assets';\nconst publicMedia = { favicon: '/favicon.ico' };\nexport default { integrations: [mediaAssets({ favicon: publicMedia.favicon })] };\n",
+    )
+    .expect("config should be written");
+
+    let document = assertions::parse_document(root.path(), rel_path)
+        .expect("astro config document should exist");
+
+    assertions::assert_parsed_document(&document);
+    let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
+        panic!("expected parsed document, got {document:?}");
+    };
+    let options = snapshot
+        .integrations
+        .first()
+        .and_then(|integration| integration.call.as_ref())
+        .and_then(|call| call.first_arg.as_ref())
+        .expect("integration options should be preserved");
+    let AstroStaticValue::Object(properties) = options else {
+        panic!("expected object options, got {options:?}");
+    };
+    let favicon = properties
+        .iter()
+        .find(|property| property.key == "favicon")
+        .expect("favicon should be present");
+    assert_eq!(
+        favicon.value,
+        AstroStaticValue::String("/favicon.ico".to_owned())
+    );
+}
+
+#[test]
+fn parses_imported_static_scalar_values() {
+    let root = tempfile::tempdir().expect("tempdir should be created");
+    std::fs::create_dir_all(root.path().join("src/lib")).expect("lib dir should be created");
+    std::fs::write(
+        root.path().join("src/lib/media-assets.ts"),
+        "export const favicon = '/favicon.ico';\n",
+    )
+    .expect("media constants should be written");
+    std::fs::write(
+        root.path().join("astro.config.mjs"),
+        "import mediaAssets from 'g3ts-astro-media-assets';\nimport { favicon } from './src/lib/media-assets';\nexport default { integrations: [mediaAssets({ favicon })] };\n",
+    )
+    .expect("config should be written");
+
+    let document = assertions::parse_document(root.path(), "astro.config.mjs")
+        .expect("astro config should parse");
+
+    assertions::assert_parsed_document(&document);
+    let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
+        panic!("expected parsed document, got {document:?}");
+    };
+    let options = snapshot
+        .integrations
+        .first()
+        .and_then(|integration| integration.call.as_ref())
+        .and_then(|call| call.first_arg.as_ref())
+        .expect("integration options should be preserved");
+    let AstroStaticValue::Object(properties) = options else {
+        panic!("expected object options, got {options:?}");
+    };
+    let favicon = properties
+        .iter()
+        .find(|property| property.key == "favicon")
+        .expect("favicon should be present");
+    assert_eq!(
+        favicon.value,
+        AstroStaticValue::String("/favicon.ico".to_owned())
+    );
+}
+
+#[test]
+fn parses_local_named_exported_static_scalar_values() {
+    let root = tempfile::tempdir().expect("tempdir should be created");
+    std::fs::create_dir_all(root.path().join("src/lib")).expect("lib dir should be created");
+    std::fs::write(
+        root.path().join("src/lib/media-assets.ts"),
+        "const favicon = '/favicon.ico';\nexport { favicon };\n",
+    )
+    .expect("media constants should be written");
+    std::fs::write(
+        root.path().join("astro.config.mjs"),
+        "import mediaAssets from 'g3ts-astro-media-assets';\nimport { favicon } from './src/lib/media-assets';\nexport default { integrations: [mediaAssets({ favicon })] };\n",
+    )
+    .expect("config should be written");
+
+    let document = assertions::parse_document(root.path(), "astro.config.mjs")
+        .expect("astro config should parse");
+
+    assertions::assert_parsed_document(&document);
+    let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
+        panic!("expected parsed document, got {document:?}");
+    };
+    let options = snapshot
+        .integrations
+        .first()
+        .and_then(|integration| integration.call.as_ref())
+        .and_then(|call| call.first_arg.as_ref())
+        .expect("integration options should be preserved");
+    let AstroStaticValue::Object(properties) = options else {
+        panic!("expected object options, got {options:?}");
+    };
+    let favicon = properties
+        .iter()
+        .find(|property| property.key == "favicon")
+        .expect("favicon should be present");
+    assert_eq!(
+        favicon.value,
+        AstroStaticValue::String("/favicon.ico".to_owned())
+    );
+}
+
+#[test]
+fn dynamic_template_static_values_are_preserved_as_unsupported() {
     let root = tempfile::tempdir().expect("tempdir should be created");
     let rel_path = "astro.config.mjs";
     std::fs::write(
@@ -134,7 +329,48 @@ fn dynamic_template_static_values_are_invalid() {
     let document = assertions::parse_document(root.path(), rel_path)
         .expect("astro config document should exist");
 
-    assertions::assert_invalid_document(&document, "must resolve to static values");
+    assertions::assert_parsed_document(&document);
+    let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
+        panic!("expected parsed document, got {document:?}");
+    };
+    let options = snapshot
+        .integrations
+        .first()
+        .and_then(|integration| integration.call.as_ref())
+        .and_then(|call| call.first_arg.as_ref())
+        .expect("integration options should be preserved");
+    let AstroStaticValue::Object(properties) = options else {
+        panic!("expected object options, got {options:?}");
+    };
+    let sitemap_urls = properties
+        .iter()
+        .find(|property| property.key == "sitemapUrls")
+        .expect("sitemapUrls should be present");
+    let AstroStaticValue::Array(values) = &sitemap_urls.value else {
+        panic!("expected sitemapUrls array, got {sitemap_urls:?}");
+    };
+    assert_eq!(
+        values.first(),
+        Some(&AstroStaticValue::UnsupportedExpression {
+            reason: "Astro template value is not statically resolvable".to_owned()
+        })
+    );
+}
+
+#[test]
+fn computed_static_member_access_is_invalid() {
+    let root = tempfile::tempdir().expect("tempdir should be created");
+    let rel_path = "astro.config.mjs";
+    std::fs::write(
+        root.path().join(rel_path),
+        "import mediaAssets from 'g3ts-astro-media-assets';\nconst publicMedia = { favicon: '/favicon.ico' };\nexport default { integrations: [mediaAssets({ favicon: publicMedia['favicon'] })] };\n",
+    )
+    .expect("config should be written");
+
+    let document = assertions::parse_document(root.path(), rel_path)
+        .expect("astro config document should exist");
+
+    assertions::assert_invalid_document(&document, "must not be computed");
 }
 
 #[test]
@@ -445,7 +681,7 @@ fn mutated_integrations_array_identifier_is_invalid() {
 }
 
 #[test]
-fn dynamic_integration_options_are_invalid() {
+fn dynamic_integration_options_are_preserved_as_unsupported() {
     let root = tempfile::tempdir().expect("tempdir should be created");
     let rel_path = "astro.config.mjs";
     std::fs::write(
@@ -457,7 +693,20 @@ fn dynamic_integration_options_are_invalid() {
     let document = assertions::parse_document(root.path(), rel_path)
         .expect("astro config document should exist");
 
-    assertions::assert_invalid_document(&document, "must resolve to static values");
+    assertions::assert_parsed_document(&document);
+    let AstroConfigParseState::Parsed(snapshot) = &document.typed else {
+        panic!("expected parsed document, got {document:?}");
+    };
+    assert_eq!(
+        snapshot
+            .integrations
+            .first()
+            .and_then(|integration| integration.call.as_ref())
+            .and_then(|call| call.first_arg.as_ref()),
+        Some(&AstroStaticValue::UnsupportedExpression {
+            reason: "Astro integration options must resolve to static values".to_owned()
+        })
+    );
 }
 
 #[test]
@@ -514,16 +763,14 @@ fn named_alias_and_imported_custom_check_are_preserved() {
     let AstroStaticValue::Array(values) = &custom_checks.value else {
         panic!("expected customChecks array, got {:?}", custom_checks.value);
     };
-    assert!(matches!(
+    assert_eq!(
         values.first(),
-        Some(AstroStaticValue::ImportedIdentifier {
-            local_name,
-            source_module: Some(source_module),
-            imported_name: Some(imported_name),
-        }) if local_name == "structuredDataPresentCheck"
-            && source_module == "g3ts-astro-nuasite-checks"
-            && imported_name == "structuredDataPresentCheck"
-    ));
+        Some(&AstroStaticValue::ImportedIdentifier {
+            local_name: "structuredDataPresentCheck".to_owned(),
+            source_module: Some("g3ts-astro-nuasite-checks".to_owned()),
+            imported_name: Some("structuredDataPresentCheck".to_owned()),
+        })
+    );
 }
 
 #[test]

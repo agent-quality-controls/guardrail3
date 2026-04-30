@@ -113,6 +113,9 @@ pub enum G3TsAstroStaticValue {
         source_module: Option<String>,
         imported_name: Option<String>,
     },
+    UnsupportedExpression {
+        reason: String,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
