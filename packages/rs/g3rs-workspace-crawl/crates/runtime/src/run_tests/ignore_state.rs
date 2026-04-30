@@ -22,6 +22,10 @@ fn write(path: impl AsRef<Path>, content: &str) {
     fs::write(path, content).expect("write fixture file");
 }
 
+fn write_root_manifest(root: &Path) {
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+}
+
 #[test]
 fn marks_gitignored_files_as_included_via_recovery() {
     let temp_dir = tempdir().expect("create temporary workspace root");
@@ -60,6 +64,7 @@ fn ignored_non_recoverable_files_do_not_appear() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join(".gitignore"), "*.log\n");
     write(root.join("debug.log"), "some log\n");
@@ -76,6 +81,7 @@ fn nested_gitignore_is_respected() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join("src/lib.rs"), "");
     write(root.join("src/.gitignore"), "*.tmp\n");
@@ -136,6 +142,7 @@ fn negation_pattern_unignores_file() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join(".gitignore"), "*.log\n!important.log\n");
     write(root.join("debug.log"), "ignored log");
@@ -235,6 +242,7 @@ fn recovery_finds_ignored_generated_state_directory_sentinels() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(
         root.join(".gitignore"),
@@ -275,6 +283,7 @@ fn recovery_uses_guardrail3_rs_toml_and_not_dead_guardrail3_toml() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(
         root.join(".gitignore"),
@@ -330,6 +339,7 @@ fn directory_only_gitignore_pattern() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join(".gitignore"), "build/\n");
     write(root.join("build/output.txt"), "artifact");
