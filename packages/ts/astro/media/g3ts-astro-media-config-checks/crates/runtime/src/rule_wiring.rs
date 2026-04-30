@@ -98,7 +98,7 @@ fn check_rule(
         id,
         "Astro media policy rule is not effective",
         format!(
-            "`{}` must activate `{rule_name}` at `error` with explicit options matching `[ts.astro.media]`.",
+            "`{}` must activate `{rule_name}` at `error` with explicit options matching `[ts.astro.media]`: `publicSourceGlobs`, `mediaHelperModules`, `approvedMediaHelpers`, `contentImageComponents`, `contentImageKeyProps`, `bannedImageSourceProps`, `bannedImageAltProps`, `allowedPublicImagePaths`, `checkedImageExtensions`, and `metadataImagePropertyNames`.",
             rel_path.unwrap_or("eslint.config.*")
         ),
         rel_path,

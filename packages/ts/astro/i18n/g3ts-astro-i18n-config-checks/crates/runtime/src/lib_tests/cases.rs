@@ -13,8 +13,6 @@ fn golden_reports_i18n_inventory_ids() {
             "g3ts-astro-i18n/i18next-plugin-wired",
             "g3ts-astro-i18n/i18n-policy-plugin-wired",
             "g3ts-astro-i18n/no-unlocalized-internal-hrefs-rule",
-            "g3ts-astro-i18n/no-inline-image-alt-rule",
-            "g3ts-astro-i18n/require-content-image-key-rule",
             "g3ts-astro-i18n/raw-date-number-formatting-bans",
             "g3ts-astro-i18n/protected-i18n-rule-disables-restricted",
         ],
@@ -46,11 +44,11 @@ fn missing_policy_rule_fails() {
     };
     snapshot
         .public_i18n_policy_rules
-        .retain(|rule| rule != "astro-i18n-policy/no-inline-image-alt");
+        .retain(|rule| rule != "astro-i18n-policy/no-unlocalized-internal-hrefs");
 
     assertions::assert_runtime_check_id_severity(
         &input,
-        "g3ts-astro-i18n/no-inline-image-alt-rule",
+        "g3ts-astro-i18n/no-unlocalized-internal-hrefs-rule",
         guardrail3_check_types::G3Severity::Error,
     );
 }
@@ -99,9 +97,8 @@ fn helper_lane_must_not_inherit_raw_formatting_bans() {
     else {
         unreachable!("test fixture must be parsed")
     };
-    snapshot.helper_no_restricted_syntax_selectors = vec![
-        "CallExpression[callee.property.name='toLocaleDateString']".to_owned(),
-    ];
+    snapshot.helper_no_restricted_syntax_selectors =
+        vec!["CallExpression[callee.property.name='toLocaleDateString']".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
         &input,

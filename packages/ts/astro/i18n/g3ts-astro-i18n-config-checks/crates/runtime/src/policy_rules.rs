@@ -1,19 +1,20 @@
-use g3ts_astro_i18n_types::{
-    G3TsAstroI18nIntegrationContractInput, G3TsAstroI18nPolicySnapshot,
-};
+use g3ts_astro_i18n_types::{G3TsAstroI18nIntegrationContractInput, G3TsAstroI18nPolicySnapshot};
 use guardrail3_check_types::G3CheckResult;
 
 const STRICT_ID: &str = "g3ts-astro-i18n/strict-policy-configured";
 const PATHS_ID: &str = "g3ts-astro-i18n/policy-paths-valid";
 
-pub(crate) fn check(contract: &G3TsAstroI18nIntegrationContractInput, results: &mut Vec<G3CheckResult>) {
+pub(crate) fn check(
+    contract: &G3TsAstroI18nIntegrationContractInput,
+    results: &mut Vec<G3CheckResult>,
+) {
     let rel_path = crate::support::i18n_policy_rel_path(&contract.astro_policy);
     let Some(policy) = crate::support::parsed_i18n_policy(&contract.astro_policy) else {
         results.push(crate::support::error(
             STRICT_ID,
             "Astro i18n strict policy is missing",
             format!(
-                "`{}` must define `[ts.astro.i18n]` with explicit `locales`, `public_source_globs`, content route prefixes, checked link helpers, approved helpers, and content image policy. G3TS does not invent i18n defaults.",
+                "`{}` must define `[ts.astro.i18n]` with explicit `locales`, `default_locale` when needed, `require_locale_prefix_for_content_routes`, `allowed_unprefixed_routes`, `content_route_prefixes`, `checked_internal_link_helpers`, `approved_internal_link_helpers`, `approved_localized_link_components`, `approved_date_format_helpers`, `approved_number_format_helpers`, `public_source_globs`, and `helper_source_globs`. G3TS does not invent i18n defaults.",
                 rel_path.unwrap_or("guardrail3-ts.toml")
             ),
             rel_path,
@@ -31,7 +32,10 @@ fn check_required_fields(policy: &G3TsAstroI18nPolicySnapshot, results: &mut Vec
         results.push(crate::support::info(
             STRICT_ID,
             "Astro i18n strict policy is configured",
-            format!("`{}` defines the required `[ts.astro.i18n]` fields with no hidden defaults.", policy.rel_path),
+            format!(
+                "`{}` defines the required `[ts.astro.i18n]` fields with no hidden defaults.",
+                policy.rel_path
+            ),
             &policy.rel_path,
         ));
         return;
@@ -69,18 +73,6 @@ fn missing_fields(policy: &G3TsAstroI18nPolicySnapshot) -> Vec<&'static str> {
     if policy.approved_localized_link_components.is_empty() {
         missing.push("approved_localized_link_components");
     }
-    if policy.content_image_components.is_empty() {
-        missing.push("content_image_components");
-    }
-    if policy.content_image_key_props.is_empty() {
-        missing.push("content_image_key_props");
-    }
-    if policy.banned_image_source_props.is_empty() {
-        missing.push("banned_image_source_props");
-    }
-    if policy.banned_image_alt_props.is_empty() {
-        missing.push("banned_image_alt_props");
-    }
     missing
 }
 
@@ -99,7 +91,10 @@ fn check_paths(policy: &G3TsAstroI18nPolicySnapshot, results: &mut Vec<G3CheckRe
         results.push(crate::support::info(
             PATHS_ID,
             "Astro i18n policy paths are app-relative",
-            format!("`{}` i18n helper paths and globs are app-relative and non-empty.", policy.rel_path),
+            format!(
+                "`{}` i18n helper paths and globs are app-relative and non-empty.",
+                policy.rel_path
+            ),
             &policy.rel_path,
         ));
         return;

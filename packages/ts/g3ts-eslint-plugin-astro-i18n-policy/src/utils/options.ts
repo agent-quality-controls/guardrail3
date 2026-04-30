@@ -9,10 +9,6 @@ export interface AstroI18nPolicyOptions {
   checkedInternalLinkHelpers?: string[];
   approvedInternalLinkHelpers?: string[];
   approvedLocalizedLinkComponents?: string[];
-  contentImageComponents?: string[];
-  contentImageKeyProps?: string[];
-  bannedImageSourceProps?: string[];
-  bannedImageAltProps?: string[];
 }
 
 export interface ResolvedAstroI18nPolicyOptions {
@@ -24,10 +20,6 @@ export interface ResolvedAstroI18nPolicyOptions {
   checkedInternalLinkHelpers: string[];
   approvedInternalLinkHelpers: string[];
   approvedLocalizedLinkComponents: string[];
-  contentImageComponents: string[];
-  contentImageKeyProps: string[];
-  bannedImageSourceProps: string[];
-  bannedImageAltProps: string[];
 }
 
 export type RuleOptionsTuple = [AstroI18nPolicyOptions?];
@@ -49,11 +41,7 @@ export const astroI18nPolicyOptionsSchema: JSONSchema4[] = [
       contentRoutePrefixes: stringArraySchema,
       checkedInternalLinkHelpers: stringArraySchema,
       approvedInternalLinkHelpers: stringArraySchema,
-      approvedLocalizedLinkComponents: stringArraySchema,
-      contentImageComponents: stringArraySchema,
-      contentImageKeyProps: stringArraySchema,
-      bannedImageSourceProps: stringArraySchema,
-      bannedImageAltProps: stringArraySchema
+      approvedLocalizedLinkComponents: stringArraySchema
     }
   }
 ];
@@ -78,11 +66,7 @@ export function resolveOptions(
     ),
     approvedLocalizedLinkComponents: normalizeStringArray(
       source.approvedLocalizedLinkComponents
-    ),
-    contentImageComponents: normalizeStringArray(source.contentImageComponents),
-    contentImageKeyProps: normalizeStringArray(source.contentImageKeyProps),
-    bannedImageSourceProps: normalizeStringArray(source.bannedImageSourceProps),
-    bannedImageAltProps: normalizeStringArray(source.bannedImageAltProps)
+    )
   };
 }
 

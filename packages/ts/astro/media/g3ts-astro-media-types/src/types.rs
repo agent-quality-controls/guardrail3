@@ -71,7 +71,7 @@ pub struct G3TsAstroMediaPolicySnapshot {
     pub favicon: String,
     pub app_icons: Vec<String>,
     pub default_social_image: String,
-    pub allow_svg_icons: bool,
+    pub allow_svg_icons: Option<bool>,
     pub public_source_globs: Vec<String>,
     pub media_helper_modules: Vec<String>,
     pub approved_media_helpers: Vec<String>,
@@ -82,6 +82,7 @@ pub struct G3TsAstroMediaPolicySnapshot {
     pub allowed_public_image_paths: Vec<String>,
     pub checked_image_extensions: Vec<String>,
     pub metadata_image_property_names: Vec<String>,
+    pub extra_fields: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

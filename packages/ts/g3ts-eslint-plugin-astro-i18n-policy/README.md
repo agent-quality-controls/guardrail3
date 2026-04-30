@@ -7,8 +7,6 @@ The package is an ESLint plugin, not a CLI. G3TS enforces that this plugin is in
 ## Rules
 
 - `astro-i18n-policy/no-unlocalized-internal-hrefs`
-- `astro-i18n-policy/no-inline-image-alt`
-- `astro-i18n-policy/require-content-image-key`
 
 Every rule requires explicit options. Missing required options reports an ESLint config error.
 

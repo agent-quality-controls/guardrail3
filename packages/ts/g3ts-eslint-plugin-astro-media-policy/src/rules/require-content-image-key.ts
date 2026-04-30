@@ -1,6 +1,11 @@
 import { AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/utils";
+import type { TSESTree } from "@typescript-eslint/utils";
 
-import { jsxAttributeName, jsxElementName } from "../utils/ast.js";
+import {
+  jsxAttributeName,
+  jsxElementName,
+  staticStringFromJsxAttribute
+} from "../utils/ast.js";
 import {
   astroMediaPolicyOptionsSchema,
   missingRequiredOptions,
@@ -8,7 +13,11 @@ import {
   type RuleOptionsTuple
 } from "../utils/options.js";
 
-type MessageIds = "missingConfig" | "missingImageKey" | "bannedSourceProp";
+type MessageIds =
+  | "missingConfig"
+  | "missingImageKey"
+  | "invalidImageKey"
+  | "bannedSourceProp";
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
@@ -29,6 +38,8 @@ export default createRule<RuleOptionsTuple, MessageIds>({
         "astro-media-policy/require-content-image-key requires non-empty options: {{missing}}.",
       missingImageKey:
         "`{{component}}` must pass one configured image key prop: {{props}}.",
+      invalidImageKey:
+        "`{{component}}` passes image key prop `{{prop}}` without a usable key value.",
       bannedSourceProp:
         "`{{component}}` uses raw image source prop `{{prop}}`. Use one configured image key prop instead: {{props}}."
     }
@@ -75,7 +86,15 @@ export default createRule<RuleOptionsTuple, MessageIds>({
 
           const prop = jsxAttributeName(attribute.name);
           if (keyProps.has(prop)) {
-            hasKey = true;
+            if (hasUsableKeyValue(attribute)) {
+              hasKey = true;
+            } else {
+              context.report({
+                node: attribute,
+                messageId: "invalidImageKey",
+                data: { component, prop }
+              });
+            }
           }
 
           if (bannedSourceProps.has(prop)) {
@@ -105,3 +124,41 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     };
   }
 });
+
+function hasUsableKeyValue(attribute: TSESTree.JSXAttribute): boolean {
+  if (!attribute.value) {
+    return false;
+  }
+
+  const staticValue = staticStringFromJsxAttribute(attribute);
+  if (staticValue !== null) {
+    return staticValue.trim().length > 0;
+  }
+
+  if (attribute.value.type !== AST_NODE_TYPES.JSXExpressionContainer) {
+    return true;
+  }
+
+  const expression = attribute.value.expression;
+
+  if (expression.type === AST_NODE_TYPES.JSXEmptyExpression) {
+    return false;
+  }
+  if (
+    expression.type === AST_NODE_TYPES.Literal &&
+    (typeof expression.value === "boolean" ||
+      typeof expression.value === "number" ||
+      expression.value === null)
+  ) {
+    return false;
+  }
+
+  if (
+    expression.type === AST_NODE_TYPES.ObjectExpression ||
+    expression.type === AST_NODE_TYPES.ArrayExpression
+  ) {
+    return false;
+  }
+
+  return expression.type !== AST_NODE_TYPES.Identifier || expression.name !== "undefined";
+}

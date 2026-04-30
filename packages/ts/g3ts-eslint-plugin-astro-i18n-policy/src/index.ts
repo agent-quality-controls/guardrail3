@@ -1,12 +1,8 @@
 import recommended from "./configs/recommended.js";
-import noInlineImageAlt from "./rules/no-inline-image-alt.js";
 import noUnlocalizedInternalHrefs from "./rules/no-unlocalized-internal-hrefs.js";
-import requireContentImageKey from "./rules/require-content-image-key.js";
 
 const rules = {
-  "no-inline-image-alt": noInlineImageAlt,
-  "no-unlocalized-internal-hrefs": noUnlocalizedInternalHrefs,
-  "require-content-image-key": requireContentImageKey
+  "no-unlocalized-internal-hrefs": noUnlocalizedInternalHrefs
 } as const;
 
 const plugin = {

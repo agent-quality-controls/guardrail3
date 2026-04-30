@@ -1,4 +1,5 @@
 import { AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/utils";
+import type { TSESTree } from "@typescript-eslint/utils";
 
 import {
   jsxAttributeName,
@@ -76,8 +77,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
             continue;
           }
 
-          const value = staticStringFromJsxAttribute(attribute);
-          if (value !== null) {
+          if (hasStaticInlineAlt(attribute)) {
             context.report({
               node: attribute,
               messageId: "inlineAlt",
@@ -89,3 +89,33 @@ export default createRule<RuleOptionsTuple, MessageIds>({
     };
   }
 });
+
+function hasStaticInlineAlt(attribute: TSESTree.JSXAttribute): boolean {
+  const value = staticStringFromJsxAttribute(attribute);
+  if (value !== null) {
+    return true;
+  }
+
+  return (
+    attribute.value?.type === AST_NODE_TYPES.JSXExpressionContainer &&
+    isStaticStringExpression(attribute.value.expression)
+  );
+}
+
+function isStaticStringExpression(
+  node: TSESTree.Expression | TSESTree.JSXEmptyExpression
+): boolean {
+  if (node.type === AST_NODE_TYPES.Literal) {
+    return typeof node.value === "string";
+  }
+
+  if (node.type === AST_NODE_TYPES.TemplateLiteral) {
+    return true;
+  }
+
+  if (node.type === AST_NODE_TYPES.BinaryExpression && node.operator === "+") {
+    return isStaticStringExpression(node.left) || isStaticStringExpression(node.right);
+  }
+
+  return false;
+}

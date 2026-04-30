@@ -12,11 +12,7 @@ export const baseOptions: AstroI18nPolicyOptions = {
   contentRoutePrefixes: ["/blog", "/guides"],
   checkedInternalLinkHelpers: ["buildPath"],
   approvedInternalLinkHelpers: ["localizedHref", "buildLocalizedPath"],
-  approvedLocalizedLinkComponents: ["LocalizedLink"],
-  contentImageComponents: ["ArticleImage", "ContentImage"],
-  contentImageKeyProps: ["image"],
-  bannedImageSourceProps: ["src", "url"],
-  bannedImageAltProps: ["alt"]
+  approvedLocalizedLinkComponents: ["LocalizedLink"]
 };
 
 export function createRuleTester(): RuleTester {

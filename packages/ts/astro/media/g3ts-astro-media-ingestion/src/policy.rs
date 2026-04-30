@@ -70,6 +70,7 @@ pub(crate) fn ingest_media_policy_surface(
             allowed_public_image_paths: media.allowed_public_image_paths,
             checked_image_extensions: media.checked_image_extensions,
             metadata_image_property_names: media.metadata_image_property_names,
+            extra_fields: media.extra.keys().cloned().collect(),
         },
     }
 }

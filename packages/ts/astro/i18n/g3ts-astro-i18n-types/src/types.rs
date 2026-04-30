@@ -38,10 +38,6 @@ pub struct G3TsAstroI18nPolicySnapshot {
     pub approved_localized_link_components: Vec<String>,
     pub approved_date_format_helpers: Vec<String>,
     pub approved_number_format_helpers: Vec<String>,
-    pub content_image_components: Vec<String>,
-    pub content_image_key_props: Vec<String>,
-    pub banned_image_source_props: Vec<String>,
-    pub banned_image_alt_props: Vec<String>,
     pub public_source_globs: Vec<String>,
     pub helper_source_globs: Vec<String>,
 }
