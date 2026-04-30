@@ -23,6 +23,10 @@ pub mod clippy_step_present;
 #[cfg(feature = "checks")]
 pub mod config_changes_trigger_validation;
 #[cfg(feature = "checks")]
+pub mod contract_critical_command_not_fail_open;
+#[cfg(feature = "checks")]
+pub mod contract_trigger_coverage;
+#[cfg(feature = "checks")]
 pub mod duplication_tool_is_cargo_dupes;
 #[cfg(feature = "checks")]
 pub mod fmt_step_present;
@@ -30,6 +34,10 @@ pub mod fmt_step_present;
 pub mod gitleaks_step_present;
 #[cfg(feature = "checks")]
 pub mod guardrail_validate_staged_present;
+#[cfg(feature = "checks")]
+pub mod required_contract_command_present;
+#[cfg(feature = "checks")]
+pub mod run;
 #[cfg(feature = "checks")]
 pub mod shared_target_dir_present;
 #[cfg(feature = "checks")]

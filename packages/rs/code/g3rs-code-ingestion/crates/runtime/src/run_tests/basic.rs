@@ -13,6 +13,8 @@ fn git_init(path: &Path) {
         .status()
         .expect("git init should succeed");
     assert!(status.success(), "git init should exit successfully");
+    fs::write(path.join("Cargo.toml"), "[workspace]\nmembers = []\n")
+        .expect("write default workspace manifest");
 }
 
 fn write(path: impl AsRef<Path>, content: &str) {
@@ -28,6 +30,10 @@ fn ingests_owned_rust_files_and_classifies_tests() {
     let root = temp_dir.path();
     git_init(root);
 
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
     write(root.join("src/lib.rs"), "pub fn run() {}\n");
     write(root.join("src/http_tests.rs"), "pub fn helper() {}\n");
     write(root.join("tests/smoke.rs"), "#[test]\nfn smoke() {}\n");
@@ -43,8 +49,8 @@ fn ingests_owned_rust_files_and_classifies_tests() {
         assertions::require_source_file(&inputs, "src/lib.rs"),
         "src/lib.rs",
         false,
-        None,
-        false,
+        Some("library"),
+        true,
         "pub fn run() {}\n",
     );
     assertions::assert_source_file(
@@ -265,6 +271,10 @@ fn routes_parse_failures_into_source_input() {
     let root = temp_dir.path();
     git_init(root);
 
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
     write(root.join("src/lib.rs"), "pub fn broken( {}\n");
 
     let workspace_crawl = crawl(root).expect("crawl should succeed");
@@ -533,11 +543,37 @@ fn leaves_unowned_source_without_profile() {
 }
 
 #[test]
+fn virtual_workspace_root_does_not_own_src_lib() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(root.join("src/lib.rs"), "pub fn probe() {}\n");
+
+    let workspace_crawl = crawl(root).expect("crawl should succeed");
+    let inputs =
+        crate::run::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
+
+    assertions::assert_source_file(
+        assertions::require_source_file(&inputs, "src/lib.rs"),
+        "src/lib.rs",
+        false,
+        None,
+        false,
+        "pub fn probe() {}\n",
+    );
+}
+
+#[test]
 fn ingested_inputs_drive_code_ast_checks() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
 
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
     write(root.join("src/lib.rs"), "pub fn run() { todo!(); }\n");
     write(
         root.join("tests/smoke.rs"),
@@ -647,7 +683,7 @@ advisories = { ignore = [] }\n\
     let input = crate::run::ingest_for_config_checks(&workspace_crawl)
         .expect("config ingestion should succeed");
 
-    assert_eq!(input.files.len(), 1, "{input:#?}");
+    assert_eq!(input.files.len(), 2, "{input:#?}");
     assertions::assert_exception_comments(
         &input,
         "deny.toml",

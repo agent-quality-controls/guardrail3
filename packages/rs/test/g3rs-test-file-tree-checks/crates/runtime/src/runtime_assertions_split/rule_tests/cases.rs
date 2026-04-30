@@ -806,6 +806,121 @@ fn reports_runtime_depends_on_assertions_at_normal_scope() {
 }
 
 #[test]
+fn accepts_public_assertion_reexport_facade() {
+    let mut component = with_external_harness(
+        component(
+            "",
+            "crates/runtime",
+            Some("demo_runtime"),
+            true,
+            Some("demo_assertions"),
+        ),
+        "crates/runtime/tests/public_surface.rs",
+    );
+    component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
+    component.assertions_dependencies = BTreeSet::from(["demo_runtime".to_owned()]);
+
+    let results = assertions::check(&input(
+        vec![
+            file(
+                "crates/runtime/tests/public_surface.rs",
+                G3RsTestFileKind::ExternalHarness,
+                Some(""),
+                None,
+                Some("demo_assertions"),
+                "use demo_assertions::assert_runtime;\n#[test]\nfn public_surface() { assert_runtime(); }\n",
+            ),
+            file(
+                "crates/assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some(""),
+                Some("lib"),
+                Some("demo_assertions"),
+                "pub mod semantic;\npub use crate::semantic::assert_runtime;\n",
+            ),
+            file(
+                "crates/assertions/src/semantic.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some(""),
+                Some("semantic"),
+                Some("demo_assertions"),
+                "pub fn assert_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
+            ),
+        ],
+        vec![component],
+    ));
+
+    assertions::assert_no_title(
+        &results,
+        "g3rs-test/runtime-assertions-split",
+        "assertions module reaches local private code",
+    );
+}
+
+#[test]
+fn rejects_public_reexport_of_non_proof_bearing_local_target_with_matching_name() {
+    let mut component = with_external_harness(
+        component(
+            "",
+            "crates/runtime",
+            Some("demo_runtime"),
+            true,
+            Some("demo_assertions"),
+        ),
+        "crates/runtime/tests/public_surface.rs",
+    );
+    component.runtime_dev_dependencies = BTreeSet::from(["demo_assertions".to_owned()]);
+    component.assertions_dependencies = BTreeSet::from(["demo_runtime".to_owned()]);
+
+    let results = assertions::check(&input(
+        vec![
+            file(
+                "crates/runtime/tests/public_surface.rs",
+                G3RsTestFileKind::ExternalHarness,
+                Some(""),
+                None,
+                Some("demo_assertions"),
+                "use demo_assertions::assert_runtime;\n#[test]\nfn public_surface() { assert_runtime(); }\n",
+            ),
+            file(
+                "crates/assertions/src/lib.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some(""),
+                Some("lib"),
+                Some("demo_assertions"),
+                "pub mod proof;\npub mod private_layout;\npub use crate::private_layout::assert_runtime;\n",
+            ),
+            file(
+                "crates/assertions/src/proof.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some(""),
+                Some("proof"),
+                Some("demo_assertions"),
+                "pub fn assert_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
+            ),
+            file(
+                "crates/assertions/src/private_layout.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some(""),
+                Some("private_layout"),
+                Some("demo_assertions"),
+                "pub fn assert_runtime() {}\n",
+            ),
+        ],
+        vec![component],
+    ));
+
+    assertions::assert_has_result(
+        &results,
+        "g3rs-test/runtime-assertions-split",
+        G3Severity::Error,
+        "assertions module reaches local private code",
+        "crates/assertions/src/lib.rs",
+        Some(3),
+    );
+}
+
+#[test]
 fn reports_assertions_missing_runtime_dependency() {
     let mut component = with_external_harness(
         component(

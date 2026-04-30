@@ -17,9 +17,6 @@ mod include_exclude_inventory;
 mod input_failures;
 mod interdependent_version_consistency;
 mod keywords_present;
-#[cfg(test)]
-#[path = "lib_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod lib_tests;
 mod license_present;
 mod linux_release_target;
 mod no_path_deps_to_unpublishable;
@@ -32,6 +29,7 @@ mod repository_present;
 mod run;
 mod semver_checks_installed;
 mod support;
+mod test_support;
 mod valid_semver;
 
 #[cfg(feature = "checks")]

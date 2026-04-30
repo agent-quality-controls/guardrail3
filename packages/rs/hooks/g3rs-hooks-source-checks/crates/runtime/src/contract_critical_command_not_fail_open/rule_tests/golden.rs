@@ -1,7 +1,7 @@
 use g3rs_hooks_contract_types::{G3HookCriticalCommand, G3HookRequirement, G3HookTriggerPattern};
-use guardrail3_check_types::G3Severity;
+use g3rs_hooks_source_checks_assertions::contract_critical_command_not_fail_open::rule as assertions;
 
-use crate::contract_critical_command_not_fail_open::rule::run_case;
+use super::super::run_case;
 
 #[test]
 fn contract_binary_critical_command_cannot_fail_open() {
@@ -12,15 +12,7 @@ fn contract_binary_critical_command_cannot_fail_open() {
         ))],
     );
 
-    assert!(
-        results.iter().any(|result| {
-            !result.inventory()
-                && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
-                && result.severity() == G3Severity::Error
-                && result.title() == "contract-critical hook command is fail-open"
-        }),
-        "fail-open contract-critical binary command should be reported"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
@@ -32,10 +24,7 @@ fn contract_cargo_subcommand_cannot_fail_open() {
         ))],
     );
 
-    assert!(
-        results.iter().any(|result| !result.inventory()),
-        "fail-open contract-critical cargo subcommand should be reported"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
@@ -47,30 +36,21 @@ fn non_critical_command_can_fail_open_for_this_rule() {
         ))],
     );
 
-    assert!(
-        results.is_empty(),
-        "non-critical command should not be reported by contract-critical rule"
-    );
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
 fn universal_g3rs_cannot_fail_open_without_contract_requirements() {
     let results = run_case("#!/bin/sh\ng3rs validate --path . || true\n", Vec::new());
 
-    assert!(
-        results.iter().any(|result| !result.inventory()),
-        "universal g3rs critical command should be reported without contract requirements"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
 fn universal_gitleaks_cannot_fail_open_without_contract_requirements() {
     let results = run_case("#!/bin/sh\ngitleaks detect || true\n", Vec::new());
 
-    assert!(
-        results.iter().any(|result| !result.inventory()),
-        "universal gitleaks critical command should be reported without contract requirements"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
@@ -80,10 +60,7 @@ fn negated_if_without_failure_exit_is_fail_open() {
         Vec::new(),
     );
 
-    assert!(
-        results.iter().any(|result| !result.inventory()),
-        "negated if branch that only echoes should be reported as fail-open"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
@@ -93,24 +70,14 @@ fn negated_if_with_failure_exit_is_not_fail_open() {
         Vec::new(),
     );
 
-    assert!(
-        results.is_empty(),
-        "negated if branch with explicit non-zero exit should not be reported"
-    );
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
 fn or_exit_zero_is_fail_open() {
     let results = run_case("#!/bin/sh\ng3rs validate --path . || exit 0\n", Vec::new());
 
-    assert!(
-        results.iter().any(|result| {
-            !result.inventory()
-                && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
-                && result.severity() == G3Severity::Error
-        }),
-        "critical command followed by `|| exit 0` should be reported"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
@@ -122,14 +89,7 @@ fn or_printf_is_fail_open() {
         ))],
     );
 
-    assert!(
-        results.iter().any(|result| {
-            !result.inventory()
-                && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
-                && result.severity() == G3Severity::Error
-        }),
-        "critical command followed by `|| printf` should be reported"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
@@ -139,14 +99,7 @@ fn or_return_zero_is_fail_open() {
         Vec::new(),
     );
 
-    assert!(
-        results.iter().any(|result| {
-            !result.inventory()
-                && result.id() == "g3rs-hooks/contract-critical-command-not-fail-open"
-                && result.severity() == G3Severity::Error
-        }),
-        "critical command followed by `|| return 0` should be reported"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
@@ -156,10 +109,7 @@ fn exported_command_substitution_is_fail_open() {
         Vec::new(),
     );
 
-    assert!(
-        results.iter().any(|result| !result.inventory()),
-        "critical command inside exported command substitution should be reported"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
@@ -169,10 +119,7 @@ fn positive_availability_guard_without_failing_else_is_fail_open() {
         Vec::new(),
     );
 
-    assert!(
-        results.iter().any(|result| !result.inventory()),
-        "critical tool availability guard with non-failing else should be reported"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 #[test]
@@ -182,10 +129,7 @@ fn positive_availability_guard_with_failing_else_is_not_fail_open() {
         Vec::new(),
     );
 
-    assert!(
-        results.is_empty(),
-        "critical tool availability guard with failing else should not be reported"
-    );
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -195,10 +139,7 @@ fn negated_if_with_failure_helper_is_not_fail_open() {
         Vec::new(),
     );
 
-    assert!(
-        results.is_empty(),
-        "negated if branch calling a helper that exits non-zero should not be reported"
-    );
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -215,10 +156,7 @@ run_clippy
         ))],
     );
 
-    assert!(
-        results.iter().any(|result| !result.inventory()),
-        "called function with fail-open contract-critical command should be reported"
-    );
+    assertions::assert_fail_open_error(&results);
 }
 
 fn requirement(command: G3HookCriticalCommand) -> G3HookRequirement {

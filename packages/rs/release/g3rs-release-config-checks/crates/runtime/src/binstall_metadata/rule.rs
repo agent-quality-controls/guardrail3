@@ -34,8 +34,7 @@ mod rule_tests;
 
 #[cfg(test)]
 pub(crate) fn run_check(cargo_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let input =
-        crate::lib_tests::test_support::config_input_for_publishable_crate(cargo_toml, None);
+    let input = crate::test_support::config_input_for_publishable_crate(cargo_toml, None);
     let mut results = Vec::new();
     crate::binstall_metadata::check(&input.crate_checks[0], &mut results);
     results

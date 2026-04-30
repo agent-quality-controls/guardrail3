@@ -105,7 +105,7 @@ mod rule_tests;
 
 #[cfg(test)]
 pub(crate) fn run_check(cliff_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let input = crate::lib_tests::test_support::config_input_for_repo(None, Some(cliff_toml));
+    let input = crate::test_support::config_input_for_repo(None, Some(cliff_toml));
     let mut results = Vec::new();
     crate::cliff_baseline::check(&input.repo_checks[0], &input.crate_checks, &mut results);
     results

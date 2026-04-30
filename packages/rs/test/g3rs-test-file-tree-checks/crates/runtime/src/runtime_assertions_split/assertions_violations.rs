@@ -17,7 +17,9 @@ pub(super) fn collect_assertions_module_violations(
         .filter(|file| matches!(file.kind, G3RsTestFileKind::AssertionsModule))
     {
         for binding in &file.parsed.imports {
-            if helpers::import_uses_local_boundary(binding) {
+            if helpers::import_uses_local_boundary(binding)
+                && !is_public_assertion_reexport(binding, &file.proof_bearing_assertion_functions)
+            {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.rel_path.clone(),
                     line: Some(binding.line),
@@ -102,6 +104,25 @@ pub(super) fn collect_assertions_module_violations(
                 message: "Assertions modules must not call runtime `check_test_tree(...)`; sidecars own family execution and assertions own reusable semantic proof only.".to_owned(),
             });
         }
+    }
+}
+
+fn is_public_assertion_reexport(
+    binding: &g3rs_test_types::ast::UseBinding,
+    proof_bearing_assertion_functions: &BTreeSet<String>,
+) -> bool {
+    binding.is_public
+        && public_reexport_target_path(&binding.path_segments)
+            .is_some_and(|target| proof_bearing_assertion_functions.contains(&target))
+}
+
+fn public_reexport_target_path(path_segments: &[String]) -> Option<String> {
+    let [root, rest @ ..] = path_segments else {
+        return None;
+    };
+    match root.as_str() {
+        "crate" => Some(rest.join("::")),
+        _ => None,
     }
 }
 

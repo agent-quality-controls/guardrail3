@@ -239,13 +239,71 @@ pub struct G3TsAstroSeoEslintPluginContractInput {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroSeoEslintDirectiveInput {
-    pub rel_path: String,
-    pub directive_kind: String,
-    pub disabled_rules: Vec<String>,
-    pub all_rules: bool,
-    pub line: u32,
-    pub target_line: Option<u32>,
-    pub parse_error: Option<String>,
+    rel_path: String,
+    directive_kind: String,
+    disabled_rules: Vec<String>,
+    all_rules: bool,
+    line: u32,
+    target_line: Option<u32>,
+    parse_error: Option<String>,
+}
+
+impl G3TsAstroSeoEslintDirectiveInput {
+    #[must_use]
+    pub fn new(
+        rel_path: String,
+        directive_kind: String,
+        disabled_rules: Vec<String>,
+        all_rules: bool,
+        line: u32,
+        target_line: Option<u32>,
+        parse_error: Option<String>,
+    ) -> Self {
+        Self {
+            rel_path,
+            directive_kind,
+            disabled_rules,
+            all_rules,
+            line,
+            target_line,
+            parse_error,
+        }
+    }
+
+    #[must_use]
+    pub fn rel_path(&self) -> &str {
+        &self.rel_path
+    }
+
+    #[must_use]
+    pub fn directive_kind(&self) -> &str {
+        &self.directive_kind
+    }
+
+    #[must_use]
+    pub fn disabled_rules(&self) -> &[String] {
+        &self.disabled_rules
+    }
+
+    #[must_use]
+    pub fn all_rules(&self) -> bool {
+        self.all_rules
+    }
+
+    #[must_use]
+    pub fn line(&self) -> u32 {
+        self.line
+    }
+
+    #[must_use]
+    pub fn target_line(&self) -> Option<u32> {
+        self.target_line
+    }
+
+    #[must_use]
+    pub fn parse_error(&self) -> Option<&str> {
+        self.parse_error.as_deref()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -39,6 +39,8 @@ fn git_init(path: &Path) {
         .status()
         .expect("git init should succeed");
     assert!(status.success(), "git init should exit successfully");
+    fs::write(path.join("Cargo.toml"), "[workspace]\nmembers = []\n")
+        .expect("write default workspace manifest");
 }
 
 fn write(path: impl AsRef<Path>, content: &str) {

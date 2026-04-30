@@ -1,6 +1,7 @@
 use g3rs_hooks_contract_types::{G3HookRequirement, G3HookTriggerPattern};
+use g3rs_hooks_source_checks_assertions::contract_trigger_coverage::rule as assertions;
 
-use crate::contract_trigger_coverage::rule::run_case;
+use super::super::run_case;
 
 #[test]
 fn reports_missing_exact_trigger_path() {
@@ -9,10 +10,7 @@ fn reports_missing_exact_trigger_path() {
         vec![requirement("guardrail3-rs.toml")],
     );
 
-    assert!(
-        results.iter().any(|result| !result.inventory()),
-        "missing exact contract trigger path should be reported"
-    );
+    assertions::assert_not_proven_warning(&results);
 }
 
 #[test]
@@ -22,12 +20,7 @@ fn warns_even_when_exact_trigger_path_is_present_until_shell_conditions_are_mode
         vec![requirement("guardrail3-rs.toml")],
     );
 
-    assert!(
-        results
-            .iter()
-            .any(|result| !result.inventory() && result.title().contains("not proven")),
-        "exact trigger path coverage should not emit success until parsed shell conditions are modeled"
-    );
+    assertions::assert_not_proven_warning(&results);
 }
 
 fn requirement(path: &str) -> G3HookRequirement {

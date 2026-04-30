@@ -290,12 +290,11 @@ fn resolve_library_root(
     manifest_rel_path: &str,
     manifest: &CargoToml,
 ) -> Option<String> {
+    let Some(package) = manifest.package.as_ref() else {
+        return None;
+    };
     let package_dir_rel = manifest_dir_rel(manifest_rel_path);
-    let autolib_enabled = manifest
-        .package
-        .as_ref()
-        .and_then(|package| package.autolib)
-        .unwrap_or(true);
+    let autolib_enabled = package.autolib.unwrap_or(true);
 
     if let Some(lib_target) = manifest.lib.as_ref() {
         if let Some(path) = lib_target.path.as_deref() {
@@ -323,12 +322,11 @@ fn resolve_binary_roots(
     manifest_rel_path: &str,
     manifest: &CargoToml,
 ) -> Vec<String> {
+    let Some(package) = manifest.package.as_ref() else {
+        return Vec::new();
+    };
     let package_dir_rel = manifest_dir_rel(manifest_rel_path);
-    let autobins_enabled = manifest
-        .package
-        .as_ref()
-        .and_then(|package| package.autobins)
-        .unwrap_or(true);
+    let autobins_enabled = package.autobins.unwrap_or(true);
 
     let mut roots = manifest
         .bin
