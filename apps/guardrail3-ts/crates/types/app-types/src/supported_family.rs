@@ -29,12 +29,14 @@ pub enum SupportedFamily {
     Npmrc,
     /// .jscpd.json checks.
     Jscpd,
+    /// Framework-independent TS style checks.
+    Style,
     /// Git hook contract checks.
     Hooks,
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 15] = [
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 16] = [
     SupportedFamily::Eslint,
     SupportedFamily::AstroSetup,
     SupportedFamily::AstroContent,
@@ -49,5 +51,6 @@ pub const SUPPORTED_FAMILIES: [SupportedFamily; 15] = [
     SupportedFamily::Package,
     SupportedFamily::Npmrc,
     SupportedFamily::Jscpd,
+    SupportedFamily::Style,
     SupportedFamily::Hooks,
 ];

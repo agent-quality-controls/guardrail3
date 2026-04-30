@@ -32,6 +32,7 @@ impl FamilyRunner for CliFamilyRunner {
             | SupportedFamily::Package
             | SupportedFamily::Npmrc
             | SupportedFamily::Jscpd
+            | SupportedFamily::Style
             | SupportedFamily::Hooks => match family {
                 SupportedFamily::Hooks => guardrail3_ts_family_runner_hooks::run(family, crawl),
                 SupportedFamily::AstroSetup
@@ -49,7 +50,8 @@ impl FamilyRunner for CliFamilyRunner {
                 | SupportedFamily::Tsconfig
                 | SupportedFamily::Package
                 | SupportedFamily::Npmrc
-                | SupportedFamily::Jscpd => guardrail3_ts_family_runner_config::run(family, crawl),
+                | SupportedFamily::Jscpd
+                | SupportedFamily::Style => guardrail3_ts_family_runner_config::run(family, crawl),
             },
         }
     }
