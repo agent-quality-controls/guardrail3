@@ -219,7 +219,7 @@ fn parse_script_commands(input: &str) -> Result<ParsedScriptCommands, String> {
         normalized_tool(command).is_some_and(|(executable, _args)| {
             matches!(
                 executable.as_str(),
-                "eslint" | "astro" | "syncpack" | "only-allow"
+                "eslint" | "astro" | "syncpack" | "only-allow" | "cspell"
             )
         })
     });
@@ -755,7 +755,7 @@ fn script_name_is_guardrail_related(script_name: &str) -> bool {
     normalized.split([':', '-', '_', '.', '/']).any(|token| {
         matches!(
             token,
-            "check" | "lint" | "validate" | "eslint" | "astro" | "syncpack"
+            "check" | "lint" | "validate" | "eslint" | "astro" | "syncpack" | "spellcheck"
         )
     })
 }

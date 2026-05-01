@@ -344,6 +344,32 @@ fn safe_tool_invocation_query_rejects_fail_open_or_chains() {
 }
 
 #[test]
+fn cspell_scripts_are_guardrail_related_for_fail_closed_parsing() {
+    let document = super::super::parse_document("spellcheck", "cspell . || true")
+        .expect("script command document should parse");
+
+    assert_no_eslint_invocation(&document);
+    assert_tool_invocation(
+        &document,
+        0,
+        ExpectedToolInvocation {
+            script_name: "spellcheck",
+            command_index: 0,
+            invocation: "cspell .",
+            executable: "cspell",
+            args: &["."],
+            preceded_by: None,
+            followed_by: Some(PackageScriptCommandSeparator::Or),
+        },
+    );
+
+    let unsupported = super::super::parse_document("spellcheck", "cspell . | tee log")
+        .expect("script command document should parse");
+    assert_unsupported_document(&unsupported);
+    assert_state_reason_contains(&unsupported, "unsupported shell syntax");
+}
+
+#[test]
 fn safe_tool_invocation_query_ignores_unrelated_unsupported_scripts() {
     let safe_typecheck =
         super::super::parse("typecheck", "astro check").expect("script command fact should parse");
