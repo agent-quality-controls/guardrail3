@@ -1,4 +1,4 @@
-use g3_workspace_crawl::crawl;
+use g3_workspace_crawl::crawl_any_root;
 
 #[test]
 fn returns_missing_when_root_package_json_is_absent() {
@@ -8,7 +8,7 @@ fn returns_missing_when_root_package_json_is_absent() {
         "pnpm-workspace.yaml",
         "packages:\n  - apps/*\n",
     );
-    let crawl = crawl(tempdir.path()).expect("crawl should succeed");
+    let crawl = crawl_any_root(tempdir.path()).expect("crawl should succeed");
 
     let input = super::super::ingest_for_config_checks(&crawl);
 
@@ -63,7 +63,7 @@ fn parses_root_and_local_manifests() {
         "#,
     );
 
-    let crawl = crawl(root).expect("crawl should succeed");
+    let crawl = crawl_any_root(root).expect("crawl should succeed");
     let input = super::super::ingest_for_config_checks(&crawl);
 
     g3ts_package_ingestion_assertions::run::assert_root_parsed(&input, "package.json");
@@ -87,7 +87,7 @@ fn surfaces_parse_error_for_invalid_root_package_json() {
     );
     super::helpers::write(tempdir.path(), "package.json", "{ invalid ");
 
-    let crawl = crawl(tempdir.path()).expect("crawl should succeed");
+    let crawl = crawl_any_root(tempdir.path()).expect("crawl should succeed");
     let input = super::super::ingest_for_config_checks(&crawl);
 
     g3ts_package_ingestion_assertions::run::assert_root_parse_error(&input, "package.json");
@@ -101,7 +101,7 @@ fn surfaces_parse_error_for_invalid_local_package_json() {
     super::helpers::write(root, "package.json", r#"{ "private": true }"#);
     super::helpers::write(root, "apps/web/package.json", "{ invalid ");
 
-    let crawl = crawl(root).expect("crawl should succeed");
+    let crawl = crawl_any_root(root).expect("crawl should succeed");
     let input = super::super::ingest_for_config_checks(&crawl);
 
     g3ts_package_ingestion_assertions::run::assert_root_parsed(&input, "package.json");
@@ -128,7 +128,7 @@ fn treats_explicit_non_workspace_root_manifest_as_local_only() {
         "#,
     );
 
-    let crawl = crawl(tempdir.path()).expect("crawl should succeed");
+    let crawl = crawl_any_root(tempdir.path()).expect("crawl should succeed");
     let input = super::super::ingest_for_config_checks(&crawl);
 
     g3ts_package_ingestion_assertions::run::assert_root_not_package_manager_root(&input);
@@ -179,7 +179,7 @@ fn parses_syncpack_config_policy_facts() {
         "#,
     );
 
-    let crawl = crawl(root).expect("crawl should succeed");
+    let crawl = crawl_any_root(root).expect("crawl should succeed");
     let input = super::super::ingest_for_config_checks(&crawl);
 
     g3ts_package_ingestion_assertions::run::assert_root_script_policy(&input, true, true);
