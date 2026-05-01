@@ -22,16 +22,21 @@ pub(crate) fn check_protected_style_rule_disables(
         return;
     };
 
-    let restricted = snapshot
-        .source_warn_or_error_rules
-        .iter()
-        .any(|rule| rule == RESTRICT_RULE)
-        && PROTECTED_RULES.iter().all(|rule| {
-            snapshot
-                .source_restricted_disable_patterns
-                .iter()
-                .any(|pattern| pattern_covers_rule(pattern, rule))
-        });
+    let restricted =
+        !snapshot.source_probe_disable_policies.is_empty()
+            && snapshot.source_probe_disable_policies.iter().all(|probe| {
+                !probe.ignored
+                    && probe
+                        .warn_or_error_rules
+                        .iter()
+                        .any(|rule| rule == RESTRICT_RULE)
+                    && PROTECTED_RULES.iter().all(|rule| {
+                        probe
+                            .restricted_disable_patterns
+                            .iter()
+                            .any(|pattern| pattern_covers_rule(pattern, rule))
+                    })
+            });
 
     if restricted {
         results.push(info(
@@ -73,15 +78,15 @@ pub(crate) fn check_eslint_disable_inventory(
     }
 
     for directive in directives {
-        if let Some(reason) = directive.parse_error_reason() {
+        if let Some(reason) = directive.parse_error.as_deref() {
             results.push(error(
                 ID,
                 "Style ESLint disable inventory cannot be parsed",
                 format!(
                     "`{}` could not be parsed for ESLint disable directives: {reason}. G3TS fails closed because hidden disables would bypass delegated style rules.",
-                    directive.rel_path()
+                    directive.rel_path
                 ),
-                Some(directive.rel_path()),
+                Some(&directive.rel_path),
             ));
             continue;
         }
@@ -92,12 +97,12 @@ pub(crate) fn check_eslint_disable_inventory(
             "Style source contains an ESLint disable directive".to_owned(),
             format!(
                 "`{}` line {} contains `{}` for {}. ESLint disables are allowed only as visible escape hatches; keep the directive described and avoid disabling protected style rules.",
-                directive.rel_path(),
-                directive.line(),
-                directive.directive_kind(),
+                directive.rel_path,
+                directive.line,
+                directive.directive_kind,
                 disabled_rules(directive),
             ),
-            Some(directive.rel_path().to_owned()),
+            Some(directive.rel_path.clone()),
             None,
         ));
     }
@@ -132,10 +137,10 @@ fn pattern_covers_rule(pattern: &str, rule: &str) -> bool {
 }
 
 fn disabled_rules(directive: &g3ts_style_types::G3TsStyleEslintDirectiveInput) -> String {
-    if directive.all_rules() {
+    if directive.all_rules {
         return "all rules".to_owned();
     }
-    directive.disabled_rules().join(", ")
+    directive.disabled_rules.join(", ")
 }
 
 fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {

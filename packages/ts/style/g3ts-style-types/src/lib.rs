@@ -4,10 +4,11 @@ mod types;
 #[cfg(feature = "api")]
 pub use types::{
     G3TsStyleConfigChecksInput, G3TsStyleContractInput, G3TsStyleEslintDirectiveInput,
-    G3TsStyleEslintSurfaceSnapshot, G3TsStyleEslintSurfaceState,
-    G3TsStylePackageScriptCommandSeparator, G3TsStylePackageScriptParseBlocker,
-    G3TsStylePackageScriptToolInvocation, G3TsStylePackageSurfaceSnapshot,
-    G3TsStylePackageSurfaceState, G3TsStylePolicySnapshot, G3TsStylePolicySurfaceState,
-    G3TsStyleSyncpackRequiredPin, G3TsStyleSyncpackSnapshot, G3TsStyleSyncpackSurfaceState,
+    G3TsStyleEslintProbeDisablePolicySnapshot, G3TsStyleEslintSurfaceSnapshot,
+    G3TsStyleEslintSurfaceState, G3TsStylePackageScriptCommandSeparator,
+    G3TsStylePackageScriptParseBlocker, G3TsStylePackageScriptToolInvocation,
+    G3TsStylePackageSurfaceSnapshot, G3TsStylePackageSurfaceState, G3TsStylePolicySnapshot,
+    G3TsStylePolicySurfaceState, G3TsStyleSyncpackRequiredPin, G3TsStyleSyncpackSnapshot,
+    G3TsStyleSyncpackSurfaceState, G3TsStyleSyncpackVersionGroupSnapshot,
     G3TsStylelintConfigSnapshot, G3TsStylelintConfigSurfaceState,
 };

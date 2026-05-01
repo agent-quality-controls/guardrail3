@@ -433,6 +433,89 @@ fn validate_script_must_not_fail_open() {
 }
 
 #[test]
+fn validate_script_package_parse_failures_fail_closed() {
+    let mut input = super::helpers::golden();
+    input.contracts[0].package = g3ts_style_types::G3TsStylePackageSurfaceState::ParseError {
+        rel_path: "package.json".to_owned(),
+        reason: "broken package json".to_owned(),
+    };
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/validate-runs-css-lint",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn validate_script_rejects_reachable_parse_blockers() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_package_mut(&mut input)
+        .script_parse_blockers
+        .push(g3ts_style_types::G3TsStylePackageScriptParseBlocker {
+            script_name: "lint:css".to_owned(),
+            reason: "unsupported shell".to_owned(),
+        });
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/validate-runs-css-lint",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn validate_script_accepts_package_manager_script_shorthand() {
+    let mut input = super::helpers::golden();
+    let package = super::helpers::parsed_package_mut(&mut input);
+    package
+        .script_tool_invocations
+        .retain(|invocation| invocation.script_name != "validate");
+    package
+        .script_tool_invocations
+        .push(g3ts_style_types::G3TsStylePackageScriptToolInvocation {
+            script_name: "validate".to_owned(),
+            executable: "lint:css".to_owned(),
+            args: Vec::new(),
+            preceded_by: None,
+            followed_by: None,
+        });
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/validate-runs-css-lint",
+        G3Severity::Info,
+    );
+}
+
+#[test]
+fn validate_script_accepts_direct_package_manager_stylelint() {
+    let mut input = super::helpers::golden();
+    let package = super::helpers::parsed_package_mut(&mut input);
+    package
+        .script_tool_invocations
+        .retain(|invocation| invocation.script_name != "validate");
+    package
+        .script_tool_invocations
+        .push(g3ts_style_types::G3TsStylePackageScriptToolInvocation {
+            script_name: "validate".to_owned(),
+            executable: "stylelint".to_owned(),
+            args: vec![
+                "--max-warnings".to_owned(),
+                "0".to_owned(),
+            ],
+            preceded_by: None,
+            followed_by: None,
+        });
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/validate-runs-css-lint",
+        G3Severity::Info,
+    );
+}
+
+#[test]
 fn style_policy_rule_must_be_effective_at_error_with_non_empty_eslint_policy() {
     let mut input = super::helpers::golden();
     super::helpers::parsed_eslint_mut(&mut input).style_policy_rule_effective = false;
@@ -465,7 +548,8 @@ fn style_policy_rule_must_use_owned_plugin_package_on_every_probe() {
 fn protected_style_rule_disables_must_restrict_style_rules() {
     let mut input = super::helpers::golden();
     super::helpers::parsed_eslint_mut(&mut input)
-        .source_restricted_disable_patterns
+        .source_probe_disable_policies[0]
+        .restricted_disable_patterns
         .retain(|pattern| pattern != "style-policy/*");
 
     assertions::assert_runtime_check_id_severity(
@@ -478,8 +562,8 @@ fn protected_style_rule_disables_must_restrict_style_rules() {
 #[test]
 fn protected_style_rule_disables_accept_wildcard() {
     let mut input = super::helpers::golden();
-    super::helpers::parsed_eslint_mut(&mut input).source_restricted_disable_patterns =
-        vec!["*".to_owned()];
+    super::helpers::parsed_eslint_mut(&mut input).source_probe_disable_policies[0]
+        .restricted_disable_patterns = vec!["*".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
         &input,
@@ -489,18 +573,39 @@ fn protected_style_rule_disables_accept_wildcard() {
 }
 
 #[test]
+fn protected_style_rule_disables_must_be_per_probe() {
+    let mut input = super::helpers::golden();
+    let protected_probe = super::helpers::parsed_eslint_mut(&mut input)
+        .source_probe_disable_policies[0]
+        .clone();
+    let mut unprotected_probe = protected_probe.clone();
+    unprotected_probe.rel_path = "src/__g3ts_style_probe__.astro".to_owned();
+    unprotected_probe.restricted_disable_patterns = vec!["style-policy/*".to_owned()];
+    super::helpers::parsed_eslint_mut(&mut input)
+        .source_probe_disable_policies
+        .push(unprotected_probe);
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/protected-style-rule-disables-restricted",
+        G3Severity::Error,
+    );
+}
+
+#[test]
 fn eslint_disable_inventory_reports_visible_warning() {
     let mut input = super::helpers::golden();
     input
         .eslint_directives
-        .push(g3ts_style_types::G3TsStyleEslintDirectiveInput::parsed(
-            "src/page.tsx".to_owned(),
-            "DisableNextLine".to_owned(),
-            vec!["style-policy/no-denied-class-tokens".to_owned()],
-            false,
-            12,
-            Some(13),
-        ));
+        .push(g3ts_style_types::G3TsStyleEslintDirectiveInput {
+            rel_path: "src/page.tsx".to_owned(),
+            directive_kind: "DisableNextLine".to_owned(),
+            disabled_rules: vec!["style-policy/no-denied-class-tokens".to_owned()],
+            all_rules: false,
+            line: 12,
+            target_line: Some(13),
+            parse_error: None,
+        });
 
     assertions::assert_runtime_check_id_severity(
         &input,
@@ -519,10 +624,15 @@ fn eslint_disable_inventory_parse_errors_fail_closed() {
     let mut input = super::helpers::golden();
     input
         .eslint_directives
-        .push(g3ts_style_types::G3TsStyleEslintDirectiveInput::parse_error(
-            "src/page.tsx".to_owned(),
-            "broken source".to_owned(),
-        ));
+        .push(g3ts_style_types::G3TsStyleEslintDirectiveInput {
+            rel_path: "src/page.tsx".to_owned(),
+            directive_kind: String::new(),
+            disabled_rules: Vec::new(),
+            all_rules: false,
+            line: 0,
+            target_line: None,
+            parse_error: Some("broken source".to_owned()),
+        });
 
     assertions::assert_runtime_check_id_severity(
         &input,
@@ -535,8 +645,61 @@ fn eslint_disable_inventory_parse_errors_fail_closed() {
 fn syncpack_must_pin_style_policy_plugin_floor() {
     let mut input = super::helpers::golden();
     super::helpers::parsed_syncpack_mut(&mut input)
-        .missing_required_pins
-        .push(super::helpers::required_style_policy_pin());
+        .version_groups
+        .clear();
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/syncpack-style-policy-pin",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn syncpack_must_reject_wrong_pin_version() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_syncpack_mut(&mut input).version_groups[0].pin_version =
+        Some("0.1.2".to_owned());
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/syncpack-style-policy-pin",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn syncpack_must_reject_duplicate_pin_groups() {
+    let mut input = super::helpers::golden();
+    let duplicate = super::helpers::parsed_syncpack_mut(&mut input).version_groups[0].clone();
+    super::helpers::parsed_syncpack_mut(&mut input)
+        .version_groups
+        .push(duplicate);
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/syncpack-style-policy-pin",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn syncpack_must_reject_package_scoped_pin_groups() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_syncpack_mut(&mut input).version_groups[0].packages =
+        Some(vec!["landing".to_owned()]);
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/syncpack-style-policy-pin",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn syncpack_must_reject_ignored_pin_groups() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_syncpack_mut(&mut input).version_groups[0].is_ignored = Some(true);
 
     assertions::assert_runtime_check_id_severity(
         &input,
@@ -548,7 +711,7 @@ fn syncpack_must_pin_style_policy_plugin_floor() {
 #[test]
 fn syncpack_must_cover_package_manifest() {
     let mut input = super::helpers::golden();
-    super::helpers::parsed_syncpack_mut(&mut input).source_covers_package_manifest = false;
+    super::helpers::parsed_syncpack_mut(&mut input).source = vec!["packages/*/package.json".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
         &input,

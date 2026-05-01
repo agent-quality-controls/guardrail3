@@ -1,6 +1,7 @@
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_style_types::{
-    G3TsStyleEslintSurfaceSnapshot, G3TsStyleEslintSurfaceState, G3TsStylePolicySurfaceState,
+    G3TsStyleEslintProbeDisablePolicySnapshot, G3TsStyleEslintSurfaceSnapshot,
+    G3TsStyleEslintSurfaceState, G3TsStylePolicySurfaceState,
 };
 
 const CONFIG_CANDIDATES: [&str; 6] = [
@@ -82,6 +83,11 @@ pub(crate) fn ingest_eslint_config(
         .collect::<std::collections::BTreeSet<_>>()
         .into_iter()
         .collect();
+    let source_probe_disable_policies = snapshot
+        .probes
+        .iter()
+        .map(probe_disable_policy)
+        .collect();
 
     G3TsStyleEslintSurfaceState::Parsed {
         snapshot: G3TsStyleEslintSurfaceSnapshot {
@@ -94,7 +100,19 @@ pub(crate) fn ingest_eslint_config(
             style_policy_rule_effective,
             source_warn_or_error_rules,
             source_restricted_disable_patterns,
+            source_probe_disable_policies,
         },
+    }
+}
+
+fn probe_disable_policy(
+    probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
+) -> G3TsStyleEslintProbeDisablePolicySnapshot {
+    G3TsStyleEslintProbeDisablePolicySnapshot {
+        rel_path: probe.rel_path.clone(),
+        ignored: probe.ignored,
+        warn_or_error_rules: active_warn_or_error_rules(probe),
+        restricted_disable_patterns: restricted_disable_patterns(probe),
     }
 }
 

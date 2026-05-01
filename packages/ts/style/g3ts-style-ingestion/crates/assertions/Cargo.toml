@@ -10,6 +10,7 @@ publish = false
 
 [dependencies]
 g3ts_style_ingestion_runtime = { package = "g3ts-style-ingestion-runtime", path = "../runtime" }
+g3ts-style-types = { path = "../../../g3ts-style-types" }
 globset = "0.4"
 
 [features]
