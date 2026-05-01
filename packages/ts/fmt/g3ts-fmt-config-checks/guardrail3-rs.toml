@@ -1,0 +1,11 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-fmt-config-checks-runtime",
+  "g3ts-fmt-config-checks-assertions",
+  "g3ts-fmt-types",
+  "guardrail3-check-types",
+]
+
+[checks]
+garde = false

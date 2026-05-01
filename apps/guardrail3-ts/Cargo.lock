@@ -923,6 +923,50 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3ts-fmt-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-fmt-config-checks-runtime",
+]
+
+[[package]]
+name = "g3ts-fmt-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-fmt-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-fmt-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
+]
+
+[[package]]
+name = "g3ts-fmt-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3ts-fmt-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-fmt-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-workspace-crawl",
+ "g3ts-fmt-types",
+ "package-json-parser",
+ "package-script-command-parser",
+ "syncpack-config-parser",
+]
+
+[[package]]
+name = "g3ts-fmt-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3ts-hooks-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -1297,6 +1341,8 @@ dependencies = [
  "g3rs-workspace-crawl",
  "g3ts-eslint-config-checks",
  "g3ts-eslint-ingestion",
+ "g3ts-fmt-config-checks",
+ "g3ts-fmt-ingestion",
  "g3ts-jscpd-config-checks",
  "g3ts-jscpd-ingestion",
  "g3ts-npmrc-config-checks",
@@ -1321,6 +1367,7 @@ dependencies = [
  "g3ts-astro-media-hook-contract",
  "g3ts-astro-seo-hook-contract",
  "g3ts-astro-setup-hook-contract",
+ "g3ts-fmt-hook-contract",
  "g3ts-hooks-config-checks",
  "g3ts-hooks-contract-types",
  "g3ts-hooks-file-tree-checks",

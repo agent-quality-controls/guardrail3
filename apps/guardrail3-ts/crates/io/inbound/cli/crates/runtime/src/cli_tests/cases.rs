@@ -45,10 +45,10 @@ fn parse_command_rejects_unknown_family() {
 #[test]
 fn parse_command_rejects_rust_family_name() {
     let error =
-        super::super::parse_command_from(["g3ts", "validate", "--path", ".", "--family", "fmt"])
+        super::super::parse_command_from(["g3ts", "validate", "--path", ".", "--family", "clippy"])
             .expect_err("rust family should fail CLI parsing");
 
-    guardrail3_ts_assertions::cli::assert_parse_error_mentions(&error, "fmt");
+    guardrail3_ts_assertions::cli::assert_parse_error_mentions(&error, "clippy");
 }
 
 #[test]

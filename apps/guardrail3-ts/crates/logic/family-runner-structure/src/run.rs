@@ -122,6 +122,7 @@ pub fn run(
         | SupportedFamily::Npmrc
         | SupportedFamily::Jscpd
         | SupportedFamily::Style
+        | SupportedFamily::Fmt
         | SupportedFamily::Hooks => Err(FamilyRunError {
             message: format!("structure group does not handle {family:?}"),
         }),

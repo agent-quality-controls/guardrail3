@@ -39,6 +39,7 @@ pub fn run(
         | SupportedFamily::Arch
         | SupportedFamily::Apparch
         | SupportedFamily::Style
+        | SupportedFamily::Fmt
         | SupportedFamily::Tsconfig
         | SupportedFamily::Package
         | SupportedFamily::Npmrc
@@ -57,6 +58,7 @@ fn hook_contracts() -> Vec<G3TsHookRequirement> {
     requirements.extend(g3ts_astro_i18n_hook_contract::hook_contract());
     requirements.extend(g3ts_astro_media_hook_contract::hook_contract());
     requirements.extend(g3ts_astro_seo_hook_contract::hook_contract());
+    requirements.extend(g3ts_fmt_hook_contract::hook_contract());
     requirements.extend(g3ts_style_hook_contract::hook_contract());
     requirements
 }
