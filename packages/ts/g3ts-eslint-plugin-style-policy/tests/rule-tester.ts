@@ -6,6 +6,8 @@ import type { StylePolicyOptions } from "../src/utils/options.js";
 
 export const baseOptions: StylePolicyOptions = {
   denyList: ["text-black", "text-9xl", "bg-red-500"],
+  denyPrefixes: ["text-[", "leading-[", "tracking-["],
+  denyPatterns: ["^font-\\[[^\\]]+\\]$"],
   classAttributes: ["class", "className"],
   classListAttributes: ["class:list"],
   classHelpers: ["cn", "clsx", "twMerge"]

@@ -1,7 +1,7 @@
-pub fn assert_denylist_option_rejected(actual: bool) {
-    assert!(!actual, "denyList option should be rejected");
+pub fn assert_style_policy_option_rejected(actual: bool) {
+    assert!(!actual, "style policy option should be rejected");
 }
 
-pub fn assert_denylist_option_accepted(actual: bool) {
-    assert!(actual, "denyList option should be accepted");
+pub fn assert_style_policy_option_accepted(actual: bool) {
+    assert!(actual, "style policy option should be accepted");
 }

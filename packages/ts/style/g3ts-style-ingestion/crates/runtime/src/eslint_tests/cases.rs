@@ -1,26 +1,44 @@
 #[test]
-fn denylist_option_requires_non_empty_denylist() {
-    g3ts_style_ingestion_assertions::eslint::assert_denylist_option_rejected(
-        super::super::option_has_non_empty_denylist(&serde_json::json!({
+fn style_policy_option_rejects_empty_policy() {
+    g3ts_style_ingestion_assertions::eslint::assert_style_policy_option_rejected(
+        super::super::option_has_non_empty_style_policy(&serde_json::json!({
             "denyList": []
         })),
     );
 }
 
 #[test]
-fn denylist_option_rejects_blank_items() {
-    g3ts_style_ingestion_assertions::eslint::assert_denylist_option_rejected(
-        super::super::option_has_non_empty_denylist(&serde_json::json!({
+fn style_policy_option_rejects_blank_items() {
+    g3ts_style_ingestion_assertions::eslint::assert_style_policy_option_rejected(
+        super::super::option_has_non_empty_style_policy(&serde_json::json!({
             "denyList": ["  "]
         })),
     );
 }
 
 #[test]
-fn denylist_option_accepts_eslint_owned_policy_values() {
-    g3ts_style_ingestion_assertions::eslint::assert_denylist_option_accepted(
-        super::super::option_has_non_empty_denylist(&serde_json::json!({
+fn style_policy_option_accepts_exact_denylist() {
+    g3ts_style_ingestion_assertions::eslint::assert_style_policy_option_accepted(
+        super::super::option_has_non_empty_style_policy(&serde_json::json!({
             "denyList": ["text-slate-500", "prose"]
+        })),
+    );
+}
+
+#[test]
+fn style_policy_option_accepts_non_empty_prefixes() {
+    g3ts_style_ingestion_assertions::eslint::assert_style_policy_option_accepted(
+        super::super::option_has_non_empty_style_policy(&serde_json::json!({
+            "denyPrefixes": ["text-["]
+        })),
+    );
+}
+
+#[test]
+fn style_policy_option_accepts_non_empty_patterns() {
+    g3ts_style_ingestion_assertions::eslint::assert_style_policy_option_accepted(
+        super::super::option_has_non_empty_style_policy(&serde_json::json!({
+            "denyPatterns": ["^text-\\["]
         })),
     );
 }
@@ -36,7 +54,7 @@ fn style_policy_rule_uses_first_options_object_only() {
     };
 
     assert!(
-        !super::super::rule_has_effective_style_policy_denylist(&rule),
+        !super::super::rule_has_effective_style_policy(&rule),
         "G3TS must not accept denyList from a later options object because ESLint rule runtime reads context.options[0]"
     );
 }
@@ -49,21 +67,47 @@ fn style_policy_rule_requires_error_severity() {
     };
 
     assert!(
-        !super::super::rule_has_effective_style_policy_denylist(&rule),
+        !super::super::rule_has_effective_style_policy(&rule),
         "style policy must fail closed at error severity"
     );
 }
 
 #[test]
-fn style_policy_rule_accepts_first_options_object_denylist() {
+fn style_policy_rule_accepts_first_options_object_policy() {
     let rule = eslint_config_parser::types::EslintRuleSetting {
         severity: eslint_config_parser::types::EslintRuleSeverity::Error,
         options: vec![serde_json::json!({ "denyList": ["text-black"] })],
     };
 
     assert!(
-        super::super::rule_has_effective_style_policy_denylist(&rule),
-        "first options object with a non-empty denyList is the effective ESLint policy"
+        super::super::rule_has_effective_style_policy(&rule),
+        "first options object with a non-empty deny policy is the effective ESLint policy"
+    );
+}
+
+#[test]
+fn style_policy_rule_accepts_first_options_object_prefix_policy() {
+    let rule = eslint_config_parser::types::EslintRuleSetting {
+        severity: eslint_config_parser::types::EslintRuleSeverity::Error,
+        options: vec![serde_json::json!({ "denyPrefixes": ["text-["] })],
+    };
+
+    assert!(
+        super::super::rule_has_effective_style_policy(&rule),
+        "first options object with a non-empty denyPrefixes policy is effective"
+    );
+}
+
+#[test]
+fn style_policy_rule_accepts_first_options_object_pattern_policy() {
+    let rule = eslint_config_parser::types::EslintRuleSetting {
+        severity: eslint_config_parser::types::EslintRuleSeverity::Error,
+        options: vec![serde_json::json!({ "denyPatterns": ["^text-\\\\["] })],
+    };
+
+    assert!(
+        super::super::rule_has_effective_style_policy(&rule),
+        "first options object with a non-empty denyPatterns policy is effective"
     );
 }
 

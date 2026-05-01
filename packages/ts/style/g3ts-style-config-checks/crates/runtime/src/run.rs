@@ -282,7 +282,7 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
         results.push(error(
             "g3ts-style/style-policy-eslint-rule",
             "Style policy ESLint rule is not effective",
-            format!("`{}` must activate `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`.", rel_path.unwrap_or("eslint.config.*")),
+            format!("`{}` must activate `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`, `denyPrefixes`, or `denyPatterns` policy.", rel_path.unwrap_or("eslint.config.*")),
             rel_path,
         ));
         return;
@@ -295,7 +295,7 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
         results.push(info(
             "g3ts-style/style-policy-eslint-rule",
             "Style policy ESLint rule is effective",
-            format!("`{}` activates `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned denyList.", snapshot.rel_path),
+            format!("`{}` activates `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned deny policy.", snapshot.rel_path),
             Some(&snapshot.rel_path),
         ));
     } else {
@@ -303,7 +303,7 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
             "g3ts-style/style-policy-eslint-rule",
             "Style policy ESLint rule is not effective",
             format!(
-                "`{}` must activate plugin namespace `style-policy` from `g3ts-eslint-plugin-style-policy` and rule `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList` on every `[ts.style].source_globs` probe.",
+                "`{}` must activate plugin namespace `style-policy` from `g3ts-eslint-plugin-style-policy` and rule `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`, `denyPrefixes`, or `denyPatterns` policy on every `[ts.style].source_globs` probe.",
                 snapshot.rel_path
             ),
             Some(&snapshot.rel_path),
