@@ -50,6 +50,7 @@ pub enum FamilyArg {
     Jscpd,
     Style,
     Fmt,
+    Spelling,
     Hooks,
 }
 
@@ -82,6 +83,7 @@ impl FamilyArg {
             FamilyArg::Jscpd => vec![SupportedFamily::Jscpd],
             FamilyArg::Style => vec![SupportedFamily::Style],
             FamilyArg::Fmt => vec![SupportedFamily::Fmt],
+            FamilyArg::Spelling => vec![SupportedFamily::Spelling],
             FamilyArg::Hooks => vec![SupportedFamily::Hooks],
         }
     }

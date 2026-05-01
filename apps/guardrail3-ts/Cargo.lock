@@ -266,6 +266,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 
 [[package]]
+name = "cspell-config-parser"
+version = "0.1.0"
+dependencies = [
+ "cspell-config-parser-runtime",
+]
+
+[[package]]
+name = "cspell-config-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "cspell-config-parser-types",
+ "serde_json",
+]
+
+[[package]]
+name = "cspell-config-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
 name = "displaydoc"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1169,6 +1191,51 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3ts-spelling-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-spelling-config-checks-runtime",
+]
+
+[[package]]
+name = "g3ts-spelling-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-spelling-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-spelling-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
+]
+
+[[package]]
+name = "g3ts-spelling-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3ts-spelling-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-spelling-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "cspell-config-parser",
+ "g3rs-workspace-crawl",
+ "g3ts-spelling-types",
+ "package-json-parser",
+ "package-script-command-parser",
+ "syncpack-config-parser",
+]
+
+[[package]]
+name = "g3ts-spelling-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3ts-style-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -1349,6 +1416,8 @@ dependencies = [
  "g3ts-npmrc-ingestion",
  "g3ts-package-config-checks",
  "g3ts-package-ingestion",
+ "g3ts-spelling-config-checks",
+ "g3ts-spelling-ingestion",
  "g3ts-style-config-checks",
  "g3ts-style-ingestion",
  "g3ts-tsconfig-config-checks",
@@ -1373,6 +1442,7 @@ dependencies = [
  "g3ts-hooks-file-tree-checks",
  "g3ts-hooks-ingestion",
  "g3ts-hooks-source-checks",
+ "g3ts-spelling-hook-contract",
  "g3ts-style-hook-contract",
  "guardrail3-ts-app-types",
 ]

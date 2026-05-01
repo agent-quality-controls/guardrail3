@@ -157,6 +157,17 @@ impl FamilyRunner for StubFamilyRunner {
                 )
                 .into_inventory(),
             ],
+            SupportedFamily::Spelling => vec![
+                G3CheckResult::new(
+                    "g3ts-spelling/cspell-package-present".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some("package.json".to_owned()),
+                    None,
+                )
+                .into_inventory(),
+            ],
             SupportedFamily::Hooks => vec![
                 G3CheckResult::new(
                     "g3ts-hooks/pre-commit-exists".to_owned(),
@@ -248,6 +259,31 @@ fn execute_runs_selected_jscpd_family_only() {
 }
 
 #[test]
+fn execute_runs_selected_spelling_family_only() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace root");
+    std::fs::write(tempdir.path().join("package.json"), "{}\n")
+        .expect("write temporary workspace package.json");
+
+    let request = ValidateRequest {
+        workspace_root: tempdir.path().to_path_buf(),
+        families: vec![SupportedFamily::Spelling],
+        include_inventory: false,
+    };
+
+    let outcome = execute(&request, &StubCrawler, &StubFamilyRunner, &StubRenderer)
+        .expect("execute should succeed for selected spelling-only run");
+
+    assertions::assert_execution_outcome(
+        outcome.stdout(),
+        outcome.stderr(),
+        outcome.exit_code(),
+        "runs=1 inventory=false",
+        "",
+        0,
+    );
+}
+
+#[test]
 fn execute_runs_selected_arch_family_only() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
     std::fs::write(tempdir.path().join("package.json"), "{}\n")
@@ -316,7 +352,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=17 inventory=false",
+        "runs=18 inventory=false",
         "",
         0,
     );
@@ -367,6 +403,9 @@ impl FamilyRunner for ErroringFamilyRunner {
             }),
             SupportedFamily::Fmt => Err(FamilyRunError {
                 message: "fmt runner exploded".to_owned(),
+            }),
+            SupportedFamily::Spelling => Err(FamilyRunError {
+                message: "spelling runner exploded".to_owned(),
             }),
             SupportedFamily::Hooks => Err(FamilyRunError {
                 message: "hooks runner exploded".to_owned(),

@@ -33,12 +33,14 @@ pub enum SupportedFamily {
     Style,
     /// Formatting toolchain checks.
     Fmt,
+    /// Spelling toolchain checks.
+    Spelling,
     /// Git hook contract checks.
     Hooks,
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 17] = [
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 18] = [
     SupportedFamily::Eslint,
     SupportedFamily::AstroSetup,
     SupportedFamily::AstroContent,
@@ -55,5 +57,6 @@ pub const SUPPORTED_FAMILIES: [SupportedFamily; 17] = [
     SupportedFamily::Jscpd,
     SupportedFamily::Style,
     SupportedFamily::Fmt,
+    SupportedFamily::Spelling,
     SupportedFamily::Hooks,
 ];

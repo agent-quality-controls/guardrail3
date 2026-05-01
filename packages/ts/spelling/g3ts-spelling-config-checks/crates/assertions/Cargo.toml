@@ -1,0 +1,21 @@
+[package]
+name = "g3ts-spelling-config-checks-assertions"
+version.workspace = true
+edition.workspace = true
+description = "Assertions for G3TS spelling config checks"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+g3ts-spelling-config-checks-runtime = { path = "../runtime", version = "0.1.0" }
+g3ts-spelling-types = { path = "../../../g3ts-spelling-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+
+[features]
+default = ["api"]
+api = []
+
+[lints]
+workspace = true

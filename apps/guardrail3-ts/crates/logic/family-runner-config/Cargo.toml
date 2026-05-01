@@ -21,6 +21,8 @@ g3ts-style-config-checks.workspace = true
 g3ts-style-ingestion.workspace = true
 g3ts-fmt-config-checks.workspace = true
 g3ts-fmt-ingestion.workspace = true
+g3ts-spelling-config-checks.workspace = true
+g3ts-spelling-ingestion.workspace = true
 
 [features]
 default = ["api"]
