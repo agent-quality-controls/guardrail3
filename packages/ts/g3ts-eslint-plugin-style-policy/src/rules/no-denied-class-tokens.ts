@@ -87,7 +87,7 @@ export default createRule<RuleOptionsTuple, MessageIds>({
             return;
           }
           if (node.value?.type === AST_NODE_TYPES.JSXExpressionContainer) {
-            reportDenied(classTokenSitesFromExpression(node.value.expression));
+            reportDenied(classTokenSitesFromExpression(node.value.expression, classHelpers));
           }
           return;
         }
@@ -96,13 +96,17 @@ export default createRule<RuleOptionsTuple, MessageIds>({
           classListAttributes.has(attributeName) &&
           node.value?.type === AST_NODE_TYPES.JSXExpressionContainer
         ) {
-          reportDenied(classTokenSitesFromExpression(node.value.expression));
+          reportDenied(classTokenSitesFromExpression(node.value.expression, classHelpers));
         }
       },
       CallExpression(node): void {
         const name = calleeName(node.callee);
         if (name !== null && classHelpers.has(name)) {
-          reportDenied(node.arguments.flatMap(classTokenSitesFromExpression));
+          reportDenied(
+            node.arguments.flatMap((argument) =>
+              classTokenSitesFromExpression(argument, classHelpers)
+            )
+          );
         }
       }
     };

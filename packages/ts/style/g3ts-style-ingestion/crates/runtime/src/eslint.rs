@@ -61,12 +61,12 @@ pub(crate) fn ingest_eslint_config(
         .iter()
         .flat_map(|probe| probe.plugin_package_names.clone())
         .collect();
+    let style_policy_plugin_effective = all_probes_use_owned_style_policy_plugin(&snapshot.probes);
     let style_policy_rule_effective = snapshot.probes.iter().all(|probe| {
         let Some(rule) = probe.rules.get("style-policy/no-denied-class-tokens") else {
             return false;
         };
-        rule.severity == eslint_config_parser::types::EslintRuleSeverity::Error
-            && rule.options.iter().any(option_has_non_empty_denylist)
+        rule_has_effective_style_policy_denylist(rule)
     });
 
     G3TsStyleEslintSurfaceState::Parsed {
@@ -76,9 +76,34 @@ pub(crate) fn ingest_eslint_config(
             source_probe_ignored,
             source_plugins,
             source_plugin_package_names,
+            style_policy_plugin_effective,
             style_policy_rule_effective,
         },
     }
+}
+
+fn rule_has_effective_style_policy_denylist(
+    rule: &eslint_config_parser::types::EslintRuleSetting,
+) -> bool {
+    rule.severity == eslint_config_parser::types::EslintRuleSeverity::Error
+        && rule
+            .options
+            .first()
+            .is_some_and(option_has_non_empty_denylist)
+}
+
+fn all_probes_use_owned_style_policy_plugin(
+    probes: &[eslint_config_parser::types::EslintEffectiveConfigProbe],
+) -> bool {
+    probes.iter().all(|probe| {
+        probe.plugin_package_names
+            .get("style-policy")
+            .is_some_and(|packages| {
+                packages
+                    .iter()
+                    .any(|package| package == "g3ts-eslint-plugin-style-policy")
+            })
+    })
 }
 
 fn option_has_non_empty_denylist(option: &serde_json::Value) -> bool {

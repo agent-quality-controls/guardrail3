@@ -349,11 +349,14 @@ fn resolves_plugin_package_identity_from_esm_only_import_export() {
     fs::create_dir_all(root.path().join("src")).expect("src directory should be created");
     fs::create_dir_all(root.path().join("node_modules/eslint"))
         .expect("fake eslint module directory should be created");
-    fs::create_dir_all(root.path().join("node_modules/eslint-plugin-tailwind-ban"))
-        .expect("fake tailwind ban plugin module directory should be created");
+    fs::create_dir_all(
+        root.path()
+            .join("node_modules/g3ts-eslint-plugin-style-policy"),
+    )
+    .expect("fake style policy plugin module directory should be created");
     fs::write(
         root.path().join("eslint.config.mjs"),
-        "import tailwindBan from \"eslint-plugin-tailwind-ban\";\nexport default [{ plugins: { \"tailwind-ban\": tailwindBan } }];\n",
+        "import stylePolicy from \"g3ts-eslint-plugin-style-policy\";\nexport default [{ plugins: { \"style-policy\": stylePolicy } }];\n",
     )
     .expect("eslint config should be written");
     fs::write(
@@ -368,25 +371,25 @@ fn resolves_plugin_package_identity_from_esm_only_import_export() {
     .expect("fake eslint package manifest should be written");
     fs::write(
         root.path()
-            .join("node_modules/eslint-plugin-tailwind-ban/package.json"),
-        "{\n  \"name\": \"eslint-plugin-tailwind-ban\",\n  \"version\": \"0.0.0-test\",\n  \"type\": \"module\",\n  \"exports\": {\n    \".\": {\n      \"import\": \"./index.js\"\n    }\n  }\n}\n",
+            .join("node_modules/g3ts-eslint-plugin-style-policy/package.json"),
+        "{\n  \"name\": \"g3ts-eslint-plugin-style-policy\",\n  \"version\": \"0.0.0-test\",\n  \"type\": \"module\",\n  \"exports\": {\n    \".\": {\n      \"import\": \"./index.js\"\n    }\n  }\n}\n",
     )
-    .expect("fake tailwind ban package manifest should be written");
+    .expect("fake style policy package manifest should be written");
     fs::write(
         root.path()
-            .join("node_modules/eslint-plugin-tailwind-ban/index.js"),
+            .join("node_modules/g3ts-eslint-plugin-style-policy/index.js"),
         r#"const rule = {
   meta: { docs: { description: "deny configured Tailwind tokens" }, schema: [] },
   create() { return {}; }
 };
 
 export default {
-  meta: { name: "eslint-plugin-tailwind-ban" },
-  rules: { "no-deny-tailwind-tokens": rule },
+  meta: { name: "g3ts-eslint-plugin-style-policy" },
+  rules: { "no-denied-class-tokens": rule },
 };
 "#,
     )
-    .expect("fake tailwind ban plugin module should be written");
+    .expect("fake style policy plugin module should be written");
     fs::write(
         root.path().join("node_modules/eslint/index.js"),
         r#"class ESLint {
@@ -395,11 +398,11 @@ export default {
   }
 
   async calculateConfigForFile(_filePath) {
-    const tailwindBan = (await import("eslint-plugin-tailwind-ban")).default;
+    const stylePolicy = (await import("g3ts-eslint-plugin-style-policy")).default;
     return {
-      plugins: { "tailwind-ban": tailwindBan },
+      plugins: { "style-policy": stylePolicy },
       rules: {
-        "tailwind-ban/no-deny-tailwind-tokens": ["error", { denyList: ["text-black"] }],
+        "style-policy/no-denied-class-tokens": ["error", { denyList: ["text-black"] }],
       },
     };
   }
@@ -420,8 +423,8 @@ module.exports = { ESLint };
     assertions::assert_plugin_package_name(
         &snapshot,
         EslintProbeKind::TsxSource,
-        "tailwind-ban",
-        "eslint-plugin-tailwind-ban",
+        "style-policy",
+        "g3ts-eslint-plugin-style-policy",
     );
 }
 

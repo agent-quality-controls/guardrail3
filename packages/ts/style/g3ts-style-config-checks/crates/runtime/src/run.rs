@@ -11,6 +11,7 @@ const REQUIRED_PACKAGES: [&str; 5] = [
     "@double-great/stylelint-a11y",
     "g3ts-eslint-plugin-style-policy",
 ];
+const FORBIDDEN_PACKAGES: [&str; 1] = ["eslint-plugin-tailwind-ban"];
 const REQUIRED_EXTENDS: [&str; 2] = ["stylelint-config-standard", "stylelint-config-tailwindcss"];
 const REQUIRED_PLUGINS: [&str; 1] = ["@double-great/stylelint-a11y"];
 const REQUIRED_A11Y_RULES: [&str; 11] = [
@@ -101,8 +102,12 @@ fn check_packages(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckRe
         .iter()
         .filter(|package| !package_present(&contract.package, package))
         .collect::<Vec<_>>();
+    let forbidden = FORBIDDEN_PACKAGES
+        .iter()
+        .filter(|package| package_present(&contract.package, package))
+        .collect::<Vec<_>>();
     let rel_path = package_rel_path(&contract.package);
-    if missing.is_empty() {
+    if missing.is_empty() && forbidden.is_empty() {
         results.push(info(
             "g3ts-style/style-packages-present",
             "Style packages are installed",
@@ -113,17 +118,34 @@ fn check_packages(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckRe
             rel_path,
         ));
     } else {
-        results.push(error(
-            "g3ts-style/style-packages-present",
-            "Style packages are missing",
-            format!(
-                "`{}` must directly install these dependencies or devDependencies: {}.",
-                rel_path.unwrap_or("package.json"),
+        let mut requirements = Vec::new();
+        if !missing.is_empty() {
+            requirements.push(format!(
+                "install {}",
                 missing
                     .into_iter()
                     .map(|item| format!("`{item}`"))
                     .collect::<Vec<_>>()
                     .join(", ")
+            ));
+        }
+        if !forbidden.is_empty() {
+            requirements.push(format!(
+                "remove {}",
+                forbidden
+                    .into_iter()
+                    .map(|item| format!("`{item}`"))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ));
+        }
+        results.push(error(
+            "g3ts-style/style-packages-present",
+            "Style packages are missing",
+            format!(
+                "`{}` must {}.",
+                rel_path.unwrap_or("package.json"),
+                requirements.join(" and ")
             ),
             rel_path,
         ));
@@ -265,17 +287,9 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
         ));
         return;
     };
-    let plugin_ok = snapshot
-        .source_plugin_package_names
-        .get("style-policy")
-        .is_some_and(|packages| {
-            packages
-                .iter()
-                .any(|package| package == "g3ts-eslint-plugin-style-policy")
-        });
     if snapshot.source_probe_present
         && !snapshot.source_probe_ignored
-        && plugin_ok
+        && snapshot.style_policy_plugin_effective
         && snapshot.style_policy_rule_effective
     {
         results.push(info(

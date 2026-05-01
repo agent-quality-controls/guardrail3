@@ -104,6 +104,7 @@ pub struct G3TsStyleEslintSurfaceSnapshot {
     pub source_probe_ignored: bool,
     pub source_plugins: Vec<String>,
     pub source_plugin_package_names: BTreeMap<String, Vec<String>>,
+    pub style_policy_plugin_effective: bool,
     pub style_policy_rule_effective: bool,
 }
 

@@ -140,6 +140,7 @@ fn eslint_config() -> G3TsStyleEslintSurfaceState {
                 "style-policy".to_owned(),
                 vec!["g3ts-eslint-plugin-style-policy".to_owned()],
             )]),
+            style_policy_plugin_effective: true,
             style_policy_rule_effective: true,
         },
     }
