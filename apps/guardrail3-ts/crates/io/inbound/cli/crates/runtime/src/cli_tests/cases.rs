@@ -22,11 +22,14 @@ fn parse_command_accepts_family_and_inventory_flags() {
             "npmrc",
             "--family",
             "jscpd",
+            "--family",
+            "typecov",
             "--inventory",
         ],
         ".",
         &[
             "eslint", "astro", "arch", "apparch", "tsconfig", "package", "npmrc", "jscpd",
+            "typecov",
         ],
         true,
     );
@@ -77,6 +80,16 @@ fn parse_command_accepts_spelling_family() {
         ["g3ts", "validate", "--path", ".", "--family", "spelling"],
         ".",
         &["spelling"],
+        false,
+    );
+}
+
+#[test]
+fn parse_command_accepts_typecov_family() {
+    guardrail3_ts_assertions::cli::assert_validate_command_from(
+        ["g3ts", "validate", "--path", ".", "--family", "typecov"],
+        ".",
+        &["typecov"],
         false,
     );
 }

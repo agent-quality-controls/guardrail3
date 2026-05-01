@@ -1333,6 +1333,50 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3ts-typecov-config-checks"
+version = "0.1.0"
+dependencies = [
+ "g3ts-typecov-config-checks-runtime",
+]
+
+[[package]]
+name = "g3ts-typecov-config-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-typecov-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3ts-typecov-hook-contract"
+version = "0.1.0"
+dependencies = [
+ "g3ts-hooks-contract-types",
+]
+
+[[package]]
+name = "g3ts-typecov-ingestion"
+version = "0.1.0"
+dependencies = [
+ "g3ts-typecov-ingestion-runtime",
+]
+
+[[package]]
+name = "g3ts-typecov-ingestion-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-workspace-crawl",
+ "g3ts-typecov-types",
+ "package-json-parser",
+ "package-script-command-parser",
+ "syncpack-config-parser",
+]
+
+[[package]]
+name = "g3ts-typecov-types"
+version = "0.1.0"
+
+[[package]]
 name = "getrandom"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1422,6 +1466,8 @@ dependencies = [
  "g3ts-style-ingestion",
  "g3ts-tsconfig-config-checks",
  "g3ts-tsconfig-ingestion",
+ "g3ts-typecov-config-checks",
+ "g3ts-typecov-ingestion",
  "guardrail3-ts-app-types",
 ]
 
@@ -1444,6 +1490,7 @@ dependencies = [
  "g3ts-hooks-source-checks",
  "g3ts-spelling-hook-contract",
  "g3ts-style-hook-contract",
+ "g3ts-typecov-hook-contract",
  "guardrail3-ts-app-types",
 ]
 

@@ -51,6 +51,7 @@ pub enum FamilyArg {
     Style,
     Fmt,
     Spelling,
+    Typecov,
     Hooks,
 }
 
@@ -84,6 +85,7 @@ impl FamilyArg {
             FamilyArg::Style => vec![SupportedFamily::Style],
             FamilyArg::Fmt => vec![SupportedFamily::Fmt],
             FamilyArg::Spelling => vec![SupportedFamily::Spelling],
+            FamilyArg::Typecov => vec![SupportedFamily::Typecov],
             FamilyArg::Hooks => vec![SupportedFamily::Hooks],
         }
     }
