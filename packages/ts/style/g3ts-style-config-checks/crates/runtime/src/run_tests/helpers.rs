@@ -5,6 +5,7 @@ use g3ts_style_types::{
     G3TsStyleEslintSurfaceState, G3TsStylePackageScriptCommandSeparator,
     G3TsStylePackageScriptToolInvocation, G3TsStylePackageSurfaceSnapshot,
     G3TsStylePackageSurfaceState, G3TsStylePolicySnapshot, G3TsStylePolicySurfaceState,
+    G3TsStyleSyncpackRequiredPin, G3TsStyleSyncpackSnapshot, G3TsStyleSyncpackSurfaceState,
     G3TsStylelintConfigSnapshot, G3TsStylelintConfigSurfaceState,
 };
 
@@ -16,7 +17,9 @@ pub(super) fn golden() -> G3TsStyleConfigChecksInput {
             package: package(),
             stylelint_config: stylelint_config(),
             eslint_config: eslint_config(),
+            syncpack_config: syncpack_config(),
         }],
+        eslint_directives: Vec::new(),
     }
 }
 
@@ -59,6 +62,17 @@ pub(super) fn parsed_eslint_mut(
     snapshot
 }
 
+pub(super) fn parsed_syncpack_mut(
+    input: &mut G3TsStyleConfigChecksInput,
+) -> &mut G3TsStyleSyncpackSnapshot {
+    let G3TsStyleSyncpackSurfaceState::Parsed { snapshot } =
+        &mut input.contracts[0].syncpack_config
+    else {
+        panic!("golden Syncpack config should be parsed");
+    };
+    snapshot
+}
+
 fn policy() -> G3TsStylePolicySurfaceState {
     G3TsStylePolicySurfaceState::Parsed {
         snapshot: G3TsStylePolicySnapshot {
@@ -82,18 +96,27 @@ fn package() -> G3TsStylePackageSurfaceState {
                 "@double-great/stylelint-a11y".to_owned(),
                 "g3ts-eslint-plugin-style-policy".to_owned(),
             ],
-            script_names: vec!["lint:css".to_owned()],
-            script_tool_invocations: vec![G3TsStylePackageScriptToolInvocation {
-                script_name: "lint:css".to_owned(),
-                executable: "stylelint".to_owned(),
-                args: vec![
-                    "--max-warnings".to_owned(),
-                    "0".to_owned(),
-                    "src/**/*.css".to_owned(),
-                ],
-                preceded_by: None,
-                followed_by: None,
-            }],
+            script_names: vec!["lint:css".to_owned(), "validate".to_owned()],
+            script_tool_invocations: vec![
+                G3TsStylePackageScriptToolInvocation {
+                    script_name: "lint:css".to_owned(),
+                    executable: "stylelint".to_owned(),
+                    args: vec![
+                        "--max-warnings".to_owned(),
+                        "0".to_owned(),
+                        "src/**/*.css".to_owned(),
+                    ],
+                    preceded_by: None,
+                    followed_by: None,
+                },
+                G3TsStylePackageScriptToolInvocation {
+                    script_name: "validate".to_owned(),
+                    executable: "package-script".to_owned(),
+                    args: vec!["lint:css".to_owned()],
+                    preceded_by: None,
+                    followed_by: None,
+                },
+            ],
             script_parse_blockers: Vec::new(),
         },
     }
@@ -142,7 +165,31 @@ fn eslint_config() -> G3TsStyleEslintSurfaceState {
             )]),
             style_policy_plugin_effective: true,
             style_policy_rule_effective: true,
+            source_warn_or_error_rules: vec![
+                "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
+            ],
+            source_restricted_disable_patterns: vec![
+                "style-policy/*".to_owned(),
+                "tailwind-ban/*".to_owned(),
+            ],
         },
+    }
+}
+
+fn syncpack_config() -> G3TsStyleSyncpackSurfaceState {
+    G3TsStyleSyncpackSurfaceState::Parsed {
+        snapshot: G3TsStyleSyncpackSnapshot {
+            rel_path: ".syncpackrc".to_owned(),
+            source_covers_package_manifest: true,
+            missing_required_pins: Vec::new(),
+        },
+    }
+}
+
+pub(super) fn required_style_policy_pin() -> G3TsStyleSyncpackRequiredPin {
+    G3TsStyleSyncpackRequiredPin {
+        dependency: "g3ts-eslint-plugin-style-policy".to_owned(),
+        version: "0.1.3".to_owned(),
     }
 }
 

@@ -1,0 +1,32 @@
+#[test]
+fn style_source_globs_are_scoped_to_app_root() {
+    let policy = g3ts_style_types::G3TsStylePolicySurfaceState::Parsed {
+        snapshot: g3ts_style_types::G3TsStylePolicySnapshot {
+            rel_path: "apps/landing/guardrail3-ts.toml".to_owned(),
+            source_globs: vec!["src/**/*.{astro,ts,tsx}".to_owned()],
+            stylelint_css_globs: Vec::new(),
+            extra_fields: Vec::new(),
+        },
+    };
+
+    g3ts_style_ingestion_assertions::eslint_directives::assert_scoped_style_globs(
+        super::super::style_source_globs("apps/landing", &policy),
+        &["apps/landing/src/**/*.{astro,ts,tsx}"],
+    );
+}
+
+#[test]
+fn compiled_style_source_globs_match_configured_files() {
+    let globs = vec!["apps/landing/src/**/*.{astro,ts,tsx}".to_owned()];
+    let compiled = super::super::compile_globs(&globs)
+        .expect("test glob should compile");
+
+    g3ts_style_ingestion_assertions::eslint_directives::assert_glob_matches(
+        &compiled,
+        "apps/landing/src/ui/page.tsx",
+    );
+    g3ts_style_ingestion_assertions::eslint_directives::assert_glob_does_not_match(
+        &compiled,
+        "apps/web/src/ui/page.tsx",
+    );
+}

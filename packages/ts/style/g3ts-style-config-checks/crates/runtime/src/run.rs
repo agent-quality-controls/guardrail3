@@ -37,8 +37,15 @@ pub fn check(input: &G3TsStyleConfigChecksInput) -> Vec<G3CheckResult> {
         check_packages(contract, &mut results);
         check_stylelint(contract, &mut results);
         check_css_lint_script(contract, &mut results);
+        crate::package_scripts::check_validate_runs_css_lint(contract, &mut results);
         check_tailwind_eslint(contract, &mut results);
+        crate::eslint_suppression::check_protected_style_rule_disables(contract, &mut results);
+        crate::syncpack_policy::check_syncpack_style_policy_pin(contract, &mut results);
     }
+    crate::eslint_suppression::check_eslint_disable_inventory(
+        &input.eslint_directives,
+        &mut results,
+    );
     results
 }
 

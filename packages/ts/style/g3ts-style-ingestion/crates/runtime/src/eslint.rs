@@ -68,6 +68,20 @@ pub(crate) fn ingest_eslint_config(
         };
         rule_has_effective_style_policy(rule)
     });
+    let source_warn_or_error_rules = snapshot
+        .probes
+        .iter()
+        .flat_map(active_warn_or_error_rules)
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    let source_restricted_disable_patterns = snapshot
+        .probes
+        .iter()
+        .flat_map(restricted_disable_patterns)
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .collect();
 
     G3TsStyleEslintSurfaceState::Parsed {
         snapshot: G3TsStyleEslintSurfaceSnapshot {
@@ -78,8 +92,51 @@ pub(crate) fn ingest_eslint_config(
             source_plugin_package_names,
             style_policy_plugin_effective,
             style_policy_rule_effective,
+            source_warn_or_error_rules,
+            source_restricted_disable_patterns,
         },
     }
+}
+
+fn active_warn_or_error_rules(
+    probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
+) -> Vec<String> {
+    if probe.ignored {
+        return Vec::new();
+    }
+    probe
+        .rules
+        .iter()
+        .filter_map(|(rule_name, setting)| {
+            (setting.severity >= eslint_config_parser::types::EslintRuleSeverity::Warn)
+                .then_some(rule_name.clone())
+        })
+        .collect()
+}
+
+fn restricted_disable_patterns(
+    probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
+) -> Vec<String> {
+    if probe.ignored {
+        return Vec::new();
+    }
+    let Some(setting) = probe
+        .rules
+        .get("@eslint-community/eslint-comments/no-restricted-disable")
+    else {
+        return Vec::new();
+    };
+    if setting.severity < eslint_config_parser::types::EslintRuleSeverity::Warn {
+        return Vec::new();
+    }
+    setting
+        .options
+        .iter()
+        .filter_map(serde_json::Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_owned)
+        .collect()
 }
 
 fn rule_has_effective_style_policy(
