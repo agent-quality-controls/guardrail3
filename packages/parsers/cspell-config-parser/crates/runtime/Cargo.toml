@@ -1,0 +1,25 @@
+[package]
+name = "cspell-config-parser-runtime"
+version.workspace = true
+edition.workspace = true
+description = "Runtime for cspell config parser"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+cspell-config-parser-types = { path = "../types", version = "0.1.0" }
+serde_json = "1"
+
+[dev-dependencies]
+cspell-config-parser-runtime-assertions = { path = "../assertions" }
+tempfile = "3"
+
+[features]
+default = ["api"]
+api = []
+
+[lints]
+workspace = true
+

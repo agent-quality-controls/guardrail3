@@ -62,6 +62,7 @@ const fn family_cli_name(family: SupportedFamily) -> &'static str {
         SupportedFamily::Jscpd => "jscpd",
         SupportedFamily::Style => "style",
         SupportedFamily::Fmt => "fmt",
+        SupportedFamily::Spelling => "spelling",
         SupportedFamily::Hooks => "hooks",
     }
 }

@@ -1,0 +1,17 @@
+profile = "library"
+
+allowed_deps = [
+  "cspell-config-parser",
+  "g3rs-workspace-crawl",
+  "g3-workspace-crawl",
+  "g3ts-spelling-ingestion-runtime",
+  "g3ts-spelling-ingestion-assertions",
+  "g3ts-spelling-types",
+  "package-json-parser",
+  "package-script-command-parser",
+  "syncpack-config-parser",
+  "tempfile",
+]
+
+[checks]
+garde = false

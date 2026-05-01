@@ -70,3 +70,13 @@ fn parse_command_accepts_astro_family() {
         false,
     );
 }
+
+#[test]
+fn parse_command_accepts_spelling_family() {
+    guardrail3_ts_assertions::cli::assert_validate_command_from(
+        ["g3ts", "validate", "--path", ".", "--family", "spelling"],
+        ".",
+        &["spelling"],
+        false,
+    );
+}

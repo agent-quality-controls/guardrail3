@@ -60,6 +60,9 @@ g3ts-style-ingestion = { path = "../../packages/ts/style/g3ts-style-ingestion" }
 g3ts-fmt-config-checks = { path = "../../packages/ts/fmt/g3ts-fmt-config-checks" }
 g3ts-fmt-hook-contract = { path = "../../packages/ts/fmt/g3ts-fmt-hook-contract" }
 g3ts-fmt-ingestion = { path = "../../packages/ts/fmt/g3ts-fmt-ingestion" }
+g3ts-spelling-config-checks = { path = "../../packages/ts/spelling/g3ts-spelling-config-checks" }
+g3ts-spelling-hook-contract = { path = "../../packages/ts/spelling/g3ts-spelling-hook-contract" }
+g3ts-spelling-ingestion = { path = "../../packages/ts/spelling/g3ts-spelling-ingestion" }
 g3ts-hooks-config-checks = { path = "../../packages/ts/hooks/g3ts-hooks-config-checks" }
 g3ts-hooks-contract-types = { path = "../../packages/ts/hooks/g3ts-hooks-contract-types" }
 g3ts-hooks-file-tree-checks = { path = "../../packages/ts/hooks/g3ts-hooks-file-tree-checks" }
