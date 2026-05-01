@@ -396,7 +396,7 @@ fn css_lint_script_must_not_fail_open() {
 }
 
 #[test]
-fn style_policy_rule_must_be_effective_at_error_with_non_empty_eslint_denylist() {
+fn style_policy_rule_must_be_effective_at_error_with_non_empty_eslint_policy() {
     let mut input = super::helpers::golden();
     super::helpers::parsed_eslint_mut(&mut input).style_policy_rule_effective = false;
 

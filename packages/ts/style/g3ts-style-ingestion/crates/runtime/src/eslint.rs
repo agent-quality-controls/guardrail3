@@ -66,7 +66,7 @@ pub(crate) fn ingest_eslint_config(
         let Some(rule) = probe.rules.get("style-policy/no-denied-class-tokens") else {
             return false;
         };
-        rule_has_effective_style_policy_denylist(rule)
+        rule_has_effective_style_policy(rule)
     });
 
     G3TsStyleEslintSurfaceState::Parsed {
@@ -82,14 +82,14 @@ pub(crate) fn ingest_eslint_config(
     }
 }
 
-fn rule_has_effective_style_policy_denylist(
+fn rule_has_effective_style_policy(
     rule: &eslint_config_parser::types::EslintRuleSetting,
 ) -> bool {
     rule.severity == eslint_config_parser::types::EslintRuleSeverity::Error
         && rule
             .options
             .first()
-            .is_some_and(option_has_non_empty_denylist)
+            .is_some_and(option_has_non_empty_style_policy)
 }
 
 fn all_probes_use_owned_style_policy_plugin(
@@ -106,13 +106,21 @@ fn all_probes_use_owned_style_policy_plugin(
     })
 }
 
-fn option_has_non_empty_denylist(option: &serde_json::Value) -> bool {
-    let Some(denylist) = option.get("denyList").and_then(serde_json::Value::as_array) else {
-        return false;
-    };
-    denylist
+fn option_has_non_empty_style_policy(option: &serde_json::Value) -> bool {
+    ["denyList", "denyPrefixes", "denyPatterns"]
         .iter()
-        .any(|item| item.as_str().is_some_and(|value| !value.trim().is_empty()))
+        .any(|key| option_has_non_empty_string_array(option, key))
+}
+
+fn option_has_non_empty_string_array(option: &serde_json::Value, key: &str) -> bool {
+    option
+        .get(key)
+        .and_then(serde_json::Value::as_array)
+        .is_some_and(|values| {
+            values
+                .iter()
+                .any(|item| item.as_str().is_some_and(|value| !value.trim().is_empty()))
+        })
 }
 
 fn probe_targets(

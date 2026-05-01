@@ -2,6 +2,8 @@ import type { JSONSchema4 } from "@typescript-eslint/utils/json-schema";
 
 export interface StylePolicyOptions {
   denyList?: string[];
+  denyPrefixes?: string[];
+  denyPatterns?: string[];
   classAttributes?: string[];
   classListAttributes?: string[];
   classHelpers?: string[];
@@ -9,6 +11,8 @@ export interface StylePolicyOptions {
 
 export interface ResolvedStylePolicyOptions {
   denyList: string[];
+  denyPrefixes: string[];
+  denyPatterns: string[];
   classAttributes: string[];
   classListAttributes: string[];
   classHelpers: string[];
@@ -27,6 +31,8 @@ export const stylePolicyOptionsSchema: JSONSchema4[] = [
     additionalProperties: false,
     properties: {
       denyList: stringArraySchema,
+      denyPrefixes: stringArraySchema,
+      denyPatterns: stringArraySchema,
       classAttributes: stringArraySchema,
       classListAttributes: stringArraySchema,
       classHelpers: stringArraySchema
@@ -41,6 +47,8 @@ export function resolveOptions(
 
   return {
     denyList: normalizeStringArray(source.denyList),
+    denyPrefixes: normalizeStringArray(source.denyPrefixes),
+    denyPatterns: normalizeStringArray(source.denyPatterns),
     classAttributes: normalizeStringArray(source.classAttributes),
     classListAttributes: normalizeStringArray(source.classListAttributes),
     classHelpers: normalizeStringArray(source.classHelpers)

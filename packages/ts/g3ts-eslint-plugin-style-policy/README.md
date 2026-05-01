@@ -20,6 +20,8 @@ export default [
         "error",
         {
           denyList: ["text-black", "bg-red-500"],
+          denyPrefixes: ["text-[", "leading-[", "tracking-["],
+          denyPatterns: ["^font-\\[[^\\]]+\\]$"],
           classAttributes: ["class", "className"],
           classListAttributes: ["class:list"],
           classHelpers: ["cn", "clsx", "twMerge"]
@@ -38,6 +40,7 @@ import { recommended as stylePolicyRecommended } from "g3ts-eslint-plugin-style-
 export default [
   stylePolicyRecommended({
     denyList: ["text-black"],
+    denyPrefixes: ["text-["],
     classAttributes: ["class", "className"],
     classListAttributes: ["class:list"],
     classHelpers: ["cn", "clsx", "twMerge"]
@@ -49,7 +52,13 @@ export default [
 
 - `style-policy/no-denied-class-tokens`
 
-The rule reports configured denied class tokens in static class positions:
+The rule reports configured denied class tokens in static class positions. A token is denied when it matches one of:
+
+- exact `denyList` entries
+- `denyPrefixes` entries
+- `denyPatterns` regular expressions
+
+The rule scans:
 
 - `class` and `className` attributes
 - Astro `class:list`
