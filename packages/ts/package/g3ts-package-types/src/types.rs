@@ -9,6 +9,7 @@ pub struct G3TsPackageRootSnapshot {
     pub prepare_script: Option<String>,
     pub lint_script: Option<String>,
     pub typecheck_script: Option<String>,
+    pub validate_script: Option<String>,
     pub dependencies: Vec<String>,
     pub dev_dependencies: Vec<String>,
     pub pnpm_override_keys: Vec<String>,

@@ -15,6 +15,7 @@ name = "g3ts-package-config-checks-assertions"
 version = "0.0.0"
 dependencies = [
  "g3ts-package-config-checks-runtime",
+ "g3ts-package-types",
  "guardrail3-check-types",
 ]
 

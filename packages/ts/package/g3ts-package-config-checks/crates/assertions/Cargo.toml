@@ -20,4 +20,5 @@ checks = []
 
 [dependencies]
 g3ts-package-config-checks-runtime = { path = "../runtime" }
+g3ts-package-types = { path = "../../../g3ts-package-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
