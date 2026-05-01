@@ -13,7 +13,11 @@ fn golden_style_package_reports_owned_ids() {
             "g3ts-style/stylelint-config-stack",
             "g3ts-style/stylelint-a11y-rules",
             "g3ts-style/css-lint-script",
+            "g3ts-style/validate-runs-css-lint",
             "g3ts-style/style-policy-eslint-rule",
+            "g3ts-style/protected-style-rule-disables-restricted",
+            "g3ts-style/syncpack-style-policy-pin",
+            "g3ts-style/eslint-disable-inventory",
         ],
     );
 }
@@ -396,6 +400,39 @@ fn css_lint_script_must_not_fail_open() {
 }
 
 #[test]
+fn validate_script_must_reach_css_lint() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_package_mut(&mut input)
+        .script_tool_invocations
+        .retain(|invocation| invocation.script_name != "validate");
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/validate-runs-css-lint",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn validate_script_must_not_fail_open() {
+    let mut input = super::helpers::golden();
+    let package = super::helpers::parsed_package_mut(&mut input);
+    package
+        .script_tool_invocations
+        .iter_mut()
+        .filter(|invocation| invocation.script_name == "validate")
+        .for_each(|invocation| {
+            invocation.followed_by = Some(super::helpers::fail_open_separator());
+        });
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/validate-runs-css-lint",
+        G3Severity::Error,
+    );
+}
+
+#[test]
 fn style_policy_rule_must_be_effective_at_error_with_non_empty_eslint_policy() {
     let mut input = super::helpers::golden();
     super::helpers::parsed_eslint_mut(&mut input).style_policy_rule_effective = false;
@@ -421,6 +458,102 @@ fn style_policy_rule_must_use_owned_plugin_package_on_every_probe() {
         &input,
         "g3ts-style/style-policy-eslint-rule",
         "g3ts-eslint-plugin-style-policy",
+    );
+}
+
+#[test]
+fn protected_style_rule_disables_must_restrict_style_rules() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_eslint_mut(&mut input)
+        .source_restricted_disable_patterns
+        .retain(|pattern| pattern != "style-policy/*");
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/protected-style-rule-disables-restricted",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn protected_style_rule_disables_accept_wildcard() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_eslint_mut(&mut input).source_restricted_disable_patterns =
+        vec!["*".to_owned()];
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/protected-style-rule-disables-restricted",
+        G3Severity::Info,
+    );
+}
+
+#[test]
+fn eslint_disable_inventory_reports_visible_warning() {
+    let mut input = super::helpers::golden();
+    input
+        .eslint_directives
+        .push(g3ts_style_types::G3TsStyleEslintDirectiveInput::parsed(
+            "src/page.tsx".to_owned(),
+            "DisableNextLine".to_owned(),
+            vec!["style-policy/no-denied-class-tokens".to_owned()],
+            false,
+            12,
+            Some(13),
+        ));
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/eslint-disable-inventory",
+        G3Severity::Warn,
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/eslint-disable-inventory",
+        "style-policy/no-denied-class-tokens",
+    );
+}
+
+#[test]
+fn eslint_disable_inventory_parse_errors_fail_closed() {
+    let mut input = super::helpers::golden();
+    input
+        .eslint_directives
+        .push(g3ts_style_types::G3TsStyleEslintDirectiveInput::parse_error(
+            "src/page.tsx".to_owned(),
+            "broken source".to_owned(),
+        ));
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/eslint-disable-inventory",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn syncpack_must_pin_style_policy_plugin_floor() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_syncpack_mut(&mut input)
+        .missing_required_pins
+        .push(super::helpers::required_style_policy_pin());
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/syncpack-style-policy-pin",
+        G3Severity::Error,
+    );
+}
+
+#[test]
+fn syncpack_must_cover_package_manifest() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_syncpack_mut(&mut input).source_covers_package_manifest = false;
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/syncpack-style-policy-pin",
+        G3Severity::Error,
     );
 }
 

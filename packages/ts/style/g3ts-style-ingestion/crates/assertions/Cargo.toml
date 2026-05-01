@@ -10,6 +10,7 @@ publish = false
 
 [dependencies]
 g3ts_style_ingestion_runtime = { package = "g3ts-style-ingestion-runtime", path = "../runtime" }
+globset = "0.4"
 
 [features]
 default = ["api"]

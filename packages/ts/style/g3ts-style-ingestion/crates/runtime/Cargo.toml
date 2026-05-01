@@ -10,13 +10,16 @@ publish = false
 
 [dependencies]
 eslint-config-parser = { path = "../../../../../parsers/eslint-config-parser", version = "0.1.0" }
+eslint-directive-parser = { path = "../../../../../parsers/eslint-directive-parser", version = "0.1.0" }
 g3-workspace-crawl = { path = "../../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", version = "0.1.0", features = ["api"] }
 g3ts-style-types = { path = "../../../g3ts-style-types", version = "0.1.0" }
+globset = "0.4"
 guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
 package-json-parser = { path = "../../../../../parsers/package-json-parser", version = "0.1.0" }
 package-script-command-parser = { path = "../../../../../parsers/package-script-command-parser", version = "0.1.0" }
 serde_json = "1"
 stylelint-config-parser = { path = "../../../../../parsers/stylelint-config-parser", version = "0.1.0" }
+syncpack-config-parser = { path = "../../../../../parsers/syncpack-config-parser", version = "0.1.0", features = ["api"] }
 
 [dev-dependencies]
 g3ts-style-ingestion-assertions = { path = "../assertions" }

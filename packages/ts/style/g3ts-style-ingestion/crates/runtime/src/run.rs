@@ -3,13 +3,22 @@ use g3ts_style_types::{G3TsStyleConfigChecksInput, G3TsStyleContractInput};
 
 #[must_use]
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsStyleConfigChecksInput {
+    let style_roots = crate::roots::style_roots(crawl);
     G3TsStyleConfigChecksInput {
-        contracts: crate::roots::style_roots(crawl)
+        contracts: style_roots
+            .iter()
+            .cloned()
             .into_iter()
             .map(|app_root_rel_path| {
                 let policy = crate::policy::ingest_policy(crawl, &app_root_rel_path);
+                let package = crate::package::ingest_package_surface(crawl, &app_root_rel_path);
                 G3TsStyleContractInput {
-                    package: crate::package::ingest_package_surface(crawl, &app_root_rel_path),
+                    syncpack_config: crate::syncpack::ingest_syncpack_config(
+                        crawl,
+                        &app_root_rel_path,
+                        &package,
+                    ),
+                    package,
                     stylelint_config: crate::stylelint::ingest_stylelint_config(
                         crawl,
                         &app_root_rel_path,
@@ -23,6 +32,13 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsStyleConfigChec
                     app_root_rel_path,
                     policy,
                 }
+            })
+            .collect(),
+        eslint_directives: style_roots
+            .iter()
+            .flat_map(|app_root_rel_path| {
+                let policy = crate::policy::ingest_policy(crawl, app_root_rel_path);
+                crate::eslint_directives::eslint_directives(crawl, app_root_rel_path, &policy)
             })
             .collect(),
     }
