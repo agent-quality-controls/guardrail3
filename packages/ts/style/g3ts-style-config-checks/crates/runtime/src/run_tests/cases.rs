@@ -406,3 +406,39 @@ fn style_policy_rule_must_be_effective_at_error_with_non_empty_eslint_denylist()
         G3Severity::Error,
     );
 }
+
+#[test]
+fn style_policy_rule_must_use_owned_plugin_package_on_every_probe() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_eslint_mut(&mut input).style_policy_plugin_effective = false;
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/style-policy-eslint-rule",
+        G3Severity::Error,
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/style-policy-eslint-rule",
+        "g3ts-eslint-plugin-style-policy",
+    );
+}
+
+#[test]
+fn style_packages_reject_legacy_tailwind_ban_plugin() {
+    let mut input = super::helpers::golden();
+    super::helpers::parsed_package_mut(&mut input)
+        .dev_dependencies
+        .push("eslint-plugin-tailwind-ban".to_owned());
+
+    assertions::assert_runtime_check_id_severity(
+        &input,
+        "g3ts-style/style-packages-present",
+        G3Severity::Error,
+    );
+    assertions::assert_runtime_check_message_contains(
+        &input,
+        "g3ts-style/style-packages-present",
+        "remove `eslint-plugin-tailwind-ban`",
+    );
+}

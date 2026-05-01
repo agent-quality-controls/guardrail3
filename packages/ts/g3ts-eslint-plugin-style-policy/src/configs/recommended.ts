@@ -1,11 +1,17 @@
-import type { Linter } from "eslint";
+import type { ESLint, Linter } from "eslint";
 
-export const recommendedRules = {
-  "style-policy/no-denied-class-tokens": "error"
-} as const satisfies Linter.RulesRecord;
+import plugin from "../plugin.js";
+import type { StylePolicyOptions } from "../utils/options.js";
 
-const recommended = {
-  rules: recommendedRules
-} as const satisfies Linter.Config;
+export function recommended(options: StylePolicyOptions): Linter.Config {
+  return {
+    plugins: {
+      "style-policy": plugin as unknown as ESLint.Plugin
+    },
+    rules: {
+      "style-policy/no-denied-class-tokens": ["error", options]
+    }
+  };
+}
 
 export default recommended;
