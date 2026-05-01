@@ -1,0 +1,23 @@
+[package]
+name = "g3ts-fmt-config-checks-runtime"
+version.workspace = true
+edition.workspace = true
+description = "Runtime crate for G3TS formatting config checks"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+g3ts-fmt-types = { path = "../../../g3ts-fmt-types", version = "0.1.0" }
+guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+
+[dev-dependencies]
+g3ts-fmt-config-checks-assertions = { path = "../assertions" }
+
+[features]
+default = ["api"]
+api = []
+
+[lints]
+workspace = true

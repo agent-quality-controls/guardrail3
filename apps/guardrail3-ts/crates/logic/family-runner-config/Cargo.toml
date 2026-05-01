@@ -19,6 +19,8 @@ g3ts-jscpd-config-checks.workspace = true
 g3ts-jscpd-ingestion.workspace = true
 g3ts-style-config-checks.workspace = true
 g3ts-style-ingestion.workspace = true
+g3ts-fmt-config-checks.workspace = true
+g3ts-fmt-ingestion.workspace = true
 
 [features]
 default = ["api"]

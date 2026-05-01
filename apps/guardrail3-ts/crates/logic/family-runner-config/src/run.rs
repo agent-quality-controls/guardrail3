@@ -32,6 +32,9 @@ pub fn run(
         SupportedFamily::Style => Ok(g3ts_style_config_checks::check(
             &g3ts_style_ingestion::ingest_for_config_checks(crawl),
         )),
+        SupportedFamily::Fmt => Ok(g3ts_fmt_config_checks::check(
+            &g3ts_fmt_ingestion::ingest_for_config_checks(crawl),
+        )),
         SupportedFamily::Tsconfig => Ok(g3ts_tsconfig_config_checks::check(
             &g3ts_tsconfig_ingestion::ingest_for_config_checks(crawl),
         )),

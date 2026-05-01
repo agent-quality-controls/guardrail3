@@ -1,0 +1,48 @@
+profile = "library"
+
+allowed_deps = []
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsFmtPackageSurfaceSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsFmtPackageScriptToolInvocation"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsFmtPackageScriptParseBlocker"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsFmtSyncpackSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsFmtSyncpackVersionGroupSnapshot"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsFmtContractInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
+
+[[waivers]]
+rule = "g3rs-code/public-struct-named-fields"
+file = "src/types.rs"
+selector = "struct:G3TsFmtConfigChecksInput"
+reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."

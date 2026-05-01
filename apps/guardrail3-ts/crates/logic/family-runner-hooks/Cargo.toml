@@ -17,6 +17,7 @@ g3ts-hooks-contract-types.workspace = true
 g3ts-hooks-file-tree-checks.workspace = true
 g3ts-hooks-ingestion.workspace = true
 g3ts-hooks-source-checks.workspace = true
+g3ts-fmt-hook-contract.workspace = true
 g3ts-style-hook-contract.workspace = true
 guardrail3-ts-app-types = { path = "../../types/app-types" }
 
