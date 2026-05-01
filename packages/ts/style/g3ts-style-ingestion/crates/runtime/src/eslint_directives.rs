@@ -11,7 +11,27 @@ pub(crate) fn eslint_directives(
     app_root_rel_path: &str,
     policy: &G3TsStylePolicySurfaceState,
 ) -> Vec<G3TsStyleEslintDirectiveInput> {
-    source_paths(crawl, app_root_rel_path, policy)
+    let Some(globs) = style_source_globs(app_root_rel_path, policy) else {
+        return Vec::new();
+    };
+    let globs = match compile_globs(&globs) {
+        Ok(globs) => globs,
+        Err(error) => {
+            return vec![G3TsStyleEslintDirectiveInput {
+                rel_path: crate::roots::scoped_rel_path(app_root_rel_path, "guardrail3-ts.toml"),
+                directive_kind: String::new(),
+                disabled_rules: Vec::new(),
+                all_rules: false,
+                line: 0,
+                target_line: None,
+                parse_error: Some(format!(
+                    "`[ts.style].source_globs` could not be compiled for ESLint disable inventory: {error}"
+                )),
+            }];
+        }
+    };
+
+    source_paths(crawl, &globs)
         .into_iter()
         .flat_map(|rel_path| file_directives(crawl, &rel_path))
         .collect()
@@ -19,16 +39,8 @@ pub(crate) fn eslint_directives(
 
 fn source_paths(
     crawl: &G3WorkspaceCrawl,
-    app_root_rel_path: &str,
-    policy: &G3TsStylePolicySurfaceState,
+    globs: &globset::GlobSet,
 ) -> Vec<String> {
-    let Some(globs) = style_source_globs(app_root_rel_path, policy) else {
-        return Vec::new();
-    };
-    let Ok(globs) = compile_globs(&globs) else {
-        return Vec::new();
-    };
-
     crawl
         .entries
         .iter()
@@ -93,20 +105,29 @@ fn file_directives(
                 finding.disabled_rules,
                 eslint_directive_parser::types::EslintDisabledRuleSet::AllRules
             );
-            G3TsStyleEslintDirectiveInput::parsed(
-                finding.rel_path,
-                format!("{:?}", finding.directive_kind),
-                disabled_rules(finding.disabled_rules),
+            G3TsStyleEslintDirectiveInput {
+                rel_path: finding.rel_path,
+                directive_kind: format!("{:?}", finding.directive_kind),
+                disabled_rules: disabled_rules(finding.disabled_rules),
                 all_rules,
-                finding.line,
-                finding.target_line,
-            )
+                line: finding.line,
+                target_line: finding.target_line,
+                parse_error: None,
+            }
         })
         .collect()
 }
 
 fn parse_error(rel_path: &str, reason: String) -> G3TsStyleEslintDirectiveInput {
-    G3TsStyleEslintDirectiveInput::parse_error(rel_path.to_owned(), reason)
+    G3TsStyleEslintDirectiveInput {
+        rel_path: rel_path.to_owned(),
+        directive_kind: String::new(),
+        disabled_rules: Vec::new(),
+        all_rules: false,
+        line: 0,
+        target_line: None,
+        parse_error: Some(reason),
+    }
 }
 
 fn disabled_rules(rules: eslint_directive_parser::types::EslintDisabledRuleSet) -> Vec<String> {

@@ -2,11 +2,12 @@ use std::collections::BTreeMap;
 
 use g3ts_style_types::{
     G3TsStyleConfigChecksInput, G3TsStyleContractInput, G3TsStyleEslintSurfaceSnapshot,
-    G3TsStyleEslintSurfaceState, G3TsStylePackageScriptCommandSeparator,
-    G3TsStylePackageScriptToolInvocation, G3TsStylePackageSurfaceSnapshot,
-    G3TsStylePackageSurfaceState, G3TsStylePolicySnapshot, G3TsStylePolicySurfaceState,
-    G3TsStyleSyncpackRequiredPin, G3TsStyleSyncpackSnapshot, G3TsStyleSyncpackSurfaceState,
-    G3TsStylelintConfigSnapshot, G3TsStylelintConfigSurfaceState,
+    G3TsStyleEslintSurfaceState, G3TsStyleEslintProbeDisablePolicySnapshot,
+    G3TsStylePackageScriptCommandSeparator, G3TsStylePackageScriptToolInvocation,
+    G3TsStylePackageSurfaceSnapshot, G3TsStylePackageSurfaceState, G3TsStylePolicySnapshot,
+    G3TsStylePolicySurfaceState, G3TsStyleSyncpackSnapshot, G3TsStyleSyncpackSurfaceState,
+    G3TsStyleSyncpackVersionGroupSnapshot, G3TsStylelintConfigSnapshot,
+    G3TsStylelintConfigSurfaceState,
 };
 
 pub(super) fn golden() -> G3TsStyleConfigChecksInput {
@@ -172,6 +173,17 @@ fn eslint_config() -> G3TsStyleEslintSurfaceState {
                 "style-policy/*".to_owned(),
                 "tailwind-ban/*".to_owned(),
             ],
+            source_probe_disable_policies: vec![G3TsStyleEslintProbeDisablePolicySnapshot {
+                rel_path: "src/__g3ts_style_probe__.tsx".to_owned(),
+                ignored: false,
+                warn_or_error_rules: vec![
+                    "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
+                ],
+                restricted_disable_patterns: vec![
+                    "style-policy/*".to_owned(),
+                    "tailwind-ban/*".to_owned(),
+                ],
+            }],
         },
     }
 }
@@ -180,16 +192,17 @@ fn syncpack_config() -> G3TsStyleSyncpackSurfaceState {
     G3TsStyleSyncpackSurfaceState::Parsed {
         snapshot: G3TsStyleSyncpackSnapshot {
             rel_path: ".syncpackrc".to_owned(),
-            source_covers_package_manifest: true,
-            missing_required_pins: Vec::new(),
+            source: vec!["package.json".to_owned()],
+            version_groups: vec![G3TsStyleSyncpackVersionGroupSnapshot {
+                dependencies: vec!["g3ts-eslint-plugin-style-policy".to_owned()],
+                dependency_types: vec!["prod".to_owned(), "dev".to_owned()],
+                packages: None,
+                specifier_types: None,
+                is_ignored: None,
+                is_banned: None,
+                pin_version: Some("0.1.3".to_owned()),
+            }],
         },
-    }
-}
-
-pub(super) fn required_style_policy_pin() -> G3TsStyleSyncpackRequiredPin {
-    G3TsStyleSyncpackRequiredPin {
-        dependency: "g3ts-eslint-plugin-style-policy".to_owned(),
-        version: "0.1.3".to_owned(),
     }
 }
 

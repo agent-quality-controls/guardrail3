@@ -16,7 +16,6 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsStyleConfigChec
                     syncpack_config: crate::syncpack::ingest_syncpack_config(
                         crawl,
                         &app_root_rel_path,
-                        &package,
                     ),
                     package,
                     stylelint_config: crate::stylelint::ingest_stylelint_config(

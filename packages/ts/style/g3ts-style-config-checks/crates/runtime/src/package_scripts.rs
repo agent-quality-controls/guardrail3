@@ -8,6 +8,15 @@ pub(crate) fn check_validate_runs_css_lint(
 ) {
     let rel_path = package_rel_path(&contract.package);
     let Some(package) = parsed_package(&contract.package) else {
+        results.push(error(
+            "g3ts-style/validate-runs-css-lint",
+            "Validate script cannot be checked",
+            format!(
+                "`{}` must be readable and parseable so G3TS can prove `validate` runs CSS lint fail-closed.",
+                rel_path.unwrap_or("package.json")
+            ),
+            rel_path,
+        ));
         return;
     };
     if validate_runs_css_lint(package) {
@@ -105,28 +114,59 @@ fn reachable_script_names(
 fn package_script_target(
     invocation: &g3ts_style_types::G3TsStylePackageScriptToolInvocation,
 ) -> Option<String> {
-    if invocation.executable != "package-script" {
-        return None;
+    if invocation.executable == "package-script" {
+        return invocation
+            .args
+            .first()
+            .map(|script_name| script_name.trim())
+            .filter(|script_name| !script_name.is_empty())
+            .map(str::to_owned);
     }
 
-    invocation
-        .args
-        .first()
-        .map(|script_name| script_name.trim())
-        .filter(|script_name| !script_name.is_empty())
-        .map(str::to_owned)
+    if invocation.executable == "lint:css" {
+        return Some("lint:css".to_owned());
+    }
+
+    if matches!(invocation.executable.as_str(), "pnpm" | "yarn" | "bun") {
+        return invocation
+            .args
+            .first()
+            .map(|script_name| script_name.trim())
+            .filter(|script_name| *script_name == "lint:css")
+            .map(str::to_owned);
+    }
+
+    None
 }
 
 fn stylelint_invocation_is_fail_closed(
     invocation: &g3ts_style_types::G3TsStylePackageScriptToolInvocation,
 ) -> bool {
-    invocation.executable == "stylelint"
-        && invocation.args.iter().any(|arg| arg == "--max-warnings")
-        && invocation.args.iter().any(|arg| arg == "0")
+    let Some(args) = stylelint_args(invocation) else {
+        return false;
+    };
+    args.iter().any(|arg| arg == "--max-warnings")
+        && args.iter().any(|arg| arg == "0")
         && invocation.preceded_by
             != Some(g3ts_style_types::G3TsStylePackageScriptCommandSeparator::Or)
         && invocation.followed_by
             != Some(g3ts_style_types::G3TsStylePackageScriptCommandSeparator::Or)
+}
+
+fn stylelint_args(
+    invocation: &g3ts_style_types::G3TsStylePackageScriptToolInvocation,
+) -> Option<&[String]> {
+    if invocation.executable == "stylelint" {
+        return Some(&invocation.args);
+    }
+    if matches!(invocation.executable.as_str(), "pnpm" | "npm" | "yarn" | "bun" | "npx" | "bunx")
+    {
+        let (tool, args) = invocation.args.split_first()?;
+        if tool == "stylelint" {
+            return Some(args);
+        }
+    }
+    None
 }
 
 fn parsed_package(

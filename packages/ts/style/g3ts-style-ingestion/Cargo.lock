@@ -142,6 +142,7 @@ name = "g3ts-style-ingestion-assertions"
 version = "0.1.0"
 dependencies = [
  "g3ts-style-ingestion-runtime",
+ "g3ts-style-types",
  "globset",
 ]
 

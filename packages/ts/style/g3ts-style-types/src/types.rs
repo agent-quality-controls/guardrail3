@@ -108,6 +108,15 @@ pub struct G3TsStyleEslintSurfaceSnapshot {
     pub style_policy_rule_effective: bool,
     pub source_warn_or_error_rules: Vec<String>,
     pub source_restricted_disable_patterns: Vec<String>,
+    pub source_probe_disable_policies: Vec<G3TsStyleEslintProbeDisablePolicySnapshot>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsStyleEslintProbeDisablePolicySnapshot {
+    pub rel_path: String,
+    pub ignored: bool,
+    pub warn_or_error_rules: Vec<String>,
+    pub restricted_disable_patterns: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -130,83 +139,13 @@ pub enum G3TsStyleEslintSurfaceState {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsStyleEslintDirectiveInput {
-    rel_path: String,
-    directive_kind: String,
-    disabled_rules: Vec<String>,
-    all_rules: bool,
-    line: u32,
-    target_line: Option<u32>,
-    parse_error: Option<String>,
-}
-
-impl G3TsStyleEslintDirectiveInput {
-    #[must_use]
-    pub fn parsed(
-        rel_path: String,
-        directive_kind: String,
-        disabled_rules: Vec<String>,
-        all_rules: bool,
-        line: u32,
-        target_line: Option<u32>,
-    ) -> Self {
-        Self {
-            rel_path,
-            directive_kind,
-            disabled_rules,
-            all_rules,
-            line,
-            target_line,
-            parse_error: None,
-        }
-    }
-
-    #[must_use]
-    pub fn parse_error(rel_path: String, reason: String) -> Self {
-        Self {
-            rel_path,
-            directive_kind: String::new(),
-            disabled_rules: Vec::new(),
-            all_rules: false,
-            line: 0,
-            target_line: None,
-            parse_error: Some(reason),
-        }
-    }
-
-    #[must_use]
-    pub fn rel_path(&self) -> &str {
-        &self.rel_path
-    }
-
-    #[must_use]
-    pub fn directive_kind(&self) -> &str {
-        &self.directive_kind
-    }
-
-    #[must_use]
-    pub fn disabled_rules(&self) -> &[String] {
-        &self.disabled_rules
-    }
-
-    #[must_use]
-    pub fn all_rules(&self) -> bool {
-        self.all_rules
-    }
-
-    #[must_use]
-    pub fn line(&self) -> u32 {
-        self.line
-    }
-
-    #[must_use]
-    pub fn target_line(&self) -> Option<u32> {
-        self.target_line
-    }
-
-    #[must_use]
-    pub fn parse_error_reason(&self) -> Option<&str> {
-        self.parse_error.as_deref()
-    }
+    pub rel_path: String,
+    pub directive_kind: String,
+    pub disabled_rules: Vec<String>,
+    pub all_rules: bool,
+    pub line: u32,
+    pub target_line: Option<u32>,
+    pub parse_error: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -218,8 +157,19 @@ pub struct G3TsStyleSyncpackRequiredPin {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsStyleSyncpackSnapshot {
     pub rel_path: String,
-    pub source_covers_package_manifest: bool,
-    pub missing_required_pins: Vec<G3TsStyleSyncpackRequiredPin>,
+    pub source: Vec<String>,
+    pub version_groups: Vec<G3TsStyleSyncpackVersionGroupSnapshot>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsStyleSyncpackVersionGroupSnapshot {
+    pub dependencies: Vec<String>,
+    pub dependency_types: Vec<String>,
+    pub packages: Option<Vec<String>>,
+    pub specifier_types: Option<Vec<String>>,
+    pub is_ignored: Option<bool>,
+    pub is_banned: Option<bool>,
+    pub pin_version: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
