@@ -14,6 +14,7 @@ pub fn root_snapshot(rel_path: &str, snapshot: &PackageJsonSnapshot) -> G3TsPack
         prepare_script: snapshot.scripts.get("prepare").cloned(),
         lint_script: snapshot.scripts.get("lint").cloned(),
         typecheck_script: snapshot.scripts.get("typecheck").cloned(),
+        validate_script: snapshot.scripts.get("validate").cloned(),
         dependencies: snapshot.dependencies.clone(),
         dev_dependencies: snapshot.dev_dependencies.clone(),
         pnpm_override_keys: snapshot.pnpm_override_keys.clone(),

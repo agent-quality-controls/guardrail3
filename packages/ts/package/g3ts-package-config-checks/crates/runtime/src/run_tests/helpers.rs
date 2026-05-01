@@ -69,6 +69,7 @@ pub(super) fn weak_root() -> G3TsPackageChecksInput {
                 prepare_script: None,
                 lint_script: None,
                 typecheck_script: Some("tsc --noEmit".to_owned()),
+                validate_script: None,
                 dependencies: Vec::new(),
                 dev_dependencies: Vec::new(),
                 pnpm_override_keys: Vec::new(),
@@ -173,31 +174,53 @@ fn root_snapshot(
         prepare_script: Some("echo prepare".to_owned()),
         lint_script: Some("eslint .".to_owned()),
         typecheck_script: Some("tsc --noEmit".to_owned()),
+        validate_script: Some("pnpm lint && pnpm typecheck".to_owned()),
         dependencies: Vec::new(),
         dev_dependencies,
         pnpm_override_keys: vec!["@eslint/js".to_owned(), "zod".to_owned()],
         pnpm_only_built_dependencies: vec!["esbuild".to_owned()],
         script_commands: Vec::new(),
-        script_tool_invocations: if invokes_syncpack_lint {
-            vec![G3TsPackageScriptToolInvocation {
-                script_name: "check".to_owned(),
-                command_index: 0,
-                invocation: if safely_runs_syncpack_lint {
-                    "syncpack lint".to_owned()
-                } else {
-                    "syncpack lint || true".to_owned()
+        script_tool_invocations: {
+            let mut invocations = vec![
+                G3TsPackageScriptToolInvocation {
+                    script_name: "validate".to_owned(),
+                    command_index: 0,
+                    invocation: "pnpm lint".to_owned(),
+                    executable: "package-script".to_owned(),
+                    args: vec!["lint".to_owned()],
+                    preceded_by: None,
+                    followed_by: Some(G3TsPackageScriptCommandSeparator::And),
                 },
-                executable: "syncpack".to_owned(),
-                args: vec!["lint".to_owned()],
-                preceded_by: None,
-                followed_by: if safely_runs_syncpack_lint {
-                    None
-                } else {
-                    Some(G3TsPackageScriptCommandSeparator::Or)
+                G3TsPackageScriptToolInvocation {
+                    script_name: "validate".to_owned(),
+                    command_index: 1,
+                    invocation: "pnpm typecheck".to_owned(),
+                    executable: "package-script".to_owned(),
+                    args: vec!["typecheck".to_owned()],
+                    preceded_by: Some(G3TsPackageScriptCommandSeparator::And),
+                    followed_by: None,
                 },
-            }]
-        } else {
-            Vec::new()
+            ];
+            if invokes_syncpack_lint {
+                invocations.push(G3TsPackageScriptToolInvocation {
+                    script_name: "check".to_owned(),
+                    command_index: 0,
+                    invocation: if safely_runs_syncpack_lint {
+                        "syncpack lint".to_owned()
+                    } else {
+                        "syncpack lint || true".to_owned()
+                    },
+                    executable: "syncpack".to_owned(),
+                    args: vec!["lint".to_owned()],
+                    preceded_by: None,
+                    followed_by: if safely_runs_syncpack_lint {
+                        None
+                    } else {
+                        Some(G3TsPackageScriptCommandSeparator::Or)
+                    },
+                });
+            }
+            invocations
         },
         script_parse_blockers: Vec::new(),
         safely_runs_only_allow_pnpm,

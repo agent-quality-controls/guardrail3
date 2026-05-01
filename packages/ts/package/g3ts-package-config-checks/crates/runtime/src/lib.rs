@@ -8,6 +8,8 @@ mod root_private;
 mod root_scripts;
 mod run;
 mod support;
+mod validate_script_fail_closed;
+mod validate_script_present;
 
 #[cfg(feature = "checks")]
 pub use run::check;
