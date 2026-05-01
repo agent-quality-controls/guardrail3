@@ -370,6 +370,39 @@ fn cspell_scripts_are_guardrail_related_for_fail_closed_parsing() {
 }
 
 #[test]
+fn type_coverage_scripts_are_guardrail_related_for_fail_closed_parsing() {
+    let document = super::super::parse_document("typecov", "type-coverage --at-least 100 || true")
+        .expect("script command document should parse");
+
+    assert_no_eslint_invocation(&document);
+    assert_tool_invocation(
+        &document,
+        0,
+        ExpectedToolInvocation {
+            script_name: "typecov",
+            command_index: 0,
+            invocation: "type-coverage --at-least 100",
+            executable: "type-coverage",
+            args: &["--at-least", "100"],
+            preceded_by: None,
+            followed_by: Some(PackageScriptCommandSeparator::Or),
+        },
+    );
+
+    let unsupported =
+        super::super::parse_document("typecov", "type-coverage --at-least 100 | tee log")
+            .expect("script command document should parse");
+    assert_unsupported_document(&unsupported);
+    assert_state_reason_contains(&unsupported, "unsupported shell syntax");
+
+    let unsupported_wrapper =
+        super::super::parse_document("typecov", "node scripts/typecov.js | tee log")
+            .expect("script command document should parse");
+    assert_unsupported_document(&unsupported_wrapper);
+    assert_state_reason_contains(&unsupported_wrapper, "unsupported shell syntax");
+}
+
+#[test]
 fn safe_tool_invocation_query_ignores_unrelated_unsupported_scripts() {
     let safe_typecheck =
         super::super::parse("typecheck", "astro check").expect("script command fact should parse");

@@ -168,6 +168,17 @@ impl FamilyRunner for StubFamilyRunner {
                 )
                 .into_inventory(),
             ],
+            SupportedFamily::Typecov => vec![
+                G3CheckResult::new(
+                    "g3ts-typecov/package-present".to_owned(),
+                    G3Severity::Info,
+                    "inventory".to_owned(),
+                    "inventory".to_owned(),
+                    Some("package.json".to_owned()),
+                    None,
+                )
+                .into_inventory(),
+            ],
             SupportedFamily::Hooks => vec![
                 G3CheckResult::new(
                     "g3ts-hooks/pre-commit-exists".to_owned(),
@@ -352,7 +363,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=18 inventory=false",
+        "runs=19 inventory=false",
         "",
         0,
     );
@@ -406,6 +417,9 @@ impl FamilyRunner for ErroringFamilyRunner {
             }),
             SupportedFamily::Spelling => Err(FamilyRunError {
                 message: "spelling runner exploded".to_owned(),
+            }),
+            SupportedFamily::Typecov => Err(FamilyRunError {
+                message: "typecov runner exploded".to_owned(),
             }),
             SupportedFamily::Hooks => Err(FamilyRunError {
                 message: "hooks runner exploded".to_owned(),

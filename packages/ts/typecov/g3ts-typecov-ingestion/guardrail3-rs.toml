@@ -1,0 +1,16 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-workspace-crawl",
+  "g3-workspace-crawl",
+  "g3ts-typecov-ingestion-runtime",
+  "g3ts-typecov-ingestion-assertions",
+  "g3ts-typecov-types",
+  "package-json-parser",
+  "package-script-command-parser",
+  "syncpack-config-parser",
+  "tempfile",
+]
+
+[checks]
+garde = false

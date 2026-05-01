@@ -1,0 +1,30 @@
+[package]
+name = "g3ts-typecov-ingestion-runtime"
+version.workspace = true
+edition.workspace = true
+description = "Runtime crate for G3TS typecov ingestion"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish = false
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+g3-workspace-crawl = { path = "../../../../../rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", version = "0.1.0", features = ["api"] }
+g3ts-typecov-types = { path = "../../../g3ts-typecov-types", version = "0.1.0" }
+package-json-parser = { path = "../../../../../parsers/package-json-parser", version = "0.1.0" }
+package-script-command-parser = { path = "../../../../../parsers/package-script-command-parser", version = "0.1.0" }
+syncpack-config-parser = { path = "../../../../../parsers/syncpack-config-parser", version = "0.1.0", features = ["api"] }
+
+[dev-dependencies]
+g3ts-typecov-ingestion-assertions = { path = "../assertions" }
+tempfile = "3"
+
+[features]
+default = ["api"]
+api = []
+
+[lints]
+workspace = true

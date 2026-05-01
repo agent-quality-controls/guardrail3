@@ -124,6 +124,7 @@ pub fn run(
         | SupportedFamily::Style
         | SupportedFamily::Fmt
         | SupportedFamily::Spelling
+        | SupportedFamily::Typecov
         | SupportedFamily::Hooks => Err(FamilyRunError {
             message: format!("structure group does not handle {family:?}"),
         }),
