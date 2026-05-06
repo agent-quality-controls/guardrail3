@@ -1,10 +1,24 @@
-use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
+use hook_shell_parser::command_query::{
+    ResolvedCommand, any_resolved_command, any_resolved_command_relaxed,
+};
 
 pub(crate) fn script_command(
     input: &g3ts_hooks_types::G3TsHooksSourceChecksInput,
     predicate: impl Fn(&ResolvedCommand) -> bool,
 ) -> bool {
     any_resolved_command(input.parsed(), predicate)
+}
+
+pub(crate) fn script_category_command(
+    input: &g3ts_hooks_types::G3TsHooksSourceChecksInput,
+    predicate: impl Fn(&ResolvedCommand) -> bool,
+) -> bool {
+    any_resolved_command_relaxed(input.parsed(), &predicate)
+        || input
+            .parsed()
+            .functions
+            .iter()
+            .any(|function| any_resolved_command_relaxed(&function.parsed_body, &predicate))
 }
 
 pub(crate) fn is_g3ts_validate_path_command(command: &ResolvedCommand, app_root: &str) -> bool {
@@ -56,5 +70,6 @@ fn path_matches_app_root(path: &str, app_root: &str) -> bool {
         || path == app_root
         || (app_root == "." && path == ".")
         || path.strip_prefix("./").is_some_and(|path| path == app_root)
-        || path.ends_with(format!("/{app_root}").as_str())
+        || path == format!("$REPO_ROOT/{app_root}")
+        || path == format!("${{REPO_ROOT}}/{app_root}")
 }

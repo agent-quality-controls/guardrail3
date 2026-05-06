@@ -182,6 +182,75 @@ fn verifier_fails_when_g3ts_validate_uses_different_scope_variable() {
 }
 
 #[test]
+fn verifier_fails_when_g3ts_validate_uses_bad_suffix_path() {
+    for bad_path in [
+        "$NOT_SCOPE/apps/landing",
+        "$SCOPELESS/apps/landing",
+        "/tmp/apps/landing",
+    ] {
+        let script = valid_verifier_script().replace(
+            "g3ts validate --path \"$SCOPE\"",
+            format!("g3ts validate --path \"{bad_path}\"").as_str(),
+        );
+        let results = run_case(vec![valid_pre_commit(), verifier(&script)]);
+
+        assertions::assert_has_id(
+            &results,
+            "g3ts-hooks/verifier-runs-g3ts-validate",
+            bad_path,
+        );
+    }
+}
+
+#[test]
+fn verifier_false_positive_tokens_do_not_satisfy_required_categories() {
+    let script = r#"
+g3ts validate --path "$SCOPE"
+echo tsc
+echo eslint
+echo prettier --check
+echo cspell
+echo stylelint
+echo syncpack
+echo type-coverage
+prettier --write "$SCOPE"
+"#;
+    let results = run_case(vec![valid_pre_commit(), verifier(script)]);
+
+    for expected_id in [
+        "g3ts-hooks/verifier-runs-typecheck",
+        "g3ts-hooks/verifier-runs-lint",
+        "g3ts-hooks/verifier-runs-format-check",
+        "g3ts-hooks/verifier-runs-spelling-check",
+        "g3ts-hooks/verifier-runs-stylelint",
+        "g3ts-hooks/verifier-runs-package-policy",
+        "g3ts-hooks/verifier-runs-typecov",
+    ] {
+        assertions::assert_has_id(&results, expected_id, expected_id);
+    }
+}
+
+#[test]
+fn repository_g3ts_verifier_satisfies_required_categories() {
+    let script = fs::read_to_string(repo_root().join("scripts/g3ts/verify"))
+        .expect("read repository G3TS verifier");
+    let results = run_case(vec![valid_pre_commit(), verifier(script.as_str())]);
+
+    for expected_id in [
+        "g3ts-hooks/verifier-runs-g3ts-validate",
+        "g3ts-hooks/verifier-runs-typecheck",
+        "g3ts-hooks/verifier-runs-lint",
+        "g3ts-hooks/verifier-runs-format-check",
+        "g3ts-hooks/verifier-runs-spelling-check",
+        "g3ts-hooks/verifier-runs-stylelint",
+        "g3ts-hooks/verifier-runs-package-policy",
+        "g3ts-hooks/verifier-runs-typecov",
+    ] {
+        assertions::assert_missing_id(&results, expected_id, expected_id);
+    }
+}
+
+#[test]
 fn verifier_fails_when_missing_each_required_category() {
     let cases = [
         ("tsc", "g3ts-hooks/verifier-runs-typecheck"),

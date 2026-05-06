@@ -324,11 +324,25 @@ fn enabled_categories(
     crawl: &workspace_crawl::G3RsWorkspaceCrawl,
     app_roots: &[String],
 ) -> hook_types::G3TsHooksEnabledCategories {
+    let category_roots = category_roots(crawl, app_roots);
     hook_types::G3TsHooksEnabledCategories::new(
-        stylelint_enabled(crawl, app_roots),
-        package_policy_enabled(crawl, app_roots),
-        typecov_enabled(crawl, app_roots),
+        stylelint_enabled(crawl, &category_roots),
+        package_policy_enabled(crawl, &category_roots),
+        typecov_enabled(crawl, &category_roots),
     )
+}
+
+fn category_roots(
+    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    app_roots: &[String],
+) -> Vec<String> {
+    let mut roots = app_roots.to_vec();
+    if has_entry_file(crawl, "package.json") {
+        roots.push(".".to_owned());
+    }
+    roots.sort();
+    roots.dedup();
+    roots
 }
 
 fn stylelint_enabled(crawl: &workspace_crawl::G3RsWorkspaceCrawl, app_roots: &[String]) -> bool {

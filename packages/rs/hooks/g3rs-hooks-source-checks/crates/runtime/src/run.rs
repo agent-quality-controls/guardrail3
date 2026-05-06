@@ -245,7 +245,15 @@ const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
         ok_title: "Rust verifier runs cargo dupes with thresholds",
         ok_message: "scripts/g3rs/verify runs cargo dupes check with required thresholds.",
         missing_title: "Rust verifier missing cargo dupes thresholds",
-        missing_message: "scripts/g3rs/verify must run cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests.",
+        missing_message: "scripts/g3rs/verify must run cargo dupes check --max-exact 85 --max-exact-percent 10.",
+    },
+    VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-cargo-dupes-exclude-tests",
+        predicate: is_cargo_dupes_exclude_tests_command,
+        ok_title: "Rust verifier excludes test duplicates",
+        ok_message: "scripts/g3rs/verify runs cargo dupes check --exclude-tests.",
+        missing_title: "Rust verifier includes test duplicates",
+        missing_message: "scripts/g3rs/verify must run cargo dupes check --exclude-tests.",
     },
 ];
 
@@ -364,6 +372,13 @@ fn is_cargo_dupes_threshold_command(command: &ResolvedCommand) -> bool {
     args.first().map(String::as_str) == Some("check")
         && args_contain_pair(args, "--max-exact", "85")
         && args_contain_pair(args, "--max-exact-percent", "10")
+}
+
+fn is_cargo_dupes_exclude_tests_command(command: &ResolvedCommand) -> bool {
+    let Some(args) = crate::support::cargo_subcommand_tail(command, "dupes") else {
+        return false;
+    };
+    args.first().map(String::as_str) == Some("check")
         && args.iter().any(|arg| arg == "--exclude-tests")
 }
 

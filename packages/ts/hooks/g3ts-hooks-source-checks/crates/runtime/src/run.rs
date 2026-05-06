@@ -3,7 +3,7 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::commands::{
     command_has_arg, is_g3ts_validate_path_command, is_g3ts_verify_pre_commit_command,
-    script_command,
+    script_category_command, script_command,
 };
 use crate::fail_open::{critical_command_names, first_fail_open_critical_command};
 use crate::results::{error, info};
@@ -107,10 +107,12 @@ fn verifier_runs_g3ts_validate(
 }
 
 fn verifier_runs_typecheck(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
-    if script_command(verifier, |command| {
+    if script_category_command(verifier, |command| {
         command.command_name() == "tsc"
-            || command.tokens().iter().any(|token| token == "typecheck")
-            || command.tokens().iter().any(|token| token == "tsc")
+            || package_manager_exec(command, "tsc")
+            || package_manager_run(command, &["typecheck"])
+            || helper_exec(command, "tsc")
+            || helper_script(command, &["typecheck"])
     }) {
         return;
     }
@@ -118,9 +120,12 @@ fn verifier_runs_typecheck(verifier: &G3TsHooksSourceChecksInput, results: &mut 
 }
 
 fn verifier_runs_lint(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
-    if script_command(verifier, |command| {
+    if script_category_command(verifier, |command| {
         command.command_name() == "eslint"
-            || command.tokens().iter().any(|token| token == "eslint")
+            || package_manager_exec(command, "eslint")
+            || package_manager_run(command, &["lint"])
+            || helper_exec(command, "eslint")
+            || helper_script(command, &["lint"])
     }) {
         return;
     }
@@ -128,11 +133,12 @@ fn verifier_runs_lint(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G
 }
 
 fn verifier_runs_format_check(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
-    if script_command(verifier, |command| {
-        command.command_name() == "prettier"
-            || (command.tokens().iter().any(|token| token == "prettier")
-                && command_has_arg(command.tokens(), "--check"))
-            || command.tokens().iter().any(|token| token == "format:check" || token == "check:format")
+    if script_category_command(verifier, |command| {
+        direct_tool_with_arg(command, "prettier", "--check")
+            || package_manager_exec_with_arg(command, "prettier", "--check")
+            || package_manager_run(command, &["format:check", "check:format"])
+            || helper_exec_with_arg(command, "prettier", "--check")
+            || helper_script(command, &["format:check", "check:format"])
     }) {
         return;
     }
@@ -140,9 +146,12 @@ fn verifier_runs_format_check(verifier: &G3TsHooksSourceChecksInput, results: &m
 }
 
 fn verifier_runs_spelling_check(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
-    if script_command(verifier, |command| {
+    if script_category_command(verifier, |command| {
         command.command_name() == "cspell"
-            || command.tokens().iter().any(|token| token == "spellcheck" || token == "spelling" || token == "cspell")
+            || package_manager_exec(command, "cspell")
+            || package_manager_run(command, &["spellcheck", "spelling"])
+            || helper_exec(command, "cspell")
+            || helper_script(command, &["spellcheck", "spelling"])
     }) {
         return;
     }
@@ -157,9 +166,12 @@ fn verifier_runs_stylelint(
     if !primary.enabled_categories().stylelint() {
         return;
     }
-    if script_command(verifier, |command| {
+    if script_category_command(verifier, |command| {
         command.command_name() == "stylelint"
-            || command.tokens().iter().any(|token| token == "stylelint")
+            || package_manager_exec(command, "stylelint")
+            || package_manager_run(command, &["stylelint"])
+            || helper_exec(command, "stylelint")
+            || helper_script(command, &["stylelint"])
     }) {
         return;
     }
@@ -174,9 +186,12 @@ fn verifier_runs_package_policy(
     if !primary.enabled_categories().package_policy() {
         return;
     }
-    if script_command(verifier, |command| {
+    if script_category_command(verifier, |command| {
         command.command_name() == "syncpack"
-            || command.tokens().iter().any(|token| token == "syncpack" || token == "package:policy")
+            || package_manager_exec(command, "syncpack")
+            || package_manager_run(command, &["package:policy", "syncpack"])
+            || helper_exec(command, "syncpack")
+            || helper_script(command, &["package:policy", "syncpack"])
     }) {
         return;
     }
@@ -191,9 +206,12 @@ fn verifier_runs_typecov(
     if !primary.enabled_categories().typecov() {
         return;
     }
-    if script_command(verifier, |command| {
+    if script_category_command(verifier, |command| {
         command.command_name() == "type-coverage"
-            || command.tokens().iter().any(|token| token == "typecov" || token == "type-coverage")
+            || package_manager_exec(command, "type-coverage")
+            || package_manager_run(command, &["typecov"])
+            || helper_exec(command, "type-coverage")
+            || helper_script(command, &["typecov"])
     }) {
         return;
     }
@@ -212,6 +230,68 @@ fn missing_category(
         verifier.rel_path(),
         None,
     )
+}
+
+fn direct_tool_with_arg(command: &hook_shell_parser::command_query::ResolvedCommand, tool: &str, arg: &str) -> bool {
+    command.command_name() == tool && command_has_arg(command.args(), arg)
+}
+
+fn package_manager_exec(command: &hook_shell_parser::command_query::ResolvedCommand, tool: &str) -> bool {
+    let args = command.args();
+    match command.command_name() {
+        "pnpm" | "yarn" => args.first().is_some_and(|arg| arg == "exec")
+            && args.get(1).is_some_and(|arg| arg == tool),
+        "npm" => args.first().is_some_and(|arg| arg == "exec")
+            && args.get(1).is_some_and(|arg| arg == tool),
+        "bun" => matches!(args.first().map(String::as_str), Some("x" | "exec"))
+            && args.get(1).is_some_and(|arg| arg == tool),
+        "npx" | "bunx" => args.iter().any(|arg| arg == tool),
+        _ => false,
+    }
+}
+
+fn package_manager_exec_with_arg(
+    command: &hook_shell_parser::command_query::ResolvedCommand,
+    tool: &str,
+    arg: &str,
+) -> bool {
+    package_manager_exec(command, tool) && command_has_arg(command.args(), arg)
+}
+
+fn package_manager_run(command: &hook_shell_parser::command_query::ResolvedCommand, scripts: &[&str]) -> bool {
+    let args = command.args();
+    if !matches!(command.command_name(), "pnpm" | "npm" | "yarn" | "bun") {
+        return false;
+    }
+    let script_index = if args.first().is_some_and(|arg| arg == "run") {
+        1
+    } else if command.command_name() == "yarn" {
+        0
+    } else {
+        return false;
+    };
+    args.get(script_index)
+        .is_some_and(|script| scripts.iter().any(|expected| script == expected))
+}
+
+fn helper_exec(command: &hook_shell_parser::command_query::ResolvedCommand, tool: &str) -> bool {
+    command.command_name() == "run_pm_exec" && command.args().get(1).is_some_and(|arg| arg == tool)
+}
+
+fn helper_exec_with_arg(
+    command: &hook_shell_parser::command_query::ResolvedCommand,
+    tool: &str,
+    arg: &str,
+) -> bool {
+    helper_exec(command, tool) && command_has_arg(command.args(), arg)
+}
+
+fn helper_script(command: &hook_shell_parser::command_query::ResolvedCommand, scripts: &[&str]) -> bool {
+    command.command_name() == "run_pm_script"
+        && command
+            .args()
+            .get(1)
+            .is_some_and(|script| scripts.iter().any(|expected| script == expected))
 }
 
 fn verifier_does_not_call_g3rs(
