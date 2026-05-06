@@ -215,7 +215,7 @@ fn verifier_fails_when_cargo_dupes_omits_thresholds() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace(" --max-exact 85 --max-exact-percent 10", ""),
         "g3rs-hooks/verifier-runs-cargo-dupes-thresholds",
-        "cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests",
+        "cargo dupes check --max-exact 85 --max-exact-percent 10",
     );
 }
 
@@ -223,8 +223,8 @@ fn verifier_fails_when_cargo_dupes_omits_thresholds() {
 fn verifier_fails_when_cargo_dupes_omits_exclude_tests() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace(" --exclude-tests", ""),
-        "g3rs-hooks/verifier-runs-cargo-dupes-thresholds",
-        "cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests",
+        "g3rs-hooks/verifier-runs-cargo-dupes-exclude-tests",
+        "cargo dupes check --exclude-tests",
     );
 }
 

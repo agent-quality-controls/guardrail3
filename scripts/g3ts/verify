@@ -206,13 +206,9 @@ run_verifiers() {
     fi
 }
 
-case "$MODE" in
-    pre-commit)
-        TS_RELEVANT_STAGED_PATHS="$(staged_ts_relevant_paths)"
-        [ -n "$TS_RELEVANT_STAGED_PATHS" ] || exit 0
-        run_verifiers
-        ;;
-    workspace)
-        run_verifiers
-        ;;
-esac
+if [ "$MODE" = "pre-commit" ]; then
+    TS_RELEVANT_STAGED_PATHS="$(staged_ts_relevant_paths)"
+    [ -n "$TS_RELEVANT_STAGED_PATHS" ] || exit 0
+fi
+
+run_verifiers
