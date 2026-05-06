@@ -2,4 +2,5 @@
 pub(crate) enum HookScriptKind {
     PreCommit,
     Modular,
+    G3RsVerifier,
 }
