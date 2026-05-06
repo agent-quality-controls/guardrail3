@@ -11,7 +11,6 @@ use hook_shell_parser::parse_script;
 
 struct SelectedHookSurface<'a> {
     entry: &'a g3rs_workspace_crawl::G3RsWorkspaceEntry,
-    has_modular_dir: bool,
 }
 
 pub fn ingest_for_config_checks(
@@ -28,41 +27,9 @@ pub fn ingest_for_source_checks(
         return Ok(inputs);
     }
 
-    let hooks_path = read_hooks_path(crawl.root_abs_path.as_path())?;
-    let Some(selected) = select_pre_commit_surface(crawl, hooks_path.as_deref()) else {
-        return Ok(inputs);
-    };
-    let pre_commit_entry = selected.entry;
-
-    if !pre_commit_entry.readable {
-        return Err(IngestionError::Unreadable {
-            path: pre_commit_entry.path.abs_path.clone(),
-            reason: "file is not readable".to_owned(),
-        });
-    }
-
-    let selected_rel_path = pre_commit_entry.path.rel_path.as_str();
-    let content = read_entry(pre_commit_entry.path.abs_path.as_path())?;
     let is_workspace_project = root_is_workspace_project(crawl)?;
-    inputs.push(G3RsHooksSourceChecksInput {
-        rel_path: selected_rel_path.to_owned(),
-        kind: G3RsHookScriptKind::PreCommit,
-        parsed: parse_script(&content),
-        has_modular_dir: selected.has_modular_dir,
-        is_workspace_project,
-        requirements: Vec::new(),
-    });
 
-    if !selected.has_modular_dir {
-        return Ok(inputs);
-    }
-
-    for entry in &crawl.entries {
-        if entry.kind != G3RsWorkspaceEntryKind::File
-            || !is_direct_modular_script(&entry.path.rel_path)
-        {
-            continue;
-        }
+    if let Some(entry) = g3rs_workspace_crawl::entry(crawl, ".githooks/pre-commit") {
         if !entry.readable {
             return Err(IngestionError::Unreadable {
                 path: entry.path.abs_path.clone(),
@@ -72,12 +39,45 @@ pub fn ingest_for_source_checks(
         let content = read_entry(entry.path.abs_path.as_path())?;
         inputs.push(G3RsHooksSourceChecksInput {
             rel_path: entry.path.rel_path.clone(),
-            kind: G3RsHookScriptKind::Modular,
+            kind: G3RsHookScriptKind::PreCommit,
+            exists: true,
             parsed: parse_script(&content),
-            has_modular_dir: selected.has_modular_dir,
+            has_modular_dir: false,
             is_workspace_project,
             requirements: Vec::new(),
         });
+    }
+
+    match g3rs_workspace_crawl::entry(crawl, "scripts/g3rs/verify") {
+        Some(entry) => {
+            if !entry.readable {
+                return Err(IngestionError::Unreadable {
+                    path: entry.path.abs_path.clone(),
+                    reason: "file is not readable".to_owned(),
+                });
+            }
+            let content = read_entry(entry.path.abs_path.as_path())?;
+            inputs.push(G3RsHooksSourceChecksInput {
+                rel_path: entry.path.rel_path.clone(),
+                kind: G3RsHookScriptKind::G3RsVerifier,
+                exists: true,
+                parsed: parse_script(&content),
+                has_modular_dir: false,
+                is_workspace_project,
+                requirements: Vec::new(),
+            });
+        }
+        None => {
+            inputs.push(G3RsHooksSourceChecksInput {
+                rel_path: "scripts/g3rs/verify".to_owned(),
+                kind: G3RsHookScriptKind::G3RsVerifier,
+                exists: false,
+                parsed: parse_script(""),
+                has_modular_dir: false,
+                is_workspace_project,
+                requirements: Vec::new(),
+            });
+        }
     }
 
     Ok(inputs)
@@ -153,13 +153,6 @@ pub(crate) fn ingest_for_config_checks_with_path(
     })
 }
 
-fn is_direct_modular_script(rel_path: &str) -> bool {
-    let Some(suffix) = rel_path.strip_prefix(".githooks/pre-commit.d/") else {
-        return false;
-    };
-    !suffix.is_empty() && !suffix.contains('/')
-}
-
 fn select_pre_commit_surface<'a>(
     crawl: &'a G3RsWorkspaceCrawl,
     hooks_path: Option<&str>,
@@ -172,12 +165,7 @@ fn select_pre_commit_surface<'a>(
             .or_else(|| g3rs_workspace_crawl::entry(crawl, "hooks/pre-commit")),
     }?;
 
-    Some(SelectedHookSurface {
-        has_modular_dir: entry.path.rel_path == ".githooks/pre-commit"
-            && g3rs_workspace_crawl::entry(crawl, ".githooks/pre-commit.d")
-                .is_some_and(|entry| entry.kind == G3RsWorkspaceEntryKind::Directory),
-        entry,
-    })
+    Some(SelectedHookSurface { entry })
 }
 
 fn normalized_hooks_path(hooks_path: Option<&str>) -> Option<&str> {

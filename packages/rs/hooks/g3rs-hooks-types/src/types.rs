@@ -19,12 +19,14 @@ pub struct G3RsHooksConfigChecksInput {
 pub enum G3RsHookScriptKind {
     PreCommit,
     Modular,
+    G3RsVerifier,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3RsHooksSourceChecksInput {
     pub rel_path: String,
     pub kind: G3RsHookScriptKind,
+    pub exists: bool,
     pub parsed: ParsedShellScript,
     pub has_modular_dir: bool,
     pub is_workspace_project: bool,

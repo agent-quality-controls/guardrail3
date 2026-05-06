@@ -32,6 +32,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
     let kind = match input.kind {
         HookScriptKind::PreCommit => "pre-commit",
         HookScriptKind::Modular => "modular hook script",
+        HookScriptKind::G3RsVerifier => "Rust verifier script",
     };
     for (line_no, step) in suspicious_lines {
         results.push(G3CheckResult::from_parts(
