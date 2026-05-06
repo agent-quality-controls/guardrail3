@@ -12,11 +12,13 @@ while [ "$#" -gt 0 ]; do
     case "$1" in
         --mode)
             [ "$#" -ge 2 ] || { usage; exit 2; }
+            [ -z "$MODE" ] || { usage; exit 2; }
             MODE="$2"
             shift 2
             ;;
         --scope)
             [ "$#" -ge 2 ] || { usage; exit 2; }
+            [ -z "$SCOPE_ARG" ] || { usage; exit 2; }
             SCOPE_ARG="$2"
             shift 2
             ;;
@@ -40,6 +42,7 @@ case "$MODE" in
 esac
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
+REPO_ROOT="$(cd "$REPO_ROOT" && pwd -P)"
 
 case "$SCOPE_ARG" in
     /*) SCOPE="$SCOPE_ARG" ;;
@@ -48,161 +51,157 @@ esac
 
 SCOPE="$(cd "$SCOPE" && pwd -P)"
 
+if [ "$MODE" = "pre-commit" ] && [ "$SCOPE" = "$REPO_ROOT" ]; then
+    echo "G3TS pre-commit mode requires a concrete app/package scope, not repo root." >&2
+    exit 2
+fi
+
 staged_ts_relevant_paths() {
     git diff --cached --name-only --diff-filter=ACM | grep -E '(^|/)(package\.json|pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lockb|bun\.lock|npm-shrinkwrap\.json|pnpm-workspace\.yaml|tsconfig[^/]*\.json|eslint\.config\.[^/]+|\.eslintrc(\.[^/]+)?|prettier\.config\.[^/]+|\.prettierrc(\.[^/]+)?|cspell\.(json|ya?ml)|cspell\.config\.(json|js|mjs|cjs|ts)|\.cspell\.(json|ya?ml)|stylelint\.config\.[^/]+|\.stylelintrc(\.[^/]+)?|syncpack\.config\.[^/]+|\.syncpackrc(\.[^/]+)?|type-coverage\.(json|config\.[^/]+)|guardrail3-ts\.toml)$|\.(ts|tsx|mts|cts|mjs|cjs|js|jsx|css)$' || true
 }
 
-package_manager() {
-    if [ -f "$REPO_ROOT/pnpm-lock.yaml" ] || [ -f "$REPO_ROOT/pnpm-workspace.yaml" ] || [ -f "$SCOPE/pnpm-lock.yaml" ]; then
-        echo "pnpm"
-    elif [ -f "$SCOPE/package-lock.json" ] || [ -f "$REPO_ROOT/package-lock.json" ]; then
-        echo "npm"
-    elif [ -f "$SCOPE/yarn.lock" ] || [ -f "$REPO_ROOT/yarn.lock" ]; then
-        echo "yarn"
-    elif [ -f "$SCOPE/bun.lockb" ] || [ -f "$SCOPE/bun.lock" ] || [ -f "$REPO_ROOT/bun.lockb" ] || [ -f "$REPO_ROOT/bun.lock" ]; then
-        echo "bun"
-    else
-        echo "pnpm"
-    fi
-}
-
-run_pm_exec() {
-    local pm="$1"
-    shift
-    case "$pm" in
-        pnpm) (cd "$SCOPE" && pnpm exec "$@") ;;
-        npm) (cd "$SCOPE" && npx --no-install "$@") ;;
-        yarn) (cd "$SCOPE" && yarn exec "$@") ;;
-        bun) (cd "$SCOPE" && bunx "$@") ;;
-        *) echo "Unsupported package manager: $pm" >&2; exit 2 ;;
-    esac
-}
-
-run_pm_script() {
-    local pm="$1"
-    local script="$2"
-    case "$pm" in
-        pnpm) (cd "$SCOPE" && pnpm run "$script") ;;
-        npm) (cd "$SCOPE" && npm run "$script") ;;
-        yarn) (cd "$SCOPE" && yarn run "$script") ;;
-        bun) (cd "$SCOPE" && bun run "$script") ;;
-        *) echo "Unsupported package manager: $pm" >&2; exit 2 ;;
-    esac
-}
-
 package_has_script() {
+    local scope="$1"
     local script="$1"
-    [ -f "$SCOPE/package.json" ] && grep -Eq "\"$script\"[[:space:]]*:" "$SCOPE/package.json"
+    script="$2"
+    [ -f "$scope/package.json" ] && grep -Eq "\"$script\"[[:space:]]*:" "$scope/package.json"
 }
 
 run_typecheck() {
-    local pm="$1"
-    if package_has_script typecheck; then
-        run_pm_script "$pm" typecheck
-    elif [ -f "$SCOPE/tsconfig.json" ]; then
-        run_pm_exec "$pm" tsc -p "$SCOPE/tsconfig.json" --noEmit
+    local scope="$1"
+    if package_has_script "$scope" typecheck; then
+        (cd "$scope" && pnpm run typecheck)
+    elif [ -f "$scope/tsconfig.json" ]; then
+        (cd "$scope" && pnpm exec tsc -p "$scope/tsconfig.json" --noEmit)
     else
-        run_pm_exec "$pm" tsc --noEmit
+        (cd "$scope" && pnpm exec tsc --noEmit)
     fi
 }
 
 run_lint() {
-    local pm="$1"
-    if package_has_script lint; then
-        run_pm_script "$pm" lint
+    local scope="$1"
+    if package_has_script "$scope" lint; then
+        (cd "$scope" && pnpm run lint)
     else
-        run_pm_exec "$pm" eslint --max-warnings 0 "$SCOPE"
+        (cd "$scope" && pnpm exec eslint --max-warnings 0 "$scope")
     fi
 }
 
 run_format_check() {
-    local pm="$1"
-    if package_has_script format:check; then
-        run_pm_script "$pm" format:check
-    elif package_has_script check:format; then
-        run_pm_script "$pm" check:format
+    local scope="$1"
+    if package_has_script "$scope" format:check; then
+        (cd "$scope" && pnpm run format:check)
+    elif package_has_script "$scope" check:format; then
+        (cd "$scope" && pnpm run check:format)
     else
-        run_pm_exec "$pm" prettier --check "$SCOPE"
+        (cd "$scope" && pnpm exec prettier --check "$scope")
     fi
 }
 
 run_spelling_check() {
-    local pm="$1"
-    if package_has_script spellcheck; then
-        run_pm_script "$pm" spellcheck
-    elif package_has_script spelling; then
-        run_pm_script "$pm" spelling
+    local scope="$1"
+    if package_has_script "$scope" spellcheck; then
+        (cd "$scope" && pnpm run spellcheck)
+    elif package_has_script "$scope" spelling; then
+        (cd "$scope" && pnpm run spelling)
     else
-        run_pm_exec "$pm" cspell --no-progress --no-summary "$SCOPE"
+        (cd "$scope" && pnpm exec cspell --no-progress --no-summary "$scope")
     fi
 }
 
 style_family_enabled() {
-    [ -f "$SCOPE/stylelint.config.js" ] || [ -f "$SCOPE/stylelint.config.mjs" ] || [ -f "$SCOPE/stylelint.config.cjs" ] ||
-        [ -f "$SCOPE/stylelint.config.ts" ] || [ -f "$SCOPE/.stylelintrc" ] || [ -f "$SCOPE/.stylelintrc.json" ] ||
-        [ -f "$SCOPE/.stylelintrc.yaml" ] || [ -f "$SCOPE/.stylelintrc.yml" ] || [ -f "$SCOPE/.stylelintrc.js" ] ||
-        [ -f "$SCOPE/.stylelintrc.cjs" ] || [ -f "$SCOPE/.stylelintrc.mjs" ] ||
-        [ -f "$REPO_ROOT/stylelint.config.js" ] || [ -f "$REPO_ROOT/stylelint.config.mjs" ] || [ -f "$REPO_ROOT/stylelint.config.cjs" ] ||
-        [ -f "$REPO_ROOT/stylelint.config.ts" ] || [ -f "$REPO_ROOT/.stylelintrc" ] || [ -f "$REPO_ROOT/.stylelintrc.json" ] ||
-        [ -f "$REPO_ROOT/.stylelintrc.yaml" ] || [ -f "$REPO_ROOT/.stylelintrc.yml" ] || [ -f "$REPO_ROOT/.stylelintrc.js" ] ||
-        [ -f "$REPO_ROOT/.stylelintrc.cjs" ] || [ -f "$REPO_ROOT/.stylelintrc.mjs" ]
+    local scope="$1"
+    [ -f "$scope/stylelint.config.js" ] || [ -f "$scope/stylelint.config.mjs" ] || [ -f "$scope/stylelint.config.cjs" ] ||
+        [ -f "$scope/stylelint.config.ts" ] || [ -f "$scope/.stylelintrc" ] || [ -f "$scope/.stylelintrc.json" ] ||
+        [ -f "$scope/.stylelintrc.yaml" ] || [ -f "$scope/.stylelintrc.yml" ] || [ -f "$scope/.stylelintrc.js" ] ||
+        [ -f "$scope/.stylelintrc.cjs" ] || [ -f "$scope/.stylelintrc.mjs" ]
 }
 
 package_family_enabled() {
-    [ -f "$SCOPE/package.json" ]
+    local scope="$1"
+    [ -f "$scope/package.json" ]
 }
 
 typecov_family_enabled() {
-    package_has_script typecov || { [ -f "$SCOPE/package.json" ] && grep -Eq '"type-coverage"[[:space:]]*:' "$SCOPE/package.json"; }
+    local scope="$1"
+    package_has_script "$scope" typecov ||
+        { [ -f "$scope/package.json" ] && grep -Eq '"type-coverage"[[:space:]]*:' "$scope/package.json"; } ||
+        [ -f "$scope/type-coverage.json" ] ||
+        [ -f "$scope/type-coverage.config.js" ] ||
+        [ -f "$scope/type-coverage.config.mjs" ] ||
+        [ -f "$scope/type-coverage.config.cjs" ] ||
+        [ -f "$scope/type-coverage.config.ts" ]
 }
 
 run_stylelint_check() {
-    local pm="$1"
-    if package_has_script stylelint; then
-        run_pm_script "$pm" stylelint
+    local scope="$1"
+    if package_has_script "$scope" stylelint; then
+        (cd "$scope" && pnpm run stylelint)
     else
-        run_pm_exec "$pm" stylelint --max-warnings 0 "$SCOPE/**/*.css"
+        (cd "$scope" && pnpm exec stylelint --max-warnings 0 "$scope/**/*.css")
     fi
 }
 
 run_package_policy_check() {
-    local pm="$1"
-    if package_has_script package:policy; then
-        run_pm_script "$pm" package:policy
-    elif package_has_script syncpack; then
-        run_pm_script "$pm" syncpack
+    local scope="$1"
+    if package_has_script "$scope" package:policy; then
+        (cd "$scope" && pnpm run package:policy)
+    elif package_has_script "$scope" syncpack; then
+        (cd "$scope" && pnpm run syncpack)
     else
-        run_pm_exec "$pm" syncpack lint
+        (cd "$scope" && pnpm exec syncpack lint)
     fi
 }
 
 run_typecov_check() {
-    local pm="$1"
-    if package_has_script typecov; then
-        run_pm_script "$pm" typecov
+    local scope="$1"
+    if package_has_script "$scope" typecov; then
+        (cd "$scope" && pnpm run typecov)
     else
-        run_pm_exec "$pm" type-coverage --at-least 100
+        (cd "$scope" && pnpm exec type-coverage --at-least 100)
     fi
 }
 
-run_verifiers() {
-    local pm
-    pm="$(package_manager)"
-
-    g3ts validate --path "$SCOPE"
-    run_typecheck "$pm"
-    run_lint "$pm"
-    run_format_check "$pm"
-    run_spelling_check "$pm"
-
-    if style_family_enabled; then
-        run_stylelint_check "$pm"
+discover_scopes() {
+    local discovered=0
+    if [ -f "$SCOPE/package.json" ]; then
+        printf '%s\n' "$SCOPE"
+        discovered=1
     fi
-    if package_family_enabled; then
-        run_package_policy_check "$pm"
+    for root in "$SCOPE/apps" "$SCOPE/packages"; do
+        [ -d "$root" ] || continue
+        while IFS= read -r package_file; do
+            printf '%s\n' "${package_file%/package.json}"
+            discovered=1
+        done < <(find "$root" -path '*/node_modules/*' -prune -o -name package.json -type f -print 2>/dev/null | sort)
+    done
+    [ "$discovered" -eq 1 ] || {
+        echo "No TypeScript verifier scope found under $SCOPE" >&2
+        return 1
+    }
+}
+
+run_verifiers_for_scope() {
+    local scope="$1"
+    if [ "$scope" = "$SCOPE" ]; then
+        g3ts validate --path "$SCOPE"
+    else
+        g3ts validate --path "$scope"
     fi
-    if typecov_family_enabled; then
-        run_typecov_check "$pm"
+
+    run_typecheck "$scope"
+    run_lint "$scope"
+    run_format_check "$scope"
+    run_spelling_check "$scope"
+
+    if style_family_enabled "$scope"; then
+        run_stylelint_check "$scope"
+    fi
+    if package_family_enabled "$scope"; then
+        run_package_policy_check "$scope"
+    fi
+    if typecov_family_enabled "$scope"; then
+        run_typecov_check "$scope"
     fi
 }
 
@@ -211,4 +210,11 @@ if [ "$MODE" = "pre-commit" ]; then
     [ -n "$TS_RELEVANT_STAGED_PATHS" ] || exit 0
 fi
 
-run_verifiers
+if ! VERIFIER_SCOPES="$(discover_scopes)"; then
+    exit 1
+fi
+
+while IFS= read -r verifier_scope; do
+    [ -n "$verifier_scope" ] || continue
+    run_verifiers_for_scope "$verifier_scope"
+done <<< "$VERIFIER_SCOPES"

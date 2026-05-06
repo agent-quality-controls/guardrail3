@@ -23,26 +23,40 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 const VALID_VERIFIER: &str = r#"#!/usr/bin/env bash
 set -euo pipefail
 usage() { exit 2; }
+MODE=""
+SCOPE_ARG=""
 [[ -n "$SCOPE_ARG" ]] || usage 'missing --scope'
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCOPE="$REPO_ROOT/apps/guardrail3-rs"
 case "$MODE" in
   pre-commit)
+    git diff --cached --name-only --diff-filter=ACM
+    g3rs validate --path "$SCOPE"
+    cargo metadata --locked
+    cargo fmt --all -- --check
+    cargo clippy --workspace --all-targets --all-features -- -D warnings
+    cargo deny check
+    cargo machete
+    cargo test --workspace
+    cargo mutants --check --in-place
+    cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests
     ;;
   workspace)
+    g3rs validate --path "$SCOPE"
+    cargo metadata --locked
+    cargo fmt --all -- --check
+    cargo clippy --workspace --all-targets --all-features -- -D warnings
+    cargo deny check
+    cargo machete
+    cargo test --workspace
+    cargo mutants --check --in-place
+    cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests
     ;;
   *)
     usage "unknown --mode: $MODE"
     ;;
 esac
 export CARGO_TARGET_DIR="$REPO_ROOT/.cargo-target"
-g3rs validate --path "$SCOPE"
-cargo metadata --locked
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets --all-features -- -D warnings
-cargo deny check
-cargo machete
-cargo test --workspace
-cargo mutants --check --in-place
-cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests
 "#;
 
 #[test]
@@ -110,6 +124,22 @@ fn hook_fails_when_g3rs_verifier_line_omits_scope() {
 }
 
 #[test]
+fn hook_fails_when_g3rs_verifier_scope_is_overridable() {
+    let results = check(&input(
+        ".githooks/pre-commit",
+        G3RsHookScriptKind::PreCommit,
+        "#!/usr/bin/env bash\nset -euo pipefail\nRUST_WORKSPACE=\"${GUARDRAIL3_RUST_WORKSPACE:-apps/guardrail3-rs}\"\n\"$REPO_ROOT/scripts/g3rs/verify\" --mode pre-commit --scope \"$REPO_ROOT/$RUST_WORKSPACE\"\n",
+        Vec::new(),
+    ));
+
+    assert_finding(
+        &results,
+        "g3rs-hooks/precommit-calls-g3rs-verifier",
+        "--mode pre-commit --scope",
+    );
+}
+
+#[test]
 fn verifier_facts_pass_with_required_commands_and_no_g3ts_script() {
     let results = check_all(&[
         input(
@@ -144,6 +174,81 @@ fn verifier_fails_when_missing_g3rs_validate_scope() {
         &VALID_VERIFIER.replace("g3rs validate --path \"$SCOPE\"\n", ""),
         "g3rs-hooks/verifier-runs-g3rs-validate",
         "g3rs validate --path \"$SCOPE\"",
+    );
+}
+
+#[test]
+fn verifier_fails_when_required_command_exists_only_in_workspace_mode() {
+    let script = VALID_VERIFIER.replace(
+        "  pre-commit)\n    git diff --cached --name-only --diff-filter=ACM\n    g3rs validate --path \"$SCOPE\"\n",
+        "  pre-commit)\n    git diff --cached --name-only --diff-filter=ACM\n",
+    );
+    let results = check(&input(
+        "scripts/g3rs/verify",
+        G3RsHookScriptKind::G3RsVerifier,
+        &script,
+        Vec::new(),
+    ));
+
+    assert_finding(
+        &results,
+        "g3rs-hooks/verifier-runs-g3rs-validate",
+        "g3rs validate --path \"$SCOPE\"",
+    );
+}
+
+#[test]
+fn verifier_fails_when_required_command_exists_only_in_precommit_mode() {
+    let script = VALID_VERIFIER.replace(
+        "  workspace)\n    g3rs validate --path \"$SCOPE\"\n",
+        "  workspace)\n",
+    );
+    let results = check(&input(
+        "scripts/g3rs/verify",
+        G3RsHookScriptKind::G3RsVerifier,
+        &script,
+        Vec::new(),
+    ));
+
+    assert_finding(
+        &results,
+        "g3rs-hooks/verifier-runs-g3rs-validate",
+        "g3rs validate --path \"$SCOPE\"",
+    );
+}
+
+#[test]
+fn verifier_fails_when_precommit_mode_does_not_read_staged_files() {
+    let results = check(&input(
+        "scripts/g3rs/verify",
+        G3RsHookScriptKind::G3RsVerifier,
+        &VALID_VERIFIER.replace("    git diff --cached --name-only --diff-filter=ACM\n", ""),
+        Vec::new(),
+    ));
+
+    assert_finding(
+        &results,
+        "g3rs-hooks/verifier-precommit-reads-staged-files",
+        "git diff --cached --name-only",
+    );
+}
+
+#[test]
+fn verifier_fails_when_precommit_staged_file_read_omits_diff_filter() {
+    let results = check(&input(
+        "scripts/g3rs/verify",
+        G3RsHookScriptKind::G3RsVerifier,
+        &VALID_VERIFIER.replace(
+            "git diff --cached --name-only --diff-filter=ACM",
+            "git diff --cached --name-only",
+        ),
+        Vec::new(),
+    ));
+
+    assert_finding(
+        &results,
+        "g3rs-hooks/verifier-precommit-reads-staged-files",
+        "git diff --cached --name-only",
     );
 }
 
@@ -226,6 +331,48 @@ fn verifier_fails_when_cargo_dupes_omits_exclude_tests() {
         "g3rs-hooks/verifier-runs-cargo-dupes-exclude-tests",
         "cargo dupes check --exclude-tests",
     );
+}
+
+#[test]
+fn verifier_fails_when_cargo_dupes_contract_is_split_across_two_partial_commands() {
+    let script = VALID_VERIFIER.replace(
+        "cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests",
+        "cargo dupes check --max-exact 85 --max-exact-percent 10\ncargo dupes check --exclude-tests",
+    );
+    let results = check(&input(
+        "scripts/g3rs/verify",
+        G3RsHookScriptKind::G3RsVerifier,
+        &script,
+        Vec::new(),
+    ));
+
+    assert_finding(
+        &results,
+        "g3rs-hooks/verifier-runs-cargo-dupes-exclude-tests",
+        "cargo dupes check --exclude-tests",
+    );
+}
+
+#[test]
+fn verifier_fails_when_required_command_is_fail_open() {
+    for command in [
+        "cargo deny check",
+        "cargo fmt --all -- --check",
+        "cargo mutants --check --in-place",
+    ] {
+        let results = check(&input(
+            "scripts/g3rs/verify",
+            G3RsHookScriptKind::G3RsVerifier,
+            &VALID_VERIFIER.replace(command, format!("{command} || true").as_str()),
+            Vec::new(),
+        ));
+
+        assert_finding(
+            &results,
+            "g3rs-hooks/verifier-required-command-not-fail-open",
+            "fail-open",
+        );
+    }
 }
 
 #[test]
@@ -502,6 +649,20 @@ fn pre_commit_runs_dupes_for_rust_source_files() {
         log_content.contains("cargo dupes check"),
         "Rust source should run dupes; got {log_content}"
     );
+    for expected in [
+        "cargo metadata --locked",
+        "cargo fmt --all -- --check",
+        "cargo clippy --workspace --all-targets --all-features -- -D warnings",
+        "cargo deny check",
+        "cargo machete",
+        "cargo test --workspace",
+        "cargo mutants --check --in-place",
+    ] {
+        assert!(
+            log_content.contains(expected),
+            "Rust source should run {expected}; got {log_content}"
+        );
+    }
 }
 
 #[test]
