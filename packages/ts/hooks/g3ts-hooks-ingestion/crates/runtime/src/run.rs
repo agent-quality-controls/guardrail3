@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use g3_workspace_crawl as workspace_crawl;
 use g3ts_hooks_types as hook_types;
-use hook_shell_parser::parse_script;
+use hook_shell_parser::{command_query::shell_words, parse_script};
 
 use crate::fs::{direct_files, executable, read_to_string};
 use crate::process::{git_root, read_hooks_path};
@@ -33,14 +33,21 @@ pub fn ingest_for_source_checks(
     else {
         return Vec::new();
     };
+    let selected_content = read_to_string(selected.abs_path.as_path());
+    let selected_parsed = parse_script(selected_content.as_str());
     let app_package_roots = app_package_roots(crawl);
-    let enabled_categories = enabled_categories(crawl, &app_package_roots);
+    let category_roots = category_roots_for_selected_hook(
+        crawl,
+        hook_root.as_path(),
+        &selected_parsed,
+        &app_package_roots,
+    );
+    let enabled_categories = enabled_categories(crawl, &category_roots);
     let mut inputs = Vec::new();
-    let content = read_to_string(selected.abs_path.as_path());
     inputs.push(hook_types::G3TsHooksSourceChecksInput::new(
         selected.rel_path.clone(),
         hook_types::G3TsHookScriptKind::PreCommit,
-        parse_script(content.as_str()),
+        selected_parsed,
         selected.has_modular_dir,
         app_package_roots.clone(),
         enabled_categories,
@@ -84,7 +91,7 @@ pub fn ingest_for_file_tree_checks(
     let hook_root =
         git_root(crawl.root_abs_path.as_path()).unwrap_or_else(|| crawl.root_abs_path.clone());
     let hooks_path = read_hooks_path(hook_root.as_path());
-    let normalized_hooks_path = normalized_hooks_path(hooks_path.as_deref()).map(ToOwned::to_owned);
+    let normalized_hooks_path = normalized_hooks_path(hook_root.as_path(), hooks_path.as_deref());
     let selected = select_pre_commit_surface(crawl, hook_root.as_path(), hooks_path.as_deref());
     let has_modular_dir = hook_root.join(".githooks/pre-commit.d").is_dir()
         || has_entry_dir(crawl, ".githooks/pre-commit.d");
@@ -148,7 +155,8 @@ fn select_pre_commit_surface(
     hook_root: &Path,
     hooks_path: Option<&str>,
 ) -> Option<SelectedHookSurface> {
-    let surface = match normalized_hooks_path(hooks_path) {
+    let normalized = normalized_hooks_path(hook_root, hooks_path);
+    let surface = match normalized.as_deref() {
         Some(".githooks") => hook_surface(crawl, hook_root, ".githooks/pre-commit"),
         Some("hooks") => hook_surface(crawl, hook_root, "hooks/pre-commit"),
         Some(_) => None,
@@ -182,10 +190,23 @@ fn hook_surface(
     })
 }
 
-fn normalized_hooks_path(hooks_path: Option<&str>) -> Option<&str> {
+fn normalized_hooks_path(hook_root: &Path, hooks_path: Option<&str>) -> Option<String> {
     let hooks_path = hooks_path?;
     let hooks_path = hooks_path.trim_end_matches('/');
-    Some(hooks_path.strip_prefix("./").unwrap_or(hooks_path))
+    let path = Path::new(hooks_path);
+    if path.is_absolute() {
+        return path
+            .strip_prefix(hook_root)
+            .ok()
+            .and_then(|path| {
+                if path.as_os_str().is_empty() {
+                    Some(".".to_owned())
+                } else {
+                    path.to_str().map(ToOwned::to_owned)
+                }
+            });
+    }
+    Some(hooks_path.strip_prefix("./").unwrap_or(hooks_path).to_owned())
 }
 
 fn entry<'a>(
@@ -293,23 +314,13 @@ fn discover_installed_tools(path_env: Option<&OsStr>) -> Vec<String> {
 }
 
 fn app_package_roots(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> Vec<String> {
-    let current_root = git_root(crawl.root_abs_path.as_path())
-        .and_then(|git_root| {
-            crawl
-                .root_abs_path
-                .strip_prefix(git_root)
-                .ok()
-                .map(Path::to_path_buf)
-        })
-        .and_then(|path| path.to_str().map(ToOwned::to_owned))
-        .filter(|path| !path.is_empty())
-        .unwrap_or_else(|| ".".to_owned());
+    let current_root = current_root(crawl);
     let mut roots = crawl
         .entries
         .iter()
         .filter(|entry| entry.kind == workspace_crawl::G3RsWorkspaceEntryKind::File)
         .filter_map(|entry| entry.path.rel_path.strip_suffix("/package.json"))
-        .filter(|root| root.starts_with("apps/") || *root == ".")
+        .filter(|root| root.starts_with("apps/") || root.starts_with("packages/") || *root == ".")
         .map(ToOwned::to_owned)
         .collect::<Vec<_>>();
     if has_entry_file(crawl, "package.json") {
@@ -322,27 +333,106 @@ fn app_package_roots(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> Vec<String>
 
 fn enabled_categories(
     crawl: &workspace_crawl::G3RsWorkspaceCrawl,
-    app_roots: &[String],
+    category_roots: &[String],
 ) -> hook_types::G3TsHooksEnabledCategories {
-    let category_roots = category_roots(crawl, app_roots);
     hook_types::G3TsHooksEnabledCategories::new(
-        stylelint_enabled(crawl, &category_roots),
-        package_policy_enabled(crawl, &category_roots),
-        typecov_enabled(crawl, &category_roots),
+        stylelint_enabled(crawl, category_roots),
+        package_policy_enabled(crawl, category_roots),
+        typecov_enabled(crawl, category_roots),
     )
 }
 
-fn category_roots(
+fn category_roots_for_selected_hook(
     crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    hook_root: &Path,
+    parsed: &hook_shell_parser::types::ParsedShellScript,
     app_roots: &[String],
 ) -> Vec<String> {
-    let mut roots = app_roots.to_vec();
-    if has_entry_file(crawl, "package.json") {
+    let current_root = current_root(crawl);
+    let scope_roots = verifier_scope_roots(hook_root, parsed);
+    let mut roots = if scope_roots.iter().any(|root| root == ".") {
+        app_roots.to_vec()
+    } else if scope_roots.is_empty() {
+        app_roots.to_vec()
+    } else {
+        scope_roots
+    };
+    if roots.is_empty() && has_entry_file(crawl, "package.json") {
+        roots.push(".".to_owned());
+    }
+    if has_entry_file(crawl, "package.json")
+        && roots.iter().any(|root| root == current_root.as_str())
+    {
         roots.push(".".to_owned());
     }
     roots.sort();
     roots.dedup();
     roots
+}
+
+fn current_root(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> String {
+    git_root(crawl.root_abs_path.as_path())
+        .and_then(|git_root| {
+            crawl
+                .root_abs_path
+                .strip_prefix(git_root)
+                .ok()
+                .map(Path::to_path_buf)
+        })
+        .and_then(|path| path.to_str().map(ToOwned::to_owned))
+        .filter(|path| !path.is_empty())
+        .unwrap_or_else(|| ".".to_owned())
+}
+
+fn verifier_scope_roots(
+    hook_root: &Path,
+    parsed: &hook_shell_parser::types::ParsedShellScript,
+) -> Vec<String> {
+    let mut roots = parsed
+        .executable_lines
+        .iter()
+        .filter_map(|line| {
+            let words = shell_words(line.command_text.as_str());
+            let command = words.first()?;
+            if !matches!(
+                command.as_str(),
+                "scripts/g3ts/verify"
+                    | "./scripts/g3ts/verify"
+                    | "$REPO_ROOT/scripts/g3ts/verify"
+                    | "${REPO_ROOT}/scripts/g3ts/verify"
+            ) {
+                return None;
+            }
+            let scope = words.windows(2).find_map(|window| {
+                (window[0] == "--scope").then(|| window[1].as_str())
+            })?;
+            normalize_scope_root(hook_root, scope)
+        })
+        .collect::<Vec<_>>();
+    roots.sort();
+    roots.dedup();
+    roots
+}
+
+fn normalize_scope_root(hook_root: &Path, scope: &str) -> Option<String> {
+    if scope == "." || scope == "$REPO_ROOT" || scope == "${REPO_ROOT}" {
+        return Some(".".to_owned());
+    }
+    if let Some(scope) = scope
+        .strip_prefix("$REPO_ROOT/")
+        .or_else(|| scope.strip_prefix("${REPO_ROOT}/"))
+    {
+        return Some(scope.to_owned());
+    }
+    let path = Path::new(scope);
+    if path.is_absolute() {
+        return path
+            .strip_prefix(hook_root)
+            .ok()
+            .and_then(|path| path.to_str())
+            .map(ToOwned::to_owned);
+    }
+    Some(scope.strip_prefix("./").unwrap_or(scope).to_owned())
 }
 
 fn stylelint_enabled(crawl: &workspace_crawl::G3RsWorkspaceCrawl, app_roots: &[String]) -> bool {

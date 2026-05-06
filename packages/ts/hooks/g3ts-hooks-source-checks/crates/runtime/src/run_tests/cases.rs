@@ -138,6 +138,143 @@ fn hook_fails_when_g3ts_verifier_line_omits_scope() {
 }
 
 #[test]
+fn hook_fails_when_g3ts_verifier_path_has_arbitrary_prefix() {
+    let results = run_case(vec![
+        pre_commit(r#"/tmp/evil/scripts/g3ts/verify --mode pre-commit --scope "$REPO_ROOT/apps/landing""#),
+        valid_verifier(),
+    ]);
+
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/pre-commit-invokes-g3ts-verifier",
+        "evil verifier path",
+    );
+}
+
+#[test]
+fn hook_fails_when_g3ts_verifier_scope_points_outside_repo() {
+    let results = run_case(vec![
+        pre_commit(r#""$REPO_ROOT/scripts/g3ts/verify" --mode pre-commit --scope /tmp/other"#),
+        valid_verifier(),
+    ]);
+
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/pre-commit-invokes-g3ts-verifier",
+        "wrong verifier scope",
+    );
+}
+
+#[test]
+fn hook_fails_when_g3ts_verifier_scope_is_not_configured_app_root() {
+    for bad_scope in ["apps/not-landing", "."] {
+        let results = run_case(vec![
+            pre_commit(
+                format!(
+                    r#""$REPO_ROOT/scripts/g3ts/verify" --mode pre-commit --scope "{bad_scope}""#
+                )
+                .as_str(),
+            ),
+            valid_verifier(),
+        ]);
+
+        assertions::assert_has_id(
+            &results,
+            "g3ts-hooks/pre-commit-invokes-g3ts-verifier",
+            bad_scope,
+        );
+    }
+}
+
+#[test]
+fn hook_fails_when_g3ts_verifier_scope_is_dot_for_root_package() {
+    let pre_commit = input_with_categories(
+        ".githooks/pre-commit",
+        G3TsHookScriptKind::PreCommit,
+        r#""$REPO_ROOT/scripts/g3ts/verify" --mode pre-commit --scope ."#,
+        G3TsHooksEnabledCategories::all(),
+    );
+    let pre_commit = G3TsHooksSourceChecksInput::new(
+        pre_commit.rel_path().to_owned(),
+        pre_commit.kind(),
+        pre_commit.parsed().clone(),
+        pre_commit.has_modular_dir(),
+        vec![".".to_owned()],
+        pre_commit.enabled_categories(),
+        Vec::new(),
+    );
+    let results = run_case(vec![pre_commit, valid_verifier()]);
+
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/pre-commit-invokes-g3ts-verifier",
+        "dot root scope",
+    );
+}
+
+#[test]
+fn hook_fails_when_g3ts_verifier_uses_equals_flag_form() {
+    let results = run_case(vec![
+        pre_commit(
+            r#""$REPO_ROOT/scripts/g3ts/verify" --mode=pre-commit --scope="$REPO_ROOT/apps/landing""#,
+        ),
+        valid_verifier(),
+    ]);
+
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/pre-commit-invokes-g3ts-verifier",
+        "equals flag form",
+    );
+}
+
+#[test]
+fn hook_fails_when_g3ts_verifier_mixes_separate_and_equals_flags() {
+    let results = run_case(vec![
+        pre_commit(
+            r#""$REPO_ROOT/scripts/g3ts/verify" --mode pre-commit --scope apps/landing --mode=workspace"#,
+        ),
+        valid_verifier(),
+    ]);
+
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/pre-commit-invokes-g3ts-verifier",
+        "mixed equals flag form",
+    );
+}
+
+#[test]
+fn hook_fails_when_g3ts_verifier_scope_uses_runtime_scope_variable() {
+    let results = run_case(vec![
+        pre_commit(r#""$REPO_ROOT/scripts/g3ts/verify" --mode pre-commit --scope "$SCOPE""#),
+        valid_verifier(),
+    ]);
+
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/pre-commit-invokes-g3ts-verifier",
+        "runtime scope variable",
+    );
+}
+
+#[test]
+fn hook_fails_when_g3ts_verifier_uses_duplicate_scope_flags() {
+    let results = run_case(vec![
+        pre_commit(
+            r#""$REPO_ROOT/scripts/g3ts/verify" --mode pre-commit --scope apps/landing --scope /tmp/other"#,
+        ),
+        valid_verifier(),
+    ]);
+
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/pre-commit-invokes-g3ts-verifier",
+        "duplicate scope flags",
+    );
+}
+
+#[test]
 fn verifier_fails_when_missing_g3ts_validate() {
     let results = run_case(vec![
         valid_pre_commit(),
@@ -149,6 +286,71 @@ fn verifier_fails_when_missing_g3ts_validate() {
         "g3ts-hooks/verifier-runs-g3ts-validate",
         "missing g3ts validate",
     );
+}
+
+#[test]
+fn uncalled_function_bodies_do_not_satisfy_required_categories() {
+    let script = r#"
+g3ts validate --path "$SCOPE"
+unused_checks() {
+  pnpm exec tsc --noEmit
+  pnpm exec eslint --max-warnings 0 "$SCOPE"
+  pnpm exec prettier --check "$SCOPE"
+  pnpm exec cspell "$SCOPE"
+  pnpm exec stylelint "$SCOPE/**/*.css"
+  pnpm exec syncpack lint
+  pnpm exec type-coverage --at-least 100
+}
+"#;
+    let results = run_case(vec![valid_pre_commit(), verifier(script)]);
+
+    for expected_id in [
+        "g3ts-hooks/verifier-runs-typecheck",
+        "g3ts-hooks/verifier-runs-lint",
+        "g3ts-hooks/verifier-runs-format-check",
+        "g3ts-hooks/verifier-runs-spelling-check",
+        "g3ts-hooks/verifier-runs-stylelint",
+        "g3ts-hooks/verifier-runs-package-policy",
+        "g3ts-hooks/verifier-runs-typecov",
+    ] {
+        assertions::assert_has_id(&results, expected_id, expected_id);
+    }
+}
+
+#[test]
+fn helper_function_names_do_not_satisfy_required_categories_without_real_tools() {
+    let script = r#"
+g3ts validate --path "$SCOPE"
+run_pm_exec() { :; }
+run_pm_script() { :; }
+run_typecheck() { run_pm_exec "$pm" tsc; }
+run_lint() { run_pm_exec "$pm" eslint; }
+run_format_check() { run_pm_exec "$pm" prettier --check; }
+run_spelling_check() { run_pm_exec "$pm" cspell; }
+run_stylelint_check() { run_pm_exec "$pm" stylelint; }
+run_package_policy_check() { run_pm_exec "$pm" syncpack; }
+run_typecov_check() { run_pm_exec "$pm" type-coverage; }
+run_typecheck
+run_lint
+run_format_check
+run_spelling_check
+run_stylelint_check
+run_package_policy_check
+run_typecov_check
+"#;
+    let results = run_case(vec![valid_pre_commit(), verifier(script)]);
+
+    for expected_id in [
+        "g3ts-hooks/verifier-runs-typecheck",
+        "g3ts-hooks/verifier-runs-lint",
+        "g3ts-hooks/verifier-runs-format-check",
+        "g3ts-hooks/verifier-runs-spelling-check",
+        "g3ts-hooks/verifier-runs-stylelint",
+        "g3ts-hooks/verifier-runs-package-policy",
+        "g3ts-hooks/verifier-runs-typecov",
+    ] {
+        assertions::assert_has_id(&results, expected_id, expected_id);
+    }
 }
 
 #[test]
@@ -227,6 +429,52 @@ prettier --write "$SCOPE"
         "g3ts-hooks/verifier-runs-typecov",
     ] {
         assertions::assert_has_id(&results, expected_id, expected_id);
+    }
+}
+
+#[test]
+fn verifier_fails_when_npx_or_bunx_wraps_echoed_tool_tokens() {
+    let script = r#"
+g3ts validate --path "$SCOPE"
+npx echo tsc
+npx echo eslint
+bunx echo prettier --check
+bunx echo cspell
+npx echo stylelint
+npx echo syncpack
+npx echo type-coverage
+"#;
+    let results = run_case(vec![valid_pre_commit(), verifier(script)]);
+
+    for expected_id in [
+        "g3ts-hooks/verifier-runs-typecheck",
+        "g3ts-hooks/verifier-runs-lint",
+        "g3ts-hooks/verifier-runs-format-check",
+        "g3ts-hooks/verifier-runs-spelling-check",
+        "g3ts-hooks/verifier-runs-stylelint",
+        "g3ts-hooks/verifier-runs-package-policy",
+        "g3ts-hooks/verifier-runs-typecov",
+    ] {
+        assertions::assert_has_id(&results, expected_id, expected_id);
+    }
+}
+
+#[test]
+fn verifier_fails_when_required_tools_are_aliased() {
+    for alias_line in [
+        "alias tsc='echo ok'",
+        "builtin alias eslint='echo ok'",
+        "command alias prettier='echo ok'",
+        "configure_aliases() { alias cspell='echo ok'; }\nconfigure_aliases",
+    ] {
+        let script = format!("{}\n{alias_line}\n", valid_verifier_script());
+        let results = run_case(vec![valid_pre_commit(), verifier(&script)]);
+
+        assertions::assert_has_id(
+            &results,
+            "g3ts-hooks/no-required-tool-aliases",
+            "aliases required tools",
+        );
     }
 }
 
@@ -327,6 +575,26 @@ fn verifier_fails_when_it_calls_g3rs_or_cargo() {
         &results,
         "g3ts-hooks/verifier-does-not-call-cargo",
         "cargo call",
+    );
+}
+
+#[test]
+fn verifier_fails_when_forbidden_tools_are_piped() {
+    let script = format!(
+        "{}\ng3rs validate --path . | cat\ncargo test | cat\n",
+        valid_verifier_script()
+    );
+    let results = run_case(vec![valid_pre_commit(), verifier(&script)]);
+
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/verifier-does-not-call-g3rs",
+        "piped g3rs",
+    );
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/verifier-does-not-call-cargo",
+        "piped cargo",
     );
 }
 
@@ -453,8 +721,26 @@ fn unknown_flag_exits_non_zero() {
 }
 
 #[test]
+fn duplicate_mode_or_scope_exits_non_zero() {
+    for args in [
+        ["--mode", "pre-commit", "--mode", "workspace", "--scope", "."],
+        ["--mode", "pre-commit", "--scope", ".", "--scope", "/tmp/other"],
+    ] {
+        let fixture = script_fixture("duplicate-flag");
+        let status = verifier_command(&fixture)
+            .args(args)
+            .status()
+            .expect("spawn verifier for duplicate flag test");
+
+        assert!(!status.success(), "duplicate mode/scope should fail");
+    }
+}
+
+#[test]
 fn pre_commit_exits_zero_when_no_relevant_staged_files_exist() {
     let fixture = script_fixture("no-relevant-staged");
+    fs::create_dir_all(fixture.join("apps/landing")).expect("create app scope");
+    fs::write(fixture.join("apps/landing/package.json"), "{}").expect("write app package fixture");
     write_fake_tool(&fixture, "git", git_fake_script(&fixture, "README.md\n"));
     write_fake_tool(&fixture, "g3ts", "echo g3ts-called >> \"$G3TS_LOG\"\nexit 1\n");
     let log = fixture.join("calls.log");
@@ -463,7 +749,7 @@ fn pre_commit_exits_zero_when_no_relevant_staged_files_exist() {
         .env("PATH", fake_path(&fixture))
         .env("G3TS_LOG", &log)
         .env("G3TS_DIFF_LOG", fixture.join("git-diff.log"))
-        .args(["--mode", "pre-commit", "--scope", "."])
+        .args(["--mode", "pre-commit", "--scope", "apps/landing"])
         .status()
         .expect("spawn verifier for irrelevant staged file test");
 
@@ -472,9 +758,35 @@ fn pre_commit_exits_zero_when_no_relevant_staged_files_exist() {
 }
 
 #[test]
+fn pre_commit_rejects_repo_root_scope() {
+    let fixture = script_fixture("pre-commit-root-scope");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, "src/index.ts\n"));
+
+    let status = verifier_command(&fixture)
+        .env("PATH", fake_path(&fixture))
+        .env("G3TS_DIFF_LOG", fixture.join("git-diff.log"))
+        .env("G3TS_LOG", fixture.join("calls.log"))
+        .args(["--mode", "pre-commit", "--scope", "."])
+        .status()
+        .expect("spawn verifier for pre-commit root scope test");
+
+    assert!(!status.success(), "pre-commit repo-root scope should fail");
+    assert!(
+        !fixture.join("calls.log").exists(),
+        "repo-root scope rejection must happen before g3ts/pnpm tools run"
+    );
+}
+
+#[test]
 fn pre_commit_runs_for_typescript_source_files() {
     let fixture = script_fixture("ts-source");
-    write_fake_tool(&fixture, "git", git_fake_script(&fixture, "src/index.ts\n"));
+    fs::create_dir_all(fixture.join("apps/landing")).expect("create app scope");
+    fs::write(fixture.join("apps/landing/package.json"), "{}").expect("write app package fixture");
+    write_fake_tool(
+        &fixture,
+        "git",
+        git_fake_script(&fixture, "apps/landing/src/index.ts\n"),
+    );
     write_fake_tool(&fixture, "g3ts", "echo \"g3ts $*\" >> \"$G3TS_LOG\"\nexit 0\n");
     write_fake_tool(&fixture, "pnpm", "echo \"pnpm $*\" >> \"$G3TS_LOG\"\nexit 0\n");
     let log = fixture.join("calls.log");
@@ -483,21 +795,132 @@ fn pre_commit_runs_for_typescript_source_files() {
         .env("PATH", fake_path(&fixture))
         .env("G3TS_LOG", &log)
         .env("G3TS_DIFF_LOG", fixture.join("git-diff.log"))
-        .args(["--mode", "pre-commit", "--scope", "."])
+        .args(["--mode", "pre-commit", "--scope", "apps/landing"])
         .status()
         .expect("spawn verifier for TypeScript source staged file test");
 
     assert!(status.success(), "TypeScript source should run verifier");
     let log_content = fs::read_to_string(log).expect("read verifier call log");
     assert!(log_content.contains("g3ts validate"));
-    assert!(log_content.contains("pnpm exec"));
+    for expected in [
+        "pnpm exec tsc",
+        "pnpm exec eslint",
+        "pnpm exec prettier",
+        "pnpm exec cspell",
+    ] {
+        assert!(
+            log_content.contains(expected),
+            "TypeScript source should run {expected}; got {log_content}"
+        );
+    }
+}
+
+#[test]
+fn workspace_mode_runs_nested_app_categories_from_repo_scope() {
+    let fixture = script_fixture("repo-scope-nested-app");
+    fs::create_dir_all(fixture.join("apps/landing")).expect("create nested app");
+    fs::write(fixture.join("apps/landing/package.json"), "{}").expect("write nested package");
+    fs::write(fixture.join("apps/landing/stylelint.config.mjs"), "export default {};\n")
+        .expect("write stylelint config");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, ""));
+    write_fake_tool(&fixture, "g3ts", "echo \"g3ts $*\" >> \"$G3TS_LOG\"\nexit 0\n");
+    write_fake_tool(&fixture, "pnpm", "echo \"pnpm $*\" >> \"$G3TS_LOG\"\nexit 0\n");
+    let log = fixture.join("calls.log");
+
+    let status = verifier_command(&fixture)
+        .env("PATH", fake_path(&fixture))
+        .env("G3TS_LOG", &log)
+        .args(["--mode", "workspace", "--scope", "."])
+        .status()
+        .expect("spawn verifier for repo-scope nested app test");
+
+    assert!(status.success(), "repo-scope nested app should run verifier");
+    let log_content = fs::read_to_string(log).expect("read verifier call log");
+    assert!(
+        log_content.contains("pnpm exec stylelint"),
+        "repo-scope app stylelint should run; got {log_content}"
+    );
+    assert!(
+        log_content.contains("pnpm exec syncpack"),
+        "repo-scope app package policy should run; got {log_content}"
+    );
+}
+
+#[test]
+fn workspace_mode_runs_nested_package_categories_from_repo_scope() {
+    let fixture = script_fixture("repo-scope-nested-package");
+    fs::create_dir_all(fixture.join("packages/ui")).expect("create nested package");
+    fs::write(fixture.join("package.json"), "{}").expect("write root package");
+    fs::write(fixture.join("packages/ui/package.json"), "{}").expect("write package");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, ""));
+    write_fake_tool(&fixture, "g3ts", "echo \"g3ts $*\" >> \"$G3TS_LOG\"\nexit 0\n");
+    write_fake_tool(&fixture, "pnpm", "echo \"pnpm $*\" >> \"$G3TS_LOG\"\nexit 0\n");
+    let log = fixture.join("calls.log");
+
+    let status = verifier_command(&fixture)
+        .env("PATH", fake_path(&fixture))
+        .env("G3TS_LOG", &log)
+        .args(["--mode", "workspace", "--scope", "."])
+        .status()
+        .expect("spawn verifier for repo-scope nested package test");
+
+    assert!(status.success(), "repo-scope nested package should run verifier");
+    let log_content = fs::read_to_string(log).expect("read verifier call log");
+    assert!(
+        log_content.contains("packages/ui"),
+        "repo-scope package should be verified; got {log_content}"
+    );
+}
+
+#[test]
+fn workspace_mode_fails_when_scope_has_no_typescript_package() {
+    let fixture = script_fixture("empty-scope");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, ""));
+
+    let status = verifier_command(&fixture)
+        .env("PATH", fake_path(&fixture))
+        .args(["--mode", "workspace", "--scope", "."])
+        .status()
+        .expect("spawn verifier for empty scope test");
+
+    assert!(!status.success(), "empty TypeScript verifier scope should fail");
+}
+
+#[test]
+fn workspace_mode_runs_typecov_when_config_file_exists() {
+    let fixture = script_fixture("typecov-config");
+    fs::write(fixture.join("package.json"), "{}").expect("write package fixture");
+    fs::write(fixture.join("type-coverage.json"), "{}").expect("write typecov config");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, ""));
+    write_fake_tool(&fixture, "g3ts", "echo \"g3ts $*\" >> \"$G3TS_LOG\"\nexit 0\n");
+    write_fake_tool(&fixture, "pnpm", "echo \"pnpm $*\" >> \"$G3TS_LOG\"\nexit 0\n");
+    let log = fixture.join("calls.log");
+
+    let status = verifier_command(&fixture)
+        .env("PATH", fake_path(&fixture))
+        .env("G3TS_LOG", &log)
+        .args(["--mode", "workspace", "--scope", "."])
+        .status()
+        .expect("spawn verifier for typecov config test");
+
+    assert!(status.success(), "typecov config should run verifier");
+    let log_content = fs::read_to_string(log).expect("read verifier call log");
+    assert!(
+        log_content.contains("pnpm exec type-coverage"),
+        "typecov config should run type-coverage; got {log_content}"
+    );
 }
 
 #[test]
 fn pre_commit_runs_for_package_config_files() {
     let fixture = script_fixture("package-config");
-    fs::write(fixture.join("package.json"), "{}").expect("write package fixture");
-    write_fake_tool(&fixture, "git", git_fake_script(&fixture, "package.json\n"));
+    fs::create_dir_all(fixture.join("apps/landing")).expect("create app scope");
+    fs::write(fixture.join("apps/landing/package.json"), "{}").expect("write app package fixture");
+    write_fake_tool(
+        &fixture,
+        "git",
+        git_fake_script(&fixture, "apps/landing/package.json\n"),
+    );
     write_fake_tool(&fixture, "g3ts", "echo \"g3ts $*\" >> \"$G3TS_LOG\"\nexit 0\n");
     write_fake_tool(&fixture, "pnpm", "echo \"pnpm $*\" >> \"$G3TS_LOG\"\nexit 0\n");
     let log = fixture.join("calls.log");
@@ -506,7 +929,7 @@ fn pre_commit_runs_for_package_config_files() {
         .env("PATH", fake_path(&fixture))
         .env("G3TS_LOG", &log)
         .env("G3TS_DIFF_LOG", fixture.join("git-diff.log"))
-        .args(["--mode", "pre-commit", "--scope", "."])
+        .args(["--mode", "pre-commit", "--scope", "apps/landing"])
         .status()
         .expect("spawn verifier for package config staged file test");
 
@@ -522,6 +945,7 @@ fn pre_commit_runs_for_package_config_files() {
 #[test]
 fn workspace_mode_does_not_read_staged_paths_before_running_checks() {
     let fixture = script_fixture("workspace-no-staged");
+    fs::write(fixture.join("package.json"), "{}").expect("write package fixture");
     write_fake_tool(&fixture, "git", git_fake_script(&fixture, "src/index.ts\n"));
     write_fake_tool(&fixture, "g3ts", "echo g3ts-called >> \"$G3TS_LOG\"\nexit 0\n");
     write_fake_tool(&fixture, "pnpm", "echo pnpm-called >> \"$G3TS_LOG\"\nexit 1\n");

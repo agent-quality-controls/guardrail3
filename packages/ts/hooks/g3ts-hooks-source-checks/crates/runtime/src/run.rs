@@ -30,6 +30,7 @@ pub fn check_effective(inputs: &[G3TsHooksSourceChecksInput]) -> Vec<G3CheckResu
         .find(|input| input.kind() == G3TsHookScriptKind::Verifier);
     verifier_exists(verifier, primary, &mut results);
     if let Some(verifier) = verifier {
+        no_required_tool_aliases(verifier, &mut results);
         verifier_runs_g3ts_validate(verifier, primary, &mut results);
         verifier_runs_typecheck(verifier, &mut results);
         verifier_runs_lint(verifier, &mut results);
@@ -56,7 +57,11 @@ fn pre_commit_invokes_g3ts_verifier(
     if inputs
         .iter()
         .filter(|input| input.kind() == G3TsHookScriptKind::PreCommit)
-        .any(|input| script_command(input, is_g3ts_verify_pre_commit_command))
+        .any(|input| {
+            script_command(input, |command| {
+                is_g3ts_verify_pre_commit_command(command, input.app_package_roots())
+            })
+        })
     {
         return;
     }
@@ -111,8 +116,6 @@ fn verifier_runs_typecheck(verifier: &G3TsHooksSourceChecksInput, results: &mut 
         command.command_name() == "tsc"
             || package_manager_exec(command, "tsc")
             || package_manager_run(command, &["typecheck"])
-            || helper_exec(command, "tsc")
-            || helper_script(command, &["typecheck"])
     }) {
         return;
     }
@@ -124,8 +127,6 @@ fn verifier_runs_lint(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G
         command.command_name() == "eslint"
             || package_manager_exec(command, "eslint")
             || package_manager_run(command, &["lint"])
-            || helper_exec(command, "eslint")
-            || helper_script(command, &["lint"])
     }) {
         return;
     }
@@ -137,8 +138,6 @@ fn verifier_runs_format_check(verifier: &G3TsHooksSourceChecksInput, results: &m
         direct_tool_with_arg(command, "prettier", "--check")
             || package_manager_exec_with_arg(command, "prettier", "--check")
             || package_manager_run(command, &["format:check", "check:format"])
-            || helper_exec_with_arg(command, "prettier", "--check")
-            || helper_script(command, &["format:check", "check:format"])
     }) {
         return;
     }
@@ -150,8 +149,6 @@ fn verifier_runs_spelling_check(verifier: &G3TsHooksSourceChecksInput, results: 
         command.command_name() == "cspell"
             || package_manager_exec(command, "cspell")
             || package_manager_run(command, &["spellcheck", "spelling"])
-            || helper_exec(command, "cspell")
-            || helper_script(command, &["spellcheck", "spelling"])
     }) {
         return;
     }
@@ -170,8 +167,6 @@ fn verifier_runs_stylelint(
         command.command_name() == "stylelint"
             || package_manager_exec(command, "stylelint")
             || package_manager_run(command, &["stylelint"])
-            || helper_exec(command, "stylelint")
-            || helper_script(command, &["stylelint"])
     }) {
         return;
     }
@@ -190,8 +185,6 @@ fn verifier_runs_package_policy(
         command.command_name() == "syncpack"
             || package_manager_exec(command, "syncpack")
             || package_manager_run(command, &["package:policy", "syncpack"])
-            || helper_exec(command, "syncpack")
-            || helper_script(command, &["package:policy", "syncpack"])
     }) {
         return;
     }
@@ -210,8 +203,6 @@ fn verifier_runs_typecov(
         command.command_name() == "type-coverage"
             || package_manager_exec(command, "type-coverage")
             || package_manager_run(command, &["typecov"])
-            || helper_exec(command, "type-coverage")
-            || helper_script(command, &["typecov"])
     }) {
         return;
     }
@@ -245,9 +236,34 @@ fn package_manager_exec(command: &hook_shell_parser::command_query::ResolvedComm
             && args.get(1).is_some_and(|arg| arg == tool),
         "bun" => matches!(args.first().map(String::as_str), Some("x" | "exec"))
             && args.get(1).is_some_and(|arg| arg == tool),
-        "npx" | "bunx" => args.iter().any(|arg| arg == tool),
+        "npx" | "bunx" => npx_tool_arg(args).is_some_and(|arg| arg == tool),
         _ => false,
     }
+}
+
+fn npx_tool_arg(args: &[String]) -> Option<&str> {
+    let mut index = 0;
+    while let Some(arg) = args.get(index) {
+        match arg.as_str() {
+            "-y" | "--yes" | "--no-install" | "--ignore-existing" | "--quiet" => {
+                index += 1;
+            }
+            "-p" | "--package" | "-c" | "--call" | "--shell" => {
+                index += 2;
+            }
+            _ if arg.starts_with("--package=")
+                || arg.starts_with("--call=")
+                || arg.starts_with("--shell=") =>
+            {
+                index += 1;
+            }
+            _ if arg.starts_with('-') => {
+                return None;
+            }
+            _ => return Some(arg.as_str()),
+        }
+    }
+    None
 }
 
 fn package_manager_exec_with_arg(
@@ -274,31 +290,11 @@ fn package_manager_run(command: &hook_shell_parser::command_query::ResolvedComma
         .is_some_and(|script| scripts.iter().any(|expected| script == expected))
 }
 
-fn helper_exec(command: &hook_shell_parser::command_query::ResolvedCommand, tool: &str) -> bool {
-    command.command_name() == "run_pm_exec" && command.args().get(1).is_some_and(|arg| arg == tool)
-}
-
-fn helper_exec_with_arg(
-    command: &hook_shell_parser::command_query::ResolvedCommand,
-    tool: &str,
-    arg: &str,
-) -> bool {
-    helper_exec(command, tool) && command_has_arg(command.args(), arg)
-}
-
-fn helper_script(command: &hook_shell_parser::command_query::ResolvedCommand, scripts: &[&str]) -> bool {
-    command.command_name() == "run_pm_script"
-        && command
-            .args()
-            .get(1)
-            .is_some_and(|script| scripts.iter().any(|expected| script == expected))
-}
-
 fn verifier_does_not_call_g3rs(
     verifier: &G3TsHooksSourceChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    if script_command(verifier, |command| {
+    if script_category_command(verifier, |command| {
         command.command_name() == "g3rs"
             || command
                 .command_path()
@@ -319,7 +315,7 @@ fn verifier_does_not_call_cargo(
     verifier: &G3TsHooksSourceChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    if script_command(verifier, |command| command.command_name() == "cargo") {
+    if script_category_command(verifier, |command| command.command_name() == "cargo") {
         results.push(error(
             "g3ts-hooks/verifier-does-not-call-cargo",
             "G3TS verifier calls Cargo",
@@ -328,6 +324,69 @@ fn verifier_does_not_call_cargo(
             None,
         ));
     }
+}
+
+fn no_required_tool_aliases(
+    verifier: &G3TsHooksSourceChecksInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    const REQUIRED_TOOLS: &[&str] = &[
+        "g3ts",
+        "pnpm",
+        "npm",
+        "yarn",
+        "bun",
+        "npx",
+        "bunx",
+        "tsc",
+        "eslint",
+        "prettier",
+        "cspell",
+        "stylelint",
+        "syncpack",
+        "type-coverage",
+    ];
+    let aliases = verifier
+        .parsed()
+        .executable_lines
+        .iter()
+        .chain(
+            verifier
+                .parsed()
+                .functions
+                .iter()
+                .flat_map(|function| function.parsed_body.executable_lines.iter()),
+        )
+        .filter_map(alias_assignments)
+        .flatten()
+        .filter_map(|assignment| assignment.split_once('=').map(|(name, _)| name.to_owned()))
+        .filter(|name| REQUIRED_TOOLS.iter().any(|tool| name == tool))
+        .collect::<Vec<_>>();
+    if aliases.is_empty() {
+        return;
+    }
+    results.push(error(
+        "g3ts-hooks/no-required-tool-aliases",
+        "G3TS verifier aliases required tools",
+        format!(
+            "`scripts/g3ts/verify` must not alias required verifier tools: {}.",
+            aliases.join(", ")
+        )
+        .as_str(),
+        verifier.rel_path(),
+        None,
+    ));
+}
+
+fn alias_assignments(line: &hook_shell_parser::types::ExecutableLine) -> Option<Vec<String>> {
+    let words = hook_shell_parser::command_query::shell_words(line.command_text.as_str());
+    let start = match words.first().map(String::as_str) {
+        Some("alias") => 1,
+        Some("builtin") if words.get(1).is_some_and(|word| word == "alias") => 2,
+        Some("command") if words.get(1).is_some_and(|word| word == "alias") => 2,
+        _ => return None,
+    };
+    Some(words.into_iter().skip(start).collect())
 }
 
 fn app_roots(input: &G3TsHooksSourceChecksInput) -> Vec<String> {

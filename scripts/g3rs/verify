@@ -72,28 +72,6 @@ is_rust_relevant_path() {
   esac
 }
 
-run_workspace_verifier() {
-  g3rs validate --path "$SCOPE"
-
-  (
-    cd "$SCOPE"
-    cargo metadata --locked
-    cargo fmt --all -- --check
-    cargo clippy --workspace --all-targets --all-features -- -D warnings
-    cargo deny check
-    cargo machete
-    cargo test --workspace
-    cargo mutants --check --in-place
-  )
-}
-
-run_duplication_verifier() {
-  (
-    cd "$SCOPE"
-    cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests
-  )
-}
-
 case "$MODE" in
   pre-commit)
     rust_relevant=0
@@ -112,14 +90,39 @@ case "$MODE" in
 
     [[ "$rust_relevant" -eq 1 ]] || exit 0
 
-    run_workspace_verifier
+    g3rs validate --path "$SCOPE"
+
+    (
+      cd "$SCOPE"
+      cargo metadata --locked
+      cargo fmt --all -- --check
+      cargo clippy --workspace --all-targets --all-features -- -D warnings
+      cargo deny check
+      cargo machete
+      cargo test --workspace
+      cargo mutants --check --in-place
+    )
 
     if [[ "$rust_source" -eq 1 ]]; then
-      run_duplication_verifier
+      (
+        cd "$SCOPE"
+        cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests
+      )
     fi
     ;;
   workspace)
-    run_workspace_verifier
-    run_duplication_verifier
+    g3rs validate --path "$SCOPE"
+
+    (
+      cd "$SCOPE"
+      cargo metadata --locked
+      cargo fmt --all -- --check
+      cargo clippy --workspace --all-targets --all-features -- -D warnings
+      cargo deny check
+      cargo machete
+      cargo test --workspace
+      cargo mutants --check --in-place
+      cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests
+    )
     ;;
 esac

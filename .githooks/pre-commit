@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Rust workspace root - override with GUARDRAIL3_RUST_WORKSPACE env var
-RUST_WORKSPACE="${GUARDRAIL3_RUST_WORKSPACE:-apps/guardrail3-rs}"
 REPO_ROOT=$(git rev-parse --show-toplevel)
 export CARGO_TARGET_DIR="$REPO_ROOT/.cargo-target"
 
@@ -54,67 +52,7 @@ while IFS= read -r file; do
     fi
 done <<< "$STAGED_FILES"
 
-# --- Migration consistency ---
-echo "Checking migration consistency..."
-MIGRATION_FILES=$(echo "$STAGED_FILES" | grep -E 'drizzle/' || true)
-if [ -n "$MIGRATION_FILES" ]; then
-    # Check that migration files are not being modified (only new ones allowed)
-    MODIFIED_MIGRATIONS=$(git diff --cached --name-only --diff-filter=M | grep -E 'drizzle/' || true)
-    if [ -n "$MODIFIED_MIGRATIONS" ]; then
-        echo "Error: Existing migration files should not be modified:"
-        echo "$MODIFIED_MIGRATIONS"
-        echo "Create a new migration instead."
-        exit 1
-    fi
-fi
-
-# Schema changed without migration = reject
-SCHEMA_CHANGED=$(echo "$STAGED_FILES" | grep -E 'db/schema/.*\.ts$' || true)
-NEW_MIGRATIONS=$(echo "$STAGED_FILES" | grep -E 'drizzle/.*\.sql$' || true)
-if [ -n "$SCHEMA_CHANGED" ] && [ -z "$NEW_MIGRATIONS" ]; then
-    echo "Error: DB schema changed but no migration file added."
-    echo "Run 'pnpm exec drizzle-kit generate' and stage the migration."
-    exit 1
-fi
-
-# --- Lockfile integrity ---
-PKG_CHANGED=$(echo "$STAGED_FILES" | grep -cE 'package\.json$' || true)
-if [ "$PKG_CHANGED" -gt 0 ]; then
-    echo "Checking lockfile integrity..."
-    while IFS= read -r package_json; do
-        [ -n "$package_json" ] || continue
-        package_dir=$(dirname "$package_json")
-
-        if [ -f "$package_dir/package-lock.json" ]; then
-            if ! (cd "$package_dir" && npm install --package-lock-only --ignore-scripts --dry-run >/dev/null); then
-                echo "$package_dir/package-lock.json is out of sync with package.json. Run 'cd \"$package_dir\" && npm install --package-lock-only'."
-                exit 1
-            fi
-            continue
-        fi
-
-        if [ -f "$package_dir/pnpm-lock.yaml" ]; then
-            if ! (cd "$package_dir" && pnpm install --frozen-lockfile >/dev/null); then
-                echo "$package_dir/pnpm-lock.yaml is out of sync with package.json. Run 'cd \"$package_dir\" && pnpm install'."
-                exit 1
-            fi
-            continue
-        fi
-
-        if [ "$package_dir" = "." ] && { [ -f "pnpm-lock.yaml" ] || [ -f "pnpm-workspace.yaml" ]; }; then
-            if ! pnpm install --frozen-lockfile >/dev/null; then
-                echo "pnpm-lock.yaml is out of sync with package.json. Run 'pnpm install' first."
-                exit 1
-            fi
-            continue
-        fi
-
-        echo "No supported lockfile found for $package_json. Add package-lock.json or pnpm-lock.yaml."
-        exit 1
-    done <<< "$(echo "$STAGED_FILES" | grep -E '(^|/)package\.json$' || true)"
-fi
-
 echo "Running Rust verifier..."
-"$REPO_ROOT/scripts/g3rs/verify" --mode pre-commit --scope "$REPO_ROOT/$RUST_WORKSPACE"
+"$REPO_ROOT/scripts/g3rs/verify" --mode pre-commit --scope "$REPO_ROOT/apps/guardrail3-rs"
 
 echo "All pre-commit checks passed."

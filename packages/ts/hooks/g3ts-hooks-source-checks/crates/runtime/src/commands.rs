@@ -14,11 +14,6 @@ pub(crate) fn script_category_command(
     predicate: impl Fn(&ResolvedCommand) -> bool,
 ) -> bool {
     any_resolved_command_relaxed(input.parsed(), &predicate)
-        || input
-            .parsed()
-            .functions
-            .iter()
-            .any(|function| any_resolved_command_relaxed(&function.parsed_body, &predicate))
 }
 
 pub(crate) fn is_g3ts_validate_path_command(command: &ResolvedCommand, app_root: &str) -> bool {
@@ -31,22 +26,36 @@ pub(crate) fn is_g3ts_validate_path_command(command: &ResolvedCommand, app_root:
         && path_arg_matches(args, app_root)
 }
 
-pub(crate) fn is_g3ts_verify_pre_commit_command(command: &ResolvedCommand) -> bool {
-    if !command.command_path().ends_with("scripts/g3ts/verify") {
+pub(crate) fn is_g3ts_verify_pre_commit_command(command: &ResolvedCommand, app_roots: &[String]) -> bool {
+    if !matches!(
+        command.command_path(),
+        "scripts/g3ts/verify" | "./scripts/g3ts/verify" | "$REPO_ROOT/scripts/g3ts/verify" | "${REPO_ROOT}/scripts/g3ts/verify"
+    ) {
         return false;
     }
     let args = command.args();
-    arg_value(args, "--mode").is_some_and(|mode| mode == "pre-commit")
-        && arg_value(args, "--scope").is_some()
+    if args
+        .iter()
+        .any(|arg| arg.starts_with("--mode=") || arg.starts_with("--scope="))
+    {
+        return false;
+    }
+    arg_values(args, "--mode").as_slice() == ["pre-commit"]
+        && arg_values(args, "--scope").len() == 1
+        && arg_value(args, "--scope").is_some_and(|scope| valid_pre_commit_scope(scope, app_roots))
 }
 
 pub(crate) fn arg_value<'a>(args: &'a [String], name: &str) -> Option<&'a str> {
-    args.iter().enumerate().find_map(|(index, arg)| {
+    arg_values(args, name).into_iter().next()
+}
+
+fn arg_values<'a>(args: &'a [String], name: &str) -> Vec<&'a str> {
+    args.iter().enumerate().filter_map(|(index, arg)| {
         if arg == name {
             return args.get(index.saturating_add(1)).map(String::as_str);
         }
-        arg.strip_prefix(format!("{name}=").as_str())
-    })
+        None
+    }).collect()
 }
 
 pub(crate) fn command_has_arg(args: &[String], expected: &str) -> bool {
@@ -72,4 +81,20 @@ fn path_matches_app_root(path: &str, app_root: &str) -> bool {
         || path.strip_prefix("./").is_some_and(|path| path == app_root)
         || path == format!("$REPO_ROOT/{app_root}")
         || path == format!("${{REPO_ROOT}}/{app_root}")
+}
+
+fn valid_pre_commit_scope(scope: &str, app_roots: &[String]) -> bool {
+    app_roots
+        .iter()
+        .any(|root| pre_commit_scope_matches_app_root(scope, root))
+}
+
+fn pre_commit_scope_matches_app_root(scope: &str, app_root: &str) -> bool {
+    if scope == "." || scope == "./" || app_root == "." {
+        return false;
+    }
+    scope == app_root
+        || scope.strip_prefix("./").is_some_and(|path| path == app_root)
+        || scope == format!("$REPO_ROOT/{app_root}")
+        || scope == format!("${{REPO_ROOT}}/{app_root}")
 }

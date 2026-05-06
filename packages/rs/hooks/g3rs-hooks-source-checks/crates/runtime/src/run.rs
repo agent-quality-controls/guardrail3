@@ -83,6 +83,8 @@ fn check_single(
             &mut results,
         );
         crate::shell_safety::concrete_lockfile_command::check(&executable_input, &mut results);
+    }
+    if input.exists {
         crate::shell_safety::no_fail_open_wrappers::check(&fail_open_input, &mut results);
         crate::contract_critical_command_not_fail_open::rule::check(&fail_open_input, &mut results);
     }
@@ -130,9 +132,13 @@ fn check_g3rs_verifier_contract(
         return;
     }
 
+    let pre_commit_parsed = parse_script(verifier_mode_body(input, "pre-commit").as_str());
+    let workspace_parsed = parse_script(verifier_mode_body(input, "workspace").as_str());
     for requirement in REQUIRED_VERIFIER_COMMANDS {
+        let pre_commit_found = any_resolved_command(&pre_commit_parsed, requirement.predicate);
+        let workspace_found = any_resolved_command(&workspace_parsed, requirement.predicate);
         push(
-            any_resolved_command(&input.parsed, requirement.predicate),
+            pre_commit_found && workspace_found,
             requirement.id,
             input.rel_path.as_str(),
             requirement.ok_title,
@@ -142,6 +148,40 @@ fn check_g3rs_verifier_contract(
             results,
         );
     }
+    if let Some((line_no, command_text)) = first_fail_open_required_verifier_command(&input.parsed)
+    {
+        results.push(crate::compat::G3CheckResult::from_parts(
+            "g3rs-hooks/verifier-required-command-not-fail-open".to_owned(),
+            crate::compat::G3Severity::Error,
+            "Rust verifier required command is fail-open".to_owned(),
+            format!(
+                "Required verifier command `{command_text}` is softened by a fail-open wrapper. Remove the wrapper so scripts/g3rs/verify fails closed."
+            ),
+            Some(input.rel_path.to_owned()),
+            Some(line_no),
+            false,
+        ));
+    }
+    push(
+        any_resolved_command(&input.parsed, is_git_rev_parse_root_command),
+        "g3rs-hooks/verifier-resolves-git-root",
+        input.rel_path.as_str(),
+        "Rust verifier resolves git root",
+        "scripts/g3rs/verify uses git rev-parse --show-toplevel.",
+        "Rust verifier does not resolve git root",
+        "scripts/g3rs/verify must resolve relative scopes from git rev-parse --show-toplevel.",
+        results,
+    );
+    push(
+        any_resolved_command(&pre_commit_parsed, is_git_cached_diff_name_only_command),
+        "g3rs-hooks/verifier-precommit-reads-staged-files",
+        input.rel_path.as_str(),
+        "Rust pre-commit verifier reads staged files",
+        "scripts/g3rs/verify pre-commit mode reads git diff --cached --name-only.",
+        "Rust pre-commit verifier does not read staged files",
+        "scripts/g3rs/verify --mode pre-commit must read git diff --cached --name-only.",
+        results,
+    );
 
     push(
         !any_resolved_command(&input.parsed, is_g3ts_command),
@@ -163,6 +203,48 @@ fn check_g3rs_verifier_contract(
         "scripts/g3rs/verify must not call pnpm, npm, yarn, or bun.",
         results,
     );
+}
+
+fn first_fail_open_required_verifier_command(
+    parsed: &hook_shell_parser::types::ParsedShellScript,
+) -> Option<(usize, String)> {
+    parsed.executable_lines.iter().find_map(|line| {
+        if line.softened_by.is_none() {
+            return None;
+        }
+        let line_has_required_command = REQUIRED_VERIFIER_COMMANDS.iter().any(|requirement| {
+            hook_shell_parser::command_query::any_resolved_command_on_line_in_context(
+                parsed,
+                parsed,
+                &line.raw,
+                line.line_no,
+                line.line_no,
+                requirement.predicate,
+            )
+        });
+        line_has_required_command.then(|| (line.line_no, line.command_text.to_owned()))
+    })
+}
+
+fn verifier_mode_body(input: &G3RsHooksSourceChecksInput, mode: &str) -> String {
+    let mut in_branch = false;
+    let mut body = String::new();
+    let branch_start = format!("{mode})");
+    for line in &input.parsed.source_lines {
+        let trimmed = line.raw.trim();
+        if trimmed == branch_start {
+            in_branch = true;
+            continue;
+        }
+        if in_branch && trimmed == ";;" {
+            break;
+        }
+        if in_branch {
+            body.push_str(line.raw.as_str());
+            body.push('\n');
+        }
+    }
+    body
 }
 
 struct VerifierCommandRequirement {
@@ -295,7 +377,7 @@ fn push(
 fn is_g3rs_verify_precommit_scope_command(command: &ResolvedCommand) -> bool {
     is_g3rs_verify_command(command)
         && args_contain_pair(command.args(), "--mode", "pre-commit")
-        && args_contain_flag_with_value(command.args(), "--scope")
+        && args_contain_scope_value(command.args(), "apps/guardrail3-rs")
 }
 
 fn is_g3rs_verify_command(command: &ResolvedCommand) -> bool {
@@ -310,6 +392,24 @@ fn is_g3rs_validate_scope_command(command: &ResolvedCommand) -> bool {
     command.command_name() == "g3rs"
         && command.args().first().map(String::as_str) == Some("validate")
         && args_contain_pair(command.args(), "--path", "$SCOPE")
+}
+
+fn is_git_rev_parse_root_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "git"
+        && command.args().first().map(String::as_str) == Some("rev-parse")
+        && command.args().iter().any(|arg| arg == "--show-toplevel")
+}
+
+fn is_git_cached_diff_name_only_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "git"
+        && command.args().first().map(String::as_str) == Some("diff")
+        && command.args().iter().any(|arg| arg == "--cached")
+        && command.args().iter().any(|arg| arg == "--name-only")
+        && (command.args().iter().any(|arg| arg == "--diff-filter=ACM")
+            || command
+                .args()
+                .windows(2)
+                .any(|window| window[0] == "--diff-filter" && window[1] == "ACM"))
 }
 
 fn is_cargo_metadata_locked_command(command: &ResolvedCommand) -> bool {
@@ -366,19 +466,20 @@ fn is_cargo_mutants_check_in_place_command(command: &ResolvedCommand) -> bool {
 }
 
 fn is_cargo_dupes_threshold_command(command: &ResolvedCommand) -> bool {
+    is_cargo_dupes_full_command(command)
+}
+
+fn is_cargo_dupes_exclude_tests_command(command: &ResolvedCommand) -> bool {
+    is_cargo_dupes_full_command(command)
+}
+
+fn is_cargo_dupes_full_command(command: &ResolvedCommand) -> bool {
     let Some(args) = crate::support::cargo_subcommand_tail(command, "dupes") else {
         return false;
     };
     args.first().map(String::as_str) == Some("check")
         && args_contain_pair(args, "--max-exact", "85")
         && args_contain_pair(args, "--max-exact-percent", "10")
-}
-
-fn is_cargo_dupes_exclude_tests_command(command: &ResolvedCommand) -> bool {
-    let Some(args) = crate::support::cargo_subcommand_tail(command, "dupes") else {
-        return false;
-    };
-    args.first().map(String::as_str) == Some("check")
         && args.iter().any(|arg| arg == "--exclude-tests")
 }
 
@@ -394,13 +495,25 @@ fn is_typescript_package_manager_command(command: &ResolvedCommand) -> bool {
     matches!(command.command_name(), "pnpm" | "npm" | "yarn" | "bun")
 }
 
-fn args_contain_flag_with_value(args: &[String], flag: &str) -> bool {
-    args.windows(2)
-        .any(|window| window[0] == flag && !window[1].starts_with('-'))
-        || args.iter().any(|arg| {
-            arg.strip_prefix(flag)
-                .is_some_and(|value| value.starts_with('='))
-        })
+fn args_contain_scope_value(args: &[String], _scope: &str) -> bool {
+    args.windows(2).any(|window| {
+        window[0] == "--scope"
+            && matches!(
+                window[1].as_str(),
+                "apps/guardrail3-rs"
+                    | "./apps/guardrail3-rs"
+                    | "$REPO_ROOT/apps/guardrail3-rs"
+                    | "${REPO_ROOT}/apps/guardrail3-rs"
+            )
+    }) || args.iter().any(|arg| {
+        matches!(
+            arg.strip_prefix("--scope="),
+            Some("apps/guardrail3-rs")
+                | Some("./apps/guardrail3-rs")
+                | Some("$REPO_ROOT/apps/guardrail3-rs")
+                | Some("${REPO_ROOT}/apps/guardrail3-rs")
+        )
+    })
 }
 
 fn args_contain_pair(args: &[String], flag: &str, value: &str) -> bool {
