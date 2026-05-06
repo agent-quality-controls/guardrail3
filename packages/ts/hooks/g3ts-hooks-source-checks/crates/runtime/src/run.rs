@@ -30,10 +30,6 @@ pub fn check_effective(inputs: &[G3TsHooksSourceChecksInput]) -> Vec<G3CheckResu
         .find(|input| input.kind() == G3TsHookScriptKind::Verifier);
     verifier_exists(verifier, primary, &mut results);
     if let Some(verifier) = verifier {
-        verifier_supports_mode(verifier, "pre-commit", &mut results);
-        verifier_supports_mode(verifier, "workspace", &mut results);
-        verifier_requires_scope(verifier, &mut results);
-        verifier_rejects_unknown_modes(verifier, &mut results);
         verifier_runs_g3ts_validate(verifier, primary, &mut results);
         verifier_runs_typecheck(verifier, &mut results);
         verifier_runs_lint(verifier, &mut results);
@@ -86,73 +82,6 @@ fn verifier_exists(
         "G3TS verifier script is missing",
         "`scripts/g3ts/verify` must exist and own TypeScript verification.",
         primary.rel_path(),
-        None,
-    ));
-}
-
-fn verifier_supports_mode(
-    verifier: &G3TsHooksSourceChecksInput,
-    mode: &str,
-    results: &mut Vec<G3CheckResult>,
-) {
-    if verifier
-        .parsed()
-        .source_lines
-        .iter()
-        .any(|line| line.raw.contains(mode))
-    {
-        return;
-    }
-    results.push(error(
-        format!("g3ts-hooks/verifier-supports-{mode}-mode").as_str(),
-        format!("G3TS verifier does not support {mode} mode").as_str(),
-        format!("`scripts/g3ts/verify` must accept `--mode {mode}`.").as_str(),
-        verifier.rel_path(),
-        None,
-    ));
-}
-
-fn verifier_requires_scope(
-    verifier: &G3TsHooksSourceChecksInput,
-    results: &mut Vec<G3CheckResult>,
-) {
-    if verifier
-        .parsed()
-        .source_lines
-        .iter()
-        .any(|line| line.raw.contains("--scope"))
-        && verifier.parsed().source_lines.iter().any(|line| {
-            line.raw.contains("SCOPE_ARG") && line.raw.contains("-n")
-                || line.raw.contains("missing --scope")
-        })
-    {
-        return;
-    }
-    results.push(error(
-        "g3ts-hooks/verifier-requires-scope",
-        "G3TS verifier does not reject missing scope",
-        "`scripts/g3ts/verify` must require `--scope` before running checks.",
-        verifier.rel_path(),
-        None,
-    ));
-}
-
-fn verifier_rejects_unknown_modes(
-    verifier: &G3TsHooksSourceChecksInput,
-    results: &mut Vec<G3CheckResult>,
-) {
-    if verifier.parsed().source_lines.iter().any(|line| {
-        line.raw.contains("pre-commit|workspace")
-            || line.raw.contains("pre-commit | workspace")
-    }) && verifier.parsed().source_lines.iter().any(|line| line.raw.contains("usage") && line.raw.contains("exit"))
-    {
-        return;
-    }
-    results.push(error(
-        "g3ts-hooks/verifier-rejects-unknown-modes",
-        "G3TS verifier does not reject unknown modes",
-        "`scripts/g3ts/verify` must accept only `pre-commit` and `workspace` modes.",
-        verifier.rel_path(),
         None,
     ));
 }
@@ -268,7 +197,13 @@ fn verifier_does_not_call_g3rs(
     verifier: &G3TsHooksSourceChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    if script_command(verifier, |command| command.command_name() == "g3rs") {
+    if script_command(verifier, |command| {
+        command.command_name() == "g3rs"
+            || command
+                .command_path()
+                .trim_matches('"')
+                .ends_with("scripts/g3rs/verify")
+    }) {
         results.push(error(
             "g3ts-hooks/verifier-does-not-call-g3rs",
             "G3TS verifier calls g3rs",

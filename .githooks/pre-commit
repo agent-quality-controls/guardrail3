@@ -117,7 +117,4 @@ fi
 echo "Running Rust verifier..."
 "$REPO_ROOT/scripts/g3rs/verify" --mode pre-commit --scope "$REPO_ROOT/$RUST_WORKSPACE"
 
-echo "Running TypeScript verifier..."
-"$REPO_ROOT/scripts/g3ts/verify" --mode pre-commit --scope "$REPO_ROOT"
-
 echo "All pre-commit checks passed."

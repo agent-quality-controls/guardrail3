@@ -92,12 +92,7 @@ fn check_single(
 
 const PRECOMMIT_CALLS_G3RS_VERIFIER_ID: &str = "g3rs-hooks/precommit-calls-g3rs-verifier";
 const G3RS_VERIFIER_EXISTS_ID: &str = "g3rs-hooks/g3rs-verifier-exists";
-const G3RS_VERIFIER_SUPPORTED_MODES_ID: &str = "g3rs-hooks/g3rs-verifier-supported-modes";
-const G3RS_VERIFIER_REJECTS_SCOPE_ID: &str = "g3rs-hooks/g3rs-verifier-rejects-missing-scope";
-const G3RS_VERIFIER_REJECTS_UNKNOWN_MODES_ID: &str =
-    "g3rs-hooks/g3rs-verifier-rejects-unknown-modes";
 const G3RS_VERIFIER_COMMANDS_ID: &str = "g3rs-hooks/g3rs-verifier-required-commands";
-const G3RS_VERIFIER_TARGET_DIR_ID: &str = "g3rs-hooks/g3rs-verifier-target-dir";
 const G3RS_VERIFIER_FORBIDDEN_TOOLS_ID: &str = "g3rs-hooks/g3rs-verifier-forbidden-tools";
 
 fn check_precommit_calls_g3rs_verifier(
@@ -133,50 +128,6 @@ fn check_g3rs_verifier_contract(
     if !input.exists {
         return;
     }
-
-    push(
-        source_contains(input, "pre-commit)") && source_contains(input, "workspace)"),
-        G3RS_VERIFIER_SUPPORTED_MODES_ID,
-        input.rel_path.as_str(),
-        "Rust verifier supports required modes",
-        "scripts/g3rs/verify supports pre-commit and workspace modes.",
-        "Rust verifier mode support incomplete",
-        "scripts/g3rs/verify must support exactly pre-commit and workspace modes.",
-        results,
-    );
-    push(
-        source_contains(input, "missing --scope"),
-        G3RS_VERIFIER_REJECTS_SCOPE_ID,
-        input.rel_path.as_str(),
-        "Rust verifier rejects missing scope",
-        "scripts/g3rs/verify rejects a missing --scope argument.",
-        "Rust verifier does not reject missing scope",
-        "scripts/g3rs/verify must reject missing --scope.",
-        results,
-    );
-    push(
-        source_contains(input, "unknown --mode"),
-        G3RS_VERIFIER_REJECTS_UNKNOWN_MODES_ID,
-        input.rel_path.as_str(),
-        "Rust verifier rejects unknown modes",
-        "scripts/g3rs/verify rejects unknown modes.",
-        "Rust verifier does not reject unknown modes",
-        "scripts/g3rs/verify must reject unknown modes.",
-        results,
-    );
-    push(
-        source_contains(
-            input,
-            "export CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\"",
-        ),
-        G3RS_VERIFIER_TARGET_DIR_ID,
-        input.rel_path.as_str(),
-        "Rust verifier exports shared target dir",
-        "scripts/g3rs/verify exports CARGO_TARGET_DIR under the repository root.",
-        "Rust verifier target dir export missing",
-        "scripts/g3rs/verify must export CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\".",
-        results,
-    );
 
     for requirement in REQUIRED_VERIFIER_COMMANDS {
         push(
@@ -322,14 +273,6 @@ fn push(
     results.push(result);
 }
 
-fn source_contains(input: &G3RsHooksSourceChecksInput, needle: &str) -> bool {
-    input
-        .parsed
-        .source_lines
-        .iter()
-        .any(|line| line.raw.contains(needle))
-}
-
 fn is_g3rs_verify_precommit_scope_command(command: &ResolvedCommand) -> bool {
     is_g3rs_verify_command(command)
         && args_contain_pair(command.args(), "--mode", "pre-commit")
@@ -415,6 +358,10 @@ fn is_cargo_dupes_threshold_command(command: &ResolvedCommand) -> bool {
 
 fn is_g3ts_command(command: &ResolvedCommand) -> bool {
     command.command_name() == "g3ts"
+        || command
+            .command_path()
+            .trim_matches('"')
+            .ends_with("scripts/g3ts/verify")
 }
 
 fn is_typescript_package_manager_command(command: &ResolvedCommand) -> bool {

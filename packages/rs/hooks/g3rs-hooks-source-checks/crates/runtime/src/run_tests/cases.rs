@@ -1,3 +1,8 @@
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use g3rs_hooks_contract_types::{
     G3HookCommandRequirement, G3HookRequirement, G3HookTriggerPattern,
 };
@@ -230,6 +235,24 @@ fn verifier_fails_when_it_calls_g3ts() {
 }
 
 #[test]
+fn verifier_fails_when_it_calls_g3ts_verifier_path() {
+    let results = check(&input(
+        "scripts/g3rs/verify",
+        G3RsHookScriptKind::G3RsVerifier,
+        &format!(
+            "{VALID_VERIFIER}\"$REPO_ROOT/scripts/g3ts/verify\" --mode pre-commit --scope \"$REPO_ROOT\"\n"
+        ),
+        Vec::new(),
+    ));
+
+    assert_finding(
+        &results,
+        "g3rs-hooks/g3rs-verifier-forbidden-tools",
+        "must not call g3ts",
+    );
+}
+
+#[test]
 fn verifier_fails_when_it_calls_typescript_package_managers() {
     for package_manager in ["pnpm", "npm", "yarn", "bun"] {
         let results = check(&input(
@@ -245,6 +268,122 @@ fn verifier_fails_when_it_calls_typescript_package_managers() {
             "must not call pnpm, npm, yarn, or bun",
         );
     }
+}
+
+#[test]
+fn missing_mode_exits_non_zero() {
+    let fixture = script_fixture("missing-mode");
+    let status = verifier_command(&fixture)
+        .args(["--scope", "."])
+        .status()
+        .expect("spawn verifier for missing mode test");
+
+    assert!(!status.success(), "missing --mode should fail");
+}
+
+#[test]
+fn missing_scope_exits_non_zero() {
+    let fixture = script_fixture("missing-scope");
+    let status = verifier_command(&fixture)
+        .args(["--mode", "pre-commit"])
+        .status()
+        .expect("spawn verifier for missing scope test");
+
+    assert!(!status.success(), "missing --scope should fail");
+}
+
+#[test]
+fn unknown_modes_exit_non_zero() {
+    for mode in ["unknown", "worktree", "files", "current"] {
+        let fixture = script_fixture(mode);
+        let status = verifier_command(&fixture)
+            .args(["--mode", mode, "--scope", "."])
+            .status()
+            .expect("spawn verifier for unknown mode test");
+
+        assert!(!status.success(), "{mode} mode should fail");
+    }
+}
+
+#[test]
+fn unknown_flag_exits_non_zero() {
+    let fixture = script_fixture("unknown-flag");
+    let status = verifier_command(&fixture)
+        .args(["--mode", "pre-commit", "--scope", ".", "--wat"])
+        .status()
+        .expect("spawn verifier for unknown flag test");
+
+    assert!(!status.success(), "unknown flag should fail");
+}
+
+#[test]
+fn pre_commit_exits_zero_when_no_relevant_staged_files_exist() {
+    let fixture = script_fixture("no-relevant-staged");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, "README.md\n"));
+    write_fake_tool(
+        &fixture,
+        "g3rs",
+        "echo g3rs-called >> \"$G3RS_LOG\"\nexit 1\n",
+    );
+    write_fake_tool(
+        &fixture,
+        "cargo",
+        "echo cargo-called >> \"$G3RS_LOG\"\nexit 1\n",
+    );
+    let log = fixture.join("calls.log");
+
+    let status = verifier_command(&fixture)
+        .env("PATH", fake_path(&fixture))
+        .env("G3RS_LOG", &log)
+        .env("G3RS_DIFF_LOG", fixture.join("git-diff.log"))
+        .args(["--mode", "pre-commit", "--scope", "."])
+        .status()
+        .expect("spawn verifier for irrelevant staged file test");
+
+    assert!(
+        status.success(),
+        "irrelevant staged files should skip checks"
+    );
+    assert!(
+        !log.exists(),
+        "Rust tools should not run for irrelevant staged files"
+    );
+}
+
+#[test]
+fn workspace_mode_does_not_read_staged_paths_before_running_checks() {
+    let fixture = script_fixture("workspace-no-staged");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, "src/lib.rs\n"));
+    write_fake_tool(
+        &fixture,
+        "g3rs",
+        "echo g3rs-called >> \"$G3RS_LOG\"\nexit 0\n",
+    );
+    write_fake_tool(
+        &fixture,
+        "cargo",
+        "echo cargo-called >> \"$G3RS_LOG\"\nexit 1\n",
+    );
+    let log = fixture.join("calls.log");
+    let diff_log = fixture.join("git-diff.log");
+
+    let status = verifier_command(&fixture)
+        .env("PATH", fake_path(&fixture))
+        .env("G3RS_LOG", &log)
+        .env("G3RS_DIFF_LOG", &diff_log)
+        .args(["--mode", "workspace", "--scope", "."])
+        .status()
+        .expect("spawn verifier for workspace mode staged-path test");
+
+    assert!(
+        !status.success(),
+        "fake cargo should stop workspace verification"
+    );
+    assert!(log.exists(), "workspace mode should start verification");
+    assert!(
+        !diff_log.exists(),
+        "workspace mode must not inspect staged paths"
+    );
 }
 
 #[test]
@@ -401,4 +540,83 @@ fn assert_no_finding(results: &[guardrail3_check_types::G3CheckResult], id: &str
             && result.message().contains(message)),
         "expected no non-inventory result {id} containing {message}; got {results:#?}",
     );
+}
+
+fn script_fixture(name: &str) -> PathBuf {
+    let unique = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("system clock should be after unix epoch")
+        .as_nanos();
+    let root = std::env::temp_dir().join(format!("g3rs-verifier-{name}-{unique}"));
+    fs::create_dir_all(root.join("bin")).expect("create fake bin dir");
+    fs::create_dir_all(root.join("scripts/g3rs")).expect("create script dir");
+    let _bytes = fs::copy(
+        repo_root().join("scripts/g3rs/verify"),
+        root.join("scripts/g3rs/verify"),
+    )
+    .expect("copy repository verifier into isolated script fixture");
+    make_executable(&root.join("scripts/g3rs/verify"));
+    root
+}
+
+fn verifier_command(fixture: &Path) -> Command {
+    let mut command = Command::new(fixture.join("scripts/g3rs/verify"));
+    let _command = command.current_dir(fixture);
+    command
+}
+
+fn write_fake_tool(fixture: &Path, name: &str, body: impl AsRef<str>) {
+    let path = fixture.join("bin").join(name);
+    fs::write(
+        &path,
+        format!("#!/usr/bin/env bash\nset -euo pipefail\n{}", body.as_ref()),
+    )
+    .expect("write fake tool");
+    make_executable(&path);
+}
+
+fn fake_path(fixture: &Path) -> String {
+    format!(
+        "{}:{}",
+        fixture.join("bin").display(),
+        std::env::var("PATH").unwrap_or_default()
+    )
+}
+
+fn git_fake_script(fixture: &Path, staged: &str) -> String {
+    format!(
+        r#"if [ "$1" = "rev-parse" ]; then
+  echo "{}"
+  exit 0
+fi
+if [ "$1" = "diff" ]; then
+  echo diff-called >> "$G3RS_DIFF_LOG"
+  printf '{}'
+  exit 0
+fi
+exit 1
+"#,
+        fixture.display(),
+        staged
+    )
+}
+
+fn make_executable(path: &Path) {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut permissions = fs::metadata(path)
+            .expect("read executable metadata")
+            .permissions();
+        permissions.set_mode(0o755);
+        fs::set_permissions(path, permissions).expect("mark executable");
+    }
+}
+
+fn repo_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .ancestors()
+        .nth(6)
+        .expect("manifest should be below repository root")
+        .to_path_buf()
 }

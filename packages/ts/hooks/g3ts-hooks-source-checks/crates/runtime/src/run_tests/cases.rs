@@ -173,28 +173,17 @@ fn verifier_fails_when_it_calls_g3rs_or_cargo() {
 }
 
 #[test]
-fn verifier_fails_when_scope_or_supported_modes_are_missing() {
-    let results = run_case(vec![valid_pre_commit(), verifier("g3ts validate --path \"$SCOPE\"")]);
+fn verifier_fails_when_it_calls_g3rs_verifier_path() {
+    let script = format!(
+        "{}\n\"$REPO_ROOT/scripts/g3rs/verify\" --mode pre-commit --scope \"$REPO_ROOT\"\n",
+        valid_verifier_script()
+    );
+    let results = run_case(vec![valid_pre_commit(), verifier(&script)]);
 
     assertions::assert_has_id(
         &results,
-        "g3ts-hooks/verifier-supports-pre-commit-mode",
-        "missing pre-commit mode support",
-    );
-    assertions::assert_has_id(
-        &results,
-        "g3ts-hooks/verifier-supports-workspace-mode",
-        "missing workspace mode support",
-    );
-    assertions::assert_has_id(
-        &results,
-        "g3ts-hooks/verifier-requires-scope",
-        "missing scope rejection",
-    );
-    assertions::assert_has_id(
-        &results,
-        "g3ts-hooks/verifier-rejects-unknown-modes",
-        "missing unknown mode rejection",
+        "g3ts-hooks/verifier-does-not-call-g3rs",
+        "g3rs verifier path",
     );
 }
 
@@ -206,6 +195,17 @@ fn typescript_hook_rules_pass_when_g3rs_verifier_does_not_exist() {
         &results,
         "g3ts-hooks/verifier-does-not-call-g3rs",
         "no g3rs verifier fact required",
+    );
+}
+
+#[test]
+fn missing_verifier_script_fails() {
+    let results = run_case(vec![valid_pre_commit()]);
+
+    assertions::assert_has_id(
+        &results,
+        "g3ts-hooks/verifier-exists",
+        "missing verifier input",
     );
 }
 
@@ -233,7 +233,7 @@ fn missing_scope_exits_non_zero() {
 
 #[test]
 fn unknown_modes_exit_non_zero() {
-    for mode in ["unknown", "worktree", "files"] {
+    for mode in ["unknown", "worktree", "files", "current"] {
         let fixture = script_fixture(mode);
         let status = verifier_command(&fixture)
             .args(["--mode", mode, "--scope", "."])
@@ -242,6 +242,17 @@ fn unknown_modes_exit_non_zero() {
 
         assert!(!status.success(), "{mode} mode should fail");
     }
+}
+
+#[test]
+fn unknown_flag_exits_non_zero() {
+    let fixture = script_fixture("unknown-flag");
+    let status = verifier_command(&fixture)
+        .args(["--mode", "pre-commit", "--scope", ".", "--wat"])
+        .status()
+        .expect("spawn verifier for unknown flag test");
+
+    assert!(!status.success(), "unknown flag should fail");
 }
 
 #[test]
