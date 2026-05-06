@@ -74,6 +74,49 @@ pub enum G3TsHookScriptKind {
     Verifier,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct G3TsHooksEnabledCategories {
+    stylelint: bool,
+    package_policy: bool,
+    typecov: bool,
+}
+
+impl G3TsHooksEnabledCategories {
+    #[must_use]
+    pub fn new(stylelint: bool, package_policy: bool, typecov: bool) -> Self {
+        Self {
+            stylelint,
+            package_policy,
+            typecov,
+        }
+    }
+
+    #[must_use]
+    pub fn none() -> Self {
+        Self::new(false, false, false)
+    }
+
+    #[must_use]
+    pub fn all() -> Self {
+        Self::new(true, true, true)
+    }
+
+    #[must_use]
+    pub fn stylelint(&self) -> bool {
+        self.stylelint
+    }
+
+    #[must_use]
+    pub fn package_policy(&self) -> bool {
+        self.package_policy
+    }
+
+    #[must_use]
+    pub fn typecov(&self) -> bool {
+        self.typecov
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsHooksSourceChecksInput {
     rel_path: String,
@@ -81,6 +124,7 @@ pub struct G3TsHooksSourceChecksInput {
     parsed: ParsedShellScript,
     has_modular_dir: bool,
     app_package_roots: Vec<String>,
+    enabled_categories: G3TsHooksEnabledCategories,
     requirements: Vec<G3TsHookRequirement>,
 }
 
@@ -92,6 +136,7 @@ impl G3TsHooksSourceChecksInput {
         parsed: ParsedShellScript,
         has_modular_dir: bool,
         app_package_roots: Vec<String>,
+        enabled_categories: G3TsHooksEnabledCategories,
         requirements: Vec<G3TsHookRequirement>,
     ) -> Self {
         Self {
@@ -100,6 +145,7 @@ impl G3TsHooksSourceChecksInput {
             parsed,
             has_modular_dir,
             app_package_roots,
+            enabled_categories,
             requirements,
         }
     }
@@ -127,6 +173,11 @@ impl G3TsHooksSourceChecksInput {
     #[must_use]
     pub fn app_package_roots(&self) -> &[String] {
         &self.app_package_roots
+    }
+
+    #[must_use]
+    pub fn enabled_categories(&self) -> G3TsHooksEnabledCategories {
+        self.enabled_categories
     }
 
     #[must_use]

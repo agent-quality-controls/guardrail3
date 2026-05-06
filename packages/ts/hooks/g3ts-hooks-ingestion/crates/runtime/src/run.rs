@@ -34,6 +34,7 @@ pub fn ingest_for_source_checks(
         return Vec::new();
     };
     let app_package_roots = app_package_roots(crawl);
+    let enabled_categories = enabled_categories(crawl, &app_package_roots);
     let mut inputs = Vec::new();
     let content = read_to_string(selected.abs_path.as_path());
     inputs.push(hook_types::G3TsHooksSourceChecksInput::new(
@@ -42,6 +43,7 @@ pub fn ingest_for_source_checks(
         parse_script(content.as_str()),
         selected.has_modular_dir,
         app_package_roots.clone(),
+        enabled_categories,
         Vec::new(),
     ));
     if let Some(script) = verifier_surface(crawl, hook_root.as_path()) {
@@ -52,6 +54,7 @@ pub fn ingest_for_source_checks(
             parse_script(content.as_str()),
             selected.has_modular_dir,
             app_package_roots,
+            enabled_categories,
             Vec::new(),
         ));
     }
@@ -315,6 +318,72 @@ fn app_package_roots(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> Vec<String>
     roots.sort();
     roots.dedup();
     roots
+}
+
+fn enabled_categories(
+    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    app_roots: &[String],
+) -> hook_types::G3TsHooksEnabledCategories {
+    hook_types::G3TsHooksEnabledCategories::new(
+        stylelint_enabled(crawl, app_roots),
+        package_policy_enabled(crawl, app_roots),
+        typecov_enabled(crawl, app_roots),
+    )
+}
+
+fn stylelint_enabled(crawl: &workspace_crawl::G3RsWorkspaceCrawl, app_roots: &[String]) -> bool {
+    app_roots.iter().any(|root| {
+        [
+            "stylelint.config.js",
+            "stylelint.config.mjs",
+            "stylelint.config.cjs",
+            "stylelint.config.ts",
+            ".stylelintrc",
+            ".stylelintrc.json",
+            ".stylelintrc.yaml",
+            ".stylelintrc.yml",
+            ".stylelintrc.js",
+            ".stylelintrc.cjs",
+            ".stylelintrc.mjs",
+        ]
+        .iter()
+        .any(|file| has_entry_file(crawl, root_file(root, file).as_str()))
+    })
+}
+
+fn package_policy_enabled(crawl: &workspace_crawl::G3RsWorkspaceCrawl, app_roots: &[String]) -> bool {
+    app_roots
+        .iter()
+        .any(|root| has_entry_file(crawl, root_file(root, "package.json").as_str()))
+}
+
+fn typecov_enabled(crawl: &workspace_crawl::G3RsWorkspaceCrawl, app_roots: &[String]) -> bool {
+    app_roots.iter().any(|root| {
+        package_content(crawl, root).is_some_and(|content| {
+            content.contains("\"typecov\"") || content.contains("\"type-coverage\"")
+        }) || [
+            "type-coverage.json",
+            "type-coverage.config.js",
+            "type-coverage.config.mjs",
+            "type-coverage.config.cjs",
+            "type-coverage.config.ts",
+        ]
+        .iter()
+        .any(|file| has_entry_file(crawl, root_file(root, file).as_str()))
+    })
+}
+
+fn package_content(crawl: &workspace_crawl::G3RsWorkspaceCrawl, root: &str) -> Option<String> {
+    let rel_path = root_file(root, "package.json");
+    entry(crawl, rel_path.as_str()).map(|entry| read_to_string(entry.path.abs_path.as_path()))
+}
+
+fn root_file(root: &str, file: &str) -> String {
+    if root == "." {
+        file.to_owned()
+    } else {
+        format!("{root}/{file}")
+    }
 }
 
 fn trust_risks(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> Vec<String> {
