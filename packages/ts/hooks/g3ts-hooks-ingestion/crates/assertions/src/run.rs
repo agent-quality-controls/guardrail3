@@ -13,17 +13,18 @@ pub fn assert_only_pre_commit_script(inputs: &[G3TsHooksSourceChecksInput]) {
     assert_eq!(input.rel_path(), ".githooks/pre-commit");
 }
 
-pub fn assert_modular_script_present(inputs: &[G3TsHooksSourceChecksInput], rel_path: &str) {
+pub fn assert_verifier_script_present(inputs: &[G3TsHooksSourceChecksInput]) {
     assert_eq!(
         inputs.len(),
         2,
-        "expected pre-commit plus modular input: {inputs:#?}"
+        "expected pre-commit plus verifier input: {inputs:#?}"
     );
     assert!(
         inputs.iter().any(
-            |input| input.kind() == G3TsHookScriptKind::Modular && input.rel_path() == rel_path
+            |input| input.kind() == G3TsHookScriptKind::Verifier
+                && input.rel_path() == "scripts/g3ts/verify"
         ),
-        "expected modular input {rel_path} in {inputs:#?}"
+        "expected verifier input in {inputs:#?}"
     );
 }
 

@@ -1,10 +1,9 @@
-use g3ts_hooks_contract_types::{G3TsHookCommandRequirement, G3TsHookTriggerPattern};
 use g3ts_hooks_types::{G3TsHookScriptKind, G3TsHooksSourceChecksInput};
 use guardrail3_check_types::G3CheckResult;
 
 use crate::commands::{
-    any_script_command, app_roots, command_mentions_guardrail_ts_config, command_mentions_pattern,
-    is_app_validate_command, is_g3ts_validate_path_command,
+    command_has_arg, is_g3ts_validate_path_command, is_g3ts_verify_pre_commit_command,
+    script_command,
 };
 use crate::fail_open::{critical_command_names, first_fail_open_critical_command};
 use crate::results::{error, info};
@@ -17,13 +16,35 @@ pub fn check(input: &G3TsHooksSourceChecksInput) -> Vec<G3CheckResult> {
 #[must_use]
 pub fn check_effective(inputs: &[G3TsHooksSourceChecksInput]) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
-    let Some(primary) = inputs.first() else {
+    let Some(primary) = inputs
+        .iter()
+        .find(|input| input.kind() == G3TsHookScriptKind::PreCommit)
+        .or_else(|| inputs.first())
+    else {
         return results;
     };
-    g3ts_validate_staged_present(inputs, primary, &mut results);
-    app_validate_step_present(inputs, primary, &mut results);
-    guardrail_config_changes_trigger_validation(inputs, primary, &mut results);
-    contract_trigger_patterns_covered(inputs, primary, &mut results);
+
+    pre_commit_invokes_g3ts_verifier(inputs, primary, &mut results);
+    let verifier = inputs
+        .iter()
+        .find(|input| input.kind() == G3TsHookScriptKind::Verifier);
+    verifier_exists(verifier, primary, &mut results);
+    if let Some(verifier) = verifier {
+        verifier_supports_mode(verifier, "pre-commit", &mut results);
+        verifier_supports_mode(verifier, "workspace", &mut results);
+        verifier_requires_scope(verifier, &mut results);
+        verifier_rejects_unknown_modes(verifier, &mut results);
+        verifier_runs_g3ts_validate(verifier, primary, &mut results);
+        verifier_runs_typecheck(verifier, &mut results);
+        verifier_runs_lint(verifier, &mut results);
+        verifier_runs_format_check(verifier, &mut results);
+        verifier_runs_spelling_check(verifier, &mut results);
+        verifier_runs_stylelint(verifier, &mut results);
+        verifier_runs_package_policy(verifier, &mut results);
+        verifier_runs_typecov(verifier, &mut results);
+        verifier_does_not_call_g3rs(verifier, &mut results);
+        verifier_does_not_call_cargo(verifier, &mut results);
+    }
     for input in inputs {
         no_fail_open_wrappers(input, &mut results);
         dispatcher_inventory(input, &mut results);
@@ -31,106 +52,256 @@ pub fn check_effective(inputs: &[G3TsHooksSourceChecksInput]) -> Vec<G3CheckResu
     results
 }
 
-fn g3ts_validate_staged_present(
+fn pre_commit_invokes_g3ts_verifier(
     inputs: &[G3TsHooksSourceChecksInput],
     primary: &G3TsHooksSourceChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    if app_roots(primary).iter().all(|app_root| {
-        any_script_command(inputs, |command| {
-            is_g3ts_validate_path_command(command, app_root)
-        })
-    }) {
+    if inputs
+        .iter()
+        .filter(|input| input.kind() == G3TsHookScriptKind::PreCommit)
+        .any(|input| script_command(input, is_g3ts_verify_pre_commit_command))
+    {
         return;
     }
     results.push(error(
-        "g3ts-hooks/g3ts-validate-staged-present",
-        "pre-commit hook does not run g3ts validate",
-        "The selected pre-commit hook must execute `g3ts validate --path ...` so TypeScript guardrails run before commits. Echoed text, comments, and aliases are not enough.",
+        "g3ts-hooks/pre-commit-invokes-g3ts-verifier",
+        "pre-commit hook does not run the G3TS verifier",
+        "The selected pre-commit hook must execute `scripts/g3ts/verify --mode pre-commit --scope <scope>`.",
         primary.rel_path(),
         None,
     ));
 }
 
-fn app_validate_step_present(
-    inputs: &[G3TsHooksSourceChecksInput],
+fn verifier_exists(
+    verifier: Option<&G3TsHooksSourceChecksInput>,
     primary: &G3TsHooksSourceChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    if primary
-        .requirements()
+    if verifier.is_some() {
+        return;
+    }
+    results.push(error(
+        "g3ts-hooks/verifier-exists",
+        "G3TS verifier script is missing",
+        "`scripts/g3ts/verify` must exist and own TypeScript verification.",
+        primary.rel_path(),
+        None,
+    ));
+}
+
+fn verifier_supports_mode(
+    verifier: &G3TsHooksSourceChecksInput,
+    mode: &str,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if verifier
+        .parsed()
+        .source_lines
         .iter()
-        .flat_map(g3ts_hooks_contract_types::G3TsHookRequirement::required_commands)
-        .any(|requirement| requirement == &G3TsHookCommandRequirement::AppValidateScript)
-        && !app_roots(primary).iter().all(|app_root| {
-            any_script_command(inputs, |command| is_app_validate_command(command, app_root))
+        .any(|line| line.raw.contains(mode))
+    {
+        return;
+    }
+    results.push(error(
+        format!("g3ts-hooks/verifier-supports-{mode}-mode").as_str(),
+        format!("G3TS verifier does not support {mode} mode").as_str(),
+        format!("`scripts/g3ts/verify` must accept `--mode {mode}`.").as_str(),
+        verifier.rel_path(),
+        None,
+    ));
+}
+
+fn verifier_requires_scope(
+    verifier: &G3TsHooksSourceChecksInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if verifier
+        .parsed()
+        .source_lines
+        .iter()
+        .any(|line| line.raw.contains("--scope"))
+        && verifier.parsed().source_lines.iter().any(|line| {
+            line.raw.contains("SCOPE_ARG") && line.raw.contains("-n")
+                || line.raw.contains("missing --scope")
         })
     {
+        return;
+    }
+    results.push(error(
+        "g3ts-hooks/verifier-requires-scope",
+        "G3TS verifier does not reject missing scope",
+        "`scripts/g3ts/verify` must require `--scope` before running checks.",
+        verifier.rel_path(),
+        None,
+    ));
+}
+
+fn verifier_rejects_unknown_modes(
+    verifier: &G3TsHooksSourceChecksInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if verifier.parsed().source_lines.iter().any(|line| {
+        line.raw.contains("pre-commit|workspace")
+            || line.raw.contains("pre-commit | workspace")
+    }) && verifier.parsed().source_lines.iter().any(|line| line.raw.contains("usage") && line.raw.contains("exit"))
+    {
+        return;
+    }
+    results.push(error(
+        "g3ts-hooks/verifier-rejects-unknown-modes",
+        "G3TS verifier does not reject unknown modes",
+        "`scripts/g3ts/verify` must accept only `pre-commit` and `workspace` modes.",
+        verifier.rel_path(),
+        None,
+    ));
+}
+
+fn verifier_runs_g3ts_validate(
+    verifier: &G3TsHooksSourceChecksInput,
+    primary: &G3TsHooksSourceChecksInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if app_roots(primary)
+        .iter()
+        .all(|app_root| script_command(verifier, |command| is_g3ts_validate_path_command(command, app_root)))
+    {
+        return;
+    }
+    results.push(error(
+        "g3ts-hooks/verifier-runs-g3ts-validate",
+        "G3TS verifier does not run g3ts validate",
+        "`scripts/g3ts/verify` must execute `g3ts validate --path \"$SCOPE\"` or an equivalent checked complete workspace validate route.",
+        verifier.rel_path(),
+        None,
+    ));
+}
+
+fn verifier_runs_typecheck(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+    if script_command(verifier, |command| {
+        command.command_name() == "tsc"
+            || command.tokens().iter().any(|token| token == "typecheck")
+            || command.tokens().iter().any(|token| token == "tsc")
+    }) {
+        return;
+    }
+    results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-typecheck", "typecheck"));
+}
+
+fn verifier_runs_lint(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+    if script_command(verifier, |command| {
+        command.command_name() == "eslint"
+            || command.tokens().iter().any(|token| token == "eslint")
+    }) {
+        return;
+    }
+    results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-lint", "lint"));
+}
+
+fn verifier_runs_format_check(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+    if script_command(verifier, |command| {
+        command.command_name() == "prettier"
+            || (command.tokens().iter().any(|token| token == "prettier")
+                && command_has_arg(command.tokens(), "--check"))
+            || command.tokens().iter().any(|token| token == "format:check" || token == "check:format")
+    }) {
+        return;
+    }
+    results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-format-check", "format check"));
+}
+
+fn verifier_runs_spelling_check(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+    if script_command(verifier, |command| {
+        command.command_name() == "cspell"
+            || command.tokens().iter().any(|token| token == "spellcheck" || token == "spelling" || token == "cspell")
+    }) {
+        return;
+    }
+    results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-spelling-check", "spelling check"));
+}
+
+fn verifier_runs_stylelint(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+    if script_command(verifier, |command| {
+        command.command_name() == "stylelint"
+            || command.tokens().iter().any(|token| token == "stylelint")
+    }) {
+        return;
+    }
+    results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-stylelint", "stylelint"));
+}
+
+fn verifier_runs_package_policy(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+    if script_command(verifier, |command| {
+        command.command_name() == "syncpack"
+            || command.tokens().iter().any(|token| token == "syncpack" || token == "package:policy")
+    }) {
+        return;
+    }
+    results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-package-policy", "package policy"));
+}
+
+fn verifier_runs_typecov(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+    if script_command(verifier, |command| {
+        command.command_name() == "type-coverage"
+            || command.tokens().iter().any(|token| token == "typecov" || token == "type-coverage")
+    }) {
+        return;
+    }
+    results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-typecov", "type coverage"));
+}
+
+fn missing_category(
+    verifier: &G3TsHooksSourceChecksInput,
+    id: &str,
+    category: &str,
+) -> G3CheckResult {
+    error(
+        id,
+        format!("G3TS verifier does not run {category}").as_str(),
+        format!("`scripts/g3ts/verify` must run the TypeScript {category} category when enabled for the configured scope.").as_str(),
+        verifier.rel_path(),
+        None,
+    )
+}
+
+fn verifier_does_not_call_g3rs(
+    verifier: &G3TsHooksSourceChecksInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if script_command(verifier, |command| command.command_name() == "g3rs") {
         results.push(error(
-            "g3ts-hooks/ts-app-validate-step-present",
-            "hook does not run the app validate script",
-            "A TypeScript hook contract requires the app-level `validate` script to run before commits. Add a real package-manager command such as `pnpm --filter <app> run validate`; comments and echoed text do not satisfy this rule.",
-            primary.rel_path(),
+            "g3ts-hooks/verifier-does-not-call-g3rs",
+            "G3TS verifier calls g3rs",
+            "`scripts/g3ts/verify` must not invoke Rust guardrails.",
+            verifier.rel_path(),
             None,
         ));
     }
 }
 
-fn guardrail_config_changes_trigger_validation(
-    inputs: &[G3TsHooksSourceChecksInput],
-    primary: &G3TsHooksSourceChecksInput,
+fn verifier_does_not_call_cargo(
+    verifier: &G3TsHooksSourceChecksInput,
     results: &mut Vec<G3CheckResult>,
 ) {
-    if any_script_command(inputs, command_mentions_guardrail_ts_config)
-        && app_roots(primary).iter().all(|app_root| {
-            any_script_command(inputs, |command| {
-                is_g3ts_validate_path_command(command, app_root)
-            })
-        })
-    {
-        return;
+    if script_command(verifier, |command| command.command_name() == "cargo") {
+        results.push(error(
+            "g3ts-hooks/verifier-does-not-call-cargo",
+            "G3TS verifier calls Cargo",
+            "`scripts/g3ts/verify` must not run Cargo as part of TypeScript verification.",
+            verifier.rel_path(),
+            None,
+        ));
     }
-    results.push(error(
-        "g3ts-hooks/ts-guardrail-config-changes-trigger-validation",
-        "guardrail3-ts.toml changes do not trigger g3ts",
-        "The pre-commit hook must explicitly include `guardrail3-ts.toml` in its changed-file routing and run `g3ts validate --path ...` when that file changes.",
-        primary.rel_path(),
-        None,
-    ));
 }
 
-fn contract_trigger_patterns_covered(
-    inputs: &[G3TsHooksSourceChecksInput],
-    primary: &G3TsHooksSourceChecksInput,
-    results: &mut Vec<G3CheckResult>,
-) {
-    let missing = primary
-        .requirements()
-        .iter()
-        .flat_map(g3ts_hooks_contract_types::G3TsHookRequirement::trigger_patterns)
-        .filter_map(|pattern| match pattern {
-            G3TsHookTriggerPattern::Glob(pattern) => Some(pattern.as_str()),
-        })
-        .filter(|pattern| {
-            !any_script_command(inputs, |command| command_mentions_pattern(command, pattern))
-        })
-        .collect::<Vec<_>>();
-
-    if missing.is_empty() {
-        return;
+fn app_roots(input: &G3TsHooksSourceChecksInput) -> Vec<String> {
+    if input.app_package_roots().is_empty() {
+        return vec!["$SCOPE".to_owned(), "SCOPE".to_owned()];
     }
-
-    results.push(error(
-        "g3ts-hooks/contract-trigger-patterns-covered",
-        "hook does not route declared TypeScript trigger patterns",
-        format!(
-            "The hook contract declares trigger patterns that are not mentioned by executable hook routing commands: {}. Add staged-file routing for these patterns and run the required validation commands from that route.",
-            missing.join(", ")
-        )
-        .as_str(),
-        primary.rel_path(),
-        None,
-    ));
+    let mut roots = input.app_package_roots().to_vec();
+    roots.push("$SCOPE".to_owned());
+    roots.push("SCOPE".to_owned());
+    roots
 }
 
 fn no_fail_open_wrappers(input: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
@@ -159,7 +330,7 @@ fn dispatcher_inventory(input: &G3TsHooksSourceChecksInput, results: &mut Vec<G3
         results.push(info(
             "g3ts-hooks/pre-commit-dispatcher-inventory",
             "pre-commit dispatcher inventory",
-            "`.githooks/pre-commit.d` exists; command-presence checks inspect direct modular scripts as well as the dispatcher.".to_owned(),
+            "`.githooks/pre-commit.d` exists; G3TS verifier checks inspect `scripts/g3ts/verify` directly.".to_owned(),
             input.rel_path(),
             None,
         ));
