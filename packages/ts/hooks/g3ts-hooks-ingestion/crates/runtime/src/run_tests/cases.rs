@@ -25,25 +25,52 @@ fn source_ingestion_ignores_undispatched_modular_scripts() {
 }
 
 #[test]
-fn source_ingestion_includes_dispatched_modular_scripts() {
-    let root = temp_root("dispatched");
+fn source_ingestion_includes_g3ts_verifier_script() {
+    let root = temp_root("g3ts-verifier");
     write(&root, "Cargo.toml", "[workspace]\nresolver = \"2\"\n");
     write(&root, "package.json", "{}\n");
     write(
         &root,
         ".githooks/pre-commit",
-        "#!/usr/bin/env bash\nrun-parts .githooks/pre-commit.d\n",
+        "#!/usr/bin/env bash\nscripts/g3ts/verify --mode pre-commit --scope .\n",
     );
     write(
         &root,
-        ".githooks/pre-commit.d/10-typescript.sh",
-        "g3ts validate --path apps/landing\npnpm --filter landing run validate\n",
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
     );
 
     let crawl = g3_workspace_crawl::crawl(&root).expect("crawl fixture workspace");
     let inputs = super::super::ingest_for_source_checks(&crawl);
 
-    assertions::assert_modular_script_present(&inputs, ".githooks/pre-commit.d/10-typescript.sh");
+    assertions::assert_verifier_script_present(&inputs);
+}
+
+#[test]
+fn source_ingestion_does_not_read_neighbor_verifiers() {
+    let root = temp_root("neighbor-verifiers");
+    write(&root, "Cargo.toml", "[workspace]\nresolver = \"2\"\n");
+    write(&root, "package.json", "{}\n");
+    write(
+        &root,
+        ".githooks/pre-commit",
+        "#!/usr/bin/env bash\nscripts/g3ts/verify --mode pre-commit --scope .\n",
+    );
+    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
+    write(&root, "scripts/g3rs/verify", "g3rs validate --path \"$SCOPE\"\n");
+    write(&root, "scripts/guardrails/verify", "echo shared\n");
+
+    let crawl = g3_workspace_crawl::crawl(&root).expect("crawl fixture workspace");
+    let inputs = super::super::ingest_for_source_checks(&crawl);
+
+    assertions::assert_verifier_script_present(&inputs);
+    assert!(
+        inputs
+            .iter()
+            .all(|input| input.rel_path() != "scripts/g3rs/verify"
+                && !input.rel_path().starts_with("scripts/guardrails/")),
+        "G3TS ingestion must not read neighboring verifier scripts: {inputs:#?}"
+    );
 }
 
 #[cfg(unix)]

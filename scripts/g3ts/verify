@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "usage: scripts/g3ts/verify --mode pre-commit|workspace --scope <path>" >&2
+}
+
+MODE=""
+SCOPE_ARG=""
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --mode)
+            [ "$#" -ge 2 ] || { usage; exit 2; }
+            MODE="$2"
+            shift 2
+            ;;
+        --scope)
+            [ "$#" -ge 2 ] || { usage; exit 2; }
+            SCOPE_ARG="$2"
+            shift 2
+            ;;
+        --*)
+            usage
+            exit 2
+            ;;
+        *)
+            usage
+            exit 2
+            ;;
+    esac
+done
+
+[ -n "$MODE" ] || { usage; exit 2; }
+[ -n "$SCOPE_ARG" ] || { usage; exit 2; }
+
+case "$MODE" in
+    pre-commit|workspace) ;;
+    *) usage; exit 2 ;;
+esac
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+case "$SCOPE_ARG" in
+    /*) SCOPE="$SCOPE_ARG" ;;
+    *) SCOPE="$REPO_ROOT/$SCOPE_ARG" ;;
+esac
+
+SCOPE="$(cd "$SCOPE" && pwd -P)"
+
+staged_ts_relevant_paths() {
+    git diff --cached --name-only --diff-filter=ACM | grep -E '(^|/)(package\.json|pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lockb|bun\.lock|npm-shrinkwrap\.json|pnpm-workspace\.yaml|tsconfig[^/]*\.json|eslint\.config\.[^/]+|\.eslintrc(\.[^/]+)?|prettier\.config\.[^/]+|\.prettierrc(\.[^/]+)?|cspell\.(json|ya?ml)|cspell\.config\.(json|js|mjs|cjs|ts)|\.cspell\.(json|ya?ml)|stylelint\.config\.[^/]+|\.stylelintrc(\.[^/]+)?|syncpack\.config\.[^/]+|\.syncpackrc(\.[^/]+)?|type-coverage\.(json|config\.[^/]+)|guardrail3-ts\.toml)$|\.(ts|tsx|mts|cts|mjs|cjs|js|jsx|css)$' || true
+}
+
+package_manager() {
+    if [ -f "$REPO_ROOT/pnpm-lock.yaml" ] || [ -f "$REPO_ROOT/pnpm-workspace.yaml" ] || [ -f "$SCOPE/pnpm-lock.yaml" ]; then
+        echo "pnpm"
+    elif [ -f "$SCOPE/package-lock.json" ] || [ -f "$REPO_ROOT/package-lock.json" ]; then
+        echo "npm"
+    elif [ -f "$SCOPE/yarn.lock" ] || [ -f "$REPO_ROOT/yarn.lock" ]; then
+        echo "yarn"
+    elif [ -f "$SCOPE/bun.lockb" ] || [ -f "$SCOPE/bun.lock" ] || [ -f "$REPO_ROOT/bun.lockb" ] || [ -f "$REPO_ROOT/bun.lock" ]; then
+        echo "bun"
+    else
+        echo "pnpm"
+    fi
+}
+
+run_pm_exec() {
+    local pm="$1"
+    shift
+    case "$pm" in
+        pnpm) (cd "$SCOPE" && pnpm exec "$@") ;;
+        npm) (cd "$SCOPE" && npx --no-install "$@") ;;
+        yarn) (cd "$SCOPE" && yarn exec "$@") ;;
+        bun) (cd "$SCOPE" && bunx "$@") ;;
+        *) echo "Unsupported package manager: $pm" >&2; exit 2 ;;
+    esac
+}
+
+run_pm_script() {
+    local pm="$1"
+    local script="$2"
+    case "$pm" in
+        pnpm) (cd "$SCOPE" && pnpm run "$script") ;;
+        npm) (cd "$SCOPE" && npm run "$script") ;;
+        yarn) (cd "$SCOPE" && yarn run "$script") ;;
+        bun) (cd "$SCOPE" && bun run "$script") ;;
+        *) echo "Unsupported package manager: $pm" >&2; exit 2 ;;
+    esac
+}
+
+package_has_script() {
+    local script="$1"
+    [ -f "$SCOPE/package.json" ] && grep -Eq "\"$script\"[[:space:]]*:" "$SCOPE/package.json"
+}
+
+run_typecheck() {
+    local pm="$1"
+    if package_has_script typecheck; then
+        run_pm_script "$pm" typecheck
+    elif [ -f "$SCOPE/tsconfig.json" ]; then
+        run_pm_exec "$pm" tsc -p "$SCOPE/tsconfig.json" --noEmit
+    else
+        run_pm_exec "$pm" tsc --noEmit
+    fi
+}
+
+run_lint() {
+    local pm="$1"
+    if package_has_script lint; then
+        run_pm_script "$pm" lint
+    else
+        run_pm_exec "$pm" eslint --max-warnings 0 "$SCOPE"
+    fi
+}
+
+run_format_check() {
+    local pm="$1"
+    if package_has_script format:check; then
+        run_pm_script "$pm" format:check
+    elif package_has_script check:format; then
+        run_pm_script "$pm" check:format
+    else
+        run_pm_exec "$pm" prettier --check "$SCOPE"
+    fi
+}
+
+run_spelling_check() {
+    local pm="$1"
+    if package_has_script spellcheck; then
+        run_pm_script "$pm" spellcheck
+    elif package_has_script spelling; then
+        run_pm_script "$pm" spelling
+    else
+        run_pm_exec "$pm" cspell --no-progress --no-summary "$SCOPE"
+    fi
+}
+
+style_family_enabled() {
+    [ -f "$SCOPE/stylelint.config.js" ] || [ -f "$SCOPE/stylelint.config.mjs" ] || [ -f "$SCOPE/stylelint.config.cjs" ] ||
+        [ -f "$SCOPE/stylelint.config.ts" ] || [ -f "$SCOPE/.stylelintrc" ] || [ -f "$SCOPE/.stylelintrc.json" ] ||
+        [ -f "$SCOPE/.stylelintrc.yaml" ] || [ -f "$SCOPE/.stylelintrc.yml" ] || [ -f "$SCOPE/.stylelintrc.js" ] ||
+        [ -f "$SCOPE/.stylelintrc.cjs" ] || [ -f "$SCOPE/.stylelintrc.mjs" ] ||
+        [ -f "$REPO_ROOT/stylelint.config.js" ] || [ -f "$REPO_ROOT/stylelint.config.mjs" ] || [ -f "$REPO_ROOT/stylelint.config.cjs" ] ||
+        [ -f "$REPO_ROOT/stylelint.config.ts" ] || [ -f "$REPO_ROOT/.stylelintrc" ] || [ -f "$REPO_ROOT/.stylelintrc.json" ] ||
+        [ -f "$REPO_ROOT/.stylelintrc.yaml" ] || [ -f "$REPO_ROOT/.stylelintrc.yml" ] || [ -f "$REPO_ROOT/.stylelintrc.js" ] ||
+        [ -f "$REPO_ROOT/.stylelintrc.cjs" ] || [ -f "$REPO_ROOT/.stylelintrc.mjs" ]
+}
+
+package_family_enabled() {
+    [ -f "$SCOPE/package.json" ]
+}
+
+typecov_family_enabled() {
+    package_has_script typecov || { [ -f "$SCOPE/package.json" ] && grep -Eq '"type-coverage"[[:space:]]*:' "$SCOPE/package.json"; }
+}
+
+run_stylelint_check() {
+    local pm="$1"
+    if package_has_script stylelint; then
+        run_pm_script "$pm" stylelint
+    else
+        run_pm_exec "$pm" stylelint --max-warnings 0 "$SCOPE/**/*.css"
+    fi
+}
+
+run_package_policy_check() {
+    local pm="$1"
+    if package_has_script package:policy; then
+        run_pm_script "$pm" package:policy
+    elif package_has_script syncpack; then
+        run_pm_script "$pm" syncpack
+    else
+        run_pm_exec "$pm" syncpack lint
+    fi
+}
+
+run_typecov_check() {
+    local pm="$1"
+    if package_has_script typecov; then
+        run_pm_script "$pm" typecov
+    else
+        run_pm_exec "$pm" type-coverage --at-least 100
+    fi
+}
+
+run_verifiers() {
+    local pm
+    pm="$(package_manager)"
+
+    g3ts validate --path "$SCOPE"
+    run_typecheck "$pm"
+    run_lint "$pm"
+    run_format_check "$pm"
+    run_spelling_check "$pm"
+
+    if style_family_enabled; then
+        run_stylelint_check "$pm"
+    fi
+    if package_family_enabled; then
+        run_package_policy_check "$pm"
+    fi
+    if typecov_family_enabled; then
+        run_typecov_check "$pm"
+    fi
+}
+
+case "$MODE" in
+    pre-commit)
+        TS_RELEVANT_STAGED_PATHS="$(staged_ts_relevant_paths)"
+        [ -n "$TS_RELEVANT_STAGED_PATHS" ] || exit 0
+        run_verifiers
+        ;;
+    workspace)
+        run_verifiers
+        ;;
+esac

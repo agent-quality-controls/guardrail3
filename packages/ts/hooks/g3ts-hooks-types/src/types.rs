@@ -71,7 +71,7 @@ impl G3TsHooksConfigChecksInput {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum G3TsHookScriptKind {
     PreCommit,
-    Modular,
+    Verifier,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

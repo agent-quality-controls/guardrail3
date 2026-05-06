@@ -44,44 +44,22 @@ pub fn ingest_for_source_checks(
         app_package_roots.clone(),
         Vec::new(),
     ));
-    if selected.has_modular_dir && pre_commit_dispatches_modular_scripts(content.as_str()) {
-        for script in direct_modular_entries(crawl, hook_root.as_path()) {
-            let content = read_to_string(script.abs_path.as_path());
-            inputs.push(hook_types::G3TsHooksSourceChecksInput::new(
-                script.rel_path,
-                hook_types::G3TsHookScriptKind::Modular,
-                parse_script(content.as_str()),
-                selected.has_modular_dir,
-                app_package_roots.clone(),
-                Vec::new(),
-            ));
-        }
+    if let Some(script) = verifier_surface(crawl, hook_root.as_path()) {
+        let content = read_to_string(script.abs_path.as_path());
+        inputs.push(hook_types::G3TsHooksSourceChecksInput::new(
+            script.rel_path,
+            hook_types::G3TsHookScriptKind::Verifier,
+            parse_script(content.as_str()),
+            selected.has_modular_dir,
+            app_package_roots,
+            Vec::new(),
+        ));
     }
     inputs
 }
 
-fn pre_commit_dispatches_modular_scripts(content: &str) -> bool {
-    parse_script(content).executable_lines.iter().any(|line| {
-        line.is_dispatcher_syntax && dispatcher_invokes_modular_directory(&line.command_text)
-    })
-}
-
-fn dispatcher_invokes_modular_directory(command_text: &str) -> bool {
-    let words = hook_shell_parser::command_query::shell_words(command_text);
-    let Some(command) = words.first().map(String::as_str) else {
-        return false;
-    };
-    match command {
-        "run-parts" => words
-            .iter()
-            .skip(1)
-            .any(|word| word.trim_end_matches('/') == ".githooks/pre-commit.d"),
-        "." | "source" => words
-            .iter()
-            .skip(1)
-            .any(|word| word == ".githooks/pre-commit.d"),
-        _ => false,
-    }
+fn verifier_surface(crawl: &workspace_crawl::G3RsWorkspaceCrawl, hook_root: &Path) -> Option<HookScriptSurface> {
+    hook_surface(crawl, hook_root, "scripts/g3ts/verify")
 }
 
 #[must_use]
