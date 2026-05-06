@@ -14,9 +14,7 @@ pub(crate) fn is_g3ts_validate_path_command(command: &ResolvedCommand, app_root:
     let args = command.args();
     args.first().is_some_and(|arg| arg == "validate")
         && !args.iter().any(|arg| arg == "--family")
-        && (path_arg_matches(args, app_root)
-            || (args.iter().any(|arg| arg == "--path")
-                && command.command_text().contains("SCOPE")))
+        && path_arg_matches(args, app_root)
 }
 
 pub(crate) fn is_g3ts_verify_pre_commit_command(command: &ResolvedCommand) -> bool {
@@ -53,7 +51,9 @@ fn path_arg_matches(args: &[String], app_root: &str) -> bool {
 }
 
 fn path_matches_app_root(path: &str, app_root: &str) -> bool {
-    path == app_root
+    path == "$SCOPE"
+        || path == "${SCOPE}"
+        || path == app_root
         || (app_root == "." && path == ".")
         || path.strip_prefix("./").is_some_and(|path| path == app_root)
         || path.ends_with(format!("/{app_root}").as_str())

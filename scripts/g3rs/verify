@@ -48,7 +48,7 @@ export CARGO_TARGET_DIR="$REPO_ROOT/.cargo-target"
 if [[ "$SCOPE_ARG" = /* ]]; then
   SCOPE="$SCOPE_ARG"
 else
-  SCOPE="$PWD/$SCOPE_ARG"
+  SCOPE="$REPO_ROOT/$SCOPE_ARG"
 fi
 SCOPE="$(cd "$SCOPE" && pwd -P)"
 
@@ -57,10 +57,10 @@ is_rust_relevant_path() {
     *.rs | Cargo.toml | Cargo.lock | */Cargo.toml | */Cargo.lock)
       return 0
       ;;
-    rust-toolchain | rust-toolchain.toml | rustfmt.toml | clippy.toml | deny.toml | guardrail3-rs.toml)
+    rust-toolchain | rust-toolchain.toml | rustfmt.toml | clippy.toml | deny.toml | .rustfmt.toml | .clippy.toml | .deny.toml | guardrail3-rs.toml)
       return 0
       ;;
-    */rust-toolchain | */rust-toolchain.toml | */rustfmt.toml | */clippy.toml | */deny.toml | */guardrail3-rs.toml)
+    */rust-toolchain | */rust-toolchain.toml | */rustfmt.toml | */clippy.toml | */deny.toml | */.rustfmt.toml | */.clippy.toml | */.deny.toml | */guardrail3-rs.toml)
       return 0
       ;;
     .cargo/config | .cargo/config.toml | */.cargo/config | */.cargo/config.toml)

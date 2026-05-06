@@ -133,7 +133,7 @@ fn verifier_facts_pass_with_required_commands_and_no_g3ts_script() {
     );
     assert_no_finding(
         &results,
-        "g3rs-hooks/g3rs-verifier-forbidden-tools",
+        "g3rs-hooks/verifier-does-not-call-g3ts",
         "must not call g3ts",
     );
 }
@@ -142,6 +142,7 @@ fn verifier_facts_pass_with_required_commands_and_no_g3ts_script() {
 fn verifier_fails_when_missing_g3rs_validate_scope() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace("g3rs validate --path \"$SCOPE\"\n", ""),
+        "g3rs-hooks/verifier-runs-g3rs-validate",
         "g3rs validate --path \"$SCOPE\"",
     );
 }
@@ -150,6 +151,7 @@ fn verifier_fails_when_missing_g3rs_validate_scope() {
 fn verifier_fails_when_missing_cargo_metadata_locked() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace("cargo metadata --locked\n", ""),
+        "g3rs-hooks/verifier-runs-cargo-metadata-locked",
         "cargo metadata --locked",
     );
 }
@@ -158,6 +160,7 @@ fn verifier_fails_when_missing_cargo_metadata_locked() {
 fn verifier_fails_when_missing_cargo_fmt_all_check() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace("cargo fmt --all -- --check\n", ""),
+        "g3rs-hooks/verifier-runs-cargo-fmt-all-check",
         "cargo fmt --all -- --check",
     );
 }
@@ -166,6 +169,7 @@ fn verifier_fails_when_missing_cargo_fmt_all_check() {
 fn verifier_fails_when_clippy_omits_warning_denial() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace(" -- -D warnings", ""),
+        "g3rs-hooks/verifier-runs-cargo-clippy-deny-warnings",
         "cargo clippy --workspace --all-targets --all-features -- -D warnings",
     );
 }
@@ -174,6 +178,7 @@ fn verifier_fails_when_clippy_omits_warning_denial() {
 fn verifier_fails_when_missing_cargo_deny_check() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace("cargo deny check\n", ""),
+        "g3rs-hooks/verifier-runs-cargo-deny-check",
         "cargo deny check",
     );
 }
@@ -182,6 +187,7 @@ fn verifier_fails_when_missing_cargo_deny_check() {
 fn verifier_fails_when_missing_cargo_machete() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace("cargo machete\n", ""),
+        "g3rs-hooks/verifier-runs-cargo-machete",
         "cargo machete",
     );
 }
@@ -190,6 +196,7 @@ fn verifier_fails_when_missing_cargo_machete() {
 fn verifier_fails_when_missing_cargo_test_workspace() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace("cargo test --workspace\n", ""),
+        "g3rs-hooks/verifier-runs-cargo-test-workspace",
         "cargo test --workspace",
     );
 }
@@ -198,6 +205,7 @@ fn verifier_fails_when_missing_cargo_test_workspace() {
 fn verifier_fails_when_missing_cargo_mutants_check_in_place() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace("cargo mutants --check --in-place\n", ""),
+        "g3rs-hooks/verifier-runs-cargo-mutants-check-in-place",
         "cargo mutants --check --in-place",
     );
 }
@@ -206,6 +214,7 @@ fn verifier_fails_when_missing_cargo_mutants_check_in_place() {
 fn verifier_fails_when_cargo_dupes_omits_thresholds() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace(" --max-exact 85 --max-exact-percent 10", ""),
+        "g3rs-hooks/verifier-runs-cargo-dupes-thresholds",
         "cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests",
     );
 }
@@ -214,6 +223,7 @@ fn verifier_fails_when_cargo_dupes_omits_thresholds() {
 fn verifier_fails_when_cargo_dupes_omits_exclude_tests() {
     assert_verifier_missing(
         &VALID_VERIFIER.replace(" --exclude-tests", ""),
+        "g3rs-hooks/verifier-runs-cargo-dupes-thresholds",
         "cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests",
     );
 }
@@ -229,7 +239,7 @@ fn verifier_fails_when_it_calls_g3ts() {
 
     assert_finding(
         &results,
-        "g3rs-hooks/g3rs-verifier-forbidden-tools",
+        "g3rs-hooks/verifier-does-not-call-g3ts",
         "must not call g3ts",
     );
 }
@@ -247,7 +257,7 @@ fn verifier_fails_when_it_calls_g3ts_verifier_path() {
 
     assert_finding(
         &results,
-        "g3rs-hooks/g3rs-verifier-forbidden-tools",
+        "g3rs-hooks/verifier-does-not-call-g3ts",
         "must not call g3ts",
     );
 }
@@ -264,10 +274,52 @@ fn verifier_fails_when_it_calls_typescript_package_managers() {
 
         assert_finding(
             &results,
-            "g3rs-hooks/g3rs-verifier-forbidden-tools",
+            "g3rs-hooks/verifier-does-not-call-ts-package-manager",
             "must not call pnpm, npm, yarn, or bun",
         );
     }
+}
+
+#[test]
+fn verifier_comments_do_not_satisfy_required_commands() {
+    let results = check(&input(
+        "scripts/g3rs/verify",
+        G3RsHookScriptKind::G3RsVerifier,
+        "# g3rs validate --path \"$SCOPE\"\n# cargo metadata --locked\n",
+        Vec::new(),
+    ));
+
+    assert_finding(
+        &results,
+        "g3rs-hooks/verifier-runs-g3rs-validate",
+        "g3rs validate --path \"$SCOPE\"",
+    );
+    assert_finding(
+        &results,
+        "g3rs-hooks/verifier-runs-cargo-metadata-locked",
+        "cargo metadata --locked",
+    );
+}
+
+#[test]
+fn verifier_comments_do_not_trigger_forbidden_tool_findings() {
+    let results = check(&input(
+        "scripts/g3rs/verify",
+        G3RsHookScriptKind::G3RsVerifier,
+        &format!("{VALID_VERIFIER}# g3ts validate --path .\n# pnpm install\n"),
+        Vec::new(),
+    ));
+
+    assert_no_finding(
+        &results,
+        "g3rs-hooks/verifier-does-not-call-g3ts",
+        "must not call g3ts",
+    );
+    assert_no_finding(
+        &results,
+        "g3rs-hooks/verifier-does-not-call-ts-package-manager",
+        "must not call pnpm, npm, yarn, or bun",
+    );
 }
 
 #[test]
@@ -347,6 +399,150 @@ fn pre_commit_exits_zero_when_no_relevant_staged_files_exist() {
     assert!(
         !log.exists(),
         "Rust tools should not run for irrelevant staged files"
+    );
+}
+
+#[test]
+fn pre_commit_runs_for_dot_prefixed_rust_config_files() {
+    for staged in [".clippy.toml\n", ".deny.toml\n", ".rustfmt.toml\n"] {
+        let fixture = script_fixture("dot-rust-config");
+        fs::create_dir_all(fixture.join("apps/guardrail3-rs")).expect("create scope");
+        write_fake_tool(&fixture, "git", git_fake_script(&fixture, staged));
+        write_fake_tool(
+            &fixture,
+            "g3rs",
+            "echo \"g3rs $*\" >> \"$G3RS_LOG\"\nexit 0\n",
+        );
+        write_fake_tool(
+            &fixture,
+            "cargo",
+            "echo \"cargo $*\" >> \"$G3RS_LOG\"\nexit 0\n",
+        );
+        let log = fixture.join("calls.log");
+
+        let status = verifier_command(&fixture)
+            .env("PATH", fake_path(&fixture))
+            .env("G3RS_LOG", &log)
+            .env("G3RS_DIFF_LOG", fixture.join("git-diff.log"))
+            .args(["--mode", "pre-commit", "--scope", "apps/guardrail3-rs"])
+            .status()
+            .expect("spawn verifier for dot config staged file test");
+
+        assert!(status.success(), "dot config should run verifier");
+        let log_content = fs::read_to_string(log).expect("read verifier call log");
+        assert!(
+            log_content.contains("g3rs validate"),
+            "dot config should run g3rs validate; got {log_content}"
+        );
+    }
+}
+
+#[test]
+fn pre_commit_runs_without_dupes_for_cargo_manifest_only() {
+    let fixture = script_fixture("cargo-manifest");
+    fs::create_dir_all(fixture.join("apps/guardrail3-rs")).expect("create scope");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, "Cargo.toml\n"));
+    write_fake_tool(
+        &fixture,
+        "g3rs",
+        "echo \"g3rs $*\" >> \"$G3RS_LOG\"\nexit 0\n",
+    );
+    write_fake_tool(
+        &fixture,
+        "cargo",
+        "echo \"cargo $*\" >> \"$G3RS_LOG\"\nexit 0\n",
+    );
+    let log = fixture.join("calls.log");
+
+    let status = verifier_command(&fixture)
+        .env("PATH", fake_path(&fixture))
+        .env("G3RS_LOG", &log)
+        .env("G3RS_DIFF_LOG", fixture.join("git-diff.log"))
+        .args(["--mode", "pre-commit", "--scope", "apps/guardrail3-rs"])
+        .status()
+        .expect("spawn verifier for Cargo.toml staged file test");
+
+    assert!(status.success(), "Cargo.toml should run verifier");
+    let log_content = fs::read_to_string(log).expect("read verifier call log");
+    assert!(log_content.contains("g3rs validate"));
+    assert!(
+        !log_content.contains("cargo dupes"),
+        "Cargo.toml-only commit should not run dupes; got {log_content}"
+    );
+}
+
+#[test]
+fn pre_commit_runs_dupes_for_rust_source_files() {
+    let fixture = script_fixture("rust-source");
+    fs::create_dir_all(fixture.join("apps/guardrail3-rs")).expect("create scope");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, "src/lib.rs\n"));
+    write_fake_tool(
+        &fixture,
+        "g3rs",
+        "echo \"g3rs $*\" >> \"$G3RS_LOG\"\nexit 0\n",
+    );
+    write_fake_tool(
+        &fixture,
+        "cargo",
+        "echo \"cargo $*\" >> \"$G3RS_LOG\"\nexit 0\n",
+    );
+    let log = fixture.join("calls.log");
+
+    let status = verifier_command(&fixture)
+        .env("PATH", fake_path(&fixture))
+        .env("G3RS_LOG", &log)
+        .env("G3RS_DIFF_LOG", fixture.join("git-diff.log"))
+        .args(["--mode", "pre-commit", "--scope", "apps/guardrail3-rs"])
+        .status()
+        .expect("spawn verifier for Rust source staged file test");
+
+    assert!(status.success(), "Rust source should run verifier");
+    let log_content = fs::read_to_string(log).expect("read verifier call log");
+    assert!(
+        log_content.contains("cargo dupes check"),
+        "Rust source should run dupes; got {log_content}"
+    );
+}
+
+#[test]
+fn relative_scope_resolves_from_repo_root_not_current_directory() {
+    let fixture = script_fixture("relative-scope");
+    let scope = fixture.join("apps/guardrail3-rs");
+    let nested = fixture.join("nested/cwd");
+    fs::create_dir_all(&scope).expect("create scope");
+    fs::create_dir_all(&nested).expect("create nested cwd");
+    write_fake_tool(&fixture, "git", git_fake_script(&fixture, "Cargo.toml\n"));
+    write_fake_tool(
+        &fixture,
+        "g3rs",
+        "echo \"g3rs $*\" >> \"$G3RS_LOG\"\nexit 0\n",
+    );
+    write_fake_tool(
+        &fixture,
+        "cargo",
+        "echo \"cargo-pwd:$PWD args:$*\" >> \"$G3RS_LOG\"\nexit 0\n",
+    );
+    let log = fixture.join("calls.log");
+
+    let status = verifier_command_in(&fixture, &nested)
+        .env("PATH", fake_path(&fixture))
+        .env("G3RS_LOG", &log)
+        .env("G3RS_DIFF_LOG", fixture.join("git-diff.log"))
+        .args(["--mode", "pre-commit", "--scope", "apps/guardrail3-rs"])
+        .status()
+        .expect("spawn verifier for repo-relative scope test");
+
+    assert!(status.success(), "repo-relative scope should resolve");
+    let canonical_scope = fs::canonicalize(&scope).expect("canonicalize expected scope");
+    let log_content = fs::read_to_string(log).expect("read verifier call log");
+    assert!(
+        log_content
+            .contains(format!("g3rs validate --path {}", canonical_scope.display()).as_str()),
+        "g3rs validate should receive repo-root scope; got {log_content}"
+    );
+    assert!(
+        log_content.contains(format!("cargo-pwd:{}", canonical_scope.display()).as_str()),
+        "cargo commands should run from repo-root scope; got {log_content}"
     );
 }
 
@@ -500,7 +696,7 @@ fn requirement(command: G3HookCommandRequirement) -> G3HookRequirement {
     }
 }
 
-fn assert_verifier_missing(content: &str, expected_message: &str) {
+fn assert_verifier_missing(content: &str, expected_id: &str, expected_message: &str) {
     let results = check(&input(
         "scripts/g3rs/verify",
         G3RsHookScriptKind::G3RsVerifier,
@@ -508,11 +704,7 @@ fn assert_verifier_missing(content: &str, expected_message: &str) {
         Vec::new(),
     ));
 
-    assert_finding(
-        &results,
-        "g3rs-hooks/g3rs-verifier-required-commands",
-        expected_message,
-    );
+    assert_finding(&results, expected_id, expected_message);
 }
 
 fn assert_finding(results: &[guardrail3_check_types::G3CheckResult], id: &str, message: &str) {
@@ -560,8 +752,12 @@ fn script_fixture(name: &str) -> PathBuf {
 }
 
 fn verifier_command(fixture: &Path) -> Command {
+    verifier_command_in(fixture, fixture)
+}
+
+fn verifier_command_in(fixture: &Path, cwd: &Path) -> Command {
     let mut command = Command::new(fixture.join("scripts/g3rs/verify"));
-    let _command = command.current_dir(fixture);
+    let _command = command.current_dir(cwd);
     command
 }
 

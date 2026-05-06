@@ -92,8 +92,9 @@ fn check_single(
 
 const PRECOMMIT_CALLS_G3RS_VERIFIER_ID: &str = "g3rs-hooks/precommit-calls-g3rs-verifier";
 const G3RS_VERIFIER_EXISTS_ID: &str = "g3rs-hooks/g3rs-verifier-exists";
-const G3RS_VERIFIER_COMMANDS_ID: &str = "g3rs-hooks/g3rs-verifier-required-commands";
-const G3RS_VERIFIER_FORBIDDEN_TOOLS_ID: &str = "g3rs-hooks/g3rs-verifier-forbidden-tools";
+const G3RS_VERIFIER_DOES_NOT_CALL_G3TS_ID: &str = "g3rs-hooks/verifier-does-not-call-g3ts";
+const G3RS_VERIFIER_DOES_NOT_CALL_TS_PACKAGE_MANAGER_ID: &str =
+    "g3rs-hooks/verifier-does-not-call-ts-package-manager";
 
 fn check_precommit_calls_g3rs_verifier(
     input: &G3RsHooksSourceChecksInput,
@@ -132,7 +133,7 @@ fn check_g3rs_verifier_contract(
     for requirement in REQUIRED_VERIFIER_COMMANDS {
         push(
             any_resolved_command(&input.parsed, requirement.predicate),
-            G3RS_VERIFIER_COMMANDS_ID,
+            requirement.id,
             input.rel_path.as_str(),
             requirement.ok_title,
             requirement.ok_message,
@@ -144,7 +145,7 @@ fn check_g3rs_verifier_contract(
 
     push(
         !any_resolved_command(&input.parsed, is_g3ts_command),
-        G3RS_VERIFIER_FORBIDDEN_TOOLS_ID,
+        G3RS_VERIFIER_DOES_NOT_CALL_G3TS_ID,
         input.rel_path.as_str(),
         "Rust verifier does not call g3ts",
         "scripts/g3rs/verify does not call the TypeScript verifier.",
@@ -154,7 +155,7 @@ fn check_g3rs_verifier_contract(
     );
     push(
         !any_resolved_command(&input.parsed, is_typescript_package_manager_command),
-        G3RS_VERIFIER_FORBIDDEN_TOOLS_ID,
+        G3RS_VERIFIER_DOES_NOT_CALL_TS_PACKAGE_MANAGER_ID,
         input.rel_path.as_str(),
         "Rust verifier does not call TypeScript package managers",
         "scripts/g3rs/verify does not call pnpm, npm, yarn, or bun.",
@@ -165,6 +166,7 @@ fn check_g3rs_verifier_contract(
 }
 
 struct VerifierCommandRequirement {
+    id: &'static str,
     predicate: fn(&ResolvedCommand) -> bool,
     ok_title: &'static str,
     ok_message: &'static str,
@@ -174,6 +176,7 @@ struct VerifierCommandRequirement {
 
 const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
     VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-g3rs-validate",
         predicate: is_g3rs_validate_scope_command,
         ok_title: "Rust verifier runs g3rs validate",
         ok_message: "scripts/g3rs/verify runs g3rs validate --path \"$SCOPE\".",
@@ -181,6 +184,7 @@ const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
         missing_message: "scripts/g3rs/verify must run g3rs validate --path \"$SCOPE\".",
     },
     VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-cargo-metadata-locked",
         predicate: is_cargo_metadata_locked_command,
         ok_title: "Rust verifier runs cargo metadata",
         ok_message: "scripts/g3rs/verify runs cargo metadata --locked.",
@@ -188,6 +192,7 @@ const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
         missing_message: "scripts/g3rs/verify must run cargo metadata --locked.",
     },
     VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-cargo-fmt-all-check",
         predicate: is_cargo_fmt_all_check_command,
         ok_title: "Rust verifier runs cargo fmt",
         ok_message: "scripts/g3rs/verify runs cargo fmt --all -- --check.",
@@ -195,6 +200,7 @@ const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
         missing_message: "scripts/g3rs/verify must run cargo fmt --all -- --check.",
     },
     VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-cargo-clippy-deny-warnings",
         predicate: is_cargo_clippy_warnings_command,
         ok_title: "Rust verifier runs clippy with warnings denied",
         ok_message: "scripts/g3rs/verify runs cargo clippy with -D warnings.",
@@ -202,6 +208,7 @@ const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
         missing_message: "scripts/g3rs/verify must run cargo clippy --workspace --all-targets --all-features -- -D warnings.",
     },
     VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-cargo-deny-check",
         predicate: is_cargo_deny_check_command,
         ok_title: "Rust verifier runs cargo deny",
         ok_message: "scripts/g3rs/verify runs cargo deny check.",
@@ -209,6 +216,7 @@ const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
         missing_message: "scripts/g3rs/verify must run cargo deny check.",
     },
     VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-cargo-machete",
         predicate: is_cargo_machete_command,
         ok_title: "Rust verifier runs cargo machete",
         ok_message: "scripts/g3rs/verify runs cargo machete.",
@@ -216,6 +224,7 @@ const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
         missing_message: "scripts/g3rs/verify must run cargo machete.",
     },
     VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-cargo-test-workspace",
         predicate: is_cargo_test_workspace_command,
         ok_title: "Rust verifier runs workspace tests",
         ok_message: "scripts/g3rs/verify runs cargo test --workspace.",
@@ -223,6 +232,7 @@ const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
         missing_message: "scripts/g3rs/verify must run cargo test --workspace.",
     },
     VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-cargo-mutants-check-in-place",
         predicate: is_cargo_mutants_check_in_place_command,
         ok_title: "Rust verifier runs cargo mutants check",
         ok_message: "scripts/g3rs/verify runs cargo mutants --check --in-place.",
@@ -230,6 +240,7 @@ const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
         missing_message: "scripts/g3rs/verify must run cargo mutants --check --in-place.",
     },
     VerifierCommandRequirement {
+        id: "g3rs-hooks/verifier-runs-cargo-dupes-thresholds",
         predicate: is_cargo_dupes_threshold_command,
         ok_title: "Rust verifier runs cargo dupes with thresholds",
         ok_message: "scripts/g3rs/verify runs cargo dupes check with required thresholds.",

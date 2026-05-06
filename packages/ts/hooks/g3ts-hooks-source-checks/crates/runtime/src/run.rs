@@ -35,9 +35,9 @@ pub fn check_effective(inputs: &[G3TsHooksSourceChecksInput]) -> Vec<G3CheckResu
         verifier_runs_lint(verifier, &mut results);
         verifier_runs_format_check(verifier, &mut results);
         verifier_runs_spelling_check(verifier, &mut results);
-        verifier_runs_stylelint(verifier, &mut results);
-        verifier_runs_package_policy(verifier, &mut results);
-        verifier_runs_typecov(verifier, &mut results);
+        verifier_runs_stylelint(verifier, primary, &mut results);
+        verifier_runs_package_policy(verifier, primary, &mut results);
+        verifier_runs_typecov(verifier, primary, &mut results);
         verifier_does_not_call_g3rs(verifier, &mut results);
         verifier_does_not_call_cargo(verifier, &mut results);
     }
@@ -149,7 +149,14 @@ fn verifier_runs_spelling_check(verifier: &G3TsHooksSourceChecksInput, results: 
     results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-spelling-check", "spelling check"));
 }
 
-fn verifier_runs_stylelint(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+fn verifier_runs_stylelint(
+    verifier: &G3TsHooksSourceChecksInput,
+    primary: &G3TsHooksSourceChecksInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if !primary.enabled_categories().stylelint() {
+        return;
+    }
     if script_command(verifier, |command| {
         command.command_name() == "stylelint"
             || command.tokens().iter().any(|token| token == "stylelint")
@@ -159,7 +166,14 @@ fn verifier_runs_stylelint(verifier: &G3TsHooksSourceChecksInput, results: &mut 
     results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-stylelint", "stylelint"));
 }
 
-fn verifier_runs_package_policy(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+fn verifier_runs_package_policy(
+    verifier: &G3TsHooksSourceChecksInput,
+    primary: &G3TsHooksSourceChecksInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if !primary.enabled_categories().package_policy() {
+        return;
+    }
     if script_command(verifier, |command| {
         command.command_name() == "syncpack"
             || command.tokens().iter().any(|token| token == "syncpack" || token == "package:policy")
@@ -169,7 +183,14 @@ fn verifier_runs_package_policy(verifier: &G3TsHooksSourceChecksInput, results: 
     results.push(missing_category(verifier, "g3ts-hooks/verifier-runs-package-policy", "package policy"));
 }
 
-fn verifier_runs_typecov(verifier: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
+fn verifier_runs_typecov(
+    verifier: &G3TsHooksSourceChecksInput,
+    primary: &G3TsHooksSourceChecksInput,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if !primary.enabled_categories().typecov() {
+        return;
+    }
     if script_command(verifier, |command| {
         command.command_name() == "type-coverage"
             || command.tokens().iter().any(|token| token == "typecov" || token == "type-coverage")
