@@ -247,13 +247,8 @@ Rust hooks must enforce:
 
 - `.githooks/pre-commit` calls `scripts/g3rs/verify --mode pre-commit --scope <scope>`.
 - `scripts/g3rs/verify` exists.
-- `scripts/g3rs/verify` supports `--mode pre-commit`.
-- `scripts/g3rs/verify` supports `--mode workspace`.
-- `scripts/g3rs/verify` rejects missing `--scope`.
-- `scripts/g3rs/verify` rejects unknown modes.
 - `scripts/g3rs/verify` runs `g3rs validate --path "$SCOPE"`.
 - `scripts/g3rs/verify` runs each required Rust command listed in this plan.
-- `scripts/g3rs/verify` exports `CARGO_TARGET_DIR="$REPO_ROOT/.cargo-target"`.
 - `scripts/g3rs/verify` does not call `g3ts`.
 - `scripts/g3rs/verify` does not call TypeScript package managers as part of Rust verification.
 
@@ -273,10 +268,6 @@ TypeScript hooks must enforce:
 
 - `.githooks/pre-commit` calls `scripts/g3ts/verify --mode pre-commit --scope <scope>`.
 - `scripts/g3ts/verify` exists.
-- `scripts/g3ts/verify` supports `--mode pre-commit`.
-- `scripts/g3ts/verify` supports `--mode workspace`.
-- `scripts/g3ts/verify` rejects missing `--scope`.
-- `scripts/g3ts/verify` rejects unknown modes.
 - `scripts/g3ts/verify` runs `g3ts validate --path "$SCOPE"` or a checked complete workspace validate route.
 - `scripts/g3ts/verify` runs each enabled TypeScript verifier category listed in this plan.
 - `scripts/g3ts/verify` does not call `g3rs`.
@@ -345,8 +336,12 @@ Add script tests for each verifier:
 - unknown mode exits non-zero.
 - `--mode worktree` exits non-zero.
 - `--mode files` exits non-zero.
+- `--mode current` exits non-zero.
+- unknown flag exits non-zero.
 - `--mode pre-commit` exits zero when no relevant staged files exist.
 - `--mode workspace` does not inspect staged paths before running checks.
+
+These are executable behavior tests for the shipped verifier scripts. Do not replace them with static source substring checks. The current shell parser can prove concrete command execution, but it does not model enough argument-parser control flow to prove shell `case` mode handling statically.
 
 ## Implementation Steps
 
@@ -453,14 +448,9 @@ Required Rust hook rules:
 
 - `.githooks/pre-commit` calls `scripts/g3rs/verify --mode pre-commit --scope <scope>`
 - `scripts/g3rs/verify` exists
-- `scripts/g3rs/verify` supports `--mode pre-commit`
-- `scripts/g3rs/verify` supports `--mode workspace`
-- `scripts/g3rs/verify` rejects missing `--scope`
-- `scripts/g3rs/verify` rejects unknown modes
 - `scripts/g3rs/verify` runs `g3rs validate --path "$SCOPE"`
 - `scripts/g3rs/verify` runs every required Rust workspace verifier command
 - `scripts/g3rs/verify` runs the Rust duplication command with thresholds and `--exclude-tests`
-- `scripts/g3rs/verify` exports `CARGO_TARGET_DIR="$REPO_ROOT/.cargo-target"`
 - `scripts/g3rs/verify` does not call `g3ts`
 - `scripts/g3rs/verify` does not call `pnpm`, `npm`, `yarn`, or `bun`
 
@@ -569,10 +559,6 @@ Required TypeScript hook rules:
 
 - `.githooks/pre-commit` calls `scripts/g3ts/verify --mode pre-commit --scope <scope>`
 - `scripts/g3ts/verify` exists
-- `scripts/g3ts/verify` supports `--mode pre-commit`
-- `scripts/g3ts/verify` supports `--mode workspace`
-- `scripts/g3ts/verify` rejects missing `--scope`
-- `scripts/g3ts/verify` rejects unknown modes
 - `scripts/g3ts/verify` runs `g3ts validate --path "$SCOPE"` or a checked complete workspace validate route
 - `scripts/g3ts/verify` runs every enabled TypeScript verifier category
 - `scripts/g3ts/verify` does not call `g3rs`
@@ -650,6 +636,7 @@ Parent responsibilities:
 - Do not call the target flag `--workspace`.
 - Do not imply `workspace` mode proves the staged commit passes.
 - Do not imply `pre-commit` mode proves the current filesystem passes.
+- Do not statically claim verifier mode parsing is correct by scanning source text for words like `workspace`, `pre-commit`, `--scope`, `usage`, or `exit`.
 
 ## Error Messages
 
